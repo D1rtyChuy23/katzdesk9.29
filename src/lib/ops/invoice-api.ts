@@ -81,6 +81,16 @@ export type InvoiceView = InvoiceTotals &
     hasPo: boolean;
     po: string | null;
     /**
+     * A linked rebuild's own invoice on a Sales Order in NetSuite (0122, Chuy 11/6): its bill-to and P.O. are the ones it
+     * was approved with, not the account's and P.O. the link gave the rebuild since.
+     */
+    asApproved: boolean;
+    /**
+     * An unlinked rebuild's own invoice on a Sales Order: what it was approved with, and what approving it again does
+     * (11/6 review). Null otherwise.
+     */
+    salesOrderNote: string | null;
+    /**
      * An install's tickets merged in as billed (10/30): their charges, billed on a Sales Order or on NetSuite invoices.
      * Shown on the install, never part of this invoice's lines or total. Empty on other invoices.
      */
@@ -167,6 +177,12 @@ type Ref = {
   locked: string | null;
   /** The record's Customer P.O. as it is now (11/2): what its invoice carries. */
   po: string | null;
+  /**
+   * A rebuild whose own invoice is on a Sales Order in NetSuite (0122, Chuy 11/6), as an Admin said at Link and
+   * unchanged since, linked or not: the account and P.O. it was approved with, which its Sales Order bills. Null
+   * otherwise.
+   */
+  billedAs?: { customer: string; po: string | null } | null;
 };
 
 const poOf = (v: string | null | undefined): string | null => String(v ?? "").trim() || null;
@@ -235,9 +251,26 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
   }
   if (type === "rebuild") {
     const r = (
-      await sql.query<{ account: string | null; title: string | null; po: string | null; install_id: number | null; job_id: number | null; job_kind: string | null; job_wo: string | null; call_id: string | null; install_wo: string | null; own_lines: number }>(
+      await sql.query<{
+        account: string | null;
+        title: string | null;
+        po: string | null;
+        install_id: number | null;
+        job_id: number | null;
+        job_kind: string | null;
+        job_wo: string | null;
+        call_id: string | null;
+        install_wo: string | null;
+        own_lines: number;
+        on_so: boolean;
+        own_customer: string | null;
+        own_po: string | null;
+      }>(
         `select r.account, r.title, r.po, r.install_id, r.job_id, j.kind as job_kind, j.wo as job_wo, j.call_id, i.wo as install_wo,
-                (select count(*)::int from invoices v join invoice_lines l on l.invoice_id = v.id where v.entity_type = 'rebuild' and v.entity_id = r.id) as own_lines
+                (select count(*)::int from invoices v join invoice_lines l on l.invoice_id = v.id where v.entity_type = 'rebuild' and v.entity_id = r.id) as own_lines,
+                rebuild_invoice_on_so(r.id) as on_so,
+                (select v.customer from invoices v where v.entity_type = 'rebuild' and v.entity_id = r.id) as own_customer,
+                (select v.po from invoices v where v.entity_type = 'rebuild' and v.entity_id = r.id) as own_po
            from rebuilds r
            left join service_jobs j on j.id = r.job_id
            left join installs i on i.id = r.install_id
@@ -246,17 +279,22 @@ async function resolveRecord(sql: Sql, type: InvoiceTarget, id: number): Promise
       )
     )[0];
     if (!r) throw new Error("That rebuild is no longer on the list.");
-    // Linked to a ticket or an install (11/6), it bills there: its own invoice takes nothing until it is unlinked.
+    // Linked to a ticket or an install (11/6), it bills there: its own invoice takes nothing until it is unlinked. On a
+    // Sales Order (0122), its own invoice keeps its lines, and they bill there.
+    const onSo = r.on_so === true;
     const locked =
       r.install_id != null
-        ? rebuildBillsOnLock({ kind: "install", name: `Install #${r.install_id}`, wo: r.install_wo?.trim() || null }, Number(r.own_lines))
+        ? rebuildBillsOnLock({ kind: "install", name: `Install #${r.install_id}`, wo: r.install_wo?.trim() || null }, Number(r.own_lines), onSo)
         : r.job_id != null
           ? rebuildBillsOnLock(
               { kind: r.job_kind === "tlc" ? "tlc" : "service", name: `${r.job_kind === "tlc" ? "TLC" : "Service"} ticket ${r.call_id?.trim() || `#${r.job_id}`}`, wo: r.job_wo?.trim() || null },
               Number(r.own_lines),
+              onSo,
             )
           : null;
-    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked, po: poOf(r.po) };
+    // What its Sales Order bills, linked or not (11/6 review): the window and the account's Invoices tab say so.
+    const billedAs = onSo ? { customer: (r.own_customer ?? "").trim(), po: poOf(r.own_po) } : null;
+    return { type, id, customer: (r.account ?? "").trim(), title: targetTitle(type, { id, title: r.title }), recordRep: null, locked, po: poOf(r.po), billedAs };
   }
   const r = (await sql.query<{ customer: string | null; producer: string | null; po: string | null }>("select customer, producer, po from deals where id = $1 and archived = false", [id]))[0];
   if (!r) throw new Error("That deal is no longer on the list.");
@@ -416,11 +454,16 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     lines = h ? await projectLines(sql, h.id) : [];
     discount = h ? toDiscount(h.discount_kind, h.discount_value) : null;
   }
+  const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state });
+  // On a Sales Order (0122): linked, the window is locked and shows it as approved. Unlinked, it shows what Approve
+  // writes now (the account and P.O. as they are), and says what it was approved with and what approving again does
+  // (11/6 review).
+  const asApproved = !!ref.billedAs && !!ref.locked;
   return {
     type: ref.type,
     id,
     title: ref.title,
-    billTo: await billTo(sql, ref),
+    billTo: await billTo(sql, asApproved ? { ...ref, customer: ref.billedAs!.customer } : ref),
     lines,
     discount,
     ...invoiceTotals(lines, discount),
@@ -434,10 +477,24 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     submittedBy: h?.submitted_by ?? null,
     version: h?.version ?? null,
     hasPo: carriesPo(ref.type),
-    po: carriesPo(ref.type) ? ref.po : null,
+    po: carriesPo(ref.type) ? (asApproved ? ref.billedAs!.po : ref.po) : null,
+    asApproved,
+    salesOrderNote: ref.billedAs && !ref.locked ? salesOrderNote(ref.billedAs, powers.canApprove) : null,
     billedElsewhere: ref.type === "install" ? await billedCarryOvers(sql, id) : [],
-    ...invoicePowers(viewer, { type: ref.type, customer: ref.customer, state }),
+    ...powers,
   };
+}
+
+/**
+ * An unlinked rebuild's own invoice on a Sales Order (0122): for someone who can approve, what it was approved with, and
+ * that approving again bills what the window shows and that it then stops counting as on its Sales Order. Warehouse,
+ * who can't, reads only that it's on one: never a customer's billing (11/6 review, round 2).
+ */
+function salesOrderNote(as: { customer: string; po: string | null }, canApprove: boolean): string {
+  if (!canApprove) return "It's on a Sales Order in NetSuite.";
+  // "P.O." ends in a period already: the sentence ends with it.
+  const approved = `It's on a Sales Order in NetSuite, approved for ${as.customer || "no account"}${as.po ? `, P.O. ${as.po}.` : " with no P.O."}`;
+  return `${approved} Approving it again bills it as shown here, and it no longer counts as on its Sales Order: Link asks again.`;
 }
 
 
@@ -996,8 +1053,8 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
       submittedAt: a.submitted_at ? new Date(a.submitted_at).toISOString() : null,
       submittedBy: a.submitted_by,
       status: a.approved_at ? "Approved" : "Waiting for approval",
-      // The record's Customer P.O. as it is now, as the Invoice window shows it (11/2).
-      po: carriesPo(ref.type) ? ref.po : null,
+      // The record's Customer P.O. as it is now, as the Invoice window shows it (11/2); one on a Sales Order, as approved.
+      po: carriesPo(ref.type) ? (ref.billedAs ? ref.billedAs.po : ref.po) : null,
     });
   }
   return out;

@@ -12,12 +12,13 @@ import {
   type RebuildLinkFind,
   type RebuildLinkView,
 } from "@/lib/ops/rebuild-link-api";
-import { billName, lineCount, money, projectLabel, type LinkProject } from "@/lib/ops/rebuild-link";
+import { billName, lineCount, money, projectLabel, type LinkDecision, type LinkProject, type SalesOrderAnswer } from "@/lib/ops/rebuild-link";
 import type { Rebuild } from "@/lib/ops/rebuilds";
 import { useRebuildLink } from "./rebuild-link-query";
 
 
 const openType = (p: Pick<LinkProject, "kind">) => (p.kind === "install" ? "install" : p.kind);
+const candidateKey = (c: LinkCandidate) => `${c.target.kind}-${c.target.id}`;
 
 /** After a link or unlink: the board's row at once (so the form takes the new account and P.O.), then everything it touched. */
 function afterLink(qc: QueryClient, row: Rebuild) {
@@ -44,6 +45,28 @@ function Effects({ lines }: { lines: string[] }) {
   );
 }
 
+/** What one link does, with its button, or why it can't. */
+function Decision({ plan, label, dirty, busy, pending, onGo }: { plan: LinkDecision; label: string; dirty: boolean; busy: boolean; pending: boolean; onGo: () => void }) {
+  if (!plan.ok) {
+    return (
+      <p className="mt-1 text-xs text-destructive" data-testid="rebuild-link-refused">
+        {plan.refusal}
+      </p>
+    );
+  }
+  // Linked there already: it only notes that its own invoice is on a Sales Order.
+  const note = plan.steps.includes("note");
+  return (
+    <>
+      <Effects lines={plan.effects} />
+      {dirty ? <p className="mt-1 text-xs text-muted-foreground">Saves your changes on Details first.</p> : null}
+      <Button type="button" size="sm" className="mt-2 max-sm:h-10" disabled={busy} onClick={onGo} data-testid="rebuild-link-go">
+        {pending ? (note ? "Saving…" : "Linking…") : note ? "Note it's on a Sales Order" : label}
+      </Button>
+    </>
+  );
+}
+
 /**
  * Linked ticket / install (Chuy, 11/6): a WO finds every service ticket, TLC and install carrying it, and the one
  * picked takes the rebuild: its account and Customer P.O., and its invoice's lines on the ticket's charges or the
@@ -67,18 +90,21 @@ export function RebuildLinkField({
   const [wo, setWo] = useState("");
   const [found, setFound] = useState<RebuildLinkFind | null>(null);
   const [confirmUnlink, setConfirmUnlink] = useState(false);
+  // Each match's answer to "Is its invoice on a Sales Order in NetSuite yet?" (Chuy, 11/6), once picked.
+  const [answers, setAnswers] = useState<Record<string, SalesOrderAnswer>>({});
 
   const find = useMutation({
     mutationFn: (q: { wo?: string; pick?: LinkTarget }) => findRebuildLinks({ data: { id: row.id, ...q } }),
     onSuccess: (next) => {
       setFound(next);
+      setAnswers({});
       setConfirmUnlink(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const go = useMutation({
-    mutationFn: async (q: { base: RebuildLinkView; to: LinkCandidate | null }) => {
+    mutationFn: async (q: { base: RebuildLinkView; to: LinkCandidate | null; salesOrder?: SalesOrderAnswer }) => {
       if (dirty && !(await saveFirst(q.to ? "link" : "unlink"))) return null;
       return setRebuildLink({
         data: {
@@ -86,6 +112,7 @@ export function RebuildLinkField({
           expect: { installId: q.base.installId, jobId: q.base.jobId },
           to: q.to ? q.to.target : null,
           seen: { own: q.base.own.version, current: q.base.current?.stamp ?? null, target: q.to ? q.to.project.stamp : null },
+          salesOrder: q.salesOrder ?? null,
         },
       });
     },
@@ -93,6 +120,7 @@ export function RebuildLinkField({
       if (!out) return;
       toast.success(out.message || "Saved");
       setFound(null);
+      setAnswers({});
       setWo("");
       setConfirmUnlink(false);
       afterLink(qc, out.row);
@@ -225,40 +253,62 @@ export function RebuildLinkField({
               ) : found.candidates.length > 1 ? (
                 <p className="text-xs text-muted-foreground">{found.candidates.length} records carry this WO. Pick the one this rebuild is for.</p>
               ) : null}
-              {found.candidates.map((c) => (
-                <div key={`${c.target.kind}-${c.target.id}`} className="rounded-xl border border-border p-3" data-testid="rebuild-link-candidate">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-2">
-                    <p className="text-sm font-medium">{projectLabel(c.project)}</p>
-                    <OpenLink entityType={openType(c.project)} id={c.project.id} className="text-xs text-primary hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center">
-                      Open
-                    </OpenLink>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {c.project.customer || "No account"} · {c.project.status}
-                    {c.project.po ? ` · P.O. ${c.project.po}` : ""}
-                  </p>
-                  {c.plan.ok ? (
-                    <>
-                      <Effects lines={c.plan.effects} />
-                      {dirty ? <p className="mt-1 text-xs text-muted-foreground">Saves your changes on Details first.</p> : null}
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="mt-2 max-sm:h-10"
-                        disabled={busy}
-                        onClick={() => go.mutate({ base: found, to: c })}
-                        data-testid="rebuild-link-go"
-                      >
-                        {go.isPending ? "Linking…" : `Link to ${c.project.wo?.trim() || c.project.name}`}
-                      </Button>
-                    </>
-                  ) : (
-                    <p className="mt-1 text-xs text-destructive" data-testid="rebuild-link-refused">
-                      {c.plan.refusal}
+              {found.candidates.map((c) => {
+                const key = candidateKey(c);
+                const answer = answers[key];
+                const label = `Link to ${c.project.wo?.trim() || c.project.name}`;
+                return (
+                  <div key={key} className="rounded-xl border border-border p-3" data-testid="rebuild-link-candidate">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                      <p className="text-sm font-medium">{projectLabel(c.project)}</p>
+                      <OpenLink entityType={openType(c.project)} id={c.project.id} className="text-xs text-primary hover:underline max-sm:inline-flex max-sm:min-h-10 max-sm:items-center">
+                        Open
+                      </OpenLink>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {c.project.customer || "No account"} · {c.project.status}
+                      {c.project.po ? ` · P.O. ${c.project.po}` : ""}
                     </p>
-                  )}
-                </div>
-              ))}
+                    {c.plan.ok === "ask" ? (
+                      // Its invoice is approved, so it may be on a Sales Order already: the person says, then sees what Link does.
+                      <div className="mt-2" data-testid="rebuild-link-ask">
+                        <p className="text-xs font-medium" id={`rb-so-${key}`}>
+                          {c.plan.question}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-2" role="group" aria-labelledby={`rb-so-${key}`}>
+                          {(["not", "on"] as const).map((a) => (
+                            <Button
+                              key={a}
+                              type="button"
+                              size="sm"
+                              variant={answer === a ? "default" : "outline"}
+                              aria-pressed={answer === a}
+                              className="max-sm:h-10"
+                              disabled={busy}
+                              onClick={() => setAnswers((x) => ({ ...x, [key]: a }))}
+                              data-testid={`rebuild-link-answer-${a}`}
+                            >
+                              {a === "not" ? "Not yet" : "Yes, it's on one"}
+                            </Button>
+                          ))}
+                        </div>
+                        {answer ? (
+                          <Decision
+                            plan={c.plan[answer]}
+                            label={label}
+                            dirty={dirty}
+                            busy={busy}
+                            pending={go.isPending}
+                            onGo={() => go.mutate({ base: found, to: c, salesOrder: answer })}
+                          />
+                        ) : null}
+                      </div>
+                    ) : (
+                      <Decision plan={c.plan} label={label} dirty={dirty} busy={busy} pending={go.isPending} onGo={() => go.mutate({ base: found, to: c })} />
+                    )}
+                  </div>
+                );
+              })}
               <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline max-sm:min-h-10" onClick={() => setFound(null)}>
                 Clear
               </button>

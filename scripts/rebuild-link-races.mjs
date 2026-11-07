@@ -1,6 +1,7 @@
 // The rebuild WO link (11/6) against every write it can meet, both orders, the second waiting on the first's locks:
 // Approve, Warehouse's Save for Approval, a Charges save, an install's Approve, a second link, a ticket merged into an
-// install, Merge installs, a WO-duplicate merge, and Remove; and Merge installs' own one-invoice check. Not part of `npm test`: it needs a real Postgres (PGlite has one
+// install, Merge installs, a WO-duplicate merge, and Remove; Merge installs' own one-invoice check; and the note that a
+// rebuild's invoice is on a Sales Order (0122). Not part of `npm test`: it needs a real Postgres (PGlite has one
 // connection). Run it only against a throwaway local server, made-up data only:
 //
 //   KD_RACE_PG=postgres://postgres@127.0.0.1:55437 node --experimental-strip-types scripts/rebuild-link-races.mjs
@@ -94,7 +95,8 @@ async function race(first, second) {
     await b.end();
   }
 }
-const linkArgs = (rb, kind, id, ownV, stamp) => [L.linkRebuildSql(), [rb, null, null, kind, id, "chuy", ownV, stamp, "linked", "linked"]];
+/** The link statement; `keep`: its lines stay on its own invoice's Sales Order, `note`: noted there now (0122). */
+const linkArgs = (rb, kind, id, ownV, stamp, keep = false, note = false, job = null) => [L.linkRebuildSql(), [rb, null, job, kind, id, "chuy", ownV, stamp, "linked", "linked", keep, note]];
 const approveArgs = (type, id, seen, items) => [
   I.approveRecordInvoiceSql(),
   [type, id, CAFE, null, null, null, null, null, null, 10, "chuy", seen, items.map((x) => x[0]), items.map(() => ""), items.map((x) => x[1]), items.map((x) => x[2]), items.map(() => "part"), null, false, items.map((x) => x[3] ?? null)],
@@ -268,7 +270,7 @@ for (const withInvoice of [false, true]) {
   const ins = await install("WO-8301");
   const v0 = await L.getRebuildLinkFor(sql, rb, "u-owner");
   const f = await L.findRebuildLinksFor(sql, { id: rb, pick: { kind: "job", id: job } }, "u-owner");
-  await L.setRebuildLinkFor(sql, { id: rb, expect: { installId: null, jobId: null }, to: f.candidates[0].target, seen: { own: v0.own.version, current: null, target: f.candidates[0].project.stamp } }, "u-owner");
+  await L.setRebuildLinkFor(sql, { id: rb, expect: { installId: null, jobId: null }, to: f.candidates[0].target, seen: { own: v0.own.version, current: null, target: f.candidates[0].project.stamp }, salesOrder: "not" }, "u-owner");
   const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
   const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: job, installId: ins });
   const a = new pg.Client(db);
@@ -418,6 +420,62 @@ for (const withInvoice of [false, true]) {
     "an Approve puts a line on the drop's invoice, then Merge installs: the merge waits and merges nothing",
     appr.rows.length === 1 && waited && dropOff === false && /both have an invoice/.test(m),
     { m },
+  );
+}
+
+// 19. A note that the rebuild's invoice is on a Sales Order holds the rebuild (linked before 11/6, its own lines still
+// there); a not-yet link, checked before, waits. The note changes no version: the link reads it fresh and moves nothing.
+{
+  const job = await ticket("WO-8601", CAFE, "Scheduled");
+  const rb = await rebuild(CAFE);
+  await q("update rebuilds set job_id = $2 where id = $1", [rb, job]);
+  await own(rb, [["TEST-A", 1, 10], ["TEST-B", 1, 20]]);
+  const seen = await ver("rebuild", rb);
+  const r = await race([L.noteRebuildSalesOrderSql(), [rb, null, job, "chuy", seen, "noted"]], linkArgs(rb, "job", job, seen, await stampOf(job), false, false, job));
+  check(
+    "a note that its invoice is on a Sales Order, then a not-yet link: the link waits, reads the note fresh, and moves nothing",
+    r.waited && r.first[0].noted === 1 && r.second.length === 0 && (await lines("rebuild", rb)).length === 2 && (await lines("job", job)).length === 0,
+    r,
+  );
+}
+// 20. The not-yet link holds the rebuild; the note waits, finds its invoice gone (its lines are on the ticket now), and
+// notes nothing.
+{
+  const job = await ticket("WO-8602", CAFE, "Scheduled");
+  const rb = await rebuild(CAFE);
+  await q("update rebuilds set job_id = $2 where id = $1", [rb, job]);
+  await own(rb, [["TEST-A", 1, 10]]);
+  const seen = await ver("rebuild", rb);
+  const r = await race(linkArgs(rb, "job", job, seen, await stampOf(job), false, false, job), [L.noteRebuildSalesOrderSql(), [rb, null, job, "chuy", seen, "noted"]]);
+  const left = (await q("select count(*)::int as n from invoices where entity_type = 'rebuild' and entity_id = $1", [rb]))[0].n;
+  check("a not-yet link, then a note: the note waits, finds its invoice gone, and notes nothing", r.waited && r.first.length === 1 && r.second[0].noted === 0 && (await lines("job", job)).length === 1 && left === 0, r);
+}
+// 21. Its own invoice approved again (other lines) while a yes link waits: the link reads the new version fresh and
+// neither links it nor notes lines the person never answered for.
+{
+  const rb = await rebuild();
+  await own(rb, [["TEST-A", 1, 10]]);
+  const job = await ticket();
+  const seen = await ver("rebuild", rb);
+  const r = await race(approveArgs("rebuild", rb, seen, [["TEST-A", 1, 10], ["TEST-B", 2, 20]]), linkArgs(rb, "job", job, seen, await stampOf(job), true, true));
+  const noted = (await q("select rebuild_invoice_on_so($1) as s", [rb]))[0].s;
+  const linked = (await q("select job_id from rebuilds where id = $1", [rb]))[0].job_id;
+  check("an approve, then a yes link: the link waits, reads the new version, and links and notes nothing", r.waited && r.first.length === 1 && r.second.length === 0 && noted === false && linked === null && (await lines("rebuild", rb)).length === 2, r);
+}
+// 22. The yes link holds the rebuild; an Approve of its own invoice, checked before, waits, finds it linked, and writes
+// nothing: the note still counts.
+{
+  const rb = await rebuild();
+  await own(rb, [["TEST-A", 1, 10]]);
+  const job = await ticket();
+  const seen = await ver("rebuild", rb);
+  const r = await race(linkArgs(rb, "job", job, seen, await stampOf(job), true, true), approveArgs("rebuild", rb, seen, [["TEST-A", 5, 10]]));
+  const noted = (await q("select rebuild_invoice_on_so($1) as s", [rb]))[0].s;
+  const mine = await lines("rebuild", rb);
+  check(
+    "a yes link, then an approve: the approve waits and writes nothing, and the note still counts",
+    r.waited && r.first.length === 1 && r.first[0].noted === 1 && r.second.length === 0 && noted === true && mine.length === 1 && mine[0].qty === 1 && (await lines("job", job)).length === 0,
+    r,
   );
 }
 
