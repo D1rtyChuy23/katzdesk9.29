@@ -66,6 +66,8 @@ export type OwnInvoice = {
   state: "none" | "waiting" | "approved";
   lines: number;
   total: number;
+  /** What its lines that take its discount add up to (11/7): all of them on the Whole bill, the ticked ones on Chosen lines. */
+  base: number;
   discount: Discount | null;
   /**
    * An Admin said at Link that it's on a Sales Order in NetSuite (Chuy, 11/6), and it hasn't been approved or saved
@@ -277,10 +279,13 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
     // An approved invoice of its own moves only once the person says it isn't on a Sales Order yet (Chuy, 11/6).
     out.push(`Its invoice's ${lineCount(own.lines)} (${money(own.total)}) ${verb(own.lines, "go")} on ${where}.`);
     if (t.discount) {
+      // On Chosen lines (11/7) they come in unticked, as every new line does: its discount stays on what was ticked.
       out.push(
-        t.discount.kind === "percent"
-          ? `${t.name}'s discount (${discountLabel(t.discount)}) applies to them there.`
-          : `${t.name}'s discount (${discountLabel(t.discount)}) stays one discount on its whole bill.`,
+        t.discount.scope === "chosen"
+          ? `These come in unticked, so ${t.name}'s discount (${discountLabel(t.discount)} its chosen lines) doesn't come off them.`
+          : t.discount.kind === "percent"
+            ? `${t.name}'s discount (${discountLabel(t.discount)}) applies to them there.`
+            : `${t.name}'s discount (${discountLabel(t.discount)}) stays one discount on its whole bill.`,
       );
     }
     if (t.netsuite) out.push(`${t.name} is billed in NetSuite already (${t.netsuite}). NetSuite's invoice won't have these lines.`);
@@ -293,9 +298,10 @@ function linkEffects(r: LinkRebuild, own: OwnInvoice, t: LinkProject): string[] 
 /**
  * Its own invoice's amount as a person reads it: what its lines add up to, and with a discount what it bills (Chuy,
  * 11/7: a 100% one bills $0.00, not its lines' total). "$315.00", or "$315.00 before its 100% discount, $0.00 billed".
+ * On Chosen lines the discount comes off its ticked lines only (`base`).
  */
-export function ownAmount(own: Pick<OwnInvoice, "total" | "discount">): string {
-  const { off, total } = applyDiscount(own.total, own.discount);
+export function ownAmount(own: Pick<OwnInvoice, "total" | "base" | "discount">): string {
+  const { off, total } = applyDiscount(own.total, own.discount, own.base);
   if (!own.discount || off <= 0) return money(own.total);
   const what = own.discount.kind === "percent" ? `${Number(own.discount.value.toFixed(2))}%` : money(own.discount.value);
   return `${money(own.total)} before its ${what} discount, ${money(total)} billed`;
@@ -396,12 +402,15 @@ function decide(r: LinkRebuild, target: LinkProject | null, keep: boolean, orYes
     if (no) return refuse(no);
     return plan(["unlink", "link"], [`It leaves ${projectLabel(c)}.`, handAdded(c, `To bill them on ${projectLabel(target)}, move them there by hand.`), ...keepEffects(r, target)], 0, 0);
   }
+  const backTotal = Math.round((r.own.total + c.total) * 100) / 100;
   const after: OwnInvoice = {
     version: r.own.version,
     // Its own invoice takes the lines back approved, unless Warehouse's saved one is still waiting for an Admin.
     state: r.own.state === "waiting" ? "waiting" : r.own.lines + c.lines > 0 ? "approved" : r.own.state,
     lines: r.own.lines + c.lines,
-    total: Math.round((r.own.total + c.total) * 100) / 100,
+    total: backTotal,
+    // They come back unticked (11/7): on Chosen lines its discount stays on what was ticked.
+    base: r.own.discount?.scope === "chosen" ? r.own.base : backTotal,
     discount: r.own.discount,
     onSalesOrder: false,
   };

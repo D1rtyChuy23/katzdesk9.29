@@ -20,6 +20,17 @@ test("totals: parts and labor apart, then the same discount math as ticket charg
   assert.deepEqual(invoiceTotals([], null), { parts: 0, labor: 0, subtotal: 0, off: 0, total: 0 });
 });
 
+test("invoice totals with a chosen-lines discount (11/7)", () => {
+  const t = invoiceTotals(
+    [
+      { qty: 2, rate: 45, kind: "part", discountChosen: true },
+      { qty: 1.5, rate: 150, kind: "labor", discountChosen: false },
+    ],
+    { kind: "percent", value: 10, scope: "chosen" },
+  );
+  assert.deepEqual(t, { parts: 90, labor: 225, subtotal: 315, off: 9, total: 306 });
+});
+
 test("lines are checked like ticket charges", () => {
   assert.equal(invoiceError(lines), null);
   assert.equal(invoiceError([{ item: "X", qty: "0", rate: 1 }]), "Line 1: Quantity must be more than zero.");

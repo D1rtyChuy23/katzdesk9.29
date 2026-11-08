@@ -9,7 +9,7 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware, isWarehouseOnly, WAREHOUSE_BILLING_REFUSAL } from "@/lib/ops/access";
 import { woMatchKey } from "@/lib/ops/corrigo";
-import { isDiscountKind, type Discount } from "@/lib/ops/discount";
+import { DISCOUNT_BASE_SQL, discountFromRow, type Discount } from "@/lib/ops/discount";
 import { isInstalled } from "@/lib/ops/install-status";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { rebuildBillTo } from "@/lib/ops/invoice-api";
@@ -94,7 +94,8 @@ async function linkViewer(sql: Sql, userId: string): Promise<Viewer> {
 const RB_KEY = (col: string, rb: string) =>
   `(${col} is not null and split_part(${col}, ':', 1) = 'rb' and split_part(${col}, ':', 2) = (${rb})::text)`;
 const STAMP = (col: string) => `(extract(epoch from ${col}) * 1000000)::bigint::text`;
-const toDiscount = (kind: string | null, value: string | null): Discount | null => (isDiscountKind(kind) && Number(value) > 0 ? { kind, value: Number(value) } : null);
+/** A bill's discount as its row has it: Whole bill, or Chosen lines (11/7). */
+const toDiscount = (kind: string | null, value: string | null, scope: string | null): Discount | null => discountFromRow(kind, value, scope);
 const num = (v: unknown) => (v == null ? 0 : Number(v));
 
 type RebuildRead = {
@@ -133,23 +134,36 @@ async function readRebuild(sql: Sql, id: number): Promise<RebuildRead | null> {
 
 async function readOwn(sql: Sql, id: number): Promise<OwnInvoice> {
   const h = (
-    await sql.query<{ version: string | null; approved: boolean; submitted: boolean; discount_kind: string | null; discount_value: string | null; n: number; total: string; on_so: boolean }>(
+    await sql.query<{
+      version: string | null;
+      approved: boolean;
+      submitted: boolean;
+      discount_kind: string | null;
+      discount_value: string | null;
+      discount_scope: string | null;
+      n: number;
+      total: string;
+      base: string;
+      on_so: boolean;
+    }>(
       `select invoice_version('rebuild', v.entity_id) as version, v.approved_at is not null as approved, v.submitted_at is not null as submitted,
-              v.discount_kind, v.discount_value::text as discount_value,
+              v.discount_kind, v.discount_value::text as discount_value, v.discount_scope,
               (select count(*)::int from invoice_lines l where l.invoice_id = v.id) as n,
               (select coalesce(sum(round(l.qty * l.rate, 2)), 0)::text from invoice_lines l where l.invoice_id = v.id) as total,
+              (select (${DISCOUNT_BASE_SQL("l", "v.discount_scope")})::text from invoice_lines l where l.invoice_id = v.id) as base,
               rebuild_invoice_on_so(v.entity_id) as on_so
          from invoices v where v.entity_type = 'rebuild' and v.entity_id = $1`,
       [id],
     )
   )[0];
-  if (!h) return { version: null, state: "none", lines: 0, total: 0, discount: null, onSalesOrder: false };
+  if (!h) return { version: null, state: "none", lines: 0, total: 0, base: 0, discount: null, onSalesOrder: false };
   return {
     version: h.version,
     state: h.approved ? "approved" : h.submitted ? "waiting" : "none",
     lines: num(h.n),
     total: Number(h.total),
-    discount: toDiscount(h.discount_kind, h.discount_value),
+    base: Number(h.base),
+    discount: toDiscount(h.discount_kind, h.discount_value, h.discount_scope),
     onSalesOrder: h.on_so === true,
   };
 }
@@ -169,11 +183,12 @@ async function readTicket(sql: Sql, jobId: number): Promise<LinkProject | null> 
       merged_install_id: number | null;
       discount_kind: string | null;
       discount_value: string | null;
+      discount_scope: string | null;
       live: string | null;
       stamp: string;
     }>(
       `select j.id, j.kind, j.call_id, j.wo, j.customer, j.status, j.po, j.ns_so, j.duplicate_of, j.merged_install_id,
-              j.discount_kind, j.discount_value::text as discount_value, ticket_live_ns_invoices(j.id) as live, ${STAMP("j.updated_at")} as stamp
+              j.discount_kind, j.discount_value::text as discount_value, j.discount_scope, ticket_live_ns_invoices(j.id) as live, ${STAMP("j.updated_at")} as stamp
          from service_jobs j where j.id = $1 and j.kind in ('service', 'tlc')`,
       [jobId],
     )
@@ -199,7 +214,7 @@ async function readTicket(sql: Sql, jobId: number): Promise<LinkProject | null> 
             : null,
     closed: so ? `is billed on ${so}` : j.live?.trim() ? `is invoiced in NetSuite on ${j.live.trim()}` : null,
     po: j.po?.trim() || null,
-    discount: toDiscount(j.discount_kind, j.discount_value),
+    discount: toDiscount(j.discount_kind, j.discount_value, j.discount_scope),
     netsuite: null,
     stamp: j.stamp,
   };
@@ -220,11 +235,12 @@ async function readInstall(sql: Sql, installId: number, wo: string | null = null
       approved: boolean | null;
       discount_kind: string | null;
       discount_value: string | null;
+      discount_scope: string | null;
       netsuite: string | null;
     }>(
       `select i.id, i.customer, i.po, i.wo, i.equip_status, i.complete, coalesce(i.archived, false) as archived,
               ${STAMP("i.updated_at")} as updated, invoice_version('install', i.id) as version, v.approved_at is not null as approved,
-              v.discount_kind, v.discount_value::text as discount_value,
+              v.discount_kind, v.discount_value::text as discount_value, v.discount_scope,
               (select string_agg(x.ns_invoice, ', ' order by x.id) from record_ns_invoices x
                 where x.install_id = i.id and lower(regexp_replace(x.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) as netsuite
          from installs i
@@ -245,7 +261,7 @@ async function readInstall(sql: Sql, installId: number, wo: string | null = null
     blocked: i.archived ? `${name} was taken off the board.` : null,
     closed: i.approved ? "has an approved invoice" : null,
     po: i.po?.trim() || null,
-    discount: toDiscount(i.discount_kind, i.discount_value),
+    discount: toDiscount(i.discount_kind, i.discount_value, i.discount_scope),
     netsuite: i.netsuite?.trim() || null,
     // The install as the person saw it (its account and P.O.) and its invoice: "row|invoice".
     stamp: `${i.updated}|${i.version ?? ""}`,
@@ -387,7 +403,7 @@ async function viewOf(sql: Sql, st: LinkState, viewer: Viewer): Promise<RebuildL
     po: st.rebuild.po?.trim() || null,
     installId: st.rebuild.install_id,
     jobId: st.rebuild.job_id,
-    own: hide ? { version: null, state: "none", lines: 0, total: 0, discount: null, onSalesOrder: false } : st.own,
+    own: hide ? { version: null, state: "none", lines: 0, total: 0, base: 0, discount: null, onSalesOrder: false } : st.own,
     current,
     unlink: st.current && !refusal ? planUnlink({ account: st.rebuild.account, po: st.rebuild.po, current: st.current, own: st.own, unitLock: null }) : null,
     suggestions: refusal ? [] : await suggestionsFor(sql, st.rebuild.account),
@@ -578,8 +594,12 @@ export function linkRebuildSql(): string {
        select 'install', ok.target_id, ok.account, invoice_total(ok.amount, null, null), $6::text, now(), now()
          from ok where ok.t = 'install' and ok.n > 0
        on conflict (entity_type, entity_id) do update
+          -- Its lines with these after them. They come in unticked (11/7): on Chosen lines its discount stays on what
+          -- was ticked; on the Whole bill it comes off them too.
           set total = invoice_total(
                 (select coalesce(sum(round(x.qty * x.rate, 2)), 0) from invoice_lines x where x.invoice_id = invoices.id) + excluded.total,
+                (select ${DISCOUNT_BASE_SQL("x", "invoices.discount_scope")} from invoice_lines x where x.invoice_id = invoices.id)
+                  + case when invoices.discount_scope = 'all' then excluded.total else 0 end,
                 invoices.discount_kind, invoices.discount_value),
               submitted_by = excluded.submitted_by, submitted_at = now(), updated_at = now()
         where invoices.approved_at is null
@@ -730,8 +750,11 @@ export function unlinkRebuildSql(): string {
          from ok cross join back
         where back.n > 0
        on conflict (entity_type, entity_id) do update
+          -- They come back unticked (11/7), like any new line: on Chosen lines its discount stays on what was ticked.
           set total = invoice_total(
                 (select coalesce(sum(round(x.qty * x.rate, 2)), 0) from invoice_lines x where x.invoice_id = invoices.id) + excluded.total,
+                (select ${DISCOUNT_BASE_SQL("x", "invoices.discount_scope")} from invoice_lines x where x.invoice_id = invoices.id)
+                  + case when invoices.discount_scope = 'all' then excluded.total else 0 end,
                 invoices.discount_kind, invoices.discount_value),
               -- Warehouse's saved invoice keeps waiting for an Admin; any other is approved again, by whoever unlinked.
               approved_by = case when invoices.approved_at is null and invoices.submitted_at is not null then invoices.approved_by else excluded.approved_by end,
@@ -747,8 +770,11 @@ export function unlinkRebuildSql(): string {
      ), old_head as (
        -- The install's invoice changed: its total, and it waits for an Admin again.
        update invoices v
+          -- Its lines without this rebuild's, the discount off those of them that take it (11/7).
           set total = invoice_total(
                 (select coalesce(sum(round(x.qty * x.rate, 2)), 0) from invoice_lines x
+                  where x.invoice_id = v.id and not ${RB_KEY("coalesce(x.source_key, '')", "ok.id")}),
+                (select ${DISCOUNT_BASE_SQL("x", "v.discount_scope")} from invoice_lines x
                   where x.invoice_id = v.id and not ${RB_KEY("coalesce(x.source_key, '')", "ok.id")}),
                 v.discount_kind, v.discount_value),
               submitted_by = $4::text, submitted_at = now(), updated_at = now()

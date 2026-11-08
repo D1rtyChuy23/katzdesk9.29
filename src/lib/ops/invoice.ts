@@ -4,8 +4,8 @@
  * same charge and discount math as the ticket Charges panel, nothing new.
  * Pure: no server imports, safe for node --test.
  */
-import { chargesTotal, checkCharges, lineAmount, round2, type ChargeKind } from "./charges.ts";
-import { applyDiscount, type Discount } from "./discount.ts";
+import { checkCharges, lineAmount, round2, type ChargeKind } from "./charges.ts";
+import { billTotals, type Discount } from "./discount.ts";
 import type { PinQuality } from "./geo.ts";
 
 export const INVOICE_TARGETS = ["service", "tlc", "pm", "install", "rebuild", "deal"] as const;
@@ -52,15 +52,18 @@ export type InvoiceTotals = {
   total: number;
 };
 
-/** Parts, labor, subtotal, discount and total: the ticket charges math, with labor and parts shown apart. */
-export function invoiceTotals(lines: { qty: number; rate: number; kind: ChargeKind }[], discount: Discount | null): InvoiceTotals {
+/**
+ * Parts, labor, subtotal, discount and total: the ticket charges math, with labor and parts shown apart. On Chosen lines
+ * the discount comes off the ticked lines only (11/7).
+ */
+export function invoiceTotals(lines: { qty: number; rate: number; kind: ChargeKind; discountChosen?: boolean | null }[], discount: Discount | null): InvoiceTotals {
   let parts = 0;
   let labor = 0;
   for (const l of lines) {
     if (isLaborKind(l.kind)) labor += lineAmount(l);
     else parts += lineAmount(l);
   }
-  const t = applyDiscount(chargesTotal(lines), discount);
+  const t = billTotals(lines, discount);
   return { parts: round2(parts), labor: round2(labor), subtotal: t.subtotal, off: t.off, total: t.total };
 }
 

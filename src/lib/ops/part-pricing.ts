@@ -478,12 +478,16 @@ export function lineProfit(line: { qty: number; rate: number }, part: { listPric
   };
 }
 
-/** The ticket discount spread over its lines by amount, in cents, so the shares add back to the discount exactly. */
-export function discountShares(amounts: number[], off: number): number[] {
-  const total = amounts.reduce((s, a) => s + a, 0);
+/**
+ * The ticket discount spread over its lines by amount, in cents, so the shares add back to the discount exactly. With
+ * `takes` (11/7), only the lines the discount comes off get a share; a line marked false gets none.
+ */
+export function discountShares(amounts: number[], off: number, takes?: boolean[]): number[] {
+  const taking = amounts.map((a, i) => (takes?.[i] === false ? 0 : a));
+  const total = taking.reduce((s, a) => s + a, 0);
   if (!(off > 0) || !(total > 0)) return amounts.map(() => 0);
   const cents = Math.round(off * 100);
-  const raw = amounts.map((a) => (a / total) * cents);
+  const raw = taking.map((a) => (a / total) * cents);
   const floor = raw.map(Math.floor);
   let left = cents - floor.reduce((s, a) => s + a, 0);
   const order = raw.map((v, i) => ({ i, frac: v - Math.floor(v) })).sort((a, b) => b.frac - a.frac);

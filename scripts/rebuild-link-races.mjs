@@ -99,11 +99,11 @@ async function race(first, second) {
 const linkArgs = (rb, kind, id, ownV, stamp, keep = false, note = false, job = null) => [L.linkRebuildSql(), [rb, null, job, kind, id, "chuy", ownV, stamp, "linked", "linked", keep, note]];
 const approveArgs = (type, id, seen, items) => [
   I.approveRecordInvoiceSql(),
-  [type, id, CAFE, null, null, null, null, null, null, 10, "chuy", seen, items.map((x) => x[0]), items.map(() => ""), items.map((x) => x[1]), items.map((x) => x[2]), items.map(() => "part"), null, false, items.map((x) => x[3] ?? null)],
+  [type, id, CAFE, null, null, null, null, null, null, 10, "chuy", seen, items.map((x) => x[0]), items.map(() => ""), items.map((x) => x[1]), items.map((x) => x[2]), items.map(() => "part"), null, false, items.map((x) => x[3] ?? null), null, items.map(() => false)],
 ];
 const saveArgs = (job, cur, qty) => [
   C.replaceTicketChargesSql(),
-  [job, cur.map((c) => c.item), cur.map(() => ""), cur.map((c) => qty(c)), cur.map((c) => Number(c.rate)), cur.map((c) => c.kind), false, cur.map((c) => Number(c.id)), null, null, null, cur.map((c) => c.source_key), false],
+  [job, cur.map((c) => c.item), cur.map(() => ""), cur.map((c) => qty(c)), cur.map((c) => Number(c.rate)), cur.map((c) => c.kind), false, cur.map((c) => Number(c.id)), null, null, null, cur.map((c) => c.source_key), false, null, cur.map(() => false)],
 ];
 const results = [];
 const check = (name, ok, detail) => results.push({ name, ok: !!ok, detail });

@@ -327,8 +327,10 @@ test("the Invoice window approves an install invoice with every line taken off, 
   assert.match(win, /const emptying = !draft\.length && type === "install" && !!v\?\.canApprove && !!v\?\.lines\.length;/);
   assert.match(win, /const problem = !draft\.length && !emptying\n/);
   assert.match(win, /if \(emptying && !window\.confirm\("Approve this invoice with no lines\? It comes to \$0\.00, and the lines it had are taken off\."\)\) return;/);
-  assert.match(win, /onClick=\{approveNow\} disabled=\{busy \|\| !!problem \|\| \(!draft\.length && !emptying\)\} data-testid="invoice-approve"/);
+  // What stops Approve and Save is the problem, or a Chosen-lines discount with nothing ticked (11/7).
+  assert.match(win, /const blocked = problem \?\? tickError;/);
+  assert.match(win, /onClick=\{approveNow\} disabled=\{busy \|\| !!blocked \|\| \(!draft\.length && !emptying\)\} data-testid="invoice-approve"/);
   assert.match(win, /\{emptying \? "Every line is taken off\. Approve saves it that way, at \$0\.00, or add lines back\." : "No lines yet\. Add the parts and the labor\."\}/);
   // Warehouse's Save for Approval still needs a part.
-  assert.match(win, /onClick=\{\(\) => save\.mutate\(\)\} disabled=\{busy \|\| !!problem \|\| !draft\.length\} data-testid="invoice-save"/);
+  assert.match(win, /onClick=\{\(\) => save\.mutate\(\)\} disabled=\{busy \|\| !!blocked \|\| !draft\.length\} data-testid="invoice-save"/);
 });

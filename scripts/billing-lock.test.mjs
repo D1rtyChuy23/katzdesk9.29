@@ -195,7 +195,7 @@ test("a live invoice locks the charges and the Sales Order for everyone; a voide
   );
   await assert.rejects(() => charges.recordTicketSalesOrder(sql, id, "u-owner", "SO77"), /invoiced on INV101/);
   // The SQL guard holds even if the check in front of it is skipped.
-  const raw = await sql.query(charges.replaceTicketChargesSql(), [id, ["X"], [""], [1], [1], ["part"], true, [], null, null, null, [""], true]);
+  const raw = await sql.query(charges.replaceTicketChargesSql(), [id, ["X"], [""], [1], [1], ["part"], true, [], null, null, null, [""], true, null, [false]]);
   assert.equal(raw.length, 0);
   assert.equal((await sql.query("select count(*)::int as n from ticket_charges where job_id = $1", [id]))[0].n, 1);
 });

@@ -23,7 +23,7 @@
  * Pure: no server imports, safe for node --test.
  */
 import { chargesTotal, kindForItem, round2, type ChargeKind } from "./charges.ts";
-import { applyDiscount, type Discount } from "./discount.ts";
+import { applyDiscount, billTotals, type Discount } from "./discount.ts";
 import {
   discountFromNetSuite,
   invoiceFitsTicket,
@@ -288,7 +288,8 @@ export type BackfillTicket = {
   corrigoNet: number | null;
   /** updated_at as text: the write skips a ticket that changed after the plan. */
   seen: string;
-  lines: { item: string; description: string; qty: number; rate: number }[];
+  /** discountChosen: the line's tick for a Chosen-lines discount (11/7). */
+  lines: { item: string; description: string; qty: number; rate: number; discountChosen?: boolean }[];
   invoices: StoredNsInvoice[];
 };
 
@@ -487,7 +488,8 @@ function sameLines(a: { item: string; qty: number; rate: number }[], b: { item: 
   return x.every((k, i) => k === y[i]);
 }
 
-const sameDiscount = (a: Discount | null, b: Discount | null) => (!a && !b) || (!!a && !!b && a.kind === b.kind && round2(a.value) === round2(b.value));
+const sameDiscount = (a: Discount | null, b: Discount | null) =>
+  (!a && !b) || (!!a && !!b && a.kind === b.kind && round2(a.value) === round2(b.value) && (a.scope ?? "all") === (b.scope ?? "all"));
 
 const money = (n: number) => `$${n.toFixed(2)}`;
 
@@ -975,7 +977,8 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   // own invoice and never exported: every run that has them refreshes them (11/5 review).
   const locked = t ? t.invoices.some((i) => !isVoidedStatus(i.status)) || !!t.billedOnInstall : false;
   const currentLines: BackfillChargeLine[] = target.lines.map((l) => ({ ...l, kind: kindForItem(l.item) }));
-  const current = applyDiscount(chargesTotal(target.lines), target.discount);
+  // Off the lines it comes off: a ticket's Chosen-lines discount, its ticked ones (11/7).
+  const current = billTotals(target.lines, target.discount);
 
   // Charges from the file.
   let next: BackfillChargeLine[] | null = null;
@@ -1019,6 +1022,9 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
       }
     }
   }
+  // NetSuite's lines carry no ticks, so they go on as the Whole bill (11/7). A Chosen-lines discount kept from the ticket
+  // (a file with no discount for it) goes on as the dollars it took off, so the total stays what it was.
+  if (next && nextDiscount?.scope === "chosen") nextDiscount = current.off > 0 ? { kind: "amount", value: current.off } : null;
   const chargesChange = !!next && (!sameLines(next, target.lines) || !sameDiscount(nextDiscount, target.discount));
   const nextNet = next ? applyDiscount(chargesTotal(next), nextDiscount).total : null;
 

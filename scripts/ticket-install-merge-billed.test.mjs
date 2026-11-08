@@ -107,14 +107,15 @@ test("a ticket billed on a Sales Order merges: its charges stay billed there, ne
   // The merge log keeps the Sales Order and a copy of the lines billed on it.
   const log = (await one(pg, "select moved from ticket_install_merges where job_id = $1", [jobId])).moved;
   assert.deepEqual([log.billedSo, log.billedInvoices, Number(log.billedTotal), log.invoiceId, log.invoiceLines], [SO, null, 500, null, []]);
-  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [LABOR_500]);
+  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [{ ...LABOR_500, discounted: true }]);
   // The install's notes end with the ticket's text and the Sales Order.
   assert.ok((await one(pg, "select notes from installs where id = $1", [installId])).notes.endsWith(`\n${BILLED}`));
 
   // The install's Invoice window: its own invoice empty, the ticket's charges listed as billed on the SO.
   const iv = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual([iv.state, iv.lines.length, iv.total], ["none", 0, 0]);
-  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: SO, so: SO, invoices: null, voided: null, lines: [LABOR_500], total: 500 }]);
+  // Each line says it took the ticket's discount (11/7): it has none to say otherwise.
+  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: SO, so: SO, invoices: null, voided: null, lines: [{ ...LABOR_500, discounted: true }], total: 500 }]);
   // The ticket's own window says where its charges are.
   assert.equal(
     (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
@@ -184,7 +185,7 @@ test("what the confirm showed is what merges: a Sales Order cleared or entered s
     await assert.rejects(() => merge(sql, jobId, installId, p.stamps), { message: M.RELOAD_FOR_BILLED(SO) });
   }
   // The statement checks it too, on the locked row.
-  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null, so, ""]);
+  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null, so, "", "all"]);
   assert.deepEqual(await run(""), []);
   assert.deepEqual(await run("SO9002"), []);
   // A repair quote or a stacked PM added after the read: still refused, read fresh in the statement.
@@ -259,7 +260,7 @@ test("a billed merge doesn't depend on the install's invoice, and names only Net
   const j2 = await billedTicket(pg, { call_id: "SC-202610-908", wo: "WO-4830" });
   const i2 = await install(pg, { wo: "WO-4830" });
   const p2 = await preview(sql, j2, i2);
-  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500, SO, ""]);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500, SO, "", "all"]);
   assert.equal(ran.length, 1);
 });
 
@@ -374,8 +375,9 @@ test("the confirm, the merge's toast and the install's Invoice window say it (so
   assert.ok(win.includes('{v.billedElsewhere.length ? (\n              <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">'));
   assert.ok(win.includes("Already billed (not on this invoice)"));
   assert.ok(win.includes("These charges were billed on the Sales Order or NetSuite invoice shown and are not billed again."));
-  // The invoice's totals come from its own lines only.
-  assert.ok(win.includes("const totals = invoiceTotals(\n    draft.map("));
+  // The invoice's totals come from its own lines only (with their Discount ticks, 11/7).
+  assert.ok(win.includes("const priced = draft.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind, discountChosen: l.discountChosen }));"));
+  assert.ok(win.includes("const totals = invoiceTotals(priced, discount);"));
   // The merged ticket's banner: billed on its SO, or its charges on the install.
   assert.ok(confirm.includes("{job.mergedBilledOn\n          ? `Its charges stay billed on ${job.mergedBilledOn} (the install lists them as billed);"));
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");

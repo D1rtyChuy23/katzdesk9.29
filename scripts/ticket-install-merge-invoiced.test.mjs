@@ -112,14 +112,15 @@ test("a ticket billed on a NetSuite invoice with no Sales Order merges: its char
   // The merge log keeps what it was billed on, its invoice and a copy of the lines billed there.
   const log = (await one(pg, "select moved from ticket_install_merges where job_id = $1", [jobId])).moved;
   assert.deepEqual([log.billedOn, log.billedSo, log.billedInvoices, Number(log.billedTotal), log.invoiceId, log.invoiceLines], [ON, null, INV, 500, null, []]);
-  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [LABOR_500]);
+  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [{ ...LABOR_500, discounted: true }]);
   assert.deepEqual(await one(pg, `select ${BILLED_ON_INSTALL("j.id")} as on_, ${BILLED_ON_INSTALL_SO("j.id")} as so from service_jobs j where j.id = $1`, [jobId]), { on_: ON, so: null });
   assert.ok((await one(pg, "select notes from installs where id = $1", [installId])).notes.endsWith(`\n${BILLED}`));
 
   // The install's Invoice window: its own invoice empty, the ticket's charges listed as billed on the invoice.
   const iv = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual([iv.state, iv.lines.length, iv.total], ["none", 0, 0]);
-  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: ON, so: null, invoices: INV, voided: null, lines: [LABOR_500], total: 500 }]);
+  // Each line says it took the ticket's discount (11/7): it has none to say otherwise.
+  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: ON, so: null, invoices: INV, voided: null, lines: [{ ...LABOR_500, discounted: true }], total: 500 }]);
   assert.equal(
     (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
     `This ticket was merged into install #${installId}. Its charges were billed on ${ON} and stay billed there; the install lists them as billed.`,
@@ -169,7 +170,7 @@ test("only the NetSuite invoices that stand are its billing; an approved install
   const d = await invoicedTicket(pg, { call_id: "SC-202610-905", wo: "WO-4833" });
   const id = await install(pg, { wo: "WO-4833" });
   const pd = await preview(sql, d, id);
-  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [d, id, "boss", pd.stamps.job, pd.stamps.install, "1:stale:stamp", "note", 0, null, null, null, "", 500, ON, INV]);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [d, id, "boss", pd.stamps.job, pd.stamps.install, "1:stale:stamp", "note", 0, null, null, null, "", 500, ON, INV, "all"]);
   assert.equal(ran.length, 1);
   // Two that stand: both named.
   const b = await ticket(pg, { call_id: "SC-202610-902", wo: "WO-4830" });
@@ -266,7 +267,7 @@ test("what the confirm showed is what merges: windows from before, and invoices 
   assert.equal(unbilled.moves.billed, null);
   // Before that, the statement never merges it as billed on invoices it doesn't have.
   const asBilled = (inv) =>
-    sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", unbilled.stamps.job, unbilled.stamps.install, unbilled.stamps.head, "note", 0, null, null, null, "", 500, "NetSuite invoice INV9050", inv]);
+    sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", unbilled.stamps.job, unbilled.stamps.install, unbilled.stamps.head, "note", 0, null, null, null, "", 500, "NetSuite invoice INV9050", inv, "all"]);
   assert.deepEqual(await asBilled(""), []);
   assert.deepEqual(await asBilled("INV9050"), []);
   await invoice(pg, j2, "INV9050");
@@ -274,7 +275,7 @@ test("what the confirm showed is what merges: windows from before, and invoices 
 
   // The statement checks it on the locked row: the invoices read fresh, and what it is billed on.
   const run = (on, inv, so = "") =>
-    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", p.stamps.job, p.stamps.install, p.stamps.head, "note", 0, null, null, null, so, on ? 500 : null, on, inv]);
+    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", p.stamps.job, p.stamps.install, p.stamps.head, "note", 0, null, null, null, so, on ? 500 : null, on, inv, "all"]);
   const now = await snapshot(pg);
   await invoice(pg, jobId, "INV9002");
   assert.deepEqual(await run(ON, INV), []);
@@ -299,7 +300,7 @@ test("a ticket billed on a Sales Order still merges from a window of 10/30's rel
   assert.deepEqual([p.moves.billed.so, p.moves.billed.on], ["SO9001", "SO9001"]);
   await assert.rejects(() => merge(sql, jobId, installId, p.stamps, "SO9001", ""), { message: M.CHANGED_SINCE_OPENED });
   // The statement never takes it as billed on anything but its SO.
-  const run = (on) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", p.stamps.job, p.stamps.install, p.stamps.head, "note", 0, null, null, null, "SO9001", 500, on, ""]);
+  const run = (on) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", p.stamps.job, p.stamps.install, p.stamps.head, "note", 0, null, null, null, "SO9001", 500, on, "", "all"]);
   assert.deepEqual(await run(ON), []);
   await invoice(pg, jobId, "INV-71");
   assert.equal((await merge(sql, jobId, installId, (await preview(sql, jobId, installId)).stamps, "SO9001")).billedOn, "SO9001");

@@ -10,7 +10,6 @@ import {
   BILLING_LABEL,
   LABOR_ITEM,
   TRIP_ITEM,
-  chargesTotal,
   kindForItem,
   lineAmount,
   normalizePartNo,
@@ -25,15 +24,17 @@ import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { PartThumb } from "./part-thumb";
 import { AddPmParts } from "./pm-bill-add";
-import { applyDiscount, cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
+import { billTotals, chosenDiscountError, cleanDiscount, discountOffLabel, type DiscountKind, type DiscountScope } from "@/lib/ops/discount";
+import { ChosenBar, LineTick, ScopePicker } from "./discount-controls";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null; sourceKey?: string | null };
+/** discountChosen: the line's Discount tick, read on a Chosen-lines discount (11/7). */
+type DraftLine = { item: string; description: string; qty: string; rate: string; part: PartRef | null; sourceKey?: string | null; discountChosen: boolean };
 
 function toDraft(l: ChargeLine & { part: PartRef | null }): DraftLine {
-  return { item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), part: l.part, sourceKey: l.sourceKey ?? null };
+  return { item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), part: l.part, sourceKey: l.sourceKey ?? null, discountChosen: l.discountChosen === true };
 }
 
 /** Trip and labor are services: no photo slot. Parts and equipment get one. */
@@ -50,6 +51,7 @@ function draftLines(lines: DraftLine[]): ChargeLine[] {
     rate: Number(l.rate) || 0,
     kind: kindForItem(l.item),
     sourceKey: l.sourceKey ?? null,
+    discountChosen: l.discountChosen,
   }));
 }
 
@@ -69,6 +71,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   const [dirty, setDirty] = useState(false);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
+  // Whole bill, or the Chosen lines ticked (11/7).
+  const [discScope, setDiscScope] = useState<DiscountScope>("all");
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState("");
 
@@ -83,7 +87,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   useEffect(() => {
     if (!c || c.jobId !== jobId) return;
     // The P.O. isn't part of it: one changed on the ticket's details reloads only the P.O. (below), never typed lines.
-    const same = JSON.stringify([jobId, c.lines.map((l) => [l.id, l.item, l.description, l.qty, l.rate]), c.nsSo, c.discount]);
+    const same = JSON.stringify([jobId, c.lines.map((l) => [l.id, l.item, l.description, l.qty, l.rate, l.discountChosen === true]), c.nsSo, c.discount]);
     if (same === loaded.current && editing.current) return;
     loaded.current = same;
     setLines(c.lines.map(toDraft));
@@ -93,6 +97,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     setBilledOn("");
     setDiscKind(c.discount?.kind ?? "percent");
     setDiscValue(c.discount ? String(c.discount.value) : "");
+    setDiscScope(c.discount?.scope === "chosen" ? "chosen" : "all");
     setDirty(false);
   }, [c, jobId]);
   // The P.O. as the ticket has it now, unless it's being changed here (an Admin's unlock).
@@ -122,7 +127,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
     refreshAround();
     toast.success(message);
   };
-  const discountInput = () => (discValue.trim() ? { kind: discKind, value: discValue } : null);
+  // With what it comes off (11/7): a save without it is a page from before then.
+  const discountInput = () => (discValue.trim() ? { kind: discKind, value: discValue, scope: discScope } : null);
   const save = useMutation({
     // No P.O.: it is the ticket's details' (11/2), so a save here never puts back an older one.
     mutationFn: () => saveTicketCharges({ data: { jobId, lines, lineIds: (charges.data?.lines ?? []).map((l) => l.id), discount: discountInput() } }),
@@ -179,16 +185,30 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
   // Locked: billed on a Sales Order (clear it to edit), or invoiced in NetSuite (an Admin unlocks it).
   const billed = c.state === "billed" && !unlocked;
   // The discount is always worked out from the lines, never from a total that already has it taken off.
-  const typedDiscount = cleanDiscount(discKind, discValue);
+  const typedDiscount = cleanDiscount(discKind, discValue, discScope);
   const discount = "error" in typedDiscount ? null : typedDiscount.discount;
-  const totals = applyDiscount(chargesTotal(draftLines(lines)), discount);
+  // On Chosen lines it comes off the ticked lines only (11/7); with none ticked, it can't be saved.
+  const totals = billTotals(draftLines(lines), discount);
   const total = totals.total;
+  const chosen = discScope === "chosen";
+  const tickError = chosenDiscountError(draftLines(lines), discount);
   const edit = (i: number, patch: Partial<DraftLine>) => {
     setLines((cur) => cur.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
     setDirty(true);
   };
-  const add = (l: DraftLine) => {
-    setLines((cur) => [...cur, l]);
+  // A line added comes in unticked (11/7): a discount on chosen lines never covers one added later.
+  const add = (l: Omit<DraftLine, "discountChosen">) => {
+    setLines((cur) => [...cur, { ...l, discountChosen: false }]);
+    setDirty(true);
+  };
+  // Chosen lines starts with every line ticked; Whole bill keeps no ticks, so nothing is left hidden.
+  const pickScope = (s: DiscountScope) => {
+    setDiscScope(s);
+    setLines((cur) => cur.map((l) => ({ ...l, discountChosen: s === "chosen" })));
+    setDirty(true);
+  };
+  const tickAll = (on: boolean) => {
+    setLines((cur) => cur.map((l) => ({ ...l, discountChosen: on })));
     setDirty(true);
   };
 
@@ -338,6 +358,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                   </p>
                 </div>
               </div>
+              {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={billed} onChange={(v) => edit(i, { discountChosen: v })} /> : null}
               {/* Admin: cost and margin on a part line, from Our Discount Rule. Shown for the saved lines. */}
               {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} /> : null}
             </li>
@@ -416,6 +437,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
               disabled={billed}
               onChange={(e) => {
                 setDiscValue(e.target.value);
+                // Cleared, it is Whole bill again with nothing ticked (11/7).
+                if (!e.target.value.trim()) pickScope("all");
                 setDirty(true);
               }}
               className="mt-1"
@@ -424,13 +447,32 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
           </div>
           {"error" in typedDiscount ? <p className="pb-2 text-xs text-destructive">{typedDiscount.error}</p> : null}
         </div>
+        {discValue.trim() ? (
+          <div className="mt-3">
+            <ScopePicker scope={discScope} onChange={pickScope} disabled={billed} />
+            {chosen ? (
+              <ChosenBar
+                chosen={lines.filter((l) => l.discountChosen).length}
+                lines={lines.length}
+                onAll={() => tickAll(true)}
+                onNone={() => tickAll(false)}
+                disabled={billed}
+              />
+            ) : null}
+            {tickError ? (
+              <p className="mt-2 text-xs text-destructive" data-testid="discount-chosen-error">
+                {tickError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-muted/50 p-3 text-sm" data-testid="charges-totals">
           <div>
             <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Original Total</dt>
             <dd className="tabular font-medium" data-testid="charges-subtotal">{money(totals.subtotal)}</dd>
           </div>
           <div>
-            <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Discount{discount ? ` · ${discountLabel(discount)}` : ""}</dt>
+            <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Discount{discount ? ` · ${discountOffLabel(discount, draftLines(lines))}` : ""}</dt>
             <dd className="tabular font-medium" data-testid="charges-off">{totals.off ? `−${money(totals.off)}` : money(0)}</dd>
           </div>
           <div>
@@ -522,7 +564,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
             <Button
               type="button"
               size="sm"
-              disabled={!dirty || saveUnlocked.isPending || "error" in typedDiscount}
+              disabled={!dirty || saveUnlocked.isPending || "error" in typedDiscount || !!tickError}
               onClick={() => saveUnlocked.mutate()}
               data-testid="charges-save-lock"
             >
@@ -530,7 +572,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
             </Button>
           </>
         ) : (
-          <Button type="button" size="sm" disabled={billed || !dirty || save.isPending || "error" in typedDiscount} onClick={() => save.mutate()} data-testid="charges-save">
+          <Button type="button" size="sm" disabled={billed || !dirty || save.isPending || "error" in typedDiscount || !!tickError} onClick={() => save.mutate()} data-testid="charges-save">
             {save.isPending ? "Saving…" : "Save Charges"}
           </Button>
         )}

@@ -21,6 +21,19 @@ side too: see "Installs and PMs" below.
   when the ticket is billed, for Parts Profit.
 - The ticket's Invoice window shows these same lines (`sharedWithCharges`). Saving there saves here.
 
+## Whole bill or Chosen lines (11/7, migration `0123`)
+
+- `service_jobs.discount_scope` and `invoices.discount_scope`: `'all'` (Whole bill, the default, and every discount
+  saved before) or `'chosen'` (Chosen lines).
+- `ticket_charges.discount_chosen` and `invoice_lines.discount_chosen`: the line's tick, default false. It is read only on
+  a Chosen-lines discount. A line added anywhere (by hand, PM parts, a rebuild link) comes in unticked.
+- A line takes the discount when its bill is Whole bill or it is ticked. The discount comes off the base, what those
+  lines add up to (each line rounded to the cent); a percent of it, or an amount, never more than it.
+- The same math in the app (`billTotals` and `applyDiscount(subtotal, discount, base)` in `discount.ts`) and in SQL
+  (`invoice_total(subtotal, base, kind, value)`; `DISCOUNT_BASE_SQL` builds the base). `invoice_total(subtotal, kind,
+  value)` from `0118` stays.
+- No discount saves as Whole bill with no ticks.
+
 ## invoices and invoice_lines: the in-app Invoice window
 
 - One `invoices` row per record (`entity_type` + `entity_id` is unique), written only on Approve.

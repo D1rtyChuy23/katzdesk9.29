@@ -530,7 +530,7 @@ test("the statement's own guards: stale stamps, a check that came true after the
   await charge(pg, jobId, "PARTS : TESTGASKET", 1, 12.5, "part", 1);
   const p = await preview(sql, jobId, installId);
   const run = (stamps, extra = {}) =>
-    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null, null, extra.so ?? "", null, extra.so ?? "", ""]);
+    sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", stamps.job, stamps.install, stamps.head, p.note, extra.total ?? 12.5, null, null, null, extra.so ?? "", null, extra.so ?? "", "", "all"]);
   const before = await snapshot(pg);
   for (const bad of [{ ...p.stamps, job: "x" }, { ...p.stamps, install: "x" }, { ...p.stamps, head: "1:x:y" }]) {
     assert.deepEqual(await run(bad), []);
@@ -755,7 +755,7 @@ test("a ticket QuickBooks invoiced: refused while it has charges (they may be bi
   // The statement checks it too.
   const before = await snapshot(pg);
   const { stamps } = await preview(sql, keeper, other);
-  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null, null, "", null, "", ""]), []);
+  assert.deepEqual(await sql.query(M.mergeTicketIntoInstallSql(), [keeper, other, "boss", stamps.job, stamps.install, stamps.head, "note", 12.5, null, null, null, "", null, "", "", "all"]), []);
   assert.equal(await snapshot(pg), before);
 });
 

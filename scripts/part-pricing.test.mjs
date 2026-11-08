@@ -122,6 +122,12 @@ test("ticket discount shares add back to the discount exactly", () => {
   assert.deepEqual(discountShares([10, 20], 0), [0, 0]);
 });
 
+test("the ticket discount goes only to the lines that take it (11/7)", () => {
+  assert.deepEqual(discountShares([90, 225], 9, [true, false]), [9, 0]);
+  assert.deepEqual(discountShares([10, 10, 10], 1, [true, false, true]), [0.5, 0, 0.5]);
+  assert.deepEqual(discountShares([10, 10], 1, [false, false]), [0, 0]);
+});
+
 test("parts profit per MPN", () => {
   const rows = profitByMpn([
     { mpn: "104120", sku: "EVER104120", description: "Gasket", qty: 2, cost: 13, sell: 24, ourDiscount: 7, ticketDiscount: 0, margin: 11 },
