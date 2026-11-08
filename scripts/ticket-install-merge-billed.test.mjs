@@ -375,8 +375,9 @@ test("the confirm, the merge's toast and the install's Invoice window say it (so
   assert.ok(win.includes('{v.billedElsewhere.length ? (\n              <section className="rounded-lg border border-dashed border-border p-3" data-testid="invoice-billed">'));
   assert.ok(win.includes("Already billed (not on this invoice)"));
   assert.ok(win.includes("These charges were billed on the Sales Order or NetSuite invoice shown and are not billed again."));
-  // The invoice's totals come from its own lines only.
-  assert.ok(win.includes("const totals = invoiceTotals(\n    draft.map("));
+  // The invoice's totals come from its own lines only (with their Discount ticks, 11/7).
+  assert.ok(win.includes("const priced = draft.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind, discountChosen: l.discountChosen }));"));
+  assert.ok(win.includes("const totals = invoiceTotals(priced, discount);"));
   // The merged ticket's banner: billed on its SO, or its charges on the install.
   assert.ok(confirm.includes("{job.mergedBilledOn\n          ? `Its charges stay billed on ${job.mergedBilledOn} (the install lists them as billed);"));
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
