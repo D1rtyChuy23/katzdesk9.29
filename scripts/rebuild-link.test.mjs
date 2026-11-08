@@ -206,6 +206,16 @@ test("what a link does, or why it can't: the rules alone", () => {
     R.planLink({ ...r, account: CAFE, po: "PO-77", own: fresh }, { ...inst, discount: { kind: "amount", value: 25 }, netsuite: null }).effects[1],
     "Install #9's discount ($25.00 off) stays one discount on its whole bill.",
   );
+  // On a Chosen-lines bill (11/7) they come in unticked, so its discount, % or $, doesn't come off them.
+  for (const [discount, label] of [
+    [{ kind: "percent", value: 10, scope: "chosen" }, "10% off"],
+    [{ kind: "amount", value: 25, scope: "chosen" }, "$25.00 off"],
+  ]) {
+    assert.equal(
+      R.planLink({ ...r, account: CAFE, po: "PO-77", own: fresh }, { ...inst, discount, netsuite: null }).effects[1],
+      `These come in unticked, so Install #9's discount (${label} its chosen lines) doesn't come off them.`,
+    );
+  }
   // Nothing on its invoice yet: its parts and labor are billed there from now on.
   assert.equal(R.planLink({ ...r, own: { ...own, lines: 0, total: 0 } }, t).effects.at(-1), "It has no invoice lines yet. Its parts and labor are billed on the ticket's charges from now on.");
   // A billed project takes no lines, and no link at all (11/6 review, round 5): linked there, the rebuild could bill
@@ -247,6 +257,10 @@ test("what a link does, or why it can't: the rules alone", () => {
   // An amount off can't take it below zero; with nothing to take off, there's no discount to speak of.
   assert.equal(R.ownAmount({ total: 15, discount: { kind: "amount", value: 20 } }), "$15.00 before its $20.00 discount, $0.00 billed");
   assert.equal(R.ownAmount({ total: 0, discount: { kind: "percent", value: 100 } }), "$0.00");
+  // On Chosen lines (11/7) it comes off the ticked lines only: 100% of $90.00 leaves $225.00 billed.
+  assert.equal(R.ownAmount({ total: 315, base: 90, discount: { kind: "percent", value: 100, scope: "chosen" } }), "$315.00 before its 100% discount, $225.00 billed");
+  // With none of them ticked, there's no discount to speak of.
+  assert.equal(R.ownAmount({ total: 315, base: 0, discount: { kind: "percent", value: 100, scope: "chosen" } }), "$315.00");
   // No hint where Yes isn't on offer. Not approved: Link doesn't ask.
   const noHint =
     "This rebuild's invoice has a discount ($20.00 off). WO-4321 (Service ticket SC-1)'s bill can't carry it, so its lines would bill there without it. If the discount shouldn't apply, take it off the rebuild's invoice first.";
@@ -1806,6 +1820,82 @@ test("a discounted invoice reads as billed: what its lines add up to, and what i
   assert.equal((await notes(sql)).at(-1).detail, "Its invoice's 1 line ($90.00 before its 10% discount, $81.00 billed) is on a Sales Order in NetSuite, so it stays on it");
 });
 
+test("linked onto a chosen-lines bill, its lines come in unticked: the bill's discount stays on what was ticked (11/7)", async () => {
+  const { sql } = await fresh();
+  const pct = { kind: "percent", value: 10, scope: "chosen" };
+  // The burr set ticked, the labor not: 10% off $90.00 is $9.00, so $315.00 of lines bill $306.00.
+  const ticked = PARTS.map((l, i) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, discountChosen: i === 0 }));
+  const lineTicks = async (type, id) =>
+    (await sql.query("select l.discount_chosen from invoices v join invoice_lines l on l.invoice_id = v.id where v.entity_type = $1 and v.entity_id = $2 order by l.sort, l.id", [type, id])).map((r) => r.discount_chosen);
+
+  // A ticket on Chosen lines: the rebuild's $315.00 adds $315.00, and the $9.00 off stays as it was.
+  const rb = await rebuild(sql);
+  await ownInvoice(sql, rb, PARTS);
+  const job = await ticket(sql, { wo: "WO-4321", status: "In progress" });
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: ticked, lineIds: [], discount: pct });
+  assert.equal((await C.loadTicketCharges(sql, job)).total, 306);
+  const f = await find(sql, rb, "4321");
+  assert.equal(f.candidates[0].plan.not.effects.at(-1), "These come in unticked, so Service ticket SC-RBL-1's discount (10% off its chosen lines) doesn't come off them.");
+  await linkTo(sql, f, f.candidates[0]);
+  const c = await C.loadTicketCharges(sql, job);
+  assert.deepEqual(c.lines.map((l) => l.discountChosen), [true, false, false, false]);
+  assert.deepEqual([c.subtotal, c.off, c.total], [630, 9, 621]);
+
+  // An install whose invoice is on Chosen lines, waiting: its total is 621.00 linked, and 306.00 again unlinked.
+  const rb2 = await rebuild(sql, { title: "Test brewer refurb", account: CAFE });
+  await ownInvoice(sql, rb2, PARTS, { customer: CAFE });
+  const inst = await install(sql, { wo: "WO-5000" });
+  const inv = await idOf(
+    sql,
+    `insert into invoices (entity_type, entity_id, customer, total, discount_kind, discount_value, discount_scope, submitted_by, submitted_at)
+     values ('install', $1, $2, 306, 'percent', 10, 'chosen', 'dana', now()) returning id`,
+    [inst, CAFE],
+  );
+  for (const [i, l] of ticked.entries()) {
+    await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, discount_chosen) values ($1, $2, $3, $4, $5, 'part', $6, $7)", [inv, l.item, l.description, l.qty, l.rate, i + 1, l.discountChosen]);
+  }
+  const g = await find(sql, rb2, "5000");
+  assert.equal(g.candidates[0].plan.not.effects.at(-1), `These come in unticked, so Install #${inst}'s discount (10% off its chosen lines) doesn't come off them.`);
+  await linkTo(sql, g, g.candidates[0]);
+  assert.equal((await head(sql, "install", inst)).total, 621);
+  assert.deepEqual(await lineTicks("install", inst), [true, false, false, false]);
+  // What the window reads agrees with what was stored.
+  assert.equal((await I.getInvoiceFor(sql, { type: "install", id: inst }, "u-owner")).total, 621);
+  await unlink(sql, rb2);
+  assert.equal((await head(sql, "install", inst)).total, 306);
+  assert.deepEqual(await lineTicks("install", inst), [true, false]);
+
+  // On the Whole bill, as before: 10% off everything, the rebuild's lines too.
+  const rb3 = await rebuild(sql, { title: "Test grinder refurb 2", account: CAFE });
+  await ownInvoice(sql, rb3, PARTS, { customer: CAFE });
+  const whole = await install(sql, { wo: "WO-6000" });
+  const inv3 = await idOf(sql, "insert into invoices (entity_type, entity_id, customer, total, discount_kind, discount_value) values ('install', $1, $2, 283.5, 'percent', 10) returning id", [whole, CAFE]);
+  for (const [i, l] of PARTS.entries()) {
+    await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort) values ($1, $2, $3, $4, $5, 'part', $6)", [inv3, l.item, l.description, l.qty, l.rate, i + 1]);
+  }
+  const h = await find(sql, rb3, "6000");
+  assert.equal(h.candidates[0].plan.not.effects.at(-1), `Install #${whole}'s discount (10% off) applies to them there.`);
+  await linkTo(sql, h, h.candidates[0]);
+  assert.equal((await head(sql, "install", whole)).total, 567);
+  await unlink(sql, rb3);
+  assert.equal((await head(sql, "install", whole)).total, 283.5);
+
+  // Its own invoice on Chosen lines reads as billed on its ticked lines: 100% off the burr set's $90.00.
+  const rb4 = await rebuild(sql, { title: "Test used parts" });
+  const own = await ownInvoice(sql, rb4, PARTS, { discount: { kind: "percent", value: 100 } });
+  await sql.query("update invoices set discount_scope = 'chosen' where id = $1", [own]);
+  await sql.query("update invoice_lines set discount_chosen = (item = 'TEST-BURR-64') where invoice_id = $1", [own]);
+  const job4 = await ticket(sql, { wo: "WO-7000", status: "In progress" });
+  const k = await find(sql, rb4, "7000");
+  assert.equal(k.candidates[0].plan.question, "Its invoice is approved (2 lines, $315.00 before its 100% discount, $225.00 billed). Is it on a Sales Order in NetSuite yet?");
+  // Kept on its Sales Order, it takes a later part back unticked on Unlink: still 100% off the burr set alone.
+  await linkTo(sql, k, k.candidates[0], "u-owner", "on");
+  await sql.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort) values ($1, 'TEST-GASKET', 'Test gasket', 1, 45, 'part', $2, 1)", [job4, `rb:${rb4}:900`]);
+  await unlink(sql, rb4);
+  assert.equal((await head(sql, "rebuild", rb4)).total, 270);
+  assert.deepEqual(await lineTicks("rebuild", rb4), [true, false, false]);
+});
+
 test("Warehouse and Sales see where a rebuild bills, and nothing of its billing or its invoice", async () => {
   const { sql } = await fresh();
   const rb = await rebuild(sql);
@@ -1816,7 +1906,7 @@ test("Warehouse and Sales see where a rebuild bills, and nothing of its billing 
   for (const who of ["u-wh", "u-rep"]) {
     const v = await L.getRebuildLinkFor(sql, rb, who);
     assert.ok(v.refusal, who);
-    assert.deepEqual(v.own, { version: null, state: "none", lines: 0, total: 0, discount: null, onSalesOrder: false }, who);
+    assert.deepEqual(v.own, { version: null, state: "none", lines: 0, total: 0, base: 0, discount: null, onSalesOrder: false }, who);
     assert.deepEqual(
       [v.current.name, v.current.closed, v.current.po, v.current.discount, v.current.netsuite, v.current.stamp, v.current.lines, v.current.total, v.unlink, v.suggestions],
       ["Service ticket SC-RBL-1", null, null, null, null, "", 0, 0, null, []],
