@@ -593,7 +593,7 @@ test("linked to a ticket: its invoice's lines go on the ticket's charges, it tak
     { message: lock },
   );
   // The statement itself refuses too (an approve whose check ran before the link committed).
-  const raw = await sql.query(I.approveRecordInvoiceSql(), ["rebuild", rb, CAFE, null, null, null, null, null, null, 45, "chuy", null, ["TEST-BURR-64"], [""], [1], [45], ["part"], null, false, [null]]);
+  const raw = await sql.query(I.approveRecordInvoiceSql(), ["rebuild", rb, CAFE, null, null, null, null, null, null, 45, "chuy", null, ["TEST-BURR-64"], [""], [1], [45], ["part"], null, false, [null], null, [false]]);
   assert.deepEqual(raw, []);
   assert.equal(await head(sql, "rebuild", rb), undefined);
   // What the sheet shows, and the ticket's list of rebuilds billed there.

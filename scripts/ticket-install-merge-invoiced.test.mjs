@@ -119,7 +119,8 @@ test("a ticket billed on a NetSuite invoice with no Sales Order merges: its char
   // The install's Invoice window: its own invoice empty, the ticket's charges listed as billed on the invoice.
   const iv = await getInvoiceFor(sql, { type: "install", id: installId }, "u-owner");
   assert.deepEqual([iv.state, iv.lines.length, iv.total], ["none", 0, 0]);
-  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: ON, so: null, invoices: INV, voided: null, lines: [LABOR_500], total: 500 }]);
+  // Each line says it took the ticket's discount (11/7): it has none to say otherwise.
+  assert.deepEqual(iv.billedElsewhere, [{ jobId, ticket: `SC-202610-901 (${WO})`, on: ON, so: null, invoices: INV, voided: null, lines: [{ ...LABOR_500, discounted: true }], total: 500 }]);
   assert.equal(
     (await getInvoiceFor(sql, { type: "service", id: jobId }, "u-owner")).locked,
     `This ticket was merged into install #${installId}. Its charges were billed on ${ON} and stay billed there; the install lists them as billed.`,

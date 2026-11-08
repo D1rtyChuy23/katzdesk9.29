@@ -315,6 +315,9 @@ test("approving a stacked PM's invoice writes nothing, and an unstacked one does
     // No P.O. changed in the window (11/2).
     null,
     false,
+    // No discount scope (a window from before 11/7) and no ticks.
+    null,
+    [false],
   ];
   assert.equal((await sql.query(approvePmInvoiceSql(), args("PARTS : X", 10))).length, 0);
   assert.equal(Number((await pg.query("select count(*)::int as n from invoices where entity_type = 'pm' and entity_id = $1", [id])).rows[0].n), 0);
