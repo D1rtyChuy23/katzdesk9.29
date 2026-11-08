@@ -1,5 +1,17 @@
 import { isWalkIn } from "./customer-key";
-import { applyDiscount, cleanDiscount, discountLabel, isDiscountKind, withHeaderDiscount, type Discount } from "./discount";
+import {
+  applyDiscount,
+  billTotals,
+  chosenDiscountError,
+  cleanDiscount,
+  discountFromRow,
+  discountOffLabel,
+  isDiscountKind,
+  OUT_OF_DATE,
+  takesDiscount,
+  withHeaderDiscount,
+  type Discount,
+} from "./discount";
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
 import { BIN_CODE_SQL, binSearchCode } from "./part-bins";
@@ -156,9 +168,9 @@ export type TicketCharges = {
   po: string;
   nsSo: string | null;
   billedAt: string | null;
-  /** Each line carries its part's photo reference when the item is on the item list. */
-  lines: (ChargeLine & { id: number; part: PartRef | null })[];
-  /** The one discount on this ticket, or null. */
+  /** Each line carries its part's photo reference when the item is on the item list, and its discount tick (11/7). */
+  lines: (ChargeLine & { id: number; part: PartRef | null; discountChosen: boolean })[];
+  /** The one discount on this ticket, or null: on the Whole bill, or on Chosen lines (scope "chosen"). */
   discount: Discount | null;
   /** The lines added up, before the discount. */
   subtotal: number;
@@ -192,6 +204,7 @@ type ChargeRow = {
   rate: string;
   kind: ChargeKind;
   source_key: string | null;
+  discount_chosen: boolean | null;
   pid: number | null;
   sku: string | null;
   mfr_part: string | null;
@@ -211,7 +224,7 @@ type ChargeRow = {
 
 async function chargeRows(sql: Sql, jobId: number): Promise<ChargeRow[]> {
   return sql.query<ChargeRow>(
-    `select c.id, c.item, c.description, c.qty, c.rate, c.kind, c.source_key,
+    `select c.id, c.item, c.description, c.qty, c.rate, c.kind, c.source_key, c.discount_chosen,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version,
             p.list_price as p_list, p.cost as p_cost,
@@ -234,9 +247,16 @@ const num = (v: string | null) => (v == null ? null : Number(v));
 /** A ticket line "has a part" when its item is on the parts list and it is not trip or labor. */
 const isPartLine = (r: Pick<ChargeRow, "pid" | "kind">) => r.pid != null && r.kind !== "trip" && r.kind !== "labor";
 
-/** Cost, sell, discount and margin per part line: stored when invoiced, else worked out from the part and the rule. */
-function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null): (LineProfitView | null)[] {
-  const shares = discountShares(rows.map((r) => round2(Number(r.qty) * Number(r.rate))), off);
+/**
+ * Cost, sell, discount and margin per part line: stored when invoiced, else worked out from the part and the rule. The
+ * ticket discount's dollars go to the lines it comes off (11/7: on Chosen lines, the ticked ones only).
+ */
+function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, discount: Discount | null): (LineProfitView | null)[] {
+  const shares = discountShares(
+    rows.map((r) => round2(Number(r.qty) * Number(r.rate))),
+    off,
+    rows.map((r) => takesDiscount({ discountChosen: r.discount_chosen === true }, discount)),
+  );
   return rows.map((r, i) => {
     if (!isPartLine(r)) return null;
     const qty = Number(r.qty);
@@ -273,11 +293,12 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     billed_at: string | null;
     discount_kind: string | null;
     discount_value: string | null;
+    discount_scope: string | null;
     billing_unlocked_at: unknown;
     billing_unlocked_by: string | null;
     billing_unlock_reason: string | null;
   }>(
-    `select po, ns_so, billed_at, discount_kind, discount_value, billing_unlocked_at, billing_unlocked_by, billing_unlock_reason
+    `select po, ns_so, billed_at, discount_kind, discount_value, discount_scope, billing_unlocked_at, billing_unlocked_by, billing_unlock_reason
        from service_jobs where id = $1`,
     [jobId],
   ))[0];
@@ -294,11 +315,11 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     rate: Number(r.rate),
     kind: r.kind,
     sourceKey: r.source_key,
+    discountChosen: r.discount_chosen === true,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
   }));
-  const discount: Discount | null =
-    isDiscountKind(job.discount_kind) && Number(job.discount_value) > 0 ? { kind: job.discount_kind, value: Number(job.discount_value) } : null;
-  const totals = applyDiscount(chargesTotal(lines), discount);
+  const discount = discountFromRow(job.discount_kind, job.discount_value, job.discount_scope);
+  const totals = billTotals(lines, discount);
   const rule = showCost ? await loadDiscountRule(sql) : null;
   return {
     jobId,
@@ -310,7 +331,7 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     discount,
     ...totals,
     state: billingState({ lineCount: lines.length, nsSo: job.ns_so, invoiced: liveInvoices(invoices).length > 0 }),
-    profit: showCost ? profitFor(rows, totals.off, rule) : null,
+    profit: showCost ? profitFor(rows, totals.off, rule, discount) : null,
     ruleLabel: showCost ? ruleLabel(rule) : null,
     invoiceLock: lockedBy ? { invoice: lockedBy.invoice, status: lockedBy.status } : null,
     unlock: lockedBy && unlockedAt && unlockActive(unlockedAt) ? { by: job.billing_unlocked_by, at: unlockedAt, reason: job.billing_unlock_reason } : null,
@@ -324,8 +345,8 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
  * now, and counted as live.
  */
 export async function invoicedPartLines(sql: Sql, range: { from: string | null; to: string | null }): Promise<{ lines: (ProfitLine & { live: boolean })[] }> {
-  const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
-    `select j.id, j.discount_kind, j.discount_value from service_jobs j
+  const jobs = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null; discount_scope: string | null }>(
+    `select j.id, j.discount_kind, j.discount_value, j.discount_scope from service_jobs j
       where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
         -- A ticket merged into an install as billed (10/30), on its Sales Order or its NetSuite invoices, still counts,
         -- once: its lines never went on the install's invoice.
@@ -340,10 +361,10 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
   const out: (ProfitLine & { live: boolean })[] = [];
   for (const j of jobs) {
     const rows = await chargeRows(sql, Number(j.id));
-    const lines = rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) }));
-    const discount: Discount | null = isDiscountKind(j.discount_kind) && Number(j.discount_value) > 0 ? { kind: j.discount_kind, value: Number(j.discount_value) } : null;
-    const off = applyDiscount(chargesTotal(lines), discount).off;
-    const profit = profitFor(rows, off, rule);
+    const lines = rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), discountChosen: r.discount_chosen === true }));
+    const discount = discountFromRow(j.discount_kind, j.discount_value, j.discount_scope);
+    const off = billTotals(lines, discount).off;
+    const profit = profitFor(rows, off, rule, discount);
     rows.forEach((r, i) => {
       const p = profit[i];
       if (!p) return;
@@ -380,7 +401,7 @@ export async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boo
   const cur = await loadCharges(sql, jobId);
   const rows = await chargeRows(sql, jobId);
   const fresh = rows.map((r) => ({ ...r, priced_at: null }));
-  const profit = profitFor(fresh, cur.off, await loadDiscountRule(sql));
+  const profit = profitFor(fresh, cur.off, await loadDiscountRule(sql), cur.discount);
   for (let i = 0; i < rows.length; i++) {
     const p = profit[i];
     if (!p) continue;
@@ -410,10 +431,15 @@ const lineSchema = z.object({
   rate: z.union([z.number(), z.string()]),
   // pmkit:/mp: a stacked PM's kit and parts; rb: a linked rebuild's lines (11/6), which Unlink takes back.
   sourceKey: z.string().max(400).regex(/^(pmkit|mp|rb):/).nullable().optional(),
+  // Ticked for a Chosen-lines discount (11/7). A page from before then sends none.
+  discountChosen: z.boolean().optional(),
 });
 
+/** A discount as a save sends it: scope "chosen" is Chosen lines, "all" the Whole bill; none is a page from before 11/7. */
+const discountSchema = z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]), scope: z.enum(["all", "chosen"]).optional() });
+
 export type ChargeLinesInput = z.input<typeof lineSchema>[];
-export type DiscountInput = { kind: string; value: string | number } | null | undefined;
+export type DiscountInput = { kind: string; value: string | number; scope?: "all" | "chosen" } | null | undefined;
 
 /**
  * One statement: lock the ticket, replace its charge lines, and write the P.O. and discount together.
@@ -421,6 +447,9 @@ export type DiscountInput = { kind: string; value: string | number } | null | un
  * and a second save of the same keys must succeed. Duplicate keys are refused in checkCharges instead.
  * The P.O. ($9) is written only when the save sent one ($13, 11/2): otherwise the ticket keeps the one it has as this
  * runs, never one read before (its Details may have just changed it).
+ * Whole bill or Chosen lines (11/7): $14 is the discount's scope and $15 each line's tick. A null $14 is a page from
+ * before then, which sends neither: it writes only while the ticket reads Whole bill as this runs, so it can never drop
+ * the ticks.
  */
 export function replaceTicketChargesSql(): string {
   return `with j as (
@@ -432,19 +461,21 @@ export function replaceTicketChargesSql(): string {
           and not ${LIVE_INVOICE_SQL("s.id")}
           and ${UNCHANGED_SINCE_READ("s", "$1")}
           and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
+          and ($14::text is not null or s.discount_scope = 'all')
         for update
      ), d as (
        delete from ticket_charges c using j where c.job_id = j.id
      ), ins as (
-       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
-       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord
+       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort, discount_chosen)
+       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord, coalesce(t.chosen, false)
          from j
-         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[]) with ordinality
-              as t(item, description, qty, rate, kind, source_key, ord)
+         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[], $15::boolean[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, chosen, ord)
        returning ticket_charges.id
      )
      update service_jobs s
-        set po = case when $13::boolean then $9 else s.po end, discount_kind = $10, discount_value = $11, updated_at = now()
+        set po = case when $13::boolean then $9 else s.po end, discount_kind = $10, discount_value = $11,
+            discount_scope = coalesce($14::text, 'all'), updated_at = now()
        from j
       where s.id = j.id
      returning s.id`;
@@ -454,7 +485,8 @@ export function replaceTicketChargesSql(): string {
  * The Admin's save on an unlocked, invoiced ticket: the same lines, P.O. and discount as replaceTicketChargesSql, plus
  * the Sales Order ($13) and its billed date ($14, else kept when the SO is unchanged, else now). The Sales Order is
  * kept, not cleared, so the lines change on a billed ticket. The unlock is cleared in the same statement, so saving
- * locks the ticket again. Nothing is written when the unlock has run out. The P.O. is written only when sent ($15).
+ * locks the ticket again. Nothing is written when the unlock has run out. The P.O. is written only when sent ($15). The
+ * scope and ticks are $16 and $17, as $14 and $15 of replaceTicketChargesSql.
  */
 export function replaceUnlockedChargesSql(): string {
   return `with j as (
@@ -464,19 +496,21 @@ export function replaceUnlockedChargesSql(): string {
           and s.duplicate_of is null
           and ${UNLOCKED_SQL("s")}
           and ($7::boolean or coalesce((select array_agg(c.id order by c.id) from ticket_charges c where c.job_id = s.id), '{}') = $8::int[])
+          and ($16::text is not null or s.discount_scope = 'all')
         for update
      ), d as (
        delete from ticket_charges c using j where c.job_id = j.id
      ), ins as (
-       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort)
-       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord
+       insert into ticket_charges (job_id, item, description, qty, rate, kind, source_key, sort, discount_chosen)
+       select j.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, nullif(btrim(t.source_key), ''), t.ord, coalesce(t.chosen, false)
          from j
-         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[]) with ordinality
-              as t(item, description, qty, rate, kind, source_key, ord)
+         cross join unnest($2::text[], $3::text[], $4::numeric[], $5::numeric[], $6::text[], $12::text[], $17::boolean[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, chosen, ord)
        returning ticket_charges.id
      )
      update service_jobs s
         set po = case when $15::boolean then $9 else s.po end, discount_kind = $10, discount_value = $11,
+            discount_scope = coalesce($16::text, 'all'),
             ns_so = $13::text,
             billed_at = case
               when $13::text is null then null
@@ -528,8 +562,19 @@ export async function writeTicketCharges(
   const problems = checkCharges(input.lines);
   if (problems.length) throw new Error(`Line ${problems[0].index + 1}: ${problems[0].message}`);
   // Left out = keep what is saved. Null or blank = no discount. Stored as the choice, never as a discounted total.
-  const typed = input.discount === undefined ? { discount: cur.discount } : input.discount === null ? { discount: null } : cleanDiscount(input.discount.kind, input.discount.value);
+  const typed =
+    input.discount === undefined
+      ? { discount: cur.discount }
+      : input.discount === null
+        ? { discount: null }
+        : cleanDiscount(input.discount.kind, input.discount.value, input.discount.scope);
   if ("error" in typed) throw new Error(typed.error);
+  // Whole bill or Chosen lines (11/7). A page from before then sends no scope and no ticks: it may save only over a
+  // Whole-bill ticket (here, and in the statement as it writes), or the ticks would be lost.
+  const ticked = input.lines.every((l) => typeof l.discountChosen === "boolean");
+  const said = input.discount === null || (input.discount === undefined ? ticked : input.discount.scope !== undefined);
+  if (!said && cur.discount?.scope === "chosen") throw new Error(OUT_OF_DATE);
+  const chosen = typed.discount?.scope === "chosen";
 
   const items = input.lines.map((l) => l.item.trim());
   const kinds = new Map<string, ChargeKind>();
@@ -547,7 +592,11 @@ export async function writeTicketCharges(
     rate: cleanRate(l.rate)!,
     kind: kinds.get(items[i].toLowerCase()) ?? kindForItem(items[i]),
     sourceKey: String(l.sourceKey ?? "").trim(),
+    // Kept only on Chosen lines: no discount, or the Whole bill, saves no ticks.
+    discountChosen: chosen && l.discountChosen === true,
   }));
+  const none = chosenDiscountError(lines, typed.discount);
+  if (none) throw new Error(none);
   const checkIds = input.lineIds != null;
   const lineIds = input.lineIds == null ? [] : [...input.lineIds].map(Number).sort((a, b) => a - b);
   // Sent, the P.O. is written (blank clears it); left out, the statement keeps the one the ticket has as it runs (11/2).
@@ -570,9 +619,12 @@ export async function writeTicketCharges(
     lines.map((l) => l.sourceKey),
   ];
   const so = unlocked ? cleanSalesOrder(unlocked.nsSo) : null;
+  // Null when the page didn't say (from before 11/7): the statement then writes only over a Whole-bill ticket.
+  const scope = said ? (chosen ? "chosen" : "all") : null;
+  const lineTicks = lines.map((l) => l.discountChosen);
   const saved = unlocked
-    ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null, poSent])
-    : await sql.query<{ id: number }>(replaceTicketChargesSql(), [...params, poSent]);
+    ? await sql.query<{ id: number }>(replaceUnlockedChargesSql(), [...params, so, unlocked.billedAt || null, poSent, scope, lineTicks])
+    : await sql.query<{ id: number }>(replaceTicketChargesSql(), [...params, poSent, scope, lineTicks]);
   if (!saved[0]) {
     const row = (await sql.query<MergedTicketRow & { ns_so: string | null }>("select duplicate_of, merged_install_id, ns_so from service_jobs where id = $1", [jobId]))[0];
     const mergedNow = mergedTicketRefusal(row, "Add charges there.");
@@ -582,10 +634,12 @@ export async function writeTicketCharges(
     if (!unlocked && now.invoiceLock) throw new Error(invoiceLockError(now.invoiceLock));
     const billedOn = String(row?.ns_so ?? "").trim();
     if (!unlocked && billedOn) throw new Error(`This ticket is already billed on ${billedOn}. Clear the Sales Order number to change the charges.`);
+    // Made Chosen lines while this page, from before 11/7, was open.
+    if (!said && now.discount?.scope === "chosen") throw new Error(OUT_OF_DATE);
     throw new Error("These charges changed since you opened them. Reload and try again.");
   }
-  const after = applyDiscount(chargesTotal(lines), typed.discount);
-  const summary = `${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountLabel(typed.discount)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`;
+  const after = billTotals(lines, typed.discount);
+  const summary = `${lines.length} line${lines.length === 1 ? "" : "s"}, $${after.subtotal.toFixed(2)}${typed.discount ? `, ${discountOffLabel(typed.discount, lines)} ($${after.off.toFixed(2)}), total $${after.total.toFixed(2)}` : ""}`;
   await logJob(
     sql,
     jobId,
@@ -608,7 +662,7 @@ export async function loadTicketCharges(sql: Sql, jobId: number): Promise<Ticket
 /** Replace the charge lines and P.O. on a ticket. A ticket that is already billed is not changed. */
 export const saveTicketCharges = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { jobId: number; po?: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: { kind: string; value: string | number } | null }) =>
+  .validator((d: { jobId: number; po?: string; lines: z.input<typeof lineSchema>[]; lineIds: number[]; discount?: DiscountInput }) =>
     z
       .object({
         jobId: z.number().int().positive(),
@@ -616,7 +670,7 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
         po: z.string().max(120).optional(),
         lines: z.array(lineSchema).max(200),
         lineIds: z.array(z.number().int().positive()).max(200),
-        discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
+        discount: discountSchema.nullable().optional(),
       })
       .parse(d),
   )
@@ -638,7 +692,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
       po?: string;
       lines: z.input<typeof lineSchema>[];
       lineIds: number[];
-      discount?: { kind: string; value: string | number } | null;
+      discount?: DiscountInput;
       nsSo: string | null;
       billedAt?: string | null;
     }) =>
@@ -649,7 +703,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
           po: z.string().max(120).optional(),
           lines: z.array(lineSchema).max(200),
           lineIds: z.array(z.number().int().positive()).max(200),
-          discount: z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable().optional(),
+          discount: discountSchema.nullable().optional(),
           nsSo: z.string().max(40).nullable(),
           billedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
         })

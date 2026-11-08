@@ -103,7 +103,7 @@ const approveArgs = (type, id, seen, items) => [
 ];
 const saveArgs = (job, cur, qty) => [
   C.replaceTicketChargesSql(),
-  [job, cur.map((c) => c.item), cur.map(() => ""), cur.map((c) => qty(c)), cur.map((c) => Number(c.rate)), cur.map((c) => c.kind), false, cur.map((c) => Number(c.id)), null, null, null, cur.map((c) => c.source_key), false],
+  [job, cur.map((c) => c.item), cur.map(() => ""), cur.map((c) => qty(c)), cur.map((c) => Number(c.rate)), cur.map((c) => c.kind), false, cur.map((c) => Number(c.id)), null, null, null, cur.map((c) => c.source_key), false, null, cur.map(() => false)],
 ];
 const results = [];
 const check = (name, ok, detail) => results.push({ name, ok: !!ok, detail });

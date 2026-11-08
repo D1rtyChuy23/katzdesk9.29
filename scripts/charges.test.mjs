@@ -278,6 +278,9 @@ test("replaceTicketChargesSql twice with the same keyed lines keeps both keys", 
       ["mp:9", "pmkit:4:acct:1:K1"],
       // The P.O. ($9, none here) is written: sent (11/2).
       true,
+      // No scope (a page from before 11/7), on a Whole-bill ticket, and no ticks.
+      null,
+      [false, false],
     ]);
   await run();
   await run();

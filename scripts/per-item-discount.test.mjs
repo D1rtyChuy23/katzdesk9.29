@@ -8,8 +8,12 @@ import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
+// As in charges.test.mjs: the server modules start the app's database when loaded, and this keeps it off data/desk.
+process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 
 const D = await import("../src/lib/ops/discount.ts");
+const C = await import("../src/lib/ops/charges-api.ts");
+const TB = await import("../src/lib/ops/ticket-billing-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -65,6 +69,25 @@ const install = (sql, o = {}) =>
     o.equipStatus ?? "Not Ready",
     o.po ?? null,
   ]);
+
+/** NetSuite's invoice on a ticket, which locks its charges until an Admin unlocks them. */
+const ticketInvoice = (sql, jobId, inv, status, total, o = {}) =>
+  sql.query(
+    `insert into ticket_invoices (job_id, ns_invoice, ns_so, invoice_date, status, total, amount_remaining, source)
+     values ($1, $2, $3, '2026-10-22', $4, $5, $5, $6)`,
+    [jobId, inv, o.so ?? null, status, total, o.so ? "so" : "standalone"],
+  );
+
+const history = async (sql, id) => (await sql.query("select detail from activity where entity_id = $1 order by id", [id])).map((r) => r.detail);
+const ticks = async (sql, jobId) => (await sql.query("select discount_chosen from ticket_charges where job_id = $1 order by sort, id", [jobId])).map((r) => r.discount_chosen);
+
+// A and B as a ticket's charge lines, as the Charges panel sends them.
+const LINES = [
+  { item: "PARTS : TEST-A", description: "", qty: 2, rate: 45, discountChosen: true },
+  { item: "Service : SERVICELABOR", description: "Bench labor", qty: 1.5, rate: 150, discountChosen: false },
+];
+/** The same lines from a page opened before 11/7: no ticks. */
+const OLD_LINES = LINES.map(({ discountChosen: _tick, ...l }) => l);
 
 /* ------------------------------------------------------------------ the migration */
 
@@ -126,4 +149,75 @@ test("migration 0123 only adds: a scope on tickets and invoices, a tick on their
   }
   // Today's three-argument total is unchanged.
   assert.equal(Number((await one(sql, "select invoice_total(315::numeric, 'percent', 10)::text as t")).t), 283.5);
+});
+
+/* ------------------------------------------------------------------ ticket charges */
+
+test("a ticket's chosen-lines discount: saved with its ticks, read back, totalled on the ticked lines, and logged that way", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const c = await C.loadTicketCharges(sql, job);
+  assert.deepEqual(c.lines.map((l) => l.discountChosen), [true, false]);
+  assert.deepEqual(c.discount, pct);
+  assert.deepEqual([c.subtotal, c.off, c.total], [315, 9, 306]);
+  assert.equal((await history(sql, job)).at(-1), "charges: 2 lines, $315.00, 10% off 1 of 2 lines ($9.00), total $306.00");
+});
+
+test("a chosen-lines discount with nothing ticked is refused; clearing it makes the ticket Whole bill with no ticks", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  const unticked = LINES.map((l) => ({ ...l, discountChosen: false }));
+  await assert.rejects(C.writeTicketCharges(sql, job, "u-owner", { lines: unticked, lineIds: [], discount: pct }), { message: D.CHOSEN_NONE });
+  assert.deepEqual(await ticks(sql, job), []);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const ids = (await C.loadTicketCharges(sql, job)).lines.map((l) => l.id);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: ids, discount: null });
+  assert.deepEqual(await one(sql, "select discount_scope, discount_kind from service_jobs where id = $1", [job]), { discount_scope: "all", discount_kind: null });
+  assert.deepEqual(await ticks(sql, job), [false, false]);
+});
+
+test("a page from before the publish can't save over a chosen-lines ticket, and saves on a Whole-bill ticket as before", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const ids = (await C.loadTicketCharges(sql, job)).lines.map((l) => l.id);
+  // Its discount with no scope, or no discount sent and lines with no ticks: either would drop the ticks.
+  await assert.rejects(C.writeTicketCharges(sql, job, "u-owner", { lines: OLD_LINES, lineIds: ids, discount: { kind: "percent", value: 10 } }), { message: D.OUT_OF_DATE });
+  await assert.rejects(C.writeTicketCharges(sql, job, "u-owner", { lines: OLD_LINES, lineIds: ids }), { message: D.OUT_OF_DATE });
+  assert.deepEqual(await ticks(sql, job), [true, false]);
+  assert.equal((await one(sql, "select discount_scope from service_jobs where id = $1", [job])).discount_scope, "chosen");
+  // A Whole-bill ticket takes both saves, as before.
+  const whole = await ticket(sql);
+  await C.writeTicketCharges(sql, whole, "u-owner", { lines: OLD_LINES, lineIds: [], discount: { kind: "percent", value: 10 } });
+  const wids = (await C.loadTicketCharges(sql, whole)).lines.map((l) => l.id);
+  await C.writeTicketCharges(sql, whole, "u-owner", { lines: OLD_LINES, lineIds: wids });
+  const w = await C.loadTicketCharges(sql, whole);
+  assert.deepEqual([w.discount, w.total], [{ kind: "percent", value: 10 }, 283.5]);
+});
+
+test("an Admin's unlocked save keeps the ticks", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql, { so: "SO5" });
+  await sql.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', '', 2, 45, 'part', 1)", [job]);
+  await ticketInvoice(sql, job, "INV200", "Paid In Full", 90, { so: "SO5" });
+  await TB.unlockTicketBillingFor(sql, job, "u-owner", "NetSuite credit memo changed the part");
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, discount: pct, unlocked: { nsSo: "SO5", billedAt: "2026-10-22" } });
+  const c = await C.loadTicketCharges(sql, job);
+  assert.deepEqual(c.lines.map((l) => l.discountChosen), [true, false]);
+  assert.deepEqual([c.discount, c.total], [pct, 306]);
+});
+
+test("Parts Profit: only lines that take the discount get a share of it", async () => {
+  const { sql } = await fresh();
+  await sql.query("insert into billing_items (sku, item, kind, rate, cost) values ('TEST-A', 'PARTS : TEST-A', 'part', 45, 20), ('TEST-B', 'PARTS : TEST-B', 'part', 150, 60)");
+  const job = await ticket(sql);
+  const parts = [
+    { item: "PARTS : TEST-A", description: "", qty: 2, rate: 45, discountChosen: true },
+    { item: "PARTS : TEST-B", description: "", qty: 1.5, rate: 150, discountChosen: false },
+  ];
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: parts, lineIds: [], discount: pct });
+  assert.deepEqual((await C.getTicketChargesFor(sql, job, "u-owner")).profit.map((p) => p?.ticketDiscount), [9, 0]);
+  await C.recordTicketSalesOrder(sql, job, "u-owner", "SO-PID-1");
+  assert.deepEqual((await sql.query("select ticket_discount::text as d from ticket_charges where job_id = $1 order by sort", [job])).map((r) => r.d), ["9.00", "0.00"]);
 });
