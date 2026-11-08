@@ -99,7 +99,7 @@ async function race(first, second) {
 const linkArgs = (rb, kind, id, ownV, stamp, keep = false, note = false, job = null) => [L.linkRebuildSql(), [rb, null, job, kind, id, "chuy", ownV, stamp, "linked", "linked", keep, note]];
 const approveArgs = (type, id, seen, items) => [
   I.approveRecordInvoiceSql(),
-  [type, id, CAFE, null, null, null, null, null, null, 10, "chuy", seen, items.map((x) => x[0]), items.map(() => ""), items.map((x) => x[1]), items.map((x) => x[2]), items.map(() => "part"), null, false, items.map((x) => x[3] ?? null)],
+  [type, id, CAFE, null, null, null, null, null, null, 10, "chuy", seen, items.map((x) => x[0]), items.map(() => ""), items.map((x) => x[1]), items.map((x) => x[2]), items.map(() => "part"), null, false, items.map((x) => x[3] ?? null), null, items.map(() => false)],
 ];
 const saveArgs = (job, cur, qty) => [
   C.replaceTicketChargesSql(),

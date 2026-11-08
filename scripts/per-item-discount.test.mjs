@@ -14,6 +14,7 @@ process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const D = await import("../src/lib/ops/discount.ts");
 const C = await import("../src/lib/ops/charges-api.ts");
 const TB = await import("../src/lib/ops/ticket-billing-api.ts");
+const I = await import("../src/lib/ops/invoice-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -60,6 +61,10 @@ const ticket = (sql, o = {}) =>
      values ($1, $2, $3, $4, $5, 'Test Tech', $6, $7, $8) returning id`,
     [o.kind ?? "service", `SC-PID-${++calls}`, o.customer ?? CAFE, o.wo ?? null, o.status ?? "Completed", o.po ?? null, o.so ?? null, o.received ?? "2026-10-20"],
   );
+
+const pmJob = (sql) => idOf(sql, "insert into pm_jobs (customer, wo, status) values ($1, $2, 'Completed') returning id", [CAFE, `WO-PID-${++calls}`]);
+const deal = (sql) => idOf(sql, "insert into deals (customer) values ($1) returning id", [CAFE]);
+const rebuild = (sql, account) => idOf(sql, "insert into rebuilds (title, account, status) values ('Test refurb', $1, 'In progress') returning id", [account]);
 
 const install = (sql, o = {}) =>
   idOf(sql, "insert into installs (customer, wo, complete, equip_status, archived, po) values ($1, $2, $3, $4, false, $5) returning id", [
@@ -220,4 +225,81 @@ test("Parts Profit: only lines that take the discount get a share of it", async 
   assert.deepEqual((await C.getTicketChargesFor(sql, job, "u-owner")).profit.map((p) => p?.ticketDiscount), [9, 0]);
   await C.recordTicketSalesOrder(sql, job, "u-owner", "SO-PID-1");
   assert.deepEqual((await sql.query("select ticket_discount::text as d from ticket_charges where job_id = $1 order by sort", [job])).map((r) => r.d), ["9.00", "0.00"]);
+});
+
+/* ------------------------------------------------------------------ the Invoice window */
+
+// What the Invoice window sends on Approve: A ticked, B not, 10% on Chosen lines.
+const SENT = { kind: "percent", value: "10", scope: "chosen" };
+const head = (sql, type, id) =>
+  one(sql, "select id, total::text as total, discount_scope, approved_at::text as approved from invoices where entity_type = $1 and entity_id = $2", [type, id]);
+const lineTicks = async (sql, invoiceId) => (await sql.query("select discount_chosen from invoice_lines where invoice_id = $1 order by sort, id", [invoiceId])).map((r) => r.discount_chosen);
+
+test("the Invoice window approves a chosen-lines discount on an install, a PM and a deal: ticks kept, total on the ticked lines", async () => {
+  const { sql } = await fresh();
+  for (const [type, id] of [
+    ["install", await install(sql)],
+    ["pm", await pmJob(sql)],
+    ["deal", await deal(sql)],
+  ]) {
+    await I.approveInvoiceFor(sql, { type, id, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+    const h = await head(sql, type, id);
+    assert.deepEqual([h.total, h.discount_scope], ["306.00", "chosen"], type);
+    assert.deepEqual(await lineTicks(sql, h.id), [true, false], type);
+    const v = await I.getInvoiceFor(sql, { type, id }, "u-owner");
+    assert.deepEqual([v.off, v.total, v.lines.map((l) => l.discountChosen)], [9, 306, [true, false]], type);
+    assert.deepEqual(v.discount, pct, type);
+    assert.equal((await history(sql, id)).at(-1), "invoice approved: 2 lines, total $306.00 · 10% off 1 of 2 lines", type);
+  }
+});
+
+test("the Invoice window on a ticket writes the ticket's Charges with their ticks", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await I.approveInvoiceFor(sql, { type: "service", id: job, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+  assert.deepEqual(await ticks(sql, job), [true, false]);
+  assert.equal((await one(sql, "select discount_scope from service_jobs where id = $1", [job])).discount_scope, "chosen");
+  assert.equal((await head(sql, "service", job)).total, "306.00");
+});
+
+test("an Invoice window from before the publish can't approve over a chosen-lines invoice", async () => {
+  const { sql } = await fresh();
+  for (const [type, id] of [
+    ["install", await install(sql)],
+    ["pm", await pmJob(sql)],
+  ]) {
+    await I.approveInvoiceFor(sql, { type, id, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+    const before = await head(sql, type, id);
+    const seen = (await I.getInvoiceFor(sql, { type, id }, "u-owner")).version;
+    await assert.rejects(I.approveInvoiceFor(sql, { type, id, lines: OLD_LINES, lineIds: [], discount: { kind: "percent", value: "10" }, seen }, "u-owner"), { message: D.OUT_OF_DATE }, type);
+    assert.deepEqual(await head(sql, type, id), before, type);
+    assert.deepEqual(await lineTicks(sql, before.id), [true, false], type);
+  }
+  // A Whole-bill invoice takes it, as before.
+  const inst = await install(sql);
+  await I.approveInvoiceFor(sql, { type: "install", id: inst, lines: OLD_LINES, lineIds: [], discount: { kind: "percent", value: "10" }, seen: null }, "u-owner");
+  const seen = (await I.getInvoiceFor(sql, { type: "install", id: inst }, "u-owner")).version;
+  await I.approveInvoiceFor(sql, { type: "install", id: inst, lines: OLD_LINES, lineIds: [], discount: { kind: "percent", value: "10" }, seen }, "u-owner");
+  assert.deepEqual([(await head(sql, "install", inst)).total, (await head(sql, "install", inst)).discount_scope], ["283.50", "all"]);
+});
+
+test("Warehouse's Save for Approval stays Whole bill with no ticks", async () => {
+  const { sql } = await fresh();
+  await sql.query("insert into billing_items (sku, item, kind, rate, active) values ('TEST-A', 'PARTS : TEST-A', 'part', 45, true)");
+  const rb = await rebuild(sql, "Katz Coffee Service Dept.");
+  // Its waiting invoice read Chosen lines with a tick (it can't from the window): saving puts it back to the Whole bill.
+  const inv = await idOf(sql, "insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at, discount_scope) values ('rebuild', $1, 'Katz Coffee Service Dept.', 90, 'wes', now(), 'chosen') returning id", [rb]);
+  await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, discount_chosen) values ($1, 'PARTS : TEST-A', '', 2, 45, 'part', 1, true)", [inv]);
+  await I.saveInvoiceForApprovalFor(sql, { type: "rebuild", id: rb, lines: [{ item: "PARTS : TEST-A", description: "", qty: 2, rate: 45, discountChosen: true }], discount: null }, "u-wh");
+  const h = await head(sql, "rebuild", rb);
+  assert.equal(h.discount_scope, "all");
+  assert.deepEqual(await lineTicks(sql, h.id), [false]);
+});
+
+test("the account's Invoices tab totals a chosen-lines ticket on its ticked lines", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const row = (await I.listAccountInvoicesFor(sql, CAFE, "u-owner")).find((r) => r.type === "service" && r.id === job);
+  assert.equal(row.total, 306);
 });

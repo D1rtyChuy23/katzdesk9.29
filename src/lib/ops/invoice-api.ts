@@ -4,7 +4,16 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { cleanQty, cleanRate, kindForItem, type ChargeKind, type PartRef } from "@/lib/ops/charges";
 import { loadTicketCharges, writeTicketCharges } from "@/lib/ops/charges-api";
-import { cleanDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
+import {
+  applyDiscount,
+  chosenDiscountError,
+  cleanDiscount,
+  discountFromRow,
+  discountOffLabel,
+  DISCOUNT_BASE_SQL,
+  OUT_OF_DATE,
+  type Discount,
+} from "@/lib/ops/discount";
 import { flagOn } from "@/lib/ops/flag";
 import { INVOICE_TARGETS, carriesPo, cleanPo, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
@@ -45,6 +54,8 @@ export type InvoiceLine = {
    * which Unlink takes back. A PM's or rebuild's own invoice lines carry none.
    */
   sourceKey?: string | null;
+  /** Ticked for a Chosen-lines discount (11/7). Always false on the Whole bill or with no discount. */
+  discountChosen: boolean;
 };
 
 export type InvoiceView = InvoiceTotals &
@@ -109,7 +120,8 @@ export type BilledCarryOver = {
   invoices: string | null;
   /** Billed on NetSuite invoices alone: the ones of those Voided in NetSuite since the merge, else null. */
   voided: string | null;
-  lines: { item: string; description: string; qty: number; rate: number; kind: ChargeKind }[];
+  /** discounted: the line took the ticket's discount (11/7). A merge from before then didn't say: every line did. */
+  lines: { item: string; description: string; qty: number; rate: number; kind: ChargeKind; discounted: boolean }[];
   /** After the ticket's discount, as billed. */
   total: number;
 };
@@ -135,7 +147,9 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
     [installId],
   );
   return rows.map((r) => {
-    const lines = Array.isArray(r.moved.billedLines) ? (r.moved.billedLines as { item?: unknown; description?: unknown; qty?: unknown; rate?: unknown; kind?: unknown }[]) : [];
+    const lines = Array.isArray(r.moved.billedLines)
+      ? (r.moved.billedLines as { item?: unknown; description?: unknown; qty?: unknown; rate?: unknown; kind?: unknown; discounted?: unknown }[])
+      : [];
     const wo = String(r.wo ?? "").trim();
     const call = String(r.call_id ?? "").trim() || `Ticket #${r.job_id}`;
     const so = r.moved.billedSo ? String(r.moved.billedSo) : null;
@@ -154,6 +168,7 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
         qty: Number(l.qty) || 0,
         rate: Number(l.rate) || 0,
         kind: (String(l.kind ?? "part") as ChargeKind),
+        discounted: l.discounted !== false,
       })),
       total: Number(r.moved.billedTotal) || 0,
     };
@@ -355,6 +370,7 @@ type HeadRow = {
   id: number;
   discount_kind: string | null;
   discount_value: string | null;
+  discount_scope: string | null;
   total: string | null;
   approved_at: string | Date | null;
   approved_by: string | null;
@@ -382,7 +398,7 @@ const savedPart = (version: string | null): string => (version == null ? "" : ve
 async function head(sql: Sql, type: InvoiceTarget, id: number): Promise<HeadRow | undefined> {
   return (
     await sql.query<HeadRow>(
-      `select id, discount_kind, discount_value, total, approved_at, approved_by, submitted_at, submitted_by, ${VERSION_OF("invoices")} as version, po
+      `select id, discount_kind, discount_value, discount_scope, total, approved_at, approved_by, submitted_at, submitted_by, ${VERSION_OF("invoices")} as version, po
          from invoices where entity_type = $1 and entity_id = $2`,
       [type, id],
     )
@@ -391,8 +407,8 @@ async function head(sql: Sql, type: InvoiceTarget, id: number): Promise<HeadRow 
 
 const headState = (h: HeadRow | undefined): InvoiceState => invoiceState(h ? { approvedAt: h.approved_at, submittedAt: h.submitted_at } : null);
 
-const toDiscount = (kind: string | null, value: string | number | null): Discount | null =>
-  isDiscountKind(kind) && Number(value) > 0 ? { kind, value: Number(value) } : null;
+/** A record's discount as its row has it: Whole bill, or Chosen lines (11/7). */
+const toDiscount = (kind: string | null, value: string | number | null, scope: string | null = null): Discount | null => discountFromRow(kind, value, scope);
 
 async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]> {
   const rows = await sql.query<{
@@ -403,13 +419,14 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     rate: string;
     kind: ChargeKind;
     source_key: string | null;
+    discount_chosen: boolean | null;
     pid: number | null;
     sku: string | null;
     mfr_part: string | null;
     has_image: boolean | null;
     image_version: string | null;
   }>(
-    `select l.id, l.item, l.description, l.qty, l.rate, l.kind, l.source_key,
+    `select l.id, l.item, l.description, l.qty, l.rate, l.kind, l.source_key, l.discount_chosen,
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version
        from invoice_lines l
@@ -432,6 +449,7 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
     kind: r.kind,
     part: r.pid == null ? null : { id: Number(r.pid), sku: r.sku ?? "", mpn: r.mfr_part, hasImage: !!r.has_image, imageVersion: r.image_version },
     sourceKey: r.source_key ?? null,
+    discountChosen: r.discount_chosen === true,
   }));
 }
 
@@ -448,11 +466,11 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
   let discount: Discount | null;
   if (usesTicketCharges(ref.type)) {
     const c = await loadTicketCharges(sql, id);
-    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null }));
+    lines = c.lines.map((l) => ({ id: l.id, item: l.item, description: l.description, qty: l.qty, rate: l.rate, kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null, discountChosen: l.discountChosen }));
     discount = c.discount;
   } else {
     lines = h ? await projectLines(sql, h.id) : [];
-    discount = h ? toDiscount(h.discount_kind, h.discount_value) : null;
+    discount = h ? toDiscount(h.discount_kind, h.discount_value, h.discount_scope) : null;
   }
   const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state });
   // On a Sales Order (0122): linked, the window is locked and shows it as approved. Unlinked, it shows what Approve
@@ -520,9 +538,12 @@ const lineInput = z.object({
   qty: z.union([z.number(), z.string().max(20)]),
   rate: z.union([z.number(), z.string().max(20)]),
   sourceKey: z.string().max(400).regex(/^(pmkit|mp|rb):/).nullable().optional(),
+  // Ticked for a Chosen-lines discount (11/7). A window from before then sends none.
+  discountChosen: z.boolean().optional(),
 });
 
-const discountInput = z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]) }).nullable();
+/** scope: "chosen" is Chosen lines, "all" the Whole bill; none is a window from before 11/7. */
+const discountInput = z.object({ kind: z.string().max(20), value: z.union([z.number(), z.string().max(40)]), scope: z.enum(["all", "chosen"]).optional() }).nullable();
 
 const approveInput = targetInput.extend({
   lines: z.array(lineInput).max(200),
@@ -572,6 +593,8 @@ async function changedSinceOpened(sql: Sql, type: InvoiceTarget, id: number, see
  * and replace the lines only when stacked_job_id is null. Zero rows means it was stacked first.
  * The stacked check sits on the locked row itself: in READ COMMITTED a `for update` that waited re-reads only the
  * row it locks, while a separate subquery would still see the snapshot from before a stack committed.
+ * Whole bill or Chosen lines (11/7): $19 is the scope and $20 each line's tick. A null $19 is a window from before
+ * then, which writes only over an invoice that reads Whole bill as this runs (zero rows otherwise).
  */
 export function approvePmInvoiceSql(): string {
   return `with locked as (
@@ -583,17 +606,19 @@ export function approvePmInvoiceSql(): string {
      inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope
        )
        -- The P.O. it is approved with (11/2): the one the window changed ($18), else the PM's own.
        select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
-              case when $18::boolean then $17::text else (select p.po from pm_jobs p where p.id = $2::int) end
+              case when $18::boolean then $17::text else (select p.po from pm_jobs p where p.id = $2::int) end,
+              coalesce($19::text, 'all')
          from open_pm
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
-         approved_at = now(), updated_at = now(), po = excluded.po
+         approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
+        where ($19::text is not null or invoices.discount_scope = 'all')
        returning id
      ),
      pm_po as (
@@ -607,11 +632,11 @@ export function approvePmInvoiceSql(): string {
        delete from invoice_lines where invoice_id in (select id from inv) returning id
      ),
      lined as (
-       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort)
-       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, discount_chosen)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord, coalesce(t.chosen, false)
          from inv
-         join unnest($12::text[], $13::text[], $14::numeric[], $15::numeric[], $16::text[]) with ordinality
-              as t(item, description, qty, rate, kind, ord) on true
+         join unnest($12::text[], $13::text[], $14::numeric[], $15::numeric[], $16::text[], $20::boolean[]) with ordinality
+              as t(item, description, qty, rate, kind, chosen, ord) on true
         where (select count(*) from cleared) >= 0
        returning id
      )
@@ -626,7 +651,8 @@ export function approvePmInvoiceSql(): string {
  * when its row reads not archived; the row is locked against Merge installs and ticket merges (not against Remove), so
  * an Approve that meets a Merge installs mid-way waits for it, then writes nothing on the install it archived. $18 is the
  * Customer P.O. the window changed, written on the record and the invoice when $19 is true; otherwise the invoice takes the
- * record's own (11/2).
+ * record's own (11/2). $21 is the scope (Whole bill or Chosen lines, 11/7) and $22 each line's tick; a null $21 is a
+ * window from before then, which writes only over an invoice that reads Whole bill as this runs.
  */
 export function approveRecordInvoiceSql(): string {
   return `with rec as (
@@ -639,7 +665,7 @@ export function approveRecordInvoiceSql(): string {
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope
        )
        -- The P.O. it is approved with (11/2): the one the window changed ($19), else the record's own.
        select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
@@ -648,7 +674,8 @@ export function approveRecordInvoiceSql(): string {
                   when 'install' then (select i.po from installs i where i.id = $2::int)
                   when 'rebuild' then (select r.po from rebuilds r where r.id = $2::int)
                   when 'deal' then (select d.po from deals d where d.id = $2::int)
-                end) end
+                end) end,
+              coalesce($21::text, 'all')
         where ($1::text <> 'install' or exists (select 1 from rec))
           and ($1::text <> 'rebuild' or exists (select 1 from rb))
           -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
@@ -657,8 +684,9 @@ export function approveRecordInvoiceSql(): string {
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
-         approved_at = now(), updated_at = now(), po = excluded.po
+         approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
         where ${VERSION_OF("invoices")} is not distinct from $12::text
+          and ($21::text is not null or invoices.discount_scope = 'all')
        returning id
      ),
      -- A P.O. changed in the window is the record's own from now on: its Details show the same one. Only once the
@@ -677,11 +705,11 @@ export function approveRecordInvoiceSql(): string {
      ),
      lined as (
        -- A linked rebuild's lines on an install keep their rb: key ($20, 11/6), so Unlink still finds them.
-       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key)
-       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord, nullif(btrim(t.source_key), '')
+       insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key, discount_chosen)
+       select inv.id, t.item, nullif(t.description, ''), t.qty, t.rate, t.kind, t.ord, nullif(btrim(t.source_key), ''), coalesce(t.chosen, false)
          from inv
-         join unnest($13::text[], $14::text[], $15::numeric[], $16::numeric[], $17::text[], $20::text[]) with ordinality
-              as t(item, description, qty, rate, kind, source_key, ord) on true
+         join unnest($13::text[], $14::text[], $15::numeric[], $16::numeric[], $17::text[], $20::text[], $22::boolean[]) with ordinality
+              as t(item, description, qty, rate, kind, source_key, chosen, ord) on true
         where (select count(*) from cleared) >= 0
        returning id
      )
@@ -705,15 +733,16 @@ export function saveForApprovalSql(): string {
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at
+         bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at, discount_scope
        )
-       select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now()
+       -- Parts at their prices, no discount: the Whole bill, and its lines unticked (11/7).
+       select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now(), 'all'
          from rb r
        on conflict (entity_type, entity_id) do update set
          customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, submitted_by = excluded.submitted_by,
-         submitted_at = now(), updated_at = now()
+         submitted_at = now(), updated_at = now(), discount_scope = 'all'
         where invoices.approved_at is null
        returning id
      ),
@@ -734,7 +763,13 @@ export function saveForApprovalSql(): string {
 
 const ACTIVITY_TYPE: Record<InvoiceTarget, string> = { service: "service", tlc: "tlc", pm: "pm", install: "install", rebuild: "rebuild", deal: "deal" };
 
-type CleanLine = { item: string; description: string; qty: number; rate: number; kind: ChargeKind; sourceKey?: string | null };
+type CleanLine = { item: string; description: string; qty: number; rate: number; kind: ChargeKind; sourceKey?: string | null; discountChosen: boolean };
+
+/** The discount scope a record's bill has now: a ticket's on the ticket, any other on its invoice (null: none yet). */
+async function storedScope(sql: Sql, type: InvoiceTarget, id: number): Promise<string | null> {
+  if (usesTicketCharges(type)) return (await sql.query<{ s: string }>("select discount_scope as s from service_jobs where id = $1", [id]))[0]?.s ?? null;
+  return (await head(sql, type, id))?.discount_scope ?? null;
+}
 
 /** The lines of a PM, install, rebuild or deal invoice as saved: each one's kind from the item list, else from its name. */
 async function recordLines(sql: Sql, raw: z.output<typeof lineInput>[]): Promise<CleanLine[]> {
@@ -752,6 +787,7 @@ async function recordLines(sql: Sql, raw: z.output<typeof lineInput>[]): Promise
     rate: cleanRate(l.rate)!,
     kind: kinds.get(items[i]!.toLowerCase()) ?? kindForItem(items[i]!),
     sourceKey: String(l.sourceKey ?? "").trim() || null,
+    discountChosen: l.discountChosen === true,
   }));
 }
 
@@ -779,8 +815,14 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
   if (!viewer.admin && headState(await head(sql, ref.type, data.id)) === "waiting") throw new Error(WAITING_FOR_ADMIN);
   const problem = invoiceError(data.lines);
   if (problem) throw new Error(problem);
-  const typed = data.discount ? cleanDiscount(data.discount.kind, data.discount.value) : { discount: null };
+  const typed = data.discount ? cleanDiscount(data.discount.kind, data.discount.value, data.discount.scope) : { discount: null };
   if ("error" in typed) throw new Error(typed.error);
+  // Whole bill or Chosen lines (11/7). A window from before then sends no scope and no ticks: it may approve only over a
+  // bill that reads Whole bill (here, and in the statement as it writes), or the ticks would be lost.
+  const said = data.discount === null || data.discount.scope !== undefined;
+  if (!said && (await storedScope(sql, ref.type, data.id)) === "chosen") throw new Error(OUT_OF_DATE);
+  const chosen = typed.discount?.scope === "chosen";
+  const scope = said ? (chosen ? "chosen" : "all") : null;
   // The record's Customer P.O. (11/2): sent only when changed in the window, it is saved on the record with the invoice
   // (blank clears it); left out, the record's stays.
   const poSent = carriesPo(ref.type) && data.po !== undefined;
@@ -795,12 +837,15 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
     await writeTicketCharges(sql, data.id, userId, {
       lines: data.lines,
       lineIds: data.lineIds,
-      discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value } : null,
+      discount: typed.discount ? { kind: typed.discount.kind, value: typed.discount.value, ...(data.discount?.scope ? { scope: data.discount.scope } : {}) } : null,
       ...(poSent ? { po: typedPo.po ?? "" } : {}),
     });
     lines = (await loadTicketCharges(sql, data.id)).lines;
   } else {
-    lines = await recordLines(sql, data.lines);
+    // Ticks are kept only on Chosen lines.
+    lines = (await recordLines(sql, data.lines)).map((l) => ({ ...l, discountChosen: chosen && l.discountChosen }));
+    const none = chosenDiscountError(lines, typed.discount);
+    if (none) throw new Error(none);
   }
   const totals = invoiceTotals(lines, typed.discount);
   const billing = [bill.name, bill.accountNumber, bill.address, bill.rep, totals.total, who];
@@ -815,8 +860,13 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       ...lineArrays(lines),
       typedPo.po,
       poSent,
+      scope,
+      lines.map((l) => l.discountChosen),
     ]);
-    if (!savedPm[0]) throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
+    if (!savedPm[0]) {
+      if (!said && (await storedScope(sql, "pm", data.id)) === "chosen") throw new Error(OUT_OF_DATE);
+      throw new Error((await pmInvoiceLock(sql, data.id)) ?? "This PM is billed on a ticket. Open the ticket's Invoicing tab.");
+    }
   } else if (usesTicketCharges(ref.type)) {
     // A ticket keeps its lines and discount on the ticket, so they are never stored twice.
     await sql.query(
@@ -842,15 +892,20 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       poSent,
       // A linked rebuild's lines on an install keep their key (11/6); other invoices' lines carry none.
       lines.map((l) => (ref.type === "install" ? (l.sourceKey ?? null) : null)),
+      scope,
+      lines.map((l) => l.discountChosen),
     ]);
-    if (!saved[0]) throw new Error(await changedSinceOpened(sql, ref.type, data.id, data.seen ?? null));
+    if (!saved[0]) {
+      if (!said && (await storedScope(sql, ref.type, data.id)) === "chosen") throw new Error(OUT_OF_DATE);
+      throw new Error(await changedSinceOpened(sql, ref.type, data.id, data.seen ?? null));
+    }
   }
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [
       ACTIVITY_TYPE[ref.type],
       data.id,
       who,
-      `invoice approved: ${lineCount(lines.length)}, total $${totals.total.toFixed(2)}${poSent && typedPo.po ? ` · P.O. ${typedPo.po}` : ""}`,
+      `invoice approved: ${lineCount(lines.length)}, total $${totals.total.toFixed(2)}${chosen ? ` · ${discountOffLabel(typed.discount, lines)}` : ""}${poSent && typedPo.po ? ` · P.O. ${typedPo.po}` : ""}`,
     ])
     .catch(() => undefined);
   return readInvoice(sql, ref.type, data.id, viewer);
@@ -1002,8 +1057,9 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
   );
   // A ticket merged into an install as billed (10/30) stays listed, as billed: its charges never went on the install's
   // invoice, so this is the one place they show on the account.
-  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; amount: string; billed_on: string | null; merged_install_id: number | null; billed_invoices: string | null; standing: string | null }>(
-    `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.po, j.discount_kind, j.discount_value, sum(round(c.qty * c.rate, 2))::text as amount,
+  const tickets = await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; ns_so: string | null; po: string | null; discount_kind: string | null; discount_value: string | null; discount_scope: string | null; amount: string; base: string; billed_on: string | null; merged_install_id: number | null; billed_invoices: string | null; standing: string | null }>(
+    `select j.id, j.kind, j.wo, j.call_id, j.ns_so, j.po, j.discount_kind, j.discount_value, j.discount_scope, sum(round(c.qty * c.rate, 2))::text as amount,
+            ${DISCOUNT_BASE_SQL("c", "j.discount_scope")}::text as base,
             ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id,
             ${BILLED_INVOICES_ON_INSTALL("j.id")} as billed_invoices, ${STANDING_NS_INVOICES("j.id")} as standing
        from service_jobs j join ticket_charges c on c.job_id = j.id
@@ -1017,7 +1073,8 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
   for (const t of tickets) {
     const type: InvoiceTarget = t.kind === "tlc" ? "tlc" : "service";
     const head = approved.find((a) => a.entity_type === type && Number(a.entity_id) === Number(t.id) && a.approved_at);
-    const total = invoiceTotals([{ qty: 1, rate: Number(t.amount), kind: "part" }], toDiscount(t.discount_kind, t.discount_value)).total;
+    // After its discount, off the lines it comes off (11/7: on Chosen lines, the ticked ones).
+    const total = applyDiscount(Number(t.amount), toDiscount(t.discount_kind, t.discount_value, t.discount_scope), Number(t.base)).total;
     seen.add(`${type}-${t.id}`);
     out.push({
       type,
