@@ -520,3 +520,56 @@ test("Merge installs moves a chosen-lines invoice as it is", async () => {
   assert.deepEqual([h.total, h.discount_scope, await lineTicks(sql, h.id)], ["306.00", "chosen", [true, false]]);
   assert.equal((await I.getInvoiceFor(sql, { type: "install", id: keep }, "u-owner")).total, 306);
 });
+
+/* ------------------------------------------------------------------ the Charges panel and the Invoice window */
+
+test("the discount box offers Whole bill or Chosen lines, a Discount tick on each line with All and None, and says what it comes off", () => {
+  const controls = src("src/components/desk/discount-controls.tsx");
+  for (const name of ["ScopePicker", "ChosenBar", "LineTick"]) assert.match(controls, new RegExp(`export function ${name}\\(`), name);
+  // The two pills, like Percent / Amount, with their testids.
+  assert.match(controls, /\(\["all", "chosen"\] as const\)\.map\(\(s\) =>/);
+  assert.match(controls, /data-testid=\{`discount-scope-\$\{s\}`\}/);
+  assert.match(controls, /\{s === "all" \? "Whole bill" : "Chosen lines"\}/);
+  assert.match(controls, /aria-pressed=\{scope === s\}/);
+  // "Comes off 3 of 5 lines", with All and None.
+  assert.match(controls, /Comes off \{chosen\} of \{lines\} line\{lines === 1 \? "" : "s"\}/);
+  assert.match(controls, /data-testid="discount-chosen-count"/);
+  assert.match(controls, /data-testid="discount-chosen-all"[^>]*>\s*All\s*</);
+  assert.match(controls, /data-testid="discount-chosen-none"[^>]*>\s*None\s*</);
+  // The tick: labelled "Discount", named for its line, a 40px row on phones.
+  assert.match(controls, /aria-label=\{`Discount \$\{item\}`\}/);
+  assert.match(controls, /data-testid="line-discount-tick"/);
+  assert.match(controls, />\s*Discount\s*<\/label>/);
+  assert.ok((controls.match(/max-sm:h-10/g) ?? []).length >= 3, "the pills, All / None and the tick row are 40px on phones");
+
+  for (const path of ["src/components/desk/charges-panel.tsx", "src/components/desk/invoice-window.tsx"]) {
+    const panel = src(path);
+    assert.match(panel, /import \{ ChosenBar, LineTick, ScopePicker \} from "\.\/discount-controls";/, path);
+    // Saves say the scope, and each line its tick.
+    assert.match(panel, /\{ kind: discKind, value: discValue, scope: discScope \}/, path);
+    assert.match(panel, /discountChosen: l\.discountChosen/, path);
+    // What it comes off, in the totals; nothing ticked is refused before the save.
+    assert.match(panel, /Discount\{discount \? ` · \$\{discountOffLabel\(discount, /, path);
+    assert.match(panel, /chosenDiscountError\(/, path);
+    // Chosen lines ticks every line, Whole bill none; a line added comes in unticked; clearing the value is Whole bill.
+    assert.match(panel, /(cur|\(cur \?\? \[\]\))\.map\(\(l\) => \(\{ \.\.\.l, discountChosen: s === "chosen" \}\)\)/, path);
+    assert.match(panel, /\[\.\.\.(cur|\(cur \?\? \[\]\)), \{ \.\.\.l, discountChosen: false \}\]/, path);
+    assert.match(panel, /if \(!e\.target\.value\.trim\(\)\) pickScope\("all"\);/, path);
+    // The pills once a discount is typed; the ticks and the bar on Chosen lines only.
+    assert.match(panel, /\{(!v\.partsOnly && )?discValue\.trim\(\) \? \(\n\s+<div className="mt-3">\n\s+<ScopePicker /, path);
+    assert.match(panel, /\{chosen \? <LineTick /, path);
+    assert.match(panel, /\{chosen \? \(\n\s+<ChosenBar\n/, path);
+  }
+  // Save and Approve wait for a tick.
+  const charges = src("src/components/desk/charges-panel.tsx");
+  assert.equal(charges.match(/\|\| !!tickError/g)?.length, 2, "Save Charges and Save And Lock");
+  const win = src("src/components/desk/invoice-window.tsx");
+  assert.match(win, /const blocked = problem \?\? tickError;/);
+  assert.equal(win.match(/disabled=\{busy \|\| !!blocked/g)?.length, 2, "Save for Approval and Approve");
+  // Warehouse invoices still take no discount: no pills, no ticks.
+  assert.match(win, /const tickError = v\?\.partsOnly \? null : chosenDiscountError\(/);
+  assert.match(win, /\{!v\.partsOnly && discValue\.trim\(\) \? \(/);
+  // A ticket merged in as billed: which of its lines took its discount.
+  assert.match(win, /\{!l\.discounted && off > 0\.004 \? " · no discount" : ""\}/);
+  assert.match(win, /Discount\{took < b\.lines\.length \? ` · off \$\{took\} of \$\{b\.lines\.length\} lines` : ""\}/);
+});

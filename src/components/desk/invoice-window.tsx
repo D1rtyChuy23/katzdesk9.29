@@ -4,7 +4,7 @@ import { CheckCircle2, MapPin, Plus, Receipt, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { approveInvoice, getInvoice, saveInvoiceForApproval, type InvoiceView } from "@/lib/ops/invoice-api";
 import { LABOR_ITEM, TRIP_ITEM, kindForItem, lineAmount, type ChargeKind, type PartRef } from "@/lib/ops/charges";
-import { cleanDiscount, discountLabel, type DiscountKind } from "@/lib/ops/discount";
+import { chosenDiscountError, cleanDiscount, discountOffLabel, type DiscountKind, type DiscountScope } from "@/lib/ops/discount";
 import { PO_MAX, billToGaps, invoiceError, invoiceTotals, isLaborKind, usesTicketCharges, type BillTo, type InvoiceTarget } from "@/lib/ops/invoice";
 import { partsOnlyError } from "@/lib/ops/warehouse-invoice";
 import { tripDraftWarning } from "@/lib/ops/pm-bill";
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Input, Label } from "@/components/ui/input";
 import { PartPicker } from "./charges-panel";
 import { AddPmParts } from "./pm-bill-add";
+import { ChosenBar, LineTick, ScopePicker } from "./discount-controls";
 import { PartThumb } from "./part-thumb";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +34,20 @@ function poNote(type: InvoiceTarget, canApprove: boolean): string {
 }
 const when = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null; sourceKey?: string | null };
+/** discountChosen: the line's Discount tick, read on a Chosen-lines discount (11/7). */
+type Draft = { id?: number; item: string; description: string; qty: string; rate: string; kind: ChargeKind; part: PartRef | null; sourceKey?: string | null; discountChosen: boolean };
 
-const toDraft = (l: InvoiceView["lines"][number]): Draft => ({ id: l.id, item: l.item, description: l.description, qty: String(l.qty), rate: l.rate.toFixed(2), kind: l.kind, part: l.part, sourceKey: l.sourceKey ?? null });
+const toDraft = (l: InvoiceView["lines"][number]): Draft => ({
+  id: l.id,
+  item: l.item,
+  description: l.description,
+  qty: String(l.qty),
+  rate: l.rate.toFixed(2),
+  kind: l.kind,
+  part: l.part,
+  sourceKey: l.sourceKey ?? null,
+  discountChosen: l.discountChosen === true,
+});
 
 /** The account's saved pin as a point, or null. */
 const billPin = (b: BillTo) => (b.latitude != null && b.longitude != null ? { lat: b.latitude, lng: b.longitude } : null);
@@ -114,6 +126,8 @@ export function InvoiceButton({
 function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
   const amounts = b.lines.map((l) => Math.round(l.qty * l.rate * 100) / 100);
   const off = Math.round((amounts.reduce((sum, a) => sum + a, 0) - b.total) * 100) / 100;
+  // The lines its discount came off (11/7): on Chosen lines, the ticked ones; saved before then, every one.
+  const took = b.lines.filter((l) => l.discounted).length;
   return (
     <li data-testid="invoice-billed-ticket">
       <p className="text-sm font-medium">
@@ -132,13 +146,14 @@ function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
               <span className="min-w-0">
                 {l.item}
                 {l.description && l.description !== l.item ? ` · ${l.description}` : ""} · {l.qty} × {money(l.rate)}
+                {!l.discounted && off > 0.004 ? " · no discount" : ""}
               </span>
               <span className="tabular shrink-0">{money(amounts[i]!)}</span>
             </li>
           ))}
           {off > 0.004 ? (
             <li className="flex justify-between gap-3" data-testid="invoice-billed-discount">
-              <span>Discount</span>
+              <span>Discount{took < b.lines.length ? ` · off ${took} of ${b.lines.length} lines` : ""}</span>
               <span className="tabular shrink-0">−{money(off)}</span>
             </li>
           ) : null}
@@ -164,6 +179,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   const [loadedIds, setLoadedIds] = useState<number[]>([]);
   const [discKind, setDiscKind] = useState<DiscountKind>("percent");
   const [discValue, setDiscValue] = useState("");
+  // Whole bill, or the Chosen lines ticked (11/7).
+  const [discScope, setDiscScope] = useState<DiscountScope>("all");
   /** The record's Customer P.O. (11/2), as the window opened it and as typed here: Approve sends it only when changed. */
   const [po, setPo] = useState("");
   const [poOpened, setPoOpened] = useState("");
@@ -180,13 +197,16 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     setLoadedIds(v.lines.flatMap((l) => (l.id != null ? [l.id] : [])));
     setDiscKind(v.discount?.kind ?? "percent");
     setDiscValue(v.discount ? String(v.discount.value) : "");
+    setDiscScope(v.discount?.scope === "chosen" ? "chosen" : "all");
     setPo(v.po ?? "");
     setPoOpened(v.po ?? "");
     setSeen({ version: v.version, state: v.state });
   }, [v, lines, q.isFetching]);
 
-  const sentLines = () => (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, sourceKey: l.sourceKey ?? null }));
-  const sentDiscount = () => (discValue.trim() ? { kind: discKind, value: discValue } : null);
+  const sentLines = () =>
+    (lines ?? []).map((l) => ({ item: l.item, description: l.description, qty: l.qty, rate: l.rate, sourceKey: l.sourceKey ?? null, discountChosen: l.discountChosen }));
+  // With what it comes off (11/7): a save without it is a page from before then.
+  const sentDiscount = () => (discValue.trim() ? { kind: discKind, value: discValue, scope: discScope } : null);
   const refreshAfter = (next: InvoiceView) => {
     qc.setQueryData(["invoice", type, id], next);
     // A ticket's invoice is its Charges: the panel and the billing list read the same lines.
@@ -251,12 +271,13 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
   // it waits for one): the lines are read only.
   const locked = !!v?.locked || (!!v && !v.canApprove && !v.canSave);
   const busy = approve.isPending || save.isPending;
-  const typed = cleanDiscount(discKind, discValue);
+  const typed = cleanDiscount(discKind, discValue, discScope);
   const discount = "error" in typed ? null : typed.discount;
-  const totals = invoiceTotals(
-    draft.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind })),
-    discount,
-  );
+  // On Chosen lines it comes off the ticked lines only (11/7); with none ticked, it can't be approved or saved.
+  const priced = draft.map((l) => ({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0, kind: l.kind, discountChosen: l.discountChosen }));
+  const totals = invoiceTotals(priced, discount);
+  const chosen = discScope === "chosen";
+  const tickError = v?.partsOnly ? null : chosenDiscountError(priced, discount);
   // An install invoice with lines on record may be approved with every line taken off: it comes to $0.00 (Merge installs
   // asks for this when both installs have an invoice, 10/30). A confirm says so first.
   const emptying = !draft.length && type === "install" && !!v?.canApprove && !!v?.lines.length;
@@ -265,6 +286,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
       ? "Add the parts the refurb used."
       : "Add a line to approve."
     : (invoiceError(draft) ?? (v?.partsOnly ? partsOnlyError(draft) : null) ?? ("error" in typed ? typed.error : null));
+  // Nothing ticked on Chosen lines: said under the discount box.
+  const blocked = problem ?? tickError;
   const approveNow = () => {
     if (emptying && !window.confirm("Approve this invoice with no lines? It comes to $0.00, and the lines it had are taken off.")) return;
     approve.mutate();
@@ -273,8 +296,19 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
     setLines((cur) => (cur ?? []).map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
     setDirty(true);
   };
-  const add = (l: Draft) => {
-    setLines((cur) => [...(cur ?? []), l]);
+  // A line added comes in unticked (11/7): a discount on chosen lines never covers one added later.
+  const add = (l: Omit<Draft, "discountChosen">) => {
+    setLines((cur) => [...(cur ?? []), { ...l, discountChosen: false }]);
+    setDirty(true);
+  };
+  // Chosen lines starts with every line ticked; Whole bill keeps no ticks, so nothing is left hidden.
+  const pickScope = (s: DiscountScope) => {
+    setDiscScope(s);
+    setLines((cur) => (cur ?? []).map((l) => ({ ...l, discountChosen: s === "chosen" })));
+    setDirty(true);
+  };
+  const tickAll = (on: boolean) => {
+    setLines((cur) => (cur ?? []).map((l) => ({ ...l, discountChosen: on })));
     setDirty(true);
   };
   const remove = (i: number) => {
@@ -451,6 +485,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                             <p className="mt-0.5 flex h-8 items-center text-sm tabular">{money(lineAmount({ qty: Number(l.qty) || 0, rate: Number(l.rate) || 0 }))}</p>
                           </div>
                         </div>
+                        {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={locked} onChange={(on) => edit(i, { discountChosen: on })} /> : null}
                       </li>
                     );
                   })}
@@ -562,6 +597,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                       disabled={locked}
                       onChange={(e) => {
                         setDiscValue(e.target.value);
+                        // Cleared, it is Whole bill again with nothing ticked (11/7).
+                        if (!e.target.value.trim()) pickScope("all");
                         setDirty(true);
                       }}
                       className="mt-1"
@@ -570,6 +607,25 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   </div>
                 </div>
               )}
+              {!v.partsOnly && discValue.trim() ? (
+                <div className="mt-3">
+                  <ScopePicker scope={discScope} onChange={pickScope} disabled={locked} />
+                  {chosen ? (
+                    <ChosenBar
+                      chosen={draft.filter((l) => l.discountChosen).length}
+                      lines={draft.length}
+                      onAll={() => tickAll(true)}
+                      onNone={() => tickAll(false)}
+                      disabled={locked}
+                    />
+                  ) : null}
+                  {tickError && !locked ? (
+                    <p className="mt-2 text-xs text-destructive" data-testid="invoice-discount-chosen-error">
+                      {tickError}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               <dl className="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-muted/50 p-3 text-sm sm:grid-cols-5" data-testid="invoice-totals">
                 <div>
                   <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Parts</dt>
@@ -584,7 +640,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   <dd className="tabular font-medium" data-testid="invoice-subtotal">{money(totals.subtotal)}</dd>
                 </div>
                 <div>
-                  <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Discount{discount ? ` · ${discountLabel(discount)}` : ""}</dt>
+                  <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Discount{discount ? ` · ${discountOffLabel(discount, priced)}` : ""}</dt>
                   <dd className="tabular font-medium" data-testid="invoice-off">{totals.off ? `−${money(totals.off)}` : money(0)}</dd>
                 </div>
                 <div>
@@ -625,11 +681,11 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                 Cancel
               </Button>
               {locked ? null : v.canSave ? (
-                <Button type="button" onClick={() => save.mutate()} disabled={busy || !!problem || !draft.length} data-testid="invoice-save">
+                <Button type="button" onClick={() => save.mutate()} disabled={busy || !!blocked || !draft.length} data-testid="invoice-save">
                   {save.isPending ? "Saving…" : "Save for Approval"}
                 </Button>
               ) : (
-                <Button type="button" onClick={approveNow} disabled={busy || !!problem || (!draft.length && !emptying)} data-testid="invoice-approve">
+                <Button type="button" onClick={approveNow} disabled={busy || !!blocked || (!draft.length && !emptying)} data-testid="invoice-approve">
                   {approve.isPending ? "Approving…" : "Approve"}
                 </Button>
               )}
