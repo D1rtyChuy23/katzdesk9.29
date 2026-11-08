@@ -290,6 +290,53 @@ test("an Invoice window from before the publish can't approve over a chosen-line
   assert.deepEqual([(await head(sql, "install", inst)).total, (await head(sql, "install", inst)).discount_scope], ["283.50", "all"]);
 });
 
+test("each save statement refuses a page from before the publish on a chosen-lines bill, even with the check in front of it skipped", async () => {
+  const { sql } = await fresh();
+  // What an old page sends: no scope. The same call with a scope, from a page of today, writes: only the guard stops it.
+  const arrays = [["PARTS : TEST-A", "Service : SERVICELABOR"], ["", "Bench labor"], [2, 1.5], [45, 150], ["part", "labor"]];
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const charges = (scope) => sql.query(C.replaceTicketChargesSql(), [job, ...arrays, true, [], null, "percent", 10, ["", ""], false, scope, [false, true]]);
+  assert.deepEqual(await charges(null), []);
+  assert.deepEqual(await ticks(sql, job), [true, false]);
+  assert.equal((await charges("chosen")).length, 1);
+  assert.deepEqual(await ticks(sql, job), [false, true]);
+
+  // An Admin's save on an unlocked, invoiced ticket.
+  const billed = await ticket(sql, { so: "SO5" });
+  await sql.query("insert into ticket_charges (job_id, item, description, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', '', 2, 45, 'part', 1)", [billed]);
+  await ticketInvoice(sql, billed, "INV200", "Paid In Full", 90, { so: "SO5" });
+  await TB.unlockTicketBillingFor(sql, billed, "u-owner", "NetSuite credit memo changed the part");
+  await C.writeTicketCharges(sql, billed, "u-owner", { lines: LINES, discount: pct, unlocked: { nsSo: "SO5", billedAt: "2026-10-22" } });
+  await TB.unlockTicketBillingFor(sql, billed, "u-owner", "NetSuite credit memo changed the labor");
+  const unlocked = (scope) => sql.query(C.replaceUnlockedChargesSql(), [billed, ...arrays, true, [], null, "percent", 10, ["", ""], "SO5", "2026-10-22", false, scope, [false, true]]);
+  assert.deepEqual(await unlocked(null), []);
+  assert.deepEqual(await ticks(sql, billed), [true, false]);
+  assert.equal((await unlocked("chosen")).length, 1);
+  assert.deepEqual(await ticks(sql, billed), [false, true]);
+
+  // Approving an install's invoice again, at the version the window opened.
+  const inst = await install(sql);
+  await I.approveInvoiceFor(sql, { type: "install", id: inst, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+  const version = (await one(sql, "select invoice_version('install', $1) as v", [inst])).v;
+  const ih = await head(sql, "install", inst);
+  const record = (scope) => sql.query(I.approveRecordInvoiceSql(), ["install", inst, CAFE, "percent", 10, null, null, null, null, 306, "chuy", version, ...arrays, null, false, [null, null], scope, [false, true]]);
+  assert.deepEqual(await record(null), []);
+  assert.deepEqual(await lineTicks(sql, ih.id), [true, false]);
+  assert.equal((await record("chosen")).length, 1);
+  assert.deepEqual(await lineTicks(sql, ih.id), [false, true]);
+
+  // And a PM's.
+  const pm = await pmJob(sql);
+  await I.approveInvoiceFor(sql, { type: "pm", id: pm, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+  const ph = await head(sql, "pm", pm);
+  const pmApprove = (scope) => sql.query(I.approvePmInvoiceSql(), ["pm", pm, CAFE, "percent", 10, null, null, null, null, 306, "chuy", ...arrays, null, false, scope, [false, true]]);
+  assert.deepEqual(await pmApprove(null), []);
+  assert.deepEqual(await lineTicks(sql, ph.id), [true, false]);
+  assert.equal((await pmApprove("chosen")).length, 1);
+  assert.deepEqual(await lineTicks(sql, ph.id), [false, true]);
+});
+
 test("Warehouse's Save for Approval stays Whole bill with no ticks", async () => {
   const { sql } = await fresh();
   await sql.query("insert into billing_items (sku, item, kind, rate, active) values ('TEST-A', 'PARTS : TEST-A', 'part', 45, true)");
