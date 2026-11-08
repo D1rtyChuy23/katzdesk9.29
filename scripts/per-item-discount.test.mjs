@@ -15,6 +15,7 @@ const D = await import("../src/lib/ops/discount.ts");
 const C = await import("../src/lib/ops/charges-api.ts");
 const TB = await import("../src/lib/ops/ticket-billing-api.ts");
 const I = await import("../src/lib/ops/invoice-api.ts");
+const BF = await import("../src/lib/ops/billing-backfill-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -356,4 +357,61 @@ test("the Parts Profit report gives a billed chosen-lines ticket's discount to i
       ["TEST-B", 0],
     ],
   );
+});
+
+/* ------------------------------------------------------------------ Billing Backfill */
+
+const CHARGES_HEAD = ["WO", "Source invoice #", "Source SO #", "PO", "NetSuite customer", "Location", "Item", "Item type", "Description", "Qty", "Rate", "Amount", "Discount Item", "Discount Amount", "Record total (after discount)"];
+const INVOICES_HEAD = ["WO", "SO #", "SO status", "Invoice #", "Invoice date", "Invoice status", "Invoice total", "Amount remaining", "Charges source", "Corrigo net (reference)"];
+/** A NetSuite export as the Backfill reads it (no cell here has a comma). */
+const nsFile = (name, rows) => ({ name, base64: Buffer.from(rows.map((r) => r.join(",")).join("\n") + "\n").toString("base64") });
+const nsInvoice = (wo, so, inv, total) => [wo, so, "Billed", inv, "2026-10-22", "Open", String(total), String(total), "Yes", ""];
+
+test("the Billing Backfill checks a chosen-lines bill on its ticked lines", async () => {
+  const { sql } = await fresh();
+  const pm1 = await idOf(sql, "insert into pm_jobs (customer, wo, status) values ($1, 'WO-7701', 'Completed') returning id", [CAFE]);
+  const pm2 = await idOf(sql, "insert into pm_jobs (customer, wo, status) values ($1, 'WO-7702', 'Completed') returning id", [CAFE]);
+  for (const id of [pm1, pm2]) await I.approveInvoiceFor(sql, { type: "pm", id, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+  assert.deepEqual((await BF.loadKatzDeskInvoiceNets(sql, [], [pm1])).get(`pm:${pm1}`), { lines: 2, net: 306 });
+  // NetSuite invoiced 306.00 on one and 315.00 on the other: only the second doesn't match.
+  const f = [nsFile("invoices.csv", [INVOICES_HEAD, nsInvoice("WO-7701", "SO7701", "INV7701", 306), nsInvoice("WO-7702", "SO7702", "INV7702", 315)])];
+  const by = Object.fromEntries((await BF.previewBillingBackfillFor(sql, f, "u-owner")).plans.map((x) => [x.wo, x]));
+  assert.deepEqual([by["WO-7701"].amounts.kd, by["WO-7701"].amounts.nsMismatch], [306, false]);
+  assert.deepEqual([by["WO-7702"].amounts.kd, by["WO-7702"].amounts.nsMismatch], [306, true]);
+});
+
+test("the Billing Backfill writes NetSuite's lines onto a chosen-lines ticket as Whole bill", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql, { wo: "WO-7801" });
+  await sql.query("update service_jobs set completed_at = '2026-10-20' where id = $1", [job]);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  // NetSuite has the same two lines, with its header discount of $9.00 off the order.
+  const row = (item, type, qty, rate) => ["WO-7801", "INV7801", "SO7801", "", CAFE, "Houston - WH", item, type, "Line", String(qty), String(rate), String(qty * rate), "CLDSERVICE", "-9", "306"];
+  const f = [
+    nsFile("charges.csv", [CHARGES_HEAD, row("PARTS : TEST-A", "InvtPart", 2, 45), row("Service : SERVICELABOR", "Service", 1.5, 150)]),
+    nsFile("invoices.csv", [INVOICES_HEAD, nsInvoice("WO-7801", "SO7801", "INV7801", 306)]),
+  ];
+  const p = await BF.previewBillingBackfillFor(sql, f, "u-owner");
+  await BF.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [] });
+  assert.deepEqual(await one(sql, "select discount_kind, discount_value::text as value, discount_scope from service_jobs where id = $1", [job]), { discount_kind: "amount", value: "9.00", discount_scope: "all" });
+  assert.deepEqual(await ticks(sql, job), [false, false]);
+  assert.equal((await C.loadTicketCharges(sql, job)).total, 306);
+});
+
+test("a NetSuite file with a ticket's lines but no discount keeps its chosen-lines discount as the dollars it took off", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql, { wo: "WO-7901" });
+  await sql.query("update service_jobs set completed_at = '2026-10-20' where id = $1", [job]);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  // No Discount Amount and no Record total: the file says nothing about a discount.
+  const row = (item, type, qty, rate) => ["WO-7901", "INV7901", "SO7901", "", CAFE, "Houston - WH", item, type, "Line", String(qty), String(rate), String(qty * rate), "", "", ""];
+  const f = [
+    nsFile("charges.csv", [CHARGES_HEAD, row("PARTS : TEST-A", "InvtPart", 2, 45), row("Service : SERVICELABOR", "Service", 1.5, 150)]),
+    nsFile("invoices.csv", [INVOICES_HEAD, nsInvoice("WO-7901", "SO7901", "INV7901", 306)]),
+  ];
+  const p = await BF.previewBillingBackfillFor(sql, f, "u-owner");
+  assert.deepEqual([p.plans[0].charges.nextDiscount, p.plans[0].charges.nextNet], [{ kind: "amount", value: 9 }, 306]);
+  await BF.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [] });
+  assert.deepEqual(await one(sql, "select discount_kind, discount_value::text as value, discount_scope from service_jobs where id = $1", [job]), { discount_kind: "amount", value: "9.00", discount_scope: "all" });
+  assert.equal((await C.loadTicketCharges(sql, job)).total, 306);
 });

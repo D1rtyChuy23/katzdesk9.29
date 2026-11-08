@@ -8,7 +8,7 @@ import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
-import { applyDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
+import { applyDiscount, discountFromRow, DISCOUNT_BASE_SQL, isDiscountKind, type Discount } from "@/lib/ops/discount";
 import {
   backfillCounts,
   backfillHash,
@@ -94,6 +94,7 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
     billed_on: string | null;
     discount_kind: string | null;
     discount_value: string | null;
+    discount_scope: string | null;
     corrigo_net: string | null;
     seen: string;
   }>(
@@ -101,7 +102,7 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
             ${BILLED_ON_INSTALL("j.id")} as billed_on_install, ${BILLED_ON_INSTALL_SO("j.id")} as billed_so_on_install,
             to_char(j.received, 'YYYY-MM-DD') as received, to_char(j.completed_at, 'YYYY-MM-DD') as completed,
             j.ns_so, to_char(j.billed_at at time zone 'America/Chicago', 'YYYY-MM-DD') as billed_on,
-            j.discount_kind, j.discount_value::text as discount_value, j.corrigo_net::text as corrigo_net, j.updated_at::text as seen
+            j.discount_kind, j.discount_value::text as discount_value, j.discount_scope, j.corrigo_net::text as corrigo_net, j.updated_at::text as seen
        from service_jobs j
       where ${WO_KEY("j.wo")} = any($1::text[])
       order by j.id`,
@@ -109,16 +110,15 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
   );
   const ids = rows.map((r) => Number(r.id));
   const lines = ids.length
-    ? await sql.query<{ job_id: number; item: string; description: string | null; qty: string; rate: string }>(
-        "select job_id, item, description, qty::text as qty, rate::text as rate from ticket_charges where job_id = any($1::int[]) order by job_id, sort, id",
+    ? await sql.query<{ job_id: number; item: string; description: string | null; qty: string; rate: string; discount_chosen: boolean | null }>(
+        "select job_id, item, description, qty::text as qty, rate::text as rate, discount_chosen from ticket_charges where job_id = any($1::int[]) order by job_id, sort, id",
         [ids],
       )
     : [];
   const invoices = await loadInvoices(sql, ids.length ? ids : [0]);
   const tickets: BackfillTicket[] = rows.map((r) => {
     const id = Number(r.id);
-    const discount: Discount | null =
-      isDiscountKind(r.discount_kind) && Number(r.discount_value) > 0 ? { kind: r.discount_kind, value: Number(r.discount_value) } : null;
+    const discount = discountFromRow(r.discount_kind, r.discount_value, r.discount_scope);
     return {
       id,
       kind: r.kind === "tlc" ? "tlc" : "service",
@@ -138,7 +138,7 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
       seen: r.seen,
       lines: lines
         .filter((l) => Number(l.job_id) === id)
-        .map((l) => ({ item: l.item, description: l.description ?? "", qty: Number(l.qty), rate: Number(l.rate) })),
+        .map((l) => ({ item: l.item, description: l.description ?? "", qty: Number(l.qty), rate: Number(l.rate), discountChosen: l.discount_chosen === true })),
       invoices: (invoices.get(id) ?? []).map((i) => ({
         invoice: i.invoice,
         so: i.so,
@@ -412,9 +412,10 @@ export async function loadRecordNsBilling(sql: Q, installIds: number[], pmIds: n
 export async function loadKatzDeskInvoiceNets(sql: Q, installIds: number[], pmIds: number[]): Promise<Map<string, { lines: number; net: number }>> {
   const out = new Map<string, { lines: number; net: number }>();
   if (!installIds.length && !pmIds.length) return out;
-  const rows = await sql.query<{ entity_type: string; entity_id: number; discount_kind: string | null; discount_value: string | null; lines: number; subtotal: string }>(
-    `select i.entity_type, i.entity_id, i.discount_kind, i.discount_value::text as discount_value, count(l.id)::int as lines,
-            coalesce(sum(round(l.qty * l.rate, 2)), 0)::text as subtotal
+  const rows = await sql.query<{ entity_type: string; entity_id: number; discount_kind: string | null; discount_value: string | null; discount_scope: string | null; lines: number; subtotal: string; base: string }>(
+    `select i.entity_type, i.entity_id, i.discount_kind, i.discount_value::text as discount_value, i.discount_scope, count(l.id)::int as lines,
+            coalesce(sum(round(l.qty * l.rate, 2)), 0)::text as subtotal,
+            ${DISCOUNT_BASE_SQL("l", "i.discount_scope")}::text as base
        from invoices i
        left join invoice_lines l on l.invoice_id = i.id
       where (i.entity_type = 'install' and i.entity_id = any($1::int[])) or (i.entity_type = 'pm' and i.entity_id = any($2::int[]))
@@ -423,8 +424,9 @@ export async function loadKatzDeskInvoiceNets(sql: Q, installIds: number[], pmId
   );
   for (const r of rows) {
     if (!Number(r.lines)) continue;
-    const discount: Discount | null = isDiscountKind(r.discount_kind) && Number(r.discount_value) > 0 ? { kind: r.discount_kind, value: Number(r.discount_value) } : null;
-    out.set(`${r.entity_type}:${Number(r.entity_id)}`, { lines: Number(r.lines), net: applyDiscount(Number(r.subtotal), discount).total });
+    // Off the lines it comes off: on Chosen lines, the ticked ones (11/7).
+    const discount = discountFromRow(r.discount_kind, r.discount_value, r.discount_scope);
+    out.set(`${r.entity_type}:${Number(r.entity_id)}`, { lines: Number(r.lines), net: applyDiscount(Number(r.subtotal), discount, Number(r.base)).total });
   }
   return out;
 }
@@ -569,6 +571,8 @@ with plan as (
   update service_jobs s
      set discount_kind = case when p.write_charges and not p.locked then p.dk else s.discount_kind end,
          discount_value = case when p.write_charges and not p.locked then p.dv else s.discount_value end,
+         -- NetSuite's lines come in unticked, under its header discount: the Whole bill (11/7).
+         discount_scope = case when p.write_charges and not p.locked then 'all' else s.discount_scope end,
          ns_so = case when p.set_so and not p.locked then p.so else s.ns_so end,
          billed_at = case
            when not p.set_so or p.locked then s.billed_at
