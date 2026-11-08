@@ -1055,7 +1055,7 @@ test("a ticket merged into an install as billed keeps the rebuild linked, throug
     return linkTo(sql, f, f.candidates.find((c) => c.target.kind === target.kind && c.target.id === target.id));
   };
   /** The merge statement's parameters for this preview, as mergeTicketIntoInstallFor sends them (unbilled, no discount or P.O.). */
-  const mergeParams = (p, job, inst) => [job, inst, "chuy", p.stamps.job, p.stamps.install, p.stamps.head, p.note, p.moves.invoiceTotal, null, null, null, "", null, "", ""];
+  const mergeParams = (p, job, inst) => [job, inst, "chuy", p.stamps.job, p.stamps.install, p.stamps.head, p.note, p.moves.invoiceTotal, null, null, null, "", null, "", "", "all"];
   const mergeIn = async (job, inst) => {
     const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: job, installId: inst });
     assert.equal(p.refusal ?? null, null);

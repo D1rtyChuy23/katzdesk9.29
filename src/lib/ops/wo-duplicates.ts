@@ -304,11 +304,14 @@ const CHANGED_WHILE_MERGING = "Those tickets changed while merging. Try again.";
  * $8 issue, $9 call type, $10 technician, $11 wo, $12 notes, $13 work done,
  * $14 completed, $15 scheduled, $16 received, $17 urgency, $18 keeper updated_at text, $19 extra updated_at text.
  * The field values are mergeJobFields. P.O. and discount are copied from the locked rows in g, not read again.
+ * Whole bill or Chosen lines (11/7): no line pays differently after. The keeper is on Chosen lines when either was (the
+ * same percent), or takes the extra's scope with its discount; a line from a Whole-bill side is then ticked, and one from
+ * a Chosen-lines side keeps its tick.
  * Zero rows means a refusal became true after the check (nothing was written).
  */
 export function mergeTicketsSql(): string {
   return `with lk as (
-    select id, kind, ns_so, po, vendor_po, discount_kind, discount_value, call_id, wo, completed_at, duplicate_of,
+    select id, kind, ns_so, po, vendor_po, discount_kind, discount_value, discount_scope, call_id, wo, completed_at, duplicate_of,
            updated_at::text as updated
       from service_jobs
      where id = any(array[$1::int, $2::int])
@@ -329,6 +332,8 @@ export function mergeTicketsSql(): string {
       k.discount_value as keeper_dv,
       e.discount_kind as extra_dk,
       e.discount_value as extra_dv,
+      k.discount_scope as keeper_ds,
+      e.discount_scope as extra_ds,
       e.call_id as extra_call,
       e.wo as extra_wo,
       k.completed_at as keeper_done,
@@ -346,7 +351,14 @@ export function mergeTicketsSql(): string {
     where k.id = $1::int
       and k.id <> e.id
   ), g as (
-    select * from pair
+    select pair.*,
+           -- The keeper's discount scope once merged (11/7).
+           case
+             when keeper_lines = 0 and keeper_dk is null and extra_lines > 0 then extra_ds
+             when extra_lines > 0 and keeper_dk is not null and extra_dk is not null and (keeper_ds = 'chosen' or extra_ds = 'chosen') then 'chosen'
+             else keeper_ds
+           end as result_ds
+      from pair
      where nullif(btrim(extra_so), '') is null
        and not exists (select 1 from ticket_invoices ti where ti.job_id = pair.extra_id)
        and not (${LIVE_INVOICE("pair.keeper_id")} and extra_lines > 0)
@@ -397,17 +409,26 @@ export function mergeTicketsSql(): string {
   ), chg as (
     update ticket_charges c
        set job_id = s.keeper_id,
-           sort = s.new_sort
+           sort = s.new_sort,
+           discount_chosen = s.chosen
       from (
         select c2.id,
                g.keeper_id,
                g.extra_id,
                coalesce((select max(t.sort) from ticket_charges t where t.job_id = g.keeper_id), 0)
-                 + row_number() over (order by c2.sort, c2.id) as new_sort
+                 + row_number() over (order by c2.sort, c2.id) as new_sort,
+               -- Its tick: kept from a Chosen-lines extra; from a Whole-bill one, ticked when the keeper is on Chosen lines.
+               case when g.extra_ds = 'chosen' then c2.discount_chosen else g.result_ds = 'chosen' end as chosen
           from ticket_charges c2
           join g on c2.job_id = g.extra_id
       ) s
      where c.id = s.id and c.job_id = s.extra_id
+    returning c.id
+  ), kept_ticked as (
+    -- The keeper's own lines, under its Whole-bill discount until now: ticked, so the discount still comes off them.
+    update ticket_charges c set discount_chosen = true
+      from g
+     where c.job_id = g.keeper_id and g.result_ds = 'chosen' and g.keeper_ds = 'all'
     returning c.id
   ), quo as (
     update repair_quotes q
@@ -490,6 +511,7 @@ export function mergeTicketsSql(): string {
            vendor_po = coalesce(nullif(btrim(k.vendor_po), ''), g.extra_vendor_po),
            discount_kind = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dk else k.discount_kind end,
            discount_value = case when g.keeper_lines = 0 and g.keeper_dk is null and g.extra_lines > 0 then g.extra_dv else k.discount_value end,
+           discount_scope = g.result_ds,
            updated_at = now()
       from g
      where k.id = g.keeper_id

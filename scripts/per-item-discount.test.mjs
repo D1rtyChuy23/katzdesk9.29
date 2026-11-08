@@ -16,6 +16,9 @@ const C = await import("../src/lib/ops/charges-api.ts");
 const TB = await import("../src/lib/ops/ticket-billing-api.ts");
 const I = await import("../src/lib/ops/invoice-api.ts");
 const BF = await import("../src/lib/ops/billing-backfill-api.ts");
+const M = await import("../src/lib/ops/ticket-install-merge.ts");
+const WD = await import("../src/lib/ops/wo-duplicates.ts");
+const IP = await import("../src/lib/ops/install-projects.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -67,14 +70,17 @@ const pmJob = (sql) => idOf(sql, "insert into pm_jobs (customer, wo, status) val
 const deal = (sql) => idOf(sql, "insert into deals (customer) values ($1) returning id", [CAFE]);
 const rebuild = (sql, account) => idOf(sql, "insert into rebuilds (title, account, status) values ('Test refurb', $1, 'In progress') returning id", [account]);
 
-const install = (sql, o = {}) =>
-  idOf(sql, "insert into installs (customer, wo, complete, equip_status, archived, po) values ($1, $2, $3, $4, false, $5) returning id", [
+async function install(sql, o = {}) {
+  const id = await idOf(sql, "insert into installs (customer, wo, complete, equip_status, archived, po) values ($1, $2, $3, $4, false, $5) returning id", [
     o.customer ?? CAFE,
     o.wo ?? null,
     o.complete ?? false,
     o.equipStatus ?? "Not Ready",
     o.po ?? null,
   ]);
+  if (o.wo) await sql.query("insert into install_work_orders (install_id, wo, match_key) values ($1, $2, $3)", [id, o.wo, o.wo.replace(/\D+/g, "").replace(/^0+/, "")]);
+  return id;
+}
 
 /** NetSuite's invoice on a ticket, which locks its charges until an Admin unlocks them. */
 const ticketInvoice = (sql, jobId, inv, status, total, o = {}) =>
@@ -414,4 +420,103 @@ test("a NetSuite file with a ticket's lines but no discount keeps its chosen-lin
   await BF.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [] });
   assert.deepEqual(await one(sql, "select discount_kind, discount_value::text as value, discount_scope from service_jobs where id = $1", [job]), { discount_kind: "amount", value: "9.00", discount_scope: "all" });
   assert.equal((await C.loadTicketCharges(sql, job)).total, 306);
+});
+
+/* ------------------------------------------------------------------ merges */
+
+/** A ticket with these charge lines and discount. */
+async function billedTicket(sql, o, lines = LINES, discount = pct) {
+  const job = await ticket(sql, o);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines, lineIds: [], discount });
+  return job;
+}
+/** An install's invoice waiting for approval, with these lines (ticks as given) and discount. */
+async function installInvoice(sql, inst, lines, discount) {
+  const inv = await idOf(
+    sql,
+    "insert into invoices (entity_type, entity_id, customer, total, discount_kind, discount_value, discount_scope, submitted_by, submitted_at) values ('install', $1, $2, 0, $3, $4, $5, 'chuy', now()) returning id",
+    [inst, CAFE, discount?.kind ?? null, discount?.value ?? null, discount?.scope ?? "all"],
+  );
+  for (const [i, l] of lines.entries()) {
+    await sql.query("insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, discount_chosen) values ($1, $2, '', $3, $4, 'part', $5, $6)", [inv, l.item, l.qty, l.rate, i + 1, !!l.discountChosen]);
+  }
+  return inv;
+}
+async function mergeIntoInstall(sql, job, inst) {
+  const p = await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: job, installId: inst });
+  assert.equal(p.refusal ?? null, null, p.refusal);
+  await M.mergeTicketIntoInstallFor(sql, "u-owner", { jobId: job, installId: inst, stamps: p.stamps, billedSo: p.moves.billed?.so ?? "", billedOn: p.moves.billed?.on ?? "" });
+  return p;
+}
+const C100 = { item: "PARTS : TEST-C", qty: 1, rate: 100, discountChosen: true };
+const D100 = { item: "PARTS : TEST-D", qty: 1, rate: 100, discountChosen: false };
+
+test("merging a ticket into an install never changes what a line pays", async () => {
+  const { sql } = await fresh();
+  // An empty install takes the ticket's Chosen-lines discount, ticks and all.
+  const j1 = await billedTicket(sql, { wo: "WO-8101", status: "Scheduled" });
+  const i1 = await install(sql, { wo: "WO-8101" });
+  assert.equal((await mergeIntoInstall(sql, j1, i1)).moves.invoiceTotal, 306);
+  const h1 = await head(sql, "install", i1);
+  assert.deepEqual([h1.total, h1.discount_scope, await lineTicks(sql, h1.id)], ["306.00", "chosen", [true, false]]);
+  // Its own 10% on the Whole bill and the ticket's 10% on Chosen lines: Chosen lines, its own line ticked.
+  const j2 = await billedTicket(sql, { wo: "WO-8102", status: "Scheduled" });
+  const i2 = await install(sql, { wo: "WO-8102" });
+  const inv2 = await installInvoice(sql, i2, [{ ...C100, discountChosen: false }], { kind: "percent", value: 10 });
+  await mergeIntoInstall(sql, j2, i2);
+  const h2 = await head(sql, "install", i2);
+  assert.deepEqual([h2.total, h2.discount_scope, await lineTicks(sql, inv2)], ["396.00", "chosen", [true, true, false]]);
+  // The ticket on the Whole bill, the install on Chosen lines: the ticket's lines come in ticked.
+  const j3 = await billedTicket(sql, { wo: "WO-8103", status: "Scheduled" }, LINES, { kind: "percent", value: 10, scope: "all" });
+  const i3 = await install(sql, { wo: "WO-8103" });
+  const inv3 = await installInvoice(sql, i3, [C100, D100], { kind: "percent", value: 10, scope: "chosen" });
+  await mergeIntoInstall(sql, j3, i3);
+  const h3 = await head(sql, "install", i3);
+  assert.deepEqual([h3.total, h3.discount_scope, await lineTicks(sql, inv3)], ["473.50", "chosen", [true, false, true, true]]);
+  // Different discounts still don't merge.
+  const j4 = await billedTicket(sql, { wo: "WO-8104", status: "Scheduled" });
+  const i4 = await install(sql, { wo: "WO-8104" });
+  await installInvoice(sql, i4, [C100], { kind: "percent", value: 15, scope: "all" });
+  assert.match((await M.previewTicketInstallMergeFor(sql, "u-owner", { jobId: j4, installId: i4 })).refusal, /has a 10% discount and Install #\d+'s invoice has 15%; merged, only one would apply/);
+});
+
+test("a ticket merged into an install as billed keeps which lines took its discount", async () => {
+  const { sql } = await fresh();
+  const job = await billedTicket(sql, { wo: "WO-8201", status: "Completed" });
+  await sql.query("update service_jobs set ns_so = 'SO8201', billed_at = now() where id = $1", [job]);
+  const inst = await install(sql, { wo: "WO-8201" });
+  await mergeIntoInstall(sql, job, inst);
+  const billed = (await I.getInvoiceFor(sql, { type: "install", id: inst }, "u-owner")).billedElsewhere[0];
+  assert.deepEqual([billed.lines.map((l) => l.discounted), billed.total], [[true, false], 306]);
+  // A merge logged before 11/7 didn't say: every line took the discount.
+  await sql.query("update ticket_install_merges set moved = jsonb_set(moved, '{billedLines}', (select jsonb_agg(x - 'discounted') from jsonb_array_elements(moved->'billedLines') x)) where job_id = $1", [job]);
+  assert.deepEqual((await I.getInvoiceFor(sql, { type: "install", id: inst }, "u-owner")).billedElsewhere[0].lines.map((l) => l.discounted), [true, true]);
+});
+
+test("merging duplicate WOs never changes what a line pays", async () => {
+  const { sql } = await fresh();
+  const tickTotal = async (id) => (await C.loadTicketCharges(sql, id)).total;
+  // An empty keeper takes the extra's Chosen-lines discount, ticks and all.
+  const k1 = await ticket(sql, { wo: "WO-8301", status: "Open" });
+  const e1 = await billedTicket(sql, { wo: "WO-8301", status: "Open" });
+  await WD.mergeServiceJobs(sql, k1, e1, "Chuy");
+  assert.deepEqual([(await one(sql, "select discount_scope from service_jobs where id = $1", [k1])).discount_scope, await ticks(sql, k1), await tickTotal(k1)], ["chosen", [true, false], 306]);
+  // A keeper at 10% on the Whole bill takes an extra at 10% on Chosen lines: its own line ticked, the totals added.
+  const k2 = await billedTicket(sql, { wo: "WO-8302", status: "Open" }, [{ item: "PARTS : TEST-C", description: "", qty: 1, rate: 100 }], { kind: "percent", value: 10, scope: "all" });
+  const e2 = await billedTicket(sql, { wo: "WO-8302", status: "Open" });
+  const before = (await tickTotal(k2)) + (await tickTotal(e2));
+  await WD.mergeServiceJobs(sql, k2, e2, "Chuy");
+  assert.deepEqual([(await one(sql, "select discount_scope from service_jobs where id = $1", [k2])).discount_scope, await ticks(sql, k2), await tickTotal(k2)], ["chosen", [true, true, false], before]);
+  assert.equal(before, 396);
+});
+
+test("Merge installs moves a chosen-lines invoice as it is", async () => {
+  const { sql } = await fresh();
+  const keep = await install(sql, { wo: "WO-8401" });
+  const drop = await install(sql, { wo: "WO-8402" });
+  await I.approveInvoiceFor(sql, { type: "install", id: drop, lines: LINES, lineIds: [], discount: SENT, seen: null }, "u-owner");
+  await IP.mergeInstallsFor(sql, "u-owner", { keepId: keep, dropId: drop });
+  const h = await head(sql, "install", keep);
+  assert.deepEqual([h.total, h.discount_scope, await lineTicks(sql, h.id)], ["306.00", "chosen", [true, false]]);
+  assert.equal((await I.getInvoiceFor(sql, { type: "install", id: keep }, "u-owner")).total, 306);
 });

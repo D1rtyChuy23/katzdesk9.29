@@ -23,7 +23,7 @@ import type { ChargeKind } from "@/lib/ops/charges";
 import { formatLongDate, todayChicago } from "@/lib/ops/clock";
 import { customersCompatible, woMatchKey } from "@/lib/ops/corrigo";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
-import { isDiscountKind, type Discount } from "@/lib/ops/discount";
+import { discountFromRow, type Discount } from "@/lib/ops/discount";
 import { invoiceTotals } from "@/lib/ops/invoice";
 import { isInstalled } from "@/lib/ops/install-status";
 import { chargesMismatch, invoiceFitsTicket, liveInvoiceTotal } from "@/lib/ops/billing-rules";
@@ -162,6 +162,7 @@ type TicketRow = {
   ns_so: string | null;
   discount_kind: string | null;
   discount_value: string | null;
+  discount_scope: string | null;
   received: string | null;
   came_in: string | null;
   completed: string | null;
@@ -189,6 +190,7 @@ type HeadRow = {
   submitted_at: string | Date | null;
   discount_kind: string | null;
   discount_value: string | null;
+  discount_scope: string | null;
   stamp: string;
 };
 
@@ -209,11 +211,12 @@ type Linked = {
   ticket_approved_by: string | null;
 };
 
-type MoneyLine = { qty: number; rate: number; kind: ChargeKind };
+/** discountChosen: the line's tick for a Chosen-lines discount (11/7). */
+type MoneyLine = { qty: number; rate: number; kind: ChargeKind; discountChosen: boolean };
 
 const TICKET_COLS = `j.id, j.kind, j.call_id, j.wo, j.customer, j.status, j.duplicate_of, j.merged_install_id,
   j.issue, j.equipment, j.work_done, j.notes, j.po, j.vendor_po, j.contact, j.phone, j.technician, j.technician2, j.ns_so,
-  j.discount_kind, j.discount_value::text as discount_value,
+  j.discount_kind, j.discount_value::text as discount_value, j.discount_scope,
   to_char(j.received, 'YYYY-MM-DD') as received, to_char(${TICKET_CAME_IN}, 'YYYY-MM-DD') as came_in,
   to_char(j.completed_at, 'YYYY-MM-DD') as completed,
   j.updated_at::text as stamp`;
@@ -222,8 +225,8 @@ async function loadTicket(sql: Q, jobId: number): Promise<TicketRow | null> {
   return (await sql.query<TicketRow>(`select ${TICKET_COLS} from service_jobs j where j.id = $1`, [jobId]))[0] ?? null;
 }
 
-const toDiscount = (kind: string | null, value: string | number | null): Discount | null =>
-  isDiscountKind(kind) && Number(value) > 0 ? { kind, value: Number(value) } : null;
+/** A bill's discount as its row has it: Whole bill, or Chosen lines (11/7). */
+const toDiscount = (kind: string | null, value: string | number | null, scope: string | null): Discount | null => discountFromRow(kind, value, scope);
 
 function discountText(d: Discount): string {
   return d.kind === "percent" ? `${Number(d.value.toFixed(2))}%` : money(d.value);
@@ -269,7 +272,7 @@ export function installMergeNote(
 /**
  * The discount the install's invoice has once the ticket's lines are on it, or why the two can't go together (the same
  * rule as merging two tickets): neither has one; both the same percent; or the invoice has no lines and no discount
- * yet, so it takes the ticket's.
+ * yet, so it takes the ticket's. Merged, it is on Chosen lines when either was (11/7): no line pays differently.
  */
 export function invoiceDiscountAfter(
   ticket: Discount | null,
@@ -279,13 +282,26 @@ export function invoiceDiscountAfter(
 ): { discount: Discount | null } | { refusal: string } {
   if (!ticket && !invoice) return { discount: null };
   if (invoiceLines === 0 && !invoice) return { discount: ticket };
-  if (ticket && invoice && ticket.kind === "percent" && invoice.kind === "percent" && ticket.value === invoice.value) return { discount: invoice };
+  if (ticket && invoice && ticket.kind === "percent" && invoice.kind === "percent" && ticket.value === invoice.value) {
+    return { discount: ticket.scope === "chosen" || invoice.scope === "chosen" ? { kind: invoice.kind, value: invoice.value, scope: "chosen" } : { kind: invoice.kind, value: invoice.value } };
+  }
   if (ticket && invoice) {
     return { refusal: `${names.ticket} has a ${discountText(ticket)} discount and ${names.install}'s invoice has ${discountText(invoice)}; merged, only one would apply. Make them match first.` };
   }
   return ticket
     ? { refusal: `${names.ticket} has a ${discountText(ticket)} discount that ${names.install}'s invoice doesn't. Make them match first.` }
     : { refusal: `${names.install}'s invoice has a ${discountText(invoice!)} discount that ${names.ticket} doesn't. Make them match first.` };
+}
+
+/**
+ * The install invoice's lines once the ticket's are on it, with the ticks the merge gives them (11/7), so no line pays
+ * differently: on a Chosen-lines result, a line from a Whole-bill side is ticked (the discount came off it) and one from
+ * a Chosen-lines side keeps its tick. With no discount, or on the Whole bill, every tick is off.
+ */
+export function mergedTicks(headLines: MoneyLine[], ticketLines: MoneyLine[], head: Discount | null, ticket: Discount | null, after: Discount | null): MoneyLine[] {
+  const chosen = after?.scope === "chosen";
+  const tick = (l: MoneyLine, side: Discount | null): MoneyLine => ({ ...l, discountChosen: chosen && (side?.scope === "chosen" ? l.discountChosen : true) });
+  return [...headLines.map((l) => tick(l, head)), ...ticketLines.map((l) => tick(l, ticket))];
 }
 
 export type InstallMergePreview = {
@@ -359,23 +375,26 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const kind: "service" | "tlc" = t.kind === "tlc" ? "tlc" : "service";
 
   const charges = (
-    await sql.query<{ id: number; qty: string; rate: string; kind: ChargeKind }>(
-      "select id, qty::text as qty, rate::text as rate, kind from ticket_charges where job_id = $1 order by sort, id",
+    await sql.query<{ id: number; qty: string; rate: string; kind: ChargeKind; discount_chosen: boolean | null }>(
+      "select id, qty::text as qty, rate::text as rate, kind, discount_chosen from ticket_charges where job_id = $1 order by sort, id",
       [jobId],
     )
-  ).map((c): MoneyLine => ({ qty: Number(c.qty), rate: Number(c.rate), kind: c.kind }));
+  ).map((c): MoneyLine => ({ qty: Number(c.qty), rate: Number(c.rate), kind: c.kind, discountChosen: c.discount_chosen === true }));
   const head = (
     await sql.query<HeadRow>(
-      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value,
+      `select v.id, v.approved_at, v.approved_by, v.submitted_at, v.discount_kind, v.discount_value::text as discount_value, v.discount_scope,
               coalesce(v.id::text, '') || ':' || coalesce(v.approved_at::text, '') || ':' || coalesce(v.submitted_at::text, '') as stamp
          from invoices v where v.entity_type = 'install' and v.entity_id = $1`,
       [installId],
     )
   )[0];
   const headLines = head
-    ? (await sql.query<{ qty: string; rate: string; kind: ChargeKind }>("select qty::text as qty, rate::text as rate, kind from invoice_lines where invoice_id = $1", [head.id])).map(
-        (l): MoneyLine => ({ qty: Number(l.qty), rate: Number(l.rate), kind: l.kind }),
-      )
+    ? (
+        await sql.query<{ qty: string; rate: string; kind: ChargeKind; discount_chosen: boolean | null }>(
+          "select qty::text as qty, rate::text as rate, kind, discount_chosen from invoice_lines where invoice_id = $1",
+          [head.id],
+        )
+      ).map((l): MoneyLine => ({ qty: Number(l.qty), rate: Number(l.rate), kind: l.kind, discountChosen: l.discount_chosen === true }))
     : [];
   const linked = (
     await sql.query<Linked>(
@@ -414,8 +433,8 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
   const digits = woDigits(t.wo);
   const matches = digits ? matchInstalls(t, await loadInstallWoRows(sql, [digits])) : [];
 
-  const ticketDiscount = toDiscount(t.discount_kind, t.discount_value);
-  const headDiscount = head ? toDiscount(head.discount_kind, head.discount_value) : null;
+  const ticketDiscount = toDiscount(t.discount_kind, t.discount_value, t.discount_scope);
+  const headDiscount = head ? toDiscount(head.discount_kind, head.discount_value, head.discount_scope) : null;
   const headState: InstallMergePreview["install"]["invoice"] = !head ? "none" : head.approved_at ? "approved" : head.submitted_at ? "waiting" : "none";
   // Billed on a Sales Order (10/30): the charges stay billed there, so none go on the install's invoice and nothing
   // about that invoice (approved, its discount or P.O., its size) stops the merge. Its NetSuite invoices are the same
@@ -509,7 +528,7 @@ async function planMerge(sql: Q, jobId: number, installId: number, actor: string
     moves: {
       chargeLines: charges.length,
       chargeTotal,
-      invoiceTotal: invoiceTotals([...headLines, ...toInvoice], discount).total,
+      invoiceTotal: invoiceTotals(mergedTicks(headLines, toInvoice, headDiscount, ticketDiscount, discount), discount).total,
       notes: Number(linked.notes) || 0,
       pings: Number(linked.pings) || 0,
       photos: Number(linked.photos) || 0,
@@ -554,8 +573,10 @@ const BILLED = `case when $14::text <> '' then ' · its charges stay billed on '
  * the install's notes; $8 the install invoice's total once the lines are on it, $9 and $10 its discount; $11 the
  * ticket's P.O., for an invoice that has none; $12 the Sales Order the ticket is billed on ('' when it isn't), as the
  * confirm read it; $13 its charges' total, billed there; $14 what it is billed on ('' when unbilled): the SO, or with
- * none "NetSuite invoice …" (10/30); $15 its NetSuite invoices that aren't Voided, as read ('' for none). The ticket's
- * Vendor P.O. (11/2) is read from its locked row: it fills an install that has none.
+ * none "NetSuite invoice …" (10/30); $15 its NetSuite invoices that aren't Voided, as read ('' for none); $16 the invoice's
+ * discount scope once merged ('all' or 'chosen', 11/7). The ticket's Vendor P.O. (11/2) is read from its locked row: it
+ * fills an install that has none. No line pays differently after: on a Chosen-lines result, a line from a Whole-bill side
+ * is ticked and one from a Chosen-lines side keeps its tick (mergedTicks), read from the locked rows.
  *
  * Both rows and the install's invoice are locked, then checked as they are now: nothing is written when any of them
  * changed (its Sales Order too), the ticket is quoted, carries a PM or is already merged, or (unbilled) is invoiced in
@@ -566,7 +587,7 @@ const BILLED = `case when $14::text <> '' then ' · its charges stay billed on '
  */
 export function mergeTicketIntoInstallSql(): string {
   return `with lk_job as (
-    select j.id, j.kind, j.call_id, j.wo, j.ns_so, j.duplicate_of, j.merged_install_id, j.vendor_po, j.updated_at::text as stamp
+    select j.id, j.kind, j.call_id, j.wo, j.ns_so, j.duplicate_of, j.merged_install_id, j.vendor_po, j.discount_scope, j.updated_at::text as stamp
       from service_jobs j
      where j.id = $1::int
        for update
@@ -576,7 +597,7 @@ export function mergeTicketIntoInstallSql(): string {
      where i.id = $2::int
        for update
   ), lk_head as (
-    select v.id, v.approved_at,
+    select v.id, v.approved_at, v.discount_scope,
            coalesce(v.id::text, '') || ':' || coalesce(v.approved_at::text, '') || ':' || coalesce(v.submitted_at::text, '') as stamp
       from invoices v
      where v.entity_type = 'install' and v.entity_id = $2::int
@@ -584,6 +605,7 @@ export function mergeTicketIntoInstallSql(): string {
   ), g as (
     -- charges: the lines that go on the install's invoice (none for a billed ticket).
     select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer, j.vendor_po as job_vendor_po,
+           j.discount_scope as job_scope,
            case when $14::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
       from lk_job j cross join lk_inst i
      where j.stamp = $4::text and i.stamp = $5::text
@@ -623,12 +645,12 @@ export function mergeTicketIntoInstallSql(): string {
     -- The charges go on the install's invoice, waiting for an Admin to approve them; never onto an approved one. The
     -- saved-for-approval stamp moves, so an Invoice window opened before this approves nothing until it reloads.
     -- The ticket's P.O. goes with the charges onto the install itself (inst, below), whose invoice carries it (11/2).
-    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, total, submitted_by, submitted_at, updated_at)
-    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $8::numeric, $3::text, now(), now()
+    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, discount_scope, total, submitted_by, submitted_at, updated_at)
+    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $16::text, $8::numeric, $3::text, now(), now()
       from g
      where g.charges > 0
     on conflict (entity_type, entity_id) do update
-       set discount_kind = excluded.discount_kind, discount_value = excluded.discount_value, total = excluded.total,
+       set discount_kind = excluded.discount_kind, discount_value = excluded.discount_value, discount_scope = excluded.discount_scope, total = excluded.total,
            submitted_by = excluded.submitted_by, submitted_at = excluded.submitted_at, updated_at = now()
      -- Only the invoice the confirm read: one approved, or saved again, or made since, takes nothing.
      where invoices.approved_at is null
@@ -640,14 +662,23 @@ export function mergeTicketIntoInstallSql(): string {
     -- A copy of each charge line, after the invoice's own lines. The ticket keeps its lines; it is hidden and never billed.
     -- Each keeps its source key: a linked rebuild's lines (rb:, 11/6) go with the rebuild to the install, so Unlink
     -- still finds them there.
-    insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key)
+    insert into invoice_lines (invoice_id, item, description, qty, rate, kind, sort, source_key, discount_chosen)
     select head.id, c.item, c.description, c.qty, c.rate, c.kind,
            coalesce((select max(l.sort) from invoice_lines l where l.invoice_id = head.id), 0) + row_number() over (order by c.sort, c.id),
-           c.source_key
+           c.source_key,
+           -- Its tick: kept from a Chosen-lines ticket; from a Whole-bill one, ticked when the invoice is on Chosen lines.
+           case when ok.job_scope = 'chosen' then c.discount_chosen else $16::text = 'chosen' end
       from head
       cross join ok
       join ticket_charges c on c.job_id = ok.job_id
     returning id
+  ), own_ticked as (
+    -- The invoice's own lines, under its Whole-bill discount until now: ticked, so the discount still comes off them.
+    -- (The lines just copied in aren't in this update's snapshot.)
+    update invoice_lines l set discount_chosen = true
+      from head
+     where l.invoice_id = head.id and $16::text = 'chosen' and coalesce((select h.discount_scope from lk_head h), 'all') = 'all'
+    returning l.id
   ), com as (
     update comments c set entity_type = 'install', entity_id = ok.install_id
       from ok
@@ -738,7 +769,9 @@ export function mergeTicketIntoInstallSql(): string {
                select string_agg(ti.ns_invoice, ', ' order by ti.id) from ticket_invoices ti
                 where ti.job_id = ok.job_id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')) end,
              'billedLines', case when $14::text <> '' then coalesce((
-               select jsonb_agg(jsonb_build_object('item', c.item, 'description', c.description, 'qty', c.qty, 'rate', c.rate, 'kind', c.kind) order by c.sort, c.id)
+               select jsonb_agg(jsonb_build_object('item', c.item, 'description', c.description, 'qty', c.qty, 'rate', c.rate, 'kind', c.kind,
+                                                   -- Whether the line took the ticket's discount (11/7).
+                                                   'discounted', ok.job_scope = 'all' or c.discount_chosen) order by c.sort, c.id)
                  from ticket_charges c where c.job_id = ok.job_id), '[]'::jsonb) end,
              'billedTotal', case when $14::text <> '' then $13::numeric end,
              'invoiceLines', coalesce((select jsonb_agg(x.id order by x.id) from lines x), '[]'::jsonb),
@@ -879,6 +912,7 @@ export async function mergeTicketIntoInstallFor(sql: Q, userId: string, data: z.
     billed ? plan.preview.moves.chargeTotal : null,
     on,
     billed?.invoices ?? "",
+    plan.discount?.scope === "chosen" ? "chosen" : "all",
   ]);
   const r = rows[0];
   if (!r) {

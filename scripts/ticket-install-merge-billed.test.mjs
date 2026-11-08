@@ -107,7 +107,7 @@ test("a ticket billed on a Sales Order merges: its charges stay billed there, ne
   // The merge log keeps the Sales Order and a copy of the lines billed on it.
   const log = (await one(pg, "select moved from ticket_install_merges where job_id = $1", [jobId])).moved;
   assert.deepEqual([log.billedSo, log.billedInvoices, Number(log.billedTotal), log.invoiceId, log.invoiceLines], [SO, null, 500, null, []]);
-  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [LABOR_500]);
+  assert.deepEqual(log.billedLines.map((l) => ({ ...l, qty: Number(l.qty), rate: Number(l.rate) })), [{ ...LABOR_500, discounted: true }]);
   // The install's notes end with the ticket's text and the Sales Order.
   assert.ok((await one(pg, "select notes from installs where id = $1", [installId])).notes.endsWith(`\n${BILLED}`));
 
@@ -185,7 +185,7 @@ test("what the confirm showed is what merges: a Sales Order cleared or entered s
     await assert.rejects(() => merge(sql, jobId, installId, p.stamps), { message: M.RELOAD_FOR_BILLED(SO) });
   }
   // The statement checks it too, on the locked row.
-  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null, so, ""]);
+  const run = (so) => sql.query(M.mergeTicketIntoInstallSql(), [jobId, installId, "boss", billed.stamps.job, billed.stamps.install, billed.stamps.head, "note", 0, null, null, null, so, so ? 500 : null, so, "", "all"]);
   assert.deepEqual(await run(""), []);
   assert.deepEqual(await run("SO9002"), []);
   // A repair quote or a stacked PM added after the read: still refused, read fresh in the statement.
@@ -260,7 +260,7 @@ test("a billed merge doesn't depend on the install's invoice, and names only Net
   const j2 = await billedTicket(pg, { call_id: "SC-202610-908", wo: "WO-4830" });
   const i2 = await install(pg, { wo: "WO-4830" });
   const p2 = await preview(sql, j2, i2);
-  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500, SO, ""]);
+  const ran = await sql.query(M.mergeTicketIntoInstallSql(), [j2, i2, "boss", p2.stamps.job, p2.stamps.install, "1:stale:stamp", "note", 0, null, null, null, SO, 500, SO, "", "all"]);
   assert.equal(ran.length, 1);
 });
 
