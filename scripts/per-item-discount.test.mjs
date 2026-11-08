@@ -303,3 +303,57 @@ test("the account's Invoices tab totals a chosen-lines ticket on its ticked line
   const row = (await I.listAccountInvoicesFor(sql, CAFE, "u-owner")).find((r) => r.type === "service" && r.id === job);
   assert.equal(row.total, 306);
 });
+
+/* ------------------------------------------------------------------ what goes out */
+
+// Two part lines on the item list, A ticked and B not, for Parts Profit.
+const PART_LINES = [
+  { item: "PARTS : TEST-A", description: "", qty: 2, rate: 45, discountChosen: true },
+  { item: "PARTS : TEST-B", description: "", qty: 1.5, rate: 150, discountChosen: false },
+];
+const partItems = (sql) => sql.query("insert into billing_items (sku, item, kind, rate, cost) values ('TEST-A', 'PARTS : TEST-A', 'part', 45, 20), ('TEST-B', 'PARTS : TEST-B', 'part', 150, 60)");
+
+test("Export Billing: a chosen-lines ticket's header discount is the dollars off its ticked lines, and the file's total matches", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  await sql.query("update service_jobs set completed_at = '2026-10-20' where id = $1", [job]);
+  const out = await C.exportBillingFor(sql, { from: "2026-10-01", to: "2026-10-31" });
+  assert.equal(out.total, 306);
+  const [header, ...rows] = out.csv.trim().split("\r\n").map((r) => r.split(","));
+  const item = header.indexOf("Discount Item");
+  const rate = header.indexOf("Discount Rate");
+  assert.deepEqual(
+    rows.map((r) => [r[item], r[rate]]),
+    [
+      ["CLDSERVICE", "-9.00"],
+      ["CLDSERVICE", "-9.00"],
+    ],
+  );
+});
+
+test("the Invoices page reads a chosen-lines ticket's total on its ticked lines", async () => {
+  const { sql } = await fresh();
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES, lineIds: [], discount: pct });
+  const net = (await TB.loadChargeNets(sql, [job])).get(job);
+  assert.deepEqual([net.lines, net.subtotal, net.off, net.net], [2, 315, 9, 306]);
+  assert.deepEqual(net.discount, pct);
+});
+
+test("the Parts Profit report gives a billed chosen-lines ticket's discount to its ticked lines", async () => {
+  const { sql } = await fresh();
+  await partItems(sql);
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: PART_LINES, lineIds: [], discount: pct });
+  // Billed with no cost stored yet: the report works it out live.
+  await sql.query("update service_jobs set ns_so = 'SO-PID-2', billed_at = '2026-10-21' where id = $1", [job]);
+  const { lines } = await C.invoicedPartLines(sql, { from: null, to: null });
+  assert.deepEqual(
+    lines.map((l) => [l.sku, l.ticketDiscount]),
+    [
+      ["TEST-A", 9],
+      ["TEST-B", 0],
+    ],
+  );
+});

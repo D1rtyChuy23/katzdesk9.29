@@ -24,7 +24,7 @@ import {
   UNLOCK_MINUTES,
   type InvoiceLite,
 } from "@/lib/ops/billing-rules";
-import { applyDiscount, isDiscountKind, type Discount } from "@/lib/ops/discount";
+import { applyDiscount, discountFromRow, DISCOUNT_BASE_SQL, type Discount } from "@/lib/ops/discount";
 import { nameKey } from "@/lib/ops/wo-history";
 import { mergedTicketRefusal, type MergedTicketRow } from "@/lib/ops/merged-ticket";
 
@@ -114,11 +114,15 @@ export async function loadInvoices(sql: Q, jobIds: number[] | null): Promise<Map
 
 export type ChargeNet = { lines: number; subtotal: number; off: number; net: number; discount: Discount | null };
 
-/** Each ticket's charge lines added up, its discount, and the total after the discount. null: every ticket. */
+/**
+ * Each ticket's charge lines added up, its discount, and the total after the discount, taken off the lines it comes off
+ * (11/7: on Chosen lines, the ticked ones). null: every ticket.
+ */
 export async function loadChargeNets(sql: Q, jobIds: number[] | null): Promise<Map<number, ChargeNet>> {
-  const rows = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null; lines: number; subtotal: string }>(
-    `select j.id, j.discount_kind, j.discount_value::text as discount_value, count(c.id)::int as lines,
-            coalesce(sum(round(c.qty * c.rate, 2)), 0)::text as subtotal
+  const rows = await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null; discount_scope: string | null; lines: number; subtotal: string; base: string }>(
+    `select j.id, j.discount_kind, j.discount_value::text as discount_value, j.discount_scope, count(c.id)::int as lines,
+            coalesce(sum(round(c.qty * c.rate, 2)), 0)::text as subtotal,
+            ${DISCOUNT_BASE_SQL("c", "j.discount_scope")}::text as base
        from service_jobs j
        left join ticket_charges c on c.job_id = j.id
       where ($1::int[] is null or j.id = any($1::int[]))
@@ -127,9 +131,8 @@ export async function loadChargeNets(sql: Q, jobIds: number[] | null): Promise<M
   );
   const out = new Map<number, ChargeNet>();
   for (const r of rows) {
-    const discount: Discount | null =
-      isDiscountKind(r.discount_kind) && Number(r.discount_value) > 0 ? { kind: r.discount_kind, value: Number(r.discount_value) } : null;
-    const t = applyDiscount(Number(r.subtotal), discount);
+    const discount: Discount | null = discountFromRow(r.discount_kind, r.discount_value, r.discount_scope);
+    const t = applyDiscount(Number(r.subtotal), discount, Number(r.base));
     out.set(Number(r.id), { lines: Number(r.lines), subtotal: t.subtotal, off: t.off, net: t.total, discount });
   }
   return out;

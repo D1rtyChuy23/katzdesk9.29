@@ -1,12 +1,10 @@
 import { isWalkIn } from "./customer-key";
 import {
-  applyDiscount,
   billTotals,
   chosenDiscountError,
   cleanDiscount,
   discountFromRow,
   discountOffLabel,
-  isDiscountKind,
   OUT_OF_DATE,
   takesDiscount,
   withHeaderDiscount,
@@ -28,7 +26,6 @@ import {
   billingCsv,
   billingState,
   checkCharges,
-  chargesTotal,
   cleanQty,
   cleanRate,
   cleanSalesOrder,
@@ -1001,9 +998,10 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
     description: string | null;
     qty: string;
     rate: string;
+    discount_chosen: boolean | null;
   }>(
     `select j.id, j.wo, j.po, j.ns_so, j.customer, j.technician, to_char(j.completed_at, 'YYYY-MM-DD') as completed_at, j.work_done,
-            dc.account_number, dc.netsuite_id, c.item, c.description, c.qty, c.rate
+            dc.account_number, dc.netsuite_id, c.item, c.description, c.qty, c.rate, c.discount_chosen
        from service_jobs j
        join ticket_charges c on c.job_id = j.id
        left join directory_customers dc on dc.archived = false and lower(btrim(dc.name)) = lower(btrim(j.customer))
@@ -1024,11 +1022,12 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
   const ids = [...new Set(rows.map((r) => Number(r.id)))];
   const discounts = new Map<number, Discount>();
   if (ids.length) {
-    for (const d of await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
-      "select id, discount_kind, discount_value from service_jobs where id = any($1::int[]) and discount_kind is not null",
+    for (const d of await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null; discount_scope: string | null }>(
+      "select id, discount_kind, discount_value, discount_scope from service_jobs where id = any($1::int[]) and discount_kind is not null",
       [ids],
     )) {
-      if (isDiscountKind(d.discount_kind) && Number(d.discount_value) > 0) discounts.set(Number(d.id), { kind: d.discount_kind, value: Number(d.discount_value) });
+      const discount = discountFromRow(d.discount_kind, d.discount_value, d.discount_scope);
+      if (discount) discounts.set(Number(d.id), discount);
     }
   }
   const invoices = await loadInvoices(sql, ids.length ? ids : [0]);
@@ -1060,9 +1059,11 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
       qty: Number(r.qty),
       rate: Number(r.rate),
       workDone: r.work_done ?? "",
+      // On Chosen lines the header discount's dollars come off the ticked rows only (11/7).
+      discountChosen: r.discount_chosen === true,
     })),
     discounts,
-  ).map(({ jobId, discountLabel: _label, ...l }) => {
+  ).map(({ jobId, discountLabel: _label, discountChosen: _tick, ...l }) => {
     const j = byJob.get(jobId)!;
     return { ...l, so: j.so, invoices: j.invoices, location: j.location };
   });
@@ -1081,10 +1082,10 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
     const rule = warehouseForTech(tech);
     if (rule) rules.set(rule, (rules.get(rule) ?? 0) + 1);
   }
-  // What will be billed: each ticket's lines after its discount.
+  // What will be billed: each ticket's lines after its discount, off the lines it comes off.
   const net = ids.reduce((sum, id) => {
-    const sub = chargesTotal(rows.filter((r) => Number(r.id) === id).map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) })));
-    return sum + applyDiscount(sub, discounts.get(id)).total;
+    const mine = rows.filter((r) => Number(r.id) === id).map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), discountChosen: r.discount_chosen === true }));
+    return sum + billTotals(mine, discounts.get(id)).total;
   }, 0);
   return {
     csv: billingCsv(lines),
