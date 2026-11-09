@@ -92,7 +92,6 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
               allowCreate
               disabled={save.isPending}
               noun="model"
-              emptyHint="Not on the list: it's added to it."
               menuInFlow
             />
           </div>
