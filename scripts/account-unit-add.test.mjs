@@ -221,6 +221,36 @@ test("Edit changes a unit's Part #, ownership and install date; a locked or chan
   }
 });
 
+test("the add and edit statements check the serial and the lock again as they write, with the checks in front skipped", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const row = await A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "LPG0080607" });
+    await query("insert into assets (kind, model, serial, qty, site, status) values ('equip', $1, 'ITCB 777', 1, 'barn-front', 'ready')", [BREWER]);
+    const add = (serial, key) => sql.query(A.addUnitSql(), [CAFE, BREWER, serial, key, null, null, null]);
+    // What two people adding the same machine at once would write second: nothing.
+    assert.deepEqual(await add("LPG0080607", "lpg0080607"), []);
+    assert.deepEqual(await add("#ITCB777", "itcb777"), []);
+    // A serial nobody has, and no serial at all, are written.
+    assert.equal((await add("ITCB181626", "itcb181626")).length, 1);
+    assert.equal((await add(null, null)).length, 1);
+    assert.equal(await unitCount(query), 3);
+
+    // Locked, or changed since it was read: the edit writes nothing.
+    const edit = (seen) => sql.query(A.editUnitSql(), [row.id, "33200.0000", null, null, seen]);
+    await query("update account_equipment set locked_at = now(), locked_by = 'chuy' where id = $1", [row.id]);
+    const locked = (await IMP.readAccountUnits(sql, HOUSE))[0];
+    assert.deepEqual(await edit(locked.seen), []);
+    // Unlocked, the same edit writes: the lock was all that stopped it.
+    await query("update account_equipment set locked_at = null, locked_by = null where id = $1", [row.id]);
+    assert.equal((await edit(locked.seen)).length, 1);
+    assert.equal((await IMP.readAccountUnits(sql, HOUSE))[0].partNumber, "33200.0000");
+    // Once written, the read before it is out of date.
+    assert.deepEqual(await edit(locked.seen), []);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("Merge keeps the kept unit's Part #, or takes the other's when it has none", async () => {
   const { pg, sql } = await fresh();
   try {
@@ -256,8 +286,8 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   assert.match(form, /OWNERSHIP_VALUES\.map\(/);
   assert.match(form, /type="date"/);
   assert.match(form, /\{unit \? \(\n\s+<p[^>]*data-testid="account-unit-fixed"/);
-  assert.match(form, /addAccountEquipment\(\{ data: \{ customer, /);
-  assert.match(form, /editAccountEquipment\(\{ data: \{ id: unit\.id, seen: unit\.seen \?\? "", /);
+  assert.ok(form.includes("addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } })"));
+  assert.ok(form.includes('editAccountEquipment({ data: { id: unit.id, seen: unit.seen ?? "", partNumber, ownership, installDate } })'));
   // Both windows pass the account's name.
   assert.match(src("src/components/desk/customer-sheet.tsx"), /<AccountEquipmentList customer=\{history\.data\?\.name \?\? null\} /);
   assert.match(src("src/components/desk/job-sheet.tsx"), /<AccountEquipmentList customer=\{customer \|\| null\} /);

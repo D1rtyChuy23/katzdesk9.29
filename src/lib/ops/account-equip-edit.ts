@@ -56,6 +56,29 @@ async function serialRefusal(sql: Sql, account: string, serial: string, key: str
 }
 
 /**
+ * The add, one statement: $1 account, $2 model, $3 serial, $4 its key, $5 install date, $6 ownership, $7 Part #.
+ * The serial is checked again as the unit is written, so two people adding the same machine at once add it once.
+ */
+export function addUnitSql(): string {
+  return `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date, ownership, part_number)
+     select $1, $2, $2, $3, $4, $5::date, $6, $7
+      where $4::text is null
+         or (not exists (select 1 from account_equipment e where e.serial_key = $4)
+             and not exists (select 1 from assets a where ${IN_STOCK} and ${ASSET_KEY} = $4))
+     returning id`;
+}
+
+/**
+ * The edit, one statement: $1 unit, $2 Part #, $3 ownership, $4 install date, $5 the unit's updated_at as read. A
+ * locked unit, or one changed since it was read, is not written.
+ */
+export function editUnitSql(): string {
+  return `update account_equipment set part_number = $2, ownership = $3, install_date = $4::date, updated_at = now()
+      where id = $1 and locked_at is null and updated_at::text = $5
+      returning id`;
+}
+
+/**
  * Put a machine on the account. Refused, with nothing written, when the serial is already on this account or
  * another, or in Katz stock. A model not on the equipment list is added to it, as the Equipment import does.
  */
@@ -73,16 +96,7 @@ export async function addEquipmentUnit(sql: Sql, customer: string, input: AddUni
   }
   const model = (await ensureCatalogModel(sql, typedModel)).name;
   const { partNumber, ownership, installDate } = checked.fields;
-  // The serial is checked again as the unit is written, so two people adding the same machine at once add it once.
-  const rows = await sql.query<{ id: number }>(
-    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date, ownership, part_number)
-     select $1, $2, $2, $3, $4, $5::date, $6, $7
-      where $4::text is null
-         or (not exists (select 1 from account_equipment e where e.serial_key = $4)
-             and not exists (select 1 from assets a where ${IN_STOCK} and ${ASSET_KEY} = $4))
-     returning id`,
-    [account, model, serial, key, installDate, ownership, partNumber],
-  );
+  const rows = await sql.query<{ id: number }>(addUnitSql(), [account, model, serial, key, installDate, ownership, partNumber]);
   if (!rows[0]) throw new Error((serial && key && (await serialRefusal(sql, account, serial, key))) || "That unit could not be added. Try again.");
   const row = await readAccountUnit(sql, rows[0].id);
   if (!row) throw new Error("That unit could not be added. Try again.");
@@ -98,12 +112,7 @@ export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInp
   if ("error" in checked) throw new Error(checked.error);
   await assertUnitUnlocked(sql, id);
   const { partNumber, ownership, installDate } = checked.fields;
-  const rows = await sql.query<{ id: number }>(
-    `update account_equipment set part_number = $2, ownership = $3, install_date = $4::date, updated_at = now()
-      where id = $1 and locked_at is null and updated_at::text = $5
-      returning id`,
-    [id, partNumber, ownership, installDate, input.seen],
-  );
+  const rows = await sql.query<{ id: number }>(editUnitSql(), [id, partNumber, ownership, installDate, input.seen]);
   if (!rows[0]) {
     if (!(await readAccountUnit(sql, id))) throw new Error("That unit is not on the account.");
     await assertUnitUnlocked(sql, id);
