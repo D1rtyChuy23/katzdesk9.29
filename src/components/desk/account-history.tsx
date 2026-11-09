@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
@@ -11,6 +12,7 @@ import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { LockBadge, LockToggle } from "./lock-badge";
+import { AccountUnitForm } from "./account-unit-form";
 
 /**
  * Pieces of the account window that the ticket window shows too: the account's equipment list, one history row,
@@ -148,13 +150,17 @@ export function useAccountEquipment(customer: string | null | undefined) {
 /**
  * Equipment On This Account, in the account window and the ticket window. These units are at the account, or are
  * assigned to go there, so no location is picked here: a unit only moves when it comes back to the Katz HQ barn
- * (Chuy, 10/27).
+ * (Chuy, 10/27). Add equipment puts a machine on it, and Edit changes a unit's Part #, ownership and install date
+ * (Chuy, 11/9).
  */
 export function AccountEquipmentList({
+  customer,
   rows,
   loading,
   className = "mt-4",
 }: {
+  /** The account's name. Without one there's nothing to add equipment to. */
+  customer?: string | null;
   rows: {
     id?: number;
     catalogModel: string;
@@ -162,6 +168,10 @@ export function AccountEquipmentList({
     serial: string | null;
     installDate: string | null;
     ownership: string | null;
+    /** Typed from the data plate or NetSuite, to tell variants of one model apart. */
+    partNumber?: string | null;
+    /** What Edit sends back, so a window opened before another save can't save over it. */
+    seen?: string;
     /** Locked by the owner: Remove and Merge are off until it is unlocked. */
     lockedBy?: string | null;
   }[];
@@ -169,6 +179,8 @@ export function AccountEquipmentList({
   className?: string;
 }) {
   const qc = useQueryClient();
+  // The form open: "add", or the id of the unit being edited.
+  const [open, setOpen] = useState<"add" | number | null>(null);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["account-equipment"] });
     void qc.invalidateQueries({ queryKey: ["inspection"] });
@@ -192,12 +204,24 @@ export function AccountEquipmentList({
   });
   return (
     <section className={className} data-testid="account-equipment" data-open="true">
-      <p className="flex items-center gap-2 px-1">
-        <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Equipment On This Account</span>
-        <span className="text-sm font-medium" data-testid="account-equipment-count">
-          {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
-        </span>
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <p className="flex items-center gap-2">
+          <span className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Equipment On This Account</span>
+          <span className="text-sm font-medium" data-testid="account-equipment-count">
+            {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
+          </span>
+        </p>
+        {customer ? (
+          <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={open === "add"} data-testid="account-equipment-add" onClick={() => setOpen("add")}>
+            Add equipment
+          </Button>
+        ) : null}
+      </div>
+      {customer && open === "add" ? (
+        <div className="mt-2">
+          <AccountUnitForm customer={customer} onDone={() => setOpen(null)} />
+        </div>
+      ) : null}
       {loading ? (
         <p className="mt-2 text-sm text-muted-foreground">Loading equipment…</p>
       ) : rows.length ? (
@@ -214,6 +238,7 @@ export function AccountEquipmentList({
                 <p className="text-xs text-muted-foreground">
                   {[
                     row.catalogModel && row.catalogModel !== row.equipmentName ? row.catalogModel : null,
+                    row.partNumber ? `Part # ${row.partNumber}` : null,
                     row.serial ? `SN ${row.serial}` : "No serial",
                     row.ownership,
                     row.installDate ? `Installed ${formatShortDate(row.installDate)}` : null,
@@ -258,7 +283,25 @@ export function AccountEquipmentList({
                     >
                       Remove
                     </Button>
+                    {customer ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={!!row.lockedBy}
+                        title={row.lockedBy ? `Locked by ${row.lockedBy}` : undefined}
+                        data-testid="edit-account-unit"
+                        onClick={() => setOpen(open === row.id ? null : row.id!)}
+                      >
+                        Edit
+                      </Button>
+                    ) : null}
                     <LockToggle kind="unit" id={row.id} locked={!!row.lockedBy} onDone={refresh} />
+                  </div>
+                ) : null}
+                {customer && row.id && open === row.id && !row.lockedBy ? (
+                  <div className="mt-2">
+                    <AccountUnitForm customer={customer} unit={{ ...row, id: row.id }} onDone={() => setOpen(null)} />
                   </div>
                 ) : null}
               </li>

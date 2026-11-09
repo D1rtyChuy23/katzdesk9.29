@@ -31,7 +31,11 @@ export type AccountEquipRow = {
   installDate: string | null;
   electrical: string | null;
   ownership: string | null;
+  /** Typed from the data plate or NetSuite, to tell variants of one model apart (Chuy, 11/9). */
+  partNumber: string | null;
   updatedAt: string;
+  /** updated_at as Postgres writes it: Edit sends it back, so a window opened before another save can't save over it. */
+  seen: string;
   /** Locked by the owner: Remove and Merge are off until it is unlocked. */
   lockedAt: string | null;
   lockedBy: string | null;
@@ -206,7 +210,9 @@ function mapDbUnit(r: {
   install_date: string | null;
   electrical: string | null;
   ownership: string | null;
+  part_number?: string | null;
   updated_at: string;
+  seen?: string;
   locked_at?: unknown;
   locked_by?: string | null;
 }): AccountEquipRow {
@@ -223,7 +229,9 @@ function mapDbUnit(r: {
     installDate: r.install_date,
     electrical: r.electrical,
     ownership: r.ownership,
+    partNumber: r.part_number ?? null,
     updatedAt: String(r.updated_at ?? ""),
+    seen: r.seen ?? "",
   };
 }
 
@@ -391,8 +399,9 @@ const applyInput = z.object({
   rows: z.array(applyRow),
 });
 
-async function ensureCatalogModel(
-  sql: Awaited<ReturnType<typeof getSql>>,
+/** The equipment list's name for a model, adding it (or bringing an archived one back) when it isn't there. */
+export async function ensureCatalogModel(
+  sql: Sql,
   name: string,
 ): Promise<{ name: string; created: boolean }> {
   const trimmed = name.trim();
@@ -576,49 +585,40 @@ const listInput = z.object({
   customer: z.string().optional(),
 });
 
+const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number,
+              updated_at, updated_at::text as seen, locked_at, locked_by`;
+
+type UnitDbRow = Parameters<typeof mapDbUnit>[0];
+
+/** An account's units (or every account's), as the Equipment tab lists them. */
+export async function readAccountUnits(sql: Sql, customer?: string | null): Promise<AccountEquipRow[]> {
+  const name = customer?.trim();
+  const rows = name
+    ? await sql.query<UnitDbRow>(
+        `select ${UNIT_COLS}
+           from account_equipment
+          where lower(customer) = lower($1)
+          order by lower(catalog_model), id`,
+        [name],
+      )
+    : await sql.query<UnitDbRow>(
+        `select ${UNIT_COLS}
+           from account_equipment
+          order by lower(customer), lower(catalog_model), id`,
+      );
+  return rows.map(mapDbUnit);
+}
+
+/** One unit, as the Equipment tab lists it. */
+export async function readAccountUnit(sql: Sql, id: number): Promise<AccountEquipRow | null> {
+  const rows = await sql.query<UnitDbRow>(`select ${UNIT_COLS} from account_equipment where id = $1`, [id]);
+  return rows[0] ? mapDbUnit(rows[0]) : null;
+}
+
 export const listAccountEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof listInput>) => listInput.parse(d ?? {}))
-  .handler(async ({ data }): Promise<AccountEquipRow[]> => {
-    const sql = await ready();
-    const customer = data.customer?.trim();
-    const rows = customer
-      ? await sql.query<{
-          id: number;
-          customer: string;
-          catalog_model: string;
-          equipment_name: string;
-          serial: string | null;
-          serial_key: string | null;
-          install_date: string | null;
-          electrical: string | null;
-          ownership: string | null;
-          updated_at: string;
-        }>(
-          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at, locked_at, locked_by
-             from account_equipment
-            where lower(customer) = lower($1)
-            order by lower(catalog_model), id`,
-          [customer],
-        )
-      : await sql.query<{
-          id: number;
-          customer: string;
-          catalog_model: string;
-          equipment_name: string;
-          serial: string | null;
-          serial_key: string | null;
-          install_date: string | null;
-          electrical: string | null;
-          ownership: string | null;
-          updated_at: string;
-        }>(
-          `select id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, updated_at, locked_at, locked_by
-             from account_equipment
-            order by lower(customer), lower(catalog_model), id`,
-        );
-    return rows.map(mapDbUnit);
-  });
+  .handler(async ({ data }): Promise<AccountEquipRow[]> => readAccountUnits(await ready(), data.customer));
 
 async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: number) {
   await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
@@ -660,7 +660,8 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     equipment_name: string;
     serial: string | null;
     electrical: string | null;
-  }>("select id, customer, catalog_model, equipment_name, serial, electrical from account_equipment where id = any($1::int[])", [
+    part_number: string | null;
+  }>("select id, customer, catalog_model, equipment_name, serial, electrical, part_number from account_equipment where id = any($1::int[])", [
     [keepId, dropId],
   ]);
   const keep = rows.find((r) => r.id === keepId);
@@ -676,10 +677,13 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   const dropSerial = (drop.serial ?? "").trim();
   const serial = dropSerial && keepSerial.length <= 2 && dropSerial.length > keepSerial.length ? dropSerial : keepSerial || dropSerial;
   const electrical = (keep.electrical ?? "").trim() || (drop.electrical ?? "").trim() || null;
-  if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim()) {
+  // The kept unit's Part #, or the other's when it has none (11/9).
+  const keepPart = (keep.part_number ?? "").trim();
+  const partNumber = keepPart || (drop.part_number ?? "").trim() || null;
+  if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim() || (partNumber ?? "") !== keepPart) {
     await sql.query(
-      "update account_equipment set serial = $2, serial_key = $3, electrical = $4, updated_at = now() where id = $1",
-      [keep.id, serial || null, serial ? serialKey(serial) : null, electrical],
+      "update account_equipment set serial = $2, serial_key = $3, electrical = $4, part_number = $5, updated_at = now() where id = $1",
+      [keep.id, serial || null, serial ? serialKey(serial) : null, electrical, partNumber],
     );
   }
   // An open install whose visit has both units loses the dropped unit's row; one row is left for the kept unit.
