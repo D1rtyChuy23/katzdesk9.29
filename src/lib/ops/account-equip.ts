@@ -472,7 +472,7 @@ export const PART_NUMBER_MAX = 60;
 /** A unit's Part # as typed, from its data plate or NetSuite: spaces tidied, blank is none. */
 export function cleanPartNumber(raw: string | null | undefined): string | null {
   const s = String(raw ?? "")
-    .replace(/[    ]/g, " ")
+    .replace(/[\u00a0\u202f\u2007\u2009]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   return s || null;

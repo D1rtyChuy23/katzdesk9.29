@@ -64,6 +64,8 @@ test("migration 0124 only adds a blank part_number to each account unit", async 
 test("a Part # is kept as typed, with spaces tidied; blank is none; past 60 characters it's refused", () => {
   assert.equal(E.cleanPartNumber("  33200.0000 "), "33200.0000");
   assert.equal(E.cleanPartNumber("52100.0101   (flip  tray)"), "52100.0101 (flip tray)");
+  // A Part # pasted from NetSuite or a PDF can carry no-break and thin spaces.
+  assert.equal(E.cleanPartNumber("\u00a0PN\u00a0123\u202f-\u2007A\u2009 "), "PN 123 - A");
   assert.equal(E.cleanPartNumber("   "), null);
   assert.equal(E.cleanPartNumber(null), null);
   assert.equal(E.PART_NUMBER_MAX, 60);
