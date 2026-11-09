@@ -425,6 +425,24 @@ export async function ensureCatalogModel(
   return { name: inserted[0]?.name ?? trimmed, created: true };
 }
 
+/**
+ * The import's update of a unit already on the account: $1 unit, $2 model, $3 name, $4 serial, $5 its key,
+ * $6 install date, $7 electrical, $8 ownership. A file with no install date, electrical or ownership leaves the
+ * unit's own as it is (11/9: the date used to be blanked).
+ */
+export function importUpdateUnitSql(): string {
+  return `update account_equipment set
+              catalog_model = $2,
+              equipment_name = $3,
+              serial = $4,
+              serial_key = $5,
+              install_date = coalesce($6::date, install_date),
+              electrical = coalesce($7, electrical),
+              ownership = coalesce($8, ownership),
+              updated_at = now()
+            where id = $1`;
+}
+
 export const applyAccountEquipImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof applyInput>) => applyInput.parse(d))
@@ -517,19 +535,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
           }
           continue;
         }
-        await sql.query(
-          `update account_equipment set
-              catalog_model = $2,
-              equipment_name = $3,
-              serial = $4,
-              serial_key = $5,
-              install_date = $6,
-              electrical = coalesce($7, electrical),
-              ownership = coalesce($8, ownership),
-              updated_at = now()
-            where id = $1`,
-          [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership],
-        );
+        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership]);
         existing = existing.map((e) =>
           e.id === unit.existingId
             ? { ...e, catalogModel, equipmentName, serial, serialKey: key }

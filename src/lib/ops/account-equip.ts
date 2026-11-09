@@ -501,7 +501,7 @@ export function checkUnitFields(
   if (typed) {
     installDate = parseInstallDate(typed);
     const real = installDate && /^\d{4}-\d{2}-\d{2}$/.test(installDate) && new Date(`${installDate}T00:00:00Z`).toISOString().slice(0, 10) === installDate;
-    if (!real) return { error: "Type the install date as MM/DD/YYYY." };
+    if (!real) return { error: "Pick a real install date." };
   }
   return { fields: { partNumber, ownership, installDate } };
 }
@@ -562,4 +562,9 @@ export function matchExistingUnit(opts: {
   );
   if (same) return { action: "update", existingId: same.id, foreignAccount: null };
   return { action: "add", existingId: null, foreignAccount: null };
+}
+
+/** Add equipment needs an account to add to: not a blank customer, and not a walk-in. */
+export function canAddEquipmentTo(customer: string | null | undefined): boolean {
+  return !!customer?.trim() && !isWalkIn(customer);
 }

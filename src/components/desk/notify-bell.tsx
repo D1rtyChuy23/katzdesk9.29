@@ -88,7 +88,7 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
     },
     onSettled: () => void qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
-  const rows = inbox.data ?? [];
+  const rows = useMemo(() => inbox.data ?? [], [inbox.data]);
   const unread = rows.filter((n) => !n.read).length;
   const primed = useRef(false);
   const prevUnread = useRef(0);

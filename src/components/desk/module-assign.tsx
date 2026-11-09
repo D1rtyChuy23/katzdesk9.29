@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Coffee, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -93,7 +93,7 @@ export function AssignModuleDialog({
     queryFn: () => listEversysModels(),
     enabled: !!module && adding,
   });
-  const list = units.data ?? [];
+  const list = useMemo(() => units.data ?? [], [units.data]);
   const family = module?.platform ?? null;
 
   useEffect(() => {

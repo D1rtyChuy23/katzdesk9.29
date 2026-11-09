@@ -83,7 +83,7 @@ function Page() {
     }
   }, [focusUnit]);
 
-  const all = data.data ?? [];
+  const all = useMemo(() => data.data ?? [], [data.data]);
   const barn = useMemo(
     () => all.filter((a) => a.status === "ready" && (a.site === "barn-back" || a.site === "barn-front")),
     [all],

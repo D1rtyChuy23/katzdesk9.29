@@ -126,7 +126,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
               setPartNumber(e.target.value);
               setError(null);
             }}
-            placeholder="From the data plate or NetSuite"
+            placeholder="Data plate or NetSuite"
             autoComplete="off"
             className="mt-1"
             disabled={save.isPending}

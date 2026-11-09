@@ -81,7 +81,7 @@ function Page() {
   const [sort, setSort] = useDeskSort("pipeline", "date-desc");
 
 
-  const all = data.data ?? [];
+  const all = useMemo(() => data.data ?? [], [data.data]);
   const live = all.filter((d) => d.completion !== "fell");
   const active = live.filter((d) => d.completion !== "complete");
   const completed = live.filter((d) => d.completion === "complete");

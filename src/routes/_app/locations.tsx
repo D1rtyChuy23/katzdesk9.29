@@ -57,7 +57,7 @@ function Page() {
   const [moveDraft, setMoveDraft] = useState<PlaceDraft>(emptyPlaceDraft());
   const [sort, setSort] = useDeskSort("locations", "alpha-asc");
 
-  const all = data.data ?? [];
+  const all = useMemo(() => data.data ?? [], [data.data]);
   const needle = q.trim().toLowerCase();
   const groups = useMemo(() => {
     const match = (a: Asset) => {

@@ -76,7 +76,7 @@ test("a Part # is kept as typed, with spaces tidied; blank is none; past 60 char
   // Ownership is one of the list's; the install date a real date.
   assert.deepEqual(E.checkUnitFields({ ownership: "Lease", installDate: "2025-11-14" }), { fields: { partNumber: null, ownership: "Lease", installDate: "2025-11-14" } });
   assert.deepEqual(E.checkUnitFields({ ownership: "Borrowed" }), { error: "Pick the ownership from the list." });
-  assert.deepEqual(E.checkUnitFields({ installDate: "soon" }), { error: "Type the install date as MM/DD/YYYY." });
+  assert.deepEqual(E.checkUnitFields({ installDate: "soon" }), { error: "Pick a real install date." });
   assert.deepEqual(E.checkUnitFields({ installDate: "11/14/2025" }).fields.installDate, "2025-11-14");
 });
 
@@ -183,7 +183,7 @@ test("Add equipment needs an account in the directory, and checks what's typed b
     await assert.rejects(() => A.addEquipmentUnit(sql, CAFE, { model: GRINDER }), { message: `${CAFE} isn't an account in the directory.` });
     await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: "New Model X", partNumber: "x".repeat(61) }), /too long/);
     await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, ownership: "Borrowed" }), { message: "Pick the ownership from the list." });
-    await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, installDate: "2025-02-31" }), { message: "Type the install date as MM/DD/YYYY." });
+    await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, installDate: "2025-02-31" }), { message: "Pick a real install date." });
     assert.equal(await unitCount(query), 0);
     assert.deepEqual(await models(query), [GRINDER, BREWER]);
   } finally {
@@ -296,7 +296,7 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   const form = src("src/components/desk/account-unit-form.tsx");
   // The list takes the account's name; the button shows only with one.
   assert.match(list, /customer\?: string \| null;/);
-  assert.match(list, /\{customer \? \(\n\s+<Button[^>]*data-testid="account-equipment-add"/);
+  assert.match(list, /\{canAddEquipmentTo\(customer\) \? \(\n\s+<Button[^>]*data-testid="account-equipment-add"/);
   assert.match(list, />\s*Add equipment\s*</);
   // Each row: Part # after the model, then the serial.
   assert.match(list, /row\.partNumber \? `Part # \$\{row\.partNumber\}` : null,\n\s+row\.serial \? `SN \$\{row\.serial\}` : "No serial",/);
