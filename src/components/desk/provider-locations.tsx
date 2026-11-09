@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useState } from "react";
 import { addProviderLocation, removeProviderLocation } from "@/lib/ops/network-api";
 import {
@@ -37,6 +38,7 @@ export function LocationsEditor({
   const [highlight, setHighlight] = useState<string | null>(null);
 
   const addMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add"),
     mutationFn: () =>
       addProviderLocation({
         data: { providerId: providerId!, state, city: city || null, zip: zip || null },
@@ -67,6 +69,7 @@ export function LocationsEditor({
   });
 
   const dropMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: (id: number) => removeProviderLocation({ data: { id } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["provider"] });
