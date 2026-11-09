@@ -206,6 +206,14 @@ test("Edit changes a unit's Part #, ownership and install date; a locked or chan
     await assert.rejects(() => A.editEquipmentUnit(sql, row.id, { seen: locked.seen, partNumber: "33200.0000" }), { message: lockedMessage("chuy", null) });
     assert.equal((await IMP.readAccountUnits(sql, HOUSE))[0].partNumber, null);
 
+    // An ownership saved before today's list keeps saving as it is; it can't be changed to another that isn't on the list.
+    const old = await A.addEquipmentUnit(sql, CAFE, { model: BREWER });
+    await query("update account_equipment set ownership = 'Customer owned (old import)' where id = $1", [old.id]);
+    const before = (await IMP.readAccountUnits(sql, CAFE))[0];
+    const kept = await A.editEquipmentUnit(sql, old.id, { seen: before.seen, partNumber: "52100.0101", ownership: "Customer owned (old import)" });
+    assert.deepEqual([kept.partNumber, kept.ownership], ["52100.0101", "Customer owned (old import)"]);
+    await assert.rejects(() => A.editEquipmentUnit(sql, old.id, { seen: kept.seen, ownership: "Borrowed" }), { message: "Pick the ownership from the list." });
+
     await assert.rejects(() => A.editEquipmentUnit(sql, 999, { seen: "x", partNumber: "1" }), { message: "That unit is not on the account." });
     await assert.rejects(() => A.editEquipmentUnit(sql, cleared.id, { seen: cleared.seen, partNumber: "x".repeat(61) }), /too long/);
   } finally {

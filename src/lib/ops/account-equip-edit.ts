@@ -91,10 +91,11 @@ export async function addEquipmentUnit(sql: Sql, customer: string, input: AddUni
 
 /** Change a unit's Part #, ownership and install date. A locked unit, or one changed since the window opened, is refused. */
 export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInput): Promise<AccountEquipRow> {
-  const checked = checkUnitFields(input);
-  if ("error" in checked) throw new Error(checked.error);
   const unit = await readAccountUnit(sql, id);
   if (!unit) throw new Error("That unit is not on the account.");
+  // An ownership from before today's list keeps saving as it is.
+  const checked = checkUnitFields(input, { keepOwnership: unit.ownership });
+  if ("error" in checked) throw new Error(checked.error);
   await assertUnitUnlocked(sql, id);
   const { partNumber, ownership, installDate } = checked.fields;
   const rows = await sql.query<{ id: number }>(

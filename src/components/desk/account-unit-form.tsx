@@ -53,7 +53,9 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
     },
     onError: (e) => setError(e instanceof Error ? e.message : unit ? "Could not save" : "Could not add"),
   });
-  const typed = checkUnitFields({ partNumber, ownership, installDate });
+  const typed = checkUnitFields({ partNumber, ownership, installDate }, { keepOwnership: unit?.ownership });
+  // An ownership from before today's list stays a choice on its own unit.
+  const oldOwnership = unit?.ownership && !(OWNERSHIP_VALUES as readonly string[]).includes(unit.ownership) ? unit.ownership : null;
   const problem = "error" in typed ? typed.error : null;
   const submit = () => {
     setError(null);
@@ -149,6 +151,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
                 {o}
               </option>
             ))}
+            {oldOwnership ? <option value={oldOwnership}>{oldOwnership}</option> : null}
           </SelectField>
         </div>
         <div>

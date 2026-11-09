@@ -479,17 +479,22 @@ export function cleanPartNumber(raw: string | null | undefined): string | null {
 }
 
 /** What Add equipment and Edit keep besides the model and serial. */
-export type UnitFields = { partNumber: string | null; ownership: OwnershipValue | null; installDate: string | null };
+export type UnitFields = { partNumber: string | null; ownership: string | null; installDate: string | null };
 
 /**
  * The Part #, ownership and install date as the Add and Edit forms send them, checked. Blank is none; ownership is
- * one of the list's; the install date is a real date (MM/DD/YYYY, or the date box's YYYY-MM-DD).
+ * one of the list's, or `keepOwnership` (what the unit has now, from before today's list) left as it is; the install
+ * date is a real date (MM/DD/YYYY, or the date box's YYYY-MM-DD).
  */
-export function checkUnitFields(input: { partNumber?: string | null; ownership?: string | null; installDate?: string | null }): { fields: UnitFields } | { error: string } {
+export function checkUnitFields(
+  input: { partNumber?: string | null; ownership?: string | null; installDate?: string | null },
+  opts: { keepOwnership?: string | null } = {},
+): { fields: UnitFields } | { error: string } {
   const partNumber = cleanPartNumber(input.partNumber);
   if (partNumber && partNumber.length > PART_NUMBER_MAX) return { error: `The part number is too long (${PART_NUMBER_MAX} characters at most).` };
   const owned = String(input.ownership ?? "").trim();
-  const ownership = owned ? (OWNERSHIP_VALUES.find((o) => o === owned) ?? null) : null;
+  const kept = (opts.keepOwnership ?? "").trim();
+  const ownership = owned ? (OWNERSHIP_VALUES.find((o) => o === owned) ?? (kept && owned === kept ? opts.keepOwnership! : null)) : null;
   if (owned && !ownership) return { error: "Pick the ownership from the list." };
   const typed = String(input.installDate ?? "").trim();
   let installDate: string | null = null;
