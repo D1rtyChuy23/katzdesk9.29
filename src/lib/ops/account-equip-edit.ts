@@ -26,8 +26,8 @@ export type EditUnitInput = { seen: string; partNumber?: string | null; ownershi
 
 /** An asset's serial the way serialKey() reads one: no spaces or #, any case. */
 const ASSET_KEY = "lower(regexp_replace(btrim(coalesce(a.serial, '')), '[#[:space:]]', '', 'g'))";
-/** Katz still has it: on the barn's racks, or placed at a Katz site (11/9). */
-const IN_STOCK = "a.status in ('ready', 'deployed')";
+/** Katz still has it: on the barn's racks, or placed at a Katz site, and not assigned to a customer yet (11/9). */
+const IN_STOCK = "a.status in ('ready', 'deployed') and coalesce(btrim(a.sold_to), '') = ''";
 
 async function accountName(sql: Sql, customer: string): Promise<string> {
   const typed = customer.trim();

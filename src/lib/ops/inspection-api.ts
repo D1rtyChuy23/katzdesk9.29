@@ -300,7 +300,7 @@ export async function catalogNames(sql: Sql): Promise<string[]> {
 }
 
 /**
- * The account's record goes only when nothing else uses it: no serial or install date, no visit, photo, module,
+ * The account's record goes only when nothing else uses it: no serial, install date or Part #, no visit, photo, module,
  * PM runbook link or runbook history ('acct:<id>'), not copied onto another visit, not locked. With `madeBy`, only
  * when that install's load made it: the prune never deletes a unit that was on the account before.
  */
@@ -308,6 +308,8 @@ async function dropUnusedUnit(sql: Sql, id: number, opts?: { madeBy?: number }):
   await sql
     .query(
       `delete from account_equipment a where a.id = $1 and a.install_date is null and coalesce(a.serial_key, '') = ''
+          -- A Part # someone typed (11/9) keeps the unit, like a serial or an install date.
+          and coalesce(btrim(a.part_number), '') = ''
           and ($2::int is null or a.created_by_install = $2::int)
           and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id or u.copied_from_equipment = a.id)
           and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)

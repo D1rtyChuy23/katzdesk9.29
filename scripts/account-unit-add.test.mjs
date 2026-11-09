@@ -14,6 +14,7 @@ const E = await import("../src/lib/ops/account-equip.ts");
 const A = await import("../src/lib/ops/account-equip-edit.ts");
 const IMP = await import("../src/lib/ops/account-equip-import.ts");
 const { lockedMessage } = await import("../src/lib/ops/equipment-lock-rules.ts");
+const { readInspection, removeInspectionUnit } = await import("../src/lib/ops/inspection-api.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
 const files = readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort();
@@ -162,6 +163,10 @@ test("a serial already on this account, on another account, or in Katz stock is 
     // Sold from Katz, it can go on an account.
     const sold = await A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "LPG-444" });
     assert.equal(sold.serial, "LPG-444");
+    // Assigned to this account and waiting at a Katz site, it isn't Katz stock: it can go back on the account it's for.
+    await query("insert into assets (kind, model, serial, qty, site, status, sold_to) values ('equip', $1, 'LPG-333', 1, 'staging', 'deployed', $2)", [GRINDER, HOUSE]);
+    const waiting = await A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "LPG-333" });
+    assert.equal(waiting.serial, "LPG-333");
   } finally {
     await pg.close();
   }
@@ -267,6 +272,23 @@ test("Merge keeps the kept unit's Part #, or takes the other's when it has none"
   }
 });
 
+test("a serial-less unit with a Part # stays on the account when it's taken off a pre-inspection", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const typed = await A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, partNumber: "33200.0000" });
+    const bare = await A.addEquipmentUnit(sql, HOUSE, { model: BREWER });
+    const id = (await query("insert into installs (customer, equipment) values ($1, $2) returning id", [HOUSE, `${GRINDER}\n${BREWER}`]))[0].id;
+    const view = await readInspection(sql, id);
+    assert.deepEqual(view.machines.map((m) => m.equipmentId).sort(), [typed.id, bare.id].sort(), "the visit takes both units");
+    await removeInspectionUnit(sql, { installId: id, equipmentId: typed.id }, "Test");
+    await removeInspectionUnit(sql, { installId: id, equipmentId: bare.id }, "Test");
+    // The one with nothing typed on it goes, as before; the one with a Part # stays, Part # and all.
+    assert.deepEqual((await IMP.readAccountUnits(sql, HOUSE)).map((u) => [u.id, u.partNumber]), [[typed.id, "33200.0000"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("the Equipment tab offers Add equipment and Edit, and each row shows its Part #", () => {
   const list = src("src/components/desk/account-history.tsx");
   const form = src("src/components/desk/account-unit-form.tsx");
@@ -287,7 +309,9 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   assert.match(form, /type="date"/);
   assert.match(form, /\{unit \? \(\n\s+<p[^>]*data-testid="account-unit-fixed"/);
   assert.ok(form.includes("addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } })"));
-  assert.ok(form.includes('editAccountEquipment({ data: { id: unit.id, seen: unit.seen ?? "", partNumber, ownership, installDate } })'));
+  // Edit sends the version it opened with, so a list refresh while it's open can't let it save over a newer save.
+  assert.ok(form.includes('const [seen] = useState(unit?.seen ?? "");'));
+  assert.ok(form.includes("editAccountEquipment({ data: { id: unit.id, seen, partNumber, ownership, installDate } })"));
   // Both windows pass the account's name.
   assert.match(src("src/components/desk/customer-sheet.tsx"), /<AccountEquipmentList customer=\{history\.data\?\.name \?\? null\} /);
   assert.match(src("src/components/desk/job-sheet.tsx"), /<AccountEquipmentList customer=\{customer \|\| null\} /);

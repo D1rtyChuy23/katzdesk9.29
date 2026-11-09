@@ -32,6 +32,8 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
   const [partNumber, setPartNumber] = useState(unit?.partNumber ?? "");
   const [ownership, setOwnership] = useState(unit?.ownership ?? "");
   const [installDate, setInstallDate] = useState(unit?.installDate ?? "");
+  // The version Edit opened with: a list refresh while it's open must not let it save over a newer save.
+  const [seen] = useState(unit?.seen ?? "");
   const [error, setError] = useState<string | null>(null);
   const models = useQuery({
     queryKey: ["directory", "equipment"],
@@ -41,7 +43,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
   const save = useMutation({
     mutationFn: () =>
       unit
-        ? editAccountEquipment({ data: { id: unit.id, seen: unit.seen ?? "", partNumber, ownership, installDate } })
+        ? editAccountEquipment({ data: { id: unit.id, seen, partNumber, ownership, installDate } })
         : addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } }),
     onSuccess: () => {
       toast.success(unit ? "Saved" : "Added to this account");
