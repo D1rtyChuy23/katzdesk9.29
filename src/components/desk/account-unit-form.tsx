@@ -78,7 +78,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           {[unit.equipmentName || unit.catalogModel, unit.serial ? `SN ${unit.serial}` : "No serial"].join(" · ")}
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div data-testid="account-unit-model">
             <ComboField
               label="Model"
@@ -113,7 +113,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           </div>
         </div>
       )}
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <Label htmlFor={`${id}-part`}>Part #</Label>
           <Input
