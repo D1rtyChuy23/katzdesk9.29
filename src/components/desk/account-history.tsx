@@ -230,7 +230,8 @@ export function AccountEquipmentList({
             // Merge is offered for any row that reads as the same model, not only the exact catalog name.
             const twins = rows.filter((other, j) => j !== i && other.id && row.id && sameUnitModel(other, row));
             return (
-              <li key={`${row.id ?? row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
+              // Keyed by the unit, not its place on the list: a row removed above an open Edit must not rebuild it.
+              <li key={row.id ? `unit-${row.id}` : `${row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
                 <p className="flex flex-wrap items-center gap-2 font-medium">
                   {row.equipmentName || row.catalogModel}
                   <LockBadge lockedBy={row.lockedBy} />

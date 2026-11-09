@@ -298,6 +298,8 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   assert.match(list, />\s*Add equipment\s*</);
   // Each row: Part # after the model, then the serial.
   assert.match(list, /row\.partNumber \? `Part # \$\{row\.partNumber\}` : null,\n\s+row\.serial \? `SN \$\{row\.serial\}` : "No serial",/);
+  // Each row is keyed by its unit, so removing a row above an open Edit doesn't rebuild the form and drop what's typed.
+  assert.ok(list.includes('<li key={row.id ? `unit-${row.id}` : `${row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">'));
   // Edit sits with Remove, off while the unit is locked.
   assert.match(list, /disabled=\{!!row\.lockedBy\}[^>]*data-testid="edit-account-unit"/);
   // The form: model, serial, Part #, ownership, install date; Edit shows the model and serial without changing them.
