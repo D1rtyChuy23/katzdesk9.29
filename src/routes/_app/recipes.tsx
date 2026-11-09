@@ -32,7 +32,7 @@ function Page() {
     if (open != null) setSelected(open);
   }, [open]);
 
-  const rows = recs.data ?? [];
+  const rows = useMemo(() => recs.data ?? [], [recs.data]);
   const current = typeof selected === "number" ? rows.find((r) => r.id === selected) ?? null : null;
   const house = useMemo(() => rows.filter((r) => !r.customer), [rows]);
   const customerRecipes = useMemo(() => rows.filter((r) => !!r.customer), [rows]);

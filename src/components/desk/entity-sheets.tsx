@@ -412,12 +412,10 @@ export function InstallSheet({
   row,
   onClose,
   onOpenRelated,
-  lockCustomer = false,
 }: {
   row: Install | null;
   onClose: () => void;
   onOpenRelated?: (id: number) => void;
-  lockCustomer?: boolean;
 }) {
   const qc = useQueryClient();
   const recs = useQuery({ queryKey: ["recipes"], queryFn: () => listRecipes() });

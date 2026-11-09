@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { sameUnitModel } from "@/lib/ops/account-equip";
+import { canAddEquipmentTo, sameUnitModel } from "@/lib/ops/account-equip";
 import { listAccountEquipment, mergeAccountEquipment, removeAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
@@ -211,13 +211,13 @@ export function AccountEquipmentList({
             {loading ? "…" : `${rows.length} unit${rows.length === 1 ? "" : "s"}`}
           </span>
         </p>
-        {customer ? (
+        {canAddEquipmentTo(customer) ? (
           <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={open === "add"} data-testid="account-equipment-add" onClick={() => setOpen("add")}>
             Add equipment
           </Button>
         ) : null}
       </div>
-      {customer && open === "add" ? (
+      {customer && canAddEquipmentTo(customer) && open === "add" ? (
         <div className="mt-2">
           <AccountUnitForm customer={customer} onDone={() => setOpen(null)} />
         </div>

@@ -51,7 +51,7 @@ function Page() {
   const [selected, setSelected] = useOpenRecord(open);
   const back = useBackTo(from);
   const [create, setCreate] = useState(false);
-  const rows = data.data?.rows ?? [];
+  const rows = useMemo(() => data.data?.rows ?? [], [data.data?.rows]);
   const canEdit = !!data.data?.canEdit;
   // Warehouse: its refurbs are for this account (Katz Coffee Service Dept.); null for everyone else.
   const accountLock = data.data?.accountLock ?? null;

@@ -43,7 +43,7 @@ function Page() {
   const [account, setAccount] = useState("");
   const [mtype, setMtype] = useState("");
   const [assignFor, setAssignFor] = useState<ModuleRow | null>(null);
-  const all = data.data ?? [];
+  const all = useMemo(() => data.data ?? [], [data.data]);
   const hqRows = all.filter((m) => moduleAvailability(m) === "hq");
   const assignedRows = all.filter((m) => moduleAvailability(m) === "assigned");
   const readyRows = hqRows.filter((m) => m.status === "Ready");
