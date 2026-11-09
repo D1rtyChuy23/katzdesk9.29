@@ -76,6 +76,7 @@ export function AssetSheet({
   }, [asset?.id]);
 
   const save = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
     mutationFn: (d: Parameters<typeof updateAsset>[0]["data"]) => updateAsset({ data: d }),
     onSuccess: () => {
       toast.success("Saved");
