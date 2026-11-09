@@ -89,6 +89,7 @@ export function ProviderSheet({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not rename"),
   });
   const remove = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: () => archiveProvider({ data: { id: id! } }),
     onSuccess: () => {
       toast.success("Provider removed from the list");

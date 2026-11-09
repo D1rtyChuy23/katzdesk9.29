@@ -30,6 +30,7 @@ export function ProviderDispatchBlock({
     enabled: name.length > 0,
   });
   const drop = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: (linkId: number) => unassignCustomerProvider({ data: { linkId } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["customer-providers"] });
@@ -227,6 +228,7 @@ export function ProviderAccountList({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not assign"),
   });
   const drop = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: (linkId: number) => unassignCustomerProvider({ data: { linkId } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["network"] });
@@ -234,6 +236,7 @@ export function ProviderAccountList({
     },
   });
   const roleMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
     mutationFn: (d: { linkId: number; role: ProviderRole }) => setProviderRole({ data: d }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["network"] });

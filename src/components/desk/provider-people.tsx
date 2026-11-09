@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useState } from "react";
 import {
   addProviderAddress,
@@ -50,6 +51,7 @@ export function PeopleEditor({
   const [hit, setHit] = useState<number | null>(null);
 
   const addMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add"),
     mutationFn: () =>
       addProviderContact({
         data: { providerId: providerId!, name: name || null, role: null, phone: phone || null, email: email || null },
@@ -70,6 +72,7 @@ export function PeopleEditor({
   });
 
   const dropMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: (id: number) => removeProviderContact({ data: { id } }),
     onSuccess: () => invalidate(qc),
   });
@@ -210,6 +213,7 @@ export function AddressEditor({
   const [hit, setHit] = useState<number | null>(null);
 
   const addMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not add"),
     mutationFn: () =>
       addProviderAddress({
         data: {
@@ -239,6 +243,7 @@ export function AddressEditor({
   });
 
   const dropMut = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
     mutationFn: (id: number) => removeProviderAddress({ data: { id } }),
     onSuccess: () => invalidate(qc),
   });

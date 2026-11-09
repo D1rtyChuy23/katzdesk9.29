@@ -65,6 +65,7 @@ function Page() {
     };
   }, [open, feed.data, navigate]);
   const resolve = useMutation({
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
     mutationFn: (id: number) => resolveComment({ data: { id, resolved: true } }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["handoff"] });
