@@ -6,7 +6,6 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
 import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { isWalkIn } from "@/lib/ops/customer-key";
-import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsStockRequest } from "@/lib/ops/notify";
 import { requireStock } from "@/lib/ops/rack-stock";
 import {

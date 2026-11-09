@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { isLocked, LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "@/lib/ops/equipment-lock-rules";
-import { flagOn } from "@/lib/ops/flag";
 import { serialKey } from "@/lib/ops/account-equip";
 import { notifyAdminsRackReview } from "@/lib/ops/notify";
 import { LEVELS, rackBayError, sectionFullMessage, slotId } from "@/lib/ops/warehouse";
