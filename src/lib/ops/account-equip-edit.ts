@@ -57,7 +57,8 @@ async function serialRefusal(sql: Sql, account: string, serial: string, key: str
 
 /**
  * The add, one statement: $1 account, $2 model, $3 serial, $4 its key, $5 install date, $6 ownership, $7 Part #.
- * The serial is checked again as the unit is written, so two people adding the same machine at once add it once.
+ * The serial is checked again as the unit is written, so a machine someone else added after the checks in front ran
+ * is still refused. Two adds in the very same moment could both land: serial_key has no unique index.
  */
 export function addUnitSql(): string {
   return `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date, ownership, part_number)
