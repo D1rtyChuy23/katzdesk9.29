@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
@@ -22,7 +23,7 @@ async function roleOf(sql: Sql, userId: string): Promise<{ admin: boolean; wareh
     [userId],
   );
   return {
-    admin: flagOn(row[0]?.is_admin),
+    admin: isAdminAccount(row[0]),
     warehouse: row[0]?.desk_role === "warehouse",
     name: row[0]?.username || "Teammate",
   };

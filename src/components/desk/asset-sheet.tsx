@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { useEffect, useState } from "react";
 import {
   assignAssetToInstall,
@@ -62,7 +63,8 @@ export function AssetSheet({
   // Locked by a person or by a sale: Return, Mark sold and the pulls wait for the owner. An assignment's own lock comes off with a return.
   const held = !!asset?.lockedAt && !releasedByReturn({ status: asset.status, lockedAt: asset.lockedAt, lockedBy: asset.lockedBy });
   const lockTip = held ? `Locked by ${asset?.lockedBy ?? "the owner"}` : undefined;
-  const canStock = !!me.data?.isAdmin || warehouseOnly;
+  const admin = isDeskAdmin(me.data);
+  const canStock = admin || warehouseOnly;
   const [testNote, setTestNote] = useState("");
   const [rejectNote, setRejectNote] = useState("");
 
@@ -214,7 +216,7 @@ export function AssetSheet({
                 {asset.shopTestNote ? <p className="text-xs text-muted-foreground">{asset.shopTestNote}</p> : null}
               </div>
             ) : null}
-            {me.data?.isAdmin && asset.reviewStatus === "pending" ? (
+            {admin && asset.reviewStatus === "pending" ? (
               <div className="space-y-3 border-b border-border p-5" data-testid="rack-review">
                 <p className="text-xs tracking-wide text-muted-foreground uppercase">Needs review</p>
                 <p className="text-sm text-muted-foreground">
@@ -267,7 +269,7 @@ export function AssetSheet({
             ) : null}
             {((canStock && !asset.lockedAt && isWarehouseStockPlace(asset.site) && (asset.status === "ready" || asset.status === "deployed")) || asset.stockHold) ? (
               <div className="border-b border-border p-5">
-                <StockActions asset={asset} canStock={canStock} isAdmin={!!me.data?.isAdmin} />
+                <StockActions asset={asset} canStock={canStock} isAdmin={admin} />
               </div>
             ) : null}
             <form

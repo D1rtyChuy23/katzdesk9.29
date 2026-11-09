@@ -3,6 +3,7 @@
  * files. Anyone with Desk access can add one and remove their own; Admin and Sales can remove any.
  * Troubleshoot does not read these: its steps come only from the files stored on the variation.
  */
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
@@ -31,7 +32,7 @@ async function who(sql: Sql, userId: string) {
     "select is_admin, desk_role, username from desk_accounts where user_id = $1",
     [userId],
   );
-  return { editor: flagOn(rows[0]?.is_admin) || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
+  return { editor: isAdminAccount(rows[0]) || rows[0]?.desk_role === "sales", name: rows[0]?.username || "Teammate" };
 }
 
 async function load(sql: Sql, bookId: number, userId: string): Promise<UnofficialSource[]> {

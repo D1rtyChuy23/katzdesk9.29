@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Coffee, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -55,7 +56,7 @@ function useRefresh() {
 
 export function useModuleRole() {
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
-  const admin = !!me.data?.isAdmin;
+  const admin = isDeskAdmin(me.data);
   const warehouse = me.data?.role === "warehouse";
   return { admin, warehouse, canReturn: admin || warehouse };
 }
