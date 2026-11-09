@@ -62,7 +62,7 @@ test("SQL helpers spell a machine's closed states for a query", () => {
   assert.equal(SM.isClosed("asset", null), false);
 });
 
-test("a closed-status list typed into a query matches a machine's, or is a known exception", () => {
+test("a closed-status list typed into a query matches a machine's, or is listed with its reason", () => {
   const dir = new URL("../src/lib/ops/", import.meta.url);
   const closedSets = new Set(SM.STATE_MACHINES.filter((m) => m.closed.length).map((m) => [...m.closed].sort().join("|")));
   const odd = [];
@@ -74,9 +74,41 @@ test("a closed-status list typed into a query matches a machine's, or is a known
       if (!closedSets.has([...set].sort().join("|"))) odd.push(`${name}: ${set.join(", ")}`);
     }
   }
-  assert.deepEqual(odd.sort(), [...SM.KNOWN_ODD_STATUS_LISTS].sort());
+  assert.deepEqual(odd.sort(), SM.INTENDED_STATUS_LISTS.map((x) => x.where).sort());
+  for (const x of SM.INTENDED_STATUS_LISTS) assert.ok(x.reason.length > 20, x.where);
 });
 
 test("docs/state-machines.md is the registry, written out", () => {
   assert.equal(read("docs/state-machines.md"), renderStateMachinesDoc());
+});
+
+test("Pull for service doesn't attach a unit to a ticket that was phone resolved", async () => {
+  const { assignAssetToServiceFor } = await import("../src/lib/ops/api.ts");
+  const pg = new PGlite();
+  try {
+    for (const name of readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
+    await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-owner', 'boss', true, true, 'admin')");
+    await pg.query("insert into directory_customers (name, account_number) values ('Test Sushi - Bayfront', 'TEST-1')");
+    const query = async (text, params) => (await pg.query(text, params)).rows;
+    const sql = Object.assign(async (strings, ...values) => query(strings.reduce((a, s, i) => `${a}$${i}${s}`), values), { query });
+    const ticket = async (callId, status) =>
+      Number((await query("insert into service_jobs (kind, call_id, customer, issue, status, done) values ('service', $1, 'Test Sushi - Bayfront', 'Test', $2, false) returning id", [callId, status]))[0].id);
+    const shelf = async (serial) =>
+      Number((await query("insert into assets (kind, model, serial, qty, site, pallet, level, line_no, status) values ('equip', 'Test Brewer', $1, 1, 'barn-back', 'A', 1, 1, 'ready') returning id", [serial]))[0].id);
+    const jobOf = async (id) => (await query("select job_id from assets where id = $1", [id]))[0].job_id;
+
+    // A phone-resolved ticket whose done flag was never set (an import can leave one): it's closed, so it takes no unit.
+    await ticket("SC-TEST-1", "Phone Resolved");
+    const first = await shelf("TB-51");
+    await assignAssetToServiceFor(sql, { assetId: first, customer: "Test Sushi - Bayfront" }, { userId: "u-owner" });
+    assert.equal(await jobOf(first), null);
+
+    // An open ticket still takes it.
+    const open = await ticket("SC-TEST-2", "Open");
+    const second = await shelf("TB-52");
+    await assignAssetToServiceFor(sql, { assetId: second, customer: "Test Sushi - Bayfront" }, { userId: "u-owner" });
+    assert.equal(Number(await jobOf(second)), open);
+  } finally {
+    await pg.close();
+  }
 });

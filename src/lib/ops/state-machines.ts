@@ -46,6 +46,8 @@ export const STATE_MACHINES: readonly StateMachine[] = [
       "The done flag follows the status: a closed status sets it, and any other status clears it (updateJob in api.ts).",
       "A row counts as closed when done is set or its status is closed (isClosedCall in ticket-status.ts).",
       "Closed work doesn't move on the day board (boardLocked in day-board.ts).",
+      "A ticket merged into an install is marked done with its status left as it was (ticket-install-merge.ts). So done can be set on an open status, on purpose; a closed status always means closed.",
+      "Pull for service attaches the unit to the account's newest ticket that isn't closed (assignAssetToServiceFor in api.ts).",
     ],
   },
   {
@@ -196,13 +198,18 @@ export const NOT_REGISTERED: readonly string[] = [
 ];
 
 /**
- * Closed-status lists typed into a query that don't match a machine's own. Each is listed so a new one fails the
- * test; none is changed here.
+ * Queries that list ticket statuses on purpose, and not the closed list. Each is named here with its reason, so a
+ * new list that matches neither a machine nor this fails the test.
  */
-export const KNOWN_ODD_STATUS_LISTS: readonly string[] = [
-  "api.ts: Complete, Completed, Closed, Cancelled",
-  "pm-stack-api.ts: Cancelled, Phone Resolved",
-  "teams-reports.ts: Completed, Phone Resolved",
+export const INTENDED_STATUS_LISTS: readonly { where: string; reason: string }[] = [
+  {
+    where: "pm-stack-api.ts: Cancelled, Phone Resolved",
+    reason: "A PM can stack on a completed ticket that isn't billed yet, but never on a cancelled or phone-resolved one.",
+  },
+  {
+    where: "teams-reports.ts: Completed, Phone Resolved",
+    reason: "The weekly notes count serviced tickets: completed or phone resolved, never cancelled.",
+  },
 ];
 
 export function machine(id: string): StateMachine {
@@ -243,9 +250,9 @@ export function renderStateMachinesDoc(): string {
   }
   out.push("## Not in the registry yet", "");
   for (const n of NOT_REGISTERED) out.push(`- ${n}`);
-  out.push("", "## Closed-status lists that differ", "");
-  out.push("These queries type their own list of closed statuses, and it doesn't match the machine's. They're listed, not changed:", "");
-  for (const n of KNOWN_ODD_STATUS_LISTS) out.push(`- ${n}`);
+  out.push("", "## Status lists that differ on purpose", "");
+  out.push("These queries list ticket statuses for their own reason, not the closed list:", "");
+  for (const n of INTENDED_STATUS_LISTS) out.push(`- \`${n.where}\`: ${n.reason}`);
   out.push("");
   return out.join("\n");
 }

@@ -2573,7 +2573,7 @@ export async function assignAssetToServiceFor(sql: any, data: { assetId: number;
         select id, kind from service_jobs
         where lower(customer) = lower(${name})
           and done = false
-          and status not in ('Complete', 'Completed', 'Closed', 'Cancelled')
+          and status not in ('Completed', 'Cancelled', 'Phone Resolved')
           and duplicate_of is null
         order by updated_at desc
         limit 1`)[0];

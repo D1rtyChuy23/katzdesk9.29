@@ -16,6 +16,8 @@ Every status below is a pick-list: any state can follow any other. The notes say
   - The done flag follows the status: a closed status sets it, and any other status clears it (updateJob in api.ts).
   - A row counts as closed when done is set or its status is closed (isClosedCall in ticket-status.ts).
   - Closed work doesn't move on the day board (boardLocked in day-board.ts).
+  - A ticket merged into an install is marked done with its status left as it was (ticket-install-merge.ts). So done can be set on an open status, on purpose; a closed status always means closed.
+  - Pull for service attaches the unit to the account's newest ticket that isn't closed (assignAssetToServiceFor in api.ts).
 
 ## PM
 
@@ -143,10 +145,9 @@ Every status below is a pick-list: any state can follow any other. The notes say
 - Clean Names items (customer_clean_items.status) and desk invites (desk_invites.status): small internal lists, not mapped yet.
 - Network providers (network_providers.status): a label.
 
-## Closed-status lists that differ
+## Status lists that differ on purpose
 
-These queries type their own list of closed statuses, and it doesn't match the machine's. They're listed, not changed:
+These queries list ticket statuses for their own reason, not the closed list:
 
-- api.ts: Complete, Completed, Closed, Cancelled
-- pm-stack-api.ts: Cancelled, Phone Resolved
-- teams-reports.ts: Completed, Phone Resolved
+- `pm-stack-api.ts: Cancelled, Phone Resolved`: A PM can stack on a completed ticket that isn't billed yet, but never on a cancelled or phone-resolved one.
+- `teams-reports.ts: Completed, Phone Resolved`: The weekly notes count serviced tickets: completed or phone resolved, never cancelled.
