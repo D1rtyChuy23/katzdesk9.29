@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { isAdminAccount } from "@/lib/ops/admin-role";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
@@ -243,12 +242,12 @@ export async function notifyAdminsRackReview(
   const who = row.username || "Warehouse";
   const serial = asset.serial?.trim() ? ` SN ${asset.serial.trim()}` : "";
   const body = `Needs review. ${who} added ${asset.model}${serial} to ${asset.slot}.`;
-  const admins = await sql.query<{ user_id: string; is_admin: boolean; desk_role: string | null; approved: boolean }>(
-    "select user_id, is_admin, desk_role, approved from desk_accounts where user_id <> $1",
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
     [fromUserId],
   );
   for (const admin of admins) {
-    if (!isAdminAccount(admin) || !flagOn(admin.approved)) continue;
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
     await sql.query(
       `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
        values ($1, $2, $3, $4, $5, 'asset', $6)`,
@@ -267,12 +266,12 @@ export async function notifyAdminsModuleReturn(
   const me = await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [fromUserId]);
   const who = me[0]?.username || "Warehouse";
   const body = `Pending module return. ${who} wants ${mod.moduleType ?? "module"} ${mod.moduleId} back at HQ from ${mod.customer || "an account"}.`;
-  const admins = await sql.query<{ user_id: string; is_admin: boolean; desk_role: string | null; approved: boolean }>(
-    "select user_id, is_admin, desk_role, approved from desk_accounts where user_id <> $1",
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
     [fromUserId],
   );
   for (const admin of admins) {
-    if (!isAdminAccount(admin) || !flagOn(admin.approved)) continue;
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
     await sql.query(
       `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
        values ($1, $2, $3, $4, $5, 'module', $6)`,
@@ -308,12 +307,12 @@ export async function notifyAdminsStockRequest(
     asset.kind === "remove"
       ? `Pending removal. ${who} asked to remove ${asset.model}${serial} from ${asset.slot}. Reason: ${asset.reason || "—"}.`
       : `Pending customer assign. ${who} wants ${asset.model}${serial} from ${asset.slot} to go to ${asset.customer || "an account"}.`;
-  const admins = await sql.query<{ user_id: string; is_admin: boolean; desk_role: string | null; approved: boolean }>(
-    "select user_id, is_admin, desk_role, approved from desk_accounts where user_id <> $1",
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
     [fromUserId],
   );
   for (const admin of admins) {
-    if (!isAdminAccount(admin) || !flagOn(admin.approved)) continue;
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
     await sql.query(
       `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
        values ($1, $2, $3, $4, $5, 'asset', $6)`,
@@ -359,12 +358,12 @@ export async function notifyAdminsWarehousePull(
 ): Promise<void> {
   await ensureTable(sql);
   const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [fromUserId]))[0]?.username || "Warehouse";
-  const admins = await sql.query<{ user_id: string; is_admin: boolean; desk_role: string | null; approved: boolean }>(
-    "select user_id, is_admin, desk_role, approved from desk_accounts where user_id <> $1",
+  const admins = await sql.query<{ user_id: string; is_admin: boolean; approved: boolean }>(
+    "select user_id, is_admin, approved from desk_accounts where user_id <> $1",
     [fromUserId],
   );
   for (const admin of admins) {
-    if (!isAdminAccount(admin) || !flagOn(admin.approved)) continue;
+    if (!flagOn(admin.is_admin) || !flagOn(admin.approved)) continue;
     await sql.query(
       `insert into desk_notifications (user_id, from_user_id, from_name, body, customer, entity_type, entity_id)
        values ($1, $2, $3, $4, $5, 'rebuild', $6)`,
