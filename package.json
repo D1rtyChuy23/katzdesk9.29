@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test 'scripts/**/*.test.mjs'",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "docs:states": "node --experimental-strip-types scripts/write-state-machines-doc.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
