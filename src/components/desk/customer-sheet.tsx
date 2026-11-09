@@ -314,7 +314,7 @@ export function CustomerHistorySheet({
                 </Tabs.Content>
 
                 <Tabs.Content value="equipment" className="p-5 outline-none" data-testid="account-panel-equipment">
-                  <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
+                  <AccountEquipmentList customer={history.data?.name ?? null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
                 </Tabs.Content>
 
                 <Tabs.Content value="tickets" className="p-5 outline-none" data-testid="account-panel-tickets">

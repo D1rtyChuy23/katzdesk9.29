@@ -537,7 +537,7 @@ export function JobSheet({
                           data-testid="ticket-panel-equipment"
                         >
                           <div className="border-b border-border p-5">
-                            <AccountEquipmentList rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
+                            <AccountEquipmentList customer={customer || null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
                           </div>
                           <section className="border-b border-border p-5" data-testid="ticket-pull-from-barn">
                             <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pull From Barn</h3>

@@ -466,6 +466,56 @@ export function mapOwnership(raw: string | null | undefined): {
   return { value: null, status: "unknown", raw: original };
 }
 
+/** The longest Part # a unit keeps (Chuy, 11/9). */
+export const PART_NUMBER_MAX = 60;
+
+/** A unit's Part # as typed, from its data plate or NetSuite: spaces tidied, blank is none. */
+export function cleanPartNumber(raw: string | null | undefined): string | null {
+  const s = String(raw ?? "")
+    .replace(/[\u00a0\u202f\u2007\u2009]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return s || null;
+}
+
+/** What Add equipment and Edit keep besides the model and serial. */
+export type UnitFields = { partNumber: string | null; ownership: string | null; installDate: string | null };
+
+/**
+ * The Part #, ownership and install date as the Add and Edit forms send them, checked. Blank is none; ownership is
+ * one of the list's, or `keepOwnership` (what the unit has now, from before today's list) left as it is; the install
+ * date is a real date (MM/DD/YYYY, or the date box's YYYY-MM-DD).
+ */
+export function checkUnitFields(
+  input: { partNumber?: string | null; ownership?: string | null; installDate?: string | null },
+  opts: { keepOwnership?: string | null } = {},
+): { fields: UnitFields } | { error: string } {
+  const partNumber = cleanPartNumber(input.partNumber);
+  if (partNumber && partNumber.length > PART_NUMBER_MAX) return { error: `The part number is too long (${PART_NUMBER_MAX} characters at most).` };
+  const owned = String(input.ownership ?? "").trim();
+  const kept = (opts.keepOwnership ?? "").trim();
+  const ownership = owned ? (OWNERSHIP_VALUES.find((o) => o === owned) ?? (kept && owned === kept ? opts.keepOwnership! : null)) : null;
+  if (owned && !ownership) return { error: "Pick the ownership from the list." };
+  const typed = String(input.installDate ?? "").trim();
+  let installDate: string | null = null;
+  if (typed) {
+    installDate = parseInstallDate(typed);
+    const real = installDate && /^\d{4}-\d{2}-\d{2}$/.test(installDate) && new Date(`${installDate}T00:00:00Z`).toISOString().slice(0, 10) === installDate;
+    if (!real) return { error: "Type the install date as MM/DD/YYYY." };
+  }
+  return { fields: { partNumber, ownership, installDate } };
+}
+
+/** Why Add equipment won't take a serial (11/9). A machine moves only when it comes back to the HQ barn (Chuy, 10/27). */
+export const serialOnThisAccount = (serial: string) => `SN ${serial} is already on this account.`;
+export const serialOnAccount = (serial: string, account: string) => `SN ${serial} is on ${account}. A machine moves only when it comes back to the HQ barn.`;
+/** In Katz stock: on the barn's racks, or at another Katz site such as the Staging area. */
+export const serialInKatzStock = (serial: string, site: string, siteLabel: string) =>
+  site === "barn-back" || site === "barn-front"
+    ? `SN ${serial} is in the HQ barn. Send it out with Warehouse → Assign.`
+    : `SN ${serial} is at Katz (${siteLabel}). Send it out with Warehouse → Assign.`;
+export const UNIT_CHANGED = "This unit changed since you opened it. Open Edit again.";
+
 export function sameEquipLabel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
