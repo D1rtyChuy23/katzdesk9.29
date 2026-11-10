@@ -303,8 +303,14 @@ function PreviewBody({
   const fromLocation = applicable.filter((r) => r.account?.status === "location");
   const noReceived = applicable.filter((r) => r.action === "create" && !r.createdAt);
   const collisions = rows.filter((r) => r.action !== "skip" && (r.conflictIds?.length || r.wrapRepeat || r.shared));
+  // Descriptions (11/10): kept back because Corrigo's copy adds nothing, flagged (cut and different, or shorter), filled.
+  const notesOf = (r: CorrigoPreviewRow) => (r.action === "skip" ? [] : (r.descriptionNotes ?? []));
+  const descKept = applicable.filter((r) => notesOf(r).some((n) => !n.warn && n.text.includes("adds nothing new"))).length;
+  const descFlagged = applicable.filter((r) => notesOf(r).some((n) => n.warn)).length;
+  const descFilled = applicable.filter((r) => !!r.workDoneFill).length;
   const rowWarned = (r: CorrigoPreviewRow) =>
-    !!statusWarning(r, hasStatusColumn) || !!r.needsReview || !!r.conflictIds?.length || r.wrapRepeat || !!r.completedNote || !!r.poNote || (r.action === "create" && !r.createdAt);
+    !!statusWarning(r, hasStatusColumn) || !!r.needsReview || !!r.conflictIds?.length || r.wrapRepeat || !!r.completedNote || !!r.poNote || (r.action === "create" && !r.createdAt)
+    || !!r.descriptionNotes?.some((n) => n.warn);
   const shownRows = onlyWarnings ? rows.filter(rowWarned) : rows;
 
   function patch(key: string, next: Partial<RowDraft>) {
@@ -389,6 +395,22 @@ function PreviewBody({
               ? "1 new ticket gets no received date: the file has no created date for it."
               : `${noReceived.length} new tickets get no received date: the file has no created date for them.`}{" "}
             Fill it on the ticket, or export the report with its Created column.
+          </li>
+        ) : null}
+        {descKept || descFlagged || descFilled ? (
+          <li
+            className={`rounded-lg border px-3 py-2 ${descFlagged ? "border-warning/40 bg-warning/10" : "border-border bg-muted/40"}`}
+            data-testid="corrigo-description-notes"
+          >
+            <span className="font-medium">Descriptions: </span>
+            {[
+              descKept ? `${descKept} kept as saved (Corrigo's text adds nothing new)` : null,
+              descFlagged ? `${descFlagged} to check (cut off and different, or shorter; Warnings only lists them)` : null,
+              descFilled ? `${descFilled} blank Description${descFilled === 1 ? "" : "s"} of work filled from the Problem Description` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+            .
           </li>
         ) : null}
         {collisions.length ? (
@@ -624,6 +646,7 @@ function RowChanges({ r }: { r: CorrigoPreviewRow }) {
   if (r.poNote) items.push({ text: r.poNote, warn: true });
   if (r.issueChange) items.push({ text: `Issue → ${clip(r.issueChange.to)}`, title: `Was: ${r.issueChange.from ?? "blank"}\nNow: ${r.issueChange.to}` });
   if (r.equipmentChange) items.push({ text: `Equipment ${r.equipmentChange.from ? `${clip(r.equipmentChange.from, 30)} ` : ""}→ ${clip(r.equipmentChange.to, 40)}` });
+  for (const n of r.descriptionNotes ?? []) items.push({ text: n.text, warn: n.warn });
   if (r.action === "update" && r.existingCustomer && r.customer && r.customer !== r.existingCustomer) {
     items.push({ text: `Customer ${r.existingCustomer} → ${r.customer}` });
   }
