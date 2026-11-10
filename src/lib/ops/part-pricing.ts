@@ -265,13 +265,22 @@ function byMpn<T extends { mpn: string | null }>(parts: T[]): Map<string, T[]> {
 }
 
 /**
- * What a parts file will do. An MPN already on a part updates that part; a new MPN adds one. A blank cell or a
+ * What a parts file will do. An MPN already on a live part updates that part; a new MPN adds one. Hidden and merged
+ * parts are left out of the match: a row that matches only one is listed and not applied. A blank cell or a
  * column the file does not have never changes what is stored. Never a second part for the same MPN: an MPN two
  * parts already share, or a new part whose SKU another part already has, is shown and left out.
  */
 export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): PartPlanLine[] {
   const mpns = byMpn(stored);
-  const skus = new Map(stored.map((p) => [p.sku.trim().toLowerCase(), p]));
+  // A live part wins a SKU it shares with a hidden one (11/10): hidden parts never make a SKU taken.
+  const isLive = (p: StoredPart) => !p.hidden && !p.mergedIntoSku;
+  const skus = new Map<string, StoredPart>();
+  for (const p of stored) {
+    const k = p.sku.trim().toLowerCase();
+    const had = skus.get(k);
+    if (!had || (!isLive(had) && isLive(p))) skus.set(k, p);
+  }
+  const hiddenReason = (parts: StoredPart[]) => `Matches a hidden part: ${parts.map((p) => `${p.sku} (id ${p.id})`).join(", ")}`;
   // A part loaded from the item list before MPNs were kept has its part number only as its SKU: same part.
   const bySkuKey = new Map<string, StoredPart[]>();
   for (const p of stored) {
@@ -282,9 +291,10 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
     const key = mpnKey(row.mpn);
     const found = [...(mpns.get(key) ?? [])];
     for (const p of bySkuKey.get(key) ?? []) if (!found.some((h) => h.id === p.id)) found.push(p);
-    // A part merged into another keeps its number (its keeper may have taken its MPN too): the keeper is the match.
-    const live = found.filter((p) => !p.mergedIntoSku);
-    const hits = live.length ? live : found;
+    // Only live parts match (11/10). A hidden part, or one merged into another (its keeper may have taken its MPN
+    // too), never takes an update and never counts toward a shared MPN.
+    const hits = found.filter(isLive);
+    const hiddenHits = found.filter((p) => !isLive(p));
     if (row.keep === false) {
       // A class outside the five: never added. A part already on the list is moved off the active list (MPN kept).
       const was = hits.length === 1 && !hits[0]!.hidden && hits[0]!.active !== false ? hits[0]! : null;
@@ -300,16 +310,23 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
       return { status: "shared_mpn", row, partId: null, changes: [], reason: `${hits.length} parts already share MPN ${row.mpn} (${hits.map((h) => h.sku).join(", ")}). Fix that on Parts first.` };
     }
     const hit = hits[0];
+    if (!hit && hiddenHits.length) {
+      const merged = hiddenHits.find((p) => p.mergedIntoSku);
+      // Only merged copies: say where they went. Otherwise name the hidden parts.
+      if (merged && hiddenHits.every((p) => p.mergedIntoSku)) {
+        return { status: "hidden", row, partId: merged.id, changes: [], reason: `Merged into ${merged.mergedIntoSku}. Skipped: it stays hidden.` };
+      }
+      const hiddenOnly = hiddenHits.filter((p) => !p.mergedIntoSku);
+      return { status: "hidden", row, partId: hiddenOnly[0]!.id, changes: [], reason: hiddenReason(hiddenOnly) };
+    }
     if (!hit) {
       const sku = row.sku ?? row.mpn;
       const taken = skus.get(sku.trim().toLowerCase());
       if (taken?.mergedIntoSku) return { status: "hidden", row, partId: taken.id, changes: [], reason: `SKU ${sku} was merged into ${taken.mergedIntoSku}. Skipped.` };
-      if (taken?.hidden) return { status: "hidden", row, partId: taken.id, changes: [], reason: `SKU ${sku} is hidden. Hidden, skipped.` };
+      if (taken?.hidden) return { status: "hidden", row, partId: taken.id, changes: [], reason: hiddenReason([taken]) };
       if (taken) return { status: "sku_taken", row, partId: null, changes: [], reason: `SKU ${sku} is already a part${taken.mpn ? ` with MPN ${taken.mpn}` : " with no MPN"}.` };
       return { status: "new", row, partId: null, changes: [`New part ${itemFullName(sku, row.parent)}`], reason: null };
     }
-    if (hit.mergedIntoSku) return { status: "hidden", row, partId: hit.id, changes: [], reason: `Merged into ${hit.mergedIntoSku}. Skipped: it stays hidden.` };
-    if (hit.hidden) return { status: "hidden", row, partId: hit.id, changes: [], reason: "Hidden, skipped. This part stays hidden." };
     const changes: string[] = [];
     if (row.description != null && row.description !== (hit.description ?? "")) changes.push(`Description → ${row.description}`);
     if (row.rate != null && row.rate !== hit.rate) changes.push(`Base Price ${money(hit.rate)} → ${money(row.rate)}`);
