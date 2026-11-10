@@ -1,4 +1,5 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { flagOn } from "./flag";
@@ -239,7 +240,7 @@ function mapAccess(row: AccessRow, canEditRoster = false): DeskAccess {
     email: row.email,
     approved: flagOn(row.approved),
     isAdmin,
-    canAddCustomers: isAdmin || flagOn(row.can_add_customers),
+    canAddCustomers: isAdminAccount(row) || flagOn(row.can_add_customers),
     canEditRoster,
     canAssignRoles: canEditRoster,
     canLockEquipment: canEditRoster,
@@ -589,7 +590,7 @@ export async function requireCanAddCustomers(sql: Sql, userId: string): Promise<
   if (!me[0] || !flagOn(me[0].approved)) {
     throw new Error("This account is waiting for approval.");
   }
-  if (flagOn(me[0].is_admin) || flagOn(me[0].can_add_customers)) return;
+  if (isAdminAccount(me[0]) || flagOn(me[0].can_add_customers)) return;
   throw new Error("You don’t have permission to add customers. Ask an admin.");
 }
 

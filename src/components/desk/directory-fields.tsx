@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addDirectoryEntry,
@@ -19,7 +20,7 @@ import { toast } from "sonner";
 export function useDirectory(kind: DirectoryKind) {
   const qc = useQueryClient();
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
-  const isAdmin = !!me.data?.isAdmin;
+  const isAdmin = isDeskAdmin(me.data);
   const canAdd = kind === "equipment" || isAdmin || me.data?.canAddCustomers !== false;
   // Renaming or removing a customer from a picker: a desk admin or the Admin role (same rule as the server).
   const canManage = kind === "equipment" || isAdmin || me.data?.role === "admin";

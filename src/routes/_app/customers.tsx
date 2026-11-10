@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
@@ -66,7 +67,7 @@ function Page() {
   const [name, setName] = useState("");
   const { filterMine, matchMine, role } = useMyView();
   const [sort, setSort] = useDeskSort("customers", "alpha-asc");
-  const isAdmin = !!me.data?.isAdmin;
+  const isAdmin = isDeskAdmin(me.data);
   // The Admin role or a desk admin: imports, account numbers, and (since 2026-10-27) Remove, Restore, the Removed list and
   // Rename / merge, so more than one person can run Customers.
   const isAdminOrRole = isAdmin || me.data?.role === "admin";

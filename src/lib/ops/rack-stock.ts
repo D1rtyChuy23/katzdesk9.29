@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { isLocked, LOCKED_BY_ASSIGNED, LOCKED_BY_SOLD } from "@/lib/ops/equipment-lock-rules";
-import { flagOn } from "@/lib/ops/flag";
 import { serialKey } from "@/lib/ops/account-equip";
 import { notifyAdminsRackReview } from "@/lib/ops/notify";
 import { LEVELS, rackBayError, sectionFullMessage, slotId } from "@/lib/ops/warehouse";
@@ -22,7 +22,7 @@ async function roleOf(sql: Sql, userId: string): Promise<{ admin: boolean; wareh
     [userId],
   );
   return {
-    admin: flagOn(row[0]?.is_admin),
+    admin: isAdminAccount(row[0]),
     warehouse: row[0]?.desk_role === "warehouse",
     name: row[0]?.username || "Teammate",
   };
