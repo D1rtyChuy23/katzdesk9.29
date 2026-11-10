@@ -664,8 +664,8 @@ test("each Details tab has both P.O. boxes and sends a box only when it was chan
   // The install's form submit, and the PM's and the deal's patch builders (their saves before the Invoice window use them too).
   assert.equal((sheets.match(/\.\.\.poFromForm\(e\.currentTarget\),/g) ?? []).length, 1);
   assert.equal((sheets.match(/\.\.\.poFromForm\(form\),/g) ?? []).length, 2);
-  assert.match(sheets, /save\.mutate\(pmPatchOf\(e\.currentTarget, pm\.id\)\);/);
-  assert.match(sheets, /save\.mutate\(dealPatchOf\(e\.currentTarget, deal\.id\)\);/);
+  assert.match(sheets, /const patch = pmPatchOf\(e\.currentTarget, pm\.id\);\n\s+save\.mutate\(patch, /);
+  assert.match(sheets, /const patch = dealPatchOf\(e\.currentTarget, deal\.id\);\n\s+save\.mutate\(patch, /);
   assert.match(rebuildSheet, /const po = useSyncedPo\(row\?\.po, row\?\.id \?\? null\);/);
   assert.match(rebuildSheet, /\.\.\.\(po\.toSend\(\) !== undefined \? \{ po: po\.toSend\(\) \} : \{\}\),/);
   // The boxes read what each box was given: a box left as it was sends nothing.
