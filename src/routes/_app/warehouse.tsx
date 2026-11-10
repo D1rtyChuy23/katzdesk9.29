@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { ShowMoreButton, useShowMore } from "@/components/desk/show-more";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -51,7 +52,7 @@ function Page() {
   const qc = useQueryClient();
   const data = useQuery({ queryKey: ["assets"], queryFn: () => listAssets() });
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
-  const canStock = !!me.data?.isAdmin || me.data?.role === "warehouse";
+  const canStock = isDeskAdmin(me.data) || me.data?.role === "warehouse";
   const [rack, setRack] = useState<Rack>("barn-back");
   const [q, setQ] = useState("");
   const [slot, setSlot] = useState<SlotKey | null>(null);
