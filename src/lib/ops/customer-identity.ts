@@ -5,6 +5,17 @@ import { catalogModels, listedEquipment, rewriteEquipmentName, samePiece } from 
 import { flagOn } from "./flag";
 import { parseMachinesJson, serializeMachines } from "./machines";
 
+/**
+ * A rename passes over a table or column this database doesn't have (an older one). Any other failure stops it with
+ * its error, before the account takes its new name, so renaming again finishes the job (11/9: every failure used to
+ * be passed over, which left records on a name no account had).
+ */
+function missingOnly(e: unknown): undefined {
+  const code = (e as { code?: string } | null)?.code;
+  if (code === "42P01" || code === "42703") return undefined;
+  throw e;
+}
+
 /** A recipe on `from` that `to` already has: same model and same recipe name (the recipes unique index). */
 const SAME_RECIPE = `lower(a.customer) = lower($1)
        and lower(b.customer) = lower($2)
@@ -23,7 +34,7 @@ async function dropLinksAlreadyOn(sql: Sql, from: string, to: string): Promise<v
        and lower(b.customer) = lower($2)
        and a.provider_id = b.provider_id`,
     [from, to],
-  ).catch(() => undefined);
+  ).catch(missingOnly);
 
   await sql.query(
     `delete from network_accounts a
@@ -31,14 +42,14 @@ async function dropLinksAlreadyOn(sql: Sql, from: string, to: string): Promise<v
      where lower(a.customer) = lower($1)
        and lower(b.customer) = lower($2)`,
     [from, to],
-  ).catch(() => undefined);
+  ).catch(missingOnly);
 
   await sql.query(
     `delete from recipes a
      using recipes b
      where ${SAME_RECIPE}`,
     [from, to],
-  ).catch(() => undefined);
+  ).catch(missingOnly);
 }
 
 /**
@@ -50,16 +61,17 @@ async function setNameCase(sql: Sql, name: string): Promise<void> {
   await sql.query(`update pm_jobs set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]);
   await sql.query(`update installs set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]);
   await sql.query(`update deals set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]);
-  await sql.query(`update recipes set customer = $1 where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(customer_owned) = lower($1) and customer_owned <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(sold_to) = lower($1) and sold_to <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
-  await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($1) and customer <> $1`, [name]).catch(() => undefined);
+  await sql.query(`update recipes set customer = $1 where lower(customer) = lower($1) and customer <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(customer_owned) = lower($1) and customer_owned <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(sold_to) = lower($1) and sold_to <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($1) and customer <> $1`, [name]).catch(missingOnly);
+  await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($1) and customer <> $1`, [name]).catch(missingOnly);
   // Rebuilds, and each rebuild machine's record of whose its unit was and whom the pull put it on (11/2).
-  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($1) and account <> $1`, [name]).catch(() => undefined);
-  await sql.query(ORIGIN_NAMES, [name, name]).catch(() => undefined);
+  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($1) and account <> $1`, [name]).catch(missingOnly);
+  await sql.query(ORIGIN_NAMES, [name, name]).catch(missingOnly);
+  for (const text of FOLLOWERS) await sql.query(text, [name, name]).catch(missingOnly);
 }
 
 /**
@@ -75,6 +87,20 @@ const ORIGIN_NAMES = `
    where origin is not null
      and ((lower(coalesce(origin->>'sold_to', '')) = lower($2) and origin->>'sold_to' is distinct from $1::text)
           or (lower(coalesce(origin->>'pulled_to', '')) = lower($2) and origin->>'pulled_to' is distinct from $1::text))`;
+
+/**
+ * More records that name the account and follow it on a rename (11/9). $1 the new name, $2 the old (the same name
+ * for a capitals-only change).
+ *  - An Eversys module on one of the account's units: its account and its place both read the account's name.
+ *  - A unit Warehouse asked to send to the account, still waiting for an Admin: the hold and the request.
+ * A request already decided is history and keeps the name it was decided under.
+ */
+const FOLLOWERS = [
+  `update modules set assigned_customer = $1, updated_at = now() where lower(assigned_customer) = lower($2) and assigned_customer is distinct from $1`,
+  `update modules set location = $1, updated_at = now() where assigned_unit_id is not null and lower(location) = lower($2) and location is distinct from $1`,
+  `update assets set stock_hold_customer = $1, updated_at = now() where lower(stock_hold_customer) = lower($2) and stock_hold_customer is distinct from $1`,
+  `update asset_stock_actions set customer = $1 where status = 'pending' and lower(customer) = lower($2) and customer is distinct from $1`,
+];
 
 /** Every table that stores a customer as a name string (the join key). */
 export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string): Promise<void> {
@@ -104,17 +130,18 @@ export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string)
     });
   }
 
-  await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
-  await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
-  await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(coalesce(customer_owned,'')) = lower($2)`, [to, from]).catch(() => undefined);
-  await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(coalesce(sold_to,'')) = lower($2)`, [to, from]).catch(() => undefined);
-  await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
+  await sql.query(`update customer_providers set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(missingOnly);
+  await sql.query(`update network_accounts set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(missingOnly);
+  await sql.query(`update assets set customer_owned = $1, updated_at = now() where lower(coalesce(customer_owned,'')) = lower($2)`, [to, from]).catch(missingOnly);
+  await sql.query(`update assets set sold_to = $1, updated_at = now() where lower(coalesce(sold_to,'')) = lower($2)`, [to, from]).catch(missingOnly);
+  await sql.query(`update account_equipment set customer = $1, updated_at = now() where lower(customer) = lower($2)`, [to, from]).catch(missingOnly);
   // Work order history (QuickBooks) follows its account.
-  await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(() => undefined);
+  await sql.query(`update wo_history set customer = $1 where lower(customer) = lower($2)`, [to, from]).catch(missingOnly);
   // So do rebuilds, and their machines' records of the units' accounts (11/2 review: a pulled unit goes back to its
   // account under the new name, and stays on the rebuild that has it).
-  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($2)`, [to, from]).catch(() => undefined);
-  await sql.query(ORIGIN_NAMES, [to, from]).catch(() => undefined);
+  await sql.query(`update rebuilds set account = $1, updated_at = now() where lower(account) = lower($2)`, [to, from]).catch(missingOnly);
+  await sql.query(ORIGIN_NAMES, [to, from]).catch(missingOnly);
+  for (const text of FOLLOWERS) await sql.query(text, [to, from]).catch(missingOnly);
 }
 
 type AccountRow = Record<string, unknown> & { id: number; name: string };

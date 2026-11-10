@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- legacy file, typed at its call sites */
 // @ts-nocheck
 import { isAdminAccount } from "@/lib/ops/admin-role";
+import { nextCallId } from "@/lib/ops/call-id";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getSql } from "@/lib/db";
+import { getSql, type Sql } from "@/lib/db";
+import { isWalkIn } from "@/lib/ops/customer-key";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
@@ -1021,27 +1023,50 @@ export const mergeServiceTickets = createServerFn({ method: "POST" }).middleware
 	if ("refused" in result) throw new Error(result.refused);
 	return getJob({ data: { id: result.keeperId } });
 });
-export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc"; customer: string; issue?: string; equipment?: string; contact?: string; phone?: string; received?: string; callType?: string; technician?: string; urgency?: string }) => d).handler(async ({ data, context }: any) => {
-	const sql = await ready();
+type NewTicket = { kind: "service" | "tlc"; customer: string; issue?: string; equipment?: string; contact?: string; phone?: string; received?: string; callType?: string; technician?: string; urgency?: string };
+
+/**
+ * The account a new ticket goes on (11/9): an account on the customer list, by its name in any capitals, spelled as
+ * the list has it. Walk-In stays as typed. Any other name is refused, so no ticket is filed under a name no account has.
+ */
+async function ticketAccount(sql: Sql, raw: string): Promise<string> {
+	const typed = String(raw ?? "").trim();
+	if (!typed) throw new Error("Pick an account.");
+	if (isWalkIn(typed)) return typed;
+	const row = (await sql.query<{ name: string }>("select name from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc, id limit 1", [typed]))[0];
+	if (!row) throw new Error(`${typed} isn't on the customer list. Pick the account, or add it on Customers first.`);
+	return row.name;
+}
+
+/**
+ * Open a ticket or TLC call. Its number is the next one for the month it was received. Two opened in the same moment
+ * read the same next number; the one that loses takes the number after it (11/9).
+ */
+export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: number; customer: string }> {
+	const customer = await ticketAccount(sql, data.customer);
 	const received = data.received || todayChicago();
-	const prefix = `SC-${received.replace(/-/g, "").slice(0, 6)}-`;
-	const last = await sql`
-      select call_id from service_jobs
-      where call_id like ${prefix + "%"}
-      order by call_id desc limit 1`;
-	let seq = 1;
-	if (last[0]) {
-		const n = Number(last[0].call_id.slice(-3));
-		if (Number.isFinite(n)) seq = n + 1;
+	for (let attempt = 0; ; attempt += 1) {
+		const callId = await nextCallId(sql, received);
+		try {
+			const rows = await sql.query<{ id: number }>(
+				`insert into service_jobs (kind, call_id, customer, issue, equipment, contact, phone, received, call_type, technician, status, urgency)
+				 values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'Open', $11)
+				 returning id`,
+				[data.kind, callId, customer, data.issue ?? null, data.equipment ?? null, data.contact ?? null, data.phone ?? null, received, data.callType ?? "Field Service", data.technician ?? null, data.urgency || "Normal"],
+			);
+			return { id: Number(rows[0].id), customer };
+		} catch (e) {
+			// The number was taken between the read and the write: take the next.
+			if ((e as { code?: string })?.code !== "23505" || attempt >= 5) throw e;
+		}
 	}
-	const callId = `${prefix}${String(seq).padStart(3, "0")}`;
-	const urgency = data.urgency || "Normal";
-	const rows = await sql`
-      insert into service_jobs (kind, call_id, customer, issue, equipment, contact, phone, received, call_type, technician, status, urgency)
-      values (${data.kind}, ${callId}, ${data.customer}, ${data.issue ?? null}, ${data.equipment ?? null}, ${data.contact ?? null}, ${data.phone ?? null}, ${received}, ${data.callType ?? "Field Service"}, ${data.technician ?? null}, ${"Open"}, ${urgency})
-      returning id`;
-	await logActivity(sql, context.userId, data.kind, rows[0].id, "opened", [data.customer, data.issue].filter(Boolean).join(" · ") || null);
-	return getJob({ data: { id: rows[0].id } });
+}
+
+export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: NewTicket) => d).handler(async ({ data, context }: any) => {
+	const sql = await ready();
+	const made = await openTicketFor(sql, data);
+	await logActivity(sql, context.userId, data.kind, made.id, "opened", [made.customer, data.issue].filter(Boolean).join(" · ") || null);
+	return getJob({ data: { id: made.id } });
 });
 /**
  * A tech was assigned to an install: tell the rep on the account they are good to issue the Tech Request Form.
