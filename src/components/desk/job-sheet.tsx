@@ -44,6 +44,8 @@ import { ProviderDispatchBlock } from "./provider-dispatch";
 import { listedEquipment } from "@/lib/ops/equipment";
 import type { ServiceJob } from "@/lib/ops/types";
 import { toast } from "sonner";
+import { patchKey } from "@/lib/ops/close-save";
+import { useCloseSave } from "./use-close-save";
 import { TechSelect } from "./tech-select";
 import { SerialNoticeBanner, SerialPullField } from "./serial-notice";
 import { UnitPlaceField } from "./unit-place-field";
@@ -175,6 +177,11 @@ export function JobSheet({
     onError: (e: Error) => toast.error(e.message),
   });
   const j = job.data;
+  // What the form holds as it first shows: closing saves only when that changed (11/9).
+  const closer = useCloseSave(j?.id);
+  useEffect(() => {
+    if (j) closer.read(formRef.current, (form) => patchKey(formPatch(form, j.id)));
+  });
   /** Merged into an install: no form or tabs, so closing it saves nothing (10/30). */
   const mergedAway = !!j?.mergedInstallId;
   // The ticket's billing (the same read as its Charges): billed or invoiced in NetSuite, its Customer P.O. is locked here.
@@ -352,7 +359,8 @@ export function JobSheet({
       className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
       onSubmit={(e) => {
         e.preventDefault();
-        save.mutate(formPatch(e.currentTarget, j.id));
+        const patch = formPatch(e.currentTarget, j.id);
+        save.mutate(patch, { onSuccess: () => closer.saved(patchKey(patch)) });
       }}
     >
       <BoundCustomer defaultValue={j.customer ?? ""} recordKey={j.id} locked={lockTicketCustomer} />
@@ -457,11 +465,17 @@ export function JobSheet({
       <Sheet
         open={id != null}
         onOpenChange={(o) => {
-          if (!o) {
-            skipToast.current = true;
-            formRef.current?.requestSubmit();
-            onClose();
-          }
+          if (!o && j) {
+            closer.closeWindow({
+              form: formRef.current,
+              now: (form) => patchKey(formPatch(form, j.id)),
+              save: () => {
+                skipToast.current = true;
+                formRef.current?.requestSubmit();
+              },
+              close: onClose,
+            });
+          } else if (!o) onClose();
         }}
       >
         <SheetContent>

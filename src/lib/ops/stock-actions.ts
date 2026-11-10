@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { serialKey } from "@/lib/ops/account-equip";
 import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { isWalkIn } from "@/lib/ops/customer-key";
-import { flagOn } from "@/lib/ops/flag";
 import { notifyAdminsStockRequest } from "@/lib/ops/notify";
 import { requireStock } from "@/lib/ops/rack-stock";
 import {
@@ -97,7 +97,7 @@ async function actorOf(sql: Sql, userId: string) {
     [userId],
   );
   return {
-    admin: flagOn(row[0]?.is_admin),
+    admin: isAdminAccount(row[0]),
     warehouse: row[0]?.desk_role === "warehouse",
     name: row[0]?.username || "Teammate",
   };

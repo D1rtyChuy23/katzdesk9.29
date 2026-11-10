@@ -84,6 +84,8 @@ import { SerialNoticeBanner } from "./serial-notice";
 import { AssignedLine, ModuleReturnActions } from "./module-assign";
 import { moduleAvailability } from "@/lib/ops/eversys";
 import { toast } from "sonner";
+import { patchKey } from "@/lib/ops/close-save";
+import { useCloseSave } from "./use-close-save";
 import { CheckCircle2, ChevronDown, ChevronRight, ChevronsUpDown, Trash2, X } from "lucide-react";
 
 function Field({
@@ -194,6 +196,7 @@ export function PmSheet({
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
   const skipToast = useRef(false);
+  const closer = useCloseSave(pm?.id);
   const save = useMutation({
     mutationFn: (d: Parameters<typeof updatePm>[0]["data"]) => updatePm({ data: d }),
     onSuccess: (saved, vars) => {
@@ -256,6 +259,10 @@ export function PmSheet({
       return false;
     }
   };
+  // What the form holds as it first shows: closing saves only when that changed (11/9).
+  useEffect(() => {
+    if (pm) closer.read(formRef.current, (form) => patchKey(pmPatchOf(form, pm.id)));
+  });
   const [tab, setTab] = useState<PmTab>("details");
   useEffect(() => setTab("details"), [pm?.id]);
   const comments = useQuery({
@@ -281,11 +288,17 @@ export function PmSheet({
     <Sheet
       open={!!pm}
       onOpenChange={(o) => {
-        if (!o) {
-          skipToast.current = true;
-          formRef.current?.requestSubmit();
-          onClose();
-        }
+        if (!o && pm) {
+          closer.closeWindow({
+            form: formRef.current,
+            now: (form) => patchKey(pmPatchOf(form, pm.id)),
+            save: () => {
+              skipToast.current = true;
+              formRef.current?.requestSubmit();
+            },
+            close: onClose,
+          });
+        } else if (!o) onClose();
       }}
     >
       <SheetContent>
@@ -320,7 +333,8 @@ export function PmSheet({
                     className="grid gap-3 p-5 sm:grid-cols-2"
                     onSubmit={(e) => {
                       e.preventDefault();
-                      save.mutate(pmPatchOf(e.currentTarget, pm.id));
+                      const patch = pmPatchOf(e.currentTarget, pm.id);
+                      save.mutate(patch, { onSuccess: () => closer.saved(patchKey(patch)) });
                     }}
                   >
                     <BoundCustomer recordKey={pm.id} defaultValue={pm.customer} required locked={lockPmCustomer} />
@@ -430,6 +444,7 @@ export function InstallSheet({
   const [hydratedId, setHydratedId] = useState<number | null>(null);
   /** The machine list as the window loaded it (plus what the server added since). Closing saves it only if it differs. */
   const loadedSpecs = useRef<MachineSpec[]>([]);
+  const closer = useCloseSave(row?.id);
   /**
    * This opening's notes (10/30). The Notes box shows the board's notes until something is typed in it, then keeps what
    * it shows until the window closes. Each save carries the slot and sends its base when it runs: the notes its text was
@@ -635,6 +650,15 @@ export function InstallSheet({
   const flushOnClose = useCallback(() => {
     for (const [flush, onClose] of [...flushers.current]) if (onClose) flush();
   }, []);
+  /** What closing would save: the form's boxes, and whether the machine list differs from the one loaded (11/9). */
+  const installKey = (form: HTMLFormElement) =>
+    patchKey({
+      fields: Array.from(new FormData(form).entries()).map(([k, v]) => [k, typeof v === "string" ? v : ""]),
+      machines: Object.keys(changedMachineFields(specsRef.current, loadedSpecs.current)).length > 0,
+    });
+  useEffect(() => {
+    if (row) closer.read(formRef.current, (form) => installKey(form));
+  });
   const saveAll = useCallback(() => {
     flushParts();
     formRef.current?.requestSubmit();
@@ -731,10 +755,17 @@ export function InstallSheet({
       open={!!row}
       onOpenChange={(o) => {
         if (!o) {
-          skipToast.current = true;
+          // The parts that keep typed work (a WO typed in Add WO) store it whatever the form does.
           flushOnClose();
-          formRef.current?.requestSubmit();
-          onClose();
+          closer.closeWindow({
+            form: formRef.current,
+            now: (form) => installKey(form),
+            save: () => {
+              skipToast.current = true;
+              formRef.current?.requestSubmit();
+            },
+            close: onClose,
+          });
         }
       }}
     >
@@ -809,6 +840,7 @@ export function InstallSheet({
                       const fd = new FormData(e.currentTarget);
                       const machineFields = changedMachineFields(specs, loadedSpecs.current);
                       if (Object.keys(machineFields).length) loadedSpecs.current = specs;
+                      const sent = installKey(e.currentTarget);
                       save.mutate({
                         id: row.id,
                         customer: String(fd.get("customer") || row.customer),
@@ -832,7 +864,7 @@ export function InstallSheet({
                         ...(Object.keys(machineFields).length ? { ...machineFields, ...listSend(row.id, specs) } : {}),
                         // Each P.O. only when it was changed here (11/2): the Invoice window may have set it meanwhile.
                         ...poFromForm(e.currentTarget),
-                      });
+                      }, { onSuccess: () => closer.saved(sent) });
                     }}
                   >
                     <InstallCustomerField row={row} value={customer || row.customer} onChange={setCustomer} />
@@ -1289,6 +1321,7 @@ export function DealSheet({
 }) {
   const qc = useQueryClient();
   const formRef = useRef<HTMLFormElement>(null);
+  const closer = useCloseSave(deal?.id);
   const directoryEquip = useQuery({
     queryKey: ["directory", "equipment"],
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
@@ -1370,6 +1403,10 @@ export function DealSheet({
       ...poFromForm(form),
     };
   };
+  // What the form holds as it first shows: closing saves only when that changed (11/9).
+  useEffect(() => {
+    if (deal) closer.read(formRef.current, (form) => patchKey(dealPatchOf(form, deal.id)));
+  });
   /** The Invoice window: save what is typed first, so it opens on the deal as it is now (its P.O. too, 11/2). */
   const saveDealBeforeInvoice = async (): Promise<boolean> => {
     if (!formRef.current || !deal) return true;
@@ -1399,11 +1436,17 @@ export function DealSheet({
     <Sheet
       open={!!deal}
       onOpenChange={(o) => {
-        if (!o) {
-          skipToast.current = true;
-          formRef.current?.requestSubmit();
-          onClose();
-        }
+        if (!o && deal) {
+          closer.closeWindow({
+            form: formRef.current,
+            now: (form) => patchKey(dealPatchOf(form, deal.id)),
+            save: () => {
+              skipToast.current = true;
+              formRef.current?.requestSubmit();
+            },
+            close: onClose,
+          });
+        } else if (!o) onClose();
       }}
     >
       <SheetContent>
@@ -1435,7 +1478,8 @@ export function DealSheet({
               className="grid gap-3 border-b border-border p-5 sm:grid-cols-2"
               onSubmit={(e) => {
                 e.preventDefault();
-                save.mutate(dealPatchOf(e.currentTarget, deal.id));
+                const patch = dealPatchOf(e.currentTarget, deal.id);
+                save.mutate(patch, { onSuccess: () => closer.saved(patchKey(patch)) });
               }}
             >
               <BoundCustomer recordKey={deal.id} defaultValue={deal.customer} required locked={lockCustomer} />

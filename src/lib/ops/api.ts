@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- legacy file, typed at its call sites */
 // @ts-nocheck
+import { isAdminAccount } from "@/lib/ops/admin-role";
 import { nextCallId } from "@/lib/ops/call-id";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -1863,7 +1864,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.
 	if (data.trfIssued !== undefined && !!data.trfIssued !== !!c.trf_issued) {
 		const me = (await sql.query("select is_admin, desk_role, username from desk_accounts where user_id = $1", [context.userId]))[0] as any;
-		if (!me || !(me.is_admin === true || me.is_admin === "true" || me.is_admin === 1 || me.desk_role === "sales")) throw new Error("Only Sales can mark the Tech Request Form as issued.");
+		if (!me || !(isAdminAccount(me) || me.desk_role === "sales")) throw new Error("Only Sales can mark the Tech Request Form as issued.");
 		await sql.query("update installs set trf_issued = $2, trf_issued_by = $3, trf_issued_at = case when $2 then now() else null end where id = $1", [data.id, !!data.trfIssued, data.trfIssued ? me.username || null : null]);
 		await logActivity(sql, context.userId, "install", data.id, "updated", data.trfIssued ? "Tech Request Form issued" : "Tech Request Form unmarked");
 	}
