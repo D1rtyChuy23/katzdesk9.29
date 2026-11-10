@@ -28,17 +28,17 @@ test("the Equipment import keeps a unit's install date when its file has none", 
     const read = async () => (await q("select install_date, electrical, ownership, serial from account_equipment where id = $1", [id]))[0];
 
     // A file row with no install date, electrical or ownership: all three stay.
-    await q(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null]);
+    await q(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null, null]);
     assert.deepEqual(await read(), { install_date: "2025-11-14", electrical: "120V", ownership: "Loaned", serial: "TG-1" });
 
     // A file row with a date still sets it.
-    await q(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", "2026-01-05", null, null]);
+    await q(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", "2026-01-05", null, null, null]);
     assert.equal((await read()).install_date, "2026-01-05");
   } finally {
     await pg.close();
   }
   // The import runs that statement, not one of its own.
-  assert.match(src("src/lib/ops/account-equip-import.ts"), /await sql\.query\(importUpdateUnitSql\(\), \[unit\.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership\]\)/);
+  assert.match(src("src/lib/ops/account-equip-import.ts"), /await sql\.query\(importUpdateUnitSql\(\), \[unit\.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber\]\)/);
 });
 
 test("Add equipment isn't offered on a walk-in ticket", () => {

@@ -4,7 +4,7 @@ import { poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { canAddEquipmentTo, sameUnitModel } from "@/lib/ops/account-equip";
-import { listAccountEquipment, mergeAccountEquipment, removeAccountEquipment } from "@/lib/ops/account-equip-import";
+import { listAccountEquipment, listRetiredEquipment, mergeAccountEquipment, removeAccountEquipment, restoreAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
 import { formatShortDate, money } from "@/lib/ops/clock";
@@ -183,13 +183,14 @@ export function AccountEquipmentList({
   const [open, setOpen] = useState<"add" | number | null>(null);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["account-equipment"] });
+    void qc.invalidateQueries({ queryKey: ["account-equipment-retired"] });
     void qc.invalidateQueries({ queryKey: ["inspection"] });
     void qc.invalidateQueries({ queryKey: ["installs"] });
   };
   const remove = useMutation({
     mutationFn: (id: number) => removeAccountEquipment({ data: { id } }),
     onSuccess: () => {
-      toast.success("Removed from this account");
+      toast.success("Moved to this account's Retired list");
       refresh();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
@@ -277,7 +278,8 @@ export function AccountEquipmentList({
                       title={row.lockedBy ? `Locked by ${row.lockedBy}` : undefined}
                       data-testid="remove-account-unit"
                       onClick={() => {
-                        if (window.confirm(`Remove ${row.equipmentName || row.catalogModel}${row.serial ? ` SN ${row.serial}` : ""} from this account?`)) {
+                        const what = `${row.equipmentName || row.catalogModel}${row.serial ? ` SN ${row.serial}` : ""}`;
+                        if (window.confirm(`Remove ${what} from this account?\n\nIt moves to this account's Retired list, with its record, and can be put back.`)) {
                           remove.mutate(row.id!);
                         }
                       }}
@@ -312,7 +314,57 @@ export function AccountEquipmentList({
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">No imported equipment on this account yet.</p>
       )}
+      {customer ? <RetiredUnits customer={customer} onChanged={refresh} /> : null}
     </section>
+  );
+}
+
+/**
+ * Machines taken off this account (11/9): each keeps its record and can be put back. Shown only when there are any.
+ */
+function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: () => void }) {
+  const retired = useQuery({
+    queryKey: ["account-equipment-retired", customer.toLowerCase()],
+    queryFn: () => listRetiredEquipment({ data: { customer } }),
+  });
+  const putBack = useMutation({
+    mutationFn: (id: number) => restoreAccountEquipment({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Back on this account");
+      onChanged();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not put it back"),
+  });
+  const rows = retired.data ?? [];
+  if (!rows.length) return null;
+  return (
+    <details className="mt-3 rounded-xl border border-border bg-card" data-testid="account-equipment-retired">
+      <summary className="cursor-pointer px-3 py-2.5 text-sm font-medium max-sm:py-3">
+        Retired <span className="text-muted-foreground">· {rows.length}</span>
+      </summary>
+      <ul className="divide-y divide-border border-t border-border">
+        {rows.map((r) => (
+          <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5" data-testid="retired-unit">
+            <span className="min-w-0">
+              <span className="block font-medium">{r.equipmentName || r.catalogModel}</span>
+              <span className="block text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                {[
+                  r.partNumber ? `Part # ${r.partNumber}` : null,
+                  r.serial ? `SN ${r.serial}` : "No serial",
+                  `Removed ${formatShortDate(r.retiredAt)}${r.retiredName ? ` by ${r.retiredName}` : ""}`,
+                  r.records ? `${r.records} inspection or PM record${r.records === 1 ? "" : "s"} kept` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            </span>
+            <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={putBack.isPending} data-testid="put-back-unit" onClick={() => putBack.mutate(r.id)}>
+              Put back
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 

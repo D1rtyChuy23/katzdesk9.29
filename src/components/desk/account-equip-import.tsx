@@ -465,6 +465,7 @@ function PreviewBody({
                   <td className="px-3 py-2 align-top whitespace-nowrap max-sm:order-2 max-sm:col-start-2 max-sm:p-0 max-sm:whitespace-normal max-sm:break-words">
                     <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Serial</span>
                     {r.serial || "—"}
+                    {r.partNumber ? <span className="block text-[11px] text-muted-foreground">Part # {r.partNumber}</span> : null}
                   </td>
                   <td className="px-3 py-2 align-top whitespace-nowrap max-sm:order-2 max-sm:col-start-3 max-sm:p-0">
                     <span className="mb-0.5 block text-[11px] font-medium tracking-wide text-muted-foreground uppercase sm:hidden">Install date</span>

@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { getDuplicateSerials } from "@/lib/ops/account-equip-import";
 import { listUnitMismatches } from "@/lib/ops/inspection-api";
+import { formatShortDate } from "@/lib/ops/clock";
 import { notLoadedText } from "@/lib/ops/load-problem";
 
 export const Route = createFileRoute("/_app/unit-mismatches")({ component: Page });
@@ -13,6 +15,9 @@ export const Route = createFileRoute("/_app/unit-mismatches")({ component: Page 
 function Page() {
   const q = useQuery({ queryKey: ["unit-mismatches"], queryFn: () => listUnitMismatches() });
   const rows = q.data ?? [];
+  // Serials on more than one account unit (11/9): a read-only list to clear before a rule can refuse them.
+  const dupes = useQuery({ queryKey: ["duplicate-serials"], queryFn: () => getDuplicateSerials() });
+  const doubled = dupes.data ?? [];
   return (
     <div>
       <header>
@@ -105,6 +110,44 @@ function Page() {
           </li>
         ))}
       </ul>
+
+      <section className="mt-10" data-testid="duplicate-serials">
+        <h2 className="font-display text-xl font-medium tracking-tight">Serials On More Than One Unit</h2>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          A serial should be on one machine. Open each account and, on its Equipment tab, Merge the two units when they're the same
+          machine on one account, or Remove the one that's wrong. Nothing here changes on its own.
+        </p>
+        {dupes.isLoading ? <p className="mt-4 text-sm text-muted-foreground">Checking every account's equipment…</p> : null}
+        {dupes.isError ? <p className="mt-4 text-sm text-destructive">{notLoadedText(dupes, "duplicate serial")}</p> : null}
+        {dupes.data ? (
+          <p className="mt-4 text-sm text-muted-foreground" data-testid="duplicate-serial-count">
+            {doubled.length ? `${doubled.length} serial${doubled.length === 1 ? "" : "s"} to review` : "No serial is on more than one unit."}
+          </p>
+        ) : null}
+        <ul className="mt-4 grid gap-3">
+          {doubled.map((d) => (
+            <li key={d.serialKey} className="rounded-lg border border-border bg-card p-4" data-testid="duplicate-serial">
+              <p className="font-medium">SN {d.units[0]?.serial ?? d.serialKey}</p>
+              <ul className="mt-2 grid gap-1.5 text-sm">
+                {d.units.map((u) => (
+                  <li key={u.id} className="flex flex-wrap items-baseline gap-x-2">
+                    {u.customerId ? (
+                      <Link to="/customers" search={{ open: u.customerId }} className="text-primary underline-offset-4 hover:underline">
+                        {u.customer}
+                      </Link>
+                    ) : (
+                      <span>{u.customer}</span>
+                    )}
+                    <span className="text-muted-foreground">
+                      {[u.equipmentName, u.installDate ? `Installed ${formatShortDate(u.installDate)}` : null, u.locked ? "Locked" : null].filter(Boolean).join(" · ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

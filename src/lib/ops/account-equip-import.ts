@@ -7,13 +7,16 @@ import { normalizeHeader } from "@/lib/ops/corrigo";
 import { catalogNames, dropMergedRow, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
+import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
 import {
+  cleanPartNumber,
   isWalkIn,
   mapOwnership,
   matchAccount,
   matchCatalogModel,
   matchExistingUnit,
   OWNERSHIP_VALUES,
+  PART_NUMBER_MAX,
   parseInstallDate,
   parseSerial,
   sameCatalogModel,
@@ -58,6 +61,8 @@ export type EquipPreviewRow = {
   electrical: string | null;
   ownership: string | null;
   ownershipRaw: string;
+  /** The file's Part #, tidied. Null when the file has none: the unit keeps its own. */
+  partNumber: string | null;
   action: "add" | "update" | "review" | "skip";
   existingId: number | null;
   foreignAccount: string | null;
@@ -106,6 +111,12 @@ const HEADER_KEYS: Record<string, EquipCol> = {
   ownership: "ownership",
   owned: "ownership",
   owner: "ownership",
+  // "Part #" reads as "part": the header's # is dropped (11/9).
+  part: "partNumber",
+  "part number": "partNumber",
+  "part no": "partNumber",
+  "part num": "partNumber",
+  pn: "partNumber",
 };
 
 type EquipCol =
@@ -115,7 +126,8 @@ type EquipCol =
   | "serial"
   | "installDate"
   | "electrical"
-  | "ownership";
+  | "ownership"
+  | "partNumber";
 
 const ready = async () => {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -161,6 +173,7 @@ function mapRow(headers: EquipCol[], cells: string[]) {
     installDate: "",
     electrical: "",
     ownership: "",
+    partNumber: "",
   };
   headers.forEach((col, i) => {
     if (!col) return;
@@ -170,7 +183,8 @@ function mapRow(headers: EquipCol[], cells: string[]) {
   return rec;
 }
 
-function parseMatrix(matrix: string[][]) {
+/** The file's rows, by the columns its header row names. */
+export function parseEquipMatrix(matrix: string[][]) {
   let headerIdx = 0;
   let mapped: EquipCol[] = [];
   for (let i = 0; i < Math.min(matrix.length, 8); i++) {
@@ -274,7 +288,7 @@ async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<Ex
   }));
 }
 
-function buildPreviewRow(
+export function buildPreviewRow(
   rec: Record<EquipCol, string>,
   index: number,
   accounts: { id: number; name: string }[],
@@ -286,6 +300,8 @@ function buildPreviewRow(
   const serial = parseSerial(rec.serial);
   const installDate = parseInstallDate(rec.installDate);
   const owned = mapOwnership(rec.ownership);
+  const typedPart = cleanPartNumber(rec.partNumber);
+  const partTooLong = !!typedPart && typedPart.length > PART_NUMBER_MAX;
   const reviewReasons: string[] = [];
   if (account.status === "walk-in") reviewReasons.push("Walk-In — pick a KatzDesk account");
   if (account.status === "unmatched") reviewReasons.push("No matching account");
@@ -319,6 +335,10 @@ function buildPreviewRow(
     action = "review";
   }
 
+  if (partTooLong) {
+    action = "review";
+    reviewReasons.push(`The part number is too long (${PART_NUMBER_MAX} characters at most).`);
+  }
   const equipmentName = rec.equipmentName.trim() || rec.model.trim();
   return {
     key: `r${index}`,
@@ -337,6 +357,7 @@ function buildPreviewRow(
     electrical: rec.electrical.trim() || null,
     ownership: owned.value,
     ownershipRaw: owned.raw,
+    partNumber: partTooLong ? null : typedPart,
     action,
     existingId,
     foreignAccount,
@@ -355,7 +376,7 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<EquipPreview> => {
     if (data.base64.length > 16_000_000) throw new Error("That file is too large.");
     const matrix = fileToMatrix(data.base64);
-    const parsed = parseMatrix(matrix);
+    const parsed = parseEquipMatrix(matrix);
     const sql = await ready();
     const [accounts, catalog, existing] = await Promise.all([
       loadAccounts(sql),
@@ -389,6 +410,7 @@ const applyRow = z.object({
   electrical: z.string().nullable().optional(),
   ownership: z.string().nullable(),
   ownershipRaw: z.string().optional(),
+  partNumber: z.string().nullable().optional(),
   action: z.enum(["add", "update", "review", "skip"]),
   existingId: z.number().nullable().optional(),
   foreignAccount: z.string().nullable().optional(),
@@ -427,7 +449,7 @@ export async function ensureCatalogModel(
 
 /**
  * The import's update of a unit already on the account: $1 unit, $2 model, $3 name, $4 serial, $5 its key,
- * $6 install date, $7 electrical, $8 ownership. A file with no install date, electrical or ownership leaves the
+ * $6 install date, $7 electrical, $8 ownership, $9 Part #. A file with no install date, electrical, ownership or Part # leaves the
  * unit's own as it is (11/9: the date used to be blanked).
  */
 export function importUpdateUnitSql(): string {
@@ -439,8 +461,17 @@ export function importUpdateUnitSql(): string {
               install_date = coalesce($6::date, install_date),
               electrical = coalesce($7, electrical),
               ownership = coalesce($8, ownership),
+              part_number = coalesce($9, part_number),
               updated_at = now()
             where id = $1`;
+}
+
+/** The import's new units, `count` at a time: nine values each, in importUpdateUnitSql's order after the unit. */
+export function importInsertUnitsSql(count: number): string {
+  const rows = Array.from({ length: count }, (_, i) => `(${Array.from({ length: 9 }, (__, c) => `$${i * 9 + c + 1}`).join(", ")})`);
+  return `insert into account_equipment
+            (customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number)
+           values ${rows.join(",")}`;
 }
 
 export const applyAccountEquipImport = createServerFn({ method: "POST" })
@@ -512,6 +543,8 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
       const installDate = parseInstallDate(row.installDate);
       const electrical = row.electrical?.trim() || null;
       const key = serialKey(serial) || null;
+      const typedPart = cleanPartNumber(row.partNumber);
+      const partNumber = typedPart && typedPart.length <= PART_NUMBER_MAX ? typedPart : null;
 
       if (unit.action === "update" && unit.existingId) {
         if (unit.existingId < 0) {
@@ -526,6 +559,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
               installDate,
               electrical,
               ownership,
+              partNumber ?? inserts[idx][8],
             ];
             existing = existing.map((e) =>
               e.id === unit.existingId
@@ -535,7 +569,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
           }
           continue;
         }
-        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership]);
+        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber]);
         existing = existing.map((e) =>
           e.id === unit.existingId
             ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
@@ -555,6 +589,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
         installDate,
         electrical,
         ownership,
+        partNumber,
       ]);
       existing.push({
         id: tempId,
@@ -570,18 +605,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
     const chunk = 50;
     for (let i = 0; i < inserts.length; i += chunk) {
       const slice = inserts.slice(i, i + chunk);
-      const values: (string | number | null)[] = [];
-      const placeholders = slice.map((row, idx) => {
-        const b = idx * 8;
-        values.push(...row);
-        return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}, $${b + 8})`;
-      });
-      await sql.query(
-        `insert into account_equipment
-            (customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership)
-           values ${placeholders.join(",")}`,
-        values,
-      );
+      await sql.query(importInsertUnitsSql(slice.length), slice.flat());
     }
 
     return { added, updated, skipped, catalogAdded };
@@ -636,22 +660,54 @@ async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: nu
  * Take one equipment row off the account. Does not guess which duplicate is real. An open install whose visit has the
  * unit loses that machine from its equipment list too; left on the list, the next load made the unit again.
  */
-export async function removeEquipmentUnit(sql: Sql, id: number): Promise<{ id: number }> {
+export async function removeEquipmentUnit(sql: Sql, id: number, by?: RetiredBy | null): Promise<{ id: number }> {
   const row = (await sql.query<{ id: number }>("select id from account_equipment where id = $1", [id]))[0];
   if (!row) throw new Error("That unit is not on the account.");
   const mod = (await sql.query<{ module_id: string }>("select module_id from modules where assigned_unit_id = $1 limit 1", [id]))[0];
   if (mod) throw new Error(`Eversys module ${mod.module_id} is still on this unit. Swap it or return it first.`);
   await assertUnitUnlocked(sql, id);
-  await takeUnitOffOpenInstalls(sql, id);
-  await dropEquipmentLinks(sql, id);
-  await sql.query("delete from account_equipment where id = $1", [id]);
+  // Its record and its inspection and PM links are kept first (11/9): the machine is retired, not lost.
+  const retired = await retireUnitRecord(sql, id, by);
+  try {
+    await takeUnitOffOpenInstalls(sql, id);
+    await dropEquipmentLinks(sql, id);
+    await sql.query("delete from account_equipment where id = $1", [id]);
+  } catch (e) {
+    // Still on the account, so not retired.
+    if (retired != null) await dropRetiredRecord(sql, retired).catch(() => undefined);
+    throw e;
+  }
   return { id };
+}
+
+/** Who a removal is recorded under. */
+async function retiredBy(sql: Sql, userId: string | null | undefined): Promise<RetiredBy> {
+  if (!userId) return { userId: null, name: null };
+  const row = await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]);
+  return { userId, name: row[0]?.username || "Teammate" };
 }
 
 export const removeAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => removeEquipmentUnit(await ready(), data.id));
+  .handler(async ({ data, context }) => removeEquipmentUnit(await ready(), data.id, await retiredBy(await ready(), context.userId)));
+
+/** An account's retired machines (11/9). */
+export const listRetiredEquipment = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: { customer: string }) => z.object({ customer: z.string().min(1).max(300) }).parse(d))
+  .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer));
+
+/** Put a retired machine back on its account. */
+export const restoreAccountEquipment = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data }) => restoreRetiredUnit(await ready(), data.id));
+
+/** Serials that are on more than one account unit. Read only. */
+export const getDuplicateSerials = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async () => listDuplicateSerials(await ready()));
 
 /**
  * Keep one account unit and drop the other. A short leftover serial (such as "L") is replaced by the longer one.

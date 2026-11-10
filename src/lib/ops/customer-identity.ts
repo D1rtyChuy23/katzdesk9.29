@@ -100,6 +100,8 @@ const FOLLOWERS = [
   `update modules set location = $1, updated_at = now() where assigned_unit_id is not null and lower(location) = lower($2) and location is distinct from $1`,
   `update assets set stock_hold_customer = $1, updated_at = now() where lower(stock_hold_customer) = lower($2) and stock_hold_customer is distinct from $1`,
   `update asset_stock_actions set customer = $1 where status = 'pending' and lower(customer) = lower($2) and customer is distinct from $1`,
+  // A machine retired from the account stays on its Retired list.
+  `update account_equipment_retired set customer = $1 where lower(customer) = lower($2) and customer is distinct from $1`,
 ];
 
 /** Every table that stores a customer as a name string (the join key). */
