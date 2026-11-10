@@ -307,7 +307,8 @@ function PreviewBody({
   const notesOf = (r: CorrigoPreviewRow) => (r.action === "skip" ? [] : (r.descriptionNotes ?? []));
   const descKept = applicable.filter((r) => notesOf(r).some((n) => !n.warn && n.text.includes("adds nothing new"))).length;
   const descFlagged = applicable.filter((r) => notesOf(r).some((n) => n.warn)).length;
-  const descFilled = applicable.filter((r) => !!r.workDoneFill).length;
+  const descFilled = applicable.filter((r) => !!r.workDoneFill && !r.workDoneFrom).length;
+  const descFuller = applicable.filter((r) => !!r.workDoneFill && !!r.workDoneFrom).length;
   const rowWarned = (r: CorrigoPreviewRow) =>
     !!statusWarning(r, hasStatusColumn) || !!r.needsReview || !!r.conflictIds?.length || r.wrapRepeat || !!r.completedNote || !!r.poNote || (r.action === "create" && !r.createdAt)
     || !!r.descriptionNotes?.some((n) => n.warn);
@@ -397,7 +398,7 @@ function PreviewBody({
             Fill it on the ticket, or export the report with its Created column.
           </li>
         ) : null}
-        {descKept || descFlagged || descFilled ? (
+        {descKept || descFlagged || descFilled || descFuller ? (
           <li
             className={`rounded-lg border px-3 py-2 ${descFlagged ? "border-warning/40 bg-warning/10" : "border-border bg-muted/40"}`}
             data-testid="corrigo-description-notes"
@@ -407,6 +408,7 @@ function PreviewBody({
               descKept ? `${descKept} kept as saved (Corrigo's text adds nothing new)` : null,
               descFlagged ? `${descFlagged} to check (cut off and different, or shorter; Warnings only lists them)` : null,
               descFilled ? `${descFilled} blank Description${descFilled === 1 ? "" : "s"} of work filled from the Problem Description` : null,
+              descFuller ? `${descFuller} cut-off Description${descFuller === 1 ? "" : "s"} of work replaced with Corrigo's fuller text` : null,
             ]
               .filter(Boolean)
               .join(" · ")}
