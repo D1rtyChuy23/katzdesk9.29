@@ -199,3 +199,65 @@ test("the preview shows each note, counts them, and lists the warned ones under 
   assert.match(screen, /\|\| !!r\.descriptionNotes\?\.some\(\(n\) => n\.warn\)/);
   assert.match(screen, /data-testid="corrigo-description-notes"/);
 });
+
+// Chuy, 11/10 (option 2): a Description of work filled from a cut-off Problem Description takes a later, fuller one.
+// Text that says something Corrigo's doesn't (a tech's own words) stays.
+test("a fill that was cut off takes Corrigo's fuller text later; a tech's own words stay", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    const pm = async (wo, workDone) => Number((await query("insert into pm_jobs (customer, status, wo, work_done) values ('ZZ Test Diner', 'Scheduled', $1, $2) returning id", [wo, workDone]))[0].id);
+    const cut = await pm("WO-3001", "ZZ Test Brewer XL: Clean and replace the System 3 filte");
+    const typed = await pm("WO-3002", "Tech: replaced the System 3 filter and the gasket.");
+    const same = await pm("WO-3003", "ZZ Test Brewer XL: Clean and replace the System 3 filter");
+    const late = await pm("WO-3004", "ZZ Test Brewer XL: Clean and replace the System 3 filte");
+    const segs = [
+      "ZZ Test Brewer XL:OTHER:Clean/Replac...",
+      "ZZ Test Brewer XL:OTHER:Clean and replace the System 3 filter, then test brew volumes",
+    ];
+    const install = Number((await query("insert into installs (customer, wo, work_done) values ('ZZ Test Cafe', 'WO-3005', $1) returning id", ["ZZ Test Brewer XL: Clean/Replac..."]))[0].id);
+    const preview = await previewCorrigoRecords(sql, file([
+      ["3001", "Open", "ZZ Test Diner", "PM", segs[1], ""],
+      ["3002", "Open", "ZZ Test Diner", "PM", segs[1], ""],
+      ["3003", "Open", "ZZ Test Diner", "PM", "ZZ Test Brewer XL:OTHER:Clean and replace the System 3 filter", ""],
+      ["3004", "Open", "ZZ Test Diner", "PM", segs[1], ""],
+      ["3005", "Open", "ZZ Test Cafe", "Request", segs[1], "Install"],
+    ]));
+    const full = "ZZ Test Brewer XL: Clean and replace the System 3 filter, then test brew volumes";
+    assert.equal(one(preview, "WO-3001").workDoneFill, full);
+    assert.equal(one(preview, "WO-3001").workDoneFrom, "ZZ Test Brewer XL: Clean and replace the System 3 filte");
+    assert.deepEqual(one(preview, "WO-3001").descriptionNotes, [{ text: "Description of work ← Corrigo's fuller Problem Description (55 → 80 characters)", warn: false }]);
+    assert.deepEqual([one(preview, "WO-3002").workDoneFill, one(preview, "WO-3002").workDoneFrom], [null, null]);
+    assert.deepEqual(one(preview, "WO-3002").descriptionNotes, [{ text: "Description of work kept: it already has text", warn: false }]);
+    assert.deepEqual([one(preview, "WO-3003").workDoneFill, one(preview, "WO-3003").descriptionNotes], [null, null]);
+    assert.equal(one(preview, "WO-3005").board, "install");
+    assert.equal(one(preview, "WO-3005").workDoneFill, full);
+    // Someone edits WO-3004 after the preview: their text stays.
+    await query("update pm_jobs set work_done = 'Edited after the preview.' where id = $1", [late]);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    const workOf = async (table, id) => (await query(`select work_done from ${table} where id = $1`, [id]))[0].work_done;
+    assert.deepEqual(
+      [await workOf("pm_jobs", cut), await workOf("pm_jobs", typed), await workOf("pm_jobs", same), await workOf("pm_jobs", late), await workOf("installs", install)],
+      [full, "Tech: replaced the System 3 filter and the gasket.", "ZZ Test Brewer XL: Clean and replace the System 3 filter", "Edited after the preview.", full],
+    );
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the fuller-text check reads each line as its own segment, so a line cut mid-word above another still matches", () => {
+  const saved = "ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the bur";
+  const fuller = "ZZ Test Brewer XL: Replace the filter cartridge\nZZ Test Grinder Q: Check the burrs and the chute";
+  // Lines already in "Machine: text" form aren't Corrigo's segmented form: they read as they are.
+  assert.equal(C.descriptionLines(saved), saved);
+  assert.equal(C.addsNothingNew(saved, fuller), true);
+  assert.equal(C.addsNothingNew("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the chute", fuller), true);
+  assert.equal(C.addsNothingNew("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the hopper", fuller), false);
+  assert.equal(C.addsNothingNew("ZZ Test Brewer XL: Replace the gasket", fuller), false);
+});
+
+test("the preview counts fuller fills apart from blank ones", () => {
+  const screen = src("src/components/desk/corrigo-import.tsx");
+  assert.match(screen, /const descFuller = applicable\.filter\(\(r\) => !!r\.workDoneFill && !!r\.workDoneFrom\)\.length;/);
+  assert.match(screen, /const descFilled = applicable\.filter\(\(r\) => !!r\.workDoneFill && !r\.workDoneFrom\)\.length;/);
+  assert.match(screen, /Description\$\{descFuller === 1 \? "" : "s"\} of work replaced with Corrigo's fuller text/);
+});

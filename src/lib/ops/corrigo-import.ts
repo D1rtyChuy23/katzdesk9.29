@@ -495,6 +495,7 @@ const applyRow = z.object({
   completedRaw: z.string().nullable().optional(),
   workDone: z.string().nullable(),
   workDoneFill: z.string().nullable().optional(),
+  workDoneFrom: z.string().nullable().optional(),
   issue: z.string().nullable(),
   wrapRepeat: z.boolean().optional(),
   shared: z.string().nullable().optional(),
@@ -685,7 +686,8 @@ export async function applyCorrigoRows(
         const status = boardStatus("pm", row.statusRaw, row.completedAt, cur[0].status).status;
         const technician = row.technician || cur[0].technician;
         // Corrigo's Work Done when the file has it; else a blank Description of work takes the Problem Description (11/10).
-        // The blank check is in the statement, so text typed since the preview stays.
+        // The blank check is in the statement, so text typed since the preview stays. A cut-off fill the preview saw
+        // (workDoneFrom) takes the fuller text only while it is still exactly that.
         const workDone = row.workDone?.trim() || null;
         const reopened = corrigoReopens("pm", row.statusRaw, row.completedAt, cur[0].status, row.completedRaw);
         const date = completedOnUpdate(row.completedAt, cur[0].completed_at, null, reopened);
@@ -695,13 +697,13 @@ export async function applyCorrigoRows(
         const done = CLOSED_PM.has(status);
         await sql.query(
           `update pm_jobs set
-              technician = $2, completed_at = $3, work_done = coalesce(nullif(btrim($4::text), ''), case when coalesce(btrim(work_done), '') = '' then $12::text else work_done end), status = $5,
+              technician = $2, completed_at = $3, work_done = coalesce(nullif(btrim($4::text), ''), case when coalesce(btrim(work_done), '') = '' then $12::text when $13::text is not null and work_done = $13::text then $12::text else work_done end), status = $5,
               wo = $6, done = $7, customer = $8,
               service_location = coalesce($9, service_location), corrigo_id = coalesce($10, corrigo_id),
               received = coalesce(received, $11::date),
               updated_at = now()
             where id = $1`,
-          [jobId, technician, completedAt, workDone, status, keptWo, done, customer, row.serviceLocation ?? null, row.corrigoId ?? null, row.createdAt ?? null, row.workDoneFill ?? null],
+          [jobId, technician, completedAt, workDone, status, keptWo, done, customer, row.serviceLocation ?? null, row.corrigoId ?? null, row.createdAt ?? null, row.workDoneFill ?? null, row.workDoneFrom ?? null],
         );
         await logCorrigo(
           sql,
@@ -756,10 +758,10 @@ export async function applyCorrigoRows(
         const primary = cur[0].wo?.trim() || keptWo;
         await sql.query(
           `update installs set
-              technician = $2, completed_at = $3, work_done = coalesce(nullif(btrim($4::text), ''), case when coalesce(btrim(work_done), '') = '' then $9::text else work_done end), equip_status = $5,
+              technician = $2, completed_at = $3, work_done = coalesce(nullif(btrim($4::text), ''), case when coalesce(btrim(work_done), '') = '' then $9::text when $10::text is not null and work_done = $10::text then $9::text else work_done end), equip_status = $5,
               wo = $6, complete = $7, customer = $8, updated_at = now()
             where id = $1`,
-          [jobId, technician, completedAt, workDone, equipStatus, primary, complete, customer, row.workDoneFill ?? null],
+          [jobId, technician, completedAt, workDone, equipStatus, primary, complete, customer, row.workDoneFill ?? null, row.workDoneFrom ?? null],
         );
         await recordInstallWo(sql, jobId, { wo: keptWo, status: row.statusRaw, completedAt: row.completedAt, source: "corrigo", addedBy: actor });
         // A new customer takes the install's own account units with it, as the install window does.

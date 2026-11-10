@@ -352,6 +352,11 @@ export type CorrigoPreviewRow = {
   descriptionNotes?: { text: string; warn: boolean }[] | null;
   /** A PM's or install's Description of work when it is blank (a new one, or blank when Confirm writes): one line per segment. */
   workDoneFill?: string | null;
+  /**
+   * The Description of work workDoneFill replaces when it isn't blank (11/10): a fill Corrigo cut off, which its fuller
+   * text now says all of and more. Confirm writes only while the saved text is still exactly this.
+   */
+  workDoneFrom?: string | null;
   /** The work order's Corrigo created date: a new ticket's received date. A new ticket without one stays blank. */
   createdAt?: string | null;
   serviceLocation?: string | null;
@@ -1556,11 +1561,12 @@ const sameText = (a: string | null | undefined, b: string | null | undefined) =>
  * Corrigo's descriptions (11/10). A report export writes each machine's text as "Equipment:Type:text", joined with ";",
  * and cuts the field at about 256 characters ("..." at the end) or a segment mid-word. Plain text stays as it is.
  */
-const SEGMENT = /^([^:;]+):([^:;]+):(.*)$/;
+// One line at most: text saved as "Machine: text" lines isn't read as Corrigo's form.
+const SEGMENT = /^([^:;\n]+):([^:;\n]+):(.*)$/;
 
 /** The text's segments, each with its machine when the text is in Corrigo's segmented form; null when it is plain. */
 function descriptionSegments(text: string): { equipment: string | null; text: string }[] | null {
-  const parts = text.split(";").map((p) => p.trim()).filter(Boolean);
+  const parts = text.split(/[;\n]/).map((p) => p.trim()).filter(Boolean);
   if (!parts.some((p) => SEGMENT.test(p))) return null;
   return parts.map((p) => {
     const m = SEGMENT.exec(p);
@@ -1572,7 +1578,8 @@ function descriptionSegments(text: string): { equipment: string | null; text: st
 function descriptionWords(text: string | null | undefined): string[][] {
   const raw = String(text ?? "").trim();
   if (!raw) return [];
-  const parts = descriptionSegments(raw)?.map((p) => p.text) ?? raw.split(";");
+  // Each line is a segment too: a Description of work filled from Corrigo has one line per machine.
+  const parts = descriptionSegments(raw)?.map((p) => p.text) ?? raw.split(/[;\n]/);
   return parts.map((p) => p.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((w) => w.length);
 }
 
@@ -1666,6 +1673,7 @@ function descriptionFields(rec: CorrigoRecord, existing: CorrigoHit | null, boar
   let workDone = rec.workDone?.trim() || null;
   if (workDone && existing && !refresh("Description of work", workDone, existing.workDone).change) workDone = null;
   let workDoneFill: string | null = null;
+  let workDoneFrom: string | null = null;
   if ((board === "pm" || board === "install") && !rec.workDone?.trim()) {
     const lines = descriptionLines(rec.issue);
     if (lines && !existing) {
@@ -1674,11 +1682,20 @@ function descriptionFields(rec: CorrigoRecord, existing: CorrigoHit | null, boar
     } else if (lines && !existing?.workDone?.trim()) {
       workDoneFill = lines;
       notes.push({ text: "Description of work ← Corrigo's Problem Description (blank today)", warn: false });
-    } else if (lines) {
-      notes.push({ text: "Description of work kept: it already has text", warn: false });
+    } else if (lines && existing?.workDone && !sameText(existing.workDone, lines)) {
+      const saved = existing.workDone;
+      // A fill Corrigo cut off ("…System 3 filte") takes the fuller text, which says all of it and more (Chuy, 11/10).
+      // Anything else (a tech's own words) stays.
+      if (addsNothingNew(saved, lines)) {
+        workDoneFill = lines;
+        workDoneFrom = saved;
+        notes.push({ text: `Description of work ← Corrigo's fuller Problem Description (${saved.trim().length} → ${lines.length} characters)`, warn: false });
+      } else {
+        notes.push({ text: "Description of work kept: it already has text", warn: false });
+      }
     }
   }
-  return { issueChange, equipmentChange, workDone, workDoneFill, descriptionNotes: notes.length ? notes : null };
+  return { issueChange, equipmentChange, workDone, workDoneFill, workDoneFrom, descriptionNotes: notes.length ? notes : null };
 }
 
 /**
