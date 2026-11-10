@@ -242,6 +242,8 @@ export type CorrigoHit = {
   po?: string | null;
   issue?: string | null;
   equipment?: string | null;
+  /** The Description of work saved now (every board). */
+  workDone?: string | null;
   invoiced?: boolean;
   corrigoId?: string | null;
   /** Installs only: every work order the install carries (the primary included), with Corrigo's status for each. */
@@ -342,6 +344,14 @@ export type CorrigoPreviewRow = {
   /** Service and TLC updates: the issue and equipment the file refreshes (old → new). */
   issueChange?: { from: string | null; to: string } | null;
   equipmentChange?: { from: string | null; to: string } | null;
+  /**
+   * What the import does with each description (11/10): a cut-off or reformatted copy that adds nothing is kept back,
+   * one that is cut and differs is kept back and flagged, a shorter one is flagged, and a PM's or install's blank
+   * Description of work takes Corrigo's Problem Description.
+   */
+  descriptionNotes?: { text: string; warn: boolean }[] | null;
+  /** A PM's or install's Description of work when it is blank (a new one, or blank when Confirm writes): one line per segment. */
+  workDoneFill?: string | null;
   /** The work order's Corrigo created date: a new ticket's received date. A new ticket without one stays blank. */
   createdAt?: string | null;
   serviceLocation?: string | null;
@@ -1533,6 +1543,7 @@ export function resolvePreviewRow(
         ? { status: woHit.status, completedAt: woHit.completedAt ?? null, wos: woHit.wos ?? [] }
         : null,
     ...ticketFields(rec, existing, board, route.note),
+    ...descriptionFields(rec, existing, board),
   };
   // An install's other work orders decide what this one does to its status.
   return settleInstallRows([row])[0]!;
@@ -1542,8 +1553,137 @@ const sameText = (a: string | null | undefined, b: string | null | undefined) =>
   String(a ?? "").replace(/\s+/g, " ").trim() === String(b ?? "").replace(/\s+/g, " ").trim();
 
 /**
+ * Corrigo's descriptions (11/10). A report export writes each machine's text as "Equipment:Type:text", joined with ";",
+ * and cuts the field at about 256 characters ("..." at the end) or a segment mid-word. Plain text stays as it is.
+ */
+const SEGMENT = /^([^:;]+):([^:;]+):(.*)$/;
+
+/** The text's segments, each with its machine when the text is in Corrigo's segmented form; null when it is plain. */
+function descriptionSegments(text: string): { equipment: string | null; text: string }[] | null {
+  const parts = text.split(";").map((p) => p.trim()).filter(Boolean);
+  if (!parts.some((p) => SEGMENT.test(p))) return null;
+  return parts.map((p) => {
+    const m = SEGMENT.exec(p);
+    return m ? { equipment: m[1]!.trim(), text: m[3]!.trim() } : { equipment: null, text: p };
+  });
+}
+
+/** Each segment's words: lowercase, letters and digits only, with the machine and Type leads left out. */
+function descriptionWords(text: string | null | undefined): string[][] {
+  const raw = String(text ?? "").trim();
+  if (!raw) return [];
+  const parts = descriptionSegments(raw)?.map((p) => p.text) ?? raw.split(";");
+  return parts.map((p) => p.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((w) => w.length);
+}
+
+/**
+ * True when every word of Corrigo's text is a word of the stored text, in the same order, so it says nothing new
+ * (a cut-off or reformatted copy). The last word of each segment may be the start of a stored word: a cut lands mid-word.
+ */
+export function addsNothingNew(file: string | null | undefined, stored: string | null | undefined): boolean {
+  const have = descriptionWords(stored).flat();
+  const segments = descriptionWords(file);
+  if (!have.length || !segments.length) return false;
+  let at = 0;
+  for (const words of segments) {
+    for (let i = 0; i < words.length; i += 1) {
+      const last = i === words.length - 1;
+      while (at < have.length && !(last ? have[at]!.startsWith(words[i]!) : have[at] === words[i])) at += 1;
+      if (at >= have.length) return false;
+      at += 1;
+    }
+  }
+  return true;
+}
+
+/**
+ * Corrigo cut the text off: it ends in "..." or an ellipsis, or it runs to the report's cap (250 to 256 characters; the
+ * cut copies Grok measured all land there). A longer text, as a Detail View export gives, is whole.
+ */
+export function looksCutOff(text: string | null | undefined): boolean {
+  const t = String(text ?? "").trim();
+  if (!t) return false;
+  return /(\.\.\.|…)$/.test(t) || (t.length >= 250 && t.length <= 256);
+}
+
+/** Corrigo's text as a Description of work: one line per segment, "Machine: text"; plain text as it is. */
+export function descriptionLines(text: string | null | undefined): string | null {
+  const raw = String(text ?? "").trim();
+  if (!raw) return null;
+  const parts = descriptionSegments(raw);
+  if (!parts) return raw;
+  const lines = parts.map((p) => (p.equipment ? `${p.equipment}: ${p.text}`.trim() : p.text)).filter(Boolean);
+  return lines.join("\n") || null;
+}
+
+export type DescriptionNote = { text: string; warn: boolean };
+
+/**
+ * What an update does with one description (the ticket's issue and equipment, or any Description of work): the change
+ * to write (old → new), or none, and the note the preview shows.
+ */
+export function descriptionRefresh(
+  label: string,
+  file: string | null | undefined,
+  stored: string | null | undefined,
+): { change: { from: string | null; to: string } | null; note: DescriptionNote | null } {
+  const to = String(file ?? "").trim();
+  const from = String(stored ?? "").trim();
+  if (!to || sameText(to, from)) return { change: null, note: null };
+  if (!from) return { change: { from: null, to }, note: null };
+  if (addsNothingNew(to, from)) {
+    return { change: null, note: { text: `${label} kept: Corrigo's text adds nothing new (${from.length} → ${to.length} characters)`, warn: false } };
+  }
+  if (looksCutOff(to)) return { change: null, note: { text: `${label} kept: Corrigo's text is cut off and differs. Check it`, warn: true } };
+  return {
+    change: { from, to },
+    note: to.length < from.length ? { text: `${label} is shorter in Corrigo (${from.length} → ${to.length} characters)`, warn: true } : null,
+  };
+}
+
+/**
+ * A row's descriptions (11/10). Service and TLC updates refresh the issue and equipment by descriptionRefresh; any
+ * update does the same with Corrigo's Work Done (null keeps the saved text). A PM or install with no Work Done in the
+ * file takes the Problem Description, one line per segment, as its Description of work when that is blank.
+ */
+function descriptionFields(rec: CorrigoRecord, existing: CorrigoHit | null, board: CorrigoBoard): Partial<CorrigoPreviewRow> {
+  const ticket = board === "service" || board === "tlc";
+  const notes: DescriptionNote[] = [];
+  const refresh = (label: string, file: string | null | undefined, stored: string | null | undefined) => {
+    const out = descriptionRefresh(label, file, stored);
+    if (out.note) notes.push(out.note);
+    return out;
+  };
+  const issueChange = ticket && existing ? refresh("Description", rec.issue, existing.issue).change : null;
+  // A new ticket takes the file's equipment as it is.
+  const equipmentChange = existing
+    ? ticket
+      ? refresh("Equipment", rec.equipment, existing.equipment).change
+      : null
+    : ticket && rec.equipment?.trim()
+      ? { from: null, to: rec.equipment.trim() }
+      : null;
+  let workDone = rec.workDone?.trim() || null;
+  if (workDone && existing && !refresh("Description of work", workDone, existing.workDone).change) workDone = null;
+  let workDoneFill: string | null = null;
+  if ((board === "pm" || board === "install") && !rec.workDone?.trim()) {
+    const lines = descriptionLines(rec.issue);
+    if (lines && !existing) {
+      workDoneFill = lines;
+      notes.push({ text: "Description of work ← Corrigo's Problem Description", warn: false });
+    } else if (lines && !existing?.workDone?.trim()) {
+      workDoneFill = lines;
+      notes.push({ text: "Description of work ← Corrigo's Problem Description (blank today)", warn: false });
+    } else if (lines) {
+      notes.push({ text: "Description of work kept: it already has text", warn: false });
+    }
+  }
+  return { issueChange, equipmentChange, workDone, workDoneFill, descriptionNotes: notes.length ? notes : null };
+}
+
+/**
  * What a row carries besides status and dates (10/28): the P.O., the issue and equipment an update refreshes (service and
- * TLC tickets; PMs and installs keep their curated machines), Corrigo's location, contact, ids and net, and a new
+ * TLC tickets, by descriptionFields; PMs and installs keep their curated machines), Corrigo's location, contact, ids and net, and a new
  * ticket's Type and urgency. A billed or invoiced ticket keeps its P.O.
  */
 function ticketFields(rec: CorrigoRecord, existing: CorrigoHit | null, board: CorrigoBoard, typeNote: string | null): Partial<CorrigoPreviewRow> {
@@ -1556,17 +1696,12 @@ function ticketFields(rec: CorrigoRecord, existing: CorrigoHit | null, board: Co
     if (billed) poNote = `P.O. kept (${existing.po || "none"}): the ticket is ${existing.invoiced ? "invoiced" : `billed on ${existing.billedSo}`}`;
     else poChange = { from: existing.po?.trim() || null, to: po };
   }
-  const refresh = (file: string | null | undefined, now: string | null | undefined) =>
-    ticket && existing && String(file ?? "").trim() && !sameText(file, now) ? { from: now?.trim() || null, to: String(file).trim() } : null;
   const urgency = urgencyFor(rec.priority);
   return {
     po,
     oldPo: existing?.po ?? null,
     poChange,
     poNote,
-    issueChange: refresh(rec.issue, existing?.issue),
-    // A new ticket takes the file's equipment as it is.
-    equipmentChange: existing ? refresh(rec.equipment, existing.equipment) : ticket && rec.equipment?.trim() ? { from: null, to: rec.equipment.trim() } : null,
     createdAt: rec.createdAt ?? null,
     serviceLocation: rec.serviceLocation?.trim() || null,
     contact: rec.contact?.trim() || null,
