@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { nextCallId } from "@/lib/ops/call-id";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
@@ -305,23 +306,6 @@ async function findExistingHit(
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
   return pickKeeper(preferFileCustomerInstalls(attachableHits(group, fileCustomer, rolled, today, row), fileCustomer), preferredBoard);
-}
-
-async function nextCallId(sql: Awaited<ReturnType<typeof getSql>>, received: string) {
-  const ym = received.replace(/-/g, "").slice(0, 6);
-  const prefix = `SC-${ym}-`;
-  const last = await sql.query<{ call_id: string }>(
-    `select call_id from service_jobs
-      where call_id like $1
-      order by call_id desc limit 1`,
-    [prefix + "%"],
-  );
-  let seq = 1;
-  if (last[0]) {
-    const n = Number(last[0].call_id.slice(-3));
-    if (Number.isFinite(n)) seq = n + 1;
-  }
-  return `${prefix}${String(seq).padStart(3, "0")}`;
 }
 
 /**
