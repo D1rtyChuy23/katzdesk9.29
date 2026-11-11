@@ -1,0 +1,8 @@
+{
+  "name": "archify",
+  "description": "Validated architecture, workflow, sequence, data-flow, lifecycle, ERD, class, tree, timeline and waterfall diagrams as explorable standalone HTML. Vendored from github.com/tt-a1i/archify (MIT), commit c21c31f.",
+  "version": "3.1.0",
+  "author": { "name": "tt-a1i" },
+  "homepage": "https://github.com/tt-a1i/archify",
+  "license": "MIT"
+}
