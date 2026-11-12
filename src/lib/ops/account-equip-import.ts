@@ -383,7 +383,11 @@ const modelWords = (s: string) => (s.toLowerCase().match(/[a-z0-9+]+/g) ?? []).f
 export function extraModelWords(fileModel: string, catalogModel: string): string[] {
   const cat = modelWords(catalogModel);
   const joined = cat.join("");
-  return modelWords(fileModel).filter((w) => !cat.includes(w) && !joined.includes(w));
+  const words = modelWords(fileModel);
+  // Written together counts as there: three characters or more inside the name, or a short word joined to its
+  // neighbor as one catalog word ("1152" + "V+" = "1152V+"). "S" is not in "Classic", "M" not in "Shotmaster" (11/12).
+  const withNeighbor = (i: number) => (i > 0 && cat.includes(words[i - 1]! + words[i]!)) || (i < words.length - 1 && cat.includes(words[i]! + words[i + 1]!));
+  return words.filter((w, i) => !cat.includes(w) && !(w.length >= 3 && joined.includes(w)) && !withNeighbor(i));
 }
 
 /** Model numbers in a name: two digits or more, not a voltage or wattage ("120V", "1800W"; "1131V+" is a model). */
@@ -410,19 +414,23 @@ export const pairKeyOf = (fileModel: string) => fileModel.toLowerCase().replace(
 
 const letters = (x: string | null | undefined) => String(x ?? "").toLowerCase().replace(/[^a-z0-9+]+/g, "");
 
-/** Words a catalog name may add that only describe the machine: its kind, finish, voltage, size. */
+/**
+ * Words a catalog name may add that only describe the machine: its kind and finish. Not sizes, groups, steps or
+ * "dual" / "single", which tell variants apart (11/12 review); "Dual Portion" is one describing phrase.
+ */
 const DESCRIPTOR_WORDS = new Set([
-  "dual", "single", "portion", "grinder", "grinders", "brewer", "brewers", "thermal", "carafe", "espresso", "hopper",
-  "batch", "button", "buttons", "blk", "black", "retail", "flip", "tray", "w", "with", "classic", "step", "and", "the",
+  "grinder", "grinders", "brewer", "brewers", "thermal", "carafe", "espresso", "hopper", "batch", "button", "buttons",
+  "blk", "black", "retail", "flip", "tray", "w", "with", "and", "the",
 ]);
 
-/** A catalog name with its describing parts taken out: voltages, wattages, gallons, inches, "6 Batch Buttons", "2 Step". */
+/** A catalog name with its describing parts taken out: voltages, wattages, inches, "Dual Portion", "6 Batch Buttons". */
 function catalogCore(name: string): string {
   return name
     .toLowerCase()
-    .replace(/\d+(?:\.\d+)?\s*(?:v|w|hz|g|gal)\b(?!\+)/g, " ")
+    .replace(/\d+(?:\.\d+)?\s*(?:v|w|hz)\b(?!\+)/g, " ")
     .replace(/\d+(?:\.\d+)?\s*(?:"|”|in\b|inch)/g, " ")
-    .replace(/\d+\s*(?=(?:batch|step|portion|buttons?)\b)/g, " ");
+    .replace(/\b(?:dual|single)[\s-]+portion\b/g, " ")
+    .replace(/\d+\s*(?=(?:batch|buttons?)\b)/g, " ");
 }
 
 /**
@@ -434,7 +442,7 @@ export function sameMachineWritten(fileModel: string, catalogModel: string): boo
   if (extraModelWords(fileModel, catalogModel).length) return false;
   const fileWords = new Set(modelWords(fileModel));
   const joined = [...fileWords].join("");
-  const extra = (catalogCore(catalogModel).match(/[a-z0-9+]+/g) ?? []).filter((w) => !fileWords.has(w) && !joined.includes(w));
+  const extra = (catalogCore(catalogModel).match(/[a-z0-9+]+/g) ?? []).filter((w) => !fileWords.has(w) && !(w.length >= 3 && joined.includes(w)));
   return extra.every((w) => DESCRIPTOR_WORDS.has(w));
 }
 
@@ -467,13 +475,19 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
     const byPart = part ? catalogByLetters.get(letters(part.description)) ?? catalogByLetters.get(letters(part.sku)) ?? null : null;
     const exact = catalogByLetters.get(letters(fileModel)) ?? null;
     const sameWritten = topMatched && sameMachineWritten(fileModel, topMatched) ? topMatched : null;
-    const suggestion = byPart ?? exact ?? sameWritten ?? null;
+    // The live part's catalog name backs a suggestion only when it is the file's machine too; a part named as another
+    // catalog model never replaces the file's Confirmed Model (11/12 review: a 220's rows carrying the 312's part).
+    const partAgrees = byPart && (letters(byPart) === letters(fileModel) || sameMachineWritten(fileModel, byPart)) ? byPart : null;
+    const suggestion = exact ?? partAgrees ?? sameWritten ?? null;
     const suggestNew = !suggestion && !!fileModel.trim();
     const catalogModel = suggestion ?? (suggestNew ? fileModel.trim() : null);
     const warnings: string[] = [];
     const notes: string[] = [];
     if (topMatched && !suggestion) warnings.push(`Not suggested: ${topMatched}. It reads as another machine.`);
-    if (suggestion && !byPart) {
+    if (byPart && byPart !== suggestion) {
+      warnings.push(`Part # ${partNumber} is ${part!.sku}, named as the catalog's ${byPart}; the file says ${fileModel}.`);
+    }
+    if (suggestion) {
       const extra = extraModelWords(fileModel, suggestion);
       if (extra.length) warnings.push(`The file says "${extra.join(" ")}"; the catalog model doesn't.`);
     }

@@ -7,7 +7,7 @@ import {
   type EquipPreview,
   type EquipPreviewRow,
 } from "@/lib/ops/account-equip-import";
-import { isWalkIn, OWNERSHIP_VALUES } from "@/lib/ops/account-equip";
+import { isWalkIn, OWNERSHIP_VALUES, PART_NUMBER_MAX } from "@/lib/ops/account-equip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -226,8 +226,13 @@ function PreviewBody({
       for (const row of preview.rows) {
         if (row.pairKey !== p.key) continue;
         const d = out[row.key] ?? draftFor(row);
-        if (d.modelSet) continue;
-        const nd = { ...d, catalogModel: next.catalogModel, addCatalog: next.addCatalog, partNumber: next.partNumber?.trim() || undefined };
+        const partNumber = next.partNumber?.trim() || undefined;
+        // A row whose model was picked on the row keeps that model, but the pairing's Part # still reaches it.
+        if (d.modelSet) {
+          out[row.key] = { ...d, partNumber };
+          continue;
+        }
+        const nd = { ...d, catalogModel: next.catalogModel, addCatalog: next.addCatalog, partNumber };
         const ok = next.confirmed && !!nd.customer.trim() && !isWalkIn(nd.customer) && !!nd.catalogModel.trim() && !row.foreignAccount && !row.holdReasons?.length;
         out[row.key] = { ...nd, selected: next.confirmed ? ok : false };
       }
@@ -733,10 +738,13 @@ function PairingsPanel({
               className="h-9 w-56 rounded-md border border-input bg-background px-2 text-sm max-sm:w-full"
               data-testid="equip-import-pairing-part"
             />
+            {(parts[p.key]?.trim().length ?? 0) > PART_NUMBER_MAX ? (
+              <span className="basis-full text-xs text-destructive">A Part # is {PART_NUMBER_MAX} characters at most.</span>
+            ) : null}
             <Button
               type="button"
               size="sm"
-              disabled={pending || !pick.trim()}
+              disabled={pending || !pick.trim() || (parts[p.key]?.trim().length ?? 0) > PART_NUMBER_MAX}
               onClick={() => onDecide(p, { confirmed: true, catalogModel: pick.trim(), addCatalog: !known(pick), partNumber: parts[p.key]?.trim() || undefined })}
             >
               {known(pick) || !pick.trim() ? `Use for ${p.rows} row${p.rows === 1 ? "" : "s"}` : `Add model and use for ${p.rows}`}
