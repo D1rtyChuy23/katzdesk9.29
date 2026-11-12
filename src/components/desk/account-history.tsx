@@ -170,6 +170,8 @@ export function AccountEquipmentList({
     ownership: string | null;
     /** Typed from the data plate or NetSuite, to tell variants of one model apart. */
     partNumber?: string | null;
+    /** Excellent, Good, Fair or Poor, from the verified units list (11/12). */
+    condition?: string | null;
     /** What Edit sends back, so a window opened before another save can't save over it. */
     seen?: string;
     /** Locked by the owner: Remove and Merge are off until it is unlocked. */
@@ -244,6 +246,7 @@ export function AccountEquipmentList({
                     row.serial ? `SN ${row.serial}` : "No serial",
                     row.ownership,
                     row.installDate ? `Installed ${formatShortDate(row.installDate)}` : null,
+                    row.condition ? `Condition ${row.condition}` : null,
                   ]
                     .filter(Boolean)
                     .join(" · ")}

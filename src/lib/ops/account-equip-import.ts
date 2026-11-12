@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
+import { mpnKey } from "@/lib/ops/mpn-rules";
 import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
@@ -36,6 +37,8 @@ export type AccountEquipRow = {
   ownership: string | null;
   /** Typed from the data plate or NetSuite, to tell variants of one model apart (Chuy, 11/9). */
   partNumber: string | null;
+  /** Excellent, Good, Fair or Poor, as the verified units list gives it (11/12). */
+  condition: string | null;
   updatedAt: string;
   /** updated_at as Postgres writes it: Edit sends it back, so a window opened before another save can't save over it. */
   seen: string;
@@ -63,18 +66,51 @@ export type EquipPreviewRow = {
   ownershipRaw: string;
   /** The file's Part #, tidied. Null when the file has none: the unit keeps its own. */
   partNumber: string | null;
+  /** The file's condition, tidied. Null when the file has none: the unit keeps its own. */
+  condition: string | null;
+  /** The file's site address, and the matched account's address: a street number that differs holds the row. */
+  site: string | null;
+  accountAddress: string | null;
+  /** The model pairing this row belongs to (file model → catalog model): see EquipPairing. */
+  pairKey: string;
+  /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
+  holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
   existingId: number | null;
   foreignAccount: string | null;
   reviewReasons: string[];
 };
 
+/**
+ * One file model and the catalog model the rows of it were matched to (11/12). A pairing whose names differ, or whose
+ * Part # reads as another model, is confirmed once for all its rows before any of them is imported.
+ */
+export type EquipPairing = {
+  key: string;
+  fileModel: string;
+  /** The Part # most of its rows carry. */
+  partNumber: string | null;
+  /** The live part that Part # is, when there is one. */
+  partSku: string | null;
+  partDescription: string | null;
+  catalogModel: string | null;
+  status: "matched" | "unmatched" | "ambiguous";
+  candidates: string[];
+  rows: number;
+  /** True when someone has to say this pairing is right (names differ, or a warning). */
+  needsConfirm: boolean;
+  warnings: string[];
+};
+
 export type EquipPreview = {
   addCount: number;
   updateCount: number;
   reviewCount: number;
+  /** Rows held for a site that doesn't match, or a pairing still to confirm. */
+  heldCount: number;
   skipped: number;
   rows: EquipPreviewRow[];
+  pairings: EquipPairing[];
 };
 
 export type EquipApplyResult = {
@@ -85,6 +121,14 @@ export type EquipApplyResult = {
 };
 
 const HEADER_KEYS: Record<string, EquipCol> = {
+  // The verified units list's own headers (11/12), so it loads as it is.
+  "equipment name as entered": "equipmentName",
+  "confirmed model": "model",
+  "site address": "site",
+  site: "site",
+  "site addr": "site",
+  condition: "condition",
+  mpn: "partNumber",
   "customer name": "customer",
   customer: "customer",
   account: "customer",
@@ -127,7 +171,9 @@ type EquipCol =
   | "installDate"
   | "electrical"
   | "ownership"
-  | "partNumber";
+  | "partNumber"
+  | "site"
+  | "condition";
 
 const ready = async () => {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -188,6 +234,8 @@ function mapRow(headers: EquipCol[], cells: string[], shown?: string[]) {
     electrical: "",
     ownership: "",
     partNumber: "",
+    site: "",
+    condition: "",
   };
   headers.forEach((col, i) => {
     if (!col) return;
@@ -239,6 +287,7 @@ function mapDbUnit(r: {
   electrical: string | null;
   ownership: string | null;
   part_number?: string | null;
+  condition?: string | null;
   updated_at: string;
   seen?: string;
   locked_at?: unknown;
@@ -258,6 +307,7 @@ function mapDbUnit(r: {
     electrical: r.electrical,
     ownership: r.ownership,
     partNumber: r.part_number ?? null,
+    condition: r.condition ?? null,
     updatedAt: String(r.updated_at ?? ""),
     seen: r.seen ?? "",
   };
@@ -271,9 +321,125 @@ async function loadCatalog(sql: Awaited<ReturnType<typeof getSql>>): Promise<str
 }
 
 async function loadAccounts(sql: Awaited<ReturnType<typeof getSql>>) {
-  return sql.query<{ id: number; name: string }>(
-    `select id, name from directory_customers where archived = false and coalesce(name,'') <> '' order by lower(name)`,
+  return sql.query<{ id: number; name: string; address: string | null }>(
+    `select id, name, address from directory_customers where archived = false and coalesce(name,'') <> '' order by lower(name)`,
   );
+}
+
+export type ImportPart = { sku: string; mpn: string | null; description: string | null };
+
+/** Live parts by MPN key and by SKU key, to read what a file's Part # is (11/12). */
+async function loadParts(sql: Awaited<ReturnType<typeof getSql>>): Promise<Map<string, ImportPart>> {
+  const rows = await sql
+    .query<{ sku: string; mfr_part: string | null; description: string | null }>(
+      `select sku, mfr_part, description from billing_items where hidden_at is null and merged_into is null`,
+    )
+    .catch(() => []);
+  const byKey = new Map<string, ImportPart>();
+  for (const r of rows) {
+    const part = { sku: r.sku, mpn: r.mfr_part, description: r.description };
+    const m = mpnKey(r.mfr_part);
+    if (m && !byKey.has(m)) byKey.set(m, part);
+  }
+  for (const r of rows) {
+    const k = mpnKey(r.sku);
+    if (k && !byKey.has(k)) byKey.set(k, { sku: r.sku, mpn: r.mfr_part, description: r.description });
+  }
+  return byKey;
+}
+
+const CONDITIONS = ["Excellent", "Good", "Fair", "Poor"] as const;
+export const CONDITION_MAX = 40;
+
+/** A file's condition: one of the four as written any way round, else the text as it is. */
+export function cleanCondition(raw: string | null | undefined): string | null {
+  const s = String(raw ?? "").replace(/\s+/g, " ").trim();
+  if (!s) return null;
+  return CONDITIONS.find((c) => c.toLowerCase() === s.toLowerCase()) ?? s;
+}
+
+const streetNumber = (s: string | null | undefined): string | null => /^\s*(\d+)[a-z]?\b/i.exec(String(s ?? ""))?.[1] ?? null;
+
+/**
+ * The file's site against the account's address (11/12): when both start with a street number and the numbers differ,
+ * the machine is likely at another site. A site written as a name ("Crave Cupcakes - Uptown"), or an account with no
+ * address, isn't checked.
+ */
+export function siteMismatch(site: string | null | undefined, address: string | null | undefined): boolean {
+  const a = streetNumber(site);
+  const b = streetNumber(address);
+  return !!a && !!b && a !== b;
+}
+
+const MODEL_STOP = new Set(["w", "with", "and", "the", "of"]);
+const modelWords = (s: string) => (s.toLowerCase().match(/[a-z0-9+]+/g) ?? []).filter((w) => !MODEL_STOP.has(w));
+
+/** Words of the file's model that the catalog name doesn't have ("NS" in "ITCB-DV (NS)", "manual"). */
+export function extraModelWords(fileModel: string, catalogModel: string): string[] {
+  const cat = modelWords(catalogModel);
+  const joined = cat.join("");
+  return modelWords(fileModel).filter((w) => !cat.includes(w) && !joined.includes(w));
+}
+
+/** Model numbers in a name: two digits or more, not a voltage, wattage or a Part #'s own digits. */
+const modelNumbers = (s: string) =>
+  new Set(
+    (s.toLowerCase().replace(/\d+(?:\.\d+)?\s*(?:v|w|hz|a)\b/g, " ").match(/\d{2,}/g) ?? []).map((n) => n.replace(/^0+/, "")),
+  );
+
+/** The live part's SKU or description carries a model number the catalog name doesn't, and none it does: 312 vs 220. */
+export function partModelConflict(part: ImportPart | null | undefined, catalogModel: string): boolean {
+  if (!part) return false;
+  const cat = modelNumbers(catalogModel);
+  const fromPart = modelNumbers(`${part.sku} ${part.description ?? ""}`);
+  if (!cat.size || !fromPart.size) return false;
+  return ![...fromPart].some((n) => cat.has(n));
+}
+
+/**
+ * A pairing's key: the file's model (or name) and the catalog model it was matched to. Every letter and digit counts,
+ * words in brackets too: "ITCB-DV (NS)" is a different pairing from "ITCB-DV".
+ */
+export const pairKeyOf = (fileModel: string, catalogModel: string | null) =>
+  `${fileModel.toLowerCase().replace(/[^a-z0-9+]+/g, "")}|${(catalogModel ?? "").toLowerCase()}`;
+
+/** The rows' model pairings, the ones to decide first (11/12). */
+export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, ImportPart>): EquipPairing[] {
+  const groups = new Map<string, EquipPreviewRow[]>();
+  for (const r of rows) groups.set(r.pairKey, [...(groups.get(r.pairKey) ?? []), r]);
+  const out: EquipPairing[] = [];
+  for (const [key, members] of groups) {
+    const first = members[0]!;
+    const fileModel = first.fileModel || first.equipmentName;
+    const counts = new Map<string, number>();
+    for (const m of members) if (m.partNumber) counts.set(m.partNumber, (counts.get(m.partNumber) ?? 0) + 1);
+    const partNumber = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const part = partNumber ? parts.get(mpnKey(partNumber)) ?? null : null;
+    const warnings: string[] = [];
+    if (first.catalogModel) {
+      const extra = extraModelWords(fileModel, first.catalogModel);
+      if (extra.length) warnings.push(`The file says "${extra.join(" ")}"; the catalog model doesn't.`);
+      if (partModelConflict(part, first.catalogModel)) warnings.push(`Part # ${partNumber} is ${part!.sku}${part!.description ? ` (${part!.description})` : ""}, which reads as another model.`);
+    }
+    const letters = (x: string) => x.toLowerCase().replace(/[^a-z0-9+]+/g, "");
+    const differs = !!first.catalogModel && letters(fileModel) !== letters(first.catalogModel);
+    out.push({
+      key,
+      fileModel,
+      partNumber,
+      partSku: part?.sku ?? null,
+      partDescription: part?.description ?? null,
+      catalogModel: first.catalogModel,
+      status: first.modelStatus,
+      candidates: first.modelCandidates,
+      rows: members.length,
+      needsConfirm: first.modelStatus === "matched" && (differs || warnings.length > 0),
+      warnings,
+    });
+  }
+  // To decide first: warnings, then names that differ, then no or several catalog models; most rows first.
+  const rank = (p: EquipPairing) => (p.warnings.length ? 0 : p.needsConfirm ? 1 : p.status !== "matched" ? 2 : 3);
+  return out.sort((a, b) => rank(a) - rank(b) || b.rows - a.rows || a.fileModel.localeCompare(b.fileModel));
 }
 
 async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<ExistingUnit[]> {
@@ -305,7 +471,7 @@ async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<Ex
 export function buildPreviewRow(
   rec: Record<EquipCol, string>,
   index: number,
-  accounts: { id: number; name: string }[],
+  accounts: { id: number; name: string; address?: string | null }[],
   catalog: string[],
   existing: ExistingUnit[],
 ): EquipPreviewRow {
@@ -353,6 +519,18 @@ export function buildPreviewRow(
     action = "review";
     reviewReasons.push(`The part number is too long (${PART_NUMBER_MAX} characters at most).`);
   }
+  const condition = cleanCondition(rec.condition);
+  const conditionTooLong = !!condition && condition.length > CONDITION_MAX;
+  if (conditionTooLong) {
+    action = "review";
+    reviewReasons.push(`The condition is too long (${CONDITION_MAX} characters at most).`);
+  }
+  const site = String(rec.site ?? "").replace(/\s+/g, " ").trim() || null;
+  const accountAddress = (accounts.find((a) => a.id === account.account?.id)?.address ?? "").trim() || null;
+  const holdReasons: string[] = [];
+  if (customerName && siteMismatch(site, accountAddress)) {
+    holdReasons.push(`Site ${site} doesn't match ${customerName} at ${accountAddress}`);
+  }
   const equipmentName = rec.equipmentName.trim() || rec.model.trim();
   return {
     key: `r${index}`,
@@ -372,6 +550,11 @@ export function buildPreviewRow(
     ownership: owned.value,
     ownershipRaw: owned.raw,
     partNumber: partTooLong ? null : typedPart,
+    condition: conditionTooLong ? null : condition,
+    site,
+    accountAddress,
+    pairKey: pairKeyOf(rec.model.trim() || equipmentName, catalogModel),
+    holdReasons,
     action,
     existingId,
     foreignAccount,
@@ -392,18 +575,24 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
     const { matrix, shown } = fileToMatrix(data.base64);
     const parsed = parseEquipMatrix(matrix, shown);
     const sql = await ready();
-    const [accounts, catalog, existing] = await Promise.all([
+    const [accounts, catalog, existing, parts] = await Promise.all([
       loadAccounts(sql),
       loadCatalog(sql),
       loadExisting(sql),
+      loadParts(sql),
     ]);
     const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing));
+    const pairings = buildPairings(rows, parts);
+    const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
+    const live = rows.filter((r) => r.action === "add" || r.action === "update");
     return {
       addCount: rows.filter((r) => r.action === "add").length,
       updateCount: rows.filter((r) => r.action === "update").length,
       reviewCount: rows.filter((r) => r.action === "review").length,
+      heldCount: live.filter((r) => r.holdReasons.length || toConfirm.has(r.pairKey)).length,
       skipped: parsed.skipped,
       rows,
+      pairings,
     };
   });
 
@@ -425,6 +614,11 @@ const applyRow = z.object({
   ownership: z.string().nullable(),
   ownershipRaw: z.string().optional(),
   partNumber: z.string().nullable().optional(),
+  condition: z.string().nullable().optional(),
+  site: z.string().nullable().optional(),
+  accountAddress: z.string().nullable().optional(),
+  pairKey: z.string().optional(),
+  holdReasons: z.array(z.string()).optional(),
   action: z.enum(["add", "update", "review", "skip"]),
   existingId: z.number().nullable().optional(),
   foreignAccount: z.string().nullable().optional(),
@@ -463,8 +657,8 @@ export async function ensureCatalogModel(
 
 /**
  * The import's update of a unit already on the account: $1 unit, $2 model, $3 name, $4 serial, $5 its key,
- * $6 install date, $7 electrical, $8 ownership, $9 Part #. A file with no install date, electrical, ownership or Part # leaves the
- * unit's own as it is (11/9: the date used to be blanked).
+ * $6 install date, $7 electrical, $8 ownership, $9 Part #, $10 condition. A file with no install date, electrical, ownership,
+ * Part # or condition leaves the unit's own as it is (11/9: the date used to be blanked).
  */
 export function importUpdateUnitSql(): string {
   return `update account_equipment set
@@ -476,15 +670,16 @@ export function importUpdateUnitSql(): string {
               electrical = coalesce($7, electrical),
               ownership = coalesce($8, ownership),
               part_number = coalesce($9, part_number),
+              condition = coalesce($10, condition),
               updated_at = now()
             where id = $1`;
 }
 
-/** The import's new units, `count` at a time: nine values each, in importUpdateUnitSql's order after the unit. */
+/** The import's new units, `count` at a time: ten values each, in importUpdateUnitSql's order after the unit. */
 export function importInsertUnitsSql(count: number): string {
-  const rows = Array.from({ length: count }, (_, i) => `(${Array.from({ length: 9 }, (__, c) => `$${i * 9 + c + 1}`).join(", ")})`);
+  const rows = Array.from({ length: count }, (_, i) => `(${Array.from({ length: 10 }, (__, c) => `$${i * 10 + c + 1}`).join(", ")})`);
   return `insert into account_equipment
-            (customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number)
+            (customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition)
            values ${rows.join(",")}`;
 }
 
@@ -559,6 +754,8 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
       const key = serialKey(serial) || null;
       const typedPart = cleanPartNumber(row.partNumber);
       const partNumber = typedPart && typedPart.length <= PART_NUMBER_MAX ? typedPart : null;
+      const typedCondition = cleanCondition(row.condition);
+      const condition = typedCondition && typedCondition.length <= CONDITION_MAX ? typedCondition : null;
 
       if (unit.action === "update" && unit.existingId) {
         if (unit.existingId < 0) {
@@ -574,6 +771,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
               electrical,
               ownership,
               partNumber ?? inserts[idx][8],
+              condition ?? inserts[idx][9],
             ];
             existing = existing.map((e) =>
               e.id === unit.existingId
@@ -583,7 +781,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
           }
           continue;
         }
-        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber]);
+        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
         existing = existing.map((e) =>
           e.id === unit.existingId
             ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
@@ -604,6 +802,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
         electrical,
         ownership,
         partNumber,
+        condition,
       ]);
       existing.push({
         id: tempId,
@@ -629,7 +828,7 @@ const listInput = z.object({
   customer: z.string().optional(),
 });
 
-const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number,
+const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
               updated_at, updated_at::text as seen, locked_at, locked_by`;
 
 type UnitDbRow = Parameters<typeof mapDbUnit>[0];
