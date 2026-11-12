@@ -150,13 +150,19 @@ function stringifyCell(v: unknown): string {
   return s;
 }
 
-/** Scientific notation, as a spreadsheet shows a long number ("1.23457E+11"): not the number's own digits. */
-const SHOWN_AS_EXPONENT = /^[-+]?\d+(\.\d+)?e[-+]?\d+$/i;
-
 /**
- * The file's cells, and the same cells as the file shows them (11/12). A Part # reads as shown: "33200.0000" keeps
- * its zeros and "00123" its leading ones, which the number read drops.
+ * A cell as the file writes it, where that is the same value (11/12): text as typed ("33200.0000" keeps its zeros,
+ * which the number read drops), and a number shown with its zeros ("00123", "20201.1000"). A number shown another way
+ * ("33,200", "$12.00", "50%", "1.23457E+11") and a date read as before.
  */
+function asWritten(raw: unknown, shown: unknown): string {
+  if (typeof raw === "string") return raw;
+  const text = String(shown ?? "").trim();
+  if (typeof raw === "number" && /^[-+]?\d+(\.\d+)?$/.test(text) && Number(text) === raw) return text;
+  return stringifyCell(raw);
+}
+
+/** The file's cells, and the same cells as the file writes them: the Part # column reads the second (11/12). */
 export function fileToMatrix(base64: string): { matrix: string[][]; shown: string[][] } {
   const wb = XLSX.read(base64, { type: "base64", cellDates: true, raw: false });
   const name = wb.SheetNames[0];
@@ -164,11 +170,11 @@ export function fileToMatrix(base64: string): { matrix: string[][]; shown: strin
   const sheet = wb.Sheets[name];
   if (!sheet) throw new Error("The file has no sheets.");
   const opts = { header: 1 as const, defval: "", blankrows: false };
-  const matrix = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, opts);
+  const raw = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, opts);
   const shown = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, { ...opts, raw: false });
   return {
-    matrix: matrix.map((row) => (row ?? []).map(stringifyCell)),
-    shown: shown.map((row) => (row ?? []).map((v) => String(v ?? ""))),
+    matrix: raw.map((row) => (row ?? []).map(stringifyCell)),
+    shown: raw.map((row, r) => (row ?? []).map((v, c) => asWritten(v, shown[r]?.[c]))),
   };
 }
 
@@ -185,8 +191,7 @@ function mapRow(headers: EquipCol[], cells: string[], shown?: string[]) {
   };
   headers.forEach((col, i) => {
     if (!col) return;
-    const asShown = col === "partNumber" ? (shown?.[i] ?? "").trim() : "";
-    const v = (asShown && !SHOWN_AS_EXPONENT.test(asShown) ? asShown : cells[i] ?? "").trim();
+    const v = (col === "partNumber" && shown ? shown[i] ?? "" : cells[i] ?? "").trim();
     if (v && !rec[col]) rec[col] = v;
   });
   return rec;

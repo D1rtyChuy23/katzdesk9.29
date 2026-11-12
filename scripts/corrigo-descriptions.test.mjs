@@ -313,3 +313,19 @@ test("a PM whose Description of work is a tech's note keeps it through an import
     await pg.close();
   }
 });
+
+test("second review (11/12): a cut can leave any letters on a long line; a short note or one ending in ... is not a cut copy", () => {
+  const fuller = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due th", fuller), true, "a long line cut after two letters");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this week. T", fuller), true, "a long line cut after one letter");
+  // A tech's note that ends in ... or … still starts like Corrigo's line, or it stays.
+  assert.equal(C.isCutCopyOf("PM not done...", fuller), false);
+  assert.equal(C.isCutCopyOf("Not done…", fuller), false);
+  assert.equal(C.isCutCopyOf("PM not done...", "PM due this week. Tech not available until Friday. Call when done"), false, "same first word, then not");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM Friday...", fuller), true, "a cut copy that starts like Corrigo's line may skip words");
+  // One or two words are never a cut copy.
+  assert.equal(C.isCutCopyOf("No", "No hot water at the brewer"), false);
+  assert.equal(C.isCutCopyOf("PM", "PM due this week"), false);
+  assert.equal(C.isCutCopyOf("PM due", "PM due this week"), false);
+  assert.equal(C.isCutCopyOf("PM due this", "PM due this week"), true, "three words that start Corrigo's text");
+});

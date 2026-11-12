@@ -1605,24 +1605,34 @@ export function addsNothingNew(file: string | null | undefined, stored: string |
 
 /**
  * True when the saved text is a cut-off copy of Corrigo's fuller text (11/12), so the fuller text can take its place
- * without losing a word: line by line, each saved line is the start of the same Corrigo line, word for word. A line's
- * last word may be cut mid-word ("filte"), when it keeps at least three letters on a line of two words or more. Saved
- * text that itself ends cut off ("..." or the report's cap) may skip words, as addsNothingNew allows. A tech's own
- * words ("PM not done") never match, even when Corrigo's text uses the same words further on.
+ * without losing a word. Line by line, each saved line is the start of the same Corrigo line, word for word. A line's
+ * last word may be cut mid-word ("filte"): on a line of four words or more at any letter, on a shorter line when it
+ * keeps three letters. Saved text that itself ends cut off ("..." or the report's cap) may skip words inside a line
+ * ("Clean/Replac..."), but each line still starts with the same two words as Corrigo's. Text of fewer than three
+ * words is never a cut copy. So a tech's own words ("PM not done", "No") stay, even where Corrigo uses them further on.
  */
 export function isCutCopyOf(saved: string | null | undefined, fuller: string | null | undefined): boolean {
-  if (looksCutOff(saved)) return addsNothingNew(saved, fuller);
   const lines = descriptionWords(saved);
   const full = descriptionWords(fuller);
-  if (!lines.length || lines.length > full.length) return false;
+  if (lines.flat().length < 3 || lines.length > full.length) return false;
+  const loose = looksCutOff(saved);
   return lines.every((words, n) => {
     const target = full[n]!;
-    if (words.length > target.length) return false;
-    return words.every((w, i) => {
-      if (w === target[i]) return true;
-      const cut = i === words.length - 1 && words.length >= 2 && w.length >= 3;
-      return cut && target[i]!.startsWith(w);
-    });
+    const cutOk = (w: string, t: string) => t.startsWith(w) && (words.length >= 4 || w.length >= 3);
+    if (!loose) {
+      if (words.length > target.length) return false;
+      return words.every((w, i) => w === target[i] || (i === words.length - 1 && cutOk(w, target[i]!)));
+    }
+    const lead = Math.min(2, words.length);
+    for (let i = 0; i < lead; i += 1) if (words[i] !== target[i] && !(i === words.length - 1 && cutOk(words[i]!, target[i]!))) return false;
+    let at = lead;
+    for (let i = lead; i < words.length; i += 1) {
+      const last = i === words.length - 1;
+      while (at < target.length && !(words[i] === target[at] || (last && target[at]!.startsWith(words[i]!)))) at += 1;
+      if (at >= target.length) return false;
+      at += 1;
+    }
+    return true;
   });
 }
 

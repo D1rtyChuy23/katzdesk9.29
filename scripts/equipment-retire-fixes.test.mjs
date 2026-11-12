@@ -118,3 +118,72 @@ test("the Equipment import keeps a Part # as the file shows it: zeros after the 
   const xl = IMP.fileToMatrix(asBase64(wb));
   assert.deepEqual(IMP.parseEquipMatrix(xl.matrix, xl.shown).records.map((r) => r.partNumber), ["20201.1000", "33200.0000", "123456789012"]);
 });
+
+// Second review (11/12) of the fix above.
+test("a retired machine's row on a completed install doesn't write its serial onto another unit of the same model", async () => {
+  const { pg, sql, query, install, unit } = await fresh();
+  try {
+    const done = await install(true, "Test Grinder", "TG-1");
+    const id = await unit("Test Grinder", "TG-1");
+    await INS.syncInstallUnits(sql, done);
+    await IMP.removeEquipmentUnit(sql, id, BY);
+    const other = await unit("Test Grinder", null);
+    await INS.readInspection(sql, done);
+    assert.deepEqual(await units(query), [{ id: other, serial: null, install_date: "2025-01-01" }]);
+    const [{ id: retiredId }] = await query("select id from account_equipment_retired");
+    assert.deepEqual(await R.restoreRetiredUnit(sql, retiredId), { id });
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a retired machine whose serial was corrected on the account since stays retired on the completed install", async () => {
+  const { pg, sql, query, install } = await fresh();
+  try {
+    const done = await install(true, "Test Grinder", "L");
+    await INS.syncInstallUnits(sql, done);
+    const [{ id }] = await query("select id from account_equipment");
+    await query("update account_equipment set serial = 'TG-100', serial_key = 'tg-100' where id = $1", [id]);
+    await IMP.removeEquipmentUnit(sql, id, BY);
+    await INS.readInspection(sql, done);
+    assert.deepEqual(await units(query), []);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a list save on a completed install keeps its retired row retired and makes a machine typed onto the list", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const done = Number((await query("insert into installs (customer, complete, equipment, serial) values ('Test Steakhouse', true, 'Test Grinder', null) returning id"))[0].id);
+    await INS.syncInstallUnits(sql, done);
+    const [{ id }] = await query("select id from account_equipment");
+    await IMP.removeEquipmentUnit(sql, id, BY);
+    // An old list with no unit ids: the stored row is the retired grinder.
+    await query("update installs set machines = null where id = $1", [done]);
+    const before = { equipment: "Test Grinder", serial: null, power_voltage: null, machines: null };
+    await INS.syncInstallUnits(sql, done, { prune: true, before });
+    assert.deepEqual(await units(query), [], "the same list saved again");
+    await query("update installs set equipment = 'Test Grinder / Test Grinder', machines = null where id = $1", [done]);
+    await INS.syncInstallUnits(sql, done, { prune: true, before });
+    assert.equal((await units(query)).length, 1, "a second grinder typed onto the list is made");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a Part # shown with commas, a currency or a percent reads as before; one written with its zeros keeps them", () => {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["Customer", "Model", "Serial", "Part #"],
+    ["Test Steakhouse", "Test Grinder", "TG-7", 33200],
+    ["Test Steakhouse", "Test Grinder", "TG-8", 1234.5],
+    ["Test Steakhouse", "Test Grinder", "TG-9", 123],
+  ]);
+  ws.D2.z = "#,##0";
+  ws.D3.z = '"$"#,##0.00';
+  ws.D4.z = "00000";
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Units");
+  const xl = IMP.fileToMatrix(asBase64(wb));
+  assert.deepEqual(IMP.parseEquipMatrix(xl.matrix, xl.shown).records.map((r) => r.partNumber), ["33200", "1234.5", "00123"]);
+});
