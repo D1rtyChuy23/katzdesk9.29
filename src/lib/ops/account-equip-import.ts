@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames, dropMergedRow, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
+import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
@@ -683,7 +683,11 @@ export async function removeEquipmentUnit(sql: Sql, id: number, by?: RetiredBy |
   // Its record and its inspection and PM links are kept first (11/9): the machine is retired, not lost.
   const retired = await retireUnitRecord(sql, id, by);
   try {
-    await takeUnitOffOpenInstalls(sql, id);
+    const offLists = await takeUnitOffOpenInstalls(sql, id);
+    // The open installs whose list lost its row: Put back returns the row there, and nowhere else (11/12).
+    if (retired != null && offLists.length) {
+      await sql.query("update account_equipment_retired set links = links || jsonb_build_object('off_lists', $2::jsonb) where id = $1", [retired, JSON.stringify(offLists)]);
+    }
     await dropEquipmentLinks(sql, id);
     await sql.query("delete from account_equipment where id = $1", [id]);
   } catch (e) {
@@ -712,11 +716,21 @@ export const listRetiredEquipment = createServerFn({ method: "GET" })
   .validator((d: { customer: string }) => z.object({ customer: z.string().min(1).max(300) }).parse(d))
   .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer));
 
+/** Put a retired machine back on its account, and on the lists of the open installs Remove took it off (11/12). */
+export async function putBackEquipmentUnit(sql: Sql, retiredId: number): Promise<{ id: number }> {
+  const off = (
+    await sql.query<{ off: number[] | null }>("select links->'off_lists' as off from account_equipment_retired where id = $1", [retiredId])
+  )[0]?.off;
+  const back = await restoreRetiredUnit(sql, retiredId);
+  if (Array.isArray(off) && off.length) await putUnitBackOnOpenInstalls(sql, back.id, off.map(Number));
+  return back;
+}
+
 /** Put a retired machine back on its account. */
 export const restoreAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => restoreRetiredUnit(await ready(), data.id));
+  .handler(async ({ data }) => putBackEquipmentUnit(await ready(), data.id));
 
 /** Serials that are on more than one account unit. Read only. */
 export const getDuplicateSerials = createServerFn({ method: "GET" })

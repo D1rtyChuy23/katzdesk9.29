@@ -402,14 +402,22 @@ export type PricePlanLine = { status: PricePlanStatus; mpn: string; partId: numb
 /** Price file against the parts: matched on MPN only. No Match and shared MPNs stay in the preview and are never applied. */
 export function planPricing(rows: PriceFileRow[], stored: StoredPart[], target: PriceTarget): PricePlanLine[] {
   const mpns = byMpn(stored);
+  // Only live parts match (11/12), as in planPartImport: a hidden part, or one merged into another, never takes a
+  // price and never makes its live part's MPN shared. A row that matches only those is listed as hidden.
+  const isLive = (p: StoredPart) => !p.hidden && !p.mergedIntoSku;
   return rows.map((r): PricePlanLine => {
-    const hits = mpns.get(mpnKey(r.mpn)) ?? [];
+    const found = mpns.get(mpnKey(r.mpn)) ?? [];
+    const live = found.filter(isLive);
+    const hits = live.length ? live : found;
     const base = { mpn: r.mpn, newPrice: r.price };
     if (!hits.length) return { ...base, status: "no_match", partId: null, sku: null, description: null, oldPrice: null, pct: null };
+    if (!live.length) {
+      const p = hits[0]!;
+      return { ...base, status: "hidden", partId: p.id, sku: hits.map((h) => h.sku).join(", "), description: p.description, oldPrice: target === "list" ? p.listPrice : p.rate, pct: null };
+    }
     if (hits.length > 1) return { ...base, status: "shared_mpn", partId: null, sku: hits.map((h) => h.sku).join(", "), description: null, oldPrice: null, pct: null };
     const p = hits[0]!;
     const old = target === "list" ? p.listPrice : p.rate;
-    if (p.hidden) return { ...base, status: "hidden", partId: p.id, sku: p.sku, description: p.description, oldPrice: old, pct: null };
     const pct = old != null && old > 0 ? round2(((r.price - old) / old) * 100) : null;
     return { ...base, status: old === r.price ? "same" : "change", partId: p.id, sku: p.sku, description: p.description, oldPrice: old, pct };
   });
