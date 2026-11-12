@@ -135,3 +135,33 @@ test("the side menu has Assets → In the Field; the Warehouse role's menu doesn
   assert.match(page, /<DeskMap pins=\{pins\}/);
   assert.match(page, /fieldAssetsCsv\(rows, repOf\)/);
 });
+
+// Fable review of this page (11/12).
+test("a machine is listed once even when two accounts' names differ only in capitals or spaces; the live one wins", async () => {
+  const pg = new PGlite({ parsers: { 20: Number, 1082: (v) => v } });
+  try {
+    for (const name of files) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
+    const query = async (text, params) => (await pg.query(text, params)).rows;
+    const sql = Object.assign(async (strings, ...values) => query(strings.reduce((a, s, i) => `${a}$${i}${s}`), values), { query });
+    // Without the start-up index that keeps names unique whatever their capitals.
+    await query("insert into directory_customers (name, address, archived) values ('ACME', '9 Old Rd', true), ('Acme ', '1 New St', false)");
+    await query("insert into account_equipment (customer, catalog_model, equipment_name) values (' acme', 'Bunn TB3', 'Bunn TB3')");
+    const rows = await readFieldAssets(sql);
+    assert.equal(rows.length, 1);
+    assert.deepEqual([rows[0].address, rows[0].accountRemoved], ["1 New St", false]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("brand counts don't split on capitals; the export keeps a leading minus on a number and adds the byte-order mark", () => {
+  const rows = [asset(1, "A", "BUNN Axiom"), asset(2, "B", "Bunn TB3"), asset(3, "C", "Fetco CBS-62H")];
+  assert.deepEqual(F.countBy(rows, (r) => r.brand), [["BUNN", 2], ["Fetco", 1]]);
+  const csv = F.fieldAssetsCsv([asset(4, "D", "Bunn TB3", { serial: "-12", partNumber: "-abc" })], () => null);
+  assert.match(csv.split("\r\n")[1], /,-12,'-abc,/);
+  const page = src("src/routes/_app/assets.tsx");
+  assert.ok(page.includes("`\\uFEFF${fieldAssetsCsv(rows, repOf)}`"), "the export adds the byte-order mark");
+  assert.ok(page.includes("disabled={!rows.length || !geoReady}"));
+  assert.ok(page.includes("extraNames={geo.data?.reps}"));
+  assert.ok(page.includes("fitKey={JSON.stringify(filters)}"));
+});

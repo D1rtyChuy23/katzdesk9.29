@@ -52,6 +52,8 @@ function Page() {
   const conditions = useMemo(() => countBy(all, (r) => r.condition), [all]);
   const accounts = useMemo(() => byAccount(rows), [rows]);
   const filtered = Object.values(filters).some(Boolean);
+  // Reps and map pins come from the map's account list: until it is in, the rep filter, export and map wait for it.
+  const geoReady = !geo.isLoading && !geo.isError;
 
   return (
     <div>
@@ -92,7 +94,12 @@ function Page() {
           ))}
           <option value={NOT_SET}>Not set</option>
         </ToolbarSelect>
-        <RepFilter value={filters.rep ?? ""} onChange={(v) => set({ rep: v })} className="h-9 w-auto max-w-56 shrink-0 rounded-full pr-8" />
+        <RepFilter
+          value={filters.rep ?? ""}
+          onChange={(v) => set({ rep: v })}
+          extraNames={geo.data?.reps}
+          className={`h-9 w-auto max-w-56 shrink-0 rounded-full pr-8 ${geoReady ? "" : "pointer-events-none opacity-50"}`}
+        />
         {filtered ? (
           <Button type="button" size="sm" variant="ghost" onClick={() => setFilters({})} data-testid="assets-clear">
             <X className="size-4" /> Clear
@@ -115,14 +122,22 @@ function Page() {
           size="sm"
           variant="outline"
           className="ml-auto"
-          disabled={!rows.length}
-          onClick={() => downloadCsv(`KatzDesk-Assets-In-The-Field-${new Date().toISOString().slice(0, 10)}.csv`, fieldAssetsCsv(rows, repOf))}
+          disabled={!rows.length || !geoReady}
+          // The byte-order mark makes Excel read accents right ("Café"), as the other exports do.
+          onClick={() => downloadCsv(`KatzDesk-Assets-In-The-Field-${new Date().toISOString().slice(0, 10)}.csv`, `\uFEFF${fieldAssetsCsv(rows, repOf)}`)}
           data-testid="assets-export"
         >
           <Download className="size-4" /> Export CSV
         </Button>
       </div>
 
+      {geo.isError ? (
+        <p className="mt-3 text-sm text-warning" data-testid="assets-geo-error">
+          Reps and map pins couldn't load, so the rep filter, the map and the export's Rep column are off. Reload to try again.
+        </p>
+      ) : geo.isLoading ? (
+        <p className="mt-3 text-xs text-muted-foreground">Loading reps and map pins…</p>
+      ) : null}
       {q.isError ? (
         <p className="mt-4 text-sm text-destructive">Could not load the machines: {q.error instanceof Error ? q.error.message : "try again"}.</p>
       ) : q.isLoading ? (
@@ -130,7 +145,7 @@ function Page() {
       ) : view === "list" ? (
         <AssetList rows={rows} repOf={repOf} resetKey={filters} />
       ) : (
-        <AssetMap accounts={accounts} geo={geo} />
+        <AssetMap accounts={accounts} geo={geo} fitKey={JSON.stringify(filters)} />
       )}
     </div>
   );
@@ -191,7 +206,7 @@ function AssetList({ rows, repOf, resetKey }: { rows: FieldAsset[]; repOf: (c: s
 }
 
 /** One pin per account with machines, colored by rep, sized and numbered by how many. A pin opens its machines. */
-function AssetMap({ accounts, geo }: { accounts: Map<string, FieldAsset[]>; geo: ReturnType<typeof useGeoIndex> }) {
+function AssetMap({ accounts, geo, fitKey }: { accounts: Map<string, FieldAsset[]>; geo: ReturnType<typeof useGeoIndex>; fitKey: string }) {
   const [picked, setPicked] = useState<string | null>(null);
   const from = useFromHere("/customers");
   const { pins, noPin } = useMemo(() => {
@@ -225,7 +240,7 @@ function AssetMap({ accounts, geo }: { accounts: Map<string, FieldAsset[]>; geo:
           <MapPinOff className="size-3.5" /> {noPin} machine{noPin === 1 ? " is" : "s are"} at accounts with no map pin; they're in the list.
         </p>
       ) : null}
-      <DeskMap pins={pins} selectedId={picked} onPinClick={(p) => setPicked(String(p.id))} fitKey={`${pins.length}`} label="Assets map" className="h-[60vh] min-h-80 rounded-xl" />
+      <DeskMap pins={pins} selectedId={picked} onPinClick={(p) => setPicked(String(p.id))} fitKey={fitKey} label="Assets map" className="h-[60vh] min-h-80 rounded-xl" />
       {picked && list.length ? (
         <section className="mt-3 rounded-xl border border-border p-3" data-testid="assets-map-account">
           <div className="flex flex-wrap items-baseline justify-between gap-2">

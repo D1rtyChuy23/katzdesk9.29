@@ -3,6 +3,7 @@
  * account_equipment with the account each is on; these rules filter, count and export them, and group them by account
  * for the map. The page reads the account's pin and rep from the map's own account list.
  */
+import { csvCell } from "@/lib/ops/customer-export";
 
 /** One machine at a customer, as the Assets list shows it. */
 export type FieldAsset = {
@@ -69,14 +70,20 @@ export function filterFieldAssets(rows: readonly FieldAsset[], f: FieldFilters, 
   });
 }
 
-/** Each value of a field and how many machines have it, most first; blanks are left out. */
+/**
+ * Each value of a field and how many machines have it, most first; blanks are left out. Capitals don't make a second
+ * value ("BUNN" and "Bunn" count together under the spelling seen first), as the filters don't tell them apart either.
+ */
 export function countBy(rows: readonly FieldAsset[], pick: (r: FieldAsset) => string | null | undefined): [string, number][] {
-  const m = new Map<string, number>();
+  const m = new Map<string, [string, number]>();
   for (const r of rows) {
     const v = String(pick(r) ?? "").trim();
-    if (v) m.set(v, (m.get(v) ?? 0) + 1);
+    if (!v) continue;
+    const k = v.toLowerCase();
+    const cur = m.get(k);
+    m.set(k, [cur?.[0] ?? v, (cur?.[1] ?? 0) + 1]);
   }
-  return [...m].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return [...m.values()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
 /** The machines by account (lower-case name), for the map: one pin per account. */
@@ -91,14 +98,7 @@ export function byAccount(rows: readonly FieldAsset[]): Map<string, FieldAsset[]
 
 const CSV_HEADERS = ["Account", "Rep", "Address", "Brand", "Catalog Model", "Equipment Name", "Serial", "Part #", "Ownership", "Install Date", "Condition"];
 
-/** A spreadsheet cell: quoted when it needs to be, and a leading = + - @ made plain text so it can't run as a formula. */
-function csvCell(v: string | null | undefined): string {
-  let s = String(v ?? "");
-  if (/^[=+\-@]/.test(s)) s = `'${s}`;
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
-/** The filtered machines as CSV, the columns the page shows plus the rep. */
+/** The filtered machines as CSV, the columns the page shows plus the rep. Cells as the Customers export writes them. */
 export function fieldAssetsCsv(rows: readonly FieldAsset[], repOf: (customer: string) => string | null): string {
   const lines = [CSV_HEADERS.join(",")];
   for (const r of rows) {

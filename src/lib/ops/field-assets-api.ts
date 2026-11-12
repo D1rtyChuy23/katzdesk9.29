@@ -26,15 +26,22 @@ type Row = {
 };
 
 /**
- * Every machine on a customer account, with the account it is on (11/12). Read only. An account name is unique
- * whatever its capitals, so each machine finds at most one account; a removed account's machines are listed, flagged.
+ * Every machine on a customer account, with the account it is on (11/12). Read only. Each machine takes at most one
+ * account, by name whatever its capitals and outer spaces: a live one before a removed one, then the oldest, so a
+ * machine is never listed twice even if two accounts' names differ only in capitals. A removed account's machines are
+ * listed, flagged.
  */
 export async function readFieldAssets(sql: Sql): Promise<FieldAsset[]> {
   const rows = await sql.query<Row>(
-    `select a.id, a.customer, c.id as customer_id, c.archived, c.address, a.catalog_model, a.equipment_name, a.serial,
+    `with acct as (
+       select distinct on (lower(btrim(name))) lower(btrim(name)) as k, id, archived, address
+         from directory_customers
+        order by lower(btrim(name)), coalesce(archived, false), id
+     )
+     select a.id, a.customer, c.id as customer_id, c.archived, c.address, a.catalog_model, a.equipment_name, a.serial,
             a.part_number, a.ownership, a.install_date::text as install_date, a.condition
        from account_equipment a
-       left join directory_customers c on lower(c.name) = lower(a.customer)
+       left join acct c on c.k = lower(btrim(a.customer))
       order by lower(a.customer), lower(a.catalog_model), a.id`,
   );
   return rows.map((r) => ({
