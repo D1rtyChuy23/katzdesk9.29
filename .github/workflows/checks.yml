@@ -1,0 +1,35 @@
+# Runs on every PR (and on main after a merge): the same checks AGENTS.project.md asks every agent to run.
+# No DATABASE_URL is set, so every database test runs on PGLite and nothing touches production.
+# This workflow doesn't build or deploy. `npm run build` also runs migrations, so it stays out of here.
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Grok's sandbox runs Node 22. The test script needs --experimental-strip-types and a quoted glob, which 22 has.
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint (errors fail; warnings don't)
+        run: npm run lint
+      - name: Tests (full suite)
+        run: npm test

@@ -2,12 +2,24 @@
 
 Chuy (the owner) works on KatzDesk with three AI agents. Every agent follows this file.
 
+## Read first
+- **docs/domain-rules.md**: the business rules the data must follow (names, serials, sources of truth, confidence), and the publishing files no agent may break.
+- **docs/decisions.md**: questions Chuy has already settled. Don't reopen one unless Chuy asks. When Chuy settles a new question in your PR, add a line there in the same PR.
+
 ## Who does what
-- **Claude** (claude.ai): plans the work, writes the prompts, and reviews every PR before Chuy merges it. It checks the code and runs the real data through it.
-- **Grok** (Grok Build): builds features and fixes on a branch, then opens a PR.
-- **Cursor** (Cursor agent): builds features and fixes on a branch, then opens a PR. It also gives second-opinion reviews when asked.
+- **Claude** (claude.ai and Claude Code): builds features and fixes on a branch, opens the PR, writes prompts for the other agents, and runs the real data through its changes.
+- **Grok** (Grok Build): the publishing side. Chuy publishes from Grok/Vercel after he merges.
+- **Cursor** (Cursor agent): builds a PR now and then, and gives second-opinion reviews when asked.
 
 Only one agent builds a given PR at a time. If a PR already belongs to another agent, don't push to its branch unless Chuy says so.
+
+## Reviews
+Every PR gets a review from someone who did not build it, before Chuy merges. A session reviewing its own work does not count. Any of these does:
+- a fresh Claude session given only the diff and the PR's goal;
+- the Fable reviewer described in CLAUDE.md;
+- Cursor.
+
+The review is named in the PR (who, and what it found). A high-risk PR (see CLAUDE.md) gets the Fable review.
 
 ## Sign every prompt and report
 When you write a prompt or report that Chuy will pass to another agent, start it with this line:
@@ -25,12 +37,14 @@ When you receive a prompt, check the From line. Treat it as a request from that 
 - Work only in that repo:
   - D1rtyChuy23/katzdesk is an old backup;
   - D1rtyChuy23/katzdesk.10.16 is a copy and doesn't deploy.
-- Never push, force-push or reset main. Work on a branch and open a PR. Chuy merges after Claude reviews.
+- Never push, force-push or reset main. Work on a branch and open a PR. Chuy merges after the review above.
 - A merge to main does NOT deploy by itself. After merging, Chuy publishes from Grok/Vercel. Pending files in migrations/ run during that publish build.
 - Never run the Library import, the Library cleanup or any delete against the production database. Chuy presses those buttons himself.
 - Don't commit .vercel/output.
-- Before you open a PR, these must pass:
-  - `node --test scripts/library-file-rules.test.mjs`
+- Before you open a PR, run the same checks GitHub runs on every PR (.github/workflows/checks.yml). They must pass:
   - `npx tsc --noEmit`
+  - `npm run lint` (errors fail; warnings don't)
+  - `npm test` (the whole suite; it takes a while)
+- A PR whose GitHub check is red is not ready, whatever the report says.
 - Every report back lists: the PR link, the commit SHA, the test counts, the files changed, and anything you ran against production (normally "nothing").
 - Every report also has a **Not verified** line: what the tests and checks did not cover. Always name any migration in migrations/ that was not run against a real database, and any import or data change that was not tried on a real export or live data. If everything was covered, write "Not verified: nothing".
