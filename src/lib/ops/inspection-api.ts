@@ -866,6 +866,37 @@ export async function listEditRefusal(sql: Sql, installId: number, next: Omit<Li
  * as it was stored before that save: a serial is written over a unit's serial only when the row's serial changed in
  * this save, never on a load.
  */
+type RetiredHere = { serialKey: string | null; model: string; name: string };
+
+/**
+ * Machines removed from the account that were on this install's visit, and are still retired: not back on the
+ * account under their own id.
+ */
+async function retiredFromInstall(sql: Sql, installId: number, customer: string): Promise<RetiredHere[]> {
+  const rows = await sql.query<{ serial_key: string | null; catalog_model: string; equipment_name: string }>(
+    `select r.serial_key, r.catalog_model, r.equipment_name
+       from account_equipment_retired r
+      where lower(r.customer) = lower($1)
+        and not exists (select 1 from account_equipment a where a.id = r.unit_id)
+        and exists (select 1 from jsonb_array_elements(coalesce(r.links->'inspection_units', '[]'::jsonb)) u
+                     where (u->>'install_id')::int = $2)
+      order by r.id`,
+    [customer, installId],
+  );
+  return rows.map((r) => ({ serialKey: r.serial_key || null, model: r.catalog_model, name: r.equipment_name }));
+}
+
+/** A listed machine that is one of those retired machines: by its serial, or by model when neither has one. Each counts once. */
+function takeRetired(retired: RetiredHere[], piece: Piece): boolean {
+  const key = serialKey(piece.serial) || null;
+  const at = retired.findIndex((r) =>
+    key ? r.serialKey === key : !r.serialKey && (sameCatalogModel(r.model, piece.equipment) || sameCatalogModel(r.name, piece.equipment)),
+  );
+  if (at < 0) return false;
+  retired.splice(at, 1);
+  return true;
+}
+
 export async function syncInstallUnits(
   sql: Sql,
   installId: number,
@@ -999,8 +1030,12 @@ export async function syncInstallUnits(
     }
   }
   const finalUnits: (AcctUnit | undefined)[] = [];
+  const retired = isComplete(row) ? await retiredFromInstall(sql, installId, row.customer) : [];
   for (const [i, piece] of pieces.entries()) {
     let hit = hits[i];
+    // A completed install still lists a machine removed from the account since (11/12): it stays retired, so the
+    // install's history doesn't make it again as a new, blank unit (and Put back still works).
+    if (!hit && takeRetired(retired, piece)) continue;
     if (hit && combined(hit) && !isLocked(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.
       hit.equipment_name = piece.equipment;

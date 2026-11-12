@@ -150,21 +150,29 @@ function stringifyCell(v: unknown): string {
   return s;
 }
 
-function fileToMatrix(base64: string): string[][] {
+/** Scientific notation, as a spreadsheet shows a long number ("1.23457E+11"): not the number's own digits. */
+const SHOWN_AS_EXPONENT = /^[-+]?\d+(\.\d+)?e[-+]?\d+$/i;
+
+/**
+ * The file's cells, and the same cells as the file shows them (11/12). A Part # reads as shown: "33200.0000" keeps
+ * its zeros and "00123" its leading ones, which the number read drops.
+ */
+export function fileToMatrix(base64: string): { matrix: string[][]; shown: string[][] } {
   const wb = XLSX.read(base64, { type: "base64", cellDates: true, raw: false });
   const name = wb.SheetNames[0];
   if (!name) throw new Error("The file has no sheets.");
   const sheet = wb.Sheets[name];
   if (!sheet) throw new Error("The file has no sheets.");
-  const matrix = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, {
-    header: 1,
-    defval: "",
-    blankrows: false,
-  });
-  return matrix.map((row) => (row ?? []).map(stringifyCell));
+  const opts = { header: 1 as const, defval: "", blankrows: false };
+  const matrix = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, opts);
+  const shown = XLSX.utils.sheet_to_json<(unknown[] | null)[]>(sheet, { ...opts, raw: false });
+  return {
+    matrix: matrix.map((row) => (row ?? []).map(stringifyCell)),
+    shown: shown.map((row) => (row ?? []).map((v) => String(v ?? ""))),
+  };
 }
 
-function mapRow(headers: EquipCol[], cells: string[]) {
+function mapRow(headers: EquipCol[], cells: string[], shown?: string[]) {
   const rec: Record<EquipCol, string> = {
     customer: "",
     equipmentName: "",
@@ -177,14 +185,15 @@ function mapRow(headers: EquipCol[], cells: string[]) {
   };
   headers.forEach((col, i) => {
     if (!col) return;
-    const v = (cells[i] ?? "").trim();
+    const asShown = col === "partNumber" ? (shown?.[i] ?? "").trim() : "";
+    const v = (asShown && !SHOWN_AS_EXPONENT.test(asShown) ? asShown : cells[i] ?? "").trim();
     if (v && !rec[col]) rec[col] = v;
   });
   return rec;
 }
 
 /** The file's rows, by the columns its header row names. */
-export function parseEquipMatrix(matrix: string[][]) {
+export function parseEquipMatrix(matrix: string[][], shown?: string[][]) {
   let headerIdx = 0;
   let mapped: EquipCol[] = [];
   for (let i = 0; i < Math.min(matrix.length, 8); i++) {
@@ -204,7 +213,7 @@ export function parseEquipMatrix(matrix: string[][]) {
   const records = [];
   let skipped = 0;
   for (let i = headerIdx + 1; i < matrix.length; i++) {
-    const rec = mapRow(mapped, matrix[i] ?? []);
+    const rec = mapRow(mapped, matrix[i] ?? [], shown?.[i]);
     if (!rec.customer && !rec.equipmentName && !rec.model && !rec.serial) {
       skipped += 1;
       continue;
@@ -375,8 +384,8 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof fileInput>) => fileInput.parse(d))
   .handler(async ({ data }): Promise<EquipPreview> => {
     if (data.base64.length > 16_000_000) throw new Error("That file is too large.");
-    const matrix = fileToMatrix(data.base64);
-    const parsed = parseEquipMatrix(matrix);
+    const { matrix, shown } = fileToMatrix(data.base64);
+    const parsed = parseEquipMatrix(matrix, shown);
     const sql = await ready();
     const [accounts, catalog, existing] = await Promise.all([
       loadAccounts(sql),
