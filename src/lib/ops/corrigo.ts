@@ -1604,6 +1604,29 @@ export function addsNothingNew(file: string | null | undefined, stored: string |
 }
 
 /**
+ * True when the saved text is a cut-off copy of Corrigo's fuller text (11/12), so the fuller text can take its place
+ * without losing a word: line by line, each saved line is the start of the same Corrigo line, word for word. A line's
+ * last word may be cut mid-word ("filte"), when it keeps at least three letters on a line of two words or more. Saved
+ * text that itself ends cut off ("..." or the report's cap) may skip words, as addsNothingNew allows. A tech's own
+ * words ("PM not done") never match, even when Corrigo's text uses the same words further on.
+ */
+export function isCutCopyOf(saved: string | null | undefined, fuller: string | null | undefined): boolean {
+  if (looksCutOff(saved)) return addsNothingNew(saved, fuller);
+  const lines = descriptionWords(saved);
+  const full = descriptionWords(fuller);
+  if (!lines.length || lines.length > full.length) return false;
+  return lines.every((words, n) => {
+    const target = full[n]!;
+    if (words.length > target.length) return false;
+    return words.every((w, i) => {
+      if (w === target[i]) return true;
+      const cut = i === words.length - 1 && words.length >= 2 && w.length >= 3;
+      return cut && target[i]!.startsWith(w);
+    });
+  });
+}
+
+/**
  * Corrigo cut the text off: it ends in "..." or an ellipsis, or it runs to the report's cap (250 to 256 characters; the
  * cut copies Grok measured all land there). A longer text, as a Detail View export gives, is whole.
  */
@@ -1686,7 +1709,7 @@ function descriptionFields(rec: CorrigoRecord, existing: CorrigoHit | null, boar
       const saved = existing.workDone;
       // A fill Corrigo cut off ("…System 3 filte") takes the fuller text, which says all of it and more (Chuy, 11/10).
       // Anything else (a tech's own words) stays.
-      if (addsNothingNew(saved, lines)) {
+      if (isCutCopyOf(saved, lines)) {
         workDoneFill = lines;
         workDoneFrom = saved;
         notes.push({ text: `Description of work ← Corrigo's fuller Problem Description (${saved.trim().length} → ${lines.length} characters)`, warn: false });

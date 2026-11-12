@@ -261,3 +261,55 @@ test("the preview counts fuller fills apart from blank ones", () => {
   assert.match(screen, /const descFilled = applicable\.filter\(\(r\) => !!r\.workDoneFill && !r\.workDoneFrom\)\.length;/);
   assert.match(screen, /Description\$\{descFuller === 1 \? "" : "s"\} of work replaced with Corrigo's fuller text/);
 });
+
+// Review of #128/#129 (11/12): the fuller-text step replaced a tech's own words whenever they appeared somewhere in
+// Corrigo's text, in order. It now takes only a saved text that is the start of Corrigo's, line by line.
+test("the fuller text takes only a cut-off copy: a tech's own words stay even when Corrigo uses them further on", () => {
+  const fuller = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+  // Cut-off copies of Corrigo's own text.
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this wee", fuller), true, "cut mid-word");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this week.", fuller), true, "cut at a word");
+  assert.equal(C.isCutCopyOf("zz test brewer xl:  pm DUE this", fuller), true, "spacing and capitals");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Clean/Replac...", "ZZ Test Brewer XL: Clean and replace the System 3 filter"), true, "ends in ... : may skip words");
+  // A tech's own words.
+  assert.equal(C.isCutCopyOf("PM not done", fuller), false);
+  assert.equal(C.isCutCopyOf("Did not replace filter", "ZZ Test Brewer XL: Customer did call, not cooling. Please replace filter"), false);
+  assert.equal(C.isCutCopyOf("No", "Notify manager"), false, "one short word is not a cut");
+  assert.equal(C.isCutCopyOf("Replace 1", "Replace 12 filters"), false, "a cut word keeps three letters");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due next week", fuller), false, "a real edit");
+  // Lines: each saved line is the start of the same Corrigo line.
+  const two = "ZZ Test Brewer XL: Replace the filter cartridge\nZZ Test Grinder Q: Check the burrs and the chute";
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the bur", two), true);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte", two), true, "the field cut before the second line");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the chute", two), false, "a line that skips words");
+  assert.equal(C.isCutCopyOf("ZZ Test Grinder Q: Check the bur", two), false, "the wrong line");
+  assert.equal(C.isCutCopyOf("", two), false);
+  assert.equal(C.isCutCopyOf(two, ""), false);
+});
+
+test("a PM whose Description of work is a tech's note keeps it through an import; a cut-off fill still takes the fuller text", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    const pm = async (wo, workDone) => Number((await query("insert into pm_jobs (customer, status, wo, work_done) values ('ZZ Test Diner', 'Scheduled', $1, $2) returning id", [wo, workDone]))[0].id);
+    const note = await pm("WO-3101", "PM not done");
+    const short = await pm("WO-3102", "No");
+    const cut = await pm("WO-3103", "ZZ Test Brewer XL: PM due this wee");
+    const text = "ZZ Test Brewer XL:OTHER:PM due this week. Tech not available until Friday. Call when done";
+    const preview = await previewCorrigoRecords(sql, file([
+      ["3101", "Open", "ZZ Test Diner", "PM", text, ""],
+      ["3102", "Open", "ZZ Test Diner", "PM", "ZZ Test Brewer XL:OTHER:Notify manager. Replace filter", ""],
+      ["3103", "Open", "ZZ Test Diner", "PM", text, ""],
+    ]));
+    for (const wo of ["WO-3101", "WO-3102"]) {
+      assert.deepEqual([one(preview, wo).workDoneFill, one(preview, wo).workDoneFrom], [null, null], wo);
+      assert.deepEqual(one(preview, wo).descriptionNotes, [{ text: "Description of work kept: it already has text", warn: false }], wo);
+    }
+    const full = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+    assert.equal(one(preview, "WO-3103").workDoneFill, full);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    const workOf = async (id) => (await query("select work_done from pm_jobs where id = $1", [id]))[0].work_done;
+    assert.deepEqual([await workOf(note), await workOf(short), await workOf(cut)], ["PM not done", "No", full]);
+  } finally {
+    await pg.close();
+  }
+});
