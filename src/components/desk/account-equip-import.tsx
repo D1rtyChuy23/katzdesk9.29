@@ -251,7 +251,8 @@ function PreviewBody({
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(needle));
     });
-  }, [preview.rows, drafts, filter, q]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rowReady reads drafts and decisions, both listed
+  }, [preview.rows, drafts, decisions, filter, q]);
 
   useEffect(() => {
     setPage(0);
