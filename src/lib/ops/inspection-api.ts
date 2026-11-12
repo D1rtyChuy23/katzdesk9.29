@@ -447,11 +447,11 @@ function ownUnit(piece: Piece, pieces: Piece[], linked: AcctUnit[], used: Set<nu
  * then the unit the row already carries by id, so a blank, partial or corrected serial, or a renamed model, keeps the row
  * on its own unit. Fills `hits` from `pools` in order, and answers which rows were claimed by their id.
  */
-function claimNamed(pieces: Piece[], hits: (AcctUnit | undefined)[], pools: AcctUnit[][], used: Set<number>): boolean[] {
+function claimNamed(pieces: Piece[], hits: (AcctUnit | undefined)[], pools: AcctUnit[][], used: Set<number>, skip?: boolean[]): boolean[] {
   const byId = pieces.map(() => false);
   pieces.forEach((piece, i) => {
     const key = serialKey(piece.serial);
-    if (hits[i] || !key) return;
+    if (hits[i] || skip?.[i] || !key) return;
     for (const pool of pools) {
       const hit = pool.find((a) => !used.has(a.id) && a.serial_key === key);
       if (!hit) continue;
@@ -463,7 +463,7 @@ function claimNamed(pieces: Piece[], hits: (AcctUnit | undefined)[], pools: Acct
   // An id names a unit on this visit (the first pool). A row still carrying the id of a unit taken off the visit is
   // matched like a new row, so a stale window can't put that unit back.
   pieces.forEach((piece, i) => {
-    if (hits[i] || !piece.unitId) return;
+    if (hits[i] || skip?.[i] || !piece.unitId) return;
     const hit = pools[0]?.find((a) => a.id === piece.unitId && !used.has(a.id));
     if (!hit) return;
     hits[i] = hit;
@@ -866,6 +866,57 @@ export async function listEditRefusal(sql: Sql, installId: number, next: Omit<Li
  * as it was stored before that save: a serial is written over a unit's serial only when the row's serial changed in
  * this save, never on a load.
  */
+type RetiredHere = { unitId: number; serialKey: string | null; model: string; name: string };
+
+/**
+ * Machines removed from the account that were on this install's visit, and are still retired: not back on the
+ * account under their own id.
+ */
+async function retiredFromInstall(sql: Sql, installId: number, customer: string): Promise<RetiredHere[]> {
+  const rows = await sql.query<{ unit_id: number; serial_key: string | null; catalog_model: string; equipment_name: string }>(
+    `select r.unit_id, r.serial_key, r.catalog_model, r.equipment_name
+       from account_equipment_retired r
+      where lower(r.customer) = lower($1)
+        and not exists (select 1 from account_equipment a where a.id = r.unit_id)
+        and exists (select 1 from jsonb_array_elements(coalesce(r.links->'inspection_units', '[]'::jsonb)) u
+                     where (u->>'install_id')::int = $2)
+      order by r.id`,
+    [customer, installId],
+  );
+  return rows.map((r) => ({ unitId: Number(r.unit_id), serialKey: r.serial_key || null, model: r.catalog_model, name: r.equipment_name }));
+}
+
+/**
+ * Before the matching, only exact evidence sets a row aside as a retired machine: it carries the retired unit's id, or
+ * its serial is the retired unit's and no unit on the account has that serial. Each retired machine counts once.
+ */
+function retiredByEvidence(retired: RetiredHere[], piece: Piece, liveKeys: Set<string>): boolean {
+  const key = serialKey(piece.serial) || null;
+  const at = piece.unitId
+    ? retired.findIndex((r) => r.unitId === piece.unitId)
+    : key && !liveKeys.has(key)
+      ? retired.findIndex((r) => r.serialKey === key)
+      : -1;
+  if (at < 0) return false;
+  retired.splice(at, 1);
+  return true;
+}
+
+/**
+ * After the matching, a row nothing claimed would make a new unit. It is a retired machine of its model instead: with no
+ * serial when the retired one has none, or with a serial the account has since corrected (the list still has "SN L").
+ */
+function retiredByModel(retired: RetiredHere[], piece: Piece): boolean {
+  if (piece.unitId) return false;
+  const key = serialKey(piece.serial) || null;
+  const at = retired.findIndex(
+    (r) => (sameCatalogModel(r.model, piece.equipment) || sameCatalogModel(r.name, piece.equipment)) && (key ? r.serialKey !== key : !r.serialKey),
+  );
+  if (at < 0) return false;
+  retired.splice(at, 1);
+  return true;
+}
+
 export async function syncInstallUnits(
   sql: Sql,
   installId: number,
@@ -912,9 +963,17 @@ export async function syncInstallUnits(
   // First pass: every piece takes the unit it names (its exact serial, then its own unit id), then by model. Only then
   // do the looser matches run, so one row never takes the unit another row names exactly.
   const hits: (AcctUnit | undefined)[] = pieces.map(() => undefined);
-  const byId = claimNamed(pieces, hits, [linkedRows, account], used);
+  // A completed install still lists a machine removed from the account since (11/12): it stays retired, so the
+  // install's history doesn't make it again as a new, blank unit, and Put back still works. A live unit is always
+  // matched first: only exact evidence sets a row aside before the matching (retiredByEvidence), and the looser
+  // match by model (retiredByModel) only stops a row from making a new unit.
+  // Loads only: a list save (prune) matches and cleans up as before, so it never takes a live unit's visit data.
+  const retired = isComplete(row) && !opts?.prune ? await retiredFromInstall(sql, installId, row.customer) : [];
+  const liveKeys = new Set(account.map((a) => a.serial_key).filter((k): k is string => !!k));
+  const skip = pieces.map((p) => retired.length > 0 && retiredByEvidence(retired, p, liveKeys));
+  const byId = claimNamed(pieces, hits, [linkedRows, account], used, skip);
   pieces.forEach((piece, i) => {
-    if (hits[i]) return;
+    if (hits[i] || skip[i]) return;
     const hit = claimUnit(piece, [linkedRows, account], used, catalog);
     if (!hit) return;
     used.add(hit.id);
@@ -923,7 +982,7 @@ export async function syncInstallUnits(
   // Serials the list had before this save: a row whose serial is not among them was corrected in this save.
   const beforeKeys = before ? new Set(before.map((p) => serialKey(p.serial)).filter(Boolean)) : null;
   for (const [i, piece] of pieces.entries()) {
-    if (hits[i]) continue;
+    if (hits[i] || skip[i]) continue;
     let hit = claimEarlierName(piece, linkedRows, used, catalog);
     if (!hit) {
       // An older combined unit that names this machine becomes this machine: its checks and photos stay with it.
@@ -970,7 +1029,9 @@ export async function syncInstallUnits(
   // A save that took a twin row off: the row that stays takes the twin unit with anything recorded, and its own empty
   // unit goes in the prune below (a load never does this). The new id reaches the window on its next read.
   if (before) {
-    for (const move of twinMoves(pieces, hits, linkedRows, recorded, hadRow)) hits[move.row] = linkedRows.find((a) => a.id === move.from);
+    for (const move of twinMoves(pieces, hits, linkedRows, recorded, hadRow)) {
+      if (!skip[move.row]) hits[move.row] = linkedRows.find((a) => a.id === move.from);
+    }
   }
   // A row that kept its unit by id, with a serial changed or cleared in this save: the unit takes the row's serial, so
   // the mirror below doesn't put the old one back. The same rules as a corrected serial above: never a locked unit, and
@@ -1000,6 +1061,7 @@ export async function syncInstallUnits(
   }
   const finalUnits: (AcctUnit | undefined)[] = [];
   for (const [i, piece] of pieces.entries()) {
+    if (skip[i] || (!hits[i] && retired.length > 0 && retiredByModel(retired, piece))) continue;
     let hit = hits[i];
     if (hit && combined(hit) && !isLocked(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.

@@ -1604,6 +1604,36 @@ export function addsNothingNew(file: string | null | undefined, stored: string |
 }
 
 /**
+ * True when the saved text is a cut-off copy of Corrigo's fuller text (11/12), so the fuller text can take its place
+ * without losing a word: line by line, each saved line is the start of the same Corrigo line, word for word. Only a
+ * line's last word may be cut mid-word ("filte"): it keeps three letters, after at least one whole word of the line's
+ * own text (past its "Machine:" lead). The last line of a text Corrigo cut off ("..." or the report's cap) may be cut
+ * anywhere. Text of fewer than three words, or saved in Corrigo's own
+ * "Equipment:Type:text" form, is never a cut copy. Different wording ("Clean/Replac..." for "Clean and replace") stays.
+ */
+export function isCutCopyOf(saved: string | null | undefined, fuller: string | null | undefined): boolean {
+  const wordsOf = (t: string) => t.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const raw = String(saved ?? "").trim();
+  if (wordsOf(raw).length < 3 || descriptionSegments(raw)) return false;
+  const lines = raw.split(/[;\n]/).map((l) => l.trim()).filter((l) => wordsOf(l).length);
+  const full = descriptionWords(fuller);
+  if (!lines.length || lines.length > full.length) return false;
+  const fieldCut = looksCutOff(raw);
+  return lines.every((line, n) => {
+    const words = wordsOf(line);
+    const target = full[n]!;
+    if (words.length > target.length) return false;
+    const colon = line.indexOf(":");
+    const body = colon >= 0 ? wordsOf(line.slice(colon + 1)).length : words.length;
+    return words.every((w, i) => {
+      if (w === target[i]) return true;
+      if (i !== words.length - 1 || !target[i]!.startsWith(w)) return false;
+      return (fieldCut && n === lines.length - 1) || (body >= 2 && w.length >= 3);
+    });
+  });
+}
+
+/**
  * Corrigo cut the text off: it ends in "..." or an ellipsis, or it runs to the report's cap (250 to 256 characters; the
  * cut copies Grok measured all land there). A longer text, as a Detail View export gives, is whole.
  */
@@ -1686,7 +1716,7 @@ function descriptionFields(rec: CorrigoRecord, existing: CorrigoHit | null, boar
       const saved = existing.workDone;
       // A fill Corrigo cut off ("…System 3 filte") takes the fuller text, which says all of it and more (Chuy, 11/10).
       // Anything else (a tech's own words) stays.
-      if (addsNothingNew(saved, lines)) {
+      if (isCutCopyOf(saved, lines)) {
         workDoneFill = lines;
         workDoneFrom = saved;
         notes.push({ text: `Description of work ← Corrigo's fuller Problem Description (${saved.trim().length} → ${lines.length} characters)`, warn: false });

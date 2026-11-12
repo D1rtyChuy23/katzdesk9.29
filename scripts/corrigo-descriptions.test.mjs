@@ -230,14 +230,15 @@ test("a fill that was cut off takes Corrigo's fuller text later; a tech's own wo
     assert.deepEqual(one(preview, "WO-3002").descriptionNotes, [{ text: "Description of work kept: it already has text", warn: false }]);
     assert.deepEqual([one(preview, "WO-3003").workDoneFill, one(preview, "WO-3003").descriptionNotes], [null, null]);
     assert.equal(one(preview, "WO-3005").board, "install");
-    assert.equal(one(preview, "WO-3005").workDoneFill, full);
+    // "Clean/Replac..." is other wording, not the start of Corrigo's text: it stays (11/12 review).
+    assert.equal(one(preview, "WO-3005").workDoneFill, null);
     // Someone edits WO-3004 after the preview: their text stays.
     await query("update pm_jobs set work_done = 'Edited after the preview.' where id = $1", [late]);
     await applyCorrigoRows(sql, preview.rows, "boss");
     const workOf = async (table, id) => (await query(`select work_done from ${table} where id = $1`, [id]))[0].work_done;
     assert.deepEqual(
       [await workOf("pm_jobs", cut), await workOf("pm_jobs", typed), await workOf("pm_jobs", same), await workOf("pm_jobs", late), await workOf("installs", install)],
-      [full, "Tech: replaced the System 3 filter and the gasket.", "ZZ Test Brewer XL: Clean and replace the System 3 filter", "Edited after the preview.", full],
+      [full, "Tech: replaced the System 3 filter and the gasket.", "ZZ Test Brewer XL: Clean and replace the System 3 filter", "Edited after the preview.", "ZZ Test Brewer XL: Clean/Replac..."],
     );
   } finally {
     await pg.close();
@@ -260,4 +261,86 @@ test("the preview counts fuller fills apart from blank ones", () => {
   assert.match(screen, /const descFuller = applicable\.filter\(\(r\) => !!r\.workDoneFill && !!r\.workDoneFrom\)\.length;/);
   assert.match(screen, /const descFilled = applicable\.filter\(\(r\) => !!r\.workDoneFill && !r\.workDoneFrom\)\.length;/);
   assert.match(screen, /Description\$\{descFuller === 1 \? "" : "s"\} of work replaced with Corrigo's fuller text/);
+});
+
+// Review of #128/#129 (11/12): the fuller-text step replaced a tech's own words whenever they appeared somewhere in
+// Corrigo's text, in order. It now takes only a saved text that is the start of Corrigo's, line by line.
+test("the fuller text takes only a cut-off copy: a tech's own words stay even when Corrigo uses them further on", () => {
+  const fuller = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+  // Cut-off copies of Corrigo's own text.
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this wee", fuller), true, "cut mid-word");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this week.", fuller), true, "cut at a word");
+  assert.equal(C.isCutCopyOf("zz test brewer xl:  pm DUE this", fuller), true, "spacing and capitals");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Clean/Replac...", "ZZ Test Brewer XL: Clean and replace the System 3 filter"), false, "other wording stays");
+  // A tech's own words.
+  assert.equal(C.isCutCopyOf("PM not done", fuller), false);
+  assert.equal(C.isCutCopyOf("Did not replace filter", "ZZ Test Brewer XL: Customer did call, not cooling. Please replace filter"), false);
+  assert.equal(C.isCutCopyOf("No", "Notify manager"), false, "one short word is not a cut");
+  assert.equal(C.isCutCopyOf("Replace 1", "Replace 12 filters"), false, "a cut word keeps three letters");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due next week", fuller), false, "a real edit");
+  // Lines: each saved line is the start of the same Corrigo line.
+  const two = "ZZ Test Brewer XL: Replace the filter cartridge\nZZ Test Grinder Q: Check the burrs and the chute";
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the bur", two), true);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte", two), true, "the field cut before the second line");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filte\nZZ Test Grinder Q: Check the chute", two), false, "a line that skips words");
+  assert.equal(C.isCutCopyOf("ZZ Test Grinder Q: Check the bur", two), false, "the wrong line");
+  assert.equal(C.isCutCopyOf("", two), false);
+  assert.equal(C.isCutCopyOf(two, ""), false);
+});
+
+test("a PM whose Description of work is a tech's note keeps it through an import; a cut-off fill still takes the fuller text", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    const pm = async (wo, workDone) => Number((await query("insert into pm_jobs (customer, status, wo, work_done) values ('ZZ Test Diner', 'Scheduled', $1, $2) returning id", [wo, workDone]))[0].id);
+    const note = await pm("WO-3101", "PM not done");
+    const short = await pm("WO-3102", "No");
+    const cut = await pm("WO-3103", "ZZ Test Brewer XL: PM due this wee");
+    const text = "ZZ Test Brewer XL:OTHER:PM due this week. Tech not available until Friday. Call when done";
+    const preview = await previewCorrigoRecords(sql, file([
+      ["3101", "Open", "ZZ Test Diner", "PM", text, ""],
+      ["3102", "Open", "ZZ Test Diner", "PM", "ZZ Test Brewer XL:OTHER:Notify manager. Replace filter", ""],
+      ["3103", "Open", "ZZ Test Diner", "PM", text, ""],
+    ]));
+    for (const wo of ["WO-3101", "WO-3102"]) {
+      assert.deepEqual([one(preview, wo).workDoneFill, one(preview, wo).workDoneFrom], [null, null], wo);
+      assert.deepEqual(one(preview, wo).descriptionNotes, [{ text: "Description of work kept: it already has text", warn: false }], wo);
+    }
+    const full = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+    assert.equal(one(preview, "WO-3103").workDoneFill, full);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    const workOf = async (id) => (await query("select work_done from pm_jobs where id = $1", [id]))[0].work_done;
+    assert.deepEqual([await workOf(note), await workOf(short), await workOf(cut)], ["PM not done", "No", full]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("second review (11/12): a cut keeps three letters; a short note or one ending in ... is not a cut copy", () => {
+  const fuller = "ZZ Test Brewer XL: PM due this week. Tech not available until Friday. Call when done";
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due th", fuller), false, "a cut that keeps two letters stays (it could be a whole word)");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due this week. T", fuller), false, "one letter stays");
+  assert.equal(C.isCutCopyOf("Tech: called customer, no", "Tech: called customer, nobody home"), false, "a whole short word stays");
+  assert.equal(C.isCutCopyOf("System 1 filter changed", "System 12 filter changed"), false);
+  // A tech's note that ends in ... or … still starts like Corrigo's line, or it stays.
+  assert.equal(C.isCutCopyOf("PM not done...", fuller), false);
+  assert.equal(C.isCutCopyOf("Not done…", fuller), false);
+  assert.equal(C.isCutCopyOf("PM not done...", "PM due this week. Tech not available until Friday. Call when done"), false, "same first word, then not");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM Friday...", fuller), false, "words skipped: not a cut copy");
+  // Third review (11/12): the machine lead doesn't count as the line's own text.
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM not done...", fuller), false);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: not done...", fuller), false);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: No", "ZZ Test Brewer XL: Notify manager. Replace filter"), false);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM du", fuller), false, "two words of its own: the cut keeps three letters");
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: PM due", fuller), true, "two whole words");
+  // The field cut off in the last line, even inside its machine name.
+  const two = "ZZ Test Brewer XL: Replace the filter and descale\nZZ Test Grinder Q: Check the burrs";
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filter and descale\nZZ Te...", two), true);
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL: Replace the filter and descale\nZZ Te", two), false, "not cut off: a short cut in a name stays");
+  // Saved in Corrigo's own segmented form: never one of our fills.
+  assert.equal(C.isCutCopyOf("ZZ Test Brewer XL:OTHER:PM due this", fuller), false);
+  // One or two words are never a cut copy.
+  assert.equal(C.isCutCopyOf("No", "No hot water at the brewer"), false);
+  assert.equal(C.isCutCopyOf("PM", "PM due this week"), false);
+  assert.equal(C.isCutCopyOf("PM due", "PM due this week"), false);
+  assert.equal(C.isCutCopyOf("PM due this", "PM due this week"), true, "three words that start Corrigo's text");
 });
