@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   applyAccountEquipImport,
   previewAccountEquipImport,
+  type EquipPairing,
   type EquipPreview,
   type EquipPreviewRow,
 } from "@/lib/ops/account-equip-import";
@@ -14,7 +15,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ComboField } from "@/components/ui/combo-field";
+import { ComboField, type ComboItem } from "@/components/ui/combo-field";
 import { SelectField } from "@/components/ui/select-field";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
@@ -61,10 +62,12 @@ export function AccountEquipImportButton({
   const apply = useMutation({
     mutationFn: (rows: EquipPreview["rows"]) => applyAccountEquipImport({ data: { rows } }),
     onSuccess: (res) => {
+      // The result stays on screen until it's closed (11/12): a long import is checked against it afterwards.
       toast.success(
         `Equipment list saved · ${res.added} added · ${res.updated} updated${
           res.catalogAdded ? ` · ${res.catalogAdded} new catalog model${res.catalogAdded === 1 ? "" : "s"}` : ""
-        }`,
+        }${res.skipped ? ` · ${res.skipped} skipped` : ""}`,
+        { duration: Infinity, closeButton: true },
       );
       setOpen(false);
       setPreview(null);
@@ -111,7 +114,9 @@ export function AccountEquipImportButton({
             {fileName ? `${fileName} · ` : ""}
             This writes machines onto existing accounts. It does not create accounts, tickets, or
             overwrite notes. Unchecked rows are skipped. Walk-In and unmatched rows stay off until
-            you pick an account and a catalog model.
+            you pick an account and a catalog model. Each model pairing whose names differ is
+            confirmed once, for all its rows; a row whose site doesn't match its account is only
+            imported when you tick it.
           </DialogDescription>
           {preview ? (
             <PreviewBody
@@ -133,10 +138,19 @@ type RowDraft = {
   catalogModel: string;
   addCatalog: boolean;
   ownership: string;
+  /** The row's catalog model was picked on the row itself, not by its pairing. */
+  modelSet?: boolean;
 };
 
-function draftFor(row: EquipPreviewRow): RowDraft {
-  const ready = row.action === "add" || row.action === "update";
+/** A model pairing's decision: the catalog model its rows take, and whether someone said it's right. */
+type PairDecision = { confirmed: boolean; catalogModel: string; addCatalog: boolean };
+
+function decisionFor(p: EquipPairing): PairDecision {
+  return { confirmed: p.status === "matched" && !p.needsConfirm, catalogModel: p.catalogModel ?? "", addCatalog: false };
+}
+
+function draftFor(row: EquipPreviewRow, pairConfirmed = true): RowDraft {
+  const ready = (row.action === "add" || row.action === "update") && pairConfirmed && !row.holdReasons?.length;
   return {
     selected: ready,
     customer: row.customer ?? "",
@@ -157,11 +171,16 @@ function PreviewBody({
   onCancel: () => void;
   onConfirm: (rows: EquipPreview["rows"]) => void;
 }) {
+  const initialDecisions = () => Object.fromEntries((preview.pairings ?? []).map((p) => [p.key, decisionFor(p)]));
+  const [decisions, setDecisions] = useState<Record<string, PairDecision>>(initialDecisions);
+  const pairConfirmed = (key: string) => decisions[key]?.confirmed ?? true;
   const [drafts, setDrafts] = useState<Record<string, RowDraft>>(() => {
+    const start = initialDecisions();
     const next: Record<string, RowDraft> = {};
-    for (const row of preview.rows) next[row.key] = draftFor(row);
+    for (const row of preview.rows) next[row.key] = draftFor(row, start[row.pairKey]?.confirmed ?? true);
     return next;
   });
+  const [showDecided, setShowDecided] = useState(false);
   const [filter, setFilter] = useState<"all" | "ready" | "review">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(0);
@@ -175,9 +194,12 @@ function PreviewBody({
   );
 
   useEffect(() => {
+    const start = initialDecisions();
+    setDecisions(start);
     const next: Record<string, RowDraft> = {};
-    for (const row of preview.rows) next[row.key] = draftFor(row);
+    for (const row of preview.rows) next[row.key] = draftFor(row, start[row.pairKey]?.confirmed ?? true);
     setDrafts(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- a new preview starts over
   }, [preview]);
 
   function rowReady(row: EquipPreviewRow, d: RowDraft) {
@@ -186,7 +208,26 @@ function PreviewBody({
     if (!customer || isWalkIn(customer)) return false;
     if (!model) return false;
     if (row.foreignAccount && customer.toLowerCase() !== row.foreignAccount.toLowerCase()) return false;
+    // A model pairing still to confirm holds its rows, unless the row's model was picked on the row (11/12).
+    if (!d.modelSet && !pairConfirmed(row.pairKey)) return false;
     return true;
+  }
+
+  /** Decide a pairing: its rows take the catalog model, and the ready ones with no site hold are ticked. */
+  function decide(p: EquipPairing, next: PairDecision) {
+    setDecisions((cur) => ({ ...cur, [p.key]: next }));
+    setDrafts((cur) => {
+      const out = { ...cur };
+      for (const row of preview.rows) {
+        if (row.pairKey !== p.key) continue;
+        const d = out[row.key] ?? draftFor(row);
+        if (d.modelSet) continue;
+        const nd = { ...d, catalogModel: next.catalogModel, addCatalog: next.addCatalog };
+        const ok = next.confirmed && !!nd.customer.trim() && !isWalkIn(nd.customer) && !!nd.catalogModel.trim() && !row.foreignAccount && !row.holdReasons?.length;
+        out[row.key] = { ...nd, selected: next.confirmed ? ok : false };
+      }
+      return out;
+    });
   }
 
   const visible = useMemo(() => {
@@ -218,6 +259,10 @@ function PreviewBody({
 
   const pageSize = 80;
   const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
+  // Deciding a pairing can move hundreds of rows out of a filter: stay on a page that has rows.
+  useEffect(() => {
+    if (page > pageCount - 1) setPage(pageCount - 1);
+  }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
   const selectedAdds = preview.rows.filter((r) => {
@@ -229,6 +274,12 @@ function PreviewBody({
     return d?.selected && rowReady(r, d) && r.action === "update";
   }).length;
   const selectedCount = selectedAdds + selectedUpdates;
+  /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
+  const heldNow = preview.rows.filter((r) => {
+    if (r.action !== "add" && r.action !== "update") return false;
+    const d = drafts[r.key];
+    return (!!r.holdReasons?.length && !d?.selected) || (!d?.modelSet && !pairConfirmed(r.pairKey));
+  }).length;
   const blocked = preview.rows.filter((r) => {
     const d = drafts[r.key];
     return d?.selected && !rowReady(r, d);
@@ -254,7 +305,8 @@ function PreviewBody({
       for (const row of preview.rows) {
         const d = next[row.key] ?? draftFor(row);
         if (selected) {
-          next[row.key] = { ...d, selected: rowReady(row, { ...d, selected: true }) };
+          // A row held for its site is never ticked in bulk: tick it on its own. One already ticked stays ticked.
+          next[row.key] = { ...d, selected: row.holdReasons?.length ? d.selected : rowReady(row, { ...d, selected: true }) };
         } else {
           next[row.key] = { ...d, selected: false };
         }
@@ -297,11 +349,27 @@ function PreviewBody({
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="font-medium">{preview.reviewCount}</span> need review
+          {heldNow ? (
+            <>
+              {" · "}
+              <span className="font-medium">{heldNow}</span> held
+            </>
+          ) : null}
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="font-medium">{preview.rows.length - selectedCount}</span> skipped
         </li>
       </ul>
+
+      <PairingsPanel
+        pairings={preview.pairings ?? []}
+        decisions={decisions}
+        equipment={equipment.items}
+        pending={pending}
+        showDecided={showDecided}
+        onShowDecided={setShowDecided}
+        onDecide={decide}
+      />
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button type="button" size="sm" variant="outline" onClick={() => setAll(true)}>
@@ -388,7 +456,7 @@ function PreviewBody({
                           value={d.customer}
                           onChange={(customer) => {
                             const next = { ...d, customer };
-                            patch(r.key, { customer, selected: d.selected || rowReady(r, next) });
+                            patch(r.key, { customer, selected: d.selected || (!r.holdReasons?.length && rowReady(r, next)) });
                           }}
                           items={customerItems}
                           placeholder="Pick an account…"
@@ -406,6 +474,7 @@ function PreviewBody({
                         ) : null}
                         <span className="mt-0.5 block text-[11px] text-muted-foreground">
                           File: {r.fileCustomer || "—"}
+                          {r.site ? ` · Site: ${r.site}` : ""}
                         </span>
                       </>
                     ) : (
@@ -428,11 +497,14 @@ function PreviewBody({
                             const known = equipment.items.some(
                               (i) => i.name.toLowerCase() === catalogModel.trim().toLowerCase(),
                             );
-                            const next = { ...d, catalogModel, addCatalog: !!catalogModel && !known };
+                            // A model cleared on the row goes back to its pairing's decision.
+                            const modelSet = !!catalogModel.trim();
+                            const next = { ...d, catalogModel, addCatalog: !!catalogModel && !known, modelSet };
                             patch(r.key, {
                               catalogModel,
                               addCatalog: next.addCatalog,
-                              selected: d.selected || rowReady(r, next),
+                              modelSet,
+                              selected: d.selected || (!r.holdReasons?.length && rowReady(r, next)),
                             });
                           }}
                           items={equipment.items}
@@ -503,6 +575,15 @@ function PreviewBody({
                         {reason}
                       </span>
                     ))}
+                    {!d.modelSet && !pairConfirmed(r.pairKey) ? (
+                      <span className="mt-0.5 block text-[11px] text-warning">Confirm its model pairing above</span>
+                    ) : null}
+                    {(r.holdReasons ?? []).map((reason) => (
+                      <span key={reason} className="mt-0.5 block text-[11px] text-warning" data-testid="equip-import-hold">
+                        Held: {reason}. Tick it to import anyway.
+                      </span>
+                    ))}
+                    {r.condition ? <span className="mt-0.5 block text-[11px] text-muted-foreground">Condition: {r.condition}</span> : null}
                     {r.foreignAccount ? (
                       <span className="mt-0.5 block text-[11px] text-warning">On {r.foreignAccount}</span>
                     ) : null}
@@ -558,5 +639,106 @@ function PreviewBody({
         </Button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Model pairings (11/12): each file model and the catalog model its rows were matched to. A pairing whose names differ,
+ * or whose Part # reads as another model, is confirmed once here for all its rows; one with no catalog model takes one
+ * here (or is added as new). Decided pairings fold away.
+ */
+function PairingsPanel({
+  pairings,
+  decisions,
+  equipment,
+  pending,
+  showDecided,
+  onShowDecided,
+  onDecide,
+}: {
+  pairings: EquipPairing[];
+  decisions: Record<string, PairDecision>;
+  equipment: ComboItem[];
+  pending: boolean;
+  showDecided: boolean;
+  onShowDecided: (v: boolean) => void;
+  onDecide: (p: EquipPairing, next: PairDecision) => void;
+}) {
+  const [picks, setPicks] = useState<Record<string, string>>({});
+  if (!pairings.length) return null;
+  const open = pairings.filter((p) => !(decisions[p.key]?.confirmed ?? true));
+  const decided = pairings.filter((p) => decisions[p.key]?.confirmed ?? true);
+  const known = (name: string) => equipment.some((i) => i.name.toLowerCase() === name.trim().toLowerCase());
+  const row = (p: EquipPairing, isOpen: boolean) => {
+    const d = decisions[p.key] ?? decisionFor(p);
+    const pick = picks[p.key] ?? d.catalogModel;
+    return (
+      <li key={p.key} className={`rounded-lg border px-3 py-2 ${isOpen ? "border-warning/50 bg-warning/5" : "border-border"}`} data-testid="equip-import-pairing">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="font-medium break-words">{p.fileModel || "—"}</span>
+          <span className="text-xs text-muted-foreground">
+            {p.rows} row{p.rows === 1 ? "" : "s"}
+            {p.partNumber ? ` · Part # ${p.partNumber}` : ""}
+            {p.partSku ? ` (${p.partSku})` : ""}
+          </span>
+        </div>
+        {p.warnings.map((w) => (
+          <p key={w} className="mt-0.5 text-xs text-warning">
+            {w}
+          </p>
+        ))}
+        {isOpen ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <div className="min-w-[16rem] flex-1">
+              <ComboField
+                value={pick}
+                onChange={(v) => setPicks((cur) => ({ ...cur, [p.key]: v }))}
+                items={equipment}
+                placeholder="Pick a catalog model…"
+                allowCreate
+                disabled={pending}
+                noun="model"
+                emptyHint="No catalog model. Type the name to add it as a new model."
+                menuInFlow
+              />
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              disabled={pending || !pick.trim()}
+              onClick={() => onDecide(p, { confirmed: true, catalogModel: pick.trim(), addCatalog: !known(pick) })}
+            >
+              {known(pick) || !pick.trim() ? `Use for ${p.rows} row${p.rows === 1 ? "" : "s"}` : `Add model and use for ${p.rows}`}
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span>
+              → {d.catalogModel || "—"}
+              {d.addCatalog ? " · will add to catalog" : ""}
+            </span>
+            <button type="button" className="text-muted-foreground hover:underline" disabled={pending} onClick={() => onDecide(p, { ...d, confirmed: false })}>
+              Change
+            </button>
+          </div>
+        )}
+      </li>
+    );
+  };
+  return (
+    <section className="mt-4" data-equip-import="pairings">
+      <h3 className="text-sm font-medium">
+        Model pairings{open.length ? ` · ${open.length} to decide` : " · all decided"}
+      </h3>
+      {open.length ? <ul className="mt-2 grid gap-2 sm:grid-cols-2">{open.map((p) => row(p, true))}</ul> : null}
+      {decided.length ? (
+        <div className="mt-2">
+          <button type="button" className="text-xs text-muted-foreground hover:underline" onClick={() => onShowDecided(!showDecided)}>
+            {showDecided ? "Hide" : "Show"} {decided.length} decided pairing{decided.length === 1 ? "" : "s"}
+          </button>
+          {showDecided ? <ul className="mt-2 grid gap-2 sm:grid-cols-2">{decided.map((p) => row(p, false))}</ul> : null}
+        </div>
+      ) : null}
+    </section>
   );
 }

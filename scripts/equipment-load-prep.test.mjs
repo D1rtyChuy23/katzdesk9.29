@@ -169,18 +169,18 @@ test("the Equipment import reads a Part # column", async () => {
     const id = await unit("Test Steakhouse", "Test Grinder", "TG-1", { partNumber: "OLD-1" });
     const read = async (unitId) => (await query("select part_number from account_equipment where id = $1", [unitId]))[0].part_number;
     // No Part # in the file: the unit keeps its own.
-    await query(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null, null]);
+    await query(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null, null, null]);
     assert.equal(await read(id), "OLD-1");
-    await query(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null, "NEW-2"]);
+    await query(IMP.importUpdateUnitSql(), [id, "Test Grinder", "Test Grinder", "TG-1", "tg-1", null, null, null, "NEW-2", null]);
     assert.equal(await read(id), "NEW-2");
     // A new unit from the file takes its Part #.
-    await query(IMP.importInsertUnitsSql(2), ["Test Steakhouse", "Test Brewer", "Test Brewer", "TB-1", "tb-1", null, null, null, "B-9", "Test Steakhouse", "Test Brewer", "Test Brewer", null, null, null, null, null, null]);
+    await query(IMP.importInsertUnitsSql(2), ["Test Steakhouse", "Test Brewer", "Test Brewer", "TB-1", "tb-1", null, null, null, "B-9", null, "Test Steakhouse", "Test Brewer", "Test Brewer", null, null, null, null, null, null, null]);
     assert.deepEqual((await query("select serial, part_number from account_equipment where catalog_model = 'Test Brewer' order by id")), [{ serial: "TB-1", part_number: "B-9" }, { serial: null, part_number: null }]);
   } finally {
     await pg.close();
   }
   const imp = src("src/lib/ops/account-equip-import.ts");
-  assert.match(imp, /await sql\.query\(importUpdateUnitSql\(\), \[unit\.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber\]\)/);
+  assert.match(imp, /await sql\.query\(importUpdateUnitSql\(\), \[unit\.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition\]\)/);
   assert.match(imp, /await sql\.query\(importInsertUnitsSql\(slice\.length\), slice\.flat\(\)\)/);
   assert.match(src("src/components/desk/account-equip-import.tsx"), /Part #/);
 });
