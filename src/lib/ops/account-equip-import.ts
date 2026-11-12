@@ -381,10 +381,10 @@ export function extraModelWords(fileModel: string, catalogModel: string): string
   return modelWords(fileModel).filter((w) => !cat.includes(w) && !joined.includes(w));
 }
 
-/** Model numbers in a name: two digits or more, not a voltage, wattage or a Part #'s own digits. */
+/** Model numbers in a name: two digits or more, not a voltage or wattage ("120V", "1800W"; "1131V+" is a model). */
 const modelNumbers = (s: string) =>
   new Set(
-    (s.toLowerCase().replace(/\d+(?:\.\d+)?\s*(?:v|w|hz|a)\b/g, " ").match(/\d{2,}/g) ?? []).map((n) => n.replace(/^0+/, "")),
+    (s.toLowerCase().replace(/\d+(?:\.\d+)?\s*(?:v|w|hz)\b(?!\+)/g, " ").match(/\d{2,}/g) ?? []).map((n) => n.replace(/^0+/, "")),
   );
 
 /** The live part's SKU or description carries a model number the catalog name doesn't, and none it does: 312 vs 220. */
@@ -413,14 +413,29 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
     const fileModel = first.fileModel || first.equipmentName;
     const counts = new Map<string, number>();
     for (const m of members) if (m.partNumber) counts.set(m.partNumber, (counts.get(m.partNumber) ?? 0) + 1);
-    const partNumber = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const byCount = [...counts].sort((a, b) => b[1] - a[1]);
+    const partNumber = byCount[0]?.[0] ?? null;
     const part = partNumber ? parts.get(mpnKey(partNumber)) ?? null : null;
     const warnings: string[] = [];
     if (first.catalogModel) {
       const extra = extraModelWords(fileModel, first.catalogModel);
       if (extra.length) warnings.push(`The file says "${extra.join(" ")}"; the catalog model doesn't.`);
-      if (partModelConflict(part, first.catalogModel)) warnings.push(`Part # ${partNumber} is ${part!.sku}${part!.description ? ` (${part!.description})` : ""}, which reads as another model.`);
+      // Every Part # its rows carry is read, not only the most common one (11/12 review).
+      for (const [pn] of byCount) {
+        const p = parts.get(mpnKey(pn));
+        if (partModelConflict(p, first.catalogModel)) warnings.push(`Part # ${pn} is ${p!.sku}${p!.description ? ` (${p!.description})` : ""}, which reads as another model.`);
+      }
     }
+    if (byCount.length > 1) {
+      warnings.push(`Its rows carry ${byCount.length} Part #s: ${byCount.map(([pn, n]) => `${pn} (${n})`).join(", ")}.`);
+    }
+    // A pairing reads as matched only when all its rows did.
+    const status: EquipPairing["status"] = members.every((m) => m.modelStatus === "matched")
+      ? "matched"
+      : members.some((m) => m.modelStatus === "ambiguous")
+        ? "ambiguous"
+        : "unmatched";
+    const candidates = [...new Set(members.flatMap((m) => m.modelCandidates))];
     const letters = (x: string) => x.toLowerCase().replace(/[^a-z0-9+]+/g, "");
     const differs = !!first.catalogModel && letters(fileModel) !== letters(first.catalogModel);
     out.push({
@@ -430,10 +445,10 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
       partSku: part?.sku ?? null,
       partDescription: part?.description ?? null,
       catalogModel: first.catalogModel,
-      status: first.modelStatus,
-      candidates: first.modelCandidates,
+      status,
+      candidates,
       rows: members.length,
-      needsConfirm: first.modelStatus === "matched" && (differs || warnings.length > 0),
+      needsConfirm: status === "matched" && (differs || warnings.length > 0),
       warnings,
     });
   }

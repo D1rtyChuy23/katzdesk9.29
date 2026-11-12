@@ -259,6 +259,10 @@ function PreviewBody({
 
   const pageSize = 80;
   const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
+  // Deciding a pairing can move hundreds of rows out of a filter: stay on a page that has rows.
+  useEffect(() => {
+    if (page > pageCount - 1) setPage(pageCount - 1);
+  }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
   const selectedAdds = preview.rows.filter((r) => {
@@ -270,6 +274,12 @@ function PreviewBody({
     return d?.selected && rowReady(r, d) && r.action === "update";
   }).length;
   const selectedCount = selectedAdds + selectedUpdates;
+  /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
+  const heldNow = preview.rows.filter((r) => {
+    if (r.action !== "add" && r.action !== "update") return false;
+    const d = drafts[r.key];
+    return (!!r.holdReasons?.length && !d?.selected) || (!d?.modelSet && !pairConfirmed(r.pairKey));
+  }).length;
   const blocked = preview.rows.filter((r) => {
     const d = drafts[r.key];
     return d?.selected && !rowReady(r, d);
@@ -295,8 +305,8 @@ function PreviewBody({
       for (const row of preview.rows) {
         const d = next[row.key] ?? draftFor(row);
         if (selected) {
-          // A row held for its site is never ticked in bulk: tick it on its own.
-          next[row.key] = { ...d, selected: !row.holdReasons?.length && rowReady(row, { ...d, selected: true }) };
+          // A row held for its site is never ticked in bulk: tick it on its own. One already ticked stays ticked.
+          next[row.key] = { ...d, selected: row.holdReasons?.length ? d.selected : rowReady(row, { ...d, selected: true }) };
         } else {
           next[row.key] = { ...d, selected: false };
         }
@@ -339,10 +349,10 @@ function PreviewBody({
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
           <span className="font-medium">{preview.reviewCount}</span> need review
-          {preview.heldCount ? (
+          {heldNow ? (
             <>
               {" · "}
-              <span className="font-medium">{preview.heldCount}</span> held
+              <span className="font-medium">{heldNow}</span> held
             </>
           ) : null}
         </li>
@@ -464,6 +474,7 @@ function PreviewBody({
                         ) : null}
                         <span className="mt-0.5 block text-[11px] text-muted-foreground">
                           File: {r.fileCustomer || "—"}
+                          {r.site ? ` · Site: ${r.site}` : ""}
                         </span>
                       </>
                     ) : (
@@ -486,11 +497,13 @@ function PreviewBody({
                             const known = equipment.items.some(
                               (i) => i.name.toLowerCase() === catalogModel.trim().toLowerCase(),
                             );
-                            const next = { ...d, catalogModel, addCatalog: !!catalogModel && !known, modelSet: true };
+                            // A model cleared on the row goes back to its pairing's decision.
+                            const modelSet = !!catalogModel.trim();
+                            const next = { ...d, catalogModel, addCatalog: !!catalogModel && !known, modelSet };
                             patch(r.key, {
                               catalogModel,
                               addCatalog: next.addCatalog,
-                              modelSet: true,
+                              modelSet,
                               selected: d.selected || (!r.holdReasons?.length && rowReady(r, next)),
                             });
                           }}

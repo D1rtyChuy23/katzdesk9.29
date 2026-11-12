@@ -142,8 +142,44 @@ test("the import screen shows model pairings, holds, the condition, and keeps it
   const screen = src("src/components/desk/account-equip-import.tsx");
   assert.match(screen, /function PairingsPanel\(/);
   assert.match(screen, /if \(!d\.modelSet && !pairConfirmed\(row\.pairKey\)\) return false;/);
-  assert.match(screen, /selected: !row\.holdReasons\?\.length && rowReady\(row, \{ \.\.\.d, selected: true \}\)/);
+  assert.match(screen, /selected: row\.holdReasons\?\.length \? d\.selected : rowReady\(row, \{ \.\.\.d, selected: true \}\)/);
   assert.match(screen, /\{ duration: Infinity, closeButton: true \}/);
   assert.match(screen, /Condition: \{r\.condition\}/);
   assert.match(src("src/components/desk/account-history.tsx"), /row\.condition \? `Condition \$\{row\.condition\}` : null/);
+});
+
+// Fable review of this change (11/12).
+test("a pairing reads every Part # its rows carry; one with several Part #s is confirmed", () => {
+  const rows = preview([
+    ["Test Bagels - Main", "1025 Test Drive", "Sure", "Bunn Sure Immersion 220", "44400.0200", "S-1", "Loaned", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "Sure", "Bunn Sure Immersion 220", "44400.0200", "S-2", "Loaned", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "Sure", "Bunn Sure Immersion 220", "44400.0202", "S-3", "Loaned", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "TB3", "Bunn TB3", "36700.0009", "S-4", "Loaned", "", "", ""],
+  ]);
+  const parts = new Map([
+    ["444000200", { sku: "BUNNSUREIMMERSION220", mpn: "44400.0200", description: null }],
+    ["444000202", { sku: "BUNNSUREIMMERSION312", mpn: "44400.0202", description: null }],
+  ]);
+  const by = Object.fromEntries(IMP.buildPairings(rows, parts).map((p) => [p.fileModel, p]));
+  assert.equal(by["Bunn Sure Immersion 220"].needsConfirm, true);
+  assert.deepEqual(by["Bunn Sure Immersion 220"].warnings, [
+    "Part # 44400.0202 is BUNNSUREIMMERSION312, which reads as another model.",
+    "Its rows carry 2 Part #s: 44400.0200 (2), 44400.0202 (1).",
+  ]);
+  assert.equal(by["Bunn TB3"].needsConfirm, false);
+});
+
+test("a model number written with V+ is a model, not a voltage", () => {
+  assert.equal(IMP.partModelConflict({ sku: "C11520", mpn: null, description: "CBS-1152V+" }, "Fetco CBS-1131V+"), true);
+  assert.equal(IMP.partModelConflict({ sku: "C11310", mpn: null, description: "CBS-1131V+" }, "Fetco CBS-1131V+"), false);
+  assert.equal(IMP.partModelConflict({ sku: "X", mpn: null, description: "Sego 12 120V" }, "Bravilor Sego 12 120V"), false);
+});
+
+test("a pairing whose rows matched differently reads as not matched, with every candidate", () => {
+  const rows = [
+    { ...preview([["Test Bagels - Main", "1025 Test Drive", "R", "Test Classe 5", "", "S-1", "", "", "", ""]])[0], modelStatus: "unmatched", modelCandidates: [], catalogModel: null, pairKey: "k" },
+    { ...preview([["Test Bagels - Main", "1025 Test Drive", "R", "Test Classe 5", "", "S-2", "", "", "", ""]])[0], key: "r1", modelStatus: "ambiguous", modelCandidates: ["A", "B"], catalogModel: null, pairKey: "k" },
+  ];
+  const [p] = IMP.buildPairings(rows, new Map());
+  assert.deepEqual([p.status, p.candidates, p.needsConfirm], ["ambiguous", ["A", "B"], false]);
 });
