@@ -152,7 +152,7 @@ test("a retired machine whose serial was corrected on the account since stays re
   }
 });
 
-test("a list save on a completed install keeps its retired row retired and makes a machine typed onto the list", async () => {
+test("a list save on a completed install matches as before: a machine typed onto the list is made", async () => {
   const { pg, sql, query } = await fresh();
   try {
     const done = Number((await query("insert into installs (customer, complete, equipment, serial) values ('Test Steakhouse', true, 'Test Grinder', null) returning id"))[0].id);
@@ -162,11 +162,11 @@ test("a list save on a completed install keeps its retired row retired and makes
     // An old list with no unit ids: the stored row is the retired grinder.
     await query("update installs set machines = null where id = $1", [done]);
     const before = { equipment: "Test Grinder", serial: null, power_voltage: null, machines: null };
-    await INS.syncInstallUnits(sql, done, { prune: true, before });
-    assert.deepEqual(await units(query), [], "the same list saved again");
     await query("update installs set equipment = 'Test Grinder / Test Grinder', machines = null where id = $1", [done]);
     await INS.syncInstallUnits(sql, done, { prune: true, before });
-    assert.equal((await units(query)).length, 1, "a second grinder typed onto the list is made");
+    // A save matches exactly as before #127, so it never takes a live unit's visit data (third review, 11/12). Known
+    // limit: a save of a completed install's list makes the retired grinder again, with the one typed on.
+    assert.equal((await units(query)).length, 2, "as before: the typed grinder, and the retired one made again");
   } finally {
     await pg.close();
   }

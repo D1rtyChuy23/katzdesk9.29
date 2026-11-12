@@ -905,12 +905,10 @@ function retiredByEvidence(retired: RetiredHere[], piece: Piece, liveKeys: Set<s
 /**
  * After the matching, a row nothing claimed would make a new unit. It is a retired machine of its model instead: with no
  * serial when the retired one has none, or with a serial the account has since corrected (the list still has "SN L").
- * On a save, only a row the list already had, so a machine typed onto the list in that save is made.
  */
-function retiredByModel(retired: RetiredHere[], piece: Piece, before: Piece[] | null): boolean {
+function retiredByModel(retired: RetiredHere[], piece: Piece): boolean {
   if (piece.unitId) return false;
   const key = serialKey(piece.serial) || null;
-  if (before && !before.some((b) => sameCatalogModel(b.equipment, piece.equipment) && (serialKey(b.serial) || null) === key)) return false;
   const at = retired.findIndex(
     (r) => (sameCatalogModel(r.model, piece.equipment) || sameCatalogModel(r.name, piece.equipment)) && (key ? r.serialKey !== key : !r.serialKey),
   );
@@ -969,7 +967,8 @@ export async function syncInstallUnits(
   // install's history doesn't make it again as a new, blank unit, and Put back still works. A live unit is always
   // matched first: only exact evidence sets a row aside before the matching (retiredByEvidence), and the looser
   // match by model (retiredByModel) only stops a row from making a new unit.
-  const retired = isComplete(row) ? await retiredFromInstall(sql, installId, row.customer) : [];
+  // Loads only: a list save (prune) matches and cleans up as before, so it never takes a live unit's visit data.
+  const retired = isComplete(row) && !opts?.prune ? await retiredFromInstall(sql, installId, row.customer) : [];
   const liveKeys = new Set(account.map((a) => a.serial_key).filter((k): k is string => !!k));
   const skip = pieces.map((p) => retired.length > 0 && retiredByEvidence(retired, p, liveKeys));
   const byId = claimNamed(pieces, hits, [linkedRows, account], used, skip);
@@ -1062,7 +1061,7 @@ export async function syncInstallUnits(
   }
   const finalUnits: (AcctUnit | undefined)[] = [];
   for (const [i, piece] of pieces.entries()) {
-    if (skip[i] || (!hits[i] && retired.length > 0 && retiredByModel(retired, piece, before))) continue;
+    if (skip[i] || (!hits[i] && retired.length > 0 && retiredByModel(retired, piece))) continue;
     let hit = hits[i];
     if (hit && combined(hit) && !isLocked(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.

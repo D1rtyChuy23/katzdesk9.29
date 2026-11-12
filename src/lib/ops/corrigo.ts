@@ -1606,9 +1606,9 @@ export function addsNothingNew(file: string | null | undefined, stored: string |
 /**
  * True when the saved text is a cut-off copy of Corrigo's fuller text (11/12), so the fuller text can take its place
  * without losing a word: line by line, each saved line is the start of the same Corrigo line, word for word. Only a
- * line's last word may be cut mid-word ("filte"), and only after enough of the line's own text: three words or more
- * after its "Machine:" lead, or two words with three letters of the cut one. The last line of a text Corrigo cut off
- * ("..." or the report's cap) may be cut anywhere. Text of fewer than three words, or saved in Corrigo's own
+ * line's last word may be cut mid-word ("filte"): it keeps three letters, after at least one whole word of the line's
+ * own text (past its "Machine:" lead). The last line of a text Corrigo cut off ("..." or the report's cap) may be cut
+ * anywhere. Text of fewer than three words, or saved in Corrigo's own
  * "Equipment:Type:text" form, is never a cut copy. Different wording ("Clean/Replac..." for "Clean and replace") stays.
  */
 export function isCutCopyOf(saved: string | null | undefined, fuller: string | null | undefined): boolean {
@@ -1628,7 +1628,7 @@ export function isCutCopyOf(saved: string | null | undefined, fuller: string | n
     return words.every((w, i) => {
       if (w === target[i]) return true;
       if (i !== words.length - 1 || !target[i]!.startsWith(w)) return false;
-      return (fieldCut && n === lines.length - 1) || body >= 3 || (body >= 2 && w.length >= 3);
+      return (fieldCut && n === lines.length - 1) || (body >= 2 && w.length >= 3);
     });
   });
 }
