@@ -1,7 +1,9 @@
 # Runs on every PR (and on main after a merge): the same checks AGENTS.project.md asks every agent to run.
 # It runs, but it only blocks a merge once main's ruleset requires the "checks" status (Chuy turns that on in GitHub).
-# DATABASE_URL is pinned empty: every database test runs on PGLite, and the build's migrate step skips.
-# Never add a DATABASE_URL secret here: 29 tests and the migrate step would then use that database.
+# Leave DATABASE_URL unset: database tests run on PGLite, and the build's migrate step skips.
+# Don't set it, not even to "": tests that use `DATABASE_URL ??= "postgres://127.0.0.1:9/unused"` keep "" and then
+# boot PGLite, which makes the suite run far longer. Never add a DATABASE_URL secret here either: tests and the
+# migrate step would use that database.
 name: Checks
 
 on:
@@ -20,8 +22,6 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    env:
-      DATABASE_URL: ""
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
