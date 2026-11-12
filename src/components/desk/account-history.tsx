@@ -7,7 +7,7 @@ import { canAddEquipmentTo, sameUnitModel } from "@/lib/ops/account-equip";
 import { listAccountEquipment, listRetiredEquipment, mergeAccountEquipment, removeAccountEquipment, restoreAccountEquipment } from "@/lib/ops/account-equip-import";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
-import { formatShortDate, money } from "@/lib/ops/clock";
+import { formatLongDate, formatShortDate, money } from "@/lib/ops/clock";
 import type { ClockFlag } from "@/lib/ops/clock";
 import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
@@ -245,7 +245,7 @@ export function AccountEquipmentList({
                     row.partNumber ? `Part # ${row.partNumber}` : null,
                     row.serial ? `SN ${row.serial}` : "No serial",
                     row.ownership,
-                    row.installDate ? `Installed ${formatShortDate(row.installDate)}` : null,
+                    row.installDate ? `Installed ${formatLongDate(row.installDate)}` : null,
                     row.condition ? `Condition ${row.condition}` : null,
                   ]
                     .filter(Boolean)

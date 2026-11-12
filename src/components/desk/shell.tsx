@@ -24,6 +24,7 @@ import {
   Wrench,
   ListChecks,
   Receipt,
+  Container,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
@@ -61,6 +62,7 @@ type DeskTo =
   | "/modules"
   | "/customers"
   | "/map"
+  | "/assets"
   | "/network"
   | "/analytics"
   | "/invoices"
@@ -95,6 +97,11 @@ const NAV: { label: string; items: NavItem[] }[] = [
       { to: "/network", label: "Out Of Network", icon: Globe },
       { to: "/customer-names", label: "Clean Names", icon: ListChecks },
     ],
+  },
+  {
+    // Every machine at a customer, and where it is (Chuy, 11/12). The warehouse's stock joins it next.
+    label: "Assets",
+    items: [{ to: "/assets", label: "In the Field", icon: Container }],
   },
   {
     label: "Installs",
