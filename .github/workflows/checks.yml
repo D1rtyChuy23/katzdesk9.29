@@ -1,6 +1,7 @@
 # Runs on every PR (and on main after a merge): the same checks AGENTS.project.md asks every agent to run.
-# No DATABASE_URL is set, so every database test runs on PGLite and nothing touches production.
-# This workflow doesn't build or deploy. `npm run build` also runs migrations, so it stays out of here.
+# It runs, but it only blocks a merge once main's ruleset requires the "checks" status (Chuy turns that on in GitHub).
+# DATABASE_URL is pinned empty: every database test runs on PGLite, and the build's migrate step skips.
+# Never add a DATABASE_URL secret here: 29 tests and the migrate step would then use that database.
 name: Checks
 
 on:
@@ -19,6 +20,8 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      DATABASE_URL: ""
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,5 +34,7 @@ jobs:
         run: npx tsc --noEmit
       - name: Lint (errors fail; warnings don't)
         run: npm run lint
+      - name: Build (the same build Vercel runs; migrations skip with no DATABASE_URL)
+        run: npm run build
       - name: Tests (full suite)
         run: npm test
