@@ -1564,7 +1564,7 @@ const sameText = (a: string | null | undefined, b: string | null | undefined) =>
 // One line at most: text saved as "Machine: text" lines isn't read as Corrigo's form. The Type is a word written right
 // after the colon ("Brewer:OTHER:text"), so plain text with a time ("at 10:30: leak") or a link ("photo: https://x: a")
 // reads as it is (11/12).
-const SEGMENT = /^([^:;\n]+):([A-Za-z][A-Za-z &/-]{0,39}):(.*)$/;
+const SEGMENT = /^([^:;\n]+):([A-Za-z][A-Za-z0-9 .&/()#-]{0,39}):(.*)$/;
 
 /** The text's segments, each with its machine when the text is in Corrigo's segmented form; null when it is plain. */
 function descriptionSegments(text: string): { equipment: string | null; text: string }[] | null {

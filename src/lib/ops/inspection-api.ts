@@ -695,11 +695,12 @@ export async function takeUnitOffOpenInstalls(sql: Sql, equipmentId: number): Pr
 }
 
 /**
- * Put back (11/12): Remove took the machine off each open install's list. A machine back on its account goes back on
- * the list of each open install whose visit has it again, as the last row, when no row there is or could be it.
- * Completed installs' lists are left as they are.
+ * Put back (11/12): a machine back on its account goes back on the list of each open install Remove took its row off
+ * (`installIds`, kept with the retired record), as the last row, when the visit has it again and no row there is or
+ * could be it. Other installs, and completed ones, are left as they are.
  */
-export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number): Promise<number[]> {
+export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number, installIds: number[]): Promise<number[]> {
+  if (!installIds.length) return [];
   const unit = (
     await sql.query<{ catalog_model: string; equipment_name: string; serial: string | null; electrical: string | null }>(
       "select catalog_model, equipment_name, serial, electrical from account_equipment where id = $1",
@@ -709,9 +710,9 @@ export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number): 
   if (!unit) return [];
   const installs = await sql.query<ListRow & { id: number }>(
     `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
-      where i.archived = false and coalesce(i.complete, false) = false
+      where i.archived = false and coalesce(i.complete, false) = false and i.id = any($2::int[])
         and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)`,
-    [equipmentId],
+    [equipmentId, installIds],
   );
   if (!installs.length) return [];
   const catalog = await catalogNames(sql);

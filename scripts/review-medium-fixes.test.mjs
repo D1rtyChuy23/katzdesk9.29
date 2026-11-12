@@ -129,3 +129,47 @@ test("Put back leaves a parts line that was linked to another unit meanwhile, an
     await pg.close();
   }
 });
+
+// Fable review of these fixes (11/12).
+test("a ticket save with no account name keeps the account and saves the other fields", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    await query("insert into directory_customers (name) values ('Test Diner - Main')");
+    const { id } = await openTicketFor(sql, { kind: "service", customer: "Test Diner - Main", received: "2026-11-12" });
+    await updateJobFor(sql, { id, customer: null, issue: "One" }, "u");
+    await updateJobFor(sql, { id, customer: "  ", issue: "Two" }, "u");
+    assert.deepEqual((await query("select customer, issue from service_jobs where id = $1", [id]))[0], { customer: "Test Diner - Main", issue: "Two" });
+    await updateJobFor(sql, { id, customer: "Walk-In" }, "u");
+    assert.equal((await query("select customer from service_jobs where id = $1", [id]))[0].customer, "Walk-In");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Put back adds a row only on an install Remove took one off; a unit on the visit with no row stays rowless", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    await query("insert into directory_customers (name) values ('Test Steakhouse')");
+    const open = Number((await query("insert into installs (customer, complete, equipment, serial) values ('Test Steakhouse', false, 'Test Grinder', 'PB001708') returning id"))[0].id);
+    const a = Number((await query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Test Steakhouse', 'Test Grinder', 'Test Grinder', 'L', 'l') returning id"))[0].id);
+    const b = Number((await query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Test Steakhouse', 'Test Grinder', 'Test Grinder', 'PB001708', 'pb001708') returning id"))[0].id);
+    await INS.syncInstallUnits(sql, open);
+    // Unit a is on the visit with a note, but no row of the list is it.
+    await query("insert into install_inspection_units (install_id, equipment_id, note) values ($1, $2, 'left for review') on conflict (install_id, equipment_id) do update set note = excluded.note", [open, a]);
+    const before = (await query("select equipment, serial from installs where id = $1", [open]))[0];
+    await IMP.removeEquipmentUnit(sql, a, BY);
+    assert.deepEqual((await query("select equipment, serial from installs where id = $1", [open]))[0], before, "Remove took no row off");
+    const [{ id: retiredId }] = await query("select id from account_equipment_retired");
+    await IMP.putBackEquipmentUnit(sql, retiredId);
+    assert.deepEqual((await query("select equipment, serial from installs where id = $1", [open]))[0], before, "Put back adds none");
+    assert.ok(b);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Corrigo Types with a digit or a period still split; a time or a link still doesn't", () => {
+  assert.equal(C.descriptionLines("Brewer:Type 2:leak;Grinder:Type 2:burrs"), "Brewer: leak\nGrinder: burrs");
+  assert.equal(C.descriptionLines("Brewer:Espresso Mach.:leak;Grinder:OTHER:x"), "Brewer: leak\nGrinder: x");
+  assert.equal(C.descriptionLines("Call store at 10:30: brewer leaking"), "Call store at 10:30: brewer leaking");
+});

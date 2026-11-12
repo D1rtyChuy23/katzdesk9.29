@@ -911,7 +911,9 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	if (cur[0].merged_install_id) throw new Error(`This ticket was merged into install #${cur[0].merged_install_id}. Open the install to keep working.`);
 	// A ticket moved to another account goes on a real one, spelled as the list has it, as a new ticket does (11/12).
 	// A save that sends the name it already has (an older ticket under a name no account has) is left as it is.
-	if (data.customer !== undefined && String(data.customer ?? "").trim() !== String(cur[0].customer ?? "").trim()) {
+	// No name sent (null, or a box left empty) keeps the ticket's account: a ticket is never left with no account.
+	if (data.customer != null && !data.customer.trim()) data = { ...data, customer: undefined };
+	if (data.customer != null && data.customer.trim() !== String(cur[0].customer ?? "").trim()) {
 		data = { ...data, customer: await ticketAccount(sql, data.customer ?? "") };
 	}
 	if (data.customer !== undefined) {
