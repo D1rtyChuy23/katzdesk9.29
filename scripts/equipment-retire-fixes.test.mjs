@@ -187,3 +187,23 @@ test("a Part # shown with commas, a currency or a percent reads as before; one w
   const xl = IMP.fileToMatrix(asBase64(wb));
   assert.deepEqual(IMP.parseEquipMatrix(xl.matrix, xl.shown).records.map((r) => r.partNumber), ["33200", "1234.5", "00123"]);
 });
+
+// Third review (11/12): a live unit is always matched before a retired machine.
+test("twins on a completed install: removing one never takes the other off the account", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const done = Number((await query("insert into installs (customer, complete, equipment, serial) values ('Test Steakhouse', true, 'Test Grinder / Test Grinder', null) returning id"))[0].id);
+    await INS.syncInstallUnits(sql, done);
+    const [a, b] = (await query("select id from account_equipment order by id")).map((r) => r.id);
+    assert.ok(a && b);
+    await IMP.removeEquipmentUnit(sql, a, BY);
+    await INS.readInspection(sql, done);
+    assert.deepEqual((await query("select id from account_equipment")).map((r) => r.id), [b], "the load keeps the live twin, makes no new one");
+    const [{ equipment, serial, power_voltage, machines }] = await query("select equipment, serial, power_voltage, machines from installs where id = $1", [done]);
+    await query("update installs set equipment = 'Test Grinder', machines = null where id = $1", [done]);
+    await INS.syncInstallUnits(sql, done, { prune: true, before: { equipment, serial, power_voltage, machines } });
+    assert.deepEqual((await query("select id from account_equipment")).map((r) => r.id), [b], "a save with one grinder row keeps the live twin");
+  } finally {
+    await pg.close();
+  }
+});

@@ -887,23 +887,33 @@ async function retiredFromInstall(sql: Sql, installId: number, customer: string)
 }
 
 /**
- * A listed machine that is one of those retired machines. A row that carries a unit id is that unit or nothing; else
- * by serial; else, when neither has a serial, by model. On a save (`stored`: the list's rows before it with no id and no
- * serial), a model-only row counts only as one of the rows already there, so a machine typed onto the list in this save
- * is made. Each retired machine and each stored row counts once.
+ * Before the matching, only exact evidence sets a row aside as a retired machine: it carries the retired unit's id, or
+ * its serial is the retired unit's and no unit on the account has that serial. Each retired machine counts once.
  */
-function takeRetired(retired: RetiredHere[], piece: Piece, stored: Piece[] | null): boolean {
+function retiredByEvidence(retired: RetiredHere[], piece: Piece, liveKeys: Set<string>): boolean {
   const key = serialKey(piece.serial) || null;
-  const sameModel = (r: RetiredHere) => sameCatalogModel(r.model, piece.equipment) || sameCatalogModel(r.name, piece.equipment);
-  let at = -1;
-  if (piece.unitId) at = retired.findIndex((r) => r.unitId === piece.unitId);
-  else if (key) at = retired.findIndex((r) => r.serialKey === key);
-  else {
-    const was = stored ? stored.findIndex((p) => sameCatalogModel(p.equipment, piece.equipment)) : -1;
-    if (stored && was < 0) return false;
-    at = retired.findIndex((r) => !r.serialKey && sameModel(r));
-    if (at >= 0 && stored) stored.splice(was, 1);
-  }
+  const at = piece.unitId
+    ? retired.findIndex((r) => r.unitId === piece.unitId)
+    : key && !liveKeys.has(key)
+      ? retired.findIndex((r) => r.serialKey === key)
+      : -1;
+  if (at < 0) return false;
+  retired.splice(at, 1);
+  return true;
+}
+
+/**
+ * After the matching, a row nothing claimed would make a new unit. It is a retired machine of its model instead: with no
+ * serial when the retired one has none, or with a serial the account has since corrected (the list still has "SN L").
+ * On a save, only a row the list already had, so a machine typed onto the list in that save is made.
+ */
+function retiredByModel(retired: RetiredHere[], piece: Piece, before: Piece[] | null): boolean {
+  if (piece.unitId) return false;
+  const key = serialKey(piece.serial) || null;
+  if (before && !before.some((b) => sameCatalogModel(b.equipment, piece.equipment) && (serialKey(b.serial) || null) === key)) return false;
+  const at = retired.findIndex(
+    (r) => (sameCatalogModel(r.model, piece.equipment) || sameCatalogModel(r.name, piece.equipment)) && (key ? r.serialKey !== key : !r.serialKey),
+  );
   if (at < 0) return false;
   retired.splice(at, 1);
   return true;
@@ -955,12 +965,13 @@ export async function syncInstallUnits(
   // First pass: every piece takes the unit it names (its exact serial, then its own unit id), then by model. Only then
   // do the looser matches run, so one row never takes the unit another row names exactly.
   const hits: (AcctUnit | undefined)[] = pieces.map(() => undefined);
-  // A completed install still lists a machine removed from the account since (11/12): it stays retired. Its row
-  // claims no unit, so the install's history neither makes it again as a new, blank unit nor writes its serial onto
-  // another one, and Put back still works.
+  // A completed install still lists a machine removed from the account since (11/12): it stays retired, so the
+  // install's history doesn't make it again as a new, blank unit, and Put back still works. A live unit is always
+  // matched first: only exact evidence sets a row aside before the matching (retiredByEvidence), and the looser
+  // match by model (retiredByModel) only stops a row from making a new unit.
   const retired = isComplete(row) ? await retiredFromInstall(sql, installId, row.customer) : [];
-  const storedRows = before ? before.filter((p) => !p.unitId && !serialKey(p.serial)) : null;
-  const skip = pieces.map((p) => retired.length > 0 && takeRetired(retired, p, storedRows));
+  const liveKeys = new Set(account.map((a) => a.serial_key).filter((k): k is string => !!k));
+  const skip = pieces.map((p) => retired.length > 0 && retiredByEvidence(retired, p, liveKeys));
   const byId = claimNamed(pieces, hits, [linkedRows, account], used, skip);
   pieces.forEach((piece, i) => {
     if (hits[i] || skip[i]) return;
@@ -1050,19 +1061,8 @@ export async function syncInstallUnits(
     }
   }
   const finalUnits: (AcctUnit | undefined)[] = [];
-  // A row nothing claimed would make a new unit. On a completed install it is the retired machine of its model whose
-  // serial was corrected on the account since (the list still has "SN L"): it stays retired too. On a save, only a
-  // row the list already had, so a machine typed onto the list in this save is made.
-  const hadBefore = (p: Piece) => !before || before.some((b) => sameCatalogModel(b.equipment, p.equipment) && serialKey(b.serial) === serialKey(p.serial));
-  const lateRetired = (p: Piece) => {
-    if (!hadBefore(p)) return false;
-    const at = retired.findIndex((r) => sameCatalogModel(r.model, p.equipment) || sameCatalogModel(r.name, p.equipment));
-    if (at < 0) return false;
-    retired.splice(at, 1);
-    return true;
-  };
   for (const [i, piece] of pieces.entries()) {
-    if (skip[i] || (!hits[i] && lateRetired(piece))) continue;
+    if (skip[i] || (!hits[i] && retired.length > 0 && retiredByModel(retired, piece, before))) continue;
     let hit = hits[i];
     if (hit && combined(hit) && !isLocked(hit)) {
       // Matched by model but still labelled with the whole list: show just this machine's name.

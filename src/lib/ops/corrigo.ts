@@ -1605,34 +1605,31 @@ export function addsNothingNew(file: string | null | undefined, stored: string |
 
 /**
  * True when the saved text is a cut-off copy of Corrigo's fuller text (11/12), so the fuller text can take its place
- * without losing a word. Line by line, each saved line is the start of the same Corrigo line, word for word. A line's
- * last word may be cut mid-word ("filte"): on a line of four words or more at any letter, on a shorter line when it
- * keeps three letters. Saved text that itself ends cut off ("..." or the report's cap) may skip words inside a line
- * ("Clean/Replac..."), but each line still starts with the same two words as Corrigo's. Text of fewer than three
- * words is never a cut copy. So a tech's own words ("PM not done", "No") stay, even where Corrigo uses them further on.
+ * without losing a word: line by line, each saved line is the start of the same Corrigo line, word for word. Only a
+ * line's last word may be cut mid-word ("filte"), and only after enough of the line's own text: three words or more
+ * after its "Machine:" lead, or two words with three letters of the cut one. The last line of a text Corrigo cut off
+ * ("..." or the report's cap) may be cut anywhere. Text of fewer than three words, or saved in Corrigo's own
+ * "Equipment:Type:text" form, is never a cut copy. Different wording ("Clean/Replac..." for "Clean and replace") stays.
  */
 export function isCutCopyOf(saved: string | null | undefined, fuller: string | null | undefined): boolean {
-  const lines = descriptionWords(saved);
+  const wordsOf = (t: string) => t.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+  const raw = String(saved ?? "").trim();
+  if (wordsOf(raw).length < 3 || descriptionSegments(raw)) return false;
+  const lines = raw.split(/[;\n]/).map((l) => l.trim()).filter((l) => wordsOf(l).length);
   const full = descriptionWords(fuller);
-  if (lines.flat().length < 3 || lines.length > full.length) return false;
-  const loose = looksCutOff(saved);
-  return lines.every((words, n) => {
+  if (!lines.length || lines.length > full.length) return false;
+  const fieldCut = looksCutOff(raw);
+  return lines.every((line, n) => {
+    const words = wordsOf(line);
     const target = full[n]!;
-    const cutOk = (w: string, t: string) => t.startsWith(w) && (words.length >= 4 || w.length >= 3);
-    if (!loose) {
-      if (words.length > target.length) return false;
-      return words.every((w, i) => w === target[i] || (i === words.length - 1 && cutOk(w, target[i]!)));
-    }
-    const lead = Math.min(2, words.length);
-    for (let i = 0; i < lead; i += 1) if (words[i] !== target[i] && !(i === words.length - 1 && cutOk(words[i]!, target[i]!))) return false;
-    let at = lead;
-    for (let i = lead; i < words.length; i += 1) {
-      const last = i === words.length - 1;
-      while (at < target.length && !(words[i] === target[at] || (last && target[at]!.startsWith(words[i]!)))) at += 1;
-      if (at >= target.length) return false;
-      at += 1;
-    }
-    return true;
+    if (words.length > target.length) return false;
+    const colon = line.indexOf(":");
+    const body = colon >= 0 ? wordsOf(line.slice(colon + 1)).length : words.length;
+    return words.every((w, i) => {
+      if (w === target[i]) return true;
+      if (i !== words.length - 1 || !target[i]!.startsWith(w)) return false;
+      return (fieldCut && n === lines.length - 1) || body >= 3 || (body >= 2 && w.length >= 3);
+    });
   });
 }
 
