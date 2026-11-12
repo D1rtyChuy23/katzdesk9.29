@@ -43,7 +43,8 @@ export function retireUnitSql(): string {
                    'inspection_units', coalesce((select jsonb_agg(to_jsonb(u)) from install_inspection_units u where u.equipment_id = a.id), '[]'::jsonb),
                    'inspection_items', coalesce((select jsonb_agg(to_jsonb(i)) from install_inspection_items i where i.equipment_id = a.id), '[]'::jsonb),
                    'inspection_photos', coalesce((select jsonb_agg(to_jsonb(p)) from install_inspection_photos p where p.equipment_id = a.id), '[]'::jsonb),
-                   'pm_links', coalesce((select jsonb_agg(to_jsonb(l)) from pm_runbook_unit_links l where l.account_equipment_id = a.id), '[]'::jsonb)),
+                   'pm_links', coalesce((select jsonb_agg(to_jsonb(l)) from pm_runbook_unit_links l where l.account_equipment_id = a.id), '[]'::jsonb),
+                   'machine_parts', coalesce((select jsonb_agg(m.id) from machine_parts m where m.account_equipment_id = a.id), '[]'::jsonb)),
                  $2, $3
             from account_equipment a
            where a.id = $1
@@ -104,7 +105,7 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
 
 /**
  * Put a retired machine back, as one statement: the unit under its own id, then the inspection and PM links whose
- * install or PM still exists, then the retired row is dropped. $1 the retired row, $2 the account's name now.
+ * install or PM still exists, and the PM parts lines logged for it, then the retired row is dropped. $1 the retired row, $2 the account's name now.
  */
 export function restoreUnitSql(): string {
   return `with r as (select * from account_equipment_retired where id = $1),
@@ -142,6 +143,14 @@ export function restoreUnitSql(): string {
             select x.* from r, jsonb_populate_recordset(null::pm_runbook_unit_links, r.links->'pm_links') x
              where exists (select 1 from unit) and exists (select 1 from pm_jobs p where p.id = x.pm_job_id)
             on conflict do nothing
+          ),
+          -- Parts logged on a PM for this machine (11/12): the delete set their link to null, so they point at it again.
+          -- A line linked to another unit meanwhile keeps that one.
+          parts as (
+            update machine_parts m set account_equipment_id = (select id from unit)
+              from r
+             where exists (select 1 from unit) and m.account_equipment_id is null
+               and m.id in (select v::int from jsonb_array_elements_text(coalesce(r.links->'machine_parts', '[]'::jsonb)) v)
           ),
           gone as (delete from account_equipment_retired where id = $1 and exists (select 1 from unit))
           select id from unit`;

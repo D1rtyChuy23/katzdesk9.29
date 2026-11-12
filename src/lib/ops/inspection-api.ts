@@ -695,6 +695,45 @@ export async function takeUnitOffOpenInstalls(sql: Sql, equipmentId: number): Pr
 }
 
 /**
+ * Put back (11/12): Remove took the machine off each open install's list. A machine back on its account goes back on
+ * the list of each open install whose visit has it again, as the last row, when no row there is or could be it.
+ * Completed installs' lists are left as they are.
+ */
+export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number): Promise<number[]> {
+  const unit = (
+    await sql.query<{ catalog_model: string; equipment_name: string; serial: string | null; electrical: string | null }>(
+      "select catalog_model, equipment_name, serial, electrical from account_equipment where id = $1",
+      [equipmentId],
+    )
+  )[0];
+  if (!unit) return [];
+  const installs = await sql.query<ListRow & { id: number }>(
+    `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
+      where i.archived = false and coalesce(i.complete, false) = false
+        and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)`,
+    [equipmentId],
+  );
+  if (!installs.length) return [];
+  const catalog = await catalogNames(sql);
+  const touched: number[] = [];
+  for (const row of installs) {
+    const pieces = piecesFrom(row, catalog);
+    const linked = await linkedUnits(sql, row.id);
+    if (listIndexOf(pieces, linked, catalog, equipmentId) >= 0) continue;
+    // A row of its model that no unit claims may be it: leave the list for the visit to sort out.
+    const claims = claimLinked(pieces, linked, catalog);
+    const sameModel = (p: Piece) => sameCatalogModel(unit.catalog_model, p.equipment) || sameCatalogModel(unit.equipment_name, p.equipment);
+    if (pieces.some((p, i) => claims[i]! < 0 && sameModel(p))) continue;
+    await writeList(sql, row.id, [
+      ...pieces,
+      { equipment: unit.equipment_name || unit.catalog_model, serial: unit.serial ?? "", powerVoltage: unit.electrical ?? "", unitId: equipmentId },
+    ]);
+    touched.push(row.id);
+  }
+  return touched;
+}
+
+/**
  * Merge on the account: an open install whose visit has both units lists that machine twice. The dropped unit's row
  * comes off the list (the rows that stay keep everything they carry), or reopening the install makes the unit again.
  */

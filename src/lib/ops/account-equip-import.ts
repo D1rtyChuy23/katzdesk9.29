@@ -4,7 +4,7 @@ import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { normalizeHeader } from "@/lib/ops/corrigo";
-import { catalogNames, dropMergedRow, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
+import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
@@ -712,11 +712,18 @@ export const listRetiredEquipment = createServerFn({ method: "GET" })
   .validator((d: { customer: string }) => z.object({ customer: z.string().min(1).max(300) }).parse(d))
   .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer));
 
+/** Put a retired machine back on its account, and on the lists of the open installs Remove took it off (11/12). */
+export async function putBackEquipmentUnit(sql: Sql, retiredId: number): Promise<{ id: number }> {
+  const back = await restoreRetiredUnit(sql, retiredId);
+  await putUnitBackOnOpenInstalls(sql, back.id);
+  return back;
+}
+
 /** Put a retired machine back on its account. */
 export const restoreAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => restoreRetiredUnit(await ready(), data.id));
+  .handler(async ({ data }) => putBackEquipmentUnit(await ready(), data.id));
 
 /** Serials that are on more than one account unit. Read only. */
 export const getDuplicateSerials = createServerFn({ method: "GET" })
