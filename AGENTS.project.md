@@ -33,3 +33,4 @@ When you receive a prompt, check the From line. Treat it as a request from that 
   - `node --test scripts/library-file-rules.test.mjs`
   - `npx tsc --noEmit`
 - Every report back lists: the PR link, the commit SHA, the test counts, the files changed, and anything you ran against production (normally "nothing").
+- Every report also has a **Not verified** line: what the tests and checks did not cover. Always name any migration in migrations/ that was not run against a real database, and any import or data change that was not tried on a real export or live data. If everything was covered, write "Not verified: nothing".
