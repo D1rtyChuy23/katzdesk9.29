@@ -77,7 +77,7 @@
       { "id": "hyd-hose", "text": "Replace the 80 mm silicone hose (cut from 25 m hose 104451). Do this at every service.", "ref": "Manual p.12" }
     ] },
     { "module": "Milk module V3", "when": { "model": ["2m"] }, "items": [
-      { "id": "milk-kit", "text": "Fit EV113696 (hose 104719 cut to 400 mm).", "ref": "Manual p.14" },
+      { "id": "milk-kit", "text": "Fit EV113696 (silicone hose 104719, Ø9/3, cut to 400 mm).", "ref": "Manual p.14" },
       { "id": "milk-kit36", "text": "Fit EV113697.", "ref": "Manual p.14", "when": { "pm": ["36"] } },
       { "id": "milk-pipes", "text": "Change the milk pipes (every 12 months). 25 m blue 106186, green 106189.", "ref": "Manual p.14" }
     ] },
