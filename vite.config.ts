@@ -128,10 +128,13 @@ function authPopupPlugin(): Plugin {
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
 /**
- * The commit this build is from, for the version line on Settings (11/13): Vercel's own variable when it builds from
- * git, else the checkout's HEAD, else "unknown".
+ * The commit this build is from, for the version line on Settings (11/13): KATZ_BUILD_SHA when the publish passes it
+ * (a CLI deploy uploads files with no git), else Vercel's own variable when it builds from git, else the checkout's
+ * HEAD, else "unknown".
  */
 function buildSha(): string {
+  const passed = process.env.KATZ_BUILD_SHA?.trim();
+  if (passed && /^[0-9a-f]{7,40}$/i.test(passed)) return passed;
   const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
   if (fromVercel) return fromVercel;
   try {

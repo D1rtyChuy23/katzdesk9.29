@@ -19,6 +19,7 @@ test("the build line: the commit's first 7 characters and the Chicago build time
 test("Vite sets the build from Vercel's commit, else git; Settings shows it", () => {
   const cfg = src("vite.config.ts");
   assert.ok(cfg.includes("process.env.VERCEL_GIT_COMMIT_SHA"));
+  assert.ok(cfg.indexOf("process.env.KATZ_BUILD_SHA") < cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA"), "a passed commit wins (11/13: the CLI publish had no git)");
   assert.ok(cfg.includes('execSync("git rev-parse HEAD"'));
   assert.ok(cfg.includes("__KATZ_BUILD__: JSON.stringify("));
   assert.ok(src("src/routes/_app/settings.tsx").includes('data-testid="settings-build"'));
