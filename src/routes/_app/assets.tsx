@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Download, MapPinOff, Warehouse as WarehouseIcon, Wrench, X } from "lucide-react";
-import { FilterChip } from "@/components/desk/desk-charts";
+import { BreakdownList, ChartCard, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
 import { DeskMap, type MapPin } from "@/components/desk/desk-map";
 import { downloadCsv } from "@/components/desk/download-csv";
 import { nameKey, pointOf, useGeoIndex } from "@/components/desk/geo-data";
@@ -23,34 +23,45 @@ import {
 } from "@/lib/ops/field-assets";
 import { FIELD_ASSETS_KEY, listFieldAssets } from "@/lib/ops/field-assets-api";
 import { getMyAccess } from "@/lib/ops/access";
+import {
+  FLAG_LABEL,
+  flaggedCsv,
+  FLAGGED,
+  HOW_LABEL,
+  OVERDUE_DAYS,
+  VISIT_LABEL,
+  type FlaggedMachine,
+  type ServiceFlag,
+} from "@/lib/ops/equipment-analytics";
+import { EQUIPMENT_ANALYTICS_KEY, getEquipmentAnalytics } from "@/lib/ops/equipment-analytics-api";
 import { useFromHere } from "@/lib/ops/search-params";
-import { byModel, filterStock, isFree, placeLabel, type StockUnit } from "@/lib/ops/warehouse-assets";
+import { byModel, filterRebuilds, filterStock, isFree, placeLabel, type StockUnit } from "@/lib/ops/warehouse-assets";
 import { listWarehouseAssets, WAREHOUSE_ASSETS_KEY } from "@/lib/ops/warehouse-assets-api";
 
 type View = "list" | "map";
-type Section = "field" | "warehouse";
-type AssetsSearch = { view?: "map"; section?: "warehouse" };
+type Section = "field" | "warehouse" | "analytics";
+type AssetsSearch = { view?: "map"; section?: "warehouse" | "analytics" };
 
 export const Route = createFileRoute("/_app/assets")({
   validateSearch: (s: Record<string, unknown>): AssetsSearch => ({
     ...(s.view === "map" ? { view: "map" as const } : {}),
-    ...(s.section === "warehouse" ? { section: "warehouse" as const } : {}),
+    ...(s.section === "warehouse" || s.section === "analytics" ? { section: s.section } : {}),
   }),
   component: Page,
 });
 
 /**
- * Assets (Chuy, 11/12): In the Field, every machine at a customer, and Warehouse, what the barn has to put out and the
- * refurbs on their way. The Warehouse role sees the Warehouse section only.
+ * Assets (Chuy, 11/12): In the Field, every machine at a customer; Warehouse, what the barn has to put out and the
+ * refurbs on their way; and Analytics (11/13), fleet counts, service load, ownership and the machines not serviced in
+ * over a year. The Warehouse role sees the Warehouse section only.
  */
 function Page() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const access = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess(), staleTime: 60_000 });
   const warehouseOnly = access.data?.role === "warehouse" && !access.data?.isAdmin;
-  const section: Section = warehouseOnly || search.section === "warehouse" ? "warehouse" : "field";
-  const setSection = (next: Section) =>
-    void navigate({ search: next === "warehouse" ? { section: "warehouse" } : {}, replace: true, resetScroll: false });
+  const section: Section = warehouseOnly ? "warehouse" : (search.section ?? "field");
+  const setSection = (next: Section) => void navigate({ search: next === "field" ? {} : { section: next }, replace: true, resetScroll: false });
   return (
     <div>
       <header>
@@ -58,7 +69,9 @@ function Page() {
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
           {section === "field"
             ? "Every machine at a customer: what it is, where it is, who owns it and what shape it's in. Filter the list, see it on the map, or export it."
-            : "What the barn has to put out at a customer, what came back from a refurb and waits in staging, and the refurbs still open. Open a unit to place or move it on the Warehouse page."}
+            : section === "warehouse"
+              ? "What the barn has to put out at a customer, what came back from a refurb and waits in staging, and the refurbs still open. Open a unit to place or move it on the Warehouse page."
+              : "The machines in the field counted by brand, model, condition and ownership; the service load over the last year; and every machine not serviced in over a year."}
         </p>
         <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Assets section" data-testid="assets-sections">
           {warehouseOnly ? null : (
@@ -69,9 +82,20 @@ function Page() {
           <FilterChip selected={section === "warehouse"} onClick={() => setSection("warehouse")} data-testid="assets-section-warehouse">
             Warehouse
           </FilterChip>
+          {warehouseOnly ? null : (
+            <FilterChip selected={section === "analytics"} onClick={() => setSection("analytics")} data-testid="assets-section-analytics">
+              Analytics
+            </FilterChip>
+          )}
         </div>
       </header>
-      {section === "warehouse" ? <WarehouseSection /> : access.isLoading ? <Skeleton className="mt-4 h-64 w-full rounded-xl" /> : <FieldSection />}
+      {section === "warehouse" ? (
+        <WarehouseSection />
+      ) : access.isLoading ? (
+        <Skeleton className="mt-4 h-64 w-full rounded-xl" />
+      ) : section === "analytics" ? <AnalyticsSection /> : (
+        <FieldSection />
+      )}
     </div>
   );
 }
@@ -312,7 +336,7 @@ function WarehouseSection() {
   const staging = useMemo(() => filterStock(q.data?.staging ?? [], text, kind), [q.data, text, kind]);
   const models = useMemo(() => byModel(available), [available]);
   const freeCount = available.filter(isFree).reduce((n, u) => n + (u.qty || 1), 0);
-  const rebuilds = q.data?.rebuilds ?? [];
+  const rebuilds = useMemo(() => filterRebuilds(q.data?.rebuilds ?? [], text, kind), [q.data, text, kind]);
   if (q.isError) return <p className="mt-4 text-sm text-destructive">Could not load the warehouse: {q.error instanceof Error ? q.error.message : "try again"}.</p>;
   if (q.isLoading) return <Skeleton className="mt-4 h-64 w-full rounded-xl" />;
   return (
@@ -391,7 +415,7 @@ function WarehouseSection() {
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">No open refurbs.</p>
+          <p className="mt-2 text-sm text-muted-foreground">{text.trim() || kind ? "No open refurb matches." : "No open refurbs."}</p>
         )}
       </section>
     </div>
@@ -435,6 +459,221 @@ function StockTable({ units }: { units: StockUnit[] }) {
         </tbody>
       </table>
       <ShowMoreButton remaining={remaining} onClick={showMore} label="units" />
+    </div>
+  );
+}
+
+const asItems = (pairs: readonly (readonly [string, number])[]) => pairs.map(([name, count]) => ({ name, count }));
+
+/**
+ * Assets → Analytics (Chuy, 11/13): fleet counts, service load, ownership, and the machines not serviced in over a
+ * year. Worked out on the server from the In the Field machines and the completed PMs, service and TLC tickets.
+ */
+function AnalyticsSection() {
+  const q = useQuery({ queryKey: EQUIPMENT_ANALYTICS_KEY, queryFn: () => getEquipmentAnalytics(), staleTime: 60_000 });
+  const [flagFilter, setFlagFilter] = useState<ServiceFlag | "">("");
+  const [text, setText] = useState("");
+  const a = q.data;
+  const flagged = useMemo(() => {
+    const needle = text.trim().toLowerCase();
+    return (a?.flagged ?? []).filter(
+      (r) =>
+        (!flagFilter || r.flag === flagFilter) &&
+        (!needle || [r.customer, r.catalogModel, r.serial, r.brand].some((v) => String(v ?? "").toLowerCase().includes(needle))),
+    );
+  }, [a, flagFilter, text]);
+  if (q.isError) return <p className="mt-4 text-sm text-destructive">Could not load the analytics: {q.error instanceof Error ? q.error.message : "try again"}.</p>;
+  if (q.isLoading || !a) return <Skeleton className="mt-4 h-64 w-full rounded-xl" />;
+  const flaggedTotal = FLAGGED.reduce((n, f) => n + a.flags[f], 0);
+  const visits = a.visitsLastYear.pm + a.visitsLastYear.service + a.visitsLastYear.tlc;
+  return (
+    <div data-testid="assets-analytics">
+      <StatRow loaded={q.isSuccess}>
+        <StatCard label="Machines in the field" value={a.machines} hint={`At ${a.accounts} account${a.accounts === 1 ? "" : "s"}`} />
+        <StatCard label="Serviced this year" value={a.flags.ok} tone="ok" hint={`A PM or ticket in the last ${OVERDUE_DAYS} days`} />
+        <StatCard
+          label="Not serviced after a year"
+          value={flaggedTotal}
+          tone={flaggedTotal ? "danger" : undefined}
+          hint={`${a.flags.overdue} overdue · ${a.flags.never} never on record · ${a.flags.unknown} no dates`}
+        />
+        <StatCard
+          label="Visits, last 12 months"
+          value={visits}
+          hint={`${a.visitsLastYear.pm} PM · ${a.visitsLastYear.service} service · ${a.visitsLastYear.tlc} TLC`}
+        />
+      </StatRow>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4" data-testid="assets-fleet-counts">
+        <ChartCard title="By brand" lede={`${a.byBrand.length} brands`}>
+          <BreakdownList items={asItems(a.byBrand)} />
+        </ChartCard>
+        <ChartCard title="By model" lede={`${a.byModel.length} models; the eight with the most machines`}>
+          <BreakdownList items={asItems(a.byModel)} />
+        </ChartCard>
+        <ChartCard title="By condition" lede={`${a.machines - a.byCondition.reduce((n, [, c]) => n + c, 0)} with no condition`}>
+          <BreakdownList items={asItems(a.byCondition)} empty="No condition on record." />
+        </ChartCard>
+        <ChartCard title="By ownership" lede="Loaned, leased or owned by the customer">
+          <BreakdownList items={asItems(a.byOwnership)} />
+        </ChartCard>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <ChartCard title="Service load by account" lede="Completed PMs, service and TLC tickets in the last 12 months, busiest first">
+          <LoadTable
+            testId="assets-load-accounts"
+            head={["Account", "Machines", "PM", "Service", "TLC", "Total"]}
+            rows={a.accountLoad.map((r) => ({ key: r.customer, cells: [r.customer, r.machines, r.pm, r.service, r.tlc, r.total] }))}
+            empty="No completed visits in the last 12 months."
+          />
+        </ChartCard>
+        <ChartCard title="Service load by model" lede="Visits tied to the model's machines in the last 12 months, and per machine">
+          <LoadTable
+            testId="assets-load-models"
+            head={["Model", "Machines", "Visits", "Per machine"]}
+            rows={a.modelLoad.map((r) => ({ key: r.model, cells: [r.model, r.machines, r.visits, r.perMachine.toFixed(2)] }))}
+            empty="No visit ties to a machine yet."
+          />
+        </ChartCard>
+      </div>
+
+      <div className="mt-4">
+        <ChartCard title="Ownership by account" lede="Each account's machines: loaned, leased, owned, other or not set">
+          <LoadTable
+            testId="assets-ownership-accounts"
+            head={["Account", "Machines", "Loaned", "Leased", "Owned", "Other", "Not set"]}
+            rows={a.ownership.map((r) => ({ key: r.customer, cells: [r.customer, r.total, r.Loaned, r.Leased, r.Owned, r.Other, r["Not set"]] }))}
+            empty="No machines in the field."
+          />
+        </ChartCard>
+      </div>
+
+      <section className="mt-6" data-testid="assets-not-serviced">
+        <h2 className="font-display text-xl">Not serviced after a year</h2>
+        <p className="mt-0.5 max-w-3xl text-xs text-muted-foreground">
+          A visit counts for a machine when a PM logged it, a ticket at its account writes its serial, or a ticket names its model and the account has only one
+          of that model. Machines installed this year aren't due yet and aren't listed.
+        </p>
+        <ListToolbar>
+          <ToolbarSearch value={text} onChange={setText} placeholder="Search account, model, serial…" label="Search flagged machines" testId="assets-flagged-search" />
+          <ToolbarSelect
+            value={flagFilter}
+            onChange={(e) => setFlagFilter(e.target.value as ServiceFlag | "")}
+            allowEmpty
+            emptyLabel="All flags"
+            aria-label="Filter by flag"
+          >
+            {FLAGGED.map((f) => (
+              <option key={f} value={f}>
+                {FLAG_LABEL[f]}
+              </option>
+            ))}
+          </ToolbarSelect>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!flagged.length}
+            onClick={() => downloadCsv(`not-serviced-${a.today}.csv`, `\uFEFF${flaggedCsv(flagged)}`)}
+            data-testid="assets-flagged-export"
+          >
+            <Download className="size-4" /> Export
+          </Button>
+          <ToolbarNote>{`${flagged.length} machine${flagged.length === 1 ? "" : "s"}`}</ToolbarNote>
+        </ListToolbar>
+        <FlaggedList
+          rows={flagged}
+          resetKey={`${flagFilter}|${text}`}
+          empty={flagFilter || text.trim() ? "No flagged machine matches the search or flag." : "No machine is past a year without service."}
+        />
+      </section>
+    </div>
+  );
+}
+
+function LoadTable({ head, rows, empty, testId }: { head: string[]; rows: { key: string; cells: (string | number)[] }[]; empty: string; testId: string }) {
+  const { visible, remaining, showMore } = useShowMore(rows, rows.length, 10);
+  if (!rows.length) return <p className="text-xs text-muted-foreground">{empty}</p>;
+  return (
+    <div className="overflow-x-auto" data-testid={testId}>
+      <table className="w-full text-left text-sm">
+        <thead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          <tr>
+            {head.map((h, i) => (
+              <th key={h} className={i ? "px-2 py-1.5 text-right" : "py-1.5 pr-2"}>
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {visible.map((r) => (
+            <tr key={r.key} className="border-t border-border">
+              {r.cells.map((c, i) => (
+                <td key={i} className={i ? "px-2 py-1.5 text-right tabular" : "py-1.5 pr-2 font-medium"}>
+                  {c}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ShowMoreButton remaining={remaining} onClick={showMore} label="rows" />
+    </div>
+  );
+}
+
+function FlaggedList({ rows, resetKey, empty }: { rows: FlaggedMachine[]; resetKey: unknown; empty: string }) {
+  const { visible, remaining, showMore } = useShowMore(rows, resetKey, 100);
+  const from = useFromHere("/assets");
+  if (!rows.length) return <p className="mt-3 text-sm text-muted-foreground">{empty}</p>;
+  return (
+    <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-left text-sm max-sm:block sm:min-w-[52rem]">
+        <thead className="bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase max-sm:hidden">
+          <tr>
+            <th className="px-3 py-2">Account</th>
+            <th className="px-3 py-2">Machine</th>
+            <th className="px-3 py-2">Ownership</th>
+            <th className="px-3 py-2">Installed</th>
+            <th className="px-3 py-2">Last service</th>
+            <th className="px-3 py-2">Flag</th>
+          </tr>
+        </thead>
+        <tbody className="max-sm:block">
+          {visible.map((r) => (
+            <tr key={r.id} className="border-t border-border align-top max-sm:block max-sm:p-3" data-testid="assets-flagged-row">
+              <td className="px-3 py-2 max-sm:block max-sm:p-0">
+                <AccountLink row={r} from={from} />
+              </td>
+              <td className="px-3 py-2 max-sm:block max-sm:p-0">
+                {r.catalogModel}
+                <span className="block text-xs text-muted-foreground">{r.serial ? `SN ${r.serial}` : "No serial"}</span>
+              </td>
+              <td className="px-3 py-2 max-sm:inline-block max-sm:p-0 max-sm:pr-3">{r.ownership || "—"}</td>
+              <td className="px-3 py-2 max-sm:inline-block max-sm:p-0 max-sm:pr-3">{r.installDate ? formatLongDate(r.installDate) : "No date"}</td>
+              <td className="px-3 py-2 max-sm:block max-sm:p-0">
+                {r.last ? (
+                  <>
+                    {formatLongDate(r.last)}
+                    <span className="block text-xs text-muted-foreground">
+                      {r.lastKind ? `${VISIT_LABEL[r.lastKind]} #${r.lastId}` : ""}
+                      {r.how ? ` · ${HOW_LABEL[r.how]}` : ""}
+                    </span>
+                  </>
+                ) : (
+                  "None on record"
+                )}
+              </td>
+              <td className="px-3 py-2 text-xs max-sm:block max-sm:p-0">
+                <span className={r.flag === "unknown" ? "text-muted-foreground" : "text-destructive"}>{FLAG_LABEL[r.flag]}</span>
+                {r.daysSince != null ? <span className="block text-muted-foreground">{r.daysSince} days</span> : null}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ShowMoreButton remaining={remaining} onClick={showMore} label="machines" />
     </div>
   );
 }

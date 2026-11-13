@@ -207,6 +207,10 @@ export const INTENDED_STATUS_LISTS: readonly { where: string; reason: string }[]
     reason: "A PM can stack on a completed ticket that isn't billed yet, but never on a cancelled or phone-resolved one.",
   },
   {
+    where: "equipment-analytics-api.ts: Cancelled, Phone Resolved",
+    reason: "A machine's last service is a completed visit: a cancelled or phone-resolved ticket didn't put a tech on the machine.",
+  },
+  {
     where: "teams-reports.ts: Completed, Phone Resolved",
     reason: "The weekly notes count serviced tickets: completed or phone resolved, never cancelled.",
   },
