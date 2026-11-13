@@ -105,6 +105,8 @@ export type EquipPairing = {
   warnings: string[];
   /** Worth knowing, not a reason to hold the pairing: a Part # that isn't a live part (it is still saved as written). */
   notes: string[];
+  /** Catalog models it didn't suggest but names (the rows' match, the part's name): a person may know it's the same. */
+  alternatives: string[];
 };
 
 export type EquipPreview = {
@@ -456,18 +458,39 @@ const withoutPower = (s: string) =>
 /** The numbers in a model's name, once its voltages and wattages are out: "Sure Immersion 220" → 220. */
 const numbersIn = (s: string) => new Set((withoutPower(s).match(/\d+/g) ?? []).map((n) => n.replace(/^0+(?=\d)/, "")));
 
+/** The voltages a name gives, each as a range: "120V" is 120-120, "208-240V" is 208-240. */
+function voltsIn(s: string): [number, number][] {
+  const out: [number, number][] = [];
+  const t = s.toLowerCase();
+  for (const m of t.matchAll(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*v\b(?!\+)/g)) out.push([Number(m[1]), Number(m[2])]);
+  const rest = t.replace(/\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\s*v\b(?!\+)/g, " ");
+  for (const m of rest.matchAll(/(\d+(?:\.\d+)?)\s*v\b(?!\+)/g)) out.push([Number(m[1]), Number(m[1])]);
+  return out;
+}
+
+/** Words a live part's catalog name may add besides the describing ones: the group or warmer it counts. */
+const PART_NAME_EXTRA = new Set(["group", "groups", "warmer", "warmers"]);
+
 /**
- * The file's model and a live part's catalog name are one machine as far as the words show (11/13 test): every
- * number of the file's model is in the part's name (220 is not 312, TB3 is not TB6), and the file's model has no word
- * the part's name lacks ("Autosteam", "NS", "HV"). The part's name may add words ("CWTF15-APS PF"): its Part #, which
- * the verified list confirmed against the name, serial and voltage, vouches for them.
+ * The file's model and a live part's catalog name are the same machine (11/13 test and review), strictly: the same
+ * model numbers on both sides (220 is not 312, G2 is not G9-2, GVH is not GVH-1), voltages that overlap when both give
+ * one (120V is not 240V; 208-240V takes 240V), no word of the file's model missing from the part's name, and no word
+ * added to it but describing ones ("2AV" = "2 Group AV", "3 Lower" = "3 Lower Warmers"). An added letter or variant
+ * ("S", "T", "Q", "V Up", "Doser", "PF") is another machine, or might be: a person picks it with its Use button.
  */
 export function partNameFits(fileModel: string, partCatalogName: string): boolean {
+  const mine = numbersIn(fileModel);
   const theirs = numbersIn(partCatalogName);
-  if ([...numbersIn(fileModel)].some((n) => !theirs.has(n))) return false;
+  if (mine.size !== theirs.size || [...mine].some((n) => !theirs.has(n))) return false;
+  const va = voltsIn(fileModel);
+  const vb = voltsIn(partCatalogName);
+  if (va.length && vb.length && !va.some(([a1, a2]) => vb.some(([b1, b2]) => a1 <= b2 && b1 <= a2))) return false;
   // Letters and numbers written together read apart, so "2AV" is "2" and "AV" as in "2 Group AV".
   const apart = (s: string) => withoutPower(s).replace(/(\d)([a-z])/g, "$1 $2").replace(/([a-z])(\d)/g, "$1 $2");
-  return extraModelWords(apart(fileModel), apart(partCatalogName)).length === 0;
+  if (extraModelWords(apart(fileModel), apart(partCatalogName)).length) return false;
+  const fileWords = new Set(modelWords(apart(fileModel)));
+  const added = modelWords(apart(partCatalogName.replace(/\b(?:dual|single)[\s-]+portion\b/gi, " "))).filter((w) => !fileWords.has(w));
+  return added.every((w) => DESCRIPTOR_WORDS.has(w) || PART_NAME_EXTRA.has(w));
 }
 
 /** The rows' model pairings, the ones to decide first (11/12). `catalog`: the catalog's model names. */
@@ -503,7 +526,9 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
     // "CWTF15-APS PF", Swift → "Swift Dual-Hopper Espresso Grinder"); one that names another model never replaces the
     // Confirmed Model (11/12 review: a 220's rows carrying the 312's part).
     const partAgrees = byPart && (letters(byPart) === letters(fileModel) || partNameFits(fileModel, byPart)) ? byPart : null;
-    const suggestion = exact ?? partAgrees ?? sameWritten ?? null;
+    // An exact name, then the catalog model the rows matched written longer, then the part's: a part never overrides a
+    // catalog model that is the same machine (11/13 review: an H5X 120V's rows with the 240V's part).
+    const suggestion = exact ?? sameWritten ?? partAgrees ?? null;
     const suggestNew = !suggestion && !!fileModel.trim();
     const catalogModel = suggestion ?? (suggestNew ? fileModel.trim() : null);
     const warnings: string[] = [];
@@ -514,10 +539,10 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
     if (byPart && byPart !== suggestion) {
       warnings.push(`Part # ${partNumber} is ${part!.sku}, named as the catalog's ${byPart}; the file says ${fileModel}.`);
     }
-    if (partAgrees && suggestion === partAgrees && partAgrees !== exact) {
-      notes.push(`Suggested by its Part # ${partNumber} (${part!.sku}).`);
-    }
-    if (suggestion) {
+    const byItsPart = !!partAgrees && suggestion === partAgrees && partAgrees !== exact;
+    if (byItsPart) notes.push(`Suggested by its Part # ${partNumber} (${part!.sku}).`);
+    // The part's fit already read the file's words its own way; the word check is for the other suggestions.
+    if (suggestion && !byItsPart) {
       const extra = extraModelWords(fileModel, suggestion);
       if (extra.length) warnings.push(`The file says "${extra.join(" ")}"; the catalog model doesn't.`);
     }
@@ -548,6 +573,8 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
       needsConfirm: !settled,
       warnings,
       notes,
+      // Catalog models named in its warnings, for a person to pick in one click if they know it's this machine.
+      alternatives: [...new Set([topMatched, byPart].filter((m): m is string => !!m && m !== suggestion))],
     });
   }
   // To decide first: warnings, then the rest to decide; most rows first.

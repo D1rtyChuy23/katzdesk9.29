@@ -711,6 +711,22 @@ function PairingsPanel({
             {n}
           </p>
         ))}
+        {isOpen && (p.alternatives ?? []).length ? (
+          <div className="mt-1 flex flex-wrap gap-1" data-testid="equip-import-pairing-alternatives">
+            {(p.alternatives ?? []).map((alt) => (
+              <button
+                key={alt}
+                type="button"
+                disabled={pending}
+                onClick={() => setPicks((cur) => ({ ...cur, [p.key]: alt }))}
+                className="rounded-full border border-border px-2 py-0.5 text-xs hover:bg-muted"
+                title="Pick it if you know it's this machine, then Use"
+              >
+                Use {alt}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {isOpen && p.suggestNew ? (
           <p className="mt-0.5 text-xs text-muted-foreground">No catalog model is this machine: suggested as a new one, named as the file has it.</p>
         ) : null}
