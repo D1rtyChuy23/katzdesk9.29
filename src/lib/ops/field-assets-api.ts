@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { brandOf, type FieldAsset } from "@/lib/ops/field-assets";
 
@@ -63,7 +63,11 @@ export async function readFieldAssets(sql: Sql): Promise<FieldAsset[]> {
 
 export const FIELD_ASSETS_KEY = ["field-assets"] as const;
 
-/** Assets → In the Field: every machine at a customer, for any desk role. */
+/** Assets → In the Field: every machine at a customer, for any desk role but Warehouse, which has the Warehouse section. */
 export const listFieldAssets = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async (): Promise<FieldAsset[]> => readFieldAssets(await ready()));
+  .handler(async ({ context }): Promise<FieldAsset[]> => {
+    const sql = await ready();
+    if (await isWarehouseOnly(sql, context.userId)) throw new Error("Warehouse has the Assets → Warehouse section.");
+    return readFieldAssets(sql);
+  });

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download, MapPinOff, X } from "lucide-react";
+import { Download, MapPinOff, Warehouse as WarehouseIcon, Wrench, X } from "lucide-react";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { DeskMap, type MapPin } from "@/components/desk/desk-map";
 import { downloadCsv } from "@/components/desk/download-csv";
@@ -22,18 +22,62 @@ import {
   type FieldFilters,
 } from "@/lib/ops/field-assets";
 import { FIELD_ASSETS_KEY, listFieldAssets } from "@/lib/ops/field-assets-api";
+import { getMyAccess } from "@/lib/ops/access";
 import { useFromHere } from "@/lib/ops/search-params";
+import { byModel, filterStock, isFree, placeLabel, type StockUnit } from "@/lib/ops/warehouse-assets";
+import { listWarehouseAssets, WAREHOUSE_ASSETS_KEY } from "@/lib/ops/warehouse-assets-api";
 
 type View = "list" | "map";
-type AssetsSearch = { view?: "map" };
+type Section = "field" | "warehouse";
+type AssetsSearch = { view?: "map"; section?: "warehouse" };
 
 export const Route = createFileRoute("/_app/assets")({
-  validateSearch: (s: Record<string, unknown>): AssetsSearch => (s.view === "map" ? { view: "map" } : {}),
+  validateSearch: (s: Record<string, unknown>): AssetsSearch => ({
+    ...(s.view === "map" ? { view: "map" as const } : {}),
+    ...(s.section === "warehouse" ? { section: "warehouse" as const } : {}),
+  }),
   component: Page,
 });
 
-/** Assets → In the Field (Chuy, 11/12): every machine at a customer, as a list or on the map. */
+/**
+ * Assets (Chuy, 11/12): In the Field, every machine at a customer, and Warehouse, what the barn has to put out and the
+ * refurbs on their way. The Warehouse role sees the Warehouse section only.
+ */
 function Page() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const access = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess(), staleTime: 60_000 });
+  const warehouseOnly = access.data?.role === "warehouse" && !access.data?.isAdmin;
+  const section: Section = warehouseOnly || search.section === "warehouse" ? "warehouse" : "field";
+  const setSection = (next: Section) =>
+    void navigate({ search: next === "warehouse" ? { section: "warehouse" } : {}, replace: true, resetScroll: false });
+  return (
+    <div>
+      <header>
+        <h1 className="font-display text-3xl font-medium tracking-tight">Assets</h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          {section === "field"
+            ? "Every machine at a customer: what it is, where it is, who owns it and what shape it's in. Filter the list, see it on the map, or export it."
+            : "What the barn has to put out at a customer, what came back from a refurb and waits in staging, and the refurbs still open. Open a unit to place or move it on the Warehouse page."}
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Assets section" data-testid="assets-sections">
+          {warehouseOnly ? null : (
+            <FilterChip selected={section === "field"} onClick={() => setSection("field")} data-testid="assets-section-field">
+              In the Field
+            </FilterChip>
+          )}
+          <FilterChip selected={section === "warehouse"} onClick={() => setSection("warehouse")} data-testid="assets-section-warehouse">
+            Warehouse
+          </FilterChip>
+        </div>
+      </header>
+      {section === "warehouse" ? <WarehouseSection /> : access.isLoading ? <Skeleton className="mt-4 h-64 w-full rounded-xl" /> : <FieldSection />}
+    </div>
+  );
+}
+
+/** Assets → In the Field (11/12): every machine at a customer, as a list or on the map. */
+function FieldSection() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const view: View = search.view ?? "list";
@@ -57,19 +101,6 @@ function Page() {
 
   return (
     <div>
-      <header>
-        <h1 className="font-display text-3xl font-medium tracking-tight">Assets</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Every machine at a customer: what it is, where it is, who owns it and what shape it's in. Filter the list, see it
-          on the map, or export it.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Assets section" data-testid="assets-sections">
-          <FilterChip selected data-testid="assets-section-field">
-            In the Field
-          </FilterChip>
-        </div>
-      </header>
-
       <ListToolbar>
         <ToolbarSearch value={filters.q ?? ""} onChange={(v) => set({ q: v })} placeholder="Search account, model, serial, Part #…" label="Search machines" testId="assets-search" />
         <ToolbarSelect value={filters.brand ?? ""} onChange={(e) => set({ brand: e.target.value, model: "" })} allowEmpty emptyLabel="All brands" aria-label="Filter by brand">
@@ -263,6 +294,147 @@ function AssetMap({ accounts, geo, fitKey }: { accounts: Map<string, FieldAsset[
           </ul>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+const KIND_LABEL: Record<string, string> = { equip: "Equipment", dispenser: "Dispensers", module: "Modules" };
+
+/**
+ * Assets → Warehouse (11/12): free stock on the racks (by model, then each unit), the staging area a completed refurb
+ * fills, and the refurbs still open. Each unit opens on the Warehouse page at its rack slot, where it is placed or moved.
+ */
+function WarehouseSection() {
+  const q = useQuery({ queryKey: WAREHOUSE_ASSETS_KEY, queryFn: () => listWarehouseAssets(), staleTime: 30_000 });
+  const [text, setText] = useState("");
+  const [kind, setKind] = useState("");
+  const available = useMemo(() => filterStock(q.data?.available ?? [], text, kind), [q.data, text, kind]);
+  const staging = useMemo(() => filterStock(q.data?.staging ?? [], text, kind), [q.data, text, kind]);
+  const models = useMemo(() => byModel(available), [available]);
+  const freeCount = available.filter(isFree).reduce((n, u) => n + (u.qty || 1), 0);
+  const rebuilds = q.data?.rebuilds ?? [];
+  if (q.isError) return <p className="mt-4 text-sm text-destructive">Could not load the warehouse: {q.error instanceof Error ? q.error.message : "try again"}.</p>;
+  if (q.isLoading) return <Skeleton className="mt-4 h-64 w-full rounded-xl" />;
+  return (
+    <div data-testid="assets-warehouse">
+      <ListToolbar>
+        <ToolbarSearch value={text} onChange={setText} placeholder="Search model, serial, rack…" label="Search stock" testId="assets-warehouse-search" />
+        <ToolbarSelect value={kind} onChange={(e) => setKind(e.target.value)} allowEmpty emptyLabel="All kinds" aria-label="Filter by kind">
+          {Object.entries(KIND_LABEL).map(([k, label]) => (
+            <option key={k} value={k}>
+              {label}
+            </option>
+          ))}
+        </ToolbarSelect>
+        <ToolbarNote data-testid="assets-warehouse-count">{`${freeCount} free to put out · ${staging.length} in staging · ${rebuilds.length} open refurb${rebuilds.length === 1 ? "" : "s"}`}</ToolbarNote>
+      </ListToolbar>
+
+      <section className="mt-4" data-testid="assets-available">
+        <h2 className="flex items-center gap-2 text-sm font-medium">
+          <WarehouseIcon className="size-4" /> Available to put out
+        </h2>
+        {models.length ? (
+          <ul className="mt-2 flex flex-wrap gap-2" data-testid="assets-available-models">
+            {models.map((m) => (
+              <li key={m.model}>
+                {/* A model's chip lists just its units. */}
+                <button
+                  type="button"
+                  onClick={() => setText(text.trim().toLowerCase() === m.model.toLowerCase() ? "" : m.model)}
+                  className={`rounded-full border px-3 py-1 text-xs hover:bg-muted ${text.trim().toLowerCase() === m.model.toLowerCase() ? "border-foreground" : "border-border"}`}
+                  aria-pressed={text.trim().toLowerCase() === m.model.toLowerCase()}
+                >
+                  <span className="font-medium">{m.model}</span> · {m.free} free{m.held ? ` · ${m.held} spoken for` : ""}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">Nothing free on the racks matches.</p>
+        )}
+        <StockTable units={available} />
+      </section>
+
+      <section className="mt-6" data-testid="assets-staging">
+        <h2 className="text-sm font-medium">Staging: back from a refurb, waiting for its shop test and a rack</h2>
+        {staging.length ? <StockTable units={staging} /> : <p className="mt-2 text-sm text-muted-foreground">Nothing in staging.</p>}
+      </section>
+
+      <section className="mt-6" data-testid="assets-rebuilds">
+        <h2 className="flex items-center gap-2 text-sm font-medium">
+          <Wrench className="size-4" /> Open refurbs
+        </h2>
+        {rebuilds.length ? (
+          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+            {rebuilds.map((r) => (
+              <li key={r.id} className="rounded-xl border border-border p-3 text-sm" data-testid="assets-rebuild">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <Link to="/rebuilds" search={{ open: r.id }} className="font-medium hover:underline">
+                    {r.title}
+                  </Link>
+                  <span className="text-xs text-muted-foreground">{r.status}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {[r.account, r.targetComplete ? `Target ${formatLongDate(r.targetComplete)}` : "No target date"].join(" · ")}
+                </p>
+                {r.machines.length ? (
+                  <ul className="mt-1 text-xs">
+                    {r.machines.map((m, i) => (
+                      <li key={`${m.model}-${m.serial ?? i}`}>
+                        {m.model}
+                        {m.serial ? ` · SN ${m.serial}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">No open refurbs.</p>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function StockTable({ units }: { units: StockUnit[] }) {
+  const { visible, remaining, showMore } = useShowMore(units, units.length, 100);
+  const from = useFromHere("/warehouse");
+  if (!units.length) return null;
+  return (
+    <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+      <table className="w-full text-left text-sm max-sm:block sm:min-w-[48rem]">
+        <thead className="bg-card text-[11px] font-medium tracking-wide text-muted-foreground uppercase max-sm:hidden">
+          <tr>
+            <th className="px-3 py-2">Model</th>
+            <th className="px-3 py-2">Serial</th>
+            <th className="px-3 py-2">Where</th>
+            <th className="px-3 py-2">Shop test</th>
+            <th className="px-3 py-2">Note</th>
+          </tr>
+        </thead>
+        <tbody className="max-sm:block">
+          {visible.map((u) => (
+            <tr key={u.id} className="border-t border-border align-top max-sm:block max-sm:p-3" data-testid="assets-stock-row">
+              <td className="px-3 py-2 max-sm:block max-sm:p-0">
+                <Link to="/warehouse" search={{ open: u.id, from }} className="font-medium hover:underline">
+                  {u.model}
+                </Link>
+                {u.qty > 1 ? <span className="ml-1 text-xs text-muted-foreground">× {u.qty}</span> : null}
+              </td>
+              <td className="px-3 py-2 max-sm:inline-block max-sm:p-0 max-sm:pr-3">{u.serial ? `SN ${u.serial}` : "No serial"}</td>
+              <td className="px-3 py-2 max-sm:inline-block max-sm:p-0 max-sm:pr-3">{placeLabel(u)}</td>
+              <td className="px-3 py-2 max-sm:inline-block max-sm:p-0 max-sm:pr-3">{u.shopTest === "needs-test" ? "Needs test" : u.shopTest ? "Tested" : "—"}</td>
+              <td className="px-3 py-2 text-xs max-sm:block max-sm:p-0">
+                {u.stockHold ? <span className="text-warning">{u.stockHold === "assign" ? `Assign requested${u.stockHoldCustomer ? ` for ${u.stockHoldCustomer}` : ""}` : "Remove requested"}</span> : null}
+                {u.customerOwned ? <span className="block text-muted-foreground">Customer-owned: {u.customerOwned}</span> : null}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ShowMoreButton remaining={remaining} onClick={showMore} label="units" />
     </div>
   );
 }

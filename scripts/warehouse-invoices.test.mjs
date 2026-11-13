@@ -752,7 +752,8 @@ test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the w
   const shell = readFileSync(new URL("../src/components/desk/shell.tsx", import.meta.url), "utf8");
   const ok = shell.match(/const WAREHOUSE_OK: DeskTo\[\] = \[([^\]]*)\]/);
   assert.ok(ok, "WAREHOUSE_OK");
-  assert.deepEqual(ok[1].split(",").map((s) => s.trim().replace(/"/g, "")), ["/warehouse", "/rebuilds", "/modules", "/library", "/parts", "/locations"]);
+  // Assets joined 11/12 (Chuy): Warehouse sees its Assets → Warehouse section, not In the Field.
+  assert.deepEqual(ok[1].split(",").map((s) => s.trim().replace(/"/g, "")), ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"]);
   assert.match(shell, /const allowed = WAREHOUSE_OK\.some\(\(p\) => pathname === p \|\| pathname\.startsWith\(`\$\{p\}\/`\)\);/, "the redirect uses the same list");
 
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
