@@ -11,28 +11,30 @@ async function ready() {
   return getSql();
 }
 
-type VisitRow = { kind: string; id: number; customer: string | null; day: string | null; equipment: string | null; serial_text: string | null };
+type VisitRow = { kind: string; id: number; customer: string | null; day: string | null; equipment: string | null; serial_text: string | null; stacked: boolean | null };
 
 /**
- * Completed visits: PMs, and service and TLC tickets, each with the day it was done (or, with no completion day, the
- * day it was scheduled, received or last saved). Cancelled ones, tickets resolved by phone and duplicates are left out.
+ * Completed visits: PMs, and service and TLC tickets, each with the day it was done. With no completion day (marking a
+ * ticket Completed doesn't stamp one) it is the day it was scheduled (or received), but never after the day it was last
+ * saved, so a PM closed early isn't dated in the future. Cancelled ones, tickets resolved by phone and duplicates are
+ * left out.
  */
 export async function readVisits(sql: Sql): Promise<Visit[]> {
   const rows = await sql.query<VisitRow>(
-    `select s.kind, s.id, s.customer, coalesce(s.completed_at, s.scheduled, s.received, s.updated_at::date)::text as day,
-            s.equipment, concat_ws(' ', s.equipment, s.work_done, s.serial_notice) as serial_text
+    `select s.kind, s.id, s.customer, coalesce(s.completed_at, least(coalesce(s.scheduled, s.received), s.updated_at::date))::text as day,
+            s.equipment, concat_ws(' ', s.equipment, s.work_done, s.serial_notice) as serial_text, false as stacked
        from service_jobs s
       where s.duplicate_of is null
         and (s.completed_at is not null or s.status = 'Completed')
         and s.status not in ('Cancelled', 'Phone Resolved')
      union all
-     select 'pm', p.id, p.customer, coalesce(p.completed_at, p.projected, p.received, p.updated_at::date)::text,
-            p.equipment, p.equipment
+     select 'pm', p.id, p.customer, coalesce(p.completed_at, least(coalesce(p.projected, p.received), p.updated_at::date))::text,
+            p.equipment, p.equipment, p.stacked_job_id is not null
        from pm_jobs p
       where (p.completed_at is not null or p.status = 'Completed') and p.status <> 'Cancelled'`,
   );
   return rows
-    .filter((r) => r.day)
+    .filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(String(r.day ?? "").slice(0, 10)))
     .map((r) => ({
       kind: r.kind === "pm" ? "pm" : r.kind === "tlc" ? "tlc" : "service",
       id: Number(r.id),
@@ -40,6 +42,7 @@ export async function readVisits(sql: Sql): Promise<Visit[]> {
       date: String(r.day).slice(0, 10),
       equipment: r.equipment ?? "",
       serialText: r.serial_text ?? "",
+      stacked: r.stacked === true,
     }));
 }
 

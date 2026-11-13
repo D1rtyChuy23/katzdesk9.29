@@ -5,14 +5,16 @@
  *
  * A visit counts for a machine when:
  *  - a PM logged that machine (its runbook unit by serial or account unit, a unit link, or a part logged on it), or
- *  - a ticket at the machine's account writes the machine's serial (5 characters or more), or
- *  - a ticket at the account names the machine's model and the account has only one machine of that model. With two
- *    or more of that model the ticket can't say which, so it dates none of them (the account's load still counts it), or
+ *  - a ticket at the machine's account writes the machine's serial as its own word (5 characters or more, a digit in it),
+ *  - a ticket at the account names the machine's model (its catalog model or its equipment name). When the account has
+ *    two or more of that model, the ticket must name it that many times; otherwise it can't say which, so it dates none
+ *    of them (the account's load still counts it), or
  *  - a ticket at the account is for all its equipment ("All", "All equipment"): it dates every machine there.
  */
 import { compactEquip, serialKey } from "@/lib/ops/account-equip";
 import { csvCell } from "@/lib/ops/customer-export";
-import type { FieldAsset } from "@/lib/ops/field-assets";
+import { brandOf, type FieldAsset } from "@/lib/ops/field-assets";
+import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 
 /** A machine not serviced in this many days is flagged. */
 export const OVERDUE_DAYS = 365;
@@ -31,6 +33,8 @@ export type Visit = {
   equipment: string;
   /** Every text the serial may be written in (equipment, work done, the serial note). */
   serialText: string;
+  /** A PM stacked on a ticket: the same trip, so the load counts the ticket only. */
+  stacked?: boolean;
 };
 
 /** A PM tied to one machine by the runbook, a unit link or a logged part. */
@@ -69,31 +73,85 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / DAY_MS);
 }
 
-const accountKey = (s: string | null | undefined) => String(s ?? "").trim().toLowerCase();
-/** The serial as the tickets are searched for it: no spaces, #, dashes or dots, lower case. */
-const serialNeedle = (s: string | null | undefined) => serialKey(s).replace(/[-./]/g, "");
+/** The account a machine or ticket is at: letters and digits only, so "Joe's Diner" and "Joes Diner" are one. */
+const accountKey = (s: string | null | undefined) => normalizeCustomerKey(s);
 const MIN_SERIAL = 5;
 /** A ticket written for every machine at the account. */
 const FOR_ALL = /^(all|all equipment|all machines|all units|everything)$/;
 
+const words = (s: string | null | undefined) => String(s ?? "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+
 /**
- * True when the ticket names the model as whole words: the whole model ("Bunn TB3"), or the model without its brand
- * when what is left has a number in it ("TB3"), as techs write it.
+ * True when the text writes the serial as its own word, or as neighbouring words joined ("TB3 55821", "TB3-55821").
+ * Never inside a longer word or number, so a date, phone or part number can't pass for it. A serial needs 5 letters or
+ * digits and at least one digit.
  */
-export function namesModel(text: string, model: string, brand: string): boolean {
-  const t = ` ${compactEquip(text)} `;
-  const m = compactEquip(model);
-  if (!m) return false;
-  if (t.includes(` ${m} `)) return true;
-  const b = compactEquip(brand);
+export function writesSerial(text: string | null | undefined, serial: string | null | undefined): boolean {
+  const s = serialKey(serial).replace(/[^a-z0-9]/g, "");
+  if (s.length < MIN_SERIAL || !/\d/.test(s)) return false;
+  const w = words(text);
+  for (let i = 0; i < w.length; i++) {
+    let joined = "";
+    for (let j = i; j < w.length && joined.length < s.length; j++) {
+      joined += w[j];
+      if (joined === s) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * The ways a ticket may write a model, compacted: the whole name, and the name without its brand when what is left has
+ * a number in it ("TB3") or is two words or more ("ITCB DV", "Linea PB").
+ */
+export function modelForms(name: string): string[] {
+  const m = compactEquip(name);
+  if (!m) return [];
+  const b = compactEquip(brandOf(name));
   const rest = b && m.startsWith(`${b} `) ? m.slice(b.length + 1) : "";
-  return rest.length >= 3 && /\d/.test(rest) && t.includes(` ${rest} `);
+  const restOk = rest.length >= 3 && (/\d/.test(rest) || (rest.includes(" ") && rest.length >= 6));
+  return restOk ? [m, rest] : [m];
+}
+
+/** True when the ticket names the model, by any of its forms, as whole words. */
+export function namesModel(text: string, model: string): boolean {
+  const t = ` ${compactEquip(text)} `;
+  return modelForms(model).some((f) => t.includes(` ${f} `));
+}
+
+/**
+ * How many times the ticket names each model group at the account. The longest names are read first and taken out, so
+ * "Bunn TB3 DV" isn't also read as "Bunn TB3". A form two groups share names neither.
+ */
+function mentionsByGroup(text: string, groups: ReadonlyMap<string, readonly FieldAsset[]>): Map<string, number> {
+  const owners = new Map<string, Set<string>>();
+  for (const [key, ms] of groups) {
+    for (const m of ms) for (const name of [m.catalogModel, m.equipmentName]) for (const f of modelForms(name)) owners.set(f, (owners.get(f) ?? new Set()).add(key));
+  }
+  let t = ` ${compactEquip(text)} `;
+  const out = new Map<string, number>();
+  for (const f of [...owners.keys()].sort((a, b) => b.length - a.length)) {
+    const needle = ` ${f} `;
+    let n = 0;
+    while (t.includes(needle)) {
+      t = t.replace(needle, " | ");
+      n += 1;
+    }
+    const keys = owners.get(f)!;
+    if (n && keys.size === 1) {
+      const k = [...keys][0]!;
+      out.set(k, (out.get(k) ?? 0) + n);
+    }
+  }
+  return out;
 }
 
 /**
  * Each machine's service: the newest visit tied to it and how many in the year to `today`. `ties` are the PMs logged
- * on a machine. Every visit is also read for serials, then for a model only one machine at the account has, so a PM
- * that logged one unit still dates the other machines it names. A visit counts once per machine.
+ * on a machine. Every visit is also read for serials, then for "All", then for models, so a PM that logged one unit
+ * still dates the other machines it names. A model the account has two of is dated only when the ticket names it as
+ * many times. A ticket tied by its model or "All" doesn't date a machine installed after it. A visit counts once per
+ * machine.
  */
 export function serviceByMachine(
   machines: readonly FieldAsset[],
@@ -106,46 +164,44 @@ export function serviceByMachine(
   const byAccount = new Map<string, FieldAsset[]>();
   for (const m of machines) {
     const k = accountKey(m.customer);
-    byAccount.set(k, [...(byAccount.get(k) ?? []), m]);
+    if (k) byAccount.set(k, [...(byAccount.get(k) ?? []), m]);
   }
   const pmById = new Map(visits.filter((v) => v.kind === "pm").map((v) => [v.id, v]));
   // One visit counts once per machine, however many ways it ties.
   const seen = new Set<string>();
-  const credit = (unitId: number, v: Visit, how: HowMatched) => {
-    const s = out.get(unitId);
-    if (!s || seen.has(`${unitId}:${v.kind}:${v.id}`)) return;
-    seen.add(`${unitId}:${v.kind}:${v.id}`);
+  const credit = (m: FieldAsset | undefined, v: Visit, how: HowMatched) => {
+    const s = m && out.get(m.id);
+    if (!m || !s || !DAY.test(v.date) || seen.has(`${m.id}:${v.kind}:${v.id}`)) return;
+    // A ticket that only names a model can't be for a machine installed after it.
+    if ((how === "model" || how === "all") && m.installDate && DAY.test(m.installDate) && v.date < m.installDate) return;
+    seen.add(`${m.id}:${v.kind}:${v.id}`);
     const age = daysBetween(v.date, today);
     if (age >= 0 && age <= OVERDUE_DAYS) s.lastYear += 1;
     if (age < 0) return; // A visit dated after today doesn't date the last service.
     if (!s.last || v.date > s.last) Object.assign(s, { last: v.date, lastKind: v.kind, lastId: v.id, how });
   };
+  const byId = new Map(machines.map((m) => [m.id, m]));
   for (const t of ties) {
     const v = pmById.get(t.pmId);
-    if (!v) continue;
-    credit(t.unitId, v, "pm unit");
+    if (v) credit(byId.get(t.unitId), v, "pm unit");
   }
   for (const v of visits) {
-    const here = byAccount.get(accountKey(v.customer)) ?? [];
+    const key = accountKey(v.customer);
+    const here = key ? (byAccount.get(key) ?? []) : [];
     if (!here.length) continue;
-    const hay = serialNeedle(v.serialText);
-    const bySerial = here.filter((m) => {
-      const s = serialNeedle(m.serial);
-      return s.length >= MIN_SERIAL && hay.includes(s);
-    });
-    for (const m of bySerial) credit(m.id, v, "serial");
-    if (bySerial.length) continue;
+    for (const m of here) if (writesSerial(v.serialText, m.serial)) credit(m, v, "serial");
     if (FOR_ALL.test(compactEquip(v.equipment))) {
-      for (const m of here) credit(m.id, v, "all");
+      for (const m of here) credit(m, v, "all");
       continue;
     }
-    const models = new Map<string, FieldAsset[]>();
+    const groups = new Map<string, FieldAsset[]>();
     for (const m of here) {
       const k = compactEquip(m.catalogModel);
-      if (k) models.set(k, [...(models.get(k) ?? []), m]);
+      if (k) groups.set(k, [...(groups.get(k) ?? []), m]);
     }
-    for (const group of models.values()) {
-      if (group.length === 1 && namesModel(v.equipment, group[0]!.catalogModel, group[0]!.brand)) credit(group[0]!.id, v, "model");
+    for (const [k, n] of mentionsByGroup(v.equipment, groups)) {
+      const group = groups.get(k)!;
+      if (n >= group.length) for (const m of group) credit(m, v, "model");
     }
   }
   return out;
@@ -189,7 +245,7 @@ export type AccountLoad = { customer: string; customerId: number | null; machine
 
 /**
  * The service load by account: completed visits in the year to `today`, every visit at the account whether or not it
- * names a machine, with the machines the account has. Busiest first. Accounts with no machine on the list are left out.
+ * names a machine, with the machines the account has. A PM stacked on a ticket is the same trip and isn't counted again. Busiest first. Accounts with no machine on the list are left out.
  */
 export function loadByAccount(machines: readonly FieldAsset[], visits: readonly Visit[], today: string): AccountLoad[] {
   const m = new Map<string, AccountLoad>();
@@ -202,7 +258,7 @@ export function loadByAccount(machines: readonly FieldAsset[], visits: readonly 
   for (const v of visits) {
     const cur = m.get(accountKey(v.customer));
     const age = daysBetween(v.date, today);
-    if (!cur || !(age >= 0 && age <= OVERDUE_DAYS)) continue;
+    if (!cur || v.stacked || !(age >= 0 && age <= OVERDUE_DAYS)) continue;
     cur[v.kind] += 1;
     cur.total += 1;
   }

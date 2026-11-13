@@ -70,9 +70,11 @@ test("a visit dates a machine by a PM logged on it, its serial, or a model only 
   assert.deepEqual([s.get(5).last, s.get(5).how], ["2026-02-01", "pm unit"]);
   assert.deepEqual([s.get(4).last, s.get(4).how], ["2026-02-01", "model"], "a PM that logged one unit still dates the others it names; a visit after today doesn't");
   assert.equal(s.get(5).lastYear, 1, "a PM logged on the unit and naming its model counts once");
-  assert.equal(E.namesModel("TB3 brewer", "Bunn TB3", "Bunn"), true);
-  assert.equal(E.namesModel("TB30 brewer", "Bunn TB3", "Bunn"), false, "whole words only");
-  assert.equal(E.namesModel("Mini grinder", "La Marzocco Mini", "La Marzocco"), false, "the rest needs a number");
+  assert.equal(E.namesModel("TB3 brewer", "Bunn TB3"), true);
+  assert.equal(E.namesModel("TB30 brewer", "Bunn TB3"), false, "whole words only");
+  assert.equal(E.namesModel("Mini grinder", "La Marzocco Mini"), false, "one word left needs a number");
+  assert.equal(E.namesModel("ITCB-DV", "Bunn ITCB-DV"), true, "two words left, no number");
+  assert.equal(E.namesModel("Linea PB leaking", "La Marzocco Linea PB"), true);
 });
 
 test("a ticket for all the equipment dates every machine at its account", () => {
@@ -173,4 +175,69 @@ test("the page: an Analytics section the Warehouse role doesn't get, with the fl
   assert.ok(page.includes("getEquipmentAnalytics()"));
   assert.ok(page.includes("flaggedCsv(flagged)"));
   assert.ok(src("src/lib/ops/equipment-analytics-api.ts").includes("if (await isWarehouseOnly(sql, context.userId)) throw new Error("));
+});
+
+// Fable review of this PR (11/13).
+test("a serial is matched only as its own word or neighbouring words, never inside a date, phone or another serial", () => {
+  assert.equal(E.writesSerial("returned 10/12/2025 no fault", "12202"), false);
+  assert.equal(E.writesSerial("call mgr 312-555-1234", "55512"), false);
+  assert.equal(E.writesSerial("Grinder serviced", "ERVIC"), false, "a serial needs a digit");
+  assert.equal(E.writesSerial("SN A12345", "A1234"), false);
+  assert.equal(E.writesSerial("SN A12345", "A12345"), true);
+  assert.equal(E.writesSerial("Serial TB3 55821, valve", "TB3-55821"), true);
+  assert.equal(E.writesSerial("sn#tb3-55821", "TB3 55821"), true);
+});
+
+test("the longer model is read first; a serial doesn't stop the models; equipment names count; pairs need two mentions", () => {
+  const machines = [
+    m(1, "Test Diner", "Bunn TB3"),
+    m(2, "Test Diner", "Bunn TB3 DV"),
+    m(3, "Test Cafe", "Bunn TB3", { serial: "TB3-55821" }),
+    m(4, "Test Cafe", "Fetco CBS-62H"),
+    m(5, "Test Bar", "Bunn 34800.0001", { equipmentName: "Bunn ITCB-DV Twin" }),
+    m(6, "Test Deli", "Bunn TB3"),
+    m(7, "Test Deli", "Bunn TB3"),
+  ];
+  const visits = [
+    v("service", 1, "Test Diner", "2026-06-01", "Bunn TB3-DV"),
+    v("service", 2, "Test Cafe", "2026-06-01", "Bunn TB3 SN TB3-55821\nFetco CBS-62H"),
+    v("service", 3, "Test Bar", "2026-06-01", "Bunn ITCB-DV Twin"),
+    v("pm", 4, "Test Deli", "2026-06-01", "Bunn TB3\nBunn TB3"),
+  ];
+  const s = E.serviceByMachine(machines, visits, [], TODAY);
+  assert.deepEqual([s.get(1).last, s.get(2).how], [null, "model"], "TB3 DV, not the TB3 beside it");
+  assert.deepEqual([s.get(3).how, s.get(4).how], ["serial", "model"]);
+  assert.equal(s.get(5).how, "model");
+  assert.deepEqual([s.get(6).how, s.get(7).how], ["model", "model"], "named twice for two machines");
+});
+
+test("bad days, blank accounts, punctuation in names, and a ticket from before the machine was installed", () => {
+  const machines = [
+    m(1, "Joe's Diner", "Bunn TB3", { installDate: "2020-01-01" }),
+    m(2, "  ", "Bunn TB3"),
+    m(3, "Test Cafe", "Bunn TB3", { installDate: "2026-09-01" }),
+    m(4, "Test Cafe", "Fetco CBS-62H", { serial: "FET-90001", installDate: "2026-09-01" }),
+  ];
+  const visits = [
+    v("service", 1, "Joes Diner", "20205-01-0", "TB3"),
+    v("service", 2, "JOES DINER", "2026-02-01", "TB3"),
+    v("tlc", 3, "", "2026-02-01", "All"),
+    v("service", 4, "Test Cafe", "2024-06-01", "Bunn TB3", "Bunn TB3 FET-90001"),
+  ];
+  const s = E.serviceByMachine(machines, visits, [], TODAY);
+  assert.deepEqual([s.get(1).last, s.get(1).lastId], ["2026-02-01", 2], "the bad day is skipped; Joes Diner is Joe's Diner");
+  assert.equal(s.get(2).last, null, "a ticket with no account dates nothing");
+  assert.equal(s.get(3).last, null, "a model ticket from before the install isn't this machine");
+  assert.equal(s.get(4).last, "2024-06-01", "its serial is this machine's own history");
+  assert.equal(E.serviceFlag(s.get(3), "2026-09-01", TODAY), "new");
+});
+
+test("a PM stacked on a ticket is one trip in the load, but still dates the machine", () => {
+  const machines = [m(1, "Test Diner", "Bunn TB3")];
+  const visits = [v("service", 1, "Test Diner", "2026-06-01", "Bunn TB3"), { ...v("pm", 2, "Test Diner", "2026-07-01", "Bunn TB3"), stacked: true }];
+  const a = E.buildEquipmentAnalytics(machines, visits, [], TODAY);
+  assert.deepEqual(a.visitsLastYear, { pm: 0, service: 1, tlc: 0 });
+  assert.equal(a.flagged.length, 0);
+  assert.ok(src("src/lib/ops/equipment-analytics-api.ts").includes("least(coalesce(p.projected, p.received), p.updated_at::date)"), "a PM closed early isn't dated in the future");
+  assert.ok(src("src/routes/_app/assets.tsx").includes('"No flagged machine matches the search or flag."'));
 });

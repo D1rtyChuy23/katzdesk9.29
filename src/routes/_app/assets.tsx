@@ -581,7 +581,11 @@ function AnalyticsSection() {
           </Button>
           <ToolbarNote>{`${flagged.length} machine${flagged.length === 1 ? "" : "s"}`}</ToolbarNote>
         </ListToolbar>
-        <FlaggedList rows={flagged} resetKey={`${flagFilter}|${text}`} />
+        <FlaggedList
+          rows={flagged}
+          resetKey={`${flagFilter}|${text}`}
+          empty={flagFilter || text.trim() ? "No flagged machine matches the search or flag." : "No machine is past a year without service."}
+        />
       </section>
     </div>
   );
@@ -619,10 +623,10 @@ function LoadTable({ head, rows, empty, testId }: { head: string[]; rows: { key:
   );
 }
 
-function FlaggedList({ rows, resetKey }: { rows: FlaggedMachine[]; resetKey: unknown }) {
+function FlaggedList({ rows, resetKey, empty }: { rows: FlaggedMachine[]; resetKey: unknown; empty: string }) {
   const { visible, remaining, showMore } = useShowMore(rows, resetKey, 100);
   const from = useFromHere("/assets");
-  if (!rows.length) return <p className="mt-3 text-sm text-muted-foreground">Every machine was serviced in the last year.</p>;
+  if (!rows.length) return <p className="mt-3 text-sm text-muted-foreground">{empty}</p>;
   return (
     <div className="mt-3 overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-left text-sm max-sm:block sm:min-w-[52rem]">
