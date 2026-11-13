@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Contrast, KeyRound, Keyboard, StretchHorizontal, Type, Vibrate } from "lucide-react";
+import { Check, Contrast, Info, KeyRound, Keyboard, StretchHorizontal, Type, Vibrate } from "lucide-react";
+import { buildLine } from "@/lib/build-info";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth/client";
@@ -135,6 +136,12 @@ function Page() {
             <Shortcut keys="?" action="Open keyboard shortcuts" />
             <Shortcut keys="Esc" action="Close a sheet or dialog" />
           </ul>
+        </Section>
+
+        <Section title="Version" hint="The build this page is running. Testers: compare it with the deploy's commit." icon={<Info className="size-4" />}>
+          <p className="font-mono text-sm" data-testid="settings-build">
+            {buildLine()}
+          </p>
         </Section>
       </div>
     </div>

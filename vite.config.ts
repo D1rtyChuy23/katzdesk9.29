@@ -4,6 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
+import { execSync } from "node:child_process";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 
@@ -126,7 +127,24 @@ function authPopupPlugin(): Plugin {
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
+/**
+ * The commit this build is from, for the version line on Settings (11/13): Vercel's own variable when it builds from
+ * git, else the checkout's HEAD, else "unknown".
+ */
+function buildSha(): string {
+  const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
+  if (fromVercel) return fromVercel;
+  try {
+    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
 export default defineConfig(({ command, isPreview }) => ({
+  define: {
+    __KATZ_BUILD__: JSON.stringify({ sha: command === "build" ? buildSha() : "dev", builtAt: command === "build" ? new Date().toISOString() : "" }),
+  },
   server: {
     host: "0.0.0.0",
     port: 8080,
