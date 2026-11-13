@@ -125,10 +125,10 @@ test("every machine with its account: address, removed flag, and none when no ac
   }
 });
 
-test("the side menu has Assets → In the Field; the Warehouse role's menu doesn't (yet)", () => {
+test("the side menu has Assets → Equipment; the Warehouse role reaches it too (its Warehouse section)", () => {
   const shell = src("src/components/desk/shell.tsx");
-  assert.match(shell, /label: "Assets",\n\s+items: \[\{ to: "\/assets", label: "In the Field", icon: Container \}\]/);
-  assert.match(shell, /const WAREHOUSE_OK: DeskTo\[\] = \["\/warehouse", "\/rebuilds", "\/modules", "\/library", "\/parts", "\/locations"\];/);
+  assert.ok(shell.includes('items: [{ to: "/assets", label: "Equipment", icon: Container }]'));
+  assert.ok(shell.includes('const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"];'));
   assert.match(src("src/routeTree.gen.ts"), /'\/assets': typeof AppAssetsRoute/);
   const page = src("src/routes/_app/assets.tsx");
   assert.match(page, /listFieldAssets\(\)/);

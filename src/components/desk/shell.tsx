@@ -99,9 +99,9 @@ const NAV: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    // Every machine at a customer, and where it is (Chuy, 11/12). The warehouse's stock joins it next.
+    // Every machine at a customer and in the barn, and where it is (Chuy, 11/12): In the Field and Warehouse.
     label: "Assets",
-    items: [{ to: "/assets", label: "In the Field", icon: Container }],
+    items: [{ to: "/assets", label: "Equipment", icon: Container }],
   },
   {
     label: "Installs",
@@ -206,7 +206,7 @@ function NavGroup({
  * The Warehouse role's pages, in menu order. Rebuilds and Parts (Chuy, 10/29): its refurbs and their invoices for
  * Katz Coffee Service Dept., and parts look-up, photos and Get Later. Invoices (NetSuite billing) stays Admin only.
  */
-const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/rebuilds", "/modules", "/library", "/parts", "/locations"];
+const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"];
 
 // A sales rep sees Service for awareness only (their own accounts): the lists, not the shop's rebuild bench or planner.
 const SALES_SERVICE = ["/service", "/pms", "/tlc"];
