@@ -113,7 +113,7 @@ export function AccountEquipImportButton({
           <DialogDescription>
             {fileName ? `${fileName} · ` : ""}
             This writes machines onto existing accounts. It does not create accounts, tickets, or
-            overwrite notes. Unchecked rows are skipped. Walk-In and unmatched rows stay off until
+            overwrite notes. Unticked rows aren't imported. Walk-In and unmatched rows stay off until
             you pick an account and a catalog model. Each model pairing whose names differ is
             confirmed once, for all its rows; a row whose site doesn't match its account is only
             imported when you tick it.
@@ -711,6 +711,22 @@ function PairingsPanel({
             {n}
           </p>
         ))}
+        {isOpen && (p.alternatives ?? []).length ? (
+          <div className="mt-1 flex flex-wrap gap-1" data-testid="equip-import-pairing-alternatives">
+            {(p.alternatives ?? []).map((alt) => (
+              <button
+                key={alt}
+                type="button"
+                disabled={pending}
+                onClick={() => setPicks((cur) => ({ ...cur, [p.key]: alt }))}
+                className="rounded-full border border-border px-2 py-0.5 text-xs hover:bg-muted"
+                title="Pick it if you know it's this machine, then Use"
+              >
+                Use {alt}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {isOpen && p.suggestNew ? (
           <p className="mt-0.5 text-xs text-muted-foreground">No catalog model is this machine: suggested as a new one, named as the file has it.</p>
         ) : null}
