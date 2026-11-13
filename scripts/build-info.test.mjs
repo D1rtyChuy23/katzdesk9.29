@@ -19,7 +19,21 @@ test("the build line: the commit's first 7 characters and the Chicago build time
 test("Vite sets the build from Vercel's commit, else git; Settings shows it", () => {
   const cfg = src("vite.config.ts");
   assert.ok(cfg.includes("process.env.VERCEL_GIT_COMMIT_SHA"));
+  assert.ok(cfg.indexOf("process.env.KATZ_BUILD_SHA") < cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA"), "a passed commit wins (11/13: the CLI publish had no git)");
   assert.ok(cfg.includes('execSync("git rev-parse HEAD"'));
   assert.ok(cfg.includes("__KATZ_BUILD__: JSON.stringify("));
   assert.ok(src("src/routes/_app/settings.tsx").includes('data-testid="settings-build"'));
+});
+
+test("a tarball carries its commit in build-sha.txt: git archive fills it in; a checkout's placeholder is skipped", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const root = new URL("../", import.meta.url).pathname;
+  assert.equal(src("build-sha.txt").trim(), "$Format:%H$");
+  assert.match(src(".gitattributes"), /^build-sha\.txt export-subst$/m);
+  const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root }).toString().trim();
+  const archived = execFileSync("git", ["archive", "HEAD", "build-sha.txt"], { cwd: root });
+  const unpacked = execFileSync("tar", ["-xO", "build-sha.txt"], { input: archived }).toString().trim();
+  assert.equal(unpacked, head, "git archive writes the commit");
+  const cfg = src("vite.config.ts");
+  assert.ok(cfg.indexOf("const fromFile = shaFromFile();") > cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA") && cfg.indexOf("const fromFile = shaFromFile();") < cfg.indexOf('execSync("git rev-parse HEAD"'));
 });
