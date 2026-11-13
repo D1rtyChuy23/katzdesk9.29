@@ -32,8 +32,8 @@ test("a tarball carries its commit in build-sha.txt: git archive fills it in; a 
   assert.match(src(".gitattributes"), /^build-sha\.txt export-subst$/m);
   const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root }).toString().trim();
   const archived = execFileSync("git", ["archive", "HEAD", "build-sha.txt"], { cwd: root });
-  // A tar entry: the file's text starts at byte 512.
-  assert.equal(archived.subarray(512, 552).toString(), head, "git archive writes the commit");
+  const unpacked = execFileSync("tar", ["-xO", "build-sha.txt"], { input: archived }).toString().trim();
+  assert.equal(unpacked, head, "git archive writes the commit");
   const cfg = src("vite.config.ts");
-  assert.ok(cfg.indexOf("shaFromFile()") > cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA") && cfg.indexOf("shaFromFile()") < cfg.indexOf('execSync("git rev-parse HEAD"'));
+  assert.ok(cfg.indexOf("const fromFile = shaFromFile();") > cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA") && cfg.indexOf("const fromFile = shaFromFile();") < cfg.indexOf('execSync("git rev-parse HEAD"'));
 });
