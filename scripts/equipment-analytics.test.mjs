@@ -68,8 +68,8 @@ test("a visit dates a machine by a PM logged on it, its serial, or a model only 
   assert.equal(s.get(2).last, null, "the model ticket names two machines, so it dates neither");
   assert.deepEqual([s.get(3).last, s.get(3).how, s.get(3).lastKind], ["2026-05-01", "model", "tlc"]);
   assert.deepEqual([s.get(5).last, s.get(5).how], ["2026-02-01", "pm unit"]);
-  assert.deepEqual([s.get(4).last, s.get(4).how], ["2026-02-01", "model"], "a PM that logged one unit still dates the others it names; a visit after today doesn't");
-  assert.equal(s.get(5).lastYear, 1, "a PM logged on the unit and naming its model counts once");
+  assert.equal(s.get(4).last, null, "a PM dates only the machines it covers, not ones its text names (11/13); a visit after today doesn't count");
+  assert.equal(s.get(5).lastYear, 1);
   assert.equal(E.namesModel("TB3 brewer", "Bunn TB3"), true);
   assert.equal(E.namesModel("TB30 brewer", "Bunn TB3"), false, "whole words only");
   assert.equal(E.namesModel("Mini grinder", "La Marzocco Mini"), false, "one word left needs a number");
@@ -109,14 +109,14 @@ test("ownership groups, by account; the service load by account and by model; th
   );
   const visits = [
     v("service", 1, "Test Diner", "2026-10-01", "", "SN TB3-55821"),
-    v("pm", 2, "Test Diner", "2026-06-01", "Bunn TB3"),
+    v("tlc", 2, "Test Diner", "2026-06-01", "Bunn TB3"),
     v("service", 3, "Test Diner", "2024-06-01", "Fetco CBS-62H"),
     v("service", 4, "Nobody Here", "2026-06-01", "Bunn TB3"),
   ];
   const a = E.buildEquipmentAnalytics(machines, visits, [], TODAY);
-  assert.deepEqual(a.accountLoad.map((x) => [x.customer, x.service, x.pm, x.total, x.machines]), [["Test Diner", 1, 1, 2, 2]]);
+  assert.deepEqual(a.accountLoad.map((x) => [x.customer, x.service, x.tlc, x.total, x.machines]), [["Test Diner", 1, 1, 2, 2]]);
   assert.deepEqual(a.modelLoad, [{ model: "Bunn TB3", machines: 2, visits: 2, perMachine: 1 }]);
-  assert.deepEqual(a.visitsLastYear, { pm: 1, service: 1, tlc: 0 });
+  assert.deepEqual(a.visitsLastYear, { pm: 0, service: 1, tlc: 1 });
   assert.deepEqual(a.flags, { ok: 1, overdue: 1, never: 0, new: 1, unknown: 1 });
   assert.deepEqual(
     a.flagged.map((x) => [x.id, x.flag, x.last, x.daysSince]),
@@ -202,7 +202,7 @@ test("the longer model is read first; a serial doesn't stop the models; equipmen
     v("service", 1, "Test Diner", "2026-06-01", "Bunn TB3-DV"),
     v("service", 2, "Test Cafe", "2026-06-01", "Bunn TB3 SN TB3-55821\nFetco CBS-62H"),
     v("service", 3, "Test Bar", "2026-06-01", "Bunn ITCB-DV Twin"),
-    v("pm", 4, "Test Deli", "2026-06-01", "Bunn TB3\nBunn TB3"),
+    v("service", 4, "Test Deli", "2026-06-01", "Bunn TB3\nBunn TB3"),
   ];
   const s = E.serviceByMachine(machines, visits, [], TODAY);
   assert.deepEqual([s.get(1).last, s.get(2).how], [null, "model"], "TB3 DV, not the TB3 beside it");
@@ -240,4 +240,62 @@ test("a PM stacked on a ticket is one trip in the load, but still dates the mach
   assert.equal(a.flagged.length, 0);
   assert.ok(src("src/lib/ops/equipment-analytics-api.ts").includes("least(coalesce(p.projected, p.received), p.updated_at::date)"), "a PM closed early isn't dated in the future");
   assert.ok(src("src/routes/_app/assets.tsx").includes('"No flagged machine matches the search or flag."'));
+});
+
+// Chuy, 11/13: a PM is attached to a piece of equipment.
+test("a model's first word with a number in it counts (X20), unless two models at the account share it", () => {
+  assert.ok(E.modelForms("Faema X20 /Turbosteam").includes("x20"));
+  const s = E.serviceByMachine(
+    [m(1, "Test Bagels", "Faema X20 /Turbosteam"), m(2, "Test Cafe", "Faema X20 /Turbosteam"), m(3, "Test Cafe", "Faema X20 Autosteam")],
+    [v("service", 1, "Test Bagels", "2026-06-22", "X20"), v("service", 2, "Test Cafe", "2026-06-22", "X20")],
+    [],
+    TODAY,
+  );
+  assert.deepEqual([s.get(1).last, s.get(1).how], ["2026-06-22", "model"]);
+  assert.deepEqual([s.get(2).last, s.get(3).last], [null, null], "both X20s at Test Cafe read X20: neither");
+});
+
+test("completing a PM with no machine on it is refused; one line on an account machine is enough", async () => {
+  const { pmNoMachineRefusal } = await import("../src/lib/ops/pm-machines.ts");
+  assert.match(pmNoMachineRefusal([]), /^Add the machines this PM covered/);
+  assert.match(pmNoMachineRefusal([{ accountId: null }]), /^None of this PM's Equipment lines is a machine on the account/);
+  assert.equal(pmNoMachineRefusal([{ accountId: null }, { accountId: 7 }]), null);
+  assert.ok(src("src/lib/ops/api.ts").includes("pmNoMachineRefusal(completionPlan.machines) ?? pmCompletionRefusal(completionPlan.planned)"));
+});
+
+test("a PM dates the machines its Equipment lines are, as the PM page plans them; a PM on no machine is listed", async () => {
+  const pg = new PGlite({ parsers: { 20: Number, 1082: (v) => v } });
+  try {
+    for (const name of files) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
+    const query = async (text, params) => (await pg.query(text, params)).rows;
+    const sql = Object.assign(async (strings, ...values) => query(strings.reduce((a, s, i) => `${a}$${i}${s}`), values), { query });
+    const unit = async (customer, model, serial) =>
+      Number(
+        (
+          await query(
+            "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date) values ($1, $2, $2, $3, $4, '2020-01-01') returning id",
+            [customer, model, serial, serial ? serial.toLowerCase() : null],
+          )
+        )[0].id,
+      );
+    const brewer = await unit("Test Diner", "Test Brewer Z9", null);
+    const other = await unit("Test Diner", "Test Grinder Q7", null);
+    const pinnedUnit = await unit("Test Cafe", "Test Brewer Z9", null);
+    const pm = async (customer, equipment) =>
+      Number((await query("insert into pm_jobs (customer, equipment, status, completed_at) values ($1, $2, 'Completed', '2026-10-01') returning id", [customer, equipment]))[0].id);
+    await pm("Test Diner", "Test Brewer Z9");
+    const empty = await pm("Test Diner", null);
+    const unknown = await pm("Test Diner", "Something Not On The Account");
+    const pinned = await pm("Test Cafe", "Brewer by the door");
+    await query("insert into pm_runbook_unit_links (pm_job_id, piece_key, account_equipment_id) values ($1, 'piece:brewer by the door#1', $2)", [pinned, pinnedUnit]);
+    const a = await readEquipmentAnalytics(sql, TODAY);
+    const flaggedIds = a.flagged.map((x) => x.id);
+    assert.ok(!flaggedIds.includes(brewer), "its Equipment line is the brewer");
+    assert.ok(flaggedIds.includes(other), "the grinder isn't on any PM");
+    assert.ok(!flaggedIds.includes(pinnedUnit), "a pinned line dates its machine");
+    assert.deepEqual(a.unattachedPms.map((p) => p.id).sort((x, y) => x - y), [empty, unknown].sort((x, y) => x - y));
+    assert.ok(src("src/routes/_app/assets.tsx").includes("<UnattachedPms pms={a.unattachedPms} />"));
+  } finally {
+    await pg.close();
+  }
 });
