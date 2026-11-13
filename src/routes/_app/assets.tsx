@@ -35,7 +35,7 @@ import {
 } from "@/lib/ops/equipment-analytics";
 import { EQUIPMENT_ANALYTICS_KEY, getEquipmentAnalytics } from "@/lib/ops/equipment-analytics-api";
 import { useFromHere } from "@/lib/ops/search-params";
-import { byModel, filterStock, isFree, placeLabel, type StockUnit } from "@/lib/ops/warehouse-assets";
+import { byModel, filterRebuilds, filterStock, isFree, placeLabel, type StockUnit } from "@/lib/ops/warehouse-assets";
 import { listWarehouseAssets, WAREHOUSE_ASSETS_KEY } from "@/lib/ops/warehouse-assets-api";
 
 type View = "list" | "map";
@@ -336,7 +336,7 @@ function WarehouseSection() {
   const staging = useMemo(() => filterStock(q.data?.staging ?? [], text, kind), [q.data, text, kind]);
   const models = useMemo(() => byModel(available), [available]);
   const freeCount = available.filter(isFree).reduce((n, u) => n + (u.qty || 1), 0);
-  const rebuilds = q.data?.rebuilds ?? [];
+  const rebuilds = useMemo(() => filterRebuilds(q.data?.rebuilds ?? [], text, kind), [q.data, text, kind]);
   if (q.isError) return <p className="mt-4 text-sm text-destructive">Could not load the warehouse: {q.error instanceof Error ? q.error.message : "try again"}.</p>;
   if (q.isLoading) return <Skeleton className="mt-4 h-64 w-full rounded-xl" />;
   return (
@@ -415,7 +415,7 @@ function WarehouseSection() {
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-muted-foreground">No open refurbs.</p>
+          <p className="mt-2 text-sm text-muted-foreground">{text.trim() || kind ? "No open refurb matches." : "No open refurbs."}</p>
         )}
       </section>
     </div>

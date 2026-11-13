@@ -74,3 +74,18 @@ test("the page: a Warehouse section, the Warehouse role kept to it, and units op
   assert.ok(page.includes('<Link to="/rebuilds" search={{ open: r.id }}'));
   assert.ok(src("src/lib/ops/field-assets-api.ts").includes("if (await isWarehouseOnly(sql, context.userId)) throw new Error("), "the field list refuses Warehouse");
 });
+
+// Grok's live test of #141 (11/13): the search and kind filter narrow the open refurbs too.
+test("the open refurbs narrow by search (title, account, machine model or serial) and show under All kinds and Equipment only", () => {
+  const r = (id, title, machines) => ({ id, title, account: "Katz shop / stock", status: "Waiting", targetComplete: null, machines });
+  const list = [r(1, "Test KB90 Rebuild", [{ model: "Test KB90", serial: "KB-1" }]), r(2, "Test Cameo Rebuild", [{ model: "Test Cameo", serial: "C-9" }])];
+  const ids = (xs) => xs.map((x) => x.id);
+  assert.deepEqual(ids(W.filterRebuilds(list, "", "")), [1, 2]);
+  assert.deepEqual(ids(W.filterRebuilds(list, "kb90", "")), [1]);
+  assert.deepEqual(ids(W.filterRebuilds(list, "c-9", "")), [2], "a machine's serial");
+  assert.deepEqual(ids(W.filterRebuilds(list, "zzzz-no-match", "")), []);
+  assert.deepEqual(ids(W.filterRebuilds(list, "", "equip")), [1, 2]);
+  assert.deepEqual(ids(W.filterRebuilds(list, "", "module")), []);
+  assert.deepEqual(ids(W.filterRebuilds(list, "", "dispenser")), []);
+  assert.ok(src("src/routes/_app/assets.tsx").includes("filterRebuilds(q.data?.rebuilds ?? [], text, kind)"));
+});

@@ -66,3 +66,16 @@ export function filterStock(units: readonly StockUnit[], q: string, kind: string
     return [u.model, u.serial, placeLabel(u), u.stockHoldCustomer].some((v) => String(v ?? "").toLowerCase().includes(needle));
   });
 }
+
+/**
+ * The open refurbs a search and a kind keep (Grok's live test, 11/13): the search reads the title, account, status and
+ * each machine's model and serial. A refurb is a machine, so it shows under All kinds and Equipment only.
+ */
+export function filterRebuilds(rebuilds: readonly OpenRebuild[], q: string, kind: string): OpenRebuild[] {
+  if (kind && kind !== "equip") return [];
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [...rebuilds];
+  return rebuilds.filter((r) =>
+    [r.title, r.account, r.status, ...r.machines.flatMap((m) => [m.model, m.serial])].some((v) => String(v ?? "").toLowerCase().includes(needle)),
+  );
+}
