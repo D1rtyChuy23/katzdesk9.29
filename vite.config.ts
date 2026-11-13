@@ -5,6 +5,7 @@ import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 
@@ -127,16 +128,28 @@ function authPopupPlugin(): Plugin {
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
+/** build-sha.txt when it holds a commit: git archive writes it there (export-subst), or the publish writes it. */
+function shaFromFile(): string {
+  try {
+    const text = readFileSync(new URL("./build-sha.txt", import.meta.url), "utf8").trim();
+    return /^[0-9a-f]{7,40}$/i.test(text) ? text : "";
+  } catch {
+    return "";
+  }
+}
+
 /**
- * The commit this build is from, for the version line on Settings (11/13): KATZ_BUILD_SHA when the publish passes it
- * (a CLI deploy uploads files with no git), else Vercel's own variable when it builds from git, else the checkout's
- * HEAD, else "unknown".
+ * The commit this build is from, for the version line on Settings (11/13). In order: KATZ_BUILD_SHA when the publish
+ * passes it; Vercel's own variable when it builds from git; build-sha.txt, which git archive and GitHub's tarball fill
+ * in (the Grok deployer uploads a tarball with no git and no build variables); the checkout's HEAD; else "unknown".
  */
 function buildSha(): string {
   const passed = process.env.KATZ_BUILD_SHA?.trim();
   if (passed && /^[0-9a-f]{7,40}$/i.test(passed)) return passed;
   const fromVercel = process.env.VERCEL_GIT_COMMIT_SHA?.trim();
   if (fromVercel) return fromVercel;
+  const fromFile = shaFromFile();
+  if (fromFile) return fromFile;
   try {
     return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim() || "unknown";
   } catch {

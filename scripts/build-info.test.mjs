@@ -24,3 +24,16 @@ test("Vite sets the build from Vercel's commit, else git; Settings shows it", ()
   assert.ok(cfg.includes("__KATZ_BUILD__: JSON.stringify("));
   assert.ok(src("src/routes/_app/settings.tsx").includes('data-testid="settings-build"'));
 });
+
+test("a tarball carries its commit in build-sha.txt: git archive fills it in; a checkout's placeholder is skipped", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const root = new URL("../", import.meta.url).pathname;
+  assert.equal(src("build-sha.txt").trim(), "$Format:%H$");
+  assert.match(src(".gitattributes"), /^build-sha\.txt export-subst$/m);
+  const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root }).toString().trim();
+  const archived = execFileSync("git", ["archive", "HEAD", "build-sha.txt"], { cwd: root });
+  // A tar entry: the file's text starts at byte 512.
+  assert.equal(archived.subarray(512, 552).toString(), head, "git archive writes the commit");
+  const cfg = src("vite.config.ts");
+  assert.ok(cfg.indexOf("shaFromFile()") > cfg.indexOf("process.env.VERCEL_GIT_COMMIT_SHA") && cfg.indexOf("shaFromFile()") < cfg.indexOf('execSync("git rev-parse HEAD"'));
+});
