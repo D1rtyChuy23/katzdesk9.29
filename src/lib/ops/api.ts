@@ -10,6 +10,7 @@ import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access"
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
+import { pmNoMachineRefusal } from "./pm-machines";
 import { stackCustomerRefusal } from "./pm-stack";
 import { formatAddress } from "./netsuite-customers";
 import { removeCustomersFor } from "./customer-remove-api";
@@ -1190,7 +1191,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 			data.equipment === undefined ? c.equipment : data.equipment,
 			data.id,
 		);
-		const refusal = pmCompletionRefusal(completionPlan.planned);
+		const refusal = pmNoMachineRefusal(completionPlan.machines) ?? pmCompletionRefusal(completionPlan.planned);
 		if (refusal) throw new Error(refusal);
 	}
 	await sql`

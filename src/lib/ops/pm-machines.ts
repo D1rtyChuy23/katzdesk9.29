@@ -115,3 +115,16 @@ export function partsLockReason(input: {
   if (input.pmInvoiceHasLines) return `PM #${input.pmId} has its own approved invoice, so its parts can't change.`;
   return null;
 }
+
+/**
+ * Named error when a PM is being completed with no machine on it (Chuy, 11/13: a PM is attached to a piece of
+ * equipment). Refused when the Equipment field is empty, or when none of its lines is a machine on the account. Null
+ * when at least one line is an account machine.
+ */
+export function pmNoMachineRefusal(machines: readonly Pick<PlannedMachine, "accountId">[]): string | null {
+  if (!machines.length) return "Add the machines this PM covered to Equipment, one per line, before completing it.";
+  if (!machines.some((m) => m.accountId != null)) {
+    return "None of this PM's Equipment lines is a machine on the account. Pick the machine for each line, or add it to the account, before completing it.";
+  }
+  return null;
+}

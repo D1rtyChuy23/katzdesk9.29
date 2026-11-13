@@ -31,6 +31,7 @@ import {
   OVERDUE_DAYS,
   VISIT_LABEL,
   type FlaggedMachine,
+  type UnattachedPm,
   type ServiceFlag,
 } from "@/lib/ops/equipment-analytics";
 import { EQUIPMENT_ANALYTICS_KEY, getEquipmentAnalytics } from "@/lib/ops/equipment-analytics-api";
@@ -581,6 +582,7 @@ function AnalyticsSection() {
           </Button>
           <ToolbarNote>{`${flagged.length} machine${flagged.length === 1 ? "" : "s"}`}</ToolbarNote>
         </ListToolbar>
+        {a.unattachedPms.length ? <UnattachedPms pms={a.unattachedPms} /> : null}
         <FlaggedList
           rows={flagged}
           resetKey={`${flagFilter}|${text}`}
@@ -674,6 +676,39 @@ function FlaggedList({ rows, resetKey, empty }: { rows: FlaggedMachine[]; resetK
         </tbody>
       </table>
       <ShowMoreButton remaining={remaining} onClick={showMore} label="machines" />
+    </div>
+  );
+}
+
+/**
+ * Completed PMs of the last year attached to no machine (Chuy, 11/13: a PM is attached to a piece of equipment). They
+ * date nothing until their machines are added, so the list says which PMs to open and fix.
+ */
+function UnattachedPms({ pms }: { pms: UnattachedPm[] }) {
+  const { visible, remaining, showMore } = useShowMore(pms, pms.length, 10);
+  const from = useFromHere("/assets");
+  return (
+    <div className="mt-3 rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm" data-testid="assets-unattached-pms">
+      <p className="font-medium">
+        {pms.length} completed PM{pms.length === 1 ? "" : "s"} in the last year {pms.length === 1 ? "is" : "are"} attached to no machine
+      </p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        Their Equipment is empty or names no machine on the account, so they date nothing here. Open each one and add the machines it covered, one per line.
+      </p>
+      <ul className="mt-2 grid gap-1 text-xs sm:grid-cols-2">
+        {visible.map((p) => (
+          <li key={p.id} data-testid="assets-unattached-pm">
+            <Link to="/pms" search={{ open: p.id, from }} className="font-medium hover:underline">
+              {p.customer || "No account"}
+            </Link>
+            <span className="text-muted-foreground">
+              {` · PM #${p.id} · ${formatLongDate(p.date)} · `}
+              {p.equipment.trim() ? p.equipment.split(/\r?\n/).map((x) => x.trim()).filter(Boolean).join(" · ") : "No equipment"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <ShowMoreButton remaining={remaining} onClick={showMore} label="PMs" />
     </div>
   );
 }

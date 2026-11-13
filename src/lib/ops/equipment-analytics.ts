@@ -4,8 +4,9 @@
  * a visit to a machine, date each machine's last service and count the load. Read only.
  *
  * A visit counts for a machine when:
- *  - a PM logged that machine (its runbook unit by serial or account unit, a unit link, or a part logged on it), or
- *  - a ticket at the machine's account writes the machine's serial as its own word (5 characters or more, a digit in it),
+ *  - a PM covers that machine, as the PM page plans it: an Equipment line matched to it by serial, pin or model, its
+ *    runbook unit, or a part logged on it (11/13: a PM is attached to a piece of equipment; its text isn't read loosely), or
+ *  - a service or TLC ticket at the machine's account writes the machine's serial as its own word (5 characters or more, a digit in it),
  *  - a ticket at the account names the machine's model (its catalog model or its equipment name). When the account has
  *    two or more of that model, the ticket must name it that many times; otherwise it can't say which, so it dates none
  *    of them (the account's load still counts it), or
@@ -37,8 +38,11 @@ export type Visit = {
   stacked?: boolean;
 };
 
-/** A PM tied to one machine by the runbook, a unit link or a logged part. */
+/** A PM tied to one machine: an Equipment line the PM page matches to it, a unit link, its runbook unit or a logged part. */
 export type PmUnitTie = { pmId: number; unitId: number };
+
+/** A completed PM of the last year attached to no machine: its Equipment is empty or names none on the account. */
+export type UnattachedPm = { id: number; customer: string; date: string; equipment: string };
 
 export type HowMatched = "pm unit" | "serial" | "model" | "all";
 export const HOW_LABEL: Record<HowMatched, string> = { "pm unit": "PM logged on the unit", serial: "Serial on the ticket", model: "Model on the ticket", all: "Ticket for all equipment" };
@@ -101,8 +105,9 @@ export function writesSerial(text: string | null | undefined, serial: string | n
 }
 
 /**
- * The ways a ticket may write a model, compacted: the whole name, and the name without its brand when what is left has
- * a number in it ("TB3") or is two words or more ("ITCB DV", "Linea PB").
+ * The ways a ticket may write a model, compacted: the whole name; the name without its brand when what is left has a
+ * number in it ("TB3") or is two words or more ("ITCB DV", "Linea PB"); and its first word after the brand when that has
+ * letters and a number ("X20"). A form two models at the account share names neither (mentionsByGroup).
  */
 export function modelForms(name: string): string[] {
   const m = compactEquip(name);
@@ -110,7 +115,11 @@ export function modelForms(name: string): string[] {
   const b = compactEquip(brandOf(name));
   const rest = b && m.startsWith(`${b} `) ? m.slice(b.length + 1) : "";
   const restOk = rest.length >= 3 && (/\d/.test(rest) || (rest.includes(" ") && rest.length >= 6));
-  return restOk ? [m, rest] : [m];
+  const out = restOk ? [m, rest] : [m];
+  // The model's first word, when it has a number in it ("Faema X20 /Turbosteam" → "X20"), as techs write it.
+  const first = (rest || "").split(" ")[0] ?? "";
+  if (first && first !== rest && first.length >= 3 && /\d/.test(first) && /[a-z]/.test(first)) out.push(first);
+  return out;
 }
 
 /** True when the ticket names the model, by any of its forms, as whole words. */
@@ -186,6 +195,7 @@ export function serviceByMachine(
     if (v) credit(byId.get(t.unitId), v, "pm unit");
   }
   for (const v of visits) {
+    if (v.kind === "pm") continue; // A PM dates only the machines it covers (the ties above).
     const key = accountKey(v.customer);
     const here = key ? (byAccount.get(key) ?? []) : [];
     if (!here.length) continue;
@@ -351,6 +361,8 @@ export type EquipmentAnalytics = {
   /** Visits in the year to today, every one at an account with machines. */
   visitsLastYear: Record<VisitKind, number>;
   flagged: FlaggedMachine[];
+  /** Completed PMs of the last year attached to no machine, newest first. */
+  unattachedPms: UnattachedPm[];
 };
 
 /** Each value and its count, most first, capitals folded as the In the Field counts do. */
@@ -365,7 +377,13 @@ function tally(values: readonly (string | null | undefined)[]): [string, number]
   return [...m.values()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
-export function buildEquipmentAnalytics(machines: readonly FieldAsset[], visits: readonly Visit[], ties: readonly PmUnitTie[], today: string): EquipmentAnalytics {
+export function buildEquipmentAnalytics(
+  machines: readonly FieldAsset[],
+  visits: readonly Visit[],
+  ties: readonly PmUnitTie[],
+  today: string,
+  unattachedPms: readonly UnattachedPm[] = [],
+): EquipmentAnalytics {
   const service = serviceByMachine(machines, visits, ties, today);
   const accountLoad = loadByAccount(machines, visits, today);
   const visitsLastYear: Record<VisitKind, number> = { pm: 0, service: 0, tlc: 0 };
@@ -386,5 +404,6 @@ export function buildEquipmentAnalytics(machines: readonly FieldAsset[], visits:
     modelLoad: loadByModel(machines, service),
     visitsLastYear,
     flagged: flaggedMachines(machines, service, today),
+    unattachedPms: [...unattachedPms],
   };
 }
