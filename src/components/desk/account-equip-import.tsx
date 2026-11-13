@@ -7,7 +7,7 @@ import {
   type EquipPreview,
   type EquipPreviewRow,
 } from "@/lib/ops/account-equip-import";
-import { isWalkIn, OWNERSHIP_VALUES } from "@/lib/ops/account-equip";
+import { isWalkIn, OWNERSHIP_VALUES, PART_NUMBER_MAX } from "@/lib/ops/account-equip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -140,10 +140,15 @@ type RowDraft = {
   ownership: string;
   /** The row's catalog model was picked on the row itself, not by its pairing. */
   modelSet?: boolean;
+  /** A Part # its pairing gives all its rows (11/12 test: a 220's rows carrying the 312's part). */
+  partNumber?: string;
 };
 
-/** A model pairing's decision: the catalog model its rows take, and whether someone said it's right. */
-type PairDecision = { confirmed: boolean; catalogModel: string; addCatalog: boolean };
+/**
+ * A model pairing's decision: the catalog model its rows take, whether someone said it's right, and a Part # for all
+ * its rows (blank keeps each row's own). Kept on this screen only: nothing is saved until Confirm import.
+ */
+type PairDecision = { confirmed: boolean; catalogModel: string; addCatalog: boolean; partNumber?: string };
 
 function decisionFor(p: EquipPairing): PairDecision {
   return { confirmed: p.status === "matched" && !p.needsConfirm, catalogModel: p.catalogModel ?? "", addCatalog: false };
@@ -221,8 +226,13 @@ function PreviewBody({
       for (const row of preview.rows) {
         if (row.pairKey !== p.key) continue;
         const d = out[row.key] ?? draftFor(row);
-        if (d.modelSet) continue;
-        const nd = { ...d, catalogModel: next.catalogModel, addCatalog: next.addCatalog };
+        const partNumber = next.partNumber?.trim() || undefined;
+        // A row whose model was picked on the row keeps that model, but the pairing's Part # still reaches it.
+        if (d.modelSet) {
+          out[row.key] = { ...d, partNumber };
+          continue;
+        }
+        const nd = { ...d, catalogModel: next.catalogModel, addCatalog: next.addCatalog, partNumber };
         const ok = next.confirmed && !!nd.customer.trim() && !isWalkIn(nd.customer) && !!nd.catalogModel.trim() && !row.foreignAccount && !row.holdReasons?.length;
         out[row.key] = { ...nd, selected: next.confirmed ? ok : false };
       }
@@ -330,6 +340,7 @@ function PreviewBody({
           catalogModel,
           addCatalog: d.addCatalog || !known,
           ownership: d.ownership.trim() || null,
+          partNumber: d.partNumber ?? row.partNumber,
           modelCandidates: [],
           reviewReasons: [],
           action: row.action === "update" ? ("update" as const) : ("add" as const),
@@ -358,7 +369,13 @@ function PreviewBody({
           ) : null}
         </li>
         <li className="rounded-lg border border-border bg-muted/40 px-3 py-2">
-          <span className="font-medium">{preview.rows.length - selectedCount}</span> skipped
+          <span className="font-medium">{preview.rows.length - selectedCount}</span> unticked
+          {preview.skipped ? (
+            <>
+              {" · "}
+              <span className="font-medium">{preview.skipped}</span> blank row{preview.skipped === 1 ? "" : "s"} not read
+            </>
+          ) : null}
         </li>
       </ul>
 
@@ -666,6 +683,7 @@ function PairingsPanel({
   onDecide: (p: EquipPairing, next: PairDecision) => void;
 }) {
   const [picks, setPicks] = useState<Record<string, string>>({});
+  const [parts, setParts] = useState<Record<string, string>>({});
   if (!pairings.length) return null;
   const open = pairings.filter((p) => !(decisions[p.key]?.confirmed ?? true));
   const decided = pairings.filter((p) => decisions[p.key]?.confirmed ?? true);
@@ -688,6 +706,14 @@ function PairingsPanel({
             {w}
           </p>
         ))}
+        {(p.notes ?? []).map((n) => (
+          <p key={n} className="mt-0.5 text-xs text-muted-foreground">
+            {n}
+          </p>
+        ))}
+        {isOpen && p.suggestNew ? (
+          <p className="mt-0.5 text-xs text-muted-foreground">No catalog model is this machine: suggested as a new one, named as the file has it.</p>
+        ) : null}
         {isOpen ? (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <div className="min-w-[16rem] flex-1">
@@ -703,11 +729,23 @@ function PairingsPanel({
                 menuInFlow
               />
             </div>
+            <input
+              value={parts[p.key] ?? ""}
+              onChange={(e) => setParts((cur) => ({ ...cur, [p.key]: e.target.value }))}
+              placeholder="Part # for all (blank keeps each row's)"
+              aria-label={`Part # for all ${p.rows} rows of ${p.fileModel}`}
+              disabled={pending}
+              className="h-9 w-56 rounded-md border border-input bg-background px-2 text-sm max-sm:w-full"
+              data-testid="equip-import-pairing-part"
+            />
+            {(parts[p.key]?.trim().length ?? 0) > PART_NUMBER_MAX ? (
+              <span className="basis-full text-xs text-destructive">A Part # is {PART_NUMBER_MAX} characters at most.</span>
+            ) : null}
             <Button
               type="button"
               size="sm"
-              disabled={pending || !pick.trim()}
-              onClick={() => onDecide(p, { confirmed: true, catalogModel: pick.trim(), addCatalog: !known(pick) })}
+              disabled={pending || !pick.trim() || (parts[p.key]?.trim().length ?? 0) > PART_NUMBER_MAX}
+              onClick={() => onDecide(p, { confirmed: true, catalogModel: pick.trim(), addCatalog: !known(pick), partNumber: parts[p.key]?.trim() || undefined })}
             >
               {known(pick) || !pick.trim() ? `Use for ${p.rows} row${p.rows === 1 ? "" : "s"}` : `Add model and use for ${p.rows}`}
             </Button>
@@ -717,6 +755,7 @@ function PairingsPanel({
             <span>
               → {d.catalogModel || "—"}
               {d.addCatalog ? " · will add to catalog" : ""}
+              {d.partNumber ? ` · Part # ${d.partNumber}` : ""}
             </span>
             <button type="button" className="text-muted-foreground hover:underline" disabled={pending} onClick={() => onDecide(p, { ...d, confirmed: false })}>
               Change
@@ -731,6 +770,9 @@ function PairingsPanel({
       <h3 className="text-sm font-medium">
         Model pairings{open.length ? ` · ${open.length} to decide` : " · all decided"}
       </h3>
+      <p className="mt-0.5 text-xs text-muted-foreground" data-testid="equip-import-pairings-note">
+        Deciding a pairing only ticks its rows here. Nothing is saved until you press Confirm import.
+      </p>
       {open.length ? <ul className="mt-2 grid gap-2 sm:grid-cols-2">{open.map((p) => row(p, true))}</ul> : null}
       {decided.length ? (
         <div className="mt-2">

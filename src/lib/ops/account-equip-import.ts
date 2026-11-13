@@ -93,13 +93,18 @@ export type EquipPairing = {
   /** The live part that Part # is, when there is one. */
   partSku: string | null;
   partDescription: string | null;
+  /** The suggested catalog model: one in the catalog, or (suggestNew) the file's own model to add as new. */
   catalogModel: string | null;
+  /** The suggestion is the file's model as a new catalog model: no catalog model is the same machine. */
+  suggestNew: boolean;
   status: "matched" | "unmatched" | "ambiguous";
   candidates: string[];
   rows: number;
   /** True when someone has to say this pairing is right (names differ, or a warning). */
   needsConfirm: boolean;
   warnings: string[];
+  /** Worth knowing, not a reason to hold the pairing: a Part # that isn't a live part (it is still saved as written). */
+  notes: string[];
 };
 
 export type EquipPreview = {
@@ -378,7 +383,11 @@ const modelWords = (s: string) => (s.toLowerCase().match(/[a-z0-9+]+/g) ?? []).f
 export function extraModelWords(fileModel: string, catalogModel: string): string[] {
   const cat = modelWords(catalogModel);
   const joined = cat.join("");
-  return modelWords(fileModel).filter((w) => !cat.includes(w) && !joined.includes(w));
+  const words = modelWords(fileModel);
+  // Written together counts as there: three characters or more inside the name, or a short word joined to its
+  // neighbor as one catalog word ("1152" + "V+" = "1152V+"). "S" is not in "Classic", "M" not in "Shotmaster" (11/12).
+  const withNeighbor = (i: number) => (i > 0 && cat.includes(words[i - 1]! + words[i]!)) || (i < words.length - 1 && cat.includes(words[i]! + words[i + 1]!));
+  return words.filter((w, i) => !cat.includes(w) && !(w.length >= 3 && joined.includes(w)) && !withNeighbor(i));
 }
 
 /** Model numbers in a name: two digits or more, not a voltage or wattage ("120V", "1800W"; "1131V+" is a model). */
@@ -397,63 +406,122 @@ export function partModelConflict(part: ImportPart | null | undefined, catalogMo
 }
 
 /**
- * A pairing's key: the file's model (or name) and the catalog model it was matched to. Every letter and digit counts,
- * words in brackets too: "ITCB-DV (NS)" is a different pairing from "ITCB-DV".
+ * A pairing's key: the file's model (or name). Every letter and digit counts, words in brackets too: "ITCB-DV (NS)" is a
+ * different pairing from "ITCB-DV". One pairing per file model (11/12 test): rows of one model whose names "as
+ * entered" differ no longer split it.
  */
-export const pairKeyOf = (fileModel: string, catalogModel: string | null) =>
-  `${fileModel.toLowerCase().replace(/[^a-z0-9+]+/g, "")}|${(catalogModel ?? "").toLowerCase()}`;
+export const pairKeyOf = (fileModel: string) => fileModel.toLowerCase().replace(/[^a-z0-9+]+/g, "");
 
-/** The rows' model pairings, the ones to decide first (11/12). */
-export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, ImportPart>): EquipPairing[] {
+const letters = (x: string | null | undefined) => String(x ?? "").toLowerCase().replace(/[^a-z0-9+]+/g, "");
+
+/**
+ * Words a catalog name may add that only describe the machine: its kind and finish. Not sizes, groups, steps or
+ * "dual" / "single", which tell variants apart (11/12 review); "Dual Portion" is one describing phrase.
+ */
+const DESCRIPTOR_WORDS = new Set([
+  "grinder", "grinders", "brewer", "brewers", "thermal", "carafe", "espresso", "hopper", "batch", "button", "buttons",
+  "blk", "black", "retail", "flip", "tray", "w", "with", "and", "the",
+]);
+
+/** A catalog name with its describing parts taken out: voltages, wattages, inches, "Dual Portion", "6 Batch Buttons". */
+function catalogCore(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\d+(?:\.\d+)?\s*(?:v|w|hz)\b(?!\+)/g, " ")
+    .replace(/\d+(?:\.\d+)?\s*(?:"|”|in\b|inch)/g, " ")
+    .replace(/\b(?:dual|single)[\s-]+portion\b/g, " ")
+    .replace(/\d+\s*(?=(?:batch|buttons?)\b)/g, " ");
+}
+
+/**
+ * The catalog model is the file's machine, written longer (11/12 test): it adds only describing words ("ITCB-DV" →
+ * "ITCB-DV, 29" w/Flip Tray"; "G3 HD" → "G3 HD BLK"), and the file's model adds none. "Super Jolly Timer" → "Doser V Up
+ * w/ Timer" adds "doser v up", and "Classe 5 USB 2GR" → "Classe 11 Xcelsius 3 GR" adds a series and groups: not the same.
+ */
+export function sameMachineWritten(fileModel: string, catalogModel: string): boolean {
+  if (extraModelWords(fileModel, catalogModel).length) return false;
+  const fileWords = new Set(modelWords(fileModel));
+  const joined = [...fileWords].join("");
+  const extra = (catalogCore(catalogModel).match(/[a-z0-9+]+/g) ?? []).filter((w) => !fileWords.has(w) && !(w.length >= 3 && joined.includes(w)));
+  return extra.every((w) => DESCRIPTOR_WORDS.has(w));
+}
+
+/** The rows' model pairings, the ones to decide first (11/12). `catalog`: the catalog's model names. */
+export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, ImportPart>, catalog: string[] = []): EquipPairing[] {
   const groups = new Map<string, EquipPreviewRow[]>();
   for (const r of rows) groups.set(r.pairKey, [...(groups.get(r.pairKey) ?? []), r]);
+  const catalogByLetters = new Map(catalog.map((n) => [letters(n), n]));
   const out: EquipPairing[] = [];
   for (const [key, members] of groups) {
     const first = members[0]!;
     const fileModel = first.fileModel || first.equipmentName;
-    const counts = new Map<string, number>();
-    for (const m of members) if (m.partNumber) counts.set(m.partNumber, (counts.get(m.partNumber) ?? 0) + 1);
-    const byCount = [...counts].sort((a, b) => b[1] - a[1]);
+    // Part #s by their key, so "Linea 2 AV" and "Linea 2AV" are one (11/12 test).
+    const counts = new Map<string, [string, number]>();
+    for (const m of members) {
+      if (!m.partNumber) continue;
+      const k = mpnKey(m.partNumber);
+      const cur = counts.get(k);
+      counts.set(k, [cur?.[0] ?? m.partNumber, (cur?.[1] ?? 0) + 1]);
+    }
+    const byCount = [...counts.values()].sort((a, b) => b[1] - a[1]);
     const partNumber = byCount[0]?.[0] ?? null;
     const part = partNumber ? parts.get(mpnKey(partNumber)) ?? null : null;
+    // What the rows were matched to, most first.
+    const matchedCounts = new Map<string, number>();
+    for (const m of members) if (m.catalogModel) matchedCounts.set(m.catalogModel, (matchedCounts.get(m.catalogModel) ?? 0) + 1);
+    const topMatched = [...matchedCounts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    // The suggestion: a catalog model named as the live part is, else the matched one when it is the same machine
+    // written longer, else the file's own model as a new catalog model. Never a near name (11/12 test).
+    const byPart = part ? catalogByLetters.get(letters(part.description)) ?? catalogByLetters.get(letters(part.sku)) ?? null : null;
+    const exact = catalogByLetters.get(letters(fileModel)) ?? null;
+    const sameWritten = topMatched && sameMachineWritten(fileModel, topMatched) ? topMatched : null;
+    // The live part's catalog name backs a suggestion only when it is the file's machine too; a part named as another
+    // catalog model never replaces the file's Confirmed Model (11/12 review: a 220's rows carrying the 312's part).
+    const partAgrees = byPart && (letters(byPart) === letters(fileModel) || sameMachineWritten(fileModel, byPart)) ? byPart : null;
+    const suggestion = exact ?? partAgrees ?? sameWritten ?? null;
+    const suggestNew = !suggestion && !!fileModel.trim();
+    const catalogModel = suggestion ?? (suggestNew ? fileModel.trim() : null);
     const warnings: string[] = [];
-    if (first.catalogModel) {
-      const extra = extraModelWords(fileModel, first.catalogModel);
+    const notes: string[] = [];
+    if (topMatched && !suggestion) warnings.push(`Not suggested: ${topMatched}. It reads as another machine.`);
+    if (byPart && byPart !== suggestion) {
+      warnings.push(`Part # ${partNumber} is ${part!.sku}, named as the catalog's ${byPart}; the file says ${fileModel}.`);
+    }
+    if (suggestion) {
+      const extra = extraModelWords(fileModel, suggestion);
       if (extra.length) warnings.push(`The file says "${extra.join(" ")}"; the catalog model doesn't.`);
-      // Every Part # its rows carry is read, not only the most common one (11/12 review).
-      for (const [pn] of byCount) {
-        const p = parts.get(mpnKey(pn));
-        if (partModelConflict(p, first.catalogModel)) warnings.push(`Part # ${pn} is ${p!.sku}${p!.description ? ` (${p!.description})` : ""}, which reads as another model.`);
-      }
+    }
+    // Every Part # its rows carry is read, not only the most common one.
+    for (const [pn] of byCount) {
+      const p = parts.get(mpnKey(pn));
+      if (p && suggestion && partModelConflict(p, suggestion)) warnings.push(`Part # ${pn} is ${p.sku}${p.description ? ` (${p.description})` : ""}, which reads as another model.`);
+      if (!p && parts.size) notes.push(`Part # ${pn} isn't a live part in Katz Desk; it is saved as written.`);
     }
     if (byCount.length > 1) {
       warnings.push(`Its rows carry ${byCount.length} Part #s: ${byCount.map(([pn, n]) => `${pn} (${n})`).join(", ")}.`);
     }
-    // A pairing reads as matched only when all its rows did.
-    const status: EquipPairing["status"] = members.every((m) => m.modelStatus === "matched")
-      ? "matched"
-      : members.some((m) => m.modelStatus === "ambiguous")
-        ? "ambiguous"
-        : "unmatched";
-    const candidates = [...new Set(members.flatMap((m) => m.modelCandidates))];
-    const letters = (x: string) => x.toLowerCase().replace(/[^a-z0-9+]+/g, "");
-    const differs = !!first.catalogModel && letters(fileModel) !== letters(first.catalogModel);
+    const status: EquipPairing["status"] = suggestion ? "matched" : members.some((m) => m.modelStatus === "ambiguous") ? "ambiguous" : "unmatched";
+    const candidates = [...new Set([...(suggestion ? [suggestion] : []), ...members.flatMap((m) => m.modelCandidates)])];
+    // Only a pairing whose rows are all named exactly as a catalog model, with nothing to warn about, goes without a decision.
+    const settled = !!exact && suggestion === exact && members.every((m) => m.catalogModel === exact) && !warnings.length;
     out.push({
       key,
       fileModel,
       partNumber,
       partSku: part?.sku ?? null,
       partDescription: part?.description ?? null,
-      catalogModel: first.catalogModel,
+      catalogModel,
+      suggestNew,
       status,
       candidates,
       rows: members.length,
-      needsConfirm: status === "matched" && (differs || warnings.length > 0),
+      needsConfirm: !settled,
       warnings,
+      notes,
     });
   }
-  // To decide first: warnings, then names that differ, then no or several catalog models; most rows first.
-  const rank = (p: EquipPairing) => (p.warnings.length ? 0 : p.needsConfirm ? 1 : p.status !== "matched" ? 2 : 3);
+  // To decide first: warnings, then the rest to decide; most rows first.
+  const rank = (p: EquipPairing) => (p.warnings.length ? 0 : p.needsConfirm ? 1 : 2);
   return out.sort((a, b) => rank(a) - rank(b) || b.rows - a.rows || a.fileModel.localeCompare(b.fileModel));
 }
 
@@ -568,7 +636,7 @@ export function buildPreviewRow(
     condition: conditionTooLong ? null : condition,
     site,
     accountAddress,
-    pairKey: pairKeyOf(rec.model.trim() || equipmentName, catalogModel),
+    pairKey: pairKeyOf(rec.model.trim() || equipmentName),
     holdReasons,
     action,
     existingId,
@@ -597,7 +665,7 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
       loadParts(sql),
     ]);
     const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing));
-    const pairings = buildPairings(rows, parts);
+    const pairings = buildPairings(rows, parts, catalog);
     const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
     return {

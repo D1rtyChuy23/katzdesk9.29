@@ -86,12 +86,22 @@ test("model pairings: one per file model and catalog model; names that differ ar
     ["Test Bagels - Main", "1025 Test Drive", "TB3", "Bunn TB3", "36700.0009", "S-4", "Lease", "", "", "Excellent"],
     ["Test Bagels - Main", "1025 Test Drive", "Sure", "Bunn Sure Immersion 220", "44400.0202", "S-5", "Loaned", "", "", "Good"],
   ]);
-  const parts = new Map([["444000202", { sku: "BUNNSUREIMMERSION312", mpn: "44400.0202", description: "Sure Immersion 312" }]]);
-  const pairings = IMP.buildPairings(rows, parts);
+  const parts = new Map([
+    ["444000202", { sku: "BUNNSUREIMMERSION312", mpn: "44400.0202", description: "Sure Immersion 312" }],
+    ["357000019", { sku: 'BUNNITCBWFLIP29"', mpn: "35700.0019", description: null }],
+    ["522000100", { sku: 'BUNNITCB29"TRAYNEWSTYLE', mpn: "52200.0100", description: null }],
+    ["367000009", { sku: "BUNNTB3", mpn: "36700.0009", description: null }],
+  ]);
+  const pairings = IMP.buildPairings(rows, parts, CATALOG);
   const by = Object.fromEntries(pairings.map((p) => [p.fileModel, p]));
   assert.equal(pairings.length, 4, "ITCB-DV (NS) is its own pairing");
-  assert.deepEqual([by["Bunn ITCB-DV"].rows, by["Bunn ITCB-DV"].needsConfirm, by["Bunn ITCB-DV"].warnings], [2, true, []]);
-  assert.deepEqual([by["Bunn ITCB-DV (NS)"].needsConfirm, by["Bunn ITCB-DV (NS)"].warnings], [true, ['The file says "ns"; the catalog model doesn\'t.']]);
+  // The same machine written longer keeps its catalog model, confirmed once.
+  assert.deepEqual([by["Bunn ITCB-DV"].rows, by["Bunn ITCB-DV"].catalogModel, by["Bunn ITCB-DV"].suggestNew, by["Bunn ITCB-DV"].needsConfirm, by["Bunn ITCB-DV"].warnings], [2, 'Bunn ITCB-DV, 29" w/Flip Tray', false, true, []]);
+  // (NS) is another machine: no near name, the file's model suggested as a new catalog model (11/12 test).
+  assert.deepEqual(
+    [by["Bunn ITCB-DV (NS)"].catalogModel, by["Bunn ITCB-DV (NS)"].suggestNew, by["Bunn ITCB-DV (NS)"].needsConfirm, by["Bunn ITCB-DV (NS)"].warnings],
+    ["Bunn ITCB-DV (NS)", true, true, ['Not suggested: Bunn ITCB-DV, 29" w/Flip Tray. It reads as another machine.']],
+  );
   assert.deepEqual([by["Bunn TB3"].needsConfirm, by["Bunn TB3"].warnings], [false, []]);
   // Same name, but the Part # is another model.
   assert.equal(by["Bunn Sure Immersion 220"].needsConfirm, true);
@@ -159,8 +169,9 @@ test("a pairing reads every Part # its rows carry; one with several Part #s is c
   const parts = new Map([
     ["444000200", { sku: "BUNNSUREIMMERSION220", mpn: "44400.0200", description: null }],
     ["444000202", { sku: "BUNNSUREIMMERSION312", mpn: "44400.0202", description: null }],
+    ["367000009", { sku: "BUNNTB3", mpn: "36700.0009", description: null }],
   ]);
-  const by = Object.fromEntries(IMP.buildPairings(rows, parts).map((p) => [p.fileModel, p]));
+  const by = Object.fromEntries(IMP.buildPairings(rows, parts, CATALOG).map((p) => [p.fileModel, p]));
   assert.equal(by["Bunn Sure Immersion 220"].needsConfirm, true);
   assert.deepEqual(by["Bunn Sure Immersion 220"].warnings, [
     "Part # 44400.0202 is BUNNSUREIMMERSION312, which reads as another model.",
@@ -181,5 +192,86 @@ test("a pairing whose rows matched differently reads as not matched, with every 
     { ...preview([["Test Bagels - Main", "1025 Test Drive", "R", "Test Classe 5", "", "S-2", "", "", "", ""]])[0], key: "r1", modelStatus: "ambiguous", modelCandidates: ["A", "B"], catalogModel: null, pairKey: "k" },
   ];
   const [p] = IMP.buildPairings(rows, new Map());
-  assert.deepEqual([p.status, p.candidates, p.needsConfirm], ["ambiguous", ["A", "B"], false]);
+  // No catalog model: the file's model is suggested as a new one, and someone decides (11/12 test).
+  assert.deepEqual([p.status, p.candidates, p.catalogModel, p.suggestNew, p.needsConfirm], ["ambiguous", ["A", "B"], "Test Classe 5", true, true]);
+});
+
+// Grok's 11/12 test of the live preview.
+test("one pairing per file model, even when the rows' names as entered matched different catalog models", () => {
+  const rows = preview([
+    ["Test Bagels - Main", "1025 Test Drive", "Faema X20", "Faema X20 w/ Autosteam", "", "S-1", "", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "Something else", "Faema X20 w/ Autosteam", "", "S-2", "", "", "", ""],
+  ]).map((r, i) => ({ ...r, catalogModel: i === 0 ? "Faema X20 /Turbosteam" : null, modelStatus: i === 0 ? "matched" : "unmatched" }));
+  const pairings = IMP.buildPairings(rows, new Map(), ["Faema X20 /Turbosteam"]);
+  assert.equal(pairings.length, 1);
+  assert.equal(pairings[0].rows, 2);
+});
+
+test("no near names: a catalog model is kept only when it's the same machine written longer", () => {
+  const same = (f, c) => IMP.sameMachineWritten(f, c);
+  // Kept: describing words only.
+  assert.equal(same("Bunn ITCB-DV", 'Bunn ITCB-DV, 29" w/Flip Tray'), true);
+  assert.equal(same("Bunn G3 HD", "Bunn G3 HD BLK"), true);
+  assert.equal(same("Bunn G9-2T HD", "Bunn G9-2T HD Dual Portion Grinder"), true);
+  assert.equal(same("Fetco GR2.3", "Fetco GR2.3 Dual Portion Grinders (6 Batch Buttons)"), true);
+  assert.equal(same("Bunn H5X Element (120V)", "Bunn H5X Element 120V 1800W"), true);
+  assert.equal(same("Fetco CBS-1152 V+", "Fetco CBS-1152V+"), true, "spaces don't count");
+  // Not kept: another machine, or maybe one (11/12 review: steps, sizes, groups and one-letter variants count).
+  assert.equal(same("Eversys Cameo c'2s", "Eversys Cameo c'2s - 2 Step Classic"), false, "a step count may be a variant");
+  assert.equal(same("Eversys Shotmaster M-Pro/ST", "Eversys Shotmaster S-Pro/ST"), false);
+  assert.equal(same("Eversys Shotmaster S-Pro/ST", "Eversys Shotmaster M-Pro/ST"), false);
+  assert.equal(same("La Marzocco Linea Classic S 2AV", "La Marzocco Linea Classic 2AV"), false);
+  assert.equal(same("La Marzocco Linea Classic 2AV", "La Marzocco Linea Classic S 2AV"), false);
+  assert.equal(same("Fetco CBS-52H", "Fetco CBS-52H 1.5G"), false, "a size");
+  assert.equal(same("Test X", "Test X 2G"), false, "groups");
+  assert.equal(same("Test Grinder", "Test Grinder Single Hopper"), false, "single vs dual");
+  assert.equal(same("Mazzer Super Jolly Timer", "Mazzer Super Jolly Doser V Up w/ Timer"), false);
+  assert.equal(same("Mazzer Super Jolly Electronic", "Mazzer Super Jolly V Up Electronic"), false);
+  assert.equal(same("Rancilio Classe 5 USB 2GR", "Rancilio Classe 11 Xcelsius 3 GR"), false);
+  assert.equal(same("Bunn ITCB-DV (NS)", 'Bunn ITCB-DV, 29" w/Flip Tray'), false);
+  assert.equal(same("Bunn ITCB-DV HV", 'Bunn ITCB-DV, 29" w/Flip Tray'), false);
+  assert.equal(same("Bunn H5X Element (208-240V)", "Bunn H5X, Element 240V 4000W"), false);
+});
+
+test("a live part's name picks the catalog model; Part #s that differ only in spaces are one; an unknown Part # is flagged", () => {
+  const rows = preview([
+    ["Test Bagels - Main", "1025 Test Drive", "Linea", "La Marzocco Linea Classic 2AV", "Linea 2 AV", "S-1", "", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "Linea", "La Marzocco Linea Classic 2AV", "Linea 2AV", "S-2", "", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "Cameo", "Eversys Cameo c'2s", "SE-C2S", "S-3", "", "", "", ""],
+  ]);
+  const parts = new Map([["LINEA2AV", { sku: "LMLINEA2AV", mpn: "Linea 2 AV", description: "La Marzocco Linea Classic 2 Group AV" }]]);
+  const catalog = ["La Marzocco Linea Classic 2 Group AV", "Eversys Cameo c'2s - 2 Step Classic"];
+  const by = Object.fromEntries(IMP.buildPairings(rows, parts, catalog).map((p) => [p.fileModel, p]));
+  // The live part is named as another catalog model: the file's model is kept (as new) and the part's name is warned
+  // about, never put in its place (11/12 review).
+  assert.deepEqual([by["La Marzocco Linea Classic 2AV"].catalogModel, by["La Marzocco Linea Classic 2AV"].suggestNew], ["La Marzocco Linea Classic 2AV", true]);
+  assert.ok(by["La Marzocco Linea Classic 2AV"].warnings.includes("Part # Linea 2 AV is LMLINEA2AV, named as the catalog's La Marzocco Linea Classic 2 Group AV; the file says La Marzocco Linea Classic 2AV."));
+  assert.equal(by["La Marzocco Linea Classic 2AV"].warnings.some((w) => w.startsWith("Its rows carry")), false, "one Part #");
+  assert.ok(by["Eversys Cameo c'2s"].notes.includes("Part # SE-C2S isn't a live part in Katz Desk; it is saved as written."));
+  assert.equal(by["Eversys Cameo c'2s"].warnings.some((w) => w.includes("SE-C2S")), false, "a note, not a reason to hold the pairing");
+});
+
+test("a live part never puts its own model in place of the file's: the 220 with the 312 part, TB3 with a TB6 part", () => {
+  const rows = preview([
+    ["Test Bagels - Main", "1025 Test Drive", "Sure", "Bunn Sure Immersion 220", "44400.0202", "S-1", "", "", "", ""],
+    ["Test Bagels - Main", "1025 Test Drive", "TB3", "Bunn TB3", "36700.0300", "S-2", "", "", "", ""],
+  ]);
+  const parts = new Map([
+    ["444000202", { sku: "BUNNSUREIMMERSION312", mpn: "44400.0202", description: null }],
+    ["367000300", { sku: "BUNNTB6", mpn: "36700.0300", description: null }],
+  ]);
+  const catalog = ["Bunn Sure Immersion 220", "Bunn Sure Immersion 312", "Bunn TB3", "Bunn TB6"];
+  const by = Object.fromEntries(IMP.buildPairings(rows, parts, catalog).map((p) => [p.fileModel, p]));
+  assert.deepEqual([by["Bunn Sure Immersion 220"].catalogModel, by["Bunn Sure Immersion 220"].needsConfirm], ["Bunn Sure Immersion 220", true]);
+  assert.ok(by["Bunn Sure Immersion 220"].warnings.some((w) => w.includes("named as the catalog's Bunn Sure Immersion 312")));
+  assert.deepEqual([by["Bunn TB3"].catalogModel, by["Bunn TB3"].needsConfirm], ["Bunn TB3", true], "an exact name with another model's part isn't auto-accepted");
+  assert.ok(by["Bunn TB3"].warnings.some((w) => w.includes("named as the catalog's Bunn TB6")));
+});
+
+test("the dialog: a pairing's Part # goes to all its rows, labels say unticked, and nothing saves before Confirm", () => {
+  const screen = src("src/components/desk/account-equip-import.tsx");
+  assert.ok(screen.includes("partNumber: d.partNumber ?? row.partNumber,"));
+  assert.ok(screen.includes('data-testid="equip-import-pairing-part"'));
+  assert.ok(screen.includes("</span> unticked"));
+  assert.ok(screen.includes("Nothing is saved until you press Confirm import."));
 });
