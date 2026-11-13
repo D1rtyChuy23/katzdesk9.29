@@ -150,4 +150,5 @@ Every status below is a pick-list: any state can follow any other. The notes say
 These queries list ticket statuses for their own reason, not the closed list:
 
 - `pm-stack-api.ts: Cancelled, Phone Resolved`: A PM can stack on a completed ticket that isn't billed yet, but never on a cancelled or phone-resolved one.
+- `equipment-analytics-api.ts: Cancelled, Phone Resolved`: A machine's last service is a completed visit: a cancelled or phone-resolved ticket didn't put a tech on the machine.
 - `teams-reports.ts: Completed, Phone Resolved`: The weekly notes count serviced tickets: completed or phone resolved, never cancelled.

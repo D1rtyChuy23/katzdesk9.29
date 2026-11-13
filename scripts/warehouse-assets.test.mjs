@@ -68,7 +68,7 @@ test("the barn's stock: free on a rack and on no install; staging; open refurbs 
 
 test("the page: a Warehouse section, the Warehouse role kept to it, and units opening on the Warehouse page", () => {
   const page = src("src/routes/_app/assets.tsx");
-  assert.ok(page.includes('const section: Section = warehouseOnly || search.section === "warehouse" ? "warehouse" : "field";'));
+  assert.ok(page.includes('const section: Section = warehouseOnly ? "warehouse" : (search.section ?? "field");'));
   assert.ok(page.includes("{warehouseOnly ? null : ("), "no In the Field chip for Warehouse");
   assert.ok(page.includes('<Link to="/warehouse" search={{ open: u.id, from }}'), "a unit opens at its rack slot");
   assert.ok(page.includes('<Link to="/rebuilds" search={{ open: r.id }}'));
