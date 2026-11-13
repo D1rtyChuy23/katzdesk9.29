@@ -446,6 +446,30 @@ export function sameMachineWritten(fileModel: string, catalogModel: string): boo
   return extra.every((w) => DESCRIPTOR_WORDS.has(w));
 }
 
+/** A name without its voltages and wattages, ranges too ("208-240V", "120V", "1800W"; "1131V+" is a model). */
+const withoutPower = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\s*v\b(?!\+)/g, " ")
+    .replace(/\d+(?:\.\d+)?\s*(?:v|w|hz)\b(?!\+)/g, " ");
+
+/** The numbers in a model's name, once its voltages and wattages are out: "Sure Immersion 220" → 220. */
+const numbersIn = (s: string) => new Set((withoutPower(s).match(/\d+/g) ?? []).map((n) => n.replace(/^0+(?=\d)/, "")));
+
+/**
+ * The file's model and a live part's catalog name are one machine as far as the words show (11/13 test): every
+ * number of the file's model is in the part's name (220 is not 312, TB3 is not TB6), and the file's model has no word
+ * the part's name lacks ("Autosteam", "NS", "HV"). The part's name may add words ("CWTF15-APS PF"): its Part #, which
+ * the verified list confirmed against the name, serial and voltage, vouches for them.
+ */
+export function partNameFits(fileModel: string, partCatalogName: string): boolean {
+  const theirs = numbersIn(partCatalogName);
+  if ([...numbersIn(fileModel)].some((n) => !theirs.has(n))) return false;
+  // Letters and numbers written together read apart, so "2AV" is "2" and "AV" as in "2 Group AV".
+  const apart = (s: string) => withoutPower(s).replace(/(\d)([a-z])/g, "$1 $2").replace(/([a-z])(\d)/g, "$1 $2");
+  return extraModelWords(apart(fileModel), apart(partCatalogName)).length === 0;
+}
+
 /** The rows' model pairings, the ones to decide first (11/12). `catalog`: the catalog's model names. */
 export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, ImportPart>, catalog: string[] = []): EquipPairing[] {
   const groups = new Map<string, EquipPreviewRow[]>();
@@ -475,17 +499,23 @@ export function buildPairings(rows: EquipPreviewRow[], parts: Map<string, Import
     const byPart = part ? catalogByLetters.get(letters(part.description)) ?? catalogByLetters.get(letters(part.sku)) ?? null : null;
     const exact = catalogByLetters.get(letters(fileModel)) ?? null;
     const sameWritten = topMatched && sameMachineWritten(fileModel, topMatched) ? topMatched : null;
-    // The live part's catalog name backs a suggestion only when it is the file's machine too; a part named as another
-    // catalog model never replaces the file's Confirmed Model (11/12 review: a 220's rows carrying the 312's part).
-    const partAgrees = byPart && (letters(byPart) === letters(fileModel) || sameMachineWritten(fileModel, byPart)) ? byPart : null;
+    // The live part's catalog name is suggested when it fits the file's model (11/13 test: CWTF15-APS → its part's
+    // "CWTF15-APS PF", Swift → "Swift Dual-Hopper Espresso Grinder"); one that names another model never replaces the
+    // Confirmed Model (11/12 review: a 220's rows carrying the 312's part).
+    const partAgrees = byPart && (letters(byPart) === letters(fileModel) || partNameFits(fileModel, byPart)) ? byPart : null;
     const suggestion = exact ?? partAgrees ?? sameWritten ?? null;
     const suggestNew = !suggestion && !!fileModel.trim();
     const catalogModel = suggestion ?? (suggestNew ? fileModel.trim() : null);
     const warnings: string[] = [];
     const notes: string[] = [];
-    if (topMatched && !suggestion) warnings.push(`Not suggested: ${topMatched}. It reads as another machine.`);
+    if (topMatched && topMatched !== suggestion && !(byPart && byPart === topMatched)) {
+      warnings.push(`Not suggested: ${topMatched}. It reads as another machine.`);
+    }
     if (byPart && byPart !== suggestion) {
       warnings.push(`Part # ${partNumber} is ${part!.sku}, named as the catalog's ${byPart}; the file says ${fileModel}.`);
+    }
+    if (partAgrees && suggestion === partAgrees && partAgrees !== exact) {
+      notes.push(`Suggested by its Part # ${partNumber} (${part!.sku}).`);
     }
     if (suggestion) {
       const extra = extraModelWords(fileModel, suggestion);

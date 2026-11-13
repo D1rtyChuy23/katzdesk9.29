@@ -113,7 +113,7 @@ export function AccountEquipImportButton({
           <DialogDescription>
             {fileName ? `${fileName} · ` : ""}
             This writes machines onto existing accounts. It does not create accounts, tickets, or
-            overwrite notes. Unchecked rows are skipped. Walk-In and unmatched rows stay off until
+            overwrite notes. Unticked rows aren't imported. Walk-In and unmatched rows stay off until
             you pick an account and a catalog model. Each model pairing whose names differ is
             confirmed once, for all its rows; a row whose site doesn't match its account is only
             imported when you tick it.

@@ -242,10 +242,9 @@ test("a live part's name picks the catalog model; Part #s that differ only in sp
   const parts = new Map([["LINEA2AV", { sku: "LMLINEA2AV", mpn: "Linea 2 AV", description: "La Marzocco Linea Classic 2 Group AV" }]]);
   const catalog = ["La Marzocco Linea Classic 2 Group AV", "Eversys Cameo c'2s - 2 Step Classic"];
   const by = Object.fromEntries(IMP.buildPairings(rows, parts, catalog).map((p) => [p.fileModel, p]));
-  // The live part is named as another catalog model: the file's model is kept (as new) and the part's name is warned
-  // about, never put in its place (11/12 review).
-  assert.deepEqual([by["La Marzocco Linea Classic 2AV"].catalogModel, by["La Marzocco Linea Classic 2AV"].suggestNew], ["La Marzocco Linea Classic 2AV", true]);
-  assert.ok(by["La Marzocco Linea Classic 2AV"].warnings.includes("Part # Linea 2 AV is LMLINEA2AV, named as the catalog's La Marzocco Linea Classic 2 Group AV; the file says La Marzocco Linea Classic 2AV."));
+  // The live part's catalog name fits the file's model ("2AV" = "2 Group AV"): it is suggested, by its Part # (11/13 test).
+  assert.deepEqual([by["La Marzocco Linea Classic 2AV"].catalogModel, by["La Marzocco Linea Classic 2AV"].suggestNew, by["La Marzocco Linea Classic 2AV"].needsConfirm], ["La Marzocco Linea Classic 2 Group AV", false, true]);
+  assert.ok(by["La Marzocco Linea Classic 2AV"].notes.includes("Suggested by its Part # Linea 2 AV (LMLINEA2AV)."));
   assert.equal(by["La Marzocco Linea Classic 2AV"].warnings.some((w) => w.startsWith("Its rows carry")), false, "one Part #");
   assert.ok(by["Eversys Cameo c'2s"].notes.includes("Part # SE-C2S isn't a live part in Katz Desk; it is saved as written."));
   assert.equal(by["Eversys Cameo c'2s"].warnings.some((w) => w.includes("SE-C2S")), false, "a note, not a reason to hold the pairing");
