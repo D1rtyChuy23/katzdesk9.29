@@ -238,6 +238,7 @@ test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (
     nsMismatch: 2,
     corrigoMismatch: 0,
     warnings: 2,
+    held: 0,
     byKind: { service: 2, tlc: 0, install: 0, pm: 1 },
   });
   const done = await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: ["408"] });

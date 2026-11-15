@@ -92,18 +92,22 @@ export function BillingBackfillButton() {
     onSuccess: ({ picked, p }) => {
       setFiles(picked);
       setPreview(p);
-      setSkip(new Set());
+      // A row NetSuite bills to another account starts unticked (11/15).
+      setSkip(heldKeys(p));
       setShow(p.counts.write + p.counts.invoices ? "changes" : "all");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not read the files"),
   });
   const write = useMutation({
-    mutationFn: () => applyBillingBackfill({ data: { files, hash: preview!.hash, skip: [...skip] } }),
+    mutationFn: () =>
+      applyBillingBackfill({
+        data: { files, hash: preview!.hash, skip: [...skip], approve: plans.filter((p) => p.hold && !skip.has(p.key)).map((p) => p.key) },
+      }),
     onSuccess: (r) => {
       const a = r.applied ?? { tickets: 0, installs: 0, pms: 0, lines: 0, invoices: 0 };
       toast.success(`Billing Backfill saved: ${recordsText(a)}, ${plural(a.lines, "charge line")}, ${plural(a.invoices, "invoice")}`);
       setPreview(r);
-      setSkip(new Set());
+      setSkip(heldKeys(r));
       setShow("all");
       for (const key of [
         "jobs",
@@ -193,6 +197,11 @@ export function BillingBackfillButton() {
                 {preview.counts.doubleBill ? <Badge variant="danger">Possible double bills {n(preview.counts.doubleBill)}</Badge> : null}
                 {preview.counts.nsMismatch ? <Badge variant="warn">NetSuite ≠ charges {n(preview.counts.nsMismatch)}</Badge> : null}
                 {preview.counts.corrigoMismatch ? <Badge variant="warn">Corrigo ≠ NetSuite {n(preview.counts.corrigoMismatch)}</Badge> : null}
+                {preview.counts.held ? (
+                  <Badge variant="warn" data-testid="backfill-held-count">
+                    Another account in NetSuite {n(preview.counts.held)}
+                  </Badge>
+                ) : null}
                 {preview.applied ? (
                   <Badge variant="ink" data-testid="backfill-applied">
                     Saved: {recordsText(preview.applied)} · {plural(preview.applied.lines, "line")} · {plural(preview.applied.invoices, "invoice")}
@@ -287,6 +296,9 @@ export function BillingBackfillButton() {
   );
 }
 
+/** The rows held for approval: NetSuite bills another account than the card's (11/15). */
+const heldKeys = (p: BackfillPreview) => new Set(p.plans.filter((x) => x.hold).map((x) => x.key));
+
 function linesText(lines: { qty: number; rate: number }[] | null, net: number | null) {
   if (!lines) return "—";
   return `${lines.length} line${lines.length === 1 ? "" : "s"} · ${money(net)}`;
@@ -313,6 +325,11 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
           <Badge size="tight" variant={STATUS_TONE[p.status]} className="ml-1.5" data-testid="backfill-status">
             {BACKFILL_STATUS_LABEL[p.status]}
           </Badge>
+          {p.hold && can ? (
+            <span className="mt-1 block text-xs font-medium text-warning" data-testid="backfill-hold">
+              {p.hold}. Left unticked: tick it to write.
+            </span>
+          ) : null}
           {p.kind && p.recordId ? (
             <>
               <Badge size="tight" variant="outline" className="ml-1" data-testid="backfill-kind">
