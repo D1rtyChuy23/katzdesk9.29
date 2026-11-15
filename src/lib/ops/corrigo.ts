@@ -373,6 +373,8 @@ export type CorrigoPreviewRow = {
   preInstall?: { label: string; note: string; installId: number | null; asInstall: CorrigoPreviewRow } | null;
   /** The install a pre-install visit's ticket is linked to (service_jobs.visit_install_id). */
   visitInstallId?: number | null;
+  /** Starts unticked: a pre-install visit whose WO is already on an install, which it would otherwise install. */
+  holdBack?: boolean;
   /** A new service or TLC ticket's Type and urgency. */
   callTypeValue?: string | null;
   urgency?: string | null;
@@ -1410,9 +1412,14 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
  * A pre-install visit (Chuy, 11/14): a pre-inspection, pre-install or site visit, by its Problem Description or Work
  * Done. Only a row that would go on an install is treated as one (resolvePreviewRow): a service row stays a service row.
  */
-const PRE_INSTALL = /\bpre[\s-]?(?:inspection|install(?:ation)?)\b|\bsite\s+(?:visit|survey|inspection)\b/i;
+// Any space, hyphen or dash between the words: "pre install", "Site-visit", "Pre–install".
+const PRE_INSTALL = /\bpre[\s\-\u2010-\u2015]*(?:inspection|install(?:ation)?)\b|\bsite[\s\-\u2010-\u2015]+(?:visit|survey|inspection)\b/i;
+/** The strong words alone (pre-install, pre-inspection): enough to link a plain service row to the account's install. */
+const PRE_INSTALL_STRONG = /\bpre[\s\-\u2010-\u2015]*(?:inspection|install(?:ation)?)\b/i;
+/** The Problem Description decides; Work Done only when there is no Problem Description (a punch list can say "pre-install"). */
+const visitText = (issue: string | null | undefined, workDone: string | null | undefined) => (String(issue ?? "").trim() ? String(issue) : String(workDone ?? ""));
 export function isPreInstallVisit(issue: string | null | undefined, workDone: string | null | undefined): boolean {
-  return PRE_INSTALL.test(String(issue ?? "")) || PRE_INSTALL.test(String(workDone ?? ""));
+  return PRE_INSTALL.test(visitText(issue, workDone));
 }
 
 export const PRE_INSTALL_LABEL = "Pre-install visit, install status unchanged";
@@ -1437,10 +1444,20 @@ export function resolvePreviewRow(
   opts: RowOpts = {},
 ): CorrigoPreviewRow {
   const row = resolveRow(rec, match, opts, false);
-  if (row.board !== "install" || row.action === "skip" || !isPreInstallVisit(rec.issue, rec.workDone)) return row;
+  if (row.action === "skip" || !isPreInstallVisit(rec.issue, rec.workDone)) return row;
+  if (row.board === "service" && PRE_INSTALL_STRONG.test(visitText(rec.issue, rec.workDone))) {
+    // A service ticket that says pre-install or pre-inspection (its own ticket already, or words without "install"):
+    // linked to the account's one open install, so the next import links one that wasn't (review, 11/14).
+    const pick = installCandidates(rec, opts.installs ?? [], opts.catalog ?? []);
+    const installId = pick && pick.strict.size === 1 ? [...pick.strict][0]! : null;
+    if (installId == null) return row;
+    return { ...row, visitInstallId: installId, matchNote: [row.matchNote, `${PRE_INSTALL_LABEL}: linked to install #${installId}`].filter(Boolean).join(" · ") };
+  }
+  if (row.board !== "install") return row;
   if (row.jobId != null && !row.byAccount) {
-    const text = `Reads like a pre-install visit, but ${rec.canonicalWo} is already on install #${row.jobId}. Check it`;
-    return { ...row, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
+    // Already on the install: it stays there, but starts unticked, so a visit can't install it by itself (review, 11/14).
+    const text = `Reads like a pre-install visit, but ${rec.canonicalWo} is already on install #${row.jobId}: left unticked. Tick it if this is the install work`;
+    return { ...row, holdBack: true, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
   }
   // The account's one open install under its own name links the visit; more than one, or another name, links none.
   const own = (row.installOptions ?? []).filter((o) => o.id != null && !o.otherName);

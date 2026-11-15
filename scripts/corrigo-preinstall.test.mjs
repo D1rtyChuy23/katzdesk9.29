@@ -28,10 +28,16 @@ test("a pre-install visit is told by its words, in the Problem Description or th
     "Site visit before the install",
     "site survey for new brewer install",
     "Site inspection",
+    "Site-visit before install",
+    "Pre\u2013install walkthrough",
+    "pre - install",
   ]) {
     assert.equal(C.isPreInstallVisit(words, null), true, words);
   }
-  assert.equal(C.isPreInstallVisit("Install new brewer", "Site visit to measure the counter"), true, "Work Done counts too");
+  // The Problem Description decides; Work Done only when there is none (a punch list can say "pre-install").
+  assert.equal(C.isPreInstallVisit(null, "Site visit to measure the counter"), true, "Work Done with no description");
+  assert.equal(C.isPreInstallVisit("  ", "Pre-inspection done"), true);
+  assert.equal(C.isPreInstallVisit("Install new brewer", "Followed up on the pre-install punch list"), false);
   for (const words of ["Install new brewer and train staff", "Installed the grinder", "Leak at the site", "visited the site", "prep install", null]) {
     assert.equal(C.isPreInstallVisit(words, null), false, String(words));
   }
@@ -153,16 +159,59 @@ test("no open install: a pre-install visit is still its own ticket, not a new in
   }
 });
 
-test("a visit whose WO is already on an install stays on it, flagged to check", async () => {
+test("a completed visit whose WO is already on an install stays on it, but starts unticked and flagged", async () => {
   const { pg, sql, query, install } = await freshDb();
   try {
     const id = await install("ZZ Test Club");
-    await query("insert into install_work_orders (install_id, wo, match_key, source) values ($1, 'WO-1074', '1074', 'corrigo')", [id]);
+    await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-1074', '1074', 'Open', 'corrigo')", [id]);
     await query("update installs set wo = 'WO-1074' where id = $1", [id]);
-    const preview = await previewCorrigoRecords(sql, file([["1074", "Open", "ZZ Test Club", "Request", VISIT, ""]]));
+    const preview = await previewCorrigoRecords(sql, file([["1074", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
     const row = one(preview, "WO-1074");
-    assert.deepEqual([row.board, row.jobId, row.preInstall ?? null], ["install", id, null]);
-    assert.ok(row.descriptionNotes.some((n) => n.warn && n.text === `Reads like a pre-install visit, but WO-1074 is already on install #${id}. Check it`));
+    assert.deepEqual([row.board, row.jobId, row.preInstall ?? null, row.holdBack], ["install", id, null, true]);
+    assert.ok(
+      row.descriptionNotes.some(
+        (n) => n.warn && n.text === `Reads like a pre-install visit, but WO-1074 is already on install #${id}: left unticked. Tick it if this is the install work`,
+      ),
+    );
+    // Unticked, the screen sends it as a skip: the install stays Ready.
+    await applyCorrigoRows(sql, [{ ...row, action: "skip" }], "boss");
+    assert.deepEqual(Object.values((await query("select equip_status, complete from installs where id = $1", [id]))[0]), ["Ready", false]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a visit ticket links once the account has one open install, and words without 'install' link too", async () => {
+  const { pg, sql, query, install } = await freshDb();
+  try {
+    const a = await install("ZZ Test Club");
+    const b = await install("ZZ Test Club");
+    await applyCorrigoRows(sql, (await previewCorrigoRecords(sql, file([["1076", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]))).rows, "boss");
+    assert.equal((await query("select visit_install_id from service_jobs where wo = 'WO-1076'"))[0].visit_install_id, null);
+    await query("update installs set archived = true where id = $1", [b]);
+    const again = await previewCorrigoRecords(sql, file([["1076", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
+    assert.deepEqual([one(again, "WO-1076").action, one(again, "WO-1076").visitInstallId], ["update", a]);
+    await applyCorrigoRows(sql, again.rows, "boss");
+    assert.equal((await query("select visit_install_id from service_jobs where wo = 'WO-1076'"))[0].visit_install_id, a);
+
+    const plain = await previewCorrigoRecords(sql, file([["1077", "Completed", "ZZ Test Club", "Request", "Preinstall check of power and water", "11/13/2026"]]));
+    assert.deepEqual([one(plain, "WO-1077").board, one(plain, "WO-1077").visitInstallId], ["service", a]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("an install archived between the preview and Confirm isn't linked, and the log doesn't claim it", async () => {
+  const { pg, sql, query, install } = await freshDb();
+  try {
+    const id = await install("ZZ Test Club");
+    const preview = await previewCorrigoRecords(sql, file([["1078", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
+    await query("update installs set archived = true where id = $1", [id]);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    const t = (await query("select id, visit_install_id from service_jobs where wo = 'WO-1078'"))[0];
+    assert.equal(t.visit_install_id, null);
+    const log = (await query("select detail from activity where entity_type = 'service' and entity_id = $1", [t.id])).map((r) => r.detail).join(" | ");
+    assert.doesNotMatch(log, /pre-install visit for install/);
   } finally {
     await pg.close();
   }
@@ -190,5 +239,7 @@ test("the preview tags the row, counts it, offers the override, and sends the ro
   assert.match(screen, /const lean = \{ \.\.\.row, installOptions: null, installState: null, account: null, preInstall: null \};/);
   const card = src("src/components/desk/install-project-fields.tsx");
   assert.match(card, /data-testid="install-visits"/);
+  assert.match(screen, /selected: applicable && !row\.needsReview && !row\.holdBack,/);
+  assert.match(src("src/lib/ops/install-projects.ts"), /update service_jobs s set visit_install_id = g\.keep_id, updated_at = now\(\) from g where s\.visit_install_id = g\.drop_id returning s\.id/);
   assert.match(src("migrations/0127_ticket_visit_install.sql"), /alter table service_jobs add column if not exists visit_install_id int references installs \(id\)/);
 });

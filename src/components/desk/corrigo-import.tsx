@@ -210,7 +210,8 @@ type RowDraft = {
 function draftFor(row: CorrigoPreviewRow): RowDraft {
   const applicable = row.action === "update" || row.action === "create";
   return {
-    selected: applicable && !row.needsReview,
+    // A pre-install visit already on an install starts unticked too, so it can't install it unseen (11/14).
+    selected: applicable && !row.needsReview && !row.holdBack,
     customer: row.customer ?? "",
     customerEdited: false,
   };
@@ -274,7 +275,7 @@ function PreviewBody({
       ),
     [base, drafts],
   );
-  const preInstallKept = rows.filter((r) => r.preInstall && r.action !== "skip").length;
+  const preInstallKept = rows.filter((r) => r.preInstall && r.action !== "skip" && drafts[rowKey(r)]?.selected).length;
   const applicable = rows.filter((r) => r.action === "update" || r.action === "create");
   const selectedUpdates = applicable.filter(
     (r) => drafts[rowKey(r)]?.selected && r.action === "update",
@@ -407,7 +408,7 @@ function PreviewBody({
         {preInstallKept ? (
           <li className="rounded-lg border border-border bg-muted/40 px-3 py-2" data-testid="corrigo-preinstall-count">
             <span className="font-medium">{preInstallKept}</span> pre-install visit{preInstallKept === 1 ? "" : "s"}: each goes on as its own
-            ticket, linked to the account's open install, which keeps its status. Tick "Treat as the install ticket" on a row that is the install work.
+            ticket, and the install keeps its status. Tick "Treat as the install ticket" on a row that is the install work.
           </li>
         ) : null}
         {descKept || descFlagged || descFilled || descFuller ? (
@@ -568,7 +569,11 @@ function PreviewBody({
                             className="size-3.5 accent-primary"
                             checked={!!d.asInstall}
                             disabled={pending}
-                            onChange={(e) => patch(key, { asInstall: e.target.checked })}
+                            onChange={(e) => {
+                              // The install row needs no account picked when it goes on an install: tick it then.
+                              const next = e.target.checked ? visitOf.get(key)!.asInstall : preview.rows.find((x) => rowKey(x) === key)!;
+                              patch(key, { asInstall: e.target.checked, selected: !next.needsReview && (next.action === "update" || next.action === "create") });
+                            }}
                             data-testid="corrigo-preinstall-override"
                           />
                           Treat as the install ticket

@@ -584,6 +584,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), tickets_moved as (
        -- Tickets merged into the drop point at the keeper: their window opens it, and a later import finds it.
        update service_jobs s set merged_install_id = g.keep_id, updated_at = now() from g where s.merged_install_id = g.drop_id returning s.id
+     ), visits_moved as (
+       -- Pre-install visits linked to the drop list on the keeper's card (11/14).
+       update service_jobs s set visit_install_id = g.keep_id, updated_at = now() from g where s.visit_install_id = g.drop_id returning s.id
      ), dropped as (
        update installs d set archived = true, duplicate_of = g.keep_id, updated_at = now() from g where d.id = g.drop_id returning d.id
      ), logged as (
@@ -605,7 +608,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
               + (select count(*)::int from twin_photos) + (select count(*)::int from units) + (select count(*)::int from items)
               + (select count(*)::int from photos) + (select count(*)::int from acct) + (select count(*)::int from com)
               + (select count(*)::int from act) + (select count(*)::int from pings) + (select count(*)::int from dropped)
-              + (select count(*)::int from logged) + (select count(*)::int from tickets_moved) as touched,
+              + (select count(*)::int from logged) + (select count(*)::int from tickets_moved) + (select count(*)::int from visits_moved) as touched,
             (select count(*)::int from inv_move) as invoices_moved,
             (select count(*)::int from parts_moved) as part_lines,
             (select count(*)::int from photos_moved) as photos,

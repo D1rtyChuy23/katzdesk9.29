@@ -981,13 +981,13 @@ export async function applyCorrigoRows(
       const status = boardStatus(board, row.statusRaw, row.completedAt, null).status;
       const done = CLOSED_CALL.has(status);
       const callId = await nextCallId(sql, received ?? todayChicago());
-      const inserted = await sql.query<{ id: number }>(
+      const inserted = await sql.query<{ id: number; visit_install_id: number | null }>(
         `insert into service_jobs
            (kind, call_id, customer, issue, technician, status, wo, work_done, completed_at, received, call_type, urgency, done,
             po, equipment, contact, phone, service_location, corrigo_id, corrigo_net, visit_install_id)
          values
            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, (select i.id from installs i where i.id = $21::int and not i.archived))
-         returning id`,
+         returning id, visit_install_id`,
         [
           kind,
           callId,
@@ -1014,7 +1014,8 @@ export async function applyCorrigoRows(
       );
       const id = inserted[0]?.id;
       if (id) {
-        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (row.visitInstallId ? ` · pre-install visit for install #${row.visitInstallId}` : ""));
+        const linked = inserted[0]?.visit_install_id;
+        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (linked ? ` · pre-install visit for install #${linked}` : ""));
         created += 1;
         maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }
