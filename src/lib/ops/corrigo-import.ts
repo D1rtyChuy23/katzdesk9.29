@@ -44,7 +44,7 @@ import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
-import { liveInstallIds, mergedInstallTarget } from "@/lib/ops/ticket-install-merge";
+import { liveInstallIds, mergedInstallTarget, sameWoRun } from "@/lib/ops/ticket-install-merge";
 
 export type CorrigoApplyResult = {
   updated: number;
@@ -107,6 +107,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
     issue: string | null;
     equipment: string | null;
     work_done: string | null;
+    corrigo_net: string | null;
     invoiced: boolean;
     corrigo_id: string | null;
     merged_install_id: number | null;
@@ -115,7 +116,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
             to_char(completed_at, 'YYYY-MM-DD') as completed_at, ns_so,
             exists (select 1 from ticket_charges c where c.job_id = service_jobs.id) as has_charges,
             ${receivedSql("service_jobs", "service_jobs.kind")},
-            po, issue, equipment, work_done, ${LIVE_INVOICE_SQL("service_jobs.id")} as invoiced, corrigo_id, merged_install_id
+            po, issue, equipment, work_done, corrigo_net::text as corrigo_net, ${LIVE_INVOICE_SQL("service_jobs.id")} as invoiced, corrigo_id, merged_install_id
        from service_jobs
       where coalesce(wo, '') <> ''
       order by id asc`,
@@ -197,6 +198,7 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
       issue: r.issue,
       equipment: r.equipment,
       workDone: r.work_done,
+      corrigoNet: r.corrigo_net == null ? null : Number(r.corrigo_net),
       invoiced: !!r.invoiced,
       corrigoId: r.corrigo_id,
       mergedInstallId: r.merged_install_id == null ? null : Number(r.merged_install_id),
@@ -219,6 +221,8 @@ async function loadHits(sql: Awaited<ReturnType<typeof getSql>>): Promise<Corrig
           wos: installWos.get(id) ?? [],
           workDone: t.work_done,
           corrigoId: r.corrigo_id,
+          // The merged ticket's own Corrigo net: the preview shows it changing, and Confirm writes it there (11/15).
+          corrigoNet: r.corrigo_net == null ? null : Number(r.corrigo_net),
         },
       ];
     }),
@@ -537,6 +541,35 @@ const applyInput = z.object({
   rows: z.array(applyRow).max(2000),
 });
 
+/** " · Corrigo net $300.00 → $465.00" when Corrigo's total changed the saved one (11/15). */
+function netLog(before: string | number | null | undefined, after: number | null | undefined): string {
+  if (after == null) return "";
+  const was = before == null || before === "" ? null : Number(before);
+  if (was != null && Math.abs(was - after) <= 0.005) return "";
+  return ` · Corrigo net ${was == null ? "none" : `$${was.toFixed(2)}`} → $${after.toFixed(2)}`;
+}
+
+/**
+ * The Corrigo net on tickets merged into this install (or one merged into it since) under this WO (11/15): reference
+ * only, never charges or invoices. Only this install's, and only tickets from the file row's WO run (WO numbers started
+ * over in July 2026), so an older WO with the same number is left alone. Each logs the change.
+ */
+async function refreshMergedTicketNet(sql: Sql, installId: number, matchKey: string, net: number, day: string | null, actor: string) {
+  const digits = matchKey.replace(/\D/g, "");
+  if (!digits) return;
+  const merged = await sql.query<{ id: number; wo: string | null; merged_install_id: number; received: string | null; corrigo_net: string | null }>(
+    `select id, wo, merged_install_id, to_char(received, 'YYYY-MM-DD') as received, corrigo_net::text as corrigo_net
+       from service_jobs where merged_install_id is not null and wo like $1 and corrigo_net is distinct from $2::numeric`,
+    [`%${digits}%`, net],
+  );
+  const live = await liveInstallIds(sql, [...new Set(merged.map((m) => Number(m.merged_install_id)))]);
+  for (const m of merged) {
+    if (woMatchKey(m.wo ?? "") !== matchKey || live.get(Number(m.merged_install_id)) !== installId || !sameWoRun(m.received, day)) continue;
+    await sql.query("update service_jobs set corrigo_net = $2::numeric, updated_at = now() where id = $1", [m.id, net]);
+    await logCorrigo(sql, "service", Number(m.id), actor, `Corrigo import · ${m.wo}${netLog(m.corrigo_net, net)} (merged into install #${installId})`);
+  }
+}
+
 /**
  * A pre-install visit's WO comes off each live install it is on (11/14): it is its ticket's now. The install keeps its
  * status and dates; the next WO becomes its first. A WO only in installs.wo (no row) comes off too.
@@ -656,6 +689,7 @@ export async function applyCorrigoRows(
     // archived: the row goes on that install (or the one it was merged into since), never on the hidden ticket, and
     // never opens a new one. An archived install takes nothing.
     if (action === "update" && jobId && (board === "service" || board === "tlc")) {
+      const ticketId = jobId;
       const into = await mergedInstallTarget(sql, jobId);
       if (into) {
         if (into.liveInstallId == null) {
@@ -668,6 +702,13 @@ export async function applyCorrigoRows(
         }
         board = "install";
         jobId = into.liveInstallId;
+        // The merged ticket's billing is still its own (10/30): its Corrigo net follows Corrigo too (11/15).
+        if (row.corrigoNet != null) {
+          await sql.query("update service_jobs set corrigo_net = $2::numeric, updated_at = now() where id = $1 and corrigo_net is distinct from $2::numeric", [
+            ticketId,
+            row.corrigoNet,
+          ]);
+        }
       }
     }
     // Exact account names only, and never a new account (10/28). A locked clean-list name wins over the file's spelling.
@@ -806,6 +847,8 @@ export async function applyCorrigoRows(
             (next.wos.length > 1 ? ` · ${next.done} of ${next.wos.length} work orders completed` : "") +
             (unitsMoved?.moved.length ? ` · moved to ${customer}: ${unitsMoved.moved.join(", ")}` : ""),
         );
+        // A ticket merged into an install keeps its own billing (10/30), so its Corrigo net follows Corrigo (11/15).
+        if (row.corrigoNet != null) await refreshMergedTicketNet(sql, jobId, matchKey, row.corrigoNet, row.createdAt || row.completedAt || null, actor);
         updated += 1;
         maybeReview(
           "install",
@@ -836,8 +879,10 @@ export async function applyCorrigoRows(
         customer: string | null;
         wo: string | null;
         ns_so: string | null;
+        corrigo_net: string | null;
       }>(
-        `select id, kind, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, ns_so
+        `select id, kind, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, ns_so,
+                corrigo_net::text as corrigo_net
            from service_jobs where id = $1`,
         [jobId],
       );
@@ -920,7 +965,8 @@ export async function applyCorrigoRows(
           customerLog(cur[0].customer, customer) +
           (row.poChange && saved?.po_written ? ` · P.O. ${row.poChange.from || "none"} → ${row.poChange.to}` : "") +
           (row.issueChange ? " · issue refreshed" : "") +
-          (row.equipmentChange ? " · equipment refreshed" : ""),
+          (row.equipmentChange ? " · equipment refreshed" : "") +
+          netLog(cur[0].corrigo_net, row.corrigoNet),
       );
       for (const extra of row.conflictIds ?? []) {
         if (wrapRepeat) break;

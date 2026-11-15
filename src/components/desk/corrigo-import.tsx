@@ -684,6 +684,8 @@ function PreviewBody({
 const clip = (s: string, n = 70) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
 /** What else a row writes, besides status and dates: shown so nothing changes unseen (10/28). */
+const netText = (n: number | null) => (n == null ? "none" : `$${n.toFixed(2)}`);
+
 function RowChanges({ r }: { r: CorrigoPreviewRow }) {
   if (r.action === "skip") return <span className="text-muted-foreground">—</span>;
   const items: { text: string; warn?: boolean; title?: string }[] = [];
@@ -706,7 +708,9 @@ function RowChanges({ r }: { r: CorrigoPreviewRow }) {
     items.push({ text: `Corrigo location ${clip(r.serviceLocation, 40)}`, title: r.serviceLocation });
   }
   if (r.contact) items.push({ text: `Contact ${r.contact}${r.phone ? ` · ${r.phone}` : ""}` });
-  if (r.corrigoNet != null) items.push({ text: `Corrigo net $${r.corrigoNet.toFixed(2)}` });
+  // A saved net Corrigo has changed since (11/15): Confirm writes the new one.
+  if (r.corrigoNetChange) items.push({ text: `Corrigo net ${netText(r.corrigoNetChange.from)} → ${netText(r.corrigoNetChange.to)}` });
+  else if (r.corrigoNet != null) items.push({ text: `Corrigo net $${r.corrigoNet.toFixed(2)}` });
   if (!items.length) return <span className="text-muted-foreground">—</span>;
   return (
     <ul className="space-y-0.5">

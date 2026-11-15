@@ -118,6 +118,11 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "invoice total": "total",
   "net total": "total",
   "corrigo net": "total",
+  // Other names Corrigo's report builder gives the work order's total (11/15).
+  "total invoice amount": "total",
+  "invoice amount": "total",
+  "wo total": "total",
+  "work order total": "total",
 };
 
 /**
@@ -244,6 +249,8 @@ export type CorrigoHit = {
   equipment?: string | null;
   /** The Description of work saved now (every board). */
   workDone?: string | null;
+  /** The ticket's Corrigo net as saved (tickets only). */
+  corrigoNet?: number | null;
   invoiced?: boolean;
   corrigoId?: string | null;
   /** Installs only: every work order the install carries (the primary included), with Corrigo's status for each. */
@@ -350,6 +357,8 @@ export type CorrigoPreviewRow = {
    * Description of work takes Corrigo's Problem Description.
    */
   descriptionNotes?: { text: string; warn: boolean }[] | null;
+  /** An update whose file total differs from the ticket's saved Corrigo net (11/15): Confirm writes the new one. */
+  corrigoNetChange?: { from: number | null; to: number } | null;
   /** A PM's or install's Description of work when it is blank (a new one, or blank when Confirm writes): one line per segment. */
   workDoneFill?: string | null;
   /**
@@ -943,7 +952,9 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       skipped += 1;
       continue;
     }
-    const total = cell(row, cols.total).replace(/[$,\s]/g, "");
+    // "$465.00", "465.00 USD", "(45.00)" for a credit.
+    const rawTotal = cell(row, cols.total).replace(/[$,\s]|usd/gi, "");
+    const total = /^\(([\d.]+)\)$/.test(rawTotal) ? `-${rawTotal.slice(1, -1)}` : rawTotal;
     const rec: CorrigoRecord = {
       rawWo,
       matchKey,
@@ -1895,6 +1906,15 @@ function ticketFields(rec: CorrigoRecord, existing: CorrigoHit | null, board: Co
     phone: rec.phone?.trim() || null,
     corrigoId: rec.corrigoId?.trim() || null,
     corrigoNet: rec.total ?? null,
+    // Corrigo's total now against the one saved (11/15). A blank total in the file changes nothing.
+    corrigoNetChange:
+      // A ticket's, or a merged ticket's on its install (its hit carries the net; other installs' don't).
+      (ticket || existing?.corrigoNet !== undefined) &&
+      existing &&
+      rec.total != null &&
+      (existing.corrigoNet == null || Math.abs(existing.corrigoNet - rec.total) > 0.005)
+        ? { from: existing.corrigoNet ?? null, to: rec.total }
+        : null,
     callTypeValue: ticket ? callTypeFor(rec) : null,
     urgency: ticket ? urgency.urgency : null,
     typeNote: [typeNote, ticket && !existing ? urgency.note : null].filter(Boolean).join(" · ") || null,
