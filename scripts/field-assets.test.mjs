@@ -127,8 +127,11 @@ test("every machine with its account: address, removed flag, and none when no ac
 
 test("the side menu has Assets → Equipment; the Warehouse role reaches it too (its Warehouse section)", () => {
   const shell = src("src/components/desk/shell.tsx");
-  assert.ok(shell.includes('items: [{ to: "/assets", label: "Equipment", icon: Container }]'));
-  assert.ok(shell.includes('const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"];'));
+  // The menu's layout moved to side-menu.ts (11/14; scripts/side-menu.test.mjs pins each role's menu).
+  const menu = src("src/lib/ops/side-menu.ts");
+  assert.ok(menu.includes('{ to: "/assets", label: "Equipment" }'));
+  assert.ok(shell.includes('"/assets": Container,'));
+  assert.ok(menu.includes('export const WAREHOUSE_PAGES: readonly MenuTo[] = ["/assets", "/warehouse", "/locations", "/modules", "/rebuilds", "/parts", "/library"];'));
   assert.match(src("src/routeTree.gen.ts"), /'\/assets': typeof AppAssetsRoute/);
   const page = src("src/routes/_app/assets.tsx");
   assert.match(page, /listFieldAssets\(\)/);

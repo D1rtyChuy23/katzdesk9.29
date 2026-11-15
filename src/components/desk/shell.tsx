@@ -25,12 +25,16 @@ import {
   ListChecks,
   Receipt,
   Container,
+  ClipboardCheck,
+  MapPinOff,
+  TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { LAST_PATH_KEY, RESUMED_KEY, readPrefs } from "@/lib/ops/prefs";
 import type { DeskRole } from "@/lib/ops/access";
+import { menuFor, WAREHOUSE_PAGES, type MenuGroup, type MenuItem, type MenuTo } from "@/lib/ops/side-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -42,111 +46,41 @@ import { Skeleton } from "@/components/ui/separator";
 import { MyViewBar } from "./my-view-bar";
 import { CalendarDock, PendingCalendarPop } from "./pending-calendar";
 
-
-type DeskTo =
-  | "/"
-  | "/customer-names"
-  | "/service"
-  | "/planner"
-  | "/tlc"
-  | "/pms"
-  | "/handoff"
-  | "/installs"
-  | "/recipes"
-  | "/library"
-  | "/parts"
-  | "/pipeline"
-  | "/warehouse"
-  | "/rebuilds"
-  | "/locations"
-  | "/modules"
-  | "/customers"
-  | "/map"
-  | "/assets"
-  | "/network"
-  | "/analytics"
-  | "/invoices"
-  | "/settings"
-  | "/access";
-
 /** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
 const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers", "/map"];
 
-type NavItem = {
-  to: DeskTo;
-  label: string;
-  icon: typeof CalendarClock;
-  exact?: boolean;
+/** Each page's menu icon. The layout and who sees what are in side-menu.ts (11/14). */
+const ICONS: Record<MenuTo, typeof CalendarClock> = {
+  "/": CalendarClock,
+  "/planner": CalendarRange,
+  "/customers": Store,
+  "/map": MapPinned,
+  "/address-report": MapPinOff,
+  "/recipes": BookOpen,
+  "/customer-names": ListChecks,
+  "/pipeline": Handshake,
+  "/installs": Truck,
+  "/handoff": MessageSquare,
+  "/service": Wrench,
+  "/pms": Settings2,
+  "/tlc": Coffee,
+  "/runbook-readiness": ClipboardCheck,
+  "/network": Globe,
+  "/assets": Container,
+  "/unit-mismatches": TriangleAlert,
+  "/warehouse": Warehouse,
+  "/locations": MapPin,
+  "/modules": Package,
+  "/rebuilds": Hammer,
+  "/parts": Boxes,
+  "/library": Library,
+  "/invoices": Receipt,
+  "/analytics": BarChart3,
+  "/settings": SlidersHorizontal,
+  "/access": Users,
 };
 
-/**
- * The side menu, by department, in the order the work flows. Coming Due sits on its own at the top.
- * Every page stays on the menu; a group with no label shows no heading.
- */
-const NAV: { label: string; items: NavItem[] }[] = [
-  {
-    label: "",
-    items: [{ to: "/", label: "Coming Due", icon: CalendarClock, exact: true }],
-  },
-  {
-    label: "Accounts",
-    items: [
-      { to: "/customers", label: "Customers", icon: Store },
-      { to: "/map", label: "Map", icon: MapPinned },
-      { to: "/recipes", label: "Recipes", icon: BookOpen },
-      { to: "/network", label: "Out Of Network", icon: Globe },
-      { to: "/customer-names", label: "Clean Names", icon: ListChecks },
-    ],
-  },
-  {
-    // Every machine at a customer and in the barn, and where it is (Chuy, 11/12): In the Field and Warehouse.
-    label: "Assets",
-    items: [{ to: "/assets", label: "Equipment", icon: Container }],
-  },
-  {
-    label: "Installs",
-    items: [
-      { to: "/pipeline", label: "Pipeline", icon: Handshake },
-      { to: "/installs", label: "Board", icon: Truck },
-      { to: "/handoff", label: "Handoff", icon: MessageSquare },
-    ],
-  },
-  {
-    label: "Service",
-    items: [
-      { to: "/service", label: "Tickets", icon: Wrench },
-      { to: "/pms", label: "PMs", icon: Settings2 },
-      { to: "/tlc", label: "TLC + Factor", icon: Coffee },
-      { to: "/rebuilds", label: "Rebuilds", icon: Hammer },
-      { to: "/planner", label: "Planner", icon: CalendarRange },
-    ],
-  },
-  {
-    label: "Shop",
-    items: [
-      { to: "/warehouse", label: "Warehouse", icon: Warehouse },
-      { to: "/modules", label: "Modules", icon: Package },
-      { to: "/library", label: "The Library", icon: Library },
-      { to: "/parts", label: "Parts", icon: Boxes },
-      { to: "/locations", label: "Locations", icon: MapPin },
-    ],
-  },
-  {
-    // Admin only (10/28): NetSuite invoices, Tickets In Window and Location Check.
-    label: "Billing",
-    items: [{ to: "/invoices", label: "Invoices", icon: Receipt }],
-  },
-  {
-    label: "Reports",
-    items: [{ to: "/analytics", label: "Analytics", icon: BarChart3 }],
-  },
-  {
-    label: "Admin",
-    items: [{ to: "/settings", label: "Settings", icon: SlidersHorizontal }],
-  },
-];
-
-function itemActive(pathname: string, item: NavItem) {
+function itemActive(pathname: string, item: MenuItem) {
   if (item.exact) return pathname === item.to;
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
@@ -156,12 +90,12 @@ function NavItemLink({
   pathname,
   onNavigate,
 }: {
-  item: NavItem;
+  item: MenuItem;
   pathname: string;
   onNavigate?: () => void;
 }) {
   const active = itemActive(pathname, item);
-  const Icon = item.icon;
+  const Icon = ICONS[item.to];
   return (
     <li>
       <Link
@@ -186,7 +120,7 @@ function NavGroup({
   pathname,
   onNavigate,
 }: {
-  group: (typeof NAV)[number];
+  group: MenuGroup;
   pathname: string;
   onNavigate?: () => void;
 }) {
@@ -202,29 +136,6 @@ function NavGroup({
   );
 }
 
-/**
- * The Warehouse role's pages, in menu order. Rebuilds and Parts (Chuy, 10/29): its refurbs and their invoices for
- * Katz Coffee Service Dept., and parts look-up, photos and Get Later. Invoices (NetSuite billing) stays Admin only.
- */
-const WAREHOUSE_OK: DeskTo[] = ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"];
-
-// A sales rep sees Service for awareness only (their own accounts): the lists, not the shop's rebuild bench or planner.
-const SALES_SERVICE = ["/service", "/pms", "/tlc"];
-
-function navForRole(role: DeskRole | null | undefined, isAdmin?: boolean) {
-  if (role === "sales" && !isAdmin) {
-    return NAV.map((g) => (g.label === "Service" ? { ...g, items: g.items.filter((item) => SALES_SERVICE.includes(item.to)) } : g));
-  }
-  if (role !== "warehouse") return NAV;
-  const items = NAV.flatMap((g) => g.items);
-  return [
-    {
-      label: "Shop",
-      items: WAREHOUSE_OK.flatMap((to) => items.filter((item) => item.to === to)),
-    },
-  ];
-}
-
 function NavLinks({
   onNavigate,
   isAdmin,
@@ -235,21 +146,13 @@ function NavLinks({
   role?: DeskRole | null;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const admin = !!isAdmin || role === "admin";
-  const groups = navForRole(role, isAdmin).filter((g) => g.label !== "Billing" || admin);
+  const groups = menuFor(role, isAdmin);
   return (
     <nav className="flex flex-col gap-5" data-testid="side-nav">
       {groups.map((group) => (
         <NavGroup
           key={group.label}
-          group={
-            group.label === "Admin" && isAdmin && role !== "warehouse"
-              ? { ...group, items: [...group.items, { to: "/access", label: "Access", icon: Users }] }
-              : group.label === "Accounts" && !isAdmin && role !== "admin"
-                ? // Clean Names is the Admin role's review.
-                  { ...group, items: group.items.filter((item) => item.to !== "/customer-names") }
-                : group
-          }
+          group={group}
           pathname={pathname}
           onNavigate={onNavigate}
         />
@@ -339,7 +242,7 @@ export function AppShell({
 
   useEffect(() => {
     if (!user || role !== "warehouse") return;
-    const allowed = WAREHOUSE_OK.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+    const allowed = WAREHOUSE_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
     if (!allowed) router.history.push("/warehouse");
   }, [user, role, pathname, router]);
 

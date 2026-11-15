@@ -43,5 +43,5 @@ test("two live parts with the same MPN are still refused, and a hidden third isn
     part({ id: 3, sku: "LMZZ-A1", mpn: "ZZ-A1", hidden: true }),
   ];
   const [line] = planPartImport([row({ mpn: "ZZ-A1" })], stored);
-  assert.deepEqual([line.status, line.partId, line.reason], ["shared_mpn", null, "2 parts already share MPN ZZ-A1 (ZZ-A1, ZZ-A1-DUP). Fix that on Parts first."]);
+  assert.deepEqual([line.status, line.partId, line.reason], ["shared_mpn", null, "2 parts already share MPN ZZ-A1 (ZZ-A1, ZZ-A1-DUP). Fix that in the Item Catalog first."]);
 });

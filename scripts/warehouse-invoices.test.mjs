@@ -750,11 +750,13 @@ test("Parts: Warehouse looks parts up and uses Get Later like a tech, but doesn'
 
 test("the screens: Warehouse's menu adds Rebuilds and Parts, not Invoices; the window saves for approval and approves with its stamp", () => {
   const shell = readFileSync(new URL("../src/components/desk/shell.tsx", import.meta.url), "utf8");
-  const ok = shell.match(/const WAREHOUSE_OK: DeskTo\[\] = \[([^\]]*)\]/);
-  assert.ok(ok, "WAREHOUSE_OK");
-  // Assets joined 11/12 (Chuy): Warehouse sees its Assets → Warehouse section, not In the Field.
-  assert.deepEqual(ok[1].split(",").map((s) => s.trim().replace(/"/g, "")), ["/warehouse", "/assets", "/rebuilds", "/modules", "/library", "/parts", "/locations"]);
-  assert.match(shell, /const allowed = WAREHOUSE_OK\.some\(\(p\) => pathname === p \|\| pathname\.startsWith\(`\$\{p\}\/`\)\);/, "the redirect uses the same list");
+  // The Warehouse role's pages moved to side-menu.ts with the menu's layout (11/14; side-menu.test.mjs pins its menu).
+  const menu = readFileSync(new URL("../src/lib/ops/side-menu.ts", import.meta.url), "utf8");
+  const ok = menu.match(/export const WAREHOUSE_PAGES: readonly MenuTo\[\] = \[([^\]]*)\]/);
+  assert.ok(ok, "WAREHOUSE_PAGES");
+  // Assets joined 11/12 (Chuy): Warehouse sees its Assets → Warehouse section, not In the Field. No Invoices.
+  assert.deepEqual(ok[1].split(",").map((s) => s.trim().replace(/"/g, "")).sort(), ["/assets", "/library", "/locations", "/modules", "/parts", "/rebuilds", "/warehouse"]);
+  assert.match(shell, /const allowed = WAREHOUSE_PAGES\.some\(\(p\) => pathname === p \|\| pathname\.startsWith\(`\$\{p\}\/`\)\);/, "the redirect uses the same list");
 
   const win = readFileSync(new URL("../src/components/desk/invoice-window.tsx", import.meta.url), "utf8");
   assert.match(win, /saveInvoiceForApproval\(\{ data: \{ type, id, lines: sentLines\(\), discount: sentDiscount\(\) \} \}\)/);

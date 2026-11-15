@@ -91,7 +91,7 @@ export function OtherParts({
   const add = useMutation({
     mutationFn: () => {
       const id = pick?.part?.id;
-      if (!id) throw new Error("Pick a part from the Parts list.");
+      if (!id) throw new Error("Pick a part from the Item Catalog.");
       return addMachinePart({ data: { pmId, pieceKey, billingItemId: id, qty, billable, note } });
     },
     onSuccess: () => {
@@ -124,7 +124,7 @@ export function OtherParts({
     <div className="grid gap-2" data-testid="other-parts">
       <h4 className="text-sm font-semibold">Other parts replaced on this machine</h4>
       <p className="text-xs text-muted-foreground">
-        Parts from the Parts list, not the kits above.
+        Parts from the Item Catalog, not the kits above.
         {completed ? " Parts added after this PM is completed stay here. The service record was written once and is not updated." : ""}
       </p>
       {locked ? <p className="rounded-md bg-amber-100 px-3 py-2 text-sm text-amber-900">{locked}</p> : null}
