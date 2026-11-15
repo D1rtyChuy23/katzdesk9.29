@@ -118,6 +118,11 @@ const HEADER_KEYS: Record<string, CorrigoCol> = {
   "invoice total": "total",
   "net total": "total",
   "corrigo net": "total",
+  // Other names Corrigo's report builder gives the work order's total (11/15).
+  "total invoice amount": "total",
+  "invoice amount": "total",
+  "wo total": "total",
+  "work order total": "total",
 };
 
 /**
@@ -947,7 +952,9 @@ export function parseCorrigoMatrix(matrix: string[][]): CorrigoParse {
       skipped += 1;
       continue;
     }
-    const total = cell(row, cols.total).replace(/[$,\s]/g, "");
+    // "$465.00", "465.00 USD", "(45.00)" for a credit.
+    const rawTotal = cell(row, cols.total).replace(/[$,\s]|usd/gi, "");
+    const total = /^\(([\d.]+)\)$/.test(rawTotal) ? `-${rawTotal.slice(1, -1)}` : rawTotal;
     const rec: CorrigoRecord = {
       rawWo,
       matchKey,

@@ -60,6 +60,9 @@ test("an update shows the stored net and the file's, and Confirm writes the file
     await applyCorrigoRows(sql, preview.rows, "boss");
     const net = async (id) => Number((await query("select corrigo_net from service_jobs where id = $1", [id]))[0].corrigo_net);
     assert.deepEqual([await net(a), await net(b), await net(same), await net(blank)], [465, 185.9, 120, 250]);
+    const logOf = async (id) => (await query("select detail from activity where entity_type = 'service' and entity_id = $1", [id])).map((r) => r.detail).join(" | ");
+    assert.match(await logOf(a), / · Corrigo net \$300\.00 → \$465\.00/);
+    assert.doesNotMatch(await logOf(same), /Corrigo net/);
     // A billed ticket's Sales Order and charges stay as they were.
     assert.equal((await query("select ns_so from service_jobs where id = $1", [b]))[0].ns_so, "SO1234");
     assert.deepEqual(await query("select count(*)::int as n from ticket_charges"), charges);
@@ -85,9 +88,40 @@ test("a ticket merged into an install takes the new net too, since its billing i
     await applyCorrigoRows(sql, preview.rows, "boss");
     assert.equal(Number((await query("select corrigo_net from service_jobs where id = $1", [t]))[0].corrigo_net), 540);
     assert.equal(Number((await query("select corrigo_net from service_jobs where id = $1", [old]))[0].corrigo_net), 99);
+    const log = (await query("select detail from activity where entity_type = 'service' and entity_id = $1", [t])).map((r) => r.detail);
+    assert.ok(log.includes(`Corrigo import · WO-0559 · Corrigo net $300.00 → $540.00 (merged into install #${install})`), log.join(" | "));
   } finally {
     await pg.close();
   }
+});
+
+test("a merged ticket from an older WO run on the same install keeps its net", async () => {
+  const { pg, sql, query, ticket } = await freshDb();
+  try {
+    const old = await ticket("WO-0560", 300);
+    await query("update service_jobs set received = '2025-06-01' where id = $1", [old]);
+    const install = Number((await query("insert into installs (customer, equip_status) values ('ZZ Test Diner', 'Ready') returning id"))[0].id);
+    await query("update service_jobs set merged_install_id = $2, duplicate_of = id where id = $1", [old, install]);
+    await query("insert into install_work_orders (install_id, wo, match_key, source) values ($1, 'WO-0560', '0560', 'merge')", [install]);
+    const records = C.parseCorrigoMatrix([
+      ["ST#", "Operational Status", "Customer Name", "Type", "Problem Description", "Total Invoice", "Created"],
+      ["0560", "Completed", "ZZ Test Diner", "Request", "Install", "75.00", "11/10/2026"],
+    ]).records;
+    const preview = await previewCorrigoRecords(sql, records);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    assert.equal(Number((await query("select corrigo_net from service_jobs where id = $1", [old]))[0].corrigo_net), 300);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Corrigo's total under its other names, with a currency or a credit in parentheses", () => {
+  for (const head of ["Total Invoice", "Invoice Total", "Total Invoice Amount", "Invoice Amount", "WO Total", "Work Order Total"]) {
+    const [rec] = C.parseCorrigoMatrix([["ST#", "Customer Name", head], ["0557", "ZZ Test Diner", "$465.00"]]).records;
+    assert.equal(rec.total, 465, head);
+  }
+  const read = (v) => C.parseCorrigoMatrix([["ST#", "Customer Name", "Total Invoice"], ["0557", "ZZ Test Diner", v]]).records[0].total;
+  assert.deepEqual([read("465.00 USD"), read("(45.00)"), read(""), read("n/a")], [465, -45, null, null]);
 });
 
 test("an install that isn't a merged ticket shows no net change", async () => {

@@ -44,7 +44,7 @@ import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
 import { lockedNameFor } from "@/lib/ops/clean-names-api";
-import { liveInstallIds, mergedInstallTarget } from "@/lib/ops/ticket-install-merge";
+import { liveInstallIds, mergedInstallTarget, sameWoRun } from "@/lib/ops/ticket-install-merge";
 
 export type CorrigoApplyResult = {
   updated: number;
@@ -541,22 +541,33 @@ const applyInput = z.object({
   rows: z.array(applyRow).max(2000),
 });
 
+/** " · Corrigo net $300.00 → $465.00" when Corrigo's total changed the saved one (11/15). */
+function netLog(before: string | number | null | undefined, after: number | null | undefined): string {
+  if (after == null) return "";
+  const was = before == null || before === "" ? null : Number(before);
+  if (was != null && Math.abs(was - after) <= 0.005) return "";
+  return ` · Corrigo net ${was == null ? "none" : `$${was.toFixed(2)}`} → $${after.toFixed(2)}`;
+}
+
 /**
  * The Corrigo net on tickets merged into this install (or one merged into it since) under this WO (11/15): reference
- * only, never charges or invoices. Only this install's, so an older WO with the same number elsewhere is left alone.
+ * only, never charges or invoices. Only this install's, and only tickets from the file row's WO run (WO numbers started
+ * over in July 2026), so an older WO with the same number is left alone. Each logs the change.
  */
-async function refreshMergedTicketNet(sql: Sql, installId: number, matchKey: string, net: number) {
+async function refreshMergedTicketNet(sql: Sql, installId: number, matchKey: string, net: number, day: string | null, actor: string) {
   const digits = matchKey.replace(/\D/g, "");
   if (!digits) return;
-  const merged = await sql.query<{ id: number; wo: string | null; merged_install_id: number }>(
-    "select id, wo, merged_install_id from service_jobs where merged_install_id is not null and wo like $1 and corrigo_net is distinct from $2::numeric",
+  const merged = await sql.query<{ id: number; wo: string | null; merged_install_id: number; received: string | null; corrigo_net: string | null }>(
+    `select id, wo, merged_install_id, to_char(received, 'YYYY-MM-DD') as received, corrigo_net::text as corrigo_net
+       from service_jobs where merged_install_id is not null and wo like $1 and corrigo_net is distinct from $2::numeric`,
     [`%${digits}%`, net],
   );
   const live = await liveInstallIds(sql, [...new Set(merged.map((m) => Number(m.merged_install_id)))]);
-  const ids = merged
-    .filter((m) => woMatchKey(m.wo ?? "") === matchKey && live.get(Number(m.merged_install_id)) === installId)
-    .map((m) => Number(m.id));
-  if (ids.length) await sql.query("update service_jobs set corrigo_net = $2::numeric, updated_at = now() where id = any($1::int[])", [ids, net]);
+  for (const m of merged) {
+    if (woMatchKey(m.wo ?? "") !== matchKey || live.get(Number(m.merged_install_id)) !== installId || !sameWoRun(m.received, day)) continue;
+    await sql.query("update service_jobs set corrigo_net = $2::numeric, updated_at = now() where id = $1", [m.id, net]);
+    await logCorrigo(sql, "service", Number(m.id), actor, `Corrigo import · ${m.wo}${netLog(m.corrigo_net, net)} (merged into install #${installId})`);
+  }
 }
 
 /**
@@ -837,7 +848,7 @@ export async function applyCorrigoRows(
             (unitsMoved?.moved.length ? ` · moved to ${customer}: ${unitsMoved.moved.join(", ")}` : ""),
         );
         // A ticket merged into an install keeps its own billing (10/30), so its Corrigo net follows Corrigo (11/15).
-        if (row.corrigoNet != null) await refreshMergedTicketNet(sql, jobId, matchKey, row.corrigoNet);
+        if (row.corrigoNet != null) await refreshMergedTicketNet(sql, jobId, matchKey, row.corrigoNet, row.createdAt || row.completedAt || null, actor);
         updated += 1;
         maybeReview(
           "install",
@@ -868,8 +879,10 @@ export async function applyCorrigoRows(
         customer: string | null;
         wo: string | null;
         ns_so: string | null;
+        corrigo_net: string | null;
       }>(
-        `select id, kind, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, ns_so
+        `select id, kind, status, technician, work_done, to_char(completed_at, 'YYYY-MM-DD') as completed_at, customer, wo, ns_so,
+                corrigo_net::text as corrigo_net
            from service_jobs where id = $1`,
         [jobId],
       );
@@ -952,7 +965,8 @@ export async function applyCorrigoRows(
           customerLog(cur[0].customer, customer) +
           (row.poChange && saved?.po_written ? ` · P.O. ${row.poChange.from || "none"} → ${row.poChange.to}` : "") +
           (row.issueChange ? " · issue refreshed" : "") +
-          (row.equipmentChange ? " · equipment refreshed" : ""),
+          (row.equipmentChange ? " · equipment refreshed" : "") +
+          netLog(cur[0].corrigo_net, row.corrigoNet),
       );
       for (const extra of row.conflictIds ?? []) {
         if (wrapRepeat) break;
