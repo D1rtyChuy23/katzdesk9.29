@@ -34,10 +34,10 @@ import {
   noInvoiceYet,
   possibleDoubleBill,
 } from "./billing-rules.ts";
-import { isWalkIn } from "./customer-key.ts";
+import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { leafOf } from "./clean-names.ts";
 import { parseCompletedDate, woCanonical, woMatchKey } from "./corrigo.ts";
-import { nameKey } from "./wo-history.ts";
+import { billedParent, nameKey } from "./wo-history.ts";
 
 // ── Reading the files ────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -137,6 +137,8 @@ export type BackfillInvoiceRow = {
   remaining: number | null;
   chargesSource: boolean;
   corrigoNet: number | null;
+  /** The account NetSuite billed, when the file has the column (11/15). */
+  nsCustomer: string;
 };
 
 export type BackfillRead = {
@@ -234,6 +236,7 @@ export function readBackfillSheets(files: { file: string; sheets: { name: string
               remaining: moneyCell(get("remaining")),
               chargesSource: source === "yes" || source === "y" || source === "true" || source === "1",
               corrigoNet: moneyCell(get("corrigoNet")),
+              nsCustomer: cellText(get("nsCustomer")),
             });
           }
         }
@@ -410,6 +413,11 @@ export type BackfillPlan = {
     corrigoMismatch: boolean;
   };
   warnings: string[];
+  /**
+   * NetSuite bills another account than the record's (11/15): the row starts unticked and is written only when it is
+   * ticked again. The text says who.
+   */
+  hold: string | null;
 };
 
 export type BackfillContext = {
@@ -420,7 +428,43 @@ export type BackfillContext = {
   otherBoards: Map<string, ("pm" | "install")[]>;
   /** Where the files' NetSuite invoices are recorded already, by soKey'd number. */
   recordedAt?: Map<string, { kind: BackfillKind; id: number }[]>;
+  /** Each account's NetSuite customer number and internal ID, by nameKey of its name (11/15). */
+  accountIds?: Map<string, string[]>;
 };
+
+/** A name as NetSuite and KatzDesk both spell it: case, accents, punctuation and a trailing LLC / Inc aside. "Coffee Bar" counts. */
+const accountKey = (s: string) =>
+  normalizeCustomerKey(s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")).replace(/(llc|inc|corp|co)$/, "");
+/** A leading NetSuite number ("4821", "C4821", "CUST-4821"): three digits or more. */
+const ID_TOKEN = /^[a-z]{0,4}-?\d{3,}$/i;
+
+/**
+ * NetSuite billed this record's own account (11/15): its exact name, the leaf of NetSuite's "Parent : Child", or the
+ * account's linked NetSuite ID (the cell, or its first word). Never the store's name alone: a Central Market store has
+ * a Coffee Bar account and another for its other departments. A blank cell has nothing to check.
+ */
+export function nsCustomerMatches(ns: string | null | undefined, card: string | null | undefined, accountIds?: Map<string, string[]>): boolean {
+  const cell = String(ns ?? "").trim();
+  if (!cell) return true;
+  const raw = String(card ?? "").trim();
+  if (!raw) return false;
+  // Billed to Walk-In or Cimbali under the account's name ("Walk-In : Black Rock …"): that parent is who NetSuite bills.
+  if (billedParent(cell)) return false;
+  const want = accountKey(raw);
+  const wantLeaf = accountKey(leafOf(raw));
+  const first = (s: string) => s.trim().split(/\s+/)[0] ?? "";
+  // NetSuite's "12345 Name" form: the name after a leading number counts as the name.
+  const unId = (s: string) => (ID_TOKEN.test(first(s)) ? s.trim().slice(first(s).length).trim() : s);
+  for (const s of [cell, leafOf(cell), unId(cell), unId(leafOf(cell))]) {
+    const k = accountKey(s);
+    if (k && (k === want || k === wantLeaf)) return true;
+  }
+  // The account's own NetSuite number or internal ID: the whole cell, or its leading number.
+  const ids = (accountIds?.get(nameKey(raw)) ?? []).map((i) => i.trim().toLowerCase()).filter(Boolean);
+  if (!ids.length) return false;
+  const tokens = [cell, first(cell), first(leafOf(cell))].map((t) => t.toLowerCase());
+  return tokens.some((t, i) => ids.includes(t) && (i === 0 || ID_TOKEN.test(t)));
+}
 
 const CENT = 0.005;
 
@@ -923,6 +967,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     so: { current: null, next: null, billedOn: null, change: false, note: null },
     invoices: [],
     amounts: { kd: 0, kdSource: "charges", netsuite: 0, corrigo: null, doubleBill: false, nsMismatch: false, corrigoMismatch: false },
+    hold: null,
     warnings: [],
   };
   if ("reason" in picked) return { ...empty, reason: picked.reason };
@@ -1129,11 +1174,12 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   const invoicesChange = invoices.some(writesInvoice);
   const counted = invoices.filter((i) => writesInvoice(i) || i.change === "same");
 
-  // The account NetSuite billed, against the record's.
-  const nsCustomer = lineRowsIn.map((r) => r.nsCustomer).find(Boolean);
-  if (nsCustomer && nameKey(leafOf(nsCustomer)) !== nameKey(target.customer) && nameKey(nsCustomer) !== nameKey(target.customer)) {
-    warnings.push(`NetSuite billed ${nsCustomer}; the ${what}'s account is ${target.customer}.`);
-  }
+  // The account NetSuite billed, against the record's (11/15): another account holds the row for approval.
+  // Every NetSuite customer the WO's rows name (charges and invoices): any other account holds the row.
+  const nsCustomers = [...new Set([...lineRowsIn.map((r) => r.nsCustomer), ...invoiceRows.map((r) => r.nsCustomer)].map((c) => c.trim()).filter(Boolean))];
+  const other = nsCustomers.filter((c) => !nsCustomerMatches(c, target.customer, ctx.accountIds));
+  const hold = other.length ? `NetSuite bills ${other.join(" and ")}, card is ${target.customer || "no account"}` : null;
+  if (hold) warnings.push(hold);
   // Lance bills from San Antonio WH, Bill from Dallas WH.
   for (const loc of new Set([...lineRowsIn.map((r) => r.location), ...counted.map((i) => i.location ?? "")].filter(Boolean))) {
     const w = locationWarning(target.technician, loc);
@@ -1226,6 +1272,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     invoices,
     amounts,
     warnings,
+    hold,
   };
 }
 
@@ -1260,6 +1307,8 @@ export function backfillCounts(plans: BackfillPlan[]) {
     nsMismatch: plans.filter((p) => p.amounts.nsMismatch && !p.amounts.doubleBill).length,
     corrigoMismatch: plans.filter((p) => p.amounts.corrigoMismatch).length,
     warnings: plans.filter((p) => p.warnings.length).length,
+    /** Would write, but NetSuite bills another account: unticked until approved (11/15). */
+    held: writes.filter((p) => p.hold).length,
     /** The WOs that will write, by what they go on. */
     byKind: {
       service: writes.filter((p) => p.kind === "service").length,

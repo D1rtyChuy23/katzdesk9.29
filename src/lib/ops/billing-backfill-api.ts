@@ -3,6 +3,7 @@
  * billing-backfill.ts; this reads the files, loads the tickets, installs and PMs (11/5), and writes the plan. Each
  * Write is logged as a run (billing_backfill_runs), and every record it writes gets a history line.
  */
+import { nameKey } from "@/lib/ops/wo-history";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -158,7 +159,24 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
     if (!list.includes(r.kind)) list.push(r.kind);
     otherBoards.set(r.woKey, list);
   }
-  return { tickets, records, otherBoards, recordedAt: await loadRecordedAt(sql, invoiceKeys) };
+  // Each card's account and its linked NetSuite ID, for the customer check (11/15).
+  const names = [...new Set([...tickets.map((t) => t.customer), ...records.map((r) => r.customer)].filter((c): c is string => !!c?.trim()))];
+  const accountIds = new Map<string, string[]>();
+  if (names.length) {
+    // Live accounts only; the first by id wins a name two accounts share in different case.
+    const linked = await sql.query<{ name: string; netsuite_id: string | null; account_number: string | null }>(
+      `select name, netsuite_id, account_number from directory_customers
+        where archived = false and lower(btrim(name)) = any($1::text[])
+          and (nullif(btrim(netsuite_id), '') is not null or nullif(btrim(account_number), '') is not null)
+        order by id`,
+      [names.map((n) => n.trim().toLowerCase())],
+    );
+    for (const a of linked) {
+      const key = nameKey(a.name);
+      if (!accountIds.has(key)) accountIds.set(key, [a.account_number, a.netsuite_id].map((v) => (v ?? "").trim()).filter(Boolean));
+    }
+  }
+  return { tickets, records, otherBoards, recordedAt: await loadRecordedAt(sql, invoiceKeys), accountIds };
 }
 
 /** SQL: a NetSuite invoice number the way the backfill compares them (soKey): upper case, no spaces. */
@@ -729,7 +747,7 @@ export async function applyBillingBackfillFor(
   sql: Q,
   files: BackfillFile[],
   userId: string,
-  opts: { hash: string; skip: string[] },
+  opts: { hash: string; skip: string[]; approve?: string[] },
 ): Promise<BackfillPreview> {
   const actor = await requireAdmin(sql, userId);
   const before = await planFiles(sql, files);
@@ -737,7 +755,11 @@ export async function applyBillingBackfillFor(
     throw new Error("Something changed since the preview (a record was edited, or another import ran). Preview the files again.");
   }
   const skip = new Set(opts.skip);
-  const go = before.plans.filter((p) => (p.status === "write" || p.status === "invoices") && p.recordId != null && !skip.has(p.key));
+  // A row NetSuite bills to another account is written only when it was ticked again (11/15).
+  const approve = new Set(opts.approve ?? []);
+  const go = before.plans.filter(
+    (p) => (p.status === "write" || p.status === "invoices") && p.recordId != null && !skip.has(p.key) && (!p.hold || approve.has(p.key)),
+  );
   const tickets = go.filter((p) => p.jobId != null);
   const records = go.filter((p) => p.jobId == null && (p.kind === "install" || p.kind === "pm"));
   let applied = { tickets: 0, installs: 0, pms: 0, lines: 0, invoices: 0 };
@@ -886,15 +908,16 @@ export const listBillingBackfillRuns = createServerFn({ method: "POST" })
 
 export const applyBillingBackfill = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { files: BackfillFile[]; hash: string; skip: string[] }) =>
+  .validator((d: { files: BackfillFile[]; hash: string; skip: string[]; approve?: string[] }) =>
     z
       .object({
         files: z.array(fileInput).min(1).max(2),
         hash: z.string().regex(/^[0-9a-f]{16}$/),
         skip: z.array(z.string().regex(/^\d+$/)).max(5000),
+        approve: z.array(z.string().regex(/^\d+$/)).max(5000).optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<BackfillPreview> =>
-    applyBillingBackfillFor(await ready(), data.files, context.userId, { hash: data.hash, skip: data.skip }),
+    applyBillingBackfillFor(await ready(), data.files, context.userId, { hash: data.hash, skip: data.skip, approve: data.approve }),
   );
