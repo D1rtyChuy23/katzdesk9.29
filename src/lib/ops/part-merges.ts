@@ -440,7 +440,7 @@ export function planPartMerges(rows: MergeFileRow[], parts: MergePart[], facts: 
       const into = rootOf(newAll.find((p) => p.mergedInto != null)!, byId);
       return fail("keeper_merged", `${r.newSku} was merged into ${into.sku}. Merge into ${into.sku} instead.`);
     } else if (newAll.length) {
-      return fail("keeper_hidden", `${r.newSku} is hidden. Restore it on Parts first, or merge into the part that replaced it.`);
+      return fail("keeper_hidden", `${r.newSku} is hidden. Restore it in the Item Catalog first, or merge into the part that replaced it.`);
     } else return fail("not_found", `No part has ${r.newSku}.`);
 
     const oldAll = byKey.get(numberKey(r.oldSku)) ?? [];

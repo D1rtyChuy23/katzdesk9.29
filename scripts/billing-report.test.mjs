@@ -286,9 +286,10 @@ test("Invoices, Tickets In Window and Location Check are an Admin's: anyone else
 });
 
 test("the side menu shows Invoices to an Admin only, and the page asks the server, which checks the Admin", () => {
-  const shell = readFileSync(new URL("../src/components/desk/shell.tsx", import.meta.url), "utf8");
-  assert.match(shell, /label: "Billing",\s*items: \[\{ to: "\/invoices", label: "Invoices"/);
-  assert.match(shell, /\.filter\(\(g\) => g\.label !== "Billing" \|\| admin\)/);
+  // The menu's layout and who sees what moved to side-menu.ts (11/14; scripts/side-menu.test.mjs pins each role).
+  const menu = readFileSync(new URL("../src/lib/ops/side-menu.ts", import.meta.url), "utf8");
+  assert.match(menu, /\{ to: "\/invoices", label: "Invoices", admin: true \}/);
+  assert.match(menu, /if \(item\.admin && !admin\) return false;/);
   const page = readFileSync(new URL("../src/routes/_app/invoices.tsx", import.meta.url), "utf8");
   for (const fn of ["getInvoicesReport()", "getTicketsInWindow(", "getLocationCheck()"]) assert.ok(page.includes(fn), fn);
   const server = readFileSync(new URL("../src/lib/ops/billing-report-api.ts", import.meta.url), "utf8");

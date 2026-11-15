@@ -307,7 +307,7 @@ export function planPartImport(rows: PartImportRow[], stored: StoredPart[]): Par
       };
     }
     if (hits.length > 1) {
-      return { status: "shared_mpn", row, partId: null, changes: [], reason: `${hits.length} parts already share MPN ${row.mpn} (${hits.map((h) => h.sku).join(", ")}). Fix that on Parts first.` };
+      return { status: "shared_mpn", row, partId: null, changes: [], reason: `${hits.length} parts already share MPN ${row.mpn} (${hits.map((h) => h.sku).join(", ")}). Fix that in the Item Catalog first.` };
     }
     const hit = hits[0];
     if (!hit && hiddenHits.length) {

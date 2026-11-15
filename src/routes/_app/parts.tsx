@@ -190,9 +190,9 @@ function Page() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-medium tracking-tight">Parts</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Item Catalog</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            The NetSuite item list with each part's photo and MPN, and how many tickets used it. Hide an obsolete part to take it off this list and the invoice picker. A ticket that already used it keeps the line.
+            The NetSuite item list: parts, filters, service, equipment and dispensers, each with its photo, MPN and how many tickets used it. Hide an obsolete item to take it off this list and the invoice picker. A ticket that already used it keeps the line.
           </p>
         </div>
         {/* Admin: Pull Confirmed Photos, Export CSV and every import, Bin Locations included (bins are Admin only for now). */}
@@ -234,7 +234,7 @@ function Page() {
       ) : (
         <>
           <ListToolbar>
-            <ToolbarSearch value={q} onChange={setQ} placeholder="Search part number or name…" label="Search parts" testId="parts-search" />
+            <ToolbarSearch value={q} onChange={setQ} placeholder="Search by MPN, SKU or name…" label="Search the item catalog" testId="parts-search" />
             <FilterChip
               selected={noPhoto}
               data-testid="parts-confirm-photo"
