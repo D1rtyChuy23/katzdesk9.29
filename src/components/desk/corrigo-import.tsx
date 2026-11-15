@@ -275,6 +275,7 @@ function PreviewBody({
       ),
     [base, drafts],
   );
+  const heldBack = rows.filter((r) => r.holdBack && r.action !== "skip" && !drafts[rowKey(r)]?.selected).length;
   const preInstallKept = rows.filter((r) => r.preInstall && r.action !== "skip" && drafts[rowKey(r)]?.selected).length;
   const applicable = rows.filter((r) => r.action === "update" || r.action === "create");
   const selectedUpdates = applicable.filter(
@@ -333,6 +334,8 @@ function PreviewBody({
       const next = { ...cur };
       for (const row of applicable) {
         const key = rowKey(row);
+        // A row held for approval (no Install on its P.O.) is ticked one at a time, never by Select all (11/14).
+        if (selected && row.holdBack && !next[key]?.selected) continue;
         next[key] = { ...(next[key] ?? draftFor(row)), selected };
       }
       return next;
@@ -350,7 +353,9 @@ function PreviewBody({
       const customer = customerOf(row, d).trim() || row.customer;
       return { ...lean, customer };
     });
-    onConfirm(out);
+    // A visit's WO comes off its install before that install's rows are written, chunks or not (11/14).
+    const moves = (r: (typeof out)[number]) => r.action !== "skip" && !!r.visitFromInstall;
+    onConfirm([...out.filter(moves), ...out.filter((r) => !moves(r))]);
   }
 
   return (
@@ -403,6 +408,12 @@ function PreviewBody({
               ? "1 new ticket gets no received date: the file has no created date for it."
               : `${noReceived.length} new tickets get no received date: the file has no created date for them.`}{" "}
             Fill it on the ticket, or export the report with its Created column.
+          </li>
+        ) : null}
+        {heldBack ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-held-count">
+            <span className="font-medium">{heldBack}</span> install row{heldBack === 1 ? "" : "s"} wait{heldBack === 1 ? "s" : ""} for approval: the
+            P.O. doesn't say Install. Tick each one that belongs on an install; Select all leaves them.
           </li>
         ) : null}
         {preInstallKept ? (

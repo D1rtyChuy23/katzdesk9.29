@@ -24,6 +24,7 @@ import {
   resolvePreviewRow,
   resolveRowAccount,
   settleInstallRows,
+  withoutVisitWos,
   withSiblingWos,
   woMatchKey,
   type AccountIndex,
@@ -435,11 +436,13 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
   // Rows are applied in order: a second row for one install adds its WO to the first row's.
   const rows = withAccounts(
     settleInstallRows(
-      records.map((rec) => {
-        const byId = rec.corrigoId?.trim() ? byCorrigoId.get(rec.corrigoId.trim()) : undefined;
-        const match = byId ? { unique: byId, conflicts: [] } : (index.get(rec.matchKey) ?? { unique: null, conflicts: [] });
-        return resolvePreviewRow(rec, match, { wrapped, today, installs, catalog });
-      }),
+      withoutVisitWos(
+        records.map((rec) => {
+          const byId = rec.corrigoId?.trim() ? byCorrigoId.get(rec.corrigoId.trim()) : undefined;
+          const match = byId ? { unique: byId, conflicts: [] } : (index.get(rec.matchKey) ?? { unique: null, conflicts: [] });
+          return resolvePreviewRow(rec, match, { wrapped, today, installs, catalog });
+        }),
+      ),
     ),
     records,
     accounts,
@@ -526,7 +529,7 @@ const applyRow = z.object({
   corrigoNet: z.number().nullable().optional(),
   callTypeValue: z.string().max(60).nullable().optional(),
   visitInstallId: z.number().int().nullable().optional(),
-  visitFromInstall: z.object({ installId: z.number().int(), matchKey: z.string().max(40) }).nullable().optional(),
+  visitFromInstall: z.object({ installIds: z.array(z.number().int()).max(20), matchKey: z.string().max(40) }).nullable().optional(),
   urgency: z.string().max(30).nullable().optional(),
 });
 
@@ -534,11 +537,31 @@ const applyInput = z.object({
   rows: z.array(applyRow).max(2000),
 });
 
+/**
+ * A pre-install visit's WO comes off each live install it is on (11/14): it is its ticket's now. The install keeps its
+ * status and dates; the next WO becomes its first. A WO only in installs.wo (no row) comes off too.
+ */
+async function moveVisitWo(sql: Sql, row: z.infer<typeof applyRow>, wo: string, actor: string) {
+  const from = row.visitFromInstall;
+  if (!from) return;
+  for (const installId of from.installIds) {
+    const live = (await sql.query<{ archived: boolean }>("select archived from installs where id = $1", [installId]))[0];
+    if (!live || live.archived) continue;
+    const has = ((await loadInstallWos(sql, [installId])).get(installId) ?? []).some((w) => w.matchKey === from.matchKey);
+    if (!has) continue;
+    const primary = await dropInstallWo(sql, installId, from.matchKey);
+    await logCorrigo(sql, "install", installId, actor, `${wo} moved to its own ticket: a pre-install visit` + (primary ? ` · ${primary} is the first WO now` : ""));
+  }
+}
+
 export async function applyCorrigoRows(
   sql: Sql,
-  rows: z.infer<typeof applyRow>[],
+  input: z.infer<typeof applyRow>[],
   actor: string,
 ): Promise<CorrigoApplyResult> {
+  // A visit's WO comes off its install before the install's own rows are written, as the preview counted (11/14).
+  const visitMove = (r: z.infer<typeof applyRow>) => r.action !== "skip" && !!r.visitFromInstall;
+  const rows = [...input.filter(visitMove), ...input.filter((r) => !visitMove(r))];
   let updated = 0;
   let created = 0;
   const review: CorrigoApplyResult["review"] = [];
@@ -908,6 +931,7 @@ export async function applyCorrigoRows(
           }
         }
       }
+      await moveVisitWo(sql, row, keptWo, actor);
       updated += 1;
       maybeReview(jobBoardKind, jobId, keptWo, customer, status, technician, done);
     } else if (action === "create") {
@@ -1021,11 +1045,7 @@ export async function applyCorrigoRows(
         await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (linked ? ` · pre-install visit for install #${linked}` : ""));
         // A pre-install visit whose WO was on an install (11/14): the WO is the ticket's now, so it leaves the install.
         // The install keeps its status and dates.
-        const from = row.visitFromInstall;
-        if (from && (await sql.query("select 1 from install_work_orders where install_id = $1 and match_key = $2", [from.installId, from.matchKey])).length) {
-          const primary = await dropInstallWo(sql, from.installId, from.matchKey);
-          await logCorrigo(sql, "install", from.installId, actor, `${wo} moved to its own ticket: a pre-install visit` + (primary ? ` · ${primary} is the first WO now` : ""));
-        }
+        await moveVisitWo(sql, row, wo, actor);
         created += 1;
         maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }

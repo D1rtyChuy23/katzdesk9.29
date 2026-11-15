@@ -375,8 +375,8 @@ export type CorrigoPreviewRow = {
   visitInstallId?: number | null;
   /** Starts unticked for approval (Chuy, 11/14): an install row whose P.O. doesn't say Install. */
   holdBack?: boolean;
-  /** A pre-install visit whose WO was on an install: Confirm takes the WO off it once the visit's ticket is made. */
-  visitFromInstall?: { installId: number; matchKey: string } | null;
+  /** A pre-install visit whose WO is on installs: Confirm takes the WO off them once the visit's ticket is written. */
+  visitFromInstall?: { installIds: number[]; matchKey: string } | null;
   /** A new service or TLC ticket's Type and urgency. */
   callTypeValue?: string | null;
   urgency?: string | null;
@@ -1448,6 +1448,18 @@ export function resolvePreviewRow(
   const row = resolveRow(rec, match, opts, false);
   if (row.action === "skip") return row;
   if (!isPreInstallVisit(rec.issue, rec.workDone)) return poApproval(rec, row);
+  // Every live install the visit's WO is on: Confirm takes it off them all (review, 11/14).
+  const onInstalls = [...new Set([match.unique, ...match.conflicts].filter((h): h is CorrigoHit => !!h && h.board === "install" && !h.duplicateOf).map((h) => h.id))];
+  const moves = onInstalls.length ? { installIds: onInstalls, matchKey: rec.matchKey } : null;
+  if (row.board === "service" && moves) {
+    // Its ticket is made already (an earlier import), but the WO is still on an install: it comes off now.
+    return {
+      ...row,
+      visitInstallId: onInstalls[0]!,
+      visitFromInstall: moves,
+      matchNote: [row.matchNote, `${PRE_INSTALL_LABEL}: moves ${rec.canonicalWo} off install${onInstalls.length > 1 ? "s" : ""} ${onInstalls.map((id) => `#${id}`).join(", ")}`].filter(Boolean).join(" · "),
+    };
+  }
   if (row.board === "service" && PRE_INSTALL_STRONG.test(visitText(rec.issue, rec.workDone))) {
     // A service ticket that says pre-install or pre-inspection (its own ticket already, or words without "install"):
     // linked to the account's one open install, so the next import links one that wasn't (review, 11/14).
@@ -1458,13 +1470,13 @@ export function resolvePreviewRow(
   }
   if (row.board !== "install") return row;
   // Nothing is installed on a pre-install visit (Chuy, 11/14): a WO already on an install leaves it for its own ticket.
-  const onInstall = row.jobId != null && !row.byAccount ? row.jobId : null;
+  const onInstall = row.jobId != null && !row.byAccount ? row.jobId : (onInstalls[0] ?? null);
   // The account's one open install under its own name links the visit; more than one, or another name, links none.
   const own = (row.installOptions ?? []).filter((o) => o.id != null && !o.otherName);
   const installId = onInstall ?? (own.length === 1 ? own[0]!.id : null);
   const note =
     onInstall != null
-      ? `moves ${rec.canonicalWo} off install #${onInstall}, linked to it`
+      ? `moves ${rec.canonicalWo} off install${onInstalls.length > 1 ? "s" : ""} ${(onInstalls.length ? onInstalls : [onInstall]).map((id) => `#${id}`).join(", ")}, linked to #${onInstall}`
       : installId != null
         ? `linked to install #${installId}`
         : own.length > 1
@@ -1475,7 +1487,7 @@ export function resolvePreviewRow(
     ...visit,
     callTypeValue: "Field Service",
     visitInstallId: installId,
-    visitFromInstall: onInstall != null ? { installId: onInstall, matchKey: rec.matchKey } : null,
+    visitFromInstall: onInstall != null ? { installIds: onInstalls.length ? onInstalls : [onInstall], matchKey: rec.matchKey } : null,
     // An earlier import may have installed it on this visit: the import leaves the install as it is, so say so.
     descriptionNotes:
       onInstall != null && row.oldStatus === "Installed"
@@ -1492,8 +1504,35 @@ export function resolvePreviewRow(
  * install by anything else (its description, a Type column, the account's open install) starts unticked for approval.
  * A WO already on an install stays where it is.
  */
+/** "Install", "Installation", "Re-install", "INSTALL-SO1" on the P.O.; not "Uninstall", "De-install" or "Pre-install". */
+export function poSaysInstall(po: string | null | undefined): boolean {
+  const s = String(po ?? "");
+  return /\b(?:re-?)?install/i.test(s) && !/\b(?:de|pre|un)[\s\-]*install/i.test(s);
+}
+
+/**
+ * Before the rows settle (11/14): a ticked visit's WO comes off its install at Confirm, so the install's other rows
+ * count its WOs without it, as Confirm will. The install shows the status it will really have.
+ */
+export function withoutVisitWos(rows: CorrigoPreviewRow[]): CorrigoPreviewRow[] {
+  const gone = new Map<number, Set<string>>();
+  for (const r of rows) for (const id of r.visitFromInstall?.installIds ?? []) gone.set(id, new Set([...(gone.get(id) ?? []), r.visitFromInstall!.matchKey]));
+  if (!gone.size) return rows;
+  const strip = <T extends { wos: InstallWo[] }>(id: number | null | undefined, state: T | null | undefined): T | null | undefined =>
+    id != null && state && gone.has(id) ? { ...state, wos: state.wos.filter((w) => !gone.get(id)!.has(woMatchKey(w.wo))) } : state;
+  return rows.map((r) =>
+    r.board !== "install"
+      ? r
+      : {
+          ...r,
+          installState: strip(r.jobId, r.installState) ?? null,
+          installOptions: r.installOptions?.map((o) => ({ ...o, state: strip(o.id, o.state) ?? null })) ?? null,
+        },
+  );
+}
+
 function poApproval(rec: CorrigoRecord, row: CorrigoPreviewRow): CorrigoPreviewRow {
-  if (row.board !== "install" || (row.jobId != null && !row.byAccount) || /\binstall/i.test(rec.po ?? "")) return row;
+  if (row.board !== "install" || (row.jobId != null && !row.byAccount) || poSaysInstall(rec.po)) return row;
   const text = "Goes on an install, but its P.O. doesn't say Install: left unticked. Tick it to approve";
   return { ...row, holdBack: true, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
 }

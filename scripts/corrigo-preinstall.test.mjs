@@ -168,8 +168,8 @@ test("a visit whose WO is already on an install becomes its own Field Service ti
     const preview = await previewCorrigoRecords(sql, file([["1074", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
     const row = one(preview, "WO-1074");
     assert.deepEqual([row.board, row.action, row.jobId, row.visitInstallId, row.callTypeValue], ["service", "create", null, id, "Field Service"]);
-    assert.deepEqual(row.visitFromInstall, { installId: id, matchKey: "1074" });
-    assert.equal(row.preInstall.note, `moves WO-1074 off install #${id}, linked to it`);
+    assert.deepEqual(row.visitFromInstall, { installIds: [id], matchKey: "1074" });
+    assert.equal(row.preInstall.note, `moves WO-1074 off install #${id}, linked to #${id}`);
     assert.deepEqual([row.preInstall.asInstall.board, row.preInstall.asInstall.jobId], ["install", id]);
     await applyCorrigoRows(sql, preview.rows, "boss");
     const t = (await query("select kind, status, call_type, visit_install_id from service_jobs where wo = 'WO-1074'"))[0];
@@ -271,6 +271,62 @@ test("the preview tags the row, counts it, offers the override, and sends the ro
   const card = src("src/components/desk/install-project-fields.tsx");
   assert.match(card, /data-testid="install-visits"/);
   assert.match(screen, /selected: applicable && !row\.needsReview && !row\.holdBack,/);
+  assert.match(screen, /if \(selected && row\.holdBack && !next\[key\]\?\.selected\) continue;/);
+  assert.match(screen, /data-testid="corrigo-held-count"/);
+  assert.match(screen, /onConfirm\(\[\.\.\.out\.filter\(moves\), \.\.\.out\.filter\(\(r\) => !moves\(r\)\)\]\);/);
   assert.match(src("src/lib/ops/install-projects.ts"), /update service_jobs s set visit_install_id = g\.keep_id, updated_at = now\(\) from g where s\.visit_install_id = g\.drop_id returning s\.id/);
   assert.match(src("migrations/0127_ticket_visit_install.sql"), /alter table service_jobs add column if not exists visit_install_id int references installs \(id\)/);
+});
+
+test("the P.O. says Install: Installation, Re-install, INSTALL-SO1; not Uninstall, De-install or Pre-install", () => {
+  for (const po of ["Install", "Installation SO1", "Re-install", "Reinstall grinder", "INSTALL-SO123", "install"]) assert.equal(C.poSaysInstall(po), true, po);
+  for (const po of ["Uninstall", "De-install old brewer", "Pre-install visit", "SO123INSTALL", "", null]) assert.equal(C.poSaysInstall(po), false, String(po));
+});
+
+test("a visit's WO comes off the install even when its ticket exists, or the WO is only the install's first WO", async () => {
+  const { pg, sql, query, install } = await freshDb();
+  try {
+    // Ticket made by an earlier import, WO still on the install.
+    const a = await install("ZZ Test Club");
+    await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-4001', '4001', 'Open', 'corrigo')", [a]);
+    await query("update installs set wo = 'WO-4001' where id = $1", [a]);
+    const t = Number((await query("insert into service_jobs (kind, call_id, customer, wo, status, received) values ('service', 'SC-ZZ-1', 'ZZ Test Club', 'WO-4001', 'Open', current_date) returning id"))[0].id);
+    // Only in installs.wo, no row.
+    const b = await install("ZZ Test Twin");
+    await query("update installs set wo = 'WO-4002' where id = $1", [b]);
+    const preview = await previewCorrigoRecords(sql, file([
+      ["4001", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"],
+      ["4002", "Completed", "ZZ Test Twin", "Request", VISIT, "11/13/2026"],
+    ]));
+    assert.deepEqual([one(preview, "WO-4001").board, one(preview, "WO-4001").jobId, one(preview, "WO-4001").visitFromInstall], ["service", t, { installIds: [a], matchKey: "4001" }]);
+    assert.deepEqual([one(preview, "WO-4002").board, one(preview, "WO-4002").visitFromInstall], ["service", { installIds: [b], matchKey: "4002" }]);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    assert.deepEqual((await query("select id, wo, equip_status from installs where id = any($1::int[]) order by id", [[a, b]])).map((r) => [r.wo, r.equip_status]), [[null, "Ready"], [null, "Ready"]]);
+    assert.deepEqual(await query("select wo from install_work_orders where install_id = any($1::int[])", [[a, b]]), []);
+    assert.equal((await query("select visit_install_id from service_jobs where id = $1", [t]))[0].visit_install_id, a);
+    assert.equal((await query("select count(*)::int as n from service_jobs where wo = 'WO-4002'"))[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a visit and the install's real WO in one file: the install counts without the visit, whichever row comes first", async () => {
+  for (const order of ["visit first", "visit last"]) {
+    const { pg, sql, query, install } = await freshDb();
+    try {
+      const id = await install("ZZ Test Club");
+      await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-3001', '3001', 'Open', 'corrigo'), ($1, 'WO-3002', '3002', 'Open', 'corrigo')", [id]);
+      await query("update installs set wo = 'WO-3001' where id = $1", [id]);
+      const visit = ["3001", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026", ""];
+      const real = ["3002", "Completed", "ZZ Test Club", "Request", "Installed the ZZ Legacy", "11/19/2026", "Install SO1"];
+      const preview = await previewCorrigoRecords(sql, file(order === "visit first" ? [visit, real] : [real, visit]));
+      assert.deepEqual([one(preview, "WO-3001").board, one(preview, "WO-3002").board, one(preview, "WO-3002").newStatus], ["service", "install", "Installed"], order);
+      await applyCorrigoRows(sql, preview.rows, "boss");
+      const after = (await query("select equip_status, wo from installs where id = $1", [id]))[0];
+      assert.deepEqual([after.equip_status, after.wo], ["Installed", "WO-3002"], order);
+      assert.deepEqual((await query("select wo from install_work_orders where install_id = $1", [id])).map((r) => r.wo), ["WO-3002"], order);
+    } finally {
+      await pg.close();
+    }
+  }
 });
