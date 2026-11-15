@@ -16,6 +16,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { CustomerCombo, LockedCustomer } from "./directory-fields";
 import { CustomerAddress } from "./customer-address";
 import { LockBadge } from "./lock-badge";
+import { OpenLink } from "./open-link";
 import { useFlushOnSave } from "./save-all";
 import { useCanLock } from "./use-can-lock";
 
@@ -157,6 +158,40 @@ export function InstallWorkOrders({ row }: { row: Install }) {
           Add WO
         </Button>
       </div>
+      <InstallVisits row={row} />
+    </div>
+  );
+}
+
+/**
+ * Pre-install visits linked to this install (11/14): each is its own ticket, billed on its own, and never moved the
+ * install's status. Listed with what Corrigo said was asked and done.
+ */
+function InstallVisits({ row }: { row: Install }) {
+  const visits = row.visits ?? [];
+  if (!visits.length) return null;
+  return (
+    <div className="mt-3" data-testid="install-visits">
+      <Label>Pre-install visits</Label>
+      <ul className="mt-1 divide-y divide-border rounded-md border border-border">
+        {visits.map((v) => (
+          <li key={v.jobId} className="px-3 py-2 text-sm" data-testid="install-visit">
+            <OpenLink entityType="service" id={v.jobId} className="font-medium text-primary tabular underline-offset-2 hover:underline">
+              {v.wo || v.callId || `Ticket #${v.jobId}`}
+            </OpenLink>
+            <span className="ml-2 text-xs text-muted-foreground">
+              {[v.status || "No status", v.completedAt, v.technician].filter(Boolean).join(" · ")}
+            </span>
+            {v.issue ? <p className="mt-1 text-xs whitespace-pre-line text-muted-foreground">{v.issue}</p> : null}
+            {v.workDone ? (
+              <p className="mt-1 text-xs whitespace-pre-line">
+                <span className="font-medium">Work done: </span>
+                {v.workDone}
+              </p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

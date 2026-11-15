@@ -9,12 +9,12 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { WO_WRAP, woCanonical, woMatchKey } from "@/lib/ops/corrigo";
-import type { InstallWorkOrder } from "@/lib/ops/types";
+import type { InstallVisit, InstallWorkOrder } from "@/lib/ops/types";
 import { INSTALL_WOS_SQL, findWoEverywhere, type WoBoardHit } from "@/lib/ops/wo-search";
 
 export { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 
-export type { InstallWorkOrder };
+export type { InstallVisit, InstallWorkOrder };
 
 type WoRow = {
   install_id: number;
@@ -83,10 +83,46 @@ export async function loadInstallWos(sql: Sql, ids: number[]): Promise<Map<numbe
   return out;
 }
 
-/** Fill each install's workOrders (the board, the window and the account page read them). */
-export async function withWorkOrders<T extends { id: number; workOrders?: InstallWorkOrder[] }>(sql: Sql, installs: T[]): Promise<T[]> {
-  const wos = await loadInstallWos(sql, installs.map((i) => i.id));
-  for (const i of installs) i.workOrders = wos.get(i.id) ?? [];
+/** Each install's pre-install visits (11/14): live tickets linked to it, oldest first. */
+export async function loadInstallVisits(sql: Sql, ids: number[]): Promise<Map<number, InstallVisit[]>> {
+  const out = new Map<number, InstallVisit[]>();
+  const list = [...new Set(ids.filter((id) => Number.isInteger(id)))];
+  if (!list.length) return out;
+  const rows = await sql.query<{
+    visit_install_id: number;
+    id: number;
+    wo: string | null;
+    call_id: string | null;
+    status: string | null;
+    completed_at: string | null;
+    technician: string | null;
+    issue: string | null;
+    work_done: string | null;
+  }>(
+    `select visit_install_id, id, wo, call_id, status, to_char(completed_at, 'YYYY-MM-DD') as completed_at, technician, issue, work_done
+       from service_jobs
+      where visit_install_id = any($1::int[]) and duplicate_of is null and merged_install_id is null
+      order by coalesce(completed_at, received), id`,
+    [list],
+  );
+  for (const r of rows) {
+    const id = Number(r.visit_install_id);
+    out.set(id, [
+      ...(out.get(id) ?? []),
+      { jobId: Number(r.id), wo: r.wo, callId: r.call_id, status: r.status, completedAt: r.completed_at, technician: r.technician, issue: r.issue, workDone: r.work_done },
+    ]);
+  }
+  return out;
+}
+
+/** Fill each install's workOrders and pre-install visits (the board, the window and the account page read them). */
+export async function withWorkOrders<T extends { id: number; workOrders?: InstallWorkOrder[]; visits?: InstallVisit[] }>(sql: Sql, installs: T[]): Promise<T[]> {
+  const ids = installs.map((i) => i.id);
+  const [wos, visits] = await Promise.all([loadInstallWos(sql, ids), loadInstallVisits(sql, ids)]);
+  for (const i of installs) {
+    i.workOrders = wos.get(i.id) ?? [];
+    i.visits = visits.get(i.id) ?? [];
+  }
   return installs;
 }
 

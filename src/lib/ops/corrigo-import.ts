@@ -24,6 +24,7 @@ import {
   resolvePreviewRow,
   resolveRowAccount,
   settleInstallRows,
+  withoutVisitWos,
   withSiblingWos,
   woMatchKey,
   type AccountIndex,
@@ -38,7 +39,7 @@ import { stripServiceChannelId } from "@/lib/ops/billing-rules";
 import { nameKey } from "@/lib/ops/wo-history";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ } from "@/lib/ops/ticket-billing-api";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
-import { INSTALL_WOS_SQL, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
+import { INSTALL_WOS_SQL, dropInstallWo, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
 import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
@@ -435,15 +436,19 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
   // Rows are applied in order: a second row for one install adds its WO to the first row's.
   const rows = withAccounts(
     settleInstallRows(
-      records.map((rec) => {
-        const byId = rec.corrigoId?.trim() ? byCorrigoId.get(rec.corrigoId.trim()) : undefined;
-        const match = byId ? { unique: byId, conflicts: [] } : (index.get(rec.matchKey) ?? { unique: null, conflicts: [] });
-        return resolvePreviewRow(rec, match, { wrapped, today, installs, catalog });
-      }),
+      withoutVisitWos(
+        records.map((rec) => {
+          const byId = rec.corrigoId?.trim() ? byCorrigoId.get(rec.corrigoId.trim()) : undefined;
+          const match = byId ? { unique: byId, conflicts: [] } : (index.get(rec.matchKey) ?? { unique: null, conflicts: [] });
+          return resolvePreviewRow(rec, match, { wrapped, today, installs, catalog });
+        }),
+      ),
     ),
     records,
     accounts,
   );
+  // A pre-install visit's other way (the install ticket) gets its account read the same way.
+  for (const r of rows) if (r.preInstall) r.preInstall = { ...r.preInstall, asInstall: withAccounts([r.preInstall.asInstall], records, accounts)[0]! };
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
   ];
@@ -523,6 +528,8 @@ const applyRow = z.object({
   corrigoId: z.string().max(80).nullable().optional(),
   corrigoNet: z.number().nullable().optional(),
   callTypeValue: z.string().max(60).nullable().optional(),
+  visitInstallId: z.number().int().nullable().optional(),
+  visitFromInstall: z.object({ installIds: z.array(z.number().int()).max(20), matchKey: z.string().max(40) }).nullable().optional(),
   urgency: z.string().max(30).nullable().optional(),
 });
 
@@ -530,11 +537,31 @@ const applyInput = z.object({
   rows: z.array(applyRow).max(2000),
 });
 
+/**
+ * A pre-install visit's WO comes off each live install it is on (11/14): it is its ticket's now. The install keeps its
+ * status and dates; the next WO becomes its first. A WO only in installs.wo (no row) comes off too.
+ */
+async function moveVisitWo(sql: Sql, row: z.infer<typeof applyRow>, wo: string, actor: string) {
+  const from = row.visitFromInstall;
+  if (!from) return;
+  for (const installId of from.installIds) {
+    const live = (await sql.query<{ archived: boolean }>("select archived from installs where id = $1", [installId]))[0];
+    if (!live || live.archived) continue;
+    const has = ((await loadInstallWos(sql, [installId])).get(installId) ?? []).some((w) => w.matchKey === from.matchKey);
+    if (!has) continue;
+    const primary = await dropInstallWo(sql, installId, from.matchKey);
+    await logCorrigo(sql, "install", installId, actor, `${wo} moved to its own ticket: a pre-install visit` + (primary ? ` · ${primary} is the first WO now` : ""));
+  }
+}
+
 export async function applyCorrigoRows(
   sql: Sql,
-  rows: z.infer<typeof applyRow>[],
+  input: z.infer<typeof applyRow>[],
   actor: string,
 ): Promise<CorrigoApplyResult> {
+  // A visit's WO comes off its install before the install's own rows are written, as the preview counted (11/14).
+  const visitMove = (r: z.infer<typeof applyRow>) => r.action !== "skip" && !!r.visitFromInstall;
+  const rows = [...input.filter(visitMove), ...input.filter((r) => !visitMove(r))];
   let updated = 0;
   let created = 0;
   const review: CorrigoApplyResult["review"] = [];
@@ -617,7 +644,9 @@ export async function applyCorrigoRows(
     }
     if (action === "create" || (action === "update" && !jobId)) {
       const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, row.createdAt || today, row);
-      if (hit) {
+      // A pre-install visit never goes on an install, even the one its WO is on (11/14): it's a ticket of its own.
+      const visit = !!row.visitFromInstall || row.visitInstallId != null;
+      if (hit && !(visit && hit.board === "install")) {
         action = "update";
         jobId = hit.id;
         board = hit.board;
@@ -843,6 +872,8 @@ export async function applyCorrigoRows(
               contact = coalesce(nullif(btrim(contact), ''), $15::text),
               phone = coalesce(nullif(btrim(phone), ''), $16::text),
               received = coalesce(received, $17::date),
+              -- A pre-install visit links to its install once (11/14); a link already made stays.
+              visit_install_id = coalesce(visit_install_id, (select i.id from installs i where i.id = $18::int and not i.archived)),
               updated_at = now()
             where id = $1 and merged_install_id is null
           returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
@@ -864,6 +895,7 @@ export async function applyCorrigoRows(
             row.contact ?? null,
             row.phone ?? null,
             row.createdAt ?? null,
+            row.visitInstallId ?? null,
           ],
         )
       )[0];
@@ -899,6 +931,7 @@ export async function applyCorrigoRows(
           }
         }
       }
+      await moveVisitWo(sql, row, keptWo, actor);
       updated += 1;
       maybeReview(jobBoardKind, jobId, keptWo, customer, status, technician, done);
     } else if (action === "create") {
@@ -975,13 +1008,13 @@ export async function applyCorrigoRows(
       const status = boardStatus(board, row.statusRaw, row.completedAt, null).status;
       const done = CLOSED_CALL.has(status);
       const callId = await nextCallId(sql, received ?? todayChicago());
-      const inserted = await sql.query<{ id: number }>(
+      const inserted = await sql.query<{ id: number; visit_install_id: number | null }>(
         `insert into service_jobs
            (kind, call_id, customer, issue, technician, status, wo, work_done, completed_at, received, call_type, urgency, done,
-            po, equipment, contact, phone, service_location, corrigo_id, corrigo_net)
+            po, equipment, contact, phone, service_location, corrigo_id, corrigo_net, visit_install_id)
          values
-           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-         returning id`,
+           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, (select i.id from installs i where i.id = $21::int and not i.archived))
+         returning id, visit_install_id`,
         [
           kind,
           callId,
@@ -1003,11 +1036,16 @@ export async function applyCorrigoRows(
           row.serviceLocation ?? null,
           row.corrigoId ?? null,
           row.corrigoNet ?? null,
+          row.visitInstallId ?? null,
         ],
       );
       const id = inserted[0]?.id;
       if (id) {
-        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}`);
+        const linked = inserted[0]?.visit_install_id;
+        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (linked ? ` · pre-install visit for install #${linked}` : ""));
+        // A pre-install visit whose WO was on an install (11/14): the WO is the ticket's now, so it leaves the install.
+        // The install keeps its status and dates.
+        await moveVisitWo(sql, row, wo, actor);
         created += 1;
         maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }

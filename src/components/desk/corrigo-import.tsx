@@ -202,13 +202,16 @@ type RowDraft = {
    * can change as earlier rows change (a later row follows the first row's new install).
    */
   installChoice?: number | null;
+  /** A pre-install visit the person says is the install ticket after all (11/14): the row goes on the install. */
+  asInstall?: boolean;
 };
 
 /** A row with no account to write with starts unticked: it needs one picked (10/28). */
 function draftFor(row: CorrigoPreviewRow): RowDraft {
   const applicable = row.action === "update" || row.action === "create";
   return {
-    selected: applicable && !row.needsReview,
+    // A pre-install visit already on an install starts unticked too, so it can't install it unseen (11/14).
+    selected: applicable && !row.needsReview && !row.holdBack,
     customer: row.customer ?? "",
     customerEdited: false,
   };
@@ -253,11 +256,14 @@ function PreviewBody({
     setDrafts(next);
   }, [preview]);
 
+  // A pre-install visit the person turned back into the install ticket is that row (11/14).
+  const base = useMemo(() => preview.rows.map((r) => (r.preInstall && drafts[rowKey(r)]?.asInstall ? r.preInstall.asInstall : r)), [preview.rows, drafts]);
+  const visitOf = useMemo(() => new Map(preview.rows.filter((r) => r.preInstall).map((r) => [rowKey(r), r.preInstall!])), [preview.rows]);
   // The rows as the import will write them with each install row's choice, in file order (the import repeats this).
   const rows = useMemo(
     () =>
       settleInstallRows(
-        preview.rows,
+        base,
         // null is a choice too (a new install); a row nobody picked for (undefined) takes the preselection.
         (r) => drafts[rowKey(r)]?.installChoice,
         (r) => drafts[rowKey(r)]?.selected ?? true,
@@ -267,8 +273,10 @@ function PreviewBody({
           return d && d.customerEdited ? customerOf(r, d) : undefined;
         },
       ),
-    [preview.rows, drafts],
+    [base, drafts],
   );
+  const heldBack = rows.filter((r) => r.holdBack && r.action !== "skip" && !drafts[rowKey(r)]?.selected).length;
+  const preInstallKept = rows.filter((r) => r.preInstall && r.action !== "skip" && drafts[rowKey(r)]?.selected).length;
   const applicable = rows.filter((r) => r.action === "update" || r.action === "create");
   const selectedUpdates = applicable.filter(
     (r) => drafts[rowKey(r)]?.selected && r.action === "update",
@@ -326,6 +334,8 @@ function PreviewBody({
       const next = { ...cur };
       for (const row of applicable) {
         const key = rowKey(row);
+        // A row held for approval (no Install on its P.O.) is ticked one at a time, never by Select all (11/14).
+        if (selected && row.holdBack && !next[key]?.selected) continue;
         next[key] = { ...(next[key] ?? draftFor(row)), selected };
       }
       return next;
@@ -338,12 +348,14 @@ function PreviewBody({
       const d = drafts[rowKey(row)];
       const applicableRow = row.action === "update" || row.action === "create";
       // The picker's options stay here; the import re-reads the chosen install itself.
-      const lean = { ...row, installOptions: null, installState: null, account: null };
+      const lean = { ...row, installOptions: null, installState: null, account: null, preInstall: null };
       if (!applicableRow || !d?.selected) return { ...lean, action: "skip" as const };
       const customer = customerOf(row, d).trim() || row.customer;
       return { ...lean, customer };
     });
-    onConfirm(out);
+    // A visit's WO comes off its install before that install's rows are written, chunks or not (11/14).
+    const moves = (r: (typeof out)[number]) => r.action !== "skip" && !!r.visitFromInstall;
+    onConfirm([...out.filter(moves), ...out.filter((r) => !moves(r))]);
   }
 
   return (
@@ -396,6 +408,18 @@ function PreviewBody({
               ? "1 new ticket gets no received date: the file has no created date for it."
               : `${noReceived.length} new tickets get no received date: the file has no created date for them.`}{" "}
             Fill it on the ticket, or export the report with its Created column.
+          </li>
+        ) : null}
+        {heldBack ? (
+          <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-held-count">
+            <span className="font-medium">{heldBack}</span> install row{heldBack === 1 ? "" : "s"} wait{heldBack === 1 ? "s" : ""} for approval: the
+            P.O. doesn't say Install. Tick each one that belongs on an install; Select all leaves them.
+          </li>
+        ) : null}
+        {preInstallKept ? (
+          <li className="rounded-lg border border-border bg-muted/40 px-3 py-2" data-testid="corrigo-preinstall-count">
+            <span className="font-medium">{preInstallKept}</span> pre-install visit{preInstallKept === 1 ? "" : "s"}: each goes on as its own
+            ticket, and the install keeps its status. Tick "Treat as the install ticket" on a row that is the install work.
           </li>
         ) : null}
         {descKept || descFlagged || descFilled || descFuller ? (
@@ -545,6 +569,26 @@ function PreviewBody({
                     {walkIn ? (
                       <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
                         Walk-In
+                      </span>
+                    ) : null}
+                    {visitOf.get(key) && !locked ? (
+                      <span className="mt-1 block text-[11px] font-normal normal-case tracking-normal">
+                        {r.preInstall ? <span className="block font-medium text-primary">{r.preInstall.label}</span> : null}
+                        <label className="mt-0.5 flex items-center gap-1.5 text-muted-foreground">
+                          <input
+                            type="checkbox"
+                            className="size-3.5 accent-primary"
+                            checked={!!d.asInstall}
+                            disabled={pending}
+                            onChange={(e) => {
+                              // The install row needs no account picked when it goes on an install: tick it then.
+                              const next = e.target.checked ? visitOf.get(key)!.asInstall : preview.rows.find((x) => rowKey(x) === key)!;
+                              patch(key, { asInstall: e.target.checked, selected: !next.needsReview && (next.action === "update" || next.action === "create") });
+                            }}
+                            data-testid="corrigo-preinstall-override"
+                          />
+                          Treat as the install ticket
+                        </label>
                       </span>
                     ) : null}
                   </td>
