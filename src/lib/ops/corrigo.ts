@@ -373,8 +373,10 @@ export type CorrigoPreviewRow = {
   preInstall?: { label: string; note: string; installId: number | null; asInstall: CorrigoPreviewRow } | null;
   /** The install a pre-install visit's ticket is linked to (service_jobs.visit_install_id). */
   visitInstallId?: number | null;
-  /** Starts unticked: a pre-install visit whose WO is already on an install, which it would otherwise install. */
+  /** Starts unticked for approval (Chuy, 11/14): an install row whose P.O. doesn't say Install. */
   holdBack?: boolean;
+  /** A pre-install visit whose WO was on an install: Confirm takes the WO off it once the visit's ticket is made. */
+  visitFromInstall?: { installId: number; matchKey: string } | null;
   /** A new service or TLC ticket's Type and urgency. */
   callTypeValue?: string | null;
   urgency?: string | null;
@@ -1444,7 +1446,8 @@ export function resolvePreviewRow(
   opts: RowOpts = {},
 ): CorrigoPreviewRow {
   const row = resolveRow(rec, match, opts, false);
-  if (row.action === "skip" || !isPreInstallVisit(rec.issue, rec.workDone)) return row;
+  if (row.action === "skip") return row;
+  if (!isPreInstallVisit(rec.issue, rec.workDone)) return poApproval(rec, row);
   if (row.board === "service" && PRE_INSTALL_STRONG.test(visitText(rec.issue, rec.workDone))) {
     // A service ticket that says pre-install or pre-inspection (its own ticket already, or words without "install"):
     // linked to the account's one open install, so the next import links one that wasn't (review, 11/14).
@@ -1454,29 +1457,45 @@ export function resolvePreviewRow(
     return { ...row, visitInstallId: installId, matchNote: [row.matchNote, `${PRE_INSTALL_LABEL}: linked to install #${installId}`].filter(Boolean).join(" · ") };
   }
   if (row.board !== "install") return row;
-  if (row.jobId != null && !row.byAccount) {
-    // Already on the install: it stays there, but starts unticked, so a visit can't install it by itself (review, 11/14).
-    const text = `Reads like a pre-install visit, but ${rec.canonicalWo} is already on install #${row.jobId}: left unticked. Tick it if this is the install work`;
-    return { ...row, holdBack: true, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
-  }
+  // Nothing is installed on a pre-install visit (Chuy, 11/14): a WO already on an install leaves it for its own ticket.
+  const onInstall = row.jobId != null && !row.byAccount ? row.jobId : null;
   // The account's one open install under its own name links the visit; more than one, or another name, links none.
   const own = (row.installOptions ?? []).filter((o) => o.id != null && !o.otherName);
-  const installId = own.length === 1 ? own[0]!.id : null;
+  const installId = onInstall ?? (own.length === 1 ? own[0]!.id : null);
   const note =
-    installId != null
-      ? `linked to install #${installId}`
-      : own.length > 1
-        ? `${own.length} open installs on this account: not linked`
-        : "no open install on this account: not linked";
+    onInstall != null
+      ? `moves ${rec.canonicalWo} off install #${onInstall}, linked to it`
+      : installId != null
+        ? `linked to install #${installId}`
+        : own.length > 1
+          ? `${own.length} open installs on this account: not linked`
+          : "no open install on this account: not linked";
   const visit = resolveRow(rec, match, opts, true);
   return {
     ...visit,
     callTypeValue: "Field Service",
     visitInstallId: installId,
+    visitFromInstall: onInstall != null ? { installId: onInstall, matchKey: rec.matchKey } : null,
+    // An earlier import may have installed it on this visit: the import leaves the install as it is, so say so.
+    descriptionNotes:
+      onInstall != null && row.oldStatus === "Installed"
+        ? [...(visit.descriptionNotes ?? []), { text: `Install #${onInstall} is Installed already, maybe from this visit. Check it`, warn: true }]
+        : visit.descriptionNotes,
     // The screen shows the label as the row's tag; the note says what it links to.
     matchNote: [visit.matchNote, note].filter(Boolean).join(" · "),
     preInstall: { label: PRE_INSTALL_LABEL, note, installId, asInstall: row },
   };
+}
+
+/**
+ * Install on the P.O. is the first sign a row belongs on an install (Chuy, 11/14). A row the import would put on an
+ * install by anything else (its description, a Type column, the account's open install) starts unticked for approval.
+ * A WO already on an install stays where it is.
+ */
+function poApproval(rec: CorrigoRecord, row: CorrigoPreviewRow): CorrigoPreviewRow {
+  if (row.board !== "install" || (row.jobId != null && !row.byAccount) || /\binstall/i.test(rec.po ?? "")) return row;
+  const text = "Goes on an install, but its P.O. doesn't say Install: left unticked. Tick it to approve";
+  return { ...row, holdBack: true, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
 }
 
 function resolveRow(
@@ -1492,7 +1511,10 @@ function resolveRow(
   const group = [
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
-  ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
+  ]
+    .filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i)
+    // A visit never goes on an install, even one its WO is on.
+    .filter((h) => !asVisit || h.board !== "install");
   const route = asVisit ? { board: "service" as CorrigoBoard, note: null } : hintedBoard(rec);
   const hinted = route.board;
   const live = group.filter((h) => !h.duplicateOf);

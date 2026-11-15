@@ -38,7 +38,7 @@ import { stripServiceChannelId } from "@/lib/ops/billing-rules";
 import { nameKey } from "@/lib/ops/wo-history";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ } from "@/lib/ops/ticket-billing-api";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
-import { INSTALL_WOS_SQL, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
+import { INSTALL_WOS_SQL, dropInstallWo, loadInstallWos, recordInstallWo } from "@/lib/ops/install-work-orders";
 import { customersStrictlyMatch } from "@/lib/ops/clean-names";
 import { moveInstallUnits } from "@/lib/ops/install-projects";
 import { attachHeldReview, reconcileServiceDuplicates, tryMergeServiceDuplicate, type HeldReview } from "@/lib/ops/wo-duplicates";
@@ -526,6 +526,7 @@ const applyRow = z.object({
   corrigoNet: z.number().nullable().optional(),
   callTypeValue: z.string().max(60).nullable().optional(),
   visitInstallId: z.number().int().nullable().optional(),
+  visitFromInstall: z.object({ installId: z.number().int(), matchKey: z.string().max(40) }).nullable().optional(),
   urgency: z.string().max(30).nullable().optional(),
 });
 
@@ -620,7 +621,9 @@ export async function applyCorrigoRows(
     }
     if (action === "create" || (action === "update" && !jobId)) {
       const hit = await findExistingHit(sql, matchKey, board, row.customer, wrapped, row.createdAt || today, row);
-      if (hit) {
+      // A pre-install visit never goes on an install, even the one its WO is on (11/14): it's a ticket of its own.
+      const visit = !!row.visitFromInstall || row.visitInstallId != null;
+      if (hit && !(visit && hit.board === "install")) {
         action = "update";
         jobId = hit.id;
         board = hit.board;
@@ -1016,6 +1019,13 @@ export async function applyCorrigoRows(
       if (id) {
         const linked = inserted[0]?.visit_install_id;
         await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (linked ? ` · pre-install visit for install #${linked}` : ""));
+        // A pre-install visit whose WO was on an install (11/14): the WO is the ticket's now, so it leaves the install.
+        // The install keeps its status and dates.
+        const from = row.visitFromInstall;
+        if (from && (await sql.query("select 1 from install_work_orders where install_id = $1 and match_key = $2", [from.installId, from.matchKey])).length) {
+          const primary = await dropInstallWo(sql, from.installId, from.matchKey);
+          await logCorrigo(sql, "install", from.installId, actor, `${wo} moved to its own ticket: a pre-install visit` + (primary ? ` · ${primary} is the first WO now` : ""));
+        }
         created += 1;
         maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }

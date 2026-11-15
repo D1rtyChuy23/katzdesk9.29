@@ -55,7 +55,7 @@ async function freshDb() {
   return { pg, sql, query, install };
 }
 const file = (rows) =>
-  C.parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Type", "Problem Description", "Date Completed"], ...rows]).records;
+  C.parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Type", "Problem Description", "Date Completed", "P.O. #"], ...rows]).records;
 const one = (preview, wo) => preview.rows.find((r) => r.canonicalWo === wo);
 
 test("WO-1065's shape: a new Field Service ticket linked to the open install, which stays Ready; a second import updates it", async () => {
@@ -96,13 +96,13 @@ test("WO-1065's shape: a new Field Service ticket linked to the open install, wh
   }
 });
 
-test("a normal install completion still goes on the install and installs it", async () => {
+test("a normal install completion with Install on its P.O. still goes on the install and installs it", async () => {
   const { pg, sql, query, install } = await freshDb();
   try {
     const id = await install("ZZ Test Club");
-    const preview = await previewCorrigoRecords(sql, file([["1070", "Completed", "ZZ Test Club", "Request", "ZZ Legacy L2:OTHER:Install the new ZZ Legacy and train staff", "11/19/2026"]]));
+    const preview = await previewCorrigoRecords(sql, file([["1070", "Completed", "ZZ Test Club", "Request", "ZZ Legacy L2:OTHER:Install the new ZZ Legacy and train staff", "11/19/2026", "Install SO0001"]]));
     const row = one(preview, "WO-1070");
-    assert.deepEqual([row.board, row.jobId, row.byAccount, row.newStatus, row.preInstall ?? null], ["install", id, true, "Installed", null]);
+    assert.deepEqual([row.board, row.jobId, row.byAccount, row.newStatus, row.preInstall ?? null, !!row.holdBack], ["install", id, true, "Installed", null, false]);
     await applyCorrigoRows(sql, preview.rows, "boss");
     assert.equal((await query("select equip_status from installs where id = $1", [id]))[0].equip_status, "Installed");
     assert.equal((await query("select count(*)::int as n from service_jobs where wo = 'WO-1070'"))[0].n, 0);
@@ -159,23 +159,54 @@ test("no open install: a pre-install visit is still its own ticket, not a new in
   }
 });
 
-test("a completed visit whose WO is already on an install stays on it, but starts unticked and flagged", async () => {
+test("a visit whose WO is already on an install becomes its own Field Service ticket and leaves the install", async () => {
   const { pg, sql, query, install } = await freshDb();
   try {
     const id = await install("ZZ Test Club");
-    await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-1074', '1074', 'Open', 'corrigo')", [id]);
+    await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-1074', '1074', 'Open', 'corrigo'), ($1, 'WO-1080', '1080', 'Open', 'corrigo')", [id]);
     await query("update installs set wo = 'WO-1074' where id = $1", [id]);
     const preview = await previewCorrigoRecords(sql, file([["1074", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
     const row = one(preview, "WO-1074");
-    assert.deepEqual([row.board, row.jobId, row.preInstall ?? null, row.holdBack], ["install", id, null, true]);
-    assert.ok(
-      row.descriptionNotes.some(
-        (n) => n.warn && n.text === `Reads like a pre-install visit, but WO-1074 is already on install #${id}: left unticked. Tick it if this is the install work`,
-      ),
-    );
-    // Unticked, the screen sends it as a skip: the install stays Ready.
-    await applyCorrigoRows(sql, [{ ...row, action: "skip" }], "boss");
-    assert.deepEqual(Object.values((await query("select equip_status, complete from installs where id = $1", [id]))[0]), ["Ready", false]);
+    assert.deepEqual([row.board, row.action, row.jobId, row.visitInstallId, row.callTypeValue], ["service", "create", null, id, "Field Service"]);
+    assert.deepEqual(row.visitFromInstall, { installId: id, matchKey: "1074" });
+    assert.equal(row.preInstall.note, `moves WO-1074 off install #${id}, linked to it`);
+    assert.deepEqual([row.preInstall.asInstall.board, row.preInstall.asInstall.jobId], ["install", id]);
+    await applyCorrigoRows(sql, preview.rows, "boss");
+    const t = (await query("select kind, status, call_type, visit_install_id from service_jobs where wo = 'WO-1074'"))[0];
+    assert.deepEqual([t.kind, t.status, t.call_type, t.visit_install_id], ["service", "Completed", "Field Service", id]);
+    const after = (await query("select equip_status, complete, completed_at, wo from installs where id = $1", [id]))[0];
+    assert.deepEqual([after.equip_status, after.complete, after.completed_at, after.wo], ["Ready", false, null, "WO-1080"]);
+    assert.deepEqual((await query("select wo from install_work_orders where install_id = $1", [id])).map((r) => r.wo), ["WO-1080"]);
+    const log = (await query("select detail from activity where entity_type = 'install' and entity_id = $1", [id])).map((r) => r.detail).join(" | ");
+    assert.match(log, /WO-1074 moved to its own ticket: a pre-install visit/);
+    // An install an earlier import already installed is left as it is, and the row says so.
+    const done = await install("ZZ Test Club");
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-13', wo = 'WO-1090' where id = $1", [done]);
+    await query("insert into install_work_orders (install_id, wo, match_key, status, source) values ($1, 'WO-1090', '1090', 'Completed', 'corrigo')", [done]);
+    const old = await previewCorrigoRecords(sql, file([["1090", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
+    assert.ok(one(old, "WO-1090").descriptionNotes.some((n) => n.warn && n.text === `Install #${done} is Installed already, maybe from this visit. Check it`));
+    // The next import finds the ticket, not the install.
+    const again = await previewCorrigoRecords(sql, file([["1074", "Completed", "ZZ Test Club", "Request", VISIT, "11/13/2026"]]));
+    assert.deepEqual([one(again, "WO-1074").board, one(again, "WO-1074").action], ["service", "update"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Install on the P.O. is the first sign: an install row by its description, Type or account alone starts unticked for approval", async () => {
+  const { pg, sql, install } = await freshDb();
+  try {
+    const id = await install("ZZ Test Club");
+    const preview = await previewCorrigoRecords(sql, file([
+      ["1081", "Completed", "ZZ Test Club", "Request", "Install the new ZZ grinder", "11/19/2026", ""],
+      ["1082", "Open", "ZZ Test Twin", "Install", "New brewer", "", ""],
+      ["1083", "Open", "ZZ Test Twin", "Request", "New brewer", "", "Installation SO2"],
+    ]));
+    const byDescription = one(preview, "WO-1081");
+    assert.deepEqual([byDescription.board, byDescription.jobId, byDescription.holdBack], ["install", id, true]);
+    assert.ok(byDescription.descriptionNotes.some((n) => n.warn && n.text === "Goes on an install, but its P.O. doesn't say Install: left unticked. Tick it to approve"));
+    assert.deepEqual([one(preview, "WO-1082").board, one(preview, "WO-1082").holdBack], ["install", true]);
+    assert.deepEqual([one(preview, "WO-1083").board, !!one(preview, "WO-1083").holdBack], ["install", false]);
   } finally {
     await pg.close();
   }
