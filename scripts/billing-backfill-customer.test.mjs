@@ -20,7 +20,8 @@ async function fresh() {
   for (const name of readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
   await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-owner', 'chuy', true, true, 'admin')");
   await pg.query(`insert into directory_customers (name, netsuite_id) values
-    ('Zz Bean Cafe', 'C10'), ('Zz Rock Coffee Webster', 'C20'), ('Zz Market Westgate', 'C30'), ('Zz Market Westgate Coffee Bar', 'C31')`);
+    ('Zz Bean Cafe', '1010'), ('Zz Rock Coffee Webster', '1020'), ('Zz Market Westgate', '1030'), ('Zz Market Westgate Coffee Bar', '1031')`);
+  await pg.query("update directory_customers set account_number = 'C' || netsuite_id");
   return { pg, query: async (text, params) => (await pg.query(text, params)).rows };
 }
 let n = 0;
@@ -39,20 +40,30 @@ const HEAD = ["WO", "SO #", "SO status", "Invoice #", "Invoice date", "Invoice s
 const row = (wo, inv, customer) => [wo, `SO${inv}`, "Billed", `INV${inv}`, "2026-10-12", "Open", "150", "150", customer];
 const invoicesOf = async (sql, id) => (await sql.query("select ns_invoice from ticket_invoices where job_id = $1", [id])).map((r) => r.ns_invoice);
 
-test("the account check: the exact name, NetSuite's Parent : Child leaf, or the account's NetSuite ID; never the store alone", () => {
-  const ids = new Map([["zz market westgate", "C30"], ["zz market westgate coffee bar", "C31"]]);
+test("the account check: the exact name, NetSuite's Parent : Child leaf, or the account's NetSuite number; never the store alone", () => {
+  const ids = new Map([["zz market westgate", ["4830", "C1030"]], ["zz market westgate coffee bar", ["4831"]]]);
   const m = (ns, card) => bf.nsCustomerMatches(ns, card, ids);
   assert.equal(m("Zz Bean Cafe", "Zz Bean Cafe"), true);
   assert.equal(m("Zz Parent : Zz Bean Cafe", "Zz Bean Cafe"), true);
-  assert.equal(m("C30 Zz Market - Westgate", "Zz Market Westgate"), true, "the linked NetSuite ID, whatever the name");
-  assert.equal(m("C30", "Zz Market Westgate"), true);
+  assert.equal(m("Zz Parent : Zz Bean Cafe", "Zz Parent : Zz Bean Cafe"), true);
+  assert.equal(m("Zz Bean Cafe", "Zz Parent : Zz Bean Cafe"), true, "a card stored as Parent : Child, a leaf in the file");
+  // Spelling NetSuite and KatzDesk differ on: punctuation, accents, a trailing LLC.
+  assert.equal(m("Zz Bean Café, LLC", "Zz Bean Cafe"), true);
+  assert.equal(m("Zz Market - Westgate", "Zz Market Westgate"), true);
   assert.equal(m("4821 Zz Bean Cafe", "Zz Bean Cafe"), true, "a leading NetSuite number before the exact name");
-  assert.equal(m("4821 Zz Market Westgate Coffee Bar", "Zz Market Westgate"), false);
-  assert.equal(m("C31 Zz Market Westgate Coffee Bar", "Zz Market Westgate"), false, "the Coffee Bar's own account");
+  assert.equal(m("7 Leaves Cafe", "Leaves Cafe"), false, "a short leading number is part of the name");
+  // The account's own NetSuite number (or internal ID), whatever the name.
+  assert.equal(m("4830 Zz Market (Westgate store)", "Zz Market Westgate"), true);
+  assert.equal(m("4830", "Zz Market Westgate"), true);
+  assert.equal(m("C1030", "Zz Market Westgate"), true);
+  assert.equal(m("48300 Zz Other", "Zz Market Westgate"), false, "a number only matches whole");
+  // The Coffee Bar's own account is another account.
+  assert.equal(m("4831 Zz Market Westgate Coffee Bar", "Zz Market Westgate"), false);
   assert.equal(m("Zz Market Westgate Coffee Bar", "Zz Market Westgate"), false);
   assert.equal(m("Zz Market Westgate", "Zz Market Westgate Coffee Bar"), false);
-  assert.equal(m("C300 Zz Other", "Zz Market Westgate"), false, "an ID only matches whole");
+  // Walk-In: alone, or as the parent NetSuite bills under the account's name.
   assert.equal(m("Walk-In", "Zz Rock Coffee Webster"), false);
+  assert.equal(m("Walk-In : Zz Rock Coffee Webster", "Zz Rock Coffee Webster"), false);
   assert.equal(m("", "Zz Bean Cafe"), true, "no NetSuite customer: nothing to check");
 });
 
@@ -63,12 +74,12 @@ test("a match stays ticked; Walk-In on another card and a Coffee Bar invoice on 
     const walk = await ticket(sql, "Zz Rock Coffee Webster", "WO-1040");
     const cm = await ticket(sql, "Zz Market Westgate", "WO-0564");
     const cmById = await ticket(sql, "Zz Market Westgate", "WO-0567");
-    const f = [file("invoices.csv", [HEAD, row("WO-1001", "9001", "Zz Bean Cafe"), row("WO-1040", "9516", "Walk-In"), row("WO-0564", "9564", "C31 Zz Market Westgate Coffee Bar"), row("WO-0567", "9567", "C30 Zz Market - Westgate")])];
+    const f = [file("invoices.csv", [HEAD, row("WO-1001", "9001", "Zz Bean Cafe"), row("WO-1040", "9516", "Walk-In"), row("WO-0564", "9564", "C1031 Zz Market Westgate Coffee Bar"), row("WO-0567", "9567", "C1030 Zz Market (Westgate)")])];
     const p = await api.previewBillingBackfillFor(sql, f, "u-owner");
     const by = Object.fromEntries(p.plans.map((x) => [x.wo, x]));
     assert.deepEqual([by["WO-1001"].hold, by["WO-0567"].hold], [null, null]);
     assert.equal(by["WO-1040"].hold, "NetSuite bills Walk-In, card is Zz Rock Coffee Webster");
-    assert.equal(by["WO-0564"].hold, "NetSuite bills C31 Zz Market Westgate Coffee Bar, card is Zz Market Westgate");
+    assert.equal(by["WO-0564"].hold, "NetSuite bills C1031 Zz Market Westgate Coffee Bar, card is Zz Market Westgate");
     assert.ok(by["WO-1040"].warnings.includes("NetSuite bills Walk-In, card is Zz Rock Coffee Webster"));
     assert.equal(p.counts.held, 2);
 
@@ -82,6 +93,18 @@ test("a match stays ticked; Walk-In on another card and a Coffee Bar invoice on 
     assert.deepEqual(await invoicesOf(sql, walk), ["INV9516"]);
     assert.deepEqual(await invoicesOf(sql, cm), [], "the other held row stays out");
     assert.ok(done.plans);
+  } finally {
+    await sql.pg.close();
+  }
+});
+
+test("every NetSuite customer on a WO is checked, charges and invoices alike", async () => {
+  const sql = await fresh();
+  try {
+    await ticket(sql, "Zz Bean Cafe", "WO-1050");
+    const f = [file("invoices.csv", [HEAD, row("WO-1050", "9050", "Zz Bean Cafe"), row("WO-1050", "9051", "Walk-In")])];
+    const p = await api.previewBillingBackfillFor(sql, f, "u-owner");
+    assert.equal(p.plans[0].hold, "NetSuite bills Walk-In, card is Zz Bean Cafe");
   } finally {
     await sql.pg.close();
   }

@@ -161,13 +161,20 @@ export async function loadBackfillContext(sql: Q, keys: string[], invoiceKeys: s
   }
   // Each card's account and its linked NetSuite ID, for the customer check (11/15).
   const names = [...new Set([...tickets.map((t) => t.customer), ...records.map((r) => r.customer)].filter((c): c is string => !!c?.trim()))];
-  const accountIds = new Map<string, string>();
+  const accountIds = new Map<string, string[]>();
   if (names.length) {
-    const linked = await sql.query<{ name: string; netsuite_id: string | null }>(
-      "select name, netsuite_id from directory_customers where lower(name) = any($1::text[]) and nullif(btrim(netsuite_id), '') is not null",
+    // Live accounts only; the first by id wins a name two accounts share in different case.
+    const linked = await sql.query<{ name: string; netsuite_id: string | null; account_number: string | null }>(
+      `select name, netsuite_id, account_number from directory_customers
+        where archived = false and lower(btrim(name)) = any($1::text[])
+          and (nullif(btrim(netsuite_id), '') is not null or nullif(btrim(account_number), '') is not null)
+        order by id`,
       [names.map((n) => n.trim().toLowerCase())],
     );
-    for (const a of linked) accountIds.set(nameKey(a.name), a.netsuite_id!.trim());
+    for (const a of linked) {
+      const key = nameKey(a.name);
+      if (!accountIds.has(key)) accountIds.set(key, [a.account_number, a.netsuite_id].map((v) => (v ?? "").trim()).filter(Boolean));
+    }
   }
   return { tickets, records, otherBoards, recordedAt: await loadRecordedAt(sql, invoiceKeys), accountIds };
 }
