@@ -102,6 +102,13 @@ function Page() {
   const [fileToDelete, setFileToDelete] = useState<LibraryFile | null>(null);
   const [renaming, setRenaming] = useState<{ manufacturer: string; model: string } | null>(null);
   const [openMaker, setOpenMaker] = useState<string | null>(null);
+  // With a manufacturer picked, its card stands alone (11/14); All manufacturers shows every card again.
+  const [allMakers, setAllMakers] = useState(false);
+  // A model in the address names its own maker: Back or a link to another model's maker opens that maker, not the one
+  // last clicked (11/14).
+  useEffect(() => {
+    if (bookParam != null) setOpenMaker(null);
+  }, [bookParam]);
   const [manage, setManage] = useState(false);
   const [adding, setAdding] = useState(false);
   const [readOnAdd, setReadOnAdd] = useState(true);
@@ -112,7 +119,8 @@ function Page() {
   const [found, setFound] = useState<{ image: string | null; dimsImage: string | null; note: string | null; file: string } | null>(null);
   const bookPanel = useRef<HTMLDivElement>(null);
 
-  const go = (s: Search) => void navigate({ to: "/library", search: { ...s, tab: s.tab ?? (tab === "library" ? undefined : tab) } });
+  // Picks inside the Library keep your place (Chuy, 11/14): what you opened scrolls into view below instead.
+  const go = (s: Search) => void navigate({ to: "/library", search: { ...s, tab: s.tab ?? (tab === "library" ? undefined : tab) }, resetScroll: false });
   const reload = () =>
     Promise.all([
       qc.invalidateQueries({ queryKey: ["library-files"] }),
@@ -122,9 +130,19 @@ function Page() {
     ]);
   const fail = (e: unknown, fallback: string) => toast.error(e instanceof Error ? e.message : fallback);
 
+  // What you opened comes to the top of the screen (11/14): a spec sheet, else the model you moved to. Closing a sheet
+  // leaves the page where it is. Runs again once the lists load, so a shared link lands on its sheet too.
+  const sheetPanel = useRef<HTMLDivElement>(null);
+  const seen = useRef<{ book: number | null; open: number | null }>({ book: null, open: null });
+  const sheetShown = !!selected && !!book;
   useEffect(() => {
-    if (book) bookPanel.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [book?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    const now = { book: book?.id ?? null, open: sheetShown ? (open ?? null) : null };
+    const opened = now.open != null && now.open !== seen.current.open;
+    const moved = now.book != null && now.book !== seen.current.book;
+    seen.current = now;
+    if (opened && sheetPanel.current) sheetPanel.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    else if (moved && bookPanel.current) bookPanel.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [book?.id, open, sheetShown]);
 
   // A file dropped beside a drop zone must not make the browser leave the page to open it.
   useEffect(() => {
@@ -303,7 +321,7 @@ function Page() {
     setQ("");
     setOpenMaker(null);
     setMode("edit");
-    void navigate({ to: "/library", search: { book: bookId, open: sheetId } });
+    void navigate({ to: "/library", search: { book: bookId, open: sheetId }, resetScroll: false });
     return true;
   }
 
@@ -324,7 +342,7 @@ function Page() {
       setHandSeed(null);
       setImportFile({ file: new File([await res.blob()], file.name, { type: file.mime || "application/pdf" }), bookId: hand.bookId });
       setMode("import");
-      void navigate({ to: "/library", search: { book: hand.bookId } });
+      void navigate({ to: "/library", search: { book: hand.bookId }, resetScroll: false });
     } catch (e) {
       fail(e, "Couldn't open that file.");
     }
@@ -339,7 +357,7 @@ function Page() {
     setHandSeed({ manufacturer, model: modelLabel(book.title, manufacturer) });
     setImportFile({ file: null, bookId: book.id });
     setMode("import");
-    void navigate({ to: "/library", search: { book: book.id } });
+    void navigate({ to: "/library", search: { book: book.id }, resetScroll: false });
   }
 
   /** After the AI read is saved: the sheet joins its book and the original PDF is kept there. */
@@ -491,6 +509,7 @@ function Page() {
   const wanted = openMaker ?? book?.manufacturer ?? (needle && makers.length === 1 ? makers[0]! : null);
   const activeMaker = wanted && makers.includes(wanted) ? wanted : null;
   const models = shownBooks.filter((b) => b.manufacturer === activeMaker);
+  const makerCards = activeMaker && !allMakers ? [activeMaker] : makers;
   // Current models stay in the main row (family, then variation). Legacy models sit in their own row under the maker.
   const { current: currentModels, legacy: legacyModels } = splitLegacy(models);
   const current = book && book.manufacturer === activeMaker && models.some((m) => m.id === book.id) ? book : currentModels[0] ?? models[0] ?? null;
@@ -608,7 +627,7 @@ function Page() {
       ) : (
         <>
           <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" role="radiogroup" aria-label="Manufacturer" data-testid="library-makers">
-            {makers.map((maker) => {
+            {makerCards.map((maker) => {
               const mine = shownBooks.filter((b) => b.manufacturer === maker);
               const count = mine.length;
               const on = maker === activeMaker;
@@ -629,6 +648,7 @@ function Page() {
                   data-maker={maker}
                   onClick={() => {
                     setMode("browse");
+                    setAllMakers(false);
                     setOpenMaker(on ? "" : maker);
                     go(on ? {} : { book: (shownBooks.find((b) => b.manufacturer === maker && !b.legacy) ?? shownBooks.find((b) => b.manufacturer === maker))!.id });
                   }}
@@ -643,10 +663,20 @@ function Page() {
                 </button>
               );
             })}
+            {activeMaker && !allMakers && makers.length > 1 ? (
+              <button
+                type="button"
+                className="flex min-h-18 flex-col justify-center rounded-xl border border-dashed border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                onClick={() => setAllMakers(true)}
+                data-testid="library-all-makers"
+              >
+                All manufacturers · {makers.length}
+              </button>
+            ) : null}
           </div>
 
           {current && inside ? (
-            <section ref={bookPanel} className="mt-4 scroll-mt-24 rounded-xl border border-border bg-card px-4 pb-4" aria-label={current.title} data-testid="open-book">
+            <section ref={bookPanel} className="mt-4 scroll-mt-32 rounded-xl border border-border bg-card px-4 pb-4 sm:scroll-mt-24" aria-label={current.title} data-testid="open-book">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 pt-3">
                 <button type="button" className="text-sm text-muted-foreground hover:text-foreground hover:underline" onClick={() => { setOpenMaker(""); go({}); }}>
                   The Library
@@ -863,7 +893,7 @@ function Page() {
                         <SpecImport key={`edit-${selected.id}`} editing={selected} aiReady={!!data.data?.aiReady} onCancel={() => { setMode("browse"); setHandFile(null); }} onSaved={(id) => void afterEdit(id, current.id)} />
                       </div>
                     ) : selected && mode === "browse" && sheetBook.get(selected.id) === current.id ? (
-                      <div className="mt-4" data-testid="book-spec-sheet">
+                      <div ref={sheetPanel} className="mt-4 scroll-mt-32 sm:scroll-mt-24" data-testid="book-spec-sheet">
                         <SpecSheetView
                           sheet={selected}
                           canEdit={canEdit}
