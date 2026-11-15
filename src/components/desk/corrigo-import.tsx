@@ -202,6 +202,8 @@ type RowDraft = {
    * can change as earlier rows change (a later row follows the first row's new install).
    */
   installChoice?: number | null;
+  /** A pre-install visit the person says is the install ticket after all (11/14): the row goes on the install. */
+  asInstall?: boolean;
 };
 
 /** A row with no account to write with starts unticked: it needs one picked (10/28). */
@@ -253,11 +255,14 @@ function PreviewBody({
     setDrafts(next);
   }, [preview]);
 
+  // A pre-install visit the person turned back into the install ticket is that row (11/14).
+  const base = useMemo(() => preview.rows.map((r) => (r.preInstall && drafts[rowKey(r)]?.asInstall ? r.preInstall.asInstall : r)), [preview.rows, drafts]);
+  const visitOf = useMemo(() => new Map(preview.rows.filter((r) => r.preInstall).map((r) => [rowKey(r), r.preInstall!])), [preview.rows]);
   // The rows as the import will write them with each install row's choice, in file order (the import repeats this).
   const rows = useMemo(
     () =>
       settleInstallRows(
-        preview.rows,
+        base,
         // null is a choice too (a new install); a row nobody picked for (undefined) takes the preselection.
         (r) => drafts[rowKey(r)]?.installChoice,
         (r) => drafts[rowKey(r)]?.selected ?? true,
@@ -267,8 +272,9 @@ function PreviewBody({
           return d && d.customerEdited ? customerOf(r, d) : undefined;
         },
       ),
-    [preview.rows, drafts],
+    [base, drafts],
   );
+  const preInstallKept = rows.filter((r) => r.preInstall && r.action !== "skip").length;
   const applicable = rows.filter((r) => r.action === "update" || r.action === "create");
   const selectedUpdates = applicable.filter(
     (r) => drafts[rowKey(r)]?.selected && r.action === "update",
@@ -338,7 +344,7 @@ function PreviewBody({
       const d = drafts[rowKey(row)];
       const applicableRow = row.action === "update" || row.action === "create";
       // The picker's options stay here; the import re-reads the chosen install itself.
-      const lean = { ...row, installOptions: null, installState: null, account: null };
+      const lean = { ...row, installOptions: null, installState: null, account: null, preInstall: null };
       if (!applicableRow || !d?.selected) return { ...lean, action: "skip" as const };
       const customer = customerOf(row, d).trim() || row.customer;
       return { ...lean, customer };
@@ -396,6 +402,12 @@ function PreviewBody({
               ? "1 new ticket gets no received date: the file has no created date for it."
               : `${noReceived.length} new tickets get no received date: the file has no created date for them.`}{" "}
             Fill it on the ticket, or export the report with its Created column.
+          </li>
+        ) : null}
+        {preInstallKept ? (
+          <li className="rounded-lg border border-border bg-muted/40 px-3 py-2" data-testid="corrigo-preinstall-count">
+            <span className="font-medium">{preInstallKept}</span> pre-install visit{preInstallKept === 1 ? "" : "s"}: each goes on as its own
+            ticket, linked to the account's open install, which keeps its status. Tick "Treat as the install ticket" on a row that is the install work.
           </li>
         ) : null}
         {descKept || descFlagged || descFilled || descFuller ? (
@@ -545,6 +557,22 @@ function PreviewBody({
                     {walkIn ? (
                       <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
                         Walk-In
+                      </span>
+                    ) : null}
+                    {visitOf.get(key) && !locked ? (
+                      <span className="mt-1 block text-[11px] font-normal normal-case tracking-normal">
+                        {r.preInstall ? <span className="block font-medium text-primary">{r.preInstall.label}</span> : null}
+                        <label className="mt-0.5 flex items-center gap-1.5 text-muted-foreground">
+                          <input
+                            type="checkbox"
+                            className="size-3.5 accent-primary"
+                            checked={!!d.asInstall}
+                            disabled={pending}
+                            onChange={(e) => patch(key, { asInstall: e.target.checked })}
+                            data-testid="corrigo-preinstall-override"
+                          />
+                          Treat as the install ticket
+                        </label>
                       </span>
                     ) : null}
                   </td>

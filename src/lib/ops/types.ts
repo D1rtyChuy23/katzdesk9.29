@@ -158,6 +158,18 @@ export type Deal = {
 
 
 /** One Corrigo work order on an install project (install_work_orders); the primary is installs.wo. */
+/** A pre-install visit linked to an install (11/14): its own service ticket, listed on the install's card. */
+export type InstallVisit = {
+  jobId: number;
+  wo: string | null;
+  callId: string | null;
+  status: string | null;
+  completedAt: string | null;
+  technician: string | null;
+  issue: string | null;
+  workDone: string | null;
+};
+
 export type InstallWorkOrder = {
   wo: string;
   matchKey: string;
@@ -208,6 +220,8 @@ export type Install = {
   /** A vendor's P.O. number, for reference only (11/2). */
   vendorPo: string | null;
   workOrders: InstallWorkOrder[];
+  /** Pre-install visits linked to this install: tickets of their own that never moved its status (11/14). */
+  visits?: InstallVisit[];
   /** The owner locked the customer: nobody changes it until the owner unlocks it. */
   customerLockedAt: string | null;
   customerLockedBy: string | null;

@@ -365,6 +365,14 @@ export type CorrigoPreviewRow = {
   corrigoId?: string | null;
   /** Corrigo's net ("Total Invoice"). */
   corrigoNet?: number | null;
+  /**
+   * A pre-install visit (11/14): a pre-inspection or site visit Corrigo files like install work. It goes on as its own
+   * Field Service ticket and never moves the install. `asInstall` is the row as the install ticket it would have been,
+   * for the preview's "Treat as the install ticket"; `installId` is the account's one open install it links to.
+   */
+  preInstall?: { label: string; note: string; installId: number | null; asInstall: CorrigoPreviewRow } | null;
+  /** The install a pre-install visit's ticket is linked to (service_jobs.visit_install_id). */
+  visitInstallId?: number | null;
   /** A new service or TLC ticket's Type and urgency. */
   callTypeValue?: string | null;
   urgency?: string | null;
@@ -1398,16 +1406,67 @@ export function settleInstallRows<T extends CorrigoPreviewRow>(
   });
 }
 
+/**
+ * A pre-install visit (Chuy, 11/14): a pre-inspection, pre-install or site visit, by its Problem Description or Work
+ * Done. Only a row that would go on an install is treated as one (resolvePreviewRow): a service row stays a service row.
+ */
+const PRE_INSTALL = /\bpre[\s-]?(?:inspection|install(?:ation)?)\b|\bsite\s+(?:visit|survey|inspection)\b/i;
+export function isPreInstallVisit(issue: string | null | undefined, workDone: string | null | undefined): boolean {
+  return PRE_INSTALL.test(String(issue ?? "")) || PRE_INSTALL.test(String(workDone ?? ""));
+}
+
+export const PRE_INSTALL_LABEL = "Pre-install visit, install status unchanged";
+
+type RowOpts = {
+  wrapped?: boolean;
+  today?: string;
+  /** Open installs (WOs or not), and the equipment catalog, for an install row no WO matches. */
+  installs?: OpenInstall[];
+  catalog?: string[];
+};
+
+/**
+ * A file row as the import will write it. A pre-install visit that would go on an install by its words or by its
+ * account's open install (11/14, WO-1065) becomes its own Field Service ticket instead, linked to the account's one open
+ * install, which keeps its status, dates and Corrigo net. Its WO still matches the ticket it made, so a second import
+ * updates that ticket. A visit whose WO is already on an install stays there, flagged to check.
+ */
 export function resolvePreviewRow(
   rec: CorrigoRecord,
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
-  opts: {
-    wrapped?: boolean;
-    today?: string;
-    /** Open installs (WOs or not), and the equipment catalog, for an install row no WO matches. */
-    installs?: OpenInstall[];
-    catalog?: string[];
-  } = {},
+  opts: RowOpts = {},
+): CorrigoPreviewRow {
+  const row = resolveRow(rec, match, opts, false);
+  if (row.board !== "install" || row.action === "skip" || !isPreInstallVisit(rec.issue, rec.workDone)) return row;
+  if (row.jobId != null && !row.byAccount) {
+    const text = `Reads like a pre-install visit, but ${rec.canonicalWo} is already on install #${row.jobId}. Check it`;
+    return { ...row, descriptionNotes: [...(row.descriptionNotes ?? []), { text, warn: true }] };
+  }
+  // The account's one open install under its own name links the visit; more than one, or another name, links none.
+  const own = (row.installOptions ?? []).filter((o) => o.id != null && !o.otherName);
+  const installId = own.length === 1 ? own[0]!.id : null;
+  const note =
+    installId != null
+      ? `linked to install #${installId}`
+      : own.length > 1
+        ? `${own.length} open installs on this account: not linked`
+        : "no open install on this account: not linked";
+  const visit = resolveRow(rec, match, opts, true);
+  return {
+    ...visit,
+    callTypeValue: "Field Service",
+    visitInstallId: installId,
+    matchNote: [visit.matchNote, `${PRE_INSTALL_LABEL}: ${note}`].filter(Boolean).join(" · "),
+    preInstall: { label: PRE_INSTALL_LABEL, note, installId, asInstall: row },
+  };
+}
+
+function resolveRow(
+  rec: CorrigoRecord,
+  match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
+  opts: RowOpts,
+  /** A pre-install visit: a service ticket by its WO alone, never an install by its account. */
+  asVisit: boolean,
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
   // The run of WO numbers is judged from Corrigo's created date when the report has one, else from today.
@@ -1416,7 +1475,7 @@ export function resolvePreviewRow(
     ...(match.unique ? [match.unique] : []),
     ...match.conflicts,
   ].filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i);
-  const route = hintedBoard(rec);
+  const route = asVisit ? { board: "service" as CorrigoBoard, note: null } : hintedBoard(rec);
   const hinted = route.board;
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;

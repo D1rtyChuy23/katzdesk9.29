@@ -444,6 +444,8 @@ export async function previewCorrigoRecords(sql: Sql, records: CorrigoRecord[]):
     records,
     accounts,
   );
+  // A pre-install visit's other way (the install ticket) gets its account read the same way.
+  for (const r of rows) if (r.preInstall) r.preInstall = { ...r.preInstall, asInstall: withAccounts([r.preInstall.asInstall], records, accounts)[0]! };
   const unmapped = [
     ...new Set(rows.map((r) => r.statusUnmapped).filter((s): s is string => !!s)),
   ];
@@ -523,6 +525,7 @@ const applyRow = z.object({
   corrigoId: z.string().max(80).nullable().optional(),
   corrigoNet: z.number().nullable().optional(),
   callTypeValue: z.string().max(60).nullable().optional(),
+  visitInstallId: z.number().int().nullable().optional(),
   urgency: z.string().max(30).nullable().optional(),
 });
 
@@ -843,6 +846,8 @@ export async function applyCorrigoRows(
               contact = coalesce(nullif(btrim(contact), ''), $15::text),
               phone = coalesce(nullif(btrim(phone), ''), $16::text),
               received = coalesce(received, $17::date),
+              -- A pre-install visit links to its install once (11/14); a link already made stays.
+              visit_install_id = coalesce(visit_install_id, (select i.id from installs i where i.id = $18::int and not i.archived)),
               updated_at = now()
             where id = $1 and merged_install_id is null
           returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
@@ -864,6 +869,7 @@ export async function applyCorrigoRows(
             row.contact ?? null,
             row.phone ?? null,
             row.createdAt ?? null,
+            row.visitInstallId ?? null,
           ],
         )
       )[0];
@@ -978,9 +984,9 @@ export async function applyCorrigoRows(
       const inserted = await sql.query<{ id: number }>(
         `insert into service_jobs
            (kind, call_id, customer, issue, technician, status, wo, work_done, completed_at, received, call_type, urgency, done,
-            po, equipment, contact, phone, service_location, corrigo_id, corrigo_net)
+            po, equipment, contact, phone, service_location, corrigo_id, corrigo_net, visit_install_id)
          values
-           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+           ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, (select i.id from installs i where i.id = $21::int and not i.archived))
          returning id`,
         [
           kind,
@@ -1003,11 +1009,12 @@ export async function applyCorrigoRows(
           row.serviceLocation ?? null,
           row.corrigoId ?? null,
           row.corrigoNet ?? null,
+          row.visitInstallId ?? null,
         ],
       );
       const id = inserted[0]?.id;
       if (id) {
-        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}`);
+        await logCorrigo(sql, board, id, actor, `Opened from Corrigo · ${wo}` + (row.visitInstallId ? ` · pre-install visit for install #${row.visitInstallId}` : ""));
         created += 1;
         maybeReview(board, id, wo, customer, status, row.technician, done, true);
       }
