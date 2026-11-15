@@ -186,7 +186,7 @@ export function suggestBill(pms: readonly BillPm[], onBill: readonly string[]): 
         const reason = machine.offPm
           ? `This machine is no longer on PM #${pm.id}.`
           : gone
-            ? "No longer in the Parts list."
+            ? "No longer in the Item Catalog."
             : dead
               ? PRICE_NOTE.inactive
               : priced

@@ -509,7 +509,7 @@ function ReportCard({ report: r, onAgain, busy }: { report: Report; onAgain: () 
         <li>Attached to existing tickets: {n(r.attached)} ({n(r.filled)} had a blank Work Done or Completed date filled)</li>
         <li>
           Item lines saved: {n(r.lines)}, plus {plural(r.discountLines, "discount line")} (stored, and added up into each invoice's one discount;{" "}
-          {plural(r.lines + r.discountLines, "QuickBooks line")} in all). Of {n(r.partLines)} part, filter, equipment and fee lines, {n(r.partMatched)} match the Parts list and{" "}
+          {plural(r.lines + r.discountLines, "QuickBooks line")} in all). Of {n(r.partLines)} part, filter, equipment and fee lines, {n(r.partMatched)} match the Item Catalog and{" "}
           {n(r.partLines - r.partMatched)} are kept as text.
         </li>
         <li>Batches saved: {n(r.batches)}</li>

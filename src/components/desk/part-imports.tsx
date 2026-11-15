@@ -407,7 +407,7 @@ export function BinLocationsButton() {
       downloadBase64(r.filename, "text/csv;charset=utf-8", r.base64);
       toast.success(
         r.more
-          ? `Bin Template downloaded: the first ${r.rows.toLocaleString()} parts by SKU. The Parts list has more; a file with their part numbers still imports.`
+          ? `Bin Template downloaded: the first ${r.rows.toLocaleString()} parts by SKU. The Item Catalog has more; a file with their part numbers still imports.`
           : `Bin Template downloaded: ${r.rows.toLocaleString()} part${r.rows === 1 ? "" : "s"}`,
       );
     },
@@ -447,7 +447,7 @@ export function BinLocationsButton() {
           <DialogDescription>
             A CSV or Excel file with a part number column (<span className="font-medium">MPN</span>, Part #, Mfr Part, or <span className="font-medium">SKU</span>, Name, Item) and{" "}
             <span className="font-medium">Rack</span>, <span className="font-medium">Shelf</span>, <span className="font-medium">Bin</span>. One Bin Location column works too: it is the whole location, so a code like A-03-12 or A/3/12 is split into rack, shelf and bin, and anything else becomes the bin with no rack or shelf.
-            Matched on the part number the way the parts import matches. A blank cell keeps what is stored. Only parts on the Parts list are matched.
+            Matched on the part number the way the parts import matches. A blank cell keeps what is stored. Only parts in the Item Catalog are matched.
           </DialogDescription>
           {!preview ? (
             <div className="flex flex-wrap items-center gap-2">

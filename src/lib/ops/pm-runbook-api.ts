@@ -570,7 +570,7 @@ export async function explainAddMachinePart(sql: Sql, pmId: number, billingItemI
   const lock = await pmPartsLock(sql, pmId);
   if (lock) return lock;
   const bi = (await sql.query<{ active: unknown; hidden_at: string | null; kind: string }>("select active, hidden_at, kind from billing_items where id = $1", [billingItemId]))[0];
-  if (!bi || !flagOn(bi.active) || bi.hidden_at) return "That part is hidden or not in the Parts list.";
+  if (!bi || !flagOn(bi.active) || bi.hidden_at) return "That part is hidden or not in the Item Catalog.";
   if (bi.kind === "trip" || bi.kind === "labor") return "Pick a part, not trip or labor.";
   const n = (await sql.query<{ n: number }>("select count(*)::int as n from machine_parts where pm_job_id = $1 and piece_key = $2 and removed_at is null", [pmId, pieceKey]))[0];
   if (Number(n?.n ?? 0) >= 50) return "This machine already has 50 parts.";

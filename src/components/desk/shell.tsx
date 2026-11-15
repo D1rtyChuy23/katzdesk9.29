@@ -46,8 +46,6 @@ import { Skeleton } from "@/components/ui/separator";
 import { MyViewBar } from "./my-view-bar";
 import { CalendarDock, PendingCalendarPop } from "./pending-calendar";
 
-
-
 /** Pages whose lists actually narrow when My View is on — the toggle is noise elsewhere. */
 const MY_VIEW_ROUTES: string[] = ["/", "/planner", "/service", "/tlc", "/pms", "/installs", "/pipeline", "/rebuilds", "/customers", "/map"];
 
@@ -82,9 +80,7 @@ const ICONS: Record<MenuTo, typeof CalendarClock> = {
   "/access": Users,
 };
 
-type NavItem = MenuItem;
-
-function itemActive(pathname: string, item: NavItem) {
+function itemActive(pathname: string, item: MenuItem) {
   if (item.exact) return pathname === item.to;
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
@@ -94,7 +90,7 @@ function NavItemLink({
   pathname,
   onNavigate,
 }: {
-  item: NavItem;
+  item: MenuItem;
   pathname: string;
   onNavigate?: () => void;
 }) {

@@ -283,7 +283,7 @@ export function planBins(rows: BinFileRow[], stored: StoredBinPart[]): BinPlanLi
     const none = { partId: null, sku: row.sku, mpn: row.mpn, description: null, old: null, next: null };
     if (!file.rack && !file.shelf && !file.bin) return { ...base, ...none, status: "blank", reason: "No rack, shelf or bin on this row." };
     const hits = resolve(row);
-    if (!hits.length) return { ...base, ...none, status: "unmatched", reason: "No part on the Parts list has this part number." };
+    if (!hits.length) return { ...base, ...none, status: "unmatched", reason: "No part in the Item Catalog has this part number." };
     if (hits.length > 1) {
       const skus = hits.slice(0, 5).map((p) => p.sku).join(", ");
       return { ...base, ...none, status: "ambiguous", reason: `Matches ${hits.length} parts (${skus}${hits.length > 5 ? ", …" : ""}). Use the SKU column to pick one.` };
