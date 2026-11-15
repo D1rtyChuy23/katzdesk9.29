@@ -1473,7 +1473,8 @@ export function resolvePreviewRow(
     ...visit,
     callTypeValue: "Field Service",
     visitInstallId: installId,
-    matchNote: [visit.matchNote, `${PRE_INSTALL_LABEL}: ${note}`].filter(Boolean).join(" · "),
+    // The screen shows the label as the row's tag; the note says what it links to.
+    matchNote: [visit.matchNote, note].filter(Boolean).join(" · "),
     preInstall: { label: PRE_INSTALL_LABEL, note, installId, asInstall: row },
   };
 }
