@@ -22,10 +22,13 @@ export function AppErrorComponent({ error }: ErrorComponentProps) {
   );
 }
 
-/** A wrong address (11/16): say so, with a way back. A plain link, so it works whatever part of the app failed to match. */
+/**
+ * A wrong address (11/16): say so, with a way back. A plain link, so it works whatever part of the app failed to match.
+ * A block, not a page: under the app's menu it sits inside the page area, and with no menu it fills the window.
+ */
 export function AppNotFoundComponent() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background px-6 text-center text-foreground">
+    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center text-foreground" data-testid="not-found">
       <span className="text-muted-foreground" aria-hidden="true">
         <Compass className="size-10" strokeWidth={2} />
       </span>
@@ -34,6 +37,6 @@ export function AppNotFoundComponent() {
       <a href="/" className="mt-2 inline-flex h-10 items-center rounded-full bg-ink px-4 text-sm font-medium text-ink-foreground">
         Go to Coming Due
       </a>
-    </main>
+    </div>
   );
 }

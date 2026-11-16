@@ -154,7 +154,7 @@ export function RepairQuotePanel({ jobId, rebuildId }: { jobId?: number; rebuild
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   <div>
                     <Label className="text-[11px]">Qty</Label>
-                    <Input aria-label={`Quantity, line ${i + 1}`} inputMode="decimal" value={l.qty} disabled={locked} onChange={(e) => edit(i, { qty: e.target.value })} className="mt-0.5 h-8" />
+                    <Input aria-label={`Qty, line ${i + 1}`} inputMode="decimal" value={l.qty} disabled={locked} onChange={(e) => edit(i, { qty: e.target.value })} className="mt-0.5 h-8" />
                   </div>
                   <div>
                     <Label className="text-[11px]">Rate</Label>

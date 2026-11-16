@@ -23,7 +23,7 @@ export function VersionNotice() {
   if (!newerBuildLive(BUILD.sha, live.data?.sha)) return null;
   return (
     <div
-      className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/30 bg-primary/10 px-4 py-2 text-sm"
+      className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-4 py-2 text-sm"
       role="status"
       data-testid="version-notice"
     >

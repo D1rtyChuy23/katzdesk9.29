@@ -959,7 +959,7 @@ function AddDialog({
             </div>
             <div>
               <Label>Qty</Label>
-              <Input name="qty" type="number" min={1} defaultValue="1" aria-label="Quantity" className="mt-1" />
+              <Input name="qty" type="number" min={1} defaultValue="1" aria-label="Qty" className="mt-1" />
             </div>
           </div>
           <div>

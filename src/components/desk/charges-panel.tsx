@@ -334,7 +334,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                 <div>
                   <Label className="text-[11px]">Qty</Label>
                   <Input
-                    aria-label={`Quantity, line ${i + 1}`}
+                    aria-label={`Qty, line ${i + 1}`}
                     inputMode="decimal"
                     value={l.qty}
                     disabled={billed}
