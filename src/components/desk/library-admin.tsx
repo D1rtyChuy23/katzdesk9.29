@@ -73,7 +73,6 @@ export function LibraryAdmin({
   });
   const setOpen = useMutation({
     mutationFn: (row: { section: string; open: boolean }) => setLibraryAdminOpen({ data: row }),
-    onError: (e) => fail(e, "Could not save the section's open state"),
   });
   const remember = (section: string, itemKey: string, label: string) => done.mutate({ section, itemKey, label });
 

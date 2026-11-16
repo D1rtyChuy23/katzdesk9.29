@@ -1,5 +1,5 @@
 // Quick fixes from the 11/16 pass (Chuy: "Go"): an open tab hears about a new version, a wrong address gets a real
-// page, three silent saves say when they fail, and fields and icon buttons carry names a screen reader can say.
+// page, two silent saves say when they fail, and fields and icon buttons carry names a screen reader can say.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { register } from "node:module";
@@ -47,9 +47,9 @@ test("fields and icon buttons carry a name a screen reader can say", () => {
   assert.match(src("src/components/desk/reps-editor.tsx"), /aria-label="Rep's full name"/);
 });
 
-test("the three saves that failed silently now say so", () => {
+test("mark-as-read and a finished Library chore say so when they fail; which section is open stays a quiet convenience", () => {
   const admin = src("src/components/desk/library-admin.tsx");
   assert.match(admin, /onError: \(e\) => fail\(e, "Could not save that as done"\)/);
-  assert.match(admin, /onError: \(e\) => fail\(e, "Could not save the section's open state"\)/);
+  assert.doesNotMatch(admin.slice(admin.indexOf("const setOpen = useMutation"), admin.indexOf("const remember")), /onError/);
   assert.match(src("src/components/desk/notify-bell.tsx"), /onError: \(e\) => toast\.error\(e instanceof Error \? e\.message : "Could not mark that as read"\)/);
 });
