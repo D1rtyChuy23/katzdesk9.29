@@ -1,5 +1,5 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
-import { TriangleAlert } from "lucide-react";
+import { Compass, TriangleAlert } from "lucide-react";
 
 export function AppErrorComponent({ error }: ErrorComponentProps) {
   return (
@@ -19,5 +19,24 @@ export function AppErrorComponent({ error }: ErrorComponentProps) {
         Reload
       </button>
     </main>
+  );
+}
+
+/**
+ * A wrong address (11/16): say so, with a way back. A plain link, so it works whatever part of the app failed to match.
+ * A block, not a page: under the app's menu it sits inside the page area, and with no menu it fills the window.
+ */
+export function AppNotFoundComponent() {
+  return (
+    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3 px-6 text-center text-foreground" data-testid="not-found">
+      <span className="text-muted-foreground" aria-hidden="true">
+        <Compass className="size-10" strokeWidth={2} />
+      </span>
+      <h1 className="font-display text-lg font-medium">Page Not Found</h1>
+      <p className="max-w-md text-sm text-muted-foreground">Nothing is at this address. Check the link, or go back to Coming Due and use the menu.</p>
+      <a href="/" className="mt-2 inline-flex h-10 items-center rounded-full bg-ink px-4 text-sm font-medium text-ink-foreground">
+        Go to Coming Due
+      </a>
+    </div>
   );
 }

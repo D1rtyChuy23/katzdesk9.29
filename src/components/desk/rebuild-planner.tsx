@@ -95,20 +95,21 @@ export function RebuildPlanner({
           </p>
         </div>
         <div className="flex gap-1">
-          <Button type="button" variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, -7))}>
-            <ChevronLeft className="size-4" />
+          <Button type="button" variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, -7))} aria-label="Previous week">
+            <ChevronLeft className="size-4" aria-hidden="true" />
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setAnchor(addDays(today, -7))}>
             Today
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, 7))}>
-            <ChevronRight className="size-4" />
+          <Button type="button" variant="outline" size="sm" onClick={() => setAnchor(addDays(anchor, 7))} aria-label="Next week">
+            <ChevronRight className="size-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
       <div className="mt-3 grid gap-2 sm:grid-cols-4">
         <OwnerFilter value={owner} onChange={setOwner} />
         <select
+          aria-label="Health"
           className="h-10 rounded-md border border-input bg-card px-3 text-sm"
           value={health}
           onChange={(e) => setHealth(e.target.value)}
@@ -120,8 +121,8 @@ export function RebuildPlanner({
             </option>
           ))}
         </select>
-        <Input value={account} onChange={(e) => setAccount(e.target.value)} placeholder="Account" />
-        <Input value={equip} onChange={(e) => setEquip(e.target.value)} placeholder="Equipment" />
+        <Input value={account} onChange={(e) => setAccount(e.target.value)} placeholder="Account" aria-label="Account" />
+        <Input value={equip} onChange={(e) => setEquip(e.target.value)} placeholder="Equipment" aria-label="Equipment" />
       </div>
       {/* Phones: each project's name sits above a full-width bar, so the whole window fits without a sideways scroll. */}
       <div className="mt-4 overflow-x-auto">
@@ -202,6 +203,7 @@ export function RebuildPlanner({
                     <Badge variant="outline">{HEALTH_LABEL[r.health]}</Badge>
                     <Input
                       type="date"
+                      aria-label={`Target date for ${r.title}`}
                       className="h-8 w-40 max-sm:h-10"
                       value={r.targetComplete ?? ""}
                       onChange={(e) => saveDate.mutate({ id: r.id, targetComplete: e.target.value || null })}

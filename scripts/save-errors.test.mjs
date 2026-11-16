@@ -7,8 +7,6 @@ import { test } from "node:test";
 
 const QUIET = {
   "src/components/desk/photos-panel.tsx:add": "awaited in a try/catch that reports each photo",
-  "src/components/desk/notify-bell.tsx:mark": "marks a notice read; the list is read again either way",
-  "src/components/desk/library-admin.tsx:done": "remembers a finished Library chore in the background",
   "src/components/desk/library-admin.tsx:setOpen": "remembers which Library section is open",
 };
 

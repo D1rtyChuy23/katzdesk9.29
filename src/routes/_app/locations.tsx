@@ -339,7 +339,7 @@ function BarnPick({ site, otherLabel, onDone }: { site: string; otherLabel: stri
   );
   return (
     <div className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="barn-pick">
-      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search model, serial, or name" />
+      <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search model, serial, or name" aria-label="Search the barn's units" />
       <ul className="mt-2 max-h-52 overflow-y-auto">
         {rows.map((a) => (
           <li key={a.id}>

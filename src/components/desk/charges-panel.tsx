@@ -334,6 +334,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                 <div>
                   <Label className="text-[11px]">Qty</Label>
                   <Input
+                    aria-label={`Qty, line ${i + 1}`}
                     inputMode="decimal"
                     value={l.qty}
                     disabled={billed}
@@ -344,6 +345,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                 <div>
                   <Label className="text-[11px]">Rate</Label>
                   <Input
+                    aria-label={`Rate, line ${i + 1}`}
                     inputMode="decimal"
                     value={l.rate}
                     disabled={billed}

@@ -64,8 +64,8 @@ export function RepsEditor() {
           add.mutate();
         }}
       >
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" className="w-48" />
-        <Input value={initials} onChange={(e) => setInitials(e.target.value)} placeholder="IN" className="w-20" />
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" aria-label="Rep's full name" className="w-48" />
+        <Input value={initials} onChange={(e) => setInitials(e.target.value)} placeholder="IN" aria-label="Rep's initials" className="w-20" />
         <Button type="submit" size="sm" disabled={add.isPending || name.trim().length < 2}>
           Add rep
         </Button>
