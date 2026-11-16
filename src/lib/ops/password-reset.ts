@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { requireAdmin } from "./access";
+import { newPasswordInput, resetTokenInput, userIdInput } from "./access-input";
 
 /** Links stay good for two days and work once. */
 const RESET_HOURS = 48;
@@ -28,7 +29,7 @@ export function passwordProblem(pw: string): string | null {
 /** Admin makes a one-time reset link for a teammate and sends it themselves. */
 export const createPasswordResetLink = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string }) => d)
+  .validator(userIdInput)
   .handler(async ({ context, data }): Promise<{ token: string; username: string; expiresAt: string }> => {
     const sql = await getSql();
     await requireAdmin(sql, context.userId, "Only an admin can reset someone's password.");
@@ -51,7 +52,7 @@ export const createPasswordResetLink = createServerFn({ method: "POST" })
 
 /** Checks a link before showing the new-password form. No sign-in needed. */
 export const peekPasswordReset = createServerFn({ method: "POST" })
-  .validator((d: { token: string }) => d)
+  .validator(resetTokenInput)
   .handler(async ({ data }): Promise<{ ok: boolean; username: string | null }> => {
     const token = data.token?.trim();
     if (!token) return { ok: false, username: null };
@@ -68,7 +69,7 @@ export const peekPasswordReset = createServerFn({ method: "POST" })
 
 /** Sets the new password from a reset link, then signs that person out everywhere. */
 export const resetPasswordWithToken = createServerFn({ method: "POST" })
-  .validator((d: { token: string; password: string }) => d)
+  .validator(newPasswordInput)
   .handler(async ({ data }): Promise<{ username: string | null; email: string | null }> => {
     const problem = passwordProblem(data.password ?? "");
     if (problem) throw new Error(problem);

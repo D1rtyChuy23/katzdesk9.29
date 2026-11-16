@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { repActiveInput } from "@/lib/ops/access-input";
 import {
   DEFAULT_REPS,
   canonicalRepName,
@@ -311,7 +312,7 @@ export const addRep = createServerFn({ method: "POST" })
 
 export const setRepActive = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; active: boolean }) => d)
+  .validator(repActiveInput)
   .handler(async ({ context, data }): Promise<RepsState> => {
     const sql = await getSql();
     const { requireRosterEditor } = await import("@/lib/ops/roster");

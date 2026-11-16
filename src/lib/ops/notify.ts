@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
+import { markReadInput, pingInput } from "@/lib/ops/access-input";
 import { flagOn } from "@/lib/ops/flag";
 import { parseMentions } from "@/lib/ops/mentions";
 
@@ -550,16 +551,7 @@ export const listNotifications = createServerFn({ method: "GET" })
 
 export const sendPing = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator(
-    (d: {
-      toUserId?: string;
-      usernames?: string[];
-      body: string;
-      entityType?: string | null;
-      entityId?: number | null;
-      commentId?: number | null;
-    }) => d,
-  )
+  .validator(pingInput)
   .handler(async ({ context, data }): Promise<{ sent: string[]; already: boolean; pingedAt: string | null }> => {
     const sql = await getSql();
     return deliverPings(sql, {
@@ -575,7 +567,7 @@ export const sendPing = createServerFn({ method: "POST" })
 
 export const markNotificationRead = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id?: number; all?: boolean }) => d)
+  .validator(markReadInput)
   .handler(async ({ context, data }): Promise<{ ok: true }> => {
     const sql = await getSql();
     await ensureTable(sql);
