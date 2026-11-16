@@ -69,9 +69,11 @@ export function LibraryAdmin({
   const done = useMutation({
     mutationFn: (row: { section: string; itemKey: string; label: string; detail?: string }) => rememberLibraryDone({ data: row }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["library-admin-state"] }),
+    onError: (e) => fail(e, "Could not save that as done"),
   });
   const setOpen = useMutation({
     mutationFn: (row: { section: string; open: boolean }) => setLibraryAdminOpen({ data: row }),
+    onError: (e) => fail(e, "Could not save the section's open state"),
   });
   const remember = (section: string, itemKey: string, label: string) => done.mutate({ section, itemKey, label });
 

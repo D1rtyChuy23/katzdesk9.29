@@ -1518,7 +1518,7 @@ export function resolvePreviewRow(
 /** "Install", "Installation", "Re-install", "INSTALL-SO1" on the P.O.; not "Uninstall", "De-install" or "Pre-install". */
 export function poSaysInstall(po: string | null | undefined): boolean {
   const s = String(po ?? "");
-  return /\b(?:re-?)?install/i.test(s) && !/\b(?:de|pre|un)[\s\-]*install/i.test(s);
+  return /\b(?:re-?)?install/i.test(s) && !/\b(?:de|pre|un)[\s-]*install/i.test(s);
 }
 
 /**

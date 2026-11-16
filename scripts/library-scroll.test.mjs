@@ -30,5 +30,5 @@ test("a picked manufacturer folds the cards to its own, with All manufacturers t
 });
 
 test("Back to another model opens its own maker: the address's model wins over the maker last clicked", () => {
-  assert.match(page, /useEffect\(\(\) => \{\n    if \(bookParam != null\) setOpenMaker\(null\);\n  \}, \[bookParam\]\);/);
+  assert.match(page, /useEffect\(\(\) => \{\n {4}if \(bookParam != null\) setOpenMaker\(null\);\n {2}\}, \[bookParam\]\);/);
 });

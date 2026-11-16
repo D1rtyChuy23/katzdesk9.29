@@ -72,6 +72,7 @@ function ManualCopyDialog({ text, onClose }: { text: string | null; onClose: () 
         <DialogDescription>This browser blocked the copy button. The text is selected — press Ctrl+C (⌘C on Mac).</DialogDescription>
         <textarea
           ref={ref}
+          aria-label="Text to copy"
           readOnly
           value={text ?? ""}
           rows={Math.min(14, (text ?? "").split("\n").length + 1)}

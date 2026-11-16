@@ -643,6 +643,19 @@ export const deskMiddleware = createMiddleware({ type: "function" })
     return next();
   });
 
+/** The public sign-in lookups are counted per address (11/16; lookup-limit.ts). Never the reason a sign-in fails. */
+async function assertLookupAllowed(sql: Sql): Promise<void> {
+  const { TOO_MANY_LOOKUPS, addressHash, clientAddress, lookupAllowed } = await import("./lookup-limit");
+  let address: string | null = null;
+  try {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    address = clientAddress(getRequest().headers);
+  } catch {
+    address = null;
+  }
+  if (!(await lookupAllowed(sql, address ? await addressHash(address) : null))) throw new Error(TOO_MANY_LOOKUPS);
+}
+
 export const checkUsername = createServerFn({ method: "POST" })
   .validator((d: { username: string }) => d)
   .handler(async ({ data }): Promise<{ available: boolean }> => {
@@ -650,6 +663,7 @@ export const checkUsername = createServerFn({ method: "POST" })
     if (!validUsername(username)) return { available: false };
     const sql = await getSql();
     await ensureTable(sql);
+    await assertLookupAllowed(sql);
     const rows = await sql.query<{ user_id: string }>(
       "select user_id from desk_accounts where lower(username) = $1 limit 1",
       [username.toLowerCase()],
@@ -667,6 +681,7 @@ export const lookupSignIn = createServerFn({ method: "POST" })
     if (!raw) throw new Error("Enter your username or email");
     const sql = await getSql();
     await ensureTable(sql);
+    await assertLookupAllowed(sql);
     const emailNorm = raw.includes("@") ? normEmail(raw) : null;
     const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
     const rows = await sql.query<{
@@ -721,6 +736,7 @@ export const peekInvite = createServerFn({ method: "POST" })
     const raw = data.identity.trim();
     const sql = await getSql();
     await ensureTable(sql);
+    await assertLookupAllowed(sql);
     const emailNorm = raw.includes("@") ? normEmail(raw) : null;
     const userNorm = emailNorm ? null : cleanUsername(raw);
     const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);

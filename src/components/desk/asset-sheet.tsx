@@ -180,6 +180,7 @@ export function AssetSheet({
                 <Input
                   value={testNote}
                   onChange={(e) => setTestNote(e.target.value)}
+                  aria-label="Test note"
                   placeholder="Optional note"
                 />
                 <div className="flex flex-wrap gap-2">
@@ -226,6 +227,7 @@ export function AssetSheet({
                 <Input
                   value={rejectNote}
                   onChange={(e) => setRejectNote(e.target.value)}
+                  aria-label="Reject note"
                   placeholder="Note if you reject"
                 />
                 <div className="flex gap-2">
@@ -583,6 +585,7 @@ export function AssetSheet({
                 </div>
                 {!asset.customerOwned ? (
                   <Input
+                    aria-label="Sold to"
                     placeholder="Sold to…"
                     value={soldTo}
                     onChange={(e) => setSoldTo(e.target.value)}

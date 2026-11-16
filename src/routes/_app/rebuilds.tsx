@@ -307,7 +307,7 @@ function CreateRebuildDialog({
                   ),
                 )}
               </SelectField>
-              <Input className="mt-2" value={reasonDetail} onChange={(e) => setReasonDetail(e.target.value)} placeholder="Detail (required if Other)" />
+              <Input className="mt-2" value={reasonDetail} onChange={(e) => setReasonDetail(e.target.value)} placeholder="Detail (required if Other)" aria-label="Reason detail" />
             </div>
           ) : null}
           <div>

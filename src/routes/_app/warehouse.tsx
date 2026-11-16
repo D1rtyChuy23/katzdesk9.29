@@ -955,11 +955,11 @@ function AddDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Serial</Label>
-              <Input name="serial" className="mt-1" />
+              <Input name="serial" aria-label="Serial" className="mt-1" />
             </div>
             <div>
               <Label>Qty</Label>
-              <Input name="qty" type="number" min={1} defaultValue="1" className="mt-1" />
+              <Input name="qty" type="number" min={1} defaultValue="1" aria-label="Quantity" className="mt-1" />
             </div>
           </div>
           <div>

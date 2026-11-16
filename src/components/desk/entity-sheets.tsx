@@ -389,7 +389,7 @@ export function PmSheet({
                     </div>
                     <div className="sm:col-span-2">
                       <Label>Notes</Label>
-                      <Textarea name="notes" className="mt-1" defaultValue={pm.notes ?? ""} />
+                      <Textarea name="notes" aria-label="Notes" className="mt-1" defaultValue={pm.notes ?? ""} />
                     </div>
                     <div className="flex justify-end sm:col-span-2">
                       <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>
@@ -929,6 +929,7 @@ export function InstallSheet({
                       <Textarea
                         key={notesSlot?.id === row.id ? notesSlot.seq : "notes"}
                         name="notes"
+                        aria-label="Notes"
                         className="mt-1"
                         defaultValue={notesSlot?.id === row.id ? notesSlot.shown : (row.notes ?? "")}
                         onInput={() => {
@@ -1544,7 +1545,7 @@ export function DealSheet({
               </div>
               <div className="sm:col-span-2">
                 <Label>Notes</Label>
-                <Textarea name="notes" className="mt-1" defaultValue={deal.notes ?? ""} />
+                <Textarea name="notes" aria-label="Notes" className="mt-1" defaultValue={deal.notes ?? ""} />
               </div>
               <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2">
                 <Button
@@ -1685,7 +1686,7 @@ export function ModuleSheet({
               <Field label="Date ready" name="dateReady" type="date" defaultValue={row.dateReady ?? ""} />
               <div className="sm:col-span-2">
                 <Label>Notes</Label>
-                <Textarea name="notes" className="mt-1" defaultValue={row.notes ?? ""} />
+                <Textarea name="notes" aria-label="Notes" className="mt-1" defaultValue={row.notes ?? ""} />
               </div>
               <div className="flex justify-end sm:col-span-2">
                 <Button type="submit" size="sm" disabled={save.isPending}>Save</Button>

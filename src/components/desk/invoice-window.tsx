@@ -474,11 +474,11 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                         <div className="mt-2 grid grid-cols-3 gap-2">
                           <div>
                             <Label className="text-[11px]">{labor ? "Hours" : "Qty"}</Label>
-                            <Input inputMode="decimal" value={l.qty} disabled={locked} onChange={(e) => edit(i, { qty: e.target.value })} className="mt-0.5 h-8" data-testid="invoice-line-qty" />
+                            <Input aria-label={`${labor ? "Hours" : "Quantity"}, line ${i + 1}`} inputMode="decimal" value={l.qty} disabled={locked} onChange={(e) => edit(i, { qty: e.target.value })} className="mt-0.5 h-8" data-testid="invoice-line-qty" />
                           </div>
                           <div>
                             <Label className="text-[11px]">Price</Label>
-                            <Input inputMode="decimal" value={l.rate} disabled={locked} onChange={(e) => edit(i, { rate: e.target.value })} className="mt-0.5 h-8" data-testid="invoice-line-rate" />
+                            <Input aria-label={`Price, line ${i + 1}`} inputMode="decimal" value={l.rate} disabled={locked} onChange={(e) => edit(i, { rate: e.target.value })} className="mt-0.5 h-8" data-testid="invoice-line-rate" />
                           </div>
                           <div>
                             <Label className="text-[11px]">Amount</Label>

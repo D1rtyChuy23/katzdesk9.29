@@ -86,6 +86,8 @@ export function NotifyBell({ ink }: { ink?: boolean }) {
         (old ?? []).map((n) => (d.all || n.id === d.id ? { ...n, read: true } : n)),
       );
     },
+    // The refresh below puts it back as unread; say why.
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not mark that as read"),
     onSettled: () => void qc.invalidateQueries({ queryKey: ["notifications"] }),
   });
   const rows = useMemo(() => inbox.data ?? [], [inbox.data]);
