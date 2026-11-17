@@ -679,8 +679,9 @@ export function parseCompletedDate(raw: string | null | undefined): string | nul
       const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
       return m ? `${m}/${d}/${y}` : all;
     })
-    // Day first, month in words: "8-Sep-2026", "8-Sep-26", "08 Sep 2026".
-    .replace(/^(\d{1,2})[\s-]([a-z]{3})[a-z]*\.?[\s,-]+(\d{4}|\d{2})(?!\d)/i, (all, d: string, mon: string, y: string) => {
+    // Day first, month in words: "8-Sep-2026", "8-Sep-26", "08 Sep 2026". The year is four digits or two, and two
+    // digits before a colon are a time ("8-Sep 15:15" has no year), not a year.
+    .replace(/^(\d{1,2})[\s-]([a-z]{3})[a-z]*\.?[\s,-]+(\d{4}(?!\d)|\d{2}(?![\d:]))/i, (all, d: string, mon: string, y: string) => {
       const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
       return m ? `${m}/${d}/${y}` : all;
     });

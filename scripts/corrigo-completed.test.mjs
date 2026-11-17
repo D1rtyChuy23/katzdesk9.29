@@ -32,6 +32,37 @@ test("a completed date written day-month-year in words is read", () => {
   assert.equal(parseCompletedDate("32-Sep-2026"), null);
 });
 
+test("a day and month with no year is not a date: the time after it is not the year", () => {
+  assert.equal(parseCompletedDate("8-Sep 15:15"), null);
+  assert.equal(parseCompletedDate("8 Sep 10:30 AM"), null);
+  assert.equal(parseCompletedDate("31-Dec 12:00:00 AM"), null);
+  // A year is two digits or four, nothing in between and nothing longer.
+  assert.equal(parseCompletedDate("8-Sep-202"), null);
+  assert.equal(parseCompletedDate("8-Sep-20261"), null);
+  // With a year, a time after it is fine.
+  assert.equal(parseCompletedDate("8-Sep-26 15:15"), "2026-09-08");
+  assert.equal(parseCompletedDate("19-Oct-2026 15:15"), "2026-10-19");
+});
+
+// The reason for all of the above, pinned: what the spreadsheet package hands over for these CSV cells.
+test("a Corrigo CSV with a day-month-year date, and one with only a time, read the way the preview needs", async () => {
+  const XLSX = await import("xlsx");
+  const { parseCorrigoBytes } = await import("../src/lib/ops/corrigo-file.ts");
+  const csv = (completed) => new TextEncoder().encode(`ST#,Operational Status,Date/Time Completed\n855,Completed,${completed}\n`);
+  const before = process.env.TZ;
+  try {
+    for (const tz of ["America/Chicago", "UTC"]) {
+      process.env.TZ = tz;
+      assert.equal(parseCorrigoBytes(XLSX, csv("8-Sep-2026")).records[0].completedAt, "2026-09-08", tz);
+      assert.equal(parseCorrigoBytes(XLSX, csv("9/8/2026 15:15")).records[0].completedAt, "2026-09-08", tz);
+      assert.equal(parseCorrigoBytes(XLSX, csv("2026-09-08")).records[0].completedAt, "2026-09-08", tz);
+      assert.equal(parseCorrigoBytes(XLSX, csv("12:30")).records[0].completedAt, null, tz);
+    }
+  } finally {
+    process.env.TZ = before;
+  }
+});
+
 // A cell that holds only a time ("12:30") now arrives as 1899-12-31, the day a spreadsheet counts from.
 test("a date before 2000 is not a completed date", () => {
   assert.equal(parseCompletedDate("1899-12-31"), null);
