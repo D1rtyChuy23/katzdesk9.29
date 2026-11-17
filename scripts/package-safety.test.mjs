@@ -8,10 +8,6 @@
  *    picker, which reads pictures out of a PDF through the reader's internals).
  *    Each one only bites when a feature KatzDesk doesn't use is switched on. These tests fail the day someone
  *    switches that feature on while the package is still below its fix, which is the day the upgrade stops being optional.
- *
- * Not covered: xlsx. npm has no fixed version, and reading a workbook is the whole use, so there is nothing to guard.
- * Any signed-in desk account can hand the server a workbook to read; that is an accepted risk until the package is
- * replaced with the maker's own 0.20.3 build.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -88,6 +84,12 @@ test("better-auth below 1.7.7: the sign-in features with open advisories stay of
   assert.deepEqual(using(/\b(magicLink|oAuthProxy|deviceAuthorization)\b/), [], "upgrade better-auth to 1.7.7 or later before turning these on");
   // Rate limits kept in PostgreSQL can be overrun (GHSA-44jh-23m7-hpcf). KatzDesk leaves them in memory, the default.
   assert.deepEqual(using(/\brateLimit\s*:/), [], "upgrade better-auth to 1.7.7 or later before configuring rateLimit");
+});
+
+test("xlsx is the maker's fixed build, 0.20.2 or later", () => {
+  const found = copies("xlsx");
+  assert.ok(found.length, "xlsx is in package-lock.json");
+  for (const c of found) assert.ok(atLeast(c.version, "0.20.2"), `${c.path} is ${c.version}, needs 0.20.2 or later`);
 });
 
 test("pdf.js below 6.2.108: PDFs are only read for text and pictures, never shown with scripting", () => {
