@@ -216,8 +216,9 @@ test("the top search finds an install by its sale's P.O. or number and says so: 
 test("the Installs board, the account page and a saved install read each install's sale", () => {
   const code = src("src/lib/ops/api.ts");
   assert.match(code, /\n\t\/\/ Each install's sale, from the deal it came from \(11\/3\)\.\n\treturn withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(installs, marks\)\)\)\);\n\}\);/);
-  assert.match(code, /\n\t\tinstalls: await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(installs\.map\(\(r\) => mapInstall\(r, today, week, catalog\)\), marks\)\)\)\),\n/);
-  assert.match(code, /const saved = \(await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(\[mapInstall\(/);
+  // Wrapped in withLiveSerialNotices (11/17), which drops a stale "not moved" serial notice.
+  assert.match(code, /\n\t\tinstalls: await withLiveSerialNotices\(sql, await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(installs\.map\(\(r\) => mapInstall\(r, today, week, catalog\)\), marks\)\)\)\)\),\n/);
+  assert.match(code, /const saved = \(await withLiveSerialNotices\(sql, await withSales\(sql, await withWorkOrders\(sql, await withInspections\(sql, applyMarks\(\[mapInstall\(/);
   // The top search's install block joins the install's deal (not a removed one) and matches its P.O. and number.
   assert.match(code, /d\.po as sale_po, d\.invoice as sale_invoice from installs i\n\s+left join deals d on d\.id = i\.deal_id and d\.archived = false\n/);
   assert.match(code, /or coalesce\(d\.po, ''\) ilike \$1 or coalesce\(d\.invoice, ''\) ilike \$1\)\n\s+limit 5`/);
