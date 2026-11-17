@@ -216,6 +216,23 @@ test("a new password from a reset link clears the count, so a locked-out person 
   }
 });
 
+test("a reset link gives someone who signs in with Google their first password, once", async () => {
+  const { pg, sql, query, person } = await freshDb();
+  try {
+    await person("u_goo", "goo.zz", "goo.zz@example.com", { methods: ["grok-google"] });
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("made-up-google-link"))), (b) => b.toString(16).padStart(2, "0")).join("");
+    await query("insert into desk_password_resets (user_id, token_hash, expires_at) values ('u_goo', $1, now() + interval '1 hour')", [hash]);
+    assert.equal((await R.applyPasswordReset(sql, "made-up-google-link", "a new made-up password")).username, "goo.zz");
+    const rows = await query(`select "providerId", "password" from "account" where "userId" = 'u_goo' order by "providerId"`);
+    assert.deepEqual(rows.map((r) => r.providerId), ["credential", "grok-google"]);
+    assert.ok(rows[0].password);
+    await assert.rejects(R.applyPasswordReset(sql, "made-up-google-link", "another made-up password"), /expired or was already used/);
+    assert.equal(rows.length, (await query(`select 1 from "account" where "userId" = 'u_goo'`)).length);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("tryVerdict: 8 are allowed, the 9th waits out what is left of the 15 minutes", () => {
   const start = Date.UTC(2026, 10, 17, 14, 0, 0);
   assert.deepEqual(S.tryVerdict(1, start, start), { allowed: true, waitMinutes: 0 });
@@ -277,13 +294,18 @@ test("a denied account with a new invite, and an account with both a password an
 // (or guesses) an email could guess passwords there with no per-account limit.
 const post = (body, path = "/api/auth/sign-in/email") =>
   new Request(`https://katzdesk.example${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: typeof body === "string" ? body : JSON.stringify(body) });
-/** Stands in for Better Auth's handler: 200 for sam's right password, 401 otherwise. It records what reached it. */
-function handler() {
+/**
+ * Stands in for Better Auth's handler: 200 with the user for the right password, 401 otherwise. It records what
+ * reached it. `signsIn` is whose account it answers with: the one the body names, unless a test says otherwise.
+ */
+function handler({ signsIn = null } = {}) {
   const reached = [];
+  const ids = { "sam.zz@example.com": "u_sam", "pat.zz@example.com": "u_pat" };
   const handle = async (request) => {
     const body = await request.json().catch(() => null);
     reached.push(body?.email ?? null);
-    return body?.password === "right one" ? Response.json({ token: "t" }) : Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
+    if (body?.password !== "right one") return Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
+    return Response.json({ token: "t", user: { id: signsIn ?? ids[String(body?.email).trim().toLowerCase()] } });
   };
   return { reached, handle };
 }
@@ -339,6 +361,33 @@ test("the direct sign-in address is counted under its one spelling; any other sp
     }
     assert.equal(reached.length, 1);
     assert.equal(await tries("u_sam"), 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the direct sign-in address goes by the account Better Auth signed in, not the one the body seemed to name", async () => {
+  const { pg, sql, query, tries } = await freshDb();
+  try {
+    const sessions = async (id) => (await query(`select count(*)::int as n from "session" where "userId" = $1`, [id]))[0].n;
+    // Sam signs in with Google only and has a session. Pat has tries counted against them.
+    await query(`delete from "account" where "userId" = 'u_sam'`);
+    await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-sam', now() + interval '7 days', 's-sam', now(), 'u_sam')`);
+    await S.throttledEmailSignIn(sql, post({ email: "pat.zz@example.com", password: "nope" }), handler().handle);
+    assert.equal(await tries("u_pat"), 1);
+    // The body names Sam; Better Auth signs Pat in. Sam's session stays, and it is Pat's count that clears.
+    const res = await S.throttledEmailSignIn(sql, post({ email: "sam.zz@example.com", password: "right one" }), handler({ signsIn: "u_pat" }).handle);
+    assert.equal(res.status, 200);
+    assert.equal(await sessions("u_sam"), 1);
+    assert.equal(await tries("u_pat"), 0);
+    // An answer with no user in it can't be checked, so it is refused.
+    const noUser = await S.throttledEmailSignIn(sql, post({ email: "pat.zz@example.com", password: "right one" }), async () => Response.json({ token: "t" }));
+    assert.equal(noUser.status, 401);
+    // Anything but JSON never reaches Better Auth.
+    const { reached, handle } = handler();
+    const form = new Request("https://katzdesk.example/api/auth/sign-in/email", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "email=pat.zz%40example.com&password=right+one" });
+    assert.equal((await S.throttledEmailSignIn(sql, form, handle)).status, 415);
+    assert.equal(reached.length, 0);
   } finally {
     await pg.close();
   }

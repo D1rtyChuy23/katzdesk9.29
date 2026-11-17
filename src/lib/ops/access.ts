@@ -480,6 +480,9 @@ async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: bo
     [userId],
   );
   if (!shared[0]) return { sealed: false, passwordRemoved: false };
+  // First, so a reset link being used right now writes nothing (password-reset.ts checks the link at each write).
+  // A link made before this would put a password back; a new link clears older ones the same way.
+  await sql.query("delete from desk_password_resets where user_id = $1 and used_at is null", [userId]);
   const removed = await sql.query<{ id: string }>(
     `delete from "account" c
       where c."userId" = $1 and c."providerId" = 'credential'
@@ -489,8 +492,6 @@ async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: bo
       returning c."id"`,
     [userId],
   );
-  // A reset link made before this would put a password back; the same clearing a new link does (password-reset.ts).
-  await sql.query("delete from desk_password_resets where user_id = $1 and used_at is null", [userId]);
   await sql.query(`delete from "session" where "userId" = $1`, [userId]);
   return { sealed: true, passwordRemoved: removed.length > 0 };
 }

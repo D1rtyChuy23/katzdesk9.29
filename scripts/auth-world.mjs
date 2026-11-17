@@ -19,11 +19,13 @@ export const S = await import("../src/lib/ops/sign-in.ts");
  * Better Auth's way into the in-memory database: one connection, handed out in turn. The same shape as
  * src/lib/auth/pglite-dialect.ts, which the test runner can't load (it only strips types).
  */
-function pgliteDialect(pg) {
+function pgliteDialect(pg, world) {
   let busy = false;
   const waiting = [];
   const connection = {
     async executeQuery(compiled) {
+      // A test can act just before one of Better Auth's own statements runs.
+      if (world.beforeQuery) await world.beforeQuery(compiled.sql);
       const result = await pg.query(compiled.sql, [...compiled.parameters]);
       return result.affectedRows ? { numAffectedRows: BigInt(result.affectedRows), rows: result.rows } : { rows: result.rows };
     },
@@ -67,10 +69,12 @@ export async function authWorld() {
   await A.ensureAccessTables(sql);
 
   const people = {};
+  /** `handle` is Better Auth's handler unless a test swaps it; `beforeQuery` runs before each of its statements. */
+  const world = { handle: null, beforeQuery: null };
   const auth = betterAuth({
     baseURL: ORIGIN,
     secret: "made-up-test-secret-made-up-test-secret",
-    database: { dialect: pgliteDialect(pg), type: "postgres" },
+    database: { dialect: pgliteDialect(pg, world), type: "postgres" },
     trustedOrigins: [ORIGIN],
     account: { encryptOAuthTokens: true, accountLinking: { enabled: true, trustedProviders: PROVIDERS, requireLocalEmailVerified: false } },
     session: { cookieCache: { enabled: true, maxAge: 300 } },
@@ -93,8 +97,7 @@ export async function authWorld() {
     ],
   });
 
-  /** Better Auth's handler, unless a test swaps it to act in the middle of a request. */
-  const world = { handle: (request) => auth.handler(request) };
+  world.handle = (request) => auth.handler(request);
   /** The desk's auth address: what routes/api/auth/$.ts does with a request. */
   const route = (request) => S.serveAuth(async () => sql, request, (r) => world.handle(r));
 
@@ -127,6 +130,17 @@ export async function authWorld() {
       jar,
       cookie,
       call,
+      /** The same address with the body sent the way an HTML form sends it. `raw` is the body as written. */
+      form: async (path, raw) => {
+        const res = await route(new Request(`${ORIGIN}/api/auth${path}`, { method: "POST", headers: { origin: ORIGIN, cookie: cookie(), "content-type": "application/x-www-form-urlencoded" }, body: raw }));
+        for (const c of res.headers.getSetCookie()) {
+          const [pair] = c.split(";");
+          const i = pair.indexOf("=");
+          if (/max-age=0/i.test(c) || pair.slice(i + 1) === "") jar.delete(pair.slice(0, i));
+          else jar.set(pair.slice(0, i), pair.slice(i + 1));
+        }
+        return { status: res.status, text: await res.text() };
+      },
       signUp: (email, password, name = "x") => call("POST", "/sign-up/email", { email, password, name }),
       signIn: (email, password) => call("POST", "/sign-in/email", { email, password }),
       /** A sign-in with Google or X: start it, then come back from the broker as `personKey`. */

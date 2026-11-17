@@ -87,6 +87,13 @@ test("the cookie copy of a session is taken off a request; everything else on it
   assert.equal(await strip("better-auth.session_data=abc; better-auth.session_token=tok.sig; other=1"), "better-auth.session_token=tok.sig; other=1");
   assert.equal(await strip("__Host-grok-auth.session_data.0=a; __Host-grok-auth.session_data.1=b; __Host-grok-auth.session_token=t"), "__Host-grok-auth.session_token=t");
   assert.equal(await strip("__Host-grok-auth.session_data=abc"), null);
+  // Better Auth also reads the copy from any name that starts with the cookie's name and a dot and ends in
+  // something it can read as a number. Whatever holds "session_data" goes.
+  for (const tail of [".0x", ".a.0", ".0.", ".1e", ".-1", ".+0", ".00"]) {
+    assert.equal(await strip(`__Host-grok-auth.session_data${tail}=abc; keep=1`), "keep=1", tail);
+    assert.equal(await strip(`better-auth.session_data${tail}=abc; keep=1`), "keep=1", tail);
+  }
+  assert.equal(await strip("x.SESSION_DATA.0=abc; keep=1"), "keep=1");
   assert.equal(await strip("__Host-grok-auth.session_token=tok.sig"), "__Host-grok-auth.session_token=tok.sig");
   assert.equal(await strip(null), null);
   // A request with nothing to take off is passed on as it is; one with a body keeps its body and its method.
@@ -182,7 +189,9 @@ for (const how of ["the invite link", "an admin's approval"]) {
       const o = w.browser();
       assert.equal((await o.signIn(email, password)).status, 200);
       assert.equal(await o.me(), uid);
-      assert.ok([...o.jar.keys()].some((k) => k.endsWith("session_data")), "the outsider holds a cookie copy");
+      const copy = [...o.jar].find(([k]) => k.endsWith("session_data"));
+      const tokenCookie = [...o.jar].find(([k]) => k.endsWith("session_token"));
+      assert.ok(copy && tokenCookie, "the outsider holds a session cookie and its copy");
 
       if (how === "the invite link") assert.equal(await A.claimInviteToken(w.sql, uid, token), true);
       else assert.equal((await A.approveDeskAccount(w.sql, uid, true)).passwordRemoved, true);
@@ -198,6 +207,11 @@ for (const how of ["the invite link", "an admin's approval"]) {
 
       // The outsider, old cookies and all.
       assert.equal(await o.me(), null, "the session read asks the database, not the cookie copy");
+      // The copy under the other names Better Auth would read it from.
+      for (const tail of [".0x", ".a.0", ".+0"]) {
+        const renamed = await o.call("GET", "/get-session", null, { cookie: `${tokenCookie[0]}=${tokenCookie[1]}; ${copy[0]}${tail}=${copy[1]}` });
+        assert.equal(renamed.json, null, `the copy renamed ${copy[0]}${tail}`);
+      }
       const listed = await o.call("GET", "/list-sessions");
       assert.equal(listed.status, 404);
       assert.ok(!listed.text.includes(pedro.token()), "Pedro's session token is not handed out");
@@ -218,21 +232,63 @@ test("a password sign-in that finishes after the account was sealed leaves no se
   const w = await authWorld();
   try {
     const { email, password, token, uid } = await w.sharedAccount();
-    // Better Auth read the password row, was busy checking the password, and made its session after the seal had
-    // already removed the password and ended the sessions. Here: the seal lands just as Better Auth answers.
-    w.world.handle = async (request) => {
-      const res = await w.auth.handler(request);
-      if (new URL(request.url).pathname.endsWith("/sign-in/email")) assert.equal(await A.claimInviteToken(w.sql, uid, token), true);
-      return res;
+    // Better Auth has read the password row and checked the password. The seal runs now, start to finish: the
+    // password, the reset links and every session go. Then Better Auth writes its session.
+    let sealed = 0;
+    w.world.beforeQuery = async (text) => {
+      if (sealed || !/^insert into "session"/i.test(text)) return;
+      sealed += 1;
+      assert.equal(await A.claimInviteToken(w.sql, uid, token), true);
+      assert.equal(await w.sessions(uid), 0);
     };
     const o = w.browser();
     const res = await o.signIn(email, password);
+    assert.equal(sealed, 1, "the seal ran in the middle of the sign-in");
     assert.equal(res.status, 401);
     assert.equal(res.json?.code, "INVALID_EMAIL_OR_PASSWORD");
     assert.ok(!res.text.includes("token"), "no session token in the answer");
     assert.equal(await w.sessions(uid), 0);
     assert.equal(await w.fresh({ cookie: o.cookie() }), null);
     assert.equal((await w.desk(uid)).approved, true);
+  } finally {
+    await w.pg.close();
+  }
+});
+
+test("a password sign-in is taken as JSON only, so the account it is counted and checked against is the one signed in", async () => {
+  const w = await authWorld();
+  try {
+    // Better Auth would also read a form body. The desk's count and its late check read JSON, so a form body went
+    // past both; and a body that is JSON and a form at once named one account to the desk and another to Better
+    // Auth, which let anyone with an account sign out a member who has no password.
+    w.people.gina = { id: "idp-gina", sub: "idp-gina", email: "gina.zz@example.com", emailVerified: true, name: "Gina" };
+    const gina = w.browser();
+    await gina.oauth("grok-google", "gina");
+    const gid = await gina.me();
+    const mallory = w.browser();
+    const mid = (await mallory.signUp("mallory.zz@example.com", "mallory-password-1", "Mallory")).json.user.id;
+    await mallory.call("POST", "/sign-out", {});
+    let asked = 0;
+    w.world.handle = async (request) => {
+      asked += 1;
+      return w.auth.handler(request);
+    };
+    const plain = await w.browser().form("/sign-in/email", "email=mallory.zz%40example.com&password=mallory-password-1");
+    assert.equal(plain.status, 415);
+    const both = await w.browser().form("/sign-in/email", JSON.stringify({ email: "gina.zz@example.com", x: "&email=mallory.zz%40example.com&password=mallory-password-1&y=" }));
+    assert.equal(both.status, 415);
+    const none = await w.route(new Request(`${ORIGIN}/api/auth/sign-in/email`, { method: "POST", headers: { origin: ORIGIN }, body: JSON.stringify({ email: "mallory.zz@example.com", password: "mallory-password-1" }) }));
+    assert.equal(none.status, 415, "no content type, or text/plain");
+    assert.equal(asked, 0, "Better Auth never saw them");
+    assert.equal(await w.sessions(mid), 0);
+    assert.equal(await w.sessions(gid), 1);
+    assert.equal(await gina.me(), gid, "Gina is still signed in");
+    // JSON, with or without a charset, is what the desk sends.
+    const ok = await w.route(new Request(`${ORIGIN}/api/auth/sign-in/email`, { method: "POST", headers: { origin: ORIGIN, "content-type": "Application/JSON; charset=utf-8" }, body: JSON.stringify({ email: "mallory.zz@example.com", password: "mallory-password-1" }) }));
+    assert.equal(ok.status, 200);
+    // And guessing at Gina, who has no password, costs her nothing.
+    assert.equal((await w.browser().signIn("gina.zz@example.com", "mallory-password-1")).status, 401);
+    assert.equal(await gina.me(), gid);
   } finally {
     await w.pg.close();
   }

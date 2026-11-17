@@ -175,8 +175,10 @@ export async function withoutSessionCopy(request: Request): Promise<Request> {
   const cookie = request.headers.get("cookie");
   if (!cookie) return request;
   const parts = cookie.split(";");
-  // The copy's name ends in session_data, or session_data.0, .1 … when Better Auth splits a long one.
-  const kept = parts.filter((part) => !/session_data(\.\d+)?$/.test(part.split("=")[0]!.trim()));
+  // Better Auth reads the copy from the cookie's own name and, when it has split a long one, from any name that
+  // starts with it and a dot and ends in something it can read as a number (".0", but also ".0x" or ".a.0"). So
+  // every cookie with session_data in its name goes; the desk has no other cookie like that.
+  const kept = parts.filter((part) => !part.split("=")[0]!.toLowerCase().includes("session_data"));
   if (kept.length === parts.length) return request;
   const headers = new Headers(request.headers);
   if (kept.length) headers.set("cookie", kept.join(";").trim());
@@ -190,12 +192,21 @@ export async function withoutSessionCopy(request: Request): Promise<Request> {
 /**
  * Better Auth's password sign-in (POST /api/auth/sign-in/email), behind the same per-account count as the form.
  * `handle` is Better Auth's handler. An email nobody has, or a body that can't be read, is passed on uncounted.
+ *
+ * Only JSON is taken. Better Auth would read a form body too, and then the email counted here and the email it
+ * signed in could differ: a form body was not counted at all, and a body written to be both named one account
+ * here and another there. The desk's own pages send JSON.
+ *
+ * After a sign-in goes through, the account checked (endIfPasswordGone) and cleared is the one in Better Auth's
+ * answer, whatever the body said.
  */
 export async function throttledEmailSignIn(
   sql: Sql,
   request: Request,
   handle: (request: Request) => Promise<Response>,
 ): Promise<Response> {
+  const kind = (request.headers.get("content-type") ?? "").split(";")[0]!.trim().toLowerCase();
+  if (kind !== "application/json") return Response.json({ code: "UNSUPPORTED_MEDIA_TYPE", message: "Send the sign-in as JSON." }, { status: 415 });
   let email: string | null = null;
   try {
     const body = (await request.clone().json()) as { email?: unknown } | null;
@@ -204,14 +215,27 @@ export async function throttledEmailSignIn(
     /* not JSON: Better Auth will refuse it */
   }
   const user = email ? (await sql.query<{ id: string }>(`select "id" from "user" where lower("email") = $1 limit 1`, [email]))[0] : undefined;
-  if (!user) return handle(request);
-  const verdict = await claimSignInTry(sql, user.id);
-  if (!verdict.allowed) return Response.json({ code: "TOO_MANY_TRIES", message: tooManyTries(verdict.waitMinutes) }, { status: 429 });
+  if (user) {
+    const verdict = await claimSignInTry(sql, user.id);
+    if (!verdict.allowed) return Response.json({ code: "TOO_MANY_TRIES", message: tooManyTries(verdict.waitMinutes) }, { status: 429 });
+  }
   const response = await handle(request);
   if (!response.ok) return response;
-  if (await endIfPasswordGone(sql, user.id)) return wrongPassword();
-  await clearSignInTries(sql, user.id);
+  const signedIn = await answeredUserId(response);
+  // Better Auth answers with the user. If it ever doesn't, there is no telling whose session this is: refuse it.
+  if (!signedIn || (await endIfPasswordGone(sql, signedIn))) return wrongPassword();
+  await clearSignInTries(sql, signedIn);
   return response;
+}
+
+/** The id of the user in one of Better Auth's answers ({ user: { id } }), or null. */
+async function answeredUserId(response: Response): Promise<string | null> {
+  try {
+    const id = ((await response.clone().json()) as { user?: { id?: unknown } } | null)?.user?.id;
+    return typeof id === "string" && id ? id : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Better Auth's own answer to a wrong email or password. */
@@ -223,14 +247,9 @@ const wrongPassword = () => Response.json({ code: "INVALID_EMAIL_OR_PASSWORD", m
  */
 export async function changedPassword(sql: Sql, response: Response): Promise<Response> {
   if (!response.ok) return response;
-  let userId: unknown;
-  try {
-    userId = ((await response.clone().json()) as { user?: { id?: unknown } } | null)?.user?.id;
-  } catch {
-    /* not JSON */
-  }
-  // Better Auth answers with the user. If it ever doesn't, there is no telling whose session this is: refuse it.
-  if (typeof userId !== "string" || !userId) return wrongPassword();
+  const userId = await answeredUserId(response);
+  // As for a sign-in: an answer with no user in it can't be checked, so it is refused.
+  if (!userId) return wrongPassword();
   return (await endIfPasswordGone(sql, userId)) ? wrongPassword() : response;
 }
 

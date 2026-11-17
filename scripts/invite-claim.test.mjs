@@ -317,6 +317,11 @@ test("X joined onto an account that began with a password is sealed the same way
     assert.equal((await A.approveDeskAccount(sql, "u_shared2", true)).passwordRemoved, true);
     assert.deepEqual(await signIns("u_shared2"), ["grok-x"]);
     assert.equal(await sessions("u_shared2"), 0);
+    // A password and X at the same instant: the password is not newer, so it is a join all the same.
+    await signedUp("u_shared3", "eva.zz@x.invalid", [["credential", 30], ["grok-x", 30]]);
+    await A.registerDeskAccount(sql, "u_shared3", { username: "eva.zz", email: null, token: null });
+    assert.equal((await A.approveDeskAccount(sql, "u_shared3", true)).passwordRemoved, true);
+    assert.deepEqual(await signIns("u_shared3"), ["grok-x"]);
   } finally {
     await pg.close();
   }
@@ -368,6 +373,35 @@ test("sealing a shared account cancels a reset link made for it before; nobody e
     assert.equal((await A.approveDeskAccount(sql, "u_plain", true)).passwordRemoved, false);
     assert.equal(await resets("u_plain"), 1);
     assert.equal(await resets("u_boss"), 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a reset link being used at the moment the account is sealed doesn't put a password back", async () => {
+  const { pg, sql, query, signedUp, invite, signIns, sessions } = await freshDb();
+  try {
+    const inv = await invite({ email: "pedro.zz@example.com", username: "pedro.zz" });
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_shared", "pedro.zz@example.com", [["credential", 120], ["grok-google", 1]], { verified: true });
+    await A.ensureDeskAccount(sql, "u_shared");
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("made-up-link"))), (b) => b.toString(16).padStart(2, "0")).join("");
+    await query("insert into desk_password_resets (user_id, token_hash, created_by, expires_at) values ('u_shared', $1, 'u_boss', now() + interval '1 day')", [hash]);
+    // The link was found and the new password hashed. The seal runs now, before the password is written.
+    let sealed = 0;
+    const racing = Object.assign((...a) => sql(...a), {
+      query: async (text, params) => {
+        if (!sealed && /"password"/.test(text) && /^\s*(update|insert into) "account"/i.test(text)) {
+          sealed += 1;
+          assert.equal(await A.claimInviteToken(sql, "u_shared", token), true);
+        }
+        return sql.query(text, params);
+      },
+    });
+    await assert.rejects(R.applyPasswordReset(racing, "made-up-link", "a-new-password-1"), /expired or was already used/);
+    assert.equal(sealed, 1, "the seal ran in the middle of the reset");
+    assert.deepEqual(await signIns("u_shared"), ["grok-google"]);
+    assert.equal(await sessions("u_shared"), 0);
   } finally {
     await pg.close();
   }
