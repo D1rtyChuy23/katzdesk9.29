@@ -10,6 +10,7 @@ import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey } from "@/lib/ops/account-equip";
+import { woCanonical } from "@/lib/ops/corrigo";
 
 export type SerialHit = {
   assetId: number;
@@ -40,6 +41,11 @@ export type SerialPullResult = {
   assetId: number | null;
   /** The serial is already on a different row of this install. Do not copy it onto the row being edited. */
   duplicateOnInstall?: boolean;
+  /**
+   * The serial is on this other account's machines. With needsConfirm the person is asked to move it to the install;
+   * sending this name back as `moveFrom` says yes.
+   */
+  moveFrom?: string | null;
 };
 
 type AssetLite = {
@@ -159,32 +165,42 @@ async function logActivity(
 }
 
 type AccountSerialHit = {
+  id: number;
   customer: string;
   catalogModel: string;
   serial: string | null;
   electrical: string | null;
 };
 
-async function loadAccountSerial(sql: Sql, raw: string): Promise<AccountSerialHit | null> {
+/**
+ * The account unit that has this serial. Only units on an account count: Remove takes a unit off its account
+ * (account_equipment_retired keeps it), so a retired unit holds no serial. When the serial is on this account and
+ * on another one too, this account's unit is the one found.
+ */
+async function loadAccountSerial(sql: Sql, raw: string, customer = ""): Promise<AccountSerialHit | null> {
   const key = serialKey(raw);
   if (!key) return null;
   const rows = await sql
     .query<{
+      id: number;
       customer: string;
       catalog_model: string;
       serial: string | null;
       electrical: string | null;
       serial_key: string | null;
     }>(
-      `select customer, catalog_model, serial, electrical, serial_key
+      `select id, customer, catalog_model, serial, electrical, serial_key
          from account_equipment
-        where serial_key is not null and serial_key <> ''`,
+        where serial_key is not null and serial_key <> ''
+        order by id`,
     )
     .catch(() => []);
   const matches = rows.filter((r) => (r.serial_key || serialKey(r.serial)) === key);
   if (!matches.length) return null;
-  const row = matches[0]!;
+  const here = customer ? matches.find((r) => normalizeCustomerKey(r.customer) === normalizeCustomerKey(customer)) : undefined;
+  const row = here ?? matches[0]!;
   return {
+    id: Number(row.id),
     customer: row.customer,
     catalogModel: row.catalog_model,
     serial: row.serial,
@@ -389,7 +405,11 @@ const applyInput = z.object({
   jobId: z.number().optional(),
   machineIndex: z.number().nullable().optional(),
   confirmReuse: z.boolean().optional(),
+  /** Yes to moving the serial off this account (the name the person was shown). */
+  moveFrom: z.string().max(300).optional(),
 });
+
+export type SerialPullInput = z.infer<typeof applyInput>;
 
 export const applySerialPull = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -397,6 +417,12 @@ export const applySerialPull = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<SerialPullResult> => {
     const sql = await readySql();
     await ensureSerialNotice(sql);
+    return pullSerial(sql, context.userId, data);
+  });
+
+/** What the serial box on an install or a ticket does with a serial. Exported for its tests. */
+export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput): Promise<SerialPullResult> {
+    const context = { userId };
     const serial = data.serial.trim();
     if (!serialKey(serial)) {
       return notFoundResult(serial);
@@ -422,7 +448,7 @@ export const applySerialPull = createServerFn({ method: "POST" })
       customer = job.customer ?? "";
     }
 
-    const accountHit = await loadAccountSerial(sql, serial);
+    const accountHit = await loadAccountSerial(sql, serial, customer);
     if (accountHit) {
       const same =
         !!customer &&
@@ -467,7 +493,79 @@ export const applySerialPull = createServerFn({ method: "POST" })
           assetId: null,
         };
       }
-      const notice = `Serial ${accountHit.serial ?? serial} is on ${accountHit.customer}'s inventory — not moved.`;
+      // On an install (11/17): ask, and move it on a yes. Nothing is written until then.
+      if (data.installId) {
+        const shown = accountHit.serial ?? serial;
+        if (!data.moveFrom || normalizeCustomerKey(data.moveFrom) !== normalizeCustomerKey(accountHit.customer)) {
+          return {
+            serial: shown,
+            found: true,
+            pulled: false,
+            needsConfirm: true,
+            alreadyHere: false,
+            allocatedTo: accountHit.customer,
+            notice: `Serial ${shown} is on ${accountHit.customer}'s inventory.`,
+            model: accountHit.catalogModel,
+            powerVoltage: null,
+            location: accountHit.customer,
+            assetId: null,
+            moveFrom: accountHit.customer,
+          };
+        }
+        const before = (
+          await sql.query<{ equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; wo: string | null }>(
+            "select equipment, serial, power_voltage, machines, wo from installs where id = $1",
+            [data.installId],
+          )
+        )[0];
+        const wrote = await writeInstallSerial(sql, data.installId, shown, data.machineIndex ?? null, {
+          model: accountHit.catalogModel,
+          powerVoltage: null,
+        });
+        if (wrote === "duplicate") return alreadyOnInstall(sql, data.installId, shown, accountHit.catalogModel);
+        const actor = await deskUsername(sql, context.userId);
+        try {
+          // The same as the unit's own Remove: kept on the old account's Retired list, with its history, and Put back works.
+          const { removeEquipmentUnit } = await import("@/lib/ops/account-equip-import");
+          await removeEquipmentUnit(sql, accountHit.id, { userId: context.userId, name: actor });
+        } catch (e) {
+          // Still on the old account (locked, or an Eversys module on it): the install's list goes back as it was.
+          if (before) {
+            await sql.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5, updated_at = now() where id = $1", [
+              data.installId,
+              before.equipment,
+              before.serial,
+              before.power_voltage,
+              before.machines,
+            ]);
+          }
+          throw e;
+        }
+        const note = movedNote(accountHit.customer, data.installId, before?.wo ?? null, actor);
+        await sql.query(
+          `update account_equipment_retired
+              set links = links || jsonb_build_object('moved_note', $2::text, 'moved_to_install', $3::int)
+            where id = (select max(id) from account_equipment_retired where unit_id = $1)`,
+          [accountHit.id, note, data.installId],
+        );
+        await logActivity(sql, context.userId, "install", data.installId, "moved-serial", `${note} · ${accountHit.catalogModel} · SN ${shown}`);
+        const notice = `Serial ${shown} moved from ${accountHit.customer} to this install · ${accountHit.catalogModel}`;
+        await setInstallNotice(sql, data.installId, notice);
+        return {
+          serial: shown,
+          found: true,
+          pulled: false,
+          needsConfirm: false,
+          alreadyHere: false,
+          allocatedTo: null,
+          notice,
+          model: accountHit.catalogModel,
+          powerVoltage: null,
+          location: accountHit.customer,
+          assetId: null,
+        };
+      }
+      const notice = notMovedNotice(accountHit.serial ?? serial, accountHit.customer);
       if (data.installId) {
         const wrote = await writeInstallSerial(sql, data.installId, serial, data.machineIndex ?? null, {
           model: accountHit.catalogModel,
@@ -629,4 +727,41 @@ export const applySerialPull = createServerFn({ method: "POST" })
       location: hit.location,
       assetId: hit.assetId,
     };
-  });
+}
+
+/** "Moved from Memorial Trail Ice House to install WO-1120 by sam 11/17/2026": kept on the old unit and on the install. */
+export function movedNote(from: string, installId: number, wo: string | null, actor: string, when = new Date()): string {
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", month: "numeric", day: "numeric", year: "numeric" }).format(when);
+  const label = (wo && woCanonical(wo)) || `#${installId}`;
+  return `Moved from ${from} to install ${label} by ${actor} ${day}`;
+}
+
+/** What a ticket says when its serial is on another account's machines. */
+export function notMovedNotice(serial: string, customer: string): string {
+  return `Serial ${serial} is on ${customer}'s inventory — not moved.`;
+}
+
+const NOT_MOVED = /^Serial (.+) is on (.+)'s inventory — not moved\.$/;
+
+/**
+ * A stored "is on X's inventory — not moved" notice holds only while that account still has the serial. Once the unit
+ * is removed there (or moved), the notice is dropped from what is read. The stored text is left as it is.
+ */
+export async function withLiveSerialNotices<T extends { serialNotice: string | null }>(sql: Sql, rows: T[]): Promise<T[]> {
+  const asks = rows
+    .map((r) => ({ r, m: NOT_MOVED.exec(String(r.serialNotice ?? "").trim()) }))
+    .filter((x): x is { r: T; m: RegExpExecArray } => !!x.m);
+  if (!asks.length) return rows;
+  const keys = [...new Set(asks.map((x) => serialKey(x.m[1])).filter(Boolean))];
+  const held = await sql
+    .query<{ serial_key: string; customer: string }>(
+      "select serial_key, customer from account_equipment where serial_key = any($1::text[])",
+      [keys],
+    )
+    .catch(() => null);
+  if (!held) return rows;
+  const on = new Set(held.map((h) => `${h.serial_key}|${normalizeCustomerKey(h.customer)}`));
+  const stale = new Set(asks.filter((x) => !on.has(`${serialKey(x.m[1])}|${normalizeCustomerKey(x.m[2]!)}`)).map((x) => x.r));
+  if (!stale.size) return rows;
+  return rows.map((r) => (stale.has(r) ? { ...r, serialNotice: null } : r));
+}

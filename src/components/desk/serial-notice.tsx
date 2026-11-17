@@ -83,7 +83,7 @@ export function SerialPullField({
   // Behind the install window's saves: a serial just cleared on another row is saved before this lookup asks the server.
   const pull = useMutation({
     scope: installId ? { id: `install-sheet-${installId}` } : undefined,
-    mutationFn: (opts: { serial: string; confirmReuse?: boolean }) =>
+    mutationFn: (opts: { serial: string; confirmReuse?: boolean; moveFrom?: string }) =>
       applySerialPull({
         data: {
           serial: opts.serial,
@@ -91,6 +91,7 @@ export function SerialPullField({
           jobId,
           machineIndex: machineIndex ?? null,
           confirmReuse: opts.confirmReuse,
+          moveFrom: opts.moveFrom,
         },
       }),
     onSuccess: (result) => {
@@ -116,7 +117,7 @@ export function SerialPullField({
       if (result.alreadyHere && result.model && model && !sameWarehouseModel(model, result.model)) {
         setOffer({ model: result.model, serial: result.serial });
       } else setOffer(null);
-      if (result.pulled) toast.success(result.notice);
+      if (result.pulled || /^Serial .+ moved from /.test(result.notice)) toast.success(result.notice);
       else if (!result.alreadyHere) toast.message(result.notice);
       void qc.invalidateQueries({ queryKey: ["assets"] });
       void qc.invalidateQueries({ queryKey: ["installs"] });
@@ -127,7 +128,7 @@ export function SerialPullField({
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not check warehouse"),
   });
 
-  function commit(raw: string, confirmReuse = false) {
+  function commit(raw: string, confirmReuse = false, moveFrom?: string) {
     const next = raw.trim();
     if (!next) {
       const had = saved.current.trim();
@@ -143,8 +144,16 @@ export function SerialPullField({
       return;
     }
     const key = next.replace(/[#\s]/g, "").toLowerCase();
-    if (!confirmReuse && key === looked.current) return;
-    pull.mutate({ serial: next, confirmReuse });
+    if (!confirmReuse && !moveFrom && key === looked.current) return;
+    pull.mutate({ serial: next, confirmReuse, moveFrom });
+  }
+
+  /** Cancel on a move leaves both records alone: the row goes back to the serial it had, so a save doesn't keep the typed one. */
+  function cancelMove() {
+    setPending(null);
+    looked.current = "";
+    setText(saved.current);
+    onValue(saved.current);
   }
 
   return (
@@ -197,7 +206,30 @@ export function SerialPullField({
       {pull.isPending ? (
         <p className="mt-1 text-xs text-muted-foreground">Checking warehouse…</p>
       ) : null}
-      <Dialog open={!!pending?.needsConfirm} onOpenChange={(o) => !o && setPending(null)}>
+      <Dialog open={!!pending?.needsConfirm && !!pending.moveFrom} onOpenChange={(o) => !o && cancelMove()}>
+        <DialogContent>
+          <DialogTitle>Serial On Another Account</DialogTitle>
+          <DialogDescription>
+            {pending?.notice} Move it to this install, or cancel and leave it. Moving takes it off {pending?.moveFrom}; it stays on that
+            account's Retired list, where Put back brings it back.
+          </DialogDescription>
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <Button type="button" variant="outline" onClick={cancelMove}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              data-testid="move-serial"
+              onClick={() => {
+                if (pending?.moveFrom) commit(pending.serial, false, pending.moveFrom);
+              }}
+            >
+              Move to this install
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!pending?.needsConfirm && !pending.moveFrom} onOpenChange={(o) => !o && setPending(null)}>
         <DialogContent>
           <DialogTitle>Serial Already Assigned</DialogTitle>
           <DialogDescription>

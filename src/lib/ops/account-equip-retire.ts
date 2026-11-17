@@ -23,6 +23,8 @@ export type RetiredUnit = {
   retiredName: string | null;
   /** How many inspection and PM records were kept with it. */
   records: number;
+  /** "Moved from <account> to install WO-#### by <user> <date>" when it left by a move to an install (11/17). */
+  movedNote: string | null;
 };
 
 export type RetiredBy = { userId: string | null; name: string | null };
@@ -77,9 +79,11 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     retired_at: string;
     retired_name: string | null;
     records: number;
+    moved_note: string | null;
   }>(
     `select r.id, r.unit_id, r.customer, r.equipment_name, r.catalog_model, r.serial, r.part_number, r.ownership, r.install_date,
             to_char(r.retired_at at time zone 'America/Chicago', 'YYYY-MM-DD') as retired_at, r.retired_name,
+            r.links->>'moved_note' as moved_note,
             (${LINK_KEYS.map((k) => `jsonb_array_length(coalesce(r.links->'${k}', '[]'::jsonb))`).join(" + ")})::int as records
        from account_equipment_retired r
       where lower(r.customer) = lower($1)
@@ -100,6 +104,7 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     retiredAt: r.retired_at,
     retiredName: r.retired_name,
     records: Number(r.records),
+    movedNote: r.moved_note ?? null,
   }));
 }
 

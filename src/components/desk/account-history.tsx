@@ -354,7 +354,7 @@ function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: ()
                 {[
                   r.partNumber ? `Part # ${r.partNumber}` : null,
                   r.serial ? `SN ${r.serial}` : "No serial",
-                  `Removed ${formatShortDate(r.retiredAt)}${r.retiredName ? ` by ${r.retiredName}` : ""}`,
+                  r.movedNote ?? `Removed ${formatShortDate(r.retiredAt)}${r.retiredName ? ` by ${r.retiredName}` : ""}`,
                   r.records ? `${r.records} inspection or PM record${r.records === 1 ? "" : "s"} kept` : null,
                 ]
                   .filter(Boolean)
