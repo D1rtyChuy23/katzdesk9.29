@@ -3,6 +3,18 @@ import { isAdminAccount } from "@/lib/ops/admin-role";
 import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { flagOn } from "./flag";
+import {
+  approveInput,
+  canAddInput,
+  createInviteInput,
+  idInput,
+  identityInput,
+  inviteTokenInput,
+  registerInput,
+  roleInput,
+  userIdInput,
+  usernameInput,
+} from "./access-input";
 
 /** Admin: reviews the clean customer list (approve, skip, unlock) and sees list ID and address. Not the desk owner. */
 export type DeskRole = "admin" | "sales" | "service" | "warehouse" | null;
@@ -644,7 +656,7 @@ export const deskMiddleware = createMiddleware({ type: "function" })
   });
 
 export const checkUsername = createServerFn({ method: "POST" })
-  .validator((d: { username: string }) => d)
+  .validator(usernameInput)
   .handler(async ({ data }): Promise<{ available: boolean }> => {
     const username = cleanUsername(data.username);
     if (!validUsername(username)) return { available: false };
@@ -658,7 +670,7 @@ export const checkUsername = createServerFn({ method: "POST" })
   });
 
 export const lookupSignIn = createServerFn({ method: "POST" })
-  .validator((d: { username: string }) => d)
+  .validator(usernameInput)
   .handler(
     async ({
       data,
@@ -716,7 +728,7 @@ export const lookupSignIn = createServerFn({ method: "POST" })
   });
 
 export const peekInvite = createServerFn({ method: "POST" })
-  .validator((d: { identity: string }) => d)
+  .validator(identityInput)
   .handler(async ({ data }): Promise<{ invited: boolean; email: string | null; username: string | null }> => {
     const raw = data.identity.trim();
     const sql = await getSql();
@@ -752,7 +764,7 @@ export const getMyAccess = createServerFn({ method: "GET" })
 
 export const claimInvite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { token?: string | null }) => d)
+  .validator(inviteTokenInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -766,7 +778,7 @@ export const claimInvite = createServerFn({ method: "POST" })
 
 export const registerAccount = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { username: string; email?: string | null; token?: string | null }) => d)
+  .validator(registerInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const username = cleanUsername(data.username);
     if (!validUsername(username)) {
@@ -873,7 +885,7 @@ export const listDeskAccounts = createServerFn({ method: "GET" })
 
 export const setAccountApproved = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string; approved: boolean }) => d)
+  .validator(approveInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -900,7 +912,7 @@ export const setAccountApproved = createServerFn({ method: "POST" })
 
 export const setAccountCanAddCustomers = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string; canAddCustomers: boolean }) => d)
+  .validator(canAddInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -923,7 +935,7 @@ export const setAccountCanAddCustomers = createServerFn({ method: "POST" })
 
 export const setAccountRole = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string; role: "admin" | "sales" | "service" | "warehouse" | null }) => d)
+  .validator(roleInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -960,7 +972,7 @@ export const grantAllCanAddCustomers = createServerFn({ method: "POST" })
 
 export const denyAccount = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { userId: string }) => d)
+  .validator(userIdInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -1018,7 +1030,7 @@ export const listDeskInvites = createServerFn({ method: "GET" })
 
 export const createInvite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { email?: string; username?: string; canAddCustomers?: boolean }) => d)
+  .validator(createInviteInput)
   .handler(async ({ context, data }): Promise<InviteResult> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -1110,7 +1122,7 @@ export const createInvite = createServerFn({ method: "POST" })
 
 export const resendInvite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ context, data }): Promise<DeskInvite> => {
     const sql = await getSql();
     await ensureTable(sql);
@@ -1133,7 +1145,7 @@ export const resendInvite = createServerFn({ method: "POST" })
 
 export const revokeInvite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ context, data }): Promise<{ ok: true }> => {
     const sql = await getSql();
     await ensureTable(sql);
