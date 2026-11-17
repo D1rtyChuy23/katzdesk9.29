@@ -389,7 +389,7 @@ function Login() {
                 {mode === "up"
                   ? readInviteToken()
                     ? "This invite lets you in. Create a password, or continue with Google or X."
-                    : "Have an invite? Open its link, or use Google with the invited email, to skip the wait. Otherwise a desk admin approves you."
+                    : "Have an invite? Open its link to get straight in. Otherwise a desk admin approves you."
                   : "Username or the email on your account. Open the invite link if you have one."}
               </p>
               <form onSubmit={onSubmit} className="mt-5 space-y-3">

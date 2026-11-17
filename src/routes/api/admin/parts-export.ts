@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth/server";
+import { freshSession } from "@/lib/auth/fresh-session.server";
 
 /**
  * Parts → Export CSV (Grok's request through Chuy, 2026-10-29): every part on the Parts page, the hidden ones too, as a
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/admin/parts-export")({
       GET: async ({ request }) => {
         const { partsExportResponse } = await import("@/lib/ops/parts-export-api");
         return partsExportResponse(request, {
-          session: (headers) => auth.api.getSession({ headers }),
+          session: (headers) => freshSession(headers),
           ready: async () => {
             const { getSql } = await import("@/lib/db");
             const { ensureSeeded } = await import("@/lib/ops/seed.server");

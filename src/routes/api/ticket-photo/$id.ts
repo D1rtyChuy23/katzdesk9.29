@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth/server";
+import { freshSession } from "@/lib/auth/fresh-session.server";
 
 /**
  * A photo on an install, a service or TLC ticket, or a PM (11/4), for someone signed in who can see that record.
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/ticket-photo/$id")({
         return ticketPhotoResponse(
           request,
           {
-            session: (headers) => auth.api.getSession({ headers }),
+            session: (headers) => freshSession(headers),
             ready: async () => {
               const { getSql } = await import("@/lib/db");
               const { ensureSeeded } = await import("@/lib/ops/seed.server");

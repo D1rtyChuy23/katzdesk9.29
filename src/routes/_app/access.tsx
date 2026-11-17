@@ -84,6 +84,10 @@ function Page() {
     mutationFn: (d: { userId: string; approved: boolean }) => setAccountApproved({ data: d }),
     onSuccess: (row) => {
       toast.success(row.approved ? `Approved ${row.username}` : `Revoked ${row.username}`);
+      // Google was added to an account that began with a password, so the password could be someone else's.
+      if (row.passwordRemoved) {
+        toast.info(`${row.username}’s older password was removed and they were signed out. They sign in with Google now.`, { duration: 12000 });
+      }
       void qc.invalidateQueries({ queryKey: ["access"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
@@ -372,9 +376,11 @@ function Page() {
                   {a.email ?? "No email"}
                   {a.email ? ` · ${emailNote(a)}` : ""}
                 </p>
-                {a.matchesInvite && !a.emailConfirmed ? (
+                {a.matchesInvite ? (
                   <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
-                    Matches your invite for {a.matchesInvite}, but didn’t come through its link. Ask them to open the link.
+                    {a.matchesInviteBy === "name"
+                      ? `Chose the name of your invite for ${a.matchesInvite}, but didn’t come through its link. Anyone can pick a name. Ask them to open the link.`
+                      : `Signed up with the email of your invite for ${a.matchesInvite}, but didn’t come through its link. Ask them to open the link.`}
                   </p>
                 ) : null}
               </div>

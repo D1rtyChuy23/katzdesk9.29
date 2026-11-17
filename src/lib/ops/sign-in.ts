@@ -112,15 +112,38 @@ export function fromAnotherSite(headers: Headers): boolean {
   return site !== null && site !== "same-origin";
 }
 
+/** An auth path as Better Auth would read it: decoded, single slashes, no trailing slash, lower case. */
+function authPath(pathname: string): string | null {
+  try {
+    return decodeURIComponent(pathname).replace(/\/{2,}/g, "/").replace(/\/$/, "").toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 /** Better Auth's own password sign-in address, however the path is spelled. */
 export function isEmailSignInPath(pathname: string): boolean {
-  let path: string;
-  try {
-    path = decodeURIComponent(pathname);
-  } catch {
-    return false;
-  }
-  return /^\/api\/auth\/sign-in\/email\/?$/i.test(path.replace(/\/{2,}/g, "/"));
+  return authPath(pathname) === "/api/auth/sign-in/email";
+}
+
+/**
+ * Better Auth routes KatzDesk never calls and doesn't serve (11/17). The first three let a signed-in person add
+ * or remove sign-in methods on an account; taking a Google sign-in off an account someone else also holds is
+ * how a shared account could be made to look like one person's. The last three hand out the Google name, picture
+ * and broker tokens stored on an account.
+ */
+const REFUSED_AUTH_PATHS = new Set([
+  "/api/auth/unlink-account",
+  "/api/auth/link-social",
+  "/api/auth/oauth2/link",
+  "/api/auth/account-info",
+  "/api/auth/get-access-token",
+  "/api/auth/refresh-token",
+]);
+
+export function isRefusedAuthPath(pathname: string): boolean {
+  const path = authPath(pathname);
+  return path !== null && REFUSED_AUTH_PATHS.has(path);
 }
 
 /**

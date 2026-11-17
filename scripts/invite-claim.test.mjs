@@ -18,6 +18,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const A = await import("../src/lib/ops/access.ts");
+const S = await import("../src/lib/ops/sign-in.ts");
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 async function freshDb() {
@@ -34,10 +35,10 @@ async function freshDb() {
    */
   const signedUp = async (id, email, how = [["credential", 0]], { verified = how.some(([p]) => p === "grok-google") } = {}) => {
     const born = Math.max(...how.map(([, m]) => m));
-    await query(`insert into "user" ("id", "name", "email", "emailVerified", "createdAt") values ($1, $1, $2, $3, now() - make_interval(mins => $4::int))`, [id, email, verified, born]);
+    await query(`insert into "user" ("id", "name", "email", "emailVerified", "createdAt") values ($1, $1, $2, $3, now() - make_interval(secs => $4::float8 * 60))`, [id, email, verified, born]);
     for (const [provider, minutesAgo] of how) {
       await query(
-        `insert into "account" ("id", "accountId", "providerId", "userId", "createdAt", "updatedAt") values ($1, $2, $3, $2, now() - make_interval(mins => $4::int), now())`,
+        `insert into "account" ("id", "accountId", "providerId", "userId", "createdAt", "updatedAt") values ($1, $2, $3, $2, now() - make_interval(secs => $4::float8 * 60), now())`,
         [`${id}-${provider}`, id, provider, minutesAgo],
       );
     }
@@ -202,6 +203,23 @@ test("a Google row is not enough: the email must be marked verified, and X then 
   }
 });
 
+test("Google landing a moment after a password sign-up is still a join, not Google's own account", async () => {
+  const { pg, sql, signedUp, invite } = await freshDb();
+  try {
+    await invite({ email: "pedro.zz@example.com" });
+    // One second apart: inside any sensible "same moment" window, but the password row is the older one.
+    await signedUp("u_race", "pedro.zz@example.com", [["credential", 1 / 60], ["grok-google", 0]], { verified: true });
+    assert.equal((await A.ensureDeskAccount(sql, "u_race")).approved, false);
+    // And Google three seconds after the user row, with nothing older, is not "created by Google" either.
+    await invite({ email: "sam.zz@example.com" });
+    await signedUp("u_late", "sam.zz@example.com", [["grok-google", 0]], { verified: true });
+    await sql.query(`update "user" set "createdAt" = now() - interval '3 seconds' where id = 'u_late'`);
+    assert.equal((await A.ensureDeskAccount(sql, "u_late")).approved, false);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("letting a shared account in by the link removes the older password and signs everyone out", async () => {
   const { pg, sql, query, signedUp, invite, account, signIns, session, sessions } = await freshDb();
   try {
@@ -224,6 +242,73 @@ test("letting a shared account in by the link removes the older password and sig
     await session("u_shared2");
     assert.equal((await A.registerDeskAccount(sql, "u_shared2", { username: "ana.zz", email: null, token: token2 })).approved, true);
     assert.equal(await sessions("u_shared2"), 0);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("removing the Google sign-in again doesn't keep a shared account from being sealed", async () => {
+  const { pg, sql, query, signedUp, invite, account, signIns, session, sessions } = await freshDb();
+  try {
+    // Joined, then whoever holds the password removed the Google row. Better Auth has marked the email verified,
+    // and that mark stays: it is how the account is still known to be shared.
+    const inv = await invite({ username: "pedro.zz" });
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_shared", "pedro.zz@example.com", [["credential", 120]], { verified: true });
+    await A.ensureDeskAccount(sql, "u_shared");
+    await session("u_shared");
+    assert.equal(await A.claimInviteToken(sql, "u_shared", token), true);
+    assert.deepEqual(await signIns("u_shared"), []);
+    assert.equal(await sessions("u_shared"), 0);
+    // The same through an admin's approval, which says the password went.
+    await signedUp("u_shared2", "ana.zz@example.com", [["credential", 120]], { verified: true });
+    await A.registerDeskAccount(sql, "u_shared2", { username: "ana.zz", email: null, token: null });
+    await session("u_shared2");
+    const access = await A.approveDeskAccount(sql, "u_shared2", true);
+    assert.equal(access.approved, true);
+    assert.equal(access.passwordRemoved, true);
+    assert.deepEqual(await signIns("u_shared2"), []);
+    assert.equal(await sessions("u_shared2"), 0);
+    assert.equal((await account("u_shared2")).approved, true);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("sealing removes a password as old as the Google sign-in or older, and keeps one set after it", async () => {
+  const { pg, sql, signedUp, signIns, session, sessions } = await freshDb();
+  try {
+    // Same instant: not newer, so it goes.
+    await signedUp("u_same", "same.zz@example.com", [["grok-x", 60], ["credential", 30], ["grok-google", 30]], { verified: true });
+    await A.registerDeskAccount(sql, "u_same", { username: "same.zz", email: null, token: null });
+    assert.equal((await A.approveDeskAccount(sql, "u_same", true)).passwordRemoved, true);
+    assert.deepEqual(await signIns("u_same"), ["grok-google", "grok-x"]);
+    // Set after Google was joined (only an admin's reset link can do that): it stays, but everyone is signed out.
+    await signedUp("u_newer", "newer.zz@example.com", [["grok-x", 60], ["grok-google", 30], ["credential", 5]], { verified: true });
+    await A.registerDeskAccount(sql, "u_newer", { username: "newer.zz", email: null, token: null });
+    await session("u_newer");
+    assert.equal((await A.approveDeskAccount(sql, "u_newer", true)).passwordRemoved, false);
+    assert.deepEqual(await signIns("u_newer"), ["credential", "grok-google", "grok-x"]);
+    assert.equal(await sessions("u_newer"), 0);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("someone already let in is never sealed: not by a second approval, not by opening an old link", async () => {
+  const { pg, sql, query, signedUp, signIns, session, sessions } = await freshDb();
+  try {
+    // A long-standing member who began with a password and added Google later.
+    await signedUp("u_member", "member.zz@example.com", [["credential", 9000], ["grok-google", 600]], { verified: true });
+    await query("insert into desk_accounts (user_id, username, email, approved, username_chosen) values ('u_member', 'member.zz', 'member.zz@example.com', true, true)");
+    await session("u_member");
+    assert.equal((await A.approveDeskAccount(sql, "u_member", true)).passwordRemoved, false);
+    // An old link in their own name, as a row: the invite form won't make one for someone who already has access.
+    await query("insert into desk_invites (username, invited_by, token, expires_at) values ('member.zz', 'u_boss', 'tok-own', now() + interval '7 days')");
+    assert.equal(await A.claimInviteToken(sql, "u_member", "tok-own"), true);
+    await A.registerDeskAccount(sql, "u_member", { username: "member.zz", email: null, token: null });
+    assert.deepEqual(await signIns("u_member"), ["credential", "grok-google"]);
+    assert.equal(await sessions("u_member"), 1);
   } finally {
     await pg.close();
   }
@@ -293,9 +378,14 @@ test("the Access page's sweep of pending invites follows the same rule", async (
     await A.ensureDeskAccount(sql, "u_ana");
     // Invites as rows, the way an older build left them: matching accounts already exist.
     await query("insert into desk_invites (email, username, invited_by, token, expires_at) values (null, 'pedro.zz', 'u_boss', 'tok-a', now() + interval '7 days'), ('ana.zz@example.com', null, 'u_boss', 'tok-b', now() + interval '7 days')");
+    // An expired invite to a Google-confirmed person who is waiting: the sweep leaves them waiting.
+    await signedUp("u_exp", "exp.zz@example.com", [["grok-google", 0]]);
+    await A.ensureDeskAccount(sql, "u_exp");
+    await query("insert into desk_invites (email, invited_by, token, expires_at) values ('exp.zz@example.com', 'u_boss', 'tok-c', now() - interval '1 day')");
     await A.applyPendingInvites(sql);
     assert.equal((await account("u_squat")).approved, false);
     assert.equal((await account("u_ana")).approved, true);
+    assert.equal((await account("u_exp")).approved, false);
   } finally {
     await pg.close();
   }
@@ -306,15 +396,17 @@ test("an admin approving a waiting account uses up the invite sent to their emai
   try {
     const inv = await invite({ email: "pedro.zz@example.com", username: "pedro.zz" });
     const other = await invite({ username: "sam.zz" });
-    const old = await invite({ email: "pedro.zz@example.com".replace("pedro", "pedro.old") });
-    await query("update desk_invites set expires_at = now() - interval '1 day' where id = $1", [old.id]);
+    // An expired invite to the same address, as an older build could leave behind.
+    const old = (await query("insert into desk_invites (email, invited_by, token, expires_at) values ('pedro.zz@example.com', 'u_boss', 'tok-old', now() - interval '1 day') returning id"))[0];
     await signedUp("u_pedro", "pedro.zz@example.com");
     await A.registerDeskAccount(sql, "u_pedro", { username: "pedro.zz", email: null, token: null });
     assert.equal((await account("u_pedro")).approved, false);
     const access = await A.approveDeskAccount(sql, "u_pedro", true);
     assert.equal(access.approved, true);
+    assert.equal(access.passwordRemoved, false);
     assert.deepEqual(await inviteStatus(inv.id), { status: "accepted", accepted_user_id: "u_pedro" });
     assert.equal((await inviteStatus(other.id)).status, "pending");
+    assert.equal((await inviteStatus(old.id)).status, "pending", "an expired invite is not used up");
     // Taking access away again leaves invites alone.
     assert.equal((await A.approveDeskAccount(sql, "u_pedro", false)).approved, false);
     // A name is self-chosen. Approving someone who only took the invited name leaves the invite, and its link,
@@ -356,6 +448,52 @@ test("with no admin yet, the first person to reach the desk still becomes its ad
   }
 });
 
+test("denying someone who only took an invited name or typed an invited email leaves the invite for its owner", async () => {
+  const { pg, sql, query, signedUp, invite, account, inviteStatus } = await freshDb();
+  try {
+    const inv = await invite({ email: "pedro.zz@example.com", username: "pedro.zz" });
+    await signedUp("u_fake", "pedro.zz@example.com");
+    await A.registerDeskAccount(sql, "u_fake", { username: "pedro.zz", email: null, token: null });
+    const denied = await A.denyDeskAccount(sql, "u_fake");
+    assert.equal(denied.denied, true);
+    assert.equal((await inviteStatus(inv.id)).status, "pending");
+    // The link still lets the real person in, under another name.
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_real", "pedro.personal.zz@example.com");
+    assert.equal((await A.registerDeskAccount(sql, "u_real", { username: "pedro.real.zz", email: null, token })).approved, true);
+    // Denying a person Google vouches for does revoke the invite sent to their address.
+    const inv2 = await invite({ email: "ana.zz@example.com" });
+    await query("update desk_invites set expires_at = now() - interval '1 day' where id = $1", [inv2.id]);
+    await signedUp("u_ana", "ana.zz@example.com", [["grok-google", 0]]);
+    await A.ensureDeskAccount(sql, "u_ana");
+    await query("update desk_invites set expires_at = now() + interval '7 days' where id = $1", [inv2.id]);
+    await A.denyDeskAccount(sql, "u_ana");
+    assert.equal((await inviteStatus(inv2.id)).status, "revoked");
+    assert.equal((await account("u_ana")).approved, false);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the account-joining and token routes Better Auth offers are refused; the ones the app uses are not", () => {
+  for (const path of ["/api/auth/unlink-account", "/api/auth/link-social", "/api/auth/oauth2/link", "/api/auth/account-info", "/api/auth/get-access-token", "/api/auth/refresh-token", "/api/auth/Unlink-Account/", "/api/auth//unlink-account", "/api/auth/unlink%2Daccount"]) {
+    assert.equal(S.isRefusedAuthPath(path), true, path);
+  }
+  for (const path of ["/api/auth/sign-in/email", "/api/auth/sign-up/email", "/api/auth/get-session", "/api/auth/sign-out", "/api/auth/sign-in/oauth2", "/api/auth/oauth2/callback/grok-google", "/api/auth/list-accounts-zz", "/api/auth/%"]) {
+    assert.equal(S.isRefusedAuthPath(path), false, path);
+  }
+  const route = src("src/routes/api/auth/$.ts");
+  assert.equal((route.match(/isRefusedAuthPath\(/g) ?? []).length >= 2, true, "checked for GET and for POST");
+});
+
+test("the server's own session check never trusts the five-minute cookie copy", () => {
+  // Sealing an account, a password reset and a sign-out all end sessions in the database. The signed cookie copy
+  // of a session stays readable for five minutes, so every server-side check asks the database.
+  const files = ["src/lib/auth/verify.server.ts", "src/routes/api/admin/tickets-in-window.ts", "src/routes/api/admin/parts-export.ts", "src/routes/api/ticket-photo/$id.ts", "src/routes/api/part-photo-source/$id.ts"];
+  for (const f of files) assert.ok(!/auth\.api\.getSession\(/.test(src(f)), `${f} goes through freshSession`);
+  assert.match(src("src/lib/auth/fresh-session.server.ts"), /auth\.api\.getSession\(\{ headers, query: \{ disableCookieCache: true \} \}\)/);
+});
+
 test("the admin's list shows the email Better Auth holds, and whether Google confirmed it", async () => {
   const { pg, sql, query, signedUp } = await freshDb();
   try {
@@ -379,8 +517,19 @@ test("the admin's list shows the email Better Auth holds, and whether Google con
     await A.createDeskInvite(sql, "u_boss", { email: "outsider.zz@example.com" });
     const again = Object.fromEntries((await A.listDeskAccountRows(sql)).map((r) => [r.userId, r]));
     assert.equal(again.u_spoof.matchesInvite, "outsider.zz@example.com");
+    assert.equal(again.u_spoof.matchesInviteBy, "email");
     assert.equal(again.u_boss.matchesInvite, null);
-    assert.match(src("src/routes/_app/access.tsx"), /matchesInvite/);
+    // A Google-confirmed person waiting under an invited NAME: the impostor case, and the warning must still show.
+    await signedUp("u_named", "named.zz@example.com", [["grok-google", 0]]);
+    await A.registerDeskAccount(sql, "u_named", { username: "sam.zz", email: null, token: null });
+    await A.createDeskInvite(sql, "u_boss", { username: "sam.zz" });
+    const named = Object.fromEntries((await A.listDeskAccountRows(sql)).map((r) => [r.userId, r])).u_named;
+    assert.equal(named.emailConfirmed, true);
+    assert.equal(named.matchesInvite, "sam.zz");
+    assert.equal(named.matchesInviteBy, "name");
+    const pageNow = src("src/routes/_app/access.tsx");
+    assert.match(pageNow, /a\.matchesInvite \? \(/);
+    assert.ok(!/a\.matchesInvite && !a\.emailConfirmed/.test(pageNow), "the warning doesn't depend on the email being unconfirmed");
     // The Access page says so next to each person who is waiting.
     const page = src("src/routes/_app/access.tsx");
     assert.match(page, /emailConfirmed \? "Google confirmed this email" : "email not confirmed"/);

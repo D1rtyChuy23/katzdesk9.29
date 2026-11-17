@@ -49,6 +49,8 @@ export type DeskAccountRow = DeskAccess & {
    * come through its link, so this is a reason to ask them to open the link, not a reason to approve.
    */
   matchesInvite: string | null;
+  /** Whether it matches by the email they signed up with, or only by the name they chose. */
+  matchesInviteBy: "email" | "name" | null;
 };
 
 export type DeskInvite = {
@@ -428,13 +430,15 @@ const GOOGLE_PROVIDER = (GROK_PROVIDERS.find((p) => p.idp === "google")?.provide
  * Sign-up is open, and a password sign-up's email is whatever was typed, so a matching email proves nothing by
  * itself (11/17). Google proves the address; X hands over a made-up one. But Better Auth also joins a Google
  * sign-in onto an existing account with the same email, so "has a Google row" is not enough: an account someone
- * else started with a password would count once the real person pressed Google. The test is anchored on the two
- * things the person cannot change afterwards: the user row's creation time and the Google row's.
+ * else started with a password would count once the real person pressed Google. The test is anchored on things
+ * the person cannot change afterwards: Google's row was made with the user row (Better Auth writes them a
+ * millisecond or so apart), and no sign-in method on the account is older than it.
  */
 const GOOGLE_BORN_SQL = `(u."emailVerified" = true and exists (
     select 1 from "account" g
      where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}'
-       and g."createdAt" <= u."createdAt" + interval '10 seconds'))`;
+       and g."createdAt" <= u."createdAt" + interval '2 seconds'
+       and not exists (select 1 from "account" o where o."userId" = u.id and o."createdAt" < g."createdAt")))`;
 
 /** The email Google vouches for on this account, or null. See GOOGLE_BORN_SQL. */
 async function googleVouchedEmail(sql: Sql, userId: string): Promise<string | null> {
@@ -446,29 +450,37 @@ async function googleVouchedEmail(sql: Sql, userId: string): Promise<string | nu
 }
 
 /**
- * Before an account is let in by the invite link or by an admin: if Google was joined onto an account that began
- * some other way, whoever began it may still hold a password or an open session. Remove every password older than
- * the Google sign-in, and end every session, so only the person Google knows can come back in. An account with no
- * Google sign-in, or one Google created, is left exactly as it is.
+ * Before an account is let in by the invite link or by an admin: an account Google did not create, but whose
+ * email Better Auth holds as verified or which carries a Google sign-in, had Google joined onto it. Whoever
+ * began it may still hold a password or an open session. Remove every password that isn't newer than a Google
+ * sign-in still on the account (all of them, if the Google sign-in was taken off again), and end every session,
+ * so only the person Google knows can come back in. An account that was never joined is left exactly as it is.
+ *
+ * The verified mark is what makes this stick: only Google sets it here (the desk sends no verification email),
+ * and nothing a signed-in person can call clears it.
  */
-async function sealSharedAccount(sql: Sql, userId: string): Promise<boolean> {
-  const joined = await sql.query<{ id: string }>(
+async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: boolean; passwordRemoved: boolean }> {
+  const shared = await sql.query<{ id: string }>(
     `select u.id from "user" u
       where u.id = $1 and not ${GOOGLE_BORN_SQL}
-        and exists (select 1 from "account" g where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}')`,
+        and (
+          u."emailVerified" = true
+          or exists (select 1 from "account" g where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}')
+        )`,
     [userId],
   );
-  if (!joined[0]) return false;
-  await sql.query(
+  if (!shared[0]) return { sealed: false, passwordRemoved: false };
+  const removed = await sql.query<{ id: string }>(
     `delete from "account" c
       where c."userId" = $1 and c."providerId" = 'credential'
-        and exists (
+        and not exists (
           select 1 from "account" g
-           where g."userId" = $1 and g."providerId" = '${GOOGLE_PROVIDER}' and g."createdAt" > c."createdAt")`,
+           where g."userId" = $1 and g."providerId" = '${GOOGLE_PROVIDER}' and g."createdAt" < c."createdAt")
+      returning c."id"`,
     [userId],
   );
   await sql.query(`delete from "session" where "userId" = $1`, [userId]);
-  return true;
+  return { sealed: true, passwordRemoved: removed.length > 0 };
 }
 
 /**
@@ -551,7 +563,8 @@ export async function claimInviteToken(sql: Sql, userId: string, token: string):
       (!!invite.username && invite.username.toLowerCase() === me.username.toLowerCase());
     if (!meant) return false;
   }
-  await sealSharedAccount(sql, userId);
+  // Someone already let in keeps their sign-ins: sealing is for the moment an account first gets access.
+  if (!(flagOn(me.approved) && !flagOn(me.denied))) await sealSharedAccount(sql, userId);
   const ok = await grantInviteAccess(sql, userId, invite);
   if (!ok) return false;
   const name = invite.username ? cleanUsername(invite.username) : "";
@@ -876,7 +889,8 @@ export async function registerDeskAccount(
   // The invite link, or an invite sent to an email Google vouches for. A matching name or typed email is not enough.
   const byLink = token ? await findInviteByToken(sql, token) : undefined;
   const invite = byLink ?? (await findTrustedInvite(sql, userId));
-  if (byLink) await sealSharedAccount(sql, userId);
+  const before = await loadAccess(sql, userId);
+  if (byLink && !(before && flagOn(before.approved) && !flagOn(before.denied))) await sealSharedAccount(sql, userId);
   const invited = !!invite;
   const first = await shouldBootstrapAdmin(sql, username);
   const approved = first || invited;
@@ -957,11 +971,17 @@ export const registerAccount = createServerFn({ method: "POST" })
  * Every desk account for the Access page. The email is the one Better Auth holds (the desk row's copy could be
  * typed by the person signing up), with whether Google confirmed it.
  */
+function inviteMatch(label: string | null): Pick<DeskAccountRow, "matchesInvite" | "matchesInviteBy"> {
+  if (!label) return { matchesInvite: null, matchesInviteBy: null };
+  const by = label.startsWith("email:") ? "email" : "name";
+  return { matchesInvite: label.slice(label.indexOf(":") + 1), matchesInviteBy: by };
+}
+
 export async function listDeskAccountRows(sql: Sql): Promise<DeskAccountRow[]> {
   const rows = await sql.query<AccessRow & { created_at: string; auth_email: string | null; google_born: boolean; invite_label: string | null }>(
     `select ${ACCESS_COLS.split(", ").map((c) => `d.${c}`).join(", ")}, d.created_at, u.email as auth_email,
             coalesce(${GOOGLE_BORN_SQL}, false) as google_born,
-            (select coalesce(i.email, i.username)
+            (select case when i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email)) then 'email:' || i.email else 'name:' || i.username end
                from desk_invites i
               where i.status = 'pending' and (i.expires_at is null or i.expires_at > now())
                 and (
@@ -978,7 +998,7 @@ export async function listDeskAccountRows(sql: Sql): Promise<DeskAccountRow[]> {
     ...mapAccess({ ...r, email: normEmail(r.auth_email) ?? r.email }),
     createdAt: String(r.created_at),
     emailConfirmed: flagOn(r.google_born),
-    matchesInvite: flagOn(r.approved) ? null : r.invite_label,
+    ...inviteMatch(flagOn(r.approved) ? null : r.invite_label),
   }));
 }
 
@@ -997,8 +1017,14 @@ export const listDeskAccounts = createServerFn({ method: "GET" })
  * An admin lets a waiting person in, or takes access away. Letting them in also uses up a pending invite sent to
  * their email: the admin has decided it is them, so the invite has done its job.
  */
-export async function approveDeskAccount(sql: Sql, userId: string, approved: boolean): Promise<DeskAccess> {
-  if (approved) await sealSharedAccount(sql, userId);
+export async function approveDeskAccount(
+  sql: Sql,
+  userId: string,
+  approved: boolean,
+): Promise<DeskAccess & { passwordRemoved: boolean }> {
+  const before = await loadAccess(sql, userId);
+  // Only when this approval is what lets them in. Approving someone who already has access changes nothing.
+  const seal = approved && before && !flagOn(before.approved) ? await sealSharedAccount(sql, userId) : null;
   await sql.query(
     `update desk_accounts
      set approved = $2,
@@ -1027,13 +1053,13 @@ export async function approveDeskAccount(sql: Sql, userId: string, approved: boo
       [userId],
     );
   }
-  return mapAccess(rows[0]);
+  return { ...mapAccess(rows[0]), passwordRemoved: !!seal?.passwordRemoved };
 }
 
 export const setAccountApproved = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(approveInput)
-  .handler(async ({ context, data }): Promise<DeskAccess> => {
+  .handler(async ({ context, data }): Promise<DeskAccess & { passwordRemoved: boolean }> => {
     const sql = await getSql();
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
@@ -1103,6 +1129,32 @@ export const grantAllCanAddCustomers = createServerFn({ method: "POST" })
     return { updated: rows.length };
   });
 
+/**
+ * An admin turns someone away. A pending invite sent to their email is revoked with them, but only when Google
+ * vouches that the email is theirs: someone who merely took an invited name, or typed an invited email, must not
+ * be able to cost the real person their invite by getting denied.
+ */
+export async function denyDeskAccount(sql: Sql, userId: string): Promise<DeskAccess> {
+  const rows = await sql.query<AccessRow>(
+    `update desk_accounts
+     set approved = false, denied = true, updated_at = now()
+     where user_id = $1
+     returning ${ACCESS_COLS}`,
+    [userId],
+  );
+  if (!rows[0]) throw new Error("Account not found");
+  const email = await googleVouchedEmail(sql, userId);
+  if (email) {
+    await sql.query(
+      `update desk_invites
+       set status = 'revoked', updated_at = now()
+       where status = 'pending' and email is not null and lower(email) = $1`,
+      [email],
+    );
+  }
+  return mapAccess(rows[0]);
+}
+
 export const denyAccount = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(userIdInput)
@@ -1111,27 +1163,7 @@ export const denyAccount = createServerFn({ method: "POST" })
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
     if (data.userId === context.userId) throw new Error("You cannot deny your own access.");
-    const target = await loadAccess(sql, data.userId);
-    if (!target) throw new Error("Account not found");
-    const rows = await sql.query<AccessRow>(
-      `update desk_accounts
-       set approved = false, denied = true, updated_at = now()
-       where user_id = $1
-       returning ${ACCESS_COLS}`,
-      [data.userId],
-    );
-    await sql.query(
-      `update desk_invites
-       set status = 'revoked', updated_at = now()
-       where status = 'pending'
-         and (
-           (email is not null and $1::text is not null and lower(email) = $1)
-           or (username is not null and lower(username) = $2)
-         )`,
-      [normEmail(target.email), target.username.toLowerCase()],
-    );
-    if (!rows[0]) throw new Error("Account not found");
-    return mapAccess(rows[0]);
+    return denyDeskAccount(sql, data.userId);
   });
 
 export const listDeskInvites = createServerFn({ method: "GET" })
