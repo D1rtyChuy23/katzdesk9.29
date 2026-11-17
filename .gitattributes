@@ -1,2 +1,4 @@
 # git archive (and GitHub's tarball download) writes the commit into build-sha.txt, for the version line on Settings.
 build-sha.txt export-subst
+# The maker's build of the spreadsheet reader (see scripts/package-safety.test.mjs). Never text.
+vendor/*.tgz binary

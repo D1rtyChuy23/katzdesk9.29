@@ -1,5 +1,5 @@
 /**
- * Package safety (11/16 audit). Two kinds of check, both read from the files as they are checked in:
+ * Package safety (11/16 audit). Three kinds of check, all read from the files as they are checked in:
  *
  * 1. Fixed packages: no installed copy in package-lock.json sits inside a range that has a published fix, so a
  *    lockfile regenerated from older ranges can't quietly bring an issue back.
@@ -8,9 +8,12 @@
  *    picker, which reads pictures out of a PDF through the reader's internals).
  *    Each one only bites when a feature KatzDesk doesn't use is switched on. These tests fail the day someone
  *    switches that feature on while the package is still below its fix, which is the day the upgrade stops being optional.
+ * 3. The vendored package: xlsx is not on npm past 0.18.5, so the maker's fixed build lives in vendor/. The lockfile
+ *    must point at that file, and the file must be the one that was reviewed.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -90,6 +93,21 @@ test("xlsx is the maker's fixed build, 0.20.2 or later", () => {
   const found = copies("xlsx");
   assert.ok(found.length, "xlsx is in package-lock.json");
   for (const c of found) assert.ok(atLeast(c.version, "0.20.2"), `${c.path} is ${c.version}, needs 0.20.2 or later`);
+});
+
+// The version number alone would still pass if the lockfile were pointed somewhere else. This is the file that was
+// reviewed on 11/17: byte-identical code to two independent npm republishes of SheetJS 0.20.3.
+// To move to a newer build: download it from cdn.sheetjs.com, put it in vendor/, point package.json at it, run
+// npm install, review it the same way, and change the name and hash here. `npm update` never moves this package.
+const XLSX_FILE = "vendor/xlsx-0.20.3.tgz";
+const XLSX_SHA512 = "sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==";
+
+test("xlsx is installed from the vendored file, and that file is the one that was reviewed", () => {
+  const entry = lock["node_modules/xlsx"];
+  assert.equal(entry?.resolved, `file:${XLSX_FILE}`);
+  assert.equal(entry?.integrity, XLSX_SHA512);
+  const onDisk = `sha512-${createHash("sha512").update(readFileSync(join(root, XLSX_FILE))).digest("base64")}`;
+  assert.equal(onDisk, XLSX_SHA512, `${XLSX_FILE} has changed`);
 });
 
 test("pdf.js below 6.2.108: PDFs are only read for text and pictures, never shown with scripting", () => {
