@@ -100,6 +100,9 @@ export const resetPasswordWithToken = createServerFn({ method: "POST" })
     }
     await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
     await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
+    // A new password ends any wait from wrong tries, so the link gets a locked-out person back in.
+    const { clearSignInTries } = await import("./sign-in");
+    await clearSignInTries(sql, hit.user_id);
     const who = await sql.query<{ username: string | null; email: string | null }>(
       `select d.username, u.email from "user" u left join desk_accounts d on d.user_id = u.id where u.id = $1`,
       [hit.user_id],

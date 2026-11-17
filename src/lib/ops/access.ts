@@ -98,6 +98,7 @@ export function isLiveDeskOwner(username: string, name?: string | null, email?: 
 }
 
 
+/** The access tables, made on first use. Exported for sign-in.ts as `ensureAccessTables`. */
 async function ensureTable(sql: Sql) {
   await sql.query(`
     create table if not exists desk_accounts (
@@ -669,75 +670,83 @@ export const checkUsername = createServerFn({ method: "POST" })
     return { available: !rows[0] };
   });
 
-export const lookupSignIn = createServerFn({ method: "POST" })
-  .validator(usernameInput)
-  .handler(
-    async ({
-      data,
-    }): Promise<{ email: string; waiting?: boolean; invited?: boolean; methods?: string[] }> => {
-    const raw = data.username.trim();
-    if (!raw) throw new Error("Enter your username or email");
-    const sql = await getSql();
-    await ensureTable(sql);
-    const emailNorm = raw.includes("@") ? normEmail(raw) : null;
-    const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
-    const rows = await sql.query<{
-      user_id: string;
-      email: string | null;
-      auth_email: string | null;
-      approved: boolean;
-      denied: boolean;
-    }>(
-      `select d.user_id, d.email, u.email as auth_email, d.approved, d.denied
-         from desk_accounts d
-         left join "user" u on u.id = d.user_id
-       where (
-           ($1::text is not null and (
-             (d.email is not null and lower(d.email) = $1) or (u.email is not null and lower(u.email) = $1)
-           ))
-           or ($2::text is not null and lower(d.username) = $2)
-         )
-       limit 1`,
-      [emailNorm, userNorm],
+/** Who a typed username or email belongs to. Server-side only: `email` must never be sent to the browser. */
+export type SignInTarget =
+  | { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] }
+  | { kind: "invited" };
+
+/**
+ * Find the account (or the pending invite) behind what was typed on the sign-in screen. The email here is the one
+ * Better Auth holds for the person; sign-in.ts checks the password against it on the server and never returns it.
+ */
+export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarget> {
+  const raw = typed.trim();
+  if (!raw) throw new Error("Enter your username or email");
+  const emailNorm = raw.includes("@") ? normEmail(raw) : null;
+  const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
+  const rows = await sql.query<{
+    user_id: string;
+    email: string | null;
+    auth_email: string | null;
+    approved: boolean;
+    denied: boolean;
+  }>(
+    `select d.user_id, d.email, u.email as auth_email, d.approved, d.denied
+       from desk_accounts d
+       left join "user" u on u.id = d.user_id
+     where (
+         ($1::text is not null and (
+           (d.email is not null and lower(d.email) = $1) or (u.email is not null and lower(u.email) = $1)
+         ))
+         or ($2::text is not null and lower(d.username) = $2)
+       )
+     limit 1`,
+    [emailNorm, userNorm],
+  );
+  const row = rows[0];
+  if (row) {
+    if (row.denied) {
+      const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
+      if (!invite) throw new Error("This account was denied access.");
+    }
+    // Sign in against the email Better Auth actually holds for this user.
+    const email = row.auth_email ?? row.email;
+    if (!email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
+    // Which ways this person can sign in: "password", "google", "x".
+    const linked = await sql.query<{ providerId: string }>(
+      `select distinct "providerId" from "account" where "userId" = $1`,
+      [row.user_id],
     );
-    const row = rows[0];
-    if (row) {
-      if (row.denied) {
-        const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-        if (!invite) throw new Error("This account was denied access.");
-      }
-      // Sign in against the email Better Auth actually holds for this user.
-      const email = row.auth_email ?? row.email;
-      if (!email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
-      // Which ways this person can sign in: "credential" (password), "google", "x".
-      const linked = await sql.query<{ providerId: string }>(
-        `select distinct "providerId" from "account" where "userId" = $1`,
-        [row.user_id],
-      );
-      const methods = linked.map((l) => (l.providerId === "credential" ? "password" : l.providerId.toLowerCase()));
-      return { email, waiting: !row.approved && !row.denied, methods };
-    }
-    const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-    if (invite) {
-      return {
-        email: invite.email || emailNorm || "",
-        invited: true,
-      };
-    }
-    throw new Error("Unknown username. Invited? Create an account with that email or username.");
-  });
+    const methods = linked.map((l) => (l.providerId === "credential" ? "password" : l.providerId.toLowerCase()));
+    return { kind: "account", userId: row.user_id, email, waiting: !row.approved && !row.denied, methods };
+  }
+  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
+  if (invite) return { kind: "invited" };
+  throw new Error("Unknown username. Invited? Create an account with that email or username.");
+}
+
+/**
+ * Whether what was typed has a pending invite, to start the sign-up form. This needs no sign-in, so it gives the
+ * invite's email back only to someone who typed that email; a username alone gets the username.
+ */
+export async function peekInviteFor(
+  sql: Sql,
+  identity: string,
+): Promise<{ invited: boolean; email: string | null; username: string | null }> {
+  const raw = identity.trim();
+  const emailNorm = raw.includes("@") ? normEmail(raw) : null;
+  const userNorm = emailNorm ? null : cleanUsername(raw);
+  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
+  if (!invite) return { invited: false, email: null, username: null };
+  return { invited: true, email: emailNorm ? invite.email : null, username: invite.username };
+}
 
 export const peekInvite = createServerFn({ method: "POST" })
   .validator(identityInput)
   .handler(async ({ data }): Promise<{ invited: boolean; email: string | null; username: string | null }> => {
-    const raw = data.identity.trim();
     const sql = await getSql();
     await ensureTable(sql);
-    const emailNorm = raw.includes("@") ? normEmail(raw) : null;
-    const userNorm = emailNorm ? null : cleanUsername(raw);
-    const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-    if (!invite) return { invited: false, email: null, username: null };
-    return { invited: true, email: invite.email, username: invite.username };
+    return peekInviteFor(sql, data.identity);
   });
 
 export const getMyAccess = createServerFn({ method: "GET" })
@@ -1176,3 +1185,5 @@ export async function salesRepScope(sql: Sql, userId: string): Promise<((rep: st
   const me = { displayName: user.name, primaryEmail: row.email ?? user.email, username: row.username };
   return (rep) => !!String(rep ?? "").trim() && namesMatchUser(me, rep);
 }
+
+export { ensureTable as ensureAccessTables };

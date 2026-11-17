@@ -41,6 +41,7 @@ test("inputProblem names the first field that was wrong", () => {
 const SENT = {
   usernameInput: [{ username: "po.admin" }, { username: "  someone@example.com " }, { username: "" }],
   identityInput: [{ identity: "po.admin" }, { identity: "" }],
+  passwordSignInInput: [{ username: "po.admin", password: "a made up password" }, { username: " someone@example.com ", password: "" }],
   inviteTokenInput: [{ token: "abc123" }, { token: null }, { token: undefined }, {}],
   registerInput: [{ username: "new.person", email: "new@example.com", token: "abc" }, { username: "new.person", email: null, token: null }, { username: "new.person" }],
   approveInput: [{ userId: "u_1", approved: true }, { userId: "u_1", approved: false }],
@@ -88,6 +89,7 @@ const SENT = {
 const WRONG = {
   usernameInput: [{ username: 5 }, { username: { $ne: "" } }, { username: ["a"] }, {}, { username: "x".repeat(400) }],
   identityInput: [{ identity: null }, { identity: {} }, { identity: "x".repeat(400) }],
+  passwordSignInInput: [{ username: "po.admin" }, { password: "x" }, { username: 5, password: "x" }, { username: "po.admin", password: ["x"] }, { username: "po.admin", password: "x".repeat(2000) }],
   inviteTokenInput: [{ token: 5 }, { token: {} }, { token: "x".repeat(400) }],
   registerInput: [{ username: 1 }, { username: "ok", email: {} }, { username: "ok", token: [] }, { email: "a@example.com" }],
   approveInput: [{ userId: "u_1", approved: "yes" }, { userId: 1, approved: true }, { approved: true }, { userId: "", approved: true }],
