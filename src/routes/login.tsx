@@ -3,11 +3,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { checkUsername, claimInvite, getMyAccess, lookupSignIn, peekInvite, registerAccount } from "@/lib/ops/access";
+import { checkUsername, claimInvite, getMyAccess, peekInvite, registerAccount } from "@/lib/ops/access";
 import { clearInviteToken, readInviteToken, rememberInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { MIN_PASSWORD, passwordProblem, peekPasswordReset, resetPasswordWithToken } from "@/lib/ops/password-reset";
+import { passwordSignIn } from "@/lib/ops/sign-in";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -35,7 +36,8 @@ function friendlySignInError(msg: string): string {
   if (/invalid (email or )?password|invalid credentials|incorrect/i.test(msg)) {
     return "That password didn't match. Check Caps Lock and try again, or tap Forgot password below.";
   }
-  if (/too many|rate limit/i.test(msg)) return "Too many tries in a row. Wait a minute, then try again.";
+  // Better Auth's own limit. The per-account wait from the server already says how long, so it passes through.
+  if (/too many requests|rate limit/i.test(msg)) return "Too many tries in a row. Wait a minute, then try again.";
   if (/network|failed to fetch|load failed/i.test(msg)) {
     return "Couldn't reach Katz Desk. Check your connection and try again.";
   }
@@ -209,32 +211,33 @@ function Login() {
         void signedIn;
       } else {
         const identity = username.trim();
-        const looked = await lookupSignIn({ data: { username: identity } });
-        if (looked.invited) {
+        // The server finds the account and checks the password; it never sends the account's email back.
+        const result = await passwordSignIn({ data: { username: identity, password } });
+        if (result.next === "invited") {
           const peek = await peekInvite({ data: { identity } });
           setMode("up");
           if (peek.username) setUsername(peek.username);
           if (peek.email) setEmail(peek.email);
           else if (identity.includes("@")) setEmail(identity);
-          setError("You’re invited — create an account with this email to get in.");
+          setError(
+            peek.email || identity.includes("@")
+              ? "You’re invited — create an account with this email to get in."
+              : "You’re invited — create an account to get in.",
+          );
           return;
         }
-        if (!looked.email) throw new Error("Unknown username");
-        const methods = looked.methods ?? [];
-        if (methods.length && !methods.includes("password")) {
+        if (result.next === "social") {
           // Google/X account with no password: send them to the right button instead of "wrong password".
-          setSocialOnly(methods);
+          setSocialOnly(result.methods);
           return;
-        }
-        const res = await authClient.signIn.email({ email: looked.email, password });
-        if (res.error) {
-          const msg = res.error.message ?? "Sign-in failed";
-          throw new Error(friendlySignInError(msg));
         }
         writeLastLogin(identity);
+        // The session cookie is set, but this sign-in didn't go through the auth client, so tell its
+        // session store to read the session again (it does that by itself after its own sign-in call).
+        authClient.$store.notify("$sessionSignal");
         await authClient.getSession();
         await router.invalidate();
-        writePending(!!looked.waiting);
+        writePending(result.waiting);
         void navigate({ to: "/" });
       }
     } catch (err) {
