@@ -2,8 +2,8 @@
 // TypeScript type, which only exists at build time: a number where text belongs crashed the function, or worse,
 // reached the database. `checked(schema)` refuses anything that doesn't match, with one plain sentence.
 //
-// This file covers the sign-in, access, password-reset, notification and rep functions (18), and holds a ceiling
-// on the unchecked ones still left elsewhere so the number only goes down.
+// This file covers the sign-in, access, password-reset, notification and rep functions (18) and Out Of Network (14),
+// and holds a ceiling on the unchecked ones still left elsewhere so the number only goes down.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -13,7 +13,7 @@ import { z } from "zod";
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 const { checked, inputProblem } = await import("../src/lib/ops/checked-input.ts");
-const input = { ...(await import("../src/lib/ops/access-input.ts")) };
+const input = { ...(await import("../src/lib/ops/access-input.ts")), ...(await import("../src/lib/ops/network-input.ts")) };
 
 const root = new URL("..", import.meta.url).pathname;
 const refuses = (fn, value, pattern) => assert.throws(() => fn(value), (e) => e instanceof Error && !(e instanceof z.ZodError) && pattern.test(e.message) && !e.message.includes("{"), `refuses ${JSON.stringify(value)}`);
@@ -59,6 +59,30 @@ const SENT = {
     { body: "hi", toUserId: "" },
   ],
   repActiveInput: [{ id: 3, active: false }],
+  // Out Of Network: provider-sheet.tsx, provider-people.tsx, provider-locations.tsx, provider-dispatch.tsx.
+  customerInput: [{ customer: "ZZ Test Diner" }, { customer: "" }],
+  providerInput: [
+    // A new provider, with what was typed before the first save.
+    {
+      id: undefined, name: "ZZ Made-Up Repair", status: "Active", dispatchPhone: "555-0100", dispatchEmail: null, secondaryPhone: null, secondaryEmail: null,
+      responseTime: null, standardRate: "$95/hr", afterHoursRate: null, travelPolicy: null, equipmentServiced: "Espresso", pmPricing: null, partsStocking: null, notes: null,
+      locations: [{ state: "TX", city: "Houston", zip: null }],
+      people: [{ name: "Sam", role: null, phone: null, email: null }],
+      addresses: [{ label: null, line1: "1 Made-Up Rd", line2: null, city: "Houston", state: "TX", zip: "77001" }],
+    },
+    // An edit: the lists are saved on their own, so they are left out.
+    { id: 12, name: "ZZ Made-Up Repair", status: null, notes: "x".repeat(30_000), locations: undefined, people: undefined, addresses: undefined },
+    { name: "" },
+    // The import's older fields.
+    { name: "ZZ", coverage: "TX, LA", contacts: "Sam 555-0100" },
+  ],
+  renameProviderInput: [{ id: 12, name: "ZZ Made-Up Repair Co" }, { id: 12, name: "" }],
+  providerLocationInput: [{ providerId: 12, state: "TX", city: "Houston", zip: null }, { providerId: 12, state: "TX", city: null, zip: "77001, 77002" }, { providerId: 12, state: "TX" }],
+  providerContactInput: [{ providerId: 12, name: "Sam", role: null, phone: "555-0100", email: null }, { providerId: 12, name: null, role: null, phone: null, email: null }],
+  providerAddressInput: [{ providerId: 12, label: null, line1: "1 Made-Up Rd", line2: null, city: "Houston", state: "TX", zip: "77001" }],
+  assignProviderInput: [{ customer: "ZZ Test Diner", providerId: 12, role: "primary" }, { customer: "ZZ Test Diner", providerId: 12, role: "secondary" }, { customer: "ZZ Test Diner", providerId: 12 }],
+  linkIdInput: [{ linkId: 5 }],
+  providerRoleInput: [{ linkId: 5, role: "additional" }],
 };
 // One wrong-typed value for each: the kind a script sends, never a screen.
 const WRONG = {
@@ -77,9 +101,22 @@ const WRONG = {
   markReadInput: [{ id: "4" }, { all: "true" }, { id: 0 }],
   pingInput: [{ body: 5 }, {}, { body: "hi", usernames: "sam" }, { body: "hi", usernames: [1] }, { body: "hi", entityId: "12" }, { body: "hi", toUserId: 7 }, { body: "x".repeat(20_001) }],
   repActiveInput: [{ id: 3, active: "false" }, { id: "3", active: true }, { id: 3 }],
+  customerInput: [{ customer: 5 }, {}, { customer: ["a"] }, { customer: "x".repeat(3000) }],
+  providerInput: [
+    {}, { name: 5 }, { name: "ZZ", id: "12" }, { name: "ZZ", notes: 5 }, { name: "ZZ", status: {} },
+    { name: "ZZ", locations: "TX" }, { name: "ZZ", locations: [{ city: "Houston", zip: null }] }, { name: "ZZ", people: [{ name: 1, role: null, phone: null, email: null }] },
+    { name: "ZZ", addresses: [5] }, { name: "ZZ", locations: Array.from({ length: 5001 }, () => ({ state: "TX", city: null, zip: null })) },
+  ],
+  renameProviderInput: [{ id: "12", name: "ZZ" }, { id: 12 }, { id: 12, name: 5 }],
+  providerLocationInput: [{ providerId: "12", state: "TX" }, { providerId: 12 }, { providerId: 12, state: "TX", city: 5 }],
+  providerContactInput: [{ providerId: 12, name: 5, role: null, phone: null, email: null }, { name: "Sam", role: null, phone: null, email: null }],
+  providerAddressInput: [{ providerId: 12, label: null, line1: 5, line2: null, city: null, state: null, zip: null }, { providerId: 0, label: null, line1: null, line2: null, city: null, state: null, zip: null }],
+  assignProviderInput: [{ customer: "ZZ", providerId: 12, role: "owner" }, { customer: "ZZ", providerId: "12" }, { providerId: 12 }, { customer: "ZZ", providerId: NaN }],
+  linkIdInput: [{ linkId: "5" }, {}, { linkId: 0 }],
+  providerRoleInput: [{ linkId: 5, role: "boss" }, { linkId: 5 }],
 };
 
-test("every sign-in, access, reset, notification and rep input takes what its screen sends", () => {
+test("every checked input takes what its screen sends", () => {
   assert.deepEqual(Object.keys(SENT).sort(), Object.keys(input).sort(), "one entry per exported input");
   for (const [name, values] of Object.entries(SENT)) {
     for (const v of values) assert.doesNotThrow(() => input[name](v), `${name} takes ${JSON.stringify(v)}`);
@@ -122,15 +159,15 @@ test("the unchecked-input pattern is recognised", () => {
   assert.equal((sample.match(UNCHECKED) ?? []).length, 2);
 });
 
-test("no save in the sign-in, access, reset, notification or rep files takes unchecked input", () => {
-  for (const f of ["src/lib/ops/access.ts", "src/lib/ops/password-reset.ts", "src/lib/ops/notify.ts", "src/lib/ops/reps.ts"]) {
+test("no save in the sign-in, access, reset, notification, rep or Out Of Network files takes unchecked input", () => {
+  for (const f of ["src/lib/ops/access.ts", "src/lib/ops/password-reset.ts", "src/lib/ops/notify.ts", "src/lib/ops/reps.ts", "src/lib/ops/network-api.ts"]) {
     assert.equal(unchecked[f] ?? 0, 0, `${f} has an unchecked .validator((d) => d)`);
   }
 });
 
 test("the unchecked saves left elsewhere only go down", () => {
   // Lower a number when a file is done; a new file or a higher number means a new save skipped the check.
-  const CEILING = { "src/lib/ops/api.ts": 41, "src/lib/ops/network-api.ts": 14 };
+  const CEILING = { "src/lib/ops/api.ts": 41 };
   for (const [file, n] of Object.entries(unchecked)) {
     assert.ok(file in CEILING, `${file} has ${n} unchecked .validator((d) => d): use checked(schema)`);
     assert.ok(n <= CEILING[file], `${file} went up to ${n} unchecked validators (ceiling ${CEILING[file]})`);

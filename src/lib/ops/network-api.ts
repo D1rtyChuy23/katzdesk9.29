@@ -2,7 +2,19 @@ import { createServerFn } from "@tanstack/react-start";
 import { getSql } from "@/lib/db";
 import { renameOrMergeProvider } from "@/lib/ops/customer-identity";
 import { deskMiddleware } from "@/lib/ops/access";
+import { idInput } from "@/lib/ops/access-input";
 import { todayChicago } from "@/lib/ops/clock";
+import {
+  assignProviderInput,
+  customerInput,
+  linkIdInput,
+  providerAddressInput,
+  providerContactInput,
+  providerInput,
+  providerLocationInput,
+  providerRoleInput,
+  renameProviderInput,
+} from "@/lib/ops/network-input";
 import { isoDayOrNull as isoDate } from "@/lib/ops/iso";
 import {
   findDuplicateAddress,
@@ -27,7 +39,6 @@ import {
   type ProviderAddress,
   type ProviderContact,
   type ProviderDetail,
-  type ProviderDraft,
   type ProviderLocation,
   type ProviderRole,
 } from "@/lib/ops/network";
@@ -276,7 +287,7 @@ async function loadAddresses(
 
 export const getProvider = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ data }): Promise<ProviderDetail | null> => {
     const sql = await ready();
     const rows = await sql.query<ProviderRow>(`${PROVIDER_SELECT} where p.id = $1`, [data.id]);
@@ -302,7 +313,7 @@ export const getProvider = createServerFn({ method: "GET" })
 
 export const upsertProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: ProviderDraft) => d)
+  .validator(providerInput)
   .handler(async ({ data }): Promise<NetworkProvider> => {
     const sql = await ready();
     const name = data.name.trim();
@@ -365,7 +376,7 @@ export const upsertProvider = createServerFn({ method: "POST" })
 
 export const renameProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number; name: string }) => d)
+  .validator(renameProviderInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     return renameOrMergeProvider(sql, data.id, data.name);
@@ -403,7 +414,7 @@ async function withLocationSummary(
 
 export const addProviderLocation = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { providerId: number; state: string; city?: string | null; zip?: string | null }) => d)
+  .validator(providerLocationInput)
   .handler(async ({ data }): Promise<{
     added: ProviderLocation[];
     duplicates: { existing: ProviderLocation; message: string }[];
@@ -443,7 +454,7 @@ export const addProviderLocation = createServerFn({ method: "POST" })
 
 export const removeProviderLocation = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     await sql`delete from provider_locations where id = ${data.id}`;
@@ -500,7 +511,7 @@ async function writeAddresses(
 
 export const addProviderContact = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { providerId: number } & ContactDraft) => d)
+  .validator(providerContactInput)
   .handler(async ({ data }): Promise<{ ok: true; contact: ProviderContact } | { ok: false; duplicate: true; existing: ProviderContact; message: string }> => {
     const sql = await ready();
     const row = {
@@ -525,7 +536,7 @@ export const addProviderContact = createServerFn({ method: "POST" })
 
 export const removeProviderContact = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     await sql`delete from provider_contacts where id = ${data.id}`;
@@ -534,7 +545,7 @@ export const removeProviderContact = createServerFn({ method: "POST" })
 
 export const addProviderAddress = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { providerId: number } & AddressDraft) => d)
+  .validator(providerAddressInput)
   .handler(async ({ data }): Promise<{ ok: true; address: ProviderAddress } | { ok: false; duplicate: true; existing: ProviderAddress; message: string }> => {
     const sql = await ready();
     const row = {
@@ -561,7 +572,7 @@ export const addProviderAddress = createServerFn({ method: "POST" })
 
 export const removeProviderAddress = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     await sql`delete from provider_addresses where id = ${data.id}`;
@@ -570,7 +581,7 @@ export const removeProviderAddress = createServerFn({ method: "POST" })
 
 export const archiveProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number }) => d)
+  .validator(idInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     await sql`delete from customer_providers where provider_id = ${data.id}`;
@@ -580,7 +591,7 @@ export const archiveProvider = createServerFn({ method: "POST" })
 
 export const getCustomerProviders = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string }) => d)
+  .validator(customerInput)
   .handler(async ({ data }): Promise<CustomerProviderLink[]> => {
     const customer = data.customer.trim();
     if (!customer) return [];
@@ -606,7 +617,7 @@ export const getCustomerProviders = createServerFn({ method: "GET" })
 
 export const assignCustomerProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string; providerId: number; role?: ProviderRole }) => d)
+  .validator(assignProviderInput)
   .handler(async ({ data }): Promise<CustomerProviderLink> => {
     const sql = await ready();
     const customer = data.customer.trim();
@@ -665,7 +676,7 @@ export const assignCustomerProvider = createServerFn({ method: "POST" })
 
 export const unassignCustomerProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { linkId: number }) => d)
+  .validator(linkIdInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     await sql`delete from customer_providers where id = ${data.linkId}`;
@@ -674,7 +685,7 @@ export const unassignCustomerProvider = createServerFn({ method: "POST" })
 
 export const setProviderRole = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { linkId: number; role: ProviderRole }) => d)
+  .validator(providerRoleInput)
   .handler(async ({ data }) => {
     const sql = await ready();
     const cur = await sql<{ customer: string }>`
