@@ -95,9 +95,36 @@ test("Move takes the unit off the old account as Remove does, puts the serial on
     assert.equal(log.length, 1);
     assert.equal(log[0].action, "moved-serial");
     assert.ok(log[0].detail.startsWith(retired[0].movedNote));
-    // Put back still works, before the install is marked Installed.
-    await putBackEquipmentUnit(sql, retired[0].id);
-    assert.deepEqual(await units(OLD), ["ZZITCB167321", "ZZITCB999000"]);
+    // The install's list is synced at once, so the unit is on the new account and the serial is held there.
+    assert.deepEqual(await units(NEW), ["ZZITCB167321"]);
+    // So Put back on the old account is refused until it is removed from the new one: never two accounts at once.
+    await assert.rejects(putBackEquipmentUnit(sql, retired[0].id), new RegExp(`is on ${NEW} now`));
+    assert.deepEqual(await units(OLD), ["ZZITCB999000"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("two installs moving the same serial at once: one gets it, the other is refused and left as it was", async () => {
+  const { pg, unit, install, units, installRow, pull } = await fresh();
+  try {
+    await unit(OLD, "ZZITCB167321");
+    const a = await install(NEW, "1120");
+    const b = await install("ZZ Second Place", "1121");
+    const beforeB = await installRow(b);
+    const beforeA = await installRow(a);
+    const results = await Promise.allSettled([
+      pull({ serial: "ZZITCB167321", installId: a, machineIndex: 0, moveFrom: OLD }),
+      pull({ serial: "ZZITCB167321", installId: b, machineIndex: 0, moveFrom: OLD }),
+    ]);
+    const won = results.filter((r) => r.status === "fulfilled" && /moved from/.test(r.value.notice));
+    assert.equal(won.length, 1, JSON.stringify(results.map((r) => r.status === "fulfilled" ? r.value.notice : String(r.reason))));
+    assert.deepEqual(await units(OLD), []);
+    assert.equal((await pg.query("select count(*)::int as n from account_equipment_retired")).rows[0].n, 1);
+    const holders = (await pg.query("select customer from account_equipment where serial_key = 'zzitcb167321'")).rows.map((r) => r.customer);
+    assert.equal(holders.length, 1);
+    const lost = holders[0] === NEW ? b : a;
+    assert.deepEqual(await installRow(lost), lost === b ? beforeB : beforeA);
   } finally {
     await pg.close();
   }
@@ -195,16 +222,19 @@ test("a stored 'not moved' notice stops showing once the old account no longer h
     await unit(OLD, "ZZITCB555");
     await removeEquipmentUnit(sql, gone, { userId: "u_sam", name: "sam.zz" });
     const rows = [
-      { id: 1, serialNotice: P.notMovedNotice("ZZITCB167321", OLD) },
-      { id: 2, serialNotice: P.notMovedNotice("ZZITCB555", OLD) },
-      { id: 3, serialNotice: P.notMovedNotice("ZZITCB555", "ZZ Another Account") },
-      { id: 4, serialNotice: "Serial ZZX not found in warehouse." },
-      { id: 5, serialNotice: null },
+      { id: 1, customer: NEW, serialNotice: P.notMovedNotice("ZZITCB167321", OLD) },
+      { id: 2, customer: NEW, serialNotice: P.notMovedNotice("ZZITCB555", OLD) },
+      // The account was renamed since: the serial is still on another account, so the warning still holds.
+      { id: 3, customer: NEW, serialNotice: P.notMovedNotice("ZZITCB555", "ZZ Ice House (old name)") },
+      { id: 4, customer: NEW, serialNotice: "Serial ZZX not found in warehouse." },
+      { id: 5, customer: NEW, serialNotice: null },
+      // Only on this install's own account now: nothing to warn about.
+      { id: 6, customer: OLD, serialNotice: P.notMovedNotice("ZZITCB555", "ZZ Somebody") },
     ];
     const live = await P.withLiveSerialNotices(sql, rows);
     assert.deepEqual(
       live.map((r) => r.serialNotice),
-      [null, rows[1].serialNotice, null, rows[3].serialNotice, null],
+      [null, rows[1].serialNotice, rows[2].serialNotice, rows[3].serialNotice, null, null],
     );
     // The stored text is not changed: this only reads.
     assert.equal(rows[0].serialNotice, P.notMovedNotice("ZZITCB167321", OLD));

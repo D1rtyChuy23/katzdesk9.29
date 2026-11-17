@@ -220,6 +220,7 @@ export function SerialPullField({
             <Button
               type="button"
               data-testid="move-serial"
+              disabled={pull.isPending}
               onClick={() => {
                 if (pending?.moveFrom) commit(pending.serial, false, pending.moveFrom);
               }}

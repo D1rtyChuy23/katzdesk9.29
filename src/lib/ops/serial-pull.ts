@@ -541,6 +541,10 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
           }
           throw e;
         }
+        // The install's list onto its account now, as the install window's save does: the serial is held there at
+        // once, so Put back on the old account is refused until it is removed here, and no second unit appears.
+        const { syncInstallUnits } = await import("@/lib/ops/inspection-api");
+        await syncInstallUnits(sql, data.installId);
         const note = movedNote(accountHit.customer, data.installId, before?.wo ?? null, actor);
         await sql.query(
           `update account_equipment_retired
@@ -744,10 +748,12 @@ export function notMovedNotice(serial: string, customer: string): string {
 const NOT_MOVED = /^Serial (.+) is on (.+)'s inventory — not moved\.$/;
 
 /**
- * A stored "is on X's inventory — not moved" notice holds only while that account still has the serial. Once the unit
- * is removed there (or moved), the notice is dropped from what is read. The stored text is left as it is.
+ * A stored "is on X's inventory — not moved" notice holds while some account other than the install's own still has
+ * the serial. Once none does (the unit was removed there, or moved), the notice is dropped from what is read. It goes
+ * by the serial, not the account name in the text, so a renamed or merged account keeps its warning. The stored text
+ * is left as it is.
  */
-export async function withLiveSerialNotices<T extends { serialNotice: string | null }>(sql: Sql, rows: T[]): Promise<T[]> {
+export async function withLiveSerialNotices<T extends { serialNotice: string | null; customer?: string | null }>(sql: Sql, rows: T[]): Promise<T[]> {
   const asks = rows
     .map((r) => ({ r, m: NOT_MOVED.exec(String(r.serialNotice ?? "").trim()) }))
     .filter((x): x is { r: T; m: RegExpExecArray } => !!x.m);
@@ -760,8 +766,16 @@ export async function withLiveSerialNotices<T extends { serialNotice: string | n
     )
     .catch(() => null);
   if (!held) return rows;
-  const on = new Set(held.map((h) => `${h.serial_key}|${normalizeCustomerKey(h.customer)}`));
-  const stale = new Set(asks.filter((x) => !on.has(`${serialKey(x.m[1])}|${normalizeCustomerKey(x.m[2]!)}`)).map((x) => x.r));
+  const holders = new Map<string, string[]>();
+  for (const h of held) holders.set(h.serial_key, [...(holders.get(h.serial_key) ?? []), normalizeCustomerKey(h.customer)]);
+  const stale = new Set(
+    asks
+      .filter((x) => {
+        const own = normalizeCustomerKey(x.r.customer ?? "");
+        return !(holders.get(serialKey(x.m[1])) ?? []).some((c) => c !== own);
+      })
+      .map((x) => x.r),
+  );
   if (!stale.size) return rows;
   return rows.map((r) => (stale.has(r) ? { ...r, serialNotice: null } : r));
 }

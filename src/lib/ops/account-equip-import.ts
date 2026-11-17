@@ -1028,7 +1028,10 @@ export async function removeEquipmentUnit(sql: Sql, id: number, by?: RetiredBy |
       await sql.query("update account_equipment_retired set links = links || jsonb_build_object('off_lists', $2::jsonb) where id = $1", [retired, JSON.stringify(offLists)]);
     }
     await dropEquipmentLinks(sql, id);
-    await sql.query("delete from account_equipment where id = $1", [id]);
+    // The delete decides (11/17): two removals of one unit at once, as two installs moving the same serial, both
+    // passed the check above. The one that deleted nothing is refused, and its retired copy is dropped below.
+    const gone = await sql.query<{ id: number }>("delete from account_equipment where id = $1 returning id", [id]);
+    if (!gone[0]) throw new Error("That unit is not on the account.");
   } catch (e) {
     // Still on the account, so not retired.
     if (retired != null) await dropRetiredRecord(sql, retired).catch(() => undefined);
