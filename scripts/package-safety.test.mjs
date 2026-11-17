@@ -3,8 +3,9 @@
  *
  * 1. Fixed packages: no installed copy in package-lock.json sits inside a range that has a published fix, so a
  *    lockfile regenerated from older ranges can't quietly bring an issue back.
- * 2. Held packages: the advisories on two are still open because the fix is a breaking upgrade (better-auth 1.7 changes
- *    the sign-in callback address the Grok broker knows; pdf.js 6 changes how pictures are read out of a PDF).
+ * 2. Held packages: the advisories on two are still open because the fix is a major upgrade (better-auth 1.7 changes
+ *    the sign-in callback address the Grok broker knows; pdf.js 6 has not been tried against the Library's photo
+ *    picker, which reads pictures out of a PDF through the reader's internals).
  *    Each one only bites when a feature KatzDesk doesn't use is switched on. These tests fail the day someone
  *    switches that feature on while the package is still below its fix, which is the day the upgrade stops being optional.
  *
