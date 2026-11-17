@@ -90,6 +90,7 @@ import { customersStrictlyMatch } from "./clean-names";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withLiveSerialNotices } from "./serial-pull";
+import * as input from "./api-input";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
@@ -848,7 +849,7 @@ async function entityContext(sql: any, type: any, id: any) {
 	}
 	return empty;
 }
-export const listJobs = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { kind: "service" | "tlc" }) => d).handler(async ({ data, context }: any): Promise<ServiceJob[]> => {
+export const listJobs = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.listJobsInput).handler(async ({ data, context }: any): Promise<ServiceJob[]> => {
 	const sql = await ready();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
@@ -856,7 +857,7 @@ export const listJobs = createServerFn({ method: "GET" }).middleware([deskMiddle
 	const scope = await salesRepScope(sql, context.userId);
 	return applyMarks(attachJobSiblings((await sql`select * from service_jobs order by received desc nulls last, id desc`).map((r) => mapJob(r, today))), marks).filter((j) => j.kind === data.kind && (!scope || scope(accountRepFor(marks, j.customer ?? null))));
 });
-export const getJob = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
+export const getJob = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any): Promise<ServiceJob | null> => {
 	const sql = await ready();
 	const today = todayChicago();
 	const marks = await loadAccountMarks(sql);
@@ -1071,7 +1072,7 @@ export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: nu
 	}
 }
 
-export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: NewTicket) => d).handler(async ({ data, context }: any) => {
+export const createJob = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.newTicketInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const made = await openTicketFor(sql, data);
 	await logActivity(sql, context.userId, data.kind, made.id, "opened", [made.customer, data.issue].filter(Boolean).join(" · ") || null);
@@ -1159,7 +1160,7 @@ export const getPm = createServerFn({ method: "GET" }).middleware([deskMiddlewar
 	if (scope && !scope(accountRepFor(marks, pm.customer ?? null))) return null;
 	return pm;
 });
-export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; equipment?: string | null; style?: string | null; projected?: string | null; partsStatus?: string | null; status?: string; technician?: string | null; notes?: string | null; workDone?: string | null; completedAt?: string | null; done?: boolean; wo?: string | null; po?: string | null; vendorPo?: string | null }) => d).handler(async ({ data, context }: any) => updatePmFor(await ready(), data, context.userId));
+export const updatePm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.updatePmInput).handler(async ({ data, context }: any) => updatePmFor(await ready(), data, context.userId));
 /** The body of updatePm. Its P.O.s are written only when sent (11/2); left out, the stored ones stay. */
 export async function updatePmFor(sql: any, data: any, userId: string) {
 	const po = sentPo(data.po, "Customer P.O.");
@@ -1228,7 +1229,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	}
 	return mapPm((await sql`select * from pm_jobs where id = ${data.id}`)[0], todayChicago());
 }
-export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; style?: string }) => d).handler(async ({ data, context }: any) => {
+export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createPmInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
@@ -1243,7 +1244,7 @@ export const listModules = createServerFn({ method: "GET" }).middleware([deskMid
 	await ensureModuleSchema(sql);
 	return (await sql`select * from modules order by module_id`).map(mapModule);
 });
-export const updateModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; status?: string; wo?: string | null; location?: string | null; dateIn?: string | null; dateReady?: string | null; technician?: string | null; notes?: string | null; platform?: string | null; moduleType?: string | null }) => d).handler(async ({ data, context }: any) => {
+export const updateModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.updateModuleInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`select * from modules where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Module not found");
@@ -1279,7 +1280,7 @@ export const updateModule = createServerFn({ method: "POST" }).middleware([deskM
 	}
 	return mapModule((await sql`select * from modules where id = ${data.id}`)[0]);
 });
-export const createModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { moduleId: string; platform?: string; moduleType?: string }) => d).handler(async ({ data, context }: any) => {
+export const createModule = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createModuleInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	// One module serial = one record: ignore case and stray spaces when checking.
 	const moduleId = String(data.moduleId ?? "").trim().replace(/\s+/g, "").toUpperCase();
@@ -1336,7 +1337,7 @@ function attachBoard(deal: any, projects: any[]) {
  * everything set on the deal: Sold, Loan or Lease, serial, volts, plug, water and recipe. "continue" adds to an
  * open project so it stays one card; "new" opens another card. The deal rows are saved as the window has them.
  */
-export const confirmDealMachines = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number; machines: MachineSpec[]; indexes: number[]; project: { mode: "new" } | { mode: "continue"; installId: number } }) => d).handler(async ({ data, context }: any) => {
+export const confirmDealMachines = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.confirmDealMachinesInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const deal = (await sql`select * from deals where id = ${data.dealId} and archived = false`)[0];
 	if (!deal) throw new Error("Deal not found");
@@ -1417,7 +1418,7 @@ export const listDeals = createServerFn({ method: "GET" }).middleware([deskMiddl
 	const projects = await loadBoardProjects(sql, await loadEquipCatalog(sql));
 	return (await sql`select * from deals where archived = false order by id`).map((r) => attachBoard(mapDeal(r, marks), projects));
 });
-export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; customer?: string; producer?: string | null; accountType?: string | null; equipment?: string | null; machines?: MachineSpec[] | null; amount?: number | null; goodToOrder?: boolean; ordered?: boolean; eta?: string | null; terms?: string | null; invoice?: string | null; completion?: string | null; notes?: string | null; aviKatz?: boolean; releaseUids?: string[]; po?: string | null; vendorPo?: string | null }) => d).handler(async ({ data, context }: any) => updateDealFor(await ready(), data, context.userId));
+export const updateDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.updateDealInput).handler(async ({ data, context }: any) => updateDealFor(await ready(), data, context.userId));
 /** The body of updateDeal. Its P.O.s are written only when sent (11/2); left out, the stored ones stay. */
 export async function updateDealFor(sql: any, data: any, userId: string) {
 	const po = sentPo(data.po, "Customer P.O.");
@@ -1517,7 +1518,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	const marks = await loadAccountMarks(sql);
 	return attachBoard(mapDeal((await sql`select * from deals where id = ${data.id}`)[0], marks), await loadBoardProjects(sql, await loadEquipCatalog(sql)));
 }
-export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; producer?: string; equipment?: string; machines?: MachineSpec[]; amount?: number }) => d).handler(async ({ data, context }: any) => {
+export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createDealInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const producer = canonicalRepName(data.producer);
 	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
@@ -1531,7 +1532,7 @@ export const createDeal = createServerFn({ method: "POST" }).middleware([deskMid
 	const marks = await loadAccountMarks(sql);
 	return attachBoard(mapDeal(rows[0], marks), await loadBoardProjects(sql, await loadEquipCatalog(sql)));
 });
-export const archiveDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
+export const archiveDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`
       select id, customer from deals where id = ${data.id} and archived = false`;
@@ -1852,7 +1853,7 @@ function mergeStaleList(data: UpdateInstallInput, c: any, catalog: string[]): vo
 	data.serial = packed.serial;
 	data.powerVoltage = packed.powerVoltage;
 }
-export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: UpdateInstallInput) => d).handler(async ({ data, context }: any) => updateInstallFor(await ready(), data, context));
+export const updateInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.updateInstallInput).handler(async ({ data, context }: any) => updateInstallFor(await ready(), data, context));
 export async function updateInstallFor(sql: any, data: UpdateInstallInput, context: { userId: string }): Promise<Install> {
 	const po = sentPo(data.po, "Customer P.O.");
 	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
@@ -1986,7 +1987,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const saved = (await withLiveSerialNotices(sql, await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks))))))[0];
 	return { ...saved, unitsMoved };
 }
-export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; technician?: string; serial?: string; powerVoltage?: string; machines?: MachineSpec[] | string | null }) => d).handler(async ({ data, context }: any) => {
+export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
@@ -2018,11 +2019,11 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
 	await syncInstallUnits(sql, rows[0].id);
 	return (await withLiveSerialNotices(sql, await withWorkOrders(sql, [mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog)])))[0];
 });
-export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
+export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any) => {
 	// A rebuild linked to it keeps it on the board (11/6 review, round 5): install-projects.ts.
 	return archiveInstallFor(await ready(), context.userId, Number(data.id));
 });
-export const listComments = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { entityType: string; entityId: number }) => d).handler(async ({ data }: any) => {
+export const listComments = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.entityInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const rows = await sql`
       select * from comments
@@ -2031,7 +2032,7 @@ export const listComments = createServerFn({ method: "GET" }).middleware([deskMi
 	const ctx = await entityContext(sql, data.entityType, data.entityId);
 	return rows.map((r) => mapComment(r, ctx));
 });
-export const listActivity = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { entityType: string; entityId: number }) => d).handler(async ({ data }: any): Promise<{ id: number; entityType: string; entityId: number; actorName: string | null; action: string; detail: string | null; createdAt: string }[]> => {
+export const listActivity = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.entityInput).handler(async ({ data }: any): Promise<{ id: number; entityType: string; entityId: number; actorName: string | null; action: string; detail: string | null; createdAt: string }[]> => {
 	return (await (await ready())`
       select id, entity_type, entity_id, actor_name, action, detail, created_at
       from activity
@@ -2047,7 +2048,7 @@ export const listActivity = createServerFn({ method: "GET" }).middleware([deskMi
 		createdAt: String(r.created_at)
 	}));
 });
-export const addComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { entityType: string; entityId: number; body: string; askTeam?: string | null; authorName?: string | null }) => d).handler(async ({ data, context }: any) => {
+export const addComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.addCommentInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const body = data.body.trim();
 	if (!body) throw new Error("Message is empty");
@@ -2077,7 +2078,7 @@ export const addComment = createServerFn({ method: "POST" }).middleware([deskMid
 	}
 	return mapComment((await sql`select * from comments where id = ${commentId}`)[0] ?? rows[0], await entityContext(sql, data.entityType, data.entityId));
 });
-export const claimComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
+export const claimComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const cur = await sql`
       select id, author_id, entity_type, entity_id from comments where id = ${data.id}`;
@@ -2093,7 +2094,7 @@ export const claimComment = createServerFn({ method: "POST" }).middleware([deskM
 	await logActivity(sql, context.userId, cur[0].entity_type, cur[0].entity_id, "note", `claimed this note`);
 	return mapComment(row, await entityContext(sql, cur[0].entity_type, cur[0].entity_id));
 });
-export const resolveComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; resolved: boolean }) => d).handler(async ({ data }: any) => {
+export const resolveComment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.resolveCommentInput).handler(async ({ data }: any) => {
 	await (await ready())`update comments set resolved = ${data.resolved} where id = ${data.id}`;
 	return { ok: true };
 });
@@ -2146,7 +2147,7 @@ async function repCustomerScope(sql: any, userId: string): Promise<((customer: s
 	const marks = await loadAccountMarks(sql);
 	return (customer) => scope(accountRepFor(marks, customer));
 }
-export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { q: string }) => d).handler(async ({ data, context }: any): Promise<SearchHit[]> => searchAllFor(await ready(), data, context));
+export const searchAll = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.searchInput).handler(async ({ data, context }: any): Promise<SearchHit[]> => searchAllFor(await ready(), data, context));
 /** The top search. A WO number finds its install by any of the project's work orders. */
 export async function searchAllFor(sql: any, data: { q: string }, context: { userId: string }): Promise<SearchHit[]> {
 	const q = data.q.trim();
@@ -2286,7 +2287,7 @@ export const findWoTickets = createServerFn({ method: "GET" }).middleware([deskM
 	const sql = await ready();
 	return findWoEverywhere(sql, key, await repCustomerScope(sql, context.userId));
 });
-export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { dealId: number }) => d).handler(async ({ data, context }: any) => {
+export const handoffDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.dealIdInput).handler(async ({ data, context }: any) => {
 	return { ok: true, handoff: await maybeHandoffInstall(await ready(), data.dealId, context.userId) };
 });
 async function nextLine(sql: any, site: any, pallet: any, level: any, exceptId?: number) {
@@ -2343,7 +2344,7 @@ async function findOpenBarnSlot(sql: any, preferred: any) {
 export const listAssets = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Asset[]> => {
 	return (await (await ready())`select * from assets order by id`).map(mapAsset);
 });
-export const createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind?: "equip" | "dispenser" | "module"; model: string; serial?: string | null; qty?: number; customerOwned?: string | null; site: string; pallet?: string | null; level?: number | null; purpose?: string | null; notes?: string | null }) => d).handler(async ({ data, context }: any): Promise<Asset> => {
+export const createAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createAssetInput).handler(async ({ data, context }: any): Promise<Asset> => {
 	const sql = await ready();
 	const kind = data.kind ?? "equip";
 	const site = data.site;
@@ -2464,7 +2465,7 @@ export async function updateAssetFor(sql: any, data: { id: number; model?: strin
 	}
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 }
-export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; model?: string; serial?: string | null; qty?: number; customerOwned?: string | null; purpose?: string | null; notes?: string | null; pallet?: string | null; level?: number | null; site?: string }) => d).handler(async ({ data, context }: any): Promise<Asset> => updateAssetFor(await ready(), data, context));
+export const updateAsset = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.updateAssetInput).handler(async ({ data, context }: any): Promise<Asset> => updateAssetFor(await ready(), data, context));
 /** Copy or clear a warehouse serial on a record that stores machine rows. Service jobs have none, so that path no-ops. */
 async function stampWarehouseSerial(sql: any, table: "installs" | "deals" | "service_jobs", id: number, unit: { model: string; serial: string | null }, mode: "place" | "clear", addRow: boolean) {
 	if (table === "service_jobs") {
@@ -2553,7 +2554,7 @@ export async function assignAssetToInstallFor(sql: any, data: { assetId: number;
 	await logActivity(sql, context.userId, "install", inst.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 }
-export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => assignAssetToInstallFor(await ready(), data, context));
+export const assignAssetToInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.assetInstallInput).handler(async ({ data, context }: any) => assignAssetToInstallFor(await ready(), data, context));
 export async function unassignAssetFromInstallFor(sql: any, data: { assetId: number; installId: number }, context: { userId: string }) {
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
@@ -2586,8 +2587,8 @@ export async function unassignAssetFromInstallFor(sql: any, data: { assetId: num
 	await logActivity(sql, context.userId, "install", data.installId, "unassigned-asset", asset.model);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 }
-export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; installId: number }) => d).handler(async ({ data, context }: any) => unassignAssetFromInstallFor(await ready(), data, context));
-export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number; customer: string; jobId?: number | null }) => d).handler(async ({ data, context }: any) => assignAssetToServiceFor(await ready(), data, context));
+export const unassignAssetFromInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.assetInstallInput).handler(async ({ data, context }: any) => unassignAssetFromInstallFor(await ready(), data, context));
+export const assignAssetToService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.assetServiceInput).handler(async ({ data, context }: any) => assignAssetToServiceFor(await ready(), data, context));
 /** Pull for service: the unit goes to the account, on its newest open ticket that isn't hidden (merged), if it has one. */
 export async function assignAssetToServiceFor(sql: any, data: { assetId: number; customer: string; jobId?: number | null }, context: { userId: string }) {
 	const customer = data.customer.trim();
@@ -2644,7 +2645,7 @@ export async function assignAssetToServiceFor(sql: any, data: { assetId: number;
 	if (job) await logActivity(sql, context.userId, job.kind, job.id, "assigned-asset", detail);
 	return mapAsset((await sql`select * from assets where id = ${data.assetId}`)[0]);
 }
-export const unassignAssetFromService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { assetId: number }) => d).handler(async ({ data, context }: any) => {
+export const unassignAssetFromService = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.assetIdInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	const asset = (await sql`select * from assets where id = ${data.assetId}`)[0];
 	if (!asset) throw new Error("Asset not found");
@@ -2734,7 +2735,7 @@ export async function returnAssetToWarehouseFor(sql: any, data: { id: number; si
 	});
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 }
-export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; site: "barn-back" | "barn-front"; pallet: string; level: number }) => d).handler(async ({ data, context }: any): Promise<Asset> => returnAssetToWarehouseFor(await ready(), data, context));
+export const returnAssetToWarehouse = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.returnAssetInput).handler(async ({ data, context }: any): Promise<Asset> => returnAssetToWarehouseFor(await ready(), data, context));
 export async function markAssetSoldFor(sql: any, data: { id: number; soldTo: string }, context: { userId: string }) {
 	const cur = (await sql`select * from assets where id = ${data.id}`)[0];
 	if (!cur) throw new Error("Asset not found");
@@ -2756,7 +2757,7 @@ export async function markAssetSoldFor(sql: any, data: { id: number; soldTo: str
 	await logActivity(sql, context.userId, "asset", data.id, "sold", data.soldTo);
 	return mapAsset((await sql`select * from assets where id = ${data.id}`)[0]);
 }
-export const markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; soldTo: string }) => d).handler(async ({ data, context }: any) => markAssetSoldFor(await ready(), data, context));
+export const markAssetSold = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.markSoldInput).handler(async ({ data, context }: any) => markAssetSoldFor(await ready(), data, context));
 export const listRecipes = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<Recipe[]> => {
 	return (await (await ready())`
       select * from recipes
@@ -2867,7 +2868,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		inactive: r.inactive === true
 	}));
 });
-export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
+export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
 	const account = (await sql`
@@ -2962,7 +2963,7 @@ function directoryTable(kind: any) {
 	if (kind === "equipment") return "directory_equipment";
 	throw new Error("Unknown directory");
 }
-export const listDirectory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind }) => d).handler(async ({ data }): Promise<DirectoryEntry[]> => {
+export const listDirectory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.directoryKindInput).handler(async ({ data }): Promise<DirectoryEntry[]> => {
 	const sql = await ready();
 	const table = directoryTable(data.kind);
 	// Customers NetSuite marks Inactive aren't offered in pickers. A record that already names one keeps the name.
@@ -2978,7 +2979,7 @@ export type CustomerLocation = {
 	/** Entered by hand on Account Details (counts as exact). */
 	manual?: boolean;
 };
-export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { name: string }) => d).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
+export const getCustomerAddress = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.nameInput).handler(async ({ data }: any): Promise<{ address: string | null; location: CustomerLocation | null }> => {
 	const sql = await ready();
 	const name = String(data.name ?? "").trim();
 	if (!name) return { address: null, location: null };
@@ -3042,7 +3043,7 @@ export const listAccountAddresses = createServerFn({ method: "GET" }).middleware
 	}
 	return out;
 });
-export const updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; aviKatz?: boolean; accountRep?: string | null }) => d).handler(async ({ data }: any) => {
+export const updateCustomerAccount = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.customerAccountInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const dir = await sql`
       select id, name from directory_customers where id = ${data.id} and archived = false`;
@@ -3059,7 +3060,7 @@ export const updateCustomerAccount = createServerFn({ method: "POST" }).middlewa
 		accountRep: accountRepFor(marks, dir[0].name)
 	};
 });
-export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind; name: string }) => d).handler(async ({ data }: any): Promise<DirectoryEntry> => {
+export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.addDirectoryInput).handler(async ({ data }: any): Promise<DirectoryEntry> => {
 	const sql = await ready();
 	const name = data.name.trim();
 	if (!name) throw new Error("Name is empty");
@@ -3090,7 +3091,7 @@ export const addDirectoryEntry = createServerFn({ method: "POST" }).middleware([
 	}
 	return (await sql.query(`insert into ${table} (name) values ($1) returning id, name`, [name]))[0];
 });
-export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { kind: DirectoryKind; id: number }) => d).handler(async ({ data, context }: any) => {
+export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.archiveDirectoryInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	if (data.kind === "customer") {
 		// Any account can be removed, with or without an Account Number (Chuy, 2026-10-26). Nothing is deleted, and
@@ -3102,15 +3103,15 @@ export const archiveDirectoryEntry = createServerFn({ method: "POST" }).middlewa
 	await sql.query(`update ${table} set archived = true, updated_at = now() where id = $1`, [data.id]);
 	return { ok: true, flagged: false };
 });
-export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string; confirmMerge?: string | null }) => d).handler(async ({ data, context }: any): Promise<RenameResult> => {
+export const renameCustomer = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.renameCustomerInput).handler(async ({ data, context }: any): Promise<RenameResult> => {
 	// A desk admin or the Admin role. A merge needs confirmMerge: the token of the merge question the window showed (customer-identity.ts).
 	return renameCustomerFor(await ready(), context.userId, data.id, data.name, { confirmMerge: data.confirmMerge ?? null });
 });
 /** The rename window asks this first: a plain rename, or a merge and what it would move (nothing is saved). */
-export const previewCustomerRename = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data, context }: any): Promise<RenamePlan> => {
+export const previewCustomerRename = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.renameInput).handler(async ({ data, context }: any): Promise<RenamePlan> => {
 	return previewCustomerRenameFor(await ready(), context.userId, data.id, data.name);
 });
-export const renameEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; name: string }) => d).handler(async ({ data }: any) => {
+export const renameEquipment = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.renameInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	return renameOrMergeEquipment(sql, data.id, data.name);
 });
@@ -3128,28 +3129,7 @@ async function findRecipeDup(sql: any, model: any, customer: any, exceptId: any 
 	if (hit && hit.id !== exceptId) return hit;
 	return null;
 }
-type RecipeInput = {
-	id?: number;
-	name?: string | null;
-	equipmentModel: string;
-	customer?: string | null;
-	installId?: number | null;
-	copiedFrom?: number | null;
-	coffee1?: string | null;
-	coffee2?: string | null;
-	coffee3?: string | null;
-	powder1?: string | null;
-	powder2?: string | null;
-	powder3?: string | null;
-	americano1?: string | null;
-	americano2?: string | null;
-	americano3?: string | null;
-	tea1?: string | null;
-	tea2?: string | null;
-	milk?: string | null;
-	notes?: string | null;
-};
-export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: RecipeInput) => d).handler(async ({ data }: any) => {
+export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.recipeInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const model = data.equipmentModel.trim();
 	if (!model) throw new Error("Pick an equipment model");
@@ -3211,7 +3191,7 @@ export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskM
       )
       returning *`)[0]);
 });
-export const copyRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { sourceId: number; customer: string; installId?: number | null }) => d).handler(async ({ data }: any) => {
+export const copyRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.copyRecipeInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const customer = data.customer.trim();
 	if (!customer) throw new Error("Pick a customer to copy onto");
@@ -3273,7 +3253,7 @@ async function recipeUsedElsewhere(sql: any, id: number, exceptDealId: number | 
 }
 
 /** Remove a recipe from the list. Asks first only when some other machine still uses it. */
-export const deleteRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number; force?: boolean; exceptDealId?: number | null; exceptIndex?: number | null }) => d).handler(async ({ data }: any) => {
+export const deleteRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.deleteRecipeInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const id = Number(data.id);
 	const row = (await sql`select id from recipes where id = ${id}`)[0];

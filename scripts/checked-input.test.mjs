@@ -166,8 +166,8 @@ test("no save in the sign-in, access, reset, notification, rep or Out Of Network
 });
 
 test("the unchecked saves left elsewhere only go down", () => {
-  // Lower a number when a file is done; a new file or a higher number means a new save skipped the check.
-  const CEILING = { "src/lib/ops/api.ts": 41 };
+  // api.ts went to 0 on 11/17 (scripts/api-input.test.mjs). A new file here means a new save skipped the check.
+  const CEILING = {};
   for (const [file, n] of Object.entries(unchecked)) {
     assert.ok(file in CEILING, `${file} has ${n} unchecked .validator((d) => d): use checked(schema)`);
     assert.ok(n <= CEILING[file], `${file} went up to ${n} unchecked validators (ceiling ${CEILING[file]})`);
