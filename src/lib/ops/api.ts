@@ -3129,27 +3129,6 @@ async function findRecipeDup(sql: any, model: any, customer: any, exceptId: any 
 	if (hit && hit.id !== exceptId) return hit;
 	return null;
 }
-type RecipeInput = {
-	id?: number;
-	name?: string | null;
-	equipmentModel: string;
-	customer?: string | null;
-	installId?: number | null;
-	copiedFrom?: number | null;
-	coffee1?: string | null;
-	coffee2?: string | null;
-	coffee3?: string | null;
-	powder1?: string | null;
-	powder2?: string | null;
-	powder3?: string | null;
-	americano1?: string | null;
-	americano2?: string | null;
-	americano3?: string | null;
-	tea1?: string | null;
-	tea2?: string | null;
-	milk?: string | null;
-	notes?: string | null;
-};
 export const upsertRecipe = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.recipeInput).handler(async ({ data }: any) => {
 	const sql = await ready();
 	const model = data.equipmentModel.trim();

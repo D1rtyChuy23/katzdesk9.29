@@ -13,6 +13,8 @@ const refuses = (fn, value) =>
   assert.throws(() => fn(value), (e) => e instanceof Error && !(e instanceof z.ZodError) && /couldn.t be read|too long/i.test(e.message) && !e.message.includes("{"), `refuses ${JSON.stringify(value)}`);
 
 const row = { equipment: 'ZZ Brewer 1.5 Gal', serial: "ZZ123", powerVoltage: "120V", recipeId: null, ownership: "Loaned", plug: "5-15", water: "", uid: "u-1", unitId: 44 };
+/** A deal row as getDeal hands it back: worked-out board id, and the day it was confirmed. */
+const dealRow = { ...row, boardId: 12, confirmedAt: "2026-11-01" };
 const SENT = {
   listJobsInput: [{ kind: "service" }, { kind: "tlc" }],
   idInput: [{ id: 1 }, { id: 98765 }],
@@ -26,12 +28,21 @@ const SENT = {
   confirmDealMachinesInput: [
     { dealId: 9, machines: [row, { equipment: "ZZ Grinder", serial: "", powerVoltage: "" }], indexes: [0], project: { mode: "new" } },
     { dealId: 9, machines: [row], indexes: [0, 1], project: { mode: "continue", installId: 4 } },
+    { dealId: 9, machines: [dealRow, { ...row, boardId: null }], indexes: [1], project: { mode: "new" } },
   ],
-  updateDealInput: [{ id: 9, amount: 1200.5, machines: [row], releaseUids: ["u-1"], goodToOrder: true }, { id: 9, amount: null, machines: null, notes: null }, { id: 9, customer: "ZZ Test Diner" }],
+  updateDealInput: [{ id: 9, amount: 1200.5, machines: [row, dealRow, { ...row, boardId: null }], releaseUids: ["u-1"], goodToOrder: true }, { id: 9, amount: null, machines: null, notes: null }, { id: 9, customer: "ZZ Test Diner" }],
   createDealInput: [{ customer: "ZZ Test Diner" }, { customer: "ZZ", producer: "sam", equipment: "ZZ Brewer", machines: [row], amount: 0 }],
   dealIdInput: [{ dealId: 9 }],
-  // entity-sheets.tsx sends the list as rows and the base as stored JSON text; install-planner.tsx a date or null.
+  // entity-sheets.tsx and installs.tsx send the list packed as JSON text (or null) with its base; install-planner.tsx a
+  // date or null; installs.tsx's bulk Installed; route-planner.tsx a tech or none.
   updateInstallInput: [
+    { id: 4, machines: JSON.stringify([row]), machinesBase: JSON.stringify([row]), equipment: "ZZ Brewer", serial: "ZZ123", powerVoltage: "120V" },
+    {
+      id: 4, customer: "ZZ Test Diner", equipStatus: "Ordered", installDate: "2026-11-18", technician: "sam", wo: "WO-1120", reqsReady: null, notes: "Bring a hose",
+      accountRep: "sam", paymentStatus: null, installType: "update", siteContact: "Ana", contactPhone: "555-0100", po: null, vendorPo: null, notesBase: "",
+    },
+    { id: 4, equipStatus: "Installed", complete: true, completedAt: "2026-11-17" },
+    { id: 4, technician: undefined },
     { id: 4, installDate: "2026-11-18" },
     { id: 4, installDate: null },
     { id: 4, technician: "sam" },
@@ -51,7 +62,7 @@ const SENT = {
     { kind: "equip", model: "ZZ Brewer", serial: null, qty: 1, customerOwned: null, site: "barn-back", pallet: "A1", level: 2 },
     { kind: "dispenser", model: "ZZ Dispenser", serial: "D1", qty: 3, customerOwned: "ZZ Test Diner", site: "barn-front", pallet: null, level: null },
   ],
-  updateAssetInput: [{ id: 7, qty: 2, notes: "", level: null, pallet: null, site: "field" }, { id: 7, model: "ZZ Brewer", serial: "ZZ9" }],
+  updateAssetInput: [{ id: 7, qty: 2, notes: "", level: null, pallet: null, site: "field" }, { id: 7, model: "ZZ Brewer", serial: "ZZ9" }, { id: 7, notes: null }],
   assetInstallInput: [{ assetId: 7, installId: 4 }],
   assetServiceInput: [{ assetId: 7, customer: "ZZ Test Diner", jobId: 12 }, { assetId: 7, customer: "ZZ", jobId: null }, { assetId: 7, customer: "ZZ" }],
   assetIdInput: [{ assetId: 7 }],
@@ -68,6 +79,11 @@ const SENT = {
   recipeInput: [
     { name: null, equipmentModel: "ZZ Espresso", customer: null, installId: null, coffee1: "18g", milk: "Whole", notes: null },
     { id: 6, name: "House", equipmentModel: "ZZ Espresso", customer: "ZZ Test Diner", installId: 4, copiedFrom: 2, notes: "Grind: 3" },
+    // recipe-form.tsx with nothing filled in.
+    {
+      equipmentModel: "ZZ Espresso", customer: null, installId: null, coffee1: null, coffee2: null, coffee3: null, powder1: null, powder2: null, powder3: null,
+      americano1: null, americano2: null, americano3: null, tea1: null, tea2: null, milk: null, notes: null,
+    },
   ],
   copyRecipeInput: [{ sourceId: 6, customer: "ZZ Test Diner", installId: 4 }, { sourceId: 6, customer: "ZZ", installId: null }],
   deleteRecipeInput: [{ id: 6, force: false, exceptDealId: null, exceptIndex: null }, { id: 6, force: true, exceptDealId: 9, exceptIndex: 0 }],
@@ -141,8 +157,17 @@ test("what is sent comes back the same: missing stays missing, null stays null, 
 test("each api.ts function takes the input its type had", () => {
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
   const uses = [...api.matchAll(/export const (\w+) = createServerFn[^\n]*\n?\s*\.middleware\(\[\w+\]\)\s*\n?\s*\.validator\(input\.(\w+)\)/g)].map((m) => `${m[1]}:${m[2]}`);
-  assert.equal(uses.length, 41);
-  for (const pair of ["getJob:idInput", "archiveDeal:idInput", "archiveInstall:idInput", "claimComment:idInput", "getCustomerHistory:idInput", "updateInstall:updateInstallInput", "upsertRecipe:recipeInput", "listComments:entityInput", "listActivity:entityInput", "previewCustomerRename:renameInput", "renameEquipment:renameInput", "assignAssetToInstall:assetInstallInput", "unassignAssetFromInstall:assetInstallInput"]) {
-    assert.ok(uses.includes(pair), pair);
-  }
+  assert.deepEqual(uses.sort(), [
+    "listJobs:listJobsInput", "getJob:idInput", "createJob:newTicketInput", "updatePm:updatePmInput", "createPm:createPmInput",
+    "updateModule:updateModuleInput", "createModule:createModuleInput", "confirmDealMachines:confirmDealMachinesInput",
+    "updateDeal:updateDealInput", "createDeal:createDealInput", "archiveDeal:idInput", "updateInstall:updateInstallInput",
+    "createInstall:createInstallInput", "archiveInstall:idInput", "listComments:entityInput", "listActivity:entityInput",
+    "addComment:addCommentInput", "claimComment:idInput", "resolveComment:resolveCommentInput", "searchAll:searchInput",
+    "handoffDeal:dealIdInput", "createAsset:createAssetInput", "updateAsset:updateAssetInput", "assignAssetToInstall:assetInstallInput",
+    "unassignAssetFromInstall:assetInstallInput", "assignAssetToService:assetServiceInput", "unassignAssetFromService:assetIdInput",
+    "returnAssetToWarehouse:returnAssetInput", "markAssetSold:markSoldInput", "getCustomerHistory:idInput", "listDirectory:directoryKindInput",
+    "getCustomerAddress:nameInput", "updateCustomerAccount:customerAccountInput", "addDirectoryEntry:addDirectoryInput",
+    "archiveDirectoryEntry:archiveDirectoryInput", "renameCustomer:renameCustomerInput", "previewCustomerRename:renameInput",
+    "renameEquipment:renameInput", "upsertRecipe:recipeInput", "copyRecipe:copyRecipeInput", "deleteRecipe:deleteRecipeInput",
+  ].sort());
 });

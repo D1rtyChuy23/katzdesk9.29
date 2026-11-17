@@ -24,7 +24,8 @@ export const machineRow = z.looseObject({
   equipment: line.nullish(),
   serial: line.nullish(),
   powerVoltage: line.nullish(),
-  recipeId: z.number().int().nullish(),
+  // Any number, as parseMachinesJson reads it: a stored odd value must not stop the row being saved again.
+  recipeId: z.number().nullish(),
   ownership: line.nullish(),
   plug: line.nullish(),
   water: line.nullish(),
