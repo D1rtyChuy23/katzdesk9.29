@@ -32,6 +32,11 @@ export const Route = createFileRoute("/_app/access")({
   component: Page,
 });
 
+/** Whether the email next to someone waiting is a fact or a claim. */
+function emailNote(a: { emailConfirmed: boolean }): string {
+  return a.emailConfirmed ? "Google confirmed this email" : "email not confirmed";
+}
+
 function inviteBody(inv: { email: string | null; username: string | null; token: string }, origin: string) {
   const bits = [
     inv.username ? `username ${inv.username}` : null,
@@ -133,6 +138,11 @@ function Page() {
         toast.success(`Approved ${res.autoApproved.join(", ")}`);
       } else if (res.invite.status === "pending") {
         toast.success("Invite saved. Copy the message and send it to them.");
+      }
+      // Someone already signed up under this name or email. The invite doesn't let them in by itself, because
+      // a name or a typed email proves nothing: the admin decides, on the list below.
+      if (res.alreadyWaiting.length) {
+        toast.info(`${res.alreadyWaiting.join(", ")} already signed up and ${res.alreadyWaiting.length === 1 ? "is" : "are"} waiting. Approve them in the list below if it’s the right person.`, { duration: 12000 });
       }
       setEmail("");
       setUsername("");
@@ -312,6 +322,7 @@ function Page() {
                   <p className="font-medium">{a.username}</p>
                   <p className="truncate text-sm text-muted-foreground">
                     {a.email ?? "No email"}
+                    {a.email ? ` · ${emailNote(a)}` : ""}
                     {a.approved ? " · invited, finishing setup" : " · finishing setup"}
                   </p>
                 </div>
@@ -344,6 +355,11 @@ function Page() {
         <h2 className="text-xs tracking-wide text-muted-foreground uppercase">
           Waiting For Approval ({pending.length})
         </h2>
+        {pending.length ? (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Anyone can sign up and type any name or email. Approve only people you know.
+          </p>
+        ) : null}
         <ul className="mt-2 overflow-hidden rounded-xl border border-border bg-card">
           {pending.map((a) => (
             <li
@@ -352,7 +368,10 @@ function Page() {
             >
               <div className="min-w-0">
                 <p className="font-medium">{a.username}</p>
-                <p className="truncate text-sm text-muted-foreground">{a.email ?? "No email"}</p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {a.email ?? "No email"}
+                  {a.email ? ` · ${emailNote(a)}` : ""}
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button

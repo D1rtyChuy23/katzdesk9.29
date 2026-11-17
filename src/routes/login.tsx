@@ -32,6 +32,13 @@ function writeLastLogin(v: string) {
 }
 
 /** Better Auth's wording is terse; say what to do next instead. */
+/**
+ * Shown when the name or email typed has a pending invite. A matching name or email no longer lets anyone in by
+ * itself (11/17): the invite link does, and so does Google with the invited email.
+ */
+const INVITED_HINT =
+  "There’s an invite for you. Open the link in your invite message to get straight in, or continue with Google using the invited email. Without either, create an account here and a desk admin will approve it.";
+
 function friendlySignInError(msg: string): string {
   if (/invalid (email or )?password|invalid credentials|incorrect/i.test(msg)) {
     return "That password didn't match. Check Caps Lock and try again, or tap Forgot password below.";
@@ -219,11 +226,7 @@ function Login() {
           if (peek.username) setUsername(peek.username);
           if (peek.email) setEmail(peek.email);
           else if (identity.includes("@")) setEmail(identity);
-          setError(
-            peek.email || identity.includes("@")
-              ? "You’re invited — create an account with this email to get in."
-              : "You’re invited — create an account to get in.",
-          );
+          setError(INVITED_HINT);
           return;
         }
         if (result.next === "social") {
@@ -258,7 +261,7 @@ function Login() {
           setMode("up");
           if (peek.username) setUsername(peek.username);
           if (peek.email) setEmail(peek.email);
-          setError("You’re invited — create an account to get in.");
+          setError(INVITED_HINT);
           return;
         }
         setNoAccount(who);
@@ -411,7 +414,7 @@ function Login() {
                 {mode === "up"
                   ? readInviteToken()
                     ? "This invite lets you in. Create a password, or continue with Google or X."
-                    : "Use the email you were invited with (or Google / X). Invited people skip the wait."
+                    : "Have an invite? Open its link, or use Google with the invited email, to skip the wait. Otherwise a desk admin approves you."
                   : "Username or the email on your account. Open the invite link if you have one."}
               </p>
               <form onSubmit={onSubmit} className="mt-5 space-y-3">
@@ -442,7 +445,7 @@ function Login() {
                       className="mt-1 border-cream/15 bg-ink text-cream"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="The email you were invited with"
+                      placeholder="Your email"
                     />
                   </div>
                 ) : null}
