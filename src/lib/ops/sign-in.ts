@@ -205,8 +205,10 @@ export async function throttledEmailSignIn(
   request: Request,
   handle: (request: Request) => Promise<Response>,
 ): Promise<Response> {
-  const kind = (request.headers.get("content-type") ?? "").split(";")[0]!.trim().toLowerCase();
-  if (kind !== "application/json") return Response.json({ code: "UNSUPPORTED_MEDIA_TYPE", message: "Send the sign-in as JSON." }, { status: 415 });
+  // Tested on the header as it came, not trimmed: JavaScript's trim() strips bytes the header rules keep, and a
+  // value that only reads as JSON once trimmed is one Better Auth takes as a form. Whatever passes here starts
+  // with application/json, which is what Better Auth's own JSON test asks for.
+  if (!IS_JSON.test(request.headers.get("content-type") ?? "")) return Response.json({ code: "UNSUPPORTED_MEDIA_TYPE", message: "Send the sign-in as JSON." }, { status: 415 });
   let email: string | null = null;
   try {
     const body = (await request.clone().json()) as { email?: unknown } | null;
@@ -227,6 +229,8 @@ export async function throttledEmailSignIn(
   await clearSignInTries(sql, signedIn);
   return response;
 }
+
+const IS_JSON = /^application\/json[ \t]*(;|$)/i;
 
 /** The id of the user in one of Better Auth's answers ({ user: { id } }), or null. */
 async function answeredUserId(response: Response): Promise<string | null> {

@@ -402,6 +402,25 @@ test("a reset link being used at the moment the account is sealed doesn't put a 
     assert.equal(sealed, 1, "the seal ran in the middle of the reset");
     assert.deepEqual(await signIns("u_shared"), ["grok-google"]);
     assert.equal(await sessions("u_shared"), 0);
+    // The other order: the new password is written, then the seal removes it before the link is marked used. The
+    // reset must not say it worked.
+    await signedUp("u_shared2", "ana.zz@example.com", [["credential", 120], ["grok-google", 1]], { verified: true });
+    await A.registerDeskAccount(sql, "u_shared2", { username: "ana.zz", email: null, token: null });
+    const hash2 = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("made-up-link-2"))), (b) => b.toString(16).padStart(2, "0")).join("");
+    await query("insert into desk_password_resets (user_id, token_hash, created_by, expires_at) values ('u_shared2', $1, 'u_boss', now() + interval '1 day')", [hash2]);
+    let sealed2 = 0;
+    const racing2 = Object.assign((...a) => sql(...a), {
+      query: async (text, params) => {
+        if (!sealed2 && /^\s*update desk_password_resets set used_at/i.test(text)) {
+          sealed2 += 1;
+          assert.equal((await A.approveDeskAccount(sql, "u_shared2", true)).passwordRemoved, true);
+        }
+        return sql.query(text, params);
+      },
+    });
+    await assert.rejects(R.applyPasswordReset(racing2, "made-up-link-2", "a-new-password-2"), /expired or was already used/);
+    assert.equal(sealed2, 1);
+    assert.deepEqual(await signIns("u_shared2"), ["grok-google"]);
   } finally {
     await pg.close();
   }

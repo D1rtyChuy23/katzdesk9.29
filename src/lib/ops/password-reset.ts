@@ -108,7 +108,10 @@ export async function applyPasswordReset(
     );
     if (!added[0]) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
   }
-  await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
+  // Marked used only if it still is unused: a second use at the same moment, or a seal that removed the password
+  // just written, finds nothing to mark and is told the link is spent rather than that it worked.
+  const marked = await sql.query<{ id: number }>("update desk_password_resets set used_at = now() where id = $1 and used_at is null returning id", [hit.id]);
+  if (!marked[0]) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
   await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
   // A new password ends any wait from wrong tries, so the link gets a locked-out person back in.
   const { clearSignInTries } = await import("./sign-in");

@@ -279,6 +279,12 @@ test("a password sign-in is taken as JSON only, so the account it is counted and
     assert.equal(both.status, 415);
     const none = await w.route(new Request(`${ORIGIN}/api/auth/sign-in/email`, { method: "POST", headers: { origin: ORIGIN }, body: JSON.stringify({ email: "mallory.zz@example.com", password: "mallory-password-1" }) }));
     assert.equal(none.status, 415, "no content type, or text/plain");
+    // A content type that reads as JSON once trimmed but that Better Auth takes as a form: a leading byte that
+    // JavaScript's trim() strips and the header rules don't, with a form type after a comma.
+    for (const type of ["\u00a0application/json;, application/x-www-form-urlencoded", "application/json, application/x-www-form-urlencoded", "application/jsonx", "application/ld+json", "text/json"]) {
+      const sly = await w.route(new Request(`${ORIGIN}/api/auth/sign-in/email`, { method: "POST", headers: { origin: ORIGIN, "content-type": type }, body: "email=mallory.zz%40example.com&password=mallory-password-1" }));
+      assert.equal(sly.status, 415, JSON.stringify(type));
+    }
     assert.equal(asked, 0, "Better Auth never saw them");
     assert.equal(await w.sessions(mid), 0);
     assert.equal(await w.sessions(gid), 1);
