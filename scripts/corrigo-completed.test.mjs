@@ -20,6 +20,32 @@ test("completed dates written as CSV text are read", () => {
   assert.equal(parseCompletedDate("Soon"), null);
 });
 
+// xlsx 0.20.3 (11/17) no longer turns these CSV spellings into dates by itself, so the text reaches this parser.
+test("a completed date written day-month-year in words is read", () => {
+  assert.equal(parseCompletedDate("8-Sep-2026"), "2026-09-08");
+  assert.equal(parseCompletedDate("8-Sep-26"), "2026-09-08");
+  assert.equal(parseCompletedDate("08 Sep 2026"), "2026-09-08");
+  assert.equal(parseCompletedDate("8 September 2026 3:15 PM"), "2026-09-08");
+  assert.equal(parseCompletedDate("Tue 8-Sep-2026"), "2026-09-08");
+  assert.equal(parseCompletedDate("19-Oct-2026 15:15"), "2026-10-19");
+  assert.equal(parseCompletedDate("8-Foo-2026"), null);
+  assert.equal(parseCompletedDate("32-Sep-2026"), null);
+});
+
+// A cell that holds only a time ("12:30") now arrives as 1899-12-31, the day a spreadsheet counts from.
+test("a date before 2000 is not a completed date", () => {
+  assert.equal(parseCompletedDate("1899-12-31"), null);
+  assert.equal(parseCompletedDate("1899-12-30"), null);
+  assert.equal(parseCompletedDate("12/31/1899"), null);
+  assert.equal(parseCompletedDate("1/1/1999"), null);
+  assert.equal(parseCompletedDate("1/1/2000"), "2000-01-01");
+  assert.equal(parseCompletedDate("9/8/26"), "2026-09-08");
+  // A spreadsheet day number: 36526 is 1/1/2000.
+  assert.equal(parseCompletedDate("36525"), null);
+  assert.equal(parseCompletedDate("36526"), "2000-01-01");
+  assert.equal(parseCompletedDate("46273"), "2026-09-08");
+});
+
 test("Corrigo's completed date wins on an existing ticket unless it is billed", () => {
   const { completedOnUpdate } = corrigo;
   assert.deepEqual(completedOnUpdate("2026-10-19", "2026-10-12", null), { value: "2026-10-19", change: "moved" });

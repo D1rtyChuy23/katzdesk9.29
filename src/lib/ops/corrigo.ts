@@ -678,23 +678,30 @@ export function parseCompletedDate(raw: string | null | undefined): string | nul
     .replace(/^([a-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/i, (all, mon: string, d: string, y: string) => {
       const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
       return m ? `${m}/${d}/${y}` : all;
+    })
+    // Day first, month in words: "8-Sep-2026", "8-Sep-26", "08 Sep 2026".
+    .replace(/^(\d{1,2})[\s-]([a-z]{3})[a-z]*\.?[\s,-]+(\d{4}|\d{2})(?!\d)/i, (all, d: string, mon: string, y: string) => {
+      const m = MONTHS.indexOf(mon.toLowerCase()) + 1;
+      return m ? `${m}/${d}/${y}` : all;
     });
   if (!s) return null;
   const iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (iso) return iso[1];
+  // Before 2000 is the day a spreadsheet counts from (a cell that held only a time), never a real completed date.
+  if (iso) return iso[1]! >= "2000-01-01" ? iso[1]! : null;
   const mdY = s.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})/);
   if (mdY) {
     const month = Number(mdY[1]);
     const day = Number(mdY[2]);
     let year = Number(mdY[3]);
     if (year < 100) year += 2000;
-    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    if (year < 2000 || month < 1 || month > 12 || day < 1 || day > 31) return null;
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
   const n = Number(s);
   if (Number.isFinite(n) && n > 20000 && n < 80000) {
     const epoch = Date.UTC(1899, 11, 30);
-    return new Date(epoch + Math.round(n) * 86400000).toISOString().slice(0, 10);
+    const day = new Date(epoch + Math.round(n) * 86400000).toISOString().slice(0, 10);
+    return day >= "2000-01-01" ? day : null;
   }
   return null;
 }
