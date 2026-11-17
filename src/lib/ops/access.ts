@@ -670,6 +670,9 @@ export const checkUsername = createServerFn({ method: "POST" })
     return { available: !rows[0] };
   });
 
+/** A sign-in refusal written for the person at the sign-in screen. Only these sentences are sent to the browser. */
+export class SignInProblem extends Error {}
+
 /** Who a typed username or email belongs to. Server-side only: `email` must never be sent to the browser. */
 export type SignInTarget =
   | { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] }
@@ -681,7 +684,7 @@ export type SignInTarget =
  */
 export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarget> {
   const raw = typed.trim();
-  if (!raw) throw new Error("Enter your username or email");
+  if (!raw) throw new SignInProblem("Enter your username or email");
   const emailNorm = raw.includes("@") ? normEmail(raw) : null;
   const userNorm = emailNorm ? null : cleanUsername(raw).toLowerCase();
   const rows = await sql.query<{
@@ -707,11 +710,11 @@ export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarg
   if (row) {
     if (row.denied) {
       const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-      if (!invite) throw new Error("This account was denied access.");
+      if (!invite) throw new SignInProblem("This account was denied access.");
     }
     // Sign in against the email Better Auth actually holds for this user.
     const email = row.auth_email ?? row.email;
-    if (!email) throw new Error("This account has no email on file. Ask an admin to invite you again.");
+    if (!email) throw new SignInProblem("This account has no email on file. Ask an admin to invite you again.");
     // Which ways this person can sign in: "password", "google", "x".
     const linked = await sql.query<{ providerId: string }>(
       `select distinct "providerId" from "account" where "userId" = $1`,
@@ -722,7 +725,7 @@ export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarg
   }
   const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
   if (invite) return { kind: "invited" };
-  throw new Error("Unknown username. Invited? Create an account with that email or username.");
+  throw new SignInProblem("Unknown username. Invited? Create an account with that email or username.");
 }
 
 /**

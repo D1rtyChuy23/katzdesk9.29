@@ -15,6 +15,8 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const S = await import("../src/lib/ops/sign-in.ts");
 const A = await import("../src/lib/ops/access.ts");
+const R = await import("../src/lib/ops/password-reset.ts");
+const { APIError } = await import("better-auth/api");
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 async function freshDb() {
@@ -185,14 +187,21 @@ test("the invite peek gives back the email only to someone who typed it", async 
   }
 });
 
-test("a new password clears the count, so a reset link gets a locked-out person back in", async () => {
-  const { pg, sql, tries } = await freshDb();
+test("a new password from a reset link clears the count, so a locked-out person gets back in", async () => {
+  const { pg, sql, query, tries } = await freshDb();
   try {
     const { signIn } = checker();
     for (let i = 0; i < S.MAX_TRIES + 1; i++) await assert.rejects(S.signInWithPassword(sql, { username: "sam.zz", password: "nope" }, signIn));
-    await S.clearSignInTries(sql, "u_sam");
+    assert.equal(await tries("u_sam"), S.MAX_TRIES + 1);
+    // The link's token is stored hashed, as createPasswordResetLink stores it.
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("made-up-token"))), (b) => b.toString(16).padStart(2, "0")).join("");
+    await query("insert into desk_password_resets (user_id, token_hash, expires_at) values ('u_sam', $1, now() + interval '1 hour')", [hash]);
+    const done = await R.applyPasswordReset(sql, "made-up-token", "a new made-up password");
+    assert.equal(done.username, "sam.zz");
     assert.equal(await tries("u_sam"), 0);
-    assert.match(src("src/lib/ops/password-reset.ts"), /clearSignInTries\(sql, hit\.user_id\)/);
+    assert.ok((await query(`select "password" from "account" where "userId" = 'u_sam' and "providerId" = 'credential'`))[0].password, "the new password is stored");
+    // The link works once.
+    await assert.rejects(R.applyPasswordReset(sql, "made-up-token", "another made-up password"), /expired or was already used/);
   } finally {
     await pg.close();
   }
@@ -205,15 +214,130 @@ test("tryVerdict: 8 are allowed, the 9th waits out what is left of the 15 minute
   assert.deepEqual(S.tryVerdict(9, start, start), { allowed: false, waitMinutes: 15 });
   assert.deepEqual(S.tryVerdict(9, start, start + 10 * 60_000 + 1), { allowed: false, waitMinutes: 5 });
   assert.deepEqual(S.tryVerdict(40, start, start + 14 * 60_000 + 59_000), { allowed: false, waitMinutes: 1 });
+  // A statement that waited on another can see a clock a moment behind the stored start: never more than the window.
+  assert.deepEqual(S.tryVerdict(9, start, start - 30_000), { allowed: false, waitMinutes: 15 });
 });
 
 test("only Better Auth's wrong-password answer counts as a wrong password", () => {
-  assert.equal(S.isWrongPassword({ status: "UNAUTHORIZED", statusCode: 401, message: "Invalid email or password" }), true);
-  assert.equal(S.isWrongPassword({ statusCode: 401 }), true);
-  // Anything else is a fault, not a wrong guess: it must not read as "that password didn't match".
+  // The errors Better Auth really throws from sign-in (better-auth/dist/api/routes/sign-in.mjs).
+  assert.equal(S.isWrongPassword(APIError.from("UNAUTHORIZED", { code: "INVALID_EMAIL_OR_PASSWORD", message: "Invalid email or password" })), true);
+  // Also a 401, but a fault, not a wrong guess: it must not read as "that password didn't match".
+  assert.equal(S.isWrongPassword(APIError.from("UNAUTHORIZED", { code: "FAILED_TO_CREATE_SESSION", message: "Failed to create session" })), false);
   assert.equal(S.isWrongPassword({ status: "INTERNAL_SERVER_ERROR", statusCode: 500 }), false);
   assert.equal(S.isWrongPassword(new Error("connection refused")), false);
   assert.equal(S.isWrongPassword(null), false);
+});
+
+test("only a plain sign-in sentence reaches the browser; a database error becomes one generic line", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    const plain = S.plainSignInError(new A.SignInProblem("Unknown username. Invited? Create an account with that email or username."));
+    assert.match(plain.message, /^Unknown username/);
+    // A desk account whose Better Auth user is gone: counting the try breaks a database rule.
+    await query("insert into desk_accounts (user_id, username, email, approved) values ('u_ghost', 'ghost.zz', 'ghost.zz@example.com', true)");
+    const raw = await S.signInWithPassword(sql, { username: "ghost.zz", password: "x" }, checker().signIn).catch((e) => e);
+    assert.match(String(raw.message), /foreign key|desk_sign_in_tries/i);
+    const shown = S.plainSignInError(raw);
+    assert.equal(shown.message, "Sign-in didn't go through. Try again in a moment.");
+    for (const e of [new TypeError("x is not a function"), "boom", null]) assert.equal(S.plainSignInError(e).message, "Sign-in didn't go through. Try again in a moment.");
+    // Every sentence the sign-in decision throws on purpose is the plain kind.
+    for (const who of ["zz.nobody", " "]) assert.ok((await S.signInWithPassword(sql, { username: who, password: "x" }, checker().signIn).catch((e) => e)) instanceof A.SignInProblem);
+    assert.ok((await S.signInWithPassword(sql, { username: "sam.zz", password: "nope" }, checker().signIn).catch((e) => e)) instanceof A.SignInProblem);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a denied account with a new invite, and an account with both a password and Google, go to the password check", async () => {
+  const { pg, sql, query, person } = await freshDb();
+  try {
+    await person("u_back", "back.zz", "back.zz@example.com", { denied: true });
+    await query("insert into desk_invites (email, username, invited_by) values ('back.zz@example.com', 'back.zz', 'u_sam')");
+    await person("u_both", "both.zz", "both.zz@example.com", { methods: ["credential", "google"] });
+    const { asked, signIn } = checker();
+    assert.deepEqual(await S.signInWithPassword(sql, { username: "back.zz", password: "right one" }, signIn), { next: "in", waiting: false });
+    assert.deepEqual(await S.signInWithPassword(sql, { username: "both.zz", password: "right one" }, signIn), { next: "in", waiting: false });
+    assert.deepEqual(asked, ["back.zz@example.com", "both.zz@example.com"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+// ── Better Auth's own sign-in address ───────────────────────────────────────────────────────────────────────────────
+// POST /api/auth/sign-in/email takes an email and a password directly. Without the same count, someone who knows
+// (or guesses) an email could guess passwords there with no per-account limit.
+const post = (body, path = "/api/auth/sign-in/email") =>
+  new Request(`https://katzdesk.example${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: typeof body === "string" ? body : JSON.stringify(body) });
+/** Stands in for Better Auth's handler: 200 for sam's right password, 401 otherwise. It records what reached it. */
+function handler() {
+  const reached = [];
+  const handle = async (request) => {
+    const body = await request.json().catch(() => null);
+    reached.push(body?.email ?? null);
+    return body?.password === "right one" ? Response.json({ token: "t" }) : Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
+  };
+  return { reached, handle };
+}
+
+test("the direct sign-in address shares the account's count with the sign-in form", async () => {
+  const { pg, sql, tries } = await freshDb();
+  try {
+    const { reached, handle } = handler();
+    // Wrong guesses sent straight to Better Auth are counted, by the email however it is typed.
+    for (let i = 0; i < 3; i++) assert.equal((await S.throttledEmailSignIn(sql, post({ email: " SAM.zz@Example.com ", password: `guess ${i}` }), handle)).status, 401);
+    assert.equal(await tries("u_sam"), 3);
+    // The form adds to the same count, and once the account is waiting the direct address is refused too.
+    for (let i = 0; i < 5; i++) await assert.rejects(S.signInWithPassword(sql, { username: "sam.zz", password: "nope" }, checker().signIn), /didn.t match/);
+    const before = reached.length;
+    const refused = await S.throttledEmailSignIn(sql, post({ email: "sam.zz@example.com", password: "right one" }), handle);
+    assert.equal(refused.status, 429);
+    assert.match((await refused.json()).message, /Too many tries for this account\. Wait 1[45] minutes/);
+    assert.equal(reached.length, before, "Better Auth never saw the request");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a good sign-in at the direct address clears the count; an unknown email or an unreadable body is passed on uncounted", async () => {
+  const { pg, sql, query, tries } = await freshDb();
+  try {
+    const { reached, handle } = handler();
+    await S.throttledEmailSignIn(sql, post({ email: "sam.zz@example.com", password: "nope" }), handle);
+    assert.equal(await tries("u_sam"), 1);
+    assert.equal((await S.throttledEmailSignIn(sql, post({ email: "sam.zz@example.com", password: "right one" }), handle)).status, 200);
+    assert.equal(await tries("u_sam"), 0);
+    assert.equal((await S.throttledEmailSignIn(sql, post({ email: "zz.nobody@example.com", password: "x" }), handle)).status, 401);
+    assert.equal((await S.throttledEmailSignIn(sql, post("not json"), handle)).status, 401);
+    assert.equal((await S.throttledEmailSignIn(sql, post({ email: 5, password: "x" }), handle)).status, 401);
+    assert.equal((await query("select count(*)::int as n from desk_sign_in_tries"))[0].n, 0);
+    assert.deepEqual(reached.slice(-3), ["zz.nobody@example.com", null, 5]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the direct sign-in address is recognised however it is spelled, and nothing else is", () => {
+  for (const path of ["/api/auth/sign-in/email", "/api/auth/sign-in/email/", "/api/auth//sign-in/email", "/API/auth/Sign-In/Email", "/api/auth/sign%2Din/email", "/api/auth/sign-in/%65mail"]) {
+    assert.equal(S.isEmailSignInPath(path), true, path);
+  }
+  for (const path of ["/api/auth/sign-in/social", "/api/auth/sign-up/email", "/api/auth/get-session", "/api/auth/sign-in/email/extra", "/sign-in/email", "/api/auth/%"]) {
+    assert.equal(S.isEmailSignInPath(path), false, path);
+  }
+  const route = src("src/routes/api/auth/$.ts");
+  assert.match(route, /isEmailSignInPath\(/);
+  assert.match(route, /throttledEmailSignIn\(/);
+});
+
+test("a sign-in sent from another site is refused", () => {
+  const from = (site) => new Headers(site === null ? {} : { "sec-fetch-site": site });
+  assert.equal(S.fromAnotherSite(from("same-origin")), false);
+  // No header: not a browser page (a script, an old browser). Nothing to protect, and the framework checks these too.
+  assert.equal(S.fromAnotherSite(from(null)), false);
+  assert.equal(S.fromAnotherSite(from("cross-site")), true);
+  // Another app on the same parent domain (a sibling *.grok.me site).
+  assert.equal(S.fromAnotherSite(from("same-site")), true);
+  assert.equal(S.fromAnotherSite(from("none")), true);
+  assert.match(src("src/lib/ops/sign-in.ts"), /fromAnotherSite\(request\.headers\)/);
 });
 
 test("the sign-in screen no longer asks for, or is given, anyone's email", () => {

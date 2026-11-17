@@ -10,10 +10,16 @@
  * Per account, not per address, because the site sits behind a proxy and every visitor shares one address. A try
  * is counted before the password is checked, so a burst sent at once can't get more than MAX_TRIES checked.
  * A good sign-in or a new password (a reset link) clears the count.
+ *
+ * Better Auth's own address for the same thing, POST /api/auth/sign-in/email, goes through the same count
+ * (throttledEmailSignIn, used by routes/api/auth/$.ts). Otherwise someone who knows an email could guess there.
+ *
+ * Known and accepted: someone who knows a username can keep that account's password sign-in waiting by sending
+ * wrong passwords. Signed-in sessions and Google or X sign-in are not affected, and a reset link clears it.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
-import { ensureAccessTables, resolveSignIn } from "./access";
+import { ensureAccessTables, resolveSignIn, SignInProblem } from "./access";
 import { passwordSignInInput } from "./access-input";
 
 export const MAX_TRIES = 8;
@@ -31,7 +37,7 @@ const WRONG_PASSWORD = "That password didn't match. Check Caps Lock and try agai
 export function tryVerdict(tries: number, windowStartMs: number, nowMs: number): { allowed: boolean; waitMinutes: number } {
   if (tries <= MAX_TRIES) return { allowed: true, waitMinutes: 0 };
   const left = windowStartMs + WINDOW_MINUTES * 60_000 - nowMs;
-  return { allowed: false, waitMinutes: Math.max(1, Math.ceil(left / 60_000)) };
+  return { allowed: false, waitMinutes: Math.min(WINDOW_MINUTES, Math.max(1, Math.ceil(left / 60_000))) };
 }
 
 /** Count one try against the account, in one statement, and say whether it may go ahead. */
@@ -49,6 +55,11 @@ export async function claimSignInTry(sql: Sql, userId: string): Promise<{ allowe
   );
   const row = rows[0]!;
   return tryVerdict(Number(row.tries), Number(row.start_ms), Number(row.now_ms));
+}
+
+function tooManyTries(waitMinutes: number): string {
+  const wait = waitMinutes === 1 ? "1 minute" : `${waitMinutes} minutes`;
+  return `Too many tries for this account. Wait ${wait} and try again, or ask a desk admin for a reset link.`;
 }
 
 export async function clearSignInTries(sql: Sql, userId: string): Promise<void> {
@@ -69,37 +80,96 @@ export async function signInWithPassword(
   // A Google or X account with no password: send them to the right button instead of "wrong password".
   if (found.methods.length && !found.methods.includes("password")) return { next: "social", methods: found.methods };
   const verdict = await claimSignInTry(sql, found.userId);
-  if (!verdict.allowed) {
-    const wait = verdict.waitMinutes === 1 ? "1 minute" : `${verdict.waitMinutes} minutes`;
-    throw new Error(`Too many tries for this account. Wait ${wait} and try again, or ask a desk admin for a reset link.`);
-  }
-  if (!(await signIn(found.email, input.password))) throw new Error(WRONG_PASSWORD);
+  if (!verdict.allowed) throw new SignInProblem(tooManyTries(verdict.waitMinutes));
+  if (!(await signIn(found.email, input.password))) throw new SignInProblem(WRONG_PASSWORD);
   await clearSignInTries(sql, found.userId);
   return { next: "in", waiting: found.waiting };
 }
 
-/** Better Auth's answer to a wrong email or password (401), as opposed to something breaking. */
+/**
+ * Better Auth's answer to a wrong email or password, as opposed to something breaking. Other failures are also a
+ * 401 there (a session that couldn't be made), so this goes by the code, not the status.
+ */
 export function isWrongPassword(err: unknown): boolean {
-  const e = err as { status?: unknown; statusCode?: unknown } | null;
-  return !!e && (e.status === "UNAUTHORIZED" || e.statusCode === 401);
+  const code = (err as { body?: { code?: unknown } } | null)?.body?.code;
+  return code === "INVALID_EMAIL_OR_PASSWORD";
+}
+
+const DID_NOT_GO_THROUGH = "Sign-in didn't go through. Try again in a moment.";
+
+/** What the browser is told: a sentence written for the person, or one generic line. Never a database error. */
+export function plainSignInError(err: unknown): Error {
+  if (err instanceof SignInProblem) return new Error(err.message);
+  console.error("[sign-in] password sign-in failed:", err instanceof Error ? err.message : err);
+  return new Error(DID_NOT_GO_THROUGH);
+}
+
+/**
+ * True when a browser says the request came from a page on another site (or another app on the same parent
+ * domain). The framework already refuses those for every server function; this keeps sign-in from depending on it.
+ */
+export function fromAnotherSite(headers: Headers): boolean {
+  const site = headers.get("sec-fetch-site");
+  return site !== null && site !== "same-origin";
+}
+
+/** Better Auth's own password sign-in address, however the path is spelled. */
+export function isEmailSignInPath(pathname: string): boolean {
+  let path: string;
+  try {
+    path = decodeURIComponent(pathname);
+  } catch {
+    return false;
+  }
+  return /^\/api\/auth\/sign-in\/email\/?$/i.test(path.replace(/\/{2,}/g, "/"));
+}
+
+/**
+ * Better Auth's password sign-in (POST /api/auth/sign-in/email), behind the same per-account count as the form.
+ * `handle` is Better Auth's handler. An email nobody has, or a body that can't be read, is passed on uncounted.
+ */
+export async function throttledEmailSignIn(
+  sql: Sql,
+  request: Request,
+  handle: (request: Request) => Promise<Response>,
+): Promise<Response> {
+  let email: string | null = null;
+  try {
+    const body = (await request.clone().json()) as { email?: unknown } | null;
+    if (typeof body?.email === "string") email = body.email.trim().toLowerCase() || null;
+  } catch {
+    /* not JSON: Better Auth will refuse it */
+  }
+  const user = email ? (await sql.query<{ id: string }>(`select "id" from "user" where lower("email") = $1 limit 1`, [email]))[0] : undefined;
+  if (!user) return handle(request);
+  const verdict = await claimSignInTry(sql, user.id);
+  if (!verdict.allowed) return Response.json({ code: "TOO_MANY_TRIES", message: tooManyTries(verdict.waitMinutes) }, { status: 429 });
+  const response = await handle(request);
+  if (response.ok) await clearSignInTries(sql, user.id);
+  return response;
 }
 
 export const passwordSignIn = createServerFn({ method: "POST" })
   .validator(passwordSignInInput)
   .handler(async ({ data }): Promise<SignInOutcome> => {
-    const sql = await getSql();
-    await ensureAccessTables(sql);
-    return signInWithPassword(sql, data, async (email, password) => {
+    try {
       // Server-only modules, loaded here so they never reach the browser bundle.
       const [{ auth }, { getRequest }] = await Promise.all([import("@/lib/auth/server"), import("@tanstack/react-start/server")]);
-      try {
-        // Sets the session cookie on this response (the tanstackStartCookies plugin in auth/server.ts).
-        await auth.api.signInEmail({ body: { email, password }, headers: getRequest().headers });
-        return true;
-      } catch (err) {
-        if (isWrongPassword(err)) return false;
-        console.error("[sign-in] password sign-in failed:", err instanceof Error ? err.message : err);
-        throw new Error("Sign-in didn't go through. Try again in a moment.");
-      }
-    });
+      const request = getRequest();
+      if (fromAnotherSite(request.headers)) throw new SignInProblem("Sign in from the Katz Desk sign-in page.");
+      const sql = await getSql();
+      await ensureAccessTables(sql);
+      return await signInWithPassword(sql, data, async (email, password) => {
+        try {
+          // Sets the session cookie on this response (the tanstackStartCookies plugin in auth/server.ts).
+          await auth.api.signInEmail({ body: { email, password }, headers: request.headers });
+          return true;
+        } catch (err) {
+          if (isWrongPassword(err)) return false;
+          throw err;
+        }
+      });
+    } catch (err) {
+      throw plainSignInError(err);
+    }
   });

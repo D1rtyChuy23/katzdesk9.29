@@ -222,7 +222,7 @@ function Login() {
           setError(
             peek.email || identity.includes("@")
               ? "You’re invited — create an account with this email to get in."
-              : "You’re invited — create an account with the email your invite was sent to.",
+              : "You’re invited — create an account to get in.",
           );
           return;
         }

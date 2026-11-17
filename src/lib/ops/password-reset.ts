@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getSql } from "@/lib/db";
+import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
 import { requireAdmin } from "./access";
 import { newPasswordInput, resetTokenInput, userIdInput } from "./access-input";
@@ -68,44 +68,52 @@ export const peekPasswordReset = createServerFn({ method: "POST" })
   });
 
 /** Sets the new password from a reset link, then signs that person out everywhere. */
+/** Set the new password for a reset link's account, once. Ends other sessions and any wait from wrong tries. */
+export async function applyPasswordReset(
+  sql: Sql,
+  token: string,
+  password: string,
+): Promise<{ username: string | null; email: string | null }> {
+  const problem = passwordProblem(password ?? "");
+  if (problem) throw new Error(problem);
+  const tokenHash = await sha256((token ?? "").trim());
+  const rows = await sql.query<{ id: number; user_id: string }>(
+    `select id, user_id from desk_password_resets
+     where token_hash = $1 and used_at is null and expires_at > now()`,
+    [tokenHash],
+  );
+  const hit = rows[0];
+  if (!hit) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
+  const { hashPassword } = await import("better-auth/crypto");
+  const hashed = await hashPassword(password);
+  const updated = await sql.query<{ id: string }>(
+    `update "account" set "password" = $2, "updatedAt" = now()
+     where "userId" = $1 and "providerId" = 'credential'
+     returning "id"`,
+    [hit.user_id, hashed],
+  );
+  if (!updated[0]) {
+    // Google / X users get a password too, so they can also sign in with username + password.
+    await sql.query(
+      `insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
+       values ($1, $2, 'credential', $2, $3, now(), now())`,
+      [randomToken().slice(0, 32), hit.user_id, hashed],
+    );
+  }
+  await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
+  await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
+  // A new password ends any wait from wrong tries, so the link gets a locked-out person back in.
+  const { clearSignInTries } = await import("./sign-in");
+  await clearSignInTries(sql, hit.user_id);
+  const who = await sql.query<{ username: string | null; email: string | null }>(
+    `select d.username, u.email from "user" u left join desk_accounts d on d.user_id = u.id where u.id = $1`,
+    [hit.user_id],
+  );
+  return { username: who[0]?.username ?? null, email: who[0]?.email ?? null };
+}
+
 export const resetPasswordWithToken = createServerFn({ method: "POST" })
   .validator(newPasswordInput)
-  .handler(async ({ data }): Promise<{ username: string | null; email: string | null }> => {
-    const problem = passwordProblem(data.password ?? "");
-    if (problem) throw new Error(problem);
-    const sql = await getSql();
-    const tokenHash = await sha256((data.token ?? "").trim());
-    const rows = await sql.query<{ id: number; user_id: string }>(
-      `select id, user_id from desk_password_resets
-       where token_hash = $1 and used_at is null and expires_at > now()`,
-      [tokenHash],
-    );
-    const hit = rows[0];
-    if (!hit) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
-    const { hashPassword } = await import("better-auth/crypto");
-    const hashed = await hashPassword(data.password);
-    const updated = await sql.query<{ id: string }>(
-      `update "account" set "password" = $2, "updatedAt" = now()
-       where "userId" = $1 and "providerId" = 'credential'
-       returning "id"`,
-      [hit.user_id, hashed],
-    );
-    if (!updated[0]) {
-      // Google / X users get a password too, so they can also sign in with username + password.
-      await sql.query(
-        `insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
-         values ($1, $2, 'credential', $2, $3, now(), now())`,
-        [randomToken().slice(0, 32), hit.user_id, hashed],
-      );
-    }
-    await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
-    await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
-    // A new password ends any wait from wrong tries, so the link gets a locked-out person back in.
-    const { clearSignInTries } = await import("./sign-in");
-    await clearSignInTries(sql, hit.user_id);
-    const who = await sql.query<{ username: string | null; email: string | null }>(
-      `select d.username, u.email from "user" u left join desk_accounts d on d.user_id = u.id where u.id = $1`,
-      [hit.user_id],
-    );
-    return { username: who[0]?.username ?? null, email: who[0]?.email ?? null };
-  });
+  .handler(async ({ data }): Promise<{ username: string | null; email: string | null }> =>
+    applyPasswordReset(await getSql(), data.token, data.password),
+  );
