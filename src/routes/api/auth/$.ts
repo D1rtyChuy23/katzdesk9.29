@@ -1,17 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@/lib/auth/server";
 import { getSql } from "@/lib/db";
-import { isEmailSignInPath, throttledEmailSignIn } from "@/lib/ops/sign-in";
+import { serveAuth } from "@/lib/ops/sign-in";
 
+// What is served here, and how, is serveAuth's (lib/ops/sign-in.ts): the tests run it against the real Better Auth.
 export const Route = createFileRoute("/api/auth/$")({
   server: {
     handlers: {
-      GET: ({ request }) => auth.handler(request),
-      POST: async ({ request }) => {
-        // Password sign-in sent straight here counts against the account, the same as the sign-in form.
-        if (!isEmailSignInPath(new URL(request.url).pathname)) return auth.handler(request);
-        return throttledEmailSignIn(await getSql(), request, (r) => auth.handler(r));
-      },
+      GET: ({ request }) => serveAuth(getSql, request, (r) => auth.handler(r)),
+      POST: ({ request }) => serveAuth(getSql, request, (r) => auth.handler(r)),
     },
   },
 });

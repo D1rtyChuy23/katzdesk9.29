@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { auth } from "@/lib/auth/server";
+import { freshSession } from "@/lib/auth/fresh-session.server";
 
 /**
  * Tickets In Window as JSON, read-only, for an Admin who is signed in (Grok's billing request, 2026-10-28):
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/admin/tickets-in-window")({
     handlers: {
       GET: async ({ request }) => {
         if (!sameSiteOk(request)) return json({ error: "Cross-site request refused." }, 403);
-        const session = await auth.api.getSession({ headers: request.headers }).catch(() => null);
+        const session = await freshSession(request.headers).catch(() => null);
         if (!session?.user) return json({ error: "Sign in first." }, 401);
         const { getSql } = await import("@/lib/db");
         const { ensureSeeded } = await import("@/lib/ops/seed.server");

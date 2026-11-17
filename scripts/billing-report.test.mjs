@@ -276,9 +276,10 @@ test("Invoices, Tickets In Window and Location Check are an Admin's: anyone else
   const win = await api.windowReportFor(sql, "u-owner", { from: "2026-10-01", to: "2026-10-31" });
   assert.deepEqual([win.forbidden, win.rows.length, win.error], [false, 1, null]);
 
-  // The JSON route checks the session, then the Admin, before reading anything; it only reads.
+  // The JSON route checks the session (from the database, not the cookie copy: fresh-session.server.ts), then the
+  // Admin, before reading anything; it only reads.
   const route = readFileSync(new URL("../src/routes/api/admin/tickets-in-window.ts", import.meta.url), "utf8");
-  const order = ["sameSiteOk(request)", "auth.api.getSession", "canReviewNames(sql, session.user.id)", "ticketsInWindowFor("].map((s) => route.indexOf(s));
+  const order = ["sameSiteOk(request)", "freshSession(request.headers)", "canReviewNames(sql, session.user.id)", "ticketsInWindowFor("].map((s) => route.indexOf(s));
   assert.ok(order.every((i) => i > 0), "each check is there");
   assert.deepEqual([...order].sort((a, b) => a - b), order, "in that order");
   assert.doesNotMatch(route, /\b(insert|update|delete)\b\s+(into|from|\w+\s+set)/i);

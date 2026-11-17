@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { checkUsername, claimInvite, getMyAccess, peekInvite, registerAccount } from "@/lib/ops/access";
+import { checkUsername, claimInvite, getMyAccess, registerAccount } from "@/lib/ops/access";
 import { clearInviteToken, readInviteToken, rememberInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -213,19 +213,6 @@ function Login() {
         const identity = username.trim();
         // The server finds the account and checks the password; it never sends the account's email back.
         const result = await passwordSignIn({ data: { username: identity, password } });
-        if (result.next === "invited") {
-          const peek = await peekInvite({ data: { identity } });
-          setMode("up");
-          if (peek.username) setUsername(peek.username);
-          if (peek.email) setEmail(peek.email);
-          else if (identity.includes("@")) setEmail(identity);
-          setError(
-            peek.email || identity.includes("@")
-              ? "You’re invited — create an account with this email to get in."
-              : "You’re invited — create an account to get in.",
-          );
-          return;
-        }
         if (result.next === "social") {
           // Google/X account with no password: send them to the right button instead of "wrong password".
           setSocialOnly(result.methods);
@@ -252,16 +239,7 @@ function Login() {
         return;
       }
       if (/unknown username/i.test(msg)) {
-        const who = username.trim();
-        const peek = await peekInvite({ data: { identity: who } }).catch(() => null);
-        if (peek?.invited) {
-          setMode("up");
-          if (peek.username) setUsername(peek.username);
-          if (peek.email) setEmail(peek.email);
-          setError("You’re invited — create an account to get in.");
-          return;
-        }
-        setNoAccount(who);
+        setNoAccount(username.trim());
         return;
       }
       setError(friendlySignInError(msg));
@@ -411,7 +389,7 @@ function Login() {
                 {mode === "up"
                   ? readInviteToken()
                     ? "This invite lets you in. Create a password, or continue with Google or X."
-                    : "Use the email you were invited with (or Google / X). Invited people skip the wait."
+                    : "Have an invite? Open its link to get straight in. Otherwise a desk admin approves you."
                   : "Username or the email on your account. Open the invite link if you have one."}
               </p>
               <form onSubmit={onSubmit} className="mt-5 space-y-3">
@@ -442,7 +420,7 @@ function Login() {
                       className="mt-1 border-cream/15 bg-ink text-cream"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="The email you were invited with"
+                      placeholder="Your email"
                     />
                   </div>
                 ) : null}
@@ -497,6 +475,8 @@ function Login() {
                     data-testid="login-no-account"
                   >
                     <p>No Katz Desk account for “{noAccount}” yet.</p>
+                    {/* The same line for everyone: the screen doesn't say whether a name has an invite (11/17). */}
+                    <p className="mt-1 text-cream/60">Have an invite? Open the link in your invite message.</p>
                     <button
                       type="button"
                       className="mt-1 font-medium text-katz-gold underline-offset-2 hover:underline"
