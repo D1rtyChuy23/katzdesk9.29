@@ -89,6 +89,7 @@ import { DEAL_MADE_NO_UNLINK, dealReviewOf, type DealReview } from "./deal-revie
 import { customersStrictlyMatch } from "./clean-names";
 import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
+import { withLiveSerialNotices } from "./serial-pull";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
@@ -502,7 +503,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 	const marks = await loadAccountMarks(sql);
 	const jobs = applyMarks(attachJobSiblings((await sql`select * from service_jobs`).map((r: any) => mapJob(r, today))).filter((j: any) => !j.duplicateOf), marks);
 	const pms = applyMarks((await sql`select * from pm_jobs`).map((r: any) => mapPm(r, today)), marks);
-	const installs = await withInspections(sql, applyMarks((await sql`select * from installs where archived = false`).map((r: any) => mapInstall(r, today, week, catalog)), marks));
+	const installs = await withLiveSerialNotices(sql, await withInspections(sql, applyMarks((await sql`select * from installs where archived = false`).map((r: any) => mapInstall(r, today, week, catalog)), marks)));
 	const deals = (await sql`select * from deals where archived = false`).map((r: any) => mapDeal(r, marks));
 	const svc = jobs.filter((j: any) => j.kind === "service");
 	const tlc = jobs.filter((j: any) => j.kind === "tlc");
@@ -1807,7 +1808,7 @@ export const listInstalls = createServerFn({ method: "GET" }).middleware([deskMi
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
 	const marks = await loadAccountMarks(sql);
-	const installs = (await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog));
+	const installs = await withLiveSerialNotices(sql, (await sql`select * from installs where archived = false order by id`).map((r) => mapInstall(r, today, week, catalog)));
 	for (const i of installs) {
 		if (i.dealId == null) continue;
 		const same = installs.filter((x) => x.dealId === i.dealId);
@@ -1982,7 +1983,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);
 	// With its sale (11/3), so a save hands back the whole install.
-	const saved = (await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks)))))[0];
+	const saved = (await withLiveSerialNotices(sql, await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks))))))[0];
 	return { ...saved, unitsMoved };
 }
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { customer: string; equipment?: string; technician?: string; serial?: string; powerVoltage?: string; machines?: MachineSpec[] | string | null }) => d).handler(async ({ data, context }: any) => {
@@ -2015,7 +2016,7 @@ export const createInstall = createServerFn({ method: "POST" }).middleware([desk
       returning *`;
 	await logActivity(sql, context.userId, "install", rows[0].id, "opened", duplicateOf ? `${name} · possible duplicate of #${duplicateOf}` : name);
 	await syncInstallUnits(sql, rows[0].id);
-	return (await withWorkOrders(sql, [mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog)]))[0];
+	return (await withLiveSerialNotices(sql, await withWorkOrders(sql, [mapInstall(rows[0], todayChicago(), weekBounds(todayChicago()), catalog)])))[0];
 });
 export const archiveInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator((d: { id: number }) => d).handler(async ({ data, context }: any) => {
 	// A rebuild linked to it keeps it on the board (11/6 review, round 5): install-projects.ts.
@@ -2948,7 +2949,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 		})(),
 		jobs: applyMarks(attachJobSiblings(jobs.map((r) => mapJob(r, today))).filter((j) => !j.duplicateOf), marks),
 		pms: applyMarks(pms.map((r) => mapPm(r, today)), marks),
-		installs: await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks)))),
+		installs: await withLiveSerialNotices(sql, await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks(installs.map((r) => mapInstall(r, today, week, catalog)), marks))))),
 		deals: await (async () => {
 			const projects = await loadBoardProjects(sql, catalog);
 			return deals.map((r) => attachBoard(mapDeal(r, marks), projects));
