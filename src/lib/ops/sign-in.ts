@@ -81,8 +81,23 @@ export async function signInWithPassword(
   const verdict = await claimSignInTry(sql, found.userId);
   if (!verdict.allowed) throw new SignInProblem(tooManyTries(verdict.waitMinutes));
   if (!(await signIn(found.email, input.password))) throw new SignInProblem(WRONG_PASSWORD);
+  if (await endIfPasswordGone(sql, found.userId)) throw new SignInProblem(WRONG_PASSWORD);
   await clearSignInTries(sql, found.userId);
   return { next: "in", waiting: found.waiting };
+}
+
+/**
+ * After Better Auth has accepted a password: is that password still on the account? Sealing a shared account
+ * (access.ts) removes its password and then ends its sessions. Better Auth reads the password, spends a moment
+ * checking it, and only then makes the session, so a sign-in or a password change already under way could leave a
+ * session behind the seal. With no password left on the account, that session and any other go, and the answer
+ * is the one for a wrong password. True when it ended them.
+ */
+export async function endIfPasswordGone(sql: Sql, userId: string): Promise<boolean> {
+  const left = await sql.query<{ id: string }>(`select "id" from "account" where "userId" = $1 and "providerId" = 'credential' limit 1`, [userId]);
+  if (left[0]) return false;
+  await sql.query(`delete from "session" where "userId" = $1`, [userId]);
+  return true;
 }
 
 /**
@@ -112,38 +127,64 @@ export function fromAnotherSite(headers: Headers): boolean {
   return site !== null && site !== "same-origin";
 }
 
-/** An auth path as Better Auth would read it: decoded, single slashes, no trailing slash, lower case. */
-function authPath(pathname: string): string | null {
-  try {
-    return decodeURIComponent(pathname).replace(/\/{2,}/g, "/").replace(/\/$/, "").toLowerCase();
-  } catch {
-    return null;
-  }
-}
+const AUTH_BASE = "/api/auth";
+const EMAIL_SIGN_IN = `${AUTH_BASE}/sign-in/email`;
+const CHANGE_PASSWORD = `${AUTH_BASE}/change-password`;
 
-/** Better Auth's own password sign-in address, however the path is spelled. */
-export function isEmailSignInPath(pathname: string): boolean {
-  return authPath(pathname) === "/api/auth/sign-in/email";
+/**
+ * The Better Auth routes the desk calls. Nothing else is served (11/17).
+ *
+ * Better Auth registers some thirty more: listing and ending an account's sessions, adding and removing sign-in
+ * methods, changing the name or email, reading the Google profile and broker tokens kept on an account. The desk
+ * calls none of them, and two reviews each found one that undid the sealing of a shared account (access.ts):
+ * /unlink-account hid that the account was shared, and /list-sessions handed the locked-out person the real
+ * person's new session token. A route added by a later Better Auth version is refused until it is listed here;
+ * scripts/auth-route.test.mjs checks this list against what Better Auth registers.
+ */
+const SERVED_AUTH_PATHS = new Set([
+  `${AUTH_BASE}/get-session`, // who is signed in
+  EMAIL_SIGN_IN, // password sign-in (counted per account, below)
+  `${AUTH_BASE}/sign-up/email`, // new account with a password
+  `${AUTH_BASE}/sign-in/oauth2`, // start a Google or X sign-in
+  `${AUTH_BASE}/sign-out`,
+  CHANGE_PASSWORD, // Settings
+  `${AUTH_BASE}/error`, // Better Auth's page when a Google or X sign-in fails
+  `${AUTH_BASE}/ok`,
+]);
+/** Where the broker sends someone back after Google or X. */
+const OAUTH_CALLBACK = /^\/api\/auth\/oauth2\/callback\/[A-Za-z0-9_-]+$/;
+
+/**
+ * True for a route the desk serves, under its one exact spelling. Better Auth itself answers 404 to a trailing
+ * slash, a doubled slash or a different case, so nothing is lost by not guessing what a spelling means.
+ */
+export function isServedAuthPath(pathname: string): boolean {
+  return SERVED_AUTH_PATHS.has(pathname) || OAUTH_CALLBACK.test(pathname);
 }
 
 /**
- * Better Auth routes KatzDesk never calls and doesn't serve (11/17). The first three let a signed-in person add
- * or remove sign-in methods on an account; taking a Google sign-in off an account someone else also holds is
- * how a shared account could be made to look like one person's. The last three hand out the Google name, picture
- * and broker tokens stored on an account.
+ * The request without Better Auth's cookie copy of the session.
+ *
+ * Better Auth keeps a signed copy of the session in a cookie for five minutes and answers from it without asking
+ * the database (auth/server.ts turns that on). A session ended in the database, by a seal, a reset link or a
+ * sign-out elsewhere, would go on working at Better Auth's own routes until the copy ran out, and some routes
+ * renew it. With the copy taken off, Better Auth looks the session up every time. The desk's own server code
+ * already does (auth/fresh-session.server.ts).
  */
-const REFUSED_AUTH_PATHS = new Set([
-  "/api/auth/unlink-account",
-  "/api/auth/link-social",
-  "/api/auth/oauth2/link",
-  "/api/auth/account-info",
-  "/api/auth/get-access-token",
-  "/api/auth/refresh-token",
-]);
-
-export function isRefusedAuthPath(pathname: string): boolean {
-  const path = authPath(pathname);
-  return path !== null && REFUSED_AUTH_PATHS.has(path);
+export async function withoutSessionCopy(request: Request): Promise<Request> {
+  const cookie = request.headers.get("cookie");
+  if (!cookie) return request;
+  const parts = cookie.split(";");
+  // The copy's name ends in session_data, or session_data.0, .1 … when Better Auth splits a long one.
+  const kept = parts.filter((part) => !/session_data(\.\d+)?$/.test(part.split("=")[0]!.trim()));
+  if (kept.length === parts.length) return request;
+  const headers = new Headers(request.headers);
+  if (kept.length) headers.set("cookie", kept.join(";").trim());
+  else headers.delete("cookie");
+  // Built from its parts, with the body read first: the server's request object is its own kind (srvx), and the
+  // standard Request can't be made from one directly. Auth bodies are a few fields of JSON.
+  const hasBody = request.method !== "GET" && request.method !== "HEAD";
+  return new Request(request.url, { method: request.method, headers, body: hasBody ? await request.arrayBuffer() : undefined });
 }
 
 /**
@@ -167,8 +208,51 @@ export async function throttledEmailSignIn(
   const verdict = await claimSignInTry(sql, user.id);
   if (!verdict.allowed) return Response.json({ code: "TOO_MANY_TRIES", message: tooManyTries(verdict.waitMinutes) }, { status: 429 });
   const response = await handle(request);
-  if (response.ok) await clearSignInTries(sql, user.id);
+  if (!response.ok) return response;
+  if (await endIfPasswordGone(sql, user.id)) return wrongPassword();
+  await clearSignInTries(sql, user.id);
   return response;
+}
+
+/** Better Auth's own answer to a wrong email or password. */
+const wrongPassword = () => Response.json({ code: "INVALID_EMAIL_OR_PASSWORD", message: "Invalid email or password" }, { status: 401 });
+
+/**
+ * Better Auth's password change (POST /api/auth/change-password), which can also make a new session. When it went
+ * through but the account has no password any more, a seal landed while it was under way: see endIfPasswordGone.
+ */
+export async function changedPassword(sql: Sql, response: Response): Promise<Response> {
+  if (!response.ok) return response;
+  let userId: unknown;
+  try {
+    userId = ((await response.clone().json()) as { user?: { id?: unknown } } | null)?.user?.id;
+  } catch {
+    /* not JSON */
+  }
+  // Better Auth answers with the user. If it ever doesn't, there is no telling whose session this is: refuse it.
+  if (typeof userId !== "string" || !userId) return wrongPassword();
+  return (await endIfPasswordGone(sql, userId)) ? wrongPassword() : response;
+}
+
+const notServed = () => Response.json({ code: "NOT_FOUND", message: "Not found" }, { status: 404 });
+
+/**
+ * Everything routes/api/auth/$.ts does with a request. `handle` is Better Auth's handler.
+ * Only the desk's routes are served, Better Auth never sees the cookie copy of a session, a password sign-in is
+ * counted against its account, and neither a sign-in nor a password change leaves a session on a sealed account.
+ */
+export async function serveAuth(
+  sqlFor: () => Promise<Sql>,
+  request: Request,
+  handle: (request: Request) => Promise<Response>,
+): Promise<Response> {
+  const path = new URL(request.url).pathname;
+  if (!isServedAuthPath(path)) return notServed();
+  const asked = await withoutSessionCopy(request);
+  if (request.method !== "POST") return handle(asked);
+  if (path === EMAIL_SIGN_IN) return throttledEmailSignIn(await sqlFor(), asked, handle);
+  if (path === CHANGE_PASSWORD) return changedPassword(await sqlFor(), await handle(asked));
+  return handle(asked);
 }
 
 export const passwordSignIn = createServerFn({ method: "POST" })

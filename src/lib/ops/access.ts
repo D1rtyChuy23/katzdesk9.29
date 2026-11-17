@@ -450,14 +450,20 @@ async function googleVouchedEmail(sql: Sql, userId: string): Promise<string | nu
 }
 
 /**
- * Before an account is let in by the invite link or by an admin: an account Google did not create, but whose
- * email Better Auth holds as verified or which carries a Google sign-in, had Google joined onto it. Whoever
- * began it may still hold a password or an open session. Remove every password that isn't newer than a Google
- * sign-in still on the account (all of them, if the Google sign-in was taken off again), and end every session,
- * so only the person Google knows can come back in. An account that was never joined is left exactly as it is.
+ * Before an account is let in by the invite link or by an admin: is it shared? Better Auth joins a Google or X
+ * sign-in onto an existing account with the same email, so an account someone began with a password can end up
+ * holding the invited person's sign-in too. Whoever began it may still hold that password or an open session.
  *
- * The verified mark is what makes this stick: only Google sets it here (the desk sends no verification email),
- * and nothing a signed-in person can call clears it.
+ * An account Google created is one person's. Otherwise it is shared when any of these holds:
+ *   - Better Auth holds its email as verified. Only Google sets that here (the desk sends no verification email)
+ *     and nothing a signed-in person can call clears it, so it still shows after a Google sign-in was taken off.
+ *   - It carries a Google sign-in.
+ *   - It has a password that a Google or X sign-in was joined onto later. X leaves no verified mark, so this is
+ *     the only sign of an X join. An account X created, with or without a password set afterwards, is not shared.
+ *
+ * Sealing removes every password that isn't newer than a Google sign-in still on the account (all of them when
+ * there is none), cancels any reset link waiting for the account, and ends every session, so only the person
+ * Google or X knows can come back in. An account that is not shared is left exactly as it is.
  */
 async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: boolean; passwordRemoved: boolean }> {
   const shared = await sql.query<{ id: string }>(
@@ -466,6 +472,10 @@ async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: bo
         and (
           u."emailVerified" = true
           or exists (select 1 from "account" g where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}')
+          or exists (
+            select 1 from "account" c
+              join "account" o on o."userId" = c."userId" and o."providerId" <> 'credential' and o."createdAt" >= c."createdAt"
+             where c."userId" = u.id and c."providerId" = 'credential')
         )`,
     [userId],
   );
@@ -479,6 +489,8 @@ async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: bo
       returning c."id"`,
     [userId],
   );
+  // A reset link made before this would put a password back; the same clearing a new link does (password-reset.ts).
+  await sql.query("delete from desk_password_resets where user_id = $1 and used_at is null", [userId]);
   await sql.query(`delete from "session" where "userId" = $1`, [userId]);
   return { sealed: true, passwordRemoved: removed.length > 0 };
 }

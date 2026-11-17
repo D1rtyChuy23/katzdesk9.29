@@ -18,7 +18,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const A = await import("../src/lib/ops/access.ts");
-const S = await import("../src/lib/ops/sign-in.ts");
+const R = await import("../src/lib/ops/password-reset.ts");
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 async function freshDb() {
@@ -295,6 +295,84 @@ test("sealing removes a password as old as the Google sign-in or older, and keep
   }
 });
 
+test("X joined onto an account that began with a password is sealed the same way", async () => {
+  const { pg, sql, query, signedUp, invite, account, signIns, session, sessions } = await freshDb();
+  try {
+    // X hands over a made-up email and never marks it verified, so neither of Google's marks is there. What shows
+    // the account is shared is a password that a later sign-in was joined onto.
+    const inv = await invite({ username: "pedro.zz" });
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_shared", "pedro.zz@x.invalid", [["credential", 120], ["grok-x", 1]]);
+    await A.ensureDeskAccount(sql, "u_shared");
+    await session("u_shared");
+    await session("u_shared");
+    assert.equal(await A.claimInviteToken(sql, "u_shared", token), true);
+    assert.equal((await account("u_shared")).approved, true);
+    assert.deepEqual(await signIns("u_shared"), ["grok-x"]);
+    assert.equal(await sessions("u_shared"), 0);
+    // The same through an admin's approval, which says the password went.
+    await signedUp("u_shared2", "ana.zz@x.invalid", [["credential", 120], ["grok-x", 1]]);
+    await A.registerDeskAccount(sql, "u_shared2", { username: "ana.zz", email: null, token: null });
+    await session("u_shared2");
+    assert.equal((await A.approveDeskAccount(sql, "u_shared2", true)).passwordRemoved, true);
+    assert.deepEqual(await signIns("u_shared2"), ["grok-x"]);
+    assert.equal(await sessions("u_shared2"), 0);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("an account X created is one person's: let in, it keeps its session, and a password set later stays", async () => {
+  const { pg, sql, query, signedUp, invite, signIns, session, sessions } = await freshDb();
+  try {
+    const inv = await invite({ username: "xavi.zz" });
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_xavi", "xavi.zz@x.invalid", [["grok-x", 30]]);
+    await A.ensureDeskAccount(sql, "u_xavi");
+    await session("u_xavi");
+    assert.equal(await A.claimInviteToken(sql, "u_xavi", token), true);
+    assert.deepEqual(await signIns("u_xavi"), ["grok-x"]);
+    assert.equal(await sessions("u_xavi"), 1);
+    // X first, then a password from an admin's reset link, then approved by the admin.
+    await signedUp("u_xena", "xena.zz@x.invalid", [["grok-x", 600], ["credential", 5]]);
+    await A.registerDeskAccount(sql, "u_xena", { username: "xena.zz", email: null, token: null });
+    await session("u_xena");
+    assert.equal((await A.approveDeskAccount(sql, "u_xena", true)).passwordRemoved, false);
+    assert.deepEqual(await signIns("u_xena"), ["credential", "grok-x"]);
+    assert.equal(await sessions("u_xena"), 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("sealing a shared account cancels a reset link made for it before; nobody else's link is touched", async () => {
+  const { pg, sql, query, signedUp, invite, signIns } = await freshDb();
+  try {
+    const resetFor = async (id, hash) => query("insert into desk_password_resets (user_id, token_hash, created_by, expires_at) values ($1, $2, 'u_boss', now() + interval '1 day')", [id, hash]);
+    const resets = async (id) => (await query("select count(*)::int as n from desk_password_resets where user_id = $1 and used_at is null", [id]))[0].n;
+    // A reset link handed to whoever was waiting under Pedro's name would put a password back after the seal.
+    const inv = await invite({ email: "pedro.zz@example.com", username: "pedro.zz" });
+    const token = (await query("select token from desk_invites where id = $1", [inv.id]))[0].token;
+    await signedUp("u_shared", "pedro.zz@example.com", [["credential", 120], ["grok-google", 1]], { verified: true });
+    await A.ensureDeskAccount(sql, "u_shared");
+    await resetFor("u_shared", "hash-shared");
+    // Someone waiting with only a password, and a member, each with a link of their own.
+    await signedUp("u_plain", "plain.zz@example.com");
+    await A.registerDeskAccount(sql, "u_plain", { username: "plain.zz", email: null, token: null });
+    await resetFor("u_plain", "hash-plain");
+    await resetFor("u_boss", "hash-boss");
+    assert.equal(await A.claimInviteToken(sql, "u_shared", token), true);
+    assert.equal(await resets("u_shared"), 0);
+    await assert.rejects(R.applyPasswordReset(sql, "whatever", "a-new-password-1"), /expired or was already used/);
+    assert.deepEqual(await signIns("u_shared"), ["grok-google"]);
+    assert.equal((await A.approveDeskAccount(sql, "u_plain", true)).passwordRemoved, false);
+    assert.equal(await resets("u_plain"), 1);
+    assert.equal(await resets("u_boss"), 1);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("someone already let in is never sealed: not by a second approval, not by opening an old link", async () => {
   const { pg, sql, query, signedUp, signIns, session, sessions } = await freshDb();
   try {
@@ -473,17 +551,6 @@ test("denying someone who only took an invited name or typed an invited email le
   } finally {
     await pg.close();
   }
-});
-
-test("the account-joining and token routes Better Auth offers are refused; the ones the app uses are not", () => {
-  for (const path of ["/api/auth/unlink-account", "/api/auth/link-social", "/api/auth/oauth2/link", "/api/auth/account-info", "/api/auth/get-access-token", "/api/auth/refresh-token", "/api/auth/Unlink-Account/", "/api/auth//unlink-account", "/api/auth/unlink%2Daccount"]) {
-    assert.equal(S.isRefusedAuthPath(path), true, path);
-  }
-  for (const path of ["/api/auth/sign-in/email", "/api/auth/sign-up/email", "/api/auth/get-session", "/api/auth/sign-out", "/api/auth/sign-in/oauth2", "/api/auth/oauth2/callback/grok-google", "/api/auth/list-accounts-zz", "/api/auth/%"]) {
-    assert.equal(S.isRefusedAuthPath(path), false, path);
-  }
-  const route = src("src/routes/api/auth/$.ts");
-  assert.equal((route.match(/isRefusedAuthPath\(/g) ?? []).length >= 2, true, "checked for GET and for POST");
 });
 
 test("the server's own session check never trusts the five-minute cookie copy", () => {

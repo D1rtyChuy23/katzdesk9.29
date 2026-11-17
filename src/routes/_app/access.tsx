@@ -84,9 +84,9 @@ function Page() {
     mutationFn: (d: { userId: string; approved: boolean }) => setAccountApproved({ data: d }),
     onSuccess: (row) => {
       toast.success(row.approved ? `Approved ${row.username}` : `Revoked ${row.username}`);
-      // Google was added to an account that began with a password, so the password could be someone else's.
+      // Google or X was added to an account that began with a password, so the password could be someone else's.
       if (row.passwordRemoved) {
-        toast.info(`${row.username}’s older password was removed and they were signed out. They sign in with Google now.`, { duration: 12000 });
+        toast.info(`${row.username}’s older password was removed and they were signed out. They sign in with Google or X now, or with a reset link from you.`, { duration: 12000 });
       }
       void qc.invalidateQueries({ queryKey: ["access"] });
     },

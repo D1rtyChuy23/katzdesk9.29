@@ -142,6 +142,28 @@ test("signing in clears the count", async () => {
   }
 });
 
+test("a sign-in that finishes after the account's password was removed is refused and leaves no session", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    // Sealing a shared account removes its password and ends its sessions (access.ts). A sign-in already under
+    // way then: Better Auth had read the password, and makes its session after the seal has been and gone.
+    const signIn = async () => {
+      await query(`delete from "account" where "userId" = 'u_sam' and "providerId" = 'credential'`);
+      await query(`delete from "session" where "userId" = 'u_sam'`);
+      await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-late', now() + interval '7 days', 's-late', now(), 'u_sam')`);
+      return true;
+    };
+    await assert.rejects(S.signInWithPassword(sql, { username: "sam.zz", password: "right one" }, signIn), (e) => e instanceof A.SignInProblem && /didn.t match/i.test(e.message));
+    assert.equal((await query(`select count(*)::int as n from "session" where "userId" = 'u_sam'`))[0].n, 0);
+    // Anyone whose password is still there is untouched.
+    await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-pat', now() + interval '7 days', 's-pat', now(), 'u_pat')`);
+    assert.deepEqual(await S.signInWithPassword(sql, { username: "pat.zz", password: "right one" }, async () => true), { next: "in", waiting: false });
+    assert.equal((await query(`select count(*)::int as n from "session" where "userId" = 'u_pat'`))[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a Google or X account with no password is pointed to its button, without a password check or a count", async () => {
   const { pg, sql, person, tries } = await freshDb();
   try {
@@ -303,16 +325,23 @@ test("a good sign-in at the direct address clears the count; an unknown email or
   }
 });
 
-test("the direct sign-in address is recognised however it is spelled, and nothing else is", () => {
-  for (const path of ["/api/auth/sign-in/email", "/api/auth/sign-in/email/", "/api/auth//sign-in/email", "/API/auth/Sign-In/Email", "/api/auth/sign%2Din/email", "/api/auth/sign-in/%65mail"]) {
-    assert.equal(S.isEmailSignInPath(path), true, path);
+test("the direct sign-in address is counted under its one spelling; any other spelling isn't served at all", async () => {
+  const { pg, sql, tries } = await freshDb();
+  try {
+    const { reached, handle } = handler();
+    const res = await S.serveAuth(async () => sql, post({ email: "sam.zz@example.com", password: "nope" }), handle);
+    assert.equal(res.status, 401);
+    assert.equal(await tries("u_sam"), 1);
+    assert.deepEqual(reached, ["sam.zz@example.com"]);
+    // Better Auth answers 404 to these itself. Here they never reach it, so there is no second way in to count.
+    for (const path of ["/api/auth/sign-in/email/", "/api/auth//sign-in/email", "/API/auth/Sign-In/Email", "/api/auth/sign%2Din/email", "/api/auth/sign-in/%65mail", "/api/auth/sign-in/email/extra", "/api/auth/sign-in/social"]) {
+      assert.equal((await S.serveAuth(async () => sql, post({ email: "sam.zz@example.com", password: "right one" }, path), handle)).status, 404, path);
+    }
+    assert.equal(reached.length, 1);
+    assert.equal(await tries("u_sam"), 1);
+  } finally {
+    await pg.close();
   }
-  for (const path of ["/api/auth/sign-in/social", "/api/auth/sign-up/email", "/api/auth/get-session", "/api/auth/sign-in/email/extra", "/sign-in/email", "/api/auth/%"]) {
-    assert.equal(S.isEmailSignInPath(path), false, path);
-  }
-  const route = src("src/routes/api/auth/$.ts");
-  assert.match(route, /isEmailSignInPath\(/);
-  assert.match(route, /throttledEmailSignIn\(/);
 });
 
 test("a sign-in sent from another site is refused", () => {
