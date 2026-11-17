@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { checkUsername, claimInvite, getMyAccess, peekInvite, registerAccount } from "@/lib/ops/access";
+import { checkUsername, claimInvite, getMyAccess, registerAccount } from "@/lib/ops/access";
 import { clearInviteToken, readInviteToken, rememberInviteToken } from "@/lib/ops/invite-client";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -32,13 +32,6 @@ function writeLastLogin(v: string) {
 }
 
 /** Better Auth's wording is terse; say what to do next instead. */
-/**
- * Shown when the name or email typed has a pending invite. A matching name or email no longer lets anyone in by
- * itself (11/17): the invite link does, and so does Google with the invited email.
- */
-const INVITED_HINT =
-  "There’s an invite for you. Open the link in your invite message to get straight in, or continue with Google using the invited email. Without either, create an account here and a desk admin will approve it.";
-
 function friendlySignInError(msg: string): string {
   if (/invalid (email or )?password|invalid credentials|incorrect/i.test(msg)) {
     return "That password didn't match. Check Caps Lock and try again, or tap Forgot password below.";
@@ -220,15 +213,6 @@ function Login() {
         const identity = username.trim();
         // The server finds the account and checks the password; it never sends the account's email back.
         const result = await passwordSignIn({ data: { username: identity, password } });
-        if (result.next === "invited") {
-          const peek = await peekInvite({ data: { identity } });
-          setMode("up");
-          if (peek.username) setUsername(peek.username);
-          if (peek.email) setEmail(peek.email);
-          else if (identity.includes("@")) setEmail(identity);
-          setError(INVITED_HINT);
-          return;
-        }
         if (result.next === "social") {
           // Google/X account with no password: send them to the right button instead of "wrong password".
           setSocialOnly(result.methods);
@@ -255,16 +239,7 @@ function Login() {
         return;
       }
       if (/unknown username/i.test(msg)) {
-        const who = username.trim();
-        const peek = await peekInvite({ data: { identity: who } }).catch(() => null);
-        if (peek?.invited) {
-          setMode("up");
-          if (peek.username) setUsername(peek.username);
-          if (peek.email) setEmail(peek.email);
-          setError(INVITED_HINT);
-          return;
-        }
-        setNoAccount(who);
+        setNoAccount(username.trim());
         return;
       }
       setError(friendlySignInError(msg));
@@ -500,6 +475,8 @@ function Login() {
                     data-testid="login-no-account"
                   >
                     <p>No Katz Desk account for “{noAccount}” yet.</p>
+                    {/* The same line for everyone: the screen doesn't say whether a name has an invite (11/17). */}
+                    <p className="mt-1 text-cream/60">Have an invite? Open the link in your invite message.</p>
                     <button
                       type="button"
                       className="mt-1 font-medium text-katz-gold underline-offset-2 hover:underline"

@@ -9,7 +9,6 @@ import {
   canAddInput,
   createInviteInput,
   idInput,
-  identityInput,
   inviteTokenInput,
   registerInput,
   roleInput,
@@ -45,6 +44,11 @@ export type DeskAccountRow = DeskAccess & {
    * over a made-up one, so for those the admin is looking at a claim, not a fact.
    */
   emailConfirmed: boolean;
+  /**
+   * For someone not yet let in: the pending invite (its email or username) their sign-up matches. They did not
+   * come through its link, so this is a reason to ask them to open the link, not a reason to approve.
+   */
+  matchesInvite: string | null;
 };
 
 export type DeskInvite = {
@@ -416,34 +420,61 @@ async function grantInviteAccess(sql: Sql, userId: string, invite: InviteRow): P
 }
 
 /** The sign-in provider that proves an email address belongs to the person: Google, through the Grok broker. */
-const GOOGLE_PROVIDER = GROK_PROVIDERS.find((p) => p.idp === "google")?.providerId ?? "grok-google";
+const GOOGLE_PROVIDER = (GROK_PROVIDERS.find((p) => p.idp === "google")?.providerId ?? "grok-google").replace(/[^a-z0-9_-]/gi, "");
 
 /**
- * The email Google vouches for on this account, or null.
+ * SQL: true when Google itself created this "user" row (alias `u`) and marked its email verified.
  *
- * Sign-up is open and a password sign-up's email is whatever was typed, so a matching email proves nothing by
- * itself (11/17). Google proves the address. X hands over a made-up one. An account that had a password before
- * Google was joined to it is left out too: whoever set that password can still sign in with it.
+ * Sign-up is open, and a password sign-up's email is whatever was typed, so a matching email proves nothing by
+ * itself (11/17). Google proves the address; X hands over a made-up one. But Better Auth also joins a Google
+ * sign-in onto an existing account with the same email, so "has a Google row" is not enough: an account someone
+ * else started with a password would count once the real person pressed Google. The test is anchored on the two
+ * things the person cannot change afterwards: the user row's creation time and the Google row's.
  */
+const GOOGLE_BORN_SQL = `(u."emailVerified" = true and exists (
+    select 1 from "account" g
+     where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}'
+       and g."createdAt" <= u."createdAt" + interval '10 seconds'))`;
+
+/** The email Google vouches for on this account, or null. See GOOGLE_BORN_SQL. */
 async function googleVouchedEmail(sql: Sql, userId: string): Promise<string | null> {
   const rows = await sql.query<{ email: string | null }>(
-    `select u.email
-       from "user" u
-       join "account" g on g."userId" = u.id and g."providerId" = $2
-      where u.id = $1
-        and not exists (
-          select 1 from "account" c
-           where c."userId" = u.id and c."providerId" = 'credential' and c."createdAt" < g."createdAt"
-        )
-      limit 1`,
-    [userId, GOOGLE_PROVIDER],
+    `select u.email from "user" u where u.id = $1 and ${GOOGLE_BORN_SQL} limit 1`,
+    [userId],
   );
   return normEmail(rows[0]?.email);
 }
 
 /**
- * The pending invite this account may take without the invite link: it was sent to an email, and Google vouches
- * that the email is this person's. A matching username never counts, and neither does an expired invite.
+ * Before an account is let in by the invite link or by an admin: if Google was joined onto an account that began
+ * some other way, whoever began it may still hold a password or an open session. Remove every password older than
+ * the Google sign-in, and end every session, so only the person Google knows can come back in. An account with no
+ * Google sign-in, or one Google created, is left exactly as it is.
+ */
+async function sealSharedAccount(sql: Sql, userId: string): Promise<boolean> {
+  const joined = await sql.query<{ id: string }>(
+    `select u.id from "user" u
+      where u.id = $1 and not ${GOOGLE_BORN_SQL}
+        and exists (select 1 from "account" g where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}')`,
+    [userId],
+  );
+  if (!joined[0]) return false;
+  await sql.query(
+    `delete from "account" c
+      where c."userId" = $1 and c."providerId" = 'credential'
+        and exists (
+          select 1 from "account" g
+           where g."userId" = $1 and g."providerId" = '${GOOGLE_PROVIDER}' and g."createdAt" > c."createdAt")`,
+    [userId],
+  );
+  await sql.query(`delete from "session" where "userId" = $1`, [userId]);
+  return true;
+}
+
+/**
+ * The pending invite this account may take without the invite link: it was sent to an email, Google created the
+ * account, and Google vouches that the email is this person's. A matching username never counts, and neither
+ * does an expired invite.
  */
 async function findTrustedInvite(sql: Sql, userId: string): Promise<InviteRow | undefined> {
   const email = await googleVouchedEmail(sql, userId);
@@ -474,13 +505,17 @@ async function trustedAccountsForInvite(sql: Sql, invite: InviteRow): Promise<{ 
   return out;
 }
 
+async function waitingNames(sql: Sql, email: string | null, username: string | null): Promise<string[]> {
+  return (await waitingAccountsLike(sql, email, username)).map((w) => w.username);
+}
+
 /** People waiting for approval who signed up under this email or username. Shown to the admin; it opens nothing. */
 async function waitingAccountsLike(sql: Sql, email: string | null, username: string | null): Promise<{ user_id: string; username: string }[]> {
   return sql.query<{ user_id: string; username: string }>(
     `select d.user_id, d.username
        from desk_accounts d
        left join "user" u on u.id = d.user_id
-      where d.approved = false
+      where d.approved = false and d.denied = false
         and (
           ($1::text is not null and u.email is not null and lower(u.email) = $1)
           or ($2::text is not null and lower(d.username) = $2)
@@ -516,6 +551,7 @@ export async function claimInviteToken(sql: Sql, userId: string, token: string):
       (!!invite.username && invite.username.toLowerCase() === me.username.toLowerCase());
     if (!meant) return false;
   }
+  await sealSharedAccount(sql, userId);
   const ok = await grantInviteAccess(sql, userId, invite);
   if (!ok) return false;
   const name = invite.username ? cleanUsername(invite.username) : "";
@@ -725,12 +761,10 @@ export const checkUsername = createServerFn({ method: "POST" })
 export class SignInProblem extends Error {}
 
 /** Who a typed username or email belongs to. Server-side only: `email` must never be sent to the browser. */
-export type SignInTarget =
-  | { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] }
-  | { kind: "invited" };
+export type SignInTarget = { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] };
 
 /**
- * Find the account (or the pending invite) behind what was typed on the sign-in screen. The email here is the one
+ * Find the account behind what was typed on the sign-in screen. The email here is the one
  * Better Auth holds for the person; sign-in.ts checks the password against it on the server and never returns it.
  */
 export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarget> {
@@ -774,34 +808,9 @@ export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarg
     const methods = linked.map((l) => (l.providerId === "credential" ? "password" : l.providerId.toLowerCase()));
     return { kind: "account", userId: row.user_id, email, waiting: !row.approved && !row.denied, methods };
   }
-  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-  if (invite) return { kind: "invited" };
-  throw new SignInProblem("Unknown username. Invited? Create an account with that email or username.");
+  // Whether the name has a pending invite is not said: a match opens nothing, so there is nothing to tell.
+  throw new SignInProblem("Unknown username.");
 }
-
-/**
- * Whether what was typed has a pending invite, to start the sign-up form. This needs no sign-in, so it gives the
- * invite's email back only to someone who typed that email; a username alone gets the username.
- */
-export async function peekInviteFor(
-  sql: Sql,
-  identity: string,
-): Promise<{ invited: boolean; email: string | null; username: string | null }> {
-  const raw = identity.trim();
-  const emailNorm = raw.includes("@") ? normEmail(raw) : null;
-  const userNorm = emailNorm ? null : cleanUsername(raw);
-  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-  if (!invite) return { invited: false, email: null, username: null };
-  return { invited: true, email: emailNorm ? invite.email : null, username: invite.username };
-}
-
-export const peekInvite = createServerFn({ method: "POST" })
-  .validator(identityInput)
-  .handler(async ({ data }): Promise<{ invited: boolean; email: string | null; username: string | null }> => {
-    const sql = await getSql();
-    await ensureTable(sql);
-    return peekInviteFor(sql, data.identity);
-  });
 
 export const getMyAccess = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -865,7 +874,9 @@ export async function registerDeskAccount(
   const email = normEmail(profile.email) || normEmail(data.email);
   const token = data.token?.trim() || "";
   // The invite link, or an invite sent to an email Google vouches for. A matching name or typed email is not enough.
-  const invite = (token ? await findInviteByToken(sql, token) : undefined) ?? (await findTrustedInvite(sql, userId));
+  const byLink = token ? await findInviteByToken(sql, token) : undefined;
+  const invite = byLink ?? (await findTrustedInvite(sql, userId));
+  if (byLink) await sealSharedAccount(sql, userId);
   const invited = !!invite;
   const first = await shouldBootstrapAdmin(sql, username);
   const approved = first || invited;
@@ -947,19 +958,28 @@ export const registerAccount = createServerFn({ method: "POST" })
  * typed by the person signing up), with whether Google confirmed it.
  */
 export async function listDeskAccountRows(sql: Sql): Promise<DeskAccountRow[]> {
-  const rows = await sql.query<AccessRow & { created_at: string; auth_email: string | null }>(
-    `select ${ACCESS_COLS.split(", ").map((c) => `d.${c}`).join(", ")}, d.created_at, u.email as auth_email
+  const rows = await sql.query<AccessRow & { created_at: string; auth_email: string | null; google_born: boolean; invite_label: string | null }>(
+    `select ${ACCESS_COLS.split(", ").map((c) => `d.${c}`).join(", ")}, d.created_at, u.email as auth_email,
+            coalesce(${GOOGLE_BORN_SQL}, false) as google_born,
+            (select coalesce(i.email, i.username)
+               from desk_invites i
+              where i.status = 'pending' and (i.expires_at is null or i.expires_at > now())
+                and (
+                  (i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email)))
+                  or (i.username is not null and lower(i.username) = lower(d.username))
+                )
+              order by (i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email))) desc, i.created_at asc
+              limit 1) as invite_label
        from desk_accounts d
        left join "user" u on u.id = d.user_id
       order by d.created_at desc`,
   );
-  const out: DeskAccountRow[] = [];
-  for (const r of rows) {
-    const shown = normEmail(r.auth_email) ?? r.email;
-    const vouched = await googleVouchedEmail(sql, r.user_id);
-    out.push({ ...mapAccess({ ...r, email: shown }), createdAt: String(r.created_at), emailConfirmed: !!vouched && vouched === normEmail(shown) });
-  }
-  return out;
+  return rows.map((r) => ({
+    ...mapAccess({ ...r, email: normEmail(r.auth_email) ?? r.email }),
+    createdAt: String(r.created_at),
+    emailConfirmed: flagOn(r.google_born),
+    matchesInvite: flagOn(r.approved) ? null : r.invite_label,
+  }));
 }
 
 export const listDeskAccounts = createServerFn({ method: "GET" })
@@ -974,10 +994,11 @@ export const listDeskAccounts = createServerFn({ method: "GET" })
   });
 
 /**
- * An admin lets a waiting person in, or takes access away. Letting them in also uses up any pending invite made
- * for their email or username: the admin has decided it is them, so the invite has done its job.
+ * An admin lets a waiting person in, or takes access away. Letting them in also uses up a pending invite sent to
+ * their email: the admin has decided it is them, so the invite has done its job.
  */
 export async function approveDeskAccount(sql: Sql, userId: string, approved: boolean): Promise<DeskAccess> {
+  if (approved) await sealSharedAccount(sql, userId);
   await sql.query(
     `update desk_accounts
      set approved = $2,
@@ -993,17 +1014,16 @@ export async function approveDeskAccount(sql: Sql, userId: string, approved: boo
   );
   if (!rows[0]) throw new Error("Account not found");
   if (approved) {
+    // By email only. A username is self-chosen, so an invite matched by name alone stays, and its link keeps
+    // working for the person it was sent to.
     await sql.query(
       `update desk_invites i
           set status = 'accepted', accepted_user_id = $1, updated_at = now()
-         from desk_accounts d
-         left join "user" u on u.id = d.user_id
-        where d.user_id = $1
+         from "user" u
+        where u.id = $1
           and i.status = 'pending'
-          and (
-            (i.email is not null and u.email is not null and lower(i.email) = lower(u.email))
-            or (i.username is not null and lower(i.username) = lower(d.username))
-          )`,
+          and (i.expires_at is null or i.expires_at > now())
+          and i.email is not null and lower(i.email) = lower(u.email)`,
       [userId],
     );
   }
@@ -1191,7 +1211,7 @@ export async function createDeskInvite(
     );
     if (byName[0] && !inviteExpired(byName[0])) {
       const invitedBy = await loadInviterName(sql, byName[0].invited_by);
-      return { invite: mapInvite(byName[0], invitedBy), autoApproved: [], alreadyWaiting: [] };
+      return { invite: mapInvite(byName[0], invitedBy), autoApproved: [], alreadyWaiting: await waitingNames(sql, email, user) };
     }
   }
   if (dup) {
@@ -1203,7 +1223,7 @@ export async function createDeskInvite(
       dup.can_add_customers = true;
     }
     const invitedBy = await loadInviterName(sql, dup.invited_by);
-    return { invite: mapInvite(dup, invitedBy), autoApproved: [], alreadyWaiting: [] };
+    return { invite: mapInvite(dup, invitedBy), autoApproved: [], alreadyWaiting: await waitingNames(sql, email, user) };
   }
 
   const inserted = await sql.query<InviteRow>(
@@ -1222,7 +1242,7 @@ export async function createDeskInvite(
     autoApproved.push(w.username);
   }
   // Anyone else waiting under this name or email is the admin's call, on the list below the invite form.
-  const alreadyWaiting = (await waitingAccountsLike(sql, email, user)).map((w) => w.username);
+  const alreadyWaiting = await waitingNames(sql, email, user);
 
   const invitedBy = await loadInviterName(sql, adminUserId);
   const fresh = autoApproved.length

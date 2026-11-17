@@ -157,31 +157,18 @@ test("a Google or X account with no password is pointed to its button, without a
   }
 });
 
-test("an unknown username, an invited one and a denied one keep their words, with no email", async () => {
+test("an unknown username, an invited one and a denied one are refused in their own words, with no email", async () => {
   const { pg, sql, query, person } = await freshDb();
   try {
     const { asked, signIn } = checker();
     await assert.rejects(S.signInWithPassword(sql, { username: "zz.nobody", password: "x" }, signIn), /^Error: Unknown username/);
     await assert.rejects(S.signInWithPassword(sql, { username: "  ", password: "x" }, signIn), /Enter your username or email/);
     await query("insert into desk_invites (email, username, invited_by) values ('inv.zz@example.com', 'inv.zz', 'u_sam')");
-    const invited = await S.signInWithPassword(sql, { username: "inv.zz", password: "x" }, signIn);
-    assert.deepEqual(invited, { next: "invited" });
-    noEmail(invited);
+    // A name with a pending invite but no account reads as unknown, like any other (11/17).
+    await assert.rejects(S.signInWithPassword(sql, { username: "inv.zz", password: "x" }, signIn), /^Error: Unknown username\.$/);
     await person("u_den", "den.zz", "den.zz@example.com", { denied: true });
     await assert.rejects(S.signInWithPassword(sql, { username: "den.zz", password: "right one" }, signIn), (e) => /denied access/i.test(e.message) && !e.message.includes("@"));
     assert.equal(asked.length, 0, "no password was checked for any of these");
-  } finally {
-    await pg.close();
-  }
-});
-
-test("the invite peek gives back the email only to someone who typed it", async () => {
-  const { pg, sql, query } = await freshDb();
-  try {
-    await query("insert into desk_invites (email, username, invited_by) values ('inv.zz@example.com', 'inv.zz', 'u_sam')");
-    assert.deepEqual(await A.peekInviteFor(sql, "inv.zz"), { invited: true, email: null, username: "inv.zz" });
-    assert.deepEqual(await A.peekInviteFor(sql, " INV.zz@example.com "), { invited: true, email: "inv.zz@example.com", username: "inv.zz" });
-    assert.deepEqual(await A.peekInviteFor(sql, "zz.nobody"), { invited: false, email: null, username: null });
   } finally {
     await pg.close();
   }

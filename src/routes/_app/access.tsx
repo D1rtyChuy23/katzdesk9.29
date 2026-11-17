@@ -372,6 +372,11 @@ function Page() {
                   {a.email ?? "No email"}
                   {a.email ? ` · ${emailNote(a)}` : ""}
                 </p>
+                {a.matchesInvite && !a.emailConfirmed ? (
+                  <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
+                    Matches your invite for {a.matchesInvite}, but didn’t come through its link. Ask them to open the link.
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button

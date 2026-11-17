@@ -26,7 +26,7 @@ export const MAX_TRIES = 8;
 export const WINDOW_MINUTES = 15;
 
 /** What the sign-in screen does next. Never an email. */
-export type SignInOutcome = { next: "in"; waiting: boolean } | { next: "invited" } | { next: "social"; methods: string[] };
+export type SignInOutcome = { next: "in"; waiting: boolean } | { next: "social"; methods: string[] };
 
 /** Checks a password and, when it is right, signs the person in. True when it was right. */
 export type PasswordCheck = (email: string, password: string) => Promise<boolean>;
@@ -76,7 +76,6 @@ export async function signInWithPassword(
   signIn: PasswordCheck,
 ): Promise<SignInOutcome> {
   const found = await resolveSignIn(sql, input.username);
-  if (found.kind === "invited") return { next: "invited" };
   // A Google or X account with no password: send them to the right button instead of "wrong password".
   if (found.methods.length && !found.methods.includes("password")) return { next: "social", methods: found.methods };
   const verdict = await claimSignInTry(sql, found.userId);
