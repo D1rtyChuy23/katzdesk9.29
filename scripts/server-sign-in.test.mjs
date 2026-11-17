@@ -142,6 +142,28 @@ test("signing in clears the count", async () => {
   }
 });
 
+test("a sign-in that finishes after the account's password was removed is refused and leaves no session", async () => {
+  const { pg, sql, query } = await freshDb();
+  try {
+    // Sealing a shared account removes its password and ends its sessions (access.ts). A sign-in already under
+    // way then: Better Auth had read the password, and makes its session after the seal has been and gone.
+    const signIn = async () => {
+      await query(`delete from "account" where "userId" = 'u_sam' and "providerId" = 'credential'`);
+      await query(`delete from "session" where "userId" = 'u_sam'`);
+      await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-late', now() + interval '7 days', 's-late', now(), 'u_sam')`);
+      return true;
+    };
+    await assert.rejects(S.signInWithPassword(sql, { username: "sam.zz", password: "right one" }, signIn), (e) => e instanceof A.SignInProblem && /didn.t match/i.test(e.message));
+    assert.equal((await query(`select count(*)::int as n from "session" where "userId" = 'u_sam'`))[0].n, 0);
+    // Anyone whose password is still there is untouched.
+    await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-pat', now() + interval '7 days', 's-pat', now(), 'u_pat')`);
+    assert.deepEqual(await S.signInWithPassword(sql, { username: "pat.zz", password: "right one" }, async () => true), { next: "in", waiting: false });
+    assert.equal((await query(`select count(*)::int as n from "session" where "userId" = 'u_pat'`))[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a Google or X account with no password is pointed to its button, without a password check or a count", async () => {
   const { pg, sql, person, tries } = await freshDb();
   try {
@@ -157,31 +179,18 @@ test("a Google or X account with no password is pointed to its button, without a
   }
 });
 
-test("an unknown username, an invited one and a denied one keep their words, with no email", async () => {
+test("an unknown username, an invited one and a denied one are refused in their own words, with no email", async () => {
   const { pg, sql, query, person } = await freshDb();
   try {
     const { asked, signIn } = checker();
     await assert.rejects(S.signInWithPassword(sql, { username: "zz.nobody", password: "x" }, signIn), /^Error: Unknown username/);
     await assert.rejects(S.signInWithPassword(sql, { username: "  ", password: "x" }, signIn), /Enter your username or email/);
     await query("insert into desk_invites (email, username, invited_by) values ('inv.zz@example.com', 'inv.zz', 'u_sam')");
-    const invited = await S.signInWithPassword(sql, { username: "inv.zz", password: "x" }, signIn);
-    assert.deepEqual(invited, { next: "invited" });
-    noEmail(invited);
+    // A name with a pending invite but no account reads as unknown, like any other (11/17).
+    await assert.rejects(S.signInWithPassword(sql, { username: "inv.zz", password: "x" }, signIn), /^Error: Unknown username\.$/);
     await person("u_den", "den.zz", "den.zz@example.com", { denied: true });
     await assert.rejects(S.signInWithPassword(sql, { username: "den.zz", password: "right one" }, signIn), (e) => /denied access/i.test(e.message) && !e.message.includes("@"));
     assert.equal(asked.length, 0, "no password was checked for any of these");
-  } finally {
-    await pg.close();
-  }
-});
-
-test("the invite peek gives back the email only to someone who typed it", async () => {
-  const { pg, sql, query } = await freshDb();
-  try {
-    await query("insert into desk_invites (email, username, invited_by) values ('inv.zz@example.com', 'inv.zz', 'u_sam')");
-    assert.deepEqual(await A.peekInviteFor(sql, "inv.zz"), { invited: true, email: null, username: "inv.zz" });
-    assert.deepEqual(await A.peekInviteFor(sql, " INV.zz@example.com "), { invited: true, email: "inv.zz@example.com", username: "inv.zz" });
-    assert.deepEqual(await A.peekInviteFor(sql, "zz.nobody"), { invited: false, email: null, username: null });
   } finally {
     await pg.close();
   }
@@ -202,6 +211,23 @@ test("a new password from a reset link clears the count, so a locked-out person 
     assert.ok((await query(`select "password" from "account" where "userId" = 'u_sam' and "providerId" = 'credential'`))[0].password, "the new password is stored");
     // The link works once.
     await assert.rejects(R.applyPasswordReset(sql, "made-up-token", "another made-up password"), /expired or was already used/);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a reset link gives someone who signs in with Google their first password, once", async () => {
+  const { pg, sql, query, person } = await freshDb();
+  try {
+    await person("u_goo", "goo.zz", "goo.zz@example.com", { methods: ["grok-google"] });
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode("made-up-google-link"))), (b) => b.toString(16).padStart(2, "0")).join("");
+    await query("insert into desk_password_resets (user_id, token_hash, expires_at) values ('u_goo', $1, now() + interval '1 hour')", [hash]);
+    assert.equal((await R.applyPasswordReset(sql, "made-up-google-link", "a new made-up password")).username, "goo.zz");
+    const rows = await query(`select "providerId", "password" from "account" where "userId" = 'u_goo' order by "providerId"`);
+    assert.deepEqual(rows.map((r) => r.providerId), ["credential", "grok-google"]);
+    assert.ok(rows[0].password);
+    await assert.rejects(R.applyPasswordReset(sql, "made-up-google-link", "another made-up password"), /expired or was already used/);
+    assert.equal(rows.length, (await query(`select 1 from "account" where "userId" = 'u_goo'`)).length);
   } finally {
     await pg.close();
   }
@@ -268,13 +294,18 @@ test("a denied account with a new invite, and an account with both a password an
 // (or guesses) an email could guess passwords there with no per-account limit.
 const post = (body, path = "/api/auth/sign-in/email") =>
   new Request(`https://katzdesk.example${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: typeof body === "string" ? body : JSON.stringify(body) });
-/** Stands in for Better Auth's handler: 200 for sam's right password, 401 otherwise. It records what reached it. */
-function handler() {
+/**
+ * Stands in for Better Auth's handler: 200 with the user for the right password, 401 otherwise. It records what
+ * reached it. `signsIn` is whose account it answers with: the one the body names, unless a test says otherwise.
+ */
+function handler({ signsIn = null } = {}) {
   const reached = [];
+  const ids = { "sam.zz@example.com": "u_sam", "pat.zz@example.com": "u_pat" };
   const handle = async (request) => {
     const body = await request.json().catch(() => null);
     reached.push(body?.email ?? null);
-    return body?.password === "right one" ? Response.json({ token: "t" }) : Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
+    if (body?.password !== "right one") return Response.json({ code: "INVALID_EMAIL_OR_PASSWORD" }, { status: 401 });
+    return Response.json({ token: "t", user: { id: signsIn ?? ids[String(body?.email).trim().toLowerCase()] } });
   };
   return { reached, handle };
 }
@@ -316,16 +347,50 @@ test("a good sign-in at the direct address clears the count; an unknown email or
   }
 });
 
-test("the direct sign-in address is recognised however it is spelled, and nothing else is", () => {
-  for (const path of ["/api/auth/sign-in/email", "/api/auth/sign-in/email/", "/api/auth//sign-in/email", "/API/auth/Sign-In/Email", "/api/auth/sign%2Din/email", "/api/auth/sign-in/%65mail"]) {
-    assert.equal(S.isEmailSignInPath(path), true, path);
+test("the direct sign-in address is counted under its one spelling; any other spelling isn't served at all", async () => {
+  const { pg, sql, tries } = await freshDb();
+  try {
+    const { reached, handle } = handler();
+    const res = await S.serveAuth(async () => sql, post({ email: "sam.zz@example.com", password: "nope" }), handle);
+    assert.equal(res.status, 401);
+    assert.equal(await tries("u_sam"), 1);
+    assert.deepEqual(reached, ["sam.zz@example.com"]);
+    // Better Auth answers 404 to these itself. Here they never reach it, so there is no second way in to count.
+    for (const path of ["/api/auth/sign-in/email/", "/api/auth//sign-in/email", "/API/auth/Sign-In/Email", "/api/auth/sign%2Din/email", "/api/auth/sign-in/%65mail", "/api/auth/sign-in/email/extra", "/api/auth/sign-in/social"]) {
+      assert.equal((await S.serveAuth(async () => sql, post({ email: "sam.zz@example.com", password: "right one" }, path), handle)).status, 404, path);
+    }
+    assert.equal(reached.length, 1);
+    assert.equal(await tries("u_sam"), 1);
+  } finally {
+    await pg.close();
   }
-  for (const path of ["/api/auth/sign-in/social", "/api/auth/sign-up/email", "/api/auth/get-session", "/api/auth/sign-in/email/extra", "/sign-in/email", "/api/auth/%"]) {
-    assert.equal(S.isEmailSignInPath(path), false, path);
+});
+
+test("the direct sign-in address goes by the account Better Auth signed in, not the one the body seemed to name", async () => {
+  const { pg, sql, query, tries } = await freshDb();
+  try {
+    const sessions = async (id) => (await query(`select count(*)::int as n from "session" where "userId" = $1`, [id]))[0].n;
+    // Sam signs in with Google only and has a session. Pat has tries counted against them.
+    await query(`delete from "account" where "userId" = 'u_sam'`);
+    await query(`insert into "session" ("id", "expiresAt", "token", "updatedAt", "userId") values ('s-sam', now() + interval '7 days', 's-sam', now(), 'u_sam')`);
+    await S.throttledEmailSignIn(sql, post({ email: "pat.zz@example.com", password: "nope" }), handler().handle);
+    assert.equal(await tries("u_pat"), 1);
+    // The body names Sam; Better Auth signs Pat in. Sam's session stays, and it is Pat's count that clears.
+    const res = await S.throttledEmailSignIn(sql, post({ email: "sam.zz@example.com", password: "right one" }), handler({ signsIn: "u_pat" }).handle);
+    assert.equal(res.status, 200);
+    assert.equal(await sessions("u_sam"), 1);
+    assert.equal(await tries("u_pat"), 0);
+    // An answer with no user in it can't be checked, so it is refused.
+    const noUser = await S.throttledEmailSignIn(sql, post({ email: "pat.zz@example.com", password: "right one" }), async () => Response.json({ token: "t" }));
+    assert.equal(noUser.status, 401);
+    // Anything but JSON never reaches Better Auth.
+    const { reached, handle } = handler();
+    const form = new Request("https://katzdesk.example/api/auth/sign-in/email", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "email=pat.zz%40example.com&password=right+one" });
+    assert.equal((await S.throttledEmailSignIn(sql, form, handle)).status, 415);
+    assert.equal(reached.length, 0);
+  } finally {
+    await pg.close();
   }
-  const route = src("src/routes/api/auth/$.ts");
-  assert.match(route, /isEmailSignInPath\(/);
-  assert.match(route, /throttledEmailSignIn\(/);
 });
 
 test("a sign-in sent from another site is refused", () => {

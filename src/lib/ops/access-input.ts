@@ -16,7 +16,6 @@ const rowId = z.number().int().positive();
 export const usernameInput = checked(z.object({ username: identity }));
 /** The sign-in form. The handler does the real checks; 1,000 characters only stops a huge body. */
 export const passwordSignInInput = checked(z.object({ username: identity, password: z.string().max(1000) }));
-export const identityInput = checked(z.object({ identity }));
 export const inviteTokenInput = checked(z.object({ token: token.nullish() }));
 export const registerInput = checked(z.object({ username: identity, email: email.nullish(), token: token.nullish() }));
 export const approveInput = checked(z.object({ userId, approved: z.boolean() }));

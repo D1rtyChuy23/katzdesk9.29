@@ -2,13 +2,13 @@ import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { isAdminAccount } from "@/lib/ops/admin-role";
 import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
+import { GROK_PROVIDERS } from "@/lib/auth/providers";
 import { flagOn } from "./flag";
 import {
   approveInput,
   canAddInput,
   createInviteInput,
   idInput,
-  identityInput,
   inviteTokenInput,
   registerInput,
   roleInput,
@@ -39,6 +39,18 @@ export type DeskAccess = {
 
 export type DeskAccountRow = DeskAccess & {
   createdAt: string;
+  /**
+   * True when Google vouches for the email shown. A password sign-up's email is whatever was typed, and X hands
+   * over a made-up one, so for those the admin is looking at a claim, not a fact.
+   */
+  emailConfirmed: boolean;
+  /**
+   * For someone not yet let in: the pending invite (its email or username) their sign-up matches. They did not
+   * come through its link, so this is a reason to ask them to open the link, not a reason to approve.
+   */
+  matchesInvite: string | null;
+  /** Whether it matches by the email they signed up with, or only by the name they chose. */
+  matchesInviteBy: "email" | "name" | null;
 };
 
 export type DeskInvite = {
@@ -58,6 +70,8 @@ export type DeskInvite = {
 export type InviteResult = {
   invite: DeskInvite;
   autoApproved: string[];
+  /** People already signed up under this name or email who were not let in by the invite: the admin decides. */
+  alreadyWaiting: string[];
 };
 
 const ACCESS_COLS =
@@ -407,22 +421,131 @@ async function grantInviteAccess(sql: Sql, userId: string, invite: InviteRow): P
   return true;
 }
 
-async function accountsForInvite(
-  sql: Sql,
-  email: string | null,
-  username: string | null,
-): Promise<{ user_id: string; username: string }[]> {
+/** The sign-in provider that proves an email address belongs to the person: Google, through the Grok broker. */
+const GOOGLE_PROVIDER = (GROK_PROVIDERS.find((p) => p.idp === "google")?.providerId ?? "grok-google").replace(/[^a-z0-9_-]/gi, "");
+
+/**
+ * SQL: true when Google itself created this "user" row (alias `u`) and marked its email verified.
+ *
+ * Sign-up is open, and a password sign-up's email is whatever was typed, so a matching email proves nothing by
+ * itself (11/17). Google proves the address; X hands over a made-up one. But Better Auth also joins a Google
+ * sign-in onto an existing account with the same email, so "has a Google row" is not enough: an account someone
+ * else started with a password would count once the real person pressed Google. The test is anchored on things
+ * the person cannot change afterwards: Google's row was made with the user row (Better Auth writes them a
+ * millisecond or so apart), and no sign-in method on the account is older than it.
+ */
+const GOOGLE_BORN_SQL = `(u."emailVerified" = true and exists (
+    select 1 from "account" g
+     where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}'
+       and g."createdAt" <= u."createdAt" + interval '2 seconds'
+       and not exists (select 1 from "account" o where o."userId" = u.id and o."createdAt" < g."createdAt")))`;
+
+/** The email Google vouches for on this account, or null. See GOOGLE_BORN_SQL. */
+async function googleVouchedEmail(sql: Sql, userId: string): Promise<string | null> {
+  const rows = await sql.query<{ email: string | null }>(
+    `select u.email from "user" u where u.id = $1 and ${GOOGLE_BORN_SQL} limit 1`,
+    [userId],
+  );
+  return normEmail(rows[0]?.email);
+}
+
+/**
+ * Before an account is let in by the invite link or by an admin: is it shared? Better Auth joins a Google or X
+ * sign-in onto an existing account with the same email, so an account someone began with a password can end up
+ * holding the invited person's sign-in too. Whoever began it may still hold that password or an open session.
+ *
+ * An account Google created is one person's. Otherwise it is shared when any of these holds:
+ *   - Better Auth holds its email as verified. Only Google sets that here (the desk sends no verification email)
+ *     and nothing a signed-in person can call clears it, so it still shows after a Google sign-in was taken off.
+ *   - It carries a Google sign-in.
+ *   - It has a password that a Google or X sign-in was joined onto later. X leaves no verified mark, so this is
+ *     the only sign of an X join. An account X created, with or without a password set afterwards, is not shared.
+ *
+ * Sealing removes every password that isn't newer than a Google sign-in still on the account (all of them when
+ * there is none), cancels any reset link waiting for the account, and ends every session, so only the person
+ * Google or X knows can come back in. An account that is not shared is left exactly as it is.
+ */
+async function sealSharedAccount(sql: Sql, userId: string): Promise<{ sealed: boolean; passwordRemoved: boolean }> {
+  const shared = await sql.query<{ id: string }>(
+    `select u.id from "user" u
+      where u.id = $1 and not ${GOOGLE_BORN_SQL}
+        and (
+          u."emailVerified" = true
+          or exists (select 1 from "account" g where g."userId" = u.id and g."providerId" = '${GOOGLE_PROVIDER}')
+          or exists (
+            select 1 from "account" c
+              join "account" o on o."userId" = c."userId" and o."providerId" <> 'credential' and o."createdAt" >= c."createdAt"
+             where c."userId" = u.id and c."providerId" = 'credential')
+        )`,
+    [userId],
+  );
+  if (!shared[0]) return { sealed: false, passwordRemoved: false };
+  // First, so a reset link being used right now writes nothing (password-reset.ts checks the link at each write).
+  // A link made before this would put a password back; a new link clears older ones the same way.
+  await sql.query("delete from desk_password_resets where user_id = $1 and used_at is null", [userId]);
+  const removed = await sql.query<{ id: string }>(
+    `delete from "account" c
+      where c."userId" = $1 and c."providerId" = 'credential'
+        and not exists (
+          select 1 from "account" g
+           where g."userId" = $1 and g."providerId" = '${GOOGLE_PROVIDER}' and g."createdAt" < c."createdAt")
+      returning c."id"`,
+    [userId],
+  );
+  await sql.query(`delete from "session" where "userId" = $1`, [userId]);
+  return { sealed: true, passwordRemoved: removed.length > 0 };
+}
+
+/**
+ * The pending invite this account may take without the invite link: it was sent to an email, Google created the
+ * account, and Google vouches that the email is this person's. A matching username never counts, and neither
+ * does an expired invite.
+ */
+async function findTrustedInvite(sql: Sql, userId: string): Promise<InviteRow | undefined> {
+  const email = await googleVouchedEmail(sql, userId);
+  if (!email) return undefined;
+  const rows = await sql.query<InviteRow>(
+    `select ${INVITE_COLS}
+       from desk_invites
+      where status = 'pending' and email is not null and lower(email) = $1
+      order by created_at asc`,
+    [email],
+  );
+  return rows.find((r) => !inviteExpired(r));
+}
+
+/** The accounts an invite lets in by itself: the ones whose Google-vouched email is the invite's email. */
+async function trustedAccountsForInvite(sql: Sql, invite: InviteRow): Promise<{ user_id: string; username: string }[]> {
+  const email = normEmail(invite.email);
+  if (!email || inviteExpired(invite)) return [];
+  const rows = await sql.query<{ user_id: string; username: string }>(
+    `select d.user_id, d.username
+       from desk_accounts d
+       join "user" u on u.id = d.user_id
+      where lower(u.email) = $1`,
+    [email],
+  );
+  const out: { user_id: string; username: string }[] = [];
+  for (const r of rows) if ((await googleVouchedEmail(sql, r.user_id)) === email) out.push(r);
+  return out;
+}
+
+async function waitingNames(sql: Sql, email: string | null, username: string | null): Promise<string[]> {
+  return (await waitingAccountsLike(sql, email, username)).map((w) => w.username);
+}
+
+/** People waiting for approval who signed up under this email or username. Shown to the admin; it opens nothing. */
+async function waitingAccountsLike(sql: Sql, email: string | null, username: string | null): Promise<{ user_id: string; username: string }[]> {
   return sql.query<{ user_id: string; username: string }>(
     `select d.user_id, d.username
        from desk_accounts d
        left join "user" u on u.id = d.user_id
-      where (
-        ($1::text is not null and (
-          (d.email is not null and lower(d.email) = $1)
-          or (u.email is not null and lower(u.email) = $1)
-        ))
-        or ($2::text is not null and lower(d.username) = $2)
-      )`,
+      where d.approved = false and d.denied = false
+        and (
+          ($1::text is not null and u.email is not null and lower(u.email) = $1)
+          or ($2::text is not null and lower(d.username) = $2)
+        )
+      order by d.username`,
     [normEmail(email), username?.trim().toLowerCase() || null],
   );
 }
@@ -441,7 +564,7 @@ async function findInviteByToken(sql: Sql, token: string): Promise<InviteRow | u
 }
 
 /** Whoever holds the invite link gets in, even if Google/X email does not match. */
-async function claimInviteToken(sql: Sql, userId: string, token: string): Promise<boolean> {
+export async function claimInviteToken(sql: Sql, userId: string, token: string): Promise<boolean> {
   const invite = await findInviteByToken(sql, token);
   if (!invite) return false;
   const me = await loadAccess(sql, userId);
@@ -453,6 +576,8 @@ async function claimInviteToken(sql: Sql, userId: string, token: string): Promis
       (!!invite.username && invite.username.toLowerCase() === me.username.toLowerCase());
     if (!meant) return false;
   }
+  // Someone already let in keeps their sign-ins: sealing is for the moment an account first gets access.
+  if (!(flagOn(me.approved) && !flagOn(me.denied))) await sealSharedAccount(sql, userId);
   const ok = await grantInviteAccess(sql, userId, invite);
   if (!ok) return false;
   const name = invite.username ? cleanUsername(invite.username) : "";
@@ -490,7 +615,7 @@ async function uniqueStubUsername(sql: Sql, raw: string): Promise<string> {
   return `user${Date.now().toString(36)}`.slice(0, 32);
 }
 
-async function ensureDeskAccount(sql: Sql, userId: string): Promise<AccessRow> {
+export async function ensureDeskAccount(sql: Sql, userId: string): Promise<AccessRow> {
   const existing = await loadAccess(sql, userId);
   const profile = await loadUser(sql, userId);
   const email = normEmail(profile.email);
@@ -501,10 +626,11 @@ async function ensureDeskAccount(sql: Sql, userId: string): Promise<AccessRow> {
         [userId, email],
       );
     }
-    await applyInviteIfAny(sql, userId, email ?? existing.email, existing.username);
+    const meant = await findTrustedInvite(sql, userId);
+    if (meant) await grantInviteAccess(sql, userId, meant);
     return (await loadAccess(sql, userId)) ?? existing;
   }
-  const invite = await findPendingInvite(sql, email, null);
+  const invite = await findTrustedInvite(sql, userId);
   const base = invite?.username || email?.split("@")[0] || profile.name || "user";
   const username = await uniqueStubUsername(sql, base);
   const first = await shouldBootstrapAdmin(sql, username);
@@ -542,29 +668,16 @@ async function adoptAuthUsers(sql: Sql): Promise<void> {
   }
 }
 
-async function applyPendingInvites(sql: Sql): Promise<void> {
+/** Let in the people a pending invite was sent to, once Google vouches for their email. Nobody else. */
+export async function applyPendingInvites(sql: Sql): Promise<void> {
   const pending = await sql.query<InviteRow>(
     `select ${INVITE_COLS} from desk_invites where status = 'pending'`,
   );
   for (const inv of pending) {
-    if (inviteExpired(inv)) continue;
-    const matches = await accountsForInvite(sql, inv.email, inv.username);
-    for (const m of matches) {
+    for (const m of await trustedAccountsForInvite(sql, inv)) {
       await grantInviteAccess(sql, m.user_id, inv);
     }
   }
-}
-
-async function applyInviteIfAny(
-  sql: Sql,
-  userId: string,
-  email: string | null,
-  username: string | null,
-): Promise<boolean> {
-  const invite = await findPendingInvite(sql, email, username);
-  if (!invite) return false;
-  await grantInviteAccess(sql, userId, invite);
-  return true;
 }
 
 async function promoteAdmin(sql: Sql, userId: string, email?: string | null): Promise<DeskAccess> {
@@ -674,12 +787,10 @@ export const checkUsername = createServerFn({ method: "POST" })
 export class SignInProblem extends Error {}
 
 /** Who a typed username or email belongs to. Server-side only: `email` must never be sent to the browser. */
-export type SignInTarget =
-  | { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] }
-  | { kind: "invited" };
+export type SignInTarget = { kind: "account"; userId: string; email: string; waiting: boolean; methods: string[] };
 
 /**
- * Find the account (or the pending invite) behind what was typed on the sign-in screen. The email here is the one
+ * Find the account behind what was typed on the sign-in screen. The email here is the one
  * Better Auth holds for the person; sign-in.ts checks the password against it on the server and never returns it.
  */
 export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarget> {
@@ -723,34 +834,9 @@ export async function resolveSignIn(sql: Sql, typed: string): Promise<SignInTarg
     const methods = linked.map((l) => (l.providerId === "credential" ? "password" : l.providerId.toLowerCase()));
     return { kind: "account", userId: row.user_id, email, waiting: !row.approved && !row.denied, methods };
   }
-  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-  if (invite) return { kind: "invited" };
-  throw new SignInProblem("Unknown username. Invited? Create an account with that email or username.");
+  // Whether the name has a pending invite is not said: a match opens nothing, so there is nothing to tell.
+  throw new SignInProblem("Unknown username.");
 }
-
-/**
- * Whether what was typed has a pending invite, to start the sign-up form. This needs no sign-in, so it gives the
- * invite's email back only to someone who typed that email; a username alone gets the username.
- */
-export async function peekInviteFor(
-  sql: Sql,
-  identity: string,
-): Promise<{ invited: boolean; email: string | null; username: string | null }> {
-  const raw = identity.trim();
-  const emailNorm = raw.includes("@") ? normEmail(raw) : null;
-  const userNorm = emailNorm ? null : cleanUsername(raw);
-  const invite = await findPendingInvite(sql, emailNorm ?? raw, userNorm);
-  if (!invite) return { invited: false, email: null, username: null };
-  return { invited: true, email: emailNorm ? invite.email : null, username: invite.username };
-}
-
-export const peekInvite = createServerFn({ method: "POST" })
-  .validator(identityInput)
-  .handler(async ({ data }): Promise<{ invited: boolean; email: string | null; username: string | null }> => {
-    const sql = await getSql();
-    await ensureTable(sql);
-    return peekInviteFor(sql, data.identity);
-  });
 
 export const getMyAccess = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -788,95 +874,146 @@ export const claimInvite = createServerFn({ method: "POST" })
     return mapAccess(fresh);
   });
 
+/**
+ * Choose a username and finish the desk account, after sign-up or a first Google or X sign-in. The account is
+ * approved only by the invite link, by an invite Google vouches for, or as the desk's first admin.
+ */
+export async function registerDeskAccount(
+  sql: Sql,
+  userId: string,
+  data: { username: string; email?: string | null; token?: string | null },
+): Promise<DeskAccess> {
+  const username = cleanUsername(data.username);
+  if (!validUsername(username)) {
+    throw new Error("Username must be 3–32 letters, numbers, dots, hyphens, or underscores.");
+  }
+  const taken = await sql.query<{ user_id: string }>(
+    "select user_id from desk_accounts where lower(username) = $1 limit 1",
+    [username.toLowerCase()],
+  );
+  if (taken[0] && taken[0].user_id !== userId) {
+    throw new Error("That username is already taken.");
+  }
+  const profile = await loadUser(sql, userId);
+  // The account's email is the one Better Auth holds. The form's copy is only a fallback: it is typed by the
+  // person signing up, so it must never decide anything.
+  const email = normEmail(profile.email) || normEmail(data.email);
+  const token = data.token?.trim() || "";
+  // The invite link, or an invite sent to an email Google vouches for. A matching name or typed email is not enough.
+  const byLink = token ? await findInviteByToken(sql, token) : undefined;
+  const invite = byLink ?? (await findTrustedInvite(sql, userId));
+  const before = await loadAccess(sql, userId);
+  if (byLink && !(before && flagOn(before.approved) && !flagOn(before.denied))) await sealSharedAccount(sql, userId);
+  const invited = !!invite;
+  const first = await shouldBootstrapAdmin(sql, username);
+  const approved = first || invited;
+  const canAdd = true;
+  const existing = await loadAccess(sql, userId);
+  try {
+    let row: AccessRow | undefined;
+    if (existing) {
+      const rows = await sql.query<AccessRow>(
+        `update desk_accounts
+         set username = $2,
+             email = coalesce($3, email),
+             username_chosen = true,
+             approved = approved or $4,
+             is_admin = is_admin or $5,
+             can_add_customers = can_add_customers or $6,
+             denied = case when $4 then false else denied end,
+             desk_role = case
+               when is_admin or $5 then desk_role
+               when $4 and (desk_role is null or btrim(desk_role) = '') then 'service'
+               else desk_role
+             end,
+             updated_at = now()
+         where user_id = $1
+         returning ${ACCESS_COLS}`,
+        [userId, username, email, approved, first, canAdd],
+      );
+      row = rows[0] ?? {
+        ...existing,
+        username,
+        email: email ?? existing.email,
+        username_chosen: true,
+        approved: existing.approved || approved,
+        is_admin: existing.is_admin || first,
+        can_add_customers: existing.can_add_customers || canAdd,
+      };
+    } else {
+      const rows = await sql.query<AccessRow>(
+        `insert into desk_accounts (user_id, username, email, approved, is_admin, can_add_customers, username_chosen, denied, desk_role)
+         values ($1, $2, $3, $4, $5, $6, true, false, $7)
+         on conflict (user_id) do update
+           set username = excluded.username,
+               email = coalesce(excluded.email, desk_accounts.email),
+               username_chosen = true,
+               approved = desk_accounts.approved or excluded.approved,
+               is_admin = desk_accounts.is_admin or excluded.is_admin,
+               can_add_customers = desk_accounts.can_add_customers or excluded.can_add_customers,
+               denied = case when excluded.approved then false else desk_accounts.denied end,
+               desk_role = case
+                 when desk_accounts.is_admin or excluded.is_admin then desk_accounts.desk_role
+                 when excluded.approved and (desk_accounts.desk_role is null or btrim(desk_accounts.desk_role) = '') then 'service'
+                 else desk_accounts.desk_role
+               end,
+               updated_at = now()
+         returning ${ACCESS_COLS}`,
+        [userId, username, email, approved, first, canAdd, approved && !first ? "service" : null],
+      );
+      row = rows[0]!;
+    }
+    if (invite) await consumeInvite(sql, invite.id, userId);
+    return mapAccess(row);
+  } catch (e) {
+    if (isUniqueUsernameError(e)) throw new Error("That username is already taken.");
+    throw e;
+  }
+}
+
 export const registerAccount = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(registerInput)
   .handler(async ({ context, data }): Promise<DeskAccess> => {
-    const username = cleanUsername(data.username);
-    if (!validUsername(username)) {
-      throw new Error("Username must be 3–32 letters, numbers, dots, hyphens, or underscores.");
-    }
     const sql = await getSql();
     await ensureTable(sql);
-    const taken = await sql.query<{ user_id: string }>(
-      "select user_id from desk_accounts where lower(username) = $1 limit 1",
-      [username.toLowerCase()],
-    );
-    if (taken[0] && taken[0].user_id !== context.userId) {
-      throw new Error("That username is already taken.");
-    }
-    const profile = await loadUser(sql, context.userId);
-    const email = normEmail(data.email) || normEmail(profile.email);
-    const token = data.token?.trim() || "";
-    const invite =
-      (token ? await findInviteByToken(sql, token) : undefined) ??
-      (await findPendingInvite(sql, email, username));
-    const invited = !!invite;
-    const first = await shouldBootstrapAdmin(sql, username);
-    const approved = first || invited;
-    const canAdd = true;
-    const existing = await loadAccess(sql, context.userId);
-    try {
-      let row: AccessRow | undefined;
-      if (existing) {
-        const rows = await sql.query<AccessRow>(
-          `update desk_accounts
-           set username = $2,
-               email = coalesce($3, email),
-               username_chosen = true,
-               approved = approved or $4,
-               is_admin = is_admin or $5,
-               can_add_customers = can_add_customers or $6,
-               denied = case when $4 then false else denied end,
-               desk_role = case
-                 when is_admin or $5 then desk_role
-                 when $4 and (desk_role is null or btrim(desk_role) = '') then 'service'
-                 else desk_role
-               end,
-               updated_at = now()
-           where user_id = $1
-           returning ${ACCESS_COLS}`,
-          [context.userId, username, email, approved, first, canAdd],
-        );
-        row = rows[0] ?? {
-          ...existing,
-          username,
-          email: email ?? existing.email,
-          username_chosen: true,
-          approved: existing.approved || approved,
-          is_admin: existing.is_admin || first,
-          can_add_customers: existing.can_add_customers || canAdd,
-        };
-      } else {
-        const rows = await sql.query<AccessRow>(
-          `insert into desk_accounts (user_id, username, email, approved, is_admin, can_add_customers, username_chosen, denied, desk_role)
-           values ($1, $2, $3, $4, $5, $6, true, false, $7)
-           on conflict (user_id) do update
-             set username = excluded.username,
-                 email = coalesce(excluded.email, desk_accounts.email),
-                 username_chosen = true,
-                 approved = desk_accounts.approved or excluded.approved,
-                 is_admin = desk_accounts.is_admin or excluded.is_admin,
-                 can_add_customers = desk_accounts.can_add_customers or excluded.can_add_customers,
-                 denied = case when excluded.approved then false else desk_accounts.denied end,
-                 desk_role = case
-                   when desk_accounts.is_admin or excluded.is_admin then desk_accounts.desk_role
-                   when excluded.approved and (desk_accounts.desk_role is null or btrim(desk_accounts.desk_role) = '') then 'service'
-                   else desk_accounts.desk_role
-                 end,
-                 updated_at = now()
-           returning ${ACCESS_COLS}`,
-          [context.userId, username, email, approved, first, canAdd, approved && !first ? "service" : null],
-        );
-        row = rows[0]!;
-      }
-      if (invite) await consumeInvite(sql, invite.id, context.userId);
-      return mapAccess(row);
-    } catch (e) {
-      if (isUniqueUsernameError(e)) throw new Error("That username is already taken.");
-      throw e;
-    }
+    return registerDeskAccount(sql, context.userId, data);
   });
+
+/**
+ * Every desk account for the Access page. The email is the one Better Auth holds (the desk row's copy could be
+ * typed by the person signing up), with whether Google confirmed it.
+ */
+function inviteMatch(label: string | null): Pick<DeskAccountRow, "matchesInvite" | "matchesInviteBy"> {
+  if (!label) return { matchesInvite: null, matchesInviteBy: null };
+  const by = label.startsWith("email:") ? "email" : "name";
+  return { matchesInvite: label.slice(label.indexOf(":") + 1), matchesInviteBy: by };
+}
+
+export async function listDeskAccountRows(sql: Sql): Promise<DeskAccountRow[]> {
+  const rows = await sql.query<AccessRow & { created_at: string; auth_email: string | null; google_born: boolean; invite_label: string | null }>(
+    `select ${ACCESS_COLS.split(", ").map((c) => `d.${c}`).join(", ")}, d.created_at, u.email as auth_email,
+            coalesce(${GOOGLE_BORN_SQL}, false) as google_born,
+            (select case when i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email)) then 'email:' || i.email else 'name:' || i.username end
+               from desk_invites i
+              where i.status = 'pending' and (i.expires_at is null or i.expires_at > now())
+                and (
+                  (i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email)))
+                  or (i.username is not null and lower(i.username) = lower(d.username))
+                )
+              order by (i.email is not null and lower(i.email) = lower(coalesce(u.email, d.email))) desc, i.created_at asc
+              limit 1) as invite_label
+       from desk_accounts d
+       left join "user" u on u.id = d.user_id
+      order by d.created_at desc`,
+  );
+  return rows.map((r) => ({
+    ...mapAccess({ ...r, email: normEmail(r.auth_email) ?? r.email }),
+    createdAt: String(r.created_at),
+    emailConfirmed: flagOn(r.google_born),
+    ...inviteMatch(flagOn(r.approved) ? null : r.invite_label),
+  }));
+}
 
 export const listDeskAccounts = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -886,40 +1023,63 @@ export const listDeskAccounts = createServerFn({ method: "GET" })
     await requireAdmin(sql, context.userId);
     await adoptAuthUsers(sql);
     await applyPendingInvites(sql);
-    const rows = await sql.query<AccessRow & { created_at: string }>(
-      `select ${ACCESS_COLS}, created_at from desk_accounts order by created_at desc`,
-    );
-    return rows.map((r) => ({
-      ...mapAccess(r),
-      createdAt: String(r.created_at),
-    }));
+    return listDeskAccountRows(sql);
   });
+
+/**
+ * An admin lets a waiting person in, or takes access away. Letting them in also uses up a pending invite sent to
+ * their email: the admin has decided it is them, so the invite has done its job.
+ */
+export async function approveDeskAccount(
+  sql: Sql,
+  userId: string,
+  approved: boolean,
+): Promise<DeskAccess & { passwordRemoved: boolean }> {
+  const before = await loadAccess(sql, userId);
+  // Only when this approval is what lets them in. Approving someone who already has access changes nothing.
+  const seal = approved && before && !flagOn(before.approved) ? await sealSharedAccount(sql, userId) : null;
+  await sql.query(
+    `update desk_accounts
+     set approved = $2,
+         denied = case when $2 then false else denied end,
+         can_add_customers = case when $2 then true else can_add_customers end,
+         updated_at = now()
+     where user_id = $1`,
+    [userId, approved],
+  );
+  const rows = await sql.query<AccessRow>(
+    `select ${ACCESS_COLS} from desk_accounts where user_id = $1`,
+    [userId],
+  );
+  if (!rows[0]) throw new Error("Account not found");
+  if (approved) {
+    // By email only. A username is self-chosen, so an invite matched by name alone stays, and its link keeps
+    // working for the person it was sent to.
+    await sql.query(
+      `update desk_invites i
+          set status = 'accepted', accepted_user_id = $1, updated_at = now()
+         from "user" u
+        where u.id = $1
+          and i.status = 'pending'
+          and (i.expires_at is null or i.expires_at > now())
+          and i.email is not null and lower(i.email) = lower(u.email)`,
+      [userId],
+    );
+  }
+  return { ...mapAccess(rows[0]), passwordRemoved: !!seal?.passwordRemoved };
+}
 
 export const setAccountApproved = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(approveInput)
-  .handler(async ({ context, data }): Promise<DeskAccess> => {
+  .handler(async ({ context, data }): Promise<DeskAccess & { passwordRemoved: boolean }> => {
     const sql = await getSql();
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
     if (data.userId === context.userId && !data.approved) {
       throw new Error("You cannot revoke your own access.");
     }
-    await sql.query(
-      `update desk_accounts
-       set approved = $2,
-           denied = case when $2 then false else denied end,
-           can_add_customers = case when $2 then true else can_add_customers end,
-           updated_at = now()
-       where user_id = $1`,
-      [data.userId, data.approved],
-    );
-    const rows = await sql.query<AccessRow>(
-      `select ${ACCESS_COLS} from desk_accounts where user_id = $1`,
-      [data.userId],
-    );
-    if (!rows[0]) throw new Error("Account not found");
-    return mapAccess(rows[0]);
+    return approveDeskAccount(sql, data.userId, data.approved);
   });
 
 export const setAccountCanAddCustomers = createServerFn({ method: "POST" })
@@ -982,6 +1142,32 @@ export const grantAllCanAddCustomers = createServerFn({ method: "POST" })
     return { updated: rows.length };
   });
 
+/**
+ * An admin turns someone away. A pending invite sent to their email is revoked with them, but only when Google
+ * vouches that the email is theirs: someone who merely took an invited name, or typed an invited email, must not
+ * be able to cost the real person their invite by getting denied.
+ */
+export async function denyDeskAccount(sql: Sql, userId: string): Promise<DeskAccess> {
+  const rows = await sql.query<AccessRow>(
+    `update desk_accounts
+     set approved = false, denied = true, updated_at = now()
+     where user_id = $1
+     returning ${ACCESS_COLS}`,
+    [userId],
+  );
+  if (!rows[0]) throw new Error("Account not found");
+  const email = await googleVouchedEmail(sql, userId);
+  if (email) {
+    await sql.query(
+      `update desk_invites
+       set status = 'revoked', updated_at = now()
+       where status = 'pending' and email is not null and lower(email) = $1`,
+      [email],
+    );
+  }
+  return mapAccess(rows[0]);
+}
+
 export const denyAccount = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(userIdInput)
@@ -990,27 +1176,7 @@ export const denyAccount = createServerFn({ method: "POST" })
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
     if (data.userId === context.userId) throw new Error("You cannot deny your own access.");
-    const target = await loadAccess(sql, data.userId);
-    if (!target) throw new Error("Account not found");
-    const rows = await sql.query<AccessRow>(
-      `update desk_accounts
-       set approved = false, denied = true, updated_at = now()
-       where user_id = $1
-       returning ${ACCESS_COLS}`,
-      [data.userId],
-    );
-    await sql.query(
-      `update desk_invites
-       set status = 'revoked', updated_at = now()
-       where status = 'pending'
-         and (
-           (email is not null and $1::text is not null and lower(email) = $1)
-           or (username is not null and lower(username) = $2)
-         )`,
-      [normEmail(target.email), target.username.toLowerCase()],
-    );
-    if (!rows[0]) throw new Error("Account not found");
-    return mapAccess(rows[0]);
+    return denyDeskAccount(sql, data.userId);
   });
 
 export const listDeskInvites = createServerFn({ method: "GET" })
@@ -1040,6 +1206,100 @@ export const listDeskInvites = createServerFn({ method: "GET" })
     return out;
   });
 
+/** Make an invite (the admin check is the caller's). Returns who it let in at once and who is still waiting. */
+export async function createDeskInvite(
+  sql: Sql,
+  adminUserId: string,
+  data: { email?: string; username?: string; canAddCustomers?: boolean },
+): Promise<InviteResult> {
+  const email = data.email?.trim() ? normEmail(data.email) : null;
+  const rawName = (data.username ?? "").trim();
+  const displayName = rawName || null;
+  const username = rawName ? (validUsername(rawName) ? cleanUsername(rawName) : slugUsername(rawName)) : "";
+  const user = username || null;
+  const canAdd = !!data.canAddCustomers;
+  if (!email && !user) throw new Error("Enter an email, a username, or both.");
+  if (email && !validEmail(email)) throw new Error("Enter a valid email address.");
+  if (user && !validUsername(user)) {
+    throw new Error("Username must be 3–32 letters, numbers, dots, hyphens, or underscores.");
+  }
+
+  await adoptAuthUsers(sql);
+
+  const already = await sql.query<{ username: string }>(
+    `select username from desk_accounts
+     where approved = true
+       and (
+         ($1::text is not null and email is not null and lower(email) = $1)
+         or ($2::text is not null and lower(username) = $2)
+       )`,
+    [normEmail(email), user?.toLowerCase() ?? null],
+  );
+  if (already[0]) {
+    throw new Error(
+      `${already[0].username} already has access. Grant “add customers” on their account below.`,
+    );
+  }
+
+  const dup = await findPendingInvite(sql, email, user);
+  if (!dup && displayName) {
+    const byName = await sql.query<InviteRow>(
+      `select ${INVITE_COLS} from desk_invites
+       where status = 'pending'
+         and (
+           lower(coalesce(display_name, '')) = lower($1)
+           or replace(lower(coalesce(username, '')), '.', '') = $2
+         )
+       order by created_at asc
+       limit 1`,
+      [displayName, displayName.toLowerCase().replace(/[^a-z0-9]/g, "")],
+    );
+    if (byName[0] && !inviteExpired(byName[0])) {
+      const invitedBy = await loadInviterName(sql, byName[0].invited_by);
+      return { invite: mapInvite(byName[0], invitedBy), autoApproved: [], alreadyWaiting: await waitingNames(sql, email, user) };
+    }
+  }
+  if (dup) {
+    if (canAdd && !dup.can_add_customers) {
+      await sql.query(
+        `update desk_invites set can_add_customers = true, updated_at = now() where id = $1`,
+        [dup.id],
+      );
+      dup.can_add_customers = true;
+    }
+    const invitedBy = await loadInviterName(sql, dup.invited_by);
+    return { invite: mapInvite(dup, invitedBy), autoApproved: [], alreadyWaiting: await waitingNames(sql, email, user) };
+  }
+
+  const inserted = await sql.query<InviteRow>(
+    `insert into desk_invites (email, username, invited_by, status, can_add_customers, token, expires_at, display_name)
+     values ($1, $2, $3, 'pending', $4, $5, $6, $7)
+     returning ${INVITE_COLS}`,
+    [email, user, adminUserId, canAdd, newInviteToken(), inviteExpiry().toISOString(), displayName],
+  );
+  const inviteRow = inserted[0]!;
+
+  // Someone already signed up is let in by the new invite only when Google vouches for the invited email.
+  const waiting = await trustedAccountsForInvite(sql, inviteRow);
+  const autoApproved: string[] = [];
+  for (const w of waiting) {
+    await grantInviteAccess(sql, w.user_id, inviteRow);
+    autoApproved.push(w.username);
+  }
+  // Anyone else waiting under this name or email is the admin's call, on the list below the invite form.
+  const alreadyWaiting = await waitingNames(sql, email, user);
+
+  const invitedBy = await loadInviterName(sql, adminUserId);
+  const fresh = autoApproved.length
+    ? {
+        ...inviteRow,
+        status: "accepted",
+        accepted_user_id: waiting[0]?.user_id ?? null,
+      }
+    : inviteRow;
+  return { invite: mapInvite(fresh, invitedBy), autoApproved, alreadyWaiting };
+}
+
 export const createInvite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(createInviteInput)
@@ -1047,89 +1307,7 @@ export const createInvite = createServerFn({ method: "POST" })
     const sql = await getSql();
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
-    const email = data.email?.trim() ? normEmail(data.email) : null;
-    const rawName = (data.username ?? "").trim();
-    const displayName = rawName || null;
-    const username = rawName ? (validUsername(rawName) ? cleanUsername(rawName) : slugUsername(rawName)) : "";
-    const user = username || null;
-    const canAdd = !!data.canAddCustomers;
-    if (!email && !user) throw new Error("Enter an email, a username, or both.");
-    if (email && !validEmail(email)) throw new Error("Enter a valid email address.");
-    if (user && !validUsername(user)) {
-      throw new Error("Username must be 3–32 letters, numbers, dots, hyphens, or underscores.");
-    }
-
-    await adoptAuthUsers(sql);
-
-    const already = await sql.query<{ username: string }>(
-      `select username from desk_accounts
-       where approved = true
-         and (
-           ($1::text is not null and email is not null and lower(email) = $1)
-           or ($2::text is not null and lower(username) = $2)
-         )`,
-      [normEmail(email), user?.toLowerCase() ?? null],
-    );
-    if (already[0]) {
-      throw new Error(
-        `${already[0].username} already has access. Grant “add customers” on their account below.`,
-      );
-    }
-
-    const dup = await findPendingInvite(sql, email, user);
-    if (!dup && displayName) {
-      const byName = await sql.query<InviteRow>(
-        `select ${INVITE_COLS} from desk_invites
-         where status = 'pending'
-           and (
-             lower(coalesce(display_name, '')) = lower($1)
-             or replace(lower(coalesce(username, '')), '.', '') = $2
-           )
-         order by created_at asc
-         limit 1`,
-        [displayName, displayName.toLowerCase().replace(/[^a-z0-9]/g, "")],
-      );
-      if (byName[0] && !inviteExpired(byName[0])) {
-        const invitedBy = await loadInviterName(sql, byName[0].invited_by);
-        return { invite: mapInvite(byName[0], invitedBy), autoApproved: [] };
-      }
-    }
-    if (dup) {
-      if (canAdd && !dup.can_add_customers) {
-        await sql.query(
-          `update desk_invites set can_add_customers = true, updated_at = now() where id = $1`,
-          [dup.id],
-        );
-        dup.can_add_customers = true;
-      }
-      const invitedBy = await loadInviterName(sql, dup.invited_by);
-      return { invite: mapInvite(dup, invitedBy), autoApproved: [] };
-    }
-
-    const inserted = await sql.query<InviteRow>(
-      `insert into desk_invites (email, username, invited_by, status, can_add_customers, token, expires_at, display_name)
-       values ($1, $2, $3, 'pending', $4, $5, $6, $7)
-       returning ${INVITE_COLS}`,
-      [email, user, context.userId, canAdd, newInviteToken(), inviteExpiry().toISOString(), displayName],
-    );
-    const inviteRow = inserted[0]!;
-
-    const waiting = await accountsForInvite(sql, email, user);
-    const autoApproved: string[] = [];
-    for (const w of waiting) {
-      await grantInviteAccess(sql, w.user_id, inviteRow);
-      autoApproved.push(w.username);
-    }
-
-    const invitedBy = await loadInviterName(sql, context.userId);
-    const fresh = autoApproved.length
-      ? {
-          ...inviteRow,
-          status: "accepted",
-          accepted_user_id: waiting[0]?.user_id ?? null,
-        }
-      : inviteRow;
-    return { invite: mapInvite(fresh, invitedBy), autoApproved };
+    return createDeskInvite(sql, context.userId, data);
   });
 
 export const resendInvite = createServerFn({ method: "POST" })

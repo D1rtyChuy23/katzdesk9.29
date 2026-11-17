@@ -1,5 +1,6 @@
 import { getRequest } from "@tanstack/react-start/server";
-import { auth, authConfigured } from "./server";
+import { freshSession } from "./fresh-session.server";
+import { authConfigured } from "./server";
 
 /**
  * Server-side session resolution (server-only).
@@ -7,7 +8,7 @@ import { auth, authConfigured } from "./server";
  * Because this app runs its OWN Better Auth at same-origin `/api/auth/*`, the
  * session cookie is sent with every request to this app — server functions AND
  * SSR loaders included. So we resolve the user straight from the request cookies
- * via `auth.api.getSession` (no client-minted JWT needed). Never trust a
+ * via Better Auth's session lookup (no client-minted JWT needed). Never trust a
  * client-supplied user id — only the result of this verification.
  */
 
@@ -64,7 +65,8 @@ export async function getSessionUser(
     headers = new Headers(request.headers);
     headers.set("Authorization", `Bearer ${bearerToken}`);
   }
-  const session = await auth.api.getSession({ headers }).catch((err) => {
+  // From the database, not the five-minute cookie copy: ended sessions stop working at once.
+  const session = await freshSession(headers).catch((err) => {
     console.error("[auth] getSession failed", err);
     return null;
   });

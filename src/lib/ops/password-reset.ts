@@ -86,21 +86,32 @@ export async function applyPasswordReset(
   if (!hit) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
   const { hashPassword } = await import("better-auth/crypto");
   const hashed = await hashPassword(password);
+  // Hashing takes a moment, and the link can be cancelled in it: sealing a shared account clears its waiting
+  // links before it removes the password (access.ts). So each write below happens only while this link is still
+  // there and unused. Cancelled in between, nothing is written and the link reads as used up.
+  const STILL_OPEN = "exists (select 1 from desk_password_resets r where r.id = $3 and r.used_at is null and r.expires_at > now())";
   const updated = await sql.query<{ id: string }>(
     `update "account" set "password" = $2, "updatedAt" = now()
-     where "userId" = $1 and "providerId" = 'credential'
+     where "userId" = $1 and "providerId" = 'credential' and ${STILL_OPEN}
      returning "id"`,
-    [hit.user_id, hashed],
+    [hit.user_id, hashed, hit.id],
   );
   if (!updated[0]) {
     // Google / X users get a password too, so they can also sign in with username + password.
-    await sql.query(
+    const added = await sql.query<{ id: string }>(
       `insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
-       values ($1, $2, 'credential', $2, $3, now(), now())`,
-      [randomToken().slice(0, 32), hit.user_id, hashed],
+       select $4, $1, 'credential', $1, $2, now(), now()
+        where ${STILL_OPEN}
+          and not exists (select 1 from "account" a where a."userId" = $1 and a."providerId" = 'credential')
+       returning "id"`,
+      [hit.user_id, hashed, hit.id, randomToken().slice(0, 32)],
     );
+    if (!added[0]) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
   }
-  await sql.query("update desk_password_resets set used_at = now() where id = $1", [hit.id]);
+  // Marked used only if it still is unused: a second use at the same moment, or a seal that removed the password
+  // just written, finds nothing to mark and is told the link is spent rather than that it worked.
+  const marked = await sql.query<{ id: number }>("update desk_password_resets set used_at = now() where id = $1 and used_at is null returning id", [hit.id]);
+  if (!marked[0]) throw new Error("This reset link has expired or was already used. Ask an admin for a new one.");
   await sql.query(`delete from "session" where "userId" = $1`, [hit.user_id]);
   // A new password ends any wait from wrong tries, so the link gets a locked-out person back in.
   const { clearSignInTries } = await import("./sign-in");

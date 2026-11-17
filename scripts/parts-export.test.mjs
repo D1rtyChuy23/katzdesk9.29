@@ -498,7 +498,7 @@ test("a read that fails stops with an error: before the first byte it is an erro
 
 test("the route hands the request to the checks, has nothing but GET, and nothing in it writes", () => {
   const route = readFileSync(new URL("../src/routes/api/admin/parts-export.ts", import.meta.url), "utf8");
-  assert.match(route, /return partsExportResponse\(request, \{\s*session: \(headers\) => auth\.api\.getSession\(\{ headers \}\),/);
+  assert.match(route, /return partsExportResponse\(request, \{\s*session: \(headers\) => freshSession\(headers\),/);
   assert.match(route, /publicUrl: process\.env\.BETTER_AUTH_URL,/);
   assert.doesNotMatch(route, /\b(POST|PUT|PATCH|DELETE):/);
   const lib = readFileSync(new URL("../src/lib/ops/parts-export-api.ts", import.meta.url), "utf8");

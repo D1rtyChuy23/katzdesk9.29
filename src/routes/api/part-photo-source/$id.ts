@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getSql } from "@/lib/db";
-import { auth } from "@/lib/auth/server";
+import { freshSession } from "@/lib/auth/fresh-session.server";
 
 const MAX_BYTES = 6_000_000;
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/part-photo-source/$id")({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
-        const session = await auth.api.getSession({ headers: request.headers }).catch(() => null);
+        const session = await freshSession(request.headers).catch(() => null);
         if (!session?.user) return new Response("Sign in first.", { status: 401 });
         const id = Number(params.id);
         const index = Number(new URL(request.url).searchParams.get("i") ?? "-1");
