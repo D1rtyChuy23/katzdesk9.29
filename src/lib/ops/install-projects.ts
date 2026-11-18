@@ -664,6 +664,9 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
   }
   // The keeper's visit reads its list again (the same load the window runs), without taking anything off.
   await syncInstallUnits(sql, keepId);
+  // An Installed keeper's new units take its date (11/18).
+  const { fillInstallDatesFor } = await import("./install-date-fill");
+  await fillInstallDatesFor(sql, keepId, actor);
   return {
     keepId,
     dropId,

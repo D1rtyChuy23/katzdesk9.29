@@ -260,3 +260,20 @@ test("backfill Write uses the date the preview showed: one that changed since wr
     await pg.close();
   }
 });
+
+test("a unit on two Installed installs takes the date of the install that made it", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const first = await bunnInstall(sql, query);
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [first]);
+    // A later visit (no kind chosen) links the same unit.
+    const later = Number((await query("insert into installs (customer, equip_status, complete, completed_at) values ($1, 'Installed', true, '2026-12-01') returning id", [CUSTOMER]))[0].id);
+    const unit = (await query("select id from account_equipment where serial = 'ITCB187083'"))[0].id;
+    await query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [later, unit]);
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.deepEqual(p.rows.map((r) => [r.serial, r.installId, r.date]), [["ITCB187074", first, "2026-11-10"], ["ITCB187083", first, "2026-11-10"]]);
+    assert.deepEqual(p.skipped, []);
+  } finally {
+    await pg.close();
+  }
+});

@@ -51,7 +51,7 @@ const CANDIDATES_SQL = `
   select distinct on (a.id)
          a.id as unit_id, a.customer, coalesce(nullif(btrim(a.equipment_name), ''), a.catalog_model) as equipment, a.serial,
          i.id as install_id, i.wo, a.locked_at is not null as locked,
-         (u.visit_kind = 'new' or a.created_by_install = i.id) as made_here,
+         coalesce(u.visit_kind = 'new' or a.created_by_install = i.id, false) as made_here,
          to_char(coalesce(i.completed_at, i.install_date), 'YYYY-MM-DD') as fill_date,
          case when i.completed_at is not null then 'completed' else 'scheduled' end as source
     from install_inspection_units u
@@ -62,7 +62,7 @@ const CANDIDATES_SQL = `
      and a.install_date is null
      and (u.visit_kind is null or u.visit_kind = 'new')
      and ($1::int is null or i.id = $1::int)
-   order by a.id, (u.visit_kind = 'new' or a.created_by_install = i.id) desc, coalesce(i.completed_at, i.install_date) is null,
+   order by a.id, coalesce(u.visit_kind = 'new' or a.created_by_install = i.id, false) desc, coalesce(i.completed_at, i.install_date) is null,
             coalesce(i.completed_at, i.install_date), i.id`;
 
 type Cand = {
