@@ -158,7 +158,7 @@ test("each api.ts function takes the input its type had", () => {
   const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
   const uses = [...api.matchAll(/export const (\w+) = createServerFn[^\n]*\n?\s*\.middleware\(\[\w+\]\)\s*\n?\s*\.validator\(input\.(\w+)\)/g)].map((m) => `${m[1]}:${m[2]}`);
   assert.deepEqual(uses.sort(), [
-    "listJobs:listJobsInput", "getJob:idInput", "createJob:newTicketInput", "updatePm:updatePmInput", "createPm:createPmInput",
+    "listJobs:listJobsInput", "getJob:idInput", "createJob:newTicketInput", "updatePm:updatePmInput", "createPm:createPmInput", "getMovedPm:idInput",
     "updateModule:updateModuleInput", "createModule:createModuleInput", "confirmDealMachines:confirmDealMachinesInput",
     "updateDeal:updateDealInput", "createDeal:createDealInput", "archiveDeal:idInput", "updateInstall:updateInstallInput",
     "createInstall:createInstallInput", "archiveInstall:idInput", "listComments:entityInput", "listActivity:entityInput",
