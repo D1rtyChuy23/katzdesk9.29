@@ -13,6 +13,9 @@ import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { formatLongDate } from "@/lib/ops/clock";
 import { getPmMoveInfo, movePmToTicket, previewPmMove, undoPmMove, type PmMovePreview } from "@/lib/ops/pm-to-ticket";
 import type { ServiceJob } from "@/lib/ops/types";
+import type { MovedPmView } from "@/lib/ops/moved-pm";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { StatusBadge } from "./flag-badge";
 import { OpenLink } from "./open-link";
 
 const LINK = "text-sm font-medium text-primary underline-offset-2 hover:underline";
@@ -177,5 +180,73 @@ export function MovedFromPmBanner({ job, onMovedBack }: { job: ServiceJob; onMov
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+/**
+ * /pms?open=N for a PM moved to a ticket: read-only. It says where the work went and links there; nothing on it can
+ * be edited, stacked, invoiced or given parts (the server refuses those too). Move it back from the ticket.
+ */
+export function MovedPmSheet({ view, onClose }: { view: MovedPmView | null; onClose: () => void }) {
+  const pm = view?.pm;
+  const fields: [string, string | null | undefined][] = pm
+    ? [
+        ["Equipment", pm.equipment],
+        ["Style", pm.style],
+        ["Technician", pm.technician],
+        ["WO", pm.wo],
+        ["Status before the move", view.statusBefore],
+        ["Projected", pm.projected ? formatLongDate(pm.projected) : null],
+        ["Customer P.O.", pm.po],
+        ["Vendor P.O.", pm.vendorPo],
+        ["Notes", pm.notes],
+        ["Work done", pm.workDone],
+      ]
+    : [];
+  return (
+    <Sheet open={!!view} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent>
+        {view && pm ? (
+          <>
+            <SheetHeader>
+              <p className="text-xs tracking-wide text-muted-foreground uppercase">Preventative maintenance #{pm.id} · read-only</p>
+              <SheetTitle>{pm.customer}</SheetTitle>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <StatusBadge status={pm.status} />
+              </div>
+            </SheetHeader>
+            <div className="border-b border-border bg-muted/40 px-5 py-3 text-sm" data-testid="moved-to-ticket">
+              <p>
+                Moved to ticket{" "}
+                <OpenLink entityType="service" id={view.jobId} className={LINK}>
+                  {view.callId}
+                </OpenLink>
+                {view.movedAt ? ` on ${formatLongDate(view.movedAt)}` : ""}
+                {view.movedBy ? ` by ${view.movedBy}` : ""}
+                {view.ticketStatus ? ` (now ${view.ticketStatus})` : ""}. Its WO, dates, parts and billing are on the ticket. To make it a PM again, use
+                Move back on the ticket.
+              </p>
+              <div className="mt-2">
+                <OpenLink entityType="service" id={view.jobId} className={LINK}>
+                  Open ticket {view.callId}
+                </OpenLink>
+              </div>
+            </div>
+            <SheetBody>
+              <dl className="grid gap-3 px-5 py-4 text-sm" data-testid="moved-pm-fields">
+                {fields
+                  .filter(([, v]) => v != null && String(v).trim() !== "")
+                  .map(([label, value]) => (
+                    <div key={label}>
+                      <dt className="text-xs text-muted-foreground">{label}</dt>
+                      <dd className="whitespace-pre-wrap">{value}</dd>
+                    </div>
+                  ))}
+              </dl>
+            </SheetBody>
+          </>
+        ) : null}
+      </SheetContent>
+    </Sheet>
   );
 }

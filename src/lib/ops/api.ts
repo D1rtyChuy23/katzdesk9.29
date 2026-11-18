@@ -92,6 +92,7 @@ import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withLiveSerialNotices } from "./serial-pull";
 import * as input from "./api-input";
+import type { MovedPmView } from "./moved-pm";
 import { fillInstallDatesFor } from "./install-date-fill";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
@@ -1156,14 +1157,48 @@ export async function moveBoardBlockFor(sql: any, data: { type: BoardType; id: n
 	if (extra) await logActivity(sql, context.userId, data.type === "service" || data.type === "tlc" ? cur.kind : data.type, data.id, "updated", extra);
 	return { ok: true, date: data.date, time, technician: tech };
 }
-export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }: any): Promise<PmJob[]> => {
-	const sql = await ready();
+export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async ({ context }: any): Promise<PmJob[]> => listPmsFor(await ready(), context.userId));
+/** The PM board's list. A sales rep sees only the accounts assigned to them. */
+export async function listPmsFor(sql: any, userId: string): Promise<PmJob[]> {
 	const marks = await loadAccountMarks(sql);
-	// A sales rep sees only the accounts assigned to them.
-	const scope = await salesRepScope(sql, context.userId);
+	const scope = await salesRepScope(sql, userId);
 	// A PM moved to a service ticket (11/18) is the ticket now: it leaves the PM board.
-	return applyMarks((await sql`select * from pm_jobs where moved_job_id is null order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
-});
+	return applyMarks((await sql`select * from pm_jobs where moved_job_id is null order by received desc nulls last, id desc`).map((r: any) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
+}
+/**
+ * A PM moved to a service ticket, read by id for its read-only drawer (/pms?open=N from the ticket's link). Null when
+ * the PM isn't moved, or is on an account this sales rep doesn't hold. Shows the PM as it was when it moved.
+ */
+export async function movedPmFor(sql: any, id: number, userId: string): Promise<MovedPmView | null> {
+	const r = (
+		await sql.query(
+			`select p.*, j.id as job_id_moved, j.call_id as job_call_id, j.status as job_status, m.pm_before as move_before, m.moved_by as move_by,
+			        to_char(m.moved_at at time zone 'America/Chicago', 'YYYY-MM-DD') as move_at
+			   from pm_jobs p join service_jobs j on j.id = p.moved_job_id
+			   left join lateral (select pm_before, moved_by, moved_at from pm_ticket_moves where pm_id = p.id and job_id = j.id and undone_at is null order by id desc limit 1) m on true
+			  where p.id = $1`,
+			[id],
+		)
+	)[0];
+	if (!r) return null;
+	const marks = await loadAccountMarks(sql);
+	const scope = await salesRepScope(sql, userId);
+	if (scope && !scope(accountRepFor(marks, r.customer ?? null))) return null;
+	const before = r.move_before ?? {};
+	// Its WO and completion went with the work; the drawer shows them as the PM had them.
+	const row = { ...r, wo: before.wo ?? r.wo, completed_at: before.completed_at ?? r.completed_at, corrigo_id: before.corrigo_id ?? r.corrigo_id };
+	const [pm] = applyMarks([mapPm(row, todayChicago())], marks);
+	return {
+		pm,
+		statusBefore: before.status ?? null,
+		jobId: Number(r.job_id_moved),
+		callId: String(r.job_call_id ?? `#${r.job_id_moved}`),
+		ticketStatus: r.job_status ?? null,
+		movedAt: r.move_at ?? null,
+		movedBy: r.move_by ?? null,
+	};
+}
+export const getMovedPm = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any): Promise<MovedPmView | null> => movedPmFor(await ready(), data.id, context.userId));
 export const getPm = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d)).handler(async ({ data, context }: any): Promise<PmJob | null> => {
 	const sql = await ready();
 	const marks = await loadAccountMarks(sql);
