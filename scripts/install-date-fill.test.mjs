@@ -123,18 +123,6 @@ test("a Locked unit is skipped", async () => {
   }
 });
 
-test("a unit already on the account before this visit (Existing on the pre-inspection) keeps its blank date", async () => {
-  const { pg, sql, query } = await fresh();
-  try {
-    const id = await bunnInstall(sql, query);
-    await query("update install_inspection_units set visit_kind = 'existing' where install_id = $1 and equipment_id = (select id from account_equipment where serial = 'ITCB187074')", [id]);
-    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
-    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial), ["ITCB187083"]);
-  } finally {
-    await pg.close();
-  }
-});
-
 test("backfill: Admin only; the preview lists every row it would write and the skipped ones, and writes nothing until Apply", async () => {
   const { pg, sql, query } = await fresh();
   try {
@@ -208,28 +196,6 @@ test("reading an Installed install writes nothing: only saves fill dates", async
   }
 });
 
-test("a unit that was on the account before the install is not dated by it, and the preview says why", async () => {
-  const { pg, sql, query } = await fresh();
-  try {
-    // Imported from the equipment list first, then claimed by the install's list by its serial.
-    await query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, 'Bunn ITCB-DV', 'Bunn ITCB-DV', 'ITCB187083', 'itcb187083')", [CUSTOMER]);
-    const id = await bunnInstall(sql, query);
-    const made = await query("select serial, created_by_install from account_equipment order by serial");
-    assert.deepEqual(made.map((r) => [r.serial, r.created_by_install]), [["ITCB187074", id], ["ITCB187083", null]]);
-    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
-    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial), ["ITCB187074"]);
-    await query("update account_equipment set install_date = null");
-    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
-    assert.deepEqual(p.rows.map((r) => r.serial), ["ITCB187074"]);
-    assert.deepEqual(p.skipped.map((r) => [r.serial, r.reason]), [["ITCB187083", F.SKIP_NOT_NEW]]);
-    // Marked New on its pre-inspection, it is this install's: it takes the date.
-    await query("update install_inspection_units set visit_kind = 'new' where install_id = $1", [id]);
-    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial).sort(), ["ITCB187074", "ITCB187083"]);
-  } finally {
-    await pg.close();
-  }
-});
-
 test("filling a date leaves the install's pre-inspection as it was: its units stay New", async () => {
   const { pg, sql, query } = await fresh();
   try {
@@ -273,6 +239,143 @@ test("a unit on two Installed installs takes the date of the install that made i
     const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
     assert.deepEqual(p.rows.map((r) => [r.serial, r.installId, r.date]), [["ITCB187074", first, "2026-11-10"], ["ITCB187083", first, "2026-11-10"]]);
     assert.deepEqual(p.skipped, []);
+  } finally {
+    await pg.close();
+  }
+});
+
+// 11/18 follow-up: units the install matched on the account (imported or added by hand first) are the ones installed.
+/** A unit imported onto the account `daysBefore` the install's date, then claimed by the install's list by serial. */
+async function matchedInstall(sql, query, { serial = "ITCB187083", daysBefore = 0, completed = "2026-11-10", scheduled = null, wo = "WO-1150" } = {}) {
+  const day = completed ?? scheduled;
+  await query(
+    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, created_at)
+     values ($1, 'Bunn ITCB-DV', 'Bunn ITCB-DV', $2, lower($2), $3::date - make_interval(days => $4))`,
+    [CUSTOMER, serial, day, daysBefore],
+  );
+  const id = await bunnInstall(sql, query, { wo, machines: JSON.stringify([{ equipment: "Bunn ITCB-DV", serial, powerVoltage: "" }]), equipment: "Bunn ITCB-DV" });
+  const unit = (await query("select id, created_by_install from account_equipment where serial = $1", [serial]))[0];
+  assert.equal(unit.created_by_install, null, "the install's list claimed the unit already on the account");
+  await query("update installs set equip_status = 'Installed', complete = true, completed_at = $2, install_date = $3 where id = $1", [id, completed, scheduled]);
+  return { id, unitId: unit.id };
+}
+const kindOf = async (query, installId, unitId) => (await query("select visit_kind from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, unitId]))[0].visit_kind;
+
+test("a matched unit takes the install's completed date; its pre-inspection kind is left as it is", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id, unitId } = await matchedInstall(sql, query);
+    const filled = await F.fillInstallDatesFor(sql, id, "chuy.zz");
+    assert.deepEqual(filled.map((r) => [r.serial, r.date, r.source, r.match]), [["ITCB187083", "2026-11-10", "completed", "matched"]]);
+    assert.equal((await units(query))[0].d, "2026-11-10");
+    assert.equal(await kindOf(query, id, unitId), null);
+    const log = (await query("select detail from activity where action = 'install-date' and entity_id = $1", [id]))[0];
+    assert.match(log.detail, /Install date 2026-11-10 \(the install's completed date\) set on: Bunn ITCB-DV ITCB187083/);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a matched unit takes the scheduled date when the install has no completed date", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id } = await matchedInstall(sql, query, { completed: null, scheduled: "2026-11-05" });
+    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => [r.date, r.source]), [["2026-11-05", "scheduled"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a matched unit with a date already set keeps it; a Locked matched unit is skipped", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id } = await matchedInstall(sql, query);
+    await query("update account_equipment set install_date = '2023-05-01'");
+    assert.deepEqual(await F.fillInstallDatesFor(sql, id, "chuy.zz"), []);
+    assert.equal((await units(query))[0].d, "2023-05-01");
+    await query("update account_equipment set install_date = null, locked_at = now(), locked_by = 'chuy.zz'");
+    assert.deepEqual(await F.fillInstallDatesFor(sql, id, "chuy.zz"), []);
+    assert.equal((await units(query))[0].d, null);
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.deepEqual(p.skipped.map((r) => [r.serial, r.reason, r.match]), [["ITCB187083", F.SKIP_LOCKED, "matched"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit marked Existing on the pre-inspection takes the date too, and stays Existing", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id, unitId } = await matchedInstall(sql, query);
+    await query("update install_inspection_units set visit_kind = 'existing' where install_id = $1", [id]);
+    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial), ["ITCB187083"]);
+    assert.equal(await kindOf(query, id, unitId), "existing");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("guard: a matched unit on the account over 30 days before the install, with an earlier ticket naming its serial, is skipped", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id } = await matchedInstall(sql, query, { daysBefore: 200 });
+    // An earlier service ticket on the account that names the serial: the unit was there already.
+    await query("insert into service_jobs (kind, call_id, customer, received, equipment, issue, status) values ('service', 'SC-202605-001', $1, '2026-05-02', 'Bunn ITCB-DV SN ITCB187083', 'Leaking', 'Completed')", [CUSTOMER]);
+    assert.deepEqual(await F.fillInstallDatesFor(sql, id, "chuy.zz"), []);
+    assert.equal((await units(query))[0].d, null);
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.deepEqual(p.rows, []);
+    assert.deepEqual(p.skipped.map((r) => [r.serial, r.reason]), [["ITCB187083", F.SKIP_EARLIER]]);
+    // Write refuses it even if it is sent.
+    assert.deepEqual((await F.applyInstallDateBackfillFor(sql, "u-owner", { rows: [{ unitId: p.skipped[0].unitId, date: "2026-11-10" }] })).written, []);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("guard needs both: an old unit with no earlier ticket, a new unit with one, or only the install's own visit ticket, are filled", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    // Old, no earlier ticket naming it.
+    const a = await matchedInstall(sql, query, { serial: "AAA11111", daysBefore: 200, wo: "WO-2001" });
+    await query("insert into service_jobs (kind, call_id, customer, received, equipment, status) values ('service', 'SC-1', $1, '2026-05-02', 'Bunn ITCB-DV SN OTHER999', 'Completed')", [CUSTOMER]);
+    // Recent (10 days), with an earlier ticket naming it.
+    const b = await matchedInstall(sql, query, { serial: "BBB22222", daysBefore: 10, wo: "WO-2002" });
+    await query("insert into service_jobs (kind, call_id, customer, received, equipment, status) values ('service', 'SC-2', $1, '2026-11-03', 'SN BBB22222', 'Completed')", [CUSTOMER]);
+    // Old, and the only earlier ticket naming it is this install's own pre-install visit.
+    const c = await matchedInstall(sql, query, { serial: "CCC33333", daysBefore: 200, wo: "WO-2003" });
+    await query("insert into service_jobs (kind, call_id, customer, received, equipment, status, visit_install_id) values ('service', 'SC-3', $1, '2026-10-01', 'SN CCC33333', 'Completed', $2)", [CUSTOMER, c.id]);
+    for (const x of [a, b, c]) assert.equal((await F.fillInstallDatesFor(sql, x.id, "chuy.zz")).length, 1);
+    assert.deepEqual((await units(query)).map((u) => [u.serial, u.d]), [["AAA11111", "2026-11-10"], ["BBB22222", "2026-11-10"], ["CCC33333", "2026-11-10"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit matched by two Installed installs takes the earliest dated one, and the preview says so", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id: later, unitId } = await matchedInstall(sql, query, { completed: "2026-11-10" });
+    const earlier = Number((await query("insert into installs (customer, equip_status, complete, completed_at) values ($1, 'Installed', true, '2026-09-15') returning id", [CUSTOMER]))[0].id);
+    await query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [earlier, unitId]);
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.deepEqual(p.rows.map((r) => [r.serial, r.installId, r.date, r.installCount, r.match]), [["ITCB187083", earlier, "2026-09-15", 2, "matched"]]);
+    // Saving the later install doesn't write its own (later) date: the unit goes by the earlier one.
+    assert.deepEqual(await F.fillInstallDatesFor(sql, later, "chuy.zz"), []);
+    assert.deepEqual((await F.fillInstallDatesFor(sql, earlier, "chuy.zz")).map((r) => r.date), ["2026-09-15"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("reading an install with a matched unit writes nothing", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const { id } = await matchedInstall(sql, query);
+    await readInspection(sql, id);
+    await loadInspectionSummaries(sql, [id]);
+    await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.equal((await units(query))[0].d, null);
   } finally {
     await pg.close();
   }

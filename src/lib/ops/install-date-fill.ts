@@ -3,13 +3,21 @@
  * marked it), each unit it put on the account gets the install's completed date, or its scheduled date when the
  * completed one is blank. The install's history says which date was used.
  *
- * What is filled: a unit this install put on the account (its load made it), or one its pre-inspection marks New, whose
- * install date is blank and which isn't Locked. A unit that was on the account before the install (imported, added by
- * hand) is left: its date isn't this install's. A date already set is never changed. Nothing is filled while the
- * install is open: on the account record an install date means "installed", so it waits until the install is done.
+ * What is filled: a unit on the install's visit whose install date is blank and which isn't Locked. That is a unit the
+ * install put on the account (its load made it, or its pre-inspection marks it New), or one the install matched (11/18
+ * follow-up): already on the account, imported or added by hand, then claimed by the install's list, a serial pulled
+ * onto it, or linked on the pre-inspection. In practice those are the units that were installed. A date already set is
+ * never changed. Nothing is filled while the install is open: an install date means "installed", so it waits.
  *
- * With no kind chosen, the pre-inspection reads a dated unit with a serial as Existing. So the same statement that dates
- * a unit records it as New on this visit, which is what it read as before: the install's pre-inspection doesn't change.
+ * Guard: a matched unit created more than 30 days before the install's date, with a ticket on the account dated before
+ * the install that names its serial, was at the site before this install, so it is skipped ("Matched, but at the site
+ * before this install"). The install's own pre-install visit and a ticket merged into it don't count.
+ *
+ * A unit on two Installed installs takes the earliest dated one.
+ *
+ * With no kind chosen, the pre-inspection reads a dated unit with a serial as Existing. A unit the install made is
+ * recorded as New on the visit in the same statement, which is what it read as before. A matched unit's kind is left as
+ * it is (Chuy): with none chosen it reads as Existing / Pre-Inspected once it has a date.
  *
  * Runs only from saves (the install window, Corrigo, adding or linking a unit, a serial pulled onto the install), never
  * from reading an install. Plus a one-time Admin backfill for installs done before this: a preview of every row it
@@ -25,7 +33,9 @@ import { checked } from "@/lib/ops/checked-input";
 export const ADMIN_ONLY = "Only an Admin can fill install dates from installs.";
 export const SKIP_LOCKED = "Locked: left as it is.";
 export const SKIP_NO_DATE = "Its install has no completed or scheduled date.";
-export const SKIP_NOT_NEW = "Was on the account before this install (not made by it, and not marked New on its pre-inspection).";
+export const SKIP_EARLIER = "Matched, but at the site before this install: on the account over 30 days earlier, with an earlier ticket naming its serial.";
+/** How the unit came to be on the install: it put it on the account, or matched one already there. */
+export type InstallDateMatch = "made" | "matched";
 
 export type InstallDateSource = "completed" | "scheduled";
 
@@ -38,32 +48,51 @@ export type InstallDateRow = {
   wo: string | null;
   date: string;
   source: InstallDateSource;
+  match: InstallDateMatch;
+  /** Installed installs this unit is on; above 1, the earliest dated one was used. */
+  installCount: number;
 };
 
 export type InstallDateSkip = Omit<InstallDateRow, "date" | "source"> & { reason: string };
 
 /**
- * Each blank-dated unit on an Installed install's visit (chosen New, or no kind chosen), once, with the date it would
- * take and whether this install made it. A unit on two Installed installs goes by its earliest dated one. $1 limits it
- * to one install (null: every install).
+ * Each blank-dated unit on an Installed install's visit, once, at its earliest dated Installed install, with whether that
+ * install made it and whether the guard holds. $1 limits it to the units on one install's visit, kept only where that
+ * install is the one chosen (null: every install).
  */
 const CANDIDATES_SQL = `
-  select distinct on (a.id)
-         a.id as unit_id, a.customer, coalesce(nullif(btrim(a.equipment_name), ''), a.catalog_model) as equipment, a.serial,
-         i.id as install_id, i.wo, a.locked_at is not null as locked,
-         coalesce(u.visit_kind = 'new' or a.created_by_install = i.id, false) as made_here,
-         to_char(coalesce(i.completed_at, i.install_date), 'YYYY-MM-DD') as fill_date,
-         case when i.completed_at is not null then 'completed' else 'scheduled' end as source
-    from install_inspection_units u
-    join account_equipment a on a.id = u.equipment_id
-    join installs i on i.id = u.install_id
-   where (i.complete or i.equip_status = 'Installed')
-     and coalesce(i.archived, false) = false
-     and a.install_date is null
-     and (u.visit_kind is null or u.visit_kind = 'new')
-     and ($1::int is null or i.id = $1::int)
-   order by a.id, coalesce(u.visit_kind = 'new' or a.created_by_install = i.id, false) desc, coalesce(i.completed_at, i.install_date) is null,
-            coalesce(i.completed_at, i.install_date), i.id`;
+  with links as (
+    select a.id as unit_id, a.customer, coalesce(nullif(btrim(a.equipment_name), ''), a.catalog_model) as equipment, a.serial,
+           a.created_at, a.locked_at is not null as locked, i.id as install_id, i.wo,
+           coalesce(u.visit_kind = 'new' or a.created_by_install = i.id, false) as made_here,
+           coalesce(i.completed_at, i.install_date) as d,
+           case when i.completed_at is not null then 'completed' else 'scheduled' end as source,
+           count(*) over (partition by a.id) as install_count
+      from install_inspection_units u
+      join account_equipment a on a.id = u.equipment_id
+      join installs i on i.id = u.install_id
+     where (i.complete or i.equip_status = 'Installed')
+       and coalesce(i.archived, false) = false
+       and a.install_date is null
+       and ($1::int is null or a.id in (select equipment_id from install_inspection_units where install_id = $1::int))
+  ), chosen as (
+    select distinct on (unit_id) * from links order by unit_id, d is null, d, made_here desc, install_id
+  )
+  select c.unit_id, c.customer, c.equipment, c.serial, c.install_id, c.wo, c.locked, c.made_here, c.source,
+         c.install_count::int as install_count, to_char(c.d, 'YYYY-MM-DD') as fill_date,
+         (not c.made_here and c.d is not null and c.created_at < c.d - interval '30 days'
+          and length(btrim(coalesce(c.serial, ''))) >= 4
+          and exists (
+            select 1 from service_jobs j
+             where lower(btrim(j.customer)) = lower(btrim(c.customer))
+               and coalesce(j.received, j.scheduled, j.completed_at) < c.d
+               and j.visit_install_id is distinct from c.install_id
+               and j.merged_install_id is distinct from c.install_id
+               and strpos(lower(concat_ws(' ', j.equipment, j.issue, j.work_done, j.notes)), lower(btrim(c.serial))) > 0
+          )) as at_site_before
+    from chosen c
+   where ($1::int is null or c.install_id = $1::int)
+   order by c.unit_id`;
 
 type Cand = {
   unit_id: number;
@@ -76,6 +105,8 @@ type Cand = {
   made_here: boolean;
   fill_date: string | null;
   source: InstallDateSource;
+  install_count: number;
+  at_site_before: boolean;
 };
 
 const rowOf = (c: Cand): InstallDateRow => ({
@@ -87,10 +118,13 @@ const rowOf = (c: Cand): InstallDateRow => ({
   wo: c.wo,
   date: String(c.fill_date),
   source: c.source,
+  match: c.made_here ? "made" : "matched",
+  installCount: Number(c.install_count ?? 1),
 });
 
 /**
- * One statement: blank, unlocked units this install made take their date, and the visit records them as New. The
+ * One statement: blank, unlocked units take their date (not one the guard holds back), and the visit records the ones
+ * the install made as New; a matched unit's kind stays as it is. The
  * `where` re-checks the unit as it is now, so a date or a lock set since the read is kept. With $2/$3 (the backfill's
  * Write), only those units, and only at the date the preview showed them.
  */
@@ -101,14 +135,15 @@ const FILL_SQL = `
     update account_equipment a
        set install_date = c.fill_date::date, updated_at = now()
       from c
-     where a.id = c.unit_id and c.made_here and not c.locked and c.fill_date is not null
+     where a.id = c.unit_id and not c.at_site_before and not c.locked and c.fill_date is not null
        and a.install_date is null and a.locked_at is null
        and ($2::int[] is null or exists (select 1 from picked p where p.unit_id = c.unit_id and p.fill_date = c.fill_date))
-    returning a.id as unit_id, c.customer, c.equipment, c.serial, c.install_id, c.wo, c.fill_date, c.source, c.locked, c.made_here
+    returning a.id as unit_id, c.customer, c.equipment, c.serial, c.install_id, c.wo, c.fill_date, c.source, c.locked, c.made_here,
+              c.install_count, c.at_site_before
   ),
   pinned as (
     update install_inspection_units u set visit_kind = 'new'
-      from upd where u.install_id = upd.install_id and u.equipment_id = upd.unit_id and u.visit_kind is null
+      from upd where upd.made_here and u.install_id = upd.install_id and u.equipment_id = upd.unit_id and u.visit_kind is null
     returning u.equipment_id
   )
   select upd.*, (select count(*) from pinned) as pinned from upd`;
@@ -167,9 +202,9 @@ export async function previewInstallDateBackfillFor(sql: Sql, userId: string): P
   const rows: InstallDateRow[] = [];
   const skipped: InstallDateSkip[] = [];
   for (const c of cands) {
-    if (c.locked || !c.fill_date || !c.made_here) {
+    if (c.locked || !c.fill_date || c.at_site_before) {
       const { date: _d, source: _s, ...rest } = rowOf({ ...c, fill_date: c.fill_date ?? "" });
-      skipped.push({ ...rest, reason: c.locked ? SKIP_LOCKED : !c.made_here ? SKIP_NOT_NEW : SKIP_NO_DATE });
+      skipped.push({ ...rest, reason: c.locked ? SKIP_LOCKED : !c.fill_date ? SKIP_NO_DATE : SKIP_EARLIER });
     } else rows.push(rowOf(c));
   }
   return { rows: rows.sort(order), skipped: skipped.sort(order) };
