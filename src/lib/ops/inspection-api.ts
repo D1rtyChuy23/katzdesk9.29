@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { fillInstallDatesFor } from "./install-date-fill";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
@@ -957,7 +958,20 @@ function retiredByModel(retired: RetiredHere[], piece: Piece): boolean {
   return true;
 }
 
+/**
+ * The install's list onto its account units (below), then, if the install is Installed, its new units' blank install
+ * dates from the install (11/18, install-date-fill.ts). `actor` names who the install history says filled them.
+ */
 export async function syncInstallUnits(
+  sql: Sql,
+  installId: number,
+  opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null; actor?: string | null },
+): Promise<void> {
+  await syncInstallUnitsBody(sql, installId, opts);
+  await fillInstallDatesFor(sql, installId, opts?.actor ?? null);
+}
+
+async function syncInstallUnitsBody(
   sql: Sql,
   installId: number,
   opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null },
