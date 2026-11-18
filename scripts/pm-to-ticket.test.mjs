@@ -302,3 +302,70 @@ test("Move back keeps the PM's own account when the ticket went to Walk - In", a
     await pg.close();
   }
 });
+
+// 11/18 follow-up: the ticket's "PM #171" link goes to /pms?open=171. The moved PM is off the board, so the page
+// reads it by id and shows it read-only, with the way back to its ticket.
+const { listPmsFor, movedPmFor } = await import("../src/lib/ops/api.ts");
+const { pmDrawerFor } = await import("../src/lib/ops/moved-pm.ts");
+
+test("opening a moved PM by id: a read-only view of the PM as it was, with its ticket", async () => {
+  const { pg, sql, query, pm, move } = await freshDb();
+  try {
+    const id = await pm();
+    const res = await move(id);
+    const view = await movedPmFor(sql, id, "u_boss");
+    assert.ok(view);
+    assert.deepEqual(
+      [view.jobId, view.callId, view.ticketStatus, view.movedBy, view.statusBefore, view.pm.id, view.pm.customer, view.pm.wo, view.pm.technician, view.pm.equipment],
+      [res.jobId, res.callId, "Dispatched", "boss.zz", "Scheduled", id, "ZZ Halcyon - Southtown", "WO-1107", "Sam ZZ", "Mazzer Super Jolly"],
+    );
+    assert.match(view.movedAt, /^\d{4}-\d{2}-\d{2}$/);
+    // The page picks the read-only drawer: the PM isn't on the board's list.
+    const list = await listPmsFor(sql, "u_boss");
+    assert.deepEqual(pmDrawerFor(list, id, view), { kind: "moved", view });
+    // A sales rep who doesn't hold the account sees nothing, as with any PM.
+    await query("insert into desk_accounts (user_id, username, approved, desk_role) values ('u_rep', 'rep.zz', true, 'sales')");
+    await query(`insert into "user" ("id","name","email","emailVerified") values ('u_rep','Rep ZZ','rep.zz@example.com',true)`).catch(() => {});
+    assert.equal(await movedPmFor(sql, id, "u_rep"), null);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a normal PM opens as before: on the list, in the editable drawer, and no moved view", async () => {
+  const { pg, sql, pm } = await freshDb();
+  try {
+    const id = await pm();
+    assert.equal(await movedPmFor(sql, id, "u_boss"), null);
+    const list = await listPmsFor(sql, "u_boss");
+    const row = list.find((p) => p.id === id);
+    assert.ok(row);
+    assert.deepEqual(pmDrawerFor(list, id, null), { kind: "pm", pm: row });
+    assert.deepEqual(pmDrawerFor(list, null, null), { kind: "none" });
+    // Before the moved read answers, nothing opens (no flash of an empty drawer).
+    assert.deepEqual(pmDrawerFor(list, 99999, undefined), { kind: "none" });
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a moved PM still stays off the PM list and out of search", async () => {
+  const { pg, sql, pm, move } = await freshDb();
+  try {
+    const kept = await pm({ wo: "WO-2001", customer: "ZZ Other Cafe" });
+    const id = await pm();
+    await move(id);
+    const ids = (await listPmsFor(sql, "u_boss")).map((p) => p.id);
+    assert.ok(ids.includes(kept));
+    assert.equal(ids.includes(id), false);
+    const W = await import("../src/lib/ops/wo-search.ts");
+    // WO search finds the ticket, never the PM (the WO went with the work); text search leaves the PM out.
+    const hits = await W.findWoEverywhere(sql, "1107");
+    assert.deepEqual(hits.map((h) => h.entityType), ["service"]);
+    const text = await W.searchTicketText(sql, "%halcyon%");
+    assert.deepEqual(text.pms.map((p) => p.id), []);
+    assert.equal(text.jobs.length, 1);
+  } finally {
+    await pg.close();
+  }
+});

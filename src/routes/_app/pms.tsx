@@ -5,7 +5,9 @@ import { SalesScopeNote } from "@/components/desk/sales-scope-note";
 import { AddressLine } from "@/components/desk/customer-address";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createPm, listPms } from "@/lib/ops/api";
+import { createPm, getMovedPm, listPms } from "@/lib/ops/api";
+import { pmDrawerFor } from "@/lib/ops/moved-pm";
+import { MovedPmSheet } from "@/components/desk/pm-ticket-move";
 import { isOpenPm } from "@/lib/ops/ticket-status";
 import { withWoMatches } from "@/lib/ops/wo-search";
 import { formatShortDate } from "@/lib/ops/clock";
@@ -67,7 +69,15 @@ function Page() {
       tech: (p) => p.technician,
     });
   }, [pms.data, q, view, sort, filterMine, matchMine, role]);
-  const selectedRow = (pms.data ?? []).find((p) => p.id === selected) ?? null;
+  // A PM moved to a service ticket is off the list; a link to it still opens it, read-only (11/18).
+  const offList = pms.isSuccess && selected != null && !(pms.data ?? []).some((p) => p.id === selected);
+  const moved = useQuery({
+    queryKey: ["pm", "moved", selected],
+    queryFn: () => getMovedPm({ data: { id: selected! } }),
+    enabled: offList,
+  });
+  const drawer = pmDrawerFor(pms.data ?? [], selected, offList ? moved.data : null);
+  const selectedRow = drawer.kind === "pm" ? drawer.pm : null;
   const all = pms.data ?? [];
   const active = all.filter((p) => isOpenPm(p));
   const flagged = all.filter((p) => p.flag);
@@ -181,6 +191,13 @@ function Page() {
           setSelected(null);
           back();
         }} />
+      <MovedPmSheet
+        view={drawer.kind === "moved" ? drawer.view : null}
+        onClose={() => {
+          setSelected(null);
+          back();
+        }}
+      />
       <SimpleCreateDialog
         title="New PM"
         open={create}
