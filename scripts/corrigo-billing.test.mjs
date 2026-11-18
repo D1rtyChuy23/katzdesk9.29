@@ -168,6 +168,10 @@ test("6 + 7: Type PM goes on PMs, a Request is service (an Install P.O. still op
     note: "Type Request: a service ticket, though its description reads like a PM",
   });
   assert.equal(hintedBoard({ po: "Install", issue: "", callType: "Request" }).board, "install");
+  assert.equal(hintedBoard({ po: null, issue: "Install grinder", callType: "Request" }).board, "service");
+  // A Type column that says Install, with no Install on the P.O., is a service ticket and says why.
+  assert.deepEqual(hintedBoard({ po: null, issue: "New brewer", callType: "Install" }), { board: "service", note: "Type Install, but its P.O. doesn't say Install: a service ticket" });
+  assert.equal(hintedBoard({ po: "Installation SO2", issue: "", callType: "Install" }).board, "install");
   assert.equal(hintedBoard({ po: "TLC & Factor", issue: "", callType: "Request" }).board, "tlc");
   assert.equal(hintedBoard({ po: null, issue: "Install grinder", callType: "PM" }).board, "pm");
   assert.match(hintedBoard({ po: null, issue: "", callType: "Quote" }).note, /Type "Quote" isn't PM or Request/);

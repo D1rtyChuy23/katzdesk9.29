@@ -258,7 +258,8 @@ export function mapJob(r: any, today: any) {
 			scheduled
 		}, today),
 		ageDays: received ? diffDays(received, today) : null,
-		walkInMove: r.kind === "tlc" && isWalkIn(r.customer) ? WALK_IN_MOVE : null
+		walkInMove: r.kind === "tlc" && isWalkIn(r.customer) ? WALK_IN_MOVE : null,
+		movedFromPmId: r.moved_from_pm_id == null ? null : Number(r.moved_from_pm_id)
 	};
 }
 /** A PM row as the boards read it. Exported for its tests. */
@@ -290,6 +291,7 @@ export function mapPm(r: any, today: any) {
 		}, today),
 		aviKatz: false,
 		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id),
+		movedJobId: r.moved_job_id == null ? null : Number(r.moved_job_id),
 		walkInMove: isWalkIn(r.customer) ? WALK_IN_MOVE : null
 	};
 }
@@ -1158,7 +1160,8 @@ export const listPms = createServerFn({ method: "GET" }).middleware([deskMiddlew
 	const marks = await loadAccountMarks(sql);
 	// A sales rep sees only the accounts assigned to them.
 	const scope = await salesRepScope(sql, context.userId);
-	return applyMarks((await sql`select * from pm_jobs order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
+	// A PM moved to a service ticket (11/18) is the ticket now: it leaves the PM board.
+	return applyMarks((await sql`select * from pm_jobs where moved_job_id is null order by received desc nulls last, id desc`).map((r) => mapPm(r, todayChicago())), marks).filter((p: any) => !scope || scope(accountRepFor(marks, p.customer ?? null)));
 });
 export const getPm = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d)).handler(async ({ data, context }: any): Promise<PmJob | null> => {
 	const sql = await ready();
@@ -1177,6 +1180,8 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from pm_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("PM not found");
+	// Moved to a service ticket (11/18): the ticket is where its work goes now. Move it back from the ticket first.
+	if (cur[0].moved_job_id) throw new Error("This PM was moved to a service ticket. Open the ticket, or move it back to a PM from there.");
 	if (data.customer !== undefined) assertWalkInMove("pm", cur[0].customer, data.customer);
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
 		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
@@ -2836,7 +2841,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
                   where not done and status not in ('Completed', 'Cancelled')
                 )::int as p
          from pm_jobs
-         where coalesce(customer, '') <> ''
+         where coalesce(customer, '') <> '' and moved_job_id is null
          group by 1
        ) pm on pm.k = lower(d.name)
        left join (
@@ -2900,7 +2905,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
       order by received desc nulls last, id desc`;
 	const pms = await sql`
       select * from pm_jobs
-      where lower(customer) = lower(${name})
+      where lower(customer) = lower(${name}) and moved_job_id is null
       order by received desc nulls last, id desc`;
 	const installs = await sql`
       select * from installs

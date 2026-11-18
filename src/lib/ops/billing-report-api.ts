@@ -226,7 +226,7 @@ export async function loadWindowRows(sql: Q, boards: BoardKey[] = WINDOW_BOARDS)
     }>(
       `select id, wo, customer, technician, status, to_char(received, 'YYYY-MM-DD') as received,
               to_char(completed_at, 'YYYY-MM-DD') as completed, service_location, stacked_job_id
-         from pm_jobs order by completed_at desc nulls last, received desc nulls last, id desc`,
+         from pm_jobs where moved_job_id is null order by completed_at desc nulls last, received desc nulls last, id desc`,
     );
     for (const p of pms) {
       // A PM stacked on a ticket bills on that ticket: its SO and invoices are the ticket's. Otherwise its own.
@@ -369,7 +369,7 @@ export async function loadLocationCheck(sql: Q): Promise<LocationCheckRow[]> {
        from service_jobs where duplicate_of is null and nullif(btrim(service_location), '') is not null
      union all
      select 'pm', id, wo, customer, technician, service_location
-       from pm_jobs where nullif(btrim(service_location), '') is not null
+       from pm_jobs where nullif(btrim(service_location), '') is not null and moved_job_id is null
      order by 1, 2 desc`,
   );
   for (const r of located) {

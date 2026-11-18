@@ -58,6 +58,7 @@ import { PmSheet } from "./entity-sheets";
 import { TicketPmStack } from "./pm-stack-panel";
 import { isJobStack, jobStackQuery, openPmReminders } from "./pm-stack-shared";
 import { InstallMergeBanner, InstallMergeDialog, MergedIntoInstallBanner, MergedTicketSummary } from "./ticket-install-merge";
+import { MovedFromPmBanner } from "./pm-ticket-move";
 import type { TicketInstallMergeResult } from "@/lib/ops/ticket-install-merge";
 import { getTicketCharges } from "@/lib/ops/charges-api";
 import { ticketPoLock } from "@/lib/ops/ticket-po";
@@ -525,6 +526,7 @@ export function JobSheet({
                       </p>
                     ))}
                     <SerialNoticeBanner notice={j.serialNotice} />
+                    <MovedFromPmBanner job={j} onMovedBack={() => void qc.invalidateQueries({ queryKey: ["jobs"] })} />
                     <DuplicateBanner
                       job={j}
                       pending={merge.isPending}

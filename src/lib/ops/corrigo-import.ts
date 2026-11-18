@@ -786,16 +786,22 @@ export async function applyCorrigoRows(
           continue;
         }
         const done = CLOSED_PM.has(status);
-        await sql.query(
+        const pmWritten = await sql.query<{ id: number }>(
           `update pm_jobs set
               technician = $2, completed_at = $3, work_done = coalesce(nullif(btrim($4::text), ''), case when coalesce(btrim(work_done), '') = '' then $12::text when $13::text is not null and work_done = $13::text then $12::text else work_done end), status = $5,
               wo = $6, done = $7, customer = $8,
               service_location = coalesce($9, service_location), corrigo_id = coalesce($10, corrigo_id),
               received = coalesce(received, $11::date),
               updated_at = now()
-            where id = $1`,
+            where id = $1 and moved_job_id is null
+          returning id`,
           [jobId, technician, completedAt, workDone, status, keptWo, done, customer, row.serviceLocation ?? null, row.corrigoId ?? null, row.createdAt ?? null, row.workDoneFill ?? null, row.workDoneFrom ?? null],
-        );
+        ).then((r) => r.length);
+        if (!pmWritten) {
+          // Moved to a service ticket since the preview (11/18): its WO is on the ticket now. Preview again.
+          refused.push({ wo, customer: typed, reason: `PM #${jobId} was moved to a service ticket since the preview. Preview the file again.` });
+          continue;
+        }
         await logCorrigo(
           sql,
           "pm",
@@ -952,6 +958,8 @@ export async function applyCorrigoRows(
               visit_install_id = coalesce(visit_install_id, (select i.id from installs i where i.id = $18::int and not i.archived)),
               updated_at = now()
             where id = $1 and merged_install_id is null
+              -- Moved back to its PM since the preview (11/18): the ticket is closed and its WO is on the PM again.
+              and not exists (select 1 from pm_ticket_moves m where m.job_id = $1 and m.undone_at is not null)
           returning ($9::text is not null and po is not distinct from $9::text) as po_written`,
           [
             jobId,
@@ -982,7 +990,11 @@ export async function applyCorrigoRows(
         refused.push({
           wo,
           customer: typed,
-          reason: into ? `Its ticket was merged into install #${into.installId} during the import: import the file again` : "The ticket is no longer on the list",
+          reason: into
+            ? `Its ticket was merged into install #${into.installId} during the import: import the file again`
+            : (await sql.query("select 1 from pm_ticket_moves where job_id = $1 and undone_at is not null limit 1", [jobId])).length
+              ? "Its ticket was moved back to PM since the preview. Preview the file again."
+              : "The ticket is no longer on the list",
         });
         continue;
       }

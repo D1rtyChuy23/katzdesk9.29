@@ -95,7 +95,7 @@ export function stackPmSql(): string {
         where j.id = $2
         for update
      ), pm as (
-       select p.id, p.customer, p.status, p.stacked_job_id
+       select p.id, p.customer, p.status, p.stacked_job_id, p.moved_job_id
          from pm_jobs p
         where p.id = $1
         for update
@@ -111,6 +111,7 @@ export function stackPmSql(): string {
           and not ${LIVE_INVOICE_SQL("ticket.id")}
           and ticket.duplicate_of is null
           and pm.stacked_job_id is null
+          and pm.moved_job_id is null
           and ${pmKey} <> ''
           and ${pmKey} <> 'walkin'
           and ${ticketKey} <> ''

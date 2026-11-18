@@ -60,12 +60,23 @@ assert.equal(detectBoard({ po: "TLC-1" }), "tlc");
 assert.equal(detectBoard({ po: "Factor run" }), "tlc");
 assert.equal(detectBoard({ po: "Install" }), "install");
 assert.equal(detectBoard({ issue: "Preventative maintenance visit" }), "pm");
-assert.equal(detectBoard({ issue: "Installation of new machine" }), "install");
+// Only the P.O. makes an install (Chuy, 11/18): the description never does, even with a blank P.O.
+assert.equal(detectBoard({ issue: "Installation of new machine" }), "service");
+assert.equal(detectBoard({ po: "", issue: "Refurbish machine for installation at Under the Radar" }), "service");
+assert.equal(detectBoard({ po: "Installation" }), "install");
+assert.equal(detectBoard({ po: "INSTALL-SO1" }), "install");
+assert.equal(detectBoard({ po: "Re-install" }), "install");
+assert.equal(detectBoard({ po: "Uninstall" }), "service");
+assert.equal(detectBoard({ po: "De-install old brewer" }), "service");
+assert.equal(detectBoard({ po: "Pre-install visit" }), "service");
 assert.equal(detectBoard({ callType: "PM" }), "pm");
 assert.equal(detectBoard({ issue: "TLC on site", existing: "service" }), "service");
 // A filled-in P.O. decides. "Install the new replacement touchpad" is a repair when the P.O. is not an install.
 assert.equal(detectBoard({ po: "SRV1347", issue: "Install the new replacement touchpad" }), "service");
-assert.equal(detectBoard({ po: "   ", issue: "Install the new replacement touchpad" }), "install");
+assert.equal(detectBoard({ po: "   ", issue: "Install the new replacement touchpad" }), "service");
+// TLC and PM still go by the P.O., or by the words when the P.O. is blank, as before.
+assert.equal(detectBoard({ po: "", issue: "TLC visit" }), "tlc");
+assert.equal(detectBoard({ po: "", issue: "Preventive maintenance" }), "pm");
 assert.equal(detectBoard({ po: "SRV1347", issue: "Installation of new machine", callType: "PM" }), "service");
 
 assert.equal(accountIndex([{ name: "Walk - In", archived: false, locked: false, walkIn: false }]).walkInAccount, "Walk - In");

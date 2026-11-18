@@ -243,6 +243,7 @@ export async function listForJob(sql: Sql, jobId: number) {
         `select p.id, p.customer, p.status, p.equipment
            from pm_jobs p
           where p.stacked_job_id is null
+            and p.moved_job_id is null
             and p.status <> 'Cancelled'
             and regexp_replace(lower(coalesce(p.customer, '')), '[^a-z0-9]+', '', 'g') = $1
             and not exists (
