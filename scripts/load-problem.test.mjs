@@ -51,7 +51,8 @@ test("every page shows the banner, and stat rows and empty spots wait for their 
     assert.match(src(file), new RegExp(`<StatRow loaded=\\{${q}\\.isSuccess\\}>`), file);
   }
   const installs = src("src/routes/_app/installs.tsx");
-  assert.match(installs, /Prep \(\{shownCount\(loaded, prepN\)\}\)/);
+  assert.match(installs, /installChip\("Prep", prepShown, prepN, narrowed, loaded\)/);
+  assert.match(src("src/lib/ops/install-board.ts"), /if \(!loaded\) return `\$\{label\} \(—\)`;/);
   assert.match(installs, /Couldn't open install #\$\{open\}: the installs list didn't load\./);
   assert.match(src("src/components/desk/desk-charts.tsx"), /if \(!loaded\) \{\s*value = "—";/);
 });

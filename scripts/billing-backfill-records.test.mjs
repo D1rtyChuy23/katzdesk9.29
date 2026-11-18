@@ -383,7 +383,7 @@ test("skips and picks: a stacked PM, an install off the board, a merged install'
   assert.deepEqual(got("WO-7401"), ["skip", null, null, `PM #${stacked} is stacked on ticket #${host} and bills on it: its billing is the ticket's. Skipped.`]);
   assert.deepEqual(got("WO-7402"), ["skip", null, null, `Install #${gone} was taken off the board. Skipped.`]);
   assert.deepEqual(got("WO-7403"), ["write", "install", kept, null], `not #${dropped}`);
-  assert.deepEqual(got("WO-7404"), ["skip", "install", walkIn, "The install is on Walk-In, which is never a billing account. Give it the real account first."]);
+  assert.deepEqual(got("WO-7404"), ["skip", "install", walkIn, "The install is on Walk - In, and NetSuite's invoice doesn't say Walk - In. Left off."]);
   assert.deepEqual(got("WO-7405"), ["write", "install", fresh2026, null]);
   assert.deepEqual(got("WO-7406"), ["skip", null, null, `The WO is on ticket #${t2}, PM #${p2}, and the invoice date (2026-10-25) fits each of them, so the Backfill can't tell which one NetSuite billed. Skipped.`]);
   assert.deepEqual(got("WO-7407"), ["skip", null, null, "No ticket, install or PM has this WO."]);

@@ -134,13 +134,13 @@ test("Put back leaves a parts line that was linked to another unit meanwhile, an
 test("a ticket save with no account name keeps the account and saves the other fields", async () => {
   const { pg, sql, query } = await fresh();
   try {
-    await query("insert into directory_customers (name) values ('Test Diner - Main')");
+    await query("insert into directory_customers (name, walk_in) values ('Test Diner - Main', false), ('Walk - In', true)");
     const { id } = await openTicketFor(sql, { kind: "service", customer: "Test Diner - Main", received: "2026-11-12" });
     await updateJobFor(sql, { id, customer: null, issue: "One" }, "u");
     await updateJobFor(sql, { id, customer: "  ", issue: "Two" }, "u");
     assert.deepEqual((await query("select customer, issue from service_jobs where id = $1", [id]))[0], { customer: "Test Diner - Main", issue: "Two" });
     await updateJobFor(sql, { id, customer: "Walk-In" }, "u");
-    assert.equal((await query("select customer from service_jobs where id = $1", [id]))[0].customer, "Walk-In");
+    assert.equal((await query("select customer from service_jobs where id = $1", [id]))[0].customer, "Walk - In");
   } finally {
     await pg.close();
   }

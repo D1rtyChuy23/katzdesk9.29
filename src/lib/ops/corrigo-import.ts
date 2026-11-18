@@ -36,6 +36,7 @@ import {
   type OpenInstall,
 } from "@/lib/ops/corrigo";
 import { stripServiceChannelId } from "@/lib/ops/billing-rules";
+import { walkInAccountName, walkInSiteRefusal, type WalkInSite } from "@/lib/ops/walk-in-account";
 import { nameKey } from "@/lib/ops/wo-history";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ } from "@/lib/ops/ticket-billing-api";
 import { installMachines, parseMachinesJson } from "@/lib/ops/machines";
@@ -325,11 +326,13 @@ async function findExistingHit(
 /**
  * The account a name is, exactly (Grok's rule through Chuy, 10/28; it replaces adding an account for every new name):
  * a locked clean-list name first, then a live account by its exact name (case and spacing aside). A ServiceChannel id
- * at the end is dropped. Walk-In, a removed account and anything else: null. Never adds an account.
+ * at the end is dropped. A removed account and anything else: null. Walk-In is the existing "Walk - In"
+ * account when that row is on the list; it is never created here.
  */
 export async function accountNameFor(sql: Pick<Sql, "query">, raw: string | null | undefined): Promise<string | null> {
   const name = stripServiceChannelId(raw);
-  if (!name || isWalkIn(name)) return null;
+  if (!name) return null;
+  if (isWalkIn(name)) return walkInAccountName(sql);
   const locked = await lockedNameFor(sql as Sql, name);
   if (locked) return locked;
   const hit = await sql.query<{ name: string }>(
@@ -343,10 +346,10 @@ export async function accountNameFor(sql: Pick<Sql, "query">, raw: string | null
 
 /** Every account, for matching a file's names exactly. */
 async function loadAccountIndex(sql: Pick<Sql, "query">): Promise<AccountIndex> {
-  const rows = await sql.query<{ name: string; archived: boolean; name_locked: boolean }>(
-    "select name, archived, name_locked from directory_customers order by id",
+  const rows = await sql.query<{ name: string; archived: boolean; name_locked: boolean; walk_in: boolean }>(
+    "select name, archived, name_locked, walk_in from directory_customers order by id",
   );
-  return accountIndex(rows.map((r) => ({ name: r.name, archived: !!r.archived, locked: !!r.name_locked })));
+  return accountIndex(rows.map((r) => ({ name: r.name, archived: !!r.archived, locked: !!r.name_locked, walkIn: r.walk_in === true })));
 }
 
 /**
@@ -362,9 +365,18 @@ export function withAccounts(rows: CorrigoPreviewRow[], records: CorrigoRecord[]
     // A new install's option names the account the file matched exactly.
     const installOptions = row.installOptions?.map((o) => (o.id == null && !o.newFrom ? { ...o, customer: acct.name } : o)) ?? null;
     const own = row.board === "install" && !!row.customer && (row.byAccount || (!!row.existingCustomer && row.customer === row.existingCustomer));
-    if (own) return { ...row, installOptions, account: { status: "kept" as const, name: row.customer, note: null }, needsReview: false };
-    return { ...row, installOptions, customer: acct.name, account: acct, needsReview: !acct.name };
+    if (own && !isWalkIn(row.customer)) return { ...row, installOptions, account: { status: "kept" as const, name: row.customer, note: null }, needsReview: false };
+    const site = walkInBoard(row.board);
+    const blocked = !!acct.name && !!site && isWalkIn(acct.name);
+    const account = blocked ? { ...acct, note: walkInSiteRefusal(site, acct.name) } : acct;
+    return { ...row, installOptions, customer: acct.name, account, needsReview: !acct.name || blocked };
   });
+}
+
+/** A PM, install or TLC cannot be filed on Walk - In. A service ticket can. */
+function walkInBoard(board: string): WalkInSite | null {
+  if (board === "pm" || board === "install" || board === "tlc") return board;
+  return null;
 }
 
 async function logCorrigo(
@@ -721,7 +733,7 @@ export async function applyCorrigoRows(
       refused.push({
         wo,
         customer: typed,
-        reason: typed && !isWalkIn(typed) ? `No account is named "${typed}" (the import never adds one)` : "Walk-In is never an account: pick the real one",
+        reason: typed && !isWalkIn(typed) ? `No account is named "${typed}" (the import never adds one)` : "Walk - In isn't on the customer list. The import doesn't add it.",
       });
       continue;
     }
@@ -730,7 +742,11 @@ export async function applyCorrigoRows(
       if (chosen) return chosen;
       // Walk-In first: a row that says Walk-In on a ticket that is on Walk-In is refused, never kept (10/28 review).
       if (!current?.trim() || isWalkIn(current)) {
-        refused.push({ wo, customer: typed, reason: "The ticket is on Walk-In and the row has no account: pick the real one" });
+        refused.push({
+          wo,
+          customer: typed,
+          reason: isWalkIn(typed) || isWalkIn(current) ? "Walk - In isn't on the customer list. The import doesn't add it." : "The ticket has no account: pick the real one",
+        });
         return undefined;
       }
       return current;
@@ -764,6 +780,11 @@ export async function applyCorrigoRows(
         const completedAt = date.value;
         const customer = accountFor(cur[0].customer);
         if (customer === undefined) continue;
+        const site = walkInSiteRefusal("pm", customer);
+        if (site) {
+          refused.push({ wo, customer: typed, reason: site });
+          continue;
+        }
         const done = CLOSED_PM.has(status);
         await sql.query(
           `update pm_jobs set
@@ -823,6 +844,11 @@ export async function applyCorrigoRows(
         const named = cur[0].customer_locked_at ? cur[0].customer : accountFor(cur[0].customer);
         if (named === undefined) continue;
         const customer = named ?? cur[0].customer;
+        const site = walkInSiteRefusal("install", customer);
+        if (site) {
+          refused.push({ wo, customer: typed, reason: site });
+          continue;
+        }
         const complete = equipStatus === "Installed";
         // installs.wo stays the project's first WO.
         const primary = cur[0].wo?.trim() || keptWo;
@@ -896,6 +922,11 @@ export async function applyCorrigoRows(
       const completedAt = date.value;
       const customer = accountFor(cur[0].customer);
       if (customer === undefined) continue;
+      const site = cur[0].kind === "tlc" ? walkInSiteRefusal("tlc", customer) : null;
+      if (site) {
+        refused.push({ wo, customer: typed, reason: site });
+        continue;
+      }
       const done = CLOSED_CALL.has(status);
       const jobBoardKind = jobBoard(cur[0].kind);
       // P.O., issue and equipment as Corrigo has them now (10/28). A ticket billed or invoiced since the preview keeps its P.O.
@@ -984,6 +1015,12 @@ export async function applyCorrigoRows(
       // Corrigo's created date, or blank (the preview flags it): never the import day (10/28).
       const received = row.createdAt || null;
       const customer = chosen!;
+      const site = walkInBoard(board);
+      const blocked = site ? walkInSiteRefusal(site, customer) : null;
+      if (blocked) {
+        refused.push({ wo, customer: typed, reason: blocked });
+        continue;
+      }
 
       if (board === "pm") {
         const status = boardStatus("pm", row.statusRaw, row.completedAt, null).status;

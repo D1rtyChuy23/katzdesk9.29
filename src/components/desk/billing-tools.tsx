@@ -299,12 +299,27 @@ export function BillingExportButton() {
                   </ul>
                 </div>
               ) : null}
+              {result.walkIn.length ? (
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm" data-testid="billing-export-walk-in">
+                  <p className="font-medium">
+                    {result.walkIn.length} ticket{result.walkIn.length === 1 ? "" : "s"} billed to Walk - In: check none is a real site
+                  </p>
+                  <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
+                    {result.walkIn.map((t) => (
+                      <li key={t.id}>
+                        {t.wo ?? `#${t.id}`} · Walk - In
+                        {t.completed ? ` · ${t.completed}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               {result.noAccount.length ? (
                 <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm" data-testid="billing-export-no-account">
                   <p className="font-medium">
-                    {result.noAccount.length} ticket{result.noAccount.length === 1 ? "" : "s"} on Walk-In or with no account left out
+                    {result.noAccount.length} ticket{result.noAccount.length === 1 ? "" : "s"} with no account left out
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">Walk-In is never a billing account. Give each one its real account, then build the file again.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Give each one its account, then build the file again.</p>
                   <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
                     {result.noAccount.map((t) => (
                       <li key={t.id}>

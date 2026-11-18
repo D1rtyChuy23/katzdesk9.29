@@ -146,9 +146,10 @@ test("a new ticket goes on a real account, and two opened at once both get a num
     assert.deepEqual((await query("select call_id, customer, status, urgency, call_type from service_jobs where id = $1", [a.id]))[0], {
       call_id: "SC-202611-001", customer: "Test Tacos - Main St", status: "Open", urgency: "Normal", call_type: "Field Service",
     });
-    // A walk-in is still a ticket.
+    // A one-time service ticket goes on the existing Walk - In account, spelled as the list has it.
+    await query("insert into directory_customers (name, walk_in) values ('Walk - In', true)");
     const w = await openTicketFor(sql, { kind: "service", customer: "Walk-In", received: "2026-11-09" });
-    assert.equal((await query("select customer from service_jobs where id = $1", [w.id]))[0].customer, "Walk-In");
+    assert.equal((await query("select customer from service_jobs where id = $1", [w.id]))[0].customer, "Walk - In");
 
     await assert.rejects(() => openTicketFor(sql, { kind: "service", customer: "Test Typo Tacos", received: "2026-11-09" }), /^Error: Test Typo Tacos isn't on the customer list\. Pick the account, or add it on Customers first\.$/);
     await assert.rejects(() => openTicketFor(sql, { kind: "tlc", customer: "Test Tacos - Closed", received: "2026-11-09" }), /isn't on the customer list/);

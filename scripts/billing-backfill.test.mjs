@@ -217,7 +217,7 @@ test("skips: merged, Walk-In, no record, two tickets; a PM's WO goes on the PM (
   const p = await api.previewBillingBackfillFor(sql, f, "u-owner");
   const by = Object.fromEntries(p.plans.map((x) => [x.wo, x]));
   assert.match(by["WO-0402"].reason, new RegExp(`Merged into #${keeper}`));
-  assert.match(by["WO-0403"].reason, /Walk-In, which is never a billing account/);
+  assert.match(by["WO-0403"].reason, /on Walk - In, and NetSuite's invoice doesn't say Walk - In/);
   assert.deepEqual([by["WO-0404"].status, by["WO-0404"].kind, by["WO-0404"].recordId, by["WO-0404"].reason], ["write", "pm", pm, null]);
   // No charges on the PM in KatzDesk or from NetSuite: nothing to check its invoice against (11/5 review).
   assert.deepEqual([by["WO-0404"].amounts.kdSource, by["WO-0404"].amounts.nsMismatch, by["WO-0404"].warnings], ["none", false, []]);

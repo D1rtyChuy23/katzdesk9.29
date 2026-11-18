@@ -298,20 +298,22 @@ test("Export Billing: header discount columns, SO and invoices, location, invoic
   await line(sql, voided, "Service : TRIPCHARGE", 1, 150);
   await invoice(sql, voided, "INV10", "Voided", 0);
   for (let i = 0; i < 230; i += 1) await ticket(sql, { wo: `WO-8${String(i).padStart(3, "0")}` });
-  // Walk-In is never a billing account: its charges stay out of the file, and the ticket is listed.
+  // Walk - In is included, under that customer, and listed so a real site isn't billed there by mistake.
   const walkIn = await ticket(sql, { wo: "WO-7104", customer: "Walk-In" });
   await line(sql, walkIn, "Service : TRIPCHARGE", 1, 150);
 
   const out = await charges.exportBillingFor(sql, { from: "2026-10-01", to: "2026-10-31" });
-  assert.deepEqual(out.noAccount.map((t) => [t.id, t.wo, t.customer]), [[walkIn, "WO-7104", "Walk-In"]]);
-  assert.ok(!out.csv.includes("WO-7104"));
+  assert.deepEqual(out.noAccount, []);
+  assert.deepEqual(out.walkIn.map((t) => [t.id, t.wo, t.customer]), [[walkIn, "WO-7104", "Walk - In"]]);
+  assert.ok(out.csv.includes("WO-7104"));
+  assert.ok(out.csv.includes("Walk - In"));
   const [head, ...rows] = out.csv.trim().split("\r\n");
   assert.match(head, /,Work Done,Discount Item,Discount Rate,SO,Invoices,Location$/);
-  assert.equal(out.tickets, 2, "the invoiced ticket is billed already");
-  assert.equal(rows.length, 3, "no discount line");
+  assert.equal(out.tickets, 3, "the invoiced ticket is billed already; Walk - In is included");
+  assert.equal(rows.length, 4, "no discount line");
   assert.ok(rows.filter((r) => r.startsWith("WO-7101,")).every((r) => r.endsWith(",CLDSERVICE,-45.00,,,San Antonio WH")));
   assert.ok(rows.find((r) => r.startsWith("WO-7103,")).endsWith(",,,,INV10 Voided,Dallas WH"));
-  assert.equal(out.total, 555, "405 after the discount, plus 150");
+  assert.equal(out.total, 705, "405 after the discount, plus 150, plus the Walk - In ticket");
   assert.equal(out.noCharges.length, 230, "no 200 cap");
   assert.deepEqual(out.locationRules.sort((x, y) => x.location.localeCompare(y.location)), [
     { location: "Dallas WH", tickets: 1 },
@@ -319,7 +321,7 @@ test("Export Billing: header discount columns, SO and invoices, location, invoic
   ]);
 
   const all = await charges.exportBillingFor(sql, { from: "2026-10-01", to: "2026-10-31", includeBilled: true });
-  assert.equal(all.tickets, 3);
+  assert.equal(all.tickets, 4);
   assert.ok(all.csv.includes(",INV9 Open,Houston - WH"));
   assert.equal(all.locationWarnings.length, 0);
   // The CSV helper still quotes and defuses.

@@ -11,6 +11,7 @@ import { filterRows, scopeLine, summarize, type AnalyticsFilters } from "@/lib/o
 import { invoicedPartLines } from "@/lib/ops/charges-api";
 import { addDays, formatNowChicago, isInstalled, moneyExact, monthBounds, pmFlag, serviceFlag, todayChicago, weekBounds } from "@/lib/ops/clock";
 import { woMatchKey } from "@/lib/ops/corrigo";
+import { isWalkIn } from "@/lib/ops/customer-key";
 import { cleanTime, timeLabel } from "@/lib/ops/day-board";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
 import { flagOn } from "@/lib/ops/flag";
@@ -371,7 +372,7 @@ async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: 
   );
   const rep = (customer: string) => accountRepFor(marks, customer) || "";
   return [
-    ...jobs.map((j) => {
+    ...jobs.filter((j) => !isWalkIn(j.customer)).map((j) => {
       const customer = flat(j.customer);
       return {
         customer,
@@ -383,7 +384,7 @@ async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: 
         what: flat(j.work_done) || flat(j.issue),
       };
     }),
-    ...pms.map((p) => {
+    ...pms.filter((p) => !isWalkIn(p.customer)).map((p) => {
       const customer = flat(p.customer);
       return { customer, rep: rep(customer), kind: "PM", date: p.day.slice(0, 10), ref: flat(p.wo), tech: flat(p.technician), what: flat(p.work_done) };
     }),
@@ -615,6 +616,7 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
 
   const attention: AttentionLine[] = [];
   for (const job of jobs) {
+    if (isWalkIn(job.customer)) continue;
     const flag = serviceFlag(
       { kind: job.kind === "tlc" ? "tlc" : "service", status: job.status || "Open", done: !!job.done, received: job.received, scheduled: job.scheduled },
       today,
@@ -629,6 +631,7 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
     });
   }
   for (const pm of pms) {
+    if (isWalkIn(pm.customer)) continue;
     const flag = pmFlag({ status: pm.status || "", done: !!pm.done, projected: pm.projected }, today);
     if (!flag) continue;
     attention.push({

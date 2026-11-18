@@ -7,6 +7,7 @@ import { isoDayOrNull } from "@/lib/ops/iso";
 import { canonicalRepName, isNoRep, DEFAULT_REPS } from "@/lib/ops/rep-match";
 import { cityFromAddress, isPoint, type PinQuality } from "@/lib/ops/geo";
 import { MANUAL_PIN_MATCH, pinQuality } from "@/lib/ops/account-pin";
+import { isWalkIn } from "@/lib/ops/customer-key";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -169,6 +170,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
     for (const r of rows) {
       const key = String(r.name ?? "").trim().toLowerCase();
       // Two rows with the same lower-case name would double-count the same jobs; the first (by id) keeps them.
+      if (isWalkIn(r.name)) continue;
       const dup = seen.has(key);
       seen.add(key);
       const rep = canonicalRepName(r.account_rep);
