@@ -14,7 +14,7 @@ process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const { parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
-const { syncInstallUnits } = await import("../src/lib/ops/inspection-api.ts");
+const { syncInstallUnits, readInspection, loadInspectionSummaries } = await import("../src/lib/ops/inspection-api.ts");
 const F = await import("../src/lib/ops/install-date-fill.ts");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -66,13 +66,15 @@ test("a Corrigo install ticket completed fills each unit's install date from the
   }
 });
 
-test("units added to an install that is already Installed get its date; the scheduled date only when completed is blank", async () => {
+test("units added in the install window to an install already Installed get its date; the scheduled one when completed is blank", async () => {
   const { pg, sql, query } = await fresh();
   try {
-    const id = await bunnInstall(sql, query, { equip_status: "Installed", complete: true, install_date: "2026-11-05", completed_at: null });
-    // syncInstallUnits added the units to an Installed install: they take its scheduled date, as nothing else is there.
-    assert.deepEqual((await units(query)).map((u) => u.d), ["2026-11-05", "2026-11-05"]);
-    const log = (await query("select detail from activity where entity_type = 'install' and entity_id = $1 and action = 'install-date'", [id]))[0];
+    const { updateInstallFor } = await import("../src/lib/ops/api.ts");
+    const id = Number((await query("insert into installs (customer, equip_status, complete, install_date, wo) values ($1, 'Installed', true, '2026-11-05', 'WO-1150') returning id", [CUSTOMER]))[0].id);
+    await updateInstallFor(sql, { id, machines: [{ equipment: "Bunn ITCB-DV", serial: "ITCB187083", powerVoltage: "" }, { equipment: "Bunn ITCB-DV", serial: "ITCB187074", powerVoltage: "" }] }, { userId: "u-owner" });
+    assert.deepEqual((await units(query)).map((u) => [u.serial, u.d]), [["ITCB187074", "2026-11-05"], ["ITCB187083", "2026-11-05"]]);
+    const log = (await query("select actor_name, detail from activity where entity_type = 'install' and entity_id = $1 and action = 'install-date'", [id]))[0];
+    assert.equal(log.actor_name, "chuy.zz");
     assert.match(log.detail, /2026-11-05 \(the install's scheduled date: it has no completed date\)/);
   } finally {
     await pg.close();
@@ -161,14 +163,14 @@ test("backfill: Admin only; the preview lists every row it would write and the s
     // The preview wrote nothing.
     assert.deepEqual(await units(query), before);
 
-    await assert.rejects(F.applyInstallDateBackfillFor(sql, "u-tech", { unitIds: p.rows.map((r) => r.unitId) }), new RegExp(F.ADMIN_ONLY.slice(0, 20)));
-    // A unit someone dated after the preview is left as they set it.
-    const res = await F.applyInstallDateBackfillFor(sql, "u-owner", { unitIds: [...p.rows.map((r) => r.unitId), ...p.skipped.map((r) => r.unitId)] });
+    await assert.rejects(F.applyInstallDateBackfillFor(sql, "u-tech", { rows: p.rows }), new RegExp(F.ADMIN_ONLY.slice(0, 20)));
+    // Skipped units sent anyway are still not written.
+    const res = await F.applyInstallDateBackfillFor(sql, "u-owner", { rows: [...p.rows, ...p.skipped.map((r) => ({ unitId: r.unitId, date: "2026-11-10" }))] });
     assert.deepEqual(res.written.map((r) => [r.serial, r.date]), [["ITCB187083", "2026-11-10"]]);
     const after = Object.fromEntries((await units(query)).map((u) => [u.serial, u.d]));
     assert.deepEqual(after, { ITCB187074: null, ITCB187083: "2026-11-10", "TB3-555": null, "TB3-777": null });
     // Apply again: nothing left to write.
-    assert.deepEqual((await F.applyInstallDateBackfillFor(sql, "u-owner", { unitIds: p.rows.map((r) => r.unitId) })).written, []);
+    assert.deepEqual((await F.applyInstallDateBackfillFor(sql, "u-owner", { rows: p.rows })).written, []);
     assert.deepEqual((await F.previewInstallDateBackfillFor(sql, "u-owner")).rows, []);
   } finally {
     await pg.close();
@@ -184,9 +186,76 @@ test("backfill apply writes only what is still blank: a date set after the previ
     const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
     assert.equal(p.rows.length, 2);
     await query("update account_equipment set install_date = '2025-01-02' where serial = 'ITCB187083'");
-    const res = await F.applyInstallDateBackfillFor(sql, "u-owner", { unitIds: p.rows.map((r) => r.unitId) });
+    const res = await F.applyInstallDateBackfillFor(sql, "u-owner", { rows: p.rows });
     assert.deepEqual(res.written.map((r) => r.serial), ["ITCB187074"]);
     assert.deepEqual((await units(query)).map((u) => [u.serial, u.d]), [["ITCB187074", "2026-11-10"], ["ITCB187083", "2025-01-02"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("reading an Installed install writes nothing: only saves fill dates", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const id = await bunnInstall(sql, query);
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
+    await readInspection(sql, id);
+    await loadInspectionSummaries(sql, [id]);
+    assert.deepEqual((await units(query)).map((u) => u.d), [null, null]);
+    assert.equal((await query("select count(*)::int as n from activity where action = 'install-date'"))[0].n, 0);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit that was on the account before the install is not dated by it, and the preview says why", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    // Imported from the equipment list first, then claimed by the install's list by its serial.
+    await query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, 'Bunn ITCB-DV', 'Bunn ITCB-DV', 'ITCB187083', 'itcb187083')", [CUSTOMER]);
+    const id = await bunnInstall(sql, query);
+    const made = await query("select serial, created_by_install from account_equipment order by serial");
+    assert.deepEqual(made.map((r) => [r.serial, r.created_by_install]), [["ITCB187074", id], ["ITCB187083", null]]);
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
+    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial), ["ITCB187074"]);
+    await query("update account_equipment set install_date = null");
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    assert.deepEqual(p.rows.map((r) => r.serial), ["ITCB187074"]);
+    assert.deepEqual(p.skipped.map((r) => [r.serial, r.reason]), [["ITCB187083", F.SKIP_NOT_NEW]]);
+    // Marked New on its pre-inspection, it is this install's: it takes the date.
+    await query("update install_inspection_units set visit_kind = 'new' where install_id = $1", [id]);
+    assert.deepEqual((await F.fillInstallDatesFor(sql, id, "chuy.zz")).map((r) => r.serial).sort(), ["ITCB187074", "ITCB187083"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("filling a date leaves the install's pre-inspection as it was: its units stay New", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const id = await bunnInstall(sql, query);
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
+    const before = (await loadInspectionSummaries(sql, [id])).get(id);
+    await F.fillInstallDatesFor(sql, id, "chuy.zz");
+    assert.deepEqual((await units(query)).map((u) => u.d), ["2026-11-10", "2026-11-10"]);
+    const after = (await loadInspectionSummaries(sql, [id])).get(id);
+    assert.deepEqual([after.overall, after.passedCount, after.machineCount], [before.overall, before.passedCount, before.machineCount]);
+    assert.deepEqual((await query("select visit_kind from install_inspection_units where install_id = $1", [id])).map((r) => r.visit_kind), ["new", "new"]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("backfill Write uses the date the preview showed: one that changed since writes nothing", async () => {
+  const { pg, sql, query } = await fresh();
+  try {
+    const id = await bunnInstall(sql, query);
+    await query("update installs set equip_status = 'Installed', complete = true, completed_at = '2026-11-10' where id = $1", [id]);
+    await query("update account_equipment set install_date = null");
+    const p = await F.previewInstallDateBackfillFor(sql, "u-owner");
+    await query("update installs set completed_at = '2026-11-12' where id = $1", [id]);
+    assert.deepEqual((await F.applyInstallDateBackfillFor(sql, "u-owner", { rows: p.rows })).written, []);
+    assert.deepEqual((await units(query)).map((u) => u.d), [null, null]);
   } finally {
     await pg.close();
   }

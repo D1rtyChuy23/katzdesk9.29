@@ -3,13 +3,18 @@
  * marked it), each unit it put on the account gets the install's completed date, or its scheduled date when the
  * completed one is blank. The install's history says which date was used.
  *
- * What is filled: a unit linked to the install on its visit as new (not "already on the account"), whose install date is
- * blank and which isn't Locked. A date already set is never changed. Nothing is filled while the install is open: on the
- * account record an install date means "installed" (the pre-inspection reads it as existing equipment, and a load then
- * never rewrites the unit's serial), so it waits until the install is done.
+ * What is filled: a unit this install put on the account (its load made it), or one its pre-inspection marks New, whose
+ * install date is blank and which isn't Locked. A unit that was on the account before the install (imported, added by
+ * hand) is left: its date isn't this install's. A date already set is never changed. Nothing is filled while the
+ * install is open: on the account record an install date means "installed", so it waits until the install is done.
  *
- * Plus a one-time Admin backfill for installs done before this: a preview of every row it would write and every one it
- * skips, then Apply, which writes only rows that are still blank, unlocked and still worked out the same way.
+ * With no kind chosen, the pre-inspection reads a dated unit with a serial as Existing. So the same statement that dates
+ * a unit records it as New on this visit, which is what it read as before: the install's pre-inspection doesn't change.
+ *
+ * Runs only from saves (the install window, Corrigo, adding or linking a unit, a serial pulled onto the install), never
+ * from reading an install. Plus a one-time Admin backfill for installs done before this: a preview of every row it
+ * would write and every one it skips, then Write, which writes only the previewed rows that are still blank, unlocked
+ * and would take the same date the preview showed.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -20,6 +25,7 @@ import { checked } from "@/lib/ops/checked-input";
 export const ADMIN_ONLY = "Only an Admin can fill install dates from installs.";
 export const SKIP_LOCKED = "Locked: left as it is.";
 export const SKIP_NO_DATE = "Its install has no completed or scheduled date.";
+export const SKIP_NOT_NEW = "Was on the account before this install (not made by it, and not marked New on its pre-inspection).";
 
 export type InstallDateSource = "completed" | "scheduled";
 
@@ -37,13 +43,15 @@ export type InstallDateRow = {
 export type InstallDateSkip = Omit<InstallDateRow, "date" | "source"> & { reason: string };
 
 /**
- * Each blank-dated, new-on-the-visit unit of an Installed install, once, with the date it would take. A unit on two
- * Installed installs takes the earliest dated one. $1 limits it to one install (null: every install).
+ * Each blank-dated unit on an Installed install's visit (chosen New, or no kind chosen), once, with the date it would
+ * take and whether this install made it. A unit on two Installed installs goes by its earliest dated one. $1 limits it
+ * to one install (null: every install).
  */
 const CANDIDATES_SQL = `
   select distinct on (a.id)
          a.id as unit_id, a.customer, coalesce(nullif(btrim(a.equipment_name), ''), a.catalog_model) as equipment, a.serial,
          i.id as install_id, i.wo, a.locked_at is not null as locked,
+         (u.visit_kind = 'new' or a.created_by_install = i.id) as made_here,
          to_char(coalesce(i.completed_at, i.install_date), 'YYYY-MM-DD') as fill_date,
          case when i.completed_at is not null then 'completed' else 'scheduled' end as source
     from install_inspection_units u
@@ -52,9 +60,10 @@ const CANDIDATES_SQL = `
    where (i.complete or i.equip_status = 'Installed')
      and coalesce(i.archived, false) = false
      and a.install_date is null
-     and coalesce(u.visit_kind, 'new') = 'new'
+     and (u.visit_kind is null or u.visit_kind = 'new')
      and ($1::int is null or i.id = $1::int)
-   order by a.id, coalesce(i.completed_at, i.install_date) is null, coalesce(i.completed_at, i.install_date), i.id`;
+   order by a.id, (u.visit_kind = 'new' or a.created_by_install = i.id) desc, coalesce(i.completed_at, i.install_date) is null,
+            coalesce(i.completed_at, i.install_date), i.id`;
 
 type Cand = {
   unit_id: number;
@@ -64,6 +73,7 @@ type Cand = {
   install_id: number;
   wo: string | null;
   locked: boolean;
+  made_here: boolean;
   fill_date: string | null;
   source: InstallDateSource;
 };
@@ -80,18 +90,28 @@ const rowOf = (c: Cand): InstallDateRow => ({
 });
 
 /**
- * One statement: blank, unlocked candidates take their date. The `where` re-checks the unit as it is now, so a date
- * set or a lock put on since the read is kept. $2 (optional) limits it to these units.
+ * One statement: blank, unlocked units this install made take their date, and the visit records them as New. The
+ * `where` re-checks the unit as it is now, so a date or a lock set since the read is kept. With $2/$3 (the backfill's
+ * Write), only those units, and only at the date the preview showed them.
  */
 const FILL_SQL = `
-  with c as (${CANDIDATES_SQL})
-  update account_equipment a
-     set install_date = c.fill_date::date, updated_at = now()
-    from c
-   where a.id = c.unit_id and not c.locked and c.fill_date is not null
-     and a.install_date is null and a.locked_at is null
-     and ($2::int[] is null or a.id = any($2::int[]))
-  returning a.id as unit_id, c.customer, c.equipment, c.serial, c.install_id, c.wo, c.fill_date, c.source, c.locked`;
+  with c as (${CANDIDATES_SQL}),
+  picked as (select * from unnest($2::int[], $3::text[]) as p(unit_id, fill_date)),
+  upd as (
+    update account_equipment a
+       set install_date = c.fill_date::date, updated_at = now()
+      from c
+     where a.id = c.unit_id and c.made_here and not c.locked and c.fill_date is not null
+       and a.install_date is null and a.locked_at is null
+       and ($2::int[] is null or exists (select 1 from picked p where p.unit_id = c.unit_id and p.fill_date = c.fill_date))
+    returning a.id as unit_id, c.customer, c.equipment, c.serial, c.install_id, c.wo, c.fill_date, c.source, c.locked, c.made_here
+  ),
+  pinned as (
+    update install_inspection_units u set visit_kind = 'new'
+      from upd where u.install_id = upd.install_id and u.equipment_id = upd.unit_id and u.visit_kind is null
+    returning u.equipment_id
+  )
+  select upd.*, (select count(*) from pinned) as pinned from upd`;
 
 const unitLabel = (r: InstallDateRow) => `${r.equipment}${r.serial ? ` ${r.serial}` : ""}`;
 
@@ -123,7 +143,7 @@ async function logFilled(sql: Sql, actor: string, rows: InstallDateRow[]): Promi
  */
 export async function fillInstallDatesFor(sql: Sql, installId: number, actor: string | null): Promise<InstallDateRow[]> {
   try {
-    const rows = (await sql.query<Cand>(FILL_SQL, [installId, null])).map(rowOf).sort((a, b) => String(a.serial).localeCompare(String(b.serial)));
+    const rows = (await sql.query<Cand>(FILL_SQL, [installId, null, null])).map(rowOf).sort((a, b) => String(a.serial).localeCompare(String(b.serial)));
     if (rows.length) await logFilled(sql, actor || "System", rows);
     return rows;
   } catch (e) {
@@ -147,27 +167,39 @@ export async function previewInstallDateBackfillFor(sql: Sql, userId: string): P
   const rows: InstallDateRow[] = [];
   const skipped: InstallDateSkip[] = [];
   for (const c of cands) {
-    if (c.locked || !c.fill_date) {
+    if (c.locked || !c.fill_date || !c.made_here) {
       const { date: _d, source: _s, ...rest } = rowOf({ ...c, fill_date: c.fill_date ?? "" });
-      skipped.push({ ...rest, reason: c.locked ? SKIP_LOCKED : SKIP_NO_DATE });
+      skipped.push({ ...rest, reason: c.locked ? SKIP_LOCKED : !c.made_here ? SKIP_NOT_NEW : SKIP_NO_DATE });
     } else rows.push(rowOf(c));
   }
   return { rows: rows.sort(order), skipped: skipped.sort(order) };
 }
 
-/** Writes the previewed units that are still blank and unlocked; a skipped or since-changed one is left. Logged per install. */
-export async function applyInstallDateBackfillFor(sql: Sql, userId: string, data: { unitIds: number[] }): Promise<{ written: InstallDateRow[] }> {
+/**
+ * Writes the previewed units, each at the date the preview showed, that are still blank and unlocked; a unit whose date
+ * would now differ, or that changed since, is left. Logged per install.
+ */
+export async function applyInstallDateBackfillFor(
+  sql: Sql,
+  userId: string,
+  data: { rows: { unitId: number; date: string }[] },
+): Promise<{ written: InstallDateRow[] }> {
   await assertAdmin(sql, userId);
-  const ids = [...new Set(data.unitIds.map(Number).filter((n) => Number.isInteger(n) && n > 0))];
-  if (!ids.length) return { written: [] };
+  const seen = new Set<number>();
+  const rows = data.rows.filter((r) => Number.isInteger(r.unitId) && r.unitId > 0 && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && !seen.has(r.unitId) && seen.add(r.unitId));
+  if (!rows.length) return { written: [] };
   const actor =
     (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Admin";
-  const written = (await sql.query<Cand>(FILL_SQL, [null, ids])).map(rowOf).sort((a, b) => String(a.serial).localeCompare(String(b.serial)));
+  const written = (await sql.query<Cand>(FILL_SQL, [null, rows.map((r) => r.unitId), rows.map((r) => r.date)]))
+    .map(rowOf)
+    .sort((a, b) => String(a.serial).localeCompare(String(b.serial)));
   if (written.length) await logFilled(sql, `${actor} (install date backfill)`, written);
   return { written };
 }
 
-const applyInput = checked(z.object({ unitIds: z.array(z.number().int().positive()).max(20_000) }));
+const applyInput = checked(
+  z.object({ rows: z.array(z.object({ unitId: z.number().int().positive(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })).max(20_000) }),
+);
 
 export const previewInstallDateBackfill = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])

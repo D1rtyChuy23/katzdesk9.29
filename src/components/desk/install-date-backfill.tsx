@@ -26,7 +26,7 @@ export function InstallDateBackfillButton() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't read the installs"),
   });
   const write = useMutation({
-    mutationFn: () => applyInstallDateBackfill({ data: { unitIds: preview!.rows.map((r) => r.unitId) } }),
+    mutationFn: () => applyInstallDateBackfill({ data: { rows: preview!.rows.map((r) => ({ unitId: r.unitId, date: r.date })) } }),
     onSuccess: (r) => {
       const left = preview!.rows.length - r.written.length;
       toast.success(`Install dates written on ${r.written.length} unit${r.written.length === 1 ? "" : "s"}${left ? `; ${left} changed since the preview and were left` : ""}`);
@@ -47,7 +47,7 @@ export function InstallDateBackfillButton() {
         <DialogContent className="max-w-3xl">
           <DialogTitle>Fill equipment install dates from installs</DialogTitle>
           <DialogDescription>
-            Units an Installed install put on an account, with a blank Install date, take the install's completed date, or its scheduled date when
+            Units an Installed install put on an account (or marked New on its pre-inspection), with a blank Install date, take the install's completed date, or its scheduled date when
             that's blank. A date already set and a Locked unit are never changed. Nothing is written until you press Write.
           </DialogDescription>
           {p ? (

@@ -958,20 +958,7 @@ function retiredByModel(retired: RetiredHere[], piece: Piece): boolean {
   return true;
 }
 
-/**
- * The install's list onto its account units (below), then, if the install is Installed, its new units' blank install
- * dates from the install (11/18, install-date-fill.ts). `actor` names who the install history says filled them.
- */
 export async function syncInstallUnits(
-  sql: Sql,
-  installId: number,
-  opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null; actor?: string | null },
-): Promise<void> {
-  await syncInstallUnitsBody(sql, installId, opts);
-  await fillInstallDatesFor(sql, installId, opts?.actor ?? null);
-}
-
-async function syncInstallUnitsBody(
   sql: Sql,
   installId: number,
   opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null },
@@ -1851,6 +1838,8 @@ export async function addMachineOntoInstall(
     [data.installId, lines, packed.machines, packed.serial, packed.powerVoltage],
   );
   await syncInstallUnits(sql, data.installId, { prune: true });
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   const view = await readInspection(sql, data.installId);
   if (!view) throw new Error("Install not found");
   const expected = current.filter((m) => m.equipment.trim()).length + 1;
@@ -2132,6 +2121,8 @@ export async function addUnitOntoList(
   const name = unit.equipment_name || unit.catalog_model;
   await writeList(sql, data.installId, [...pieces, { equipment: name, serial: unit.serial ?? "", powerVoltage: unit.electrical ?? "", unitId: unit.id }]);
   await syncInstallUnits(sql, data.installId);
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,
@@ -2224,6 +2215,8 @@ export async function linkVisitUnit(
   for (const copy of copies) await mergeEquipmentUnits(sql, to.id, copy.id);
   await mergeEquipmentUnits(sql, to.id, from.id);
   await syncInstallUnits(sql, data.installId);
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,
