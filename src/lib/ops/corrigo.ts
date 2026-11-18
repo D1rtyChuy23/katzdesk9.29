@@ -399,7 +399,7 @@ export type CorrigoPreviewRow = {
 
 // ── Accounts: exact names only (Grok's rule through Chuy, 10/28) ─────────────────────────────────────────────────────
 
-export type AccountRow = { name: string; archived: boolean; locked: boolean; /** directory_customers.walk_in. Omitted only by callers that have no flag. */ walkIn?: boolean };
+export type AccountRow = { name: string; archived: boolean; locked: boolean; /** directory_customers.walk_in. Not used to find the "Walk - In" account. */ walkIn?: boolean };
 
 export type AccountIndex = {
   /** Live accounts by exact name (case and spacing aside). */
@@ -409,8 +409,8 @@ export type AccountIndex = {
   /** Locked clean-list names by their letters and digits: a locked name wins over the file's spelling. */
   locked: Map<string, string>;
   /**
-   * The one shared account named exactly "Walk - In" and marked walk_in, when it is on the list.
-   * A name that only normalizes to walkin, or the right name with the flag off, is not this account.
+   * The one shared live account named exactly "Walk - In", when it is on the list.
+   * A name that only normalizes to walkin is not this account. The walk_in flag is not checked.
    */
   walkInAccount: string | null;
 };
@@ -427,7 +427,7 @@ export function accountIndex(rows: AccountRow[]): AccountIndex {
     if (!idx.active.has(k)) idx.active.set(k, r.name);
     const lk = normalizeCustomerKey(r.name);
     if (r.locked && lk && !idx.locked.has(lk)) idx.locked.set(lk, r.name);
-    if (r.walkIn === true && r.name === "Walk - In") idx.walkInAccount = "Walk - In";
+    if (idx.walkInAccount == null && r.name === "Walk - In") idx.walkInAccount = "Walk - In";
   }
   return idx;
 }
@@ -774,7 +774,9 @@ export function detectBoard(hints: {
   existing?: CorrigoBoard | null;
 }): CorrigoBoard {
   if (hints.existing) return hints.existing;
-  const blob = [hints.po, hints.issue, hints.callType].filter(Boolean).join(" ");
+  // A filled-in P.O. decides the board. The Problem Description and call type decide only when the P.O. is blank.
+  const po = String(hints.po ?? "").trim();
+  const blob = po || [hints.issue, hints.callType].filter(Boolean).join(" ");
   if (/\b(installs?|installation)\b/i.test(blob)) return "install";
   if (/\b(tlc|factor)\b/i.test(blob)) return "tlc";
   if (/\b(preventative|preventive|\bpm\b)\b/i.test(blob)) return "pm";
@@ -795,8 +797,8 @@ export function corrigoType(raw: string | null | undefined): { type: CorrigoType
 
 /**
  * The board a new row goes on. With a Type column, Type PM is a PM and Install is an install. A Request is service
- * work: an install or a TLC / Factor visit by its P.O. or description (Corrigo has no Install type), never a PM by its
- * words. Without a Type, the P.O., description and call type decide, as before.
+ * work: an install or a TLC / Factor visit by its P.O. when the P.O. is filled in, otherwise by its description
+ * (Corrigo has no Install type), never a PM by its words. Without a Type, the same P.O. rule decides.
  */
 export function hintedBoard(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): { board: CorrigoBoard; note: string | null } {
   const t = corrigoType(rec.callType);

@@ -7,6 +7,16 @@ export function FlagBadge({ flag }: { flag: ClockFlag | null | undefined }) {
   return <Badge variant={variant}>{flag.label}</Badge>;
 }
 
+/** A PM, install or TLC already on Walk - In: it stays listed so it can be moved to the café. */
+export function WalkInMoveBadge({ text }: { text?: string | null }) {
+  if (!text) return null;
+  return (
+    <Badge variant="warn" data-testid="walk-in-move">
+      {text}
+    </Badge>
+  );
+}
+
 export function UrgencyBadge({ urgency }: { urgency: string | null | undefined }) {
   if (!urgency) return null;
   const s = urgency.toLowerCase();

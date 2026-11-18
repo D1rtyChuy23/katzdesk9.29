@@ -13,8 +13,8 @@ const { installChip, installHiddenMessage, clearedInstallNarrow } = await import
 const { accountIndex, resolveRowAccount } = await import("../src/lib/ops/corrigo.ts");
 const { parseCorrigoMatrix } = await import("../src/lib/ops/corrigo.ts");
 const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
-const { assertWalkInSite } = await import("../src/lib/ops/walk-in-account.ts");
-const { openTicketFor, updatePmFor, updateInstallFor, updateDealFor } = await import("../src/lib/ops/api.ts");
+const { assertWalkInSite, WALK_IN_MOVE } = await import("../src/lib/ops/walk-in-account.ts");
+const { openTicketFor, updatePmFor, updateInstallFor, updateDealFor, mapJob, mapPm, mapInstall } = await import("../src/lib/ops/api.ts");
 const { addEquipmentUnit } = await import("../src/lib/ops/account-equip-edit.ts");
 const api = await import("../src/lib/ops/billing-backfill-api.ts");
 const charges = await import("../src/lib/ops/charges-api.ts");
@@ -211,3 +211,61 @@ test("a PM, install, deal, TLC schedule or equipment on Walk - In is refused", a
     await pg.close();
   }
 });
+
+test("Corrigo: a live Walk - In with walk_in false still takes a row that has no Service Location", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await sql.query("insert into directory_customers (name, walk_in, archived) values ('Walk - In', false, false)");
+    const idx = accountIndex([{ name: "Walk - In", archived: false, locked: false, walkIn: false }]);
+    assert.equal(idx.walkInAccount, "Walk - In");
+    const hit = resolveRowAccount({ customer: "Walk-In", serviceLocation: "" }, null, idx);
+    assert.equal(hit.status, "onetime");
+    assert.equal(hit.name, "Walk - In");
+    const { records } = parseCorrigoMatrix([
+      ["ST#", "Operational Status", "Customer Name", "Service Location Name", "Type"],
+      ["0930", "Work Started", "Walk - In", "", "Request"],
+    ]);
+    const preview = await previewCorrigoRecords(sql, records);
+    assert.equal(preview.rows[0].needsReview, false);
+    assert.equal(preview.rows[0].customer, "Walk - In");
+    assert.equal(preview.rows[0].account.status, "onetime");
+    const written = await applyCorrigoRows(sql, preview.rows, "chuy");
+    assert.equal(written.refused.length, 0);
+    assert.equal((await sql.query("select customer from service_jobs where wo = 'WO-0930'"))[0].customer, "Walk - In");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("an install already on Walk - In saves its notes; a move onto Walk - In is still refused", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await sql.query("insert into directory_customers (name, walk_in) values ('Walk - In', false)");
+    const install = (await sql.query("insert into installs (customer, received, notes) values ('Walk - In', '2026-11-01', 'old') returning id"))[0].id;
+    const saved = await updateInstallFor(sql, { id: install, customer: "Walk - In", notes: "Side door" }, { userId: "u-owner" });
+    assert.equal(saved.notes, "Side door");
+    assert.equal(saved.customer, "Walk - In");
+    assert.equal(saved.walkInMove, WALK_IN_MOVE);
+    assert.equal((await sql.query("select notes, customer from installs where id = $1", [install]))[0].notes, "Side door");
+    const other = (await sql.query("insert into installs (customer, received) values ('Zz Bean Cafe', '2026-11-01') returning id"))[0].id;
+    await assert.rejects(() => updateInstallFor(sql, { id: other, customer: "Walk - In", notes: "nope" }, { userId: "u-owner" }), /doesn't take an install/);
+    assert.equal((await sql.query("select notes from installs where id = $1", [other]))[0].notes, null);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a TLC, PM or install already on Walk - In is listed with the move flag; a service ticket is not", () => {
+  const today = "2026-11-17";
+  const tlc = mapJob({ id: 1, kind: "tlc", customer: "Walk - In", call_id: "TLC-1", status: "Open" }, today);
+  const service = mapJob({ id: 2, kind: "service", customer: "Walk - In", call_id: "SC-1", status: "Open" }, today);
+  const pm = mapPm({ id: 3, customer: "Walk - In", status: "Pending Scheduling" }, today);
+  const install = mapInstall({ id: 4, customer: "Walk-In", equip_status: "Not Ready" }, today, { start: today, end: today });
+  const cafe = mapPm({ id: 5, customer: "Zz Bean Cafe", status: "Pending Scheduling" }, today);
+  assert.equal(tlc.walkInMove, WALK_IN_MOVE);
+  assert.equal(service.walkInMove, null);
+  assert.equal(pm.walkInMove, WALK_IN_MOVE);
+  assert.equal(install.walkInMove, WALK_IN_MOVE);
+  assert.equal(cafe.walkInMove, null);
+});
+

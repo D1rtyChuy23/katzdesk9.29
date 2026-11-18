@@ -24,7 +24,7 @@ import { DealLinkReview } from "@/components/desk/deal-link-review";
 import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
 import { Label, Textarea } from "@/components/ui/input";
-import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
+import { FlagBadge, StatusBadge, WalkInMoveBadge } from "@/components/desk/flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { InstallSheet } from "@/components/desk/entity-sheets";
 import { RecipeChip } from "@/components/desk/recipe-sheet";
@@ -929,6 +929,7 @@ function InstallRow({
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />
+              <WalkInMoveBadge text={i.walkInMove} />
               <StatusBadge status={i.equipStatus} tight />
               {open ? (
                 <InspectionBadge

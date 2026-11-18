@@ -372,7 +372,7 @@ async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: 
   );
   const rep = (customer: string) => accountRepFor(marks, customer) || "";
   return [
-    ...jobs.filter((j) => !isWalkIn(j.customer)).map((j) => {
+    ...jobs.map((j) => {
       const customer = flat(j.customer);
       return {
         customer,
@@ -616,7 +616,7 @@ async function loadSnapshot(sql: Sql, chats: TeamsChat[], now: Date = new Date()
 
   const attention: AttentionLine[] = [];
   for (const job of jobs) {
-    if (isWalkIn(job.customer)) continue;
+    if (job.kind === "tlc" && isWalkIn(job.customer)) continue;
     const flag = serviceFlag(
       { kind: job.kind === "tlc" ? "tlc" : "service", status: job.status || "Open", done: !!job.done, received: job.received, scheduled: job.scheduled },
       today,

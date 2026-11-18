@@ -45,6 +45,8 @@ export async function readFieldAssets(sql: Sql): Promise<FieldAsset[]> {
        left join acct c on c.k = lower(btrim(a.customer))
       order by lower(a.customer), lower(a.catalog_model), a.id`,
   );
+  // In the Field is the machine list, not service tickets. Walk-In equipment stays off it.
+  // Service tickets on Walk - In stay on the work boards (Coming Due, the map, Teams, Analytics).
   return rows.filter((r) => !isWalkIn(r.customer)).map((r) => ({
     id: Number(r.id),
     customer: r.customer,

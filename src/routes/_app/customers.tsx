@@ -389,12 +389,13 @@ function Page() {
                 <p className="text-xs text-muted-foreground sm:truncate">
                   {isWalkIn(c.name) ? (
                     "One-time"
+                  ) : c.accountRep ? (
+                    <RepName name={c.accountRep} />
                   ) : (
-                    <>
-                  {c.accountRep ? <RepName name={c.accountRep} /> : <NoRepFlag show />}
+                    <NoRepFlag show />
+                  )}
                   {" · "}
                   {countLabel(c.calls, "call", "calls")}
-
                   {" · "}
                   {countLabel(c.tlcs, "TLC", "TLCs")}
                   {" · "}
@@ -403,8 +404,6 @@ function Page() {
                   {countLabel(c.installs, "install", "installs")}
                   {c.deals ? ` · ${countLabel(c.deals, "deal", "deals")}` : ""}
                   {c.recipes ? ` · ${countLabel(c.recipes, "recipe", "recipes")}` : ""}
-                    </>
-                  )}
                 </p>
                 {pending ? (
                   <p className="text-xs text-amber-800 sm:truncate dark:text-amber-300">{pending}</p>

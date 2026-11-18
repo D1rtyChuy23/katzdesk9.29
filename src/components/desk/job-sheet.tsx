@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/separator";
-import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
+import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge, WalkInMoveBadge } from "./flag-badge";
 import { Thread } from "./thread";
 import { ChargesPanel } from "./charges-panel";
 import { TicketBillingFlags, TicketInvoicesPanel } from "./ticket-invoices";
@@ -497,6 +497,7 @@ export function JobSheet({
                       <UrgencyBadge urgency={j.urgency} />
                       <StatusBadge status={j.status} />
                       <FlagBadge flag={j.flag} />
+                      <WalkInMoveBadge text={j.walkInMove} />
                     </>
                   )}
                   <DuplicateBadge duplicateOf={j.duplicateOf} siblingCount={j.siblings?.length ?? 0} mergedInstallId={j.mergedInstallId} />

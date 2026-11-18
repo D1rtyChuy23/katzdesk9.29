@@ -1,18 +1,22 @@
 /**
- * The one shared Walk - In account. It already exists (name exactly "Walk - In", walk_in = true).
+ * The one shared Walk - In account. It already exists (name exactly "Walk - In").
+ * The walk_in column marks renamed child accounts, not this parent, so it is not how the account is found.
  * Nothing here creates a second one. A missing account is a stop, not a reason to insert a row.
  */
 import { isWalkIn } from "./customer-key.ts";
 
 export const WALK_IN_ACCOUNT_NAME = "Walk - In";
 
+/** On a PM, install or TLC already sitting on Walk - In, so it can be found and moved. */
+export const WALK_IN_MOVE = "On Walk - In: move it to the café's account";
+
 type QuerySql = { query: (text: string, params?: unknown[]) => Promise<{ name?: string }[]> };
 
-/** The live account named exactly "Walk - In" and marked walk_in. Null when it isn't there. */
+/** The live account named exactly "Walk - In". Null when it isn't there, or the only row is archived. */
 export async function walkInAccountName(sql: QuerySql): Promise<string | null> {
   const rows = await sql.query(
     `select name from directory_customers
-      where archived = false and walk_in is true and name = $1
+      where archived = false and name = $1
       order by id
       limit 1`,
     [WALK_IN_ACCOUNT_NAME],
@@ -37,6 +41,16 @@ export function walkInSiteRefusal(kind: WalkInSite, name: string | null | undefi
 export function assertWalkInSite(kind: WalkInSite, name: string | null | undefined): void {
   const why = walkInSiteRefusal(kind, name);
   if (why) throw new Error(why);
+}
+
+/**
+ * Refuse only a move onto Walk - In. A save that sends the customer the record already has
+ * (the windows send it on every save) is allowed, and so is a move off Walk - In.
+ * Creating a record still uses assertWalkInSite.
+ */
+export function assertWalkInMove(kind: WalkInSite, current: string | null | undefined, next: string | null | undefined): void {
+  if (next === undefined) return;
+  if (isWalkIn(next) && !isWalkIn(current)) assertWalkInSite(kind, next);
 }
 
 /** SQL fragment: this text column is not the Walk - In account. */

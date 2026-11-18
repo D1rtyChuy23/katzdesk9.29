@@ -18,7 +18,7 @@ import { isClosedCall, isOpenCall } from "@/lib/ops/ticket-status";
 import { formatShortDate } from "@/lib/ops/clock";
 import type { ServiceJob } from "@/lib/ops/types";
 import { Button } from "@/components/ui/button";
-import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
+import { DuplicateBadge, FlagBadge, StatusBadge, UrgencyBadge, WalkInMoveBadge } from "./flag-badge";
 import { JobSheet, NewJobDialog } from "./job-sheet";
 import { CorrigoImportButton, CorrigoReviewList, type CorrigoReviewItem } from "./corrigo-import";
 import { TicketInstallPairsPanel } from "./ticket-install-merge";
@@ -436,6 +436,7 @@ function JobRow({ job, billing, onOpen }: { job: ServiceJob; billing?: TicketBil
         <span className="flex flex-wrap gap-1 max-sm:contents">
           <DuplicateBadge duplicateOf={job.duplicateOf} siblingCount={job.siblings?.length ?? 0} mergedInstallId={job.mergedInstallId} />
           <FlagBadge flag={job.flag} />
+          <WalkInMoveBadge text={job.walkInMove} />
           <DoubleBillBadge on={billing?.doubleBill} />
           <span className="xl:hidden">
             <UrgencyBadge urgency={job.urgency} />
