@@ -47,7 +47,7 @@ export function InstallDateBackfillButton() {
         <DialogContent className="max-w-3xl">
           <DialogTitle>Fill equipment install dates from installs</DialogTitle>
           <DialogDescription>
-            Units an Installed install put on an account (or marked New on its pre-inspection), with a blank Install date, take the install's completed date, or its scheduled date when
+            Units an Installed install put on an account or matched there (by serial, its equipment list or its pre-inspection), with a blank Install date, take the install's completed date, or its scheduled date when
             that's blank. A date already set and a Locked unit are never changed. Nothing is written until you press Write.
           </DialogDescription>
           {p ? (
@@ -74,6 +74,11 @@ export function InstallDateBackfillButton() {
                             <td className="px-2 py-1">
                               {r.equipment}
                               {r.serial ? <span className="text-muted-foreground"> · {r.serial}</span> : null}
+                              {r.match === "matched" ? (
+                                <span className="ml-1.5 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground" data-testid="install-date-matched">
+                                  Matched by install
+                                </span>
+                              ) : null}
                             </td>
                             <td className="px-2 py-1">
                               <OpenLink entityType="install" id={r.installId} className={LINK}>
@@ -83,6 +88,9 @@ export function InstallDateBackfillButton() {
                             </td>
                             <td className="px-2 py-1">
                               {r.date} <span className="text-muted-foreground">({r.source === "completed" ? "completed" : "scheduled: no completed date"})</span>
+                              {r.installCount > 1 ? (
+                                <span className="block text-xs text-muted-foreground">earliest of {r.installCount} Installed installs it's on</span>
+                              ) : null}
                             </td>
                           </tr>
                         ))}
