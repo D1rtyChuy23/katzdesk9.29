@@ -325,10 +325,7 @@ export function PmSheet({
               <MovePmToTicket
                 pmId={pm.id}
                 movedJobId={pm.movedJobId}
-                onSaveFirst={() => {
-                  skipToast.current = true;
-                  formRef.current?.requestSubmit();
-                }}
+                onSaveFirst={saveBeforeInvoice}
                 onMoved={(jobId) => {
                   onClose();
                   void navigate({ to: "/service", search: { open: jobId } });

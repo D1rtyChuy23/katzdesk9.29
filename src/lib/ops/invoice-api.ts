@@ -598,7 +598,7 @@ async function changedSinceOpened(sql: Sql, type: InvoiceTarget, id: number, see
  */
 export function approvePmInvoiceSql(): string {
   return `with locked as (
-       select p.id from pm_jobs p where p.id = $2::int and p.stacked_job_id is null for update
+       select p.id from pm_jobs p where p.id = $2::int and p.stacked_job_id is null and p.moved_job_id is null for update
      ),
      open_pm as (
        select locked.id from locked

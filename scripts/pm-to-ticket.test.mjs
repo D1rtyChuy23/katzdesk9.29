@@ -10,7 +10,9 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const M = await import("../src/lib/ops/pm-to-ticket.ts");
 const C = await import("../src/lib/ops/corrigo.ts");
-const { previewCorrigoRecords } = await import("../src/lib/ops/corrigo-import.ts");
+const { previewCorrigoRecords, applyCorrigoRows } = await import("../src/lib/ops/corrigo-import.ts");
+const Stack = await import("../src/lib/ops/pm-stack.ts");
+const StackApi = await import("../src/lib/ops/pm-stack-api.ts");
 const { updatePmFor } = await import("../src/lib/ops/api.ts");
 
 async function freshDb() {
@@ -115,9 +117,7 @@ test("refused: not an Admin, a stale window, stacked on a ticket, billing on it,
     await assert.rejects(move(stacked), /stacked on a ticket/);
 
     const ns = await pm({ wo: "WO-2002" });
-    await query("insert into record_ns_billing (pm_id, wo, wo_key) values ($1, 'WO-2002', 'wo2002')", [ns]).catch(async () => {
-      await query("insert into record_ns_invoices (pm_id, ns_invoice, wo) values ($1, 'INV-ZZ', 'WO-2002')", [ns]);
-    });
+    await query("insert into record_ns_billing (pm_id, wo, wo_key, ns_so) values ($1, 'WO-2002', 'wo2002', 'SO-ZZ')", [ns]);
     await assert.rejects(move(ns), /NetSuite billing/);
 
     const billed = await pm({ wo: "WO-2003" });
@@ -208,6 +208,96 @@ test("Move back is refused once the ticket has charges, is billed, or changed si
     assert.match((await M.pmMoveInfoFor(sql, second.jobId)).refusal, /billed/);
     // Neither PM moved back.
     assert.deepEqual((await query("select moved_job_id from pm_jobs where id = any($1::int[]) order by id", [[id, id2]])).map((r) => r.moved_job_id), [jobId, second.jobId]);
+  } finally {
+    await pg.close();
+  }
+});
+
+const corrigoFile = (rows) =>
+  C.parseCorrigoMatrix([["ST#", "Operational Status", "Customer Name", "Type", "Problem Description", "Date Completed", "P.O. #"], ...rows]).records;
+
+test("a Corrigo preview read before the move writes nothing onto the moved PM", async () => {
+  const { pg, sql, pm, move, job, pmRow } = await freshDb();
+  try {
+    const id = await pm();
+    const preview = await previewCorrigoRecords(sql, corrigoFile([["1107", "Completed", "ZZ Halcyon - Southtown", "PM", "Mazzer hopper", "11/19/2026", "PO-77"]]));
+    assert.equal(preview.rows[0].jobId, id);
+    const { jobId } = await move(id);
+    const res = await applyCorrigoRows(sql, preview.rows, "boss.zz");
+    assert.equal(res.refused.length, 1);
+    assert.match(res.refused[0].reason, /moved to a service ticket/i);
+    const p = await pmRow(id);
+    assert.deepEqual([p.wo, p.status, p.moved_job_id], [null, M.MOVED_STATUS, jobId]);
+    assert.equal((await job(jobId)).wo, "WO-1107");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a Corrigo preview read before Move back writes nothing onto the closed ticket", async () => {
+  const { pg, sql, pm, move, job, pmRow } = await freshDb();
+  try {
+    const id = await pm();
+    const { jobId } = await move(id);
+    const preview = await previewCorrigoRecords(sql, corrigoFile([["1107", "Completed", "ZZ Halcyon - Southtown", "PM", "Mazzer hopper", "11/19/2026", "PO-77"]]));
+    assert.equal(preview.rows[0].jobId, jobId);
+    await M.undoPmMoveFor(sql, "u_boss", { jobId, stamp: (await M.pmMoveInfoFor(sql, jobId)).stamp });
+    const res = await applyCorrigoRows(sql, preview.rows, "boss.zz");
+    assert.equal(res.refused.length, 1);
+    assert.match(res.refused[0].reason, /moved back to PM/i);
+    const t = await job(jobId);
+    assert.deepEqual([t.wo, t.status], [null, "Cancelled"]);
+    assert.equal((await pmRow(id)).wo, "WO-1107");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a moved PM can't be stacked on a ticket or invoiced", async () => {
+  const { pg, sql, query, pm, move } = await freshDb();
+  try {
+    const id = await pm();
+    const { jobId } = await move(id);
+    const other = Number((await query("insert into service_jobs (kind, call_id, customer, status) values ('service', 'SC-ZZ-9', 'ZZ Halcyon - Southtown', 'Open') returning id"))[0].id);
+    for (const target of [jobId, other]) {
+      const listed = await StackApi.listForJob(sql, target);
+      assert.ok(!JSON.stringify(listed.candidates ?? listed).includes(`"id":${id},`), `not offered on ticket ${target}`);
+      const rows = await query(Stack.stackPmSql(), [id, target, "boss.zz"]);
+      assert.equal(rows.length, 0);
+      const stacked = (await query("select stacked_job_id from pm_jobs where id = $1", [id]))[0].stacked_job_id;
+      assert.equal(stacked, null, `not stacked on ${target}`);
+      void rows;
+    }
+    const inv = await import("../src/lib/ops/invoice-api.ts");
+    assert.match(inv.approvePmInvoiceSql(), /p\.moved_job_id is null/);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("WO part lines move with the work, both ways", async () => {
+  const { pg, sql, query, pm, move } = await freshDb();
+  try {
+    const id = await pm();
+    await query("insert into ticket_part_lines (wo, used_on, item, sku, qty, source, pm_id) values ('WO-1107', '2026-11-19', 'ZZ-HOPPER', 'ZZHOPPER', 1, 'corrigo', $1)", [id]);
+    const { jobId } = await move(id);
+    assert.deepEqual((await query("select job_id, pm_id from ticket_part_lines")).map((r) => [r.job_id, r.pm_id]), [[jobId, null]]);
+    await M.undoPmMoveFor(sql, "u_boss", { jobId, stamp: (await M.pmMoveInfoFor(sql, jobId)).stamp });
+    assert.deepEqual((await query("select job_id, pm_id from ticket_part_lines")).map((r) => [r.job_id, r.pm_id]), [[null, id]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("Move back keeps the PM's own account when the ticket went to Walk - In", async () => {
+  const { pg, sql, query, pm, move, pmRow } = await freshDb();
+  try {
+    await query("insert into directory_customers (name) values ('Walk - In')");
+    const id = await pm();
+    const { jobId } = await move(id);
+    await query("update service_jobs set customer = 'Walk - In', updated_at = now() where id = $1", [jobId]);
+    await M.undoPmMoveFor(sql, "u_boss", { jobId, stamp: (await M.pmMoveInfoFor(sql, jobId)).stamp });
+    assert.equal((await pmRow(id)).customer, "ZZ Halcyon - Southtown");
   } finally {
     await pg.close();
   }

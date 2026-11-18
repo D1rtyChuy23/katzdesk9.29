@@ -369,7 +369,7 @@ export async function loadLocationCheck(sql: Q): Promise<LocationCheckRow[]> {
        from service_jobs where duplicate_of is null and nullif(btrim(service_location), '') is not null
      union all
      select 'pm', id, wo, customer, technician, service_location
-       from pm_jobs where nullif(btrim(service_location), '') is not null
+       from pm_jobs where nullif(btrim(service_location), '') is not null and moved_job_id is null
      order by 1, 2 desc`,
   );
   for (const r of located) {

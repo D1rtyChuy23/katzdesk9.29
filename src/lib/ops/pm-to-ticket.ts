@@ -6,7 +6,8 @@
  * scheduled dates, sched time, completed date, work done, notes, equipment, P.O.s, Corrigo id and service location.
  * The PM is kept as a closed record ("Moved To Ticket") that points at the ticket. Its WO, Corrigo id and completed
  * date move to the ticket, so the Corrigo import, the Billing Backfill and WO search find the ticket and never both.
- * Its photos, Ping notes, runbook checks and part lines stay on the PM, which the ticket links to.
+ * Its WO part lines go with it. Its photos, Ping notes and runbook checks stay on the PM, which the ticket links to.
+ * PMs keep no Corrigo net, so the ticket's comes with the next Corrigo import of the WO.
  *
  * Move back: the PM takes the ticket's work as it is now (the same fields, status mapped back) and opens again; the
  * ticket is closed as Cancelled, with a note saying where its work went, and gives up its WO and Corrigo id. Nothing is deleted. The log
@@ -58,10 +59,9 @@ const CLOSED_TICKET = "('Completed', 'Cancelled', 'Phone Resolved')";
 export const PM_MOVE_REFUSAL_SQL = (p: string) => `case
     when ${p}.moved_job_id is not null then 'This PM was moved to a service ticket already.'
     when ${p}.stacked_job_id is not null then 'This PM is stacked on a ticket and billed there. Take it off that ticket first.'
-    when exists (select 1 from invoices v join invoice_lines l on l.invoice_id = v.id where v.entity_type = 'pm' and v.entity_id = ${p}.id)
-      then 'This PM has an invoice with lines in KatzDesk. Bill it as a PM, or take the lines off first.'
-    when exists (select 1 from record_ns_billing b where b.pm_id = ${p}.id) or exists (select 1 from record_ns_invoices x where x.pm_id = ${p}.id)
-      then 'NetSuite billing from the Billing Backfill is on this PM. It stays a PM.'
+    -- Volatile functions read fresh, so an invoice approved while the move waited for the PM's lock is seen (as in pm-stack.ts).
+    when pm_own_invoice_has_lines(${p}.id) then 'This PM has an invoice with lines in KatzDesk. Bill it as a PM, or take the lines off first.'
+    when pm_netsuite_billed(${p}.id) then 'NetSuite billing from the Billing Backfill is on this PM. It stays a PM.'
     else null end`;
 
 export type PmMovePreview = {
@@ -115,7 +115,6 @@ export async function previewPmMoveFor(sql: Sql, userId: string, pmId: number): 
     r.photos ? `${r.photos} photo${r.photos === 1 ? "" : "s"}` : null,
     r.notes ? `${r.notes} Ping note${r.notes === 1 ? "" : "s"}` : null,
     r.checks ? `${r.checks} runbook check${r.checks === 1 ? "" : "s"}` : null,
-    r.parts ? `${r.parts} WO part line${r.parts === 1 ? "" : "s"}` : null,
   ].filter((s): s is string => !!s);
   return {
     pmId: Number(r.id),
@@ -155,6 +154,10 @@ export function movePmSql(): string {
            completed_at = null, updated_at = now()
       from ok where p.id = ok.id
     returning p.id
+  ), lines as (
+    -- WO part lines go with the work, so Parts usage and a re-import see them on the ticket.
+    update ticket_part_lines l set pm_id = null, job_id = (select id from job) from ok where l.pm_id = ok.id
+    returning l.id
   ), logged as (
     insert into pm_ticket_moves (pm_id, job_id, moved_by, pm_before)
     select ok.id, (select id from job), $4::text, to_jsonb(ok) - 'stamp' from ok
@@ -242,11 +245,16 @@ export function undoPmMoveSql(): string {
     update pm_jobs p
        set moved_job_id = null, status = ${caseSql(TICKET_TO_PM_STATUS, "ok.status", "Pending Scheduling")},
            done = ${caseSql(TICKET_TO_PM_STATUS, "ok.status", "Pending Scheduling")} in ('Completed', 'Cancelled'),
-           customer = ok.customer, equipment = ok.equipment, technician = ok.technician, wo = ok.wo, projected = ok.scheduled,
+           -- A PM never goes on Walk - In: one moved back from a Walk - In ticket keeps its own account.
+           customer = case when regexp_replace(lower(btrim(coalesce(ok.customer, ''))), '[^a-z0-9]+', '', 'g') in ('', 'walkin') then p.customer else ok.customer end,
+           equipment = ok.equipment, technician = ok.technician, wo = ok.wo, projected = ok.scheduled,
            sched_time = ok.sched_time, notes = ok.notes, work_done = ok.work_done, completed_at = ok.completed_at, po = ok.po,
            vendor_po = ok.vendor_po, corrigo_id = ok.corrigo_id, service_location = ok.service_location, updated_at = now()
       from ok where p.id = (select id from lk_pm)
     returning p.id, p.status
+  ), lines as (
+    update ticket_part_lines l set job_id = null, pm_id = (select id from lk_pm) from ok where l.job_id = ok.id
+    returning l.id
   ), job as (
     update service_jobs j
        set status = 'Cancelled', done = true, wo = null, corrigo_id = null,

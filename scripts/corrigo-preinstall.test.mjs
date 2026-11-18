@@ -223,6 +223,23 @@ test("only Install on the P.O. makes or finds an install: the description, a Typ
   }
 });
 
+test("a pre-install visit whose words also say PM or TLC is still a linked Field Service visit, as before 11/18", async () => {
+  const { pg, sql, install } = await freshDb();
+  try {
+    const id = await install("ZZ Test Club");
+    const preview = await previewCorrigoRecords(sql, file([
+      ["1201", "Completed", "ZZ Test Club", "Request", "Pre-install check and PM on old brewer", "11/19/2026", ""],
+      ["1202", "Completed", "ZZ Test Club", "Request", "Site visit before install", "11/19/2026", "Pre-install TLC"],
+    ]));
+    for (const wo of ["WO-1201", "WO-1202"]) {
+      const r = one(preview, wo);
+      assert.deepEqual([r.board, r.callTypeValue, r.visitInstallId, r.preInstall?.label ?? null], ["service", "Field Service", id, "Pre-install visit, install status unchanged"], wo);
+    }
+  } finally {
+    await pg.close();
+  }
+});
+
 test("a WO already on an install still updates that install, whatever its P.O. says", async () => {
   const { pg, sql, query, install } = await freshDb();
   try {

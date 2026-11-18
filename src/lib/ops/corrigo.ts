@@ -1492,7 +1492,7 @@ export function resolvePreviewRow(
   // Pre-install visits stay as they were (11/18): a visit whose words read as an install is told apart, linked to the
   // account's open install and offered the "treat as the install ticket" override, from the install row its words
   // would have made. The row itself is still a service ticket unless the person picks the override.
-  if (row.board === "service" && wordsSayInstall(rec)) row = resolveRow(rec, match, opts, false, true);
+  if (row.board !== "install" && wordsSayInstall(rec)) row = resolveRow(rec, match, opts, false, true);
   // Every live install the visit's WO is on: Confirm takes it off them all (review, 11/14).
   const onInstalls = [...new Set([match.unique, ...match.conflicts].filter((h): h is CorrigoHit => !!h && h.board === "install" && !h.duplicateOf).map((h) => h.id))];
   const moves = onInstalls.length ? { installIds: onInstalls, matchKey: rec.matchKey } : null;
@@ -1545,16 +1545,13 @@ export function resolvePreviewRow(
 }
 
 /**
- * Install on the P.O. is the first sign a row belongs on an install (Chuy, 11/14). A row the import would put on an
- * install by anything else (its description, a Type column, the account's open install) starts unticked for approval.
- * A WO already on an install stays where it is.
- */
-/**
  * The rule before 11/18, kept only to tell a pre-install visit apart: a Type of Install, or "install" in the P.O. or
  * (with no P.O.) the description. It never decides a board on its own.
  */
 function wordsSayInstall(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): boolean {
-  if (corrigoType(rec.callType).type === "install") return true;
+  const t = corrigoType(rec.callType).type;
+  if (t === "install") return true;
+  if (t === "pm") return false;
   const po = String(rec.po ?? "").trim();
   const blob = po || [rec.issue, rec.callType].filter(Boolean).join(" ");
   return /\b(installs?|installation)\b/i.test(blob);
@@ -1587,6 +1584,10 @@ export function withoutVisitWos(rows: CorrigoPreviewRow[]): CorrigoPreviewRow[] 
   );
 }
 
+/**
+ * A row on an install without Install on its P.O. starts unticked for approval (Chuy, 11/14). Since 11/18 only the P.O.
+ * makes an install, so this is left for a WO already on an install, which stays where it is and isn't held.
+ */
 function poApproval(rec: CorrigoRecord, row: CorrigoPreviewRow): CorrigoPreviewRow {
   if (row.board !== "install" || (row.jobId != null && !row.byAccount) || poSaysInstall(rec.po)) return row;
   const text = "Goes on an install, but its P.O. doesn't say Install: left unticked. Tick it to approve";

@@ -544,7 +544,7 @@ export function addMachinePartSql(): string {
        select pm.id
          from pm
          join bi on true
-        where pm.status <> 'Cancelled'
+        where pm.status not in ('Cancelled', 'Moved To Ticket')
           and pm.ns_so is null
           and not pm.has_lines
           and (select count(*) from machine_parts m where m.pm_job_id = pm.id and m.piece_key = $3 and m.removed_at is null) < 50
@@ -604,7 +604,7 @@ export function removeMachinePartSql(): string {
        select part.id
          from part
          join pm on true
-        where pm.status <> 'Cancelled'
+        where pm.status not in ('Cancelled', 'Moved To Ticket')
           and pm.ns_so is null
           and not pm.has_lines
           and not exists (select 1 from ticket_charges c where c.source_key = 'mp:' || part.id::text)

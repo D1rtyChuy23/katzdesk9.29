@@ -21,19 +21,28 @@ function refreshAll(qc: ReturnType<typeof useQueryClient>) {
   for (const key of [["pms"], ["jobs"], ["dashboard"], ["customer-history"], ["customers"], ["pm"], ["job"]]) void qc.invalidateQueries({ queryKey: key });
 }
 
-/** On the PM card, for an Admin: the button, and its confirm. `onSaveFirst` saves what's typed before the confirm reads the PM. */
-export function MovePmToTicket({ pmId, movedJobId, onSaveFirst, onMoved }: { pmId: number; movedJobId?: number | null; onSaveFirst: () => void; onMoved: (jobId: number) => void }) {
+/** On the PM card, for an Admin: the button, and its confirm. What is typed is saved before the confirm reads the PM. */
+export function MovePmToTicket({
+  pmId,
+  movedJobId,
+  onSaveFirst,
+  onMoved,
+}: {
+  pmId: number;
+  movedJobId?: number | null;
+  /** Saves what is typed and resolves false when it couldn't (the confirm then stays shut). */
+  onSaveFirst: () => Promise<boolean>;
+  onMoved: (jobId: number) => void;
+}) {
   const qc = useQueryClient();
   const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
   const [preview, setPreview] = useState<PmMovePreview | null>(null);
   const open = useMutation({
-    mutationFn: async () => {
-      onSaveFirst();
-      // The save goes first; give it a moment to land so the confirm reads the PM as saved.
-      await new Promise((r) => setTimeout(r, 400));
-      return previewPmMove({ data: { pmId } });
+    // What is typed is saved first, and the confirm reads the PM after the save has landed (its stamp too).
+    mutationFn: async () => ((await onSaveFirst()) ? previewPmMove({ data: { pmId } }) : null),
+    onSuccess: (p) => {
+      if (p) setPreview(p);
     },
-    onSuccess: setPreview,
     onError: (e) => toast.error(e instanceof Error ? e.message : "Couldn't read the PM"),
   });
   const move = useMutation({
@@ -67,8 +76,9 @@ export function MovePmToTicket({ pmId, movedJobId, onSaveFirst, onMoved }: { pmI
           <DialogTitle>Move PM #{preview?.pmId} to a service ticket</DialogTitle>
           <DialogDescription>
             A new Field Service ticket on {preview?.customer}
-            {preview?.wo ? ` takes ${preview.wo}` : ""}, the tech, the dates, the work done, the notes, the P.O.s and the Corrigo fields. Its status will be{" "}
-            {preview?.ticketStatus} (the PM is {preview?.pmStatus}).
+            {preview?.wo ? ` takes ${preview.wo}` : ""}, the tech, the dates, the work done, the notes, the P.O.s, the WO part lines and the Corrigo
+            fields. Its status will be {preview?.ticketStatus} (the PM is {preview?.pmStatus}). PMs keep no Corrigo net: the ticket&apos;s comes with the
+            next Corrigo import.
           </DialogDescription>
           <div className="mt-3 space-y-2 text-sm">
             <p>The PM stays as a closed record that points at the ticket. Nothing is deleted, and an Admin can move it back from the ticket.</p>
@@ -129,7 +139,17 @@ export function MovedFromPmBanner({ job, onMovedBack }: { job: ServiceJob; onMov
       </p>
       {admin ? (
         <div className="mt-2">
-          <Button type="button" size="sm" variant="outline" onClick={() => setAsking(true)} data-testid="pm-move-back">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              // A save in this card since it opened changed the ticket: the stamp is read again before Move back.
+              void info.refetch();
+              setAsking(true);
+            }}
+            data-testid="pm-move-back"
+          >
             Move back to PM…
           </Button>
         </div>
@@ -150,7 +170,7 @@ export function MovedFromPmBanner({ job, onMovedBack }: { job: ServiceJob; onMov
             <Button type="button" variant="outline" onClick={() => setAsking(false)}>
               Cancel
             </Button>
-            <Button type="button" disabled={!!m.refusal || back.isPending} onClick={() => back.mutate()} data-testid="pm-move-back-confirm">
+            <Button type="button" disabled={!!m.refusal || back.isPending || info.isFetching} onClick={() => back.mutate()} data-testid="pm-move-back-confirm">
               Move back to PM
             </Button>
           </div>
