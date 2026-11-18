@@ -3,6 +3,8 @@ import {
   customersCompatible,
   deskHasWrapped,
   detectBoard,
+  accountIndex,
+  resolveRowAccount,
   hitClosed,
   indexHits,
   isWalkIn,
@@ -61,6 +63,15 @@ assert.equal(detectBoard({ issue: "Preventative maintenance visit" }), "pm");
 assert.equal(detectBoard({ issue: "Installation of new machine" }), "install");
 assert.equal(detectBoard({ callType: "PM" }), "pm");
 assert.equal(detectBoard({ issue: "TLC on site", existing: "service" }), "service");
+// A filled-in P.O. decides. "Install the new replacement touchpad" is a repair when the P.O. is not an install.
+assert.equal(detectBoard({ po: "SRV1347", issue: "Install the new replacement touchpad" }), "service");
+assert.equal(detectBoard({ po: "   ", issue: "Install the new replacement touchpad" }), "install");
+assert.equal(detectBoard({ po: "SRV1347", issue: "Installation of new machine", callType: "PM" }), "service");
+
+assert.equal(accountIndex([{ name: "Walk - In", archived: false, locked: false, walkIn: false }]).walkInAccount, "Walk - In");
+assert.equal(accountIndex([{ name: "Walk - In", archived: true, locked: false, walkIn: true }]).walkInAccount, null);
+assert.equal(accountIndex([{ name: "Walk-In", archived: false, locked: false, walkIn: true }]).walkInAccount, null);
+assert.equal(resolveRowAccount({ customer: "Walk-In", serviceLocation: null }, null, accountIndex([{ name: "Walk - In", archived: false, locked: false, walkIn: false }])).status, "onetime");
 
 assert.equal(customersCompatible("Houston's - Kirby", "Houston's - Kirby"), true);
 assert.equal(customersCompatible("State Fare Woodlands", "State Fare - Woodlands"), true);

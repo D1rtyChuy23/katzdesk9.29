@@ -60,7 +60,7 @@ import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/compo
 import { SheetTabs } from "./sheet-tabs";
 import { RecordPhotosPanel } from "./photos-panel";
 import { useRecordPhotos, useSeenTab } from "./photo-queries";
-import { FlagBadge, StatusBadge } from "./flag-badge";
+import { FlagBadge, StatusBadge, WalkInMoveBadge } from "./flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { Thread } from "./thread";
 import { PmRunbook } from "./pm-runbook";
@@ -310,6 +310,7 @@ export function PmSheet({
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <StatusBadge status={pm.status} />
                 <FlagBadge flag={pm.flag} />
+                <WalkInMoveBadge text={pm.walkInMove} />
               </div>
               <PmStackHeader
                 pmId={pm.id}
@@ -783,6 +784,7 @@ export function InstallSheet({
                 />
                 <StatusBadge tight status={row.equipStatus} />
                 <FlagBadge flag={row.flag} />
+                <WalkInMoveBadge text={row.walkInMove} />
                 {row.duplicateOf ? <Badge variant="warn">Possible duplicate</Badge> : null}
               </div>
               <CustomerAddress customer={row.customer} className="mt-2" />

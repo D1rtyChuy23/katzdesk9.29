@@ -222,8 +222,12 @@ function customerOf(row: CorrigoPreviewRow, d: RowDraft): string {
   return d.customerEdited ? d.customer : row.customer ?? "";
 }
 
-/** A ticked row with no account (blank or Walk-In) can't be written. */
-const lacksAccount = (name: string) => !name.trim() || isWalkIn(name);
+/** A ticked row with no account can't be written. "Walk - In" is the shared one-time account; any other Walk-In spelling is not. */
+const lacksAccount = (name: string) => {
+  const typed = name.trim();
+  if (!typed) return true;
+  return isWalkIn(typed) && typed !== "Walk - In";
+};
 
 /** Why a row is listed among the warnings at the top, or null. */
 function statusWarning(r: CorrigoPreviewRow, hasStatusColumn: boolean): string | null {
@@ -390,8 +394,8 @@ function PreviewBody({
           <li className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2" data-testid="corrigo-review-accounts">
             <span className="font-medium">Needs review: </span>
             {reviewRows.length === 1
-              ? "1 row has no account by that exact name, or is Walk-In with no Service Location that is an account. It starts unticked; pick an account to include it."
-              : `${reviewRows.length} rows have no account by that exact name, or are Walk-In with no Service Location that is an account. They start unticked; pick an account to include one.`}{" "}
+              ? "1 row has no account by that exact name, or is Walk-In with a Service Location that isn't an account. It starts unticked; pick an account to include it."
+              : `${reviewRows.length} rows have no account by that exact name, or are Walk-In with a Service Location that isn't an account. They start unticked; pick an account to include one.`}{" "}
             The import never adds accounts.
           </li>
         ) : null}
@@ -566,9 +570,9 @@ function PreviewBody({
                         — will flag)
                       </span>
                     ) : null}
-                    {walkIn ? (
-                      <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase">
-                        Walk-In
+                    {walkIn && (!d.customerEdited || isWalkIn(customer)) ? (
+                      <span className="mt-0.5 block text-[11px] font-normal tracking-wide text-warning uppercase" data-testid="corrigo-walk-in-label">
+                        {(!d.customerEdited && r.account?.status === "onetime") || customer === "Walk - In" ? "One-time · Walk - In" : "Walk-In"}
                       </span>
                     ) : null}
                     {visitOf.get(key) && !locked ? (
@@ -784,7 +788,7 @@ function ImportCustomerPicker({
 }) {
   // Accounts only: the import never adds one (10/28). Walk-In is never an account.
   const dir = useDirectory("customer");
-  const items = useMemo(() => dir.items.filter((i) => !isWalkIn(i.name)), [dir.items]);
+  const items = useMemo(() => dir.items.filter((i) => !isWalkIn(i.name) || i.name === "Walk - In"), [dir.items]);
   return (
     <div className="min-w-0">
       <ComboField

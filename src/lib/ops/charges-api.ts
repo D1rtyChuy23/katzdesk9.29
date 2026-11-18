@@ -970,8 +970,10 @@ export type BillingExport = {
   locationWarnings: { id: number; wo: string | null; customer: string | null; warning: string }[];
   /** How many tickets in the file each warehouse rule sets the location for. */
   locationRules: { location: string; tickets: number }[];
-  /** Tickets with charges left out of the file: on Walk-In or with no account, which is never a billing account. */
+  /** Tickets with charges left out of the file because they have no account. */
   noAccount: { id: number; wo: string | null; customer: string | null; completed: string | null }[];
+  /** Tickets included under the customer "Walk - In". Check none of them is a real site. */
+  walkIn: { id: number; wo: string | null; customer: string | null; completed: string | null }[];
 };
 
 /**
@@ -1011,13 +1013,20 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
       order by j.completed_at, j.id, c.sort, c.id`,
     [data.from, data.to],
   );
-  // Walk-In (or no account) is never a billing account: those tickets stay out of the file and are listed (10/28 review).
+  // A ticket with no account stays out. Walk - In is included, under that customer, and listed so it can be checked.
   const noAccount = new Map<number, { id: number; wo: string | null; customer: string | null; completed: string | null }>();
-  const rows = found.filter((r) => {
-    if (r.customer?.trim() && !isWalkIn(r.customer)) return true;
+  const walkIn = new Map<number, { id: number; wo: string | null; customer: string | null; completed: string | null }>();
+  const rows = found.flatMap((r) => {
     const id = Number(r.id);
-    if (!noAccount.has(id)) noAccount.set(id, { id, wo: r.wo, customer: r.customer, completed: r.completed_at });
-    return false;
+    if (!r.customer?.trim()) {
+      if (!noAccount.has(id)) noAccount.set(id, { id, wo: r.wo, customer: r.customer, completed: r.completed_at });
+      return [];
+    }
+    if (isWalkIn(r.customer)) {
+      if (!walkIn.has(id)) walkIn.set(id, { id, wo: r.wo, customer: "Walk - In", completed: r.completed_at });
+      return [{ ...r, customer: "Walk - In" }];
+    }
+    return [r];
   });
   const ids = [...new Set(rows.map((r) => Number(r.id)))];
   const discounts = new Map<number, Discount>();
@@ -1102,6 +1111,7 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
       }),
     locationRules: [...rules].map(([location, tickets]) => ({ location, tickets })),
     noAccount: [...noAccount.values()],
+    walkIn: [...walkIn.values()],
   };
 }
 

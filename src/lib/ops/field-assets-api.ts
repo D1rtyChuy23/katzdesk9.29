@@ -3,6 +3,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { brandOf, type FieldAsset } from "@/lib/ops/field-assets";
+import { isWalkIn } from "@/lib/ops/customer-key";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -44,7 +45,9 @@ export async function readFieldAssets(sql: Sql): Promise<FieldAsset[]> {
        left join acct c on c.k = lower(btrim(a.customer))
       order by lower(a.customer), lower(a.catalog_model), a.id`,
   );
-  return rows.map((r) => ({
+  // In the Field is the machine list, not service tickets. Walk-In equipment stays off it.
+  // Service tickets on Walk - In stay on the work boards (Coming Due, the map, Teams, Analytics).
+  return rows.filter((r) => !isWalkIn(r.customer)).map((r) => ({
     id: Number(r.id),
     customer: r.customer,
     customerId: r.customer_id == null ? null : Number(r.customer_id),

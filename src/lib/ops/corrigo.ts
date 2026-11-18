@@ -399,7 +399,7 @@ export type CorrigoPreviewRow = {
 
 // ── Accounts: exact names only (Grok's rule through Chuy, 10/28) ─────────────────────────────────────────────────────
 
-export type AccountRow = { name: string; archived: boolean; locked: boolean };
+export type AccountRow = { name: string; archived: boolean; locked: boolean; /** directory_customers.walk_in. Not used to find the "Walk - In" account. */ walkIn?: boolean };
 
 export type AccountIndex = {
   /** Live accounts by exact name (case and spacing aside). */
@@ -408,10 +408,15 @@ export type AccountIndex = {
   removed: Map<string, string>;
   /** Locked clean-list names by their letters and digits: a locked name wins over the file's spelling. */
   locked: Map<string, string>;
+  /**
+   * The one shared live account named exactly "Walk - In", when it is on the list.
+   * A name that only normalizes to walkin is not this account. The walk_in flag is not checked.
+   */
+  walkInAccount: string | null;
 };
 
 export function accountIndex(rows: AccountRow[]): AccountIndex {
-  const idx: AccountIndex = { active: new Map(), removed: new Map(), locked: new Map() };
+  const idx: AccountIndex = { active: new Map(), removed: new Map(), locked: new Map(), walkInAccount: null };
   for (const r of rows) {
     const k = nameKey(r.name);
     if (!k) continue;
@@ -422,6 +427,7 @@ export function accountIndex(rows: AccountRow[]): AccountIndex {
     if (!idx.active.has(k)) idx.active.set(k, r.name);
     const lk = normalizeCustomerKey(r.name);
     if (r.locked && lk && !idx.locked.has(lk)) idx.locked.set(lk, r.name);
+    if (idx.walkInAccount == null && r.name === "Walk - In") idx.walkInAccount = "Walk - In";
   }
   return idx;
 }
@@ -439,15 +445,16 @@ export function exactAccount(raw: string | null | undefined, idx: AccountIndex):
 }
 
 export type RowAccount = {
-  status: "exact" | "locked" | "location" | "kept" | "none" | "removed" | "walkin";
+  status: "exact" | "locked" | "location" | "kept" | "none" | "removed" | "walkin" | "onetime";
   name: string | null;
   note: string | null;
 };
 
 /**
- * The account a Corrigo row is written with. Walk-In is never one: its account comes from the Service Location Name.
- * Nothing is matched loosely and no account is ever added: anything without an exact match needs review (an update
- * keeps the ticket's own account, unless that is Walk-In too).
+ * The account a Corrigo row is written with. A Walk-In row whose Service Location is an account uses that account.
+ * A Walk-In row with no Service Location uses the existing "Walk - In" account (one-time). A Service Location that
+ * matches no account needs review. Nothing is matched loosely and no account is ever added. An update whose ticket
+ * already has a real account keeps it when the file has no Service Location.
  */
 export function resolveRowAccount(
   rec: Pick<CorrigoRecord, "customer" | "serviceLocation">,
@@ -459,13 +466,21 @@ export function resolveRowAccount(
   const file = String(rec.customer ?? "").trim();
   if (isWalkIn(file)) {
     const loc = stripServiceChannelId(rec.serviceLocation);
-    const hit = loc ? exactAccount(loc, idx) : null;
-    if (hit && "name" in hit) return { status: "location", name: hit.name, note: `Walk-In: the account from its Service Location "${String(rec.serviceLocation).trim()}"` };
+    if (loc && !isWalkIn(loc)) {
+      const hit = exactAccount(loc, idx);
+      if (hit && "name" in hit) return { status: "location", name: hit.name, note: `Walk-In: the account from its Service Location "${String(rec.serviceLocation).trim()}"` };
+      return {
+        status: "walkin",
+        name: null,
+        note: `Walk-In, and no account is named "${loc}" (its Service Location). Pick one.`,
+      };
+    }
     if (keep) return { status: "kept", name: keep, note: "Walk-In in Corrigo: the ticket keeps its account" };
+    if (idx.walkInAccount) return { status: "onetime", name: idx.walkInAccount, note: "One-time · Walk - In" };
     return {
       status: "walkin",
       name: null,
-      note: loc ? `Walk-In, and no account is named "${loc}" (its Service Location). Pick one.` : "Walk-In, and the file has no Service Location Name. Pick an account.",
+      note: "Walk - In isn't on the customer list. The import doesn't add it.",
     };
   }
   if (!file) return keep ? { status: "kept", name: keep, note: null } : { status: "none", name: null, note: "No customer in the file. Pick an account." };
@@ -759,7 +774,9 @@ export function detectBoard(hints: {
   existing?: CorrigoBoard | null;
 }): CorrigoBoard {
   if (hints.existing) return hints.existing;
-  const blob = [hints.po, hints.issue, hints.callType].filter(Boolean).join(" ");
+  // A filled-in P.O. decides the board. The Problem Description and call type decide only when the P.O. is blank.
+  const po = String(hints.po ?? "").trim();
+  const blob = po || [hints.issue, hints.callType].filter(Boolean).join(" ");
   if (/\b(installs?|installation)\b/i.test(blob)) return "install";
   if (/\b(tlc|factor)\b/i.test(blob)) return "tlc";
   if (/\b(preventative|preventive|\bpm\b)\b/i.test(blob)) return "pm";
@@ -780,8 +797,8 @@ export function corrigoType(raw: string | null | undefined): { type: CorrigoType
 
 /**
  * The board a new row goes on. With a Type column, Type PM is a PM and Install is an install. A Request is service
- * work: an install or a TLC / Factor visit by its P.O. or description (Corrigo has no Install type), never a PM by its
- * words. Without a Type, the P.O., description and call type decide, as before.
+ * work: an install or a TLC / Factor visit by its P.O. when the P.O. is filled in, otherwise by its description
+ * (Corrigo has no Install type), never a PM by its words. Without a Type, the same P.O. rule decides.
  */
 export function hintedBoard(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): { board: CorrigoBoard; note: string | null } {
   const t = corrigoType(rec.callType);

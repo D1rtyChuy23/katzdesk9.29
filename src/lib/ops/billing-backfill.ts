@@ -17,8 +17,8 @@
  * - locked (an invoice that isn't Voided is already on it): only invoice records (number, status, total, remaining).
  *   Charges, P.O., discount, Sales Order and billed date are never touched;
  * - skipped: no record with the WO, a merged (duplicate) ticket or install, a PM stacked on a ticket, an install taken
- *   off the board, a WO on two records the invoice dates can't tell apart, or a record on Walk-In (never a billing
- *   account).
+ *   off the board, a WO on two records the invoice dates can't tell apart, or a record on Walk - In whose NetSuite
+ *   invoice is not also to Walk - In.
  *
  * Pure: no server imports, safe for node --test.
  */
@@ -986,8 +986,21 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     amounts: { ...empty.amounts, kdSource: t ? "charges" : rec!.katzdesk ? "katzdesk" : "netsuite" },
   };
   const what = t ? "ticket" : rec!.kind === "install" ? "install" : "PM";
-  if (!target.customer?.trim() || isWalkIn(target.customer)) {
-    return { ...base, reason: `The ${what} is on Walk-In, which is never a billing account. Give it the real account first.` };
+  if (!target.customer?.trim()) {
+    return { ...base, reason: `The ${what} has no account, which is never a billing account. Give it the real account first.` };
+  }
+  if (isWalkIn(target.customer)) {
+    const named = [...new Set([...lineRowsIn.map((r) => r.nsCustomer), ...invoiceRows.map((r) => r.nsCustomer)].map((c) => c.trim()).filter(Boolean))];
+    const toWalkIn = named.filter((c) => isWalkIn(c) && !billedParent(c));
+    const others = named.filter((c) => !toWalkIn.includes(c));
+    if (!toWalkIn.length || others.length) {
+      return {
+        ...base,
+        reason: others.length
+          ? `NetSuite bills ${others.join(" and ")}, not Walk - In. Left off.`
+          : `The ${what} is on Walk - In, and NetSuite's invoice doesn't say Walk - In. Left off.`,
+      };
+    }
   }
   const warnings: string[] = picked.warning ? [picked.warning] : [];
 

@@ -10,7 +10,7 @@ import { isOpenPm } from "@/lib/ops/ticket-status";
 import { withWoMatches } from "@/lib/ops/wo-search";
 import { formatShortDate } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
-import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
+import { FlagBadge, StatusBadge, WalkInMoveBadge } from "@/components/desk/flag-badge";
 import { PmSheet, SimpleCreateDialog } from "@/components/desk/entity-sheets";
 import { ActionMenu, StatCard, StatRow, toggleChip } from "@/components/desk/desk-charts";
 import { parseOpenSearch, useBackTo, useOpenRecord } from "@/lib/ops/search-params";
@@ -148,6 +148,7 @@ function Page() {
             </span>
             <span className="flex flex-wrap gap-1 max-sm:contents">
               <FlagBadge flag={p.flag} />
+              <WalkInMoveBadge text={p.walkInMove} />
             </span>
             <StatusBadge status={p.status} />
             {/* Phones: the date and tech start their own line under the chips. Not rendered from sm up. */}

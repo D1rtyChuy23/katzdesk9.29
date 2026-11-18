@@ -10,6 +10,7 @@ import {
   type ReadinessRow,
 } from "@/lib/ops/pm-runbook-readiness";
 import { splitEquipment } from "@/lib/ops/equipment";
+import { notWalkInSql } from "@/lib/ops/walk-in-account";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -31,7 +32,7 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
   .handler(async (): Promise<RunbookReadiness> => {
     const sql = await ready();
     const all = await sql.query<{ id: number; customer: string; equipment: string | null; status: string }>(
-      "select id, customer, equipment, status from pm_jobs where status not in ('Completed', 'Cancelled') order by id",
+      `select id, customer, equipment, status from pm_jobs where status not in ('Completed', 'Cancelled') and ${notWalkInSql("customer")} order by id`,
     );
     const pms = all.filter((p) => splitEquipment(p.equipment).some((piece) => matchPiece(piece)));
     const names = [...new Set(pms.map((p) => p.customer.toLowerCase()))];

@@ -9,7 +9,6 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import {
   checkUnitFields,
-  isWalkIn,
   parseSerial,
   serialInKatzStock,
   serialKey,
@@ -20,6 +19,7 @@ import {
 import { ensureCatalogModel, readAccountUnit, type AccountEquipRow } from "@/lib/ops/account-equip-import";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { SITE_LABEL } from "@/lib/ops/warehouse";
+import { assertWalkInSite } from "@/lib/ops/walk-in-account";
 
 export type AddUnitInput = { model: string; serial?: string | null; partNumber?: string | null; ownership?: string | null; installDate?: string | null };
 export type EditUnitInput = { seen: string; partNumber?: string | null; ownership?: string | null; installDate?: string | null };
@@ -32,7 +32,7 @@ const IN_STOCK = "a.status in ('ready', 'deployed') and coalesce(btrim(a.sold_to
 async function accountName(sql: Sql, customer: string): Promise<string> {
   const typed = customer.trim();
   if (!typed) throw new Error("Pick an account first.");
-  if (isWalkIn(typed)) throw new Error("A walk-in has no account to add equipment to.");
+  assertWalkInSite("equipment", typed);
   const row = (
     await sql.query<{ name: string }>(
       "select name from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc, id limit 1",

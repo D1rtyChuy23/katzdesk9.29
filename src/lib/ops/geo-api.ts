@@ -7,6 +7,7 @@ import { isoDayOrNull } from "@/lib/ops/iso";
 import { canonicalRepName, isNoRep, DEFAULT_REPS } from "@/lib/ops/rep-match";
 import { cityFromAddress, isPoint, type PinQuality } from "@/lib/ops/geo";
 import { MANUAL_PIN_MATCH, pinQuality } from "@/lib/ops/account-pin";
+import { isWalkIn } from "@/lib/ops/customer-key";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -80,6 +81,7 @@ type Row = {
   open_calls: number;
   open_tlcs: number;
   past_due_calls: number;
+  past_due_service: number;
   open_pms: number;
   pms_past_due: number;
   pms_due_soon: number;
@@ -116,7 +118,8 @@ export const listAccountGeo = createServerFn({ method: "GET" })
          select lower(customer) as k,
                 count(*) filter (where kind = 'service')::int as open_calls,
                 count(*) filter (where kind = 'tlc')::int as open_tlcs,
-                count(*) filter (where scheduled < $1::date)::int as past_due_calls
+                count(*) filter (where scheduled < $1::date)::int as past_due_calls,
+                count(*) filter (where kind = 'service' and scheduled < $1::date)::int as past_due_service
            from service_jobs
           where not done and status not in ('Completed', 'Cancelled', 'Phone Resolved')
             and duplicate_of is null and coalesce(customer, '') <> ''
@@ -151,7 +154,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
        select d.id, d.name, d.account_rep, d.avi_katz, (oon.k is not null) as out_of_network, d.account_number, d.address,
               d.latitude, d.longitude, d.geocode_match, d.geocode_address,
               coalesce(svc.open_calls, 0) as open_calls, coalesce(svc.open_tlcs, 0) as open_tlcs,
-              coalesce(svc.past_due_calls, 0) as past_due_calls,
+              coalesce(svc.past_due_calls, 0) as past_due_calls, coalesce(svc.past_due_service, 0) as past_due_service,
               coalesce(pm.open_pms, 0) as open_pms, coalesce(pm.pms_past_due, 0) as pms_past_due,
               coalesce(pm.pms_due_soon, 0) as pms_due_soon, coalesce(pm.pms_no_date, 0) as pms_no_date, pm.next_pm,
               coalesce(inst.open_installs, 0) as open_installs, inst.next_install
@@ -169,6 +172,7 @@ export const listAccountGeo = createServerFn({ method: "GET" })
     for (const r of rows) {
       const key = String(r.name ?? "").trim().toLowerCase();
       // Two rows with the same lower-case name would double-count the same jobs; the first (by id) keeps them.
+      const walkIn = isWalkIn(r.name);
       const dup = seen.has(key);
       seen.add(key);
       const rep = canonicalRepName(r.account_rep);
@@ -189,20 +193,20 @@ export const listAccountGeo = createServerFn({ method: "GET" })
         geocodeAddress,
         city: cityFromAddress(address) ?? cityFromAddress(geocodeAddress),
         rep,
-        noRep: isNoRep(r.account_rep),
+        noRep: walkIn ? false : isNoRep(r.account_rep),
         aviKatz: flagOn(r.avi_katz),
         outOfNetwork: flagOn(r.out_of_network),
         accountNumber: r.account_number ? String(r.account_number) : null,
         openCalls: counts ? Number(r.open_calls) : 0,
-        openTlcs: counts ? Number(r.open_tlcs) : 0,
-        pastDueCalls: counts ? Number(r.past_due_calls) : 0,
-        openPms: counts ? Number(r.open_pms) : 0,
-        pmsPastDue: counts ? Number(r.pms_past_due) : 0,
-        pmsDueSoon: counts ? Number(r.pms_due_soon) : 0,
-        pmsNoDate: counts ? Number(r.pms_no_date) : 0,
-        nextPm: counts ? isoDayOrNull(r.next_pm) : null,
-        openInstalls: counts ? Number(r.open_installs) : 0,
-        nextInstall: counts ? isoDayOrNull(r.next_install) : null,
+        openTlcs: counts && !walkIn ? Number(r.open_tlcs) : 0,
+        pastDueCalls: counts ? Number(walkIn ? r.past_due_service : r.past_due_calls) : 0,
+        openPms: counts && !walkIn ? Number(r.open_pms) : 0,
+        pmsPastDue: counts && !walkIn ? Number(r.pms_past_due) : 0,
+        pmsDueSoon: counts && !walkIn ? Number(r.pms_due_soon) : 0,
+        pmsNoDate: counts && !walkIn ? Number(r.pms_no_date) : 0,
+        nextPm: counts && !walkIn ? isoDayOrNull(r.next_pm) : null,
+        openInstalls: counts && !walkIn ? Number(r.open_installs) : 0,
+        nextInstall: counts && !walkIn ? isoDayOrNull(r.next_install) : null,
       });
     }
     const reps = [...new Set([...DEFAULT_REPS.map((r) => r.name), ...accounts.map((a) => a.rep).filter((r): r is string => !!r)])].sort((a, b) =>

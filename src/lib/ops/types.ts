@@ -43,6 +43,8 @@ export type ServiceJob = {
   updatedAt: string;
   flag: ClockFlag | null;
   ageDays: number | null;
+  /** Set on a TLC already on Walk - In. Service tickets leave this null: those calls are real work. */
+  walkInMove?: string | null;
   urgency: string;
   /** Merged into another ticket (its id), or into an install (the ticket's own id; mergedInstallId names the install). */
   duplicateOf: number | null;
@@ -85,6 +87,8 @@ export type PmJob = {
   aviKatz: boolean;
   /** The service or TLC ticket this PM bills on, or null when it has its own invoice. */
   stackedJobId: number | null;
+  /** Set when this PM is already on Walk - In and should move to the café's account. */
+  walkInMove?: string | null;
 };
 
 
@@ -258,6 +262,8 @@ export type Install = {
   daysOut: number | null;
   aviKatz: boolean;
   noRep: boolean;
+  /** Set when this install is already on Walk - In and should move to the café's account. */
+  walkInMove?: string | null;
   inspection?: {
     overall: "Not started" | "In progress" | "Failed" | "Passed";
     failedItems: string[];

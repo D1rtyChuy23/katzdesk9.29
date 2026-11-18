@@ -24,7 +24,7 @@ import { DealLinkReview } from "@/components/desk/deal-link-review";
 import { InspectionBadge, PreInspectionPanel } from "@/components/desk/pre-inspection-panel";
 import { Button } from "@/components/ui/button";
 import { Label, Textarea } from "@/components/ui/input";
-import { FlagBadge, StatusBadge } from "@/components/desk/flag-badge";
+import { FlagBadge, StatusBadge, WalkInMoveBadge } from "@/components/desk/flag-badge";
 import { Badge } from "@/components/ui/badge";
 import { InstallSheet } from "@/components/desk/entity-sheets";
 import { RecipeChip } from "@/components/desk/recipe-sheet";
@@ -48,6 +48,7 @@ import { AkBadge, NoRepFlag } from "@/components/desk/ak-badge";
 import { RepFilter, RepName } from "@/components/desk/rep-select";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { sameRep } from "@/lib/ops/reps";
+import { installChip, installHiddenMessage, installNarrowed } from "@/lib/ops/install-board";
 
 export const Route = createFileRoute("/_app/installs")({
   validateSearch: parseOpenSearch,
@@ -65,7 +66,7 @@ function Page() {
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
   });
   const [q, setQ] = useState("");
-  const { filterMine, matchMine } = useMyView();
+  const { filterMine, matchMine, setOn } = useMyView();
   const [repFilter, setRepFilter] = useState("");
   const [akOnly, setAkOnly] = useState(false);
   const [lane, setLane] = useState<"prep" | "installed">("prep");
@@ -125,6 +126,31 @@ function Page() {
   const notReadyN = allInstalls.filter((i) => isOpenInstall(i) && !siteIsReady(i.equipStatus, i.inspection?.overall)).length;
   const installedN = allInstalls.filter((i) => isInstalled(i)).length;
   const prepN = allInstalls.filter((i) => isOpenInstall(i)).length;
+  const narrow = {
+    mine: filterMine,
+    rep: !!repFilter,
+    ak: akOnly,
+    search: !!q.trim(),
+  };
+  const narrowed = installNarrowed(narrow);
+  const passesNarrow = (i: Install) => {
+    if (filterMine && !(matchMine(i.accountRep, i.technician) || i.aviKatz)) return false;
+    if (repFilter === "__none__") {
+      if (!i.noRep) return false;
+    } else if (repFilter && !sameRep(i.accountRep, repFilter)) return false;
+    if (akOnly && !i.aviKatz) return false;
+    const needle = q.trim().toLowerCase();
+    if (needle) {
+      const hit = [i.customer, i.equipment, ...rowWos(i), i.technician, i.serial, i.powerVoltage, i.po, i.vendorPo, i.sale?.po, i.sale?.invoice, ...(i.machines ?? []).flatMap((m) => [m.equipment, m.serial, m.powerVoltage])]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(needle));
+      if (!hit) return false;
+    }
+    return true;
+  };
+  const prepShown = allInstalls.filter((i) => isOpenInstall(i) && passesNarrow(i)).length;
+  const installedShown = allInstalls.filter((i) => isInstalled(i) && passesNarrow(i)).length;
+  const hidden = installHiddenMessage(lane, narrow);
   // Counts and "No installs" only once the list has loaded: a failed load shows the banner and "—", never a fake 0.
   const loaded = data.isSuccess;
   const readyByEquip = tally(
@@ -279,11 +305,11 @@ function Page() {
       ) : null}
       <ListToolbar data-testid="prep-installed-toggle">
         <ToolbarSearch value={q} onChange={setQ} placeholder="Search installs…" />
-        <FilterChip selected={lane === "prep"} onClick={() => setLane("prep")}>
-          Prep ({shownCount(loaded, prepN)})
+        <FilterChip selected={lane === "prep"} onClick={() => setLane("prep")} data-testid="prep-chip">
+          {installChip("Prep", prepShown, prepN, narrowed, loaded)}
         </FilterChip>
-        <FilterChip selected={lane === "installed"} onClick={() => setLane("installed")}>
-          Installed ({shownCount(loaded, installedN)})
+        <FilterChip selected={lane === "installed"} onClick={() => setLane("installed")} data-testid="installed-chip">
+          {installChip("Installed", installedShown, installedN, narrowed, loaded)}
         </FilterChip>
         <RepFilter value={repFilter} onChange={setRepFilter} extraNames={(data.data ?? []).map((i) => i.accountRep)} className={`${TOOLBAR_SELECT} w-44`} />
         <label className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-secondary px-3 text-sm">
@@ -341,10 +367,25 @@ function Page() {
         ) : null}
         {rows.length === 0 && loaded ? (
           <div className="px-4 py-8">
-            <p className="text-sm text-muted-foreground">
-              {lane === "installed" ? "No installs marked installed." : "No installs in prep."}
+            <p className="text-sm text-muted-foreground" data-testid="installs-empty">
+              {hidden ?? (lane === "installed" ? "No installs marked installed." : "No installs in prep.")}
             </p>
-            {lane === "prep" && !q.trim() ? (
+            {hidden ? (
+              <Button
+                type="button"
+                size="sm"
+                className="mt-3"
+                data-testid="installs-show-all"
+                onClick={() => {
+                  setOn(false);
+                  setRepFilter("");
+                  setAkOnly(false);
+                  setQ("");
+                }}
+              >
+                Show all
+              </Button>
+            ) : lane === "prep" && !q.trim() ? (
               <Button type="button" size="sm" className="mt-3" onClick={() => setCreate(true)}>
                 <Plus className="size-4" />
                 New install
@@ -888,6 +929,7 @@ function InstallRow({
             </button>
             <div className="flex flex-wrap gap-1">
               <FlagBadge flag={i.flag} />
+              <WalkInMoveBadge text={i.walkInMove} />
               <StatusBadge status={i.equipStatus} tight />
               {open ? (
                 <InspectionBadge

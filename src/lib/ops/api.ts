@@ -6,6 +6,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { isWalkIn } from "@/lib/ops/customer-key";
+import { assertWalkInMove, assertWalkInSite, WALK_IN_MOVE, walkInAccountName } from "@/lib/ops/walk-in-account";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
@@ -256,7 +257,8 @@ export function mapJob(r: any, today: any) {
 			received,
 			scheduled
 		}, today),
-		ageDays: received ? diffDays(received, today) : null
+		ageDays: received ? diffDays(received, today) : null,
+		walkInMove: r.kind === "tlc" && isWalkIn(r.customer) ? WALK_IN_MOVE : null
 	};
 }
 /** A PM row as the boards read it. Exported for its tests. */
@@ -287,7 +289,8 @@ export function mapPm(r: any, today: any) {
 			projected
 		}, today),
 		aviKatz: false,
-		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id)
+		stackedJobId: r.stacked_job_id == null ? null : Number(r.stacked_job_id),
+		walkInMove: isWalkIn(r.customer) ? WALK_IN_MOVE : null
 	};
 }
 /** An install row as the boards read it. Exported for its tests. */
@@ -337,7 +340,8 @@ export function mapInstall(r: any, today: any, week: any, catalog: any[] = []) {
 		}, today, week),
 		daysOut: installDate ? diffDays(today, installDate) : null,
 		aviKatz: false,
-		noRep: isNoRep(r.account_rep)
+		noRep: isNoRep(r.account_rep),
+		walkInMove: isWalkIn(r.customer) ? WALK_IN_MOVE : null
 	};
 }
 /** A deal row as the boards read it. Exported for its tests. */
@@ -532,7 +536,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 		comingDue.push(row);
 	};
 	for (const j of jobs) {
-		if (isClosedCall(j) || !j.scheduled) continue;
+		if ((j.kind === "tlc" && isWalkIn(j.customer)) || isClosedCall(j) || !j.scheduled) continue;
 		if (j.scheduled > laterHorizon) continue;
 		const accountRep = accountRepFor(marks, j.customer);
 		pushDue({
@@ -550,11 +554,11 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 			entityType: j.kind,
 			id: j.id,
 			aviKatz: j.aviKatz,
-			noRep: isNoRep(accountRep)
+			noRep: isWalkIn(j.customer) ? false : isNoRep(accountRep)
 		});
 	}
 	for (const p of pms) {
-		if (isClosedPm(p) || !p.projected) continue;
+		if (isWalkIn(p.customer) || isClosedPm(p) || !p.projected) continue;
 		if (p.projected > laterHorizon) continue;
 		const accountRep = accountRepFor(marks, p.customer);
 		pushDue({
@@ -576,7 +580,7 @@ export const getDashboard = createServerFn({ method: "GET" }).middleware([deskMi
 		});
 	}
 	for (const i of installs) {
-		if (isInstalled(i) || !i.installDate) continue;
+		if (isWalkIn(i.customer) || isInstalled(i) || !i.installDate) continue;
 		if (i.installDate > laterHorizon) continue;
 		pushDue({
 			daysOut: diffDays(today, i.installDate),
@@ -917,6 +921,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	// No name sent (null, or a box left empty) keeps the ticket's account: a ticket is never left with no account.
 	if (data.customer != null && !data.customer.trim()) data = { ...data, customer: undefined };
 	if (data.customer != null && data.customer.trim() !== String(cur[0].customer ?? "").trim()) {
+		if (cur[0].kind === "tlc") assertWalkInMove("tlc", cur[0].customer, data.customer);
 		data = { ...data, customer: await ticketAccount(sql, data.customer ?? "") };
 	}
 	if (data.customer !== undefined) {
@@ -1042,7 +1047,11 @@ type NewTicket = { kind: "service" | "tlc"; customer: string; issue?: string; eq
 async function ticketAccount(sql: Sql, raw: string): Promise<string> {
 	const typed = String(raw ?? "").trim();
 	if (!typed) throw new Error("Pick an account.");
-	if (isWalkIn(typed)) return typed;
+	if (isWalkIn(typed)) {
+		const canonical = await walkInAccountName(sql);
+		if (!canonical) throw new Error("Walk - In isn't on the customer list. It isn't added from here.");
+		return canonical;
+	}
 	const row = (await sql.query<{ name: string }>("select name from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc, id limit 1", [typed]))[0];
 	if (!row) throw new Error(`${typed} isn't on the customer list. Pick the account, or add it on Customers first.`);
 	return row.name;
@@ -1053,6 +1062,7 @@ async function ticketAccount(sql: Sql, raw: string): Promise<string> {
  * read the same next number; the one that loses takes the number after it (11/9).
  */
 export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: number; customer: string }> {
+	if (data.kind === "tlc") assertWalkInSite("tlc", data.customer);
 	const customer = await ticketAccount(sql, data.customer);
 	const received = data.received || todayChicago();
 	for (let attempt = 0; ; attempt += 1) {
@@ -1167,6 +1177,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from pm_jobs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("PM not found");
+	if (data.customer !== undefined) assertWalkInMove("pm", cur[0].customer, data.customer);
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
 		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
 		const refusal = stackCustomerRefusal(
@@ -1231,6 +1242,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 }
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createPmInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	assertWalkInSite("pm", data.customer);
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
       values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? DEFAULT_PM_STYLE}, ${todayChicago()}, ${"Pending Scheduling"})
@@ -1425,6 +1437,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
+	if (data.customer !== undefined) assertWalkInMove("deal", cur[0].customer, data.customer);
 	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
 	const release = new Set<string>(Array.isArray(data.releaseUids) ? data.releaseUids.filter((u: unknown) => typeof u === "string" && u) : []);
 	if (release.size) {
@@ -1520,6 +1533,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 }
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createDealInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	assertWalkInSite("deal", data.customer);
 	const producer = canonicalRepName(data.producer);
 	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
 	const packed = Array.isArray(data.machines) && data.machines.length ? serializeMachines(data.machines.map((m: any) => cleanMachine({ ...m, equipment: String(m?.equipment ?? ""), serial: String(m?.serial ?? ""), powerVoltage: String(m?.powerVoltage ?? "") }))) : null;
@@ -1859,6 +1873,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const vendorPo = sentPo(data.vendorPo, "Vendor P.O.");
 	const cur = await sql`select * from installs where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Install not found");
+	if (data.customer !== undefined) assertWalkInMove("install", cur[0].customer, data.customer);
 	const c = cur[0];
 	// Checked before anything is written: the Tech Request Form tick below saves on its own.
 	if (data.installType != null && data.installType !== "" && !installTypeOf(data.installType)) throw new Error("Install type is New account or Update.");
@@ -1989,6 +2004,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 }
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
+	assertWalkInSite("install", data.customer);
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 	const parsed = parseMachinesJson(machinesJsonRaw);
@@ -2861,7 +2877,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		pendingInstalls: r.pending_installs,
 		aviKatz: !!r.avi_katz,
 		accountRep: r.account_rep,
-		noRep: isNoRep(r.account_rep),
+		noRep: isWalkIn(r.name) ? false : isNoRep(r.account_rep),
 		nameLocked: r.name_locked === true,
 		removalFlag: r.removal_flag === true,
 		accountNumber: r.account_number ?? null,

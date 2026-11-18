@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { useMyView } from "@/components/desk/my-view-bar";
 import { notLoadedText } from "@/lib/ops/load-problem";
 import type { CustomerRecord } from "@/lib/ops/types";
+import { isWalkIn } from "@/lib/ops/customer-key";
 
 
 export const Route = createFileRoute("/_app/customers")({
@@ -386,10 +387,15 @@ function Page() {
                 </p>
                 <AddressLine customer={c.name} />
                 <p className="text-xs text-muted-foreground sm:truncate">
-                  {c.accountRep ? <RepName name={c.accountRep} /> : <NoRepFlag show />}
+                  {isWalkIn(c.name) ? (
+                    "One-time"
+                  ) : c.accountRep ? (
+                    <RepName name={c.accountRep} />
+                  ) : (
+                    <NoRepFlag show />
+                  )}
                   {" · "}
                   {countLabel(c.calls, "call", "calls")}
-
                   {" · "}
                   {countLabel(c.tlcs, "TLC", "TLCs")}
                   {" · "}

@@ -11,6 +11,7 @@ import { formatNowChicago, isInstalled, todayChicago } from "@/lib/ops/clock";
 import { isoDay } from "@/lib/ops/iso";
 import { accountNumberFor, accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
+import { isWalkIn } from "@/lib/ops/customer-key";
 import { loadRebuilds } from "@/lib/ops/rebuilds";
 import {
   ANALYTICS_TYPES,
@@ -122,7 +123,8 @@ export async function loadAnalyticsRows(sql: Sql): Promise<AnalyticsRow[]> {
       detail: [r.title, oneLine(r.equipment)].filter(Boolean).join(" · "),
     });
   }
-  return out;
+  // Service tickets on Walk - In are real jobs. Installs, PMs, TLC and rebuilds on that account are not work to count.
+  return out.filter((r) => r.type === "service" || !isWalkIn(r.account));
 }
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;

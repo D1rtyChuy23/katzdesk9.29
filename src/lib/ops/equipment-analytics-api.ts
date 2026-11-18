@@ -4,7 +4,7 @@ import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
 import { todayChicago } from "@/lib/ops/clock";
 import { readFieldAssets } from "@/lib/ops/field-assets-api";
 import { buildEquipmentAnalytics, daysBetween, OVERDUE_DAYS, type EquipmentAnalytics, type PmUnitTie, type UnattachedPm, type Visit } from "@/lib/ops/equipment-analytics";
-import { normalizeCustomerKey } from "@/lib/ops/customer-key";
+import { isWalkIn, normalizeCustomerKey } from "@/lib/ops/customer-key";
 import type { FieldAsset } from "@/lib/ops/field-assets";
 import { planMachines } from "@/lib/ops/pm-machines";
 import type { AccountUnitRow } from "@/lib/ops/pm-runbook-units";
@@ -39,7 +39,7 @@ export async function readVisits(sql: Sql): Promise<Visit[]> {
       where (p.completed_at is not null or p.status = 'Completed') and p.status <> 'Cancelled'`,
   );
   return rows
-    .filter((r) => /^\d{4}-\d{2}-\d{2}$/.test(String(r.day ?? "").slice(0, 10)))
+    .filter((r) => !isWalkIn(r.customer) && /^\d{4}-\d{2}-\d{2}$/.test(String(r.day ?? "").slice(0, 10)))
     .map((r) => ({
       kind: r.kind === "pm" ? "pm" : r.kind === "tlc" ? "tlc" : "service",
       id: Number(r.id),

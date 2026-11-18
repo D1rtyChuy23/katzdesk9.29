@@ -13,6 +13,7 @@ import { loadTechs } from "@/lib/ops/roster";
 import { sameTech } from "@/lib/ops/tech-match";
 import { accountNumberFor, isAviKatz, loadAccountMarks, type AccountMarks } from "@/lib/ops/reps";
 import { HEALTH_LABEL } from "@/lib/ops/rebuild-model";
+import { notWalkInSql } from "@/lib/ops/walk-in-account";
 import { loadRebuilds, sortRebuildsForExport } from "@/lib/ops/rebuilds";
 import type { Recipe } from "@/lib/ops/types";
 import { sameCatalogModel, serialKey } from "@/lib/ops/account-equip";
@@ -650,7 +651,7 @@ async function buildInstalls(
   const accountSerials = await sql
     .query<{ customer: string; catalog_model: string; serial: string | null; serial_key: string | null }>(
       `select customer, catalog_model, serial, serial_key from account_equipment
-        where coalesce(serial,'') <> ''`,
+        where coalesce(serial,'') <> '' and ${notWalkInSql("customer")}`,
     )
     .catch(() => []);
   const usedSerials = new Set<string>();
@@ -874,7 +875,7 @@ async function buildRebuilds(
 export async function buildSerials(sql: Awaited<ReturnType<typeof getSql>>, filters: ExportFilters): Promise<ExportSheet[]> {
   const [units, installs, assets, modules, catalog] = await Promise.all([
     sql.query<{ id: number; customer: string; name: string | null; serial: string | null; install_date: unknown; locked_at: unknown }>(
-      "select id, customer, coalesce(nullif(equipment_name, ''), catalog_model) as name, serial, install_date, locked_at from account_equipment where coalesce(serial, '') <> '' order by id",
+      `select id, customer, coalesce(nullif(equipment_name, ''), catalog_model) as name, serial, install_date, locked_at from account_equipment where coalesce(serial, '') <> '' and ${notWalkInSql("customer")} order by id`,
     ),
     sql.query<{ id: number; customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: unknown; equip_status: string | null }>(
       "select id, customer, equipment, serial, power_voltage, machines, complete, equip_status from installs where archived = false order by id",
