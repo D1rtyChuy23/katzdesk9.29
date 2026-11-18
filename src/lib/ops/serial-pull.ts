@@ -545,6 +545,9 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
         // once, so Put back on the old account is refused until it is removed here, and no second unit appears.
         const { syncInstallUnits } = await import("@/lib/ops/inspection-api");
         await syncInstallUnits(sql, data.installId);
+        // Pulled onto an Installed install: the unit takes its date when the install made it (11/18).
+        const { fillInstallDatesFor } = await import("@/lib/ops/install-date-fill");
+        await fillInstallDatesFor(sql, data.installId, actor);
         const note = movedNote(accountHit.customer, data.installId, before?.wo ?? null, actor);
         await sql.query(
           `update account_equipment_retired

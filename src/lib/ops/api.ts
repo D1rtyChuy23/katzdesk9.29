@@ -92,6 +92,7 @@ import { mergeServiceJobs } from "./wo-duplicates";
 import { INSTALL_WOS_SQL, assertWoFree, setPrimaryWo, withWorkOrders } from "./install-work-orders";
 import { withLiveSerialNotices } from "./serial-pull";
 import * as input from "./api-input";
+import { fillInstallDatesFor } from "./install-date-fill";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
@@ -2000,6 +2001,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		// The list as stored before this save: only a serial changed in this save is written onto the row's unit.
 		await syncInstallUnits(sql, data.id, { prune: true, before: { equipment: c.equipment, serial: c.serial, power_voltage: c.power_voltage, machines: c.machines } });
 	}
+	// Installed (now, or already): its new units' blank install dates come from the install (11/18). A no-op otherwise.
+	await fillInstallDatesFor(sql, data.id, await deskUsername(sql, context.userId));
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const marks = await loadAccountMarks(sql);

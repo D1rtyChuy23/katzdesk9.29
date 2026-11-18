@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { fillInstallDatesFor } from "./install-date-fill";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
@@ -1837,6 +1838,8 @@ export async function addMachineOntoInstall(
     [data.installId, lines, packed.machines, packed.serial, packed.powerVoltage],
   );
   await syncInstallUnits(sql, data.installId, { prune: true });
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   const view = await readInspection(sql, data.installId);
   if (!view) throw new Error("Install not found");
   const expected = current.filter((m) => m.equipment.trim()).length + 1;
@@ -2118,6 +2121,8 @@ export async function addUnitOntoList(
   const name = unit.equipment_name || unit.catalog_model;
   await writeList(sql, data.installId, [...pieces, { equipment: name, serial: unit.serial ?? "", powerVoltage: unit.electrical ?? "", unitId: unit.id }]);
   await syncInstallUnits(sql, data.installId);
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,
@@ -2210,6 +2215,8 @@ export async function linkVisitUnit(
   for (const copy of copies) await mergeEquipmentUnits(sql, to.id, copy.id);
   await mergeEquipmentUnits(sql, to.id, from.id);
   await syncInstallUnits(sql, data.installId);
+  // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
+  await fillInstallDatesFor(sql, data.installId, actor);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,

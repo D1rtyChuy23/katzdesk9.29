@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { fillInstallDatesFor } from "./install-date-fill";
 import { nextCallId } from "@/lib/ops/call-id";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
@@ -868,6 +869,8 @@ export async function applyCorrigoRows(
         await recordInstallWo(sql, jobId, { wo: keptWo, status: row.statusRaw, completedAt: row.completedAt, source: "corrigo", addedBy: actor });
         // A new customer takes the install's own account units with it, as the install window does.
         const unitsMoved = customer !== cur[0].customer ? await moveInstallUnits(sql, jobId, cur[0].customer, customer) : null;
+        // Completed in Corrigo: the install's new units take its date as their Install date (11/18). Corrigo fields as they were.
+        if (complete) await fillInstallDatesFor(sql, jobId, actor);
         const added = !wos.some((w) => w.matchKey === matchKey);
         await logCorrigo(
           sql,

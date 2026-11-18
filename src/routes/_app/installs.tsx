@@ -38,6 +38,7 @@ import { rowWos, withWoMatches } from "@/lib/ops/wo-search";
 import { SortSelect, useDeskSort } from "@/components/desk/sort-bar";
 import { SORT_LIST, equipmentCount, sortDesk, tally } from "@/lib/ops/sort";
 import { ActionMenu, FilterChip, StatCard, StatRow } from "@/components/desk/desk-charts";
+import { InstallDateBackfillButton } from "@/components/desk/install-date-backfill";
 import { ArrowLeftRight, CheckCircle2, ClipboardCheck, Clock, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Install, Recipe } from "@/lib/ops/types";
@@ -271,6 +272,7 @@ function Page() {
           <ActionMenu label="Export">
             <ExportButton defaultType="installs" label="Export readiness" />
           </ActionMenu>
+          <InstallDateBackfillButton />
           <Button asChild variant="outline">
             <Link to="/unit-mismatches" data-testid="unit-mismatches-link" title="Installs whose Equipment list and Pre-inspection list different machines">
               <ArrowLeftRight className="size-4" />
