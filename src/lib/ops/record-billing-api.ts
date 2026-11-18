@@ -150,7 +150,7 @@ export async function loadRecordBillingRows(sql: Q): Promise<TicketBillingRow[]>
       `select p.id, p.wo, p.customer, p.technician, p.status, to_char(p.received, 'YYYY-MM-DD') as received,
               to_char(p.completed_at, 'YYYY-MM-DD') as completed, p.po, p.vendor_po, p.service_location
          from pm_jobs p
-        where p.stacked_job_id is null`,
+        where p.stacked_job_id is null and p.moved_job_id is null`,
     ),
   ]);
   const billings = await loadRecordBillings(

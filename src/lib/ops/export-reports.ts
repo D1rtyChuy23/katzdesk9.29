@@ -434,7 +434,7 @@ async function buildPms(
     done: boolean;
   }>(
     `select wo, customer, status, technician, completed_at, equipment, work_done, style, parts_status, projected, received, done
-       from pm_jobs order by customer, wo`,
+       from pm_jobs where moved_job_id is null order by customer, wo`,
   );
   let rows: string[][] = [];
   for (const j of jobs) {

@@ -774,10 +774,13 @@ export function detectBoard(hints: {
   existing?: CorrigoBoard | null;
 }): CorrigoBoard {
   if (hints.existing) return hints.existing;
-  // A filled-in P.O. decides the board. The Problem Description and call type decide only when the P.O. is blank.
   const po = String(hints.po ?? "").trim();
+  // Only the P.O. makes a row an install (Chuy, 11/18). The Problem Description never does, even with a blank P.O.:
+  // "Refurbish machine for installation at …" (WO-1112) and "install the new replacement touchpad" (WO-1126) are
+  // service work.
+  if (poSaysInstall(po)) return "install";
+  // TLC and PM: a filled-in P.O. decides; the description and call type only when the P.O. is blank.
   const blob = po || [hints.issue, hints.callType].filter(Boolean).join(" ");
-  if (/\b(installs?|installation)\b/i.test(blob)) return "install";
   if (/\b(tlc|factor)\b/i.test(blob)) return "tlc";
   if (/\b(preventative|preventive|\bpm\b)\b/i.test(blob)) return "pm";
   return "service";
@@ -796,14 +799,16 @@ export function corrigoType(raw: string | null | undefined): { type: CorrigoType
 }
 
 /**
- * The board a new row goes on. With a Type column, Type PM is a PM and Install is an install. A Request is service
- * work: an install or a TLC / Factor visit by its P.O. when the P.O. is filled in, otherwise by its description
- * (Corrigo has no Install type), never a PM by its words. Without a Type, the same P.O. rule decides.
+ * The board a new row goes on. An install only when its P.O. says Install (11/18), whatever the Type or the words.
+ * Type PM is a PM. A Request is service work, or a TLC / Factor visit by its P.O. when the P.O. is filled in,
+ * otherwise by its description; never a PM by its words. Without a Type, the same rules decide.
  */
 export function hintedBoard(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): { board: CorrigoBoard; note: string | null } {
   const t = corrigoType(rec.callType);
   if (t.type === "pm") return { board: "pm", note: null };
-  if (t.type === "install") return { board: "install", note: null };
+  if (t.type === "install") {
+    return poSaysInstall(rec.po) ? { board: "install", note: null } : { board: "service", note: "Type Install, but its P.O. doesn't say Install: a service ticket" };
+  }
   if (t.type === "request") {
     const b = detectBoard({ po: rec.po, issue: rec.issue, callType: null });
     return b === "pm" ? { board: "service", note: "Type Request: a service ticket, though its description reads like a PM" } : { board: b, note: null };
@@ -1481,9 +1486,13 @@ export function resolvePreviewRow(
   match: { unique: CorrigoHit | null; conflicts: CorrigoHit[] },
   opts: RowOpts = {},
 ): CorrigoPreviewRow {
-  const row = resolveRow(rec, match, opts, false);
+  let row = resolveRow(rec, match, opts, false);
   if (row.action === "skip") return row;
   if (!isPreInstallVisit(rec.issue, rec.workDone)) return poApproval(rec, row);
+  // Pre-install visits stay as they were (11/18): a visit whose words read as an install is told apart, linked to the
+  // account's open install and offered the "treat as the install ticket" override, from the install row its words
+  // would have made. The row itself is still a service ticket unless the person picks the override.
+  if (row.board === "service" && wordsSayInstall(rec)) row = resolveRow(rec, match, opts, false, true);
   // Every live install the visit's WO is on: Confirm takes it off them all (review, 11/14).
   const onInstalls = [...new Set([match.unique, ...match.conflicts].filter((h): h is CorrigoHit => !!h && h.board === "install" && !h.duplicateOf).map((h) => h.id))];
   const moves = onInstalls.length ? { installIds: onInstalls, matchKey: rec.matchKey } : null;
@@ -1540,6 +1549,17 @@ export function resolvePreviewRow(
  * install by anything else (its description, a Type column, the account's open install) starts unticked for approval.
  * A WO already on an install stays where it is.
  */
+/**
+ * The rule before 11/18, kept only to tell a pre-install visit apart: a Type of Install, or "install" in the P.O. or
+ * (with no P.O.) the description. It never decides a board on its own.
+ */
+function wordsSayInstall(rec: Pick<CorrigoRecord, "po" | "issue" | "callType">): boolean {
+  if (corrigoType(rec.callType).type === "install") return true;
+  const po = String(rec.po ?? "").trim();
+  const blob = po || [rec.issue, rec.callType].filter(Boolean).join(" ");
+  return /\b(installs?|installation)\b/i.test(blob);
+}
+
 /** "Install", "Installation", "Re-install", "INSTALL-SO1" on the P.O.; not "Uninstall", "De-install" or "Pre-install". */
 export function poSaysInstall(po: string | null | undefined): boolean {
   const s = String(po ?? "");
@@ -1579,6 +1599,8 @@ function resolveRow(
   opts: RowOpts,
   /** A pre-install visit: a service ticket by its WO alone, never an install by its account. */
   asVisit: boolean,
+  /** Only for telling a pre-install visit apart: the install row its words would make. */
+  byWords = false,
 ): CorrigoPreviewRow {
   const wrapped = !!opts.wrapped;
   // The run of WO numbers is judged from Corrigo's created date when the report has one, else from today.
@@ -1590,7 +1612,7 @@ function resolveRow(
     .filter((h, i, all) => all.findIndex((x) => x.board === h.board && x.id === h.id) === i)
     // A visit never goes on an install, even one its WO is on.
     .filter((h) => !asVisit || h.board !== "install");
-  const route = asVisit ? { board: "service" as CorrigoBoard, note: null } : hintedBoard(rec);
+  const route = asVisit ? { board: "service" as CorrigoBoard, note: null } : byWords ? { board: "install" as CorrigoBoard, note: null } : hintedBoard(rec);
   const hinted = route.board;
   const live = group.filter((h) => !h.duplicateOf);
   const pool = live.length ? live : group;

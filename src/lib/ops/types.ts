@@ -59,6 +59,8 @@ export type ServiceJob = {
   aviKatz: boolean;
   /** After a save only: why its Customer P.O. didn't change (billed or invoiced in NetSuite meanwhile), else null. */
   notice?: string | null;
+  /** Made from this PM by "Move to service ticket" (11/18). */
+  movedFromPmId?: number | null;
 };
 
 
@@ -87,6 +89,8 @@ export type PmJob = {
   aviKatz: boolean;
   /** The service or TLC ticket this PM bills on, or null when it has its own invoice. */
   stackedJobId: number | null;
+  /** Moved to this service ticket (11/18); the PM is a closed record pointing at it. */
+  movedJobId?: number | null;
   /** Set when this PM is already on Walk - In and should move to the café's account. */
   walkInMove?: string | null;
 };

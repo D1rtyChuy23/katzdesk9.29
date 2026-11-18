@@ -364,7 +364,7 @@ async function loadServiced(sql: Sql, marks: AccountMarks, from: string, today: 
                     order by a.id desc limit 1),
                   p.projected, p.received) as day
            from pm_jobs p
-          where coalesce(p.status, '') <> 'Cancelled' and (p.done or p.status = 'Completed') and p.stacked_job_id is null
+          where coalesce(p.status, '') <> 'Cancelled' and (p.done or p.status = 'Completed') and p.stacked_job_id is null and p.moved_job_id is null
        ) x
       where day between $1::date and $2::date
       order by id`,

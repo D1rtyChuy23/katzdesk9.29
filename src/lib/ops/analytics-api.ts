@@ -92,7 +92,7 @@ export async function loadAnalyticsRows(sql: Sql): Promise<AnalyticsRow[]> {
   }
 
   const pms = await sql.query<Record<string, unknown>>(
-    "select id, customer, status, technician, wo, equipment, style, projected, completed_at, received, updated_at from pm_jobs",
+    "select id, customer, status, technician, wo, equipment, style, projected, completed_at, received, updated_at from pm_jobs where moved_job_id is null",
   );
   for (const r of pms) {
     out.push({

@@ -117,7 +117,7 @@ export async function searchTicketText(
   );
   const pms = await sql.query<{ id: number; customer: string; status: string; equipment: string | null; wo: string | null; po: string | null; vendor_po: string | null }>(
     `select id, customer, status, equipment, wo, po, vendor_po from pm_jobs
-      where customer ilike $1 or coalesce(wo,'') ilike $1 or coalesce(po,'') ilike $1 or coalesce(vendor_po,'') ilike $1${inScope ? "" : " limit 5"}`,
+      where moved_job_id is null and (customer ilike $1 or coalesce(wo,'') ilike $1 or coalesce(po,'') ilike $1 or coalesce(vendor_po,'') ilike $1)${inScope ? "" : " limit 5"}`,
     [like],
   );
   const shown = (r: { customer: string | null }) => !inScope || inScope(r.customer);

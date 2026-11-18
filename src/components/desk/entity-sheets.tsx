@@ -78,6 +78,8 @@ import { SaveAllProvider, type FlushOptions, type SaveAll } from "./save-all";
 import { SaveBar } from "./save-bar";
 import { OpenLink } from "./open-link";
 import { PmStackHeader } from "./pm-stack-panel";
+import { MovePmToTicket } from "./pm-ticket-move";
+import { useNavigate } from "@tanstack/react-router";
 import { isPmStack, pmStackQuery } from "./pm-stack-shared";
 import { CustomerAddress } from "./customer-address";
 import { SerialNoticeBanner } from "./serial-notice";
@@ -275,6 +277,7 @@ export function PmSheet({
     enabled: pm != null,
   });
   const stackedOn = isPmStack(stack.data) ? stack.data.stackedOn : null;
+  const navigate = useNavigate();
   // Locked while stacked and the names match. A Corrigo split leaves the customer editable,
   // unless the sheet was already told to lock it.
   const customersDiffer = !!stackedOn && !stackedOn.customerMatches;
@@ -317,6 +320,18 @@ export function PmSheet({
                 onSaveFirst={() => {
                   skipToast.current = true;
                   formRef.current?.requestSubmit();
+                }}
+              />
+              <MovePmToTicket
+                pmId={pm.id}
+                movedJobId={pm.movedJobId}
+                onSaveFirst={() => {
+                  skipToast.current = true;
+                  formRef.current?.requestSubmit();
+                }}
+                onMoved={(jobId) => {
+                  onClose();
+                  void navigate({ to: "/service", search: { open: jobId } });
                 }}
               />
             </SheetHeader>

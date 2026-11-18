@@ -193,20 +193,44 @@ test("a visit whose WO is already on an install becomes its own Field Service ti
   }
 });
 
-test("Install on the P.O. is the first sign: an install row by its description, Type or account alone starts unticked for approval", async () => {
-  const { pg, sql, install } = await freshDb();
+test("only Install on the P.O. makes or finds an install: the description, a Type column or the account's open install never do (11/18)", async () => {
+  const { pg, sql, query, install } = await freshDb();
   try {
+    await query("insert into directory_customers (name) values ('ZZ Coffee Service Dept.')");
     const id = await install("ZZ Test Club");
+    const dept = await install("ZZ Coffee Service Dept.");
     const preview = await previewCorrigoRecords(sql, file([
       ["1081", "Completed", "ZZ Test Club", "Request", "Install the new ZZ grinder", "11/19/2026", ""],
       ["1082", "Open", "ZZ Test Twin", "Install", "New brewer", "", ""],
       ["1083", "Open", "ZZ Test Twin", "Request", "New brewer", "", "Installation SO2"],
+      // WO-1112's shape: a blank P.O. and "installation" in the words, on an account with an open install.
+      ["1112", "Open", "ZZ Coffee Service Dept.", "Request", "Refurbish machine for installation at ZZ Under the Radar", "", ""],
+      ["1113", "Open", "ZZ Test Club", "Request", "Swap brewer", "", "Uninstall"],
     ]));
-    const byDescription = one(preview, "WO-1081");
-    assert.deepEqual([byDescription.board, byDescription.jobId, byDescription.holdBack], ["install", id, true]);
-    assert.ok(byDescription.descriptionNotes.some((n) => n.warn && n.text === "Goes on an install, but its P.O. doesn't say Install: left unticked. Tick it to approve"));
-    assert.deepEqual([one(preview, "WO-1082").board, one(preview, "WO-1082").holdBack], ["install", true]);
+    const service = (wo) => {
+      const r = one(preview, wo);
+      assert.deepEqual([r.board, r.action, r.jobId, !!r.byAccount, !!r.holdBack, r.installOptions ?? null], ["service", "create", null, false, false, null], wo);
+    };
+    service("WO-1081");
+    service("WO-1082");
+    service("WO-1112");
+    service("WO-1113");
     assert.deepEqual([one(preview, "WO-1083").board, !!one(preview, "WO-1083").holdBack], ["install", false]);
+    // Neither open install was touched by the words.
+    assert.deepEqual((await query("select id, equip_status from installs order by id")).map((r) => [r.id, r.equip_status]), [[id, "Ready"], [dept, "Ready"]]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a WO already on an install still updates that install, whatever its P.O. says", async () => {
+  const { pg, sql, query, install } = await freshDb();
+  try {
+    const id = await install("ZZ Test Club");
+    await query("update installs set wo = 'WO-1090' where id = $1", [id]);
+    const preview = await previewCorrigoRecords(sql, file([["1090", "Open", "ZZ Test Club", "Request", "Finish hookup", "", ""]]));
+    const r = one(preview, "WO-1090");
+    assert.deepEqual([r.board, r.action, r.jobId], ["install", "update", id]);
   } finally {
     await pg.close();
   }

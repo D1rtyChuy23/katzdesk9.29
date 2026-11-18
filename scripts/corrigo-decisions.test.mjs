@@ -332,7 +332,20 @@ test("install: a row with no WO match attaches to the account's one open install
   assert.deepEqual(await installsOf(sql, "Cafe Delta"), [{ id, wo: "WO-1001", equip_status: "Ready" }]);
 });
 
-test("install: with no equipment column a problem description that is the install's machine name attaches", async () => {
+test("install: with no equipment column a problem description that is the install's machine name attaches, when the P.O. says Install", async () => {
+  const sql = await installDesk();
+  const id = await openInstall(sql, "Cafe Echo", { equipment: "Bunn ITCB 120v SN:ITCB064919" });
+  const { records } = parseCorrigoMatrix([
+    ["ST#", "Operational Status", "Customer Name", "Problem Description", "P.O. #"],
+    ["1002", "Completed", "Cafe Echo", "New install of Bunn ITCB", "Install"],
+  ]);
+  const preview = await previewCorrigoRecords(sql, records);
+  assert.deepEqual([preview.rows[0].action, preview.rows[0].jobId, preview.rows[0].newStatus], ["update", id, "Installed"]);
+  await applyCorrigoRows(sql, preview.rows, "Chuy");
+  assert.deepEqual(await installsOf(sql, "Cafe Echo"), [{ id, wo: "WO-1002", equip_status: "Installed" }]);
+});
+
+test("install: the same row with a blank P.O. is a service ticket, and the open install is left alone (11/18)", async () => {
   const sql = await installDesk();
   const id = await openInstall(sql, "Cafe Echo", { equipment: "Bunn ITCB 120v SN:ITCB064919" });
   const { records } = parseCorrigoMatrix([
@@ -340,9 +353,12 @@ test("install: with no equipment column a problem description that is the instal
     ["1002", "Completed", "Cafe Echo", "New install of Bunn ITCB"],
   ]);
   const preview = await previewCorrigoRecords(sql, records);
-  assert.deepEqual([preview.rows[0].action, preview.rows[0].jobId, preview.rows[0].newStatus], ["update", id, "Installed"]);
+  assert.deepEqual([preview.rows[0].board, preview.rows[0].action, preview.rows[0].jobId], ["service", "create", null]);
   await applyCorrigoRows(sql, preview.rows, "Chuy");
-  assert.deepEqual(await installsOf(sql, "Cafe Echo"), [{ id, wo: "WO-1002", equip_status: "Installed" }]);
+  const [install] = await installsOf(sql, "Cafe Echo");
+  assert.equal(install.id, id);
+  assert.notEqual(install.equip_status, "Installed");
+  assert.notEqual(install.wo, "WO-1002");
 });
 
 // Chuy 10/21: an install row whose WO no install has preselects the account's one open install unless it names other
@@ -432,7 +448,7 @@ test("install: an install given another WO after the preview keeps it as its fir
 
 // Review fixes: real catalog spellings, a wrapped desk with both cycles of one number, and apply races.
 
-test("install: with the real catalog and no equipment column, the problem description finds the account's open install", async () => {
+test("install: with the real catalog and no equipment column, the problem description finds the account's open install (an Install P.O.)", async () => {
   const sql = await freshDb();
   await sql.query("insert into directory_equipment (name) select unnest($1::text[])", [realCatalog]);
   const mike = await openInstall(sql, "Cafe Mike", { equipment: "Eversys Cameo c'2s" });
@@ -443,9 +459,9 @@ test("install: with the real catalog and no equipment column, the problem descri
   const romeo = await openInstall(sql, "Cafe Romeo", { machines: ['Bunn ITCB-DV, 29" w/Flip Tray'] });
   const { records } = parseCorrigoMatrix([
     ["ST#", "Operational Status", "Customer Name", "P.O. #", "Problem Description"],
-    ["0663", "Work Started", "Cafe Mike", "", "Install Eversys Cameo c'2s"],
-    ["0664", "Work Started", "Cafe November", "", "New install of Bunn ITCB-DV, 29\" w/Flip Tray"],
-    ["0665", "Work Started", "Cafe Oscar", "", "Install new Cameo c'2s; Bunn ITCB"],
+    ["0663", "Work Started", "Cafe Mike", "Install", "Install Eversys Cameo c'2s"],
+    ["0664", "Work Started", "Cafe November", "Installation", "New install of Bunn ITCB-DV, 29\" w/Flip Tray"],
+    ["0665", "Work Started", "Cafe Oscar", "INSTALL-SO1", "Install new Cameo c'2s; Bunn ITCB"],
     ["0666", "Work Started", "Cafe Papa", "Install", "Install"],
     ["0667", "Work Started", "Cafe Quebec", "Install", "Set up"],
     ["0668", "Work Started", "Cafe Romeo", "Install", "Brewer"],
