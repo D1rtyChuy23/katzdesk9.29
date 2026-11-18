@@ -523,7 +523,7 @@ async function earlierPartNotes(sql: Sql, pmId: number, machines: PlannedMachine
  */
 export function addMachinePartSql(): string {
   return `with pm as (
-       select p.id, p.status, nullif(btrim(j.ns_so), '') as ns_so,
+       select p.id, p.status, p.moved_job_id, nullif(btrim(j.ns_so), '') as ns_so,
               exists (
                 select 1 from invoices i
                 join invoice_lines l on l.invoice_id = i.id
@@ -544,7 +544,7 @@ export function addMachinePartSql(): string {
        select pm.id
          from pm
          join bi on true
-        where pm.status not in ('Cancelled', 'Moved To Ticket')
+        where pm.status <> 'Cancelled' and pm.moved_job_id is null
           and pm.ns_so is null
           and not pm.has_lines
           and (select count(*) from machine_parts m where m.pm_job_id = pm.id and m.piece_key = $3 and m.removed_at is null) < 50
@@ -584,7 +584,7 @@ export async function explainAddMachinePart(sql: Sql, pmId: number, billingItemI
  */
 export function removeMachinePartSql(): string {
   return `with pm as (
-       select p.id, p.status, nullif(btrim(j.ns_so), '') as ns_so,
+       select p.id, p.status, p.moved_job_id, nullif(btrim(j.ns_so), '') as ns_so,
               exists (
                 select 1 from invoices i
                 join invoice_lines l on l.invoice_id = i.id
@@ -604,7 +604,7 @@ export function removeMachinePartSql(): string {
        select part.id
          from part
          join pm on true
-        where pm.status not in ('Cancelled', 'Moved To Ticket')
+        where pm.status <> 'Cancelled' and pm.moved_job_id is null
           and pm.ns_so is null
           and not pm.has_lines
           and not exists (select 1 from ticket_charges c where c.source_key = 'mp:' || part.id::text)
