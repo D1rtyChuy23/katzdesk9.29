@@ -1,7 +1,8 @@
 /**
  * Add equipment and Edit on an account's Equipment tab (Chuy, 11/9). A machine goes on the account with its model,
- * serial, Part #, ownership and install date; Edit changes the Part #, ownership and install date. The model and
- * serial stay as they are here: they tie the unit to its installs, inspections and PM runbooks.
+ * serial, Part #, ownership and install date; Edit changes the Part #, ownership, install date and condition. An Admin
+ * can also fix the serial and (11/19) change the model to another one on the equipment list: see unit-model-change.ts
+ * for what follows the unit when its model changes.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -21,6 +22,7 @@ import { CONDITION_MAX, cleanCondition, ensureCatalogModel, readAccountUnit, typ
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { SITE_LABEL } from "@/lib/ops/warehouse";
 import { assertWalkInSite } from "@/lib/ops/walk-in-account";
+import { catalogModelNamed, editUnitModelSql, MODEL_EDIT_ADMIN_ONLY, MODEL_NOT_IN_CATALOG, modelChangeText, planModelChange } from "@/lib/ops/unit-model-change";
 
 export type AddUnitInput = { model: string; serial?: string | null; partNumber?: string | null; ownership?: string | null; installDate?: string | null };
 export type EditUnitInput = {
@@ -32,6 +34,8 @@ export type EditUnitInput = {
   condition?: string | null;
   /** A new serial: an Admin's only, refused when another unit has it (11/19). Left as it is when not sent. */
   serial?: string | null;
+  /** Another model from the equipment list: an Admin's only (11/19). Left as it is when not sent or the same. */
+  model?: string | null;
 };
 
 export const SERIAL_EDIT_ADMIN_ONLY = "Only an Admin can change a unit's serial.";
@@ -128,7 +132,7 @@ export async function addEquipmentUnit(sql: Sql, customer: string, input: AddUni
  * Change a unit's Part #, ownership, install date and condition, and (an Admin) its serial. A locked unit, or one
  * changed since the window opened, is refused; so is a serial another unit has.
  */
-export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInput, opts?: { admin?: boolean }): Promise<AccountEquipRow> {
+export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInput, opts?: { admin?: boolean; who?: string }): Promise<AccountEquipRow> {
   const unit = await readAccountUnit(sql, id);
   if (!unit) throw new Error("That unit is not on the account.");
   // An ownership from before today's list keeps saving as it is.
@@ -150,18 +154,28 @@ export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInp
     if (on && newSerial)
       throw new Error(on.customer.trim().toLowerCase() === unit.customer.trim().toLowerCase() ? serialOnThisAccount(newSerial) : serialOnAccount(newSerial, on.customer));
   }
-  const rows = await sql.query<{ id: number }>(editUnitSql(), [
-    id,
-    partNumber,
-    ownership,
-    installDate,
-    input.seen,
-    conditionSent,
-    condition,
-    serialSent,
-    serialSent ? newSerial : null,
-    key,
-  ]);
+  // A model change: another model on the equipment list, an Admin's only. The same model (any capitals) is no change.
+  let newModel: string | null = null;
+  if (input.model != null && String(input.model).trim() && String(input.model).trim().toLowerCase() !== unit.catalogModel.trim().toLowerCase()) {
+    if (!opts?.admin) throw new Error(MODEL_EDIT_ADMIN_ONLY);
+    newModel = await catalogModelNamed(sql, input.model);
+    if (!newModel) throw new Error(MODEL_NOT_IN_CATALOG);
+    if (newModel === unit.catalogModel) newModel = null;
+  }
+  const params = [id, partNumber, ownership, installDate, input.seen, conditionSent, condition, serialSent, serialSent ? newSerial : null, key];
+  let rows: { id: number }[];
+  if (newModel) {
+    const plan = await planModelChange(sql, unit, newModel);
+    rows = await sql.query<{ id: number }>(editUnitModelSql(), [
+      ...params,
+      newModel,
+      unit.catalogModel,
+      JSON.stringify(plan.installs),
+      JSON.stringify(plan.pins),
+      opts?.who || "Admin",
+      modelChangeText(serialSent ? newSerial ?? null : unit.serial, unit.catalogModel, newModel),
+    ]);
+  } else rows = await sql.query<{ id: number }>(editUnitSql(), params);
   if (!rows[0]) {
     if (!(await readAccountUnit(sql, id))) throw new Error("That unit is not on the account.");
     await assertUnitUnlocked(sql, id);
@@ -206,11 +220,13 @@ export const editAccountEquipment = createServerFn({ method: "POST" })
         ...fields,
         condition: z.string().max(200).nullable().optional(),
         serial: z.string().max(200).nullable().optional(),
+        model: z.string().max(300).nullable().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { id, ...input } = data;
     const sql = await ready();
-    return editEquipmentUnit(sql, id, input, { admin: await canReviewNames(sql, context.userId) });
+    const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Admin";
+    return editEquipmentUnit(sql, id, input, { admin: await canReviewNames(sql, context.userId), who });
   });
