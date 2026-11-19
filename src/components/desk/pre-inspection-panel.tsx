@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, ChevronLeft, ImagePlus, Images, Pencil, Trash2, Download } from "lucide-react";
 import { ZoomableImage } from "@/components/desk/image-lightbox";
@@ -211,9 +213,13 @@ function MachineList({
   onSaved: (v: InspectionView) => void;
 }) {
   const [removing, setRemoving] = useState<InspectionView["machines"][number] | null>(null);
+  // Taking a unit off an install is an Admin's (11/19).
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canRemove = isDeskAdmin(me.data);
   const [editing, setEditing] = useState<InspectionView["machines"][number] | null>(null);
   const remove = useMutation({
-    mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId: view.installId, equipmentId } }),
+    // The dialog below is the confirm: it names the unit and says a Ready or passed install reopens (11/19).
+    mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId: view.installId, equipmentId, confirmReopen: true } }),
     onSuccess: (next) => {
       toast.success(`${next.removed} removed from the pre-inspection${next.fromList ? " and the equipment list" : ""}`);
       setRemoving(null);
@@ -295,6 +301,7 @@ function MachineList({
               >
                 <Pencil className="size-4" />
               </button>
+              {canRemove ? (
               <button
                 type="button"
                 className="flex w-12 shrink-0 items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-40"
@@ -306,6 +313,7 @@ function MachineList({
               >
                 <Trash2 className="size-4" />
               </button>
+              ) : null}
               </div>
               {!m.onList ? (
                 <div
@@ -342,6 +350,8 @@ function MachineList({
             {removing?.name}
             {removing?.serial ? ` · SN ${removing.serial}` : ""} comes off this pre-inspection, with its checks{removing?.photoCount ? ` and ${removing.photoCount} photo${removing.photoCount === 1 ? "" : "s"}` : ""} for this visit.
             If it is on this install's equipment list it comes off that list too. Other installs and the account's history are not changed.
+            It's kept under Removed on the Equipment tab, and Put back returns it.
+            {view.overall === "Passed" ? " This pre-inspection has passed: taking it off reopens it, and a Ready install goes back to Not Ready, to be checked again." : " If the install is Ready, it goes back to Not Ready, to be checked again."}
           </DialogDescription>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setRemoving(null)} disabled={remove.isPending}>

@@ -16,6 +16,7 @@ import { ComboField, MultiComboField, type ComboItem } from "@/components/ui/com
 import { Label } from "@/components/ui/input";
 import { RenameDialog } from "./rename-dialog";
 import { toast } from "sonner";
+import { SERIAL_LIKE_MODEL_PREFIX } from "@/lib/ops/account-equip";
 
 export function useDirectory(kind: DirectoryKind) {
   const qc = useQueryClient();
@@ -29,7 +30,17 @@ export function useDirectory(kind: DirectoryKind) {
     queryFn: () => listDirectory({ data: { kind } }),
   });
   const add = useMutation({
-    mutationFn: (name: string) => addDirectoryEntry({ data: { kind, name } }),
+    // A typed model that reads as a serial is asked about first (11/19); a yes adds it as typed.
+    mutationFn: async (name: string) => {
+      try {
+        return await addDirectoryEntry({ data: { kind, name } });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "";
+        if (!message.startsWith(SERIAL_LIKE_MODEL_PREFIX)) throw e;
+        if (!window.confirm(message.slice(SERIAL_LIKE_MODEL_PREFIX.length).trim())) throw new Error(`"${name}" wasn't added as a model.`);
+        return addDirectoryEntry({ data: { kind, name, confirmSerialLike: true } });
+      }
+    },
     onSuccess: (row) => {
       qc.setQueryData<ComboItem[]>(["directory", kind], (old) => {
         const list = old ?? [];

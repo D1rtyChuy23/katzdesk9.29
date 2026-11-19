@@ -106,8 +106,8 @@ test("a locked unit survives Remove, Merge, the prune and an import", async () =
     await assert.rejects(() => removeEquipmentUnit(sql, tb3), { message });
     await assert.rejects(() => mergeEquipmentUnits(sql, fetco, tb3), { message });
     await assert.rejects(() => mergeEquipmentUnits(sql, tb3, fetco), { message });
-    await assert.rejects(() => removeInspectionUnit(sql, { installId: id, equipmentId: tb3 }, "Test"), { message });
-    await assert.rejects(() => removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "Test"), { message });
+    await assert.rejects(() => removeInspectionUnit(sql, { installId: id, equipmentId: tb3 }, "Test", { admin: true }), { message });
+    await assert.rejects(() => removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "" }, "Test", { admin: true }), { message });
     // The Equipment tab saves a list without it: the prune leaves it on the visit and the account.
     await pg.query("update installs set equipment = 'Fetco 52H', machines = $2 where id = $1", [id, JSON.stringify([{ equipment: "Fetco 52H", serial: "", powerVoltage: "" }])]);
     await syncInstallUnits(sql, id, { prune: true });

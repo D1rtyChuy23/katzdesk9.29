@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SerialNormalizeButton } from "@/components/desk/serial-normalize";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { getDuplicateSerials } from "@/lib/ops/account-equip-import";
@@ -117,6 +118,9 @@ function Page() {
           A serial should be on one machine. Open each account and, on its Equipment tab, Merge the two units when they're the same
           machine on one account, or Remove the one that's wrong. Nothing here changes on its own.
         </p>
+        <div className="mt-3">
+          <SerialNormalizeButton />
+        </div>
         {dupes.isLoading ? <p className="mt-4 text-sm text-muted-foreground">Checking every account's equipment…</p> : null}
         {dupes.isError ? <p className="mt-4 text-sm text-destructive">{notLoadedText(dupes, "duplicate serial")}</p> : null}
         {dupes.data ? (

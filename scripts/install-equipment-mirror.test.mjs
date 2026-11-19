@@ -170,9 +170,9 @@ test("an installed project: only the owner edits or removes its machines", async
     const [tb3, fetco] = (await readInspection(sql, id)).machines;
     await pg.query("update installs set complete = true where id = $1", [id]);
     await assert.rejects(() => editInspectionUnit(sql, { installId: id, equipmentId: tb3.equipmentId, model: "Bunn TB3", serial: "TB-111" }, "Tech"), /only the owner/);
-    await assert.rejects(() => removeInspectionUnit(sql, { installId: id, equipmentId: fetco.equipmentId }, "Tech"), /only the owner/);
+    await assert.rejects(() => removeInspectionUnit(sql, { installId: id, equipmentId: fetco.equipmentId }, "Tech", { admin: true }), /only the owner/);
     await editInspectionUnit(sql, { installId: id, equipmentId: tb3.equipmentId, model: "Bunn TB3", serial: "TB-111" }, "Chuy", { owner: true });
-    await removeInspectionUnit(sql, { installId: id, equipmentId: fetco.equipmentId }, "Chuy", { owner: true });
+    await removeInspectionUnit(sql, { installId: id, equipmentId: fetco.equipmentId }, "Chuy", { owner: true, admin: true });
     assert.deepEqual(await listOf(pg, id), [["Bunn TB3", "TB-111", ""]]);
     assert.deepEqual((await preOf(sql, id)).map((m) => [m[1], m[2]]), [["Bunn TB3", "TB-111"]]);
   } finally {

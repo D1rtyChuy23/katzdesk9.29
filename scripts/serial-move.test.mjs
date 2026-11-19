@@ -28,7 +28,7 @@ async function fresh() {
   await P.ensureSerialNotice(sql);
   await pg.query("insert into directory_equipment (name) values ($1)", [MODEL]);
   await pg.query("insert into directory_customers (name) values ($1), ($2)", [OLD, NEW]);
-  await pg.query("insert into desk_accounts (user_id, username, approved) values ('u_sam', 'sam.zz', true)");
+  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin) values ('u_sam', 'sam.zz', true, true)");
   const unit = async (customer, serial) =>
     (
       await pg.query(

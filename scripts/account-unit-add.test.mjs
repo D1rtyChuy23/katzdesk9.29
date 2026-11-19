@@ -147,12 +147,12 @@ test("a serial already on this account, on another account, or in Katz stock is 
     const list = await models(query);
 
     // Case, spaces and # don't make it a different serial.
-    await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "lpg 0080607" }), { message: "SN lpg 0080607 is already on this account." });
+    await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "lpg 0080607" }), { message: "SN LPG 0080607 is already on this account." });
     await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: BREWER, serial: "#ITCB181626" }), {
       message: `SN #ITCB181626 is on ${CAFE}. A machine moves only when it comes back to the HQ barn.`,
     });
     await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: BREWER, serial: "itcb-777" }), {
-      message: "SN itcb-777 is in the HQ barn. Send it out with Warehouse → Assign.",
+      message: "SN ITCB-777 is in the HQ barn. Send it out with Warehouse → Assign.",
     });
     await assert.rejects(() => A.addEquipmentUnit(sql, HOUSE, { model: GRINDER, serial: "LPG-555" }), {
       message: "SN LPG-555 is at Katz (Staging area). Send it out with Warehouse → Assign.",
@@ -243,7 +243,7 @@ test("the add and edit statements check the serial and the lock again as they wr
     assert.equal(await unitCount(query), 3);
 
     // Locked, or changed since it was read: the edit writes nothing.
-    const edit = (seen) => sql.query(A.editUnitSql(), [row.id, "33200.0000", null, null, seen]);
+    const edit = (seen) => sql.query(A.editUnitSql(), [row.id, "33200.0000", null, null, seen, false, null, false, null, null]);
     await query("update account_equipment set locked_at = now(), locked_by = 'chuy' where id = $1", [row.id]);
     const locked = (await IMP.readAccountUnits(sql, HOUSE))[0];
     assert.deepEqual(await edit(locked.seen), []);
@@ -282,8 +282,8 @@ test("a serial-less unit with a Part # stays on the account when it's taken off 
     const id = (await query("insert into installs (customer, equipment) values ($1, $2) returning id", [HOUSE, `${GRINDER}\n${BREWER}`]))[0].id;
     const view = await readInspection(sql, id);
     assert.deepEqual(view.machines.map((m) => m.equipmentId).sort(), [typed.id, bare.id].sort(), "the visit takes both units");
-    await removeInspectionUnit(sql, { installId: id, equipmentId: typed.id }, "Test");
-    await removeInspectionUnit(sql, { installId: id, equipmentId: bare.id }, "Test");
+    await removeInspectionUnit(sql, { installId: id, equipmentId: typed.id }, "Test", { admin: true });
+    await removeInspectionUnit(sql, { installId: id, equipmentId: bare.id }, "Test", { admin: true });
     // The one with nothing typed on it goes, as before; the one with a Part # stays, Part # and all.
     assert.deepEqual((await IMP.readAccountUnits(sql, HOUSE)).map((u) => [u.id, u.partNumber]), [[typed.id, "33200.0000"]]);
   } finally {
@@ -311,11 +311,11 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   assert.match(form, /maxLength=\{PART_NUMBER_MAX\}/);
   assert.match(form, /OWNERSHIP_VALUES\.map\(/);
   assert.match(form, /type="date"/);
-  assert.match(form, /\{unit \? \(\n\s+<p[^>]*data-testid="account-unit-fixed"/);
+  assert.match(form, /\{unit \? \(\n\s+<div[^>]*>\n\s+<p[^>]*data-testid="account-unit-fixed"/);
   assert.ok(form.includes("addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } })"));
   // Edit sends the version it opened with, so a list refresh while it's open can't let it save over a newer save.
   assert.ok(form.includes('const [seen] = useState(unit?.seen ?? "");'));
-  assert.ok(form.includes("editAccountEquipment({ data: { id: unit.id, seen, partNumber, ownership, installDate } })"));
+  assert.ok(/editAccountEquipment\(\{\n\s+data: \{ id: unit\.id, seen, partNumber, ownership, installDate, condition, \.\.\.\(admin && editSerial !== \(unit\.serial \?\? ""\) \? \{ serial: editSerial \} : \{\}\) \},/.test(form));
   // Both windows pass the account's name.
   assert.match(src("src/components/desk/customer-sheet.tsx"), /<AccountEquipmentList customer=\{history\.data\?\.name \?\? null\} /);
   assert.match(src("src/components/desk/job-sheet.tsx"), /<AccountEquipmentList customer=\{customer \|\| null\} /);

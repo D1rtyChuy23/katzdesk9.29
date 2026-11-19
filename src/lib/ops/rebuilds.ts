@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { SERIAL_KEY_SQL } from "@/lib/ops/account-equip";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
@@ -164,7 +165,7 @@ const SAME_ACCOUNT = (x: string, y: string) =>
   `(${NAME_KEY(x)} = ${NAME_KEY(y)} or (${NAME_KEY(x)} = any(${HOUSE_KEYS}) and ${NAME_KEY(y)} = any(${HOUSE_KEYS})))`;
 
 /** SQL: a serial as serialKey() reads it, which is how account units are keyed too. */
-const SERIAL_KEY = (col: string) => `lower(regexp_replace(btrim(coalesce(${col}, '')), '[#[:space:]]', '', 'g'))`;
+const SERIAL_KEY = SERIAL_KEY_SQL;
 
 /**
  * SQL: machine `m` (any row or CTE with the machine's id, asset_id, pulled_at and stocked_at) holds its unit (11/2

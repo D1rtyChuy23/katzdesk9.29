@@ -165,9 +165,36 @@ const GENERIC_TOKENS = new Set([
 
 const EMPTY_SERIAL = /^(n\/?a|na|n a|not available|not avail|none|null|unknown|-|—|–)$/i;
 
+/** Characters that print as nothing, pasted in with a serial from a spreadsheet or an email (11/19). */
+export const INVISIBLE = /[\u200B-\u200D\u2060\uFEFF\u00AD]/g;
+
+/**
+ * A serial's key, for matching: any case, no spaces, no #, no invisible characters, full-width letters as plain
+ * ones. The SQL twin is SERIAL_KEY_SQL below; keep them the same.
+ */
 export function serialKey(raw: string | null | undefined): string {
-  return (raw ?? "").trim().replace(/[#\s]/g, "").toLowerCase();
+  return (raw ?? "").normalize("NFKC").replace(INVISIBLE, "").trim().replace(/[#\s]/g, "").toLowerCase();
 }
+
+/**
+ * Text that reads as a serial, not a model (11/19): "ITCB154148", "PB001708", "231515042", "SN:231515042". A model has
+ * a space, or a hyphen, or only a few digits ("Bunn ITCB-DV", "TB3", "G9-2T").
+ */
+export function looksLikeSerial(raw: string | null | undefined): boolean {
+  const t = String(raw ?? "").normalize("NFKC").replace(INVISIBLE, "").trim();
+  if (!t) return false;
+  if (/^S\/?N\b|^S\/?N[:#]/i.test(t) && /\d{3,}/.test(t)) return true;
+  return /^[A-Za-z]{0,5}\d{5,}[A-Za-z]{0,2}$/.test(t);
+}
+
+/** The start of the server's question when a typed model reads as a serial; the window asks it and sends the yes. */
+export const SERIAL_LIKE_MODEL_PREFIX = "Looks like a serial:";
+export const serialLikeModelMessage = (name: string, isUnitSerial: boolean) =>
+  `${SERIAL_LIKE_MODEL_PREFIX} "${name}" ${isUnitSerial ? "is a unit's serial" : "reads as a serial number"}, not a model. Add it to the model list anyway?`;
+
+/** serialKey() in SQL, for a column or expression. */
+export const SERIAL_KEY_SQL = (col: string) =>
+  `lower(regexp_replace(regexp_replace(normalize(btrim(coalesce(${col}, '')), NFKC), '[\u200B-\u200D\u2060\uFEFF\u00AD]', '', 'g'), '[#[:space:]]', '', 'g'))`;
 
 export function compactEquip(raw: string): string {
   return String(raw ?? "")
@@ -398,14 +425,17 @@ function uniqueNames(names: string[]): string[] {
   return out;
 }
 
+/** A serial as typed or imported, kept uppercase (11/19). Placeholders such as N/A are no serial. */
 export function parseSerial(raw: string | null | undefined): string | null {
   const s = String(raw ?? "")
+    .normalize("NFKC")
+    .replace(INVISIBLE, "")
     .replace(/[\u00a0\u202f\u2007\u2009]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   if (!s) return null;
   if (EMPTY_SERIAL.test(s)) return null;
-  return s;
+  return s.toUpperCase();
 }
 
 export function parseInstallDate(raw: string | null | undefined): string | null {

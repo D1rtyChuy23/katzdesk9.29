@@ -1,4 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
+import { REMOVE_ADMIN_ONLY } from "@/lib/ops/inspection-api";
 import { toast } from "sonner";
 import {
   addInspectionUnitToList,
@@ -39,13 +42,16 @@ export function OffListBanner({ installId }: { installId: number }) {
     toast.success(message);
   };
   const fail = (fallback: string) => (e: unknown) => toast.error(e instanceof Error ? e.message : fallback);
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = isDeskAdmin(me.data);
   const add = useMutation({
     mutationFn: (equipmentId: number) => addInspectionUnitToList({ data: { installId, equipmentId } }),
     onSuccess: (view) => done(view, "Added to the equipment list"),
     onError: fail("Could not add it to the equipment list"),
   });
   const drop = useMutation({
-    mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId, equipmentId } }),
+    // Asked first below, by name, with what a Ready or passed install does (11/19).
+    mutationFn: (equipmentId: number) => removeInspectionEquipment({ data: { installId, equipmentId, confirmReopen: true } }),
     onSuccess: (view) => done(view, `${view.removed} removed from the pre-inspection`),
     onError: fail("Could not remove it"),
   });
@@ -118,7 +124,13 @@ export function OffListBanner({ installId }: { installId: number }) {
                       className={ACTION}
                       disabled={m.locked || busy}
                       onClick={() => {
-                        if (!window.confirm(`Take ${label} off the pre-inspection? Its checks and photos for this visit go with it.`)) return;
+                        if (!isAdmin) return void toast.error(REMOVE_ADMIN_ONLY);
+                        if (
+                          !window.confirm(
+                            `Take ${label} off the pre-inspection? Its checks and photos for this visit are kept under Removed, and Put back returns them. A Ready install goes back to Not Ready, to be checked again.`,
+                          )
+                        )
+                          return;
                         drop.mutate(m.equipmentId);
                       }}
                       data-testid={`off-list-remove-${m.equipmentId}`}

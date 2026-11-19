@@ -235,6 +235,8 @@ export type Install = {
   customerLockedBy: string | null;
   /** After a customer change: the install's own account units that moved with it, and those that stayed. */
   unitsMoved?: { moved: string[]; stayed: string[] } | null;
+  /** Machines a save by someone who isn't an Admin left off the list, put back on it (11/19). */
+  unitsKeptBack?: string[];
   reqsReady: string | null;
   notes: string | null;
   workDone: string | null;

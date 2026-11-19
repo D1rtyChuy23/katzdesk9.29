@@ -7,7 +7,10 @@ import { Input, Label } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
 import { checkUnitFields, OWNERSHIP_VALUES, PART_NUMBER_MAX } from "@/lib/ops/account-equip";
 import { addAccountEquipment, editAccountEquipment } from "@/lib/ops/account-equip-edit";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { listDirectory } from "@/lib/ops/api";
+import { EquipmentHistoryList } from "./equipment-history-list";
 
 /** What Edit needs of a unit on the list. */
 export type EditableUnit = {
@@ -18,12 +21,14 @@ export type EditableUnit = {
   partNumber?: string | null;
   ownership: string | null;
   installDate: string | null;
+  condition?: string | null;
   seen?: string;
 };
 
 /**
  * Add equipment, or Edit one unit (Chuy, 11/9). Adding takes the model, serial, Part #, ownership and install date.
- * Edit changes the Part #, ownership and install date; the model and serial are shown, not changed.
+ * Edit changes the Part #, ownership, install date and condition (11/19); an Admin can also fix the serial, and the
+ * unit's history shows below.
  */
 export function AccountUnitForm({ customer, unit, onDone }: { customer: string; unit?: EditableUnit | null; onDone: () => void }) {
   const qc = useQueryClient();
@@ -32,6 +37,10 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
   const [partNumber, setPartNumber] = useState(unit?.partNumber ?? "");
   const [ownership, setOwnership] = useState(unit?.ownership ?? "");
   const [installDate, setInstallDate] = useState(unit?.installDate ?? "");
+  const [condition, setCondition] = useState(unit?.condition ?? "");
+  const [editSerial, setEditSerial] = useState(unit?.serial ?? "");
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess(), enabled: !!unit });
+  const admin = isDeskAdmin(me.data);
   // The version Edit opened with: a list refresh while it's open must not let it save over a newer save.
   const [seen] = useState(unit?.seen ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +52,9 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
   const save = useMutation({
     mutationFn: () =>
       unit
-        ? editAccountEquipment({ data: { id: unit.id, seen, partNumber, ownership, installDate } })
+        ? editAccountEquipment({
+            data: { id: unit.id, seen, partNumber, ownership, installDate, condition, ...(admin && editSerial !== (unit.serial ?? "") ? { serial: editSerial } : {}) },
+          })
         : addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } }),
     onSuccess: () => {
       toast.success(unit ? "Saved" : "Added to this account");
@@ -76,9 +87,29 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
       }}
     >
       {unit ? (
-        <p className="text-sm font-medium" data-testid="account-unit-fixed">
-          {[unit.equipmentName || unit.catalogModel, unit.serial ? `SN ${unit.serial}` : "No serial"].join(" · ")}
-        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <p className="text-sm font-medium" data-testid="account-unit-fixed">
+            {[unit.equipmentName || unit.catalogModel, !admin ? (unit.serial ? `SN ${unit.serial}` : "No serial") : null].filter(Boolean).join(" · ")}
+          </p>
+          {admin ? (
+            <div>
+              <Label htmlFor={`${id}-serial-edit`}>Serial (Admin)</Label>
+              <Input
+                id={`${id}-serial-edit`}
+                value={editSerial}
+                onChange={(e) => {
+                  setEditSerial(e.target.value);
+                  setError(null);
+                }}
+                placeholder="Blank if it has none"
+                autoComplete="off"
+                className="mt-1 uppercase"
+                disabled={save.isPending}
+                data-testid="account-unit-serial-edit"
+              />
+            </div>
+          ) : null}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div data-testid="account-unit-model">
@@ -115,7 +146,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           </div>
         </div>
       )}
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className={`mt-3 grid grid-cols-1 gap-3 ${unit ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
         <div>
           <Label htmlFor={`${id}-part`}>Part #</Label>
           <Input
@@ -170,6 +201,25 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
             data-testid="account-unit-install-date"
           />
         </div>
+        {unit ? (
+          <div>
+            <Label htmlFor={`${id}-condition`}>Condition</Label>
+            <Input
+              id={`${id}-condition`}
+              value={condition}
+              maxLength={40}
+              onChange={(e) => {
+                setCondition(e.target.value);
+                setError(null);
+              }}
+              placeholder="Good, Fair, Needs work…"
+              autoComplete="off"
+              className="mt-1"
+              disabled={save.isPending}
+              data-testid="account-unit-condition"
+            />
+          </div>
+        ) : null}
       </div>
       {error || problem ? (
         <p className="mt-2 text-xs text-destructive" data-testid="account-unit-error">
@@ -184,6 +234,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           Cancel
         </Button>
       </div>
+      {unit ? <EquipmentHistoryList unitId={unit.id} /> : null}
     </form>
   );
 }

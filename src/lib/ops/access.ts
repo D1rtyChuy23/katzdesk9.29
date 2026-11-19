@@ -752,21 +752,26 @@ export async function requireNameReviewer(sql: Sql, userId: string, message?: st
 }
 
 /** Reject unapproved sessions before any ops query. Used by deskMiddleware. */
-export async function assertApproved(userId: string): Promise<void> {
+export async function assertApproved(userId: string): Promise<{ username: string | null }> {
   const sql = await getSql();
   await ensureTable(sql);
   const existing = await loadAccess(sql, userId);
   if (!flagOn(existing?.approved)) {
     throw new Error("This account is waiting for approval.");
   }
+  return { username: (existing as { username?: string | null } | undefined)?.username ?? null };
 }
 
-/** Auth + approved desk account. Use on every ops/notify server function. */
+/**
+ * Auth + approved desk account. Use on every ops/notify server function. The function then runs as its person: an
+ * equipment write names them in the change history (11/19, src/lib/request-actor.server.ts).
+ */
 export const deskMiddleware = createMiddleware({ type: "function" })
   .middleware([authMiddleware])
   .server(async ({ next, context }) => {
-    await assertApproved(context.userId);
-    return next();
+    const me = await assertApproved(context.userId);
+    const { withRequestActor } = await import("@/lib/request-actor.server");
+    return withRequestActor(me.username || "Teammate", () => next());
   });
 
 export const checkUsername = createServerFn({ method: "POST" })

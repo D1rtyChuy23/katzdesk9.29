@@ -6,26 +6,38 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import {
   checkUnitFields,
   parseSerial,
+  SERIAL_KEY_SQL,
   serialInKatzStock,
   serialKey,
   serialOnAccount,
   serialOnThisAccount,
   UNIT_CHANGED,
 } from "@/lib/ops/account-equip";
-import { ensureCatalogModel, readAccountUnit, type AccountEquipRow } from "@/lib/ops/account-equip-import";
+import { CONDITION_MAX, cleanCondition, ensureCatalogModel, readAccountUnit, type AccountEquipRow } from "@/lib/ops/account-equip-import";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { SITE_LABEL } from "@/lib/ops/warehouse";
 import { assertWalkInSite } from "@/lib/ops/walk-in-account";
 
 export type AddUnitInput = { model: string; serial?: string | null; partNumber?: string | null; ownership?: string | null; installDate?: string | null };
-export type EditUnitInput = { seen: string; partNumber?: string | null; ownership?: string | null; installDate?: string | null };
+export type EditUnitInput = {
+  seen: string;
+  partNumber?: string | null;
+  ownership?: string | null;
+  installDate?: string | null;
+  /** The unit's condition (11/19). Left as it is when not sent. */
+  condition?: string | null;
+  /** A new serial: an Admin's only, refused when another unit has it (11/19). Left as it is when not sent. */
+  serial?: string | null;
+};
+
+export const SERIAL_EDIT_ADMIN_ONLY = "Only an Admin can change a unit's serial.";
 
 /** An asset's serial the way serialKey() reads one: no spaces or #, any case. */
-const ASSET_KEY = "lower(regexp_replace(btrim(coalesce(a.serial, '')), '[#[:space:]]', '', 'g'))";
+const ASSET_KEY = SERIAL_KEY_SQL("a.serial");
 /** Katz still has it: on the barn's racks, or placed at a Katz site, and not assigned to a customer yet (11/9). */
 const IN_STOCK = "a.status in ('ready', 'deployed') and coalesce(btrim(a.sold_to), '') = ''";
 
@@ -74,8 +86,16 @@ export function addUnitSql(): string {
  * locked unit, or one changed since it was read, is not written.
  */
 export function editUnitSql(): string {
-  return `update account_equipment set part_number = $2, ownership = $3, install_date = $4::date, updated_at = now()
+  // $6 condition sent, $7 its value; $8 a new serial sent, $9 the serial, $10 its key. A new serial is checked again
+  // as it is written, so one another unit took meanwhile is refused.
+  return `update account_equipment
+         set part_number = $2, ownership = $3, install_date = $4::date,
+             condition = case when $6::boolean then $7 else condition end,
+             serial = case when $8::boolean then $9 else serial end,
+             serial_key = case when $8::boolean then $10 else serial_key end,
+             updated_at = now()
       where id = $1 and locked_at is null and updated_at::text = $5
+        and (not $8::boolean or $10::text is null or not exists (select 1 from account_equipment e where e.serial_key = $10 and e.id <> $1))
       returning id`;
 }
 
@@ -104,8 +124,11 @@ export async function addEquipmentUnit(sql: Sql, customer: string, input: AddUni
   return row;
 }
 
-/** Change a unit's Part #, ownership and install date. A locked unit, or one changed since the window opened, is refused. */
-export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInput): Promise<AccountEquipRow> {
+/**
+ * Change a unit's Part #, ownership, install date and condition, and (an Admin) its serial. A locked unit, or one
+ * changed since the window opened, is refused; so is a serial another unit has.
+ */
+export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInput, opts?: { admin?: boolean }): Promise<AccountEquipRow> {
   const unit = await readAccountUnit(sql, id);
   if (!unit) throw new Error("That unit is not on the account.");
   // An ownership from before today's list keeps saving as it is.
@@ -113,10 +136,37 @@ export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInp
   if ("error" in checked) throw new Error(checked.error);
   await assertUnitUnlocked(sql, id);
   const { partNumber, ownership, installDate } = checked.fields;
-  const rows = await sql.query<{ id: number }>(editUnitSql(), [id, partNumber, ownership, installDate, input.seen]);
+  const conditionSent = input.condition !== undefined;
+  const condition = conditionSent ? cleanCondition(input.condition) : null;
+  if (condition && condition.length > CONDITION_MAX) throw new Error(`The condition is too long (${CONDITION_MAX} characters at most).`);
+  const newSerial = input.serial === undefined ? undefined : parseSerial(input.serial);
+  const serialSent = newSerial !== undefined && serialKey(newSerial) !== serialKey(unit.serial);
+  const key = serialSent ? serialKey(newSerial) || null : null;
+  const takenBy = async () =>
+    key ? (await sql.query<{ customer: string }>("select customer from account_equipment where serial_key = $1 and id <> $2 order by id limit 1", [key, id]))[0] : undefined;
+  if (serialSent) {
+    if (!opts?.admin) throw new Error(SERIAL_EDIT_ADMIN_ONLY);
+    const on = await takenBy();
+    if (on && newSerial)
+      throw new Error(on.customer.trim().toLowerCase() === unit.customer.trim().toLowerCase() ? serialOnThisAccount(newSerial) : serialOnAccount(newSerial, on.customer));
+  }
+  const rows = await sql.query<{ id: number }>(editUnitSql(), [
+    id,
+    partNumber,
+    ownership,
+    installDate,
+    input.seen,
+    conditionSent,
+    condition,
+    serialSent,
+    serialSent ? newSerial : null,
+    key,
+  ]);
   if (!rows[0]) {
     if (!(await readAccountUnit(sql, id))) throw new Error("That unit is not on the account.");
     await assertUnitUnlocked(sql, id);
+    const on = serialSent ? await takenBy() : undefined;
+    if (on && newSerial) throw new Error(serialOnAccount(newSerial, on.customer));
     throw new Error(UNIT_CHANGED);
   }
   const row = await readAccountUnit(sql, id);
@@ -148,8 +198,19 @@ export const addAccountEquipment = createServerFn({ method: "POST" })
 
 export const editAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { id: number } & EditUnitInput) => z.object({ id: z.number().int().positive(), seen: z.string().max(100), ...fields }).parse(d))
-  .handler(async ({ data }) => {
+  .validator((d: { id: number } & EditUnitInput) =>
+    z
+      .object({
+        id: z.number().int().positive(),
+        seen: z.string().max(100),
+        ...fields,
+        condition: z.string().max(200).nullable().optional(),
+        serial: z.string().max(200).nullable().optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
     const { id, ...input } = data;
-    return editEquipmentUnit(await ready(), id, input);
+    const sql = await ready();
+    return editEquipmentUnit(sql, id, input, { admin: await canReviewNames(sql, context.userId) });
   });

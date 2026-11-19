@@ -33,6 +33,11 @@ export interface Sql {
     text: string,
     params?: unknown[],
   ): Promise<T[]>;
+  /**
+   * The same client, but each statement runs in its own transaction that first records who is writing (and, for a
+   * move, retire or put-back, what): the equipment history triggers read it (11/19, src/lib/ops/unit-history.ts).
+   */
+  as?(actor: string, action?: string | null): Sql;
 }
 
 /**
@@ -74,7 +79,30 @@ const identity = (v: string) => v;
 type Run = <T>(text: string, params: unknown[]) => Promise<T[]>;
 
 /** Wrap a query runner in the tagged-template + `.query()` `Sql` surface. */
-function toSql(run: Run): Sql {
+/** Runs one statement after setting katz.actor and katz.action for its transaction. */
+type RunAs = <T>(actor: string, action: string, text: string, params: unknown[]) => Promise<T[]>;
+
+const SET_WHO = "select set_config('katz.actor', $1, true), set_config('katz.action', $2, true)";
+const READ_ONLY = /^\s*(select|with)\b/i;
+/** The tables the equipment history watches: a write to one of them in a signed-in request names its person. */
+const EQUIPMENT_TABLES = /\b(account_equipment|account_equipment_retired|install_inspection_units|installs)\b/i;
+/** The signed-in person of this request, when deskMiddleware set one (src/lib/request-actor.server.ts). */
+function requestActor(): string | null {
+  const store = (globalThis as { __katzRequestActor__?: { getStore(): { actor: string } | undefined } }).__katzRequestActor__;
+  return store?.getStore()?.actor ?? null;
+}
+const WRITES = /\b(insert|update|delete|merge)\b/i;
+
+function toSql(given: Run, runAs?: RunAs): Sql {
+  // In a signed-in request, a write to the equipment tables names its person for the history triggers.
+  const run: Run = runAs
+    ? <T>(text: string, params: unknown[]) => {
+        const actor = requestActor();
+        return actor && EQUIPMENT_TABLES.test(text) && !(READ_ONLY.test(text) && !WRITES.test(text))
+          ? runAs<T>(actor, "", text, params)
+          : given<T>(text, params);
+      }
+    : given;
   const sql = (async <T = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
@@ -86,6 +114,10 @@ function toSql(run: Run): Sql {
   }) as unknown as Sql;
   sql.query = <T = Record<string, unknown>>(text: string, params: unknown[] = []) =>
     run<T>(text, params);
+  // A plain read writes nothing to record, so it skips the transaction.
+  if (runAs)
+    sql.as = (actor: string, action?: string | null) =>
+      toSql((text, params) => (READ_ONLY.test(text) && !WRITES.test(text) ? given(text, params) : runAs(actor, action ?? "", text, params)));
   return sql;
 }
 
@@ -98,10 +130,27 @@ function createNeonSql(): Promise<Sql> {
     types.setTypeParser(OID_DATE, identity);
     types.setTypeParser(OID_INTERVAL, identity);
     const pool = new Pool({ connectionString: databaseUrl });
-    return toSql(async <T>(text: string, params: unknown[]) => {
-      const res = await pool.query(text, params);
-      return res.rows as T[];
-    });
+    return toSql(
+      async <T>(text: string, params: unknown[]) => {
+        const res = await pool.query(text, params);
+        return res.rows as T[];
+      },
+      async <T>(actor: string, action: string, text: string, params: unknown[]) => {
+        const client = await pool.connect();
+        try {
+          await client.query("begin");
+          await client.query(SET_WHO, [actor, action]);
+          const res = await client.query(text, params);
+          await client.query("commit");
+          return res.rows as T[];
+        } catch (e) {
+          await client.query("rollback").catch(() => undefined);
+          throw e;
+        } finally {
+          client.release();
+        }
+      },
+    );
   })().catch((err) => {
     globalRef.__pgSqlPromise__ = undefined;
     throw err;
@@ -181,10 +230,17 @@ async function createPgliteSql(): Promise<Sql> {
   globalRef.__pgliteMigrateChain__ = pass;
   await pass;
 
-  return toSql(async <T>(text: string, params: unknown[]) => {
-    const result = await pg.query<T>(text, params);
-    return result.rows;
-  });
+  return toSql(
+    async <T>(text: string, params: unknown[]) => {
+      const result = await pg.query<T>(text, params);
+      return result.rows;
+    },
+    async <T>(actor: string, action: string, text: string, params: unknown[]) =>
+      pg.transaction(async (tx) => {
+        await tx.query(SET_WHO, [actor, action]);
+        return (await tx.query<T>(text, params)).rows;
+      }),
+  );
 }
 
 let sqlPromise: Promise<Sql> | null = null;

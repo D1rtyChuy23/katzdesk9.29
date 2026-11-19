@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
 import { foldVisitUnits, applySerialInPlace, dedupeMachineSerials } from "@/lib/ops/install-form";
 import { catalogModels } from "@/lib/ops/equipment";
@@ -9,7 +9,7 @@ import { catalogNames } from "@/lib/ops/inspection-api";
 import { assertUnlocked } from "@/lib/ops/equipment-lock";
 import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
-import { normalizeCustomerKey } from "@/lib/ops/account-equip";
+import { normalizeCustomerKey, serialKey as accountSerialKey } from "@/lib/ops/account-equip";
 import { woCanonical } from "@/lib/ops/corrigo";
 
 export type SerialHit = {
@@ -41,6 +41,8 @@ export type SerialPullResult = {
   assetId: number | null;
   /** The serial is already on a different row of this install. Do not copy it onto the row being edited. */
   duplicateOnInstall?: boolean;
+  /** Someone who isn't an Admin said yes to the move: it is asked of an Admin instead (11/19). Nothing moved. */
+  moveAsked?: boolean;
   /**
    * The serial is on this other account's machines. With needsConfirm the person is asked to move it to the install;
    * sending this name back as `moveFrom` says yes.
@@ -72,8 +74,9 @@ type AssetLite = {
   locked_by?: string | null;
 };
 
+/** The one serial key (src/lib/ops/account-equip.ts): any case, spacing, # or invisible character. */
 export function serialKey(raw: string | null | undefined): string {
-  return (raw ?? "").trim().replace(/[#\s]/g, "").toLowerCase();
+  return accountSerialKey(raw);
 }
 
 function voltageFrom(text: string | null | undefined): string {
@@ -512,6 +515,25 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
             moveFrom: accountHit.customer,
           };
         }
+        // Moving a unit between accounts is an Admin's (11/19): anyone else's yes asks an Admin, and nothing moves yet.
+        if (!(await canReviewNames(sql, userId))) {
+          const { askMove } = await import("@/lib/ops/move-requests");
+          await askMove(sql, userId, { unitId: accountHit.id, fromCustomer: accountHit.customer, installId: data.installId, serial: shown, machineIndex: data.machineIndex ?? null });
+          return {
+            serial: shown,
+            found: true,
+            pulled: false,
+            needsConfirm: false,
+            alreadyHere: false,
+            allocatedTo: accountHit.customer,
+            notice: `Move asked: an Admin confirms moving serial ${shown} from ${accountHit.customer} to this install.`,
+            model: accountHit.catalogModel,
+            powerVoltage: null,
+            location: accountHit.customer,
+            assetId: null,
+            moveAsked: true,
+          };
+        }
         const before = (
           await sql.query<{ equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; wo: string | null }>(
             "select equipment, serial, power_voltage, machines, wo from installs where id = $1",
@@ -527,7 +549,8 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
         try {
           // The same as the unit's own Remove: kept on the old account's Retired list, with its history, and Put back works.
           const { removeEquipmentUnit } = await import("@/lib/ops/account-equip-import");
-          await removeEquipmentUnit(sql, accountHit.id, { userId: context.userId, name: actor });
+          const { asActor } = await import("@/lib/ops/unit-history");
+          await removeEquipmentUnit(asActor(sql, actor, "move"), accountHit.id, { userId: context.userId, name: actor });
         } catch (e) {
           // Still on the old account (locked, or an Eversys module on it): the install's list goes back as it was.
           if (before) {
@@ -545,6 +568,15 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
         // once, so Put back on the old account is refused until it is removed here, and no second unit appears.
         const { syncInstallUnits } = await import("@/lib/ops/inspection-api");
         await syncInstallUnits(sql, data.installId);
+        // The new unit keeps the old one's Part #, Ownership, Install date, Condition, Electrical and Model (11/19).
+        // Before the install-date fill, which then fills only a date the old unit didn't have.
+        {
+          const { asActor } = await import("@/lib/ops/unit-history");
+          const { carryUnitDetails, unitBySerial } = await import("@/lib/ops/unit-move");
+          const target = (await sql.query<{ customer: string }>("select customer from installs where id = $1", [data.installId]))[0]?.customer ?? "";
+          const made = await unitBySerial(sql, target, serialKey(shown));
+          if (made) await carryUnitDetails(asActor(sql, actor, "move"), accountHit.id, made);
+        }
         // Pulled onto an Installed install: the unit takes its date when the install made it (11/18).
         const { fillInstallDatesFor } = await import("@/lib/ops/install-date-fill");
         await fillInstallDatesFor(sql, data.installId, actor);
