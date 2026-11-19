@@ -13,9 +13,6 @@ import { FilterChip } from "@/components/desk/desk-charts";
 import { Skeleton } from "@/components/ui/separator";
 
 export const Route = createFileRoute("/_app/planner")({
-  // Keep this page in the main app script. A separate planner chunk was 404ing
-  // after publish ("Failed to fetch dynamically imported module").
-  codeSplitGroupings: [],
   component: Page,
 });
 
