@@ -184,11 +184,10 @@ export default defineConfig(({ command, isPreview }) => ({
     tailwindcss(),
     tanstackStart({
       router: {
-        // One script for the whole desk. Split route files 404 after publish
-        // ("Failed to fetch dynamically imported module") and every page
-        // dies on the loading clock. Empty groupings are kept (a nullish
-        // default would fall back to splitting each page).
-        codeSplittingOptions: { defaultBehavior: [] },
+        // Each page is its own script (site pass #5, 11/19): the first load only fetches the page you open. A tab still
+        // on an older build that asks for a page script the new publish no longer has reloads itself once
+        // (src/lib/ops/stale-build.ts) instead of dying on the loading clock, which is why this was off before.
+        autoCodeSplitting: true,
       },
     }),
     ...(command === "build" || isPreview

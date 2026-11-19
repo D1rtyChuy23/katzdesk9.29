@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { QUERY_DEFAULTS, returnRefreshListener } from "@/lib/ops/return-refresh";
+import { installStaleBuildRecovery } from "@/lib/ops/stale-build";
 import { useState, type ReactNode } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PrefsProvider, usePrefs } from "@/components/desk/prefs-provider";
@@ -11,6 +12,8 @@ import { Toaster } from "sonner";
 
 // The query library's own focus listener fires on every return to the tab; this one waits out a quick switch.
 if (typeof window !== "undefined") focusManager.setEventListener(returnRefreshListener());
+// A tab on an older build that misses a page script after a publish reloads once onto the new build (site pass #5).
+if (typeof window !== "undefined") installStaleBuildRecovery();
 
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(
