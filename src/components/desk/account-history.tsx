@@ -13,6 +13,8 @@ import type { Deal, Install, PmJob, ServiceJob } from "@/lib/ops/types";
 import { FlagBadge, StatusBadge, UrgencyBadge } from "./flag-badge";
 import { LockBadge, LockToggle } from "./lock-badge";
 import { AccountUnitForm } from "./account-unit-form";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 
 /**
  * Pieces of the account window that the ticket window shows too: the account's equipment list, one history row,
@@ -183,6 +185,9 @@ export function AccountEquipmentList({
   const qc = useQueryClient();
   // The form open: "add", or the id of the unit being edited.
   const [open, setOpen] = useState<"add" | number | null>(null);
+  // Removing a unit is an Admin's (11/19); the server refuses anyone else too.
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const canRemove = isDeskAdmin(me.data);
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["account-equipment"] });
     void qc.invalidateQueries({ queryKey: ["account-equipment-retired"] });
@@ -273,6 +278,7 @@ export function AccountEquipmentList({
                         Merge into {twin.serial || twin.equipmentName}
                       </Button>
                     ))}
+                    {canRemove ? (
                     <Button
                       type="button"
                       size="sm"
@@ -289,6 +295,7 @@ export function AccountEquipmentList({
                     >
                       Remove
                     </Button>
+                    ) : null}
                     {customer ? (
                       <Button
                         type="button"

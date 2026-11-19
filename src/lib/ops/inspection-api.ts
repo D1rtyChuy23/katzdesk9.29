@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { fillInstallDatesFor } from "./install-date-fill";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { matchCatalogModel, sameCatalogModel, sameUnitModel, serialKey } from "@/lib/ops/account-equip";
 import { catalogModels, isTrailingWord, joinEquipment, listedEquipment, matchModel } from "@/lib/ops/equipment";
 import { SERIAL_LINE, SUFFIX_ONLY, installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
@@ -627,10 +627,43 @@ function listIndexOf(pieces: Piece[], linked: AcctUnit[], catalog: string[], equ
 }
 
 /**
- * Take one unit off a visit: its checks, photos and link. The account's record goes too when nothing else uses it;
- * with `madeBy`, only when that install's load made it.
+ * Keep what is about to come off this install for one unit (11/19): its row on the list, and its checks, photos, link
+ * and account record, under the install's Removed with Put back. Run before the deletes. $1 install, $2 unit, $3 row.
  */
-async function unlinkUnit(sql: Sql, installId: number, equipmentId: number, opts?: { madeBy?: number }): Promise<void> {
+export function keepRemovedSql(): string {
+  return `insert into install_units_removed (install_id, unit_id, list_row, links, removed_by)
+          select $1, $2, $3::jsonb,
+                 jsonb_build_object(
+                   'units', coalesce((select jsonb_agg(to_jsonb(u)) from install_inspection_units u where u.install_id = $1 and u.equipment_id = $2), '[]'::jsonb),
+                   'items', coalesce((select jsonb_agg(to_jsonb(i)) from install_inspection_items i where i.install_id = $1 and i.equipment_id = $2), '[]'::jsonb),
+                   'photos', coalesce((select jsonb_agg(to_jsonb(p)) from install_inspection_photos p where p.install_id = $1 and p.equipment_id = $2), '[]'::jsonb),
+                   'unit', (select to_jsonb(a) from account_equipment a where a.id = $2)),
+                 equipment_history_actor()
+           where exists (select 1 from install_inspection_units u where u.install_id = $1 and u.equipment_id = $2)
+          returning id`;
+}
+
+/** The list row a removed unit had: the one given, or one made from its account record. */
+async function keepRemoved(sql: Sql, installId: number, equipmentId: number, row?: Piece | null): Promise<void> {
+  let listRow: Record<string, unknown> | null = row ? { equipment: row.equipment, serial: row.serial ?? "", powerVoltage: row.powerVoltage ?? "" } : null;
+  if (!listRow) {
+    const a = (
+      await sql.query<{ catalog_model: string | null; equipment_name: string | null; serial: string | null; electrical: string | null }>(
+        "select catalog_model, equipment_name, serial, electrical from account_equipment where id = $1",
+        [equipmentId],
+      )
+    )[0];
+    listRow = { equipment: a?.catalog_model || a?.equipment_name || "Machine", serial: a?.serial ?? "", powerVoltage: a?.electrical ?? "" };
+  }
+  await sql.query(keepRemovedSql(), [installId, equipmentId, JSON.stringify(listRow)]);
+}
+
+/**
+ * Take one unit off a visit: its checks, photos and link, kept first under the install's Removed (11/19). The
+ * account's record goes too when nothing else uses it; with `madeBy`, only when that install's load made it.
+ */
+async function unlinkUnit(sql: Sql, installId: number, equipmentId: number, opts?: { madeBy?: number; row?: Piece | null }): Promise<void> {
+  await keepRemoved(sql, installId, equipmentId, opts?.row);
   await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
   await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
   await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, equipmentId]);
@@ -961,8 +994,18 @@ function retiredByModel(retired: RetiredHere[], piece: Piece): boolean {
 export async function syncInstallUnits(
   sql: Sql,
   installId: number,
-  opts?: { prune?: boolean; before?: Omit<ListRow, "complete"> | null },
+  opts?: {
+    prune?: boolean;
+    before?: Omit<ListRow, "complete"> | null;
+    /** false: the save may not take a unit with a serial or a record off the install; its row comes back (11/19). */
+    canRemove?: boolean;
+    /** Filled with the machines a save that may not remove units put back on the list. */
+    keptBack?: string[];
+    /** Filled with the machines this save took off the install (kept under Removed). */
+    removed?: string[];
+  },
 ): Promise<void> {
+  const keptBack = opts?.keptBack ?? [];
   const install = await sql.query<{
     customer: string;
     equipment: string | null;
@@ -1213,6 +1256,25 @@ export async function syncInstallUnits(
     // unit by that unit's serial ("L" typed over with PB001708), wasn't taken off by this save: what was recorded on it
     // stays for review (Same machine as …, Add to this list, Remove). Only an empty one goes.
     if ((!hadRow.has(id) || repointed.has(id)) && recorded.has(id)) continue;
+    // Taking a unit off an install is an Admin's (11/19). Someone else's save that left its row out puts the row back.
+    const realUnit = account.find((a) => a.id === id);
+    // A unit with anything of its own (a serial, a Part #, an install date, or checks on this visit) is an Admin's to take off.
+    const ownDetails =
+      opts?.canRemove === false &&
+      (!!serialKey(realUnit?.serial) ||
+        recorded.has(id) ||
+        (
+          await sql.query("select 1 from account_equipment where id = $1 and (coalesce(btrim(part_number), '') <> '' or install_date is not null)", [id])
+        ).length > 0);
+    if (ownDetails) {
+      const was = before ? rowOfUnit(before, linkedRows, catalog, id) : null;
+      if (was) back.push({ ...was, unitId: id });
+      keptBack.push(realUnit?.equipment_name || realUnit?.catalog_model || "Machine");
+      continue;
+    }
+    // Kept under the install's Removed first, with its row as the list had it, so Put back returns it (11/19).
+    await keepRemoved(sql, installId, id, before ? rowOfUnit(before, linkedRows, catalog, id) : null);
+    opts?.removed?.push(realUnit?.equipment_name || realUnit?.catalog_model || "Machine");
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
@@ -1861,11 +1923,51 @@ export const addInspectionEquipment = createServerFn({ method: "POST" })
     return addMachineOntoInstall(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 
+export const REMOVE_ADMIN_ONLY = "Only an Admin can take a unit off an install. Ask an Admin, or leave it on the list.";
+export const reopenConfirmText = (unit: string, ready: boolean) =>
+  `Take ${unit} off this install? ${
+    ready
+      ? "The install is Ready and its pre-inspection goes back to Not Ready, to be checked again."
+      : "Its pre-inspection has passed: taking this unit off reopens it, so check it again before the install."
+  } What was recorded on ${unit} is kept under Removed, and Put back returns it.`;
+export const REOPEN_NEEDS_CONFIRM = "Confirm first: taking this unit off reopens the install's pre-inspection.";
+
+/** Is the install Ready, or has its pre-inspection passed? Taking a unit off then needs a confirm (11/19). */
+export async function installReadyOrPassed(sql: Sql, installId: number): Promise<{ ready: boolean; passed: boolean }> {
+  const row = (await sql.query<{ equip_status: string | null }>("select equip_status from installs where id = $1", [installId]))[0];
+  const summary = (await loadInspectionSummaries(sql, [installId])).get(installId);
+  return { ready: row?.equip_status === "Ready", passed: summary?.overall === "Passed" };
+}
+
+/** After a unit comes off a Ready install, the install goes back to Not Ready (Chuy, 11/19). Logged on the install. */
+export async function reopenInstall(sql: Sql, installId: number, actor: string, unit: string): Promise<void> {
+  const changed = await sql.query("update installs set equip_status = 'Not Ready', updated_at = now() where id = $1 and equip_status = 'Ready' returning id", [installId]);
+  if (changed.length)
+    await sql
+      .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+        installId,
+        actor,
+        `set back to Not Ready: ${unit} was taken off, so the pre-inspection is checked again`,
+      ])
+      .catch(() => undefined);
+}
+
+/** The Admin rule and the Ready/passed confirm, before a unit comes off an install. */
+async function assertMayRemove(sql: Sql, installId: number, opts: { admin?: boolean; confirmReopen?: boolean } | undefined): Promise<{ reopen: boolean }> {
+  if (!opts?.admin) throw new Error(REMOVE_ADMIN_ONLY);
+  const state = await installReadyOrPassed(sql, installId);
+  const reopen = state.ready || state.passed;
+  if (reopen && !opts.confirmReopen) throw new Error(REOPEN_NEEDS_CONFIRM);
+  return { reopen };
+}
+
 const removeInput = z.object({
   installId: z.number().int().positive(),
   equipmentId: z.number().int().positive(),
   /** The equipment list was already saved without this unit. Do not write it again. */
   keepList: z.boolean().optional(),
+  /** Yes to "this reopens the pre-inspection", for a Ready or passed install (11/19). */
+  confirmReopen: z.boolean().optional(),
 });
 
 /**
@@ -1877,10 +1979,11 @@ export async function removeInspectionUnit(
   sql: Sql,
   data: z.infer<typeof removeInput>,
   actor: string,
-  opts?: { owner?: boolean },
+  opts?: { owner?: boolean; admin?: boolean },
 ): Promise<InspectionView & { removed: string; fromList: boolean }> {
   await requireInstall(sql, data.installId);
   await requireUnit(sql, data.installId, data.equipmentId);
+  const { reopen } = await assertMayRemove(sql, data.installId, { admin: opts?.admin, confirmReopen: data.confirmReopen });
   const row = (
     await sql.query<{ customer: string; equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; complete: boolean }>(
       "select customer, equipment, serial, power_voltage, machines, complete from installs where id = $1",
@@ -1903,7 +2006,8 @@ export async function removeInspectionUnit(
   const pieces = piecesFrom(row, catalog);
   const at = listIndexOf(pieces, await linkedUnits(sql, data.installId), catalog, data.equipmentId);
   if (!data.keepList && at >= 0) await writeList(sql, data.installId, pieces.filter((_, i) => i !== at));
-  await unlinkUnit(sql, data.installId, data.equipmentId);
+  await unlinkUnit(sql, data.installId, data.equipmentId, { row: at >= 0 ? pieces[at] : null });
+  if (reopen) await reopenInstall(sql, data.installId, actor, name);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,
@@ -1921,7 +2025,10 @@ export const removeInspectionEquipment = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof removeInput>) => removeInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView & { removed: string; fromList: boolean }> => {
     const sql = await ready();
-    return removeInspectionUnit(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
+    return removeInspectionUnit(sql, data, await deskUsername(sql, context.userId), {
+      owner: await canLockEquipment(sql, context.userId),
+      admin: await canReviewNames(sql, context.userId),
+    });
   });
 
 /** An installed project's list and pre-inspection are kept as they were; only the owner changes them. */
@@ -2017,6 +2124,8 @@ const removeRowInput = z.object({
   serial: z.string().nullable().optional(),
   /** The row's pre-inspection unit, when the window has it: the row that names it is the one taken off. */
   unitId: z.number().int().positive().nullable().optional(),
+  /** Yes to "this reopens the pre-inspection", for a Ready or passed install (11/19). */
+  confirmReopen: z.boolean().optional(),
 });
 
 /**
@@ -2030,7 +2139,7 @@ export async function removeInstallRow(
   sql: Sql,
   data: z.infer<typeof removeRowInput>,
   actor: string,
-  opts?: { owner?: boolean },
+  opts?: { owner?: boolean; admin?: boolean },
 ): Promise<{ removed: string | null }> {
   const row = (
     await sql.query<ListRow>("select equipment, serial, power_voltage, machines, complete from installs where id = $1 and archived = false", [data.installId])
@@ -2048,6 +2157,9 @@ export async function removeInstallRow(
   const at = named >= 0 ? named : fits.includes(data.index) ? data.index : fits.length === 1 ? fits[0]! : -1;
   if (at < 0) return { removed: null };
   const linked = await linkedUnits(sql, data.installId);
+  // A row with no unit behind it (typed in the window, nothing recorded) is only a list edit; a unit is an Admin's.
+  const removesUnit = claimHits(pieces, linked, catalog)[at] != null;
+  const { reopen } = removesUnit ? await assertMayRemove(sql, data.installId, { admin: opts?.admin, confirmReopen: data.confirmReopen }) : { reopen: false };
   const beforeHits = claimHits(pieces, linked, catalog);
   const rest = pieces.filter((_, i) => i !== at);
   const restHits = claimHits(rest, linked, catalog);
@@ -2067,8 +2179,9 @@ export async function removeInstallRow(
     rest.map((p, i) => (restHits[i] ? { ...p, unitId: restHits[i]!.id } : p)),
   );
   // Same list edit as a save: a unit the account had before this install stays on the account.
-  for (const id of gone) await unlinkUnit(sql, data.installId, id, { madeBy: data.installId });
+  for (const id of gone) await unlinkUnit(sql, data.installId, id, { madeBy: data.installId, row: pieces[at] });
   const piece = pieces[at]!;
+  if (reopen && gone.length) await reopenInstall(sql, data.installId, actor, piece.equipment);
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
       data.installId,
@@ -2084,7 +2197,10 @@ export const removeInstallMachine = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof removeRowInput>) => removeRowInput.parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
-    return removeInstallRow(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
+    return removeInstallRow(sql, data, await deskUsername(sql, context.userId), {
+      owner: await canLockEquipment(sql, context.userId),
+      admin: await canReviewNames(sql, context.userId),
+    });
   });
 
 const onListInput = z.object({
@@ -2240,6 +2356,8 @@ export const linkInspectionUnit = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof linkInput>) => linkInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView> => {
     const sql = await ready();
+    // "Same machine as…" merges two units into one: an Admin's (11/19).
+    if (!(await canReviewNames(sql, context.userId))) throw new Error("Only an Admin can make two units one machine.");
     return linkVisitUnit(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 
@@ -2594,4 +2712,140 @@ export const copyInspectionFromExisting = createServerFn({ method: "POST" })
     const view = await readInspection(sql, data.installId);
     if (!view) throw new Error("Install not found");
     return view;
+  });
+
+// ── Removed from an install, and Put back (11/19) ──────────────────────────────────────────────────────────────────
+
+export type RemovedInstallUnit = {
+  id: number;
+  unitId: number;
+  equipment: string;
+  serial: string | null;
+  /** When, in Houston's time: "YYYY-MM-DD HH:MM". */
+  removedAt: string;
+  removedBy: string | null;
+  /** Checks and photos kept with it. */
+  records: number;
+  /** The account unit is gone too (nothing else used it): Put back makes it again under its own id. */
+  unitGone: boolean;
+};
+
+/** What was taken off this install and can be put back, newest first. */
+export async function listInstallRemoved(sql: Sql, installId: number): Promise<RemovedInstallUnit[]> {
+  const rows = await sql.query<{
+    id: number;
+    unit_id: number;
+    list_row: { equipment?: string; serial?: string } | null;
+    removed_at: string;
+    removed_by: string | null;
+    records: number;
+    unit_gone: boolean;
+  }>(
+    `select r.id, r.unit_id, r.list_row, to_char(r.removed_at at time zone 'America/Chicago', 'YYYY-MM-DD HH24:MI') as removed_at, r.removed_by,
+            (jsonb_array_length(coalesce(r.links->'items', '[]'::jsonb)) + jsonb_array_length(coalesce(r.links->'photos', '[]'::jsonb)))::int as records,
+            not exists (select 1 from account_equipment a where a.id = r.unit_id) as unit_gone
+       from install_units_removed r
+      where r.install_id = $1 and r.put_back_at is null
+        and not exists (select 1 from install_inspection_units u where u.install_id = r.install_id and u.equipment_id = r.unit_id)
+      order by r.removed_at desc, r.id desc`,
+    [installId],
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    unitId: Number(r.unit_id),
+    equipment: r.list_row?.equipment || "Machine",
+    serial: r.list_row?.serial || null,
+    removedAt: r.removed_at,
+    removedBy: r.removed_by,
+    records: Number(r.records),
+    unitGone: !!r.unit_gone,
+  }));
+}
+
+/**
+ * Put back, one statement: the account unit again under its own id when it went too, then its link, checks and photos
+ * on this install, then the record is marked put back. $1 the removed row, $2 who.
+ */
+export function putBackInstallUnitSql(): string {
+  return `with r as (select * from install_units_removed where id = $1 and put_back_at is null),
+          unit as (
+            insert into account_equipment
+            select x.* from r, jsonb_populate_record(null::account_equipment, r.links->'unit') x
+             where r.links->'unit' is not null and r.links->'unit' <> 'null'::jsonb
+               and not exists (select 1 from account_equipment a where a.id = r.unit_id)
+            returning id
+          ),
+          links as (
+            insert into install_inspection_units
+            select x.* from r, jsonb_populate_recordset(null::install_inspection_units, r.links->'units') x
+             where exists (select 1 from installs i where i.id = r.install_id)
+               and (exists (select 1 from unit) or exists (select 1 from account_equipment a where a.id = r.unit_id))
+            on conflict do nothing
+            returning equipment_id
+          ),
+          items as (
+            insert into install_inspection_items
+            select x.* from r, jsonb_populate_recordset(null::install_inspection_items, r.links->'items') x
+             where exists (select 1 from links)
+            on conflict do nothing
+          ),
+          photos as (
+            insert into install_inspection_photos
+            select x.* from r, jsonb_populate_recordset(null::install_inspection_photos, r.links->'photos') x
+             where exists (select 1 from links)
+            on conflict do nothing
+          ),
+          done as (
+            update install_units_removed set put_back_at = now(), put_back_by = $2
+             where id = $1 and exists (select 1 from links)
+            returning install_id, unit_id, list_row
+          )
+          select install_id, unit_id, list_row from done`;
+}
+
+/** Put a removed unit back on its install: on the visit with what was recorded, and its row back on the list. */
+export async function putBackInstallUnit(sql: Sql, removedId: number, actor: string): Promise<{ installId: number }> {
+  const r = (
+    await sql.query<{ install_id: number; unit_id: number; unit: { serial_key?: string | null } | null; put_back_at: string | null }>(
+      "select install_id, unit_id, links->'unit' as unit, put_back_at from install_units_removed where id = $1",
+      [removedId],
+    )
+  )[0];
+  if (!r) throw new Error("That machine isn't on this install's Removed list.");
+  if (r.put_back_at) throw new Error("That machine was already put back.");
+  const key = r.unit?.serial_key;
+  if (key) {
+    const on = (await sql.query<{ customer: string }>("select customer from account_equipment where serial_key = $1 and id <> $2 order by id limit 1", [key, r.unit_id]))[0];
+    if (on) throw new Error(`That serial is on ${on.customer} now. Take it off there first.`);
+  }
+  const done = (await sql.query<{ install_id: number; unit_id: number; list_row: Piece }>(putBackInstallUnitSql(), [removedId, actor]))[0];
+  if (!done) throw new Error("That machine is already on this install.");
+  // Its row back on the list, as the last row, with its unit's id so the next save matches it.
+  const row = (await sql.query<ListRow>("select equipment, serial, power_voltage, machines from installs where id = $1", [done.install_id]))[0];
+  if (row) {
+    const catalog = await catalogNames(sql);
+    const pieces = piecesFrom(row, catalog);
+    if (!pieces.some((p) => p.unitId === Number(done.unit_id))) await writeList(sql, done.install_id, [...pieces, { ...done.list_row, unitId: Number(done.unit_id) }]);
+  }
+  await sql
+    .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('install', $1, $2, 'updated', $3)", [
+      done.install_id,
+      actor,
+      `put back ${done.list_row?.equipment || "a machine"}${done.list_row?.serial ? ` (SN ${done.list_row.serial})` : ""} on the install`,
+    ])
+    .catch(() => undefined);
+  return { installId: Number(done.install_id) };
+}
+
+export const listRemovedInstallUnits = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof idInput>) => idInput.parse(d))
+  .handler(async ({ data }) => listInstallRemoved(await ready(), data.installId));
+
+export const putBackRemovedInstallUnit = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    return putBackInstallUnit(sql, data.id, await deskUsername(sql, context.userId));
   });

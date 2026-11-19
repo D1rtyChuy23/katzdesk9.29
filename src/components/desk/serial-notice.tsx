@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { applySerialPull, type SerialPullResult } from "@/lib/ops/serial-pull";
 import { parseAccountSerialNotice } from "@/lib/ops/install-form";
 import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
@@ -70,6 +72,8 @@ export function SerialPullField({
   model?: string;
 }) {
   const qc = useQueryClient();
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = isDeskAdmin(me.data);
   const [text, setText] = useState(value);
   const [pending, setPending] = useState<SerialPullResult | null>(null);
   const [offer, setOffer] = useState<{ model: string; serial: string } | null>(null);
@@ -100,6 +104,16 @@ export function SerialPullField({
         return;
       }
       setPending(null);
+      // Asked of an Admin (11/19): nothing moved, so the row keeps the serial it had; the ask shows on the Equipment tab.
+      if (result.moveAsked) {
+        looked.current = "";
+        setText(saved.current);
+        onValue(saved.current);
+        setOffer(null);
+        toast.message(result.notice);
+        void qc.invalidateQueries({ queryKey: ["move-requests"] });
+        return;
+      }
       looked.current = result.serial.trim().replace(/[#\s]/g, "").toLowerCase();
       if (result.duplicateOnInstall) {
         // The row goes back to its serial, and typing the same one again asks the server again.
@@ -212,6 +226,7 @@ export function SerialPullField({
           <DialogDescription>
             {pending?.notice} Move it to this install, or cancel and leave it. Moving takes it off {pending?.moveFrom}; it stays on that
             account's Retired list, where Put back brings it back.
+            {isAdmin ? "" : " Moving a unit between accounts is an Admin's: your yes asks an Admin, and it moves when they confirm."}
           </DialogDescription>
           <div className="mt-4 flex flex-wrap justify-end gap-2">
             <Button type="button" variant="outline" onClick={cancelMove}>
@@ -225,7 +240,7 @@ export function SerialPullField({
                 if (pending?.moveFrom) commit(pending.serial, false, pending.moveFrom);
               }}
             >
-              Move to this install
+              {isAdmin ? "Move to this install" : "Ask an Admin to move it"}
             </Button>
           </div>
         </DialogContent>

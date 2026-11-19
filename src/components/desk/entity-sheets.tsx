@@ -46,7 +46,10 @@ import { sameWarehouseModel } from "@/lib/ops/warehouse-serial";
 import { dedupeMachineSerials, hasSerial, machinesBeforeSave, parseAccountSerialNotice } from "@/lib/ops/install-form";
 import { isInstalled } from "@/lib/ops/install-status";
 import { useCanLock } from "./use-can-lock";
-import { removeInstallMachine } from "@/lib/ops/inspection-api";
+import { REMOVE_ADMIN_ONLY, removeInstallMachine, reopenConfirmText } from "@/lib/ops/inspection-api";
+import { InstallEquipmentRemoved } from "./install-equipment-removed";
+import { getMyAccess } from "@/lib/ops/access";
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { OffListBanner } from "@/components/desk/off-list-banner";
 import type { Asset, Deal, Install, ModuleRow, PmJob, Recipe } from "@/lib/ops/types";
 import { confirmError, isOwnership } from "@/lib/ops/deal-board";
@@ -581,6 +584,9 @@ export function InstallSheet({
             .join(" · "),
         );
       } else if (!machineOnly && !skipToast.current) toast.success("Saved");
+      // Taking a unit off an install is an Admin's (11/19): a row left out comes back, and says so.
+      if (saved?.unitsKeptBack?.length)
+        toast.message(`Kept on the list: ${saved.unitsKeptBack.join(", ")}. Only an Admin can take a unit off an install.`);
       skipToast.current = false;
       const refreshed = qc.invalidateQueries({ queryKey: ["installs"] });
       // A read set aside meanwhile: look at the board's row again once this save's own read is in, even if it reads the
@@ -618,9 +624,16 @@ export function InstallSheet({
     },
   });
   const canLock = useCanLock();
+  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
+  const isAdmin = isDeskAdmin(me.data);
   const dropRow = useMutation({
     scope: queue,
-    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string; unitId: number | null }) => removeInstallMachine({ data: v }),
+    mutationFn: (v: { installId: number; index: number; equipment: string; serial: string; unitId: number | null; confirmReopen?: boolean }) =>
+      removeInstallMachine({ data: v }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["install-removed"] });
+      void qc.invalidateQueries({ queryKey: ["equipment-history"] });
+    },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove that unit"),
   });
   const dropInstall = useMutation({
@@ -1026,18 +1039,29 @@ export function InstallSheet({
                           toast.error("This install is marked installed. Its equipment list and pre-inspection are kept as they were; only the owner can change them.");
                           return;
                         }
-                        if (!window.confirm(`Remove ${label} from this install?`)) return;
+                        // A row with a unit behind it is an Admin's to take off (11/19); a row typed here only is a list edit.
+                        const hasUnit = !!spec.unitId || !!spec.serial.trim();
+                        if (hasUnit && !isAdmin) {
+                          toast.error(REMOVE_ADMIN_ONLY);
+                          return;
+                        }
+                        const reopen = row.equipStatus === "Ready" || row.inspection?.overall === "Passed";
+                        const ask = reopen
+                          ? reopenConfirmText(label, row.equipStatus === "Ready")
+                          : `Remove ${label} from this install?${hasUnit ? " It's kept under Removed, and Put back returns it." : ""}`;
+                        if (!window.confirm(ask)) return;
                         // The server takes the row off the list and its unit off the visit (even one that passed); the save
                         // follows in the same queue with the rest of the window's list, as it is then (a refresh may have
                         // brought a machine added elsewhere meanwhile). A refused remove saves nothing.
                         dropRow.mutate(
-                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial, unitId: spec.unitId ?? null },
+                          { installId: row.id, index, equipment: spec.equipment, serial: spec.serial, unitId: spec.unitId ?? null, confirmReopen: reopen },
                           { onSuccess: () => persistMachines(withoutRow(specsRef.current, spec)) },
                         );
                       }}
                     />
                   </div>
                   <InstallAssets installId={row.id} />
+                  <InstallEquipmentRemoved installId={row.id} />
                 </Tabs.Content>
 
                 <Tabs.Content value="invoices" forceMount className={`p-5 ${KEEP_MOUNTED}`} data-testid="install-panel-invoices">

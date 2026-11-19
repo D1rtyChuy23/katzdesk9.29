@@ -201,7 +201,7 @@ test("serials on more than one unit are listed, with each unit's account", async
       {
         serialKey: "tg-1",
         units: [
-          { id: b, customer: "Test Bean Cafe", customerId: cafe, equipmentName: "Test Grinder", serial: "tg-1", installDate: null, locked: false },
+          { id: b, customer: "Test Bean Cafe", customerId: cafe, equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false },
           { id: c, customer: "Test Bean Cafe", customerId: cafe, equipmentName: "Test Grinder FPG", serial: "TG-1", installDate: null, locked: false },
           { id: a, customer: "Test Steakhouse", customerId: steak, equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false },
         ],
@@ -221,5 +221,6 @@ test("the screens offer the retired list, Put back and the duplicate-serial list
   const page = src("src/routes/_app/unit-mismatches.tsx");
   assert.match(page, /data-testid="duplicate-serials"/);
   assert.match(page, /getDuplicateSerials/);
-  assert.match(src("src/lib/ops/account-equip-import.ts"), /\.handler\(async \(\{ data, context \}\) => removeEquipmentUnit\(await ready\(\), data\.id, await retiredBy\(await ready\(\), context\.userId\)\)\)/);
+  // Remove is an Admin's (11/19), and records who removed it: the same retire, behind the Admin check.
+  assert.match(src("src/lib/ops/account-equip-import.ts"), /if \(!\(await canReviewNames\(sql, context\.userId\)\)\) throw new Error\(ACCOUNT_REMOVE_ADMIN_ONLY\);\n\s+const by = await retiredBy\(sql, context\.userId\);\n\s+return removeEquipmentUnit\(asActor\(sql, by\.name, "retire"\), data\.id, by\);/);
 });

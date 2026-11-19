@@ -345,7 +345,7 @@ test("merge: a drop row the keeper has (same model, a serial on one side) fills 
   assert.equal(added.length, 1);
 });
 
-test("customer: anyone can change it, the install's own units go with it, and a locked customer is refused until the owner unlocks", async () => {
+test("customer: an Admin changes it (11/19: it moves units), the install's own units go with it, and a locked customer is refused until the owner unlocks", async () => {
   const { pg, sql } = await fresh();
   try {
     const id = await install(sql, "Baldi Management", { machines: [{ equipment: "Bunn TB3", serial: "T-1", powerVoltage: "" }, "Bunn ITCB", "Eversys e'4m"] });
@@ -357,7 +357,9 @@ test("customer: anyone can change it, the install's own units go with it, and a 
     // The ITCB is on another install's visit too, and the e'4m is locked: both stay on the old account.
     await sql.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [other, itcb.id]);
     await sql.query("update account_equipment set locked_at = now(), locked_by = 'chuy' where id = $1", [e4m.id]);
-    const saved = await api.updateInstallFor(sql, { id, customer: "Baldi Management Group Inc." }, { userId: "u-tech" });
+    // Moving the install's units to another account is an Admin's (11/19): the tech's change is refused, the owner's goes.
+    await assert.rejects(() => api.updateInstallFor(sql, { id, customer: "Baldi Management Group Inc." }, { userId: "u-tech" }), /Only an Admin can move units between accounts/);
+    const saved = await api.updateInstallFor(sql, { id, customer: "Baldi Management Group Inc." }, { userId: "u-owner" });
     assert.equal(saved.customer, "Baldi Management Group Inc.");
     assert.deepEqual(saved.unitsMoved, { moved: ["Bunn TB3 SN T-1"], stayed: ["Bunn ITCB", "Eversys e'4m"] });
     assert.deepEqual(
@@ -381,7 +383,8 @@ test("customer: anyone can change it, the install's own units go with it, and a 
     await applyCorrigoRows(sql, [row], "Chuy");
     assert.equal((await installRow(sql, id)).customer, "Baldi Management Group Inc.");
     await setInstallCustomerLockFor(sql, "u-owner", { id, locked: false });
-    assert.equal((await api.updateInstallFor(sql, { id, customer: "Somewhere Else" }, { userId: "u-tech" })).customer, "Somewhere Else");
+    // Unlocked: the change goes, by the owner (the tech's would move units, an Admin's job since 11/19).
+    assert.equal((await api.updateInstallFor(sql, { id, customer: "Somewhere Else" }, { userId: "u-owner" })).customer, "Somewhere Else");
   } finally {
     await pg.close();
   }

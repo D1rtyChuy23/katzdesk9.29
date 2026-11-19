@@ -40,7 +40,7 @@ test("Equipment-tab Remove keeps a unit the account had before the install", asy
   await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ('Rm Cafe','Fetco 52H','Fetco 52H')");
   const id = (await pg.query("insert into installs (customer, equipment) values ('Rm Cafe', $1) returning id", ["Bunn TB3\nFetco 52H"])).rows[0].id;
   await readInspection(sql, id);
-  await removeInstallRow(sql, { installId: id, index: 1, equipment: "Fetco 52H", serial: "" }, "t");
+  await removeInstallRow(sql, { installId: id, index: 1, equipment: "Fetco 52H", serial: "" }, "t", { admin: true });
   const after = await acct(pg, "Rm Cafe");
   assert.ok(after.some((a) => a.equipment_name === "Fetco 52H"), "imported Fetco 52H deleted by row Remove");
 });

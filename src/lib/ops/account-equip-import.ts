@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { asActor } from "@/lib/ops/unit-history";
 import { normalizeHeader } from "@/lib/ops/corrigo";
 import { mpnKey } from "@/lib/ops/mpn-rules";
 import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
@@ -1047,10 +1048,19 @@ async function retiredBy(sql: Sql, userId: string | null | undefined): Promise<R
   return { userId, name: row[0]?.username || "Teammate" };
 }
 
+export const ACCOUNT_REMOVE_ADMIN_ONLY = "Only an Admin can remove a unit from an account.";
+export const MERGE_ADMIN_ONLY = "Only an Admin can merge two units into one.";
+
 export const removeAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data, context }) => removeEquipmentUnit(await ready(), data.id, await retiredBy(await ready(), context.userId)));
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    // Removing a unit is an Admin's (11/19). Kept on the account's Retired list, with Put back, as before.
+    if (!(await canReviewNames(sql, context.userId))) throw new Error(ACCOUNT_REMOVE_ADMIN_ONLY);
+    const by = await retiredBy(sql, context.userId);
+    return removeEquipmentUnit(asActor(sql, by.name, "retire"), data.id, by);
+  });
 
 /** An account's retired machines (11/9). */
 export const listRetiredEquipment = createServerFn({ method: "GET" })
@@ -1072,7 +1082,7 @@ export async function putBackEquipmentUnit(sql: Sql, retiredId: number): Promise
 export const restoreAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => putBackEquipmentUnit(await ready(), data.id));
+  .handler(async ({ data }) => putBackEquipmentUnit(asActor(await ready(), null, "put_back"), data.id));
 
 /** Serials that are on more than one account unit. Read only. */
 export const getDuplicateSerials = createServerFn({ method: "GET" })
@@ -1118,6 +1128,20 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
       [keep.id, serial || null, serial ? serialKey(serial) : null, electrical, partNumber],
     );
   }
+  // The other details too (11/19): the kept unit takes the dropped one's Ownership, Install date and Condition where
+  // it has none. Nothing it has is blanked.
+  await sql.query(
+    `update account_equipment k
+        set ownership = coalesce(nullif(btrim(k.ownership), ''), d.ownership),
+            install_date = coalesce(k.install_date, d.install_date),
+            condition = coalesce(nullif(btrim(k.condition), ''), d.condition),
+            updated_at = now()
+       from account_equipment d
+      where k.id = $1 and d.id = $2
+        and ((coalesce(btrim(k.ownership), '') = '' and d.ownership is not null) or (k.install_date is null and d.install_date is not null)
+             or (coalesce(btrim(k.condition), '') = '' and d.condition is not null))`,
+    [keep.id, drop.id],
+  );
   // An open install whose visit has both units loses the dropped unit's row; one row is left for the kept unit.
   await dropMergedRow(sql, keep.id, drop.id);
   // An install that lists the dropped unit takes the kept serial on that machine. Otherwise its next load matches
@@ -1239,7 +1263,9 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     "update unit_runbook_options d set unit_key = $1 where d.unit_key = $2 and not exists (select 1 from unit_runbook_options k where k.unit_key = $1)",
     [keepKey, dropKey2],
   );
-  await sql.query("delete from account_equipment where id = $1", [drop.id]);
+  // The dropped unit's record is kept on the account's Retired list first (11/19): a merge done by mistake can be undone.
+  await retireUnitRecord(sql, drop.id, null);
+  await asActor(sql, null, "merge").query("delete from account_equipment where id = $1", [drop.id]);
   return { keepId: keep.id, serial };
 }
 
@@ -1248,4 +1274,9 @@ export const mergeAccountEquipment = createServerFn({ method: "POST" })
   .validator((d: { keepId: number; dropId: number }) =>
     z.object({ keepId: z.number().int().positive(), dropId: z.number().int().positive() }).parse(d),
   )
-  .handler(async ({ data }) => mergeEquipmentUnits(await ready(), data.keepId, data.dropId));
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    // Merging drops a unit: an Admin's (11/19).
+    if (!(await canReviewNames(sql, context.userId))) throw new Error(MERGE_ADMIN_ONLY);
+    return mergeEquipmentUnits(sql, data.keepId, data.dropId);
+  });

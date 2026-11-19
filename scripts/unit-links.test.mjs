@@ -162,7 +162,7 @@ test("a row whose text no longer reads as its unit still comes off with it on a 
     const rows = await stored(pg, id);
     await pg.query("update installs set machines = $2 where id = $1", [id, JSON.stringify(rows.map((r) => (r.unitId === fetco ? { ...r, equipment: "Fetco 1251" } : r)))]);
     assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), ["Fetco 1251", "Bunn TB3"]);
-    const view = await removeInspectionUnit(sql, { installId: id, equipmentId: fetco }, "Test");
+    const view = await removeInspectionUnit(sql, { installId: id, equipmentId: fetco }, "Test", { admin: true });
     assert.equal(view.fromList, true);
     assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), ["Bunn TB3"]);
     assert.deepEqual((await readInspection(sql, id)).machines.map((m) => m.name), ["Bunn TB3"]);
@@ -182,7 +182,7 @@ test("the Equipment tab's Remove takes off the unit its row names by id", async 
     const rows = await stored(pg, id);
     // The window's row reads T1; the server's row 0 was given a corrected serial meanwhile. The id still points at it.
     await pg.query("update installs set machines = $2 where id = $1", [id, JSON.stringify([{ ...rows[0], serial: "T1-A" }, rows[1]])]);
-    const out = await removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "T1", unitId: rows[0].unitId }, "Test");
+    const out = await removeInstallRow(sql, { installId: id, index: 0, equipment: "Bunn TB3", serial: "T1", unitId: rows[0].unitId }, "Test", { admin: true });
     assert.equal(out.removed, "Bunn TB3");
     assert.deepEqual((await stored(pg, id)).map((r) => r.serial), ["T2"]);
     assert.deepEqual((await visit(pg, id)).map((u) => u.id), [rows[1].unitId]);
@@ -321,7 +321,7 @@ test("a window left open saves only what it changed: a serial fixed, a machine a
     const { id, opened, linea, g9 } = await openedWayside(pg, sql);
     // Elsewhere (the Pre-inspection tab, or another computer) while this window stays open:
     await editInspectionUnit(sql, { installId: id, equipmentId: linea, model: LINEA, serial: "LPB3-50112", electrical: "208V" }, "Tech", { owner: true });
-    await removeInspectionUnit(sql, { installId: id, equipmentId: g9 }, "Tech", { owner: true });
+    await removeInspectionUnit(sql, { installId: id, equipmentId: g9 }, "Tech", { owner: true, admin: true });
     await addMachineOntoInstall(sql, { installId: id, model: "Bunn TB3", serial: "TB300777", electrical: "120V" }, "Tech", { owner: true });
     // The window then sets the Mazzer's plug and saves the list it has.
     await windowSave(sql, id, opened.map((r) => (r.equipment === MAZZER ? { ...r, plug: "5-15P" } : r)), opened);
@@ -405,7 +405,7 @@ test("a read never moves a row to another unit: a check on the second of two pla
       ["Loaned", 2, ""],
     ]);
     // Remove on the Sold row takes the Sold row off.
-    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: opened[0].unitId }, "Test", { owner: true });
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: opened[0].unitId }, "Test", { owner: true, admin: true });
     assert.deepEqual((await stored(pg, id)).map((r) => r.ownership), ["Loaned"]);
   } finally {
     await pg.close();
@@ -423,7 +423,7 @@ test("an Equipment-tab Remove of the inspected one of two plain twins keeps its 
     const opened = await stored(pg, id);
     const [u1, u2] = opened.map((r) => r.unitId);
     await record(pg, id, u1);
-    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: u1 }, "Test", { owner: true });
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "", unitId: u1 }, "Test", { owner: true, admin: true });
     // The window's own save follows in the same queue, with the list it opened on as its base.
     await windowSave(sql, id, opened.slice(1), opened);
     assert.deepEqual((await stored(pg, id)).map((r) => [r.equipment, r.unitId]), [[TB3, u2]]);
@@ -486,7 +486,7 @@ test("taking the last row off in a window keeps a machine added on the Pre-inspe
     await addMachineOntoInstall(sql, { installId: id, model: "Fetco CBS-51H", serial: "F1", electrical: "" }, "Tech", { owner: true });
     const fetco = (await visit(pg, id)).find((u) => u.serial === "F1").id;
     await record(pg, id, fetco);
-    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "T1", unitId: seen[0].unitId }, "Test", { owner: true });
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "T1", unitId: seen[0].unitId }, "Test", { owner: true, admin: true });
     await windowSave(sql, id, [], seen);
     assert.deepEqual((await stored(pg, id)).map((r) => r.serial), ["F1"]);
     assert.ok((await visit(pg, id)).some((u) => u.id === fetco));
@@ -502,7 +502,7 @@ test("a window that opened before the ids, saved after a machine was swapped on 
     const id = await install(pg, "Old Cafe", [{ equipment: MAZZER, serial: "M1" }, { equipment: TB3 }]);
     await readInspection(sql, id);
     const tb3 = (await stored(pg, id))[1].unitId;
-    await takeOffVisit(sql, { installId: id, equipmentId: tb3 }, "Tech", { owner: true });
+    await takeOffVisit(sql, { installId: id, equipmentId: tb3 }, "Tech", { owner: true, admin: true });
     await addMachineOntoInstall(sql, { installId: id, model: "Fetco CBS-51H", serial: "", electrical: "" }, "Tech", { owner: true });
     const fetco = (await stored(pg, id))[1].unitId;
     await record(pg, id, fetco);
@@ -680,7 +680,7 @@ test("Remove while a refresh lands: the save that follows is the window's list a
     await windowSave(sql, id, added, opened);
     // The board's refresh lands (the window's rows now carry the Fetco's id), then Remove on the TB3 runs.
     const refreshed = await stored(pg, id);
-    await removeInstallRow(sql, { installId: id, index: 1, equipment: TB3, serial: "", unitId: opened[1].unitId }, "Test", { owner: true });
+    await removeInstallRow(sql, { installId: id, index: 1, equipment: TB3, serial: "", unitId: opened[1].unitId }, "Test", { owner: true, admin: true });
     await windowSave(sql, id, refreshed.filter((r) => r.equipment !== TB3), refreshed);
     assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), [MAZZER, "Fetco CBS-51H"]);
   } finally {
@@ -813,7 +813,7 @@ test("Remove of one of two twin rows the window holds without ids leaves the oth
       { equipment: TB3, serial: "", powerVoltage: "" },
       { equipment: TB3, serial: "", powerVoltage: "" },
     ];
-    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "" }, "Test", { owner: true });
+    await removeInstallRow(sql, { installId: id, index: 0, equipment: TB3, serial: "" }, "Test", { owner: true, admin: true });
     // The window couldn't tell which copy it removed, so it sends both, on the list it opened with.
     await windowSave(sql, id, windowRows, windowRows);
     assert.deepEqual((await stored(pg, id)).map((r) => r.equipment), [TB3]);
