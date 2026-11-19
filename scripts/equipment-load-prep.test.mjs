@@ -65,7 +65,7 @@ test("Remove retires a machine: it leaves the account, and its record and inspec
     assert.equal(retired.length, 1);
     assert.deepEqual(
       { ...retired[0], id: 0, retiredAt: "" },
-      { id: 0, unitId: id, customer: "Test Steakhouse", equipmentName: "Test Grinder", catalogModel: "Test Grinder", serial: "TG-1", partNumber: "33200.0000", ownership: "Loaned", installDate: "2025-11-14", retiredAt: "", retiredName: "boss", records: 4, movedNote: null },
+      { id: 0, unitId: id, customer: "Test Steakhouse", equipmentName: "Test Grinder", catalogModel: "Test Grinder", serial: "TG-1", partNumber: "33200.0000", ownership: "Loaned", installDate: "2025-11-14", retiredAt: "", retiredName: "boss", records: 4, movedNote: null, reason: null, mergedInto: null, mergedSerial: null },
     );
     assert.match(retired[0].retiredAt, /^\d{4}-\d{2}-\d{2}/);
     const kept = (await query("select unit, links from account_equipment_retired"))[0];
