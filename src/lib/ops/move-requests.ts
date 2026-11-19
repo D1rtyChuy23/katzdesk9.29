@@ -91,8 +91,23 @@ export async function decideMoveRequest(sql: Sql, userId: string, id: number, co
   let notice = "Move declined.";
   if (confirm) {
     if (!r.to_install_id) throw new Error("That move has no install to go to.");
-    const { pullSerial } = await import("@/lib/ops/serial-pull");
-    const out = await pullSerial(sql, userId, { serial: r.serial, installId: Number(r.to_install_id), machineIndex: r.machine_index, moveFrom: r.from_customer });
+    const { pullSerial, serialKey } = await import("@/lib/ops/serial-pull");
+    // The row it was asked for, only while that row is still empty or holds this serial; a list changed since gets the
+    // unit as a row of its own, so nothing on the list is overwritten.
+    let machineIndex: number | null = null;
+    if (r.machine_index != null) {
+      const { installMachines } = await import("@/lib/ops/machines");
+      const { catalogNames } = await import("@/lib/ops/inspection-api");
+      const row = (
+        await sql.query<{ equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null }>(
+          "select equipment, serial, power_voltage, machines from installs where id = $1",
+          [r.to_install_id],
+        )
+      )[0];
+      const at = row ? installMachines(row, await catalogNames(sql)).machines[r.machine_index] : undefined;
+      if (at && (!serialKey(at.serial) || serialKey(at.serial) === serialKey(r.serial))) machineIndex = r.machine_index;
+    }
+    const out = await pullSerial(sql, userId, { serial: r.serial, installId: Number(r.to_install_id), machineIndex, moveFrom: r.from_customer });
     if (out.needsConfirm || out.moveAsked) throw new Error(out.notice || "That serial couldn't be moved.");
     notice = out.notice;
   }

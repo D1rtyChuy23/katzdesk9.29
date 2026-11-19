@@ -128,3 +128,19 @@ test("the model picker won't add text that looks like a serial as a new model wi
     await pg.close();
   }
 });
+
+test("Normalize leaves placeholder serials such as N/A alone: no key, no duplicate flag", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    await pg.query("alter table account_equipment disable trigger account_equipment_serial_upper");
+    await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, $2, $2, 'N/A', null), ('ZZ Other', $2, $2, 'n/a', null)", [LOPEZ, MODEL]);
+    await pg.query("alter table account_equipment enable trigger account_equipment_serial_upper");
+    const p = await N.previewSerialNormalizeFor(sql, "u_boss");
+    assert.deepEqual(p.rows, []);
+    const res = await N.applySerialNormalizeFor(sql, "u_boss", { rows: [{ unitId: 1, oldSerial: "N/A" }] });
+    assert.deepEqual(res.written, []);
+    assert.deepEqual((await pg.query("select serial_key from account_equipment order by id")).rows.map((r) => r.serial_key), [null, null]);
+  } finally {
+    await pg.close();
+  }
+});

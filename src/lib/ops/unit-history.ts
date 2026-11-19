@@ -36,7 +36,8 @@ export type HistoryEntry = {
 export function asActor(sql: Sql, actor: string | null | undefined, action?: HistoryAction | null): Sql {
   // No name given: the signed-in person of this request (src/lib/request-actor.server.ts), when there is one.
   const store = (globalThis as { __katzRequestActor__?: { getStore(): { actor: string } | undefined } }).__katzRequestActor__;
-  const name = (actor ?? "").trim() || store?.getStore()?.actor || "";
+  // An action with nobody to name (a background step) still records what it was, as System.
+  const name = (actor ?? "").trim() || store?.getStore()?.actor || (action ? "System" : "");
   return name && sql.as ? sql.as(name, action ?? null) : sql;
 }
 

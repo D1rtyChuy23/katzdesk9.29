@@ -95,6 +95,7 @@ import * as input from "./api-input";
 import { looksLikeSerial, serialKey, serialLikeModelMessage } from "./account-equip";
 import type { MovedPmView } from "./moved-pm";
 import { fillInstallDatesFor } from "./install-date-fill";
+import { reopenInstall } from "./inspection-api";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
@@ -1925,6 +1926,11 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	if (contactPhone && contactPhone.length > CONTACT_PHONE_MAX) throw new Error(`The contact phone is too long: ${CONTACT_PHONE_MAX} characters at most.`);
 	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
 	await assertCustomerChangeAllowed(sql, c, data.customer);
+	// Moving units between accounts is an Admin's (11/19): a new account for an install that made units is refused for anyone else.
+	if (data.customer !== undefined && data.customer.trim().toLowerCase() !== String(c.customer ?? "").trim().toLowerCase() && !(await canReviewNames(sql, context.userId))) {
+		const own = await sql.query(`select count(*)::int as n from account_equipment where created_by_install = $1 and lower(customer) = lower($2)`, [data.id, c.customer]);
+		if (Number(own[0]?.n ?? 0) > 0) throw new Error(`Changing this install's account moves its ${own[0].n} unit${Number(own[0].n) === 1 ? "" : "s"} to the new account. Only an Admin can move units between accounts.`);
+	}
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
 	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
 	if (data.wo !== undefined && data.wo && woMatchKey(data.wo) !== woMatchKey(c.wo ?? "")) await assertWoFree(sql, data.id, data.wo);
@@ -2025,6 +2031,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	// The install's own account units go with it to the new customer (not a locked one, nor one on another visit).
 	const unitsMoved = data.customer !== undefined && data.customer !== c.customer ? await moveInstallUnits(sql, data.id, c.customer, data.customer) : null;
 	const unitsKeptBack: string[] = [];
+	const unitsRemoved: string[] = [];
 	if (unitsMoved?.moved.length || unitsMoved?.stayed.length) {
 		await logActivity(sql, context.userId, "install", data.id, "updated", [unitsMoved.moved.length ? `moved to ${data.customer}: ${unitsMoved.moved.join(", ")}` : null, unitsMoved.stayed.length ? `stayed on ${c.customer}: ${unitsMoved.stayed.join(", ")}` : null].filter(Boolean).join(" · "));
 	}
@@ -2042,7 +2049,10 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 			before: { equipment: c.equipment, serial: c.serial, power_voltage: c.power_voltage, machines: c.machines },
 			canRemove: await canReviewNames(sql, context.userId),
 			keptBack: unitsKeptBack,
+			removed: unitsRemoved,
 		});
+		// A unit taken off a Ready install by this save sends it back to Not Ready, as the Remove buttons do (11/19).
+		if (unitsRemoved.length) await reopenInstall(sql, data.id, await deskUsername(sql, context.userId), unitsRemoved.join(", "));
 	}
 	// Installed (now, or already): its new units' blank install dates come from the install (11/18). A no-op otherwise.
 	await fillInstallDatesFor(sql, data.id, await deskUsername(sql, context.userId));

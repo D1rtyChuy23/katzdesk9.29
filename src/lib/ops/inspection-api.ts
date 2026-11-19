@@ -1001,6 +1001,8 @@ export async function syncInstallUnits(
     canRemove?: boolean;
     /** Filled with the machines a save that may not remove units put back on the list. */
     keptBack?: string[];
+    /** Filled with the machines this save took off the install (kept under Removed). */
+    removed?: string[];
   },
 ): Promise<void> {
   const keptBack = opts?.keptBack ?? [];
@@ -1256,7 +1258,15 @@ export async function syncInstallUnits(
     if ((!hadRow.has(id) || repointed.has(id)) && recorded.has(id)) continue;
     // Taking a unit off an install is an Admin's (11/19). Someone else's save that left its row out puts the row back.
     const realUnit = account.find((a) => a.id === id);
-    if (opts?.canRemove === false && (serialKey(realUnit?.serial) || recorded.has(id))) {
+    // A unit with anything of its own (a serial, a Part #, an install date, or checks on this visit) is an Admin's to take off.
+    const ownDetails =
+      opts?.canRemove === false &&
+      (!!serialKey(realUnit?.serial) ||
+        recorded.has(id) ||
+        (
+          await sql.query("select 1 from account_equipment where id = $1 and (coalesce(btrim(part_number), '') <> '' or install_date is not null)", [id])
+        ).length > 0);
+    if (ownDetails) {
       const was = before ? rowOfUnit(before, linkedRows, catalog, id) : null;
       if (was) back.push({ ...was, unitId: id });
       keptBack.push(realUnit?.equipment_name || realUnit?.catalog_model || "Machine");
@@ -1264,6 +1274,7 @@ export async function syncInstallUnits(
     }
     // Kept under the install's Removed first, with its row as the list had it, so Put back returns it (11/19).
     await keepRemoved(sql, installId, id, before ? rowOfUnit(before, linkedRows, catalog, id) : null);
+    opts?.removed?.push(realUnit?.equipment_name || realUnit?.catalog_model || "Machine");
     await sql.query("delete from install_inspection_photos where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_items where install_id = $1 and equipment_id = $2", [installId, id]);
     await sql.query("delete from install_inspection_units where install_id = $1 and equipment_id = $2", [installId, id]);
@@ -1914,7 +1925,11 @@ export const addInspectionEquipment = createServerFn({ method: "POST" })
 
 export const REMOVE_ADMIN_ONLY = "Only an Admin can take a unit off an install. Ask an Admin, or leave it on the list.";
 export const reopenConfirmText = (unit: string, ready: boolean) =>
-  `Take ${unit} off this install? ${ready ? "The install is Ready and " : ""}its pre-inspection ${ready ? "goes" : "has passed. It goes"} back to Not Ready, to be checked again. What was recorded on ${unit} is kept under Removed, and Put back returns it.`;
+  `Take ${unit} off this install? ${
+    ready
+      ? "The install is Ready and its pre-inspection goes back to Not Ready, to be checked again."
+      : "Its pre-inspection has passed: taking this unit off reopens it, so check it again before the install."
+  } What was recorded on ${unit} is kept under Removed, and Put back returns it.`;
 export const REOPEN_NEEDS_CONFIRM = "Confirm first: taking this unit off reopens the install's pre-inspection.";
 
 /** Is the install Ready, or has its pre-inspection passed? Taking a unit off then needs a confirm (11/19). */
@@ -1925,7 +1940,7 @@ export async function installReadyOrPassed(sql: Sql, installId: number): Promise
 }
 
 /** After a unit comes off a Ready install, the install goes back to Not Ready (Chuy, 11/19). Logged on the install. */
-async function reopenInstall(sql: Sql, installId: number, actor: string, unit: string): Promise<void> {
+export async function reopenInstall(sql: Sql, installId: number, actor: string, unit: string): Promise<void> {
   const changed = await sql.query("update installs set equip_status = 'Not Ready', updated_at = now() where id = $1 and equip_status = 'Ready' returning id", [installId]);
   if (changed.length)
     await sql
@@ -2341,6 +2356,8 @@ export const linkInspectionUnit = createServerFn({ method: "POST" })
   .validator((d: z.infer<typeof linkInput>) => linkInput.parse(d))
   .handler(async ({ data, context }): Promise<InspectionView> => {
     const sql = await ready();
+    // "Same machine as…" merges two units into one: an Admin's (11/19).
+    if (!(await canReviewNames(sql, context.userId))) throw new Error("Only an Admin can make two units one machine.");
     return linkVisitUnit(sql, data, await deskUsername(sql, context.userId), { owner: await canLockEquipment(sql, context.userId) });
   });
 

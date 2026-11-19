@@ -351,7 +351,7 @@ function MachineList({
             {removing?.serial ? ` · SN ${removing.serial}` : ""} comes off this pre-inspection, with its checks{removing?.photoCount ? ` and ${removing.photoCount} photo${removing.photoCount === 1 ? "" : "s"}` : ""} for this visit.
             If it is on this install's equipment list it comes off that list too. Other installs and the account's history are not changed.
             It's kept under Removed on the Equipment tab, and Put back returns it.
-            {view.overall === "Passed" ? " This pre-inspection has passed: taking it off reopens it, and a Ready install goes back to Not Ready, to be checked again." : " If the install is Ready, it goes back to Not Ready, to be checked again."}
+            {view.overall === "Passed" ? " This pre-inspection has passed: taking it off reopens it, so check it again. A Ready install goes back to Not Ready." : " If the install is Ready, it goes back to Not Ready, to be checked again."}
           </DialogDescription>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setRemoving(null)} disabled={remove.isPending}>

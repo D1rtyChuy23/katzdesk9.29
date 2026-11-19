@@ -288,7 +288,7 @@ test("an Equipment-tab Remove takes its row and pre-inspection unit off before t
   const src = componentSource("../src/components/desk/entity-sheets.tsx", "InstallSheet");
   // Both mutations share one scope, so the save (and its prune) waits for the remove. A refused remove saves nothing.
   assert.match(src, /const save = useMutation\(\{\s*scope: queue,\s*mutationFn: \((?:d|vars)[^)]*\) => \{[\s\S]*?return updateInstall\(/);
-  assert.match(src, /const dropRow = useMutation\(\{\s*scope: queue,\s*mutationFn: [^\n]*removeInstallMachine\(\{ data: v \}\)/);
+  assert.match(src, /const dropRow = useMutation\(\{\s*scope: queue,\s*mutationFn: [^]*?=>\s*removeInstallMachine\(\{ data: v \}\)/);
   const remove = src.slice(src.indexOf("onRemove={(index) => {"));
   const drop = remove.indexOf("dropRow.mutate(");
   // The save that follows is the window's list as it is then, less the removed row.

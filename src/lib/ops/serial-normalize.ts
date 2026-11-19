@@ -39,13 +39,16 @@ export async function previewSerialNormalizeFor(sql: Sql, userId: string): Promi
   );
   const byKey = new Map<string, Set<string>>();
   for (const u of units) {
-    const k = serialKey(u.serial);
+    const k = parseSerial(u.serial) ? serialKey(u.serial) : "";
     if (!k) continue;
     byKey.set(k, (byKey.get(k) ?? new Set()).add(u.customer.trim()));
   }
   const rows: SerialNormalizeRow[] = [];
   for (const u of units) {
-    const newSerial = parseSerial(u.serial) ?? u.serial;
+    // A placeholder ("N/A", "none") is no serial: never keyed, so it can't match another unit's.
+    const parsed = parseSerial(u.serial);
+    if (!parsed) continue;
+    const newSerial = parsed;
     const newKey = serialKey(u.serial);
     if (newSerial === u.serial && newKey === u.serial_key) continue;
     rows.push({
@@ -72,7 +75,8 @@ export async function applySerialNormalizeFor(
   await assertAdmin(sql, userId);
   const written: number[] = [];
   for (const r of data.rows) {
-    const newSerial = parseSerial(r.oldSerial) ?? r.oldSerial;
+    const newSerial = parseSerial(r.oldSerial);
+    if (!newSerial) continue;
     const out = await sql.query<{ id: number }>(
       `update account_equipment set serial = $3, serial_key = $4, updated_at = now()
         where id = $1 and serial = $2 and locked_at is null returning id`,

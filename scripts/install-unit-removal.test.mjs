@@ -8,7 +8,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { register } from "node:module";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
-register(new URL("./ts-alias-hook.mjs", import.meta.url));
+await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
 const I = await import("../src/lib/ops/inspection-api.ts");
@@ -22,7 +22,8 @@ async function fresh() {
   const dir = new URL("../migrations/", import.meta.url);
   for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, dir), "utf8"));
   await pg.query("insert into directory_equipment (name) values ($1)", [MODEL]);
-  const sql = { query: async (t, p) => (await pg.query(t, p)).rows };
+  const run = async (t, p) => (await pg.query(t, p)).rows;
+  const sql = Object.assign(async (strings, ...values) => run(strings.reduce((a, x, i) => `${a}$${i}${x}`), values), { query: run });
   // An install with three Bunns on its list, units made by its load, and a check recorded on the second.
   const list = ["ZZITCB076334", "ZZITCB083077", "ZZITCB154148"].map((serial) => ({ equipment: MODEL, serial, powerVoltage: "" }));
   const packed = machines.serializeMachines(list);
@@ -95,6 +96,25 @@ test("on a Ready install it asks first, then sets the install back to Not Ready"
     assert.equal((await pg.query("select equip_status from installs where id = $1", [id])).rows[0].equip_status, "Not Ready");
     const log = (await pg.query("select detail from activity where entity_type = 'install' and entity_id = $1 order by id", [id])).rows.map((r) => r.detail);
     assert.ok(log.some((d) => /set back to Not Ready/.test(d)));
+  } finally {
+    await pg.close();
+  }
+});
+
+test("through the install window: someone else can't move an install's units to another account; an Admin's save that drops a unit reopens a Ready install", async () => {
+  const { pg, sql, id, second } = await fresh();
+  try {
+    const api = await import("../src/lib/ops/api.ts");
+    await pg.query("insert into desk_accounts (user_id, username, approved, is_admin) values ('u_boss', 'boss.zz', true, true), ('u_tech', 'tech.zz', true, false)");
+    await pg.query("insert into directory_customers (name) values ($1), ('ZZ Other Cafe')", [SITE]);
+    await assert.rejects(api.updateInstallFor(sql, { id, customer: "ZZ Other Cafe" }, { userId: "u_tech" }), /Only an Admin can move units between accounts/);
+    assert.equal((await pg.query("select customer from installs where id = $1", [id])).rows[0].customer, SITE);
+    // An Admin's save on a Ready install that leaves a unit's row out: kept under Removed, and the install is Not Ready.
+    await pg.query("update installs set equip_status = 'Ready' where id = $1", [id]);
+    const list = ["ZZITCB076334", "ZZITCB154148"].map((serial) => ({ equipment: MODEL, serial, powerVoltage: "" }));
+    await api.updateInstallFor(sql, { id, machines: list }, { userId: "u_boss" });
+    assert.equal((await pg.query("select equip_status from installs where id = $1", [id])).rows[0].equip_status, "Not Ready");
+    assert.deepEqual((await I.listInstallRemoved(sql, id)).map((r) => r.unitId), [second]);
   } finally {
     await pg.close();
   }

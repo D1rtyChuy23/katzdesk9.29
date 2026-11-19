@@ -575,7 +575,12 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
           const { carryUnitDetails, unitBySerial } = await import("@/lib/ops/unit-move");
           const target = (await sql.query<{ customer: string }>("select customer from installs where id = $1", [data.installId]))[0]?.customer ?? "";
           const made = await unitBySerial(sql, target, serialKey(shown));
-          if (made) await carryUnitDetails(asActor(sql, actor, "move"), accountHit.id, made);
+          // Never a quiet half-move: the unit left the old account, so it must be on the new one now.
+          if (!made)
+            throw new Error(
+              `Serial ${shown} came off ${accountHit.customer} but isn't on this install's account. It's on ${accountHit.customer}'s Retired list: Put back returns it.`,
+            );
+          await carryUnitDetails(asActor(sql, actor, "move"), accountHit.id, made);
         }
         // Pulled onto an Installed install: the unit takes its date when the install made it (11/18).
         const { fillInstallDatesFor } = await import("@/lib/ops/install-date-fill");

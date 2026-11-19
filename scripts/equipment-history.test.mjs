@@ -232,3 +232,51 @@ test("the unit form: anyone sets Condition; only an Admin changes the Serial, an
     await pg.close();
   }
 });
+
+test("confirming a move after that row got its own serial adds the unit as a new row; it never overwrites the row", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const P = await import("../src/lib/ops/serial-pull.ts");
+    const M = await import("../src/lib/ops/move-requests.ts");
+    const { syncInstallUnits } = await import("../src/lib/ops/inspection-api.ts");
+    const machines = await import("../src/lib/ops/machines.ts");
+    await P.ensureSerialNotice(sql);
+    await pg.query(`insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, part_number) values ($1, $2, $2, 'ZZMOVE1', 'zzmove1', 'PN-1')`, [TWO, MODEL]);
+    const install = (await pg.query("insert into installs (customer, equipment, wo) values ($1, $2, '1140') returning id", [LOPEZ, MODEL])).rows[0].id;
+    await P.pullSerial(sql, "u_tech", { serial: "ZZMOVE1", installId: install, machineIndex: 0, moveFrom: TWO });
+    // Meanwhile row 0 gets its own machine and serial.
+    const packed = machines.serializeMachines([{ equipment: MODEL, serial: "AAA111", powerVoltage: "" }]);
+    await pg.query("update installs set equipment = $2, serial = $3, machines = $4 where id = $1", [install, packed.equipment, packed.serial, packed.machines]);
+    await syncInstallUnits(sql, install);
+    const [ask] = await M.listMoveRequests(sql, install);
+    await M.decideMoveRequest(sql, "u_boss", ask.id, true);
+    const list = machines.parseMachinesJson((await pg.query("select machines from installs where id = $1", [install])).rows[0].machines).map((m) => m.serial);
+    assert.deepEqual(list.sort(), ["AAA111", "ZZMOVE1"]);
+    const onLopez = (await pg.query("select serial, part_number from account_equipment where lower(customer) = lower($1) order by serial", [LOPEZ])).rows;
+    assert.deepEqual(onLopez, [{ serial: "AAA111", part_number: null }, { serial: "ZZMOVE1", part_number: "PN-1" }]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("merging two units keeps the dropped one's details on the kept unit, and keeps its record on the Retired list", async () => {
+  const { pg, sql, history } = await fresh();
+  try {
+    const { mergeEquipmentUnits } = await import("../src/lib/ops/account-equip-import.ts");
+    const { listRetiredUnits } = await import("../src/lib/ops/account-equip-retire.ts");
+    const keep = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, part_number) values ($1, $2, $2, 'ZZM1', 'zzm1', 'PN-K') returning id", [LOPEZ, MODEL])).rows[0].id;
+    const drop = (
+      await pg.query(
+        "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, ownership, install_date, condition) values ($1, $2, $2, 'L', 'l', 'Loaned', '2025-03-01', 'Good') returning id",
+        [LOPEZ, MODEL],
+      )
+    ).rows[0].id;
+    await mergeEquipmentUnits(sql, keep, drop);
+    const k = (await pg.query("select part_number, ownership, install_date::text as d, condition from account_equipment where id = $1", [keep])).rows[0];
+    assert.deepEqual(k, { part_number: "PN-K", ownership: "Loaned", d: "2025-03-01", condition: "Good" });
+    assert.deepEqual((await listRetiredUnits(sql, LOPEZ)).map((r) => r.unitId), [drop]);
+    assert.equal((await history(drop)).at(-1).action, "merge");
+  } finally {
+    await pg.close();
+  }
+});
