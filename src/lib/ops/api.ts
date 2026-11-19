@@ -928,6 +928,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	if (data.customer != null && data.customer.trim() !== String(cur[0].customer ?? "").trim()) {
 		if (cur[0].kind === "tlc") assertWalkInMove("tlc", cur[0].customer, data.customer);
 		data = { ...data, customer: await ticketAccount(sql, data.customer ?? "") };
+		await assertTakesNewWork(sql, data.customer, "ticket", { moving: true });
 	}
 	if (data.customer !== undefined) {
 		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
@@ -1222,6 +1223,8 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	// Moved to a service ticket (11/18): the ticket is where its work goes now. Move it back from the ticket first.
 	if (cur[0].moved_job_id) throw new Error("This PM was moved to a service ticket. Open the ticket, or move it back to a PM from there.");
 	if (data.customer !== undefined) assertWalkInMove("pm", cur[0].customer, data.customer);
+	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "pm", { moving: true });
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
 		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
 		const refusal = stackCustomerRefusal(
@@ -1484,6 +1487,8 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	if (data.customer !== undefined) assertWalkInMove("deal", cur[0].customer, data.customer);
+	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "deal", { moving: true });
 	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
 	const release = new Set<string>(Array.isArray(data.releaseUids) ? data.releaseUids.filter((u: unknown) => typeof u === "string" && u) : []);
 	if (release.size) {
@@ -1580,6 +1585,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createDealInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("deal", data.customer);
+	await assertTakesNewWork(sql, data.customer, "deal");
 	const producer = canonicalRepName(data.producer);
 	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
 	const packed = Array.isArray(data.machines) && data.machines.length ? serializeMachines(data.machines.map((m: any) => cleanMachine({ ...m, equipment: String(m?.equipment ?? ""), serial: String(m?.serial ?? ""), powerVoltage: String(m?.powerVoltage ?? "") }))) : null;
@@ -1932,6 +1938,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	// The owner's lock on the customer: anyone else's change is refused, the same message as the equipment lock.
 	await assertCustomerChangeAllowed(sql, c, data.customer);
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
+	if (data.customer !== undefined && data.customer.toLowerCase() !== String(c.customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "install", { moving: true });
 	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
 	if (data.wo !== undefined && data.wo && woMatchKey(data.wo) !== woMatchKey(c.wo ?? "")) await assertWoFree(sql, data.id, data.wo);
 	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.

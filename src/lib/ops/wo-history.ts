@@ -478,6 +478,8 @@ export type SavedHistory = {
   id: number;
   ref: string;
   jobId: number | null;
+  /** The account it's saved on. A removed one is restored as Retired when the row is saved again. */
+  customer?: string;
   values: Partial<Record<HistoryFillField, string | number | null>>;
   lines: KeyLine[];
 };
@@ -586,7 +588,21 @@ export function ticketFills(o: WoPlanInput, ticket: Pick<SavedTicket, "id" | "te
   return out;
 }
 
-const keyNum = (n: number | null | undefined) => (n == null || !Number.isFinite(n) ? "" : String(Math.round((n + Number.EPSILON) * 100) / 100));
+/**
+ * A number rounded to 2 dp as Postgres stores it in numeric(12,2): on its decimal digits, half away from zero (2.135 is
+ * 2.14 and -0.125 is -0.13), not on the binary double (where 2.135 is 2.13499…). Keys made this way match saved lines.
+ */
+export function round2(n: number): number {
+  const m = /^(-?)(\d+)(?:\.(\d*))?$/.exec(String(n));
+  if (!m) return Math.round(n * 100) / 100;
+  const [, sign, int, frac = ""] = m;
+  let cents = BigInt(int!) * 100n + BigInt((frac + "00").slice(0, 2));
+  if ((frac[2] ?? "0") >= "5") cents += 1n;
+  const v = Number(cents) / 100;
+  return sign ? -v : v;
+}
+
+const keyNum = (n: number | null | undefined) => (n == null || !Number.isFinite(n) ? "" : String(round2(n)));
 const keyText = (s: string | null | undefined) => String(s ?? "").trim().toLowerCase();
 
 /** The files have no line #: a line is its type, code, description, qty, price, amount and date (2 dp, blank is its own value). */
@@ -715,6 +731,10 @@ export function planWoHistory(
     const fileOwn = linesByRef.get(o.ref.toLowerCase()) ?? [];
     const newLines = missingLines(row.lines, fileOwn);
     const tags: WoStatus[] = [];
+    // Saved on an account that was removed (and no active account has the name): saving again restores it as Retired.
+    const onRemoved = row.customer && !(active.get(nameKey(row.customer)) ?? []).length ? (removed.get(nameKey(row.customer)) ?? []) : [];
+    const retire = onRemoved.length === 1 && !base.locationNeeded ? onRemoved[0]! : null;
+    if (retire) tags.push("retire");
     if (fills.length) tags.push("fill");
     if (newLines.length) tags.push("addLines");
     if (!tags.length) tags.push("same");
@@ -725,12 +745,14 @@ export function planWoHistory(
       addLines = { lines: newLines.length, discount, invoice: `Invoice ${o.wo || o.ref}`, discountTotal: inv.discount, total: inv.total };
     }
     const reasons = [
+      ...(retire ? [`Saved on “${retire.name}”, which was removed. Saving restores it as Retired: hidden from pickers and lists, and it takes no new tickets, installs or PMs.`] : []),
       ...(fills.length ? [fills.map(fillText).join("; ")] : []),
       ...(addLines ? [`${addLines.lines} ${addLines.lines === 1 ? "line" : "lines"} (${addLines.discount} discount) to ${addLines.invoice}`] : []),
     ];
     return {
       ...base,
-      account: base.lookup,
+      account: retire?.name ?? row.customer ?? base.lookup,
+      accountId: retire?.id ?? null,
       status: tags[0]!,
       tags,
       historyId: row.id,
@@ -751,8 +773,8 @@ export function countWoPlan(lines: WoPlanLine[]): WoCounts {
   const c: WoCounts = { create: 0, attach: 0, retire: 0, fill: 0, addLines: 0, removed: 0, unmatched: 0, ambiguous: 0, same: 0, locationNeeded: 0, remapped: 0 };
   for (const l of lines) {
     for (const t of l.tags ?? [l.status]) c[t]++;
-    if (l.locationNeeded && isNewRow(l.status)) c.locationNeeded++;
-    if (l.originalTech && isNewRow(l.status)) c.remapped++;
+    if (l.locationNeeded && l.historyId == null && isNewRow(l.status)) c.locationNeeded++;
+    if (l.originalTech && l.historyId == null && isNewRow(l.status)) c.remapped++;
   }
   return c;
 }
@@ -767,7 +789,7 @@ export function retireByAccount(lines: WoPlanLine[]): { account: string; count: 
 /** Tickets that go to the fallback tech, by the tech who did them. */
 export function remappedByTech(lines: WoPlanLine[]): { tech: string; count: number }[] {
   const m = new Map<string, number>();
-  for (const l of lines) if (l.originalTech && isNewRow(l.status)) m.set(l.originalTech, (m.get(l.originalTech) ?? 0) + 1);
+  for (const l of lines) if (l.originalTech && l.historyId == null && isNewRow(l.status)) m.set(l.originalTech, (m.get(l.originalTech) ?? 0) + 1);
   return [...m].map(([tech, count]) => ({ tech, count })).sort((a, b) => b.count - a.count || a.tech.localeCompare(b.tech));
 }
 

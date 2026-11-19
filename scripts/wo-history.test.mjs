@@ -357,6 +357,15 @@ test("line dedupe: a multiset; an exact re-run adds 0; discount lines dedupe too
   assert.deepEqual([all.subtotal, all.discount, all.total], [265, 40, 225]);
 });
 
+test("line keys round the way the database stores numeric(12,2): half away from zero, on the decimal digits", () => {
+  const ref = "WO-0910";
+  // 2.135 is 2.13499… as a double; Postgres stores 2.14. -0.125 is stored -0.13.
+  assert.equal(missingLines([wline(ref, "Part", "V", 2, 2.14, 4.27)], [wline(ref, "Part", "V", 2, 2.135, 4.27)]).length, 0);
+  assert.equal(missingLines([wline(ref, "Discount", "D", -0.13, 10, -1.25)], [wline(ref, "Discount", "D", -0.125, 10, -1.25)]).length, 0);
+  assert.equal(missingLines([wline(ref, "Part", "V", 1, 4.02, 4.02)], [wline(ref, "Part", "V", 1, 4.015, 4.015)]).length, 0);
+  assert.equal(missingLines([wline(ref, "Part", "V", 1, 4.01, 4.01)], [wline(ref, "Part", "V", 1, 4.015, 4.015)]).length, 1);
+});
+
 test("a row can be both Will Fill and Will Add Lines, counted in each", () => {
   const ref = "WO-0903";
   const [p] = planWoHistory([fullOrder({ ref, po: "P1" })], fillCtx([savedRow(3, ref, { po: "" }, [])]), [wline(ref, "Part", "VALVE1", 1, 20, 20)]);
@@ -769,6 +778,60 @@ test("a later run fills blanks and adds missing lines on saved work orders; a re
   assert.equal((await pg.query("select issue from service_jobs where id = $1", [job])).rows[0].issue, "", "back to what it was before the run");
   const runs = await api.recentRuns(sql);
   assert.equal(runs.find((r) => r.id === run1.runId).current, 2);
+});
+
+test("a 3-dp price saved once is never added again on a re-run", async () => {
+  const { pg, sql } = await fresh();
+  const f = files([FILE_ORDERS[1]], [line("WO-1500", "Part", "VALVE1", "2", "2.135", "4.27"), line("WO-1500", "Discount", "CLD", "-0.125", "10", "-1.25")]);
+  await runAll(sql, f);
+  const again = await runAll(sql, f);
+  assert.deepEqual(again.plan.map((p) => p.status), ["same"]);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 2);
+});
+
+test("undoing a middle run works the discount and line total out again from the lines left", async () => {
+  const { pg, sql } = await fresh();
+  const o = [FILE_ORDERS[1]];
+  const a = line("WO-1500", "Part", "A", "1", "10", "10");
+  const b = line("WO-1500", "Part", "B", "1", "20", "20");
+  const c = line("WO-1500", "Part", "C", "1", "40", "40");
+  await runAll(sql, files(o, [a]));
+  const run2 = await runAll(sql, files(o, [a, b]));
+  await runAll(sql, files(o, [a, b, c]));
+  assert.equal((await pg.query("select lines_total::text from wo_history")).rows[0].lines_total, "70.00");
+  await api.undoRun(sql, { runId: run2.runId, who: "chuy" });
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 2);
+  assert.deepEqual((await pg.query("select discount::text, lines_total::text from wo_history")).rows[0], { discount: "0.00", lines_total: "50.00" });
+});
+
+test("a removed account a run restored and filled a ticket on goes back to removed on undo", async () => {
+  const { pg, sql } = await fresh();
+  await pg.query("update directory_customers set archived = false where name = 'Real Spot'");
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, received, status, issue) values ('service', 'SC-9', 'Real Spot', 'WO-1502', '2025-01-20', 'Completed', 'Kept')");
+  const job = (await pg.query("select id from service_jobs where call_id = 'SC-9'")).rows[0].id;
+  await runAll(sql, files([FILE_ORDERS[3]], []));
+  assert.equal((await pg.query("select job_id from wo_history")).rows[0].job_id, job);
+  // The account is removed later, and the ticket's issue cleared.
+  await pg.query("update directory_customers set archived = true where name = 'Real Spot'");
+  await pg.query("update service_jobs set issue = null where id = $1", [job]);
+  const run = await runAll(sql, files([FILE_ORDERS[3]], []));
+  assert.deepEqual(run.plan[0].tags, ["retire", "fill"], "a saved row on a removed account restores it");
+  assert.deepEqual((await pg.query("select archived, inactive from directory_customers where name = 'Real Spot'")).rows[0], { archived: false, inactive: true });
+  const undone = await api.undoRun(sql, { runId: run.runId, who: "chuy" });
+  assert.deepEqual([undone.accountsBack, undone.accountsKept], [["Real Spot"], []], "its own ticket fill isn't something added since");
+  assert.equal((await pg.query("select archived from directory_customers where name = 'Real Spot'")).rows[0].archived, true);
+  assert.equal((await pg.query("select issue from service_jobs where id = $1", [job])).rows[0].issue, null);
+});
+
+test("an added line with a blank invoice date saves", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files([FILE_ORDERS[1]], [FILE_LINES[4]]));
+  const read = files([FILE_ORDERS[1]], [FILE_LINES[4], FILE_LINES[5]]);
+  const lines = read.lines.map((l) => (l.itemCode === "INSTALLATIONFEE" ? { ...l, invoiceDate: "" } : l));
+  const runId = await api.startRun(sql, { filename: "t", rowCount: 1, counts: {}, who: "chuy" });
+  const res = await api.saveBatch(sql, { runId, orders: read.orders, lines, include: ["WO-1500"], seen: {}, who: "chuy" });
+  assert.equal(res.linesAdded, 1);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines where invoice_date is null")).rows[0].n, 1);
 });
 
 test("undo leaves a retired account Retired once something was added to it", async () => {

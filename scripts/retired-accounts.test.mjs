@@ -12,7 +12,7 @@ process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 
 const { assertTakesNewWork, inactiveLabel } = await import("../src/lib/ops/retired-accounts.ts");
 const { makeAccountActiveFor, MAKE_ACTIVE_ADMIN_ONLY } = await import("../src/lib/ops/retired-accounts-api.ts");
-const { openTicketFor, searchAllFor } = await import("../src/lib/ops/api.ts");
+const { openTicketFor, searchAllFor, updateJobFor } = await import("../src/lib/ops/api.ts");
 const { readNetsuiteMatrix, planNetsuiteCustomers } = await import("../src/lib/ops/netsuite-customers.ts");
 
 const dir = new URL("../migrations/", import.meta.url);
@@ -55,8 +55,22 @@ test("every way to make a ticket, install or PM checks on the server; pickers le
   assert.match(body("createInstall"), /assertTakesNewWork\(sql, data\.customer, "install"\)/);
   assert.match(body("confirmDealMachines"), /assertTakesNewWork\(sql, deal\.customer, "install"\)/);
   assert.match(body("linkOrMakeInstall"), /assertTakesNewWork\(sql, deal\.customer, "install"\)/);
+  assert.match(body("updatePmFor"), /assertTakesNewWork\(sql, data\.customer, "pm", \{ moving: true \}\)/);
+  assert.match(body("updateInstallFor"), /assertTakesNewWork\(sql, data\.customer, "install", \{ moving: true \}\)/);
+  assert.match(body("updateDealFor"), /assertTakesNewWork\(sql, data\.customer, "deal", \{ moving: true \}\)/);
+  assert.match(body("createDeal"), /assertTakesNewWork\(sql, data\.customer, "deal"\)/);
   assert.match(body("listDirectory"), /inactive = false/);
   assert.match(body("listCustomers"), /archived = false and inactive = false/);
+});
+
+test("a ticket can't be moved onto a Retired account; work already on it can still be edited", async () => {
+  const { pg, sql } = await fresh();
+  const { id } = await openTicketFor(sql, { kind: "service", customer: "Test Cafe", received: "2026-11-19" });
+  await assert.rejects(updateJobFor(sql, { id, customer: "Test Cafe - North" }, "u-owner"), /can't take a ticket moved onto it/);
+  assert.equal((await pg.query("select customer from service_jobs where id = $1", [id])).rows[0].customer, "Test Cafe");
+  await pg.query("update service_jobs set customer = 'Test Cafe - North' where id = $1", [id]);
+  await updateJobFor(sql, { id, issue: "Still fixing it" }, "u-owner");
+  assert.equal((await pg.query("select issue from service_jobs where id = $1", [id])).rows[0].issue, "Still fixing it");
 });
 
 test("search finds a Retired account by name and labels it", async () => {
