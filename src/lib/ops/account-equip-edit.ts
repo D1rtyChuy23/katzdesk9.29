@@ -165,8 +165,7 @@ export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInp
   const params = [id, partNumber, ownership, installDate, input.seen, conditionSent, condition, serialSent, serialSent ? newSerial : null, key];
   let rows: { id: number }[];
   if (newModel) {
-    const newName = unit.equipmentName === unit.catalogModel ? newModel : unit.equipmentName || newModel;
-    const plan = await planModelChange(sql, unit, newName);
+    const plan = await planModelChange(sql, unit, newModel);
     rows = await sql.query<{ id: number }>(editUnitModelSql(), [
       ...params,
       newModel,
@@ -174,7 +173,7 @@ export async function editEquipmentUnit(sql: Sql, id: number, input: EditUnitInp
       JSON.stringify(plan.installs),
       JSON.stringify(plan.pins),
       opts?.who || "Admin",
-      modelChangeText(unit.serial, unit.catalogModel, newModel),
+      modelChangeText(serialSent ? newSerial ?? null : unit.serial, unit.catalogModel, newModel),
     ]);
   } else rows = await sql.query<{ id: number }>(editUnitSql(), params);
   if (!rows[0]) {

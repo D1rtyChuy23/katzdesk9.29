@@ -56,7 +56,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
   // An Admin's model change: only a model on the equipment list (Edit never adds one).
   const listed = (models.data ?? []).find((m) => m.name.trim().toLowerCase() === editModel.trim().toLowerCase())?.name ?? null;
   const modelChanged = !!unit && admin && editModel.trim() !== "" && editModel.trim().toLowerCase() !== unit.catalogModel.trim().toLowerCase();
-  const modelProblem = modelChanged && models.data && !listed ? MODEL_NOT_IN_CATALOG : null;
+  const modelProblem = !modelChanged ? null : !models.data ? "Loading the equipment list…" : !listed ? MODEL_NOT_IN_CATALOG : null;
   const parts = useQuery({
     queryKey: ["model-part-numbers", unit?.catalogModel, listed],
     queryFn: () => getModelPartNumbers({ data: { models: [unit!.catalogModel, listed!] } }),
@@ -294,7 +294,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           <DialogContent className="p-4" data-testid="account-unit-model-confirm">
             <DialogTitle>Change model?</DialogTitle>
             <DialogDescription className="mt-2 text-sm">
-              Change model from {unit.catalogModel} to {listed} for {unit.serial ? `SN ${unit.serial}` : "this unit (no serial)"}?
+              Change model from {unit.catalogModel} to {listed} for {(admin ? editSerial : unit.serial) ? `SN ${(admin ? editSerial : unit.serial)!.trim().toUpperCase()}` : "this unit (no serial)"}?
             </DialogDescription>
             <p className="mt-2 text-xs text-muted-foreground">
               The unit keeps its serial, history, installs, pre-inspection and PM links. Its row on open installs follows the new model.

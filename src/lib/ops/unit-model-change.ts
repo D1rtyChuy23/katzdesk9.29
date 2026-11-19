@@ -10,8 +10,8 @@
  * - Matched by model name, so they follow in the same statement:
  *   - each install whose visit has the unit: its row on the install's list gets the unit's id, and its model text
  *     when it named the old model (a load or a save then finds the unit by id, never drops it);
- *   - each open PM on the account whose plan picks this unit without a pin: the unit is pinned to that line, so the
- *     PM keeps it under the new model.
+ *   - each PM on the account (open or completed) whose plan picks this unit without a pin: the unit is pinned to that
+ *     line, so the PM keeps it under the new model.
  * - Read fresh each time, nothing stored to update: the pre-inspection checks (unitChecks reads the model as it is),
  *   the install-date fill, the lock label, field assets, module assignment, export and Teams reports.
  * The serial never changes. equipment_name follows only when it was the old model (a custom title is kept).
@@ -46,14 +46,13 @@ export type ModelChangePlan = {
 export async function planModelChange(
   sql: Sql,
   unit: { id: number; customer: string; catalogModel: string },
-  newName: string,
+  newModel: string,
 ): Promise<ModelChangePlan> {
   const { listRowsForModelChange } = await import("./inspection-api");
-  const installs = await listRowsForModelChange(sql, unit.id, unit.catalogModel, newName);
+  const installs = await listRowsForModelChange(sql, unit.id, unit.catalogModel, newModel);
+  // Every PM on the account, completed ones too: their runbook view, bills and analytics plan the units again on each read.
   const pms = await sql.query<{ id: number; equipment: string | null }>(
-    `select id, equipment from pm_jobs
-      where lower(btrim(customer)) = lower(btrim($1)) and moved_job_id is null
-        and done = false and completed_at is null and status not in ('Completed', 'Cancelled')`,
+    "select id, equipment from pm_jobs where lower(btrim(customer)) = lower(btrim($1)) order by id",
     [unit.customer],
   );
   const pins: ModelChangePlan["pins"] = [];
@@ -97,6 +96,7 @@ export function editUnitModelSql(): string {
     update installs i
        set equipment = x.equipment, machines = x.machines, serial = x.serial, power_voltage = x.power_voltage, updated_at = now()
       from x where i.id = x.id and exists (select 1 from u)
+       and i.machines is not distinct from x.before and i.equipment is not distinct from x.before_equipment
     returning i.id
   ), pins as (
     insert into pm_runbook_unit_links (pm_job_id, piece_key, account_equipment_id)
@@ -105,9 +105,10 @@ export function editUnitModelSql(): string {
     on conflict do nothing
     returning pm_job_id
   ), act as (
+    -- On the account; on the unit itself when the account has no directory row.
     insert into activity (entity_type, entity_id, actor_name, action, detail)
-    select 'customer', d.id, $15::text, 'updated', $16::text
-      from u join lateral (
+    select case when d.id is null then 'equipment' else 'customer' end, coalesce(d.id, u.id), $15::text, 'updated', $16::text
+      from u left join lateral (
         select id from directory_customers d where lower(btrim(d.name)) = lower(btrim(u.customer)) order by archived, id limit 1
       ) d on true
     returning id

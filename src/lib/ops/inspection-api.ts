@@ -771,19 +771,20 @@ export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number, i
 /**
  * A unit's model is changing (an Admin's Edit, 11/19): each install whose visit has the unit, with its list as read and
  * the list as it will be. The row the unit is on (claimed the way a load claims it, with the old model) is given the
- * unit's id, and its model text follows when it named the old model, so a load or save after the change still finds
- * the unit there and never drops it. Installs where the unit isn't on the list, or its row already reads the new way,
- * are left out. Nothing is written here: the Edit writes it with the unit, in one statement.
+ * unit's id, and its model text becomes the new catalog model when it named the old one, so a load or save after the
+ * change still finds the unit there and never drops it. Archived installs too (one can be brought back). Installs where
+ * the unit isn't on the list, or its row already reads the new way, are left out. Nothing is written here: the Edit
+ * writes it with the unit, in one statement.
  */
 export async function listRowsForModelChange(
   sql: Sql,
   equipmentId: number,
   oldModel: string,
-  newName: string,
+  newModel: string,
 ): Promise<{ id: number; before: string | null; before_equipment: string | null; equipment: string | null; machines: string | null; serial: string | null; power_voltage: string | null }[]> {
   const installs = await sql.query<ListRow & { id: number }>(
     `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
-      where i.archived = false and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)
+      where exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)
       order by i.id`,
     [equipmentId],
   );
@@ -798,11 +799,12 @@ export async function listRowsForModelChange(
     const piece = pieces[at]!;
     const follows = sameCatalogModel(piece.equipment, oldModel);
     if (!follows && piece.unitId === equipmentId) continue;
-    pieces[at] = { ...piece, equipment: follows ? newName : piece.equipment, unitId: equipmentId };
+    pieces[at] = { ...piece, equipment: follows ? newModel : piece.equipment, unitId: equipmentId };
     const packed = serializeMachines(pieces);
     out.push({
       id: row.id,
-      before: text(row.machines) || null,
+      // As stored (null or even ''), so the write can tell the list is still as read.
+      before: row.machines == null ? null : String(row.machines),
       before_equipment: row.equipment ?? null,
       equipment: packed.equipment,
       machines: packed.machines,

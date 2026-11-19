@@ -103,6 +103,55 @@ test("a PM's runbook line keeps the unit: an existing pin stays, and an unpinned
   }
 });
 
+test("a completed PM that picked the unit by model is pinned too", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const unit = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name) values ($1, 'Linea PB', 'Linea PB') returning id", [SITE])).rows[0].id;
+    const pm = (await pg.query("insert into pm_jobs (customer, equipment, status, done, completed_at) values ($1, 'Linea PB', 'Completed', true, '2026-10-01') returning id", [SITE])).rows[0].id;
+    const u = await unitOf(sql, unit);
+    await A.editEquipmentUnit(sql, unit, editOf(u, { model: "Linea Classic" }), { admin: true, who: "boss.zz" });
+    assert.equal((await loadPmRunbookPlan(sql, SITE, "Linea PB", pm)).planned[0].accountId, unit);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a custom-titled unit's install row takes the new catalog model, not the title; archived installs and an empty list follow too", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const { id: installId, unit } = await installWithBrewer(pg, sql);
+    await pg.query("update account_equipment set equipment_name = 'ZZ Combo Brewer 2' where id = $1", [unit]);
+    // A second, archived install with the unit on its visit and only typed text, and machines stored as ''.
+    const old = (await pg.query("insert into installs (customer, equipment, machines, wo, equip_status, archived) values ($1, $2, '', 'WO-9002', 'Not Ready', true) returning id", [SITE, OLD])).rows[0].id;
+    await pg.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [old, unit]);
+    const u = await unitOf(sql, unit);
+    await A.editEquipmentUnit(sql, unit, editOf(u, { model: NEW }), { admin: true, who: "boss.zz" });
+    for (const id of [installId, old]) {
+      const row = (await pg.query("select equipment, machines from installs where id = $1", [id])).rows[0];
+      assert.deepEqual(machines.parseMachinesJson(row.machines).map((m) => [m.equipment, m.unitId]), [[NEW, unit]], `install ${id}`);
+    }
+    // Unarchived and loaded, the archived one still has just the one unit.
+    await pg.query("update installs set archived = false where id = $1", [old]);
+    await I.readInspection(sql, old);
+    assert.equal((await pg.query("select count(*)::int as n from account_equipment where customer = $1", [SITE])).rows[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("the change is logged even when the account has no directory row", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = (await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('ZZ Nowhere', $1, $1, 'ZZN1', 'zzn1') returning id", [OLD])).rows[0].id;
+    const u = (await IMP.readAccountUnits(sql, "ZZ Nowhere"))[0];
+    await A.editEquipmentUnit(sql, id, editOf(u, { model: NEW }), { admin: true, who: "boss.zz" });
+    const log = (await pg.query("select entity_type, entity_id, detail from activity")).rows;
+    assert.deepEqual(log, [{ entity_type: "equipment", entity_id: id, detail: `Changed model of SN ZZN1 from ${OLD} to ${NEW}` }]);
+  } finally {
+    await pg.close();
+  }
+});
+
 test("refused: not an Admin (server), a locked unit, a stale read, a model not on the list", async () => {
   const { pg, sql } = await fresh();
   try {
