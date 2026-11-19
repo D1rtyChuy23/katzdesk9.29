@@ -403,6 +403,11 @@ function MergeDialog({ keep, drop, busy, onCancel, onMerge }: { keep: UnitRow; d
           {side(keep, "Stays", true)}
           {side(drop, "Goes to Retired", false)}
         </div>
+        {(keep.serial ?? "").replace(/[\s#]/g, "").length <= 2 && (drop.serial ?? "").replace(/[\s#]/g, "").length > (keep.serial ?? "").replace(/[\s#]/g, "").length ? (
+          <p className="mt-2 text-xs font-medium" data-testid="merge-takes-serial">
+            The unit that stays takes SN {drop.serial}, the full serial.
+          </p>
+        ) : null}
         <p className="mt-2 text-xs text-muted-foreground">
           Its installs, pre-inspection checks and PM links move to the unit that stays. Tickets count the ones on this account that name the serial.
         </p>
