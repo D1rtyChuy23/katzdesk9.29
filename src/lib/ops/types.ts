@@ -514,8 +514,10 @@ export type CustomerRecord = DirectoryEntry & {
   removalFlag?: boolean;
   /** Account Number (text; leading zeros and dashes kept). Unique when filled in. */
   accountNumber?: string | null;
-  /** Marked Inactive by the NetSuite customer import: hidden from the default list, never deleted. */
+  /** Marked Inactive by the NetSuite customer import, or Retired: hidden from the default list, never deleted. */
   inactive?: boolean;
+  /** Restored as Retired by the Work Order History import (inactive too): it holds history and takes no new work. */
+  retired?: boolean;
 };
 
 
@@ -536,6 +538,8 @@ export type CustomerHistory = {
     phone: string | null;
     email: string | null;
     inactive: boolean;
+    /** Retired by the Work Order History import (inactive too). */
+    retired?: boolean;
     netsuiteId: string | null;
     billingAddress: string | null;
   } | null;

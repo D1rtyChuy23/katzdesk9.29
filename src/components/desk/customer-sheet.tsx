@@ -10,6 +10,7 @@ import { CustomerAddress } from "@/components/desk/customer-address";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { setAccountNumber } from "@/lib/ops/account-numbers-api";
+import { makeAccountActive } from "@/lib/ops/retired-accounts-api";
 import { copyRecipe, getCustomerHistory, listDirectory, listRecipes, previewCustomerRename, renameCustomer, updateCustomerAccount } from "@/lib/ops/api";
 import { renameConfirm, renameToast } from "@/lib/ops/customer-rename";
 
@@ -287,6 +288,7 @@ export function CustomerHistorySheet({
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
                   <AccountPinField id={data.id} pin={data.pin ?? null} canEdit={!!data.canEditPin} />
+                  <InactiveBlock id={data.id} netsuite={data.netsuite ?? null} admin={canRename} />
                   <NetsuiteDetails netsuite={data.netsuite ?? null} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
                   <AssignedSalesReps reps={data.salesReps ?? []} />
@@ -806,20 +808,12 @@ function NetsuiteDetails({ netsuite }: { netsuite: CustomerHistory["netsuite"] }
   if (netsuite.email) rows.push({ label: "Email", value: <a href={`mailto:${netsuite.email}`} className={cn(link, "break-all")}>{netsuite.email}</a>, testId: "ns-email" });
   if (netsuite.netsuiteId) rows.push({ label: "NetSuite ID", value: <span className="tabular">{netsuite.netsuiteId}</span>, testId: "ns-id" });
   if (netsuite.billingAddress) rows.push({ label: "Billing address", value: netsuite.billingAddress, testId: "ns-billing" });
-  if (!rows.length && !netsuite.inactive) return null;
+  if (!rows.length) return null;
   return (
     <section className="mt-3 rounded-xl border border-border px-3 py-2.5" data-testid="netsuite-details">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">From NetSuite</h3>
-        {netsuite.inactive ? (
-          <Badge size="tight" variant="warn" data-testid="netsuite-inactive">
-            Inactive
-          </Badge>
-        ) : null}
       </div>
-      {netsuite.inactive ? (
-        <p className="mt-1 text-xs text-muted-foreground">Inactive in NetSuite, so it's hidden from the customer list and pickers. Nothing is deleted.</p>
-      ) : null}
       {rows.length ? (
         <dl className="mt-1 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_minmax(0,1fr)]">
           {rows.map((r) => (
@@ -832,6 +826,54 @@ function NetsuiteDetails({ netsuite }: { netsuite: CustomerHistory["netsuite"] }
           ))}
         </dl>
       ) : null}
+    </section>
+  );
+}
+
+/**
+ * Inactive (NetSuite) or Retired (restored by the Work Order History import to hold its history): hidden from the
+ * customer list and pickers, and it takes no new tickets, installs or PMs. An Admin can make it active again.
+ */
+function InactiveBlock({ id, netsuite, admin }: { id: number; netsuite: CustomerHistory["netsuite"]; admin: boolean }) {
+  const qc = useQueryClient();
+  const activate = useMutation({
+    mutationFn: () => makeAccountActive({ data: { id } }),
+    onSuccess: (r) => {
+      toast.success(`${r.name} is active again`);
+      for (const key of ["customer-history", "customers", "directory", "customer-records"]) void qc.invalidateQueries({ queryKey: [key] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not make it active"),
+  });
+  if (!netsuite?.inactive) return null;
+  const retired = !!netsuite.retired;
+  return (
+    <section className="mt-3 rounded-xl border border-warning/50 bg-warning/5 px-3 py-2.5" data-testid="account-inactive">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge size="tight" variant="warn" data-testid={retired ? "account-retired" : "netsuite-inactive"}>
+          {retired ? "Retired" : "Inactive"}
+        </Badge>
+        {admin ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="ml-auto h-8"
+            disabled={activate.isPending}
+            onClick={() => {
+              if (window.confirm("Make this account active again? It shows in pickers and lists, and takes new tickets, installs and PMs.")) activate.mutate();
+            }}
+            data-testid="make-active"
+          >
+            {activate.isPending ? "Saving…" : "Make Active"}
+          </Button>
+        ) : null}
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {retired
+          ? "Retired: it was removed, and came back to hold its work order history. "
+          : "Inactive in NetSuite. "}
+        It's hidden from the customer list and pickers and takes no new tickets, installs or PMs. Its history stays; nothing is deleted.
+      </p>
     </section>
   );
 }

@@ -20,9 +20,11 @@ import {
 import {
   WO_STATUS_LABEL,
   countWoPlan,
+  fillText,
   isSaveable,
   readWoHistory,
   remappedByTech,
+  retireByAccount,
   saveBatches,
   startsTicked,
   unmatchedNames,
@@ -39,16 +41,18 @@ import { ActionButton, FilterChip } from "./desk-charts";
 import { ShowMoreButton, useShowMore } from "./show-more";
 import { cn } from "@/lib/utils";
 
-const STATUSES: WoStatus[] = ["create", "attach", "removed", "unmatched", "ambiguous", "same"];
+const STATUSES: WoStatus[] = ["create", "attach", "retire", "fill", "addLines", "removed", "unmatched", "ambiguous", "same"];
 const VARIANT: Record<WoStatus, "success" | "primary" | "outline" | "danger" | "warn"> = {
   create: "success",
   attach: "primary",
+  retire: "warn",
+  fill: "primary",
+  addLines: "primary",
   removed: "warn",
   unmatched: "danger",
   ambiguous: "danger",
   same: "outline",
 };
-const PLAN_BATCH = 1500;
 const n = (v: number) => v.toLocaleString("en-US");
 const plural = (v: number, one: string, many = `${one}s`) => `${n(v)} ${v === 1 ? one : many}`;
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago" });
@@ -64,6 +68,10 @@ const emptyReport = (runId: number): Report => ({
   discountLines: 0,
   partLines: 0,
   partMatched: 0,
+  historyFilled: 0,
+  linesAdded: 0,
+  discountLinesAdded: 0,
+  retired: 0,
   notSaved: [],
   alreadySaved: 0,
   batches: 0,
@@ -132,18 +140,21 @@ export function WoHistoryImportButton() {
 
   const preview = useMutation({
     mutationFn: async () => {
-      const orders = read!.orders.map(({ ref, wo, completed, customer, serviceLocation, locationSource, tech }) => ({ ref, wo, completed, customer, serviceLocation, locationSource, tech }));
+      // Whole rows with their lines, in the save's batches: saved rows are checked for blanks and missing lines.
+      const batches = saveBatches(read!.orders, read!.lines);
       const out: WoPlanLine[] = [];
-      for (let i = 0; i < orders.length; i += PLAN_BATCH) {
-        setProgress(`Checking rows ${n(i + 1)}–${n(Math.min(i + PLAN_BATCH, orders.length))} of ${n(orders.length)}…`);
-        out.push(...(await previewWoHistoryBatch({ data: { orders: orders.slice(i, i + PLAN_BATCH) } })));
+      let done = 0;
+      for (const b of batches) {
+        setProgress(`Checking rows ${n(done + 1)}–${n(done + b.orders.length)} of ${n(read!.orders.length)}…`);
+        out.push(...(await previewWoHistoryBatch({ data: { orders: b.orders, lines: b.lines } })));
+        done += b.orders.length;
       }
       return out;
     },
     onSuccess: (p) => {
       setPlan(p);
       setTicks(new Set(p.filter((l) => startsTicked(l.status)).map((l) => l.ref)));
-      setGroup(STATUSES.find((s) => p.some((l) => l.status === s)) ?? "create");
+      setGroup(STATUSES.find((s) => p.some((l) => (l.tags ?? [l.status]).includes(s))) ?? "create");
       setStep("preview");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not build the preview"),
@@ -186,6 +197,10 @@ export function WoHistoryImportButton() {
           rep.discountLines += r.discountLines;
           rep.partLines += r.partLines;
           rep.partMatched += r.partMatched;
+          rep.historyFilled += r.historyFilled;
+          rep.linesAdded += r.linesAdded;
+          rep.discountLinesAdded += r.discountLinesAdded;
+          rep.retired += r.retired;
           rep.alreadySaved += r.alreadySaved;
           rep.notSaved.push(...r.notSaved);
           rep.batches++;
@@ -203,7 +218,10 @@ export function WoHistoryImportButton() {
       setReport(rep);
       setStep("done");
       if (rep.stopped) toast.error("The import stopped. See the report.");
-      else toast.success(`Saved ${plural(rep.created, "work order")} · attached ${n(rep.attached)} to existing tickets`);
+      else
+        toast.success(
+          `Saved ${plural(rep.created, "work order")} · attached ${n(rep.attached)} · filled ${n(rep.historyFilled)} · ${plural(rep.linesAdded + rep.discountLinesAdded, "line")} added · ${plural(rep.retired, "account")} retired`,
+        );
     },
     onError: (e) => {
       setStep("preview");
@@ -211,7 +229,7 @@ export function WoHistoryImportButton() {
     },
     onSettled: () => {
       setProgress(null);
-      for (const key of ["wo-history-runs", "wo-history-location-needed", "wo-history-account", "wo-history-job", "jobs", "job", "customer-history", "activity"]) {
+      for (const key of ["wo-history-runs", "wo-history-location-needed", "wo-history-account", "wo-history-job", "jobs", "job", "customer-history", "customers", "directory", "activity"]) {
         void qc.invalidateQueries({ queryKey: [key] });
       }
     },
@@ -220,15 +238,21 @@ export function WoHistoryImportButton() {
   const undo = useMutation({
     mutationFn: (runId: number) => undoWoHistoryRun({ data: { runId } }),
     onSuccess: (r) => {
-      toast.success(`Undone: ${plural(r.removed, "work order")} removed, ${plural(r.restored, "ticket")} cleared`);
-      for (const key of ["wo-history-runs", "wo-history-location-needed", "wo-history-account", "wo-history-job", "jobs", "job", "customer-history"]) void qc.invalidateQueries({ queryKey: [key] });
+      toast.success(
+        `Undone: ${plural(r.removed, "work order")} removed, ${plural(r.linesRemoved, "added line")} removed, ${plural(r.rowsCleared, "filled work order")} and ${plural(r.restored, "ticket")} put back${
+          r.accountsBack.length ? `, ${plural(r.accountsBack.length, "account")} removed again` : ""
+        }`,
+      );
+      if (r.accountsKept.length) toast.warning(`Not removed again, because they changed or had work added since: ${r.accountsKept.join(", ")}`);
+      for (const key of ["wo-history-runs", "wo-history-location-needed", "wo-history-account", "wo-history-job", "jobs", "job", "customer-history", "customers", "directory"]) void qc.invalidateQueries({ queryKey: [key] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not undo"),
   });
 
   const busy = readFiles.isPending || preview.isPending || applyRenames.isPending || save.isPending;
   const counts = useMemo(() => (plan ? countWoPlan(plan) : null), [plan]);
-  const groupLines = useMemo(() => (plan ?? []).filter((l) => l.status === group), [plan, group]);
+  const groupLines = useMemo(() => (plan ?? []).filter((l) => (l.tags ?? [l.status]).includes(group)), [plan, group]);
+  const retiring = useMemo(() => retireByAccount(plan ?? []), [plan]);
   const paged = useShowMore(groupLines, `${group}|${plan?.length}`, 100);
   const tickedLines = useMemo(() => (plan ?? []).filter((l) => isSaveable(l.status) && ticks.has(l.ref)), [plan, ticks]);
   const remapped = useMemo(() => remappedByTech(plan ?? []), [plan]);
@@ -242,11 +266,17 @@ export function WoHistoryImportButton() {
     });
 
   function onSave() {
-    const attach = tickedLines.filter((l) => l.status === "attach").length;
-    const removed = tickedLines.filter((l) => l.status === "removed").length;
-    const msg = `Save ${plural(tickedLines.length - attach, "work order")} as history${attach ? ` and attach ${n(attach)} to existing tickets` : ""}${
-      removed ? ` (${n(removed)} on removed accounts)` : ""
-    }? It saves in batches; keep this page open until it's done.`;
+    const count = (s: WoStatus) => tickedLines.filter((l) => (l.tags ?? [l.status]).includes(s)).length;
+    const made = count("create") + count("retire") + count("removed");
+    const parts = [
+      made ? `save ${plural(made, "work order")} as history` : "",
+      count("attach") ? `attach ${n(count("attach"))} to existing tickets` : "",
+      count("fill") ? `fill blanks on ${plural(count("fill"), "saved work order")}` : "",
+      count("addLines") ? `add missing lines to ${plural(count("addLines"), "saved work order")}` : "",
+      retiring.length ? `restore ${plural(retiring.filter((r) => tickedLines.some((l) => l.status === "retire" && l.account === r.account)).length, "removed account")} as Retired` : "",
+    ].filter(Boolean);
+    const removed = count("removed");
+    const msg = `${parts.join(", ").replace(/^./, (c) => c.toUpperCase())}${removed ? ` (${n(removed)} on removed accounts, not restored)` : ""}? Nothing already saved is overwritten. It saves in batches; keep this page open until it's done.`;
     if (window.confirm(msg)) save.mutate();
   }
 
@@ -269,7 +299,13 @@ export function WoHistoryImportButton() {
             <p className="text-sm text-muted-foreground">
               Completed work orders from the old ticket system with their QuickBooks invoice lines: the Work Orders CSV and the Items CSV. Each row goes on the
               account named by its Service Location, exactly (never a close name). Steps: account renames, then the preview, then Save. Nothing saves until you
-              say so, and history is read-only: it never changes Charges, invoices or billing.
+              say so, and history is read-only: it never changes Charges, invoices or billing. These came from the legacy QuickBooks system, where the
+              QuickBooks invoice # is the Corrigo WO #, so each work order's invoice is “Invoice WO-####”.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Reading the same files again is safe. A work order already saved (same History Ref) only gets its blank fields filled and the lines it's
+              missing added; nothing that has a value is overwritten. A row on a removed account restores that account as Retired: hidden from pickers and
+              lists, and it takes no new tickets, installs or PMs.
             </p>
 
             {step === "files" ? (
@@ -397,6 +433,15 @@ export function WoHistoryImportButton() {
                     </li>
                   ) : null}
                 </ul>
+                {group === "retire" && retiring.length ? (
+                  <ul className="rounded-lg border border-warning/40 bg-warning/5 px-3 py-2 text-xs" data-testid="wo-history-retire-accounts">
+                    {retiring.map((r) => (
+                      <li key={r.account}>
+                        {r.account}: {plural(r.count, "WO")}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 {isSaveable(group) && groupLines.length ? (
                   <div className="flex flex-wrap items-center gap-x-3 text-xs">
                     <span className="text-muted-foreground">
@@ -433,14 +478,26 @@ export function WoHistoryImportButton() {
                             </Badge>
                           ) : null}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          <Badge size="tight" variant={VARIANT[l.status]} className="mr-1 align-middle">
-                            {WO_STATUS_LABEL[l.status]}
-                          </Badge>
+                        <p className="line-clamp-2 text-xs break-words text-muted-foreground" title={l.reason ?? undefined}>
+                          {(l.tags ?? [l.status]).map((t) => (
+                            <Badge key={t} size="tight" variant={VARIANT[t]} className="mr-1 align-middle">
+                              {WO_STATUS_LABEL[t]}
+                            </Badge>
+                          ))}
                           {l.technician}
                           {l.originalTech ? ` (done by ${l.originalTech})` : ""}
                           {l.reason ? ` · ${l.reason}` : ""}
                         </p>
+                        {l.fills?.length && l.status !== "attach" ? (
+                          <details className="text-xs text-muted-foreground">
+                            <summary className="cursor-pointer text-primary">Show the {plural(l.fills.length, "field")}</summary>
+                            <ul className="mt-1 list-disc space-y-0.5 pl-4 break-words whitespace-pre-wrap">
+                              {l.fills.map((f) => (
+                                <li key={`${f.target}-${f.field}`}>{fillText(f)}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        ) : null}
                       </div>
                     </li>
                   ))}
@@ -463,7 +520,12 @@ export function WoHistoryImportButton() {
 
             <LocationNeeded rows={need.data ?? []} />
             <Runs runs={runs.data ?? []} busy={undo.isPending || save.isPending} onUndo={(r) => {
-              if (window.confirm(`Undo the ${when(r.createdAt)} import? ${plural(r.current, "history work order")} and their invoice lines are deleted, and ticket fields it filled are cleared. Account renames stay.`)) undo.mutate(r.id);
+              if (
+                window.confirm(
+                  `Undo the ${when(r.createdAt)} import? ${plural(r.current, "history work order")} and their invoice lines are deleted, lines it added are deleted, fields it filled are put back while they still hold what it wrote, and accounts it restored as Retired are removed again if nothing was added to them since. Account renames stay.`,
+                )
+              )
+                undo.mutate(r.id);
             }} />
           </div>
         </DialogContent>
@@ -506,12 +568,16 @@ function ReportCard({ report: r, onAgain, busy }: { report: Report; onAgain: () 
       {r.stopped ? <p className="text-destructive" data-testid="wo-history-stopped">{r.stopped}</p> : null}
       <ul className="space-y-0.5">
         <li>Created: {n(r.created)} history work orders</li>
-        <li>Attached to existing tickets: {n(r.attached)} ({n(r.filled)} had a blank Work Done or Completed date filled)</li>
+        <li>Attached to existing tickets: {n(r.attached)} · tickets with blank fields filled (Work Done, Completed, tech, issue): {n(r.filled)}</li>
         <li>
           Item lines saved: {n(r.lines)}, plus {plural(r.discountLines, "discount line")} (stored, and added up into each invoice's one discount;{" "}
           {plural(r.lines + r.discountLines, "QuickBooks line")} in all). Of {n(r.partLines)} part, filter, equipment and fee lines, {n(r.partMatched)} match the Item Catalog and{" "}
           {n(r.partLines - r.partMatched)} are kept as text.
         </li>
+        <li>
+          Saved work orders with blank fields filled: {n(r.historyFilled)} · missing lines added: {n(r.linesAdded)} item and {plural(r.discountLinesAdded, "discount line")}
+        </li>
+        {r.retired ? <li>Removed accounts restored as Retired: {n(r.retired)}</li> : null}
         <li>Batches saved: {n(r.batches)}</li>
         {r.alreadySaved ? <li>Already saved before (skipped): {n(r.alreadySaved)}</li> : null}
         {r.notSaved.length ? (
@@ -595,6 +661,9 @@ function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onU
               {r.itemLines != null && r.discountLines != null
                 ? `${plural(r.itemLines, "item line")} + ${plural(r.discountLines, "discount line")}`
                 : `${plural(r.lines, "QuickBooks line")} (discount lines included)`}
+              {r.rowsFilled ? ` · filled ${plural(r.rowsFilled, "saved work order")}` : ""}
+              {r.linesAdded ? ` · added ${plural(r.linesAdded, "line")}` : ""}
+              {r.retired.length ? ` · retired ${r.retired.join(", ")}` : ""}
               {r.undoneAt ? ` · undone by ${r.undoneBy ?? "Admin"} ${when(r.undoneAt)}` : r.finishedAt ? "" : " · didn't finish"}
             </span>
             {!r.undoneAt ? (

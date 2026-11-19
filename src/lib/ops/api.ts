@@ -97,6 +97,7 @@ import { fillInstallDatesFor } from "./install-date-fill";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
+import { assertTakesNewWork, inactiveLabel } from "./retired-accounts";
 import { deliverPings } from "./notify";
 
 const INITIALS_TO_PRODUCER = Object.fromEntries(Object.entries(PRODUCER_INITIALS).map(([name, initials]) => [initials.toLowerCase(), name]));
@@ -1068,6 +1069,8 @@ async function ticketAccount(sql: Sql, raw: string): Promise<string> {
 export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: number; customer: string }> {
 	if (data.kind === "tlc") assertWalkInSite("tlc", data.customer);
 	const customer = await ticketAccount(sql, data.customer);
+	// An inactive or Retired account takes no new tickets (11/19).
+	await assertTakesNewWork(sql, customer, "ticket");
 	const received = data.received || todayChicago();
 	for (let attempt = 0; ; attempt += 1) {
 		const callId = await nextCallId(sql, received);
@@ -1284,6 +1287,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createPmInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("pm", data.customer);
+	await assertTakesNewWork(sql, data.customer, "pm");
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
       values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? DEFAULT_PM_STYLE}, ${todayChicago()}, ${"Pending Scheduling"})
@@ -1434,6 +1438,7 @@ export const confirmDealMachines = createServerFn({ method: "POST" }).middleware
 		installId = target.id;
 		await syncInstallUnits(sql, installId, { prune: true });
 	} else {
+		await assertTakesNewWork(sql, deal.customer, "install");
 		const packed = serializeMachines(incoming);
 		const made = await sql`
       insert into installs (received, customer, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
@@ -1687,6 +1692,8 @@ async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: strin
 		const now = await hasOne();
 		if (now) return { kind: "had", installId: Number(now.id) };
 	}
+	// A new install isn't made on an inactive or Retired account: the deal goes back to the Handoff page, saying why.
+	await assertTakesNewWork(sql, deal.customer, "install");
 	// Made from the deal's rows as they are: one statement locks the deal, checks the claim is this one's and the machines
 	// are as read (else it reads them again), makes the install while the deal has none, and ties the deal's rows to it.
 	let cur = deal;
@@ -2048,6 +2055,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("install", data.customer);
+	await assertTakesNewWork(sql, data.customer, "install");
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 	const parsed = parseMachinesJson(machinesJsonRaw);
@@ -2320,16 +2328,17 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		status: r.customer ? "Account" : "House"
 	});
 	const accounts = await sql`
-      select id, name from directory_customers
+      select id, name, inactive, retired_at from directory_customers
       where archived = false and name ilike ${like}
-      order by lower(name)
+      order by inactive, lower(name)
       limit 8`;
+	// Found by name either way; an inactive one says so ("Retired" from the history import, else "Inactive").
 	for (const a of accounts) hits.push({
 		entityType: "customer",
 		id: a.id,
 		title: a.name,
 		subtitle: "Account history",
-		status: null
+		status: inactiveLabel({ inactive: a.inactive === true, retiredAt: a.retired_at })
 	});
 	const seen = new Set<string>();
 	return hits.filter((h) => {
@@ -2825,7 +2834,7 @@ export const listRecipes = createServerFn({ method: "GET" }).middleware([deskMid
 export const listCustomers = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<string[]> => {
 	return (await (await ready())`
       select name as customer from directory_customers
-      where archived = false and coalesce(name, '') <> ''
+      where archived = false and inactive = false and coalesce(name, '') <> ''
       order by lower(name)`).map((r) => r.customer);
 });
 export const listCustomerRecords = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<CustomerRecord[]> => {
@@ -2841,6 +2850,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
          d.removal_flag,
          d.account_number,
          d.inactive,
+         d.retired_at,
          coalesce(svc.n, 0)::int as calls,
          coalesce(svc.p, 0)::int as pending_calls,
          coalesce(tlc.n, 0)::int as tlcs,
@@ -2924,7 +2934,8 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		nameLocked: r.name_locked === true,
 		removalFlag: r.removal_flag === true,
 		accountNumber: r.account_number ?? null,
-		inactive: r.inactive === true
+		inactive: r.inactive === true,
+		retired: r.inactive === true && r.retired_at != null
 	}));
 });
 export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
@@ -2994,6 +3005,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 				phone: text(account.phone),
 				email: text(account.email),
 				inactive: account.inactive === true,
+				retired: account.inactive === true && account.retired_at != null,
 				netsuiteId: admin ? text(account.netsuite_id) : null,
 				billingAddress: admin
 					? formatAddress({

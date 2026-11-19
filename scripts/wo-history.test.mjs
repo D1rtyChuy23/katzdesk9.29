@@ -22,6 +22,13 @@ const {
   srvOf,
   historyTech,
   historyDay,
+  missingLines,
+  lineKey,
+  fillText,
+  retireByAccount,
+  isSaveable,
+  startsTicked,
+  WO_STATUS_LABEL,
 } = await import("../src/lib/ops/wo-history.ts");
 const api = await import("../src/lib/ops/wo-history-api.ts");
 const { ensureRoster } = await import("../src/lib/ops/roster.ts");
@@ -176,7 +183,7 @@ const ctxBase = () => ({
 });
 const pin = (o) => ({ wo: o.ref.slice(0, 7), completed: "2026-07-24 08:04", customer: o.loc ?? "", serviceLocation: o.loc ?? "", locationSource: "Ticket customer", tech: "Ryan Gloria", ...o });
 
-test("planning: create, attach in the window, ambiguous, removed, unmatched, location needed, no change", () => {
+test("planning: create, attach in the window, ambiguous, retire-restore, unmatched, location needed, no change", () => {
   const plan = planWoHistory(
     [
       pin({ ref: "WO-0211 (2026-07-24)", wo: "WO-0211", loc: "Alpha Cafe" }),
@@ -191,7 +198,7 @@ test("planning: create, attach in the window, ambiguous, removed, unmatched, loc
     ctxBase(),
   );
   const s = plan.map((p) => p.status);
-  assert.deepEqual(s, ["attach", "create", "ambiguous", "removed", "unmatched", "create", "same", "create"]);
+  assert.deepEqual(s, ["attach", "create", "ambiguous", "retire", "unmatched", "create", "same", "create"]);
   assert.deepEqual([plan[0].jobId, plan[0].seen, plan[0].account], [50, "t50", "Alpha Cafe"]);
   assert.equal(plan[1].jobId, null, "an older work order with the reused WO # is not the July ticket");
   assert.equal(plan[7].jobId, null, "completed before the ticket was received: not the same work");
@@ -199,7 +206,7 @@ test("planning: create, attach in the window, ambiguous, removed, unmatched, loc
   assert.equal(plan[3].account, "Closed Diner");
   assert.deepEqual([plan[5].locationNeeded, plan[5].account, plan[5].technician, plan[5].originalTech], [true, "Walk - In", "Jesus Garcia", "Elias Banda"]);
   const c = countWoPlan(plan);
-  assert.deepEqual(c, { create: 3, attach: 1, removed: 1, unmatched: 1, ambiguous: 1, same: 1, locationNeeded: 1, remapped: 1 });
+  assert.deepEqual(c, { create: 3, attach: 1, retire: 1, fill: 0, addLines: 0, removed: 0, unmatched: 1, ambiguous: 1, same: 1, locationNeeded: 1, remapped: 1 });
   assert.deepEqual(remappedByTech(plan), [{ tech: "Elias Banda", count: 1 }]);
   assert.deepEqual(unmatchedNames(plan), [{ name: "Nowhere Bistro", count: 1 }]);
 });
@@ -218,6 +225,244 @@ test("planning: 90 days is the edge, and a ticket is only claimed once", () => {
   assert.deepEqual(two.map((p) => p.status), ["attach", "ambiguous"]);
   ctx.linkedJobs = new Set([60]);
   assert.equal(at("2026-01-05 10:00").status, "ambiguous", "a ticket that already has a history row isn't attached again");
+});
+
+// ── Filling blanks on saved work orders, missing lines, retire-restore (Jesus, 11/19) ─────────────────────────────────
+
+/** A file row with every field set, the way the Work Orders CSV gives it. */
+const fullOrder = (o) => ({
+  ref: o.ref,
+  wo: o.wo ?? o.ref.slice(0, 7),
+  completed: o.completed ?? "2026-07-24 08:04",
+  customer: o.loc ?? "Test Cafe",
+  serviceLocation: o.loc ?? "Test Cafe",
+  locationSource: "Ticket customer",
+  tech: o.tech ?? "Ryan Gloria",
+  techStatus: "Active",
+  callCategory: o.callCategory ?? "Repairs",
+  serviceType: "OTHER",
+  problem: o.problem ?? "Brewer leaking",
+  workDone: o.workDone ?? "Replaced the valve.",
+  partsUsed: "1 x VALVE1",
+  laborHours: o.laborHours === undefined ? 1.5 : o.laborHours,
+  tripCharges: o.tripCharges === undefined ? 1 : o.tripCharges,
+  partsAmount: 40,
+  invoiceTotal: 373.5,
+  po: o.po ?? "",
+  invoiceDate: o.invoiceDate === undefined ? "2026-07-25" : o.invoiceDate,
+  hasItems: "Yes",
+  reviewFlags: "",
+});
+/** A saved history row as KatzDesk has it: every field filled unless the test blanks it. */
+const savedRow = (id, ref, values = {}, lines = [], jobId = null) => ({
+  id,
+  ref,
+  jobId,
+  values: {
+    technician: "Ryan Gloria",
+    original_tech: null,
+    call_category: "Repairs",
+    service_type: "OTHER",
+    problem: "Brewer leaking",
+    work_done: "Replaced the valve.",
+    parts_used: "1 x VALVE1",
+    labor_hours: 1.5,
+    trip_charges: 1,
+    parts_amount: 40,
+    invoice_total: 373.5,
+    po: "ABC",
+    invoice_date: "2026-07-25",
+    has_items: "Yes",
+    review_flags: "Ok",
+    ...values,
+  },
+  lines,
+});
+const wline = (ref, type, code, qty, price, amount, extra = {}) => ({
+  ref,
+  lineType: type,
+  itemCode: code,
+  description: extra.desc ?? `${code} desc`,
+  itemClass: "",
+  itemGroup: "",
+  qty,
+  unitPrice: price,
+  amount,
+  invoiceDate: extra.date ?? "2026-07-25",
+  invoiceCustomer: "Test",
+});
+const fillCtx = (saved, extra = {}) => ({
+  accounts: [{ id: 1, name: "Test Cafe", archived: false }],
+  activeTechs: ["Ryan Gloria", "Jesus Garcia"],
+  savedRefs: new Set(saved.map((s) => s.ref)),
+  saved: new Map(saved.map((s) => [s.ref.toLowerCase(), s])),
+  savedTickets: new Map(),
+  tickets: [],
+  linkedJobs: new Set(),
+  ...extra,
+});
+
+test("fill-blank: a saved row with a blank PO #, Invoice Date and Tech plans Will Fill, (blank) → value", () => {
+  const saved = savedRow(7, "WO-0900", { po: null, invoice_date: null, technician: "  " });
+  const [p] = planWoHistory([fullOrder({ ref: "WO-0900", po: "SRV1347", invoiceDate: "2026-07-25", tech: "Ryan Gloria" })], fillCtx([saved]), []);
+  assert.equal(p.status, "fill");
+  assert.deepEqual(p.tags, ["fill"]);
+  assert.equal(p.historyId, 7);
+  assert.deepEqual(
+    p.fills.map((f) => [f.target, f.field, f.value]),
+    [
+      ["history", "technician", "Ryan Gloria"],
+      ["history", "po", "SRV1347"],
+      ["history", "invoice_date", "2026-07-25"],
+    ],
+  );
+  assert.equal(fillText(p.fills[1]), "PO #: (blank) → SRV1347");
+  assert.match(p.reason, /Tech: \(blank\) → Ryan Gloria/);
+  assert.equal(WO_STATUS_LABEL.fill, "Will Fill");
+  assert.ok(startsTicked("fill") && isSaveable("fill"));
+});
+
+test("no-overwrite: a kept PO stays, and 0 is a value, not a blank", () => {
+  const saved = savedRow(7, "WO-0901", { po: "ABC", labor_hours: 0, trip_charges: null });
+  const [p] = planWoHistory([fullOrder({ ref: "WO-0901", po: "XYZ", laborHours: 2, tripCharges: 0 })], fillCtx([saved]), []);
+  assert.deepEqual(p.fills.map((f) => [f.field, f.value]), [["trip_charges", 0]], "only the blank Trip Charges fills, with the file's 0");
+  const [same] = planWoHistory([fullOrder({ ref: "WO-0901", po: "XYZ", laborHours: 2, tripCharges: null })], fillCtx([saved]), []);
+  assert.equal(same.status, "same");
+  assert.equal(same.reason, "Already saved; nothing blank to fill and no missing lines.");
+  // A blank in the file never fills anything.
+  const blankFile = planWoHistory([fullOrder({ ref: "WO-0901", po: "", tripCharges: null })], fillCtx([savedRow(7, "WO-0901", { po: null, trip_charges: null })]), []);
+  assert.equal(blankFile[0].status, "same");
+});
+
+test("line dedupe: a multiset; an exact re-run adds 0; discount lines dedupe too and the invoice is recomputed", () => {
+  const ref = "WO-0902";
+  const filter = (n) => Array.from({ length: n }, () => wline(ref, "Filter", "7CB5S", 1, 10, 10));
+  // KatzDesk has two identical filter lines; the file has three.
+  assert.equal(missingLines(filter(2), filter(3)).length, 1);
+  assert.equal(missingLines(filter(3), filter(3)).length, 0, "an exact re-run adds nothing");
+  assert.equal(missingLines(filter(4), filter(3)).length, 0, "never more than the file has, and nothing is taken away");
+  // Case and spaces in the code and description, and 2-dp numbers, are the same line; a different date is not.
+  assert.equal(missingLines([wline(ref, "Part", " valve1 ", 2, 20, 40, { desc: "VALVE1 DESC" })], [wline(ref, "Part", "VALVE1", 2.001, 20, 40)]).length, 0);
+  assert.equal(missingLines([wline(ref, "Part", "VALVE1", 2, 20, 40)], [wline(ref, "Part", "VALVE1", 2, 20, 40, { date: "2026-07-26" })]).length, 1);
+  assert.equal(lineKey(wline(ref, "Part", "", null, null, 5, { desc: "" })), "Part|||||5|2026-07-25", "blank is its own value");
+
+  const kd = [wline(ref, "Labor", "SERVICELABOR", 1.5, 150, 225), wline(ref, "Discount", "CLD", null, -20, -20)];
+  const file = [...kd, wline(ref, "Discount", "CLD", null, -20, -20), wline(ref, "Part", "VALVE1", 2, 20, 40)];
+  const [p] = planWoHistory([fullOrder({ ref })], fillCtx([savedRow(9, ref, {}, kd)]), file);
+  assert.equal(p.status, "addLines");
+  assert.deepEqual(p.addLines, { lines: 2, discount: 1, invoice: "Invoice WO-0902", discountTotal: 40, total: 225 });
+  assert.equal(p.reason, "2 lines (1 discount) to Invoice WO-0902");
+  assert.deepEqual(p.newLines.map((l) => l.itemCode), ["CLD", "VALVE1"]);
+  const all = historyInvoice([...kd, ...p.newLines]);
+  assert.deepEqual([all.subtotal, all.discount, all.total], [265, 40, 225]);
+});
+
+test("a row can be both Will Fill and Will Add Lines, counted in each", () => {
+  const ref = "WO-0903";
+  const [p] = planWoHistory([fullOrder({ ref, po: "P1" })], fillCtx([savedRow(3, ref, { po: "" }, [])]), [wline(ref, "Part", "VALVE1", 1, 20, 20)]);
+  assert.deepEqual(p.tags, ["fill", "addLines"]);
+  assert.match(p.reason, /PO #: \(blank\) → P1 · 1 line \(0 discount\) to Invoice WO-0903/);
+  const c = countWoPlan([p]);
+  assert.deepEqual([c.fill, c.addLines, c.same, c.create], [1, 1, 0, 0]);
+});
+
+test("a reused WO # on another date fills and adds lines only on its own row", () => {
+  const a = savedRow(1, "WO-0211", { po: null }, []);
+  const b = savedRow(2, "WO-0211 (2026-07-24)", { po: "KEEP" }, [wline("WO-0211 (2026-07-24)", "Part", "A", 1, 1, 1)]);
+  const plan = planWoHistory(
+    [fullOrder({ ref: "WO-0211", wo: "WO-0211", po: "NEW" }), fullOrder({ ref: "WO-0211 (2026-07-24)", wo: "WO-0211", po: "OTHER" })],
+    fillCtx([a, b]),
+    [wline("WO-0211", "Part", "A", 1, 1, 1), wline("WO-0211", "Part", "B", 1, 2, 2), wline("WO-0211 (2026-07-24)", "Part", "A", 1, 1, 1)],
+  );
+  assert.deepEqual(plan.map((p) => [p.ref, p.historyId, p.tags]), [
+    ["WO-0211", 1, ["fill", "addLines"]],
+    ["WO-0211 (2026-07-24)", 2, ["same"]],
+  ]);
+  assert.deepEqual(plan[0].fills.map((f) => f.value), ["NEW"]);
+  assert.deepEqual(plan[0].newLines.map((l) => l.itemCode), ["A", "B"], "the other row's line A doesn't count for this one");
+});
+
+test("idempotent: plan, apply what it says, plan again → all No Change", () => {
+  const ref = "WO-0904";
+  const saved = savedRow(4, ref, { po: null, technician: null }, [wline(ref, "Labor", "L", 1, 100, 100)], 77);
+  const ticket = { id: 77, updatedAt: "t1", technician: null, issue: "", workDone: null, completedAt: null };
+  const ctx = fillCtx([saved], { savedTickets: new Map([[77, ticket]]) });
+  const file = [wline(ref, "Labor", "L", 1, 100, 100), wline(ref, "Part", "P", 1, 5, 5)];
+  const [first] = planWoHistory([fullOrder({ ref, po: "Q" })], ctx, file);
+  assert.deepEqual(first.tags, ["fill", "addLines"]);
+  // Apply it the way the save does.
+  for (const f of first.fills) {
+    if (f.target === "history") saved.values[f.field] = f.value;
+    else ticket[{ technician: "technician", issue: "issue", work_done: "workDone", completed_at: "completedAt" }[f.field]] = f.value;
+  }
+  saved.lines.push(...first.newLines);
+  const [again] = planWoHistory([fullOrder({ ref, po: "Q" })], ctx, file);
+  assert.deepEqual([again.status, again.tags, again.fills.length, again.newLines.length], ["same", ["same"], 0, 0]);
+  const c = countWoPlan([again]);
+  assert.deepEqual([c.fill, c.addLines, c.retire, c.create, c.same], [0, 0, 0, 0, 1]);
+});
+
+test("retire-restore: removed-only name, an active twin wins, two removed are Ambiguous, unmatched stays unmatched", () => {
+  const ctx = {
+    accounts: [
+      { id: 1, name: "Test Cafe", archived: false },
+      { id: 2, name: "test cafe", archived: true },
+      { id: 3, name: "Test Cafe - North", archived: true },
+      { id: 4, name: "Twin Diner", archived: true },
+      { id: 5, name: "twin diner", archived: true },
+    ],
+    activeTechs: ["Ryan Gloria"],
+    savedRefs: new Set(),
+    tickets: [],
+    linkedJobs: new Set(),
+  };
+  const plan = planWoHistory(
+    [
+      fullOrder({ ref: "WO-1", loc: "Test Cafe - North" }),
+      fullOrder({ ref: "WO-2", loc: "Test Cafe - North" }),
+      fullOrder({ ref: "WO-3", loc: "Test Cafe" }),
+      fullOrder({ ref: "WO-4", loc: "Twin Diner" }),
+      fullOrder({ ref: "WO-5", loc: "Nowhere Bistro" }),
+    ],
+    ctx,
+    [],
+  );
+  assert.deepEqual(plan.map((p) => p.status), ["retire", "retire", "create", "ambiguous", "unmatched"]);
+  assert.deepEqual([plan[0].account, plan[0].accountId], ["Test Cafe - North", 3]);
+  assert.match(plan[0].reason, /removed .*Retired/);
+  assert.equal(plan[2].accountId, 1, "the active account, never the removed twin");
+  assert.match(plan[3].reason, /2 removed accounts are named/);
+  assert.equal(plan[4].account, null, "never created from an unmatched name");
+  assert.deepEqual(retireByAccount(plan), [{ account: "Test Cafe - North", count: 2 }]);
+  assert.ok(startsTicked("retire") && isSaveable("retire"));
+  assert.equal(WO_STATUS_LABEL.retire, "Will Retire-Restore");
+  const c = countWoPlan(plan);
+  assert.deepEqual([c.retire, c.create, c.ambiguous, c.unmatched], [2, 1, 1, 1]);
+});
+
+test("ticket blanks: a blank technician or issue fills, a kept one stays", () => {
+  const ref = "WO-0905";
+  const saved = savedRow(5, ref, {}, [], 88);
+  const ticket = { id: 88, updatedAt: "t88", technician: "Joshua Harper", issue: "  ", workDone: "Kept notes", completedAt: null };
+  const [p] = planWoHistory([fullOrder({ ref, problem: "No water" })], fillCtx([saved], { savedTickets: new Map([[88, ticket]]) }), []);
+  assert.equal(p.status, "fill");
+  assert.equal(p.seen, "t88", "the save skips it if the ticket changed after the preview");
+  assert.deepEqual(p.fills.map((f) => [f.target, f.jobId, f.field, f.value]), [
+    ["ticket", 88, "issue", "No water"],
+    ["ticket", 88, "completed_at", "2026-07-24"],
+  ]);
+  assert.equal(fillText(p.fills[0]), "Ticket #88 Issue: (blank) → No water");
+  // A new attach fills the ticket's blank tech and issue too.
+  const attach = planWoHistory(
+    [fullOrder({ ref: "WO-0906", wo: "WO-0906", problem: "Grinder jam" })],
+    {
+      ...fillCtx([]),
+      tickets: [{ id: 90, wo: "WO-0906", customer: "Test Cafe", received: "2026-07-20", updatedAt: "t90", workDone: null, completedAt: null, duplicateOf: null, technician: null, issue: "Kept issue" }],
+    },
+    [],
+  )[0];
+  assert.equal(attach.status, "attach");
+  assert.deepEqual(attach.fills.map((f) => [f.field, f.value]), [["technician", "Ryan Gloria"]]);
 });
 
 test("invoice: labor 1.5 h + trip + 2 parts − one discount; Amount as billed; labels kept", () => {
@@ -294,8 +539,8 @@ function files(orders = FILE_ORDERS, lines = FILE_LINES) {
 }
 
 async function runAll(sql, read, opts = {}) {
-  const plan = await api.planOrders(sql, read.orders);
-  const include = plan.filter((p) => (opts.tickRemoved ? ["create", "attach", "removed"] : ["create", "attach"]).includes(p.status)).map((p) => p.ref);
+  const plan = await api.planOrders(sql, read.orders, read.lines);
+  const include = plan.filter((p) => (opts.tickRemoved ? isSaveable(p.status) : startsTicked(p.status))).map((p) => p.ref);
   const seen = Object.fromEntries(plan.filter((p) => p.seen).map((p) => [p.ref, p.seen]));
   const runId = await api.startRun(sql, { filename: "test.csv", rowCount: read.orders.length, counts: countWoPlan(plan), who: "chuy" });
   const results = [];
@@ -326,7 +571,7 @@ test("renames apply, keep the parent and Walk-In mark, move records, and hold a 
   assert.match(log[0].detail, /Renamed from “Walk - In:Water Oak Cafe” .*billed under Walk - In/);
 });
 
-test("saving: create, attach (blank fields only), location needed, removed unticked, unmatched skipped; rerun adds nothing; undo", async () => {
+test("saving: create, attach (blank fields only), location needed, retire-restore, unmatched skipped; rerun adds nothing; undo", async () => {
   const { pg, sql } = await fresh();
   await api.applyRenames(sql, { ids: (await api.previewRenames(sql, [])).map((p) => p.id), locations: [], who: "chuy" });
   // A live ticket with the July WO and a blank Work Done.
@@ -342,13 +587,13 @@ test("saving: create, attach (blank fields only), location needed, removed untic
       ["WO-0211 (2026-07-24)", "attach"],
       ["WO-1500", "create"],
       ["WO-1501", "create"],
-      ["WO-1502", "removed"],
+      ["WO-1502", "retire"],
       ["WO-1503", "unmatched"],
       ["WO-1504", "create"],
     ],
   );
   const sum = (k) => results.reduce((n, r) => n + r[k], 0);
-  assert.deepEqual([sum("created"), sum("attached"), sum("filled"), sum("lines"), sum("partLines"), sum("partMatched")], [3, 1, 1, 5, 3, 1]);
+  assert.deepEqual([sum("created"), sum("attached"), sum("filled"), sum("lines"), sum("partLines"), sum("partMatched"), sum("retired")], [4, 1, 1, 5, 3, 1, 1]);
   assert.equal(sum("discountLines"), 1, "the Discount line is stored too, but isn't an item line");
   // Past imports shows the same split as the Step 3 report; the run's counter is every line saved.
   const run1 = (await api.recentRuns(sql)).find((r) => r.id === runId);
@@ -360,16 +605,19 @@ test("saving: create, attach (blank fields only), location needed, removed untic
     ["WO-0211 (2026-07-24)", "Alpha Cafe", false],
     ["WO-1500", "Alpha Cafe", false],
     ["WO-1501", "Walk - In", true],
+    ["WO-1502", "Real Spot", false],
     ["WO-1504", "Water Oak Cafe", false],
   ]);
+  const spot = (await pg.query("select archived, inactive, retired_at is not null as retired from directory_customers where name = 'Real Spot'")).rows[0];
+  assert.deepEqual(spot, { archived: false, inactive: true, retired: true }, "the removed account comes back as Retired");
   const attached = h[0];
   assert.equal(attached.job_id, job);
   assert.equal(Number(attached.discount), 41.5);
   assert.equal(Number(attached.lines_total), 373.5);
   const nick = h[1];
   assert.deepEqual([nick.technician, nick.original_tech], ["Jesus Garcia", "Nick Anderson"]);
-  const ticket = (await pg.query("select work_done, completed_at::text as completed_at from service_jobs where id = $1", [job])).rows[0];
-  assert.deepEqual(ticket, { work_done: "Fixed the steam boiler.", completed_at: "2026-07-24" });
+  const ticket = (await pg.query("select work_done, completed_at::text as completed_at, technician, issue from service_jobs where id = $1", [job])).rows[0];
+  assert.deepEqual(ticket, { work_done: "Fixed the steam boiler.", completed_at: "2026-07-24", technician: "Ryan Gloria", issue: "Brewer leaking, check valve" });
   assert.equal((await pg.query("select count(*)::int as n from ticket_charges")).rows[0].n, 0, "history never writes ticket Charges");
   assert.equal((await pg.query("select count(*)::int as n from invoices")).rows[0].n, 0, "nor approved invoices");
 
@@ -387,11 +635,14 @@ test("saving: create, attach (blank fields only), location needed, removed untic
   assert.deepEqual(d2.lines.map((l) => [l.lineType, l.qty]), [["Part", 0], ["Install Fee", 1]]);
   assert.equal(d2.lines[0].part, null, "an item code that isn't a part stays text");
 
-  // The same files again: nothing new, the removed and unmatched rows still not saved.
+  // The same files again: all No Change, and the save writes nothing.
   const again = await runAll(sql, read);
-  assert.deepEqual(again.plan.map((p) => p.status), ["same", "same", "same", "removed", "unmatched", "same"]);
-  assert.equal(again.results.reduce((n, r) => n + r.created + r.attached, 0), 0);
-  assert.equal((await pg.query("select count(*)::int as n from wo_history")).rows[0].n, 4);
+  assert.deepEqual(again.plan.map((p) => p.status), ["same", "same", "same", "same", "unmatched", "same"]);
+  const c2 = countWoPlan(again.plan);
+  assert.deepEqual([c2.fill, c2.addLines, c2.retire, c2.create], [0, 0, 0, 0]);
+  for (const k of ["created", "attached", "filled", "lines", "historyFilled", "linesAdded", "retired"]) assert.equal(again.results.reduce((n, r) => n + r[k], 0), 0, `a second save writes no ${k}`);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history")).rows[0].n, 5);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_fills")).rows[0].n, 2, "only the first run's ticket tech and issue");
 
   // Location Needed: put the Walk-In row on its real account.
   const need = await api.locationNeeded(sql);
@@ -402,15 +653,16 @@ test("saving: create, attach (blank fields only), location needed, removed untic
 
   // Undo the first run: its rows and lines go, the filled ticket fields are cleared, other runs stay.
   const undone = await api.undoRun(sql, { runId, who: "chuy" });
-  assert.deepEqual(undone, { removed: 4, restored: 1 });
+  assert.deepEqual(undone, { removed: 5, restored: 1, linesRemoved: 0, rowsCleared: 0, accountsBack: ["Real Spot"], accountsKept: [] });
+  assert.deepEqual((await pg.query("select archived, inactive, retired_at from directory_customers where name = 'Real Spot'")).rows[0], { archived: true, inactive: false, retired_at: null });
   assert.equal((await pg.query("select count(*)::int as n from wo_history")).rows[0].n, 0);
   assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 0);
-  const after = (await pg.query("select work_done, completed_at from service_jobs where id = $1", [job])).rows[0];
-  assert.deepEqual(after, { work_done: null, completed_at: null });
+  const after = (await pg.query("select work_done, completed_at, technician, issue from service_jobs where id = $1", [job])).rows[0];
+  assert.deepEqual(after, { work_done: null, completed_at: null, technician: null, issue: null });
   await assert.rejects(api.undoRun(sql, { runId, who: "chuy" }), /already undone/);
   const runs = await api.recentRuns(sql);
   assert.equal(runs.find((r) => r.id === runId).undoneBy, "chuy");
-  assert.equal(runs.find((r) => r.id === runId).created, 3);
+  assert.equal(runs.find((r) => r.id === runId).created, 4);
   assert.deepEqual(
     [runs.find((r) => r.id === runId).lines, runs.find((r) => r.id === runId).itemLines, runs.find((r) => r.id === runId).discountLines],
     [6, null, null],
@@ -428,7 +680,7 @@ test("saving: a ticket edited after the preview is skipped, and a kept value is 
     "insert into service_jobs (kind, call_id, customer, wo, received, status, work_done, completed_at) values ('service', 'SC-1', 'Alpha Cafe', 'WO-0211', '2026-07-20', 'Completed', 'Tech notes already here', '2026-07-23')",
   );
   const read = files([FILE_ORDERS[0], FILE_ORDERS[1]], FILE_LINES);
-  const plan = await api.planOrders(sql, read.orders);
+  const plan = await api.planOrders(sql, read.orders, read.lines);
   const seen = Object.fromEntries(plan.filter((p) => p.seen).map((p) => [p.ref, p.seen]));
   const runId = await api.startRun(sql, { filename: "t", rowCount: 2, counts: countWoPlan(plan), who: "chuy" });
   // Someone edits the ticket between the preview and the save.
@@ -437,24 +689,108 @@ test("saving: a ticket edited after the preview is skipped, and a kept value is 
   assert.deepEqual([res.created, res.attached], [1, 0]);
   assert.match(res.notSaved[0].why, /changed after the preview/);
   // Read again and save: it attaches, and the ticket's own Work Done and Completed date stay as they were.
-  const plan2 = await api.planOrders(sql, read.orders);
+  const plan2 = await api.planOrders(sql, read.orders, read.lines);
   const seen2 = Object.fromEntries(plan2.filter((p) => p.seen).map((p) => [p.ref, p.seen]));
   const res2 = await api.saveBatch(sql, { runId, orders: read.orders, lines: read.lines, include: [read.orders[0].ref], seen: seen2, who: "chuy" });
-  assert.deepEqual([res2.attached, res2.filled], [1, 0]);
-  const t = (await pg.query("select work_done, completed_at::text as c from service_jobs where call_id = 'SC-1'")).rows[0];
-  assert.deepEqual(t, { work_done: "Tech notes already here", c: "2026-07-23" });
-  // Undo leaves a value the run didn't write.
+  assert.deepEqual([res2.attached, res2.filled], [1, 1], "only its blank tech and issue fill");
+  const t = (await pg.query("select work_done, completed_at::text as c, technician, issue from service_jobs where call_id = 'SC-1'")).rows[0];
+  assert.deepEqual(t, { work_done: "Tech notes already here", c: "2026-07-23", technician: "Ryan Gloria", issue: "Brewer leaking, check valve" });
+  // Undo leaves a value the run didn't write, and clears the ones it did.
   await api.undoRun(sql, { runId, who: "chuy" });
-  assert.equal((await pg.query("select work_done from service_jobs where call_id = 'SC-1'")).rows[0].work_done, "Tech notes already here");
+  assert.deepEqual((await pg.query("select work_done, technician, issue from service_jobs where call_id = 'SC-1'")).rows[0], { work_done: "Tech notes already here", technician: null, issue: null });
 });
 
-test("a removed account's row saves only when ticked, and never restores the account", async () => {
+test("a later run fills blanks and adds missing lines on saved work orders; a rerun is all No Change; undo takes back only that run", async () => {
   const { pg, sql } = await fresh();
-  const read = files([FILE_ORDERS[3]], []);
+  await pg.query(
+    "insert into service_jobs (kind, call_id, customer, wo, received, status, technician, issue) values ('service', 'SC-202607-1', 'Alpha Cafe', 'WO-0211', '2026-07-20', 'Completed', 'Joshua Harper', 'Kept issue')",
+  );
+  const job = (await pg.query("select id from service_jobs where call_id = 'SC-202607-1'")).rows[0].id;
+  // The first export: WO-1500 had no PO # or Call Category yet, and only one line.
+  const first = files(
+    [FILE_ORDERS[0], order({ ref: "WO-1500", loc: "Alpha Cafe", completed: "2025-02-01 09:00", po: "", category: "" })],
+    [FILE_LINES[0], FILE_LINES[1], FILE_LINES[4]],
+  );
+  const run1 = await runAll(sql, first);
+  assert.deepEqual(run1.plan.map((p) => p.status), ["attach", "create"]);
+  // Someone clears the ticket's issue after the first run.
+  await pg.query("update service_jobs set issue = '' where id = $1", [job]);
+
+  // The fuller export: a PO # and Call Category, two more lines and a discount on WO-1500; WO-0211's Part and Discount lines.
+  const full = files(
+    [FILE_ORDERS[0], order({ ref: "WO-1500", loc: "Alpha Cafe", completed: "2025-02-01 09:00", po: "PO-9", category: "Repairs" })],
+    [...FILE_LINES.slice(0, 4), FILE_LINES[4], FILE_LINES[4], line("WO-1500", "Discount", "CLD", "", "-5", "-5")],
+  );
+  const run2 = await runAll(sql, full);
+  assert.deepEqual(run2.plan.map((p) => [p.ref, p.tags]), [
+    ["WO-0211 (2026-07-24)", ["fill", "addLines"]],
+    ["WO-1500", ["fill", "addLines"]],
+  ]);
+  assert.match(run2.plan[0].reason, /Ticket #\d+ Issue: \(blank\) → Brewer leaking, check valve · 2 lines \(1 discount\) to Invoice WO-0211/);
+  assert.match(run2.plan[1].reason, /Call Category: \(blank\) → Repairs; PO #: \(blank\) → PO-9 · 2 lines \(1 discount\) to Invoice WO-1500/);
+  const sum = (k) => run2.results.reduce((n, r) => n + r[k], 0);
+  assert.deepEqual([sum("created"), sum("historyFilled"), sum("linesAdded"), sum("discountLinesAdded"), sum("filled")], [0, 1, 2, 2, 1]);
+  const h1500 = (await pg.query("select po, call_category, discount::text, lines_total::text from wo_history where history_ref = 'WO-1500'")).rows[0];
+  assert.deepEqual(h1500, { po: "PO-9", call_category: "Repairs", discount: "5.00", lines_total: "-5.00" }, "0 + 0 of lines − the 5 discount");
+  const h0211 = (await pg.query("select discount::text, lines_total::text from wo_history where history_ref = 'WO-0211 (2026-07-24)'")).rows[0];
+  assert.deepEqual(h0211, { discount: "41.50", lines_total: "373.50" });
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines l join wo_history h on h.id = l.history_id where h.history_ref = 'WO-1500'")).rows[0].n, 3);
+  assert.equal((await pg.query("select issue from service_jobs where id = $1", [job])).rows[0].issue, "Brewer leaking, check valve");
+  assert.equal((await pg.query("select technician from service_jobs where id = $1", [job])).rows[0].technician, "Joshua Harper", "a kept tech stays");
+  assert.equal((await pg.query("select count(*)::int as n from ticket_charges")).rows[0].n, 0, "history never writes Charges");
+
+  // The same files again: all No Change, and a save writes nothing.
+  const run3 = await runAll(sql, full);
+  assert.deepEqual(run3.plan.map((p) => p.status), ["same", "same"]);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 7);
+
+  // A ticket edited between the preview and the save is skipped.
+  await pg.query("update service_jobs set issue = null where id = $1", [job]);
+  const plan4 = await api.planOrders(sql, full.orders, full.lines);
+  assert.equal(plan4[0].status, "fill");
+  const seen4 = { [plan4[0].ref]: plan4[0].seen };
+  await pg.query("update service_jobs set notes = 'edited', updated_at = now() + interval '1 second' where id = $1", [job]);
+  const run4 = await api.startRun(sql, { filename: "t", rowCount: 1, counts: countWoPlan(plan4), who: "chuy" });
+  const res4 = await api.saveBatch(sql, { runId: run4, orders: full.orders, lines: full.lines, include: [plan4[0].ref], seen: seen4, who: "chuy" });
+  assert.match(res4.notSaved[0].why, /changed after the preview/);
+  assert.equal((await pg.query("select issue from service_jobs where id = $1", [job])).rows[0].issue, null);
+
+  // Undo the second run: its fills and lines go; the first run's work orders and lines stay.
+  await pg.query("update service_jobs set issue = 'Brewer leaking, check valve' where id = $1", [job]);
+  const undone = await api.undoRun(sql, { runId: run2.runId, who: "chuy" });
+  assert.deepEqual([undone.removed, undone.linesRemoved, undone.rowsCleared, undone.restored], [0, 4, 2, 1]);
+  assert.deepEqual((await pg.query("select po, call_category, discount::text, lines_total::text from wo_history where history_ref = 'WO-1500'")).rows[0], {
+    po: null,
+    call_category: null,
+    discount: "0.00",
+    lines_total: "0.00",
+  });
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 3, "the first run's lines stay");
+  assert.equal((await pg.query("select issue from service_jobs where id = $1", [job])).rows[0].issue, "", "back to what it was before the run");
+  const runs = await api.recentRuns(sql);
+  assert.equal(runs.find((r) => r.id === run1.runId).current, 2);
+});
+
+test("undo leaves a retired account Retired once something was added to it", async () => {
+  const { pg, sql } = await fresh();
+  const { runId } = await runAll(sql, files([FILE_ORDERS[3]], []));
+  assert.equal((await pg.query("select inactive from directory_customers where name = 'Real Spot'")).rows[0].inactive, true);
+  await pg.query("insert into pm_jobs (customer, status, updated_at) values ('Real Spot', 'Pending Scheduling', now() + interval '1 second')");
+  const undone = await api.undoRun(sql, { runId, who: "chuy" });
+  assert.deepEqual([undone.removed, undone.accountsBack, undone.accountsKept], [1, [], ["Real Spot"]]);
+  assert.deepEqual((await pg.query("select archived, inactive from directory_customers where name = 'Real Spot'")).rows[0], { archived: false, inactive: true });
+});
+
+test("a removed parent account holding Location Needed rows saves only when ticked, and is never restored", async () => {
+  const { pg, sql } = await fresh();
+  await pg.query("update directory_customers set archived = true where name = 'Walk - In'");
+  const read = files([FILE_ORDERS[2]], []);
+  const plan = await api.planOrders(sql, read.orders, read.lines);
+  assert.equal(plan[0].status, "removed");
+  assert.equal(startsTicked("removed"), false);
   await runAll(sql, read, { tickRemoved: true });
-  const h = (await pg.query("select customer from wo_history")).rows;
-  assert.deepEqual(h, [{ customer: "Real Spot" }]);
-  assert.equal((await pg.query("select archived from directory_customers where name = 'Real Spot'")).rows[0].archived, true);
+  assert.deepEqual((await pg.query("select customer from wo_history")).rows, [{ customer: "Walk - In" }]);
+  assert.equal((await pg.query("select archived from directory_customers where name = 'Walk - In'")).rows[0].archived, true);
 });
 
 test("renaming an account later moves its history with it", async () => {

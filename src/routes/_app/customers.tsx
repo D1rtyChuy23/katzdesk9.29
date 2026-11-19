@@ -381,7 +381,7 @@ function Page() {
                   ) : null}
                   {c.inactive ? (
                     <Badge size="tight" variant="warn" className="ml-1.5 align-middle" data-testid="customer-inactive">
-                      Inactive
+                      {c.retired ? "Retired" : "Inactive"}
                     </Badge>
                   ) : null}
                 </p>
