@@ -2375,8 +2375,10 @@ export async function linkVisitUnit(
     if (elsewhere) throw new Error(`${unitLabel(u)} is on install #${elsewhere}'s pre-inspection. Take it off there first.`);
   }
   const { mergeEquipmentUnits } = await import("@/lib/ops/account-equip-import");
-  for (const copy of copies) await mergeEquipmentUnits(sql, to.id, copy.id);
-  await mergeEquipmentUnits(sql, to.id, from.id);
+  // Someone said these are one machine: the merge itself, not the Equipment tab's duplicate check (11/19).
+  const by = { userId: null, name: actor };
+  for (const copy of copies) await mergeEquipmentUnits(sql, to.id, copy.id, { by });
+  await mergeEquipmentUnits(sql, to.id, from.id, { by });
   await syncInstallUnits(sql, data.installId);
   // A unit added to an Installed install takes its date (11/18, install-date-fill.ts).
   await fillInstallDatesFor(sql, data.installId, actor);

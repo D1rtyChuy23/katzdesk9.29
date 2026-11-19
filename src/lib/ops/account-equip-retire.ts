@@ -25,6 +25,11 @@ export type RetiredUnit = {
   records: number;
   /** "Moved from <account> to install WO-#### by <user> <date>" when it left by a move to an install (11/17). */
   movedNote: string | null;
+  /** Why it was retired, when it says: "Merged into SN …" for a merge (11/19). */
+  reason: string | null;
+  /** The unit a merge kept, when it was merged. */
+  mergedInto: number | null;
+  mergedSerial: string | null;
 };
 
 export type RetiredBy = { userId: string | null; name: string | null };
@@ -32,8 +37,9 @@ export type RetiredBy = { userId: string | null; name: string | null };
 const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", "pm_links"] as const;
 
 /**
- * Copy a unit and its links to the retired table. $1 unit, $2 who (id), $3 who (name). Run before the unit's links
- * are taken off, so they are all in the copy. Returns the retired row's id, or nothing when the unit isn't there.
+ * Copy a unit and its links to the retired table. $1 unit, $2 who (id), $3 who (name), $4 more to keep with it (a
+ * merge's reason and the unit it went into). Run before the unit's links are taken off, so they are all in the copy.
+ * Returns the retired row's id, or nothing when the unit isn't there.
  */
 export function retireUnitSql(): string {
   return `insert into account_equipment_retired
@@ -46,7 +52,8 @@ export function retireUnitSql(): string {
                    'inspection_items', coalesce((select jsonb_agg(to_jsonb(i)) from install_inspection_items i where i.equipment_id = a.id), '[]'::jsonb),
                    'inspection_photos', coalesce((select jsonb_agg(to_jsonb(p)) from install_inspection_photos p where p.equipment_id = a.id), '[]'::jsonb),
                    'pm_links', coalesce((select jsonb_agg(to_jsonb(l)) from pm_runbook_unit_links l where l.account_equipment_id = a.id), '[]'::jsonb),
-                   'machine_parts', coalesce((select jsonb_agg(m.id) from machine_parts m where m.account_equipment_id = a.id), '[]'::jsonb)),
+                   'machine_parts', coalesce((select jsonb_agg(m.id) from machine_parts m where m.account_equipment_id = a.id), '[]'::jsonb))
+                   || coalesce($4::jsonb, '{}'::jsonb),
                  $2, $3
             from account_equipment a
            where a.id = $1
@@ -54,8 +61,16 @@ export function retireUnitSql(): string {
 }
 
 /** Keep the unit's record before it leaves the account. */
-export async function retireUnitRecord(sql: Sql, unitId: number, by?: RetiredBy | null): Promise<number | null> {
-  const rows = await sql.query<{ id: number }>(retireUnitSql(), [unitId, by?.userId ?? null, by?.name ?? null]);
+export async function retireUnitRecord(
+  sql: Sql,
+  unitId: number,
+  by?: RetiredBy | null,
+  extra?: { reason?: string; mergedInto?: number; mergedSerial?: string | null } | null,
+): Promise<number | null> {
+  const keep = extra
+    ? JSON.stringify({ reason: extra.reason ?? null, merged_into: extra.mergedInto ?? null, merged_serial: extra.mergedSerial ?? null })
+    : null;
+  const rows = await sql.query<{ id: number }>(retireUnitSql(), [unitId, by?.userId ?? null, by?.name ?? null, keep]);
   return rows[0] ? Number(rows[0].id) : null;
 }
 
@@ -80,10 +95,14 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     retired_name: string | null;
     records: number;
     moved_note: string | null;
+    reason: string | null;
+    merged_into: string | null;
+    merged_serial: string | null;
   }>(
     `select r.id, r.unit_id, r.customer, r.equipment_name, r.catalog_model, r.serial, r.part_number, r.ownership, r.install_date,
             to_char(r.retired_at at time zone 'America/Chicago', 'YYYY-MM-DD') as retired_at, r.retired_name,
-            r.links->>'moved_note' as moved_note,
+            r.links->>'moved_note' as moved_note, r.links->>'reason' as reason, r.links->>'merged_into' as merged_into,
+            r.links->>'merged_serial' as merged_serial,
             (${LINK_KEYS.map((k) => `jsonb_array_length(coalesce(r.links->'${k}', '[]'::jsonb))`).join(" + ")})::int as records
        from account_equipment_retired r
       where lower(r.customer) = lower($1)
@@ -105,6 +124,9 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     retiredName: r.retired_name,
     records: Number(r.records),
     movedNote: r.moved_note ?? null,
+    reason: r.reason ?? null,
+    mergedInto: r.merged_into ? Number(r.merged_into) : null,
+    mergedSerial: r.merged_serial ?? null,
   }));
 }
 

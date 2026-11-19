@@ -446,13 +446,14 @@ test("an installed install refuses a list change its kept pre-inspection would d
   }
 });
 
-test("Merge is offered for account rows that read as the same model", () => {
+test("Merge is offered for account rows that read as the same model (and, 11/19, are a true duplicate)", () => {
   assert.equal(sameUnitModel({ catalogModel: ITCB_CATALOG, equipmentName: "Bunn ITCB" }, { catalogModel: "Bunn ITCB", equipmentName: "Bunn ITCB" }), true);
   assert.equal(sameUnitModel({ catalogModel: "Bunn TB3", equipmentName: "TB3" }, { catalogModel: "bunn tb-3", equipmentName: "" }), true);
   assert.equal(sameUnitModel({ catalogModel: "Bunn TB3", equipmentName: "TB3" }, { catalogModel: "BUNN  TB3", equipmentName: "" }), true);
   assert.equal(sameUnitModel({ catalogModel: "Bunn TB3", equipmentName: "TB3" }, { catalogModel: "Fetco 52H", equipmentName: "Fetco 52H" }), false);
   const src = readFileSync(new URL("../src/components/desk/account-history.tsx", import.meta.url), "utf8");
-  assert.match(src, /const twins = rows\.filter\(\(other, j\) => j !== i && other\.id && row\.id && sameUnitModel\(other, row\)\);/);
+  // canMergeUnits reads the model with sameUnitModel, and adds the serial and lock rules (scripts/merge-guard.test.mjs).
+  assert.match(src, /const twins = rows\.filter\(\(other, j\) => j !== i && other\.id && row\.id && canRemove && canMergeUnits\(asMerge\(other\), asMerge\(row\)\)\);/);
 });
 
 test("R1: a serial corrected on the account is not put back by opening the install, open or completed", async () => {

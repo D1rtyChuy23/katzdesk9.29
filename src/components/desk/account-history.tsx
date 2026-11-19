@@ -3,8 +3,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { poCardLine, saleRefLine } from "@/lib/ops/ticket-po";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { canAddEquipmentTo, sameUnitModel } from "@/lib/ops/account-equip";
-import { listAccountEquipment, listRetiredEquipment, mergeAccountEquipment, removeAccountEquipment, restoreAccountEquipment } from "@/lib/ops/account-equip-import";
+import { canAddEquipmentTo, canMergeUnits } from "@/lib/ops/account-equip";
+import {
+  getUnitLinkCounts,
+  listAccountEquipment,
+  listRetiredEquipment,
+  mergeAccountEquipment,
+  removeAccountEquipment,
+  restoreAccountEquipment,
+} from "@/lib/ops/account-equip-import";
+import type { RetiredUnit } from "@/lib/ops/account-equip-retire";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { detectBoard } from "@/lib/ops/corrigo";
 import { isOpenCall, isOpenPm } from "@/lib/ops/ticket-status";
 import { formatLongDate, formatShortDate, money } from "@/lib/ops/clock";
@@ -202,14 +211,19 @@ export function AccountEquipmentList({
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not remove"),
   });
+  // The pair the Merge dialog is asking about: `keep` stays, `drop` goes to Retired.
+  const [asking, setAsking] = useState<{ keep: UnitRow; drop: UnitRow } | null>(null);
   const merge = useMutation({
     mutationFn: (d: { keepId: number; dropId: number }) => mergeAccountEquipment({ data: d }),
     onSuccess: () => {
       toast.success("Merged into one unit");
+      setAsking(null);
       refresh();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not merge"),
   });
+  // Merge is only for a true duplicate (11/19): the same rule the server checks.
+  const asMerge = (r: UnitRow) => ({ customer: customer ?? "", catalogModel: r.catalogModel, equipmentName: r.equipmentName, serial: r.serial, lockedBy: r.lockedBy });
   return (
     <section className={className} data-testid="account-equipment" data-open="true">
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
@@ -235,8 +249,9 @@ export function AccountEquipmentList({
       ) : rows.length ? (
         <ul className="mt-2 divide-y divide-border overflow-hidden rounded-xl border border-border">
           {rows.map((row, i) => {
-            // Merge is offered for any row that reads as the same model, not only the exact catalog name.
-            const twins = rows.filter((other, j) => j !== i && other.id && row.id && sameUnitModel(other, row));
+            // Merge is offered to an Admin, only where the two rows are one machine (same model, serials that match or
+            // where one is blank or a short leftover, neither locked). Two different full serials never get the button.
+            const twins = rows.filter((other, j) => j !== i && other.id && row.id && canRemove && canMergeUnits(asMerge(other), asMerge(row)));
             return (
               // Keyed by the unit, not its place on the list: a row removed above an open Edit must not rebuild it.
               <li key={row.id ? `unit-${row.id}` : `${row.catalogModel}-${row.serial ?? "none"}-${i}`} className="px-3 py-2.5">
@@ -264,18 +279,12 @@ export function AccountEquipmentList({
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={merge.isPending || !!row.lockedBy || !!twin.lockedBy}
-                        title={row.lockedBy || twin.lockedBy ? `Locked by ${row.lockedBy || twin.lockedBy}` : undefined}
+                        disabled={merge.isPending}
+                        title={`Merge this into ${twin.serial ? `SN ${twin.serial}` : "the unit with no serial"}`}
                         data-testid="merge-account-unit"
-                        onClick={() => {
-                          const keep = twin.serial || twin.equipmentName || "the other row";
-                          const drop = row.serial || "this row";
-                          if (window.confirm(`Keep SN ${keep} and remove SN ${drop}? This does not change the other row's model.`)) {
-                            merge.mutate({ keepId: twin.id!, dropId: row.id! });
-                          }
-                        }}
+                        onClick={() => setAsking({ keep: twin, drop: row })}
                       >
-                        Merge into {twin.serial || twin.equipmentName}
+                        Merge duplicate
                       </Button>
                     ))}
                     {canRemove ? (
@@ -325,7 +334,118 @@ export function AccountEquipmentList({
         <p className="mt-2 text-sm text-muted-foreground">No imported equipment on this account yet.</p>
       )}
       {customer ? <RetiredUnits customer={customer} onChanged={refresh} /> : null}
+      {asking ? (
+        <MergeDialog
+          keep={asking.keep}
+          drop={asking.drop}
+          busy={merge.isPending}
+          onCancel={() => setAsking(null)}
+          onMerge={() => merge.mutate({ keepId: asking.keep.id!, dropId: asking.drop.id! })}
+        />
+      ) : null}
     </section>
+  );
+}
+
+type UnitRow = {
+  id?: number;
+  catalogModel: string;
+  equipmentName: string;
+  serial: string | null;
+  installDate: string | null;
+  ownership: string | null;
+  partNumber?: string | null;
+  condition?: string | null;
+  lockedBy?: string | null;
+};
+
+/** Merge, asked in the app's dialog (11/19): both units side by side, and which one stays. */
+function MergeDialog({ keep, drop, busy, onCancel, onMerge }: { keep: UnitRow; drop: UnitRow; busy: boolean; onCancel: () => void; onMerge: () => void }) {
+  const counts = useQuery({
+    queryKey: ["unit-link-counts", keep.id, drop.id],
+    queryFn: () => getUnitLinkCounts({ data: { ids: [keep.id!, drop.id!] } }),
+  });
+  const side = (r: UnitRow, label: string, stays: boolean) => {
+    const c = counts.data?.[r.id!];
+    const lines: [string, string][] = [
+      ["Model", r.catalogModel],
+      ["Serial", r.serial || "None"],
+      ["Part #", r.partNumber || "—"],
+      ["Condition", r.condition || "—"],
+      ["Install date", r.installDate ? formatLongDate(r.installDate) : "—"],
+      ["Tickets", c ? String(c.tickets) : "…"],
+      ["Installs", c ? String(c.installs) : "…"],
+      ["PMs", c ? String(c.pms) : "…"],
+    ];
+    return (
+      <div className={`min-w-0 rounded-lg border p-2.5 ${stays ? "border-primary/50" : "border-border"}`} data-testid={stays ? "merge-keep" : "merge-drop"}>
+        <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">{label}</p>
+        <p className="mt-1 font-medium break-words">{r.equipmentName || r.catalogModel}</p>
+        <dl className="mt-1 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-0.5 text-xs">
+          {lines.map(([k, v]) => (
+            <div key={k} className="contents">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="break-words">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    );
+  };
+  return (
+    <Dialog open onOpenChange={(o) => (o ? null : onCancel())}>
+      <DialogContent className="p-4 sm:max-w-xl" data-testid="merge-confirm">
+        <DialogTitle>Merge duplicate?</DialogTitle>
+        <DialogDescription className="mt-1 text-sm">
+          These read as one machine. The unit on the left stays; the one on the right goes to this account's Retired list, where Put back can return it.
+        </DialogDescription>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {side(keep, "Stays", true)}
+          {side(drop, "Goes to Retired", false)}
+        </div>
+        {(keep.serial ?? "").replace(/[\s#]/g, "").length <= 2 && (drop.serial ?? "").replace(/[\s#]/g, "").length > (keep.serial ?? "").replace(/[\s#]/g, "").length ? (
+          <p className="mt-2 text-xs font-medium" data-testid="merge-takes-serial">
+            The unit that stays takes SN {drop.serial}, the full serial.
+          </p>
+        ) : null}
+        <p className="mt-2 text-xs text-muted-foreground">
+          Its installs, pre-inspection checks and PM links move to the unit that stays. Tickets count the ones on this account that name the serial.
+        </p>
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="button" size="sm" disabled={busy} onClick={onMerge} data-testid="merge-confirm-yes">
+            {busy ? "Merging…" : "Merge duplicate"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Put back, asked in the app's dialog first (11/19). A merged unit's says what the merge moved stays where it went. */
+function PutBackDialog({ unit, busy, onCancel, onPutBack }: { unit: RetiredUnit; busy: boolean; onCancel: () => void; onPutBack: () => void }) {
+  const what = `${unit.equipmentName || unit.catalogModel}${unit.serial ? ` SN ${unit.serial}` : ""}`;
+  return (
+    <Dialog open onOpenChange={(o) => (o ? null : onCancel())}>
+      <DialogContent className="p-4" data-testid="put-back-confirm">
+        <DialogTitle>Put back {what}?</DialogTitle>
+        <DialogDescription className="mt-2 text-sm">
+          {unit.mergedInto
+            ? `It was merged into ${unit.mergedSerial ? `SN ${unit.mergedSerial}` : "the unit with no serial"}. It comes back on this account as its own unit; the installs, checks and PM links the merge moved stay on the kept unit.`
+            : "It comes back on this account with its record, and on the open installs it was taken off."}
+        </DialogDescription>
+        <div className="mt-4 flex flex-wrap justify-end gap-2">
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="button" size="sm" disabled={busy} onClick={onPutBack} data-testid="put-back-confirm-yes">
+            {busy ? "Putting back…" : "Put back"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -337,10 +457,12 @@ function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: ()
     queryKey: ["account-equipment-retired", customer.toLowerCase()],
     queryFn: () => listRetiredEquipment({ data: { customer } }),
   });
+  const [asking, setAsking] = useState<RetiredUnit | null>(null);
   const putBack = useMutation({
     mutationFn: (id: number) => restoreAccountEquipment({ data: { id } }),
     onSuccess: () => {
       toast.success("Back on this account");
+      setAsking(null);
       onChanged();
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not put it back"),
@@ -361,19 +483,20 @@ function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: ()
                 {[
                   r.partNumber ? `Part # ${r.partNumber}` : null,
                   r.serial ? `SN ${r.serial}` : "No serial",
-                  r.movedNote ?? `Removed ${formatShortDate(r.retiredAt)}${r.retiredName ? ` by ${r.retiredName}` : ""}`,
+                  r.movedNote ?? `${r.reason ?? "Removed"} ${formatShortDate(r.retiredAt)}${r.retiredName ? ` by ${r.retiredName}` : ""}`,
                   r.records ? `${r.records} inspection or PM record${r.records === 1 ? "" : "s"} kept` : null,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
               </span>
             </span>
-            <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={putBack.isPending} data-testid="put-back-unit" onClick={() => putBack.mutate(r.id)}>
+            <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={putBack.isPending} data-testid="put-back-unit" onClick={() => setAsking(r)}>
               Put back
             </Button>
           </li>
         ))}
       </ul>
+      {asking ? <PutBackDialog unit={asking} busy={putBack.isPending} onCancel={() => setAsking(null)} onPutBack={() => putBack.mutate(asking.id)} /> : null}
     </details>
   );
 }
