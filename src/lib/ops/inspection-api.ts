@@ -769,6 +769,51 @@ export async function putUnitBackOnOpenInstalls(sql: Sql, equipmentId: number, i
 }
 
 /**
+ * A unit's model is changing (an Admin's Edit, 11/19): each install whose visit has the unit, with its list as read and
+ * the list as it will be. The row the unit is on (claimed the way a load claims it, with the old model) is given the
+ * unit's id, and its model text follows when it named the old model, so a load or save after the change still finds
+ * the unit there and never drops it. Installs where the unit isn't on the list, or its row already reads the new way,
+ * are left out. Nothing is written here: the Edit writes it with the unit, in one statement.
+ */
+export async function listRowsForModelChange(
+  sql: Sql,
+  equipmentId: number,
+  oldModel: string,
+  newName: string,
+): Promise<{ id: number; before: string | null; before_equipment: string | null; equipment: string | null; machines: string | null; serial: string | null; power_voltage: string | null }[]> {
+  const installs = await sql.query<ListRow & { id: number }>(
+    `select i.id, i.equipment, i.serial, i.power_voltage, i.machines from installs i
+      where i.archived = false and exists (select 1 from install_inspection_units u where u.install_id = i.id and u.equipment_id = $1)
+      order by i.id`,
+    [equipmentId],
+  );
+  if (!installs.length) return [];
+  const catalog = await catalogNames(sql);
+  const out: Awaited<ReturnType<typeof listRowsForModelChange>> = [];
+  for (const row of installs) {
+    const pieces = piecesFrom(row, catalog);
+    const linked = await linkedUnits(sql, row.id);
+    const at = listIndexOf(pieces, linked, catalog, equipmentId);
+    if (at < 0) continue;
+    const piece = pieces[at]!;
+    const follows = sameCatalogModel(piece.equipment, oldModel);
+    if (!follows && piece.unitId === equipmentId) continue;
+    pieces[at] = { ...piece, equipment: follows ? newName : piece.equipment, unitId: equipmentId };
+    const packed = serializeMachines(pieces);
+    out.push({
+      id: row.id,
+      before: text(row.machines) || null,
+      before_equipment: row.equipment ?? null,
+      equipment: packed.equipment,
+      machines: packed.machines,
+      serial: packed.serial,
+      power_voltage: packed.powerVoltage,
+    });
+  }
+  return out;
+}
+
+/**
  * Merge on the account: an open install whose visit has both units lists that machine twice. The dropped unit's row
  * comes off the list (the rows that stay keep everything they carry), or reopening the install makes the unit again.
  */

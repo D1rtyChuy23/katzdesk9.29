@@ -315,7 +315,7 @@ test("the Equipment tab offers Add equipment and Edit, and each row shows its Pa
   assert.ok(form.includes("addAccountEquipment({ data: { customer, model, serial, partNumber, ownership, installDate } })"));
   // Edit sends the version it opened with, so a list refresh while it's open can't let it save over a newer save.
   assert.ok(form.includes('const [seen] = useState(unit?.seen ?? "");'));
-  assert.ok(/editAccountEquipment\(\{\n\s+data: \{ id: unit\.id, seen, partNumber, ownership, installDate, condition, \.\.\.\(admin && editSerial !== \(unit\.serial \?\? ""\) \? \{ serial: editSerial \} : \{\}\) \},/.test(form));
+  assert.match(form, /editAccountEquipment\(\{\s+data: \{\s+id: unit\.id,\s+seen,\s+partNumber,\s+ownership,\s+installDate,\s+condition,\s+\.\.\.\(admin && editSerial !== \(unit\.serial \?\? ""\) \? \{ serial: editSerial \} : \{\}\),\s+\.\.\.\(modelChanged && listed \? \{ model: listed \} : \{\}\),/);
   // Both windows pass the account's name.
   assert.match(src("src/components/desk/customer-sheet.tsx"), /<AccountEquipmentList customer=\{history\.data\?\.name \?\? null\} /);
   assert.match(src("src/components/desk/job-sheet.tsx"), /<AccountEquipmentList customer=\{customer \|\| null\} /);
