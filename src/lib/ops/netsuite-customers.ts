@@ -51,6 +51,8 @@ export type NsAccount = {
   phone: string | null;
   email: string | null;
   inactive: boolean;
+  /** Restored as Retired by the Work Order History import: the import never sets it back to Active. */
+  retired?: boolean;
   /** Kept when a "Walk - In:" child account was renamed to its place (Work Order History import). */
   walkIn?: boolean;
 };
@@ -546,7 +548,10 @@ function updateOf(acct: NsAccount, r: NsRow, id: string, num: string | null, not
     write.phone = r.phone;
   }
   text("email", textKey);
-  if (r.inactive !== null && r.inactive !== acct.inactive) {
+  if (r.inactive === false && acct.inactive && acct.retired) {
+    // Retired by the Work Order History import (11/19): NetSuite's Active doesn't bring it back. An Admin can, on its sheet.
+    notes.push("Retired by the Work Order History import, so it stays Retired here. An Admin can make it active on its Customers sheet.");
+  } else if (r.inactive !== null && r.inactive !== acct.inactive) {
     change("inactive", acct.inactive ? "Inactive" : "Active", r.inactive ? "Inactive" : "Active");
     write.inactive = r.inactive;
   }

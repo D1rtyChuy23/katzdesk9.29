@@ -405,7 +405,7 @@ export const HISTORY_FALLBACK_TECH = "Jesus Garcia";
 /** Days before completion a KatzDesk ticket's received date may be and still be the same work order. */
 export const ATTACH_WINDOW_DAYS = 90;
 
-export type PlanAccount = { id: number; name: string; archived: boolean };
+export type PlanAccount = { id: number; name: string; archived: boolean; inactive?: boolean };
 
 export type PlanTicket = {
   id: number;
@@ -418,27 +418,85 @@ export type PlanTicket = {
   workDone: string | null;
   completedAt: string | null;
   duplicateOf: number | null;
+  technician?: string | null;
+  issue?: string | null;
 };
 
-/** What a row needs for planning; the preview sends only these. */
-export type WoPlanInput = Pick<WoOrder, "ref" | "wo" | "completed" | "customer" | "serviceLocation" | "locationSource" | "tech">;
+/** What a row needs for planning. Only the first seven are needed to place it; the rest fill blanks on a saved row. */
+export type WoPlanInput = Pick<WoOrder, "ref" | "wo" | "completed" | "customer" | "serviceLocation" | "locationSource" | "tech"> & Partial<WoOrder>;
 
-export type WoStatus = "create" | "attach" | "removed" | "unmatched" | "ambiguous" | "same";
+export type WoStatus = "create" | "attach" | "retire" | "fill" | "addLines" | "removed" | "unmatched" | "ambiguous" | "same";
 
 export const WO_STATUS_LABEL: Record<WoStatus, string> = {
   create: "Will Create",
   attach: "Attach To Existing Ticket",
+  retire: "Will Retire-Restore",
+  fill: "Will Fill",
+  addLines: "Will Add Lines",
   removed: "Removed Account",
   unmatched: "Unmatched Account",
   ambiguous: "Ambiguous",
   same: "No Change",
 };
 
+/** The history fields a later run may fill when they're blank on the saved row. Account, routing, ticket and date never change. */
+export const HISTORY_FILL_FIELDS = [
+  { field: "technician", label: "Tech", kind: "text" },
+  { field: "original_tech", label: "Done by", kind: "text" },
+  { field: "call_category", label: "Call Category", kind: "text", of: (o: WoPlanInput) => o.callCategory },
+  { field: "service_type", label: "Service Type", kind: "text", of: (o: WoPlanInput) => o.serviceType },
+  { field: "problem", label: "Problem", kind: "text", of: (o: WoPlanInput) => o.problem },
+  { field: "work_done", label: "Work Done", kind: "text", of: (o: WoPlanInput) => o.workDone },
+  { field: "parts_used", label: "Parts Used", kind: "text", of: (o: WoPlanInput) => o.partsUsed },
+  { field: "labor_hours", label: "Labor Hrs", kind: "number", of: (o: WoPlanInput) => o.laborHours },
+  { field: "trip_charges", label: "Trip Charges", kind: "number", of: (o: WoPlanInput) => o.tripCharges },
+  { field: "parts_amount", label: "Parts $", kind: "number", of: (o: WoPlanInput) => o.partsAmount },
+  { field: "invoice_total", label: "Invoice Total", kind: "number", of: (o: WoPlanInput) => o.invoiceTotal },
+  { field: "po", label: "PO #", kind: "text", of: (o: WoPlanInput) => o.po },
+  { field: "invoice_date", label: "Invoice Date", kind: "date", of: (o: WoPlanInput) => o.invoiceDate },
+  { field: "has_items", label: "Has Items", kind: "text", of: (o: WoPlanInput) => o.hasItems },
+  { field: "review_flags", label: "Review Flags", kind: "text", of: (o: WoPlanInput) => o.reviewFlags },
+] as const;
+export type HistoryFillField = (typeof HISTORY_FILL_FIELDS)[number]["field"];
+
+/** The attached ticket's fields a run may fill when blank. Status, WO, account and routing never change. */
+export const TICKET_FILL_FIELDS = [
+  { field: "technician", label: "Tech", kind: "text" },
+  { field: "issue", label: "Issue", kind: "text" },
+  { field: "work_done", label: "Work Done", kind: "text" },
+  { field: "completed_at", label: "Completed", kind: "date" },
+] as const;
+export type TicketFillField = (typeof TICKET_FILL_FIELDS)[number]["field"];
+
+export type WoFill = { target: "history" | "ticket"; field: string; label: string; value: string | number; jobId: number | null };
+
+/** A line as compared for missing lines. */
+export type KeyLine = Pick<WoLine, "lineType" | "itemCode" | "description" | "qty" | "unitPrice" | "amount" | "invoiceDate">;
+
+/** A history row already saved, as the planner compares it with the file. */
+export type SavedHistory = {
+  id: number;
+  ref: string;
+  jobId: number | null;
+  /** The account it's saved on. A removed one is restored as Retired when the row is saved again. */
+  customer?: string;
+  values: Partial<Record<HistoryFillField, string | number | null>>;
+  lines: KeyLine[];
+};
+
+/** The ticket a saved history row is attached to. */
+export type SavedTicket = { id: number; updatedAt: string; technician: string | null; issue: string | null; workDone: string | null; completedAt: string | null };
+
 export type WoPlanLine = {
   ref: string;
+  /** The first of `tags`: what the row shows under. */
   status: WoStatus;
+  /** Every status that applies: a saved row can be both Will Fill and Will Add Lines. */
+  tags: WoStatus[];
   /** The KatzDesk account it goes on (or the removed account's name). */
   account: string | null;
+  /** That account's id, when there is one. Will Retire-Restore restores this account. */
+  accountId: number | null;
   /** The name it was looked up by: the Service Location, or the parent for Location Needed rows. */
   lookup: string;
   /** No Service Location: saved on the parent account, listed as Location Needed. */
@@ -450,11 +508,20 @@ export type WoPlanLine = {
   /** The file's tech when they aren't on the active roster. */
   originalTech: string | null;
   reason: string | null;
+  /** The saved history row (Will Fill / Will Add Lines / No Change). */
+  historyId: number | null;
+  /** Blank fields this row fills: on the saved history row, and on its ticket. */
+  fills: WoFill[];
+  /** The file's lines the saved row is missing, in file order. */
+  newLines: WoLine[];
+  addLines: { lines: number; discount: number; invoice: string; discountTotal: number; total: number } | null;
 };
 
 /** Saveable rows start ticked except removed accounts. */
-export const isSaveable = (s: WoStatus) => s === "create" || s === "attach" || s === "removed";
-export const startsTicked = (s: WoStatus) => s === "create" || s === "attach";
+export const isSaveable = (s: WoStatus) => s === "create" || s === "attach" || s === "removed" || s === "retire" || s === "fill" || s === "addLines";
+export const startsTicked = (s: WoStatus) => s !== "removed" && isSaveable(s);
+/** Rows that save a new history work order (the rest change one already saved). */
+export const isNewRow = (s: WoStatus) => s === "create" || s === "attach" || s === "removed" || s === "retire";
 
 function dayNumber(ymd: string): number {
   const [y, m, d] = ymd.slice(0, 10).split("-").map(Number);
@@ -472,13 +539,114 @@ export function historyTech(tech: string, activeTechs: string[]): { technician: 
 
 export const techNote = (originalTech: string | null) => (originalTech ? `Done by ${originalTech}` : null);
 
+/** Blank in KatzDesk: null, or text that is empty or only spaces. A 0 is a value. */
+export const isBlank = (v: unknown) => v == null || (typeof v === "string" && v.trim() === "");
+
+/** A file value worth filling with: text that isn't blank, any finite number (0 too), a date. */
+function fileValue(v: unknown): string | number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (typeof v === "string") return v.trim() ? v.trim() : null;
+  return null;
+}
+
+/** "PO #: (blank) → SRV1347", or "Ticket #88 Issue: (blank) → No water". */
+export function fillText(f: WoFill): string {
+  return `${f.target === "ticket" ? `Ticket #${f.jobId} ` : ""}${f.label}: (blank) → ${f.value}`;
+}
+
+/** The blank fields on a saved history row that the file fills. Never a field that has a value. */
+export function historyFills(o: WoPlanInput, saved: SavedHistory, activeTechs: string[]): WoFill[] {
+  const out: WoFill[] = [];
+  const tech = o.tech?.trim() ? historyTech(o.tech, activeTechs) : null;
+  for (const d of HISTORY_FILL_FIELDS) {
+    if (!isBlank(saved.values[d.field])) continue;
+    let v: string | number | null;
+    if (d.field === "technician") v = tech?.technician ?? null;
+    // The real name goes with the fallback tech, and only when the tech is filled with it.
+    else if (d.field === "original_tech") v = tech && isBlank(saved.values.technician) ? tech.originalTech : null;
+    else v = fileValue(d.of(o));
+    if (v != null) out.push({ target: "history", field: d.field, label: d.label, value: v, jobId: null });
+  }
+  return out;
+}
+
+/** The attached ticket's blank fields the file fills: tech (the roster name), issue, and Work Done and Completed. */
+export function ticketFills(o: WoPlanInput, ticket: Pick<SavedTicket, "id" | "technician" | "issue" | "workDone" | "completedAt">, activeTechs: string[], only?: TicketFillField[]): WoFill[] {
+  const values: Record<TicketFillField, string | null> = {
+    technician: o.tech?.trim() ? historyTech(o.tech, activeTechs).technician : null,
+    issue: fileValue(o.problem) as string | null,
+    work_done: fileValue(o.workDone) as string | null,
+    completed_at: o.completed ? o.completed.slice(0, 10) : null,
+  };
+  const current: Record<TicketFillField, unknown> = { technician: ticket.technician, issue: ticket.issue, work_done: ticket.workDone, completed_at: ticket.completedAt };
+  const out: WoFill[] = [];
+  for (const d of TICKET_FILL_FIELDS) {
+    if (only && !only.includes(d.field)) continue;
+    const v = values[d.field];
+    if (v != null && isBlank(current[d.field])) out.push({ target: "ticket", field: d.field, label: d.label, value: v, jobId: ticket.id });
+  }
+  return out;
+}
+
+/**
+ * A number rounded to 2 dp as Postgres stores it in numeric(12,2): on its decimal digits, half away from zero (2.135 is
+ * 2.14 and -0.125 is -0.13), not on the binary double (where 2.135 is 2.13499…). Keys made this way match saved lines.
+ */
+export function round2(n: number): number {
+  const m = /^(-?)(\d+)(?:\.(\d*))?$/.exec(String(n));
+  if (!m) return Math.round(n * 100) / 100;
+  const [, sign, int, frac = ""] = m;
+  let cents = BigInt(int!) * 100n + BigInt((frac + "00").slice(0, 2));
+  if ((frac[2] ?? "0") >= "5") cents += 1n;
+  const v = Number(cents) / 100;
+  return sign ? -v : v;
+}
+
+const keyNum = (n: number | null | undefined) => (n == null || !Number.isFinite(n) ? "" : String(round2(n)));
+const keyText = (s: string | null | undefined) => String(s ?? "").trim().toLowerCase();
+
+/** The files have no line #: a line is its type, code, description, qty, price, amount and date (2 dp, blank is its own value). */
+export function lineKey(l: KeyLine): string {
+  return [l.lineType ?? "", keyText(l.itemCode), keyText(l.description), keyNum(l.qty), keyNum(l.unitPrice), keyNum(l.amount), l.invoiceDate ?? ""].join("|");
+}
+
+/**
+ * The file's lines a saved row doesn't have yet, compared as a multiset: identical lines can repeat, so the file's
+ * third copy of a line KatzDesk has twice is one to add. Existing lines are never changed or taken away.
+ */
+export function missingLines<T extends KeyLine>(existing: KeyLine[], file: T[]): T[] {
+  const have = new Map<string, number>();
+  for (const l of existing) have.set(lineKey(l), (have.get(lineKey(l)) ?? 0) + 1);
+  const out: T[] = [];
+  for (const l of file) {
+    const k = lineKey(l);
+    const n = have.get(k) ?? 0;
+    if (n > 0) have.set(k, n - 1);
+    else out.push(l);
+  }
+  return out;
+}
+
+const SAME_REASON = "Already saved; nothing blank to fill and no missing lines.";
+
 /**
  * Plan every row against KatzDesk as it is now. Saves nothing.
- * `savedRefs`: History Refs already imported. `linkedJobs`: tickets already holding a history row.
+ * `savedRefs`: History Refs already imported. `saved`: those rows as saved (by lowercase ref), so blanks can be filled
+ * and missing lines added; a saved ref without one is No Change. `linkedJobs`: tickets already holding a history row.
+ * A saved row is matched on History Ref only, never on the WO # alone (a reused WO # on another date is another job).
  */
 export function planWoHistory(
   orders: WoPlanInput[],
-  ctx: { accounts: PlanAccount[]; activeTechs: string[]; savedRefs: Set<string>; tickets: PlanTicket[]; linkedJobs: Set<number> },
+  ctx: {
+    accounts: PlanAccount[];
+    activeTechs: string[];
+    savedRefs: Set<string>;
+    tickets: PlanTicket[];
+    linkedJobs: Set<number>;
+    saved?: Map<string, SavedHistory>;
+    savedTickets?: Map<number, SavedTicket>;
+  },
+  fileLines: WoLine[] = [],
 ): WoPlanLine[] {
   const active = new Map<string, PlanAccount[]>();
   const removed = new Map<string, PlanAccount[]>();
@@ -491,27 +659,42 @@ export function planWoHistory(
     if (t.duplicateOf || !t.wo) continue;
     byWo.set(nameKey(t.wo), [...(byWo.get(nameKey(t.wo)) ?? []), t]);
   }
+  const linesByRef = new Map<string, WoLine[]>();
+  for (const l of fileLines) linesByRef.set(l.ref.toLowerCase(), [...(linesByRef.get(l.ref.toLowerCase()) ?? []), l]);
   const claimed = new Set(ctx.linkedJobs);
   const saved = new Set([...ctx.savedRefs].map((r) => r.toLowerCase()));
-  return orders.map((o) => {
+  return orders.map((o): WoPlanLine => {
     const locationNeeded = o.locationSource.trim().toLowerCase() === "missing" || !o.serviceLocation.trim();
     const lookup = (locationNeeded ? o.customer : o.serviceLocation).trim();
     const tech = historyTech(o.tech, ctx.activeTechs);
-    const base = { ref: o.ref, lookup, locationNeeded, jobId: null, seen: null, ...tech, reason: null } as const;
-    if (saved.has(o.ref.toLowerCase())) return { ...base, status: "same", account: lookup, reason: "Already imported." };
+    const base = { ref: o.ref, lookup, locationNeeded, jobId: null, seen: null, ...tech, reason: null, accountId: null, historyId: null, fills: [] as WoFill[], newLines: [] as WoLine[], addLines: null };
+    const one = (status: WoStatus, rest: Partial<WoPlanLine>): WoPlanLine => ({ ...base, account: null, ...rest, status, tags: [status] });
+    const ref = o.ref.toLowerCase();
+    const row = ctx.saved?.get(ref);
+    if (row) return savedLine(o, row, base);
+    if (saved.has(ref)) return one("same", { account: lookup, reason: SAME_REASON });
     const live = active.get(nameKey(lookup)) ?? [];
     if (!live.length) {
       const gone = removed.get(nameKey(lookup)) ?? [];
-      if (gone.length)
-        return { ...base, status: "removed", account: gone[0]!.name, reason: `“${gone[0]!.name}” was removed from Customers. Ticked, it saves on the removed account without restoring it.` };
-      return {
-        ...base,
-        status: "unmatched",
-        account: null,
+      if (gone.length > 1)
+        return one("ambiguous", { account: null, reason: `${gone.length} removed accounts are named “${lookup}”. Keep one on Customers, then read the files again.` });
+      if (gone.length === 1) {
+        const g = gone[0]!;
+        // A parent account (Walk - In, Cimbali National Accounts) is never brought back to hold Location Needed rows.
+        if (locationNeeded)
+          return one("removed", { account: g.name, accountId: g.id, reason: `“${g.name}” was removed from Customers, and a parent account isn't restored for Location Needed rows. Ticked, it saves on the removed account without restoring it.` });
+        return one("retire", {
+          account: g.name,
+          accountId: g.id,
+          reason: `“${g.name}” was removed from Customers. Saving restores it as Retired: hidden from pickers and lists, and it takes no new tickets, installs or PMs.`,
+        });
+      }
+      return one("unmatched", {
         reason: locationNeeded ? `No account named “${lookup}” for the Location Needed rows.` : `No account named “${lookup}”. Fix the name on Clean Names, then read the files again.`,
-      };
+      });
     }
-    const account = live[0]!.name;
+    const acct = live[0]!;
+    const account = acct.name;
     const done = o.completed ? dayNumber(o.completed) : null;
     const hits =
       done == null
@@ -522,33 +705,91 @@ export function planWoHistory(
             return gap >= 0 && gap <= ATTACH_WINDOW_DAYS;
           });
     if (hits.length > 1)
-      return { ...base, status: "ambiguous", account, reason: `${hits.length} KatzDesk tickets have ${o.wo} on this account within ${ATTACH_WINDOW_DAYS} days: #${hits.map((t) => t.id).join(", #")}.` };
+      return one("ambiguous", { account, accountId: acct.id, reason: `${hits.length} KatzDesk tickets have ${o.wo} on this account within ${ATTACH_WINDOW_DAYS} days: #${hits.map((t) => t.id).join(", #")}.` });
     if (hits.length === 1) {
       const t = hits[0]!;
-      if (claimed.has(t.id)) return { ...base, status: "ambiguous", account, reason: `Ticket #${t.id} (${o.wo}) already has another history row.` };
+      if (claimed.has(t.id)) return one("ambiguous", { account, accountId: acct.id, reason: `Ticket #${t.id} (${o.wo}) already has another history row.` });
       claimed.add(t.id);
-      return { ...base, status: "attach", account, jobId: t.id, seen: t.updatedAt, reason: `KatzDesk ticket #${t.id} (${t.wo}, received ${t.received}).` };
+      // Work Done and Completed fill as they always have; the ticket's blank tech and issue fill too.
+      const fills = ticketFills(o, { id: t.id, technician: t.technician ?? null, issue: t.issue ?? null, workDone: t.workDone, completedAt: t.completedAt }, ctx.activeTechs, ["technician", "issue"]);
+      return one("attach", {
+        account,
+        accountId: acct.id,
+        jobId: t.id,
+        seen: t.updatedAt,
+        fills,
+        reason: `KatzDesk ticket #${t.id} (${t.wo}, received ${t.received}).${fills.length ? ` Fills ${fills.map(fillText).join("; ")}.` : ""}`,
+      });
     }
-    return { ...base, status: "create", account };
+    return one("create", { account, accountId: acct.id, reason: acct.inactive ? `On “${account}”, which is Retired.` : null });
   });
+
+  function savedLine(o: WoPlanInput, row: SavedHistory, base: Omit<WoPlanLine, "status" | "tags" | "account">): WoPlanLine {
+    const fills = historyFills(o, row, ctx.activeTechs);
+    const ticket = row.jobId != null ? ctx.savedTickets?.get(row.jobId) : undefined;
+    if (ticket) fills.push(...ticketFills(o, ticket, ctx.activeTechs));
+    const fileOwn = linesByRef.get(o.ref.toLowerCase()) ?? [];
+    const newLines = missingLines(row.lines, fileOwn);
+    const tags: WoStatus[] = [];
+    // Saved on an account that was removed (and no active account has the name): saving again restores it as Retired.
+    const onRemoved = row.customer && !(active.get(nameKey(row.customer)) ?? []).length ? (removed.get(nameKey(row.customer)) ?? []) : [];
+    const retire = onRemoved.length === 1 && !base.locationNeeded ? onRemoved[0]! : null;
+    if (retire) tags.push("retire");
+    if (fills.length) tags.push("fill");
+    if (newLines.length) tags.push("addLines");
+    if (!tags.length) tags.push("same");
+    let addLines: WoPlanLine["addLines"] = null;
+    if (newLines.length) {
+      const inv = historyInvoice([...row.lines, ...newLines]);
+      const discount = newLines.filter((l) => LINE_KIND[l.lineType] === "discount").length;
+      addLines = { lines: newLines.length, discount, invoice: `Invoice ${o.wo || o.ref}`, discountTotal: inv.discount, total: inv.total };
+    }
+    const reasons = [
+      ...(retire ? [`Saved on “${retire.name}”, which was removed. Saving restores it as Retired: hidden from pickers and lists, and it takes no new tickets, installs or PMs.`] : []),
+      ...(fills.length ? [fills.map(fillText).join("; ")] : []),
+      ...(addLines ? [`${addLines.lines} ${addLines.lines === 1 ? "line" : "lines"} (${addLines.discount} discount) to ${addLines.invoice}`] : []),
+    ];
+    return {
+      ...base,
+      account: retire?.name ?? row.customer ?? base.lookup,
+      accountId: retire?.id ?? null,
+      status: tags[0]!,
+      tags,
+      historyId: row.id,
+      jobId: row.jobId,
+      seen: ticket && fills.some((f) => f.target === "ticket") ? ticket.updatedAt : null,
+      fills,
+      newLines,
+      addLines,
+      reason: reasons.length ? reasons.join(" · ") : SAME_REASON,
+    };
+  }
 }
 
 export type WoCounts = Record<WoStatus, number> & { locationNeeded: number; remapped: number };
 
+/** Every status a row has counts once: a row that fills and adds lines counts in both. */
 export function countWoPlan(lines: WoPlanLine[]): WoCounts {
-  const c: WoCounts = { create: 0, attach: 0, removed: 0, unmatched: 0, ambiguous: 0, same: 0, locationNeeded: 0, remapped: 0 };
+  const c: WoCounts = { create: 0, attach: 0, retire: 0, fill: 0, addLines: 0, removed: 0, unmatched: 0, ambiguous: 0, same: 0, locationNeeded: 0, remapped: 0 };
   for (const l of lines) {
-    c[l.status]++;
-    if (l.locationNeeded && isSaveable(l.status)) c.locationNeeded++;
-    if (l.originalTech && isSaveable(l.status)) c.remapped++;
+    for (const t of l.tags ?? [l.status]) c[t]++;
+    if (l.locationNeeded && l.historyId == null && isNewRow(l.status)) c.locationNeeded++;
+    if (l.originalTech && l.historyId == null && isNewRow(l.status)) c.remapped++;
   }
   return c;
+}
+
+/** Will Retire-Restore, by account: "Test Cafe - North: 18 WOs". */
+export function retireByAccount(lines: WoPlanLine[]): { account: string; count: number }[] {
+  const m = new Map<string, number>();
+  for (const l of lines) if (l.status === "retire" && l.account) m.set(l.account, (m.get(l.account) ?? 0) + 1);
+  return [...m].map(([account, count]) => ({ account, count })).sort((a, b) => b.count - a.count || a.account.localeCompare(b.account));
 }
 
 /** Tickets that go to the fallback tech, by the tech who did them. */
 export function remappedByTech(lines: WoPlanLine[]): { tech: string; count: number }[] {
   const m = new Map<string, number>();
-  for (const l of lines) if (l.originalTech && isSaveable(l.status)) m.set(l.originalTech, (m.get(l.originalTech) ?? 0) + 1);
+  for (const l of lines) if (l.originalTech && l.historyId == null && isNewRow(l.status)) m.set(l.originalTech, (m.get(l.originalTech) ?? 0) + 1);
   return [...m].map(([tech, count]) => ({ tech, count })).sort((a, b) => b.count - a.count || a.tech.localeCompare(b.tech));
 }
 
@@ -606,7 +847,11 @@ export type HistoryInvoice = {
   invoiceDate: string | null;
 };
 
-/** The invoice the lines make: Amount as billed (never qty × price), Discount lines summed into one discount. */
+/**
+ * The invoice the lines make: Amount as billed (never qty × price), Discount lines summed into one discount.
+ * These work orders come from the legacy QuickBooks system, where the QuickBooks invoice # IS the Corrigo WO #: a
+ * history invoice is "Invoice WO-####", one per History Ref, dated by its earliest line.
+ */
 export function historyInvoice(lines: Pick<WoLine, "lineType" | "itemCode" | "description" | "qty" | "unitPrice" | "amount" | "invoiceDate">[]): HistoryInvoice {
   let parts = 0;
   let labor = 0;

@@ -99,6 +99,7 @@ import { reopenInstall } from "./inspection-api";
 import { withSales } from "./install-sale";
 import { archiveInstallFor, assertCustomerChangeAllowed, moveInstallUnits } from "./install-projects";
 import { parseMentions } from "./mentions";
+import { assertTakesNewWork, inactiveLabel } from "./retired-accounts";
 import { deliverPings } from "./notify";
 
 const INITIALS_TO_PRODUCER = Object.fromEntries(Object.entries(PRODUCER_INITIALS).map(([name, initials]) => [initials.toLowerCase(), name]));
@@ -929,6 +930,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	if (data.customer != null && data.customer.trim() !== String(cur[0].customer ?? "").trim()) {
 		if (cur[0].kind === "tlc") assertWalkInMove("tlc", cur[0].customer, data.customer);
 		data = { ...data, customer: await ticketAccount(sql, data.customer ?? "") };
+		await assertTakesNewWork(sql, data.customer, "ticket", { moving: true });
 	}
 	if (data.customer !== undefined) {
 		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
@@ -1070,6 +1072,8 @@ async function ticketAccount(sql: Sql, raw: string): Promise<string> {
 export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: number; customer: string }> {
 	if (data.kind === "tlc") assertWalkInSite("tlc", data.customer);
 	const customer = await ticketAccount(sql, data.customer);
+	// An inactive or Retired account takes no new tickets (11/19).
+	await assertTakesNewWork(sql, customer, "ticket");
 	const received = data.received || todayChicago();
 	for (let attempt = 0; ; attempt += 1) {
 		const callId = await nextCallId(sql, received);
@@ -1221,6 +1225,8 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	// Moved to a service ticket (11/18): the ticket is where its work goes now. Move it back from the ticket first.
 	if (cur[0].moved_job_id) throw new Error("This PM was moved to a service ticket. Open the ticket, or move it back to a PM from there.");
 	if (data.customer !== undefined) assertWalkInMove("pm", cur[0].customer, data.customer);
+	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "pm", { moving: true });
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
 		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
 		const refusal = stackCustomerRefusal(
@@ -1286,6 +1292,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createPmInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("pm", data.customer);
+	await assertTakesNewWork(sql, data.customer, "pm");
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
       values (${data.customer}, ${data.equipment ?? null}, ${data.style ?? DEFAULT_PM_STYLE}, ${todayChicago()}, ${"Pending Scheduling"})
@@ -1436,6 +1443,7 @@ export const confirmDealMachines = createServerFn({ method: "POST" }).middleware
 		installId = target.id;
 		await syncInstallUnits(sql, installId, { prune: true });
 	} else {
+		await assertTakesNewWork(sql, deal.customer, "install");
 		const packed = serializeMachines(incoming);
 		const made = await sql`
       insert into installs (received, customer, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
@@ -1481,6 +1489,8 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	if (data.customer !== undefined) assertWalkInMove("deal", cur[0].customer, data.customer);
+	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "deal", { moving: true });
 	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
 	const release = new Set<string>(Array.isArray(data.releaseUids) ? data.releaseUids.filter((u: unknown) => typeof u === "string" && u) : []);
 	if (release.size) {
@@ -1577,6 +1587,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createDealInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("deal", data.customer);
+	await assertTakesNewWork(sql, data.customer, "deal");
 	const producer = canonicalRepName(data.producer);
 	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
 	const packed = Array.isArray(data.machines) && data.machines.length ? serializeMachines(data.machines.map((m: any) => cleanMachine({ ...m, equipment: String(m?.equipment ?? ""), serial: String(m?.serial ?? ""), powerVoltage: String(m?.powerVoltage ?? "") }))) : null;
@@ -1689,6 +1700,8 @@ async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: strin
 		const now = await hasOne();
 		if (now) return { kind: "had", installId: Number(now.id) };
 	}
+	// A new install isn't made on an inactive or Retired account: the deal goes back to the Handoff page, saying why.
+	await assertTakesNewWork(sql, deal.customer, "install");
 	// Made from the deal's rows as they are: one statement locks the deal, checks the claim is this one's and the machines
 	// are as read (else it reads them again), makes the install while the deal has none, and ties the deal's rows to it.
 	let cur = deal;
@@ -1932,6 +1945,8 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		if (Number(own[0]?.n ?? 0) > 0) throw new Error(`Changing this install's account moves its ${own[0].n} unit${Number(own[0].n) === 1 ? "" : "s"} to the new account. Only an Admin can move units between accounts.`);
 	}
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
+	if (data.customer !== undefined && data.customer.toLowerCase() !== String(c.customer ?? "").trim().toLowerCase())
+		await assertTakesNewWork(sql, data.customer, "install", { moving: true });
 	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
 	if (data.wo !== undefined && data.wo && woMatchKey(data.wo) !== woMatchKey(c.wo ?? "")) await assertWoFree(sql, data.id, data.wo);
 	// Tech Request Form issued: a person ticks it, and only Sales or an admin may.
@@ -2066,6 +2081,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("install", data.customer);
+	await assertTakesNewWork(sql, data.customer, "install");
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
 	const parsed = parseMachinesJson(machinesJsonRaw);
@@ -2338,16 +2354,17 @@ export async function searchAllFor(sql: any, data: { q: string }, context: { use
 		status: r.customer ? "Account" : "House"
 	});
 	const accounts = await sql`
-      select id, name from directory_customers
+      select id, name, inactive, retired_at from directory_customers
       where archived = false and name ilike ${like}
-      order by lower(name)
+      order by inactive, lower(name)
       limit 8`;
+	// Found by name either way; an inactive one says so ("Retired" from the history import, else "Inactive").
 	for (const a of accounts) hits.push({
 		entityType: "customer",
 		id: a.id,
 		title: a.name,
 		subtitle: "Account history",
-		status: null
+		status: inactiveLabel({ inactive: a.inactive === true, retiredAt: a.retired_at })
 	});
 	const seen = new Set<string>();
 	return hits.filter((h) => {
@@ -2842,7 +2859,7 @@ export const listRecipes = createServerFn({ method: "GET" }).middleware([deskMid
 export const listCustomers = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<string[]> => {
 	return (await (await ready())`
       select name as customer from directory_customers
-      where archived = false and coalesce(name, '') <> ''
+      where archived = false and inactive = false and coalesce(name, '') <> ''
       order by lower(name)`).map((r) => r.customer);
 });
 export const listCustomerRecords = createServerFn({ method: "GET" }).middleware([deskMiddleware]).handler(async (): Promise<CustomerRecord[]> => {
@@ -2858,6 +2875,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
          d.removal_flag,
          d.account_number,
          d.inactive,
+         d.retired_at,
          coalesce(svc.n, 0)::int as calls,
          coalesce(svc.p, 0)::int as pending_calls,
          coalesce(tlc.n, 0)::int as tlcs,
@@ -2941,7 +2959,8 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 		nameLocked: r.name_locked === true,
 		removalFlag: r.removal_flag === true,
 		accountNumber: r.account_number ?? null,
-		inactive: r.inactive === true
+		inactive: r.inactive === true,
+		retired: r.inactive === true && r.retired_at != null
 	}));
 });
 export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([deskMiddleware]).validator(input.idInput).handler(async ({ data, context }: any): Promise<CustomerHistory | null> => {
@@ -3011,6 +3030,7 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 				phone: text(account.phone),
 				email: text(account.email),
 				inactive: account.inactive === true,
+				retired: account.inactive === true && account.retired_at != null,
 				netsuiteId: admin ? text(account.netsuite_id) : null,
 				billingAddress: admin
 					? formatAddress({

@@ -15,7 +15,9 @@ import type { PartRef } from "@/lib/ops/charges";
 import { renameOrMergeCustomer } from "@/lib/ops/customer-identity";
 import { ensureRoster } from "@/lib/ops/roster";
 import {
+  HISTORY_FILL_FIELDS,
   historyInvoice,
+  isNewRow,
   isSaveable,
   nameKey,
   planAccountRenames,
@@ -28,6 +30,8 @@ import {
   type PlanAccount,
   type PlanTicket,
   type RenamePlanLine,
+  type SavedHistory,
+  type SavedTicket,
   type WoCounts,
   type WoLine,
   type WoOrder,
@@ -113,20 +117,64 @@ export async function applyRenames(sql: Sql, input: { ids: number[]; locations: 
 // ── Planning ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 export async function loadPlanContext(sql: Query, orders: WoPlanInput[]) {
-  const accounts: PlanAccount[] = (await sql.query<{ id: number; name: string; archived: boolean }>("select id, name, archived from directory_customers")).map((r) => ({
+  const accounts: PlanAccount[] = (await sql.query<{ id: number; name: string; archived: boolean; inactive: boolean }>("select id, name, archived, inactive from directory_customers")).map((r) => ({
     id: Number(r.id),
     name: String(r.name ?? ""),
     archived: r.archived === true,
+    inactive: r.inactive === true,
   }));
   const activeTechs = (await sql.query<{ name: string }>("select name from desk_techs where active = true order by sort_order, id").catch(() => [])).map((r) => r.name);
   const refs = orders.map((o) => o.ref.toLowerCase());
-  const savedRefs = new Set(
-    (await sql.query<{ history_ref: string }>("select history_ref from wo_history where lower(history_ref) = any($1::text[])", [refs])).map((r) => r.history_ref),
+  // Saved rows, matched on History Ref only: their fields and lines, so blanks fill and missing lines are added.
+  const savedRows = await sql.query<Record<string, unknown>>(
+    `select id, history_ref, job_id, customer, ${HISTORY_FILL_FIELDS.map((f) => (f.kind === "date" ? `${f.field}::text as ${f.field}` : f.field)).join(", ")}
+       from wo_history where lower(history_ref) = any($1::text[])`,
+    [refs],
+  );
+  const savedRefs = new Set(savedRows.map((r) => String(r.history_ref)));
+  const savedLines = savedRows.length
+    ? await sql.query<Record<string, unknown>>(
+        `select history_id, line_type, item_code, description, qty, unit_price, amount, invoice_date::text as invoice_date
+           from wo_history_lines where history_id = any($1::int[]) order by history_id, sort, id`,
+        [savedRows.map((r) => Number(r.id))],
+      )
+    : [];
+  const linesBy = new Map<number, SavedHistory["lines"]>();
+  for (const l of savedLines) {
+    const id = Number(l.history_id);
+    linesBy.set(id, [
+      ...(linesBy.get(id) ?? []),
+      { lineType: String(l.line_type), itemCode: str(l.item_code) ?? "", description: str(l.description) ?? "", qty: num(l.qty), unitPrice: num(l.unit_price), amount: num(l.amount), invoiceDate: str(l.invoice_date) },
+    ]);
+  }
+  const saved = new Map<string, SavedHistory>(
+    savedRows.map((r) => {
+      const values: SavedHistory["values"] = {};
+      for (const f of HISTORY_FILL_FIELDS) values[f.field] = f.kind === "number" ? num(r[f.field]) : (r[f.field] as string | null);
+      return [
+        String(r.history_ref).toLowerCase(),
+        { id: Number(r.id), ref: String(r.history_ref), jobId: num(r.job_id), customer: String(r.customer ?? ""), values, lines: linesBy.get(Number(r.id)) ?? [] },
+      ];
+    }),
+  );
+  const savedJobIds = [...new Set(savedRows.map((r) => num(r.job_id)).filter((v): v is number => v != null))];
+  const savedTickets = new Map<number, SavedTicket>(
+    (savedJobIds.length
+      ? await sql.query<Record<string, unknown>>(
+          "select id, updated_at::text as updated_at, technician, issue, work_done, completed_at::text as completed_at from service_jobs where id = any($1::int[])",
+          [savedJobIds],
+        )
+      : []
+    ).map((r) => [
+      Number(r.id),
+      { id: Number(r.id), updatedAt: String(r.updated_at ?? ""), technician: str(r.technician), issue: str(r.issue), workDone: str(r.work_done), completedAt: str(r.completed_at) },
+    ]),
   );
   const wos = [...new Set(orders.map((o) => nameKey(o.wo)).filter(Boolean))];
   const tickets: PlanTicket[] = (
     await sql.query<Record<string, unknown>>(
-      `select id, wo, customer, received::text as received, updated_at::text as updated_at, work_done, completed_at::text as completed_at, duplicate_of
+      `select id, wo, customer, received::text as received, updated_at::text as updated_at, work_done, completed_at::text as completed_at, duplicate_of,
+              technician, issue
          from service_jobs where kind = 'service' and lower(btrim(wo)) = any($1::text[])`,
       [wos],
     )
@@ -139,15 +187,18 @@ export async function loadPlanContext(sql: Query, orders: WoPlanInput[]) {
     workDone: str(r.work_done),
     completedAt: str(r.completed_at),
     duplicateOf: num(r.duplicate_of),
+    technician: str(r.technician),
+    issue: str(r.issue),
   }));
   const linkedJobs = new Set(
     (await sql.query<{ job_id: number }>("select job_id from wo_history where job_id = any($1::int[])", [tickets.map((t) => t.id)])).map((r) => Number(r.job_id)),
   );
-  return { accounts, activeTechs, savedRefs, tickets, linkedJobs };
+  return { accounts, activeTechs, savedRefs, saved, savedTickets, tickets, linkedJobs };
 }
 
-export async function planOrders(sql: Query, orders: WoPlanInput[]): Promise<WoPlanLine[]> {
-  return planWoHistory(orders, await loadPlanContext(sql, orders));
+/** Plan rows against KatzDesk now. `lines` are the file's lines for these rows: missing ones on saved rows are listed. */
+export async function planOrders(sql: Query, orders: WoPlanInput[], lines: WoLine[] = []): Promise<WoPlanLine[]> {
+  return planWoHistory(orders, await loadPlanContext(sql, orders), lines);
 }
 
 // ── Saving ───────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -162,12 +213,22 @@ export async function startRun(sql: Query, input: { filename: string; rowCount: 
   return Number(r[0]!.id);
 }
 
+const FILL_TYPE = { text: "text", number: "numeric", date: "date" } as const;
+const H = HISTORY_FILL_FIELDS;
+/** A history field is blank: text that is null or only spaces; a number or date that is null. A 0 is a value. */
+const blankSql = (col: string, kind: string) => (kind === "text" ? `coalesce(btrim(${col}), '') = ''` : `${col} is null`);
+
 /**
  * One batch, one statement: it saves whole or not at all.
- * - Only ticked rows the plan (run again now) can save: create, attach, or removed.
- * - Attach: the ticket must still read as it did in the preview (updated_at); if it changed, the row is skipped.
- *   Only its blank Work Done and Completed are filled, and what was filled is kept so Undo can clear it.
- * - A History Ref already saved is skipped.
+ * - Only ticked rows the plan (run again now) can save.
+ * - New rows (create, attach, retire-restore, removed): a History Ref already saved is skipped.
+ *   Attach: the ticket must still read as it did in the preview (updated_at); if it changed, the row is skipped. Its
+ *   blank Work Done and Completed are filled (kept on the row so Undo can clear them), and its blank tech and issue.
+ * - Saved rows (Will Fill, Will Add Lines): only blank fields are filled, each recorded in wo_history_fills. Missing
+ *   lines are added only while the row still has the lines the preview read, and its discount and line total are
+ *   worked out again from all its lines. Its ticket's blank fields fill only while the ticket reads as previewed.
+ * - Retire-restore: a removed account that a row in this batch saved onto is restored as Retired
+ *   (archived = false, inactive = true), recorded in wo_history_retired, and logged.
  */
 const SAVE_SQL = `
 with input as (
@@ -208,15 +269,7 @@ with input as (
          case when fill_work then work_done end, case when fill_done then nullif(completed, '')::timestamp::date end
     from ok
   on conflict (history_ref) do nothing
-  returning id, history_ref, job_id, filled_work_done, filled_completed
-), fill as (
-  update service_jobs j
-     set work_done = coalesce(ins.filled_work_done, j.work_done),
-         completed_at = coalesce(j.completed_at, ins.filled_completed),
-         updated_at = now()
-    from ins
-   where j.id = ins.job_id and (ins.filled_work_done is not null or ins.filled_completed is not null)
-  returning j.id
+  returning id, history_ref, customer, job_id, filled_work_done, filled_completed
 ), lined as (
   insert into wo_history_lines (history_id, sort, line_type, kind, item_code, description, item_class, item_group, qty, unit_price,
          amount, invoice_date, invoice_customer)
@@ -229,31 +282,154 @@ with input as (
   select 'service', ins.job_id, $43::text, 'updated', 'Work order history from QuickBooks attached (' || ins.history_ref || ')'
     from ins where ins.job_id is not null
   returning id
+),
+-- Tickets: an attached ticket's blank fields, and the tickets of saved rows that still read as previewed. One update.
+tf as (
+  select * from jsonb_to_recordset($46::jsonb) as t(job int, seen text, ref text, attach boolean, technician text, issue text, work_done text, completed date)
+), tix as (
+  select distinct on (job) * from (
+    select ins.job_id as job, ins.history_ref as ref, true as attach, ins.filled_work_done as work_done, ins.filled_completed as completed,
+           t.technician, t.issue
+      from ins left join tf t on t.job = ins.job_id and t.attach
+     where ins.job_id is not null
+    union all
+    select t.job, t.ref, false, t.work_done, t.completed, t.technician, t.issue
+      from tf t join service_jobs j on j.id = t.job
+     where not t.attach and j.updated_at::text = t.seen
+  ) x order by job, attach desc
+), tset as (
+  select x.*, j.technician as was_technician, j.issue as was_issue, j.work_done as was_work_done, j.completed_at::text as was_completed,
+         (x.technician is not null and coalesce(btrim(j.technician), '') = '') as do_technician,
+         (x.issue is not null and coalesce(btrim(j.issue), '') = '') as do_issue,
+         (x.work_done is not null and coalesce(btrim(j.work_done), '') = '') as do_work_done,
+         (x.completed is not null and j.completed_at is null) as do_completed
+    from tix x join service_jobs j on j.id = x.job
+), tupd as (
+  update service_jobs j
+     set technician = case when s.do_technician then s.technician else j.technician end,
+         issue = case when s.do_issue then s.issue else j.issue end,
+         work_done = case when s.do_work_done then s.work_done else j.work_done end,
+         completed_at = case when s.do_completed then s.completed else j.completed_at end,
+         updated_at = now()
+    from tset s
+   where j.id = s.job and (s.do_technician or s.do_issue or s.do_work_done or s.do_completed)
+  returning j.id, j.technician, j.issue, j.work_done, j.completed_at::text as completed_at
+), tlog as (
+  insert into wo_history_fills (run_id, target, job_id, field, old_value, new_value)
+  select $42::int, 'ticket', s.job, v.field, v.old, v.new
+    from tset s join tupd u on u.id = s.job
+   cross join lateral (values
+     ('technician', s.was_technician, u.technician, s.do_technician),
+     ('issue', s.was_issue, u.issue, s.do_issue),
+     -- An attach's Work Done and Completed are kept on the history row (filled_*), as before.
+     ('work_done', s.was_work_done, u.work_done, s.do_work_done and not s.attach),
+     ('completed_at', s.was_completed, u.completed_at, s.do_completed and not s.attach)
+   ) v(field, old, new, applied)
+   where v.applied
+  returning id
+), tact as (
+  insert into activity (entity_type, entity_id, actor_name, action, detail)
+  select 'service', s.job, $43::text, 'updated', 'Blank fields filled from work order history (' || s.ref || ')'
+    from tset s join tupd u on u.id = s.job where not s.attach
+  returning id
+),
+-- Saved history rows: blank fields, missing lines, and the discount and line total worked out again.
+hu as (
+  select * from jsonb_to_recordset($44::jsonb) as u(hid int, ref text, seen_lines int, add_lines boolean,
+    ${H.map((f) => `n_${f.field} ${FILL_TYPE[f.kind]}`).join(", ")}, n_discount numeric, n_lines_total numeric)
+), hset as (
+  select u.*, ${H.map((f) => `h.${f.field} as was_${f.field}`).join(", ")}, h.discount as was_discount, h.lines_total as was_lines_total,
+         (u.add_lines and (select count(*) from wo_history_lines l where l.history_id = h.id) = u.seen_lines) as lines_ok,
+         ${H.map((f) =>
+           f.field === "original_tech"
+             ? `(u.n_original_tech is not null and ${blankSql("h.original_tech", "text")} and ${blankSql("h.technician", "text")}) as do_original_tech`
+             : `(u.n_${f.field} is not null and ${blankSql(`h.${f.field}`, f.kind)}) as do_${f.field}`,
+         ).join(",\n         ")}
+    from hu u join wo_history h on h.id = u.hid and lower(h.history_ref) = lower(u.ref)
+     for update of h
+), hupd as (
+  update wo_history h
+     set ${H.map((f) => `${f.field} = case when s.do_${f.field} then s.n_${f.field} else h.${f.field} end`).join(",\n         ")},
+         discount = case when s.lines_ok then s.n_discount else h.discount end,
+         lines_total = case when s.lines_ok then s.n_lines_total else h.lines_total end
+    from hset s
+   where h.id = s.hid and (s.lines_ok or ${H.map((f) => `s.do_${f.field}`).join(" or ")})
+  returning h.id, ${H.map((f) => `h.${f.field}::text as r_${f.field}`).join(", ")}, h.discount::text as r_discount, h.lines_total::text as r_lines_total
+), hlog as (
+  insert into wo_history_fills (run_id, target, history_id, field, old_value, new_value)
+  select $42::int, 'history', s.hid, v.field, v.old, v.new
+    from hset s join hupd u on u.id = s.hid
+   cross join lateral (values
+     ${H.map((f) => `('${f.field}', s.was_${f.field}::text, u.r_${f.field}, s.do_${f.field})`).join(",\n     ")},
+     ('discount', s.was_discount::text, u.r_discount, s.lines_ok),
+     ('lines_total', s.was_lines_total::text, u.r_lines_total, s.lines_ok)
+   ) v(field, old, new, applied)
+   where v.applied
+  returning history_id, field
+), la as (
+  select * from jsonb_to_recordset($45::jsonb) as a(hid int, sort int, line_type text, kind text, item_code text, description text,
+    item_class text, item_group text, qty numeric, unit_price numeric, amount numeric, invoice_date date, invoice_customer text)
+), added as (
+  insert into wo_history_lines (history_id, run_id, sort, line_type, kind, item_code, description, item_class, item_group, qty, unit_price,
+         amount, invoice_date, invoice_customer)
+  select a.hid, $42::int, a.sort, a.line_type, a.kind, nullif(a.item_code, ''), nullif(a.description, ''), nullif(a.item_class, ''),
+         nullif(a.item_group, ''), a.qty, a.unit_price, a.amount, a.invoice_date, nullif(a.invoice_customer, '')
+    from la a join hset s on s.hid = a.hid and s.lines_ok
+  returning id, kind
+),
+-- Removed accounts this batch saved history onto come back as Retired.
+rpre as (
+  select d.id, d.name, d.inactive from directory_customers d
+   where d.archived = true
+     and ((d.id = any($47::int[]) and exists (select 1 from ins where lower(btrim(ins.customer)) = lower(btrim(d.name))))
+          or d.id = any($48::int[]))
+), rupd as (
+  update directory_customers d set archived = false, inactive = true, retired_at = now(), updated_at = now()
+    from rpre where d.id = rpre.id
+  returning d.id, d.name, d.retired_at
+), rlog as (
+  insert into wo_history_retired (run_id, customer_id, name, was_inactive, retired_at)
+  select $42::int, r.id, r.name, p.inactive, r.retired_at from rupd r join rpre p on p.id = r.id
+  returning id
+), ract as (
+  insert into activity (entity_type, entity_id, actor_name, action, detail)
+  select 'customer', r.id, $43::text, 'updated',
+         'Restored as Retired for the Work Order History import (it was removed). Retired accounts are hidden from pickers and lists and take no new tickets, installs or PMs.'
+    from rupd r
+  returning id
 ), run as (
   update wo_history_runs
      set created = created + (select count(*) from ins where job_id is null),
          attached = attached + (select count(*) from ins where job_id is not null),
-         lines = lines + (select count(*) from lined)
+         lines = lines + (select count(*) from lined) + (select count(*) from added)
    where id = $42::int and undone_at is null
   returning id
 )
 select (select count(*) from ins where job_id is null)::int as created,
        (select count(*) from ins where job_id is not null)::int as attached,
-       (select count(*) from fill)::int as filled,
+       (select count(*) from tupd)::int as filled,
        (select count(*) from lined where kind <> 'discount')::int as lines,
        (select count(*) from lined where kind = 'discount')::int as discount_lines,
        (select count(*) from lined where kind not in ('discount', 'labor', 'trip'))::int as part_lines,
        (select count(*) from lined l where l.kind not in ('discount', 'labor', 'trip') and exists (
           select 1 from billing_items b where lower(btrim(b.sku)) = lower(btrim(l.item_code))))::int as part_matched,
-       (select count(*) from act)::int as logged,
+       (select count(distinct history_id) from hlog where field not in ('discount', 'lines_total'))::int as history_filled,
+       (select count(*) from added where kind <> 'discount')::int as lines_added,
+       (select count(*) from added where kind = 'discount')::int as discount_added,
+       (select count(*) from rupd)::int as retired,
+       (select coalesce(array_agg(ref), '{}') from hset where add_lines and not lines_ok) as lines_held,
+       (select coalesce(array_agg(t.ref), '{}') from tf t where not t.attach and not exists (select 1 from tix x where x.job = t.job)) as tickets_held,
+       (select count(*) from act)::int + (select count(*) from tact)::int + (select count(*) from ract)::int as logged,
+       (select count(*) from tlog)::int as ticket_fills,
+       (select count(*) from rlog)::int as retired_logged,
        (select count(*) from run)::int as run_ok`;
 
 export type SaveBatchResult = {
   created: number;
   attached: number;
-  /** Tickets whose blank Work Done or Completed date were filled. */
+  /** Tickets whose blank fields (Work Done, Completed, tech, issue) were filled. */
   filled: number;
-  /** Item lines saved: every QuickBooks line except Discount lines. */
+  /** Item lines saved with new work orders: every QuickBooks line except Discount lines. */
   lines: number;
   /** Discount lines saved. They're stored with their work order and added up into its invoice's one discount; the invoice doesn't list them as lines. */
   discountLines: number;
@@ -261,11 +437,32 @@ export type SaveBatchResult = {
   partLines: number;
   /** Of those, the ones whose Item Code is a part # on the Parts list; the rest show as text. */
   partMatched: number;
+  /** Saved history work orders that had blank fields filled. */
+  historyFilled: number;
+  /** Missing item lines added to saved work orders, and missing Discount lines. */
+  linesAdded: number;
+  discountLinesAdded: number;
+  /** Removed accounts restored as Retired. */
+  retired: number;
   /** Ticked rows that weren't saved: the ticket changed since the preview, or the plan changed. */
   notSaved: { ref: string; why: string }[];
-  /** Ticked rows already saved by an earlier batch or run. */
+  /** Ticked rows already saved, with nothing left to fill or add. */
   alreadySaved: number;
 };
+
+const emptyResult = (): Omit<SaveBatchResult, "notSaved" | "alreadySaved"> => ({
+  created: 0,
+  attached: 0,
+  filled: 0,
+  lines: 0,
+  discountLines: 0,
+  partLines: 0,
+  partMatched: 0,
+  historyFilled: 0,
+  linesAdded: 0,
+  discountLinesAdded: 0,
+  retired: 0,
+});
 
 export async function saveBatch(
   sql: Sql,
@@ -276,12 +473,14 @@ export async function saveBatch(
   if (run.undone_at) throw new Error("That import run was undone. Start the save again.");
   const wanted = new Set(input.include.map((r) => r.toLowerCase()));
   const chosen = input.orders.filter((o) => wanted.has(o.ref.toLowerCase()));
-  const plan = await planOrders(sql, chosen);
+  const byRef = new Map<string, WoLine[]>();
+  for (const l of input.lines) byRef.set(l.ref.toLowerCase(), [...(byRef.get(l.ref.toLowerCase()) ?? []), l]);
+  const ctx = await loadPlanContext(sql, chosen);
+  const plan = planWoHistory(chosen, ctx, chosen.flatMap((o) => byRef.get(o.ref.toLowerCase()) ?? []));
   const notSaved: SaveBatchResult["notSaved"] = [];
   let alreadySaved = 0;
   const rows: { o: WoOrder; p: WoPlanLine; inv: HistoryInvoice }[] = [];
-  const byRef = new Map<string, WoLine[]>();
-  for (const l of input.lines) byRef.set(l.ref.toLowerCase(), [...(byRef.get(l.ref.toLowerCase()) ?? []), l]);
+  const updates: { o: WoOrder; p: WoPlanLine }[] = [];
   chosen.forEach((o, i) => {
     const p = plan[i]!;
     if (p.status === "same") {
@@ -293,20 +492,73 @@ export async function saveBatch(
       return;
     }
     const seen = input.seen[o.ref];
-    if (p.status === "attach" && seen && seen !== p.seen) {
+    if (p.seen && seen && seen !== p.seen) {
       notSaved.push({ ref: o.ref, why: `Ticket #${p.jobId} changed after the preview. Read the files again to pick it up.` });
       return;
     }
-    rows.push({ o, p, inv: historyInvoice(byRef.get(o.ref.toLowerCase()) ?? []) });
+    if (p.historyId == null && isNewRow(p.status)) rows.push({ o, p, inv: historyInvoice(byRef.get(o.ref.toLowerCase()) ?? []) });
+    else updates.push({ o, p });
   });
-  if (!rows.length) return { created: 0, attached: 0, filled: 0, lines: 0, discountLines: 0, partLines: 0, partMatched: 0, notSaved, alreadySaved };
+  if (!rows.length && !updates.length) return { ...emptyResult(), notSaved, alreadySaved };
   const col = <T>(f: (r: (typeof rows)[number]) => T) => rows.map(f);
   const lineRows = rows.flatMap((r) =>
     (byRef.get(r.o.ref.toLowerCase()) ?? []).map((l, i) => ({ ref: r.o.ref, sort: i, l, kind: LINE_KIND[l.lineType] ?? "other" })),
   );
   const lcol = <T>(f: (r: (typeof lineRows)[number]) => T) => lineRows.map(f);
   const hasLines = (r: (typeof rows)[number]) => (byRef.get(r.o.ref.toLowerCase()) ?? []).length > 0;
-  const res = await sql.query<Record<string, number>>(SAVE_SQL, [
+  const fillOf = (p: WoPlanLine, target: "history" | "ticket", field: string) => p.fills.find((f) => f.target === target && f.field === field)?.value ?? null;
+  // Saved rows: the blank fields to fill, and the lines to add with the totals they make.
+  const historyUpdates = updates.map(({ p }) => {
+    const saved = ctx.saved.get(p.ref.toLowerCase())!;
+    return {
+      hid: p.historyId,
+      ref: p.ref,
+      seen_lines: saved.lines.length,
+      add_lines: p.newLines.length > 0,
+      ...Object.fromEntries(HISTORY_FILL_FIELDS.map((f) => [`n_${f.field}`, fillOf(p, "history", f.field)])),
+      n_discount: p.addLines ? p.addLines.discountTotal : null,
+      n_lines_total: p.addLines ? p.addLines.total : null,
+    };
+  });
+  const lineAdds = updates.flatMap(({ p }) => {
+    const start = ctx.saved.get(p.ref.toLowerCase())!.lines.length;
+    return p.newLines.map((l, i) => ({
+      hid: p.historyId,
+      sort: start + i,
+      line_type: l.lineType,
+      kind: LINE_KIND[l.lineType] ?? "other",
+      item_code: l.itemCode,
+      description: l.description,
+      item_class: l.itemClass ?? "",
+      item_group: l.itemGroup ?? "",
+      qty: l.qty,
+      unit_price: l.unitPrice,
+      amount: l.amount,
+      invoice_date: l.invoiceDate || null,
+      invoice_customer: l.invoiceCustomer ?? "",
+    }));
+  });
+  const ticketFills = [
+    ...rows
+      .filter((r) => r.p.status === "attach" && r.p.jobId != null)
+      .map((r) => ({ job: r.p.jobId, seen: r.p.seen, ref: r.o.ref, attach: true, technician: fillOf(r.p, "ticket", "technician"), issue: fillOf(r.p, "ticket", "issue"), work_done: null, completed: null })),
+    ...updates
+      .filter(({ p }) => p.jobId != null && p.fills.some((f) => f.target === "ticket"))
+      .map(({ p }) => ({
+        job: p.jobId,
+        seen: p.seen,
+        ref: p.ref,
+        attach: false,
+        technician: fillOf(p, "ticket", "technician"),
+        issue: fillOf(p, "ticket", "issue"),
+        work_done: fillOf(p, "ticket", "work_done"),
+        completed: fillOf(p, "ticket", "completed_at"),
+      })),
+  ];
+  const retireIds = [...new Set(rows.filter((r) => r.p.status === "retire" && r.p.accountId != null).map((r) => r.p.accountId!))];
+  // Saved rows on a removed account: it comes back as Retired too.
+  const retireSavedIds = [...new Set(updates.filter(({ p }) => p.tags.includes("retire") && p.accountId != null).map(({ p }) => p.accountId!))];
+  const res = await sql.query<Record<string, unknown>>(SAVE_SQL, [
     col((r) => r.o.ref),
     col((r) => r.o.wo),
     col((r) => r.o.completed),
@@ -350,14 +602,18 @@ export async function saveBatch(
     lcol((r) => r.l.invoiceCustomer),
     input.runId,
     input.who,
+    JSON.stringify(historyUpdates),
+    JSON.stringify(lineAdds),
+    JSON.stringify(ticketFills),
+    retireIds,
+    retireSavedIds,
   ]);
   const out = res[0] ?? {};
   if (!Number(out.run_ok)) throw new Error("That import run was undone while saving. Nothing in this batch was saved.");
   const created = Number(out.created ?? 0);
   const attached = Number(out.attached ?? 0);
   // Attach rows the statement skipped: their ticket changed between planning and saving.
-  const savedCount = created + attached;
-  if (savedCount < rows.length) {
+  if (created + attached < rows.length) {
     const saved = new Set(
       (await sql.query<{ history_ref: string }>("select history_ref from wo_history where lower(history_ref) = any($1::text[])", [rows.map((r) => r.o.ref.toLowerCase())])).map((r) =>
         r.history_ref.toLowerCase(),
@@ -365,7 +621,24 @@ export async function saveBatch(
     );
     for (const r of rows) if (!saved.has(r.o.ref.toLowerCase())) notSaved.push({ ref: r.o.ref, why: `Ticket #${r.p.jobId} changed while saving. Read the files again to pick it up.` });
   }
-  return { created, attached, filled: Number(out.filled ?? 0), lines: Number(out.lines ?? 0), discountLines: Number(out.discount_lines ?? 0), partLines: Number(out.part_lines ?? 0), partMatched: Number(out.part_matched ?? 0), notSaved, alreadySaved };
+  const list = (v: unknown) => (Array.isArray(v) ? v.map(String) : typeof v === "string" ? v.replace(/^\{|\}$/g, "").split(",").filter(Boolean) : []);
+  for (const ref of list(out.lines_held)) notSaved.push({ ref, why: "Its lines changed after the preview, so none were added. Read the files again to pick it up." });
+  for (const ref of list(out.tickets_held)) notSaved.push({ ref, why: "Its ticket changed after the preview, so the ticket's blank fields weren't filled. Read the files again to pick it up." });
+  return {
+    created,
+    attached,
+    filled: Number(out.filled ?? 0),
+    lines: Number(out.lines ?? 0),
+    discountLines: Number(out.discount_lines ?? 0),
+    partLines: Number(out.part_lines ?? 0),
+    partMatched: Number(out.part_matched ?? 0),
+    historyFilled: Number(out.history_filled ?? 0),
+    linesAdded: Number(out.lines_added ?? 0),
+    discountLinesAdded: Number(out.discount_added ?? 0),
+    retired: Number(out.retired ?? 0),
+    notSaved,
+    alreadySaved,
+  };
 }
 
 export async function finishRun(sql: Query, runId: number) {
@@ -391,17 +664,24 @@ export type WoHistoryRun = {
   undoneBy: string | null;
   /** History rows from this run still saved. */
   current: number;
+  /** Saved work orders whose blank fields this run filled, lines it added to them, and accounts it restored as Retired. */
+  rowsFilled: number;
+  linesAdded: number;
+  retired: string[];
 };
 
 export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]> {
   const rows = await sql.query<Record<string, unknown>>(
-    `select r.*, (select count(*) from wo_history h where h.run_id = r.id)::int as current, c.item_lines, c.discount_lines
+    `select r.*, (select count(*) from wo_history h where h.run_id = r.id)::int as current, c.item_lines, c.discount_lines,
+            (select count(distinct f.history_id) from wo_history_fills f where f.run_id = r.id and f.target = 'history' and f.field not in ('discount', 'lines_total'))::int as rows_filled,
+            (select count(*) from wo_history_lines l where l.run_id = r.id)::int as lines_added,
+            (select coalesce(array_agg(x.name order by x.name), '{}') from wo_history_retired x where x.run_id = r.id and x.undone_at is null) as retired
        from wo_history_runs r
        left join lateral (
          select count(*) filter (where l.kind <> 'discount')::int as item_lines,
                 count(*) filter (where l.kind = 'discount')::int as discount_lines
            from wo_history h join wo_history_lines l on l.history_id = h.id
-          where h.run_id = r.id
+          where h.run_id = r.id and l.run_id is null
        ) c on true
       order by r.created_at desc, r.id desc limit $1`,
     [limit],
@@ -422,42 +702,148 @@ export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]
     undoneAt: iso(r.undone_at),
     undoneBy: str(r.undone_by),
     current: Number(r.current ?? 0),
+    rowsFilled: r.undone_at ? 0 : Number(r.rows_filled ?? 0),
+    linesAdded: Number(r.lines_added ?? 0),
+    retired: Array.isArray(r.retired) ? r.retired.map(String) : typeof r.retired === "string" ? r.retired.replace(/^\{|\}$/g, "").split(",").filter(Boolean) : [],
   }));
 }
 
+const TICKET_UNDO = [
+  { field: "technician", type: "text" },
+  { field: "issue", type: "text" },
+  { field: "work_done", type: "text" },
+  { field: "completed_at", type: "date" },
+] as const;
+
+/** Put a filled field back to what it was, but only while it still holds what the run wrote. */
+const undoCol = (alias: string, fills: string, key: string, field: string, type: string) =>
+  `${field} = case when exists (select 1 from ${fills} f where f.${key} = ${alias}.id and f.field = '${field}' and ${alias}.${field}::text is not distinct from f.new_value)
+      then (select f.old_value from ${fills} f where f.${key} = ${alias}.id and f.field = '${field}' order by f.id limit 1)::${type} else ${alias}.${field} end`;
+
+const UNDO_SQL = `
+with live as (
+  select id from wo_history_runs where id = $1 and undone_at is null
+), h as (
+  select * from wo_history where run_id = (select id from live)
+), tfl as (
+  select * from wo_history_fills where run_id = (select id from live) and target = 'ticket' and job_id is not null
+), jobs as (
+  select job_id as id from h where job_id is not null
+  union
+  select job_id from tfl
+), tmatch as (
+  select j.id,
+         exists (select 1 from h where h.job_id = j.id and h.filled_work_done is not null and j.work_done = h.filled_work_done) as wd_attach,
+         exists (select 1 from h where h.job_id = j.id and h.filled_completed is not null and j.completed_at = h.filled_completed) as ca_attach,
+         ${TICKET_UNDO.map((c) => `exists (select 1 from tfl f where f.job_id = j.id and f.field = '${c.field}' and j.${c.field}::text is not distinct from f.new_value) as m_${c.field}`).join(",\n         ")},
+         exists (select 1 from h where h.job_id = j.id) as attached
+    from service_jobs j join jobs on jobs.id = j.id
+), restore as (
+  update service_jobs j
+     set work_done = case when m.wd_attach then null when m.m_work_done then (select f.old_value from tfl f where f.job_id = j.id and f.field = 'work_done' order by f.id limit 1) else j.work_done end,
+         completed_at = case when m.ca_attach then null when m.m_completed_at then (select f.old_value from tfl f where f.job_id = j.id and f.field = 'completed_at' order by f.id limit 1)::date else j.completed_at end,
+         technician = case when m.m_technician then (select f.old_value from tfl f where f.job_id = j.id and f.field = 'technician' order by f.id limit 1) else j.technician end,
+         issue = case when m.m_issue then (select f.old_value from tfl f where f.job_id = j.id and f.field = 'issue' order by f.id limit 1) else j.issue end,
+         updated_at = now()
+    from tmatch m
+   where j.id = m.id and (m.wd_attach or m.ca_attach or m.m_work_done or m.m_completed_at or m.m_technician or m.m_issue)
+  returning j.id
+), act as (
+  insert into activity (entity_type, entity_id, actor_name, action, detail)
+  select 'service', m.id, $2::text, 'updated',
+         case when m.attached then 'Work order history from QuickBooks removed (undo of import #' || $1::int || ')'
+              else 'Blank fields filled from work order history put back (undo of import #' || $1::int || ')' end
+    from tmatch m where m.attached or m.id in (select id from restore)
+  returning id
+),
+-- Fields this run filled on work orders other runs saved (this run's own rows are deleted below).
+hfl as (
+  select * from wo_history_fills where run_id = (select id from live) and target = 'history' and history_id is not null
+), hrev as (
+  update wo_history w
+     set ${HISTORY_FILL_FIELDS.map((f) => undoCol("w", "hfl", "history_id", f.field, FILL_TYPE[f.kind])).join(",\n         ")},
+         -- Lines this run added are deleted: the discount and line total come from the lines left (later runs' too).
+         discount = case when w.id in (select history_id from hfl where field = 'discount')
+           then (select case when count(*) = 0 then null else round(coalesce(-sum(l.amount) filter (where l.kind = 'discount'), 0), 2) end
+                   from wo_history_lines l where l.history_id = w.id and l.run_id is distinct from $1)
+           else w.discount end,
+         lines_total = case when w.id in (select history_id from hfl where field = 'lines_total')
+           then (select case when count(*) = 0 then null
+                        else round(coalesce(sum(l.amount) filter (where l.kind <> 'discount'), 0), 2) - round(coalesce(-sum(l.amount) filter (where l.kind = 'discount'), 0), 2) end
+                   from wo_history_lines l where l.history_id = w.id and l.run_id is distinct from $1)
+           else w.lines_total end
+   where w.id in (select history_id from hfl) and w.run_id <> $1
+  returning w.id
+), lgone as (
+  delete from wo_history_lines where run_id = (select id from live) and history_id in (select id from wo_history where run_id <> $1) returning id
+), gone as (
+  delete from wo_history where run_id = (select id from live) returning id
+),
+-- Accounts this run restored as Retired go back to removed, only while still Retired from this run, with nothing added since.
+rr as (
+  select r.* from wo_history_retired r where r.run_id = (select id from live) and r.undone_at is null
+), rok as (
+  select rr.* from rr join directory_customers d on d.id = rr.customer_id
+   where d.archived = false and d.inactive = true and d.retired_at = rr.retired_at and d.name = rr.name
+     -- This run's own ticket fills aren't something added since.
+     and not exists (select 1 from service_jobs x where lower(btrim(x.customer)) = lower(btrim(rr.name)) and x.updated_at >= rr.retired_at
+                       and x.id not in (select id from jobs))
+     and not exists (select 1 from pm_jobs x where lower(btrim(x.customer)) = lower(btrim(rr.name)) and x.updated_at >= rr.retired_at)
+     and not exists (select 1 from installs x where lower(btrim(x.customer)) = lower(btrim(rr.name)) and x.updated_at >= rr.retired_at)
+     and not exists (select 1 from wo_history x where lower(btrim(x.customer)) = lower(btrim(rr.name)) and x.run_id <> $1 and x.created_at >= rr.retired_at)
+), rback as (
+  update directory_customers d set archived = true, inactive = rok.was_inactive, retired_at = null, updated_at = now()
+    from rok where d.id = rok.customer_id
+  returning d.id, d.name
+), rdone as (
+  update wo_history_retired r set undone_at = now() where r.id in (select id from rok) returning id
+), ract as (
+  insert into activity (entity_type, entity_id, actor_name, action, detail)
+  select 'customer', b.id, $2::text, 'updated', 'Removed again: undo of Work Order History import #' || $1::int || ', which had restored it as Retired'
+    from rback b
+  returning id
+), run as (
+  update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null returning id
+)
+select (select count(*) from gone)::int as removed, (select count(*) from restore)::int as restored,
+       (select count(*) from lgone)::int as lines_removed, (select count(*) from hrev)::int as rows_cleared,
+       (select coalesce(array_agg(name order by name), '{}') from rback) as accounts_back,
+       (select coalesce(array_agg(rr.name order by rr.name), '{}') from rr where rr.id not in (select id from rok)) as accounts_kept,
+       (select count(*) from run)::int as ok, (select count(*) from act)::int + (select count(*) from ract)::int + (select count(*) from rdone)::int as logged`;
+
+export type UndoResult = {
+  /** History work orders this run saved, now deleted. */
+  removed: number;
+  /** Tickets whose filled fields were put back. */
+  restored: number;
+  /** Lines this run added to other runs' work orders, now deleted. */
+  linesRemoved: number;
+  /** Other runs' work orders whose blanks this run filled, put back. */
+  rowsCleared: number;
+  /** Accounts this run restored as Retired, removed again. */
+  accountsBack: string[];
+  /** Ones left Retired: something was added to them since, or they changed. */
+  accountsKept: string[];
+};
+
 /**
- * Undo a run: its history rows and their lines are deleted, and on attached tickets only the fields the run filled
- * are cleared, and only while they still hold what the run wrote. Renames are separate and stay.
+ * Undo a run, removing only what it added: its history rows and their lines, the lines it added to other rows, the
+ * blank fields it filled (only while they still hold what it wrote), and the accounts it restored as Retired (only while
+ * still Retired from it with nothing added since). Renames are separate and stay.
  */
-export async function undoRun(sql: Query, input: { runId: number; who: string }) {
-  const res = await sql.query<{ removed: number; restored: number; ok: number }>(
-    `with h as (
-       select * from wo_history where run_id = $1
-     ), restore as (
-       update service_jobs j
-          set work_done = case when h.filled_work_done is not null and j.work_done = h.filled_work_done then null else j.work_done end,
-              completed_at = case when h.filled_completed is not null and j.completed_at = h.filled_completed then null else j.completed_at end,
-              updated_at = now()
-         from h
-        where j.id = h.job_id and (h.filled_work_done is not null or h.filled_completed is not null)
-       returning j.id
-     ), act as (
-       insert into activity (entity_type, entity_id, actor_name, action, detail)
-       select 'service', h.job_id, $2::text, 'updated', 'Work order history from QuickBooks removed (' || h.history_ref || ', undo)'
-         from h where h.job_id is not null
-       returning id
-     ), gone as (
-       delete from wo_history where run_id = $1 returning id
-     ), run as (
-       update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null returning id
-     )
-     select (select count(*) from gone)::int as removed, (select count(*) from restore)::int as restored,
-            (select count(*) from run)::int as ok, (select count(*) from act)::int as logged`,
-    [input.runId, input.who],
-  );
+export async function undoRun(sql: Query, input: { runId: number; who: string }): Promise<UndoResult> {
+  const res = await sql.query<Record<string, unknown>>(UNDO_SQL, [input.runId, input.who]);
   const r = res[0];
   if (!r || !Number(r.ok)) throw new Error("That run isn't on the list or was already undone.");
-  return { removed: Number(r.removed), restored: Number(r.restored) };
+  const list = (v: unknown) => (Array.isArray(v) ? v.map(String) : typeof v === "string" ? v.replace(/^\{|\}$/g, "").split(",").filter(Boolean) : []);
+  return {
+    removed: Number(r.removed),
+    restored: Number(r.restored),
+    linesRemoved: Number(r.lines_removed),
+    rowsCleared: Number(r.rows_cleared),
+    accountsBack: list(r.accounts_back),
+    accountsKept: list(r.accounts_kept),
+  };
 }
 
 // ── Location Needed ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -666,7 +1052,6 @@ export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDe
 
 // ── Server functions ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-const MAX_PLAN_ROWS = 3000;
 const short = (n: number) => z.string().max(n);
 const nnum = z.number().finite().nullable();
 
@@ -733,12 +1118,13 @@ export const applyWoHistoryRenames = createServerFn({ method: "POST" })
 
 export const previewWoHistoryBatch = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { orders: WoPlanInput[] }) => z.object({ orders: z.array(planRow).max(MAX_PLAN_ROWS) }).parse(d))
+  // The whole row and its lines, in the save's batches: a saved row's blanks and missing lines are compared with them.
+  .validator((d: { orders: WoOrder[]; lines: WoLine[] }) => z.object({ orders: z.array(orderRow).max(300), lines: z.array(lineRow).max(20_000) }).parse(d))
   .handler(async ({ data, context }): Promise<WoPlanLine[]> => {
     const sql = await ready();
     await requireImporter(sql, context.userId);
     await ensureRoster(sql);
-    return planOrders(sql, data.orders);
+    return planOrders(sql, data.orders, data.lines);
   });
 
 const countsSchema = z.record(z.string(), z.number());
