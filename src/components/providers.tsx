@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
+import { QUERY_DEFAULTS, returnRefreshListener } from "@/lib/ops/return-refresh";
 import { useState, type ReactNode } from "react";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PrefsProvider, usePrefs } from "@/components/desk/prefs-provider";
@@ -8,13 +9,15 @@ import { useToastsLifted } from "@/components/desk/toast-lift";
 import { resolvedDark } from "@/lib/ops/prefs";
 import { Toaster } from "sonner";
 
+// The query library's own focus listener fires on every return to the tab; this one waits out a quick switch.
+if (typeof window !== "undefined") focusManager.setEventListener(returnRefreshListener());
+
 export function Providers({ children }: { children: ReactNode }) {
   const [client] = useState(
     () =>
       new QueryClient({
-        defaultOptions: {
-          queries: { staleTime: 8_000, retry: 1, refetchOnWindowFocus: false },
-        },
+        // Lists read again on coming back to the tab after 30 seconds or more (site pass #7): return-refresh.ts.
+        defaultOptions: { queries: { ...QUERY_DEFAULTS } },
       }),
   );
   return (
