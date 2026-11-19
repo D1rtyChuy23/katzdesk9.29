@@ -220,7 +220,9 @@ test("the lock shows on every equipment list, and only the owner sees Lock / Unl
   assert.match(badge, /if \(!canLock\) return null;/);
   assert.match(badge, /title=\{`Locked by \$\{lockedBy\}`\}/);
   const history = read("account-history.tsx");
-  assert.match(history, /disabled=\{merge\.isPending \|\| !!row\.lockedBy \|\| !!twin\.lockedBy\}/);
+  // Merge isn't offered on a locked unit at all (11/19): canMergeUnits is false when either is locked.
+  assert.match(history, /lockedBy: r\.lockedBy \}\)/);
+  assert.match(history, /canMergeUnits\(asMerge\(other\), asMerge\(row\)\)/);
   assert.match(history, /disabled=\{remove\.isPending \|\| !!row\.lockedBy\}/);
   assert.match(history, /<LockToggle kind="unit" id=\{row\.id\} locked=\{!!row\.lockedBy\} onDone=\{refresh\} \/>/);
   const pre = read("pre-inspection-panel.tsx");

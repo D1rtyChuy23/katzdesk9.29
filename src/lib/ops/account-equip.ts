@@ -309,6 +309,27 @@ export function sameUnitModel(
   return names(a).some((x) => names(b).some((y) => x.trim().toLowerCase() === y.trim().toLowerCase() || sameCatalogModel(x, y)));
 }
 
+/** A unit as Merge compares it. */
+export type MergeUnit = { customer: string; catalogModel: string; equipmentName: string; serial: string | null; lockedBy?: string | null; locked?: boolean };
+
+/**
+ * Why two units can't be merged as one machine, or null when they can (Chuy, 11/19). A true duplicate is on the same
+ * account and model, neither is locked, and its serials match (any case or spaces), or one is blank or a short
+ * leftover of 2 characters or fewer. Two different full serials are two machines and never merge. The UI offers
+ * Merge, and the server allows it, only when this is null.
+ */
+export function mergeRefusal(a: MergeUnit, b: MergeUnit): string | null {
+  if (a.customer.trim().toLowerCase() !== b.customer.trim().toLowerCase()) return "Only two units on the same account can be merged.";
+  if (!sameUnitModel(a, b)) return "Only two units of the same model can be merged.";
+  if (a.lockedBy || a.locked || b.lockedBy || b.locked) return "A locked unit can't be merged. Unlock it first.";
+  const ka = serialKey(a.serial);
+  const kb = serialKey(b.serial);
+  if (!ka || !kb || ka === kb || ka.length <= 2 || kb.length <= 2) return null;
+  return `SN ${a.serial?.trim()} and SN ${b.serial?.trim()} are two different serials, so they're two machines. Merge is only for a duplicate of one machine.`;
+}
+
+export const canMergeUnits = (a: MergeUnit, b: MergeUnit) => mergeRefusal(a, b) === null;
+
 export function matchAccount(name: string, accounts: AccountHit[]): AccountMatch {
   const trimmed = String(name ?? "").trim();
   if (!trimmed) return { status: "unmatched", account: null, candidates: [] };

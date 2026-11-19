@@ -17,6 +17,7 @@ import {
   matchAccount,
   matchCatalogModel,
   matchExistingUnit,
+  mergeRefusal,
   OWNERSHIP_VALUES,
   PART_NUMBER_MAX,
   parseInstallDate,
@@ -1068,13 +1069,41 @@ export const listRetiredEquipment = createServerFn({ method: "GET" })
   .validator((d: { customer: string }) => z.object({ customer: z.string().min(1).max(300) }).parse(d))
   .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer));
 
-/** Put a retired machine back on its account, and on the lists of the open installs Remove took it off (11/12). */
-export async function putBackEquipmentUnit(sql: Sql, retiredId: number): Promise<{ id: number }> {
-  const off = (
-    await sql.query<{ off: number[] | null }>("select links->'off_lists' as off from account_equipment_retired where id = $1", [retiredId])
-  )[0]?.off;
+/** "SN ZZB1234", or "a unit with no serial". */
+const unitWord = (serial: string | null | undefined, none = "a unit with no serial") => (serial?.trim() ? `SN ${serial.trim()}` : none);
+
+/** A line on the account's activity, or on the unit itself when the account has no directory row. */
+async function logOnAccount(sql: Sql, customer: string, unitId: number, who: string | null | undefined, detail: string): Promise<void> {
+  await sql
+    .query(
+      `insert into activity (entity_type, entity_id, actor_name, action, detail)
+       select case when d.id is null then 'equipment' else 'customer' end, coalesce(d.id, $2), $3, 'updated', $4
+         from (select 1) one
+         left join lateral (select id from directory_customers where lower(btrim(name)) = lower(btrim($1)) order by archived, id limit 1) d on true`,
+      [customer, unitId, who || "Admin", detail],
+    )
+    .catch(() => undefined);
+}
+
+/**
+ * Put a retired machine back on its account, and on the lists of the open installs Remove took it off (11/12). Logged
+ * on the account (11/19); a merged unit's line says what the merge moved stays on the unit it went into.
+ */
+export async function putBackEquipmentUnit(sql: Sql, retiredId: number, by?: RetiredBy | null): Promise<{ id: number }> {
+  const row = (
+    await sql.query<{ off: number[] | null; customer: string; serial: string | null; merged_serial: string | null; merged_into: string | null }>(
+      `select links->'off_lists' as off, customer, serial, links->>'merged_serial' as merged_serial, links->>'merged_into' as merged_into
+         from account_equipment_retired where id = $1`,
+      [retiredId],
+    )
+  )[0];
+  const off = row?.off;
   const back = await restoreRetiredUnit(sql, retiredId);
   if (Array.isArray(off) && off.length) await putUnitBackOnOpenInstalls(sql, back.id, off.map(Number));
+  if (row) {
+    const merged = row.merged_into ? ` (it was merged into ${unitWord(row.merged_serial, "a unit with no serial")}; what the merge moved stays on that unit)` : "";
+    await logOnAccount(sql, row.customer, back.id, by?.name, `Put back ${unitWord(row.serial)}${merged}`);
+  }
   return back;
 }
 
@@ -1082,7 +1111,11 @@ export async function putBackEquipmentUnit(sql: Sql, retiredId: number): Promise
 export const restoreAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }) => putBackEquipmentUnit(asActor(await ready(), null, "put_back"), data.id));
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const by = await retiredBy(sql, context.userId);
+    return putBackEquipmentUnit(asActor(sql, by.name, "put_back"), data.id, by);
+  });
 
 /** Serials that are on more than one account unit. Read only. */
 export const getDuplicateSerials = createServerFn({ method: "GET" })
@@ -1091,9 +1124,11 @@ export const getDuplicateSerials = createServerFn({ method: "GET" })
 
 /**
  * Keep one account unit and drop the other. A short leftover serial (such as "L") is replaced by the longer one.
- * Inspection links move onto the unit that stays.
+ * Inspection links move onto the unit that stays. This is the merge itself, with no check that the two are a true
+ * duplicate: the Equipment tab goes through mergeDuplicateUnits, which checks; the pre-inspection's "these are one
+ * machine" (linkVisitUnit), where someone says a visit's machine is the account's unit, calls this directly.
  */
-export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: number): Promise<{ keepId: number; serial: string }> {
+export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: number, opts?: { by?: RetiredBy | null }): Promise<{ keepId: number; serial: string }> {
   if (keepId === dropId) throw new Error("Pick two different units.");
   const rows = await sql.query<{
     id: number;
@@ -1263,11 +1298,71 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     "update unit_runbook_options d set unit_key = $1 where d.unit_key = $2 and not exists (select 1 from unit_runbook_options k where k.unit_key = $1)",
     [keepKey, dropKey2],
   );
-  // The dropped unit's record is kept on the account's Retired list first (11/19): a merge done by mistake can be undone.
-  await retireUnitRecord(sql, drop.id, null);
-  await asActor(sql, null, "merge").query("delete from account_equipment where id = $1", [drop.id]);
+  // The dropped unit's record is kept on the account's Retired list first (11/19): a merge done by mistake can be
+  // undone. It says what it was merged into, and who merged it.
+  const by = opts?.by ?? null;
+  await retireUnitRecord(sql, drop.id, by, { reason: `Merged into ${unitWord(serial, "the unit with no serial")}`, mergedInto: keep.id, mergedSerial: serial || null });
+  await asActor(sql, by?.name ?? null, "merge").query("delete from account_equipment where id = $1", [drop.id]);
+  await logOnAccount(sql, keep.customer, keep.id, by?.name, `Merged ${unitWord(dropSerial)} into ${unitWord(serial, "the unit with no serial")}`);
   return { keepId: keep.id, serial };
 }
+
+/**
+ * Merge on the Equipment tab (11/19): an Admin's only, and only a true duplicate (mergeRefusal: same account and
+ * model, neither locked, serials that match or where one is blank or a 2-character leftover). Refused with the reason
+ * otherwise, and nothing changes.
+ */
+export async function mergeDuplicateUnits(
+  sql: Sql,
+  data: { keepId: number; dropId: number },
+  opts: { admin: boolean; by: RetiredBy },
+): Promise<{ keepId: number; serial: string }> {
+  if (!opts.admin) throw new Error(MERGE_ADMIN_ONLY);
+  if (data.keepId === data.dropId) throw new Error("Pick two different units.");
+  const rows = await sql.query<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; locked: boolean }>(
+    "select id, customer, catalog_model, equipment_name, serial, locked_at is not null as locked from account_equipment where id = any($1::int[])",
+    [[data.keepId, data.dropId]],
+  );
+  const at = (id: number) => rows.find((r) => r.id === id);
+  const keep = at(data.keepId);
+  const drop = at(data.dropId);
+  if (!keep || !drop) throw new Error("Those units are not both on an account.");
+  const unit = (r: NonNullable<typeof keep>) => ({ customer: r.customer, catalogModel: r.catalog_model, equipmentName: r.equipment_name, serial: r.serial, locked: r.locked });
+  const why = mergeRefusal(unit(keep), unit(drop));
+  if (why) throw new Error(why);
+  return mergeEquipmentUnits(sql, keep.id, drop.id, { by: opts.by });
+}
+
+export type UnitLinkCounts = { tickets: number; installs: number; pms: number };
+
+/**
+ * What each unit is tied to, for the Merge dialog (11/19): installs whose visit has it, PMs that have it on a runbook
+ * line, a pin or a parts line, and tickets on its account that name its serial (a ticket isn't linked to a unit by id,
+ * so a unit with no serial counts none). Read only.
+ */
+export async function unitLinkCounts(sql: Sql, ids: number[]): Promise<Record<number, UnitLinkCounts>> {
+  const rows = await sql.query<{ id: number; tickets: number; installs: number; pms: number }>(
+    `select a.id,
+            (select count(distinct u.install_id) from install_inspection_units u where u.equipment_id = a.id)::int as installs,
+            (select count(distinct p) from (
+               select l.pm_job_id as p from pm_runbook_unit_links l where l.account_equipment_id = a.id
+               union select r.pm_job_id from pm_runbook_units r where r.unit_key = 'acct:' || a.id
+               union select m.pm_job_id from machine_parts m where m.account_equipment_id = a.id) x)::int as pms,
+            (case when coalesce(a.serial_key, '') = '' or length(a.serial_key) <= 2 then 0 else (
+               select count(*) from service_jobs j
+                where lower(btrim(j.customer)) = lower(btrim(a.customer))
+                  and position(a.serial_key in lower(regexp_replace(coalesce(j.equipment, '') || ' ' || coalesce(j.issue, '') || ' ' || coalesce(j.work_done, ''), '[[:space:]#]', '', 'g'))) > 0
+             ) end)::int as tickets
+       from account_equipment a where a.id = any($1::int[])`,
+    [ids],
+  );
+  return Object.fromEntries(rows.map((r) => [Number(r.id), { tickets: Number(r.tickets), installs: Number(r.installs), pms: Number(r.pms) }]));
+}
+
+export const getUnitLinkCounts = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { ids: number[] }) => z.object({ ids: z.array(z.number().int().positive()).min(1).max(2) }).parse(d))
+  .handler(async ({ data }) => unitLinkCounts(await ready(), data.ids));
 
 export const mergeAccountEquipment = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -1276,7 +1371,6 @@ export const mergeAccountEquipment = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const sql = await ready();
-    // Merging drops a unit: an Admin's (11/19).
-    if (!(await canReviewNames(sql, context.userId))) throw new Error(MERGE_ADMIN_ONLY);
-    return mergeEquipmentUnits(sql, data.keepId, data.dropId);
+    // Merging drops a unit: an Admin's, and only a true duplicate (11/19).
+    return mergeDuplicateUnits(sql, data, { admin: await canReviewNames(sql, context.userId), by: await retiredBy(sql, context.userId) });
   });
