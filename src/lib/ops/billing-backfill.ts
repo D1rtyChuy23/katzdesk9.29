@@ -418,6 +418,8 @@ export type BackfillPlan = {
    * ticked again. The text says who.
    */
   hold: string | null;
+  /** On the Walk - In account: the NetSuite sub-customer it was billed to ("Walk - In:<name>"), as info. */
+  walkInName?: string | null;
 };
 
 export type BackfillContext = {
@@ -464,6 +466,22 @@ export function nsCustomerMatches(ns: string | null | undefined, card: string | 
   if (!ids.length) return false;
   const tokens = [cell, first(cell), first(leafOf(cell))].map((t) => t.toLowerCase());
   return tokens.some((t, i) => ids.includes(t) && (i === 0 || ID_TOKEN.test(t)));
+}
+
+/**
+ * NetSuite's customer is Walk - In (Chuy, 11/19, WO-1130): "Walk - In" itself, or one of NetSuite's Walk-In one-time
+ * sub-customers, "Walk - In:<name>". The part before the first ":" normalizes to "walkin", as the Walk - In account's
+ * name does. Returns the sub-customer's name (null for plain Walk - In), or null when it isn't Walk - In. Used only for
+ * a record on the Walk - In account; a normal account billed as "Walk - In:<name>" is still another account.
+ */
+export function nsWalkIn(cell: string | null | undefined): { name: string | null } | null {
+  const t = String(cell ?? "").trim();
+  if (!t) return null;
+  const at = t.indexOf(":");
+  const parent = at < 0 ? t : t.slice(0, at);
+  if (normalizeCustomerKey(parent) !== "walkin") return null;
+  const name = at < 0 ? "" : t.slice(at + 1).trim();
+  return { name: name || null };
 }
 
 const CENT = 0.005;
@@ -989,9 +1007,11 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   if (!target.customer?.trim()) {
     return { ...base, reason: `The ${what} has no account, which is never a billing account. Give it the real account first.` };
   }
+  let walkInName: string | null = null;
   if (isWalkIn(target.customer)) {
     const named = [...new Set([...lineRowsIn.map((r) => r.nsCustomer), ...invoiceRows.map((r) => r.nsCustomer)].map((c) => c.trim()).filter(Boolean))];
-    const toWalkIn = named.filter((c) => isWalkIn(c) && !billedParent(c));
+    // "Walk - In" or a "Walk - In:<name>" sub-customer is Walk - In (11/19).
+    const toWalkIn = named.filter((c) => nsWalkIn(c));
     const others = named.filter((c) => !toWalkIn.includes(c));
     if (!toWalkIn.length || others.length) {
       return {
@@ -1001,6 +1021,8 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
           : `The ${what} is on Walk - In, and NetSuite's invoice doesn't say Walk - In. Left off.`,
       };
     }
+    const subs = [...new Set(toWalkIn.map((c) => nsWalkIn(c)?.name).filter((n): n is string => !!n))];
+    walkInName = subs.length ? subs.join(", ") : null;
   }
   const warnings: string[] = picked.warning ? [picked.warning] : [];
 
@@ -1190,7 +1212,9 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
   // The account NetSuite billed, against the record's (11/15): another account holds the row for approval.
   // Every NetSuite customer the WO's rows name (charges and invoices): any other account holds the row.
   const nsCustomers = [...new Set([...lineRowsIn.map((r) => r.nsCustomer), ...invoiceRows.map((r) => r.nsCustomer)].map((c) => c.trim()).filter(Boolean))];
-  const other = nsCustomers.filter((c) => !nsCustomerMatches(c, target.customer, ctx.accountIds));
+  // On the Walk - In account, NetSuite's Walk - In sub-customers are Walk - In (checked above); elsewhere, as before.
+  const onWalkIn = isWalkIn(target.customer);
+  const other = nsCustomers.filter((c) => !(onWalkIn && nsWalkIn(c)) && !nsCustomerMatches(c, target.customer, ctx.accountIds));
   const hold = other.length ? `NetSuite bills ${other.join(" and ")}, card is ${target.customer || "no account"}` : null;
   if (hold) warnings.push(hold);
   // Lance bills from San Antonio WH, Bill from Dallas WH.
@@ -1286,6 +1310,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     amounts,
     warnings,
     hold,
+    walkInName,
   };
 }
 

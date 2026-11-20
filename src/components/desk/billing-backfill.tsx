@@ -336,7 +336,7 @@ function PlanRow({ p, on, disabled, onToggle }: { p: BackfillPlan; on: boolean; 
                 {BACKFILL_KIND_LABEL[p.kind]}
               </Badge>
               <OpenLink entityType={p.kind} id={p.recordId} className="mt-0.5 block text-xs text-primary underline-offset-2 hover:underline">
-                {BACKFILL_KIND_LABEL[p.kind]} #{p.recordId} · {p.customer || "no account"}
+                {BACKFILL_KIND_LABEL[p.kind]} #{p.recordId} · {p.customer || "no account"}{p.walkInName ? ` (NetSuite: Walk - In:${p.walkInName})` : ""}
               </OpenLink>
             </>
           ) : null}
