@@ -68,6 +68,17 @@ export type DiscountedTotal = {
 };
 
 /**
+ * A percent of a base, in whole cents, half a cent rounding up: the database's round(base * pct / 100, 2) (Chuy,
+ * 11/20). Worked in integers, because 14.95% of $910.00 in floating point is a hair under $136.045 and rounded down.
+ * A percent is kept to two decimals (cleanDiscount), so cents × hundredths is exact.
+ */
+export function percentOff(base: number, percent: number): number {
+  const cents = Math.round(Math.max(0, base) * 100);
+  const hundredths = Math.round(Math.min(Math.max(0, percent), 100) * 100);
+  return Math.min(cents, Math.floor((cents * hundredths + 5000) / 10000)) / 100;
+}
+
+/**
  * The original total, the discount in dollars and the new total. The discount comes off the base: what the lines it
  * comes off add up to (the subtotal on the Whole bill), held between 0 and the subtotal.
  */
@@ -75,8 +86,7 @@ export function applyDiscount(subtotal: number, discount: Discount | null | unde
   const sub = round2(Math.max(0, subtotal));
   if (!discount || !(discount.value > 0)) return { subtotal: sub, off: 0, total: sub };
   const from = Math.min(round2(Math.max(0, base)), sub);
-  const raw = discount.kind === "percent" ? (from * Math.min(discount.value, 100)) / 100 : discount.value;
-  const off = round2(Math.min(from, raw));
+  const off = discount.kind === "percent" ? percentOff(from, discount.value) : round2(Math.min(from, discount.value));
   return { subtotal: sub, off, total: round2(sub - off) };
 }
 
