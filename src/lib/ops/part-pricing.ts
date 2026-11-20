@@ -430,7 +430,7 @@ export const pricingToApply = (plan: PricePlanLine[]) => plan.filter((l) => l.st
 
 /**
  * Our Discount Rule: what we pay a manufacturer. Percent off the manufacturer price, or a fixed dollar amount
- * off it per unit. When a part has no manufacturer price, its NetSuite Purchase Price is the cost.
+ * off it per unit. It is used only when a part has no NetSuite Purchase Price, which is the cost first (11/20).
  */
 export type DiscountRule = { mode: "percent"; value: number; note?: string } | { mode: "fixed"; value: number; note?: string };
 
@@ -457,13 +457,21 @@ export function ruleLabel(rule: DiscountRule | null | undefined): string {
 
 export type CostSource = "rule" | "purchase" | "none";
 
-/** One unit's cost: the rule on the manufacturer price, else the Purchase Price, else unknown. */
+/** Where a part's cost came from, in words for the Parts screens. */
+export function costSourceLabel(source: CostSource): string {
+  return source === "purchase" ? "NetSuite Purchase Price" : source === "rule" ? "Our Discount Rule" : "Not set";
+}
+
+/**
+ * One unit's cost: the NetSuite Purchase Price, else the rule on the manufacturer price, else unknown (Chuy, 11/20:
+ * the Purchase Price comes first). A Purchase Price of 0 or less is not a cost: it would read as all margin.
+ */
 export function unitCost(part: { listPrice: number | null; cost: number | null }, rule: DiscountRule | null): { cost: number | null; ourDiscount: number | null; source: CostSource } {
+  if (part.cost != null && part.cost > 0) return { cost: round2(part.cost), ourDiscount: part.listPrice != null ? round2(Math.max(0, part.listPrice - part.cost)) : null, source: "purchase" };
   if (part.listPrice != null && rule) {
     const off = rule.mode === "percent" ? (part.listPrice * rule.value) / 100 : Math.min(rule.value, part.listPrice);
     return { cost: round2(part.listPrice - off), ourDiscount: round2(off), source: "rule" };
   }
-  if (part.cost != null) return { cost: round2(part.cost), ourDiscount: part.listPrice != null ? round2(Math.max(0, part.listPrice - part.cost)) : null, source: "purchase" };
   return { cost: null, ourDiscount: null, source: "none" };
 }
 

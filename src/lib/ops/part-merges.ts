@@ -173,6 +173,9 @@ export type CopyCounts = {
   research: number;
 };
 
+/** A field a copy can fill: blank, or a Purchase Price of $0 or less, which is no cost (11/20). */
+const fillBlank = (field: string, v: unknown): boolean => blank(v) || (field === "cost" && Number(v) <= 0);
+
 const COPY_FILLS: { field: "description" | "listPrice" | "rate" | "cost"; label: string; show: (p: MergePart) => string }[] = [
   { field: "description", label: "Name", show: (p) => String(p.description ?? "").trim() },
   { field: "listPrice", label: "Mfr List Price", show: (p) => money(p.listPrice ?? 0) },
@@ -244,7 +247,7 @@ export function planImportCopies(parts: MergePart[], facts: MergeFacts): CopyPla
     const taken = filledBy.get(o.id) ?? new Set<string>();
     const fills: PartFill[] = [];
     for (const f of COPY_FILLS) {
-      if (taken.has(f.field) || !blank(o[f.field]) || blank(c[f.field])) continue;
+      if (taken.has(f.field) || !fillBlank(f.field, o[f.field]) || fillBlank(f.field, c[f.field])) continue;
       taken.add(f.field);
       fills.push({ field: f.field, label: f.label, value: f.show(c) });
     }

@@ -162,6 +162,21 @@ async function copiesWorld(sql) {
   return ids;
 }
 
+test("Clean Up Import Copies: a $0 Purchase Price is blank, so the copy's real one fills it, and a copy's $0 fills nothing (11/20)", async () => {
+  const sql = await fresh();
+  const zero = await part(sql, "EVER7", { cost: 0 });
+  await part(sql, "EVER7", { copy: "PARTS", cost: 9 });
+  const none = await part(sql, "EVER8");
+  await part(sql, "EVER8", { copy: "PARTS", cost: 0 });
+  const p = await cleanUpImportCopiesFor(sql, { apply: false }, "u-owner");
+  const fills = Object.fromEntries(p.lines.filter((l) => l.status === "fold").map((l) => [l.original.id, l.fills.map((f) => `${f.label} ${f.value}`)]));
+  assert.deepEqual(fills[zero], ["Purchase Price $9.00"]);
+  assert.deepEqual(fills[none], []);
+  await cleanUpImportCopiesFor(sql, { apply: true }, "u-owner");
+  assert.equal(Number((await row(sql, zero)).cost), 9);
+  assert.equal((await row(sql, none)).cost, null);
+});
+
 test("Clean Up Import Copies: the preview folds, fixes and lists the ambiguous ones, and writes nothing", async () => {
   const sql = await fresh();
   const ids = await copiesWorld(sql);

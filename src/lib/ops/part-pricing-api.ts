@@ -5,6 +5,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { itemFullName } from "@/lib/ops/charges";
+import { RULE_KEY, loadDiscountRule } from "@/lib/ops/discount-rule";
 import {
   PRICE_TARGET_LABEL,
   cleanRule,
@@ -403,18 +404,7 @@ export const partBinTemplate = createServerFn({ method: "POST" })
 
 // ------------------------------------------------------------------------------------------ discount rule
 
-const RULE_KEY = "our_discount_rule";
-
-export async function loadDiscountRule(sql: Sql): Promise<DiscountRule | null> {
-  const row = (await sql.query<{ value: string | null }>("select value from desk_settings where key = $1", [RULE_KEY]))[0];
-  if (!row?.value) return null;
-  try {
-    const r = cleanRule(JSON.parse(row.value));
-    return "rule" in r ? r.rule : null;
-  } catch {
-    return null;
-  }
-}
+export { loadDiscountRule };
 
 export const getDiscountRule = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])

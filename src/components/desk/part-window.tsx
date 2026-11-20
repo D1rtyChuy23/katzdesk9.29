@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPart, type PartRow } from "@/lib/ops/parts-api";
 import { binText } from "@/lib/ops/part-bins";
+import { costSourceLabel } from "@/lib/ops/part-pricing";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/separator";
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -223,6 +224,28 @@ function PartWindowView({
             <dd className="tabular" data-testid="part-window-list-price">
               {row.listPrice != null ? partMoney(row.listPrice) : <span className="text-muted-foreground">Not set</span>}
             </dd>
+            {row.kind !== "trip" && row.kind !== "labor" ? (
+              <>
+                <dt className="text-muted-foreground">Our Cost</dt>
+                <dd className="tabular" data-testid="part-window-cost">
+                  {row.cost != null ? (
+                    <>
+                      {partMoney(row.cost)} <span className="text-muted-foreground">· {costSourceLabel(row.costSource)}</span>
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground">Not set</span>
+                  )}
+                </dd>
+                <dt className="text-muted-foreground">Margin</dt>
+                <dd className="tabular" data-testid="part-window-margin">
+                  {row.margin != null ? (
+                    `${partMoney(row.margin)}${row.marginPct != null ? ` (${row.marginPct}%)` : ""}`
+                  ) : (
+                    <span className="text-muted-foreground">Needs a price and a cost</span>
+                  )}
+                </dd>
+              </>
+            ) : null}
             <dt className="text-muted-foreground">Get Later</dt>
             <dd>
               <PartGetLater row={row} onChanged={onChanged} tid={T} />

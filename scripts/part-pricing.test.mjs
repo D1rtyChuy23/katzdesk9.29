@@ -104,10 +104,21 @@ test("discount rule: percent or fixed off the manufacturer price", () => {
   assert.ok("error" in cleanRule({ mode: "percent", value: 120 }));
   assert.deepEqual(cleanRule({ mode: "fixed", value: "" }), { rule: null });
   assert.equal(ruleLabel({ mode: "percent", value: 35 }), "35% off manufacturer price");
-  assert.deepEqual(unitCost({ listPrice: 100, cost: 70 }, { mode: "percent", value: 35 }), { cost: 65, ourDiscount: 35, source: "rule" });
-  assert.deepEqual(unitCost({ listPrice: 100, cost: 70 }, { mode: "fixed", value: 12.5 }), { cost: 87.5, ourDiscount: 12.5, source: "rule" });
+  // Chuy, 11/20: the NetSuite Purchase Price comes first; the rule is used only when a part has no Purchase Price.
+  assert.deepEqual(unitCost({ listPrice: 100, cost: 70 }, { mode: "percent", value: 35 }), { cost: 70, ourDiscount: 30, source: "purchase" });
+  assert.deepEqual(unitCost({ listPrice: 100, cost: null }, { mode: "percent", value: 35 }), { cost: 65, ourDiscount: 35, source: "rule" });
+  assert.deepEqual(unitCost({ listPrice: 100, cost: null }, { mode: "fixed", value: 12.5 }), { cost: 87.5, ourDiscount: 12.5, source: "rule" });
   assert.deepEqual(unitCost({ listPrice: null, cost: 70 }, { mode: "percent", value: 35 }), { cost: 70, ourDiscount: null, source: "purchase" });
   assert.equal(unitCost({ listPrice: null, cost: null }, null).source, "none");
+  // A Purchase Price of 0 (or less) is not a cost: it would read as all margin.
+  assert.deepEqual(unitCost({ listPrice: 100, cost: 0 }, { mode: "percent", value: 35 }), { cost: 65, ourDiscount: 35, source: "rule" });
+  assert.deepEqual(unitCost({ listPrice: null, cost: 0 }, null), { cost: null, ourDiscount: null, source: "none" });
+  assert.deepEqual(unitCost({ listPrice: null, cost: -4 }, null), { cost: null, ourDiscount: null, source: "none" });
+});
+
+test("line profit uses the Purchase Price over the rule, and a cost above the sell is a loss (11/20)", () => {
+  const p = lineProfit({ qty: 2, rate: 50 }, { listPrice: 100, cost: 70 }, { mode: "percent", value: 35 }, 0);
+  assert.deepEqual([p.source, p.unitCost, p.cost, p.ourDiscount, p.margin], ["purchase", 70, 140, 60, -40]);
 });
 
 test("line profit: cost, sell, discount and margin, with the ticket discount taken off", () => {
