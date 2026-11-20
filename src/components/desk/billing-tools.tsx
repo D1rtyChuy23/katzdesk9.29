@@ -228,12 +228,20 @@ export function BillingExportButton() {
   // The download records its tickets as exported (11/19), so the next export with an overlapping window leaves them
   // out until their Sales Order comes back. Recorded first: a file is only handed over once that's saved.
   const record = useMutation({
-    mutationFn: (ids: number[]) => markBillingExported({ data: { ids } }),
+    mutationFn: (v: { ids: number[]; again: boolean }) => markBillingExported({ data: v }),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not record the export, so nothing was downloaded"),
   });
   const download = async () => {
     if (!result) return;
-    if (result.jobIds.length) await record.mutateAsync(result.jobIds);
+    if (result.jobIds.length) {
+      const marked = await record.mutateAsync({ ids: result.jobIds, again: result.includeBilled || result.includeExported });
+      // Someone exported some of these since this file was built: it would send them twice (11/19).
+      if (marked.skipped.length) {
+        const names = marked.skipped.map((t) => `${t.wo ?? `#${t.id}`}${t.by ? ` (${t.by})` : ""}`).join(", ");
+        toast.error(`Exported by someone else since this file was built: ${names}. Build again, then download.`);
+        return;
+      }
+    }
     downloadCsv(`billing-${from}_${to}${result.includeBilled ? "-all" : ""}.csv`, result.csv);
   };
 
@@ -320,18 +328,33 @@ export function BillingExportButton() {
               ) : null}
               {result.alreadyExported.length ? (
                 <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm" data-testid="billing-export-already">
-                  <p className="font-medium">
-                    {result.alreadyExported.length} ticket{result.alreadyExported.length === 1 ? "" : "s"} exported before, still waiting on a Sales
-                    Order: {result.includeExported ? "in this file again" : "left out"}
-                  </p>
-                  {!result.includeExported ? (
-                    <p className="mt-1 text-xs text-muted-foreground">Tick “Include tickets already exported” and build again to send them again.</p>
-                  ) : null}
+                  {(() => {
+                    // Include billed puts every ticket in the file too, exported or not (11/19).
+                    const resent = result.includeBilled || result.includeExported;
+                    const changed = result.alreadyExported.filter((t) => t.changed).length;
+                    return (
+                      <>
+                        <p className="font-medium">
+                          {result.alreadyExported.length} ticket{result.alreadyExported.length === 1 ? "" : "s"} exported before, still waiting on a
+                          Sales Order: {resent ? "in this file again" : changed ? `${changed} changed since, so in this file again; the rest left out` : "left out"}
+                        </p>
+                        {changed && !resent ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            A changed ticket goes in whole. Check the earlier file's Sales Order so its first lines aren't billed twice.
+                          </p>
+                        ) : null}
+                        {!resent && changed < result.alreadyExported.length ? (
+                          <p className="mt-1 text-xs text-muted-foreground">Tick “Include tickets already exported” and build again to send them again.</p>
+                        ) : null}
+                      </>
+                    );
+                  })()}
                   <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
                     {result.alreadyExported.map((t) => (
                       <li key={t.id}>
                         {t.wo ?? `#${t.id}`} · {t.customer ?? "Untitled"} · exported {t.exportedAt}
                         {t.by ? ` by ${t.by}` : ""}
+                        {t.changed ? " · changed since" : ""}
                       </li>
                     ))}
                   </ul>

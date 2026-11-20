@@ -970,9 +970,10 @@ export type BillingExport = {
   jobIds: number[];
   /**
    * Tickets in the window that are not billed yet but were in an earlier download (11/19). Left out of the file
-   * unless includeExported; listed either way, with when and by whom.
+   * unless includeExported; listed either way, with when and by whom. changed: its lines changed since, so it's in
+   * the file again (check the earlier file's Sales Order).
    */
-  alreadyExported: { id: number; wo: string | null; customer: string | null; completed: string | null; exportedAt: string; by: string | null }[];
+  alreadyExported: { id: number; wo: string | null; customer: string | null; completed: string | null; exportedAt: string; by: string | null; changed: boolean }[];
   /** Completed tickets in the window with nothing on them — usually a missed bill. Every one (the window pages them). */
   noCharges: { id: number; kind: string; wo: string | null; customer: string | null; completed: string | null; technician: string | null }[];
   /** Tickets in the file whose NetSuite location breaks the warehouse rule (Lance: San Antonio WH, Bill: Dallas WH). */
@@ -995,9 +996,20 @@ export type BillingExport = {
  * back, so an overlapping window doesn't list it twice (11/19), unless includeExported. Building the file records
  * nothing; only the download does.
  */
+/**
+ * What a ticket's bill is made of, as one fingerprint (11/19): every charge line and the ticket's discount. Recorded at
+ * the download; a ticket whose fingerprint has changed since (a part added, a rate fixed, lines merged in) is no longer
+ * "already exported" and goes in the next file again.
+ */
+const BILL_LINES_SQL = (job: string) =>
+  `md5(coalesce((select string_agg(concat_ws('|', c.item, c.description, c.qty::text, c.rate::text, coalesce(c.discount_chosen::text, '')), E'\\n' order by c.id)
+                   from ticket_charges c where c.job_id = ${job}.id), '')
+       || '|' || coalesce(${job}.discount_kind, '') || '|' || coalesce(${job}.discount_value::text, '') || '|' || coalesce(${job}.discount_scope, ''))`;
+const EXPORTED_SAME_SQL = (job: string) => `(${job}.billing_exported_at is not null and ${job}.billing_exported_lines is not distinct from ${BILL_LINES_SQL(job)})`;
+
 export async function exportBillingFor(sql: Sql, data: { from: string; to: string; includeBilled?: boolean; includeExported?: boolean }): Promise<BillingExport> {
   const unbilled = `nullif(btrim(j.ns_so), '') is null and not ${LIVE_INVOICE_SQL("j.id")}`;
-  const billed = data.includeBilled ? "" : `and ${unbilled}${data.includeExported ? "" : " and j.billing_exported_at is null"}`;
+  const billed = data.includeBilled ? "" : `and ${unbilled}${data.includeExported ? "" : ` and not ${EXPORTED_SAME_SQL("j")}`}`;
   const found = await sql.query<{
     id: number;
     wo: string | null;
@@ -1115,8 +1127,8 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
     jobIds: ids,
     includeExported: !!data.includeExported,
     alreadyExported: (
-      await sql.query<{ id: number; wo: string | null; customer: string | null; completed: string | null; exported_at: string; by: string | null }>(
-        `select j.id, j.wo, j.customer, to_char(j.completed_at, 'YYYY-MM-DD') as completed,
+      await sql.query<{ id: number; wo: string | null; customer: string | null; completed: string | null; exported_at: string; by: string | null; changed: boolean }>(
+        `select j.id, j.wo, j.customer, to_char(j.completed_at, 'YYYY-MM-DD') as completed, not ${EXPORTED_SAME_SQL("j")} as changed,
                 to_char(j.billing_exported_at at time zone 'America/Chicago', 'YYYY-MM-DD') as exported_at, j.billing_exported_by as by
            from service_jobs j
           where j.duplicate_of is null and j.completed_at between $1::date and $2::date and j.billing_exported_at is not null
@@ -1124,7 +1136,7 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
           order by j.completed_at, j.id`,
         [data.from, data.to],
       )
-    ).map((r) => ({ id: Number(r.id), wo: r.wo, customer: r.customer, completed: r.completed, exportedAt: r.exported_at, by: r.by })),
+    ).map((r) => ({ id: Number(r.id), wo: r.wo, customer: r.customer, completed: r.completed, exportedAt: r.exported_at, by: r.by, changed: !!r.changed })),
     lines: lines.length,
     total: round2(net),
     includeBilled: !!data.includeBilled,
@@ -1156,23 +1168,40 @@ export const exportBilling = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<BillingExport> => exportBillingFor(await ready(), data));
 
 /**
- * The file was downloaded (11/19): its tickets are recorded as exported, now, by whom. A ticket downloaded again takes
- * the latest. Nothing else on the ticket changes (not its updated_at, so an open window can still save).
+ * The file was downloaded (11/19): its tickets are recorded as exported, now, by whom, with their lines. Nothing else
+ * on the ticket changes (not its updated_at, so an open window can still save). Only completed tickets that aren't
+ * merged into another. Unless again (the file was built with Include already exported or Include billed), a ticket
+ * someone else last exported, with the same lines, is skipped and returned: the file would send it twice.
  */
-export async function markBillingExportedFor(sql: Pick<Sql, "query">, data: { ids: number[]; who: string }): Promise<{ marked: number }> {
-  if (!data.ids.length) return { marked: 0 };
-  const rows = await sql.query<{ id: number }>(
-    "update service_jobs set billing_exported_at = now(), billing_exported_by = $2 where id = any($1::int[]) returning id",
-    [data.ids, data.who],
+export async function markBillingExportedFor(
+  sql: Pick<Sql, "query">,
+  data: { ids: number[]; who: string; again?: boolean },
+): Promise<{ marked: number; skipped: { id: number; wo: string | null; by: string | null }[] }> {
+  if (!data.ids.length) return { marked: 0, skipped: [] };
+  const rows = await sql.query<{ id: number; wo: string | null; by: string | null; marked: boolean }>(
+    `with mine as (
+       select j.id, j.wo, j.billing_exported_by as by, ($3::boolean or j.billing_exported_by is not distinct from $2 or not ${EXPORTED_SAME_SQL("j")}) as ok
+         from service_jobs j
+        where j.id = any($1::int[]) and j.completed_at is not null and j.duplicate_of is null
+     ), marked as (
+       update service_jobs s set billing_exported_at = now(), billing_exported_by = $2, billing_exported_lines = ${BILL_LINES_SQL("s")}
+         from mine where s.id = mine.id and mine.ok
+       returning s.id
+     )
+     select mine.id, mine.wo, mine.by, mine.ok as marked from mine order by mine.id`,
+    [data.ids, data.who, !!data.again],
   );
-  return { marked: rows.length };
+  return {
+    marked: rows.filter((r) => r.marked).length,
+    skipped: rows.filter((r) => !r.marked).map((r) => ({ id: Number(r.id), wo: r.wo, by: r.by })),
+  };
 }
 
 export const markBillingExported = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { ids: number[] }) => z.object({ ids: z.array(z.number().int().positive()).max(20_000) }).parse(d))
+  .validator((d: { ids: number[]; again?: boolean }) => z.object({ ids: z.array(z.number().int().positive().max(2147483647)).max(20_000), again: z.boolean().optional() }).parse(d))
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Teammate";
-    return markBillingExportedFor(sql, { ids: data.ids, who });
+    return markBillingExportedFor(sql, { ids: data.ids, who, again: data.again });
   });
