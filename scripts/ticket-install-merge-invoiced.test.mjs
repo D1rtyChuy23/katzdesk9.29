@@ -217,7 +217,8 @@ test("an invoice that doesn't fit the ticket isn't taken as its billing: dated f
     await refusal({ call_id: "SC-202610-915", wo: "WO-4915" }, [["INV5004", "Open", 300], ["INV5005", "Open", 150]]),
     "SC-202610-915 (WO-4915)'s NetSuite invoices INV5004, INV5005 come to $450.00 and its charges to $500.00, so they may not be this ticket's billing. If they are, an Admin can unlock the ticket's Charges and make them match, then merge.",
   );
-  assert.match(await refusal({ call_id: "SC-202610-916", wo: "WO-4916" }, [["INV5006", "Open", 500.01]]), /comes to \$500\.01 and its charges to \$500\.00/);
+  // A cent either way is rounding (11/20: bills sent before then rounded an exact half cent down); two cents isn't.
+  assert.match(await refusal({ call_id: "SC-202610-916", wo: "WO-4916" }, [["INV5006", "Open", 500.02]]), /comes to \$500\.02 and its charges to \$500\.00/);
   assert.match(await refusal({ call_id: "SC-202610-917", wo: "WO-4917" }, [["INV5007", "Open", 500]], []), /comes to \$500\.00 and its charges to \$0\.00/);
   // No total recorded (a blank cell in the Backfill's file): it can't be checked, so it isn't taken as $0.00.
   assert.equal(
