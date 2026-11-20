@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSql, type Sql } from "@/lib/db";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { requireAdmin } from "./access";
+import { requireAdmin, requireCanChangeAccount } from "./access";
 import { newPasswordInput, resetTokenInput, userIdInput } from "./access-input";
 
 /** Links stay good for two days and work once. */
@@ -33,6 +33,7 @@ export const createPasswordResetLink = createServerFn({ method: "POST" })
   .handler(async ({ context, data }): Promise<{ token: string; username: string; expiresAt: string }> => {
     const sql = await getSql();
     await requireAdmin(sql, context.userId, "Only an admin can reset someone's password.");
+    await requireCanChangeAccount(sql, context.userId, data.userId);
     const who = await sql.query<{ username: string }>(
       "select username from desk_accounts where user_id = $1",
       [data.userId],
