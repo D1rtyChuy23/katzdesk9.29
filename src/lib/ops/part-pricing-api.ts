@@ -6,6 +6,7 @@ import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { itemFullName } from "@/lib/ops/charges";
 import { RULE_KEY, loadDiscountRule } from "@/lib/ops/discount-rule";
+import { cleanLaborRate } from "@/lib/ops/labor-cost";
 import {
   PRICE_TARGET_LABEL,
   cleanRule,
@@ -434,4 +435,50 @@ export const setDiscountRule = createServerFn({ method: "POST" })
       );
     }
     return { rule: r.rule, label: ruleLabel(r.rule), canEdit: true };
+  });
+
+// ------------------------------------------------------------------------------------------ labor cost rate
+
+const LABOR_KEY = "labor_cost_rate";
+
+/** The blended labor cost rate ($ per hour), or null when none is set. */
+export async function loadLaborRate(sql: Sql): Promise<number | null> {
+  const row = (await sql.query<{ value: string | null }>("select value from desk_settings where key = $1", [LABOR_KEY]))[0];
+  const r = cleanLaborRate(row?.value ?? null);
+  return "rate" in r ? r.rate : null;
+}
+
+/** Store the rate, or clear it with null. */
+export async function saveLaborRate(sql: Sql, rate: number | null): Promise<void> {
+  if (rate == null) await sql.query("delete from desk_settings where key = $1", [LABOR_KEY]);
+  else {
+    await sql.query(
+      `insert into desk_settings (key, value, updated_at) values ($1, $2, now())
+       on conflict (key) do update set value = excluded.value, updated_at = now()`,
+      [LABOR_KEY, String(rate)],
+    );
+  }
+}
+
+/** Whether a labor cost rate is set; the number itself goes only to an Admin ("Hide pay rates", 11/20). */
+export const getLaborRate = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async ({ context }): Promise<{ rate: number | null; isSet: boolean; canEdit: boolean }> => {
+    const sql = await ready();
+    const rate = await loadLaborRate(sql);
+    const canEdit = await canReviewNames(sql, context.userId);
+    return { rate: canEdit ? rate : null, isSet: rate != null, canEdit };
+  });
+
+/** Set the blended labor cost rate. Admin only. Blank clears it. */
+export const setLaborRate = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { rate: string | number | null }) => z.object({ rate: z.union([z.string().max(30), z.number(), z.null()]) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ rate: number | null; isSet: boolean; canEdit: boolean }> => {
+    const sql = await ready();
+    await requireAdmin(sql, context.userId);
+    const r = cleanLaborRate(data.rate);
+    if ("error" in r) throw new Error(r.error);
+    await saveLaborRate(sql, r.rate);
+    return { rate: r.rate, isSet: r.rate != null, canEdit: true };
   });
