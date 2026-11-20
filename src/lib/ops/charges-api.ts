@@ -964,6 +964,15 @@ export type BillingExport = {
   /** The tickets' totals after their discounts. */
   total: number;
   includeBilled: boolean;
+  /** Already-exported tickets were put in the file too (11/19). */
+  includeExported: boolean;
+  /** The tickets in the file: Download records these as exported. */
+  jobIds: number[];
+  /**
+   * Tickets in the window that are not billed yet but were in an earlier download (11/19). Left out of the file
+   * unless includeExported; listed either way, with when and by whom.
+   */
+  alreadyExported: { id: number; wo: string | null; customer: string | null; completed: string | null; exportedAt: string; by: string | null }[];
   /** Completed tickets in the window with nothing on them — usually a missed bill. Every one (the window pages them). */
   noCharges: { id: number; kind: string; wo: string | null; customer: string | null; completed: string | null; technician: string | null }[];
   /** Tickets in the file whose NetSuite location breaks the warehouse rule (Lance: San Antonio WH, Bill: Dallas WH). */
@@ -982,9 +991,13 @@ export type BillingExport = {
  * discount on every row (Discount Item CLDSERVICE, Discount Rate at minus the dollars), never a discount line. Each
  * row also carries the ticket's SO, its NetSuite invoices, and the location it bills from (the location on its latest
  * invoice, else Lance's San Antonio WH or Bill's Dallas WH).
+ * A ticket in an earlier download (billing_exported_at, set by markBillingExportedFor) is left out until its SO comes
+ * back, so an overlapping window doesn't list it twice (11/19), unless includeExported. Building the file records
+ * nothing; only the download does.
  */
-export async function exportBillingFor(sql: Sql, data: { from: string; to: string; includeBilled?: boolean }): Promise<BillingExport> {
-  const billed = data.includeBilled ? "" : `and nullif(btrim(j.ns_so), '') is null and not ${LIVE_INVOICE_SQL("j.id")}`;
+export async function exportBillingFor(sql: Sql, data: { from: string; to: string; includeBilled?: boolean; includeExported?: boolean }): Promise<BillingExport> {
+  const unbilled = `nullif(btrim(j.ns_so), '') is null and not ${LIVE_INVOICE_SQL("j.id")}`;
+  const billed = data.includeBilled ? "" : `and ${unbilled}${data.includeExported ? "" : " and j.billing_exported_at is null"}`;
   const found = await sql.query<{
     id: number;
     wo: string | null;
@@ -1099,6 +1112,19 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
   return {
     csv: billingCsv(lines),
     tickets: ids.length,
+    jobIds: ids,
+    includeExported: !!data.includeExported,
+    alreadyExported: (
+      await sql.query<{ id: number; wo: string | null; customer: string | null; completed: string | null; exported_at: string; by: string | null }>(
+        `select j.id, j.wo, j.customer, to_char(j.completed_at, 'YYYY-MM-DD') as completed,
+                to_char(j.billing_exported_at at time zone 'America/Chicago', 'YYYY-MM-DD') as exported_at, j.billing_exported_by as by
+           from service_jobs j
+          where j.duplicate_of is null and j.completed_at between $1::date and $2::date and j.billing_exported_at is not null
+            and ${unbilled} and exists (select 1 from ticket_charges c where c.job_id = j.id)
+          order by j.completed_at, j.id`,
+        [data.from, data.to],
+      )
+    ).map((r) => ({ id: Number(r.id), wo: r.wo, customer: r.customer, completed: r.completed, exportedAt: r.exported_at, by: r.by })),
     lines: lines.length,
     total: round2(net),
     includeBilled: !!data.includeBilled,
@@ -1117,13 +1143,36 @@ export async function exportBillingFor(sql: Sql, data: { from: string; to: strin
 
 export const exportBilling = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { from: string; to: string; includeBilled?: boolean }) =>
+  .validator((d: { from: string; to: string; includeBilled?: boolean; includeExported?: boolean }) =>
     z
       .object({
         from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         includeBilled: z.boolean().optional(),
+        includeExported: z.boolean().optional(),
       })
       .parse(d),
   )
   .handler(async ({ data }): Promise<BillingExport> => exportBillingFor(await ready(), data));
+
+/**
+ * The file was downloaded (11/19): its tickets are recorded as exported, now, by whom. A ticket downloaded again takes
+ * the latest. Nothing else on the ticket changes (not its updated_at, so an open window can still save).
+ */
+export async function markBillingExportedFor(sql: Pick<Sql, "query">, data: { ids: number[]; who: string }): Promise<{ marked: number }> {
+  if (!data.ids.length) return { marked: 0 };
+  const rows = await sql.query<{ id: number }>(
+    "update service_jobs set billing_exported_at = now(), billing_exported_by = $2 where id = any($1::int[]) returning id",
+    [data.ids, data.who],
+  );
+  return { marked: rows.length };
+}
+
+export const markBillingExported = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { ids: number[] }) => z.object({ ids: z.array(z.number().int().positive()).max(20_000) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    const who = (await sql.query<{ username: string }>("select username from desk_accounts where user_id = $1", [context.userId]))[0]?.username || "Teammate";
+    return markBillingExportedFor(sql, { ids: data.ids, who });
+  });
