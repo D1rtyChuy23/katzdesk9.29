@@ -2047,6 +2047,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const unitsMoved = data.customer !== undefined && data.customer !== c.customer ? await moveInstallUnits(sql, data.id, c.customer, data.customer) : null;
 	const unitsKeptBack: string[] = [];
 	const unitsRemoved: string[] = [];
+	const modelsKeptBack: string[] = [];
 	if (unitsMoved?.moved.length || unitsMoved?.stayed.length) {
 		await logActivity(sql, context.userId, "install", data.id, "updated", [unitsMoved.moved.length ? `moved to ${data.customer}: ${unitsMoved.moved.join(", ")}` : null, unitsMoved.stayed.length ? `stayed on ${c.customer}: ${unitsMoved.stayed.join(", ")}` : null].filter(Boolean).join(" · "));
 	}
@@ -2059,12 +2060,16 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	if (data.equipment !== undefined || data.machines !== undefined || data.serial !== undefined || data.powerVoltage !== undefined) {
 		// The list as stored before this save: only a serial changed in this save is written onto the row's unit.
 		// Taking a unit off an install is an Admin's (11/19): anyone else's save that left a unit's row out puts it back.
+		// So is changing a unit's model by typing another on its row (11/19), as Edit's Model is.
+		const admin = await canReviewNames(sql, context.userId);
 		await syncInstallUnits(sql, data.id, {
 			prune: true,
 			before: { equipment: c.equipment, serial: c.serial, power_voltage: c.power_voltage, machines: c.machines },
-			canRemove: await canReviewNames(sql, context.userId),
+			canRemove: admin,
 			keptBack: unitsKeptBack,
 			removed: unitsRemoved,
+			canRenameModel: admin,
+			modelsKeptBack,
 		});
 		// A unit taken off a Ready install by this save sends it back to Not Ready, as the Remove buttons do (11/19).
 		if (unitsRemoved.length) await reopenInstall(sql, data.id, await deskUsername(sql, context.userId), unitsRemoved.join(", "));
@@ -2076,7 +2081,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 	const marks = await loadAccountMarks(sql);
 	// With its sale (11/3), so a save hands back the whole install.
 	const saved = (await withLiveSerialNotices(sql, await withSales(sql, await withWorkOrders(sql, await withInspections(sql, applyMarks([mapInstall((await sql`select * from installs where id = ${data.id}`)[0], today, week, catalog)], marks))))))[0];
-	return { ...saved, unitsMoved, unitsKeptBack };
+	return { ...saved, unitsMoved, unitsKeptBack, modelsKeptBack };
 }
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();

@@ -237,6 +237,8 @@ export type Install = {
   unitsMoved?: { moved: string[]; stayed: string[] } | null;
   /** Machines a save by someone who isn't an Admin left off the list, put back on it (11/19). */
   unitsKeptBack?: string[];
+  /** Rows whose model change a non-Admin's save kept back: the unit keeps its model (11/19). */
+  modelsKeptBack?: string[];
   reqsReady: string | null;
   notes: string | null;
   workDone: string | null;
