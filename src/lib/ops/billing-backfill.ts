@@ -475,7 +475,10 @@ export function nsCustomerMatches(ns: string | null | undefined, card: string | 
  * a record on the Walk - In account; a normal account billed as "Walk - In:<name>" is still another account.
  */
 export function nsWalkIn(cell: string | null | undefined): { name: string | null } | null {
-  const t = String(cell ?? "").trim();
+  let t = String(cell ?? "").trim();
+  // NetSuite's "12345 Name" form: the name after a leading number, as nsCustomerMatches reads it.
+  const lead = t.split(/\s+/)[0] ?? "";
+  if (ID_TOKEN.test(lead)) t = t.slice(lead.length).trim();
   if (!t) return null;
   const at = t.indexOf(":");
   const parent = at < 0 ? t : t.slice(0, at);
@@ -1008,6 +1011,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     return { ...base, reason: `The ${what} has no account, which is never a billing account. Give it the real account first.` };
   }
   let walkInName: string | null = null;
+  let walkInWarning: string | null = null;
   if (isWalkIn(target.customer)) {
     const named = [...new Set([...lineRowsIn.map((r) => r.nsCustomer), ...invoiceRows.map((r) => r.nsCustomer)].map((c) => c.trim()).filter(Boolean))];
     // "Walk - In" or a "Walk - In:<name>" sub-customer is Walk - In (11/19).
@@ -1023,8 +1027,12 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     }
     const subs = [...new Set(toWalkIn.map((c) => nsWalkIn(c)?.name).filter((n): n is string => !!n))];
     walkInName = subs.length ? subs.join(", ") : null;
+    // Two different Walk - In customers on one WO (WO numbers restarted in July): written, but said.
+    const who = [...new Set(toWalkIn.map((c) => nsWalkIn(c)?.name ?? "Walk - In"))];
+    if (who.length > 1) walkInWarning = `NetSuite bills this WO to different Walk - In customers: ${who.join(" and ")}. Make sure they're all this ${what}'s.`;
   }
   const warnings: string[] = picked.warning ? [picked.warning] : [];
+  if (walkInWarning) warnings.push(walkInWarning);
 
   // An install's tickets merged in as billed: their rows are their billing, on the install's card already. Their
   // charge lines stay off the install; their invoices are listed as on the card. One that would change the ticket (an

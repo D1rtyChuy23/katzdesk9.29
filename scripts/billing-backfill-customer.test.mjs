@@ -176,4 +176,42 @@ test("nsWalkIn: Walk - In, and Walk - In:<name> with the name", () => {
   assert.equal(bf.nsWalkIn("Zz Hines"), null);
   assert.equal(bf.nsWalkIn("Walking Cafe:Zz"), null);
   assert.equal(bf.nsWalkIn("Cimbali National Accounts:Zz"), null);
+  // NetSuite's "12345 Name" form, as nsCustomerMatches reads it.
+  assert.deepEqual(bf.nsWalkIn("12345 Walk - In:Zz A"), { name: "Zz A" });
+  assert.deepEqual(bf.nsWalkIn("C777 Walk - In"), { name: null });
+  // Lookalikes and odd shapes.
+  assert.equal(bf.nsWalkIn("Walk-Inn Diner"), null);
+  assert.equal(bf.nsWalkIn("Foo:Walk - In:Bar"), null);
+  assert.equal(bf.nsWalkIn("12345"), null);
+  assert.deepEqual(bf.nsWalkIn("Walk - In:"), { name: null });
+  assert.deepEqual(bf.nsWalkIn("Walk - In: A : B"), { name: "A : B" });
+});
+
+test("a Walk - In WO with two different Walk - In customers is written, with a warning; one with Hines in it is left off", async () => {
+  const sql = await fresh();
+  try {
+    await sql.query("insert into directory_customers (name, walk_in) values ('Walk - In', true)");
+    await ticket(sql, "Walk - In", "WO-1140");
+    await ticket(sql, "Walk - In", "WO-1141");
+    await ticket(sql, "Walk - In", "WO-1142");
+    const f = [
+      file("invoices.csv", [
+        HEAD,
+        row("WO-1140", "9140", "Walk - In:Zz A"),
+        row("WO-1140", "9141", "Walk - In:Zz B"),
+        row("WO-1141", "9142", "Walk - In:Zz A"),
+        row("WO-1141", "9143", "Zz Hines"),
+        row("WO-1142", "9144", "Walk - In"),
+        row("WO-1142", "9145", "Walk - In:Zz C"),
+      ]),
+    ];
+    const by = Object.fromEntries((await api.previewBillingBackfillFor(sql, f, "u-owner")).plans.map((x) => [x.wo, x]));
+    assert.notEqual(by["WO-1140"].status, "skip");
+    assert.ok(by["WO-1140"].warnings.some((w) => /different Walk - In customers: Zz A and Zz B/.test(w)), by["WO-1140"].warnings.join(" | "));
+    assert.equal(by["WO-1141"].status, "skip");
+    assert.match(by["WO-1141"].reason, /NetSuite bills Zz Hines, not Walk - In/);
+    assert.ok(by["WO-1142"].warnings.some((w) => /different Walk - In customers: Walk - In and Zz C/.test(w)), by["WO-1142"].warnings.join(" | "));
+  } finally {
+    await sql.pg.close();
+  }
 });
