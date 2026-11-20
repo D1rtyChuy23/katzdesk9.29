@@ -140,7 +140,7 @@ export function withHeaderDiscount<T extends { jobId: number; qty: number; rate:
   const subtotals = new Map<number, number>();
   const bases = new Map<number, number>();
   for (const r of rows) {
-    const amount = round2(r.qty * r.rate);
+    const amount = lineAmount(r);
     subtotals.set(r.jobId, (subtotals.get(r.jobId) ?? 0) + amount);
     if (takesDiscount(r, discounts.get(r.jobId))) bases.set(r.jobId, (bases.get(r.jobId) ?? 0) + amount);
   }

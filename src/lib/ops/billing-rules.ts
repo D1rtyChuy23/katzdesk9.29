@@ -71,8 +71,13 @@ export function liveInvoiceTotal(invoices: Pick<InvoiceLite, "status" | "total">
   return round2(liveInvoices(invoices).reduce((sum, i) => sum + (i.total ?? 0), 0));
 }
 
-/** A cent either way is the same amount. */
+/** Under half a cent: the same amount. */
 const CENT = 0.005;
+/**
+ * KatzDesk's charges against NetSuite's invoices: a cent either way is rounding, not a billing difference. Bills sent
+ * before 11/20 rounded an exact half cent down, and KatzDesk now rounds it up as the database does.
+ */
+export const ROUNDING = 0.011;
 
 const dayNumber = (iso: string) => Date.parse(`${iso}T12:00:00Z`) / 86_400_000;
 
@@ -95,12 +100,12 @@ export function invoiceFitsTicket(invoiceDate: string, cameIn: string | null | u
 
 /** Two or more live invoices whose totals add up to more than the ticket's charges (after its discount). */
 export function possibleDoubleBill(invoices: Pick<InvoiceLite, "status" | "total">[], chargeNet: number): boolean {
-  return liveInvoices(invoices).length >= 2 && liveInvoiceTotal(invoices) > round2(chargeNet) + CENT;
+  return liveInvoices(invoices).length >= 2 && liveInvoiceTotal(invoices) > round2(chargeNet) + ROUNDING;
 }
 
 /** NetSuite's live invoices don't add up to the ticket's charges (after its discount). No live invoice: nothing to compare. */
 export function chargesMismatch(invoices: Pick<InvoiceLite, "status" | "total">[], chargeNet: number): boolean {
-  return liveInvoices(invoices).length > 0 && Math.abs(liveInvoiceTotal(invoices) - round2(chargeNet)) > CENT;
+  return liveInvoices(invoices).length > 0 && Math.abs(liveInvoiceTotal(invoices) - round2(chargeNet)) > ROUNDING;
 }
 
 /** The invoice that locks the ticket: the latest live one (by date, then number), or null. */

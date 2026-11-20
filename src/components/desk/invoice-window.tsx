@@ -124,7 +124,7 @@ export function InvoiceButton({
  * and what was billed.
  */
 function BilledTicket({ b }: { b: InvoiceView["billedElsewhere"][number] }) {
-  const amounts = b.lines.map((l) => Math.round(l.qty * l.rate * 100) / 100);
+  const amounts = b.lines.map((l) => lineAmount(l));
   const off = Math.round((amounts.reduce((sum, a) => sum + a, 0) - b.total) * 100) / 100;
   // The lines its discount came off (11/7): on Chosen lines, the ticked ones; saved before then, every one.
   const took = b.lines.filter((l) => l.discounted).length;
