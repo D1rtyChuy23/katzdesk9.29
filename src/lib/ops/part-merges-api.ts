@@ -149,7 +149,7 @@ with pairs as (
          (array_agg(c.description order by l.ord) filter (where nullif(btrim(c.description), '') is not null))[1] as description,
          (array_agg(c.list_price order by l.ord) filter (where c.list_price is not null))[1] as list_price,
          (array_agg(c.rate order by l.ord) filter (where c.rate is not null))[1] as rate,
-         (array_agg(c.cost order by l.ord) filter (where c.cost is not null))[1] as cost
+         (array_agg(c.cost order by l.ord) filter (where c.cost > 0))[1] as cost
     from live l
     join billing_items c on c.id = l.copy_id
    group by l.orig_id
@@ -158,14 +158,14 @@ with pairs as (
          description = case when nullif(btrim(o.description), '') is null and s.description is not null then s.description else o.description end,
          list_price = coalesce(o.list_price, s.list_price),
          rate = coalesce(o.rate, s.rate),
-         cost = coalesce(o.cost, s.cost),
+         cost = case when coalesce(o.cost, 0) <= 0 and s.cost is not null then s.cost else o.cost end,
          updated_at = now()
     from src s
    where o.id = s.orig_id
      and ((nullif(btrim(o.description), '') is null and s.description is not null)
           or (o.list_price is null and s.list_price is not null)
           or (o.rate is null and s.rate is not null)
-          or (o.cost is null and s.cost is not null))
+          or (coalesce(o.cost, 0) <= 0 and s.cost is not null))
   returning o.id
 ), moved as (
   update machine_parts m set billing_item_id = l.orig_id

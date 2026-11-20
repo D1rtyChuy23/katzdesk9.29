@@ -116,6 +116,11 @@ test("discount rule: percent or fixed off the manufacturer price", () => {
   assert.deepEqual(unitCost({ listPrice: null, cost: -4 }, null), { cost: null, ourDiscount: null, source: "none" });
 });
 
+test("line profit uses the Purchase Price over the rule, and a cost above the sell is a loss (11/20)", () => {
+  const p = lineProfit({ qty: 2, rate: 50 }, { listPrice: 100, cost: 70 }, { mode: "percent", value: 35 }, 0);
+  assert.deepEqual([p.source, p.unitCost, p.cost, p.ourDiscount, p.margin], ["purchase", 70, 140, 60, -40]);
+});
+
 test("line profit: cost, sell, discount and margin, with the ticket discount taken off", () => {
   const p = lineProfit({ qty: 2, rate: 120 }, { listPrice: 100, cost: null }, { mode: "percent", value: 35 }, 24);
   assert.deepEqual([p.cost, p.sell, p.ourDiscount, p.ticketDiscount, p.margin, p.marginPct], [130, 240, 70, 24, 86, 39.81]);

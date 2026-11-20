@@ -8,8 +8,9 @@ import { Input, Label } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
- * Our Discount Rule: what we pay a manufacturer, as percent off its price or a fixed amount off per unit. It sets the
- * cost on every ticket part line, and that cost, sell, discount and margin are stored when the ticket is invoiced.
+ * Our Discount Rule: what we pay a manufacturer, as percent off its price or a fixed amount off per unit. It is a part's
+ * cost only when the part has no NetSuite Purchase Price (11/20); cost, sell, discount and margin are stored when the
+ * ticket is invoiced.
  */
 export function DiscountRuleEditor() {
   const qc = useQueryClient();
@@ -30,6 +31,7 @@ export function DiscountRuleEditor() {
       qc.setQueryData(["discount-rule"], next);
       void qc.invalidateQueries({ queryKey: ["charges"] });
       void qc.invalidateQueries({ queryKey: ["parts-profit"] });
+      void qc.invalidateQueries({ queryKey: ["parts"] });
       toast.success(next.rule ? `Our Discount Rule: ${next.label}` : "Our Discount Rule cleared");
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
@@ -40,8 +42,8 @@ export function DiscountRuleEditor() {
     <section className="rounded-xl border border-border bg-card p-5" data-testid="discount-rule">
       <h2 className="font-display text-xl">Our Discount Rule</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        What we pay the manufacturer: percent off the manufacturer price, or a fixed amount off it per unit. It sets the cost on ticket part lines; when a
-        ticket is invoiced, its cost, sell, discount and margin are stored. A part's NetSuite Purchase Price comes first; this rule is used only for a part with no Purchase Price.
+        What we pay the manufacturer: percent off the manufacturer price, or a fixed amount off it per unit. A part's NetSuite Purchase Price comes first;
+        this rule is its cost only when it has no Purchase Price. When a ticket is invoiced, its cost, sell, discount and margin are stored.
       </p>
       <p className="mt-3 text-sm">
         Now: <span className="font-medium" data-testid="discount-rule-now">{q.data.label}</span>

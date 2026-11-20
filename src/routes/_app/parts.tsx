@@ -541,11 +541,13 @@ function PartRowView({
           Part # {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
           {row.rate != null ? ` · ${money(row.rate)}` : ""}
           {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
-          <span data-testid="part-cost" title={costSourceLabel(row.costSource)}>
-            {" · Cost "}
-            {row.cost != null ? money(row.cost) : "not set"}
-            {row.marginPct != null ? ` (${row.marginPct}% margin)` : ""}
-          </span>
+          {row.kind !== "trip" && row.kind !== "labor" ? (
+            <span data-testid="part-cost" title={costSourceLabel(row.costSource)}>
+              {" · Cost "}
+              {row.cost != null ? money(row.cost) : "not set"}
+              {row.marginPct != null ? ` (${row.marginPct}% margin)` : ""}
+            </span>
+          ) : null}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
           {canEditClass ? (

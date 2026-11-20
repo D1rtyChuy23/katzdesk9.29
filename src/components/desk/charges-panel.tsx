@@ -361,7 +361,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                 </div>
               </div>
               {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={billed} onChange={(v) => edit(i, { discountChosen: v })} /> : null}
-              {/* Admin: cost and margin on a part line, from Our Discount Rule. Shown for the saved lines. */}
+              {/* Admin: cost and margin on a part line, from its Purchase Price (else Our Discount Rule). Shown for the saved lines. */}
               {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} /> : null}
             </li>
           ))}

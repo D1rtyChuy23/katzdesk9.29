@@ -15,7 +15,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES, isPartClass, unitCost, type CostSource, type DiscountRule, type PartClass } from "@/lib/ops/part-pricing";
-import { loadDiscountRule } from "@/lib/ops/part-pricing-api";
+import { loadDiscountRule } from "@/lib/ops/discount-rule";
 import { round2 } from "@/lib/ops/charges";
 import { BIN_CODE_SQL, BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
 import { textArray } from "@/lib/ops/part-merges";

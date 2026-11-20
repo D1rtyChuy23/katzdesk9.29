@@ -854,7 +854,7 @@ Checked with clicks: 10% off $450.00 → $405.00, saved twice and reloaded, stil
 
 **Approval before it runs.** Both imports open one window: file name, row count, what will change (counts and the line list). Approve runs it; Cancel closes and writes nothing. Reading a file never writes. Each approved run is logged in `part_import_runs` (0067).
 
-**Our Discount Rule (Settings, Admin edits).** Percent off the manufacturer price, or a fixed dollar amount off it per unit, with a note. Cost of a part = manufacturer price less the rule; a part with no manufacturer price uses its NetSuite Purchase Price.
+**Our Discount Rule (Settings, Admin edits).** Percent off the manufacturer price, or a fixed dollar amount off it per unit, with a note. Cost of a part = its NetSuite Purchase Price; a part with no Purchase Price (or $0) uses the manufacturer price less the rule (order flipped 11/20).
 - On ticket lines that have a part (Admin sees it): Cost, Sell, Discount (ours, off the manufacturer price), the line's share of the ticket discount, and Margin (sell − ticket discount − cost) with %.
 - Stored on the line when the ticket is invoiced (Sales Order number entered), so later price changes do not rewrite it. Clearing the Sales Order clears it.
 

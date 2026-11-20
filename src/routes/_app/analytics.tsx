@@ -348,7 +348,7 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Analytics</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Parts Profit: every part on an invoiced ticket, by MPN. Cost is the NetSuite Purchase Price (or Our Discount Rule when a part has none), and is stored when the
+            Parts Profit: every part on an invoiced ticket, by MPN. Cost is the NetSuite Purchase Price (or Our Discount Rule when a part has none; lines invoiced before 11/20 keep the cost stored then), and is stored when the
             ticket is invoiced. Margin is sell, less the ticket discount, less cost.
           </p>
           {switcher}

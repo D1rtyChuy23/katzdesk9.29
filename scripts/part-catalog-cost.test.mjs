@@ -17,7 +17,7 @@ async function db() {
   const pg = new PGlite();
   const dir = new URL("../migrations/", import.meta.url);
   for (const name of readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, dir), "utf8"));
-  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-svc', 'zz.service', true, false, 'service')");
+  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-svc', 'zz.service', true, false, 'service'), ('u-wh', 'zz.warehouse', true, false, 'warehouse')");
   const add = (sku, rate, list, cost) =>
     pg.query("insert into billing_items (sku, item, mfr_part, description, rate, list_price, cost) values ($1, $1, $1, 'x', $2, $3, $4)", [sku, rate, list, cost]);
   await add("ZZ-PP", 100, 90, 40);
@@ -37,6 +37,8 @@ test("the Parts list gives everyone each part's cost, its source and the margin 
     assert.deepEqual([by["ZZ-RULE"].cost, by["ZZ-RULE"].costSource, by["ZZ-RULE"].margin], [60, "rule", 40]);
     assert.deepEqual([by["ZZ-ZERO"].cost, by["ZZ-ZERO"].costSource, by["ZZ-ZERO"].margin, by["ZZ-ZERO"].marginPct], [null, "none", null, null]);
     assert.deepEqual([by["ZZ-NORATE"].cost, by["ZZ-NORATE"].margin], [25, null], "no price, no margin");
+    const wh = await listPartsFor(sql, { q: "ZZ-PP" }, "u-wh");
+    assert.deepEqual([wh.rows[0].cost, wh.rows[0].margin], [40, 60], "Warehouse sees it too");
   } finally {
     await pg.close();
   }
