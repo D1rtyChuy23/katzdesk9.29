@@ -4,13 +4,14 @@ import { register } from "node:module";
 import { test } from "node:test";
 import { PGlite } from "@electric-sql/pglite";
 
-// Chuy, 11/20: everyone sees our cost and the margin on the Parts catalog. Cost is the NetSuite Purchase Price, else
+// Chuy, 11/20: our cost and the margin on the Parts catalog, for an Admin and any role an Admin turns on (cost-access). Cost is the NetSuite Purchase Price, else
 // Our Discount Rule on the manufacturer price, else not set.
 
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
 const { listPartsFor } = await import("../src/lib/ops/parts-api.ts");
+const CA = await import("../src/lib/ops/cost-access.ts");
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 async function db() {
@@ -27,9 +28,10 @@ async function db() {
   return { pg, sql: { query: async (t, p) => (await pg.query(t, p)).rows } };
 }
 
-test("the Parts list gives everyone each part's cost, its source and the margin on its price", async () => {
+test("the Parts list gives each part's cost, its source and the margin on its price to a role that is turned on", async () => {
   const { pg, sql } = await db();
   try {
+    await CA.saveCostRoles(sql, ["service", "warehouse"]);
     await pg.query("insert into desk_settings (key, value) values ('our_discount_rule', $1)", [JSON.stringify({ mode: "percent", value: 25 })]);
     const page = await listPartsFor(sql, { q: "ZZ-" }, "u-svc");
     const by = Object.fromEntries(page.rows.map((r) => [r.sku, r]));
@@ -47,6 +49,7 @@ test("the Parts list gives everyone each part's cost, its source and the margin 
 test("with no discount rule set, a part with no Purchase Price has no cost", async () => {
   const { pg, sql } = await db();
   try {
+    await CA.saveCostRoles(sql, ["service"]);
     const page = await listPartsFor(sql, { q: "ZZ-RULE" }, "u-svc");
     assert.deepEqual([page.rows[0].cost, page.rows[0].costSource], [null, "none"]);
   } finally {
@@ -54,7 +57,7 @@ test("with no discount rule set, a part with no Purchase Price has no cost", asy
   }
 });
 
-test("the list and the part window show cost and margin, with no admin gate", () => {
+test("the list and the part window show cost and margin", () => {
   const list = src("src/routes/_app/parts.tsx");
   assert.match(list, /data-testid="part-cost"/);
   const win = src("src/components/desk/part-window.tsx");

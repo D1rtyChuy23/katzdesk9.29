@@ -16,6 +16,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
 import { PART_CLASSES, isPartClass, unitCost, type CostSource, type DiscountRule, type PartClass } from "@/lib/ops/part-pricing";
 import { loadDiscountRule } from "@/lib/ops/discount-rule";
+import { canSeeCost } from "@/lib/ops/cost-access";
 import { round2 } from "@/lib/ops/charges";
 import { BIN_CODE_SQL, BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
 import { textArray } from "@/lib/ops/part-merges";
@@ -91,6 +92,8 @@ export type PartRow = {
   /** Price − cost, and as a % of the price; null without both. */
   margin: number | null;
   marginPct: number | null;
+  /** False when this person can't see cost (11/20): purchasePrice, listPrice, cost and margin are then left out. */
+  showCost: boolean;
   kind: ChargeKind;
   hasImage: boolean;
   /** Changes when the photo does; part of the photo's address so a replaced photo is not stale. */
@@ -196,10 +199,11 @@ const whenHidden = (v: string | Date | null): string | null => {
   return Number.isNaN(d.getTime()) ? String(v) : d.toISOString();
 };
 
-const toRow = (r: Raw, rule: DiscountRule | null): PartRow => {
+const toRow = (r: Raw, rule: DiscountRule | null, showCost: boolean): PartRow => {
   const rate = r.rate == null ? null : Number(r.rate);
-  const listPrice = r.list_price == null ? null : Number(r.list_price);
-  const purchasePrice = r.cost == null ? null : Number(r.cost);
+  // The Mfr List Price goes with cost: with Our Discount Rule it gives the cost.
+  const listPrice = !showCost || r.list_price == null ? null : Number(r.list_price);
+  const purchasePrice = !showCost || r.cost == null ? null : Number(r.cost);
   const u = unitCost({ listPrice, cost: purchasePrice }, rule);
   const margin = rate != null && u.cost != null ? round2(rate - u.cost) : null;
   return {
@@ -215,6 +219,7 @@ const toRow = (r: Raw, rule: DiscountRule | null): PartRow => {
   costSource: u.source,
   margin,
   marginPct: margin != null && rate ? round2((margin / rate) * 100) : null,
+  showCost,
   kind: r.kind,
   hasImage: !!r.has_image,
   imageVersion: r.image_version,
@@ -244,6 +249,8 @@ const toRow = (r: Raw, rule: DiscountRule | null): PartRow => {
 };
 
 export type PartsPage = {
+  /** Whether this person sees cost and margin (11/20). */
+  showCost: boolean;
   rows: PartRow[];
   total: number;
   withPhoto: number;
@@ -340,9 +347,11 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   const classCounts: Record<string, number> = Object.fromEntries(PART_CLASSES.map((c) => [c, classRows.find((r) => r.c === c)?.n ?? 0]));
   const classes: string[] = [...PART_CLASSES];
   const who = await powers(sql, userId);
-  const rule = await loadDiscountRule(sql);
+  const showCost = await canSeeCost(sql, userId);
+  const rule = showCost ? await loadDiscountRule(sql) : null;
   return {
-    rows: rows.map((r) => toRow(r, rule)),
+    showCost,
+    rows: rows.map((r) => toRow(r, rule, showCost)),
     total: counts?.total ?? 0,
     withPhoto: counts?.with_photo ?? 0,
     hiddenCount: hiddenCount?.n ?? 0,
@@ -360,13 +369,15 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   };
 }
 
-async function findPart(sql: Sql, id: number): Promise<PartRow | null> {
+async function findPart(sql: Sql, id: number, userId: string): Promise<PartRow | null> {
   const r = (await sql.query<Raw>(`select ${COLS} from ${FROM} where id = $1`, [id]))[0];
-  return r ? toRow(r, await loadDiscountRule(sql)) : null;
+  if (!r) return null;
+  const showCost = await canSeeCost(sql, userId);
+  return toRow(r, showCost ? await loadDiscountRule(sql) : null, showCost);
 }
 
-async function loadPart(sql: Sql, id: number): Promise<PartRow> {
-  const part = await findPart(sql, id);
+async function loadPart(sql: Sql, id: number, userId: string): Promise<PartRow> {
+  const part = await findPart(sql, id, userId);
   if (!part) throw new Error("That part is no longer on the list.");
   return part;
 }
@@ -377,7 +388,11 @@ const partIdInput = z.object({ id: z.number().int().positive() });
 export const getPart = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.input<typeof partIdInput>) => partIdInput.parse(d))
-  .handler(async ({ data }): Promise<PartRow | null> => findPart(await ready(), data.id));
+  .handler(async ({ data, context }): Promise<PartRow | null> => {
+    const sql = await ready();
+    // Cost only for an Admin or a role an Admin turned on: canSeeCost(sql, context.userId), in findPart.
+    return findPart(sql, data.id, context.userId);
+  });
 
 const binInput = z.object({
   id: z.number().int().positive(),
@@ -418,7 +433,7 @@ export async function setPartBinFor(sql: Sql, data: z.infer<typeof binInput>, us
     [data.id, next.rack, next.shelf, next.bin, who.name],
   );
   if (!rows.length) throw new Error("That part is no longer on the list.");
-  return loadPart(sql, data.id);
+  return loadPart(sql, data.id, userId);
 }
 
 const moveInput = z.object({
@@ -505,7 +520,7 @@ export async function setPartClassFor(sql: Sql, data: z.infer<typeof classInput>
     [data.id, next],
   );
   if (!rows.length) throw new Error("That part is no longer on the list.");
-  return loadPart(sql, data.id);
+  return loadPart(sql, data.id, userId);
 }
 
 const classesInput = z.object({ ids: z.array(z.number().int().positive()).min(1).max(PARTS_PICK_MAX), itemClass: z.string().max(120).nullable() });
@@ -590,7 +605,7 @@ export async function setPartImageFor(sql: Sql, data: z.infer<typeof imageInput>
     [data.id, data.base64, mime, data.sourceUrl ?? null, me.name],
   );
   if (!rows.length) throw new Error("That part is no longer on the list.");
-  return loadPart(sql, data.id);
+  return loadPart(sql, data.id, userId);
 }
 
 /** Get Later: mark a part to pull later. It does not change price or stock. Anyone on the Desk. */
@@ -605,7 +620,7 @@ export const setPartGetLater = createServerFn({ method: "POST" })
       [data.id, data.on, who],
     );
     if (!rows.length) throw new Error("That part is no longer on the list.");
-    return loadPart(sql, data.id);
+    return loadPart(sql, data.id, context.userId);
   });
 
 /** Remove the photo. Not Warehouse. */
@@ -621,7 +636,7 @@ export async function clearPartImageFor(sql: Sql, data: { id: number }, userId: 
     "update billing_items set image = null, image_mime = null, image_updated_at = null, photo_status = null, photo_source_url = null, photo_confirmed_by = null, photo_confirmed_at = null where id = $1",
     [data.id],
   );
-  return loadPart(sql, data.id);
+  return loadPart(sql, data.id, userId);
 }
 
 /**
@@ -637,7 +652,7 @@ export const setPartDescription = createServerFn({ method: "POST" })
     const text = (data.description ?? "").replace(/\s+/g, " ").trim();
     const rows = await sql.query("update billing_items set description = $2, updated_at = now() where id = $1 returning id", [data.id, text || null]);
     if (!rows.length) throw new Error("That part is no longer on the list.");
-    return loadPart(sql, data.id);
+    return loadPart(sql, data.id, context.userId);
   });
 
 const noteInput = z.object({
@@ -667,7 +682,7 @@ export async function setPartNoteFor(sql: Sql, data: z.infer<typeof noteInput>, 
   // The box holds the note it opened with (spaces aside): nothing to write, and the stored text keeps every character.
   if (next === cleanPartNote(data.before)) {
     if (await gone()) throw new Error("That part is no longer on the list.");
-    return loadPart(sql, data.id);
+    return loadPart(sql, data.id, userId);
   }
   const rows = await sql.query(
     `update billing_items set note = $2, updated_at = now()
@@ -679,7 +694,7 @@ export async function setPartNoteFor(sql: Sql, data: z.infer<typeof noteInput>, 
     if (await gone()) throw new Error("That part is no longer on the list.");
     throw new Error("The note changed while you were editing it (an import may have added a line), so nothing was saved. Copy your text, then Cancel and edit the note again.");
   }
-  return loadPart(sql, data.id);
+  return loadPart(sql, data.id, userId);
 }
 
 /** Record the manufacturer part number for a part. Blank clears it. */
@@ -690,7 +705,7 @@ export const setPartMpn = createServerFn({ method: "POST" })
     const sql = await ready();
     if (!(await powers(sql, context.userId)).canEditMpn) throw new Error("Only Admin and Sales can change a part's MPN.");
     await sql.query("update billing_items set mfr_part = $2, updated_at = now() where id = $1", [data.id, cleanMpn(data.mpn)]);
-    return loadPart(sql, data.id);
+    return loadPart(sql, data.id, context.userId);
   });
 
 const idsInput = z.object({

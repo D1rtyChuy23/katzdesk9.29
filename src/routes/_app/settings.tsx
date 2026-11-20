@@ -13,6 +13,7 @@ import { RosterEditor } from "@/components/desk/roster-editor";
 import { RepsEditor } from "@/components/desk/reps-editor";
 import { DiscountRuleEditor } from "@/components/desk/discount-rule-editor";
 import { LaborRateEditor } from "@/components/desk/labor-rate-editor";
+import { CostAccessEditor } from "@/components/desk/cost-access-editor";
 
 import { cn } from "@/lib/utils";
 import type { Appearance } from "@/lib/ops/prefs";
@@ -40,6 +41,7 @@ function Page() {
         <RepsEditor />
         <DiscountRuleEditor />
         <LaborRateEditor />
+        <CostAccessEditor />
 
 
         <Section
