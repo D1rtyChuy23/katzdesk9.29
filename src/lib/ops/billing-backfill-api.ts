@@ -1,3 +1,4 @@
+import { lineAmount } from "@/lib/ops/charges";
 /**
  * Billing Backfill (NetSuite) — Admin only, preview first, one statement on confirm. The rules are in
  * billing-backfill.ts; this reads the files, loads the tickets, installs and PMs (11/5), and writes the plan. Each
@@ -397,7 +398,7 @@ export async function loadRecordNsBilling(sql: Q, installIds: number[], pmIds: n
       const mine = lines
         .filter((l) => Number(l.billing_id) === Number(h.id))
         .map((l) => ({ item: l.item, description: l.description ?? "", qty: Number(l.qty), rate: Number(l.rate) }));
-      const t = applyDiscount(mine.reduce((s, l) => s + Math.round(l.qty * l.rate * 100) / 100, 0), discount);
+      const t = applyDiscount(mine.reduce((s, l) => s + lineAmount(l), 0), discount);
       return {
         id: Number(h.id),
         record: h.record_key,

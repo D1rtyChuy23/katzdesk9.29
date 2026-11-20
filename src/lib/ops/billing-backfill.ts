@@ -33,7 +33,7 @@ import {
   locationWarning,
   noInvoiceYet,
   possibleDoubleBill,
-} from "./billing-rules.ts";
+ ROUNDING } from "./billing-rules.ts";
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { leafOf } from "./clean-names.ts";
 import { parseCompletedDate, woCanonical, woMatchKey } from "./corrigo.ts";
@@ -934,7 +934,7 @@ function recordChecks(plans: BackfillPlan[], ctx: BackfillContext): BackfillPlan
         kdSource,
         netsuite,
         doubleBill: kdSource !== "none" && possibleDoubleBill(after, kd),
-        nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > CENT,
+        nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > ROUNDING,
       });
     }
   }
@@ -1256,7 +1256,7 @@ function planOne(key: string, lineRowsIn: BackfillLine[], invoiceRows: BackfillI
     netsuite,
     corrigo,
     doubleBill: kdSource !== "none" && possibleDoubleBill(after, kd),
-    nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > CENT,
+    nsMismatch: kdSource !== "none" && hasLive && Math.abs(netsuite - kd) > ROUNDING,
     corrigoMismatch: corrigo != null && hasLive && Math.abs(corrigo - netsuite) > CENT,
   };
   const amountWarn = amountWarning(amounts, what);

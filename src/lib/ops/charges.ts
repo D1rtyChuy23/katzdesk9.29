@@ -51,8 +51,13 @@ export function round2(n: number): number {
   return Math.round((n + Number.EPSILON) * 100) / 100;
 }
 
+/**
+ * A line's amount to the cent, half a cent away from zero: the database's round(qty * rate, 2) (Chuy, 11/20). Worked
+ * in integers (qty and rate are kept to two decimals), because 0.5 × $4.35 in floating point is a hair under $2.175.
+ */
 export function lineAmount(l: Pick<ChargeLine, "qty" | "rate">): number {
-  return round2(l.qty * l.rate);
+  const p = Math.round(l.qty * 100) * Math.round(l.rate * 100);
+  return (Math.sign(p) * Math.floor((Math.abs(p) + 50) / 100)) / 100;
 }
 
 export function chargesTotal(lines: Pick<ChargeLine, "qty" | "rate">[]): number {
