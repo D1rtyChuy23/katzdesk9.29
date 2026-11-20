@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Download, FileUp, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { exportBilling, importBillingItems, type BillingExport, type ItemImportPreview } from "@/lib/ops/charges-api";
+import { exportBilling, importBillingItems, markBillingExported, type BillingExport, type ItemImportPreview } from "@/lib/ops/charges-api";
 import { toCsv } from "@/lib/ops/billing-rules";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -215,17 +215,34 @@ export function BillingExportButton() {
   const [from, setFrom] = useState(isoDay(weekAgo));
   const [to, setTo] = useState(isoDay(today));
   const [includeBilled, setIncludeBilled] = useState(false);
+  const [includeExported, setIncludeExported] = useState(false);
   const [result, setResult] = useState<BillingExport | null>(null);
   const missed = useShowMore(result?.noCharges ?? [], `${from}:${to}:${includeBilled}`, 25);
 
   const run = useMutation({
-    mutationFn: () => exportBilling({ data: { from, to, includeBilled } }),
+    mutationFn: () => exportBilling({ data: { from, to, includeBilled, includeExported } }),
     onSuccess: (r) => setResult(r),
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not build the file"),
   });
 
-  const download = () => {
-    if (result) downloadCsv(`billing-${from}_${to}${result.includeBilled ? "-all" : ""}.csv`, result.csv);
+  // The download records its tickets as exported (11/19), so the next export with an overlapping window leaves them
+  // out until their Sales Order comes back. Recorded first: a file is only handed over once that's saved.
+  const record = useMutation({
+    mutationFn: (v: { ids: number[]; again: boolean }) => markBillingExported({ data: v }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not record the export, so nothing was downloaded"),
+  });
+  const download = async () => {
+    if (!result) return;
+    if (result.jobIds.length) {
+      const marked = await record.mutateAsync({ ids: result.jobIds, again: result.includeBilled || result.includeExported });
+      // Someone exported some of these since this file was built: it would send them twice (11/19).
+      if (marked.skipped.length) {
+        const names = marked.skipped.map((t) => `${t.wo ?? `#${t.id}`}${t.by ? ` (${t.by})` : ""}`).join(", ");
+        toast.error(`Exported by someone else since this file was built: ${names}. Build again, then download.`);
+        return;
+      }
+    }
+    downloadCsv(`billing-${from}_${to}${result.includeBilled ? "-all" : ""}.csv`, result.csv);
   };
 
   return (
@@ -244,7 +261,7 @@ export function BillingExportButton() {
           <DialogTitle>Export Billing</DialogTitle>
           <p className="text-sm text-muted-foreground">
             One row per charge line for tickets completed in the range that have charges and aren&apos;t billed yet (no Sales Order, no live
-            NetSuite invoice). A discount rides on every row of its ticket as NetSuite&apos;s header discount (Discount Item CLDSERVICE, Discount
+            NetSuite invoice), and weren&apos;t in an earlier download. Downloading records the file&apos;s tickets as exported. A discount rides on every row of its ticket as NetSuite&apos;s header discount (Discount Item CLDSERVICE, Discount
             Rate at minus the dollars), never as a line. Each row also has the ticket&apos;s SO, invoices and billing location.
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -266,6 +283,16 @@ export function BillingExportButton() {
               data-testid="billing-export-include-billed"
             />
             Include billed tickets (with their SO and invoices)
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={includeExported}
+              onChange={(e) => setIncludeExported(e.target.checked)}
+              data-testid="billing-export-include-exported"
+            />
+            Include tickets already exported (still waiting on their Sales Order)
           </label>
           <div className="flex justify-end">
             <Button type="button" size="sm" disabled={!from || !to || run.isPending} onClick={() => run.mutate()}>
@@ -294,6 +321,40 @@ export function BillingExportButton() {
                     {result.locationWarnings.map((w) => (
                       <li key={w.id}>
                         {w.wo ?? `#${w.id}`} · {w.customer ?? "Untitled"} · {w.warning}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {result.alreadyExported.length ? (
+                <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm" data-testid="billing-export-already">
+                  {(() => {
+                    // Include billed puts every ticket in the file too, exported or not (11/19).
+                    const resent = result.includeBilled || result.includeExported;
+                    const changed = result.alreadyExported.filter((t) => t.changed).length;
+                    return (
+                      <>
+                        <p className="font-medium">
+                          {result.alreadyExported.length} ticket{result.alreadyExported.length === 1 ? "" : "s"} exported before, still waiting on a
+                          Sales Order: {resent ? "in this file again" : changed ? `${changed} changed since, so in this file again; the rest left out` : "left out"}
+                        </p>
+                        {changed && !resent ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            A changed ticket goes in whole. Check the earlier file's Sales Order so its first lines aren't billed twice.
+                          </p>
+                        ) : null}
+                        {!resent && changed < result.alreadyExported.length ? (
+                          <p className="mt-1 text-xs text-muted-foreground">Tick “Include tickets already exported” and build again to send them again.</p>
+                        ) : null}
+                      </>
+                    );
+                  })()}
+                  <ul className="mt-2 max-h-32 space-y-0.5 overflow-y-auto text-xs">
+                    {result.alreadyExported.map((t) => (
+                      <li key={t.id}>
+                        {t.wo ?? `#${t.id}`} · {t.customer ?? "Untitled"} · exported {t.exportedAt}
+                        {t.by ? ` by ${t.by}` : ""}
+                        {t.changed ? " · changed since" : ""}
                       </li>
                     ))}
                   </ul>
@@ -362,9 +423,9 @@ export function BillingExportButton() {
                 </div>
               ) : null}
               <div className="flex justify-end">
-                <Button type="button" size="sm" disabled={!result.lines} onClick={download}>
+                <Button type="button" size="sm" disabled={!result.lines || record.isPending} onClick={() => void download().catch(() => undefined)} data-testid="billing-export-download">
                   <Download className="size-4" />
-                  Download CSV
+                  {record.isPending ? "Recording…" : "Download CSV"}
                 </Button>
               </div>
             </div>
