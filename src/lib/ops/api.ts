@@ -929,7 +929,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	if (data.customer != null && !data.customer.trim()) data = { ...data, customer: undefined };
 	if (data.customer != null && data.customer.trim() !== String(cur[0].customer ?? "").trim()) {
 		if (cur[0].kind === "tlc") assertWalkInMove("tlc", cur[0].customer, data.customer);
-		data = { ...data, customer: await ticketAccount(sql, data.customer ?? "") };
+		data = { ...data, customer: await listedAccount(sql, data.customer ?? "") };
 		await assertTakesNewWork(sql, data.customer, "ticket", { moving: true });
 	}
 	if (data.customer !== undefined) {
@@ -1052,7 +1052,8 @@ type NewTicket = { kind: "service" | "tlc"; customer: string; issue?: string; eq
  * The account a new ticket goes on (11/9): an account on the customer list, by its name in any capitals, spelled as
  * the list has it. Walk-In stays as typed. Any other name is refused, so no ticket is filed under a name no account has.
  */
-async function ticketAccount(sql: Sql, raw: string): Promise<string> {
+/** The account as the customer list spells it; tickets, PMs, installs and deals only go on a listed one (11/19). */
+export async function listedAccount(sql: Sql, raw: string): Promise<string> {
 	const typed = String(raw ?? "").trim();
 	if (!typed) throw new Error("Pick an account.");
 	if (isWalkIn(typed)) {
@@ -1071,7 +1072,7 @@ async function ticketAccount(sql: Sql, raw: string): Promise<string> {
  */
 export async function openTicketFor(sql: Sql, data: NewTicket): Promise<{ id: number; customer: string }> {
 	if (data.kind === "tlc") assertWalkInSite("tlc", data.customer);
-	const customer = await ticketAccount(sql, data.customer);
+	const customer = await listedAccount(sql, data.customer);
 	// An inactive or Retired account takes no new tickets (11/19).
 	await assertTakesNewWork(sql, customer, "ticket");
 	const received = data.received || todayChicago();
@@ -1292,6 +1293,7 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 export const createPm = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createPmInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("pm", data.customer);
+	data = { ...data, customer: await listedAccount(sql, data.customer) };
 	await assertTakesNewWork(sql, data.customer, "pm");
 	const rows = await sql`
       insert into pm_jobs (customer, equipment, style, received, status)
@@ -1587,6 +1589,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 export const createDeal = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createDealInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("deal", data.customer);
+	data = { ...data, customer: await listedAccount(sql, data.customer) };
 	await assertTakesNewWork(sql, data.customer, "deal");
 	const producer = canonicalRepName(data.producer);
 	// One row per machine, each marked Sold, Loan or Lease; equipment stays the joined models so lists and search read it.
@@ -2086,6 +2089,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 export const createInstall = createServerFn({ method: "POST" }).middleware([deskMiddleware]).validator(input.createInstallInput).handler(async ({ data, context }: any) => {
 	const sql = await ready();
 	assertWalkInSite("install", data.customer);
+	data = { ...data, customer: await listedAccount(sql, data.customer) };
 	await assertTakesNewWork(sql, data.customer, "install");
 	const catalog = await loadEquipCatalog(sql);
 	const machinesJsonRaw = data.machines == null ? null : typeof data.machines === "string" ? data.machines : JSON.stringify(data.machines);
