@@ -585,6 +585,8 @@ export function InstallSheet({
         );
       } else if (!machineOnly && !skipToast.current) toast.success("Saved");
       // Taking a unit off an install is an Admin's (11/19): a row left out comes back, and says so.
+      if (saved?.modelsKeptBack?.length)
+        toast.message(`Model kept: ${saved.modelsKeptBack.join(", ")}. Only an Admin can change a unit's model; Edit on the account's Equipment tab does it.`);
       if (saved?.unitsKeptBack?.length)
         toast.message(`Kept on the list: ${saved.unitsKeptBack.join(", ")}. Only an Admin can take a unit off an install.`);
       skipToast.current = false;

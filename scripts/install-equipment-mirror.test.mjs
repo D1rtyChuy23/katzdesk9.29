@@ -179,3 +179,32 @@ test("an installed project: only the owner edits or removes its machines", async
     await pg.close();
   }
 });
+
+test("a model change through the install's list is an Admin's (11/19): anyone else's save keeps the unit's model", async () => {
+  const { pg, sql } = await fresh();
+  try {
+    const id = await install(pg, "Gate Cafe", "Bunn TB3");
+    await readInspection(sql, id);
+    await saveList(pg, sql, id, [TB3("TB-222")]);
+    const unit = (await preOf(sql, id))[0][0];
+    const modelOf = async () => (await pg.query("select catalog_model, equipment_name from account_equipment where id = $1", [unit])).rows[0];
+    // Someone who isn't an Admin types another model on the row: the unit stays a TB3, and so does the row.
+    const cat = await catalog(pg);
+    const next = packed([{ equipment: savedMachineName("Fetco 52H", cat), serial: "TB-222", powerVoltage: "" }]);
+    const before = (await pg.query("select equipment, serial, power_voltage, machines from installs where id = $1", [id])).rows[0];
+    await pg.query("update installs set equipment = $2, serial = $3, power_voltage = $4, machines = $5 where id = $1", [id, next.equipment, next.serial, next.power_voltage, next.machines]);
+    const kept = [];
+    await syncInstallUnits(sql, id, { prune: true, before, canRenameModel: false, modelsKeptBack: kept });
+    assert.deepEqual(await modelOf(), { catalog_model: "Bunn TB3", equipment_name: "Bunn TB3" });
+    assert.deepEqual(await listOf(pg, id), [["Bunn TB3", "TB-222", ""]], "the row shows the unit's model again");
+    assert.deepEqual(kept, ["Fetco 52H SN TB-222"]);
+    // An Admin's save renames it, as before.
+    await saveList(pg, sql, id, [{ equipment: "Fetco 52H", serial: "TB-222", powerVoltage: "" }]);
+    assert.equal((await modelOf()).catalog_model, "Fetco 52H");
+    // The install window's save passes who it is.
+    const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
+    assert.match(api, /canRenameModel: admin,\s+modelsKeptBack,/);
+  } finally {
+    await pg.close();
+  }
+});

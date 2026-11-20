@@ -883,7 +883,7 @@ async function mirrorList(
   catalog: string[],
   saved: boolean,
   before: Piece[] | null,
-  how: { byId: boolean[]; typed: boolean; adopted?: boolean; stored?: string | null },
+  how: { byId: boolean[]; typed: boolean; adopted?: boolean; stored?: string | null; canRename?: boolean; renamesKeptBack?: string[] },
 ): Promise<void> {
   const modelBefore = new Map((before ?? []).filter((p) => serialKey(p.serial)).map((p) => [serialKey(p.serial), p.equipment]));
   const modelBeforeById = new Map((before ?? []).filter((p) => p.unitId).map((p) => [p.unitId!, p.equipment]));
@@ -897,7 +897,10 @@ async function mirrorList(
     const named = (!!key && unit.serial_key === key) || !!how.byId[i];
     const was = !named ? undefined : how.byId[i] && modelBeforeById.has(unit.id) ? modelBeforeById.get(unit.id) : key ? modelBefore.get(key) : undefined;
     if (saved && named && !sameMachine(unit, piece, catalog)) {
-      if (was !== undefined && !sameCatalogModel(was, piece.equipment) && !isLocked(unit)) {
+      const renaming = was !== undefined && !sameCatalogModel(was, piece.equipment) && !isLocked(unit);
+      // A model change typed on the row is an Admin's (11/19): anyone else's row shows the unit's model again.
+      if (renaming && how.canRename === false) how.renamesKeptBack?.push(`${piece.equipment}${piece.serial?.trim() ? ` SN ${piece.serial.trim()}` : ""}`);
+      if (renaming && how.canRename !== false) {
         unit.catalog_model = matchCatalogModel(piece.equipment, piece.equipment, catalog).catalogModel || piece.equipment;
         unit.equipment_name = piece.equipment;
         await sql.query("update account_equipment set catalog_model = $2, equipment_name = $3, updated_at = now() where id = $1", [
@@ -1050,6 +1053,13 @@ export async function syncInstallUnits(
     keptBack?: string[];
     /** Filled with the machines this save took off the install (kept under Removed). */
     removed?: string[];
+    /**
+     * false: the save may not change a unit's model by renaming its row (11/19, Admin only, as Edit's Model is). The
+     * row shows the unit's model again. Left out (true) for the loads and the app's own steps, as before.
+     */
+    canRenameModel?: boolean;
+    /** Filled with the rows whose model change was kept back ("Fetco 52H SN TB-222"). */
+    modelsKeptBack?: string[];
   },
 ): Promise<void> {
   const keptBack = opts?.keptBack ?? [];
@@ -1233,7 +1243,14 @@ export async function syncInstallUnits(
   );
   // Ids taken from the stored rows above are not on the rows this save stored yet.
   const adopted = pieces.some((p, i) => p.unitId !== listed.machines[i]?.unitId);
-  await mirrorList(sql, installId, pieces, finalUnits, catalog, !!opts?.prune, before, { byId, typed: listed.typed, adopted, stored: row.machines });
+  await mirrorList(sql, installId, pieces, finalUnits, catalog, !!opts?.prune, before, {
+    byId,
+    typed: listed.typed,
+    adopted,
+    stored: row.machines,
+    canRename: opts?.canRenameModel !== false,
+    renamesKeptBack: opts?.modelsKeptBack,
+  });
   if (first) {
     await sql.query(
       `update install_inspection_items set equipment_id = $1 where install_id = $2 and equipment_id is null`,
