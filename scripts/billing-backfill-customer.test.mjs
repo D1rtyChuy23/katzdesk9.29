@@ -131,3 +131,87 @@ test("the screen starts held rows unticked, says why, and sends the ones ticked 
   assert.match(screen, /approve: plans\.filter\(\(p\) => p\.hold && !skip\.has\(p\.key\)\)\.map\(\(p\) => p\.key\)/);
   assert.match(screen, /data-testid="backfill-hold"/);
 });
+
+// NetSuite bills Walk-In one-time customers as sub-customers, "Walk - In:<name>" (Chuy, 11/19, WO-1130). On a ticket
+// on the Walk - In account, NetSuite's "Walk - In" or "Walk - In:<anything>" is Walk - In. Nowhere else.
+test("a Walk - In ticket matches NetSuite's Walk - In and its Walk - In:<name> sub-customers; nothing else does", async () => {
+  const sql = await fresh();
+  try {
+    await sql.query("insert into directory_customers (name, walk_in) values ('Walk - In', true)");
+    const sub = await ticket(sql, "Walk - In", "WO-1130");
+    const plain = await ticket(sql, "Walk - In", "WO-1131");
+    const hines = await ticket(sql, "Walk - In", "WO-1132");
+    const normal = await ticket(sql, "Zz Bean Cafe", "WO-1133");
+    const f = [
+      file("invoices.csv", [
+        HEAD,
+        row("WO-1130", "9130", "Walk - In:Zz Frittella Cafe"),
+        row("WO-1131", "9131", "Walk - In"),
+        row("WO-1132", "9132", "Zz Hines"),
+        row("WO-1133", "9133", "Walk - In:Zz Bean Cafe"),
+      ]),
+    ];
+    const p = await api.previewBillingBackfillFor(sql, f, "u-owner");
+    const by = Object.fromEntries(p.plans.map((x) => [x.wo, x]));
+    assert.deepEqual([by["WO-1130"].status === "skip", by["WO-1130"].reason, by["WO-1130"].hold], [false, null, null]);
+    assert.equal(by["WO-1130"].walkInName, "Zz Frittella Cafe", "the sub-customer shows on the row");
+    assert.deepEqual([by["WO-1131"].status === "skip", by["WO-1131"].reason, by["WO-1131"].hold, by["WO-1131"].walkInName], [false, null, null, null]);
+    assert.equal(by["WO-1132"].status, "skip");
+    assert.match(by["WO-1132"].reason, /NetSuite bills Zz Hines, not Walk - In/);
+    assert.ok(by["WO-1133"].hold, "a normal account billed as Walk - In:<name> is still held");
+    await api.applyBillingBackfillFor(sql, f, "u-owner", { hash: p.hash, skip: [], approve: [] });
+    assert.deepEqual(
+      [await invoicesOf(sql, sub), await invoicesOf(sql, plain), await invoicesOf(sql, hines), await invoicesOf(sql, normal)],
+      [["INV9130"], ["INV9131"], [], []],
+    );
+  } finally {
+    await sql.pg.close();
+  }
+});
+
+test("nsWalkIn: Walk - In, and Walk - In:<name> with the name", () => {
+  assert.deepEqual(bf.nsWalkIn("Walk - In:Zz Frittella Cafe"), { name: "Zz Frittella Cafe" });
+  assert.deepEqual(bf.nsWalkIn("walk-in : Zz Frittella Cafe"), { name: "Zz Frittella Cafe" });
+  assert.deepEqual(bf.nsWalkIn("Walk - In"), { name: null });
+  assert.equal(bf.nsWalkIn("Zz Hines"), null);
+  assert.equal(bf.nsWalkIn("Walking Cafe:Zz"), null);
+  assert.equal(bf.nsWalkIn("Cimbali National Accounts:Zz"), null);
+  // NetSuite's "12345 Name" form, as nsCustomerMatches reads it.
+  assert.deepEqual(bf.nsWalkIn("12345 Walk - In:Zz A"), { name: "Zz A" });
+  assert.deepEqual(bf.nsWalkIn("C777 Walk - In"), { name: null });
+  // Lookalikes and odd shapes.
+  assert.equal(bf.nsWalkIn("Walk-Inn Diner"), null);
+  assert.equal(bf.nsWalkIn("Foo:Walk - In:Bar"), null);
+  assert.equal(bf.nsWalkIn("12345"), null);
+  assert.deepEqual(bf.nsWalkIn("Walk - In:"), { name: null });
+  assert.deepEqual(bf.nsWalkIn("Walk - In: A : B"), { name: "A : B" });
+});
+
+test("a Walk - In WO with two different Walk - In customers is written, with a warning; one with Hines in it is left off", async () => {
+  const sql = await fresh();
+  try {
+    await sql.query("insert into directory_customers (name, walk_in) values ('Walk - In', true)");
+    await ticket(sql, "Walk - In", "WO-1140");
+    await ticket(sql, "Walk - In", "WO-1141");
+    await ticket(sql, "Walk - In", "WO-1142");
+    const f = [
+      file("invoices.csv", [
+        HEAD,
+        row("WO-1140", "9140", "Walk - In:Zz A"),
+        row("WO-1140", "9141", "Walk - In:Zz B"),
+        row("WO-1141", "9142", "Walk - In:Zz A"),
+        row("WO-1141", "9143", "Zz Hines"),
+        row("WO-1142", "9144", "Walk - In"),
+        row("WO-1142", "9145", "Walk - In:Zz C"),
+      ]),
+    ];
+    const by = Object.fromEntries((await api.previewBillingBackfillFor(sql, f, "u-owner")).plans.map((x) => [x.wo, x]));
+    assert.notEqual(by["WO-1140"].status, "skip");
+    assert.ok(by["WO-1140"].warnings.some((w) => /different Walk - In customers: Zz A and Zz B/.test(w)), by["WO-1140"].warnings.join(" | "));
+    assert.equal(by["WO-1141"].status, "skip");
+    assert.match(by["WO-1141"].reason, /NetSuite bills Zz Hines, not Walk - In/);
+    assert.ok(by["WO-1142"].warnings.some((w) => /different Walk - In customers: Walk - In and Zz C/.test(w)), by["WO-1142"].warnings.join(" | "));
+  } finally {
+    await sql.pg.close();
+  }
+});
