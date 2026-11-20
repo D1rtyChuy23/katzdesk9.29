@@ -333,6 +333,8 @@ function PreviewBody({
       if (!d.selected || !rowReady(row, d)) return [];
       const catalogModel = d.catalogModel.trim();
       const known = equipment.items.some((i) => i.name.toLowerCase() === catalogModel.toLowerCase());
+      // A locked unit's Part # fill goes as previewed: the pairing's Part # for all doesn't replace it.
+      if (row.lockedNote) return [{ ...row, modelCandidates: [], reviewReasons: [], action: "update" } as EquipPreviewRow];
       return [
         {
           ...row,
@@ -446,7 +448,8 @@ function PreviewBody({
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
               const needsReview = !ready;
-              const showPickers = needsReview || !!editing[r.key];
+              // A locked unit's Part # fill takes the row as previewed: it can't be pointed at another account or model.
+              const showPickers = !r.lockedNote && (needsReview || !!editing[r.key]);
               return (
                 <tr
                   key={r.key}
@@ -499,7 +502,7 @@ function PreviewBody({
                       <button
                         type="button"
                         className="text-left font-medium hover:underline max-sm:min-h-10 max-sm:w-full"
-                        onClick={() => setEditing((cur) => ({ ...cur, [r.key]: true }))}
+                        onClick={() => !r.lockedNote && setEditing((cur) => ({ ...cur, [r.key]: true }))}
                       >
                         {d.customer || "—"}
                       </button>
@@ -542,7 +545,7 @@ function PreviewBody({
                       <button
                         type="button"
                         className="text-left hover:underline max-sm:min-h-10 max-sm:w-full"
-                        onClick={() => setEditing((cur) => ({ ...cur, [r.key]: true }))}
+                        onClick={() => !r.lockedNote && setEditing((cur) => ({ ...cur, [r.key]: true }))}
                       >
                         {d.catalogModel || "—"}
                       </button>

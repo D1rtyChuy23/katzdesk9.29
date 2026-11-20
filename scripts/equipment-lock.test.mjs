@@ -122,7 +122,7 @@ test("a locked unit survives Remove, Merge, the prune and an import", async () =
     const existing = [{ id: tb3, customer: "Lock Cafe", catalogModel: "Bunn TB3", equipmentName: "Bunn TB3", serial: null, serialKey: null, lockedBy: "chuy" }];
     assert.equal(matchExistingUnit({ customer: "Lock Cafe", catalogModel: "Bunn TB3", equipmentName: "TB3", serial: "TB-9", existing }).action, "add");
     const importer = readFileSync(new URL("../src/lib/ops/account-equip-import.ts", import.meta.url), "utf8");
-    assert.match(importer, /if \(lockedUnit\) \{\s*const fill = lockedPartFill\(lockedUnit\.partNumber, row\.partNumber, parts\);\s*if \(fill && \(await sql\.query\(lockedPartFillSql\(\), \[lockedUnit\.id, fill\]\)\)\.length\) \{[\s\S]*?\} else \{\s*skipped \+= 1;\s*\}\s*continue;/);
+    assert.match(importer, /if \(lockedUnit\) \{\s*const fill = lockedPartFill\(lockedUnit, \{ partNumber: row\.partNumber, catalogModel, serial \}, fillParts\);\s*if \(fill && \(await sql\.query\(lockedPartFillSql\(\), \[lockedUnit\.id, fill\]\)\)\.length\) \{[\s\S]*?\} else \{\s*skipped \+= 1;\s*\}\s*continue;/);
     assert.match(importer, /lockedBy: r\.locked_at \? r\.locked_by \|\| "the owner" : null/);
   } finally {
     await pg.close();

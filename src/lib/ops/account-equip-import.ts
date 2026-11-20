@@ -75,9 +75,9 @@ export type EquipPreviewRow = {
   accountAddress: string | null;
   /** The model pairing this row belongs to (file model → catalog model): see EquipPairing. */
   pairKey: string;
-  /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   /** A locked unit whose blank Part # the file fills: the import writes that Part # and nothing else (11/20). */
   lockedNote?: string | null;
+  /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
   existingId: number | null;
@@ -617,23 +617,55 @@ async function loadExisting(sql: Awaited<ReturnType<typeof getSql>>): Promise<Ex
 }
 
 /**
- * A locked unit's blank Part #, filled from the file (Chuy, 11/20: "if it is updating to correct information"). Only
- * when the unit has none, and only with a live part in the catalog, in the catalog's spelling. Null: leave it.
+ * The parts a locked unit's Part # may be filled with: live equipment-side parts, as the Parts list shows them (active,
+ * not hidden or merged, not trip or labor). A key two parts share maps to null: it can't say which part is meant.
  */
-export function lockedPartFill(unitPart: string | null | undefined, filePart: string | null | undefined, parts: Map<string, ImportPart>): string | null {
-  if ((unitPart ?? "").trim()) return null;
-  const typed = cleanPartNumber(filePart ?? "");
-  if (!typed) return null;
+export async function loadFillParts(sql: Pick<Sql, "query">): Promise<Map<string, ImportPart | null>> {
+  const rows = await sql
+    .query<{ sku: string; mfr_part: string | null; description: string | null }>(
+      `select sku, mfr_part, description from billing_items
+        where active and hidden_at is null and merged_into is null and kind not in ('trip', 'labor')
+        order by id`,
+    )
+    .catch(() => []);
+  const byKey = new Map<string, ImportPart | null>();
+  for (const r of rows) {
+    const part = { sku: r.sku, mpn: r.mfr_part, description: r.description };
+    for (const k of new Set([mpnKey(r.mfr_part), mpnKey(r.sku)].filter(Boolean) as string[])) {
+      const had = byKey.get(k);
+      byKey.set(k, had === undefined || had?.sku === part.sku ? part : null);
+    }
+  }
+  return byKey;
+}
+
+/**
+ * A locked unit's blank Part #, filled from the file (Chuy, 11/20: "if it is updating to correct information"). Only
+ * when the unit has none, the file row names the unit by its serial and its own model, and the Part # is one live part
+ * in the catalog, written in the catalog's spelling. Null: leave the unit as it is.
+ */
+export function lockedPartFill(
+  unit: { partNumber?: string | null; catalogModel: string; serialKey: string | null },
+  file: { partNumber: string | null | undefined; catalogModel: string | null | undefined; serial: string | null | undefined },
+  parts: Map<string, ImportPart | null>,
+): string | null {
+  if (cleanPartNumber(unit.partNumber ?? "")) return null;
+  const fileKey = serialKey(file.serial ?? "");
+  if (!fileKey || fileKey !== unit.serialKey) return null;
+  if ((file.catalogModel ?? "").trim().toLowerCase() !== unit.catalogModel.trim().toLowerCase()) return null;
+  const typed = cleanPartNumber(file.partNumber ?? "");
+  if (!typed || typed.length > PART_NUMBER_MAX) return null;
   const key = mpnKey(typed);
-  const part = key ? parts.get(key) : undefined;
+  const part = key ? parts.get(key) : null;
   if (!part) return null;
   const spelled = part.mpn && mpnKey(part.mpn) === key ? part.mpn : part.sku;
   return spelled.length <= PART_NUMBER_MAX ? spelled : null;
 }
 
-/** The fill: the Part # only, and only while the unit still has none. */
+/** The fill: the Part # only, and only while the unit still has none (spaces, tabs and no-break spaces are none). */
 export function lockedPartFillSql(): string {
-  return `update account_equipment set part_number = $2, updated_at = now() where id = $1 and nullif(btrim(part_number), '') is null returning id`;
+  return `update account_equipment set part_number = $2, updated_at = now()
+           where id = $1 and nullif(btrim(coalesce(part_number, ''), E' \\t\\u00a0'), '') is null returning id`;
 }
 
 export function buildPreviewRow(
@@ -642,7 +674,7 @@ export function buildPreviewRow(
   accounts: { id: number; name: string; address?: string | null }[],
   catalog: string[],
   existing: ExistingUnit[],
-  parts: Map<string, ImportPart> = new Map(),
+  fillParts: Map<string, ImportPart | null> = new Map(),
 ): EquipPreviewRow {
   const account = matchAccount(rec.customer, accounts);
   const catalogHit = matchCatalogModel(rec.equipmentName, rec.model, catalog);
@@ -677,7 +709,7 @@ export function buildPreviewRow(
     foreignAccount = unit.foreignAccount;
     if (unit.foreignAccount) reviewReasons.push(`Serial already on ${unit.foreignAccount}`);
     const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
-    const fill = lockedUnit && !unit.foreignAccount ? lockedPartFill(lockedUnit.partNumber, rec.partNumber, parts) : null;
+    const fill = lockedUnit && !unit.foreignAccount ? lockedPartFill(lockedUnit, { partNumber: rec.partNumber, catalogModel, serial }, fillParts) : null;
     if (lockedUnit && fill) {
       action = "update";
       lockedNote = `Locked by ${lockedUnit.lockedBy}: only its blank Part # is filled, with ${fill}.`;
@@ -729,7 +761,7 @@ export function buildPreviewRow(
     accountAddress,
     pairKey: pairKeyOf(rec.model.trim() || equipmentName),
     holdReasons,
-    lockedNote,
+    lockedNote: action === "review" ? null : lockedNote,
     action,
     existingId,
     foreignAccount,
@@ -750,13 +782,14 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
     const { matrix, shown } = fileToMatrix(data.base64);
     const parsed = parseEquipMatrix(matrix, shown);
     const sql = await ready();
-    const [accounts, catalog, existing, parts] = await Promise.all([
+    const [accounts, catalog, existing, parts, fillParts] = await Promise.all([
       loadAccounts(sql),
       loadCatalog(sql),
       loadExisting(sql),
       loadParts(sql),
+      loadFillParts(sql),
     ]);
-    const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing, parts));
+    const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing, fillParts));
     const pairings = buildPairings(rows, parts, catalog);
     const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
@@ -868,7 +901,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
     const catalog = await loadCatalog(sql);
     const catalogByKey = new Map(catalog.map((n) => [n.toLowerCase(), n]));
     let existing = await loadExisting(sql);
-    const parts = await loadParts(sql);
+    const fillParts = await loadFillParts(sql);
     let partsFilled = 0;
     let added = 0;
     let updated = 0;
@@ -925,7 +958,7 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
       // A locked unit is left as it is, but for a blank Part # the file fills with a live part (Chuy, 11/20).
       const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
       if (lockedUnit) {
-        const fill = lockedPartFill(lockedUnit.partNumber, row.partNumber, parts);
+        const fill = lockedPartFill(lockedUnit, { partNumber: row.partNumber, catalogModel, serial }, fillParts);
         if (fill && (await sql.query(lockedPartFillSql(), [lockedUnit.id, fill])).length) {
           existing = existing.map((e) => (e.id === lockedUnit.id ? { ...e, partNumber: fill } : e));
           partsFilled += 1;
