@@ -39,6 +39,8 @@ export type ExistingUnit = {
   serialKey: string | null;
   /** Locked by the owner: an import never fills or rewrites it. */
   lockedBy?: string | null;
+  /** The unit's Part # (the import fills a blank one on a locked unit). */
+  partNumber?: string | null;
 };
 
 export type UnitMatch = {

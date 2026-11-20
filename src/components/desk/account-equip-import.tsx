@@ -66,7 +66,7 @@ export function AccountEquipImportButton({
       toast.success(
         `Equipment list saved · ${res.added} added · ${res.updated} updated${
           res.catalogAdded ? ` · ${res.catalogAdded} new catalog model${res.catalogAdded === 1 ? "" : "s"}` : ""
-        }${res.skipped ? ` · ${res.skipped} skipped` : ""}`,
+        }${res.partsFilled ? ` · ${res.partsFilled} locked Part # filled` : ""}${res.skipped ? ` · ${res.skipped} skipped` : ""}`,
         { duration: Infinity, closeButton: true },
       );
       setOpen(false);
@@ -586,8 +586,9 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
-                      {needsReview ? "Needs review" : r.action === "update" ? "Update existing" : "Matched"}
+                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : r.action === "update" ? "Update existing" : "Matched"}
                     </span>
+                    {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
                     {r.reviewReasons.map((reason) => (
                       <span key={reason} className="mt-0.5 block text-[11px] text-muted-foreground">
                         {reason}
