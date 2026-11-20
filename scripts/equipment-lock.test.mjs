@@ -117,11 +117,12 @@ test("a locked unit survives Remove, Merge, the prune and an import", async () =
     await pg.query("update installs set equipment = 'Bunn TB3', machines = $2 where id = $1", [id, JSON.stringify([{ equipment: "Bunn TB3", serial: "TB-NEW", powerVoltage: "" }])]);
     await syncInstallUnits(sql, id, { prune: true });
     assert.equal((await unitsOf(pg, "Lock Cafe")).find((u) => u.id === tb3).serial, null);
-    // An import never fills a locked blank unit, and the importer skips a locked match.
+    // An import never fills a locked blank unit. A locked match is skipped, but for a blank Part # filled with a
+    // live part (Chuy, 11/20; scripts/locked-part-fill.test.mjs).
     const existing = [{ id: tb3, customer: "Lock Cafe", catalogModel: "Bunn TB3", equipmentName: "Bunn TB3", serial: null, serialKey: null, lockedBy: "chuy" }];
     assert.equal(matchExistingUnit({ customer: "Lock Cafe", catalogModel: "Bunn TB3", equipmentName: "TB3", serial: "TB-9", existing }).action, "add");
     const importer = readFileSync(new URL("../src/lib/ops/account-equip-import.ts", import.meta.url), "utf8");
-    assert.match(importer, /if \(unit\.foreignAccount \|\| existing\.find\(\(e\) => e\.id === unit\.existingId\)\?\.lockedBy\) \{\s*skipped \+= 1;/);
+    assert.match(importer, /if \(lockedUnit\) \{\s*const fill = lockedPartFill\(lockedUnit, \{ partNumber: row\.partNumber, catalogModel, serial \}, fillParts\);\s*if \(fill && \(await sql\.query\(lockedPartFillSql\(\), \[lockedUnit\.id, fill\]\)\)\.length\) \{[\s\S]*?\} else \{\s*skipped \+= 1;\s*\}\s*continue;/);
     assert.match(importer, /lockedBy: r\.locked_at \? r\.locked_by \|\| "the owner" : null/);
   } finally {
     await pg.close();
