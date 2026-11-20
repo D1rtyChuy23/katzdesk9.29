@@ -72,7 +72,7 @@
       "note": "E'line milk V1 kit. The manual lists no 36-month milk kit for E'line." },
 
     { "ev": "EV109706", "name": "E'choco Standard", "module": "E'choco", "interval": 12, "qty": 1,
-      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 in the V4.0 kit." },
+      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 (Ø6.07x1.78) in the V4.0 kit." },
     { "ev": "EV111934", "name": "E'choco add-on, 2 outlets", "module": "E'choco", "interval": 12, "qty": 1,
       "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms"] } }
   ],
@@ -117,7 +117,7 @@
       ["EV102821", "EV118340", "E'line brew kit. The new kit adds the top piston 116915 and bottom piston 117268."],
       ["EV109586, EV109590, EV102865", "Same numbers", "Hydraulic kits now 36 months."],
       ["EV108391, EV108312, EV109568, EV109570, EV108390", "Same numbers", "Steam add-ons now 36 months."],
-      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 (Ø6.07x1.78) added (x2)."],
       ["Full-machine kits 102941-102946, 103083-103089", "Module kits", "Not in the V4.0 manuals. Order module kits instead."]
     ]
   },
