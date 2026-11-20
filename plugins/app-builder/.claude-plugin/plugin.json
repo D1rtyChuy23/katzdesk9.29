@@ -1,0 +1,6 @@
+{
+  "name": "app-builder",
+  "description": "App-builder playbooks: UI design, auth, Neon/Postgres, share cards, xAI API, games (loop, controls, three.js, multiplayer), and 2D game-asset generation.",
+  "version": "0.1.0",
+  "author": { "name": "D1rtyChuy23" }
+}

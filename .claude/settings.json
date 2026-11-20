@@ -1,10 +1,23 @@
 {
   "extraKnownMarketplaces": {
     "typesafe-ai": {
-      "source": { "source": "github", "repo": "typesafe-ai/skills" }
+      "source": {
+        "source": "github",
+        "repo": "typesafe-ai/skills"
+      }
+    },
+    "d1rtychuy23-skills": {
+      "source": {
+        "source": "github",
+        "repo": "D1rtyChuy23/katzdesk9.29"
+      }
     }
   },
   "enabledPlugins": {
-    "typesafe@typesafe-ai": true
+    "typesafe@typesafe-ai": true,
+    "motion-design@d1rtychuy23-skills": true,
+    "app-builder@d1rtychuy23-skills": true,
+    "archify@d1rtychuy23-skills": true,
+    "agent-skills@d1rtychuy23-skills": true
   }
 }
