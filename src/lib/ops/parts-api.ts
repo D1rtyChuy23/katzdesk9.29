@@ -14,7 +14,9 @@ import { getSql, type Sql } from "@/lib/db";
 import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { cleanMpn } from "@/lib/ops/mpn-rules";
-import { PART_CLASSES, isPartClass, type PartClass } from "@/lib/ops/part-pricing";
+import { PART_CLASSES, isPartClass, unitCost, type CostSource, type DiscountRule, type PartClass } from "@/lib/ops/part-pricing";
+import { loadDiscountRule } from "@/lib/ops/part-pricing-api";
+import { round2 } from "@/lib/ops/charges";
 import { BIN_CODE_SQL, BIN_LABEL, BIN_MAX, BIN_PIECES, PARTS_PICK_MAX, binSearchCode, cleanBinValue, type BinValues } from "@/lib/ops/part-bins";
 import { textArray } from "@/lib/ops/part-merges";
 import { partImageError, sniffImage, MAX_PART_IMAGE_BYTES } from "@/lib/ops/part-images";
@@ -81,6 +83,14 @@ export type PartRow = {
   rate: number | null;
   /** Manufacturer price, from Update Part Pricing. */
   listPrice: number | null;
+  /** The NetSuite Purchase Price as stored. */
+  purchasePrice: number | null;
+  /** Our cost for one: the Purchase Price, else Our Discount Rule on the Mfr List Price; null when neither is set. */
+  cost: number | null;
+  costSource: CostSource;
+  /** Price − cost, and as a % of the price; null without both. */
+  margin: number | null;
+  marginPct: number | null;
   kind: ChargeKind;
   hasImage: boolean;
   /** Changes when the photo does; part of the photo's address so a replaced photo is not stale. */
@@ -127,6 +137,7 @@ type Raw = {
   mfr_part: string | null;
   rate: string | null;
   list_price: string | null;
+  cost: string | null;
   kind: ChargeKind;
   has_image: boolean;
   image_version: string | null;
@@ -154,7 +165,7 @@ type Raw = {
   merged_sku: string | null;
 };
 
-const COLS = `id, sku, item, description, mfr_part, rate, list_price, kind,
+const COLS = `id, sku, item, description, mfr_part, rate, list_price, cost, kind,
   (image is not null) as has_image,
   case when image is null then null else extract(epoch from image_updated_at)::bigint::text end as image_version,
   hidden_at, hidden_by, hidden_reason, item_class, get_later, get_later_by, photo_status, photo_source_url, photo_confirmed_by,
@@ -185,14 +196,25 @@ const whenHidden = (v: string | Date | null): string | null => {
   return Number.isNaN(d.getTime()) ? String(v) : d.toISOString();
 };
 
-const toRow = (r: Raw): PartRow => ({
+const toRow = (r: Raw, rule: DiscountRule | null): PartRow => {
+  const rate = r.rate == null ? null : Number(r.rate);
+  const listPrice = r.list_price == null ? null : Number(r.list_price);
+  const purchasePrice = r.cost == null ? null : Number(r.cost);
+  const u = unitCost({ listPrice, cost: purchasePrice }, rule);
+  const margin = rate != null && u.cost != null ? round2(rate - u.cost) : null;
+  return {
   id: Number(r.id),
   sku: r.sku,
   item: r.item,
   description: r.description,
   mpn: r.mfr_part,
-  rate: r.rate == null ? null : Number(r.rate),
-  listPrice: r.list_price == null ? null : Number(r.list_price),
+  rate,
+  listPrice,
+  purchasePrice,
+  cost: u.cost,
+  costSource: u.source,
+  margin,
+  marginPct: margin != null && rate ? round2((margin / rate) * 100) : null,
   kind: r.kind,
   hasImage: !!r.has_image,
   imageVersion: r.image_version,
@@ -218,7 +240,8 @@ const toRow = (r: Raw): PartRow => ({
   mergeNote: r.note?.trim() || null,
   note: r.note,
   mergedInto: r.merged_into == null ? null : { id: Number(r.merged_into), sku: r.merged_sku ?? "" },
-});
+  };
+};
 
 export type PartsPage = {
   rows: PartRow[];
@@ -317,8 +340,9 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
   const classCounts: Record<string, number> = Object.fromEntries(PART_CLASSES.map((c) => [c, classRows.find((r) => r.c === c)?.n ?? 0]));
   const classes: string[] = [...PART_CLASSES];
   const who = await powers(sql, userId);
+  const rule = await loadDiscountRule(sql);
   return {
-    rows: rows.map(toRow),
+    rows: rows.map((r) => toRow(r, rule)),
     total: counts?.total ?? 0,
     withPhoto: counts?.with_photo ?? 0,
     hiddenCount: hiddenCount?.n ?? 0,
@@ -338,7 +362,7 @@ export async function listPartsFor(sql: Sql, data: z.infer<typeof listInput>, us
 
 async function findPart(sql: Sql, id: number): Promise<PartRow | null> {
   const r = (await sql.query<Raw>(`select ${COLS} from ${FROM} where id = $1`, [id]))[0];
-  return r ? toRow(r) : null;
+  return r ? toRow(r, await loadDiscountRule(sql)) : null;
 }
 
 async function loadPart(sql: Sql, id: number): Promise<PartRow> {

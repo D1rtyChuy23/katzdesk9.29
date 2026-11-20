@@ -41,7 +41,7 @@ export function DiscountRuleEditor() {
       <h2 className="font-display text-xl">Our Discount Rule</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         What we pay the manufacturer: percent off the manufacturer price, or a fixed amount off it per unit. It sets the cost on ticket part lines; when a
-        ticket is invoiced, its cost, sell, discount and margin are stored. A part with no manufacturer price uses its NetSuite Purchase Price.
+        ticket is invoiced, its cost, sell, discount and margin are stored. A part's NetSuite Purchase Price comes first; this rule is used only for a part with no Purchase Price.
       </p>
       <p className="mt-3 text-sm">
         Now: <span className="font-medium" data-testid="discount-rule-now">{q.data.label}</span>
