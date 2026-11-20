@@ -696,12 +696,28 @@ async function promoteAdmin(sql: Sql, userId: string, email?: string | null): Pr
   return mapAccess(rows[0]);
 }
 
+/** The owner flag, or an approved Admin role (Chuy, 11/20: the Admin role manages accounts too). */
 async function requireAdmin(sql: Sql, userId: string, message?: string): Promise<void> {
-  const me = await sql.query<{ is_admin: boolean }>(
-    "select is_admin from desk_accounts where user_id = $1",
+  const me = await sql.query<{ is_admin: unknown; desk_role: string | null; approved: unknown }>(
+    "select is_admin, desk_role, approved from desk_accounts where user_id = $1",
     [userId],
   );
-  if (!flagOn(me[0]?.is_admin)) throw new Error(message ?? "Only an admin can review accounts.");
+  const row = me[0];
+  const ok = !!row && (flagOn(row.is_admin) || (flagOn(row.approved) && isAdminAccount(row)));
+  if (!ok) throw new Error(message ?? "Only an admin can review accounts.");
+}
+
+/**
+ * Taking away access, denying or resetting a password: an Admin-role person can do it to anyone but an owner-flag
+ * admin. Only the owner flag can act on the owner flag.
+ */
+export async function requireCanChangeAccount(sql: Sql, userId: string, targetId: string): Promise<void> {
+  const rows = await sql.query<{ user_id: string; is_admin: unknown }>(
+    "select user_id, is_admin from desk_accounts where user_id = any($1::text[])",
+    [[userId, targetId]],
+  );
+  const flag = (id: string) => flagOn(rows.find((r) => r.user_id === id)?.is_admin);
+  if (flag(targetId) && !flag(userId)) throw new Error("Only the desk owner can change an owner admin's access.");
 }
 
 export async function requireCanAddCustomers(sql: Sql, userId: string): Promise<void> {
@@ -1081,6 +1097,7 @@ export const setAccountApproved = createServerFn({ method: "POST" })
     const sql = await getSql();
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
+    await requireCanChangeAccount(sql, context.userId, data.userId);
     if (data.userId === context.userId && !data.approved) {
       throw new Error("You cannot revoke your own access.");
     }
@@ -1180,6 +1197,7 @@ export const denyAccount = createServerFn({ method: "POST" })
     const sql = await getSql();
     await ensureTable(sql);
     await requireAdmin(sql, context.userId);
+    await requireCanChangeAccount(sql, context.userId, data.userId);
     if (data.userId === context.userId) throw new Error("You cannot deny your own access.");
     return denyDeskAccount(sql, data.userId);
   });

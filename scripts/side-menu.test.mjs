@@ -25,9 +25,8 @@ test("the owner sees every group in work order", () => {
   assert.deepEqual(shape(menuFor("admin", true)), OWNER);
 });
 
-test("the Admin role sees everything but Access (the owner's)", () => {
-  const admin = OWNER.map(([g, items]) => [g, g === "Admin" ? ["Settings"] : items]);
-  assert.deepEqual(shape(menuFor("admin", false)), admin);
+test("the Admin role sees everything, Access too (11/20)", () => {
+  assert.deepEqual(shape(menuFor("admin", false)), OWNER);
 });
 
 test("the Service role: no Clean Names, no Invoices, no Access", () => {

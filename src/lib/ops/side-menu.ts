@@ -123,7 +123,7 @@ export const SIDE_MENU: MenuGroup[] = [
     label: "Admin",
     items: [
       { to: "/settings", label: "Settings" },
-      { to: "/access", label: "Access", owner: true },
+      { to: "/access", label: "Access", admin: true },
     ],
   },
 ];

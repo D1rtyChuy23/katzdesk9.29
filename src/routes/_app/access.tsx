@@ -1,3 +1,4 @@
+import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -67,13 +68,13 @@ function Page() {
   const list = useQuery({
     queryKey: ["access", "list"],
     queryFn: () => listDeskAccounts(),
-    enabled: !!me.data?.isAdmin,
+    enabled: isDeskAdmin(me.data),
     refetchInterval: 8000,
   });
   const invites = useQuery({
     queryKey: ["access", "invites"],
     queryFn: () => listDeskInvites(),
-    enabled: !!me.data?.isAdmin,
+    enabled: isDeskAdmin(me.data),
     refetchInterval: 8000,
   });
   const [email, setEmail] = useState("");
@@ -197,7 +198,7 @@ function Page() {
     });
   }
 
-  if (me.data && !me.data.isAdmin) {
+  if (me.data && !isDeskAdmin(me.data)) {
     return (
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight">Access</h1>

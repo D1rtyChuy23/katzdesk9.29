@@ -445,10 +445,14 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     assert.equal(pulled.notice, "Serial TESTSN-RACK pulled from warehouse · Test espresso machine · B-L2");
     assert.deepEqual(await unitRow(rack), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "barn-back" });
     const first = { from_name: "wade", body: ping("TESTSN-RACK", "Back · B-L2"), customer: SD, entity_type: "rebuild", entity_id: sd };
-    assert.deepEqual(await pinged(), [{ user_id: "u-owner", ...first }, { user_id: "u-wh-owner", ...first }], "the owner flag, approved: not the Admin role, not an unapproved account");
+    assert.deepEqual(
+      await pinged(),
+      [{ user_id: "u-owner", ...first }, { user_id: "u-role", ...first }, { user_id: "u-wh-owner", ...first }],
+      "the owner flag or the Admin role, approved (11/20): not an unapproved account",
+    );
     // The serial box pulls again when it loses focus: the same unit on the same machine pings no one again.
     await pull(sd, "TESTSN-RACK");
-    assert.equal((await pings(pg)).length, 2);
+    assert.equal((await pings(pg)).length, 3);
 
     // On a customer's account: the same confirm a tech gets, then onto the refurb. Nothing waits for an Admin.
     const theirs = await unit("TESTSN-CUST", { site: "account", status: "at-account", sold_to: "Bean Test Cafe" });
@@ -456,7 +460,7 @@ test("Warehouse pulls a unit onto its refurb from wherever it is, with no approv
     await assert.rejects(() => pull(sd, "TESTSN-CUST"), /^Error: Serial TESTSN-CUST is already assigned to Bean Test Cafe\. Confirm reuse or cancel\.$/);
     assert.deepEqual(await unitRow(theirs), { status: "at-account", sold_to: "Bean Test Cafe", purpose: null, site: "account" }, "nothing moves before the confirm");
     assert.equal(await machineOf(sd, "TESTSN-CUST"), null, "and no machine is added before the answer");
-    assert.equal((await pings(pg)).length, 2, "no ping for a question");
+    assert.equal((await pings(pg)).length, 3, "no ping for a question");
     const reused = await pull(sd, "TESTSN-CUST", "u-wh", true);
     assert.equal(reused.notice, "Serial TESTSN-CUST pulled from warehouse · Test espresso machine · On the account (was Bean Test Cafe)");
     assert.deepEqual(await unitRow(theirs), { status: "assigned", sold_to: SD, purpose: "In-house rebuild", site: "account" });
@@ -699,7 +703,7 @@ test("Warehouse's change never lands on a rebuild an Admin moved to a customer b
     assert.equal((await updateRebuildFor(sql, { id: sd, notes: "Warehouse note" }, "u-wh")).notes, "Warehouse note");
     assert.equal((await pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-RACE" }, "u-wh")).machines[0].assetId, free);
     assert.equal((await pullRebuildMachineFor(sql, { id: sd, serial: "TESTSN-TAKEN", confirmReuse: true }, "u-wh")).machines[1].assetId, taken);
-    assert.equal((await pings(pg)).length, 4, "two pulls, two Admins");
+    assert.equal((await pings(pg)).length, 6, "two pulls, three Admins (the owner flags and the Admin role, 11/20)");
   } finally {
     await pg.close();
   }
