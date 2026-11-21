@@ -13,11 +13,16 @@ export function CostAccessEditor() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["cost-access"], queryFn: () => getCostAccess() });
   const [roles, setRoles] = useState<CostRole[]>([]);
+  const [showLabor, setShowLabor] = useState(false);
+  const [warehouseRebuilds, setWarehouseRebuilds] = useState(false);
   useEffect(() => {
-    if (q.data) setRoles(q.data.roles);
+    if (!q.data) return;
+    setRoles(q.data.roles);
+    setShowLabor(q.data.showLabor);
+    setWarehouseRebuilds(q.data.warehouseRebuilds);
   }, [q.data]);
   const save = useMutation({
-    mutationFn: () => setCostAccess({ data: { roles } }),
+    mutationFn: () => setCostAccess({ data: { roles, showLabor, warehouseRebuilds } }),
     onSuccess: (next) => {
       qc.setQueryData(["cost-access"], next);
       void qc.invalidateQueries({ queryKey: ["parts"] });
@@ -26,7 +31,7 @@ export function CostAccessEditor() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
   if (!q.data?.canEdit) return null;
-  const changed = [...roles].sort().join() !== [...q.data.roles].sort().join();
+  const changed = [...roles].sort().join() !== [...q.data.roles].sort().join() || showLabor !== q.data.showLabor || warehouseRebuilds !== q.data.warehouseRebuilds;
   return (
     <section className="rounded-xl border border-border bg-card p-5" data-testid="cost-access">
       <h2 className="font-display text-xl">Who Sees Cost and Margin</h2>
@@ -47,6 +52,22 @@ export function CostAccessEditor() {
             {r.label}
           </label>
         ))}
+      </div>
+      <div className="mt-4 space-y-2 text-sm">
+        <label className="flex items-start gap-2">
+          <input type="checkbox" className="mt-0.5 size-4" checked={showLabor} onChange={(e) => setShowLabor(e.target.checked)} data-testid="cost-access-labor" />
+          <span>
+            Show labor cost to ticked roles
+            <span className="block text-xs text-muted-foreground">Off: they see parts and the trip only, with labor left out of the totals, so the Labor Cost Rate can't be worked out.</span>
+          </span>
+        </label>
+        <label className="flex items-start gap-2">
+          <input type="checkbox" className="mt-0.5 size-4" checked={warehouseRebuilds} onChange={(e) => setWarehouseRebuilds(e.target.checked)} data-testid="cost-access-warehouse-rebuilds" />
+          <span>
+            Warehouse sees cost on rebuild invoices
+            <span className="block text-xs text-muted-foreground">Only when Warehouse is ticked above. Off: no cost on rebuild invoices for Warehouse.</span>
+          </span>
+        </label>
       </div>
       <div className="mt-4">
         <Button type="button" disabled={save.isPending || !changed} onClick={() => save.mutate()} data-testid="cost-access-save">

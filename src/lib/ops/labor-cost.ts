@@ -2,6 +2,7 @@
  * Labor cost (Chuy, 11/20): billed labor hours × one blended labor cost rate that an Admin sets. It is never a tech's
  * own pay, and the rate is shown only to an Admin.
  */
+import type { Sql } from "@/lib/db";
 import { round2 } from "./charges.ts";
 
 export const LABOR_RATE_MAX = 1000;
@@ -21,3 +22,25 @@ export function cleanLaborRate(value: unknown): { rate: number | null } | { erro
 export function laborCost(hours: number, rate: number | null): number | null {
   return rate == null ? null : round2(hours * rate);
 }
+
+export const LABOR_KEY = "labor_cost_rate";
+
+/** The blended labor cost rate ($ per hour), or null when none is set. */
+export async function loadLaborRate(sql: Sql): Promise<number | null> {
+  const row = (await sql.query<{ value: string | null }>("select value from desk_settings where key = $1", [LABOR_KEY]))[0];
+  const r = cleanLaborRate(row?.value ?? null);
+  return "rate" in r ? r.rate : null;
+}
+
+/** Store the rate, or clear it with null. */
+export async function saveLaborRate(sql: Sql, rate: number | null): Promise<void> {
+  if (rate == null) await sql.query("delete from desk_settings where key = $1", [LABOR_KEY]);
+  else {
+    await sql.query(
+      `insert into desk_settings (key, value, updated_at) values ($1, $2, now())
+       on conflict (key) do update set value = excluded.value, updated_at = now()`,
+      [LABOR_KEY, String(rate)],
+    );
+  }
+}
+

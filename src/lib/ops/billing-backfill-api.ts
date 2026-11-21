@@ -28,6 +28,7 @@ import {
 } from "@/lib/ops/billing-backfill";
 import { woMatchKey } from "@/lib/ops/corrigo";
 import { storeInvoicedProfit } from "@/lib/ops/charges-api";
+import { storeLineCosts } from "@/lib/ops/line-cost";
 import { BILLED_ON_INSTALL, BILLED_ON_INSTALL_SO } from "@/lib/ops/merged-ticket";
 import { LIVE_INVOICE_SQL, loadInvoices } from "@/lib/ops/ticket-billing-api";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
@@ -859,6 +860,17 @@ export async function applyBillingBackfillFor(
     // Billed tickets keep each part line's cost and margin as of now (what Mark Billed does). Worked out live otherwise.
     for (const p of tickets) {
       if (!p.locked && p.charges.change) await storeInvoicedProfit(sql as Sql, p.jobId!, true).catch(() => undefined);
+    }
+    // NetSuite's lines on an install or PM are billed already: their cost and margin as of now too (11/20).
+    for (const p of rplan) {
+      if (!p.write_charges) continue;
+      const b = (
+        await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null }>(
+          "select id, discount_kind, discount_value from record_ns_billing where record_key = $1 and wo_key = $2",
+          [`${p.rtype}:${p.rid}`, p.wo_key],
+        )
+      )[0];
+      if (b) await storeLineCosts(sql as Sql, "record_ns_charges", Number(b.id), discountFromRow(b.discount_kind, b.discount_value)).catch(() => undefined);
     }
   }
   const after = await planFiles(sql, files);
