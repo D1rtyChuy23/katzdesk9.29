@@ -43,7 +43,7 @@ export function LineProfitRow({ p, labor }: { p: LineProfit & { stored: boolean 
 export function ProfitTotalsRow({ t, testId }: { t: BillProfitTotals; testId: string }) {
   return (
     <p className="mt-3 flex flex-wrap gap-x-3 gap-y-0.5 rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground tabular" data-testid={testId}>
-      <span className="font-medium text-foreground">Cost and margin</span>
+      <span className="font-medium text-foreground">Cost and margin{t.laborHidden ? " · parts and trip (labor not shown)" : ""}</span>
       <span>
         Sell <span className="font-medium text-foreground">{money(t.sell)}</span>
       </span>

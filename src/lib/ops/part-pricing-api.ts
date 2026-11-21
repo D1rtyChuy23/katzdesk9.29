@@ -7,7 +7,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { itemFullName } from "@/lib/ops/charges";
 import { RULE_KEY, loadDiscountRule } from "@/lib/ops/discount-rule";
 import { cleanLaborRate, loadLaborRate, saveLaborRate } from "@/lib/ops/labor-cost";
-import { COST_ROLES, canSeeCost, cleanCostRoles, loadCostRoles, saveCostRoles, type CostRole } from "@/lib/ops/cost-access";
+import { COST_ROLES, canSeeCost, cleanCostRoles, loadCostOptions, saveCostOptions, type CostOptions } from "@/lib/ops/cost-access";
 import {
   PRICE_TARGET_LABEL,
   cleanRule,
@@ -469,23 +469,25 @@ export const setLaborRate = createServerFn({ method: "POST" })
 
 // ------------------------------------------------------------------------------------------ who sees cost
 
-/** Which roles see our cost and margin (an Admin always does). Admin only. */
+/** Which roles see our cost and margin (an Admin always does), and the labor and Warehouse switches. Admin only. */
 export const getCostAccess = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ roles: CostRole[]; canEdit: boolean }> => {
+  .handler(async ({ context }): Promise<CostOptions & { canEdit: boolean }> => {
     const sql = await ready();
     const canEdit = await canReviewNames(sql, context.userId);
-    return { roles: canEdit ? await loadCostRoles(sql) : [], canEdit };
+    return canEdit ? { ...(await loadCostOptions(sql)), canEdit } : { roles: [], showLabor: false, warehouseRebuilds: false, canEdit };
   });
 
-/** Set which roles see cost and margin. Admin only. */
+/** Set who sees cost and margin, and the two switches. Admin only. */
 export const setCostAccess = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { roles: string[] }) => z.object({ roles: z.array(z.string().max(20)).max(COST_ROLES.length) }).parse(d))
-  .handler(async ({ data, context }): Promise<{ roles: CostRole[]; canEdit: boolean }> => {
+  .validator((d: { roles: string[]; showLabor?: boolean; warehouseRebuilds?: boolean }) =>
+    z.object({ roles: z.array(z.string().max(20)).max(COST_ROLES.length), showLabor: z.boolean().optional(), warehouseRebuilds: z.boolean().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }): Promise<CostOptions & { canEdit: boolean }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
-    const roles = cleanCostRoles(data.roles);
-    await saveCostRoles(sql, roles);
-    return { roles, canEdit: true };
+    const o: CostOptions = { roles: cleanCostRoles(data.roles), showLabor: data.showLabor === true, warehouseRebuilds: data.warehouseRebuilds === true };
+    await saveCostOptions(sql, o);
+    return { ...o, canEdit: true };
   });

@@ -563,16 +563,28 @@ export function storedLineProfit(line: { qty: number; rate: number }, s: { unitC
   };
 }
 
-export type BillProfitTotals = { sell: number; ticketDiscount: number; cost: number; margin: number | null; marginPct: number | null; noCost: number };
+/** laborHidden: labor lines are left out (Who Sees Cost and Margin's labor switch is off for this person). */
+export type BillProfitTotals = { sell: number; ticketDiscount: number; cost: number; margin: number | null; marginPct: number | null; noCost: number; laborHidden: boolean };
 
 /** A bill's sell, discount, known cost and margin (11/20). Margin waits until every line has a cost. */
-export function billProfitTotals(lines: { qty: number; rate: number }[], off: number, profit: ({ cost: number | null } | null)[]): BillProfitTotals {
+export function billProfitTotals(
+  lines: { qty: number; rate: number; kind?: string }[],
+  off: number,
+  profit: ({ cost: number | null; ticketDiscount?: number } | null)[],
+  hideLabor = false,
+): BillProfitTotals {
+  if (hideLabor) {
+    // Without labor: its sell and its share of the discount come out too, so nothing about it can be worked out.
+    const keep = lines.map((l) => l.kind !== "labor");
+    const laborOff = profit.reduce((a, p, i) => a + (keep[i] ? 0 : (p?.ticketDiscount ?? 0)), 0);
+    return { ...billProfitTotals(lines.filter((_, i) => keep[i]), round2(off - laborOff), profit.filter((_, i) => keep[i])), laborHidden: true };
+  }
   const sell = round2(lines.reduce((a, l) => a + round2(l.qty * l.rate), 0));
   const cost = round2(profit.reduce((a, p) => a + (p?.cost ?? 0), 0));
   const noCost = profit.filter((p) => p?.cost == null).length;
   const net = round2(sell - off);
   const margin = noCost ? null : round2(net - cost);
-  return { sell, ticketDiscount: round2(off), cost, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), noCost };
+  return { sell, ticketDiscount: round2(off), cost, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), noCost, laborHidden: false };
 }
 
 /**

@@ -111,10 +111,11 @@ test("the Invoice window's cost follows Who Sees Cost and Margin; the rate goes 
   await I.approveInvoiceFor(sql, { type: "install", id: install, lines: LINES, lineIds: [], discount: null, seen: null }, "u-owner");
   const off = await I.getInvoiceFor(sql, { type: "install", id: install }, "u-desk");
   assert.deepEqual([off.profit, off.profitTotals], [null, null]);
-  await CA.saveCostRoles(sql, ["service"]);
+  // The labor switch on (cost-options.test.mjs has it off).
+  await CA.saveCostOptions(sql, { roles: ["service"], showLabor: true, warehouseRebuilds: false });
   const on = await I.getInvoiceFor(sql, { type: "install", id: install }, "u-desk");
   assert.deepEqual([on.profit[1].cost, on.profit[1].unitCost, on.profit[2].unitCost], [60, null, 20]);
-  assert.deepEqual(on.profitTotals, { sell: 540, ticketDiscount: 0, cost: 100, margin: 440, marginPct: 81.48, noCost: 0 });
+  assert.deepEqual(on.profitTotals, { sell: 540, ticketDiscount: 0, cost: 100, margin: 440, marginPct: 81.48, noCost: 0, laborHidden: false });
   const admin = await I.getInvoiceFor(sql, { type: "install", id: install }, "u-owner");
   assert.equal(admin.profit[1].unitCost, 30);
   const job = await idOf(sql, "insert into service_jobs (kind, call_id, customer, status, received) values ('service', 'SC-IC-1', $1, 'Completed', '2026-10-20') returning id", [CAFE]);

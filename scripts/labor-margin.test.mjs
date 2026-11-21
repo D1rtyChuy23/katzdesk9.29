@@ -56,7 +56,7 @@ test("labor's cost is billed hours × the Labor Cost Rate; the trip has no cost;
   assert.deepEqual([part.source, part.cost, part.margin], ["purchase", 40, 50]);
   assert.equal(unlisted, null, "a line not on the parts list has no cost");
   // 150 + 225 + 90 + 10 = 475 sell; 0 + 46.5 + 40 known cost; one line with no cost, so no margin.
-  assert.deepEqual(c.profitTotals, { sell: 475, ticketDiscount: 0, cost: 86.5, margin: null, marginPct: null, noCost: 1 });
+  assert.deepEqual(c.profitTotals, { sell: 475, ticketDiscount: 0, cost: 86.5, margin: null, marginPct: null, noCost: 1, laborHidden: false });
 });
 
 test("with every line costed the ticket has a margin; with no Labor Cost Rate labor has no cost", async () => {
@@ -69,7 +69,7 @@ test("with every line costed the ticket has a margin; with no Labor Cost Rate la
   await P.saveLaborRate(sql, 30);
   c = await C.getTicketChargesFor(sql, job, "u-owner");
   // 465 sell − (0 + 45 + 40) = 380.
-  assert.deepEqual(c.profitTotals, { sell: 465, ticketDiscount: 0, cost: 85, margin: 380, marginPct: 81.72, noCost: 0 });
+  assert.deepEqual(c.profitTotals, { sell: 465, ticketDiscount: 0, cost: 85, margin: 380, marginPct: 81.72, noCost: 0, laborHidden: false });
 });
 
 test("invoicing stores labor's cost at the rate then; a later rate change leaves it; clearing the Sales Order clears it", async () => {
@@ -110,7 +110,8 @@ test("a ticket's cost follows Who Sees Cost and Margin; the labor rate goes only
   await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES.slice(0, 3), lineIds: [] });
   const off = await C.getTicketChargesFor(sql, job, "u-desk");
   assert.deepEqual([off.profit, off.profitTotals, off.ruleLabel, off.canUnlock], [null, null, null, false]);
-  await CA.saveCostRoles(sql, ["service"]);
+  // The labor switch on (cost-options.test.mjs has it off).
+  await CA.saveCostOptions(sql, { roles: ["service"], showLabor: true, warehouseRebuilds: false });
   const on = await C.getTicketChargesFor(sql, job, "u-desk");
   assert.equal(on.canUnlock, false);
   // The rate isn't sent; a ticked role can still divide labor's cost by its hours (Chuy decides whether labor shows).
@@ -129,7 +130,7 @@ test("a discount spreads over labor too: Whole bill, Chosen lines, and 100% off"
   await C.writeTicketCharges(sql, whole, "u-owner", { lines: three, lineIds: [], discount: { kind: "percent", value: 10 } });
   let c = await C.getTicketChargesFor(sql, whole, "u-owner");
   assert.deepEqual(c.profit.map((p) => p.ticketDiscount), [15, 22.5, 9]);
-  assert.deepEqual(c.profitTotals, { sell: 465, ticketDiscount: 46.5, cost: 85, margin: 333.5, marginPct: 79.69, noCost: 0 });
+  assert.deepEqual(c.profitTotals, { sell: 465, ticketDiscount: 46.5, cost: 85, margin: 333.5, marginPct: 79.69, noCost: 0, laborHidden: false });
   assert.equal(round(c.profit.reduce((a, p) => a + p.margin, 0)), c.profitTotals.margin, "the lines add up to the ticket");
   const chosen = await ticket(sql);
   await C.writeTicketCharges(sql, chosen, "u-owner", {
@@ -149,7 +150,8 @@ test("a discount spreads over labor too: Whole bill, Chosen lines, and 100% off"
 test("an invoiced ticket viewed by a ticked role: stored costs and totals, still no labor rate", async () => {
   const sql = await fresh();
   await P.saveLaborRate(sql, 31);
-  await CA.saveCostRoles(sql, ["service"]);
+  // The labor switch on (cost-options.test.mjs has it off).
+  await CA.saveCostOptions(sql, { roles: ["service"], showLabor: true, warehouseRebuilds: false });
   const job = await ticket(sql);
   await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES.slice(0, 3), lineIds: [] });
   await C.recordTicketSalesOrder(sql, job, "u-owner", "SO-LM-4");

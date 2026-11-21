@@ -53,3 +53,46 @@ export async function canSeeCost(sql: Sql, userId: string): Promise<boolean> {
   const role = String(row.desk_role ?? "").trim().toLowerCase() || "none";
   return (await loadCostRoles(sql)).includes(role as CostRole);
 }
+
+// Two more switches (Chuy, 11/20: "I want both to be toggle. I can decide later."), both off to start.
+export const COST_OPTIONS_KEY = "cost_options";
+
+export type CostOptions = {
+  roles: CostRole[];
+  /** Ticked roles see labor's cost too. Off: parts and the trip only, so the Labor Cost Rate can't be worked out. */
+  showLabor: boolean;
+  /** Warehouse, when ticked, sees cost on rebuild invoices too. Off: never there. */
+  warehouseRebuilds: boolean;
+};
+
+export async function loadCostOptions(sql: Sql): Promise<CostOptions> {
+  const row = (await sql.query<{ value: string | null }>("select value from desk_settings where key = $1", [COST_OPTIONS_KEY]))[0];
+  let o: Record<string, unknown> = {};
+  try {
+    o = row?.value ? (JSON.parse(row.value) ?? {}) : {};
+  } catch {
+    o = {};
+  }
+  return { roles: await loadCostRoles(sql), showLabor: o.showLabor === true, warehouseRebuilds: o.warehouseRebuilds === true };
+}
+
+export async function saveCostOptions(sql: Sql, o: CostOptions): Promise<void> {
+  await saveCostRoles(sql, o.roles);
+  await sql.query(
+    `insert into desk_settings (key, value, updated_at) values ($1, $2, now())
+     on conflict (key) do update set value = excluded.value, updated_at = now()`,
+    [COST_OPTIONS_KEY, JSON.stringify({ showLabor: o.showLabor === true, warehouseRebuilds: o.warehouseRebuilds === true })],
+  );
+}
+
+/** What this person sees: cost at all, labor's cost (an Admin always), and whether they are an Admin. */
+export async function costView(sql: Sql, userId: string): Promise<{ showCost: boolean; showLabor: boolean; admin: boolean; warehouseRebuilds: boolean }> {
+  const row = (await sql.query<{ is_admin: unknown; desk_role: string | null; approved: unknown }>(
+    "select is_admin, desk_role, approved from desk_accounts where user_id = $1",
+    [userId],
+  ))[0];
+  const admin = !!row && flagOn(row.approved) && isAdminAccount(row);
+  const showCost = await canSeeCost(sql, userId);
+  const o = await loadCostOptions(sql);
+  return { showCost, showLabor: admin || (showCost && o.showLabor), admin, warehouseRebuilds: o.warehouseRebuilds };
+}

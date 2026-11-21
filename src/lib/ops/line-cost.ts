@@ -92,16 +92,18 @@ export async function storeLineCosts(sql: Sql, table: LineCostTable, parentId: n
 }
 
 /** Each line's cost and margin (stored, else live) and the bill's totals. The labor rate goes only to an Admin. */
-export async function billProfit(sql: Sql, table: LineCostTable, parentId: number, discount: Discount | null, admin: boolean): Promise<BillProfit> {
+export async function billProfit(sql: Sql, table: LineCostTable, parentId: number, discount: Discount | null, admin: boolean, showLabor = admin): Promise<BillProfit> {
   const rows = await lineRows(sql, table, parentId);
   const { lines, off, live } = await livePrices(sql, rows, discount);
-  const profit: (StoredLineProfit | null)[] = rows.map((r, i) => {
-    const p: StoredLineProfit | null = r.priced_at
+  const full: (StoredLineProfit | null)[] = rows.map((r, i) =>
+    r.priced_at
       ? { ...storedLineProfit(lines[i], { unitCost: num(r.unit_cost), source: r.cost_source, discount: num(r.line_discount), margin: num(r.margin) }), stored: true }
       : live[i]
         ? { ...live[i]!, stored: false }
-        : null;
-    return p && !admin && r.kind === "labor" ? { ...p, unitCost: null } : p;
-  });
-  return { profit, totals: billProfitTotals(lines, off, profit) };
+        : null,
+  );
+  // A non-Admin: labor's cost without its rate, or nothing when the labor switch is off (11/20).
+  const hideLabor = !admin && !showLabor;
+  const profit = full.map((p, i) => (!p || admin || rows[i].kind !== "labor" ? p : hideLabor ? null : { ...p, unitCost: null }));
+  return { profit, totals: billProfitTotals(rows.map((r, i) => ({ ...lines[i], kind: r.kind })), off, full, hideLabor) };
 }

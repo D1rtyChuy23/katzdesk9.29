@@ -15,7 +15,7 @@ import { textArray } from "./part-merges";
 import { BIN_CODE_SQL, binSearchCode } from "./part-bins";
 import { loadDiscountRule } from "./part-pricing-api";
 import { loadLaborRate } from "./labor-cost";
-import { canSeeCost } from "./cost-access";
+import { costView } from "./cost-access";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
 import { createServerFn } from "@tanstack/react-start";
@@ -202,10 +202,11 @@ export type LineProfitView = LineProfit & { mpn: string | null; listPrice: numbe
 export type { ProfitTotals };
 
 /** What a person may see on a ticket's charges: cost and margin (Who Sees Cost and Margin), and the Admin's extras. */
-export type ChargeView = { showCost: boolean; admin: boolean };
+export type ChargeView = { showCost: boolean; admin: boolean; showLabor?: boolean };
 
 export async function chargeView(sql: Sql, userId: string): Promise<ChargeView> {
-  return { showCost: await canSeeCost(sql, userId), admin: await canReviewNames(sql, userId) };
+  const v = await costView(sql, userId);
+  return { showCost: v.showCost, admin: await canReviewNames(sql, userId), showLabor: v.showLabor };
 }
 
 type ChargeRow = {
@@ -303,8 +304,8 @@ function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, di
   });
 }
 
-function profitTotalsFor(rows: ChargeRow[], off: number, profit: (LineProfitView | null)[]): ProfitTotals {
-  return billProfitTotals(rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) })), off, profit);
+function profitTotalsFor(rows: ChargeRow[], off: number, profit: (LineProfitView | null)[], hideLabor = false): ProfitTotals {
+  return billProfitTotals(rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), kind: r.kind })), off, profit, hideLabor);
 }
 
 async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCost: false, admin: false }): Promise<TicketCharges> {
@@ -345,7 +346,9 @@ async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCos
   const rule = showCost ? await loadDiscountRule(sql) : null;
   const profit = showCost ? profitFor(rows, totals.off, rule, discount, await loadLaborRate(sql)) : null;
   // The Labor Cost Rate is Admin only ("Hide pay rates", 11/20): others get labor's cost, not its rate.
-  const shown = profit && !view.admin ? profit.map((p, i) => (p && rows[i].kind === "labor" ? { ...p, unitCost: null } : p)) : profit;
+  // With the labor switch off, a non-Admin gets no labor cost at all, and the totals leave labor out (11/20).
+  const hideLabor = !view.admin && !view.showLabor;
+  const shown = profit && !view.admin ? profit.map((p, i) => (p && rows[i].kind === "labor" ? (hideLabor ? null : { ...p, unitCost: null }) : p)) : profit;
   return {
     jobId,
     po: job.po ?? "",
@@ -357,7 +360,7 @@ async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCos
     ...totals,
     state: billingState({ lineCount: lines.length, nsSo: job.ns_so, invoiced: liveInvoices(invoices).length > 0 }),
     profit: shown,
-    profitTotals: profit ? profitTotalsFor(rows, totals.off, profit) : null,
+    profitTotals: profit ? profitTotalsFor(rows, totals.off, profit, hideLabor) : null,
     ruleLabel: showCost ? ruleLabel(rule) : null,
     invoiceLock: lockedBy ? { invoice: lockedBy.invoice, status: lockedBy.status } : null,
     unlock: lockedBy && unlockedAt && unlockActive(unlockedAt) ? { by: job.billing_unlocked_by, at: unlockedAt, reason: job.billing_unlock_reason } : null,
