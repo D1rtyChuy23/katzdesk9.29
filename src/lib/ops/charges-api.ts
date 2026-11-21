@@ -416,6 +416,34 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
 }
 
 /**
+ * The Profit report's tickets (11/20): each invoiced ticket billed in the range, once (as Parts Profit counts them), with
+ * its sell, discount, cost and margin as the Charges panel works them out for this person.
+ */
+export async function ticketProfitBills(
+  sql: Sql,
+  range: { from: string | null; to: string | null },
+  view: ChargeView,
+): Promise<{ id: number; kind: string; customer: string; date: string; totals: ProfitTotals; estimated: boolean }[]> {
+  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; day: string }>(
+    `select j.id, j.kind, j.customer, to_char(coalesce(j.billed_at, j.completed_at, j.received)::date, 'YYYY-MM-DD') as day from service_jobs j
+      where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
+        and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
+        and ($1::date is null or coalesce(j.billed_at::date, j.completed_at::date) >= $1::date)
+        and ($2::date is null or coalesce(j.billed_at::date, j.completed_at::date) <= $2::date)
+        and exists (select 1 from ticket_charges c where c.job_id = j.id)
+      order by j.id`,
+    [range.from || null, range.to || null],
+  );
+  const out = [];
+  for (const j of jobs) {
+    const c = await loadCharges(sql, Number(j.id), { ...view, showCost: true });
+    if (!c.profitTotals) continue;
+    out.push({ id: Number(j.id), kind: j.kind, customer: j.customer ?? "", date: j.day, totals: c.profitTotals, estimated: (c.profit ?? []).some((p) => p != null && !p.stored) });
+  }
+  return out;
+}
+
+/**
  * When a ticket is invoiced, store on each part line its MPN, manufacturer price, cost, our discount, its share of
  * the ticket discount and its margin, from the part and Our Discount Rule as they are now. Clearing the Sales
  * Order clears them, so a re-bill stores fresh ones.

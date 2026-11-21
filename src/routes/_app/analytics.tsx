@@ -5,7 +5,8 @@ import { FileSpreadsheet, FileText, FileType } from "lucide-react";
 import { toast } from "sonner";
 import { downloadAnalytics, getAnalytics } from "@/lib/ops/analytics-api";
 import { downloadPartsProfit, getPartsProfit } from "@/lib/ops/parts-profit-api";
-import { getMyAccess } from "@/lib/ops/access";
+import { downloadProfitReport, getCostVisibility, getProfitReport } from "@/lib/ops/profit-report-api";
+import { jobTypeLabel, type GroupTotals } from "@/lib/ops/profit-report";
 import { ANALYTICS_LABEL, ANALYTICS_TYPES, NO_REP, type AnalyticsFilters, type AnalyticsRow, type AnalyticsType, type ExportFormat } from "@/lib/ops/analytics";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { formatRep } from "@/lib/ops/rep-match";
@@ -56,24 +57,28 @@ const CARD_LINE = "max-sm:basis-full max-sm:max-w-none max-sm:p-0";
 /** A small value in a run of values; the label comes from before:content on the cell. */
 const CARD_VALUE = "max-sm:p-0 max-sm:text-left max-sm:text-xs max-sm:before:mr-1 max-sm:before:font-normal max-sm:before:text-muted-foreground";
 
-type ReportView = "records" | "profit";
+type ReportView = "records" | "profit-all" | "profit";
 
 function Page() {
-  const me = useQuery({ queryKey: ["access", "me"], queryFn: () => getMyAccess() });
-  const isAdmin = !!me.data?.isAdmin || me.data?.role === "admin";
+  // Profit and Parts Profit show cost and margin: for an Admin, or a role ticked in Who Sees Cost and Margin (11/20).
+  const cost = useQuery({ queryKey: ["cost-visibility"], queryFn: () => getCostVisibility() });
+  const showCost = !!cost.data?.showCost;
   const [view, setView] = useState<ReportView>("records");
-  // Parts Profit shows cost and margin, so it is Admin only; everyone else sees the records report.
-  const switcher = isAdmin ? (
+  const switcher = showCost ? (
     <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Report" data-testid="analytics-report-switch">
       <FilterChip selected={view === "records"} onClick={() => setView("records")} data-testid="analytics-view-records">
         Records
+      </FilterChip>
+      <FilterChip selected={view === "profit-all"} onClick={() => setView("profit-all")} data-testid="analytics-view-profit-all">
+        Profit
       </FilterChip>
       <FilterChip selected={view === "profit"} onClick={() => setView("profit")} data-testid="analytics-view-profit">
         Parts Profit
       </FilterChip>
     </div>
   ) : null;
-  return view === "profit" && isAdmin ? <PartsProfitView switcher={switcher} /> : <RecordsView switcher={switcher} />;
+  if (showCost && view === "profit-all") return <ProfitView switcher={switcher} />;
+  return view === "profit" && showCost ? <PartsProfitView switcher={switcher} /> : <RecordsView switcher={switcher} />;
 }
 
 function RecordsView({ switcher }: { switcher: ReactNode }) {
@@ -466,5 +471,176 @@ function PartsProfitView({ switcher }: { switcher: ReactNode }) {
         ) : null}
       </section>
     </div>
+  );
+}
+
+/**
+ * Profit (11/20): every billed job's revenue, cost and margin, by job type and by customer. Margin adds up the bills with
+ * every cost known; the rest show as sell with no cost.
+ */
+function ProfitView({ switcher }: { switcher: ReactNode }) {
+  const today = todayChicago();
+  const [range, setRange] = useState<RangeId>("year");
+  const [dates, setDates] = useState(() => rangeDates("year", today));
+  const [shown, setShown] = useState(PAGE);
+  const filters = { from: dates.from || null, to: dates.to || null };
+  const view = useQuery({ queryKey: ["profit-report", filters], queryFn: () => getProfitReport({ data: filters }), placeholderData: keepPreviousData });
+  const file = useMutation({
+    mutationFn: (format: ExportFormat) => downloadProfitReport({ data: { filters, format } }),
+    onSuccess: (f) => {
+      downloadBase64(f.filename, f.mime, f.base64);
+      toast.success(`${f.filename} · ${f.records} customer${f.records === 1 ? "" : "s"}`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not build the file"),
+  });
+  const building = (format: ExportFormat) => file.isPending && file.variables === format;
+  const d = view.data;
+  const t = d?.totals;
+  const customers = d?.byCustomer ?? [];
+  return (
+    <div data-testid="profit-report">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Analytics</h1>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Profit: every billed ticket, PM, install, rebuild and deal, each counted once. Parts at their Purchase Price (or Our Discount Rule), labor at the
+            Labor Cost Rate, the trip at no cost. Bills before 2026 count as sell with no cost.
+          </p>
+          {switcher}
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <ActionMenu label="Export" testId="profit-all-export">
+            <ActionButton icon={FileText} busy={building("pdf")} busyLabel="Building…" onClick={() => file.mutate("pdf")}>
+              PDF
+            </ActionButton>
+            <ActionButton icon={FileSpreadsheet} busy={building("xlsx")} busyLabel="Building…" onClick={() => file.mutate("xlsx")}>
+              Excel
+            </ActionButton>
+            <ActionButton icon={FileType} busy={building("docx")} busyLabel="Building…" onClick={() => file.mutate("docx")}>
+              Word
+            </ActionButton>
+          </ActionMenu>
+        </div>
+      </header>
+
+      <StatRow loaded={view.isSuccess}>
+        <StatCard label="Sell" value={t ? money(t.sell) : "…"} hint={t ? `${t.bills} bill${t.bills === 1 ? "" : "s"}` : ""} />
+        <StatCard label="Discount" value={t ? money(t.discount) : "…"} hint="Given to the customer" />
+        <StatCard label="Cost" value={t ? money(t.cost) : "…"} hint={t?.estimated ? `${t.estimated} estimated` : "Stored when billed"} />
+        <StatCard label="Margin" value={t ? money(t.margin) : "…"} hint={t?.marginPct != null ? `${t.marginPct}% of net sell with cost` : "—"} tone={t && t.margin < 0 ? "danger" : undefined} />
+        <StatCard label="Sell With No Cost" value={t ? money(t.uncostedSell) : "…"} hint={t?.before2026 ? `${t.before2026} before 2026` : "Not in the margin"} />
+      </StatRow>
+
+      <ListToolbar data-testid="profit-all-toolbar">
+        {RANGES.map((r) => (
+          <FilterChip
+            key={r.id}
+            selected={range === r.id}
+            onClick={() => {
+              setRange(r.id);
+              setDates(rangeDates(r.id, today));
+            }}
+          >
+            {r.label}
+          </FilterChip>
+        ))}
+        <span className="flex shrink-0 items-center gap-2 max-sm:max-w-full max-sm:flex-wrap">
+          <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+            From
+            <Input type="date" value={dates.from} max={dates.to || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, from: e.target.value })); }} className="h-9 w-[8.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto" aria-label="From date" />
+          </label>
+          <label className="flex h-9 shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+            To
+            <Input type="date" value={dates.to} min={dates.from || undefined} onChange={(e) => { setRange("custom"); setDates((x) => ({ ...x, to: e.target.value })); }} className="h-9 w-[9.25rem] rounded-full max-sm:px-2 sm:w-[9.5rem] pointer-coarse:w-auto" aria-label="To date" />
+          </label>
+        </span>
+      </ListToolbar>
+      {d ? (
+        <p className="mt-2 text-xs text-muted-foreground" data-testid="profit-all-scope">
+          {d.scope}
+        </p>
+      ) : null}
+
+      <ProfitTable title="By Job Type" rows={(d?.byType ?? []).map((g) => ({ ...g, label: jobTypeLabel(g.key) }))} loading={view.isLoading} empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."} testId="profit-by-type" />
+      <ProfitTable
+        title="By Customer"
+        rows={customers.slice(0, shown).map((g) => ({ ...g, label: g.key || "(no customer)" }))}
+        loading={view.isLoading}
+        empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."}
+        testId="profit-by-customer"
+        more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
+      />
+    </div>
+  );
+}
+
+function ProfitTable({
+  title,
+  rows,
+  loading,
+  empty,
+  testId,
+  more = null,
+}: {
+  title: string;
+  rows: (GroupTotals & { key: string; label: string })[];
+  loading: boolean;
+  empty: string;
+  testId: string;
+  more?: { shown: number; total: number; onMore: () => void } | null;
+}) {
+  return (
+    <section className="mt-4 overflow-hidden rounded-xl border border-border bg-card" data-testid={testId}>
+      <h2 className="border-b border-border px-4 py-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h2>
+      {loading ? (
+        <Skeleton className="h-40 w-full" />
+      ) : rows.length ? (
+        <div className="overflow-x-auto">
+          <table className={`w-full text-sm sm:min-w-[52rem] ${CARD_TABLE}`}>
+            <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
+              <tr className="border-b border-border">
+                <th className="px-4 py-2.5 font-medium">{title === "By Job Type" ? "Job Type" : "Customer"}</th>
+                <th className="px-2 py-2.5 text-right font-medium">Bills</th>
+                <th className="px-2 py-2.5 text-right font-medium">Sell</th>
+                <th className="px-2 py-2.5 text-right font-medium">Discount</th>
+                <th className="px-2 py-2.5 text-right font-medium">Cost</th>
+                <th className="px-2 py-2.5 text-right font-medium">Margin</th>
+                <th className="px-2 py-2.5 text-right font-medium">Margin %</th>
+                <th className="px-2 py-2.5 pr-4 text-right font-medium">Sell With No Cost</th>
+              </tr>
+            </thead>
+            <tbody className={CARD_BODY}>
+              {rows.map((r) => (
+                <tr key={r.key} className={`border-b border-border align-top last:border-b-0 ${CARD_ROW}`} data-testid="profit-group-row">
+                  <td className={`px-4 py-2 font-medium ${CARD_LINE}`}>
+                    {r.label}
+                    {r.estimated ? <span className="block text-[11px] font-normal text-warning">{r.estimated} estimated</span> : null}
+                  </td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Bills']`}>{r.bills}</td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Sell']`}>{money(r.sell)}</td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Discount']`}>{money(r.discount)}</td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>{money(r.cost)}</td>
+                  <td className={`tabular px-2 py-2 text-right font-medium ${r.margin < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Margin']`}>{money(r.margin)}</td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Margin_%']`}>{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
+                  <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['No_cost']`}>{money(r.uncostedSell)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="px-4 py-8 text-sm text-muted-foreground">{empty}</p>
+      )}
+      {more ? (
+        <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
+          <span>
+            Showing {more.shown} of {more.total}. An export has all {more.total}.
+          </span>
+          <Button type="button" size="sm" variant="outline" onClick={more.onMore}>
+            Show More
+          </Button>
+        </div>
+      ) : null}
+    </section>
   );
 }
