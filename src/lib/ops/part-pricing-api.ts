@@ -7,6 +7,7 @@ import { flagOn } from "@/lib/ops/flag";
 import { itemFullName } from "@/lib/ops/charges";
 import { RULE_KEY, loadDiscountRule } from "@/lib/ops/discount-rule";
 import { cleanLaborRate } from "@/lib/ops/labor-cost";
+import { COST_ROLES, canSeeCost, cleanCostRoles, loadCostRoles, saveCostRoles, type CostRole } from "@/lib/ops/cost-access";
 import {
   PRICE_TARGET_LABEL,
   cleanRule,
@@ -409,10 +410,12 @@ export { loadDiscountRule };
 
 export const getDiscountRule = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .handler(async ({ context }): Promise<{ rule: DiscountRule | null; label: string; canEdit: boolean }> => {
+  .handler(async ({ context }): Promise<{ rule: DiscountRule | null; label: string; canEdit: boolean; visible: boolean }> => {
     const sql = await ready();
+    // The rule gives the cost from the Mfr List Price, so it goes only to someone who sees cost (11/20).
+    if (!(await canSeeCost(sql, context.userId))) return { rule: null, label: "", canEdit: false, visible: false };
     const rule = await loadDiscountRule(sql);
-    return { rule, label: ruleLabel(rule), canEdit: await canReviewNames(sql, context.userId) };
+    return { rule, label: ruleLabel(rule), canEdit: await canReviewNames(sql, context.userId), visible: true };
   });
 
 /** Our Discount Rule: percent off the manufacturer price, or a fixed amount off it. Admin only. Blank clears it. */
@@ -421,7 +424,7 @@ export const setDiscountRule = createServerFn({ method: "POST" })
   .validator((d: { mode: string; value: string | number; note?: string }) =>
     z.object({ mode: z.string().max(20), value: z.union([z.string().max(30), z.number()]), note: z.string().max(300).optional() }).parse(d),
   )
-  .handler(async ({ data, context }): Promise<{ rule: DiscountRule | null; label: string; canEdit: boolean }> => {
+  .handler(async ({ data, context }): Promise<{ rule: DiscountRule | null; label: string; canEdit: boolean; visible: boolean }> => {
     const sql = await ready();
     await requireAdmin(sql, context.userId);
     const r = cleanRule(data);
@@ -434,7 +437,7 @@ export const setDiscountRule = createServerFn({ method: "POST" })
         [RULE_KEY, JSON.stringify(r.rule)],
       );
     }
-    return { rule: r.rule, label: ruleLabel(r.rule), canEdit: true };
+    return { rule: r.rule, label: ruleLabel(r.rule), canEdit: true, visible: true };
   });
 
 // ------------------------------------------------------------------------------------------ labor cost rate
@@ -481,4 +484,27 @@ export const setLaborRate = createServerFn({ method: "POST" })
     if ("error" in r) throw new Error(r.error);
     await saveLaborRate(sql, r.rate);
     return { rate: r.rate, isSet: r.rate != null, canEdit: true };
+  });
+
+// ------------------------------------------------------------------------------------------ who sees cost
+
+/** Which roles see our cost and margin (an Admin always does). Admin only. */
+export const getCostAccess = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async ({ context }): Promise<{ roles: CostRole[]; canEdit: boolean }> => {
+    const sql = await ready();
+    const canEdit = await canReviewNames(sql, context.userId);
+    return { roles: canEdit ? await loadCostRoles(sql) : [], canEdit };
+  });
+
+/** Set which roles see cost and margin. Admin only. */
+export const setCostAccess = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { roles: string[] }) => z.object({ roles: z.array(z.string().max(20)).max(COST_ROLES.length) }).parse(d))
+  .handler(async ({ data, context }): Promise<{ roles: CostRole[]; canEdit: boolean }> => {
+    const sql = await ready();
+    await requireAdmin(sql, context.userId);
+    const roles = cleanCostRoles(data.roles);
+    await saveCostRoles(sql, roles);
+    return { roles, canEdit: true };
   });

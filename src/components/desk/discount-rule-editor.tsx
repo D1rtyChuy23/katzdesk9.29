@@ -36,7 +36,7 @@ export function DiscountRuleEditor() {
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
-  if (!q.data) return null;
+  if (!q.data?.visible) return null;
   const canEdit = q.data.canEdit;
   return (
     <section className="rounded-xl border border-border bg-card p-5" data-testid="discount-rule">

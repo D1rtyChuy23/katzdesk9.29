@@ -220,12 +220,12 @@ function PartWindowView({
             <dd className="tabular" data-testid="part-window-price">
               {row.rate != null ? partMoney(row.rate) : <span className="text-muted-foreground">Not set</span>}
             </dd>
-            <dt className="text-muted-foreground">Mfr List Price</dt>
-            <dd className="tabular" data-testid="part-window-list-price">
-              {row.listPrice != null ? partMoney(row.listPrice) : <span className="text-muted-foreground">Not set</span>}
-            </dd>
-            {row.kind !== "trip" && row.kind !== "labor" ? (
+            {row.showCost && row.kind !== "trip" && row.kind !== "labor" ? (
               <>
+                <dt className="text-muted-foreground">Mfr List Price</dt>
+                <dd className="tabular" data-testid="part-window-list-price">
+                  {row.listPrice != null ? partMoney(row.listPrice) : <span className="text-muted-foreground">Not set</span>}
+                </dd>
                 <dt className="text-muted-foreground">Our Cost</dt>
                 <dd className="tabular" data-testid="part-window-cost">
                   {row.cost != null ? (

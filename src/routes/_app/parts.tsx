@@ -541,7 +541,7 @@ function PartRowView({
           Part # {row.mpn ? <span className="font-medium text-foreground">{row.mpn}</span> : <span>not set</span>}
           {row.rate != null ? ` · ${money(row.rate)}` : ""}
           {row.listPrice != null ? <span data-testid="part-list-price"> · Mfr {money(row.listPrice)}</span> : null}
-          {row.kind !== "trip" && row.kind !== "labor" ? (
+          {row.showCost && row.kind !== "trip" && row.kind !== "labor" ? (
             <span data-testid="part-cost" title={costSourceLabel(row.costSource)}>
               {" · Cost "}
               {row.cost != null ? money(row.cost) : "not set"}
