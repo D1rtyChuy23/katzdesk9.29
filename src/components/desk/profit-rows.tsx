@@ -23,7 +23,7 @@ export function LineProfitRow({ p, labor }: { p: LineProfit & { stored: boolean 
       <span>
         Sell <span className="font-medium text-foreground">{money(p.sell)}</span>
       </span>
-      {service ? null : (
+      {service || (p.stored && p.ourDiscount == null) ? null : (
         <span>
           Discount <span className="font-medium text-foreground">{p.ourDiscount == null ? "—" : money(p.ourDiscount)}</span>
         </span>

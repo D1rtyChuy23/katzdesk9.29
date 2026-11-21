@@ -158,3 +158,55 @@ test("the Invoice window shows each saved line's cost and the bill's total", () 
   assert.match(w, /!dirty && v\.profit\?\.\[i\] \? <LineProfitRow/);
   assert.match(w, /<ProfitTotalsRow t=\{v\.profitTotals\} testId="invoice-profit-total" \/>/);
 });
+
+test("a Chosen-lines or dollar discount, a rule-priced part, and a part with no cost (left live)", async () => {
+  const sql = await fresh();
+  await P.saveLaborRate(sql, 30);
+  await sql.query("insert into billing_items (sku, item, kind, rate, list_price) values ('TEST-R', 'PARTS : TEST-R', 'part', 80, 100), ('TEST-N', 'PARTS : TEST-N', 'part', 10, null)");
+  await sql.query("insert into desk_settings (key, value) values ('our_discount_rule', $1)", [JSON.stringify({ mode: "percent", value: 40 })]);
+  const { deal, pm } = await records(sql);
+  const lines = [
+    { item: "PARTS : TEST-R", description: "", qty: 1, rate: 80, discountChosen: true },
+    { item: "Service : SERVICELABOR", description: "", qty: 1, rate: 150, discountChosen: false },
+    { item: "PARTS : TEST-N", description: "", qty: 1, rate: 10, discountChosen: false },
+  ];
+  await I.approveInvoiceFor(sql, { type: "deal", id: deal, lines, lineIds: [], discount: { kind: "percent", value: "10", scope: "chosen" }, seen: null }, "u-owner");
+  assert.deepEqual(await stored(sql, "deal", deal), [
+    ["part", "60.00", "rule", "8.00", "12.00", true],
+    ["labor", "30.00", "labor", "0.00", "120.00", true],
+    ["part", null, null, null, null, false],
+  ]);
+  let v = await I.getInvoiceFor(sql, { type: "deal", id: deal }, "u-owner");
+  assert.deepEqual([v.profit[2].source, v.profitTotals.noCost, v.profitTotals.margin], ["none", 1, null]);
+  await sql.query("update billing_items set cost = 4 where sku = 'TEST-N'");
+  v = await I.getInvoiceFor(sql, { type: "deal", id: deal }, "u-owner");
+  assert.deepEqual([v.profit[2].cost, v.profit[2].stored, v.profitTotals.margin], [4, false, 138]);
+  await I.approveInvoiceFor(sql, { type: "pm", id: pm, lines: lines.map(({ discountChosen: _t, ...l }) => l), lineIds: [], discount: { kind: "amount", value: "24", scope: "all" }, seen: null }, "u-owner");
+  // $24 off 240, spread 8 / 15 / 1; TEST-N has its $4 cost by now, so all three are stored.
+  assert.deepEqual((await stored(sql, "pm", pm)).map((r) => [r[3], r[5]]), [["8.00", true], ["15.00", true], ["1.00", true]]);
+});
+
+test("unlinking a rebuild brings its lines back onto its own approved invoice, with their cost stored", async () => {
+  const sql = await fresh();
+  await P.saveLaborRate(sql, 30);
+  const L = await import("../src/lib/ops/rebuild-link-api.ts");
+  const rb = await idOf(sql, "insert into rebuilds (title, account, status) values ('Test refurb', $1, 'In progress') returning id", [CAFE]);
+  const inv = await idOf(sql, "insert into invoices (entity_type, entity_id, customer, total, approved_by, approved_at) values ('rebuild', $1, $2, 240, 'chuy', '2026-11-01T15:00:00Z') returning id", [rb, CAFE]);
+  await sql.query("insert into invoice_lines (invoice_id, item, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', 2, 45, 'part', 1), ($1, 'Service : SERVICELABOR', 1, 150, 'labor', 2)", [inv]);
+  const inst = await idOf(sql, "insert into installs (customer, complete, equip_status, archived) values ($1, false, 'Not Ready', false) returning id", [CAFE]);
+  await sql.query("insert into install_work_orders (install_id, wo, match_key) values ($1, 'WO-5100', '5100')", [inst]);
+  const f = await L.findRebuildLinksFor(sql, { id: rb, wo: "5100" }, "u-owner");
+  const cand = f.candidates[0];
+  await L.setRebuildLinkFor(
+    sql,
+    { id: rb, expect: { installId: f.installId, jobId: f.jobId }, to: cand.target, seen: { own: f.own.version, current: f.current?.stamp ?? null, target: cand.project.stamp }, ...(cand.plan.ok === "ask" ? { salesOrder: "not" } : {}) },
+    "u-owner",
+  );
+  const v = await L.getRebuildLinkFor(sql, rb, "u-owner");
+  await L.setRebuildLinkFor(sql, { id: rb, expect: { installId: v.installId, jobId: v.jobId }, to: null, seen: { own: v.own.version, current: v.current?.stamp ?? null, target: null } }, "u-owner");
+  const rows = await stored(sql, "rebuild", rb);
+  assert.deepEqual(rows.map((r) => [r[0], r[1], r[4], r[5]]), [
+    ["part", "20.00", "50.00", true],
+    ["labor", "30.00", "120.00", true],
+  ]);
+});

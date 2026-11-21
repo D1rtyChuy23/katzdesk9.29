@@ -4,6 +4,7 @@
  * its invoice's lines on the ticket's charges or the install's invoice (rb:<rebuild>:<line>); unlinking takes them
  * back onto its own invoice. Each write is one statement, checked against what the person saw.
  */
+import { storeLineCosts } from "@/lib/ops/line-cost";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
@@ -840,6 +841,14 @@ async function unlinkNow(sql: Sql, st: LinkState, who: string): Promise<{ moved:
     throw isDeadlock(e) ? new Error(CHANGED_UNLINK) : e;
   });
   if (!out[0]) throw new Error(CHANGED_UNLINK);
+  // The lines came back onto the rebuild's own invoice, approved: its cost and margin as of now (11/20).
+  const own = (
+    await sql.query<{ id: number; discount_kind: string | null; discount_value: string | null; discount_scope: string | null }>(
+      "select id, discount_kind, discount_value, discount_scope from invoices where entity_type = 'rebuild' and entity_id = $1 and approved_at is not null",
+      [st.rebuild.id],
+    )
+  )[0];
+  if (own) await storeLineCosts(sql, "invoice_lines", Number(own.id), discountFromRow(own.discount_kind, own.discount_value, own.discount_scope)).catch(() => undefined);
   return { moved: num(out[0].moved), amount: Number(out[0].amount ?? 0) };
 }
 

@@ -917,7 +917,8 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
   if (!usesTicketCharges(ref.type)) {
     // Each line's cost and margin as of approval (11/20). Approving again re-writes the lines, so it prices them fresh.
     const approved = await head(sql, ref.type, data.id);
-    if (approved) await storeLineCosts(sql, "invoice_lines", approved.id, toDiscount(approved.discount_kind, approved.discount_value, approved.discount_scope));
+    // Never fails the approval: a line left unstored is worked out live.
+    if (approved) await storeLineCosts(sql, "invoice_lines", approved.id, toDiscount(approved.discount_kind, approved.discount_value, approved.discount_scope)).catch(() => undefined);
   }
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [

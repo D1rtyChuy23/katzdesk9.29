@@ -68,13 +68,19 @@ async function livePrices(sql: Sql, rows: Row[], discount: Discount | null) {
   return { lines, off, live };
 }
 
-/** Store each line's cost and margin as of now. Labor with no Labor Cost Rate yet stays live, to price once it's set. */
+/**
+ * Store each line's cost and margin as of now. A line with no cost yet (labor with no Labor Cost Rate, a part with no
+ * Purchase Price or rule) stays live, so it prices once that is set.
+ */
 export async function storeLineCosts(sql: Sql, table: LineCostTable, parentId: number, discount: Discount | null): Promise<void> {
   const rows = await lineRows(sql, table, parentId);
   const { live } = await livePrices(sql, rows, discount);
   for (let i = 0; i < rows.length; i++) {
     const p = live[i];
-    if (!p || (rows[i].kind === "labor" && p.cost == null)) continue;
+    if (!p || p.cost == null) {
+      await sql.query(`update ${table} set unit_cost = null, cost_source = null, line_discount = null, margin = null, priced_at = null where id = $1`, [rows[i].id]);
+      continue;
+    }
     await sql.query(`update ${table} set unit_cost = $2, cost_source = $3, line_discount = $4, margin = $5, priced_at = now() where id = $1`, [
       rows[i].id,
       p.unitCost,
