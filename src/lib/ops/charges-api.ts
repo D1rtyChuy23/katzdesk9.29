@@ -13,7 +13,9 @@ import {
 import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
 import { BIN_CODE_SQL, binSearchCode } from "./part-bins";
-import { loadDiscountRule } from "./part-pricing-api";
+import { loadDiscountRule, loadLaborRate } from "./part-pricing-api";
+import { laborCost } from "./labor-cost";
+import { canSeeCost } from "./cost-access";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
 import { createServerFn } from "@tanstack/react-start";
@@ -177,10 +179,14 @@ export type TicketCharges = {
   total: number;
   state: BillingState;
   /**
-   * Admin only: cost, sell, discount and margin on each line that has a part (same order as lines; null for trip,
-   * labor and lines with no part). Stored when the ticket is invoiced; worked out live before that.
+   * For an Admin, or a role an Admin turned on in Who Sees Cost and Margin (11/20); null for anyone else. Cost, sell,
+   * discount and margin on each line (same order as lines): a part at its Purchase Price or the rule, labor at the
+   * Labor Cost Rate, the trip at no cost; null for a line whose item isn't on the parts list. Stored when the ticket is
+   * invoiced; worked out live before that. A labor line's unitCost (the rate) goes only to an Admin.
    */
   profit: (LineProfitView | null)[] | null;
+  /** The ticket's sell, discount, known cost and margin; margin is null while any line has no cost. Null with profit. */
+  profitTotals: ProfitTotals | null;
   /** Our Discount Rule as it reads now, for the Admin's view. */
   ruleLabel: string | null;
   /** The NetSuite invoice (not Voided) that locks the charges, P.O., discount and Sales Order, or null. */
@@ -192,6 +198,15 @@ export type TicketCharges = {
 };
 
 export type LineProfitView = LineProfit & { mpn: string | null; listPrice: number | null; stored: boolean };
+
+export type ProfitTotals = { sell: number; ticketDiscount: number; cost: number; margin: number | null; marginPct: number | null; noCost: number };
+
+/** What a person may see on a ticket's charges: cost and margin (Who Sees Cost and Margin), and the Admin's extras. */
+export type ChargeView = { showCost: boolean; admin: boolean };
+
+export async function chargeView(sql: Sql, userId: string): Promise<ChargeView> {
+  return { showCost: await canSeeCost(sql, userId), admin: await canReviewNames(sql, userId) };
+}
 
 type ChargeRow = {
   id: number;
@@ -243,19 +258,20 @@ async function chargeRows(sql: Sql, jobId: number): Promise<ChargeRow[]> {
 const num = (v: string | null) => (v == null ? null : Number(v));
 /** A ticket line "has a part" when its item is on the parts list and it is not trip or labor. */
 const isPartLine = (r: Pick<ChargeRow, "pid" | "kind">) => r.pid != null && r.kind !== "trip" && r.kind !== "labor";
+const isServiceLine = (r: Pick<ChargeRow, "kind">) => r.kind === "trip" || r.kind === "labor";
 
 /**
  * Cost, sell, discount and margin per part line: stored when invoiced, else worked out from the part and the rule. The
  * ticket discount's dollars go to the lines it comes off (11/7: on Chosen lines, the ticked ones only).
  */
-function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, discount: Discount | null): (LineProfitView | null)[] {
+function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, discount: Discount | null, laborRate: number | null): (LineProfitView | null)[] {
   const shares = discountShares(
     rows.map((r) => round2(Number(r.qty) * Number(r.rate))),
     off,
     rows.map((r) => takesDiscount({ discountChosen: r.discount_chosen === true }, discount)),
   );
   return rows.map((r, i) => {
-    if (!isPartLine(r)) return null;
+    if (!isPartLine(r) && !isServiceLine(r)) return null;
     const qty = Number(r.qty);
     if (r.priced_at) {
       const sell = round2(qty * Number(r.rate));
@@ -278,12 +294,34 @@ function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, di
         stored: true,
       };
     }
+    if (isServiceLine(r)) {
+      // Labor: billed hours × the Labor Cost Rate (11/20). The trip charge is separate, one per visit: no cost.
+      const sell = round2(qty * Number(r.rate));
+      const ticketDiscount = round2(shares[i] ?? 0);
+      const net = round2(sell - ticketDiscount);
+      const unit = r.kind === "trip" ? 0 : laborRate;
+      const cost = r.kind === "trip" ? 0 : laborCost(qty, laborRate);
+      const margin = cost == null ? null : round2(net - cost);
+      const source: LineProfit["source"] = r.kind === "trip" ? "trip" : unit == null ? "none" : "labor";
+      return { qty, unitCost: unit, cost, sell, ourDiscount: null, ticketDiscount, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), source, mpn: null, listPrice: null, stored: false };
+    }
     const p = lineProfit({ qty, rate: Number(r.rate) }, { listPrice: num(r.p_list), cost: num(r.p_cost) }, rule, shares[i] ?? 0);
     return { ...p, mpn: r.mfr_part, listPrice: num(r.p_list), stored: false };
   });
 }
 
-async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<TicketCharges> {
+/** A ticket's sell, discount, known cost and margin (11/20). Margin waits until every line has a cost. */
+function profitTotalsFor(rows: ChargeRow[], off: number, profit: (LineProfitView | null)[]): ProfitTotals {
+  const sell = round2(rows.reduce((a, r) => a + round2(Number(r.qty) * Number(r.rate)), 0));
+  const cost = round2(profit.reduce((a, p) => a + (p?.cost ?? 0), 0));
+  const noCost = profit.filter((p) => p?.cost == null).length;
+  const net = round2(sell - off);
+  const margin = noCost ? null : round2(net - cost);
+  return { sell, ticketDiscount: round2(off), cost, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), noCost };
+}
+
+async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCost: false, admin: false }): Promise<TicketCharges> {
+  const { showCost } = view;
   const job = (await sql.query<{
     po: string | null;
     ns_so: string | null;
@@ -318,6 +356,9 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
   const discount = discountFromRow(job.discount_kind, job.discount_value, job.discount_scope);
   const totals = billTotals(lines, discount);
   const rule = showCost ? await loadDiscountRule(sql) : null;
+  const profit = showCost ? profitFor(rows, totals.off, rule, discount, await loadLaborRate(sql)) : null;
+  // The Labor Cost Rate is Admin only ("Hide pay rates", 11/20): others get labor's cost, not its rate.
+  const shown = profit && !view.admin ? profit.map((p, i) => (p && rows[i].kind === "labor" ? { ...p, unitCost: null } : p)) : profit;
   return {
     jobId,
     po: job.po ?? "",
@@ -328,11 +369,12 @@ async function loadCharges(sql: Sql, jobId: number, showCost = false): Promise<T
     discount,
     ...totals,
     state: billingState({ lineCount: lines.length, nsSo: job.ns_so, invoiced: liveInvoices(invoices).length > 0 }),
-    profit: showCost ? profitFor(rows, totals.off, rule, discount) : null,
+    profit: shown,
+    profitTotals: profit ? profitTotalsFor(rows, totals.off, profit) : null,
     ruleLabel: showCost ? ruleLabel(rule) : null,
     invoiceLock: lockedBy ? { invoice: lockedBy.invoice, status: lockedBy.status } : null,
     unlock: lockedBy && unlockedAt && unlockActive(unlockedAt) ? { by: job.billing_unlocked_by, at: unlockedAt, reason: job.billing_unlock_reason } : null,
-    canUnlock: showCost,
+    canUnlock: view.admin,
   };
 }
 
@@ -361,10 +403,11 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
     const lines = rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), discountChosen: r.discount_chosen === true }));
     const discount = discountFromRow(j.discount_kind, j.discount_value, j.discount_scope);
     const off = billTotals(lines, discount).off;
-    const profit = profitFor(rows, off, rule, discount);
+    const profit = profitFor(rows, off, rule, discount, null);
     rows.forEach((r, i) => {
       const p = profit[i];
-      if (!p) return;
+      // Parts Profit is parts only: labor and the trip are in the ticket's own totals.
+      if (!p || !isPartLine(r)) return;
       out.push({
         mpn: p.mpn ?? r.mfr_part ?? "",
         sku: r.sku ?? r.item,
@@ -398,10 +441,12 @@ export async function storeInvoicedProfit(sql: Sql, jobId: number, invoiced: boo
   const cur = await loadCharges(sql, jobId);
   const rows = await chargeRows(sql, jobId);
   const fresh = rows.map((r) => ({ ...r, priced_at: null }));
-  const profit = profitFor(fresh, cur.off, await loadDiscountRule(sql), cur.discount);
+  const profit = profitFor(fresh, cur.off, await loadDiscountRule(sql), cur.discount, await loadLaborRate(sql));
   for (let i = 0; i < rows.length; i++) {
     const p = profit[i];
     if (!p) continue;
+    // Labor with no Labor Cost Rate set yet stays live, so it prices once an Admin sets the rate (11/20).
+    if (rows[i].kind === "labor" && p.cost == null) continue;
     await sql.query(
       `update ticket_charges set mpn = $2, list_price = $3, unit_cost = $4, cost_source = $5, our_discount = $6, ticket_discount = $7, margin = $8, priced_at = now()
         where id = $1`,
@@ -418,7 +463,7 @@ export const getTicketCharges = createServerFn({ method: "POST" })
 /** The body of getTicketCharges. Warehouse doesn't read tickets' billing. */
 export async function getTicketChargesFor(sql: Sql, jobId: number, userId: string): Promise<TicketCharges> {
   if (await isWarehouseOnly(sql, userId)) throw new Error(WAREHOUSE_BILLING_REFUSAL);
-  return loadCharges(sql, jobId, await canReviewNames(sql, userId));
+  return loadCharges(sql, jobId, await chargeView(sql, userId));
 }
 
 const lineSchema = z.object({
@@ -674,7 +719,7 @@ export const saveTicketCharges = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
     await writeTicketCharges(sql, data.jobId, context.userId, { po: data.po, lines: data.lines, lineIds: data.lineIds, discount: data.discount });
-    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
+    return loadCharges(sql, data.jobId, await chargeView(sql, context.userId));
   });
 
 /**
@@ -718,7 +763,7 @@ export const saveUnlockedBilling = createServerFn({ method: "POST" })
     });
     // Still billed (its invoice stands), so the new lines get their cost and margin stored like any billed ticket.
     await storeInvoicedProfit(sql, data.jobId, true);
-    return loadCharges(sql, data.jobId, true);
+    return loadCharges(sql, data.jobId, await chargeView(sql, context.userId));
   });
 
 /**
@@ -778,7 +823,7 @@ export const setTicketSalesOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<TicketCharges> => {
     const sql = await ready();
     await recordTicketSalesOrder(sql, data.jobId, context.userId, data.nsSo, data.billedAt ?? null);
-    return loadCharges(sql, data.jobId, await canReviewNames(sql, context.userId));
+    return loadCharges(sql, data.jobId, await chargeView(sql, context.userId));
   });
 
 // ---- Item list and price import (Admin) ----------------------------------------------------------------

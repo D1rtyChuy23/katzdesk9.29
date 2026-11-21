@@ -19,6 +19,7 @@ import {
 } from "@/lib/ops/charges";
 import { tripDraftWarning } from "@/lib/ops/pm-bill";
 import { binText } from "@/lib/ops/part-bins";
+import { costSourceLabel } from "@/lib/ops/part-pricing";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
@@ -361,7 +362,8 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
                 </div>
               </div>
               {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={billed} onChange={(v) => edit(i, { discountChosen: v })} /> : null}
-              {/* Admin: cost and margin on a part line, from its Purchase Price (else Our Discount Rule). Shown for the saved lines. */}
+              {/* Cost and margin (Who Sees Cost and Margin): a part from its Purchase Price (else Our Discount Rule), labor at
+                  the Labor Cost Rate, the trip at no cost. Shown for the saved lines. */}
               {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} /> : null}
             </li>
           ))}
@@ -369,6 +371,26 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
       ) : (
         <p className="mt-3 text-sm text-muted-foreground">Nothing on this ticket yet. Add the trip, labor and parts used.</p>
       )}
+      {lines.length && !dirty && c.profitTotals ? (
+        <p className="mt-3 flex flex-wrap gap-x-3 gap-y-0.5 rounded-md border border-border px-2 py-1.5 text-xs text-muted-foreground tabular" data-testid="charge-profit-total">
+          <span className="font-medium text-foreground">Ticket</span>
+          <span>
+            Sell <span className="font-medium text-foreground">{money(c.profitTotals.sell)}</span>
+          </span>
+          {c.profitTotals.ticketDiscount ? <span>Discount −{money(c.profitTotals.ticketDiscount)}</span> : null}
+          <span>
+            Cost <span className="font-medium text-foreground">{money(c.profitTotals.cost)}</span>
+          </span>
+          <span>
+            Margin{" "}
+            <span className={cn("font-medium", c.profitTotals.margin != null && c.profitTotals.margin < 0 ? "text-destructive" : "text-foreground")}>
+              {c.profitTotals.margin == null
+                ? `— (${c.profitTotals.noCost} line${c.profitTotals.noCost === 1 ? "" : "s"} with no cost)`
+                : `${money(c.profitTotals.margin)}${c.profitTotals.marginPct != null ? ` · ${c.profitTotals.marginPct}%` : ""}`}
+            </span>
+          </span>
+        </p>
+      ) : null}
 
       {!billed ? (
         <div className="mt-3 space-y-3">
@@ -673,7 +695,7 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
 }
 
 function LineProfitRow({ p }: { p: NonNullable<NonNullable<TicketCharges["profit"]>[number]> }) {
-  const source = p.source === "rule" ? "Our Discount Rule" : p.source === "purchase" ? "NetSuite Purchase Price" : "no cost on file";
+  const source = p.source === "none" ? "no cost on file" : costSourceLabel(p.source);
   return (
     <p
       className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 rounded-md bg-muted/50 px-2 py-1.5 text-xs text-muted-foreground tabular"
