@@ -132,8 +132,10 @@ test("not invoiced yet: charges, then the SO and its billed date, then the invoi
   const log = (await sql.query("select actor_name, detail from activity where entity_id = $1 and detail like 'Billing Backfill%'", [id]))[0];
   assert.equal(log.actor_name, "chuy");
   assert.match(log.detail, /charges 4 lines \$450\.06, discount \$307\.20 off, total \$142\.86 · Sales Order SO2001 \(billed 2026-10-26\) · invoices: INV2001 new \(Open \$142\.86\)/);
-  // The part line got its cost and margin stored, as a billed ticket's lines do.
-  assert.equal((await sql.query("select count(*)::int as n from ticket_charges where job_id = $1 and priced_at is not null", [id]))[0].n, 2);
+  // The part lines got their cost and margin stored, as a billed ticket's lines do, and the trip (no cost, 11/20). Labor
+  // stays live: no Labor Cost Rate is set here.
+  assert.equal((await sql.query("select count(*)::int as n from ticket_charges where job_id = $1 and priced_at is not null", [id]))[0].n, 3);
+  assert.deepEqual((await sql.query("select kind from ticket_charges where job_id = $1 and priced_at is null", [id])).map((r) => r.kind), ["labor"]);
 
   // The same files again: nothing left to do.
   const again = await api.previewBillingBackfillFor(sql, f, "u-owner");
