@@ -19,11 +19,13 @@ export const JOB_TYPES = [
 export type ProfitBill = {
   type: string;
   customer: string;
+  /** The customer as grouped: case, spaces and punctuation don't split a customer. */
+  customerKey: string;
   /** YYYY-MM-DD: billed (tickets, NetSuite) or approved (invoices). */
   date: string;
   sell: number;
   discount: number;
-  /** Known cost. */
+  /** Known cost (partial while margin is null). */
   cost: number;
   /** Net less cost; null while any line has no cost, and before 2026. */
   margin: number | null;
@@ -37,7 +39,7 @@ export type GroupTotals = {
   sell: number;
   discount: number;
   cost: number;
-  /** Over the bills with every cost known. */
+  /** Cost and margin add up the bills with every cost known: Sell − Discount − Cost − Sell With No Cost = Margin. */
   margin: number;
   marginPct: number | null;
   /** Net sell of the bills whose margin can't be told. */
@@ -55,7 +57,7 @@ export function groupTotals(bills: ProfitBill[]): GroupTotals {
     bills: bills.length,
     sell: sum((b) => b.sell),
     discount: sum((b) => b.discount),
-    cost: sum((b) => b.cost),
+    cost: round2(costed.reduce((a, b) => a + b.cost, 0)),
     margin,
     marginPct: costedNet > 0 ? round2((margin / costedNet) * 100) : null,
     uncostedSell: sum((b) => (b.margin == null ? b.sell - b.discount : 0)),
@@ -65,10 +67,10 @@ export function groupTotals(bills: ProfitBill[]): GroupTotals {
 }
 
 /** Groups by `key`, biggest sell first (job types in their own order). */
-export function groupBy(bills: ProfitBill[], key: (b: ProfitBill) => string, order?: readonly string[]): (GroupTotals & { key: string })[] {
+export function groupBy(bills: ProfitBill[], key: (b: ProfitBill) => string, order?: readonly string[], label: (b: ProfitBill) => string = key): (GroupTotals & { key: string; label: string })[] {
   const by = new Map<string, ProfitBill[]>();
   for (const b of bills) by.set(key(b), [...(by.get(key(b)) ?? []), b]);
-  const rows = [...by.entries()].map(([k, list]) => ({ key: k, ...groupTotals(list) }));
+  const rows = [...by.entries()].map(([k, list]) => ({ key: k, label: label(list[0]!), ...groupTotals(list) }));
   return order ? rows.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key)) : rows.sort((a, b) => b.sell - a.sell || a.key.localeCompare(b.key));
 }
 
@@ -78,7 +80,7 @@ const COLUMNS = ["Bills", "Sell", "Discount", "Cost", "Margin", "Margin %", "Sel
 const WEIGHTS = [50, 80, 80, 80, 80, 60, 90, 60];
 
 /** One report for every download: a table by job type (with the total), and one by customer. */
-export function buildProfitReportFile(r: { byType: (GroupTotals & { key: string })[]; byCustomer: (GroupTotals & { key: string })[]; totals: GroupTotals }, opts: { generated: string; scope: string }) {
+export function buildProfitReportFile(r: { byType: (GroupTotals & { key: string })[]; byCustomer: (GroupTotals & { key: string; label: string })[]; totals: GroupTotals }, opts: { generated: string; scope: string }) {
   const m = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const cells = (g: GroupTotals) => [String(g.bills), m(g.sell), m(g.discount), m(g.cost), m(g.margin), g.marginPct == null ? "—" : `${g.marginPct}%`, m(g.uncostedSell), String(g.estimated)];
   return {
@@ -86,7 +88,7 @@ export function buildProfitReportFile(r: { byType: (GroupTotals & { key: string 
     generated: `Generated ${opts.generated}`,
     scope: opts.scope,
     summary: { title: "By Job Type", columns: ["Job Type", ...COLUMNS], weights: [80, ...WEIGHTS], rows: [...r.byType.map((g) => [jobTypeLabel(g.key), ...cells(g)]), ["Total", ...cells(r.totals)]] },
-    records: { title: "By Customer", columns: ["Customer", ...COLUMNS], weights: [140, ...WEIGHTS], rows: r.byCustomer.map((g) => [g.key || "(none)", ...cells(g)]) },
+    records: { title: "By Customer", columns: ["Customer", ...COLUMNS], weights: [140, ...WEIGHTS], rows: r.byCustomer.map((g) => [g.label || "(none)", ...cells(g)]) },
   };
 }
 

@@ -72,7 +72,7 @@ test("each job type and customer totals its bills; margin is net less cost", asy
   const r = await R.profitReportFor(sql, ALL, "u-owner");
   const t = Object.fromEntries(r.byType.map((x) => [x.key, [x.bills, x.sell, x.cost, x.margin]]));
   assert.deepEqual(t, { service: [1, 540, 100, 440], tlc: [1, 540, 100, 440], pm: [1, 540, 100, 440], install: [1, 540, 100, 440], deal: [1, 540, 100, 440] });
-  const c = Object.fromEntries(r.byCustomer.map((x) => [x.key, [x.bills, x.sell, x.margin]]));
+  const c = Object.fromEntries(r.byCustomer.map((x) => [x.label, [x.bills, x.sell, x.margin]]));
   assert.deepEqual(c, { "Alpha Cafe": [3, 1620, 1320], "Beta Bakery": [2, 1080, 880] });
   assert.deepEqual([r.totals.bills, r.totals.sell, r.totals.cost, r.totals.margin, r.totals.marginPct], [5, 2700, 500, 2200, 81.48]);
 });
@@ -134,7 +134,7 @@ test("the group totals: margin only over bills with every cost known", () => {
     { type: "service", customer: "A", date: "2026-01-02", sell: 100, discount: 10, cost: 30, margin: 60, estimated: false, before2026: false },
     { type: "service", customer: "A", date: "2026-01-03", sell: 50, discount: 0, cost: 5, margin: null, estimated: true, before2026: false },
   ]);
-  assert.deepEqual(g, { bills: 2, sell: 150, discount: 10, cost: 35, margin: 60, marginPct: 66.67, uncostedSell: 50, estimated: 1, before2026: 0 });
+  assert.deepEqual(g, { bills: 2, sell: 150, discount: 10, cost: 30, margin: 60, marginPct: 66.67, uncostedSell: 50, estimated: 1, before2026: 0 });
 });
 
 test("Analytics offers Profit and Parts Profit to anyone who sees cost", () => {
@@ -142,4 +142,81 @@ test("Analytics offers Profit and Parts Profit to anyone who sees cost", () => {
   assert.match(a, /getCostVisibility/);
   assert.match(a, /data-testid="analytics-view-profit-all"/);
   assert.doesNotMatch(a, /const isAdmin = /);
+});
+
+test("review: an install flagged as a possible duplicate still counts; one merged into another doesn't", async () => {
+  const sql = await fresh();
+  const keep = await approved(sql, "install", "Alpha Cafe");
+  const flagged = await approved(sql, "install", "Alpha Cafe");
+  await sql.query("update installs set duplicate_of = $1 where id = $2", [keep, flagged]);
+  let r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.equal(r.byType.find((x) => x.key === "install").bills, 2);
+  await sql.query("update installs set archived = true where id = $1", [flagged]);
+  r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.equal(r.byType.find((x) => x.key === "install").bills, 1);
+});
+
+test("review: NetSuite lines with no Sales Order date are dated when written, so the bill isn't lost", async () => {
+  const sql = await fresh();
+  const pm = await approved(sql, "pm", "Beta Bakery");
+  const b = await idOf(sql, "insert into record_ns_billing (pm_id, wo, wo_key, updated_at) values ($1, 'WO-8', '8', '2026-10-15T15:00:00Z') returning id", [pm]);
+  await sql.query("insert into record_ns_charges (billing_id, item, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', 2, 45, 'part', 1)", [b]);
+  const r = await R.profitReportFor(sql, { from: "2026-10-01", to: "2026-10-31" }, "u-owner");
+  assert.deepEqual(r.byType.map((x) => [x.key, x.bills, x.sell]), [["pm", 1, 90]]);
+});
+
+test("review: a ticket billed by a NetSuite invoice alone is dated by that invoice, in range", async () => {
+  const sql = await fresh();
+  const job = await idOf(sql, "insert into service_jobs (kind, call_id, customer, status, received) values ('service', 'SC-PR-INV', 'Alpha Cafe', 'Open', '2025-11-02') returning id");
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES.slice(2), lineIds: [] });
+  await sql.query("insert into ticket_invoices (job_id, ns_invoice, invoice_date, status, total, amount_remaining, source) values ($1, 'INV-PR-1', '2026-03-04', 'Open', 90, 90, 'standalone')", [job]);
+  const r = await R.profitReportFor(sql, { from: "2026-01-01", to: "2026-12-31" }, "u-owner");
+  assert.deepEqual([r.totals.bills, r.totals.sell, r.totals.before2026], [1, 90, 0]);
+});
+
+test("review: dates are Chicago days: an approval on New Year's Eve evening is a 2025 bill", async () => {
+  const sql = await fresh();
+  const deal = await approved(sql, "deal", "Alpha Cafe");
+  await sql.query("update invoices set approved_at = '2026-01-01T03:00:00Z' where entity_type = 'deal' and entity_id = $1", [deal]);
+  const r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.deepEqual([r.totals.before2026, r.totals.margin], [1, 0]);
+});
+
+test("review: a standalone rebuild invoice counts as Rebuild; customers group by their current name, any case", async () => {
+  const sql = await fresh();
+  const rb = await idOf(sql, "insert into rebuilds (title, account, status) values ('Refurb', 'Gamma Grind', 'Done') returning id");
+  await I.approveInvoiceFor(sql, { type: "rebuild", id: rb, lines: LINES.slice(2), lineIds: [], discount: null, seen: null }, "u-owner");
+  await billedTicket(sql, "gamma grind ", "2026-10-05");
+  await sql.query("update invoices set customer = 'Old Gamma Name' where entity_type = 'rebuild'");
+  const r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.deepEqual(r.byType.find((x) => x.key === "rebuild").sell, 90);
+  assert.deepEqual(r.byCustomer.map((x) => [x.bills, x.sell]), [[2, 630]]);
+});
+
+test("review: Warehouse never gets Profit or Parts Profit (it doesn't read customers' billing)", async () => {
+  const sql = await fresh();
+  await sql.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-wh', 'wes', true, false, 'warehouse')");
+  await CA.saveCostOptions(sql, { roles: ["warehouse"], showLabor: true, warehouseRebuilds: true });
+  await assert.rejects(R.profitReportFor(sql, ALL, "u-wh"), /Profit/);
+  assert.equal((await R.costVisibilityFor(sql, "u-wh")).showReports, false);
+  assert.equal((await R.costVisibilityFor(sql, "u-owner")).showReports, true);
+});
+
+test("review: Cost adds up the bills with a margin, so Sell − Discount − Cost = Margin", async () => {
+  const sql = await fresh();
+  await P.saveLaborRate(sql, null);
+  await billedTicket(sql, "Alpha Cafe", "2026-10-05");
+  await P.saveLaborRate(sql, 30);
+  await sql.query("insert into billing_items (sku, item, kind, rate) values ('TEST-N', 'PARTS : TEST-N', 'part', 10)");
+  const job = await idOf(sql, "insert into service_jobs (kind, call_id, customer, status, received, completed_at) values ('service', 'SC-PR-N', 'Alpha Cafe', 'Completed', '2026-10-07', '2026-10-07') returning id");
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: [{ item: "PARTS : TEST-A", description: "", qty: 1, rate: 45 }, { item: "PARTS : TEST-N", description: "", qty: 1, rate: 10 }], lineIds: [] });
+  await C.recordTicketSalesOrder(sql, job, "u-owner", "SO-PR-N", "2026-10-07");
+  const t = (await R.profitReportFor(sql, ALL, "u-owner")).totals;
+  assert.deepEqual([t.sell, t.cost, t.margin, t.uncostedSell], [595, 100, 440, 55]);
+  assert.equal(t.sell - t.discount - t.cost - t.uncostedSell, t.margin);
+});
+
+test("migration 0134 only adds the item-name index", () => {
+  const m = readFileSync(new URL("0134_billing_items_item_index.sql", MIGRATIONS), "utf8").replace(/--.*$/gm, "").trim();
+  assert.equal(m, "create index if not exists billing_items_item_lower_idx on billing_items (lower(btrim(item)));");
 });

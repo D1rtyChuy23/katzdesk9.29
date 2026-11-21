@@ -62,7 +62,8 @@ type ReportView = "records" | "profit-all" | "profit";
 function Page() {
   // Profit and Parts Profit show cost and margin: for an Admin, or a role ticked in Who Sees Cost and Margin (11/20).
   const cost = useQuery({ queryKey: ["cost-visibility"], queryFn: () => getCostVisibility() });
-  const showCost = !!cost.data?.showCost;
+  // Never Warehouse, which doesn't read customers' billing.
+  const showCost = !!cost.data?.showReports;
   const [view, setView] = useState<ReportView>("records");
   const switcher = showCost ? (
     <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Report" data-testid="analytics-report-switch">
@@ -484,6 +485,7 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
   const [dates, setDates] = useState(() => rangeDates("year", today));
   const [shown, setShown] = useState(PAGE);
   const filters = { from: dates.from || null, to: dates.to || null };
+  useEffect(() => setShown(PAGE), [dates.from, dates.to]);
   const view = useQuery({ queryKey: ["profit-report", filters], queryFn: () => getProfitReport({ data: filters }), placeholderData: keepPreviousData });
   const file = useMutation({
     mutationFn: (format: ExportFormat) => downloadProfitReport({ data: { filters, format } }),
@@ -503,8 +505,8 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Analytics</h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Profit: every billed ticket, PM, install, rebuild and deal, each counted once. Parts at their Purchase Price (or Our Discount Rule), labor at the
-            Labor Cost Rate, the trip at no cost. Bills before 2026 count as sell with no cost.
+            Profit: every billed ticket, PM, install, rebuild and deal, each counted once. Parts at their Purchase Price (or Our Discount Rule),
+            {d?.laborHidden ? " labor not shown," : " labor at the Labor Cost Rate,"} the trip at no cost. Bills before 2026 count as sell with no cost.
           </p>
           {switcher}
         </div>
@@ -561,15 +563,17 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
         </p>
       ) : null}
 
+      <div className={view.isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"} aria-busy={view.isPlaceholderData}>
       <ProfitTable title="By Job Type" rows={(d?.byType ?? []).map((g) => ({ ...g, label: jobTypeLabel(g.key) }))} loading={view.isLoading} empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."} testId="profit-by-type" />
       <ProfitTable
         title="By Customer"
-        rows={customers.slice(0, shown).map((g) => ({ ...g, label: g.key || "(no customer)" }))}
+        rows={customers.slice(0, shown).map((g) => ({ ...g, label: g.label || "(no customer)" }))}
         loading={view.isLoading}
         empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."}
         testId="profit-by-customer"
         more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
       />
+      </div>
     </div>
   );
 }
@@ -606,7 +610,8 @@ function ProfitTable({
                 <th className="px-2 py-2.5 text-right font-medium">Cost</th>
                 <th className="px-2 py-2.5 text-right font-medium">Margin</th>
                 <th className="px-2 py-2.5 text-right font-medium">Margin %</th>
-                <th className="px-2 py-2.5 pr-4 text-right font-medium">Sell With No Cost</th>
+                <th className="px-2 py-2.5 text-right font-medium">Sell With No Cost</th>
+                <th className="px-2 py-2.5 pr-4 text-right font-medium">Estimated</th>
               </tr>
             </thead>
             <tbody className={CARD_BODY}>
@@ -614,7 +619,6 @@ function ProfitTable({
                 <tr key={r.key} className={`border-b border-border align-top last:border-b-0 ${CARD_ROW}`} data-testid="profit-group-row">
                   <td className={`px-4 py-2 font-medium ${CARD_LINE}`}>
                     {r.label}
-                    {r.estimated ? <span className="block text-[11px] font-normal text-warning">{r.estimated} estimated</span> : null}
                   </td>
                   <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Bills']`}>{r.bills}</td>
                   <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Sell']`}>{money(r.sell)}</td>
@@ -622,7 +626,8 @@ function ProfitTable({
                   <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>{money(r.cost)}</td>
                   <td className={`tabular px-2 py-2 text-right font-medium ${r.margin < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Margin']`}>{money(r.margin)}</td>
                   <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Margin_%']`}>{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
-                  <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['No_cost']`}>{money(r.uncostedSell)}</td>
+                  <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['No_cost']`}>{money(r.uncostedSell)}</td>
+                  <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Estimated']`}>{r.estimated}</td>
                 </tr>
               ))}
             </tbody>

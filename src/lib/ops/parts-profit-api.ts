@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
-import { deskMiddleware } from "@/lib/ops/access";
+import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
 import { canSeeCost } from "@/lib/ops/cost-access";
 import { formatNowChicago, todayChicago } from "@/lib/ops/clock";
 import { EXPORT_FORMATS, reportSheets, type ExportFormat } from "@/lib/ops/analytics";
@@ -48,7 +48,8 @@ async function load(sql: Sql, f: ProfitFilters): Promise<PartsProfit> {
 
 /** Cost and margin: an Admin, or a role ticked in Settings → Who Sees Cost and Margin (11/20). */
 async function requireAdmin(sql: Sql, userId: string) {
-  if (!(await canSeeCost(sql, userId))) throw new Error("Parts Profit shows cost and margin, so it's for Admins and the roles ticked in Settings → Who Sees Cost and Margin.");
+  // Never Warehouse: it doesn't read customers' billing.
+  if (!(await canSeeCost(sql, userId)) || (await isWarehouseOnly(sql, userId))) throw new Error("Parts Profit shows cost and margin, so it's for Admins and the roles ticked in Settings → Who Sees Cost and Margin.");
 }
 
 /** Parts Profit: invoiced part lines per MPN with qty, cost, sell, discount and margin. For whoever sees cost. */
