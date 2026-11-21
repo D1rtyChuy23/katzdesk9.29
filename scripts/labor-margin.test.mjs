@@ -13,6 +13,7 @@ process.env.DATABASE_URL ??= "postgres://127.0.0.1:9/unused";
 const C = await import("../src/lib/ops/charges-api.ts");
 const P = await import("../src/lib/ops/part-pricing-api.ts");
 const CA = await import("../src/lib/ops/cost-access.ts");
+const round = (n) => Math.round(n * 100) / 100;
 const src = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 const MIGRATIONS = new URL("../migrations/", import.meta.url);
@@ -112,11 +113,48 @@ test("a ticket's cost follows Who Sees Cost and Margin; the labor rate goes only
   await CA.saveCostRoles(sql, ["service"]);
   const on = await C.getTicketChargesFor(sql, job, "u-desk");
   assert.equal(on.canUnlock, false);
-  assert.deepEqual([on.profit[1].cost, on.profit[1].unitCost], [46.5, null], "the cost, not the rate");
+  // The rate isn't sent; a ticked role can still divide labor's cost by its hours (Chuy decides whether labor shows).
+  assert.deepEqual([on.profit[1].cost, on.profit[1].unitCost], [46.5, null]);
   assert.equal(on.profit[2].unitCost, 20, "a part's unit cost is shown");
   assert.equal((await C.getTicketChargesFor(sql, job, "u-sales")).profit, null);
   const admin = await C.getTicketChargesFor(sql, job, "u-owner");
   assert.deepEqual([admin.profit[1].unitCost, admin.canUnlock], [31, true]);
+});
+
+test("a discount spreads over labor too: Whole bill, Chosen lines, and 100% off", async () => {
+  const sql = await fresh();
+  await P.saveLaborRate(sql, 30);
+  const three = LINES.slice(0, 3); // trip 150, labor 225, part 90 = 465
+  const whole = await ticket(sql);
+  await C.writeTicketCharges(sql, whole, "u-owner", { lines: three, lineIds: [], discount: { kind: "percent", value: 10 } });
+  let c = await C.getTicketChargesFor(sql, whole, "u-owner");
+  assert.deepEqual(c.profit.map((p) => p.ticketDiscount), [15, 22.5, 9]);
+  assert.deepEqual(c.profitTotals, { sell: 465, ticketDiscount: 46.5, cost: 85, margin: 333.5, marginPct: 79.69, noCost: 0 });
+  assert.equal(round(c.profit.reduce((a, p) => a + p.margin, 0)), c.profitTotals.margin, "the lines add up to the ticket");
+  const chosen = await ticket(sql);
+  await C.writeTicketCharges(sql, chosen, "u-owner", {
+    lines: three.map((l, i) => ({ ...l, discountChosen: i === 1 })),
+    lineIds: [],
+    discount: { kind: "percent", value: 10, scope: "chosen" },
+  });
+  c = await C.getTicketChargesFor(sql, chosen, "u-owner");
+  assert.deepEqual(c.profit.map((p) => p.ticketDiscount), [0, 22.5, 0]);
+  assert.deepEqual([c.profit[1].margin, c.profitTotals.margin], [157.5, 357.5]);
+  const free = await ticket(sql);
+  await C.writeTicketCharges(sql, free, "u-owner", { lines: three, lineIds: [], discount: { kind: "percent", value: 100 } });
+  c = await C.getTicketChargesFor(sql, free, "u-owner");
+  assert.deepEqual([c.profitTotals.margin, c.profitTotals.marginPct], [-85, null]);
+});
+
+test("an invoiced ticket viewed by a ticked role: stored costs and totals, still no labor rate", async () => {
+  const sql = await fresh();
+  await P.saveLaborRate(sql, 31);
+  await CA.saveCostRoles(sql, ["service"]);
+  const job = await ticket(sql);
+  await C.writeTicketCharges(sql, job, "u-owner", { lines: LINES.slice(0, 3), lineIds: [] });
+  await C.recordTicketSalesOrder(sql, job, "u-owner", "SO-LM-4");
+  const c = await C.getTicketChargesFor(sql, job, "u-desk");
+  assert.deepEqual([c.profit[1].stored, c.profit[1].cost, c.profit[1].unitCost, c.profitTotals.margin], [true, 46.5, null, 378.5]);
 });
 
 test("Parts Profit stays parts only: labor and trip lines aren't in it", async () => {

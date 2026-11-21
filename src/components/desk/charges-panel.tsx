@@ -364,7 +364,7 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
               {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={billed} onChange={(v) => edit(i, { discountChosen: v })} /> : null}
               {/* Cost and margin (Who Sees Cost and Margin): a part from its Purchase Price (else Our Discount Rule), labor at
                   the Labor Cost Rate, the trip at no cost. Shown for the saved lines. */}
-              {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} /> : null}
+              {!dirty && c.profit?.[i] ? <LineProfitRow p={c.profit[i]!} labor={c.lines[i]?.kind === "labor"} /> : null}
             </li>
           ))}
         </ul>
@@ -377,9 +377,16 @@ export function ChargesPanel({ jobId }: { jobId: number }) {
           <span>
             Sell <span className="font-medium text-foreground">{money(c.profitTotals.sell)}</span>
           </span>
-          {c.profitTotals.ticketDiscount ? <span>Discount −{money(c.profitTotals.ticketDiscount)}</span> : null}
+          {c.profitTotals.ticketDiscount ? (
+            <>
+              <span>Discount −{money(c.profitTotals.ticketDiscount)}</span>
+              <span>
+                Net <span className="font-medium text-foreground">{money(c.profitTotals.sell - c.profitTotals.ticketDiscount)}</span>
+              </span>
+            </>
+          ) : null}
           <span>
-            Cost <span className="font-medium text-foreground">{money(c.profitTotals.cost)}</span>
+            {c.profitTotals.noCost ? "Known cost" : "Cost"} <span className="font-medium text-foreground">{money(c.profitTotals.cost)}</span>
           </span>
           <span>
             Margin{" "}
@@ -694,8 +701,10 @@ export function PartPicker({ onPick, id = "part-search" }: { onPick: (item: Bill
   );
 }
 
-function LineProfitRow({ p }: { p: NonNullable<NonNullable<TicketCharges["profit"]>[number]> }) {
-  const source = p.source === "none" ? "no cost on file" : costSourceLabel(p.source);
+function LineProfitRow({ p, labor }: { p: NonNullable<NonNullable<TicketCharges["profit"]>[number]>; labor: boolean }) {
+  // Labor with no rate is waiting on Settings, not missing a part cost (11/20).
+  const source = p.source === "none" ? (labor ? "no Labor Cost Rate (Settings)" : "no cost on file") : costSourceLabel(p.source);
+  const service = labor || p.source === "trip";
   return (
     <p
       className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 rounded-md bg-muted/50 px-2 py-1.5 text-xs text-muted-foreground tabular"
@@ -703,14 +712,16 @@ function LineProfitRow({ p }: { p: NonNullable<NonNullable<TicketCharges["profit
       data-testid="charge-profit"
     >
       <span>
-        Cost <span className="font-medium text-foreground">{p.cost == null ? "Not set" : money(p.cost)}</span>
+        Cost <span className="font-medium text-foreground">{p.cost == null ? (labor ? "Labor Cost Rate not set" : "Not set") : money(p.cost)}</span>
       </span>
       <span>
         Sell <span className="font-medium text-foreground">{money(p.sell)}</span>
       </span>
-      <span>
-        Discount <span className="font-medium text-foreground">{p.ourDiscount == null ? "—" : money(p.ourDiscount)}</span>
-      </span>
+      {service ? null : (
+        <span>
+          Discount <span className="font-medium text-foreground">{p.ourDiscount == null ? "—" : money(p.ourDiscount)}</span>
+        </span>
+      )}
       {p.ticketDiscount ? <span>Ticket discount −{money(p.ticketDiscount)}</span> : null}
       <span>
         Margin{" "}
