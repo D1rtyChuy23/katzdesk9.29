@@ -171,5 +171,5 @@ test("every save that returns the charges uses the same view rule", () => {
   const f = src("src/lib/ops/charges-api.ts");
   assert.doesNotMatch(f, /loadCharges\(sql, (data\.)?jobId, await canReviewNames/);
   assert.equal((f.match(/loadCharges\(sql, (data\.)?jobId, await chargeView\(sql, (context\.)?userId\)\)/g) ?? []).length, 4);
-  assert.match(src("src/components/desk/charges-panel.tsx"), /data-testid="charge-profit-total"/);
+  assert.match(src("src/components/desk/charges-panel.tsx"), /<ProfitTotalsRow t=\{c\.profitTotals\} testId="charge-profit-total" \/>/);
 });

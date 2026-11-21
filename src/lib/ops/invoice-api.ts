@@ -15,6 +15,8 @@ import {
   type Discount,
 } from "@/lib/ops/discount";
 import { flagOn } from "@/lib/ops/flag";
+import { canSeeCost } from "@/lib/ops/cost-access";
+import { billProfit, storeLineCosts, type BillProfit } from "@/lib/ops/line-cost";
 import { INVOICE_TARGETS, carriesPo, cleanPo, invoiceError, invoiceTotals, stackedPmLock, targetTitle, usesTicketCharges, type BillTo, type InvoiceTarget, type InvoiceTotals } from "@/lib/ops/invoice";
 import { notifyAdminsInvoiceWaiting } from "@/lib/ops/notify";
 import { rebuildBillsOnLock } from "@/lib/ops/rebuild-link";
@@ -97,6 +99,13 @@ export type InvoiceView = InvoiceTotals &
      */
     asApproved: boolean;
     /**
+     * Cost and margin on each line (same order as lines) and the bill's totals, for an Admin or a role ticked in Who
+     * Sees Cost and Margin (11/20); null for anyone else and for tickets (their Charges panel has them). Stored when
+     * approved; worked out live before that. A labor line's rate goes only to an Admin.
+     */
+    profit: BillProfit["profit"] | null;
+    profitTotals: BillProfit["totals"] | null;
+    /**
      * An unlinked rebuild's own invoice on a Sales Order: what it was approved with, and what approving it again does
      * (11/6 review). Null otherwise.
      */
@@ -176,11 +185,12 @@ async function billedCarryOvers(sql: Sql, installId: number): Promise<BilledCarr
 }
 
 /** Who is looking: an Admin (the desk owner flag or the Admin role), Warehouse (that role, not an Admin), or anyone else. */
-export async function invoiceViewer(sql: Sql, userId: string): Promise<InvoiceViewer & { name: string }> {
+export async function invoiceViewer(sql: Sql, userId: string): Promise<InvoiceViewer & { name: string; showCost: boolean }> {
   const r = (await sql.query<{ is_admin: unknown; desk_role: string | null; username: string | null }>("select is_admin, desk_role, username from desk_accounts where user_id = $1", [userId]))[0];
   const role = String(r?.desk_role ?? "").trim().toLowerCase();
   const admin = flagOn(r?.is_admin) || role === "admin";
-  return { admin, warehouse: !admin && role === "warehouse", name: r?.username || "Desk" };
+  // Cost and margin follow Who Sees Cost and Margin (11/20).
+  return { admin, warehouse: !admin && role === "warehouse", name: r?.username || "Desk", showCost: await canSeeCost(sql, userId) };
 }
 
 type Ref = {
@@ -455,7 +465,7 @@ async function projectLines(sql: Sql, invoiceId: number): Promise<InvoiceLine[]>
 
 const WAREHOUSE_REBUILDS_ONLY = "Warehouse opens rebuild invoices only.";
 
-async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: InvoiceViewer): Promise<InvoiceView> {
+async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: InvoiceViewer & { showCost?: boolean }): Promise<InvoiceView> {
   if (viewer.warehouse && type !== "rebuild") throw new Error(WAREHOUSE_REBUILDS_ONLY);
   const ref = await resolveRecord(sql, type, id);
   const h = await head(sql, ref.type, id);
@@ -473,6 +483,8 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     discount = h ? toDiscount(h.discount_kind, h.discount_value, h.discount_scope) : null;
   }
   const powers = invoicePowers(viewer, { type: ref.type, customer: ref.customer, state });
+  // A ticket's cost and margin are on its Charges panel; the other records' are here (11/20).
+  const cost: BillProfit | null = viewer.showCost && h && !usesTicketCharges(ref.type) ? await billProfit(sql, "invoice_lines", h.id, discount, viewer.admin) : null;
   // On a Sales Order (0122): linked, the window is locked and shows it as approved. Unlinked, it shows what Approve
   // writes now (the account and P.O. as they are), and says what it was approved with and what approving again does
   // (11/6 review).
@@ -499,6 +511,8 @@ async function readInvoice(sql: Sql, type: InvoiceTarget, id: number, viewer: In
     asApproved,
     salesOrderNote: ref.billedAs && !ref.locked ? salesOrderNote(ref.billedAs, powers.canApprove) : null,
     billedElsewhere: ref.type === "install" ? await billedCarryOvers(sql, id) : [],
+    profit: cost?.profit ?? null,
+    profitTotals: cost?.totals ?? null,
     ...powers,
   };
 }
@@ -899,6 +913,11 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       if (!said && (await storedScope(sql, ref.type, data.id)) === "chosen") throw new Error(OUT_OF_DATE);
       throw new Error(await changedSinceOpened(sql, ref.type, data.id, data.seen ?? null));
     }
+  }
+  if (!usesTicketCharges(ref.type)) {
+    // Each line's cost and margin as of approval (11/20). Approving again re-writes the lines, so it prices them fresh.
+    const approved = await head(sql, ref.type, data.id);
+    if (approved) await storeLineCosts(sql, "invoice_lines", approved.id, toDiscount(approved.discount_kind, approved.discount_value, approved.discount_scope));
   }
   await sql
     .query("insert into activity (entity_type, entity_id, actor_name, action, detail) values ($1, $2, $3, 'updated', $4)", [

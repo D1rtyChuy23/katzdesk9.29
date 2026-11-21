@@ -521,6 +521,61 @@ export function lineProfit(line: { qty: number; rate: number }, part: { listPric
 }
 
 /**
+ * One bill line's cost and margin, worked out now (11/20): a part at its Purchase Price (else the rule), labor at the
+ * Labor Cost Rate, the trip at no cost. Null for a part line whose item isn't on the parts list. `share` is the line's
+ * share of the bill's discount.
+ */
+export function priceLine(
+  line: { qty: number; rate: number; kind: string },
+  part: { listPrice: number | null; cost: number | null } | null,
+  rule: DiscountRule | null,
+  laborRate: number | null,
+  share = 0,
+): LineProfit | null {
+  if (line.kind === "trip" || line.kind === "labor") {
+    const sell = round2(line.qty * line.rate);
+    const ticketDiscount = round2(share);
+    const net = round2(sell - ticketDiscount);
+    const unit = line.kind === "trip" ? 0 : laborRate;
+    const cost = unit == null ? null : round2(line.qty * unit);
+    const margin = cost == null ? null : round2(net - cost);
+    const source: CostSource = line.kind === "trip" ? "trip" : unit == null ? "none" : "labor";
+    return { qty: line.qty, unitCost: unit, cost, sell, ourDiscount: null, ticketDiscount, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), source };
+  }
+  return part ? lineProfit(line, part, rule, share) : null;
+}
+
+/** A line's cost and margin as stored when it was billed. */
+export function storedLineProfit(line: { qty: number; rate: number }, s: { unitCost: number | null; source: string | null; discount: number | null; margin: number | null; ourDiscount?: number | null }): LineProfit {
+  const sell = round2(line.qty * line.rate);
+  const ticketDiscount = s.discount ?? 0;
+  const net = sell - ticketDiscount;
+  return {
+    qty: line.qty,
+    unitCost: s.unitCost,
+    cost: s.unitCost == null ? null : round2(line.qty * s.unitCost),
+    sell,
+    ourDiscount: s.ourDiscount ?? null,
+    ticketDiscount,
+    margin: s.margin,
+    marginPct: s.margin == null || net <= 0 ? null : round2((s.margin / net) * 100),
+    source: (s.source as CostSource) ?? "none",
+  };
+}
+
+export type BillProfitTotals = { sell: number; ticketDiscount: number; cost: number; margin: number | null; marginPct: number | null; noCost: number };
+
+/** A bill's sell, discount, known cost and margin (11/20). Margin waits until every line has a cost. */
+export function billProfitTotals(lines: { qty: number; rate: number }[], off: number, profit: ({ cost: number | null } | null)[]): BillProfitTotals {
+  const sell = round2(lines.reduce((a, l) => a + round2(l.qty * l.rate), 0));
+  const cost = round2(profit.reduce((a, p) => a + (p?.cost ?? 0), 0));
+  const noCost = profit.filter((p) => p?.cost == null).length;
+  const net = round2(sell - off);
+  const margin = noCost ? null : round2(net - cost);
+  return { sell, ticketDiscount: round2(off), cost, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), noCost };
+}
+
+/**
  * The ticket discount spread over its lines by amount, in cents, so the shares add back to the discount exactly. With
  * `takes` (11/7), only the lines the discount comes off get a share; a line marked false gets none.
  */

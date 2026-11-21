@@ -18,6 +18,7 @@ import { PartPicker } from "./charges-panel";
 import { AddPmParts } from "./pm-bill-add";
 import { ChosenBar, LineTick, ScopePicker } from "./discount-controls";
 import { PartThumb } from "./part-thumb";
+import { LineProfitRow, ProfitTotalsRow } from "./profit-rows";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -486,6 +487,8 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                           </div>
                         </div>
                         {chosen ? <LineTick item={l.item} checked={l.discountChosen} disabled={locked} onChange={(on) => edit(i, { discountChosen: on })} /> : null}
+                        {/* Cost and margin (Who Sees Cost and Margin, 11/20), for the saved lines. */}
+                        {!dirty && v.profit?.[i] ? <LineProfitRow p={v.profit[i]!} labor={v.lines[i]?.kind === "labor"} /> : null}
                       </li>
                     );
                   })}
@@ -648,6 +651,7 @@ export function InvoiceWindow({ type, id, onClose }: { type: InvoiceTarget; id: 
                   <dd className="tabular text-base font-semibold" data-testid="invoice-total">{money(totals.total)}</dd>
                 </div>
               </dl>
+              {!dirty && v.profitTotals ? <ProfitTotalsRow t={v.profitTotals} testId="invoice-profit-total" /> : null}
             </section>
 
             {/* Tickets merged in as billed (10/30), on a Sales Order or NetSuite invoices: never on this invoice or its total. */}

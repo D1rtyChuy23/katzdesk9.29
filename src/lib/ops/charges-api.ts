@@ -10,11 +10,11 @@ import {
   withHeaderDiscount,
   type Discount,
 } from "./discount";
-import { discountShares, lineProfit, ruleLabel, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
+import { discountShares, lineProfit, priceLine, billProfitTotals, ruleLabel, type BillProfitTotals as ProfitTotals, type DiscountRule, type LineProfit, type ProfitLine } from "./part-pricing";
 import { textArray } from "./part-merges";
 import { BIN_CODE_SQL, binSearchCode } from "./part-bins";
-import { loadDiscountRule, loadLaborRate } from "./part-pricing-api";
-import { laborCost } from "./labor-cost";
+import { loadDiscountRule } from "./part-pricing-api";
+import { loadLaborRate } from "./labor-cost";
 import { canSeeCost } from "./cost-access";
 import { liveInvoices, lockingInvoice, locationWarning, unlockActive, warehouseForTech } from "./billing-rules";
 import { LIVE_INVOICE_SQL, UNCHANGED_SINCE_READ, UNLOCKED_SQL, loadInvoices } from "./ticket-billing-api";
@@ -199,7 +199,7 @@ export type TicketCharges = {
 
 export type LineProfitView = LineProfit & { mpn: string | null; listPrice: number | null; stored: boolean };
 
-export type ProfitTotals = { sell: number; ticketDiscount: number; cost: number; margin: number | null; marginPct: number | null; noCost: number };
+export type { ProfitTotals };
 
 /** What a person may see on a ticket's charges: cost and margin (Who Sees Cost and Margin), and the Admin's extras. */
 export type ChargeView = { showCost: boolean; admin: boolean };
@@ -296,28 +296,15 @@ function profitFor(rows: ChargeRow[], off: number, rule: DiscountRule | null, di
     }
     if (isServiceLine(r)) {
       // Labor: billed hours × the Labor Cost Rate (11/20). The trip charge is separate, one per visit: no cost.
-      const sell = round2(qty * Number(r.rate));
-      const ticketDiscount = round2(shares[i] ?? 0);
-      const net = round2(sell - ticketDiscount);
-      const unit = r.kind === "trip" ? 0 : laborRate;
-      const cost = r.kind === "trip" ? 0 : laborCost(qty, laborRate);
-      const margin = cost == null ? null : round2(net - cost);
-      const source: LineProfit["source"] = r.kind === "trip" ? "trip" : unit == null ? "none" : "labor";
-      return { qty, unitCost: unit, cost, sell, ourDiscount: null, ticketDiscount, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), source, mpn: null, listPrice: null, stored: false };
+      return { ...priceLine({ qty, rate: Number(r.rate), kind: r.kind }, null, rule, laborRate, shares[i] ?? 0)!, mpn: null, listPrice: null, stored: false };
     }
     const p = lineProfit({ qty, rate: Number(r.rate) }, { listPrice: num(r.p_list), cost: num(r.p_cost) }, rule, shares[i] ?? 0);
     return { ...p, mpn: r.mfr_part, listPrice: num(r.p_list), stored: false };
   });
 }
 
-/** A ticket's sell, discount, known cost and margin (11/20). Margin waits until every line has a cost. */
 function profitTotalsFor(rows: ChargeRow[], off: number, profit: (LineProfitView | null)[]): ProfitTotals {
-  const sell = round2(rows.reduce((a, r) => a + round2(Number(r.qty) * Number(r.rate)), 0));
-  const cost = round2(profit.reduce((a, p) => a + (p?.cost ?? 0), 0));
-  const noCost = profit.filter((p) => p?.cost == null).length;
-  const net = round2(sell - off);
-  const margin = noCost ? null : round2(net - cost);
-  return { sell, ticketDiscount: round2(off), cost, margin, marginPct: margin == null || net <= 0 ? null : round2((margin / net) * 100), noCost };
+  return billProfitTotals(rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate) })), off, profit);
 }
 
 async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCost: false, admin: false }): Promise<TicketCharges> {
