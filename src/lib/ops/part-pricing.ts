@@ -455,11 +455,20 @@ export function ruleLabel(rule: DiscountRule | null | undefined): string {
   return rule.mode === "percent" ? `${Number(rule.value.toFixed(2))}% off manufacturer price` : `${money(rule.value)} off manufacturer price, per unit`;
 }
 
-export type CostSource = "rule" | "purchase" | "none";
+/** Where a line's cost came from: a part's Purchase Price or the rule, labor at the Labor Cost Rate, the trip (no cost). */
+export type CostSource = "rule" | "purchase" | "none" | "labor" | "trip";
 
 /** Where a part's cost came from, in words for the Parts screens. */
 export function costSourceLabel(source: CostSource): string {
-  return source === "purchase" ? "NetSuite Purchase Price" : source === "rule" ? "Our Discount Rule" : "Not set";
+  return source === "purchase"
+    ? "NetSuite Purchase Price"
+    : source === "rule"
+      ? "Our Discount Rule"
+      : source === "labor"
+        ? "Labor Cost Rate"
+        : source === "trip"
+          ? "Trip charge, no cost"
+          : "Not set";
 }
 
 /**
