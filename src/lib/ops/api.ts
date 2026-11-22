@@ -995,6 +995,12 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 		const now = (await sql`select merged_install_id from service_jobs where id = ${data.id}`)[0];
 		throw new Error(now?.merged_install_id ? `This ticket was merged into install #${now.merged_install_id}. Open the install to keep working.` : "Job not found");
 	}
+	if (String(next.customer ?? "").trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase()) {
+		// Moved to another account (11/21): a machine it named on the old one isn't its machine any more.
+		await sql`delete from ticket_units t using account_equipment a
+		           where t.job_id = ${data.id} and a.id = t.account_equipment_id
+		             and lower(btrim(a.customer)) <> lower(btrim(${next.customer ?? ""}))`;
+	}
 	if (data.status && data.status !== cur[0].status) await logActivity(sql, userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([
 		changed("customer", cur[0].customer, next.customer),

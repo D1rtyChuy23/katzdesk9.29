@@ -53,6 +53,7 @@ import { SheetTabs } from "./sheet-tabs";
 import { RecordPhotosPanel } from "./photos-panel";
 import { useRecordPhotos, useSeenTab } from "./photo-queries";
 import { AccountEquipmentList, HistoryRow, pendingSchedules, useAccountEquipment } from "./account-history";
+import { TicketUnitsPicker } from "./ticket-units";
 import { ModuleRecord } from "./module-record";
 import { PmSheet } from "./entity-sheets";
 import { TicketPmStack } from "./pm-stack-panel";
@@ -553,6 +554,7 @@ export function JobSheet({
                           className={KEEP_MOUNTED}
                           data-testid="ticket-panel-equipment"
                         >
+                          <TicketUnitsPicker jobId={j.id} />
                           <div className="border-b border-border p-5">
                             <AccountEquipmentList customer={customer || null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
                           </div>

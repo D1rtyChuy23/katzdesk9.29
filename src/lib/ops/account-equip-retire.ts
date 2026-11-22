@@ -52,6 +52,7 @@ export function retireUnitSql(): string {
                    'inspection_items', coalesce((select jsonb_agg(to_jsonb(i)) from install_inspection_items i where i.equipment_id = a.id), '[]'::jsonb),
                    'inspection_photos', coalesce((select jsonb_agg(to_jsonb(p)) from install_inspection_photos p where p.equipment_id = a.id), '[]'::jsonb),
                    'pm_links', coalesce((select jsonb_agg(to_jsonb(l)) from pm_runbook_unit_links l where l.account_equipment_id = a.id), '[]'::jsonb),
+                   'ticket_links', coalesce((select jsonb_agg(to_jsonb(t)) from ticket_units t where t.account_equipment_id = a.id), '[]'::jsonb),
                    'machine_parts', coalesce((select jsonb_agg(m.id) from machine_parts m where m.account_equipment_id = a.id), '[]'::jsonb))
                    || coalesce($4::jsonb, '{}'::jsonb),
                  $2, $3
@@ -163,6 +164,13 @@ export function restoreUnitSql(): string {
             insert into install_inspection_photos
             select x.* from r, jsonb_populate_recordset(null::install_inspection_photos, r.links->'inspection_photos') x
              where exists (select 1 from unit) and exists (select 1 from installs i where i.id = x.install_id)
+            on conflict do nothing
+          ),
+          tickets as (
+            -- The tickets that named it (11/21), where the ticket is still there.
+            insert into ticket_units
+            select x.* from r, jsonb_populate_recordset(null::ticket_units, coalesce(r.links->'ticket_links', '[]'::jsonb)) x
+             where exists (select 1 from unit) and exists (select 1 from service_jobs j where j.id = x.job_id)
             on conflict do nothing
           ),
           pms as (

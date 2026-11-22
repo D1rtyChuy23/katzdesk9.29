@@ -13,6 +13,7 @@ import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { listDirectory } from "@/lib/ops/api";
 import { getModelPartNumbers, MODEL_NOT_IN_CATALOG, partNumberHint } from "@/lib/ops/unit-model-change";
 import { EquipmentHistoryList } from "./equipment-history-list";
+import { UnitServiceHistory } from "./ticket-units";
 
 /** What Edit needs of a unit on the list. */
 export type EditableUnit = {
@@ -288,6 +289,7 @@ export function AccountUnitForm({ customer, unit, onDone }: { customer: string; 
           Cancel
         </Button>
       </div>
+      {unit ? <UnitServiceHistory unitId={unit.id} /> : null}
       {unit ? <EquipmentHistoryList unitId={unit.id} /> : null}
       {unit ? (
         <Dialog open={confirmModel} onOpenChange={setConfirmModel}>
