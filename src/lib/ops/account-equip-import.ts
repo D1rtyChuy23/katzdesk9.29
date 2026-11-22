@@ -1088,6 +1088,7 @@ async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: nu
   await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
   await sql.query("delete from install_inspection_photos where equipment_id = $1", [id]);
   await sql.query("delete from pm_runbook_unit_links where account_equipment_id = $1", [id]);
+  await sql.query("delete from ticket_units where account_equipment_id = $1", [id]);
 }
 
 /**
@@ -1360,6 +1361,14 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
     [keep.id, drop.id],
   );
   await sql.query("update pm_runbook_unit_links set account_equipment_id = $1 where account_equipment_id = $2", [keep.id, drop.id]);
+  // Tickets that name the dropped unit name the kept one (11/21); one that named both keeps a single link.
+  await sql.query(
+    `insert into ticket_units (job_id, account_equipment_id, linked_by, created_at)
+     select job_id, $1, linked_by, created_at from ticket_units where account_equipment_id = $2
+     on conflict do nothing`,
+    [keep.id, drop.id],
+  );
+  await sql.query("delete from ticket_units where account_equipment_id = $1", [drop.id]);
   // PM runbook rows a PM keyed by the dropped record ('acct:<id>'): its units, ticks and options follow to the kept
   // record. Where the kept record has its own for that PM (or tick), the kept one stays.
   const [keepKey, dropKey2] = [`acct:${keep.id}`, `acct:${drop.id}`];
@@ -1416,8 +1425,8 @@ export type UnitLinkCounts = { tickets: number; installs: number; pms: number };
 
 /**
  * What each unit is tied to, for the Merge dialog (11/19): installs whose visit has it, PMs that have it on a runbook
- * line, a pin or a parts line, and tickets on its account that name its serial (a ticket isn't linked to a unit by id,
- * so a unit with no serial counts none). Read only.
+ * line, a pin or a parts line, and tickets that name it (ticket_units, 11/21) or whose text on its account names its
+ * serial. Read only.
  */
 export async function unitLinkCounts(sql: Sql, ids: number[]): Promise<Record<number, UnitLinkCounts>> {
   const rows = await sql.query<{ id: number; tickets: number; installs: number; pms: number }>(
@@ -1427,11 +1436,13 @@ export async function unitLinkCounts(sql: Sql, ids: number[]): Promise<Record<nu
                select l.pm_job_id as p from pm_runbook_unit_links l where l.account_equipment_id = a.id
                union select r.pm_job_id from pm_runbook_units r where r.unit_key = 'acct:' || a.id
                union select m.pm_job_id from machine_parts m where m.account_equipment_id = a.id) x)::int as pms,
-            (case when coalesce(a.serial_key, '') = '' or length(a.serial_key) <= 2 then 0 else (
-               select count(*) from service_jobs j
-                where lower(btrim(j.customer)) = lower(btrim(a.customer))
-                  and position(a.serial_key in lower(regexp_replace(coalesce(j.equipment, '') || ' ' || coalesce(j.issue, '') || ' ' || coalesce(j.work_done, ''), '[[:space:]#]', '', 'g'))) > 0
-             ) end)::int as tickets
+            -- Tickets that name it (11/21), and tickets on its account whose text names its serial, each once.
+            (select count(*) from service_jobs j
+              where exists (select 1 from ticket_units t where t.job_id = j.id and t.account_equipment_id = a.id)
+                 or (coalesce(a.serial_key, '') <> '' and length(a.serial_key) > 2
+                     and lower(btrim(j.customer)) = lower(btrim(a.customer))
+                     and position(a.serial_key in lower(regexp_replace(coalesce(j.equipment, '') || ' ' || coalesce(j.issue, '') || ' ' || coalesce(j.work_done, ''), '[[:space:]#]', '', 'g'))) > 0)
+            )::int as tickets
        from account_equipment a where a.id = any($1::int[])`,
     [ids],
   );

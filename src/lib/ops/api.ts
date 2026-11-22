@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- legacy file, typed at its call sites */
 // @ts-nocheck
+import { dropOffAccountTicketUnits } from "@/lib/ops/ticket-units";
 import { isAdminAccount } from "@/lib/ops/admin-role";
 import { nextCallId } from "@/lib/ops/call-id";
 import { createServerFn } from "@tanstack/react-start";
@@ -994,6 +995,10 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 		// Merged into an install after the read above (10/30): nothing is written onto the hidden ticket.
 		const now = (await sql`select merged_install_id from service_jobs where id = ${data.id}`)[0];
 		throw new Error(now?.merged_install_id ? `This ticket was merged into install #${now.merged_install_id}. Open the install to keep working.` : "Job not found");
+	}
+	if (String(next.customer ?? "").trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase()) {
+		// Moved to another account (11/21): a machine it named on the old one isn't its machine any more.
+		await dropOffAccountTicketUnits(sql, data.id, cur[0].customer);
 	}
 	if (data.status && data.status !== cur[0].status) await logActivity(sql, userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([

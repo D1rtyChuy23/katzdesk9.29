@@ -21,7 +21,7 @@ export type RetiredUnit = {
   /** The day it was removed, in Houston's time (YYYY-MM-DD). */
   retiredAt: string;
   retiredName: string | null;
-  /** How many inspection and PM records were kept with it. */
+  /** How many inspection, PM and ticket records were kept with it. */
   records: number;
   /** "Moved from <account> to install WO-#### by <user> <date>" when it left by a move to an install (11/17). */
   movedNote: string | null;
@@ -34,7 +34,7 @@ export type RetiredUnit = {
 
 export type RetiredBy = { userId: string | null; name: string | null };
 
-const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", "pm_links"] as const;
+const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", "pm_links", "ticket_links"] as const;
 
 /**
  * Copy a unit and its links to the retired table. $1 unit, $2 who (id), $3 who (name), $4 more to keep with it (a
@@ -52,6 +52,7 @@ export function retireUnitSql(): string {
                    'inspection_items', coalesce((select jsonb_agg(to_jsonb(i)) from install_inspection_items i where i.equipment_id = a.id), '[]'::jsonb),
                    'inspection_photos', coalesce((select jsonb_agg(to_jsonb(p)) from install_inspection_photos p where p.equipment_id = a.id), '[]'::jsonb),
                    'pm_links', coalesce((select jsonb_agg(to_jsonb(l)) from pm_runbook_unit_links l where l.account_equipment_id = a.id), '[]'::jsonb),
+                   'ticket_links', coalesce((select jsonb_agg(to_jsonb(t)) from ticket_units t where t.account_equipment_id = a.id), '[]'::jsonb),
                    'machine_parts', coalesce((select jsonb_agg(m.id) from machine_parts m where m.account_equipment_id = a.id), '[]'::jsonb))
                    || coalesce($4::jsonb, '{}'::jsonb),
                  $2, $3
@@ -163,6 +164,14 @@ export function restoreUnitSql(): string {
             insert into install_inspection_photos
             select x.* from r, jsonb_populate_recordset(null::install_inspection_photos, r.links->'inspection_photos') x
              where exists (select 1 from unit) and exists (select 1 from installs i where i.id = x.install_id)
+            on conflict do nothing
+          ),
+          tickets as (
+            -- The tickets that named it (11/21), where the ticket is still there.
+            insert into ticket_units
+            select x.* from r, jsonb_populate_recordset(null::ticket_units, coalesce(r.links->'ticket_links', '[]'::jsonb)) x
+             -- Only a ticket still on this account: one moved away while the unit was retired doesn't name it again.
+             where exists (select 1 from unit) and exists (select 1 from service_jobs j where j.id = x.job_id and lower(btrim(j.customer)) = lower(btrim($2)))
             on conflict do nothing
           ),
           pms as (

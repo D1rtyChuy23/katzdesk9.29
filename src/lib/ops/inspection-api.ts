@@ -316,6 +316,8 @@ async function dropUnusedUnit(sql: Sql, id: number, opts?: { madeBy?: number }):
           and not exists (select 1 from install_inspection_photos p where p.equipment_id = a.id)
           and not exists (select 1 from modules m where m.assigned_unit_id = a.id)
           and not exists (select 1 from pm_runbook_unit_links l where l.account_equipment_id = a.id)
+          -- A ticket names it (11/21).
+          and not exists (select 1 from ticket_units t where t.account_equipment_id = a.id)
           and not exists (select 1 from pm_runbook_units r where r.unit_key = 'acct:' || a.id)
           and not exists (select 1 from pm_runbook_checks c where c.unit_key = 'acct:' || a.id)
           and not exists (select 1 from unit_runbook_options o where o.unit_key = 'acct:' || a.id)

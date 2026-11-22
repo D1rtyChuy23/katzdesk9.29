@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { dropOffAccountTicketUnits } from "@/lib/ops/ticket-units";
 import { fillInstallDatesFor } from "./install-date-fill";
 import { nextCallId } from "@/lib/ops/call-id";
 import { z } from "zod";
@@ -986,6 +987,8 @@ export async function applyCorrigoRows(
           ],
         )
       )[0];
+      // Moved to another account by the file (11/21): its machines on the old one aren't its machines any more.
+      if (saved) await dropOffAccountTicketUnits(sql, jobId, cur[0].customer);
       if (!saved) {
         // Merged into an install after the check above (10/30): nothing went onto the hidden ticket. Importing the file
         // again puts the row on the install.

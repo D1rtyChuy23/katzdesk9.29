@@ -53,6 +53,7 @@ import { SheetTabs } from "./sheet-tabs";
 import { RecordPhotosPanel } from "./photos-panel";
 import { useRecordPhotos, useSeenTab } from "./photo-queries";
 import { AccountEquipmentList, HistoryRow, pendingSchedules, useAccountEquipment } from "./account-history";
+import { TicketUnitsPicker } from "./ticket-units";
 import { ModuleRecord } from "./module-record";
 import { PmSheet } from "./entity-sheets";
 import { TicketPmStack } from "./pm-stack-panel";
@@ -154,6 +155,9 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
       void qc.invalidateQueries({ queryKey: ["ticket-install-matches"] });
+      // A new account offers its own machines, and drops the old one's (11/21).
+      void qc.invalidateQueries({ queryKey: ["ticket-units"] });
+      void qc.invalidateQueries({ queryKey: ["unit-service-history"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -171,8 +175,10 @@ export function JobSheet({
       void qc.invalidateQueries({ queryKey: ["account-invoices"] });
       void qc.invalidateQueries({ queryKey: ["repair-quote"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
-      // The extra's photos are the keeper's now.
+      // The extra's photos and machines are the keeper's now.
       void qc.invalidateQueries({ queryKey: ["photos"] });
+      void qc.invalidateQueries({ queryKey: ["ticket-units"] });
+      void qc.invalidateQueries({ queryKey: ["unit-service-history"] });
       if (row?.id && row.id !== activeId) showTicket(row.id);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -553,6 +559,7 @@ export function JobSheet({
                           className={KEEP_MOUNTED}
                           data-testid="ticket-panel-equipment"
                         >
+                          <TicketUnitsPicker jobId={j.id} />
                           <div className="border-b border-border p-5">
                             <AccountEquipmentList customer={customer || null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
                           </div>

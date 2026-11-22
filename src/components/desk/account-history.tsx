@@ -200,6 +200,9 @@ export function AccountEquipmentList({
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["account-equipment"] });
     void qc.invalidateQueries({ queryKey: ["account-equipment-retired"] });
+    // Remove, Put back and Merge move a unit's ticket links (11/21).
+    void qc.invalidateQueries({ queryKey: ["ticket-units"] });
+    void qc.invalidateQueries({ queryKey: ["unit-service-history"] });
     void qc.invalidateQueries({ queryKey: ["inspection"] });
     void qc.invalidateQueries({ queryKey: ["installs"] });
   };
