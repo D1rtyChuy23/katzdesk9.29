@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 import { getSql, type Sql } from "@/lib/db";
-import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { deskMiddleware, isWarehouseOnly } from "@/lib/ops/access";
+import { canSeeCost } from "@/lib/ops/cost-access";
 import { formatNowChicago, todayChicago } from "@/lib/ops/clock";
 import { EXPORT_FORMATS, reportSheets, type ExportFormat } from "@/lib/ops/analytics";
 import { invoicedPartLines } from "@/lib/ops/charges-api";
@@ -45,11 +46,13 @@ async function load(sql: Sql, f: ProfitFilters): Promise<PartsProfit> {
   return { rows, totals, scope, live, rule };
 }
 
+/** Cost and margin: an Admin, or a role ticked in Settings → Who Sees Cost and Margin (11/20). */
 async function requireAdmin(sql: Sql, userId: string) {
-  if (!(await canReviewNames(sql, userId))) throw new Error("Parts Profit shows cost and margin, so it is for Admin.");
+  // Never Warehouse: it doesn't read customers' billing.
+  if (!(await canSeeCost(sql, userId)) || (await isWarehouseOnly(sql, userId))) throw new Error("Parts Profit shows cost and margin, so it's for Admins and the roles ticked in Settings → Who Sees Cost and Margin.");
 }
 
-/** Parts Profit: invoiced part lines per MPN with qty, cost, sell, discount and margin. Admin only. */
+/** Parts Profit: invoiced part lines per MPN with qty, cost, sell, discount and margin. For whoever sees cost. */
 export const getPartsProfit = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: ProfitFilters) => filterInput.parse(d))

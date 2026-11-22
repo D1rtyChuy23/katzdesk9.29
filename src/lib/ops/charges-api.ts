@@ -308,7 +308,12 @@ function profitTotalsFor(rows: ChargeRow[], off: number, profit: (LineProfitView
   return billProfitTotals(rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), kind: r.kind })), off, profit, hideLabor);
 }
 
-async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCost: false, admin: false }): Promise<TicketCharges> {
+async function loadCharges(
+  sql: Sql,
+  jobId: number,
+  view: ChargeView = { showCost: false, admin: false },
+  cache?: { rule: DiscountRule | null; laborRate: number | null },
+): Promise<TicketCharges> {
   const { showCost } = view;
   const job = (await sql.query<{
     po: string | null;
@@ -343,8 +348,8 @@ async function loadCharges(sql: Sql, jobId: number, view: ChargeView = { showCos
   }));
   const discount = discountFromRow(job.discount_kind, job.discount_value, job.discount_scope);
   const totals = billTotals(lines, discount);
-  const rule = showCost ? await loadDiscountRule(sql) : null;
-  const profit = showCost ? profitFor(rows, totals.off, rule, discount, await loadLaborRate(sql)) : null;
+  const rule = showCost ? (cache ? cache.rule : await loadDiscountRule(sql)) : null;
+  const profit = showCost ? profitFor(rows, totals.off, rule, discount, cache ? cache.laborRate : await loadLaborRate(sql)) : null;
   // The Labor Cost Rate is Admin only ("Hide pay rates", 11/20): others get labor's cost, not its rate.
   // With the labor switch off, a non-Admin gets no labor cost at all, and the totals leave labor out (11/20).
   const hideLabor = !view.admin && !view.showLabor;
@@ -413,6 +418,41 @@ export async function invoicedPartLines(sql: Sql, range: { from: string | null; 
     });
   }
   return { lines: out };
+}
+
+/**
+ * The Profit report's tickets (11/20): each invoiced ticket billed in the range, once (as Parts Profit counts them), with
+ * its sell, discount, cost and margin as the Charges panel works them out for this person.
+ */
+export async function ticketProfitBills(
+  sql: Sql,
+  range: { from: string | null; to: string | null },
+  view: ChargeView,
+): Promise<{ id: number; kind: string; customer: string; date: string; totals: ProfitTotals; estimated: boolean }[]> {
+  // The day a ticket was billed: its Sales Order date, else its first NetSuite invoice, else completed, else received.
+  // Chicago days, the same for the range and the report (review, 11/20).
+  const DAY = `coalesce((j.billed_at at time zone 'America/Chicago')::date,
+                 (select min(ti.invoice_date) from ticket_invoices ti where ti.job_id = j.id
+                     and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')),
+                 j.completed_at, j.received)`;
+  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; day: string | null }>(
+    `select j.id, j.kind, j.customer, to_char(${DAY}, 'YYYY-MM-DD') as day from service_jobs j
+      where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
+        and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
+        and ($1::date is null or ${DAY} >= $1::date)
+        and ($2::date is null or ${DAY} <= $2::date)
+        and exists (select 1 from ticket_charges c where c.job_id = j.id)
+      order by j.id`,
+    [range.from || null, range.to || null],
+  );
+  const cache = { rule: await loadDiscountRule(sql), laborRate: await loadLaborRate(sql) };
+  const out = [];
+  for (const j of jobs) {
+    const c = await loadCharges(sql, Number(j.id), { ...view, showCost: true }, cache);
+    if (!c.profitTotals || !j.day) continue;
+    out.push({ id: Number(j.id), kind: j.kind, customer: j.customer ?? "", date: j.day, totals: c.profitTotals, estimated: (c.profit ?? []).some((p) => p != null && !p.stored) });
+  }
+  return out;
 }
 
 /**

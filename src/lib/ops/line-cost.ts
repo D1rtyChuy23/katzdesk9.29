@@ -52,7 +52,9 @@ async function lineRows(sql: Sql, table: LineCostTable, parentId: number): Promi
   );
 }
 
-async function livePrices(sql: Sql, rows: Row[], discount: Discount | null) {
+export type PriceCache = { rule: Awaited<ReturnType<typeof loadDiscountRule>>; laborRate: number | null };
+
+async function livePrices(sql: Sql, rows: Row[], discount: Discount | null, cache?: PriceCache) {
   const lines = rows.map((r) => ({ qty: Number(r.qty), rate: Number(r.rate), discountChosen: r.chosen === true }));
   const off = billTotals(lines, discount).off;
   const shares = discountShares(
@@ -60,8 +62,8 @@ async function livePrices(sql: Sql, rows: Row[], discount: Discount | null) {
     off,
     lines.map((l) => takesDiscount(l, discount)),
   );
-  const rule = await loadDiscountRule(sql);
-  const laborRate = await loadLaborRate(sql);
+  const rule = cache ? cache.rule : await loadDiscountRule(sql);
+  const laborRate = cache ? cache.laborRate : await loadLaborRate(sql);
   const live = rows.map((r, i) =>
     priceLine({ qty: lines[i].qty, rate: lines[i].rate, kind: r.kind }, r.pid == null ? null : { listPrice: num(r.p_list), cost: num(r.p_cost) }, rule, laborRate, shares[i] ?? 0),
   );
@@ -92,9 +94,9 @@ export async function storeLineCosts(sql: Sql, table: LineCostTable, parentId: n
 }
 
 /** Each line's cost and margin (stored, else live) and the bill's totals. The labor rate goes only to an Admin. */
-export async function billProfit(sql: Sql, table: LineCostTable, parentId: number, discount: Discount | null, admin: boolean, showLabor = admin): Promise<BillProfit> {
+export async function billProfit(sql: Sql, table: LineCostTable, parentId: number, discount: Discount | null, admin: boolean, showLabor = admin, cache?: PriceCache): Promise<BillProfit> {
   const rows = await lineRows(sql, table, parentId);
-  const { lines, off, live } = await livePrices(sql, rows, discount);
+  const { lines, off, live } = await livePrices(sql, rows, discount, cache);
   const full: (StoredLineProfit | null)[] = rows.map((r, i) =>
     r.priced_at
       ? { ...storedLineProfit(lines[i], { unitCost: num(r.unit_cost), source: r.cost_source, discount: num(r.line_discount), margin: num(r.margin) }), stored: true }
