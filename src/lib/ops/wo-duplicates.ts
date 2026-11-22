@@ -540,6 +540,15 @@ export function mergeTicketsSql(): string {
       from g
      where a.job_id = g.extra_id
     returning a.id
+  ), units_kept as (
+    -- The machines it named (11/21) are the keeper's; one both named stays once.
+    insert into ticket_units (job_id, account_equipment_id, linked_by, created_at)
+    select g.keeper_id, t.account_equipment_id, t.linked_by, t.created_at from g join ticket_units t on t.job_id = g.extra_id
+    on conflict do nothing
+    returning 1
+  ), units_gone as (
+    delete from ticket_units t using g where t.job_id = g.extra_id
+    returning 1
   ), photos as (
     -- Its photos (11/4) are the keeper's, with the keeper's own in the order they were taken.
     update ticket_photos p

@@ -21,7 +21,7 @@ export type RetiredUnit = {
   /** The day it was removed, in Houston's time (YYYY-MM-DD). */
   retiredAt: string;
   retiredName: string | null;
-  /** How many inspection and PM records were kept with it. */
+  /** How many inspection, PM and ticket records were kept with it. */
   records: number;
   /** "Moved from <account> to install WO-#### by <user> <date>" when it left by a move to an install (11/17). */
   movedNote: string | null;
@@ -34,7 +34,7 @@ export type RetiredUnit = {
 
 export type RetiredBy = { userId: string | null; name: string | null };
 
-const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", "pm_links"] as const;
+const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", "pm_links", "ticket_links"] as const;
 
 /**
  * Copy a unit and its links to the retired table. $1 unit, $2 who (id), $3 who (name), $4 more to keep with it (a
@@ -170,7 +170,8 @@ export function restoreUnitSql(): string {
             -- The tickets that named it (11/21), where the ticket is still there.
             insert into ticket_units
             select x.* from r, jsonb_populate_recordset(null::ticket_units, coalesce(r.links->'ticket_links', '[]'::jsonb)) x
-             where exists (select 1 from unit) and exists (select 1 from service_jobs j where j.id = x.job_id)
+             -- Only a ticket still on this account: one moved away while the unit was retired doesn't name it again.
+             where exists (select 1 from unit) and exists (select 1 from service_jobs j where j.id = x.job_id and lower(btrim(j.customer)) = lower(btrim($2)))
             on conflict do nothing
           ),
           pms as (

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getTicketUnits, getUnitServiceHistory, setTicketUnits, type TicketUnit } from "@/lib/ops/ticket-units-api";
 
 const unitText = (u: TicketUnit) => [u.model || u.name, u.serial ? `S/N ${u.serial}` : "no serial"].filter(Boolean).join(" · ");
+const idsKey = (ids: number[]) => [...ids].sort((a, b) => a - b).join(",");
 
 /**
  * Which of the account's machines this ticket is for (Chuy, 11/21): any number of them, optional. Each one picked lists
@@ -15,9 +16,12 @@ export function TicketUnitsPicker({ jobId }: { jobId: number }) {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["ticket-units", jobId], queryFn: () => getTicketUnits({ data: { jobId } }) });
   const [picked, setPicked] = useState<number[]>([]);
+  // Reset to what's saved only when that changes: a refetch on focus keeps unsaved ticks.
+  const savedKey = q.data ? idsKey(q.data.linked.map((u) => u.id)) : null;
   useEffect(() => {
     if (q.data) setPicked(q.data.linked.map((u) => u.id));
-  }, [q.data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedKey, jobId]);
   const save = useMutation({
     mutationFn: () => setTicketUnits({ data: { jobId, unitIds: picked } }),
     onSuccess: (next) => {
@@ -29,15 +33,19 @@ export function TicketUnitsPicker({ jobId }: { jobId: number }) {
   });
   const d = q.data;
   if (!d) return null;
-  const changed = [...picked].sort().join() !== d.linked.map((u) => u.id).sort().join();
+  const changed = idsKey(picked) !== idsKey(d.linked.map((u) => u.id));
+  // Machines it named that have moved to another account since: listed so they can stay or be unticked.
+  const moved = d.linked.filter((u) => u.elsewhere);
+  const choices = [...d.options, ...moved.filter((m) => !d.options.some((o) => o.id === m.id))];
   return (
     <section className="border-b border-border p-5" data-testid="ticket-units">
       <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Machines On This Ticket</h3>
-      {d.options.length ? (
+      {d.hidden ? <p className="mt-1 text-xs text-muted-foreground">{d.hidden} Its machines are named there.</p> : null}
+      {choices.length ? (
         <>
           <p className="mt-1 text-xs text-muted-foreground">Tick the machines this visit was for. Each one lists this ticket in its Service History.</p>
           <ul className="mt-3 space-y-1.5">
-            {d.options.map((u) => (
+            {choices.map((u) => (
               <li key={u.id}>
                 <label className="flex items-center gap-2 text-sm">
                   <input
@@ -49,6 +57,7 @@ export function TicketUnitsPicker({ jobId }: { jobId: number }) {
                     data-testid={`ticket-unit-${u.id}`}
                   />
                   {unitText(u)}
+                  {u.elsewhere ? <span className="text-xs text-warning">· now on {u.elsewhere}</span> : null}
                 </label>
               </li>
             ))}
@@ -59,7 +68,7 @@ export function TicketUnitsPicker({ jobId }: { jobId: number }) {
             </Button>
           ) : null}
         </>
-      ) : (
+      ) : d.hidden ? null : (
         <p className="mt-1 text-xs text-muted-foreground">
           {d.customer ? `${d.customer} has no machines on its Equipment list yet.` : "This ticket has no account, so no machines to name."}
         </p>
@@ -89,6 +98,7 @@ export function UnitServiceHistory({ unitId }: { unitId: number }) {
                 {" · "}
                 {v.kind === "tlc" ? "TLC" : "Service"} · {v.status ?? "—"} · {v.completed ?? v.received ?? "no date"}
               </span>
+              {v.mergedInstall ? <span className="text-xs text-muted-foreground"> · merged into install #{v.mergedInstall}</span> : null}
               {v.workDone || v.issue ? <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{v.workDone || v.issue}</span> : null}
             </li>
           ))}

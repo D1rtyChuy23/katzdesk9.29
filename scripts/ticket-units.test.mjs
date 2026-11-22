@@ -111,3 +111,57 @@ test("the ticket's Equipment tab has the picker; the unit window has Service His
   assert.match(src("src/components/desk/job-sheet.tsx"), /<TicketUnitsPicker jobId=\{j\.id\}/);
   assert.match(src("src/components/desk/account-unit-form.tsx"), /<UnitServiceHistory unitId=\{unit\.id\} \/>/);
 });
+
+test("review: a machine that moved to another account keeps the ticket; the picker lists it so it can be unticked, and other saves aren't blocked", async () => {
+  const sql = await fresh();
+  const a = await unit(sql, "Alpha Cafe", "Zz Brewer", "SN-1");
+  const b = await unit(sql, "Alpha Cafe", "Zz Grinder", "SN-2");
+  const job = await ticket(sql, "Alpha Cafe");
+  await T.setTicketUnitsFor(sql, { jobId: job, unitIds: [a] }, "u-owner");
+  await sql.query("update account_equipment set customer = 'Beta Bakery' where id = $1", [a]);
+  let v = await T.ticketUnitsFor(sql, job, "u-owner");
+  assert.deepEqual(v.linked.map((u) => [u.id, u.elsewhere]), [[a, "Beta Bakery"]]);
+  v = await T.setTicketUnitsFor(sql, { jobId: job, unitIds: [a, b] }, "u-owner");
+  assert.deepEqual(v.linked.map((u) => u.id).sort(), [a, b].sort(), "keeping the moved one while adding another is fine");
+  assert.deepEqual((await T.unitServiceHistoryFor(sql, a, "u-owner")).map((x) => x.jobId), [job], "its history is the machine's");
+  await A.updateJobFor(sql, { id: job, customer: "Beta Bakery" }, "u-owner");
+  assert.deepEqual((await T.ticketUnitsFor(sql, job, "u-owner")).linked.map((u) => u.id), [a], "the move drops Alpha's grinder only");
+});
+
+test("review: merging a ticket into another moves its machines to the keeper", async () => {
+  const sql = await fresh();
+  const u1 = await unit(sql, "Alpha Cafe", "Zz Brewer", "SN-1");
+  const u2 = await unit(sql, "Alpha Cafe", "Zz Grinder", "SN-2");
+  const W = await import("../src/lib/ops/wo-duplicates.ts");
+  const keeper = await ticket(sql, "Alpha Cafe");
+  const extra = await ticket(sql, "Alpha Cafe");
+  await T.setTicketUnitsFor(sql, { jobId: keeper, unitIds: [u1] }, "u-owner");
+  await T.setTicketUnitsFor(sql, { jobId: extra, unitIds: [u1, u2] }, "u-owner");
+  const r = await W.mergeServiceJobs(sql, keeper, extra, "chuy");
+  assert.ok(!r?.refused, JSON.stringify(r));
+  assert.deepEqual((await sql.query("select job_id, account_equipment_id from ticket_units order by account_equipment_id")).map((x) => [x.job_id, x.account_equipment_id]), [
+    [keeper, u1],
+    [keeper, u2],
+  ]);
+  await assert.rejects(T.setTicketUnitsFor(sql, { jobId: extra, unitIds: [u1] }, "u-owner"), /merged into another ticket/);
+  assert.equal((await T.ticketUnitsFor(sql, extra, "u-owner")).canEdit, false);
+});
+
+test("review: Put back doesn't re-link a ticket that moved off the account meanwhile", async () => {
+  const sql = await fresh();
+  const u = await unit(sql, "Alpha Cafe", "Zz Brewer", "SN-1");
+  const job = await ticket(sql, "Alpha Cafe");
+  await T.setTicketUnitsFor(sql, { jobId: job, unitIds: [u] }, "u-owner");
+  await E.removeEquipmentUnit(sql, u, { userId: "u-owner", name: "chuy" });
+  await sql.query("update service_jobs set customer = 'Beta Bakery' where id = $1", [job]);
+  const retired = (await sql.query("select id from account_equipment_retired where unit_id = $1", [u]))[0].id;
+  assert.equal((await RET.listRetiredUnits(sql, "Alpha Cafe"))[0].records, 1, "the retired list counts the ticket link");
+  await RET.restoreRetiredUnit(sql, Number(retired));
+  assert.equal((await sql.query("select count(*)::int as n from ticket_units"))[0].n, 0);
+});
+
+test("review: the install prune keeps a unit a ticket names; the Corrigo import drops links off the old account", () => {
+  assert.match(src("src/lib/ops/inspection-api.ts"), /and not exists \(select 1 from ticket_units t where t\.account_equipment_id = a\.id\)/);
+  assert.match(src("src/lib/ops/corrigo-import.ts"), /if \(saved\) await dropOffAccountTicketUnits\(sql, jobId, cur\[0\]\.customer\);/);
+  assert.match(src("src/lib/ops/api.ts"), /await dropOffAccountTicketUnits\(sql, data\.id, cur\[0\]\.customer\);/);
+});

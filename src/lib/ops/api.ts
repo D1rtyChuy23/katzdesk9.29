@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment -- legacy file, typed at its call sites */
 // @ts-nocheck
+import { dropOffAccountTicketUnits } from "@/lib/ops/ticket-units";
 import { isAdminAccount } from "@/lib/ops/admin-role";
 import { nextCallId } from "@/lib/ops/call-id";
 import { createServerFn } from "@tanstack/react-start";
@@ -997,9 +998,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 	}
 	if (String(next.customer ?? "").trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase()) {
 		// Moved to another account (11/21): a machine it named on the old one isn't its machine any more.
-		await sql`delete from ticket_units t using account_equipment a
-		           where t.job_id = ${data.id} and a.id = t.account_equipment_id
-		             and lower(btrim(a.customer)) <> lower(btrim(${next.customer ?? ""}))`;
+		await dropOffAccountTicketUnits(sql, data.id, cur[0].customer);
 	}
 	if (data.status && data.status !== cur[0].status) await logActivity(sql, userId, cur[0].kind, data.id, "status", `${cur[0].status} → ${data.status}`);
 	const extra = summarize([
