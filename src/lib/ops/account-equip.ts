@@ -579,6 +579,12 @@ export function sameEquipLabel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
 
+/** The same name as written, ignoring case and spacing only: "#1" and "#2" are two names (11/23). */
+const sameFileName = (a: string, b: string) => {
+  const t = (x: string) => String(x ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+  return !!t(a) && t(a) === t(b);
+};
+
 export function matchExistingUnit(opts: {
   customer: string;
   catalogModel: string;
@@ -601,12 +607,15 @@ export function matchExistingUnit(opts: {
     );
     if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-serial" };
     // A unit of this model with no serial yet takes it (the one with this name first); adding made two of one machine.
+    // A unit added earlier in the same import (a negative id) takes it only from a row with its own name: the file
+    // listed them as two machines (11/23).
     const blank = opts.existing.filter(
       (e) =>
         normalizeCustomerKey(e.customer) === customerKey &&
         sameCatalogModel(e.catalogModel, opts.catalogModel) &&
         !serialKey(e.serial) &&
-        !e.lockedBy,
+        !e.lockedBy &&
+        (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
     );
     const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
     if (fill) return { action: "update", existingId: fill.id, foreignAccount: null, matchKind: "fill-blank" };

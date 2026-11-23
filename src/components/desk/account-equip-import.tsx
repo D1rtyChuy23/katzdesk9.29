@@ -157,6 +157,16 @@ function decisionFor(p: EquipPairing): PairDecision {
   return { confirmed: p.status === "matched" && !p.needsConfirm, catalogModel: p.catalogModel ?? "", addCatalog: false };
 }
 
+/**
+ * A row as the save will take it, given the choices on rows before it (11/23): an add that the preview showed because
+ * an earlier row fills its serial-less unit fills that unit after all when the earlier row is added on its own.
+ */
+export function effectiveRow(row: EquipPreviewRow, drafts: Record<string, RowDraft | undefined>): EquipPreviewRow {
+  const by = row.fillBlankIf;
+  if (!by || !drafts[by.byKey]?.addInstead) return row;
+  return { ...row, action: "update", existingId: by.id, fillBlank: { id: by.id, name: by.name } };
+}
+
 function draftFor(row: EquipPreviewRow, pairConfirmed = true): RowDraft {
   const ready = (row.action === "add" || row.action === "update") && pairConfirmed && !row.holdReasons?.length;
   return {
@@ -279,11 +289,13 @@ function PreviewBody({
   }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
-  const selectedAdds = preview.rows.filter((r) => {
+  const selectedAdds = preview.rows.filter((row) => {
+    const r = effectiveRow(row, drafts);
     const d = drafts[r.key];
     return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
   }).length;
-  const selectedUpdates = preview.rows.filter((r) => {
+  const selectedUpdates = preview.rows.filter((row) => {
+    const r = effectiveRow(row, drafts);
     const d = drafts[r.key];
     return d?.selected && rowReady(r, d) && r.action === "update" && !(d.addInstead && addInsteadOffer(r, d).offer);
   }).length;
@@ -350,7 +362,7 @@ function PreviewBody({
           reviewReasons: [],
           action: row.action === "update" ? ("update" as const) : ("add" as const),
           // The server adds it as its own unit only if it still finds a serial-less unit to fill (11/23).
-          addInstead: !!d.addInstead && addInsteadOffer(row, d).offer,
+          addInstead: !!d.addInstead && addInsteadOffer(effectiveRow(row, drafts), d).offer,
         },
       ];
     });
@@ -449,7 +461,9 @@ function PreviewBody({
             </tr>
           </thead>
           <tbody className="max-sm:block">
-            {pageRows.map((r) => {
+            {pageRows.map((shown) => {
+              // As the save will take it, given the rows before it (11/23).
+              const r = effectiveRow(shown, drafts);
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
               const needsReview = !ready;
@@ -599,6 +613,11 @@ function PreviewBody({
                       {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : asNew ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
+                    {shown.fillBlankIf && r === shown && !needsReview ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {shown.fillBlankIf.name || "A unit with no serial"} is filled by an earlier row; if that row is added on its own, this one fills it.
+                      </span>
+                    ) : null}
                     {offer.offer && !needsReview ? (
                       <label className="mt-1 flex items-start gap-1.5 text-[11px]">
                         <input

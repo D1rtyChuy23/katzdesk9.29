@@ -84,6 +84,11 @@ export type EquipPreviewRow = {
   fillBlank?: { id: number; name: string } | null;
   /** Add the row as its own unit instead of filling fillBlank (off by default). Only counts on a fill-blank row. */
   addInstead?: boolean;
+  /**
+   * An add that would fill this serial-less unit if the earlier row byKey, which fills it, were added on its own
+   * instead (11/23): the preview follows the file in order, as the save does.
+   */
+  fillBlankIf?: { byKey: string; id: number; name: string } | null;
   /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
@@ -784,6 +789,54 @@ export function buildPreviewRow(
   };
 }
 
+/**
+ * The preview's rows in file order, the way the save takes them (11/23): each row is matched against the units as the
+ * rows before it leave them. A serial-less unit one row fills isn't offered to the next; each add is there for the rows
+ * after it. A row the save may not take (held for review, a site, or a locked unit's Part # only) claims nothing.
+ */
+export function previewRowsInFileOrder(
+  records: Parameters<typeof buildPreviewRow>[0][],
+  accounts: Parameters<typeof buildPreviewRow>[2],
+  catalog: string[],
+  existing: ExistingUnit[],
+  fillParts: Map<string, ImportPart | null> = new Map(),
+): EquipPreviewRow[] {
+  let working = existing.map((e) => ({ ...e }));
+  const original = new Map(existing.map((e) => [e.id, e]));
+  // The serial-less unit a fill-blank row took, and which row: a later row is told it fills it if that row is added instead.
+  const claims = new Map<number, string>();
+  let temp = 0;
+  return records.map((rec, i) => {
+    const row = buildPreviewRow(rec, i, accounts, catalog, working, fillParts);
+    if (row.action === "add" && row.serial && row.customer && row.catalogModel && claims.size) {
+      const restored = working.map((e) => (claims.has(e.id) ? { ...e, ...original.get(e.id)! } : e));
+      const alt = matchExistingUnit({
+        customer: row.customer,
+        catalogModel: row.catalogModel,
+        equipmentName: rec.equipmentName.trim() || rec.model.trim() || row.catalogModel,
+        serial: row.serial,
+        existing: restored,
+      });
+      const byKey = alt.matchKind === "fill-blank" && alt.existingId != null ? claims.get(alt.existingId) : undefined;
+      const blank = byKey ? original.get(alt.existingId!) : undefined;
+      if (byKey && blank) row.fillBlankIf = { byKey, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
+    }
+    const takes = (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel;
+    if (takes) {
+      const key = serialKey(row.serial) || null;
+      const name = row.equipmentName || row.catalogModel!;
+      if (row.action === "update" && row.existingId != null) {
+        if (row.fillBlank) claims.set(row.existingId, row.key);
+        working = working.map((e) => (e.id === row.existingId ? { ...e, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key } : e));
+      } else {
+        temp -= 1;
+        working.push({ id: temp, customer: row.customer!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key });
+      }
+    }
+    return row;
+  });
+}
+
 const fileInput = z.object({
   filename: z.string(),
   base64: z.string().min(8),
@@ -804,7 +857,7 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
       loadParts(sql),
       loadFillParts(sql),
     ]);
-    const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing, fillParts));
+    const rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts);
     const pairings = buildPairings(rows, parts, catalog);
     const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
@@ -844,6 +897,7 @@ const applyRow = z.object({
   holdReasons: z.array(z.string()).optional(),
   lockedNote: z.string().nullable().optional(),
   fillBlank: z.object({ id: z.number(), name: z.string() }).nullable().optional(),
+  fillBlankIf: z.object({ byKey: z.string(), id: z.number(), name: z.string() }).nullable().optional(),
   // Add the row as its own unit rather than filling a serial-less one (11/23). Counts only on a fill-blank match.
   addInstead: z.boolean().optional(),
   action: z.enum(["add", "update", "review", "skip"]),
