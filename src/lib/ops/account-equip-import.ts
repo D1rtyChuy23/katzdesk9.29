@@ -90,6 +90,8 @@ export type EquipPreviewRow = {
    * instead (11/23): the preview follows the file in order, as the save does.
    */
   fillBlankIf?: { byKey: string; id: number; name: string } | null;
+  /** The row whose add this row folds into (an update of a unit added earlier in the same file), 11/23. */
+  foldsInto?: string | null;
   /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
@@ -801,6 +803,8 @@ export function previewRowsInFileOrder(
   catalog: string[],
   existing: ExistingUnit[],
   fillParts: Map<string, ImportPart | null> = new Map(),
+  /** Model pairings still to confirm: their rows start unticked, so they claim nothing (review, 11/23). */
+  heldPairs: Set<string> = new Set(),
 ): EquipPreviewRow[] {
   // One working list, changed in place (review, 11/23: a copy per row made a big file slow).
   const working = existing.map((e) => ({ ...e }));
@@ -808,13 +812,17 @@ export function previewRowsInFileOrder(
   const original = new Map(existing.map((e) => [e.id, e]));
   // Serial-less units a fill-blank row took, by account: a later row that wanted one is told so.
   const claims = new Map<number, { key: string; account: string }>();
+  const claimedBy = new Map<string, number[]>();
+  const tempOwner = new Map<number, string>();
   let temp = 0;
   return records.map((rec, i) => {
     const row = buildPreviewRow(rec, i, accounts, catalog, working, fillParts);
     const account = normalizeCustomerKey(row.customer ?? "");
-    if (row.action === "add" && row.serial && row.customer && row.catalogModel && [...claims.values()].some((c) => c.account === account)) {
-      // Only this account's units, with the ones taken put back as they were.
-      const mine = working.filter((e) => normalizeCustomerKey(e.customer) === account).map((e) => (claims.has(e.id) ? { ...e, ...original.get(e.id)! } : e));
+    const taken = claimedBy.get(account);
+    if (row.action === "add" && row.serial && row.customer && row.catalogModel && taken?.length) {
+      // The row is an add, so no unit on the account matched it as it stands: only the taken units, as they were,
+      // can (review, 11/23: matching the whole account again was slow on a big account).
+      const mine = taken.map((id) => original.get(id)!);
       const alt = matchExistingUnit({
         customer: row.customer,
         catalogModel: row.catalogModel,
@@ -826,16 +834,22 @@ export function previewRowsInFileOrder(
       const blank = by ? original.get(alt.existingId!) : undefined;
       if (by && blank) row.fillBlankIf = { byKey: by.key, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
     }
-    const takes = (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel;
+    if (row.action === "update" && row.existingId != null && row.existingId < 0) row.foldsInto = tempOwner.get(row.existingId) ?? null;
+    const takes =
+      (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel && !heldPairs.has(row.pairKey);
     if (takes) {
       const key = serialKey(row.serial) || null;
       const name = row.equipmentName || row.catalogModel!;
       if (row.action === "update" && row.existingId != null) {
-        if (row.fillBlank) claims.set(row.existingId, { key: row.key, account });
+        if (row.fillBlank && row.existingId > 0) {
+          claims.set(row.existingId, { key: row.key, account });
+          claimedBy.set(account, [...(claimedBy.get(account) ?? []), row.existingId]);
+        }
         const idx = at.get(row.existingId);
         if (idx != null) working[idx] = { ...working[idx]!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key };
       } else {
         temp -= 1;
+        tempOwner.set(temp, row.key);
         at.set(temp, working.length);
         working.push({ id: temp, customer: row.customer!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key });
       }
@@ -864,9 +878,12 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
       loadParts(sql),
       loadFillParts(sql),
     ]);
-    const rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts);
+    let rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts);
     const pairings = buildPairings(rows, parts, catalog);
     const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
+    // Rows of a pairing still to confirm start unticked: walk the file again without them (review, 11/23). Pairings
+    // don't depend on the walk (models and Part #s only), so they stand.
+    if (toConfirm.size) rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts, toConfirm);
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
     return {
       addCount: rows.filter((r) => r.action === "add").length,

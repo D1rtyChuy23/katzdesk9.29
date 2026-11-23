@@ -16,20 +16,25 @@ export type OfferRow = {
   fillBlankIf?: { id: number; name: string } | null;
 };
 
+/** The row's account and model as the preview matched them (not changed on the screen). */
+export function asPreviewed(row: { customer: string | null; catalogModel: string | null }, draft: { customer: string; catalogModel: string }): boolean {
+  const same = (a: string | null, b: string) => (a ?? "").trim().toLowerCase() === b.trim().toLowerCase();
+  return same(row.customer, draft.customer) && same(row.catalogModel, draft.catalogModel);
+}
+
 export function addInsteadOffer(row: OfferRow, draft: { customer: string; catalogModel: string }): { offer: boolean; hint: { on: string; off: string } } {
   const none = { offer: false, hint: { on: "", off: "" } };
   if (!row.serial?.trim() || row.lockedNote || row.foreignAccount || row.action === "skip") return none;
-  const same = (a: string | null, b: string) => (a ?? "").trim().toLowerCase() === b.trim().toLowerCase();
-  const asPreviewed = same(row.customer, draft.customer) && same(row.catalogModel, draft.catalogModel);
-  if (row.fillBlank && asPreviewed) {
+  const previewed = asPreviewed(row, draft);
+  if (row.fillBlank && previewed) {
     const name = row.fillBlank.name || "the unit with no serial";
     return { offer: true, hint: { on: `Adds it on its own; ${name} stays as it is.`, off: `Otherwise its serial fills ${name}, which has none.` } };
   }
-  if (row.fillBlankIf && asPreviewed && row.action === "add") {
+  if (row.fillBlankIf && previewed && row.action === "add") {
     const name = row.fillBlankIf.name || "the unit with no serial";
     return { offer: true, hint: { on: `Adds it on its own, whatever the earlier row does; ${name} stays as it is.`, off: `If the earlier row doesn't take ${name}, this row's serial fills it.` } };
   }
-  if (asPreviewed && row.action !== "review") return none;
+  if (previewed && row.action !== "review") return none;
   const model = draft.catalogModel.trim() || "this model";
   const account = draft.customer.trim() || "the account";
   return {

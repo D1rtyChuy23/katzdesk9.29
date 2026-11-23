@@ -1,4 +1,4 @@
-import { addInsteadOffer } from "@/lib/ops/equip-import-offer";
+import { addInsteadOffer, asPreviewed } from "@/lib/ops/equip-import-offer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -157,9 +157,6 @@ function decisionFor(p: EquipPairing): PairDecision {
   return { confirmed: p.status === "matched" && !p.needsConfirm, catalogModel: p.catalogModel ?? "", addCatalog: false };
 }
 
-/** A row that folds into a unit an earlier row of the same file adds (11/23): part of that add, not an update. */
-const foldsIntoEarlierRow = (r: EquipPreviewRow) => r.action === "update" && (r.existingId ?? 0) < 0;
-
 function draftFor(row: EquipPreviewRow, pairConfirmed = true): RowDraft {
   const ready = (row.action === "add" || row.action === "update") && pairConfirmed && !row.holdReasons?.length;
   return {
@@ -282,15 +279,19 @@ function PreviewBody({
   }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
-  const selectedAdds = preview.rows.filter((r) => {
-    const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && !foldsIntoEarlierRow(r) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
-  }).length;
-  const selectedUpdates = preview.rows.filter((r) => {
-    const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action === "update" && !foldsIntoEarlierRow(r) && !(d.addInstead && addInsteadOffer(r, d).offer);
-  }).length;
-  const selectedCount = selectedAdds + selectedUpdates;
+  const rowByKey = new Map(preview.rows.map((r) => [r.key, r]));
+  const goes = (r: EquipPreviewRow | undefined) => {
+    const d = r ? drafts[r.key] : undefined;
+    return !!r && !!d?.selected && rowReady(r, d);
+  };
+  const asNewRow = (r: EquipPreviewRow) => !!drafts[r.key]?.addInstead && addInsteadOffer(r, drafts[r.key]!).offer;
+  /** A row that folds into the unit an earlier row of the file adds, while that row is going (11/23). */
+  const folds = (r: EquipPreviewRow) => !!r.foldsInto && goes(rowByKey.get(r.foldsInto)) && !asNewRow(r);
+  // Without its earlier row, a folding row is an add of its own (review, 11/23).
+  const selectedAdds = preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || !!r.foldsInto)).length;
+  const selectedUpdates = preview.rows.filter((r) => goes(r) && r.action === "update" && !r.foldsInto && !asNewRow(r)).length;
+  /** Every ticked row the save is sent, a folding one included: it gates Confirm and the unticked count. */
+  const selectedCount = preview.rows.filter((r) => goes(r)).length;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
   const heldNow = preview.rows.filter((r) => {
     if (r.action !== "add" && r.action !== "update") return false;
@@ -605,14 +606,16 @@ function PreviewBody({
                           ? "Fill Part # only"
                           : asNew
                             ? "Add new"
-                            : foldsIntoEarlierRow(r)
+                            : folds(r)
                               ? "Same unit as an earlier row"
-                              : r.action === "update"
+                              : r.foldsInto
+                                ? "Add new"
+                                : r.action === "update"
                                 ? "Update existing"
                                 : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
-                    {r.fillBlankIf && !needsReview ? (
+                    {r.fillBlankIf && !needsReview && asPreviewed(r, d) ? (
                       <span className="mt-0.5 block text-[11px] text-muted-foreground" data-testid="equip-fill-blank-if">
                         An earlier row fills {r.fillBlankIf.name || "a unit with no serial"}. If that row isn't imported as shown, this one may fill it.
                       </span>

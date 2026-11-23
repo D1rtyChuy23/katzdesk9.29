@@ -92,9 +92,12 @@ test("the screen notes a row that may fill an earlier row's unit, and labels a r
   assert.match(ui, /r\.fillBlankIf && !needsReview/);
   assert.doesNotMatch(ui, /effectiveRow/);
   assert.match(ui, /"Same unit as an earlier row"/);
-  assert.match(ui, /!foldsIntoEarlierRow\(r\) && !\(d\.addInstead/);
+  // A folding row counts as part of its earlier row's add only while that row goes; Confirm counts every ticked row.
+  assert.match(ui, /const folds = \(r: EquipPreviewRow\) => !!r\.foldsInto && goes\(rowByKey\.get\(r\.foldsInto\)\) && !asNewRow\(r\);/);
+  assert.match(ui, /const selectedCount = preview\.rows\.filter\(\(r\) => goes\(r\)\)\.length;/);
+  assert.match(ui, /r\.fillBlankIf && !needsReview && asPreviewed\(r, d\)/);
   const preview = src("src/lib/ops/account-equip-import.ts");
-  assert.match(preview, /const rows = previewRowsInFileOrder\(parsed\.records, accounts, catalog, existing, fillParts\);/);
+  assert.match(preview, /let rows = previewRowsInFileOrder\(parsed\.records, accounts, catalog, existing, fillParts\);/);
   assert.match(preview, /updateCount: rows\.filter\(\(r\) => r\.action === "update" && \(r\.existingId \?\? 0\) >= 0\)/);
 });
 
@@ -134,6 +137,8 @@ test("a row that folds into an earlier row of the file shows as an update of a t
   const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #2", null), rec("Zz Swift Grinder #2", "6803")], accounts, [G], []);
   assert.deepEqual(rows.map((r) => r.action), ["add", "update"]);
   assert.ok(rows[1].existingId < 0);
+  assert.equal(rows[1].foldsInto, "r0");
+  assert.equal(rows[0].foldsInto ?? null, null);
 });
 
 test("three rows and one serial-less unit: the first fills it, the next two are adds with the note", () => {
@@ -157,4 +162,32 @@ test("the save: the first row unticked, the next row with Add as new unit instea
   } finally {
     await pg.close();
   }
+});
+
+test("review: rows of a pairing still to confirm claim nothing, so the next row fills the unit as the save would", () => {
+  const recs = [{ ...rec("Zz Swift Grinder #1", "6803"), model: "Swift Grinder" }, rec("Zz Swift Grinder #3", "6805")];
+  const held = new Set([recs[0].model.toLowerCase().replace(/[^a-z0-9+]+/g, "")]);
+  const rows = IMP.previewRowsInFileOrder(recs, accounts, [G], [unitOf(1, "Zz Swift Grinder #2", null)], new Map(), held);
+  assert.equal(rows[1].action, "update");
+  assert.equal(rows[1].existingId, 1);
+  assert.equal(rows[1].fillBlankIf ?? null, null);
+  const fold = IMP.previewRowsInFileOrder([{ ...rec("Zz Swift Grinder #2", null), model: "Swift Grinder" }, rec("Zz Swift Grinder #2", "6803")], accounts, [G], [], new Map(), held);
+  assert.deepEqual(fold.map((r) => [r.action, r.foldsInto ?? null]), [["add", null], ["add", null]]);
+});
+
+test("review: the preview server function walks the file again without pairings still to confirm", () => {
+  const preview = src("src/lib/ops/account-equip-import.ts");
+  assert.match(preview, /if \(toConfirm\.size\) rows = previewRowsInFileOrder\(parsed\.records, accounts, catalog, existing, fillParts, toConfirm\);/);
+});
+
+test("review: a big account stays quick once one of its units is taken", () => {
+  const blank = unitOf(1, "Zz Swift Grinder #0", null);
+  const existing = [blank, ...Array.from({ length: 2999 }, (_, i) => unitOf(i + 2, `Zz Swift Grinder #${i + 1}`, `S${i}`))];
+  const recs = Array.from({ length: 600 }, (_, i) => rec(`Zz Swift Grinder #${5000 + i}`, `N${i}`));
+  const t = performance.now();
+  const rows = IMP.previewRowsInFileOrder(recs, accounts, [G], existing);
+  const s = (performance.now() - t) / 1000;
+  assert.equal(rows[0].fillBlank?.id, 1);
+  assert.equal(rows[1].fillBlankIf?.id, 1);
+  assert.ok(s < 12, `took ${s.toFixed(1)} s`);
 });
