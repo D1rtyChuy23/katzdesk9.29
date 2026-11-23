@@ -12,6 +12,7 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
 const AE = await import("../src/lib/ops/account-equip.ts");
+const OF = await import("../src/lib/ops/equip-import-offer.ts");
 const IMP = await import("../src/lib/ops/account-equip-import.ts");
 const src = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
@@ -106,8 +107,8 @@ test("the choice only counts on a fill-blank row: a same-serial match still upda
       rows: [applyRow({ key: "a", equipmentName: "Zz Swift Grinder #4", serial: "G-44", addInstead: true }), applyRow({ key: "b", serial: "F-1", addInstead: true })],
     });
     assert.deepEqual([r.added, r.updated, r.skipped], [0, 1, 1]);
-    assert.equal((await sql.query("select count(*)::int as n from account_equipment where serial_key = 'g-44'"))[0].n, 1);
-    assert.equal(Number(has) > 0, true);
+    const g44 = await sql.query("select id, equipment_name from account_equipment where serial_key = 'g-44'");
+    assert.deepEqual(g44.map((x) => [x.id, x.equipment_name]), [[has, "Zz Swift Grinder #4"]], "the same-serial unit was updated, no second one added");
   } finally {
     await pg.close();
   }
@@ -117,5 +118,69 @@ test("the preview screen has the checkbox and sends the choice", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
   assert.match(ui, /data-testid="equip-add-instead"/);
   assert.match(ui, /Add as new unit instead/);
-  assert.match(ui, /addInstead: !!d\.addInstead/);
+  assert.match(ui, /addInstead: !!d\.addInstead && addInsteadOffer\(row, d\)\.offer/);
+  assert.match(ui, /data-equip-status=\{needsReview \? "review" : asNew \? "add"/);
+});
+
+test("review: a row that needed review at preview (model picked on screen) can still be added as its own unit", async () => {
+  const { pg, sql, blank } = await db();
+  try {
+    // Previewed as review ("No catalog model"), so it went up as add, with the choice ticked once the model was picked.
+    const r = await IMP.applyAccountEquipImportFor(sql, { rows: [applyRow({ action: "add", addInstead: true })] });
+    assert.deepEqual([r.added, r.updated], [1, 0]);
+    assert.equal((await sql.query("select serial from account_equipment where id = $1", [blank]))[0].serial, null);
+    // Without the tick, it fills the blank unit, as before.
+    const { pg: pg2, sql: sql2, blank: blank2 } = await db();
+    try {
+      const r2 = await IMP.applyAccountEquipImportFor(sql2, { rows: [applyRow({ action: "add" })] });
+      assert.deepEqual([r2.added, r2.updated], [0, 1]);
+      assert.equal((await sql2.query("select serial from account_equipment where id = $1", [blank2]))[0].serial, "6803");
+    } finally {
+      await pg2.close();
+    }
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: two rows in one file: #1 added as its own unit, #3 fills the blank unit; and the other way round", async () => {
+  for (const tickFirst of [true, false]) {
+    const { pg, sql, blank } = await db();
+    try {
+      const rows = [
+        applyRow({ key: "a", equipmentName: "Zz Swift Grinder #1", serial: "6803", addInstead: tickFirst }),
+        applyRow({ key: "b", equipmentName: "Zz Swift Grinder #3", serial: "6805", addInstead: !tickFirst }),
+      ];
+      const r = await IMP.applyAccountEquipImportFor(sql, { rows });
+      assert.deepEqual([r.added, r.updated], [1, 1], String(tickFirst));
+      const filled = (await sql.query("select serial from account_equipment where id = $1", [blank]))[0].serial;
+      assert.equal(filled, tickFirst ? "6805" : "6803", "the unticked row fills the blank unit");
+      assert.equal((await sql.query("select count(*)::int as n from account_equipment"))[0].n, 2);
+    } finally {
+      await pg.close();
+    }
+  }
+});
+
+test("review: the offer rule: a fill-blank row as previewed names the unit; a review or edited row gets the general hint; others none", () => {
+  const draft = { customer: CAFE, catalogModel: GRINDER };
+  const base = { serial: "6803", customer: CAFE, catalogModel: GRINDER, action: "update", fillBlank: { id: 1, name: "Zz Swift Grinder #2" } };
+  assert.match(OF.addInsteadOffer(base, draft).hint.off, /fills Zz Swift Grinder #2/);
+  const review = OF.addInsteadOffer({ ...base, action: "review", fillBlank: null, catalogModel: null }, draft);
+  assert.equal(review.offer, true);
+  assert.match(review.hint.off, /If Zz Dining at Test Church S0319 has a Zz Swift Grinder with no serial/);
+  assert.equal(OF.addInsteadOffer({ ...base, fillBlank: null }, { ...draft, catalogModel: "Zz Other Grinder" }).offer, true, "model changed on screen");
+  assert.equal(OF.addInsteadOffer({ ...base, fillBlank: null }, draft).offer, false, "a same-serial or plain add row as previewed");
+  assert.equal(OF.addInsteadOffer({ ...base, serial: null }, draft).offer, false, "no serial, nothing to fill with");
+  assert.equal(OF.addInsteadOffer({ ...base, lockedNote: "Locked by chuy" }, draft).offer, false);
+  assert.equal(OF.addInsteadOffer({ ...base, foreignAccount: "Elsewhere" }, draft).offer, false);
+});
+
+test("review: a no-serial row matched by name never offers it", () => {
+  const accounts = [{ id: 1, name: CAFE, address: null }];
+  const existing = [unitOf(1, "Zz Swift Grinder #2", null)];
+  const rec = { customer: CAFE, equipmentName: "Zz Swift Grinder #2", model: GRINDER, serial: "", installDate: "", electrical: "", ownership: "", partNumber: "", condition: "", site: "" };
+  const row = IMP.buildPreviewRow(rec, 0, accounts, [GRINDER], existing);
+  assert.equal(row.action, "update");
+  assert.equal(row.fillBlank, null);
 });

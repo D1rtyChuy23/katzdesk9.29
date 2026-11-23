@@ -1,3 +1,4 @@
+import { addInsteadOffer } from "@/lib/ops/equip-import-offer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -280,11 +281,11 @@ function PreviewBody({
 
   const selectedAdds = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!r.fillBlank && !!d.addInstead));
+    return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
   }).length;
   const selectedUpdates = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action === "update" && !(r.fillBlank && d.addInstead);
+    return d?.selected && rowReady(r, d) && r.action === "update" && !(d.addInstead && addInsteadOffer(r, d).offer);
   }).length;
   const selectedCount = selectedAdds + selectedUpdates;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
@@ -349,7 +350,7 @@ function PreviewBody({
           reviewReasons: [],
           action: row.action === "update" ? ("update" as const) : ("add" as const),
           // The server adds it as its own unit only if it still finds a serial-less unit to fill (11/23).
-          addInstead: !!d.addInstead && !!row.fillBlank,
+          addInstead: !!d.addInstead && addInsteadOffer(row, d).offer,
         },
       ];
     });
@@ -452,12 +453,14 @@ function PreviewBody({
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
               const needsReview = !ready;
+              const offer = addInsteadOffer(r, d);
+              const asNew = ready && offer.offer && !!d.addInstead;
               // A locked unit's Part # fill takes the row as previewed: it can't be pointed at another account or model.
               const showPickers = !r.lockedNote && (needsReview || !!editing[r.key]);
               return (
                 <tr
                   key={r.key}
-                  data-equip-status={needsReview ? "review" : r.action === "update" ? "update" : "matched"}
+                  data-equip-status={needsReview ? "review" : asNew ? "add" : r.action === "update" ? "update" : "matched"}
                   className={`border-t border-border max-sm:grid max-sm:grid-cols-[1.5rem_minmax(0,1fr)_minmax(0,1fr)] max-sm:gap-x-2 max-sm:gap-y-2 max-sm:p-3 max-sm:first:border-t-0 ${needsReview ? "bg-warning/10" : ""}`}
                 >
                   <td className="px-3 py-2 align-top max-sm:row-span-6 max-sm:p-0">
@@ -593,10 +596,10 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
-                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : r.fillBlank && d.addInstead ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
+                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : asNew ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
-                    {r.fillBlank && !needsReview ? (
+                    {offer.offer && !needsReview ? (
                       <label className="mt-1 flex items-start gap-1.5 text-[11px]">
                         <input
                           type="checkbox"
@@ -608,9 +611,7 @@ function PreviewBody({
                         <span>
                           Add as new unit instead
                           <span className="block text-muted-foreground">
-                            {d.addInstead
-                              ? `Adds it on its own; ${r.fillBlank.name || "the unit with no serial"} stays as it is.`
-                              : `Otherwise its serial fills ${r.fillBlank.name || "the unit with no serial"}, which has none.`}
+                            {d.addInstead ? offer.hint.on : offer.hint.off}
                           </span>
                         </span>
                       </label>
