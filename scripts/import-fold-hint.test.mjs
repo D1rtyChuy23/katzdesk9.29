@@ -34,14 +34,16 @@ test("after the earlier row is unticked, the joining row reads the add wording, 
   const r = rows()[1];
   const o = addInsteadOffer(r, draft, { earlierRowGoes: false });
   assert.equal(o.offer, true);
-  assert.doesNotMatch(o.hint.off, /fills/);
-  assert.doesNotMatch(o.hint.on, /fills/);
-  assert.match(o.hint.off, /added on its own/);
+  assert.doesNotMatch(o.hint.off, /fills Zz Swift Grinder #5, which has none/);
+  assert.doesNotMatch(o.hint.on, /Zz Swift Grinder #5 stays/);
+  assert.match(o.hint.off, /isn't imported\. If Zz Dining S0319 has a Zz Swift Grinder with no serial, this row's serial fills it; otherwise it's added on its own\./);
+  assert.match(o.hint.on, /Adds this one on its own, even if/);
 });
 
 test("the screen passes the earlier row's tick to the hint", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
-  assert.match(ui, /const offer = addInsteadOffer\(r, d, \{ earlierRowGoes: r\.foldsInto \? goes\(rowByKey\.get\(r\.foldsInto\)\) : undefined \}\);/);
+  assert.match(ui, /const earlierGoes = earlier \? goes\(earlier\) && asPreviewed\(earlier, drafts\[earlier\.key\]!\) : undefined;/);
+  assert.match(ui, /const offer = addInsteadOffer\(r, d, \{ earlierRowGoes: earlierGoes \}\);/);
 });
 
 async function db() {
@@ -68,5 +70,19 @@ test("the save is the same as before: both rows give one unit with the serial; t
     } finally {
       await pg.close();
     }
+  }
+});
+
+test("review: on an account that already has a serial-less unit of the model, the save of the second row alone is unchanged (it fills that unit), and the hint doesn't promise an add", async () => {
+  const { pg, sql } = await db();
+  try {
+    await sql.query("insert into account_equipment (customer, catalog_model, equipment_name) values ($1, $2, 'Front Bar')", [CAFE, G]);
+    const r = await IMP.applyAccountEquipImportFor(sql, { rows: [applyRow("r1", "Zz Swift Grinder #5", "C-1")] });
+    assert.deepEqual([r.added, r.updated], [0, 1]);
+    const o = addInsteadOffer(rows()[1], draft, { earlierRowGoes: false });
+    assert.doesNotMatch(o.hint.off, /^The earlier row isn't imported, so/);
+    assert.match(o.hint.off, /fills it; otherwise/);
+  } finally {
+    await pg.close();
   }
 });
