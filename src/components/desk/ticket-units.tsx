@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/ops/ticket-units-api";
 
 const unitText = (u: TicketUnit) => [u.model || u.name, u.serial ? `S/N ${u.serial}` : "no serial"].filter(Boolean).join(" · ");
+const PAGE_SIZE = 100;
 const idsKey = (ids: number[]) => [...ids].sort((a, b) => a - b).join(",");
 
 /**
@@ -124,10 +125,17 @@ export function UnitServiceHistory({ unitId }: { unitId: number }) {
  */
 export function TicketUnitSuggestions() {
   const qc = useQueryClient();
+  // The account filter applies on Enter or Apply, not on every key (review, 11/22): each query reads every ticket.
+  const [typed, setTyped] = useState("");
   const [account, setAccount] = useState("");
-  const [shown, setShown] = useState(100);
-  const filters = { customer: account.trim() || null, limit: shown };
-  const q = useQuery({ queryKey: ["ticket-unit-suggestions", filters], queryFn: () => getTicketUnitSuggestions({ data: filters }) });
+  const [page, setPage] = useState(0);
+  const filters = { customer: account.trim() || null, limit: PAGE_SIZE, offset: page * PAGE_SIZE };
+  const q = useQuery({
+    queryKey: ["ticket-unit-suggestions", filters],
+    queryFn: () => getTicketUnitSuggestions({ data: filters }),
+    placeholderData: keepPreviousData,
+    retry: false,
+  });
   const done = () => {
     void qc.invalidateQueries({ queryKey: ["ticket-unit-suggestions"] });
     void qc.invalidateQueries({ queryKey: ["ticket-units"] });
@@ -137,7 +145,11 @@ export function TicketUnitSuggestions() {
     mutationFn: (pairs: { jobId: number; unitId: number }[]) => confirmTicketUnitSuggestions({ data: { pairs } }),
     onSuccess: (r) => {
       done();
-      toast.success(`${r.linked} linked${r.skipped ? ` · ${r.skipped} skipped: the machine or ticket changed since the list loaded` : ""}`);
+      toast.success(
+        [`${r.linked} linked`, r.alreadyLinked ? `${r.alreadyLinked} already linked` : null, r.skipped ? `${r.skipped} skipped: the machine or ticket changed since the list loaded` : null]
+          .filter(Boolean)
+          .join(" · "),
+      );
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not link"),
   });
@@ -150,7 +162,8 @@ export function TicketUnitSuggestions() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
   });
   const rows = q.data?.rows ?? [];
-  const clear = rows.filter((r) => r.others === 0);
+  // Confirm all: tickets that name one machine, by a serial that isn't all digits (a WO or a phone number can be).
+  const clear = rows.filter((r) => r.others === 0 && !r.numeric);
   // Warehouse doesn't edit tickets: no section for it.
   if (q.isError && q.error instanceof Error && /Warehouse/.test(q.error.message)) return null;
   const busy = confirm.isPending || dismiss.isPending;
@@ -158,20 +171,30 @@ export function TicketUnitSuggestions() {
     <section className="mt-10" data-testid="ticket-unit-suggestions">
       <h2 className="font-display text-xl font-medium tracking-tight">Tickets That Name A Machine</h2>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Older tickets whose equipment, issue or work done names one of the account's machines by serial (5 or more characters). Confirm adds the ticket to
-        that machine's Service History; Not this one hides the pair for good. A ticket that names more than one machine says so: check it first.
+        Older tickets whose equipment, issue or work done names one of the account's machines by serial, as a whole word (5 or more characters; 6 or
+        more if all digits). Confirm adds the ticket to that machine's Service History; Not this one hides the pair for good. A ticket that names more
+        than one machine, or an all-digit serial, says so: check it first.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <input
-          className="h-9 w-64 rounded-full border border-border bg-background px-3 text-sm"
-          placeholder="Account (exact name), or all"
-          value={account}
-          onChange={(e) => {
-            setAccount(e.target.value);
-            setShown(100);
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setAccount(typed);
+            setPage(0);
           }}
-          data-testid="ticket-unit-suggestions-account"
-        />
+        >
+          <input
+            className="h-9 w-64 rounded-full border border-border bg-background px-3 text-sm"
+            placeholder="Account (exact name), or all"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            data-testid="ticket-unit-suggestions-account"
+          />
+          <Button type="submit" size="sm" variant="outline">
+            Apply
+          </Button>
+        </form>
         <Button type="button" size="sm" disabled={busy || !clear.length} onClick={() => confirm.mutate(clear.map((r) => ({ jobId: r.jobId, unitId: r.unit.id })))} data-testid="ticket-unit-suggestions-confirm-all">
           Confirm {clear.length} shown that name one machine
         </Button>
@@ -192,6 +215,7 @@ export function TicketUnitSuggestions() {
                 </span>
                 <span>→ {unitText(r.unit)}</span>
                 {r.others ? <span className="text-xs text-warning">also names {r.others} other machine{r.others === 1 ? "" : "s"}</span> : null}
+                {r.numeric ? <span className="text-xs text-warning">all-digit serial: check it isn't a WO or phone number</span> : null}
               </div>
               <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.text}</p>
               <div className="mt-1.5 flex gap-2">
@@ -208,10 +232,18 @@ export function TicketUnitSuggestions() {
       ) : (
         <p className="mt-4 text-sm text-muted-foreground">No ticket names an unlinked machine{account.trim() ? " on that account" : ""}.</p>
       )}
-      {q.data && q.data.total > rows.length ? (
-        <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setShown((n) => n + 100)}>
-          Show More ({rows.length} of {q.data.total})
-        </Button>
+      {q.data && q.data.total > PAGE_SIZE ? (
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((n) => Math.max(0, n - 1))}>
+            Previous
+          </Button>
+          <span>
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, q.data.total)} of {q.data.total}
+          </span>
+          <Button type="button" size="sm" variant="outline" disabled={(page + 1) * PAGE_SIZE >= q.data.total} onClick={() => setPage((n) => n + 1)}>
+            Next
+          </Button>
+        </div>
       ) : null}
     </section>
   );

@@ -125,16 +125,20 @@ export type TicketUnitSuggestion = {
   unit: TicketUnit;
   /** How many other units this ticket's text also names: more than none, look closer. */
   others: number;
+  /** An all-digit serial: could be a WO or a phone number, so Confirm all leaves it for a look. */
+  numeric: boolean;
 };
 
-/** A serial this short matches too much text to suggest from. */
+/** A serial this short matches too much text to suggest from; an all-digit one needs more (a WO or a phone number). */
 export const SUGGEST_MIN_SERIAL = 5;
-
-const TICKET_TEXT = `lower(regexp_replace(coalesce(j.equipment, '') || ' ' || coalesce(j.issue, '') || ' ' || coalesce(j.work_done, ''), '[[:space:]#]', '', 'g'))`;
+export const SUGGEST_MIN_DIGITS = 6;
 
 /**
- * Pairs of a ticket and one of its account's units whose serial its equipment, issue or work done names, with no link
- * yet and not marked "Not this one". Service and TLC tickets on an account (not Walk-In, not merged away). Newest first.
+ * Pairs of a ticket and one of its account's units whose serial its equipment, issue or work done names as a whole word,
+ * with no link yet and not marked "Not this one". Service and TLC tickets on an account (not Walk-In, not merged away).
+ * Newest first. Each ticket's text is squeezed once and checked with position() (review, 11/22); the few that pass are
+ * checked for the serial as a whole word, as stored or as typed with its spaces, one field at a time: never part of a
+ * longer number or serial, and never across fields.
  */
 export async function ticketUnitSuggestionsFor(
   sql: Sql,
@@ -143,6 +147,7 @@ export async function ticketUnitSuggestionsFor(
 ): Promise<{ rows: TicketUnitSuggestion[]; total: number }> {
   if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't edit tickets.");
   const limit = Math.min(Math.max(f.limit ?? 100, 1), 500);
+  const offset = Math.max(f.offset ?? 0, 0);
   const rows = await sql.query<{
     job_id: number;
     call_id: string | null;
@@ -156,30 +161,55 @@ export async function ticketUnitSuggestionsFor(
     model: string | null;
     name: string | null;
     serial: string | null;
+    numeric: boolean;
     others: number;
     total: number;
   }>(
-    `with pairs as (
+    String.raw`with un as materialized (
+       select a.id, a.catalog_model as model, a.equipment_name as name, a.serial, a.serial_key, lower(btrim(a.customer)) as ckey,
+              a.serial_key ~ '^[0-9]+$' as numeric,
+              -- Whole word: the key as stored, or the serial as typed with its spaces; every other character escaped.
+              '(^|[^a-z0-9])(' || regexp_replace(a.serial_key, '([^a-z0-9])', '\\\1', 'g') || '|'
+                || regexp_replace(regexp_replace(lower(btrim(a.serial)), '[[:space:]]+', ' ', 'g'), '([^a-z0-9 ])', '\\\1', 'g') || ')($|[^a-z0-9])' as pattern
+         from account_equipment a
+        where length(coalesce(a.serial_key, '')) >= ${SUGGEST_MIN_SERIAL}
+          and (a.serial_key !~ '^[0-9]+$' or length(a.serial_key) >= ${SUGGEST_MIN_DIGITS})
+          and ($1::text is null or lower(btrim(a.customer)) = lower(btrim($1::text)))
+     ), tk as (
+       -- Each ticket's text squeezed once (offset 0 keeps it from being worked out again per unit).
        select j.id as job_id, j.call_id, j.kind, j.customer, coalesce(j.completed_at, j.received) as day, j.equipment, j.issue, j.work_done,
-              a.id, a.catalog_model as model, a.equipment_name as name, a.serial
+              lower(btrim(j.customer)) as ckey,
+              regexp_replace(lower(coalesce(j.equipment, '') || coalesce(j.issue, '') || coalesce(j.work_done, '')), '[[:space:]#]', '', 'g') as squeezed
          from service_jobs j
-         join account_equipment a on lower(btrim(a.customer)) = lower(btrim(j.customer))
         where j.kind in ('service', 'tlc')
           and j.merged_install_id is null and (j.duplicate_of is null or j.duplicate_of = j.id)
-          and lower(regexp_replace(btrim(coalesce(j.customer, '')), '[\s-]+', '', 'g')) <> 'walkin'
+          and regexp_replace(lower(coalesce(j.customer, '')), '[^a-z0-9]+', '', 'g') <> 'walkin'
           and ($1::text is null or lower(btrim(j.customer)) = lower(btrim($1::text)))
-          and length(coalesce(a.serial_key, '')) >= ${SUGGEST_MIN_SERIAL}
-          and position(a.serial_key in ${TICKET_TEXT}) > 0
-          and not exists (select 1 from ticket_units t where t.job_id = j.id and t.account_equipment_id = a.id)
-          and not exists (select 1 from ticket_unit_dismissals d where d.job_id = j.id and d.account_equipment_id = a.id)
+        offset 0
+     ), hits as (
+       -- The cheap check first, then the whole-word check on the few that pass: fields apart, # as a space.
+       select tk.*, un.id, un.model, un.name, un.serial, un.numeric, un.pattern
+         from tk join un on un.ckey = tk.ckey
+        where position(un.serial_key in tk.squeezed) > 0
+        offset 0
+     ), pairs as (
+       select h.* from hits h
+        where (regexp_replace(lower(replace(coalesce(h.equipment, ''), '#', ' ')), '[[:space:]]+', ' ', 'g') ~ h.pattern
+            or regexp_replace(lower(replace(coalesce(h.issue, ''), '#', ' ')), '[[:space:]]+', ' ', 'g') ~ h.pattern
+            or regexp_replace(lower(replace(coalesce(h.work_done, ''), '#', ' ')), '[[:space:]]+', ' ', 'g') ~ h.pattern)
+          and not exists (select 1 from ticket_units t where t.job_id = h.job_id and t.account_equipment_id = h.id)
+          and not exists (select 1 from ticket_unit_dismissals d where d.job_id = h.job_id and d.account_equipment_id = h.id)
+     ), counted as (
+       select p.*, (count(*) over (partition by p.job_id) - 1)::int as others, (count(*) over ())::int as total from pairs p
      )
-     select p.*, to_char(p.day, 'YYYY-MM-DD') as day, (count(*) over (partition by p.job_id) - 1)::int as others, (count(*) over ())::int as total
-       from pairs p
-      order by p.day desc nulls last, p.job_id desc, p.model, p.id
+     select c.job_id, c.call_id, c.kind, c.customer, to_char(c.day, 'YYYY-MM-DD') as day, c.equipment, c.issue, c.work_done,
+            c.id, c.model, c.name, c.serial, c.numeric, c.others, c.total
+       from counted c
+      order by c.day desc nulls last, c.job_id desc, c.model, c.id
       limit $2 offset $3`,
-    [f.customer?.trim() || null, limit, Math.max(f.offset ?? 0, 0)],
+    [f.customer?.trim() || null, limit, offset],
   );
-  const total = rows[0]?.total ?? (f.offset ? Number((await ticketUnitSuggestionsFor(sql, { ...f, offset: 0, limit: 1 }, userId)).total) : 0);
+  const total = rows[0]?.total ?? (offset ? (await ticketUnitSuggestionsFor(sql, { ...f, offset: 0, limit: 1 }, userId)).total : 0);
   return {
     total,
     rows: rows.map((r) => ({
@@ -191,16 +221,28 @@ export async function ticketUnitSuggestionsFor(
       text: [r.equipment, r.issue, r.work_done].filter((x) => x && x.trim()).join(" · ").slice(0, 240),
       unit: toUnit({ id: r.id, model: r.model, name: r.name, serial: r.serial, customer: r.customer }),
       others: Number(r.others),
+      numeric: r.numeric === true,
     })),
   };
 }
 
 type Pairs = { pairs: { jobId: number; unitId: number }[] };
 
-/** Link the confirmed pairs. One whose unit isn't on the ticket's account (any more), or whose ticket was merged away, is skipped. */
-export async function confirmTicketUnitSuggestionsFor(sql: Sql, data: Pairs, userId: string): Promise<{ linked: number; skipped: number }> {
+/**
+ * Link the confirmed pairs. One whose unit isn't on the ticket's account (any more), whose ticket was merged away or is a
+ * Walk-In, is skipped; one someone linked meanwhile is counted apart.
+ */
+export async function confirmTicketUnitSuggestionsFor(sql: Sql, data: Pairs, userId: string): Promise<{ linked: number; alreadyLinked: number; skipped: number }> {
   if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't edit tickets.");
   const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username ?? null;
+  const jobs = data.pairs.map((p) => p.jobId);
+  const units = data.pairs.map((p) => p.unitId);
+  const already = (
+    await sql.query<{ n: number }>(
+      "select count(*)::int as n from unnest($1::int[], $2::int[]) as p(job_id, unit_id) where exists (select 1 from ticket_units t where t.job_id = p.job_id and t.account_equipment_id = p.unit_id)",
+      [jobs, units],
+    )
+  )[0]?.n ?? 0;
   const done = await sql.query<{ job_id: number }>(
     `insert into ticket_units (job_id, account_equipment_id, linked_by)
      select p.job_id, p.unit_id, $3
@@ -208,12 +250,13 @@ export async function confirmTicketUnitSuggestionsFor(sql: Sql, data: Pairs, use
        join service_jobs j on j.id = p.job_id
        join account_equipment a on a.id = p.unit_id
       where lower(btrim(a.customer)) = lower(btrim(j.customer))
+        and regexp_replace(lower(coalesce(j.customer, '')), '[^a-z0-9]+', '', 'g') <> 'walkin'
         and j.merged_install_id is null and (j.duplicate_of is null or j.duplicate_of = j.id)
      on conflict do nothing
      returning job_id`,
-    [data.pairs.map((p) => p.jobId), data.pairs.map((p) => p.unitId), who],
+    [jobs, units, who],
   );
-  return { linked: done.length, skipped: data.pairs.length - done.length };
+  return { linked: done.length, alreadyLinked: Number(already), skipped: data.pairs.length - done.length - Number(already) };
 }
 
 /** "Not this one": the pairs aren't suggested again. */

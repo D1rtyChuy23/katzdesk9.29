@@ -26,6 +26,7 @@ async function fresh() {
     `insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values
        ('u-owner', 'chuy', true, true, 'admin'), ('u-desk', 'dana', true, false, 'service'), ('u-wh', 'wes', true, false, 'warehouse')`,
   );
+  await pg.query("insert into directory_customers (name) values ('Alpha Cafe'), ('Beta Bakery')");
   const query = async (text, params) => (await pg.query(text, params)).rows;
   return Object.assign(async (strings, ...values) => query(strings.reduce((a, s, i) => `${a}$${i}${s}`), values), { query });
 }
@@ -117,6 +118,7 @@ test("the list can be narrowed to one account and pages", async () => {
   for (let i = 0; i < 3; i++) await ticket(sql, "Alpha Cafe", "ZZB12345");
   await ticket(sql, "Beta Bakery", "ZZB99999");
   const alpha = await T.ticketUnitSuggestionsFor(sql, { customer: "alpha cafe", limit: 2 }, "u-desk");
+  assert.ok(alpha.rows.every((r) => r.customer === "Alpha Cafe"));
   assert.deepEqual([alpha.rows.length, alpha.total], [2, 3]);
   const next = await T.ticketUnitSuggestionsFor(sql, { customer: "Alpha Cafe", limit: 2, offset: 2 }, "u-desk");
   assert.equal(next.rows.length, 1);
@@ -124,4 +126,58 @@ test("the list can be narrowed to one account and pages", async () => {
 
 test("Equipment Mismatches has the section", () => {
   assert.match(src("src/routes/_app/unit-mismatches.tsx"), /<TicketUnitSuggestions \/>/);
+});
+
+test("review: a serial matches only as a whole word: not inside a WO, a phone number, a longer serial or across fields", async () => {
+  const sql = await fresh();
+  const short = await unit(sql, "Alpha Cafe", "Zz Brewer", "ZZB1234");
+  const long = await unit(sql, "Alpha Cafe", "Zz Brewer", "ZZB12345");
+  const num = await unit(sql, "Alpha Cafe", "Zz Grinder", "8123456");
+  const spaced = await unit(sql, "Alpha Cafe", "Zz Kettle", "KT 55501");
+  const j1 = await ticket(sql, "Alpha Cafe", "brewer ZZB12345 leaking");
+  await ticket(sql, "Alpha Cafe", "WO 98123456 callback 713-812-3456");
+  await ticket(sql, "Alpha Cafe", "ends ZZB12", { workDone: "345 replaced" });
+  const j4 = await ticket(sql, "Alpha Cafe", "kettle s/n: kt 55501, also #KT55501");
+  const j5 = await ticket(sql, "Alpha Cafe", "grinder 8123456 jam");
+  const s = await T.ticketUnitSuggestionsFor(sql, {}, "u-desk");
+  const got = s.rows.map((r) => [r.jobId, r.unit.id]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  assert.deepEqual(got, [[j1, long], [j4, spaced], [j5, num]].sort((a, b) => a[0] - b[0] || a[1] - b[1]));
+  assert.ok(!got.some((p) => p[1] === short), "ZZB1234 isn't in ZZB12345");
+  assert.equal(s.rows.find((r) => r.jobId === j5).numeric, true, "an all-digit serial is flagged, and kept out of Confirm all");
+});
+
+test("review: every spelling of Walk-In is left out, and Confirm refuses it", async () => {
+  const sql = await fresh();
+  const u = await unit(sql, "Walk - In", "Zz Brewer", "ZZB12345");
+  const job = await ticket(sql, "Walk - In", "ZZB12345");
+  assert.deepEqual((await T.ticketUnitSuggestionsFor(sql, {}, "u-desk")).rows, []);
+  assert.deepEqual(await T.confirmTicketUnitSuggestionsFor(sql, { pairs: [{ jobId: job, unitId: u }] }, "u-desk"), { linked: 0, alreadyLinked: 0, skipped: 1 });
+});
+
+test("review: pages by offset past 500; an already-linked pair isn't counted as skipped; Warehouse can't dismiss", async () => {
+  const sql = await fresh();
+  const u = await unit(sql, "Alpha Cafe", "Zz Brewer", "ZZB12345");
+  for (let i = 0; i < 4; i++) await ticket(sql, "Alpha Cafe", "ZZB12345");
+  const p1 = await T.ticketUnitSuggestionsFor(sql, { limit: 2, offset: 0 }, "u-desk");
+  const p2 = await T.ticketUnitSuggestionsFor(sql, { limit: 2, offset: 2 }, "u-desk");
+  const p3 = await T.ticketUnitSuggestionsFor(sql, { limit: 2, offset: 9 }, "u-desk");
+  assert.deepEqual([p1.rows.length, p2.rows.length, p3.rows.length, p3.total], [2, 2, 0, 4]);
+  assert.equal(new Set([...p1.rows, ...p2.rows].map((r) => r.jobId)).size, 4);
+  const pair = { jobId: p1.rows[0].jobId, unitId: u };
+  await T.confirmTicketUnitSuggestionsFor(sql, { pairs: [pair] }, "u-desk");
+  assert.deepEqual(await T.confirmTicketUnitSuggestionsFor(sql, { pairs: [pair] }, "u-owner"), { linked: 0, alreadyLinked: 1, skipped: 0 });
+  await assert.rejects(T.dismissTicketUnitSuggestionsFor(sql, { pairs: [pair] }, "u-wh"), /Warehouse/);
+});
+
+test("review: Not this one survives Remove and Put back", async () => {
+  const sql = await fresh();
+  const E = await import("../src/lib/ops/account-equip-import.ts");
+  const RET = await import("../src/lib/ops/account-equip-retire.ts");
+  const u = await unit(sql, "Alpha Cafe", "Zz Brewer", "ZZB12345");
+  const job = await ticket(sql, "Alpha Cafe", "ZZB12345");
+  await T.dismissTicketUnitSuggestionsFor(sql, { pairs: [{ jobId: job, unitId: u }] }, "u-desk");
+  await E.removeEquipmentUnit(sql, u, { userId: "u-owner", name: "chuy" });
+  const retired = (await sql.query("select id from account_equipment_retired where unit_id = $1", [u]))[0].id;
+  await RET.restoreRetiredUnit(sql, Number(retired));
+  assert.deepEqual((await T.ticketUnitSuggestionsFor(sql, {}, "u-desk")).rows, []);
 });
