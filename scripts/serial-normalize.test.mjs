@@ -29,7 +29,7 @@ test("a serial's key ignores case, spaces, # and invisible characters, the same 
 test("the Equipment List import updates the unit whose serial differs only in case or spacing; it never adds a second one", () => {
   const existing = [{ id: 7, customer: LOPEZ, catalogModel: MODEL, equipmentName: MODEL, serial: "Itcb154148", serialKey: "itcb154148", lockedBy: null }];
   for (const serial of ["ITCB154148", "itcb154148", "ITCB 154148", "ITCB​154148"]) {
-    assert.deepEqual(A.matchExistingUnit({ customer: LOPEZ, catalogModel: MODEL, equipmentName: MODEL, serial, existing }), { action: "update", existingId: 7, foreignAccount: null }, serial);
+    assert.deepEqual(A.matchExistingUnit({ customer: LOPEZ, catalogModel: MODEL, equipmentName: MODEL, serial, existing }), { action: "update", existingId: 7, foreignAccount: null, matchKind: "same-serial" }, serial);
   }
   // On another account: asked about, not added.
   assert.equal(A.matchExistingUnit({ customer: "ZZ Somewhere Else", catalogModel: MODEL, equipmentName: MODEL, serial: "ITCB154148", existing }).action, "review");

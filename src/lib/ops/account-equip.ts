@@ -47,6 +47,12 @@ export type UnitMatch = {
   action: "add" | "update" | "review";
   existingId: number | null;
   foreignAccount: string | null;
+  /**
+   * How an update found its unit (11/23): the same serial on this account; a unit of this model with no serial that the
+   * file's serial would fill ("fill-blank", which the import can add as its own unit instead); or, with no serial in
+   * the file, a serial-less unit of the same model and name. Null for add and review.
+   */
+  matchKind: "same-serial" | "fill-blank" | "same-name" | null;
 };
 
 const GENERIC_TOKENS = new Set([
@@ -587,13 +593,13 @@ export function matchExistingUnit(opts: {
       (e) => serialKey(e.serial) === key && normalizeCustomerKey(e.customer) !== customerKey,
     );
     if (foreign) {
-      return { action: "review", existingId: null, foreignAccount: foreign.customer };
+      return { action: "review", existingId: null, foreignAccount: foreign.customer, matchKind: null };
     }
     // The same serial on this account is that unit whatever model it was saved under.
     const same = opts.existing.find(
       (e) => serialKey(e.serial) === key && normalizeCustomerKey(e.customer) === customerKey,
     );
-    if (same) return { action: "update", existingId: same.id, foreignAccount: null };
+    if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-serial" };
     // A unit of this model with no serial yet takes it (the one with this name first); adding made two of one machine.
     const blank = opts.existing.filter(
       (e) =>
@@ -603,8 +609,8 @@ export function matchExistingUnit(opts: {
         !e.lockedBy,
     );
     const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
-    if (fill) return { action: "update", existingId: fill.id, foreignAccount: null };
-    return { action: "add", existingId: null, foreignAccount: null };
+    if (fill) return { action: "update", existingId: fill.id, foreignAccount: null, matchKind: "fill-blank" };
+    return { action: "add", existingId: null, foreignAccount: null, matchKind: null };
   }
   const same = opts.existing.find(
     (e) =>
@@ -613,8 +619,8 @@ export function matchExistingUnit(opts: {
       sameEquipLabel(e.equipmentName, opts.equipmentName) &&
       !serialKey(e.serial),
   );
-  if (same) return { action: "update", existingId: same.id, foreignAccount: null };
-  return { action: "add", existingId: null, foreignAccount: null };
+  if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-name" };
+  return { action: "add", existingId: null, foreignAccount: null, matchKind: null };
 }
 
 /** Add equipment needs an account to add to: not a blank customer, and not a walk-in. */

@@ -77,6 +77,13 @@ export type EquipPreviewRow = {
   pairKey: string;
   /** A locked unit whose blank Part # the file fills: the import writes that Part # and nothing else (11/20). */
   lockedNote?: string | null;
+  /**
+   * The serial-less unit this row's serial would fill (11/23), when that's how the update found it: the screen offers
+   * "Add as new unit instead". Null for a same-serial match and every other row.
+   */
+  fillBlank?: { id: number; name: string } | null;
+  /** Add the row as its own unit instead of filling fillBlank (off by default). Only counts on a fill-blank row. */
+  addInstead?: boolean;
   /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
@@ -694,6 +701,7 @@ export function buildPreviewRow(
   let existingId: number | null = null;
   let foreignAccount: string | null = null;
   let lockedNote: string | null = null;
+  let fillBlank: EquipPreviewRow["fillBlank"] = null;
   const customerName = account.account?.name ?? null;
   const catalogModel = catalogHit.catalogModel;
   if (customerName && catalogModel && !reviewReasons.length) {
@@ -708,6 +716,10 @@ export function buildPreviewRow(
     existingId = unit.existingId;
     foreignAccount = unit.foreignAccount;
     if (unit.foreignAccount) reviewReasons.push(`Serial already on ${unit.foreignAccount}`);
+    if (unit.matchKind === "fill-blank") {
+      const blank = existing.find((e) => e.id === unit.existingId);
+      fillBlank = blank ? { id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() } : null;
+    }
     const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
     const fill = lockedUnit && !unit.foreignAccount ? lockedPartFill(lockedUnit, { partNumber: rec.partNumber, catalogModel, serial }, fillParts) : null;
     if (lockedUnit && fill) {
@@ -762,6 +774,9 @@ export function buildPreviewRow(
     pairKey: pairKeyOf(rec.model.trim() || equipmentName),
     holdReasons,
     lockedNote: action === "review" ? null : lockedNote,
+    // A locked unit is never filled (blank units exclude locked ones), and a held row has no choice to make.
+    fillBlank: action === "update" && !lockedNote ? fillBlank : null,
+    addInstead: false,
     action,
     existingId,
     foreignAccount,
@@ -827,6 +842,10 @@ const applyRow = z.object({
   accountAddress: z.string().nullable().optional(),
   pairKey: z.string().optional(),
   holdReasons: z.array(z.string()).optional(),
+  lockedNote: z.string().nullable().optional(),
+  fillBlank: z.object({ id: z.number(), name: z.string() }).nullable().optional(),
+  // Add the row as its own unit rather than filling a serial-less one (11/23). Counts only on a fill-blank match.
+  addInstead: z.boolean().optional(),
   action: z.enum(["add", "update", "review", "skip"]),
   existingId: z.number().nullable().optional(),
   foreignAccount: z.string().nullable().optional(),
@@ -891,159 +910,163 @@ export function importInsertUnitsSql(count: number): string {
            values ${rows.join(",")}`;
 }
 
+/** The body of applyAccountEquipImport: the confirmed rows, matched again here against the units as they are now. */
+export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>): Promise<EquipApplyResult> {
+  const accounts = await loadAccounts(sql);
+  const accountByKey = new Map(accounts.map((a) => [a.name.toLowerCase(), a]));
+  const catalog = await loadCatalog(sql);
+  const catalogByKey = new Map(catalog.map((n) => [n.toLowerCase(), n]));
+  let existing = await loadExisting(sql);
+  const fillParts = await loadFillParts(sql);
+  let partsFilled = 0;
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+  let catalogAdded = 0;
+  const inserts: (string | number | null)[][] = [];
+
+  for (const row of data.rows) {
+    if (row.action === "skip" || row.action === "review") {
+      skipped += 1;
+      continue;
+    }
+    const customerName = (row.customer ?? "").trim();
+    if (!customerName || isWalkIn(customerName)) {
+      skipped += 1;
+      continue;
+    }
+    const account = accountByKey.get(customerName.toLowerCase());
+    if (!account) {
+      skipped += 1;
+      continue;
+    }
+    let catalogModel = (row.catalogModel ?? "").trim();
+    if (!catalogModel) {
+      skipped += 1;
+      continue;
+    }
+    const known = catalogByKey.get(catalogModel.toLowerCase());
+    if (known) {
+      catalogModel = known;
+    } else if (row.addCatalog) {
+      const made = await ensureCatalogModel(sql, catalogModel);
+      catalogModel = made.name;
+      catalogByKey.set(catalogModel.toLowerCase(), catalogModel);
+      if (made.created) catalogAdded += 1;
+    } else {
+      skipped += 1;
+      continue;
+    }
+
+    const serial = parseSerial(row.serial);
+    const equipmentName = row.equipmentName.trim() || catalogModel;
+    const unit = matchExistingUnit({
+      customer: account.name,
+      catalogModel,
+      equipmentName,
+      serial,
+      existing,
+    });
+    if (unit.foreignAccount) {
+      skipped += 1;
+      continue;
+    }
+    // A locked unit is left as it is, but for a blank Part # the file fills with a live part (Chuy, 11/20).
+    const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
+    if (lockedUnit) {
+      const fill = lockedPartFill(lockedUnit, { partNumber: row.partNumber, catalogModel, serial }, fillParts);
+      if (fill && (await sql.query(lockedPartFillSql(), [lockedUnit.id, fill])).length) {
+        existing = existing.map((e) => (e.id === lockedUnit.id ? { ...e, partNumber: fill } : e));
+        partsFilled += 1;
+      } else {
+        skipped += 1;
+      }
+      continue;
+    }
+    const ownership = OWNERSHIP_VALUES.includes(row.ownership as (typeof OWNERSHIP_VALUES)[number])
+      ? row.ownership
+      : mapOwnership(row.ownership).value;
+    const installDate = parseInstallDate(row.installDate);
+    const electrical = row.electrical?.trim() || null;
+    const key = serialKey(serial) || null;
+    const typedPart = cleanPartNumber(row.partNumber);
+    const partNumber = typedPart && typedPart.length <= PART_NUMBER_MAX ? typedPart : null;
+    const typedCondition = cleanCondition(row.condition);
+    const condition = typedCondition && typedCondition.length <= CONDITION_MAX ? typedCondition : null;
+
+    // "Add as new unit instead" (11/23): only where the update would fill a serial-less unit; the unit stays as it is.
+    const asNew = !!row.addInstead && unit.matchKind === "fill-blank";
+    if (unit.action === "update" && unit.existingId && !asNew) {
+      if (unit.existingId < 0) {
+        const idx = -unit.existingId - 1;
+        if (inserts[idx]) {
+          inserts[idx] = [
+            account.name,
+            catalogModel,
+            equipmentName,
+            serial,
+            key,
+            installDate,
+            electrical,
+            ownership,
+            partNumber ?? inserts[idx][8],
+            condition ?? inserts[idx][9],
+          ];
+          existing = existing.map((e) =>
+            e.id === unit.existingId
+              ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
+              : e,
+          );
+        }
+        continue;
+      }
+      await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
+      existing = existing.map((e) =>
+        e.id === unit.existingId
+          ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
+          : e,
+      );
+      updated += 1;
+      continue;
+    }
+
+    const tempId = -(inserts.length + 1);
+    inserts.push([
+      account.name,
+      catalogModel,
+      equipmentName,
+      serial,
+      key,
+      installDate,
+      electrical,
+      ownership,
+      partNumber,
+      condition,
+    ]);
+    existing.push({
+      id: tempId,
+      customer: account.name,
+      catalogModel,
+      equipmentName,
+      serial,
+      serialKey: key,
+    });
+    added += 1;
+  }
+
+  const chunk = 50;
+  for (let i = 0; i < inserts.length; i += chunk) {
+    const slice = inserts.slice(i, i + chunk);
+    await sql.query(importInsertUnitsSql(slice.length), slice.flat());
+  }
+
+  return { added, updated, skipped, catalogAdded, partsFilled };
+}
+
 export const applyAccountEquipImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof applyInput>) => applyInput.parse(d))
-  .handler(async ({ data }): Promise<EquipApplyResult> => {
-    const sql = await ready();
-    const accounts = await loadAccounts(sql);
-    const accountByKey = new Map(accounts.map((a) => [a.name.toLowerCase(), a]));
-    const catalog = await loadCatalog(sql);
-    const catalogByKey = new Map(catalog.map((n) => [n.toLowerCase(), n]));
-    let existing = await loadExisting(sql);
-    const fillParts = await loadFillParts(sql);
-    let partsFilled = 0;
-    let added = 0;
-    let updated = 0;
-    let skipped = 0;
-    let catalogAdded = 0;
-    const inserts: (string | number | null)[][] = [];
-
-    for (const row of data.rows) {
-      if (row.action === "skip" || row.action === "review") {
-        skipped += 1;
-        continue;
-      }
-      const customerName = (row.customer ?? "").trim();
-      if (!customerName || isWalkIn(customerName)) {
-        skipped += 1;
-        continue;
-      }
-      const account = accountByKey.get(customerName.toLowerCase());
-      if (!account) {
-        skipped += 1;
-        continue;
-      }
-      let catalogModel = (row.catalogModel ?? "").trim();
-      if (!catalogModel) {
-        skipped += 1;
-        continue;
-      }
-      const known = catalogByKey.get(catalogModel.toLowerCase());
-      if (known) {
-        catalogModel = known;
-      } else if (row.addCatalog) {
-        const made = await ensureCatalogModel(sql, catalogModel);
-        catalogModel = made.name;
-        catalogByKey.set(catalogModel.toLowerCase(), catalogModel);
-        if (made.created) catalogAdded += 1;
-      } else {
-        skipped += 1;
-        continue;
-      }
-
-      const serial = parseSerial(row.serial);
-      const equipmentName = row.equipmentName.trim() || catalogModel;
-      const unit = matchExistingUnit({
-        customer: account.name,
-        catalogModel,
-        equipmentName,
-        serial,
-        existing,
-      });
-      if (unit.foreignAccount) {
-        skipped += 1;
-        continue;
-      }
-      // A locked unit is left as it is, but for a blank Part # the file fills with a live part (Chuy, 11/20).
-      const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
-      if (lockedUnit) {
-        const fill = lockedPartFill(lockedUnit, { partNumber: row.partNumber, catalogModel, serial }, fillParts);
-        if (fill && (await sql.query(lockedPartFillSql(), [lockedUnit.id, fill])).length) {
-          existing = existing.map((e) => (e.id === lockedUnit.id ? { ...e, partNumber: fill } : e));
-          partsFilled += 1;
-        } else {
-          skipped += 1;
-        }
-        continue;
-      }
-      const ownership = OWNERSHIP_VALUES.includes(row.ownership as (typeof OWNERSHIP_VALUES)[number])
-        ? row.ownership
-        : mapOwnership(row.ownership).value;
-      const installDate = parseInstallDate(row.installDate);
-      const electrical = row.electrical?.trim() || null;
-      const key = serialKey(serial) || null;
-      const typedPart = cleanPartNumber(row.partNumber);
-      const partNumber = typedPart && typedPart.length <= PART_NUMBER_MAX ? typedPart : null;
-      const typedCondition = cleanCondition(row.condition);
-      const condition = typedCondition && typedCondition.length <= CONDITION_MAX ? typedCondition : null;
-
-      if (unit.action === "update" && unit.existingId) {
-        if (unit.existingId < 0) {
-          const idx = -unit.existingId - 1;
-          if (inserts[idx]) {
-            inserts[idx] = [
-              account.name,
-              catalogModel,
-              equipmentName,
-              serial,
-              key,
-              installDate,
-              electrical,
-              ownership,
-              partNumber ?? inserts[idx][8],
-              condition ?? inserts[idx][9],
-            ];
-            existing = existing.map((e) =>
-              e.id === unit.existingId
-                ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
-                : e,
-            );
-          }
-          continue;
-        }
-        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
-        existing = existing.map((e) =>
-          e.id === unit.existingId
-            ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
-            : e,
-        );
-        updated += 1;
-        continue;
-      }
-
-      const tempId = -(inserts.length + 1);
-      inserts.push([
-        account.name,
-        catalogModel,
-        equipmentName,
-        serial,
-        key,
-        installDate,
-        electrical,
-        ownership,
-        partNumber,
-        condition,
-      ]);
-      existing.push({
-        id: tempId,
-        customer: account.name,
-        catalogModel,
-        equipmentName,
-        serial,
-        serialKey: key,
-      });
-      added += 1;
-    }
-
-    const chunk = 50;
-    for (let i = 0; i < inserts.length; i += chunk) {
-      const slice = inserts.slice(i, i + chunk);
-      await sql.query(importInsertUnitsSql(slice.length), slice.flat());
-    }
-
-    return { added, updated, skipped, catalogAdded, partsFilled };
-  });
+  .handler(async ({ data }): Promise<EquipApplyResult> => applyAccountEquipImportFor(await ready(), data));
 
 const listInput = z.object({
   customer: z.string().optional(),

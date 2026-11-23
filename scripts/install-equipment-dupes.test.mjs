@@ -318,11 +318,13 @@ test("P9: an import row with a serial fills the account's blank unit of that mod
     action: "update",
     existingId: 1,
     foreignAccount: null,
+    matchKind: "fill-blank",
   });
   assert.deepEqual(matchExistingUnit({ customer: "Cafe", catalogModel: "Fetco 2051e", equipmentName: "Fetco", serial: "F-1", existing }), {
     action: "update",
     existingId: 2,
     foreignAccount: null,
+    matchKind: "same-serial",
   });
   assert.equal(matchExistingUnit({ customer: "Cafe", catalogModel: "Bunn G9-2T", equipmentName: "G9", serial: "G-1", existing }).action, "add");
 });

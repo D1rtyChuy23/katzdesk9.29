@@ -115,11 +115,12 @@ test("the fill writes only the Part #, and only while it is still blank", async 
 
 test("the apply checks the fill again on the server with the strict parts list; the screen sends the row as previewed", () => {
   const f = src("src/lib/ops/account-equip-import.ts");
-  const apply = f.slice(f.indexOf("export const applyAccountEquipImport"), f.indexOf("export const listAccountEquipment"));
+  // The apply's body is applyAccountEquipImportFor (11/23), which the server call runs.
+  const apply = f.slice(f.indexOf("export async function applyAccountEquipImportFor"), f.indexOf("export const listAccountEquipment"));
   assert.match(apply, /const fillParts = await loadFillParts\(sql\);/);
   assert.match(apply, /const fill = lockedPartFill\(lockedUnit, \{ partNumber: row\.partNumber, catalogModel, serial \}, fillParts\);/);
   assert.match(apply, /await sql\.query\(lockedPartFillSql\(\), \[lockedUnit\.id, fill\]\)\)\.length/);
-  const preview = f.slice(f.indexOf("export const previewAccountEquipImport"), f.indexOf("export const applyAccountEquipImport"));
+  const preview = f.slice(f.indexOf("export const previewAccountEquipImport"), f.indexOf("export async function applyAccountEquipImportFor"));
   assert.match(preview, /buildPreviewRow\(rec, i, accounts, catalog, existing, fillParts\)/);
   const ui = src("src/components/desk/account-equip-import.tsx");
   assert.match(ui, /const showPickers = !r\.lockedNote && \(needsReview \|\| !!editing\[r\.key\]\);/);
