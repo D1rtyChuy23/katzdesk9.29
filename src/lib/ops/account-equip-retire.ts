@@ -227,7 +227,21 @@ export async function restoreRetiredUnit(sql: Sql, retiredId: number): Promise<{
 
 export type DuplicateSerial = {
   serialKey: string;
-  units: { id: number; customer: string; customerId: number | null; equipmentName: string; serial: string | null; installDate: string | null; locked: boolean }[];
+  units: {
+    id: number;
+    customer: string;
+    customerId: number | null;
+    /** For Merge's rule and dialog on the list (11/23). */
+    catalogModel: string;
+    equipmentName: string;
+    serial: string | null;
+    installDate: string | null;
+    locked: boolean;
+    lockedBy: string | null;
+    partNumber: string | null;
+    condition: string | null;
+    ownership: string | null;
+  }[];
 };
 
 /** Serials that are on more than one account unit, with every unit that has each. Read only. */
@@ -237,12 +251,18 @@ export async function listDuplicateSerials(sql: Sql): Promise<DuplicateSerial[]>
     serial_key: string;
     customer: string;
     customer_id: number | null;
+    catalog_model: string;
     equipment_name: string;
+    locked_by: string | null;
+    part_number: string | null;
+    condition: string | null;
+    ownership: string | null;
     serial: string | null;
     install_date: string | null;
     locked: boolean;
   }>(
-    `select e.id, e.serial_key, e.customer, e.equipment_name, e.serial, e.install_date, e.locked_at is not null as locked,
+    `select e.id, e.serial_key, e.customer, e.catalog_model, e.equipment_name, e.serial, e.install_date, e.locked_at is not null as locked,
+            e.locked_by, e.part_number, e.condition, e.ownership,
             (select d.id from directory_customers d where lower(d.name) = lower(e.customer) and d.archived = false order by d.id limit 1) as customer_id
        from account_equipment e
       where coalesce(e.serial_key, '') <> ''
@@ -251,7 +271,20 @@ export async function listDuplicateSerials(sql: Sql): Promise<DuplicateSerial[]>
   );
   const out: DuplicateSerial[] = [];
   for (const r of rows) {
-    const unit = { id: Number(r.id), customer: r.customer, customerId: r.customer_id == null ? null : Number(r.customer_id), equipmentName: r.equipment_name, serial: r.serial, installDate: r.install_date, locked: !!r.locked };
+    const unit = {
+      id: Number(r.id),
+      customer: r.customer,
+      customerId: r.customer_id == null ? null : Number(r.customer_id),
+      catalogModel: r.catalog_model,
+      equipmentName: r.equipment_name,
+      serial: r.serial,
+      installDate: r.install_date,
+      locked: !!r.locked,
+      lockedBy: r.locked_by ?? null,
+      partNumber: r.part_number ?? null,
+      condition: r.condition ?? null,
+      ownership: r.ownership ?? null,
+    };
     const last = out[out.length - 1];
     if (last && last.serialKey === r.serial_key) last.units.push(unit);
     else out.push({ serialKey: r.serial_key, units: [unit] });
