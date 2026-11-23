@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { getTicketUnits, getUnitServiceHistory, setTicketUnits, type TicketUnit } from "@/lib/ops/ticket-units-api";
+import {
+  confirmTicketUnitSuggestions,
+  dismissTicketUnitSuggestions,
+  getTicketUnitSuggestions,
+  getTicketUnits,
+  getUnitServiceHistory,
+  setTicketUnits,
+  type TicketUnit,
+} from "@/lib/ops/ticket-units-api";
 
 const unitText = (u: TicketUnit) => [u.model || u.name, u.serial ? `S/N ${u.serial}` : "no serial"].filter(Boolean).join(" · ");
+const PAGE_SIZE = 100;
 const idsKey = (ids: number[]) => [...ids].sort((a, b) => a - b).join(",");
 
 /**
@@ -106,6 +115,136 @@ export function UnitServiceHistory({ unitId }: { unitId: number }) {
       ) : (
         <p className="mt-2 text-xs text-muted-foreground">No ticket names this machine yet. Pick it on a ticket's Equipment tab.</p>
       )}
+    </section>
+  );
+}
+
+/**
+ * Suggested machines for older tickets (Chuy, 11/21: "Suggest, you confirm"): a ticket whose text names one of its
+ * account's units by serial. Confirm links it; Not this one hides the pair for good. Nothing links by itself.
+ */
+export function TicketUnitSuggestions() {
+  const qc = useQueryClient();
+  // The account filter applies on Enter or Apply, not on every key (review, 11/22): each query reads every ticket.
+  const [typed, setTyped] = useState("");
+  const [account, setAccount] = useState("");
+  const [page, setPage] = useState(0);
+  const filters = { customer: account.trim() || null, limit: PAGE_SIZE, offset: page * PAGE_SIZE };
+  const q = useQuery({
+    queryKey: ["ticket-unit-suggestions", filters],
+    queryFn: () => getTicketUnitSuggestions({ data: filters }),
+    placeholderData: keepPreviousData,
+    retry: false,
+  });
+  const done = () => {
+    void qc.invalidateQueries({ queryKey: ["ticket-unit-suggestions"] });
+    void qc.invalidateQueries({ queryKey: ["ticket-units"] });
+    void qc.invalidateQueries({ queryKey: ["unit-service-history"] });
+  };
+  const confirm = useMutation({
+    mutationFn: (pairs: { jobId: number; unitId: number }[]) => confirmTicketUnitSuggestions({ data: { pairs } }),
+    onSuccess: (r) => {
+      done();
+      toast.success(
+        [`${r.linked} linked`, r.alreadyLinked ? `${r.alreadyLinked} already linked` : null, r.skipped ? `${r.skipped} skipped: the machine or ticket changed since the list loaded` : null]
+          .filter(Boolean)
+          .join(" · "),
+      );
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not link"),
+  });
+  const dismiss = useMutation({
+    mutationFn: (pairs: { jobId: number; unitId: number }[]) => dismissTicketUnitSuggestions({ data: { pairs } }),
+    onSuccess: () => {
+      done();
+      toast.success("Won't be suggested again");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const rows = q.data?.rows ?? [];
+  // Confirm all: tickets that name one machine, by a serial that isn't all digits (a WO or a phone number can be).
+  const clear = rows.filter((r) => r.others === 0 && !r.numeric);
+  // Warehouse doesn't edit tickets: no section for it.
+  if (q.isError && q.error instanceof Error && /Warehouse/.test(q.error.message)) return null;
+  const busy = confirm.isPending || dismiss.isPending;
+  return (
+    <section className="mt-10" data-testid="ticket-unit-suggestions">
+      <h2 className="font-display text-xl font-medium tracking-tight">Tickets That Name A Machine</h2>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+        Older tickets whose equipment, issue or work done names one of the account's machines by serial, as a whole word (5 or more characters; 6 or
+        more if all digits). Confirm adds the ticket to that machine's Service History; Not this one hides the pair for good. A ticket that names more
+        than one machine, or an all-digit serial, says so: check it first.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <form
+          className="flex items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setAccount(typed);
+            setPage(0);
+          }}
+        >
+          <input
+            className="h-9 w-64 rounded-full border border-border bg-background px-3 text-sm"
+            placeholder="Account (exact name), or all"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            data-testid="ticket-unit-suggestions-account"
+          />
+          <Button type="submit" size="sm" variant="outline">
+            Apply
+          </Button>
+        </form>
+        <Button type="button" size="sm" disabled={busy || !clear.length} onClick={() => confirm.mutate(clear.map((r) => ({ jobId: r.jobId, unitId: r.unit.id })))} data-testid="ticket-unit-suggestions-confirm-all">
+          Confirm {clear.length} shown that name one machine
+        </Button>
+        {q.data ? <span className="text-xs text-muted-foreground">{q.data.total} suggested</span> : null}
+      </div>
+      {q.isLoading ? (
+        <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
+      ) : q.isError ? (
+        <p className="mt-4 text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load"}</p>
+      ) : rows.length ? (
+        <ul className="mt-4 space-y-2">
+          {rows.map((r) => (
+            <li key={`${r.jobId}:${r.unit.id}`} className="rounded-lg border border-border px-3 py-2 text-sm" data-testid="ticket-unit-suggestion">
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-medium">{r.callId || `#${r.jobId}`}</span>
+                <span className="text-muted-foreground">
+                  {r.kind === "tlc" ? "TLC" : "Service"} · {r.customer} · {r.date ?? "no date"}
+                </span>
+                <span>→ {unitText(r.unit)}</span>
+                {r.others ? <span className="text-xs text-warning">also names {r.others} other machine{r.others === 1 ? "" : "s"}</span> : null}
+                {r.numeric ? <span className="text-xs text-warning">all-digit serial: check it isn't a WO or phone number</span> : null}
+              </div>
+              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.text}</p>
+              <div className="mt-1.5 flex gap-2">
+                <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => confirm.mutate([{ jobId: r.jobId, unitId: r.unit.id }])} data-testid="ticket-unit-suggestion-confirm">
+                  Confirm
+                </Button>
+                <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => dismiss.mutate([{ jobId: r.jobId, unitId: r.unit.id }])} data-testid="ticket-unit-suggestion-dismiss">
+                  Not this one
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 text-sm text-muted-foreground">No ticket names an unlinked machine{account.trim() ? " on that account" : ""}.</p>
+      )}
+      {q.data && q.data.total > PAGE_SIZE ? (
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          <Button type="button" size="sm" variant="outline" disabled={page === 0} onClick={() => setPage((n) => Math.max(0, n - 1))}>
+            Previous
+          </Button>
+          <span>
+            {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, q.data.total)} of {q.data.total}
+          </span>
+          <Button type="button" size="sm" variant="outline" disabled={(page + 1) * PAGE_SIZE >= q.data.total} onClick={() => setPage((n) => n + 1)}>
+            Next
+          </Button>
+        </div>
+      ) : null}
     </section>
   );
 }

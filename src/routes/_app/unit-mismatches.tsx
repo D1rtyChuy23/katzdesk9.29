@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SerialNormalizeButton } from "@/components/desk/serial-normalize";
+import { TicketUnitSuggestions } from "@/components/desk/ticket-units";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { getDuplicateSerials } from "@/lib/ops/account-equip-import";
@@ -152,6 +153,7 @@ function Page() {
           ))}
         </ul>
       </section>
+      <TicketUnitSuggestions />
     </div>
   );
 }
