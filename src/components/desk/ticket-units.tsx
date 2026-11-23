@@ -3,7 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { getTicketUnits, getUnitServiceHistory, setTicketUnits, type TicketUnit } from "@/lib/ops/ticket-units-api";
+import {
+  confirmTicketUnitSuggestions,
+  dismissTicketUnitSuggestions,
+  getTicketUnitSuggestions,
+  getTicketUnits,
+  getUnitServiceHistory,
+  setTicketUnits,
+  type TicketUnit,
+} from "@/lib/ops/ticket-units-api";
 
 const unitText = (u: TicketUnit) => [u.model || u.name, u.serial ? `S/N ${u.serial}` : "no serial"].filter(Boolean).join(" · ");
 const idsKey = (ids: number[]) => [...ids].sort((a, b) => a - b).join(",");
@@ -106,6 +114,105 @@ export function UnitServiceHistory({ unitId }: { unitId: number }) {
       ) : (
         <p className="mt-2 text-xs text-muted-foreground">No ticket names this machine yet. Pick it on a ticket's Equipment tab.</p>
       )}
+    </section>
+  );
+}
+
+/**
+ * Suggested machines for older tickets (Chuy, 11/21: "Suggest, you confirm"): a ticket whose text names one of its
+ * account's units by serial. Confirm links it; Not this one hides the pair for good. Nothing links by itself.
+ */
+export function TicketUnitSuggestions() {
+  const qc = useQueryClient();
+  const [account, setAccount] = useState("");
+  const [shown, setShown] = useState(100);
+  const filters = { customer: account.trim() || null, limit: shown };
+  const q = useQuery({ queryKey: ["ticket-unit-suggestions", filters], queryFn: () => getTicketUnitSuggestions({ data: filters }) });
+  const done = () => {
+    void qc.invalidateQueries({ queryKey: ["ticket-unit-suggestions"] });
+    void qc.invalidateQueries({ queryKey: ["ticket-units"] });
+    void qc.invalidateQueries({ queryKey: ["unit-service-history"] });
+  };
+  const confirm = useMutation({
+    mutationFn: (pairs: { jobId: number; unitId: number }[]) => confirmTicketUnitSuggestions({ data: { pairs } }),
+    onSuccess: (r) => {
+      done();
+      toast.success(`${r.linked} linked${r.skipped ? ` · ${r.skipped} skipped: the machine or ticket changed since the list loaded` : ""}`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not link"),
+  });
+  const dismiss = useMutation({
+    mutationFn: (pairs: { jobId: number; unitId: number }[]) => dismissTicketUnitSuggestions({ data: { pairs } }),
+    onSuccess: () => {
+      done();
+      toast.success("Won't be suggested again");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not save"),
+  });
+  const rows = q.data?.rows ?? [];
+  const clear = rows.filter((r) => r.others === 0);
+  // Warehouse doesn't edit tickets: no section for it.
+  if (q.isError && q.error instanceof Error && /Warehouse/.test(q.error.message)) return null;
+  const busy = confirm.isPending || dismiss.isPending;
+  return (
+    <section className="mt-10" data-testid="ticket-unit-suggestions">
+      <h2 className="font-display text-xl font-medium tracking-tight">Tickets That Name A Machine</h2>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+        Older tickets whose equipment, issue or work done names one of the account's machines by serial (5 or more characters). Confirm adds the ticket to
+        that machine's Service History; Not this one hides the pair for good. A ticket that names more than one machine says so: check it first.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          className="h-9 w-64 rounded-full border border-border bg-background px-3 text-sm"
+          placeholder="Account (exact name), or all"
+          value={account}
+          onChange={(e) => {
+            setAccount(e.target.value);
+            setShown(100);
+          }}
+          data-testid="ticket-unit-suggestions-account"
+        />
+        <Button type="button" size="sm" disabled={busy || !clear.length} onClick={() => confirm.mutate(clear.map((r) => ({ jobId: r.jobId, unitId: r.unit.id })))} data-testid="ticket-unit-suggestions-confirm-all">
+          Confirm {clear.length} shown that name one machine
+        </Button>
+        {q.data ? <span className="text-xs text-muted-foreground">{q.data.total} suggested</span> : null}
+      </div>
+      {q.isLoading ? (
+        <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
+      ) : q.isError ? (
+        <p className="mt-4 text-sm text-destructive">{q.error instanceof Error ? q.error.message : "Could not load"}</p>
+      ) : rows.length ? (
+        <ul className="mt-4 space-y-2">
+          {rows.map((r) => (
+            <li key={`${r.jobId}:${r.unit.id}`} className="rounded-lg border border-border px-3 py-2 text-sm" data-testid="ticket-unit-suggestion">
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-medium">{r.callId || `#${r.jobId}`}</span>
+                <span className="text-muted-foreground">
+                  {r.kind === "tlc" ? "TLC" : "Service"} · {r.customer} · {r.date ?? "no date"}
+                </span>
+                <span>→ {unitText(r.unit)}</span>
+                {r.others ? <span className="text-xs text-warning">also names {r.others} other machine{r.others === 1 ? "" : "s"}</span> : null}
+              </div>
+              <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.text}</p>
+              <div className="mt-1.5 flex gap-2">
+                <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => confirm.mutate([{ jobId: r.jobId, unitId: r.unit.id }])} data-testid="ticket-unit-suggestion-confirm">
+                  Confirm
+                </Button>
+                <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => dismiss.mutate([{ jobId: r.jobId, unitId: r.unit.id }])} data-testid="ticket-unit-suggestion-dismiss">
+                  Not this one
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 text-sm text-muted-foreground">No ticket names an unlinked machine{account.trim() ? " on that account" : ""}.</p>
+      )}
+      {q.data && q.data.total > rows.length ? (
+        <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => setShown((n) => n + 100)}>
+          Show More ({rows.length} of {q.data.total})
+        </Button>
+      ) : null}
     </section>
   );
 }

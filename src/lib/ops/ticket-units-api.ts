@@ -112,6 +112,144 @@ export async function unitServiceHistoryFor(sql: Sql, unitId: number, _userId: s
   return rows.map((r) => ({ jobId: Number(r.id), callId: r.call_id, kind: r.kind, status: r.status, received: r.received, completed: r.completed, workDone: r.work_done, issue: r.issue, mergedInstall: r.merged_install_id == null ? null : Number(r.merged_install_id) }));
 }
 
+// ------------------------------------------------------------------------------------- suggestions (11/21)
+
+export type TicketUnitSuggestion = {
+  jobId: number;
+  callId: string | null;
+  kind: string;
+  customer: string;
+  date: string | null;
+  /** The ticket's text that names the serial. */
+  text: string;
+  unit: TicketUnit;
+  /** How many other units this ticket's text also names: more than none, look closer. */
+  others: number;
+};
+
+/** A serial this short matches too much text to suggest from. */
+export const SUGGEST_MIN_SERIAL = 5;
+
+const TICKET_TEXT = `lower(regexp_replace(coalesce(j.equipment, '') || ' ' || coalesce(j.issue, '') || ' ' || coalesce(j.work_done, ''), '[[:space:]#]', '', 'g'))`;
+
+/**
+ * Pairs of a ticket and one of its account's units whose serial its equipment, issue or work done names, with no link
+ * yet and not marked "Not this one". Service and TLC tickets on an account (not Walk-In, not merged away). Newest first.
+ */
+export async function ticketUnitSuggestionsFor(
+  sql: Sql,
+  f: { customer?: string | null; limit?: number; offset?: number },
+  userId: string,
+): Promise<{ rows: TicketUnitSuggestion[]; total: number }> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't edit tickets.");
+  const limit = Math.min(Math.max(f.limit ?? 100, 1), 500);
+  const rows = await sql.query<{
+    job_id: number;
+    call_id: string | null;
+    kind: string;
+    customer: string | null;
+    day: string | null;
+    equipment: string | null;
+    issue: string | null;
+    work_done: string | null;
+    id: number;
+    model: string | null;
+    name: string | null;
+    serial: string | null;
+    others: number;
+    total: number;
+  }>(
+    `with pairs as (
+       select j.id as job_id, j.call_id, j.kind, j.customer, coalesce(j.completed_at, j.received) as day, j.equipment, j.issue, j.work_done,
+              a.id, a.catalog_model as model, a.equipment_name as name, a.serial
+         from service_jobs j
+         join account_equipment a on lower(btrim(a.customer)) = lower(btrim(j.customer))
+        where j.kind in ('service', 'tlc')
+          and j.merged_install_id is null and (j.duplicate_of is null or j.duplicate_of = j.id)
+          and lower(regexp_replace(btrim(coalesce(j.customer, '')), '[\s-]+', '', 'g')) <> 'walkin'
+          and ($1::text is null or lower(btrim(j.customer)) = lower(btrim($1::text)))
+          and length(coalesce(a.serial_key, '')) >= ${SUGGEST_MIN_SERIAL}
+          and position(a.serial_key in ${TICKET_TEXT}) > 0
+          and not exists (select 1 from ticket_units t where t.job_id = j.id and t.account_equipment_id = a.id)
+          and not exists (select 1 from ticket_unit_dismissals d where d.job_id = j.id and d.account_equipment_id = a.id)
+     )
+     select p.*, to_char(p.day, 'YYYY-MM-DD') as day, (count(*) over (partition by p.job_id) - 1)::int as others, (count(*) over ())::int as total
+       from pairs p
+      order by p.day desc nulls last, p.job_id desc, p.model, p.id
+      limit $2 offset $3`,
+    [f.customer?.trim() || null, limit, Math.max(f.offset ?? 0, 0)],
+  );
+  const total = rows[0]?.total ?? (f.offset ? Number((await ticketUnitSuggestionsFor(sql, { ...f, offset: 0, limit: 1 }, userId)).total) : 0);
+  return {
+    total,
+    rows: rows.map((r) => ({
+      jobId: Number(r.job_id),
+      callId: r.call_id,
+      kind: r.kind,
+      customer: (r.customer ?? "").trim(),
+      date: r.day,
+      text: [r.equipment, r.issue, r.work_done].filter((x) => x && x.trim()).join(" · ").slice(0, 240),
+      unit: toUnit({ id: r.id, model: r.model, name: r.name, serial: r.serial, customer: r.customer }),
+      others: Number(r.others),
+    })),
+  };
+}
+
+type Pairs = { pairs: { jobId: number; unitId: number }[] };
+
+/** Link the confirmed pairs. One whose unit isn't on the ticket's account (any more), or whose ticket was merged away, is skipped. */
+export async function confirmTicketUnitSuggestionsFor(sql: Sql, data: Pairs, userId: string): Promise<{ linked: number; skipped: number }> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't edit tickets.");
+  const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username ?? null;
+  const done = await sql.query<{ job_id: number }>(
+    `insert into ticket_units (job_id, account_equipment_id, linked_by)
+     select p.job_id, p.unit_id, $3
+       from unnest($1::int[], $2::int[]) as p(job_id, unit_id)
+       join service_jobs j on j.id = p.job_id
+       join account_equipment a on a.id = p.unit_id
+      where lower(btrim(a.customer)) = lower(btrim(j.customer))
+        and j.merged_install_id is null and (j.duplicate_of is null or j.duplicate_of = j.id)
+     on conflict do nothing
+     returning job_id`,
+    [data.pairs.map((p) => p.jobId), data.pairs.map((p) => p.unitId), who],
+  );
+  return { linked: done.length, skipped: data.pairs.length - done.length };
+}
+
+/** "Not this one": the pairs aren't suggested again. */
+export async function dismissTicketUnitSuggestionsFor(sql: Sql, data: Pairs, userId: string): Promise<{ dismissed: number }> {
+  if (await isWarehouseOnly(sql, userId)) throw new Error("Warehouse doesn't edit tickets.");
+  const who = (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username ?? null;
+  const done = await sql.query(
+    `insert into ticket_unit_dismissals (job_id, account_equipment_id, dismissed_by)
+     select p.job_id, p.unit_id, $3 from unnest($1::int[], $2::int[]) as p(job_id, unit_id)
+      where exists (select 1 from service_jobs j where j.id = p.job_id) and exists (select 1 from account_equipment a where a.id = p.unit_id)
+     on conflict do nothing
+     returning 1`,
+    [data.pairs.map((p) => p.jobId), data.pairs.map((p) => p.unitId), who],
+  );
+  return { dismissed: done.length };
+}
+
+const pairsInput = z.object({ pairs: z.array(z.object({ jobId: z.number().int().positive(), unitId: z.number().int().positive() })).min(1).max(500) });
+
+export const getTicketUnitSuggestions = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { customer?: string | null; limit?: number; offset?: number }) =>
+    z.object({ customer: z.string().max(200).nullable().optional(), limit: z.number().int().optional(), offset: z.number().int().optional() }).parse(d),
+  )
+  .handler(async ({ data, context }) => ticketUnitSuggestionsFor(await ready(), data, context.userId));
+
+export const confirmTicketUnitSuggestions = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: Pairs) => pairsInput.parse(d))
+  .handler(async ({ data, context }) => confirmTicketUnitSuggestionsFor(await ready(), data, context.userId));
+
+export const dismissTicketUnitSuggestions = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: Pairs) => pairsInput.parse(d))
+  .handler(async ({ data, context }) => dismissTicketUnitSuggestionsFor(await ready(), data, context.userId));
+
 export const getTicketUnits = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: { jobId: number }) => z.object({ jobId: z.number().int().positive() }).parse(d))
