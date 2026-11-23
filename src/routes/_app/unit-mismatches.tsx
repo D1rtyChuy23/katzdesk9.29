@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SerialNormalizeButton } from "@/components/desk/serial-normalize";
 import { TicketUnitSuggestions } from "@/components/desk/ticket-units";
+import { DuplicateSerialActions } from "@/components/desk/duplicate-serial-actions";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { getDuplicateSerials } from "@/lib/ops/account-equip-import";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/_app/unit-mismatches")({ component: Page 
 function Page() {
   const q = useQuery({ queryKey: ["unit-mismatches"], queryFn: () => listUnitMismatches() });
   const rows = q.data ?? [];
-  // Serials on more than one account unit (11/9): a read-only list to clear before a rule can refuse them.
+  // Serials on more than one account unit (11/9): the list to clear before a rule can refuse them; Merge and Remove on it (11/23).
   const dupes = useQuery({ queryKey: ["duplicate-serials"], queryFn: () => getDuplicateSerials() });
   const doubled = dupes.data ?? [];
   return (
@@ -116,8 +117,9 @@ function Page() {
       <section className="mt-10" data-testid="duplicate-serials">
         <h2 className="font-display text-xl font-medium tracking-tight">Serials On More Than One Unit</h2>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          A serial should be on one machine. Open each account and, on its Equipment tab, Merge the two units when they're the same
-          machine on one account, or Remove the one that's wrong. Nothing here changes on its own.
+          A serial should be on one machine. Merge the two units when they're the same machine on one account, or Remove the one
+          that's wrong; an Admin can do either right here, and each is asked first. Removed units go to that account's Retired list,
+          where Put back returns them. Nothing here changes on its own.
         </p>
         <div className="mt-3">
           <SerialNormalizeButton />
@@ -149,6 +151,7 @@ function Page() {
                   </li>
                 ))}
               </ul>
+              <DuplicateSerialActions group={d} />
             </li>
           ))}
         </ul>

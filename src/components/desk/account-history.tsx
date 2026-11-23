@@ -350,7 +350,7 @@ export function AccountEquipmentList({
   );
 }
 
-type UnitRow = {
+export type UnitRow = {
   id?: number;
   catalogModel: string;
   equipmentName: string;
@@ -363,7 +363,22 @@ type UnitRow = {
 };
 
 /** Merge, asked in the app's dialog (11/19): both units side by side, and which one stays. */
-function MergeDialog({ keep, drop, busy, onCancel, onMerge }: { keep: UnitRow; drop: UnitRow; busy: boolean; onCancel: () => void; onMerge: () => void }) {
+export function MergeDialog({
+  keep,
+  drop,
+  busy,
+  onCancel,
+  onMerge,
+  onSwap,
+}: {
+  keep: UnitRow;
+  drop: UnitRow;
+  busy: boolean;
+  onCancel: () => void;
+  onMerge: () => void;
+  /** Offer "Keep the other one" (the duplicate list, 11/23). */
+  onSwap?: () => void;
+}) {
   const counts = useQuery({
     queryKey: ["unit-link-counts", keep.id, drop.id],
     queryFn: () => getUnitLinkCounts({ data: { ids: [keep.id!, drop.id!] } }),
@@ -418,6 +433,11 @@ function MergeDialog({ keep, drop, busy, onCancel, onMerge }: { keep: UnitRow; d
           <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
             Cancel
           </Button>
+          {onSwap ? (
+            <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onSwap} data-testid="merge-swap">
+              Keep the other one
+            </Button>
+          ) : null}
           <Button type="button" size="sm" disabled={busy} onClick={onMerge} data-testid="merge-confirm-yes">
             {busy ? "Merging…" : "Merge duplicate"}
           </Button>

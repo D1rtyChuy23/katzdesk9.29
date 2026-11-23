@@ -201,15 +201,27 @@ test("serials on more than one unit are listed, with each unit's account", async
       {
         serialKey: "tg-1",
         units: [
-          { id: b, customer: "Test Bean Cafe", customerId: cafe, equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false },
-          { id: c, customer: "Test Bean Cafe", customerId: cafe, equipmentName: "Test Grinder FPG", serial: "TG-1", installDate: null, locked: false },
-          { id: a, customer: "Test Steakhouse", customerId: steak, equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false },
+          { id: b, customer: "Test Bean Cafe", customerId: cafe, catalogModel: "Test Grinder", equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false, lockedBy: null, partNumber: null, condition: null, ownership: null },
+          { id: c, customer: "Test Bean Cafe", customerId: cafe, catalogModel: "Test Grinder FPG", equipmentName: "Test Grinder FPG", serial: "TG-1", installDate: null, locked: false, lockedBy: null, partNumber: null, condition: null, ownership: null },
+          { id: a, customer: "Test Steakhouse", customerId: steak, catalogModel: "Test Grinder", equipmentName: "Test Grinder", serial: "TG-1", installDate: null, locked: false, lockedBy: null, partNumber: null, condition: null, ownership: null },
         ],
       },
     ]);
   } finally {
     await pg.close();
   }
+});
+
+test("the duplicate list offers Merge where Merge's own rule allows it, and Remove, to an Admin, each asked first", () => {
+  const page = src("src/routes/_app/unit-mismatches.tsx");
+  assert.match(page, /<DuplicateSerialActions group=\{d\} \/>/);
+  const actions = src("src/components/desk/duplicate-serial-actions.tsx");
+  assert.match(actions, /canMergeUnits\(/);
+  assert.match(actions, /isDeskAdmin\(me\.data\)/);
+  assert.match(actions, /<MergeDialog/);
+  assert.match(actions, /data-testid="duplicate-remove-confirm"/);
+  assert.match(actions, /removeAccountEquipment\(/);
+  assert.match(actions, /mergeAccountEquipment\(/);
 });
 
 test("the screens offer the retired list, Put back and the duplicate-serial list", () => {
