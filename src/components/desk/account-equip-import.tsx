@@ -142,6 +142,8 @@ type RowDraft = {
   modelSet?: boolean;
   /** A Part # its pairing gives all its rows (11/12 test: a 220's rows carrying the 312's part). */
   partNumber?: string;
+  /** "Add as new unit instead" on a row that would fill a serial-less unit (11/23). Off by default. */
+  addInstead?: boolean;
 };
 
 /**
@@ -278,11 +280,11 @@ function PreviewBody({
 
   const selectedAdds = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action !== "update";
+    return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!r.fillBlank && !!d.addInstead));
   }).length;
   const selectedUpdates = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action === "update";
+    return d?.selected && rowReady(r, d) && r.action === "update" && !(r.fillBlank && d.addInstead);
   }).length;
   const selectedCount = selectedAdds + selectedUpdates;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
@@ -346,6 +348,8 @@ function PreviewBody({
           modelCandidates: [],
           reviewReasons: [],
           action: row.action === "update" ? ("update" as const) : ("add" as const),
+          // The server adds it as its own unit only if it still finds a serial-less unit to fill (11/23).
+          addInstead: !!d.addInstead && !!row.fillBlank,
         },
       ];
     });
@@ -589,9 +593,28 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
-                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : r.action === "update" ? "Update existing" : "Matched"}
+                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : r.fillBlank && d.addInstead ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
+                    {r.fillBlank && !needsReview ? (
+                      <label className="mt-1 flex items-start gap-1.5 text-[11px]">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 size-3.5"
+                          checked={!!d.addInstead}
+                          onChange={(e) => patch(r.key, { addInstead: e.target.checked })}
+                          data-testid="equip-add-instead"
+                        />
+                        <span>
+                          Add as new unit instead
+                          <span className="block text-muted-foreground">
+                            {d.addInstead
+                              ? `Adds it on its own; ${r.fillBlank.name || "the unit with no serial"} stays as it is.`
+                              : `Otherwise its serial fills ${r.fillBlank.name || "the unit with no serial"}, which has none.`}
+                          </span>
+                        </span>
+                      </label>
+                    ) : null}
                     {r.reviewReasons.map((reason) => (
                       <span key={reason} className="mt-0.5 block text-[11px] text-muted-foreground">
                         {reason}
