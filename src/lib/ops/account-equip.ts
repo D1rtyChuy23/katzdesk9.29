@@ -579,6 +579,21 @@ export function sameEquipLabel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
 
+/**
+ * The same name as written (11/23): case, spacing, punctuation and how a number is written ("#2", "# 2", "No. 2") don't
+ * count, but the number does: "#1" and "#2" are two machines.
+ */
+export function fileNameKey(x: string): string {
+  return String(x ?? "")
+    .toLowerCase()
+    .replace(/\b(?:no|nbr|num|number)\.?\s*(?=\d)/g, "#")
+    .replace(/#\s+(?=\d)/g, "#")
+    .replace(/[^a-z0-9#]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+const sameFileName = (a: string, b: string) => !!fileNameKey(a) && fileNameKey(a) === fileNameKey(b);
+
 export function matchExistingUnit(opts: {
   customer: string;
   catalogModel: string;
@@ -601,12 +616,15 @@ export function matchExistingUnit(opts: {
     );
     if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-serial" };
     // A unit of this model with no serial yet takes it (the one with this name first); adding made two of one machine.
+    // A unit added earlier in the same import (a negative id) takes it only from a row with its own name: the file
+    // listed them as two machines (11/23).
     const blank = opts.existing.filter(
       (e) =>
         normalizeCustomerKey(e.customer) === customerKey &&
         sameCatalogModel(e.catalogModel, opts.catalogModel) &&
         !serialKey(e.serial) &&
-        !e.lockedBy,
+        !e.lockedBy &&
+        (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
     );
     const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
     if (fill) return { action: "update", existingId: fill.id, foreignAccount: null, matchKind: "fill-blank" };
@@ -617,7 +635,9 @@ export function matchExistingUnit(opts: {
       normalizeCustomerKey(e.customer) === customerKey &&
       sameCatalogModel(e.catalogModel, opts.catalogModel) &&
       sameEquipLabel(e.equipmentName, opts.equipmentName) &&
-      !serialKey(e.serial),
+      !serialKey(e.serial) &&
+      // A row added earlier in the same import is the same machine only by the same name as written (11/23).
+      (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
   );
   if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-name" };
   return { action: "add", existingId: null, foreignAccount: null, matchKind: null };

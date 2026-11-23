@@ -1,3 +1,4 @@
+import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -84,6 +85,13 @@ export type EquipPreviewRow = {
   fillBlank?: { id: number; name: string } | null;
   /** Add the row as its own unit instead of filling fillBlank (off by default). Only counts on a fill-blank row. */
   addInstead?: boolean;
+  /**
+   * An add that would fill this serial-less unit if the earlier row byKey, which fills it, were added on its own
+   * instead (11/23): the preview follows the file in order, as the save does.
+   */
+  fillBlankIf?: { byKey: string; id: number; name: string } | null;
+  /** The row whose add this row folds into (an update of a unit added earlier in the same file), 11/23. */
+  foldsInto?: string | null;
   /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
@@ -784,6 +792,72 @@ export function buildPreviewRow(
   };
 }
 
+/**
+ * The preview's rows in file order, the way the save takes them (11/23): each row is matched against the units as the
+ * rows before it leave them. A serial-less unit one row fills isn't offered to the next; each add is there for the rows
+ * after it. A row the save may not take (held for review, a site, or a locked unit's Part # only) claims nothing.
+ */
+export function previewRowsInFileOrder(
+  records: Parameters<typeof buildPreviewRow>[0][],
+  accounts: Parameters<typeof buildPreviewRow>[2],
+  catalog: string[],
+  existing: ExistingUnit[],
+  fillParts: Map<string, ImportPart | null> = new Map(),
+  /** Model pairings still to confirm: their rows start unticked, so they claim nothing (review, 11/23). */
+  heldPairs: Set<string> = new Set(),
+): EquipPreviewRow[] {
+  // One working list, changed in place (review, 11/23: a copy per row made a big file slow).
+  const working = existing.map((e) => ({ ...e }));
+  const at = new Map(working.map((e, i) => [e.id, i]));
+  const original = new Map(existing.map((e) => [e.id, e]));
+  // Serial-less units a fill-blank row took, by account: a later row that wanted one is told so.
+  const claims = new Map<number, { key: string; account: string }>();
+  const claimedBy = new Map<string, number[]>();
+  const tempOwner = new Map<number, string>();
+  let temp = 0;
+  return records.map((rec, i) => {
+    const row = buildPreviewRow(rec, i, accounts, catalog, working, fillParts);
+    const account = normalizeCustomerKey(row.customer ?? "");
+    const taken = claimedBy.get(account);
+    if (row.action === "add" && row.serial && row.customer && row.catalogModel && taken?.length) {
+      // The row is an add, so no unit on the account matched it as it stands: only the taken units, as they were,
+      // can (review, 11/23: matching the whole account again was slow on a big account).
+      const mine = taken.map((id) => original.get(id)!);
+      const alt = matchExistingUnit({
+        customer: row.customer,
+        catalogModel: row.catalogModel,
+        equipmentName: rec.equipmentName.trim() || rec.model.trim() || row.catalogModel,
+        serial: row.serial,
+        existing: mine,
+      });
+      const by = alt.matchKind === "fill-blank" && alt.existingId != null ? claims.get(alt.existingId) : undefined;
+      const blank = by ? original.get(alt.existingId!) : undefined;
+      if (by && blank) row.fillBlankIf = { byKey: by.key, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
+    }
+    if (row.action === "update" && row.existingId != null && row.existingId < 0) row.foldsInto = tempOwner.get(row.existingId) ?? null;
+    const takes =
+      (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel && !heldPairs.has(row.pairKey);
+    if (takes) {
+      const key = serialKey(row.serial) || null;
+      const name = row.equipmentName || row.catalogModel!;
+      if (row.action === "update" && row.existingId != null) {
+        if (row.fillBlank && row.existingId > 0) {
+          claims.set(row.existingId, { key: row.key, account });
+          claimedBy.set(account, [...(claimedBy.get(account) ?? []), row.existingId]);
+        }
+        const idx = at.get(row.existingId);
+        if (idx != null) working[idx] = { ...working[idx]!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key };
+      } else {
+        temp -= 1;
+        tempOwner.set(temp, row.key);
+        at.set(temp, working.length);
+        working.push({ id: temp, customer: row.customer!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key });
+      }
+    }
+    return row;
+  });
+}
+
 const fileInput = z.object({
   filename: z.string(),
   base64: z.string().min(8),
@@ -804,13 +878,17 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
       loadParts(sql),
       loadFillParts(sql),
     ]);
-    const rows = parsed.records.map((rec, i) => buildPreviewRow(rec, i, accounts, catalog, existing, fillParts));
+    let rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts);
     const pairings = buildPairings(rows, parts, catalog);
     const toConfirm = new Set(pairings.filter((p) => p.needsConfirm).map((p) => p.key));
+    // Rows of a pairing still to confirm start unticked: walk the file again without them (review, 11/23). Pairings
+    // don't depend on the walk (models and Part #s only), so they stand.
+    if (toConfirm.size) rows = previewRowsInFileOrder(parsed.records, accounts, catalog, existing, fillParts, toConfirm);
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
     return {
       addCount: rows.filter((r) => r.action === "add").length,
-      updateCount: rows.filter((r) => r.action === "update").length,
+      // A row that folds into an earlier row of the file (a negative id) is part of that add, as the save counts it.
+      updateCount: rows.filter((r) => r.action === "update" && (r.existingId ?? 0) >= 0).length,
       reviewCount: rows.filter((r) => r.action === "review").length,
       heldCount: live.filter((r) => r.holdReasons.length || toConfirm.has(r.pairKey)).length,
       skipped: parsed.skipped,
@@ -844,6 +922,7 @@ const applyRow = z.object({
   holdReasons: z.array(z.string()).optional(),
   lockedNote: z.string().nullable().optional(),
   fillBlank: z.object({ id: z.number(), name: z.string() }).nullable().optional(),
+  fillBlankIf: z.object({ byKey: z.string(), id: z.number(), name: z.string() }).nullable().optional(),
   // Add the row as its own unit rather than filling a serial-less one (11/23). Counts only on a fill-blank match.
   addInstead: z.boolean().optional(),
   action: z.enum(["add", "update", "review", "skip"]),

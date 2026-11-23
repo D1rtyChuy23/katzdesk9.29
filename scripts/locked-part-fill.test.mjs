@@ -121,7 +121,9 @@ test("the apply checks the fill again on the server with the strict parts list; 
   assert.match(apply, /const fill = lockedPartFill\(lockedUnit, \{ partNumber: row\.partNumber, catalogModel, serial \}, fillParts\);/);
   assert.match(apply, /await sql\.query\(lockedPartFillSql\(\), \[lockedUnit\.id, fill\]\)\)\.length/);
   const preview = f.slice(f.indexOf("export const previewAccountEquipImport"), f.indexOf("export async function applyAccountEquipImportFor"));
-  assert.match(preview, /buildPreviewRow\(rec, i, accounts, catalog, existing, fillParts\)/);
+  // The preview takes the file in order (11/23), each row through buildPreviewRow with the fill parts.
+  assert.match(preview, /previewRowsInFileOrder\(parsed\.records, accounts, catalog, existing, fillParts\)/);
+  assert.match(f, /const row = buildPreviewRow\(rec, i, accounts, catalog, working, fillParts\);/);
   const ui = src("src/components/desk/account-equip-import.tsx");
   assert.match(ui, /const showPickers = !r\.lockedNote && \(needsReview \|\| !!editing\[r\.key\]\);/);
   assert.match(ui, /if \(row\.lockedNote\) return \[\{ \.\.\.row, modelCandidates: \[\], reviewReasons: \[\], action: "update" \} as EquipPreviewRow\];/);

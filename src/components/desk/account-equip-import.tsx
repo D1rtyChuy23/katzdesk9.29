@@ -1,4 +1,4 @@
-import { addInsteadOffer } from "@/lib/ops/equip-import-offer";
+import { addInsteadOffer, asPreviewed } from "@/lib/ops/equip-import-offer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -279,15 +279,19 @@ function PreviewBody({
   }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
-  const selectedAdds = preview.rows.filter((r) => {
-    const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
-  }).length;
-  const selectedUpdates = preview.rows.filter((r) => {
-    const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action === "update" && !(d.addInstead && addInsteadOffer(r, d).offer);
-  }).length;
-  const selectedCount = selectedAdds + selectedUpdates;
+  const rowByKey = new Map(preview.rows.map((r) => [r.key, r]));
+  const goes = (r: EquipPreviewRow | undefined) => {
+    const d = r ? drafts[r.key] : undefined;
+    return !!r && !!d?.selected && rowReady(r, d);
+  };
+  const asNewRow = (r: EquipPreviewRow) => !!drafts[r.key]?.addInstead && addInsteadOffer(r, drafts[r.key]!).offer;
+  /** A row that folds into the unit an earlier row of the file adds, while that row is going (11/23). */
+  const folds = (r: EquipPreviewRow) => !!r.foldsInto && goes(rowByKey.get(r.foldsInto)) && !asNewRow(r);
+  // Without its earlier row, a folding row is an add of its own (review, 11/23).
+  const selectedAdds = preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || !!r.foldsInto)).length;
+  const selectedUpdates = preview.rows.filter((r) => goes(r) && r.action === "update" && !r.foldsInto && !asNewRow(r)).length;
+  /** Every ticked row the save is sent, a folding one included: it gates Confirm and the unticked count. */
+  const selectedCount = preview.rows.filter((r) => goes(r)).length;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
   const heldNow = preview.rows.filter((r) => {
     if (r.action !== "add" && r.action !== "update") return false;
@@ -596,9 +600,26 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
-                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : asNew ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
+                      {needsReview
+                        ? "Needs review"
+                        : r.lockedNote
+                          ? "Fill Part # only"
+                          : asNew
+                            ? "Add new"
+                            : folds(r)
+                              ? "Same unit as an earlier row"
+                              : r.foldsInto
+                                ? "Add new"
+                                : r.action === "update"
+                                ? "Update existing"
+                                : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
+                    {r.fillBlankIf && !needsReview && asPreviewed(r, d) ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground" data-testid="equip-fill-blank-if">
+                        An earlier row fills {r.fillBlankIf.name || "a unit with no serial"}. If that row isn't imported as shown, this one may fill it.
+                      </span>
+                    ) : null}
                     {offer.offer && !needsReview ? (
                       <label className="mt-1 flex items-start gap-1.5 text-[11px]">
                         <input
