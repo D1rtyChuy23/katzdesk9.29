@@ -12,6 +12,8 @@ export type OfferRow = {
   lockedNote?: string | null;
   foreignAccount?: string | null;
   fillBlank?: { id: number; name: string } | null;
+  /** A serial-less unit an earlier row of the file fills; this row would fill it if that row doesn't (11/23). */
+  fillBlankIf?: { id: number; name: string } | null;
 };
 
 export function addInsteadOffer(row: OfferRow, draft: { customer: string; catalogModel: string }): { offer: boolean; hint: { on: string; off: string } } {
@@ -22,6 +24,10 @@ export function addInsteadOffer(row: OfferRow, draft: { customer: string; catalo
   if (row.fillBlank && asPreviewed) {
     const name = row.fillBlank.name || "the unit with no serial";
     return { offer: true, hint: { on: `Adds it on its own; ${name} stays as it is.`, off: `Otherwise its serial fills ${name}, which has none.` } };
+  }
+  if (row.fillBlankIf && asPreviewed && row.action === "add") {
+    const name = row.fillBlankIf.name || "the unit with no serial";
+    return { offer: true, hint: { on: `Adds it on its own, whatever the earlier row does; ${name} stays as it is.`, off: `If the earlier row doesn't take ${name}, this row's serial fills it.` } };
   }
   if (asPreviewed && row.action !== "review") return none;
   const model = draft.catalogModel.trim() || "this model";

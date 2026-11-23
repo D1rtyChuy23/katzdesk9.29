@@ -1,3 +1,4 @@
+import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import * as XLSX from "xlsx";
@@ -801,35 +802,41 @@ export function previewRowsInFileOrder(
   existing: ExistingUnit[],
   fillParts: Map<string, ImportPart | null> = new Map(),
 ): EquipPreviewRow[] {
-  let working = existing.map((e) => ({ ...e }));
+  // One working list, changed in place (review, 11/23: a copy per row made a big file slow).
+  const working = existing.map((e) => ({ ...e }));
+  const at = new Map(working.map((e, i) => [e.id, i]));
   const original = new Map(existing.map((e) => [e.id, e]));
-  // The serial-less unit a fill-blank row took, and which row: a later row is told it fills it if that row is added instead.
-  const claims = new Map<number, string>();
+  // Serial-less units a fill-blank row took, by account: a later row that wanted one is told so.
+  const claims = new Map<number, { key: string; account: string }>();
   let temp = 0;
   return records.map((rec, i) => {
     const row = buildPreviewRow(rec, i, accounts, catalog, working, fillParts);
-    if (row.action === "add" && row.serial && row.customer && row.catalogModel && claims.size) {
-      const restored = working.map((e) => (claims.has(e.id) ? { ...e, ...original.get(e.id)! } : e));
+    const account = normalizeCustomerKey(row.customer ?? "");
+    if (row.action === "add" && row.serial && row.customer && row.catalogModel && [...claims.values()].some((c) => c.account === account)) {
+      // Only this account's units, with the ones taken put back as they were.
+      const mine = working.filter((e) => normalizeCustomerKey(e.customer) === account).map((e) => (claims.has(e.id) ? { ...e, ...original.get(e.id)! } : e));
       const alt = matchExistingUnit({
         customer: row.customer,
         catalogModel: row.catalogModel,
         equipmentName: rec.equipmentName.trim() || rec.model.trim() || row.catalogModel,
         serial: row.serial,
-        existing: restored,
+        existing: mine,
       });
-      const byKey = alt.matchKind === "fill-blank" && alt.existingId != null ? claims.get(alt.existingId) : undefined;
-      const blank = byKey ? original.get(alt.existingId!) : undefined;
-      if (byKey && blank) row.fillBlankIf = { byKey, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
+      const by = alt.matchKind === "fill-blank" && alt.existingId != null ? claims.get(alt.existingId) : undefined;
+      const blank = by ? original.get(alt.existingId!) : undefined;
+      if (by && blank) row.fillBlankIf = { byKey: by.key, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
     }
     const takes = (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel;
     if (takes) {
       const key = serialKey(row.serial) || null;
       const name = row.equipmentName || row.catalogModel!;
       if (row.action === "update" && row.existingId != null) {
-        if (row.fillBlank) claims.set(row.existingId, row.key);
-        working = working.map((e) => (e.id === row.existingId ? { ...e, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key } : e));
+        if (row.fillBlank) claims.set(row.existingId, { key: row.key, account });
+        const idx = at.get(row.existingId);
+        if (idx != null) working[idx] = { ...working[idx]!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key };
       } else {
         temp -= 1;
+        at.set(temp, working.length);
         working.push({ id: temp, customer: row.customer!, catalogModel: row.catalogModel!, equipmentName: name, serial: row.serial, serialKey: key });
       }
     }
@@ -863,7 +870,8 @@ export const previewAccountEquipImport = createServerFn({ method: "POST" })
     const live = rows.filter((r) => r.action === "add" || r.action === "update");
     return {
       addCount: rows.filter((r) => r.action === "add").length,
-      updateCount: rows.filter((r) => r.action === "update").length,
+      // A row that folds into an earlier row of the file (a negative id) is part of that add, as the save counts it.
+      updateCount: rows.filter((r) => r.action === "update" && (r.existingId ?? 0) >= 0).length,
       reviewCount: rows.filter((r) => r.action === "review").length,
       heldCount: live.filter((r) => r.holdReasons.length || toConfirm.has(r.pairKey)).length,
       skipped: parsed.skipped,

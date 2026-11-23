@@ -118,7 +118,7 @@ test("the preview screen has the checkbox and sends the choice", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
   assert.match(ui, /data-testid="equip-add-instead"/);
   assert.match(ui, /Add as new unit instead/);
-  assert.match(ui, /addInstead: !!d\.addInstead && addInsteadOffer\(effectiveRow\(row, drafts\), d\)\.offer/);
+  assert.match(ui, /addInstead: !!d\.addInstead && addInsteadOffer\(row, d\)\.offer/);
   assert.match(ui, /data-equip-status=\{needsReview \? "review" : asNew \? "add"/);
 });
 

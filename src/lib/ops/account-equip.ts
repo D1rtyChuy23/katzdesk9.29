@@ -579,11 +579,20 @@ export function sameEquipLabel(a: string, b: string): boolean {
   return compactEquip(a) === compactEquip(b) && !!compactEquip(a);
 }
 
-/** The same name as written, ignoring case and spacing only: "#1" and "#2" are two names (11/23). */
-const sameFileName = (a: string, b: string) => {
-  const t = (x: string) => String(x ?? "").toLowerCase().replace(/\s+/g, " ").trim();
-  return !!t(a) && t(a) === t(b);
-};
+/**
+ * The same name as written (11/23): case, spacing, punctuation and how a number is written ("#2", "# 2", "No. 2") don't
+ * count, but the number does: "#1" and "#2" are two machines.
+ */
+export function fileNameKey(x: string): string {
+  return String(x ?? "")
+    .toLowerCase()
+    .replace(/\b(?:no|nbr|num|number)\.?\s*(?=\d)/g, "#")
+    .replace(/#\s+(?=\d)/g, "#")
+    .replace(/[^a-z0-9#]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+const sameFileName = (a: string, b: string) => !!fileNameKey(a) && fileNameKey(a) === fileNameKey(b);
 
 export function matchExistingUnit(opts: {
   customer: string;
@@ -626,7 +635,9 @@ export function matchExistingUnit(opts: {
       normalizeCustomerKey(e.customer) === customerKey &&
       sameCatalogModel(e.catalogModel, opts.catalogModel) &&
       sameEquipLabel(e.equipmentName, opts.equipmentName) &&
-      !serialKey(e.serial),
+      !serialKey(e.serial) &&
+      // A row added earlier in the same import is the same machine only by the same name as written (11/23).
+      (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
   );
   if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-name" };
   return { action: "add", existingId: null, foreignAccount: null, matchKind: null };

@@ -20,7 +20,7 @@ const accounts = [{ id: 1, name: CAFE, address: null }];
 const rec = (equipmentName, serial) => ({ customer: CAFE, equipmentName, model: G, serial: serial ?? "", installDate: "", electrical: "", ownership: "", partNumber: "", condition: "", site: "" });
 const unitOf = (id, name, serial) => ({ id, customer: CAFE, catalogModel: G, equipmentName: name, serial, serialKey: AE.serialKey(serial) });
 
-test("two rows that want the same serial-less unit: the first fills it, the second is an add, and says it fills it if the first is added on its own", () => {
+test("two rows that want the same serial-less unit: the first fills it, the second is an add, with a note that it may fill it if the first one is not imported as shown", () => {
   const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #1", "6803"), rec("Zz Swift Grinder #3", "6805")], accounts, [G], [unitOf(1, "Zz Swift Grinder #2", null)]);
   assert.deepEqual(rows.map((r) => [r.action, r.existingId, r.fillBlank?.id ?? null]), [
     ["update", 1, 1],
@@ -87,10 +87,74 @@ test("the save still folds a row into an earlier one of the same name in the fil
   }
 });
 
-test("the screen shows a row as filling the unit when the row before it is added on its own", () => {
+test("the screen notes a row that may fill an earlier row's unit, and labels a row that folds into an earlier row", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
-  assert.match(ui, /fillBlankIf/);
-  assert.match(ui, /effectiveRow\(/);
+  assert.match(ui, /r\.fillBlankIf && !needsReview/);
+  assert.doesNotMatch(ui, /effectiveRow/);
+  assert.match(ui, /"Same unit as an earlier row"/);
+  assert.match(ui, /!foldsIntoEarlierRow\(r\) && !\(d\.addInstead/);
   const preview = src("src/lib/ops/account-equip-import.ts");
   assert.match(preview, /const rows = previewRowsInFileOrder\(parsed\.records, accounts, catalog, existing, fillParts\);/);
+  assert.match(preview, /updateCount: rows\.filter\(\(r\) => r\.action === "update" && \(r\.existingId \?\? 0\) >= 0\)/);
+});
+
+test("a row that may fill an earlier row's unit gets its own Add as new unit instead box", async () => {
+  const { addInsteadOffer } = await import("../src/lib/ops/equip-import-offer.ts");
+  const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #1", "6803"), rec("Zz Swift Grinder #3", "6805")], accounts, [G], [unitOf(1, "Zz Swift Grinder #2", null)]);
+  const d = { customer: CAFE, catalogModel: G };
+  const o = addInsteadOffer(rows[1], d);
+  assert.equal(o.offer, true);
+  assert.match(o.hint.off, /Zz Swift Grinder #2/);
+  assert.equal(addInsteadOffer({ ...rows[1], fillBlankIf: null }, d).offer, false);
+});
+
+test("serial-less rows #1 and #2 in one file stay two units, in the preview and the save", async () => {
+  const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #1", null), rec("Zz Swift Grinder #2", null)], accounts, [G], []);
+  assert.deepEqual(rows.map((r) => r.action), ["add", "add"]);
+  const { pg, sql } = await db();
+  try {
+    const r = await IMP.applyAccountEquipImportFor(sql, { rows: [applyRow("a", "Zz Swift Grinder #1", null), applyRow("b", "Zz Swift Grinder #2", null)] });
+    assert.deepEqual([r.added, r.updated], [2, 0]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("names: '#2', '# 2' and 'No. 2' are one name; '#1' and '#2' are two", () => {
+  const k = AE.fileNameKey;
+  assert.equal(k("Zz Swift Grinder #2"), k("zz swift grinder # 2"));
+  assert.equal(k("Zz Swift Grinder #2"), k("Zz Swift Grinder No. 2"));
+  assert.equal(k("Zz Swift Grinder #2"), k("Zz  Swift-Grinder #2"));
+  assert.notEqual(k("Zz Swift Grinder #1"), k("Zz Swift Grinder #2"));
+  const temp = unitOf(-1, "Zz Swift Grinder No. 2", null);
+  assert.equal(AE.matchExistingUnit({ customer: CAFE, catalogModel: G, equipmentName: "Zz Swift Grinder # 2", serial: "6803", existing: [temp] }).action, "update");
+});
+
+test("a row that folds into an earlier row of the file shows as an update of a temp unit, and isn't a real update", () => {
+  const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #2", null), rec("Zz Swift Grinder #2", "6803")], accounts, [G], []);
+  assert.deepEqual(rows.map((r) => r.action), ["add", "update"]);
+  assert.ok(rows[1].existingId < 0);
+});
+
+test("three rows and one serial-less unit: the first fills it, the next two are adds with the note", () => {
+  const rows = IMP.previewRowsInFileOrder(
+    [rec("Zz Swift Grinder #1", "6803"), rec("Zz Swift Grinder #3", "6805"), rec("Zz Swift Grinder #4", "6806")],
+    accounts,
+    [G],
+    [unitOf(1, "Zz Swift Grinder #2", null)],
+  );
+  assert.deepEqual(rows.map((r) => [r.action, r.fillBlankIf?.id ?? null]), [["update", null], ["add", 1], ["add", 1]]);
+});
+
+test("the save: the first row unticked, the next row with Add as new unit instead ticked stays its own unit", async () => {
+  const { pg, sql } = await db();
+  try {
+    await sql.query("insert into account_equipment (customer, catalog_model, equipment_name) values ($1, $2, $3)", [CAFE, G, "Zz Swift Grinder #2"]);
+    const r = await IMP.applyAccountEquipImportFor(sql, { rows: [applyRow("b", "Zz Swift Grinder #3", "6805", { addInstead: true })] });
+    assert.deepEqual([r.added, r.updated], [1, 0]);
+    const units = await sql.query("select equipment_name, serial from account_equipment order by id");
+    assert.deepEqual(units.map((u) => [u.equipment_name, u.serial]), [["Zz Swift Grinder #2", null], ["Zz Swift Grinder #3", "6805"]]);
+  } finally {
+    await pg.close();
+  }
 });

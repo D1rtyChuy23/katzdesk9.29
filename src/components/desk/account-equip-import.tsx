@@ -157,15 +157,8 @@ function decisionFor(p: EquipPairing): PairDecision {
   return { confirmed: p.status === "matched" && !p.needsConfirm, catalogModel: p.catalogModel ?? "", addCatalog: false };
 }
 
-/**
- * A row as the save will take it, given the choices on rows before it (11/23): an add that the preview showed because
- * an earlier row fills its serial-less unit fills that unit after all when the earlier row is added on its own.
- */
-export function effectiveRow(row: EquipPreviewRow, drafts: Record<string, RowDraft | undefined>): EquipPreviewRow {
-  const by = row.fillBlankIf;
-  if (!by || !drafts[by.byKey]?.addInstead) return row;
-  return { ...row, action: "update", existingId: by.id, fillBlank: { id: by.id, name: by.name } };
-}
+/** A row that folds into a unit an earlier row of the same file adds (11/23): part of that add, not an update. */
+const foldsIntoEarlierRow = (r: EquipPreviewRow) => r.action === "update" && (r.existingId ?? 0) < 0;
 
 function draftFor(row: EquipPreviewRow, pairConfirmed = true): RowDraft {
   const ready = (row.action === "add" || row.action === "update") && pairConfirmed && !row.holdReasons?.length;
@@ -289,15 +282,13 @@ function PreviewBody({
   }, [page, pageCount]);
   const pageRows = visible.slice(page * pageSize, page * pageSize + pageSize);
 
-  const selectedAdds = preview.rows.filter((row) => {
-    const r = effectiveRow(row, drafts);
+  const selectedAdds = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
+    return d?.selected && rowReady(r, d) && !foldsIntoEarlierRow(r) && (r.action !== "update" || (!!d.addInstead && addInsteadOffer(r, d).offer));
   }).length;
-  const selectedUpdates = preview.rows.filter((row) => {
-    const r = effectiveRow(row, drafts);
+  const selectedUpdates = preview.rows.filter((r) => {
     const d = drafts[r.key];
-    return d?.selected && rowReady(r, d) && r.action === "update" && !(d.addInstead && addInsteadOffer(r, d).offer);
+    return d?.selected && rowReady(r, d) && r.action === "update" && !foldsIntoEarlierRow(r) && !(d.addInstead && addInsteadOffer(r, d).offer);
   }).length;
   const selectedCount = selectedAdds + selectedUpdates;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
@@ -362,7 +353,7 @@ function PreviewBody({
           reviewReasons: [],
           action: row.action === "update" ? ("update" as const) : ("add" as const),
           // The server adds it as its own unit only if it still finds a serial-less unit to fill (11/23).
-          addInstead: !!d.addInstead && addInsteadOffer(effectiveRow(row, drafts), d).offer,
+          addInstead: !!d.addInstead && addInsteadOffer(row, d).offer,
         },
       ];
     });
@@ -461,9 +452,7 @@ function PreviewBody({
             </tr>
           </thead>
           <tbody className="max-sm:block">
-            {pageRows.map((shown) => {
-              // As the save will take it, given the rows before it (11/23).
-              const r = effectiveRow(shown, drafts);
+            {pageRows.map((r) => {
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
               const needsReview = !ready;
@@ -610,12 +599,22 @@ function PreviewBody({
                   </td>
                   <td className="px-3 py-2 align-top max-sm:order-1 max-sm:col-span-2 max-sm:col-start-2 max-sm:p-0">
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
-                      {needsReview ? "Needs review" : r.lockedNote ? "Fill Part # only" : asNew ? "Add new" : r.action === "update" ? "Update existing" : "Matched"}
+                      {needsReview
+                        ? "Needs review"
+                        : r.lockedNote
+                          ? "Fill Part # only"
+                          : asNew
+                            ? "Add new"
+                            : foldsIntoEarlierRow(r)
+                              ? "Same unit as an earlier row"
+                              : r.action === "update"
+                                ? "Update existing"
+                                : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
-                    {shown.fillBlankIf && r === shown && !needsReview ? (
-                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                        {shown.fillBlankIf.name || "A unit with no serial"} is filled by an earlier row; if that row is added on its own, this one fills it.
+                    {r.fillBlankIf && !needsReview ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground" data-testid="equip-fill-blank-if">
+                        An earlier row fills {r.fillBlankIf.name || "a unit with no serial"}. If that row isn't imported as shown, this one may fill it.
                       </span>
                     ) : null}
                     {offer.offer && !needsReview ? (
