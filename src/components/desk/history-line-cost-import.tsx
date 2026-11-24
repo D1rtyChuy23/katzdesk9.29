@@ -68,6 +68,10 @@ export function HistoryLineCostImportButton() {
   const [report, setReport] = useState<{ filled: number; skipped: number; stopped: string | null } | null>(null);
   const runs = useQuery({ queryKey: ["wo-history-runs"], queryFn: () => listWoHistoryRuns(), enabled: open });
   const pick = useRef<HTMLInputElement>(null);
+  const openRef = useRef(open);
+  openRef.current = open;
+  const fileRef = useRef<File | null>(file);
+  fileRef.current = file;
 
   useEffect(() => {
     if (step !== "saving") return;
@@ -97,8 +101,9 @@ export function HistoryLineCostImportButton() {
       }
       return out;
     },
-    onSuccess: (p) => {
-      if (!p) return;
+    onSuccess: (p, f) => {
+      // Closed (or another file picked) while it was checking: drop this preview (review, 11/24).
+      if (!p || !openRef.current || fileRef.current !== f) return;
       setPlan(p);
       setTicks(new Set(p.filter((l) => lineCostStartsTicked(l.status)).map(keyOf)));
       setGroup(LINE_COST_STATUSES.find((s) => p.some((l) => l.status === s)) ?? "fill");

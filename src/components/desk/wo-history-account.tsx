@@ -28,8 +28,13 @@ function Row({ h, mode, onOpen }: { h: WoHistorySummary; mode: "tickets" | "invo
           </span>
         </span>
         {mode === "invoices" && h.cost ? (
-          <span className="w-24 shrink-0 text-right text-xs tabular text-muted-foreground" data-testid="wo-history-row-profit" title="Profit after discount. Parts cost only; labor cost not included.">
-            {h.cost.internal || h.cost.profit == null ? "" : `Profit ${money(h.cost.profit)}`}
+          <span
+            className="w-24 shrink-0 text-right text-xs tabular text-muted-foreground"
+            data-testid="wo-history-row-profit"
+            title={`Profit after discount. Parts cost only; labor cost not included. ${h.cost.costedLines} of ${h.cost.totalLines} lines costed.`}
+          >
+            {/* No profit until a line has its cost: a profit equal to the whole sell would mislead (review, 11/24). */}
+            {h.cost.internal || h.cost.profit == null ? "" : h.cost.totalLines && !h.cost.costedLines ? "Not costed" : `Profit ${money(h.cost.profit)}`}
           </span>
         ) : null}
         <span className="shrink-0 text-sm font-medium tabular">{money(total)}</span>

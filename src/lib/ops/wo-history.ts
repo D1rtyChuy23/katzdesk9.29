@@ -977,6 +977,18 @@ export type LineCostRead = { rows: LineCostRow[]; problems: string[] };
 
 const round4 = (n: number) => Math.round((n + Number.EPSILON) * 10_000) / 10_000;
 
+/** A YYYY-MM-DD that is a real calendar day (not 2025-02-30). */
+export function isRealDay(d: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+  if (!m) return false;
+  const t = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return t.getUTCFullYear() === Number(m[1]) && t.getUTCMonth() === Number(m[2]) - 1 && t.getUTCDate() === Number(m[3]);
+}
+
+/** Line Cost is Qty × Unit Cost (a blank Qty bills one), within a cent. */
+export const lineCostAddsUp = (qty: number | null, unitCost: number, lineCost: number) => Math.abs(round2((qty ?? 1) * unitCost) - lineCost) <= 0.01 + 1e-9;
+export const isNoCostLineType = (t: string) => (NO_COST_LINE_TYPES as readonly string[]).some((x) => x.toLowerCase() === t.trim().toLowerCase());
+
 /** Read and check the line-cost file. Any problem stops the import: nothing is previewed or saved. */
 export function readHistoryLineCosts(text: string): LineCostRead {
   const problems: string[] = [];
@@ -1004,7 +1016,7 @@ export function readHistoryLineCosts(text: string): LineCostRead {
     if (seen.has(key)) return problem(`${where}: Line Sort ${sort} is also on line ${seen.get(key)}.`);
     seen.set(key, line);
     const lineType = c("lineType");
-    if ((NO_COST_LINE_TYPES as readonly string[]).some((t) => t.toLowerCase() === lineType.toLowerCase()))
+    if (isNoCostLineType(lineType))
       return problem(`${where}: a ${lineType} line doesn't take a cost; only part, filter and other item lines do.`);
     const numberOf = (k: "qty" | "unitPrice" | "amount" | "unitCost" | "lineCost") => {
       const v = readNumber(c(k));
@@ -1028,7 +1040,7 @@ export function readHistoryLineCosts(text: string): LineCostRead {
     if (!(COST_BASES as readonly string[]).includes(basis))
       return problem(`${where}: Cost Basis “${c("costBasis")}” isn't one of ${COST_BASES.join(", ")}.`);
     const costDate = readDay(c("costDate"));
-    if (costDate === undefined || (c("costDate") && !/^\d{4}-\d{2}-\d{2}$/.test(c("costDate"))))
+    if (costDate === undefined || (c("costDate") && !isRealDay(c("costDate"))))
       return problem(`${where}: Cost Date “${c("costDate")}” isn't YYYY-MM-DD.`);
     const costSource = c("costSource").toLowerCase();
     if (costSource !== "quickbooks") return problem(`${where}: Cost Source “${c("costSource")}” isn't quickbooks.`);

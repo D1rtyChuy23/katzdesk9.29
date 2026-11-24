@@ -38,6 +38,9 @@ import {
   type WoPlanInput,
   type WoPlanLine,
   historyInvoiceCost,
+  isNoCostLineType,
+  isRealDay,
+  lineCostAddsUp,
   itemCodeKey,
   planLineCosts,
   HISTORY_COST_NOTE,
@@ -700,7 +703,10 @@ export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]
            from wo_history h join wo_history_lines l on l.history_id = h.id
           where h.run_id = r.id and l.run_id is null
        ) c on true
-      order by r.created_at desc, r.id desc limit $1`,
+      -- The latest of each kind, so ten history runs never hide a cost run's Undo, or the reverse.
+      where r.id in (select t.id from (select x.id, row_number() over (partition by x.kind order by x.created_at desc, x.id desc) as n
+                                         from wo_history_runs x) t where t.n <= $1)
+      order by r.created_at desc, r.id desc`,
     [limit],
   );
   return rows.map((r) => ({
@@ -944,10 +950,27 @@ update wo_history_lines l
  where exists (select 1 from run) and l.id = x.line_id
    -- Only a line with no cost at all, and still the line the preview matched (sort, type, item, qty and amount).
    and l.unit_cost is null and l.line_cost is null and l.cost_basis is null and l.cost_date is null and l.cost_source is null and l.cost_flag is null
-   and l.sort = x.sort and lower(l.line_type) = lower(x.line_type)
+   and l.sort = x.sort and lower(l.line_type) = lower(x.line_type) and l.kind not in ('discount', 'labor', 'trip')
    and lower(regexp_replace(coalesce(l.item_code, ''), '\\s+', '', 'g')) = x.item_key
    and l.qty is not distinct from round(x.qty, 2) and l.amount is not distinct from round(x.amount, 2)
 returning l.id`;
+
+/** The file's checks again on the server, for what the save is sent. Null when every row passes. */
+export function checkCostSaveRows(rows: CostSaveRow[]): string | null {
+  const seen = new Set<number>();
+  for (const r of rows) {
+    const at = `Line Sort ${r.sort} (${r.itemCode || "no item"})`;
+    if (seen.has(r.lineId)) return `${at}: the same line is in the save twice.`;
+    seen.add(r.lineId);
+    if (isNoCostLineType(r.lineType)) return `${at}: a ${r.lineType} line doesn't take a cost.`;
+    if (!(r.unitCost >= 0)) return `${at}: Unit Cost is below zero.`;
+    if (!lineCostAddsUp(r.qty, r.unitCost, r.lineCost)) return `${at}: Line Cost ${r.lineCost} isn't Qty × Unit Cost.`;
+    if (!(COST_BASES as readonly string[]).includes(r.costBasis)) return `${at}: Cost Basis ${r.costBasis} isn't known.`;
+    if (r.costDate != null && !isRealDay(r.costDate)) return `${at}: Cost Date ${r.costDate} isn't a real day.`;
+    if (r.costSource !== "quickbooks") return `${at}: Cost Source isn't quickbooks.`;
+  }
+  return null;
+}
 
 /** Fill the cost on these lines. A line that has any cost, or changed since the preview, is skipped. */
 export async function saveCostBatch(sql: Query, input: { runId: number; rows: CostSaveRow[] }): Promise<{ filled: number; skipped: number }> {
@@ -1067,8 +1090,8 @@ const SUMMARY_COLS = `h.id, h.history_ref, h.wo, h.completed::text as completed,
   (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount')::int as line_count`;
 
 /** The cost columns a summary reads, only when the caller may see cost. */
-const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount') as cost_known,
-  (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount' and l.line_cost is not null)::int as costed_lines,
+const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip')) as cost_known,
+  (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip') and l.line_cost is not null)::int as costed_lines,
   (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip'))::int as costable_lines,
   h.customer as cost_customer`;
 
@@ -1426,7 +1449,7 @@ const costRow = z.object({
   unitCost: z.number().finite().nonnegative(),
   lineCost: z.number().finite(),
   costBasis: z.enum(COST_BASES),
-  costDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  costDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isRealDay, "isn't a real day").nullable(),
   costSource: z.literal("quickbooks"),
   costFlag: short(300).nullable(),
 });
@@ -1465,6 +1488,8 @@ export const saveHistoryCostBatch = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sql = await ready();
     await requireImporter(sql, context.userId);
+    const bad = checkCostSaveRows(data.rows as CostSaveRow[]);
+    if (bad) throw new Error(bad);
     return saveCostBatch(sql, data as { runId: number; rows: CostSaveRow[] });
   });
 

@@ -1123,12 +1123,13 @@ test("history profit: after the discount on the invoice, nothing for a non-cost 
 
 test("profit report: QuickBooks history by year and customer, apart; Service Dept and tickets already billed left out", async () => {
   const { pg, sql } = await fresh();
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, received, status) values ('service', 'SC-202607-1', 'Alpha Cafe', 'WO-0211', '2026-07-20', 'Completed')");
   await runAll(sql, files());
   await saveCosts(sql, costFile());
   await pg.query("update wo_history set invoice_date = '2026-07-24' where history_ref = $1", [WO]);
   const R = await import("../src/lib/ops/profit-report-api.ts");
   const P = await import("../src/lib/ops/profit-report.ts");
-  const all = await R.historyProfitSection(sql, {}, new Set());
+  const all = await R.historyProfitSection(sql, {});
   // WO-0211 (2026): 415 sell, 41.50 off, 24 cost. WO-1500 (2025): 373.53 sell, cost 0 (NOTAPART) + 100 (install fee).
   // WO-1501 has no lines; WO-1504 (2025) has none either.
   assert.deepEqual(all.byYear.map((g) => [g.label, g.bills, g.sell, g.discount, g.cost, g.profit, g.uncostedSell]), [
@@ -1140,11 +1141,23 @@ test("profit report: QuickBooks history by year and customer, apart; Service Dep
   assert.match(all.note, /^Parts cost only; labor cost not included$/);
 
   const job = (await pg.query("select job_id from wo_history where history_ref = $1", [WO])).rows[0].job_id;
+  assert.ok(job != null, "WO-0211 is on its ticket");
+  // Its ticket is billed (Sales Order, a charge), on a day after July.
+  await pg.query("update service_jobs set ns_so = 'SO-1', billed_at = '2026-08-02' where id = $1", [job]);
+  await pg.query("insert into ticket_charges (job_id, item, qty, rate) values ($1, 'VALVE1', 1, 20)", [job]);
   await pg.query("update wo_history set customer = 'Katz Coffee Service Dept.' where history_ref = 'WO-1500'");
-  const left = await R.historyProfitSection(sql, { from: "2024-01-01", to: "2026-12-31" }, new Set([Number(job ?? -1)]));
-  assert.deepEqual(left.excluded, { serviceDept: 1, billedTicket: job == null ? 0 : 1 });
+  const left = await R.historyProfitSection(sql, { from: "2024-01-01", to: "2026-12-31" });
+  assert.deepEqual(left.excluded, { serviceDept: 1, billedTicket: 1 });
   assert.match(left.note, /1 Service Dept left out/);
-  const only2025 = await R.historyProfitSection(sql, { from: "2025-01-01", to: "2025-12-31" }, new Set());
+  // The exclusion doesn't depend on the range: a ticket billed after the range still keeps its history row out.
+  {
+    const july = await R.historyProfitSection(sql, { from: "2026-07-01", to: "2026-07-31" });
+    assert.deepEqual([july.totals.bills, july.excluded.billedTicket], [0, 1]);
+    await pg.query("update service_jobs set ns_so = null where id = $1", [job]);
+    const unbilled = await R.historyProfitSection(sql, { from: "2026-07-01", to: "2026-07-31" });
+    assert.deepEqual([unbilled.totals.bills, unbilled.excluded.billedTicket], [1, 0], "an unbilled ticket's history counts");
+  }
+  const only2025 = await R.historyProfitSection(sql, { from: "2025-01-01", to: "2025-12-31" });
   assert.deepEqual([only2025.totals.bills, only2025.excluded.serviceDept], [0, 1], "the range applies; Service Dept is left out");
 
   // The downloads carry the section as its own two tables, after the job-type and customer tables.
@@ -1156,4 +1169,31 @@ test("profit report: QuickBooks history by year and customer, apart; Service Dep
   assert.deepEqual(file.extra[0].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "$0.00"]);
   const { reportSheets } = await import("../src/lib/ops/analytics.ts");
   assert.deepEqual(reportSheets(file).map((s) => s.name), ["By Job Type", "By Customer", "QB History By Year", "QB History By Customer"]);
+});
+
+test("line costs: the server repeats the file checks, and never costs a labor, trip or discount line", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  assert.match(readCosts([costRow(WO, 2, "Part", "VALVE1", "2", "20", "40", "12", "24", { date: "2025-02-30" })]).problems[0], /Cost Date “2025-02-30”/);
+  const plan = await api.previewLineCosts(sql, costFile());
+  const runId = await api.startCostRun(sql, { filename: "x.csv", rowCount: 3, counts: C.countLineCostPlan(plan), who: "chuy" });
+  const good = { ...plan[0].row, lineId: plan[0].lineId };
+  const check = (rows) => api.checkCostSaveRows(rows);
+  assert.equal(check([good]), null);
+  assert.match(check([{ ...good, lineType: "Labor" }]), /doesn't take a cost/);
+  assert.match(check([{ ...good, lineCost: 30 }]), /isn't Qty × Unit Cost/);
+  assert.match(check([{ ...good, costDate: "2025-02-30" }]), /isn't a real day/);
+  assert.match(check([good, good]), /twice/);
+  // Even straight to the save, a labor line is never written.
+  const labor = (await pg.query("select id, sort, qty::float8 as qty, amount::float8 as amount from wo_history_lines where line_type = 'Labor' limit 1")).rows[0];
+  const r = await api.saveCostBatch(sql, { runId, rows: [{ ...good, lineId: labor.id, sort: labor.sort, lineType: "Labor", itemCode: "SERVICELABOR", qty: labor.qty, amount: labor.amount, unitCost: 1, lineCost: 1.5 }] });
+  assert.deepEqual(r, { filled: 0, skipped: 1 });
+});
+
+test("Past imports keeps the latest of each kind: ten newer history runs never hide a cost run", async () => {
+  const { sql } = await fresh();
+  const cost = await api.startCostRun(sql, { filename: "c.csv", rowCount: 0, counts: {}, who: "chuy" });
+  for (let i = 0; i < 11; i++) await api.startRun(sql, { filename: `h${i}.csv`, rowCount: 0, counts: {}, who: "chuy" });
+  const runs = await api.recentRuns(sql);
+  assert.deepEqual([runs.filter((r) => r.kind === "history").length, runs.some((r) => r.id === cost)], [10, true]);
 });

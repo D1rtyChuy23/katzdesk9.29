@@ -27,6 +27,8 @@ import { billProfit, type LineCostTable } from "@/lib/ops/line-cost";
 import type { BillProfitTotals } from "@/lib/ops/part-pricing";
 import { COSTED_FROM, JOB_TYPES, buildProfitReportFile, groupBy, groupTotals, historySection, profitReportFileName, type GroupTotals, type HistoryBill, type HistorySection, type ProfitBill } from "@/lib/ops/profit-report";
 import { historyInvoiceCost } from "@/lib/ops/wo-history";
+import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
+import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
 import { reportDocx, reportPdf } from "@/lib/ops/report-files";
 
@@ -148,8 +150,18 @@ async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLab
  * completed), with the parts cost the line-cost import filled. Leaves out Service Dept, and any work order whose
  * ticket already counts in this report as a billed ticket, so nothing is counted twice.
  */
-export async function historyProfitSection(sql: Sql, f: Filters, billedTickets: Set<number>): Promise<HistorySection> {
+export async function historyProfitSection(sql: Sql, f: Filters): Promise<HistorySection> {
   const DAY = "coalesce(h.invoice_date, h.completed::date)";
+  // Tickets that count as billed tickets in this report on any dates (the same rule as ticketProfitBills, without the
+  // range), so a work order and its ticket billed on either side of a range edge never both count (review, 11/24).
+  const billed = await sql.query<{ id: number }>(
+    `select j.id from service_jobs j
+      where j.id in (select h.job_id from wo_history h where h.job_id is not null)
+        and (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
+        and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
+        and exists (select 1 from ticket_charges c where c.job_id = j.id)`,
+  );
+  const billedTickets = new Set(billed.map((r) => Number(r.id)));
   const rows = await sql.query<{ id: number; customer: string; job_id: number | null; day: string | null }>(
     `select h.id, h.customer, h.job_id, to_char(${DAY}, 'YYYY-MM-DD') as day
        from wo_history h
@@ -209,7 +221,7 @@ export async function profitReportFor(sql: Sql, f: Filters, userId: string): Pro
     laborHidden ? "labor not shown" : null,
     "a PM billed on a ticket counts with the ticket",
   ].filter(Boolean);
-  const history = await historyProfitSection(sql, f, new Set(tickets.map((t) => t.id)));
+  const history = await historyProfitSection(sql, f);
   return {
     byType: groupBy(bills, (b) => b.type, JOB_TYPES.map((t) => t.key)),
     byCustomer: groupBy(bills, (b) => b.customerKey, undefined, (b) => b.customer),

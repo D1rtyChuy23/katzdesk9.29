@@ -2,8 +2,8 @@
 -- can take the cost it had when it was billed, from QuickBooks vendor purchase history (Tickets → Import → Update
 -- History Line Costs). Additive only: every new column starts null; no backfill; no existing value changes.
 --
--- Labor, trip, service and install fee lines keep a blank cost: this data has none, and today's Labor Cost Rate is
--- never used on history. Cost and profit are shown only to the people Settings → Who Sees Cost and Margin allows.
+-- Labor, trip and discount lines never take a cost (this data has none, and today's Labor Cost Rate is
+-- never used on history). Cost and profit are shown only to the people Settings → Who Sees Cost and Margin allows.
 
 alter table wo_history_lines add column if not exists unit_cost   numeric(12, 4);  -- QuickBooks purchase cost per unit
 alter table wo_history_lines add column if not exists line_cost   numeric(12, 2);  -- qty × unit_cost, rounded
