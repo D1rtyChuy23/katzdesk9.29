@@ -25,7 +25,12 @@ export function SerialNormalizeButton() {
     mutationFn: () => applySerialNormalize({ data: { rows: rows!.filter((r) => !r.locked).map((r) => ({ unitId: r.unitId, oldSerial: r.oldSerial })) } }),
     onSuccess: (r) => {
       const asked = rows!.filter((x) => !x.locked).length;
-      toast.success(`Serials normalized on ${r.written.length} unit${r.written.length === 1 ? "" : "s"}${asked > r.written.length ? `; ${asked - r.written.length} changed since the preview and were left` : ""}`);
+      const changed = asked - r.written.length - r.refused.length;
+      toast.success(
+        `Serials normalized on ${r.written.length} unit${r.written.length === 1 ? "" : "s"}` +
+          (r.refused.length ? `; ${r.refused.length} left because another unit has that serial (Same serial on …)` : "") +
+          (changed > 0 ? `; ${changed} changed since the preview and were left` : ""),
+      );
       setRows(null);
       void qc.invalidateQueries();
     },

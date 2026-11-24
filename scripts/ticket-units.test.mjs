@@ -11,6 +11,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const T = await import("../src/lib/ops/ticket-units-api.ts");
 const E = await import("../src/lib/ops/account-equip-import.ts");
 const RET = await import("../src/lib/ops/account-equip-retire.ts");
@@ -97,7 +98,8 @@ test("a removed unit keeps its tickets for Put back; a merged unit's tickets fol
   const retired = (await sql.query("select id from account_equipment_retired where unit_id = $1", [u]))[0].id;
   await RET.restoreRetiredUnit(sql, Number(retired));
   assert.deepEqual((await T.unitServiceHistoryFor(sql, u, "u-owner")).map((x) => x.jobId), [job]);
-  const keep = await unit(sql, "Alpha Cafe", "Zz Brewer", "SN-1");
+  // An old duplicate, set up with the serial check off; the merge runs with it on (11/23).
+  const keep = await withDuplicates(sql, () => unit(sql, "Alpha Cafe", "Zz Brewer", "SN-1"));
   const job2 = await ticket(sql, "Alpha Cafe");
   await T.setTicketUnitsFor(sql, { jobId: job2, unitIds: [u, keep] }, "u-owner");
   await E.mergeEquipmentUnits(sql, keep, u);

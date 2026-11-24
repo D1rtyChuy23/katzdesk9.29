@@ -10,6 +10,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const { canMergeUnits, mergeRefusal } = await import("../src/lib/ops/account-equip.ts");
 const IMP = await import("../src/lib/ops/account-equip-import.ts");
 const { listRetiredUnits } = await import("../src/lib/ops/account-equip-retire.ts");
@@ -44,16 +45,17 @@ async function fresh() {
   await pg.query("insert into directory_equipment (name) values ($1)", [MODEL]);
   const run = async (t, p) => (await pg.query(t, p)).rows;
   const sql = Object.assign(async (strings, ...values) => run(strings.reduce((a, x, i) => `${a}$${i}${x}`), values), { query: run });
+  // Old duplicates, set up with the serial check off; the merge itself runs with it on (11/23).
   const unit = async (serial, o = {}) =>
     (
-      await pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by) values ($1, $2, $2, $3, $4, $5, $6) returning id", [
+      await withDuplicates(pg, () => pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, locked_at, locked_by) values ($1, $2, $2, $3, $4, $5, $6) returning id", [
         o.customer ?? SITE,
         MODEL,
         serial,
         serial ? serial.replace(/\s+/g, "").toLowerCase() : null,
         o.locked ? new Date() : null,
         o.locked ? "chuy" : null,
-      ])
+      ]))
     ).rows[0].id;
   return { pg, sql, unit };
 }
