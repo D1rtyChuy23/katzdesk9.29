@@ -346,6 +346,9 @@ export async function renameOrMergeCustomer(sql: Sql, id: number, nextRaw: strin
 }
 
 /** Does exactly what the plan says. Not one transaction: if it stops partway, renaming again finishes it. */
+/** Tables that carry the account's id beside its name (migration 0138, phase C1). */
+export const CUSTOMER_ID_TABLES = ["service_jobs", "pm_jobs", "installs", "deals", "recipes"] as const;
+
 async function applyPlanned(sql: Sql, { row, plan, merge }: Planned): Promise<RenameResult> {
   const id = row.id;
   if (plan.kind === "same") return { id: row.id, name: row.name, merged: false };
@@ -377,6 +380,9 @@ async function applyPlanned(sql: Sql, { row, plan, merge }: Planned): Promise<Re
     [kept.id, plan.name, dropped.id],
   );
   if (moveReps) await sql.query("update customer_sales_reps set customer_id = $1 where customer_id = $2", [kept.id, dropped.id]);
+  // Records linked by account id (migration 0138) follow the merge too: while names were rewritten above, the id a
+  // record found by name may have been either account's.
+  for (const table of CUSTOMER_ID_TABLES) await sql.query(`update ${table} set customer_id = $1 where customer_id = $2`, [kept.id, dropped.id]);
   return { id: kept.id, name: plan.name, merged: true, kept: plan.keep, filled: plan.filled };
 }
 
