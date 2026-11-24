@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { withPoMatches } from "@/lib/ops/ticket-po";
 import { PoLine } from "./po-fields";
 import { WoHistoryImportButton } from "@/components/desk/wo-history-import";
+import { HistoryLineCostImportButton } from "@/components/desk/history-line-cost-import";
 import { useBackTo, type TicketSearch, type TicketView } from "@/lib/ops/search-params";
 import { ImportPartsButton, UpdatePricingButton } from "@/components/desk/part-imports";
 import { SalesScopeNote } from "@/components/desk/sales-scope-note";
@@ -224,6 +225,7 @@ export function JobsPage({
             {kind === "service" && isAdmin ? <ImportPartsButton /> : null}
             {kind === "service" && isAdmin ? <UpdatePricingButton /> : null}
             {kind === "service" && isAdmin ? <WoHistoryImportButton /> : null}
+            {kind === "service" && isAdmin ? <HistoryLineCostImportButton /> : null}
           </ImportMenu>
           <ActionMenu label="Export">
             <BillingExportButton />

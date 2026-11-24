@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { History, Lock } from "lucide-react";
 import { getWoHistory, type WoHistoryDetail, type WoHistorySummary } from "@/lib/ops/wo-history-api";
-import { historyDay, historyTitle, isHistoryLabor } from "@/lib/ops/wo-history";
+import { COST_BASIS_LABEL, historyDay, historyTitle, isHistoryLabor, type CostBasis } from "@/lib/ops/wo-history";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -180,7 +180,7 @@ function InvoicePanel({ h }: { h: WoHistoryDetail }) {
                   {l.description ? <p className="text-xs text-muted-foreground">{l.description}</p> : null}
                   {!labor && l.part?.mpn ? <p className="text-xs text-muted-foreground">MPN {l.part.mpn}</p> : null}
                 </div>
-                <div className="grid shrink-0 grid-cols-3 gap-3 text-right text-sm tabular">
+                <div className={cn("grid shrink-0 gap-3 text-right text-sm tabular", l.cost ? "grid-cols-3 sm:grid-cols-5" : "grid-cols-3")}>
                   <div>
                     <p className="text-[11px] text-muted-foreground">{labor ? "Hours" : "Qty"}</p>
                     <p>{qtyText(l.qty)}</p>
@@ -193,6 +193,27 @@ function InvoicePanel({ h }: { h: WoHistoryDetail }) {
                     <p className="text-[11px] text-muted-foreground">Amount</p>
                     <p className="font-medium">{money(l.amount)}</p>
                   </div>
+                  {l.cost ? (
+                    <>
+                      <div data-testid="wo-history-line-cost">
+                        <p className="text-[11px] text-muted-foreground">Cost</p>
+                        <p>{l.cost.lineCost == null ? "—" : money(l.cost.lineCost)}</p>
+                        {l.cost.costFlag || (l.cost.costBasis && l.cost.costBasis !== "last_on_or_before") ? (
+                          <span
+                            className="mt-0.5 inline-block rounded bg-warning/15 px-1 text-[10px] text-warning"
+                            title={[l.cost.costBasis ? COST_BASIS_LABEL[l.cost.costBasis as CostBasis] : null, l.cost.costDate, l.cost.costFlag].filter(Boolean).join(" · ")}
+                            data-testid="wo-history-cost-flag"
+                          >
+                            {l.cost.costBasis === "first_after" ? "Later purchase" : l.cost.costBasis === "wtd_avg" ? "Avg" : "Flag"}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div data-testid="wo-history-line-profit">
+                        <p className="text-[11px] text-muted-foreground">Profit</p>
+                        <p>{l.cost.profit == null ? "—" : money(l.cost.profit)}</p>
+                      </div>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </li>
@@ -213,6 +234,35 @@ function InvoicePanel({ h }: { h: WoHistoryDetail }) {
           </div>
         ))}
       </dl>
+      {inv.cost ? (
+        <div className="rounded-lg border border-border p-3 text-sm" data-testid="wo-history-cost-totals">
+          <dl className="grid grid-cols-3 gap-2">
+            <div>
+              <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Cost</dt>
+              <dd className="font-medium tabular">{money(inv.cost.cost)}</dd>
+            </div>
+            {inv.cost.internal ? (
+              <div className="col-span-2 text-xs text-muted-foreground" data-testid="wo-history-internal">
+                Internal account, not in profit totals
+              </div>
+            ) : (
+              <>
+                <div>
+                  <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Profit after discount</dt>
+                  <dd className="font-medium tabular">{inv.cost.profit == null ? "—" : money(inv.cost.profit)}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Margin</dt>
+                  <dd className="font-medium tabular">{inv.cost.margin == null ? "—" : `${inv.cost.margin}%`}</dd>
+                </div>
+              </>
+            )}
+          </dl>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {inv.cost.note}. {inv.cost.costedLines} of {inv.cost.totalLines} lines costed.
+          </p>
+        </div>
+      ) : null}
       <p className="text-sm" data-testid="wo-history-qb-total">
         QuickBooks invoice total: <span className="font-medium tabular">{money(h.invoiceTotal)}</span>
         {inv.differs ? (
