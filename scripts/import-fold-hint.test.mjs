@@ -36,14 +36,15 @@ test("after the earlier row is unticked, the joining row reads the add wording, 
   assert.equal(o.offer, true);
   assert.doesNotMatch(o.hint.off, /fills Zz Swift Grinder #5, which has none/);
   assert.doesNotMatch(o.hint.on, /Zz Swift Grinder #5 stays/);
-  assert.match(o.hint.off, /isn't imported\. If Zz Dining S0319 has a Zz Swift Grinder with no serial, this row's serial fills it; otherwise it's added on its own\./);
-  assert.match(o.hint.on, /Adds this one on its own, even if/);
+  // The account has no other Zz Swift Grinder: the save adds it on its own (aloneMatch, 11/23).
+  assert.equal(r.aloneMatch, null);
+  assert.equal(o.hint.off, "The earlier row isn't imported, so this row is added on its own.");
 });
 
 test("the screen passes the earlier row's tick to the hint", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
-  assert.match(ui, /const earlierGoes = earlier \? goes\(earlier\) && asPreviewed\(earlier, drafts\[earlier\.key\]!\) : undefined;/);
-  assert.match(ui, /const offer = addInsteadOffer\(r, d, \{ earlierRowGoes: earlierGoes \}\);/);
+  assert.match(ui, /return !!e && goes\(e\) && asPreviewed\(e, drafts\[e\.key\]!\);/);
+  assert.match(ui, /const offer = addInsteadOffer\(r, d, \{ earlierRowGoes: r\.foldsInto \? earlierGoes\(r\) : undefined \}\);/);
 });
 
 async function db() {
@@ -79,10 +80,29 @@ test("review: on an account that already has a serial-less unit of the model, th
     await sql.query("insert into account_equipment (customer, catalog_model, equipment_name) values ($1, $2, 'Front Bar')", [CAFE, G]);
     const r = await IMP.applyAccountEquipImportFor(sql, { rows: [applyRow("r1", "Zz Swift Grinder #5", "C-1")] });
     assert.deepEqual([r.added, r.updated], [0, 1]);
-    const o = addInsteadOffer(rows()[1], draft, { earlierRowGoes: false });
-    assert.doesNotMatch(o.hint.off, /^The earlier row isn't imported, so/);
-    assert.match(o.hint.off, /fills it; otherwise/);
+    // The preview with Front Bar on the account names it: unticked, the joining row fills Front Bar, as the save does.
+    const withBlank = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #5", null), rec("Zz Swift Grinder #5", "C-1")], accounts, [G], [
+      { id: 1, customer: CAFE, catalogModel: G, equipmentName: "Front Bar", serial: null, serialKey: null },
+    ]);
+    assert.deepEqual(withBlank.map((x) => [x.action, x.foldsInto ?? null]), [["add", null], ["update", "r0"]]);
+    assert.deepEqual(withBlank[1].aloneMatch, { id: 1, name: "Front Bar", fills: true });
+    assert.equal(addInsteadOffer(withBlank[1], draft, { earlierRowGoes: false }).hint.off, "The earlier row isn't imported, so this row's serial fills Front Bar, which has none.");
   } finally {
     await pg.close();
   }
+});
+
+test("review: unticked, a joining row the save takes to an existing serial-less unit reads Update existing and names it", () => {
+  // The earlier row has no serial, so it is an add; Front Bar stays blank, and the joining row prefers its own name.
+  const rowsB = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder #5", null), rec("Zz Swift Grinder #5", "C-1")], accounts, [G], [
+    { id: 7, customer: CAFE, catalogModel: G, equipmentName: "Front Bar", serial: null, serialKey: null, lockedBy: null },
+  ]);
+  const r = rowsB[1];
+  assert.equal(r.foldsInto, "r0");
+  assert.deepEqual(r.aloneMatch, { id: 7, name: "Front Bar", fills: true });
+  const o = addInsteadOffer(r, draft, { earlierRowGoes: false });
+  assert.equal(o.hint.off, "The earlier row isn't imported, so this row's serial fills Front Bar, which has none.");
+  const ui = src("src/components/desk/account-equip-import.tsx");
+  assert.match(ui, /const aloneUpdate = \(r: EquipPreviewRow\) => !!r\.foldsInto && !earlierGoes\(r\) && !asNewRow\(r\) && !!r\.aloneMatch;/);
+  assert.match(ui, /\? aloneUpdate\(r\)\s+\? "Update existing"\s+: "Add new"/);
 });

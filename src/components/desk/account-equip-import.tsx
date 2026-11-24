@@ -286,10 +286,17 @@ function PreviewBody({
   };
   const asNewRow = (r: EquipPreviewRow) => !!drafts[r.key]?.addInstead && addInsteadOffer(r, drafts[r.key]!).offer;
   /** A row that folds into the unit an earlier row of the file adds, while that row is going (11/23). */
-  const folds = (r: EquipPreviewRow) => !!r.foldsInto && goes(rowByKey.get(r.foldsInto)) && !asNewRow(r);
+  /** The earlier row a joining row joins is going, with the account and model it was previewed with. */
+  const earlierGoes = (r: EquipPreviewRow) => {
+    const e = r.foldsInto ? rowByKey.get(r.foldsInto) : undefined;
+    return !!e && goes(e) && asPreviewed(e, drafts[e.key]!);
+  };
+  const folds = (r: EquipPreviewRow) => !!r.foldsInto && earlierGoes(r) && !asNewRow(r);
+  /** Without its earlier row, a joining row the save takes to an existing unit (11/23): an update, not an add. */
+  const aloneUpdate = (r: EquipPreviewRow) => !!r.foldsInto && !earlierGoes(r) && !asNewRow(r) && !!r.aloneMatch;
   // Without its earlier row, a folding row is an add of its own (review, 11/23).
-  const selectedAdds = preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || !!r.foldsInto)).length;
-  const selectedUpdates = preview.rows.filter((r) => goes(r) && r.action === "update" && !r.foldsInto && !asNewRow(r)).length;
+  const selectedAdds = preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || (!!r.foldsInto && !aloneUpdate(r)))).length;
+  const selectedUpdates = preview.rows.filter((r) => goes(r) && r.action === "update" && !asNewRow(r) && (!r.foldsInto || aloneUpdate(r))).length;
   /** Every ticked row the save is sent, a folding one included: it gates Confirm and the unticked count. */
   const selectedCount = preview.rows.filter((r) => goes(r)).length;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
@@ -458,9 +465,7 @@ function PreviewBody({
               const ready = rowReady(r, d);
               const needsReview = !ready;
               // A joining row's hint follows the earlier row's tick; the box and the save don't (11/23).
-              const earlier = r.foldsInto ? rowByKey.get(r.foldsInto) : undefined;
-              const earlierGoes = earlier ? goes(earlier) && asPreviewed(earlier, drafts[earlier.key]!) : undefined;
-              const offer = addInsteadOffer(r, d, { earlierRowGoes: earlierGoes });
+              const offer = addInsteadOffer(r, d, { earlierRowGoes: r.foldsInto ? earlierGoes(r) : undefined });
               const asNew = ready && offer.offer && !!d.addInstead;
               // A locked unit's Part # fill takes the row as previewed: it can't be pointed at another account or model.
               const showPickers = !r.lockedNote && (needsReview || !!editing[r.key]);
@@ -612,7 +617,9 @@ function PreviewBody({
                             : folds(r)
                               ? "Same unit as an earlier row"
                               : r.foldsInto
-                                ? "Add new"
+                                ? aloneUpdate(r)
+                                  ? "Update existing"
+                                  : "Add new"
                                 : r.action === "update"
                                 ? "Update existing"
                                 : "Matched"}

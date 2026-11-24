@@ -92,6 +92,11 @@ export type EquipPreviewRow = {
   fillBlankIf?: { byKey: string; id: number; name: string } | null;
   /** The row whose add this row folds into (an update of a unit added earlier in the same file), 11/23. */
   foldsInto?: string | null;
+  /**
+   * For a row that joins an earlier row's unit: the existing unit the save takes it to when that earlier row isn't
+   * imported (11/23). `fills` when that unit has no serial and takes this row's. Null: the row is added on its own.
+   */
+  aloneMatch?: { id: number; name: string; fills: boolean } | null;
   /** Why the row is held: Select all leaves it, and it is imported only when ticked on its own. */
   holdReasons: string[];
   action: "add" | "update" | "review" | "skip";
@@ -834,7 +839,23 @@ export function previewRowsInFileOrder(
       const blank = by ? original.get(alt.existingId!) : undefined;
       if (by && blank) row.fillBlankIf = { byKey: by.key, id: blank.id, name: (blank.equipmentName || blank.catalogModel || "").trim() };
     }
-    if (row.action === "update" && row.existingId != null && row.existingId < 0) row.foldsInto = tempOwner.get(row.existingId) ?? null;
+    if (row.action === "update" && row.existingId != null && row.existingId < 0) {
+      row.foldsInto = tempOwner.get(row.existingId) ?? null;
+      // Without the earlier row, the save matches this one against the account's own units as the rows before it
+      // left them (the same working list, without the units this file adds).
+      if (row.foldsInto && row.customer && row.catalogModel) {
+        const mineReal = working.filter((e) => e.id > 0 && normalizeCustomerKey(e.customer) === account);
+        const alone = matchExistingUnit({
+          customer: row.customer,
+          catalogModel: row.catalogModel,
+          equipmentName: rec.equipmentName.trim() || rec.model.trim() || row.catalogModel,
+          serial: row.serial,
+          existing: mineReal,
+        });
+        const hit = alone.action === "update" && alone.existingId != null && alone.existingId > 0 ? original.get(alone.existingId) : undefined;
+        row.aloneMatch = hit ? { id: hit.id, name: (hit.equipmentName || hit.catalogModel || "").trim(), fills: alone.matchKind === "fill-blank" } : null;
+      }
+    }
     const takes =
       (row.action === "add" || row.action === "update") && !row.holdReasons.length && !row.lockedNote && row.customer && row.catalogModel && !heldPairs.has(row.pairKey);
     if (takes) {

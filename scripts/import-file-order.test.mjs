@@ -93,7 +93,7 @@ test("the screen notes a row that may fill an earlier row's unit, and labels a r
   assert.doesNotMatch(ui, /effectiveRow/);
   assert.match(ui, /"Same unit as an earlier row"/);
   // A folding row counts as part of its earlier row's add only while that row goes; Confirm counts every ticked row.
-  assert.match(ui, /const folds = \(r: EquipPreviewRow\) => !!r\.foldsInto && goes\(rowByKey\.get\(r\.foldsInto\)\) && !asNewRow\(r\);/);
+  assert.match(ui, /const folds = \(r: EquipPreviewRow\) => !!r\.foldsInto && earlierGoes\(r\) && !asNewRow\(r\);/);
   assert.match(ui, /const selectedCount = preview\.rows\.filter\(\(r\) => goes\(r\)\)\.length;/);
   assert.match(ui, /r\.fillBlankIf && !needsReview && asPreviewed\(r, d\)/);
   const preview = src("src/lib/ops/account-equip-import.ts");
