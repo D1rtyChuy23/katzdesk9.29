@@ -18,12 +18,15 @@ async function before0138() {
   const pg = new PGlite();
   for (const f of files.filter((f) => f < C1)) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
   const q = async (t, p) => (await pg.query(t, p)).rows;
-  return { pg, q, run0138: () => pg.exec(readFileSync(new URL(C1, dir), "utf8")), sql: { query: q } };
+  const run0138 = async () => {
+    for (const f of files.filter((f) => f >= C1 && f < "0140")) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
+  };
+  return { pg, q, run0138, sql: { query: q } };
 }
 async function all() {
   const b = await before0138();
   await b.run0138();
-  for (const f of files.filter((f) => f > C1)) await b.pg.exec(readFileSync(new URL(f, dir), "utf8"));
+  for (const f of files.filter((f) => f >= "0140")) await b.pg.exec(readFileSync(new URL(f, dir), "utf8"));
   return b;
 }
 const accounts = async (q) => {
@@ -99,9 +102,9 @@ test("moving a record to another account moves its id; other edits leave it", as
     assert.equal(await idOf(q, "service_jobs", t.id), a["Zz Cafe"]);
     await q("update service_jobs set customer = 'Zz Bar-Grill' where id = $1", [t.id]);
     assert.equal(await idOf(q, "service_jobs", t.id), a["Zz Bar-Grill"]);
-    // A name that finds no account (a rename in progress) keeps the id it had.
+    // A name that finds no account: no id (review, 11/23: never the old account's).
     await q("update service_jobs set customer = 'Zz Bar & Grill Renamed' where id = $1", [t.id]);
-    assert.equal(await idOf(q, "service_jobs", t.id), a["Zz Bar-Grill"]);
+    assert.equal(await idOf(q, "service_jobs", t.id), null);
     // A statement that sets the id with the name keeps the id it set.
     await q("update service_jobs set customer = 'Zz Cafe', customer_id = $2 where id = $1", [t.id, a["Zz Twins"]]);
     assert.equal(await idOf(q, "service_jobs", t.id), a["Zz Twins"]);
@@ -147,9 +150,68 @@ test("Link Check shows the id links on the five tables", async () => {
     const { linkCheckFor } = await import("../src/lib/ops/link-check.ts");
     const r = await linkCheckFor(sql, "zz-admin");
     const t = r.nameLinks.find((l) => l.table === "service_jobs");
-    assert.deepEqual(t.ids, { linked: 2, unlinked: 1, disagree: 1 });
+    assert.deepEqual(t.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0 });
     assert.ok(r.nameLinks.find((l) => l.table === "installs").ids);
     assert.equal(r.nameLinks.find((l) => l.table === "account_equipment").ids, undefined);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: a PM moved to an unlisted name, and a recipe made a house template, have no id", async () => {
+  const { pg, q } = await all();
+  try {
+    const a = await accounts(q);
+    const [pm] = await q("insert into pm_jobs (customer) values ('Zz Cafe') returning id").catch(() => q("insert into pm_jobs (kind, customer) values ('pm', 'Zz Cafe') returning id"));
+    assert.equal(await idOf(q, "pm_jobs", pm.id), a["Zz Cafe"]);
+    await q("update pm_jobs set customer = 'Zz Somewhere Unlisted' where id = $1", [pm.id]);
+    assert.equal(await idOf(q, "pm_jobs", pm.id), null);
+    const [r] = await q("insert into recipes (name, equipment_model, customer) values ('r', 'Zz Grinder', 'Zz Cafe') returning id");
+    await q("update recipes set customer = null where id = $1", [r.id]);
+    assert.equal(await idOf(q, "recipes", r.id), null);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: an account added, restored or removed later links or unlinks the records under its name", async () => {
+  const { pg, q } = await all();
+  try {
+    await accounts(q);
+    const [t] = await ticket(q, "zz new place");
+    const [g] = await ticket(q, "Zz Gone");
+    assert.deepEqual([t.customer_id, g.customer_id], [null, null]);
+    const [{ id: added }] = await q("insert into directory_customers (name) values ('Zz New Place') returning id");
+    assert.equal(await idOf(q, "service_jobs", t.id), added);
+    const gone = (await q("select id from directory_customers where name = 'Zz Gone'"))[0].id;
+    await q("update directory_customers set archived = false where id = $1", [gone]);
+    assert.equal(await idOf(q, "service_jobs", g.id), gone);
+    await q("update directory_customers set archived = true where id = $1", [gone]);
+    assert.equal(await idOf(q, "service_jobs", g.id), null);
+    // Renaming an account onto a name unlinked records carry links them.
+    const [u] = await ticket(q, "Zz Someday");
+    await q("update directory_customers set name = 'Zz Someday' where id = $1", [added]);
+    assert.equal(await idOf(q, "service_jobs", u.id), added);
+    assert.equal(await idOf(q, "service_jobs", t.id), null, "the old name's records find no account now");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: merging onto a removed twin's name links the twin's records to the kept account", async () => {
+  const { pg, q, sql } = await all();
+  try {
+    const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
+    await q("insert into directory_customers (name, archived) values ('Zz Old', true), ('Zz New', false)");
+    const [o1] = await ticket(q, "Zz Old");
+    const [o2] = await ticket(q, "ZZ OLD");
+    const newId = (await q("select id from directory_customers where name = 'Zz New'"))[0].id;
+    const [n1] = await ticket(q, "Zz New");
+    const r = await renameOrMergeCustomer(sql, newId, "Zz Old", { force: true });
+    const ids = await Promise.all([o1, o2, n1].map((t) => idOf(q, "service_jobs", t.id)));
+    assert.deepEqual(ids, [r.id, r.id, r.id]);
+    const active = (await q("select id from directory_customers where id = $1 and archived = false", [r.id])).length;
+    assert.equal(active, 1);
   } finally {
     await pg.close();
   }

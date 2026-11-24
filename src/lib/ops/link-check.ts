@@ -130,7 +130,7 @@ export type NameLinkReport = {
    * Tables linked by account id (phase C1 on): rows with an id, without one (a name that isn't blank or walk-in), and
    * rows whose id's account has another name than the row (after a rename these should be none).
    */
-  ids?: { linked: number; unlinked: number; disagree: number };
+  ids?: { linked: number; unlinked: number; disagree: number; onRemoved: number };
   /** Up to 50 names each, most rows first. */
   samples: { none: NameSample[]; several: NameSample[]; loose: NameSample[]; archived: NameSample[]; trimmed: NameSample[] };
 };
@@ -247,11 +247,12 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
           `select count(*) filter (where t.customer_id is not null)::int as linked,
                   count(*) filter (where t.customer_id is null and coalesce(btrim(t.customer), '') <> ''
                                      and regexp_replace(lower(t.customer), '[^a-z0-9]+', '', 'g') <> 'walkin')::int as unlinked,
-                  count(*) filter (where d.id is not null and lower(btrim(d.name)) <> lower(btrim(coalesce(t.customer, ''))))::int as disagree
+                  count(*) filter (where d.id is not null and lower(btrim(d.name)) <> lower(btrim(coalesce(t.customer, ''))))::int as disagree,
+                  count(*) filter (where d.archived)::int as on_removed
              from ${link.table} t left join directory_customers d on d.id = t.customer_id`,
         )
       )[0]!;
-      report.ids = { linked: n(ids.linked), unlinked: n(ids.unlinked), disagree: n(ids.disagree) };
+      report.ids = { linked: n(ids.linked), unlinked: n(ids.unlinked), disagree: n(ids.disagree), onRemoved: n(ids.on_removed) };
     }
     nameLinks.push(report);
   }
