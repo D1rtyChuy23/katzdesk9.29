@@ -1024,6 +1024,12 @@ export function importInsertUnitsSql(count: number): string {
 }
 
 /** The body of applyAccountEquipImport: the confirmed rows, matched again here against the units as they are now. */
+/** Another real unit holds this key as the database reads it (its stored key, or its serial when it has none). */
+function storedKeyHeld(existing: ExistingUnit[], key: string | null, self: number | null | undefined): boolean {
+  if (!key || key.length < 3) return false;
+  return existing.some((e) => e.id > 0 && e.id !== self && (e.serialKey ? e.serialKey === key : serialKey(e.serial) === key));
+}
+
 export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>): Promise<EquipApplyResult>;
 export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>, opts: { dryRun: true }): Promise<EquipImportPlan>;
 export async function applyAccountEquipImportFor(
@@ -1153,6 +1159,13 @@ export async function applyAccountEquipImportFor(
         continue;
       }
       const target = existing.find((e) => e.id === unit.existingId);
+      // The dry run can't hear the database refuse a serial another unit holds by its stored key (migration 0137): it
+      // looks, and skips the row as the save's catch would (review, 11/23).
+      if (dry && storedKeyHeld(existing, key, unit.existingId)) {
+        skipped += 1;
+        plan[row.key] = { outcome: "skip" };
+        continue;
+      }
       try {
         if (!dry) await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
       } catch (e) {
@@ -1198,6 +1211,12 @@ export async function applyAccountEquipImportFor(
     added += 1;
     tempOwner.set(tempId, row.key);
     plan[row.key] = { outcome: "add" };
+    // As the save: the unit is listed for the rows after it, and the insert at the end is refused (counted skipped).
+    if (dry && storedKeyHeld(existing, key, tempId)) {
+      added -= 1;
+      skipped += 1;
+      plan[row.key] = { outcome: "skip" };
+    }
   }
 
   if (dry) return { added, updated, skipped, catalogAdded, partsFilled, plan };

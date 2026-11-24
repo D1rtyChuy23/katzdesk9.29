@@ -53,7 +53,7 @@ test("a later row whose unit an earlier row now takes is an add", async () => {
   assert.deepEqual([plan.plan.r1.outcome, plan.plan.r2.outcome], ["update", "add"]);
 });
 
-test("three rows of one name, the first unticked: the third joins the second", async () => {
+test("rows r0 (unticked), r1 no serial, r2 C-1 of one name: r2 joins r1, not Front Bar", async () => {
   const { plan } = await both(frontBar, [row("r1", "G #5", null), row("r2", "G #5", "C-1")]);
   assert.deepEqual(plan.plan, { r1: { outcome: "add" }, r2: { outcome: "join", joins: "r1" } });
 });
@@ -88,4 +88,33 @@ test("the dry run doesn't add a new catalog model or fill a locked unit's Part #
   } finally {
     await pg.close();
   }
+});
+
+test("review: a serial another unit holds by its stored key: the dry run skips the row as the save does", async () => {
+  const stale = async (sql) => {
+    await frontBar(sql);
+    await sql.query("insert into directory_customers (name) values ('Zz Other Cafe')");
+    // Its serial reads XYZ999 but its stored key says abc123 (old data).
+    await sql.query("alter table account_equipment disable trigger account_equipment_serial_guard");
+    await sql.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Zz Other Cafe', $1, 'Old', 'XYZ999', 'abc123')", [G]);
+    await sql.query("alter table account_equipment enable trigger account_equipment_serial_guard");
+  };
+  const { plan } = await both(stale, [row("r1", "G #5", "ABC123"), row("r2", "G #6", "ABC-777")]);
+  assert.deepEqual([plan.plan.r1.outcome, plan.plan.r2.outcome], ["skip", "update"]);
+  const { plan: p2 } = await both(async (sql) => {
+    await sql.query("insert into directory_customers (name) values ('Zz Other Cafe')");
+    await sql.query("alter table account_equipment disable trigger account_equipment_serial_guard");
+    await sql.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Zz Other Cafe', $1, 'Old', 'XYZ999', 'abc123')", [G]);
+    await sql.query("alter table account_equipment enable trigger account_equipment_serial_guard");
+  }, [row("r1", "G #5", "ABC123")]);
+  assert.deepEqual([p2.added, p2.skipped, p2.plan.r1.outcome], [0, 1, "skip"]);
+});
+
+test("review: the screen takes the earlier row's going from the dry run, and notes only rows as previewed", () => {
+  const ui = src("src/components/desk/account-equip-import.tsx");
+  assert.match(ui, /\? !!earlierPlan && \(earlierPlan\.outcome === "add" \|\| earlierPlan\.outcome === "join"\)/);
+  assert.match(ui, /const offer = addInsteadOffer\(shownRow, d, \{ earlierRowGoes: earlierGoing \}\);/);
+  assert.match(ui, /else if \(p && p\.outcome === "update" && p\.fills && r\.fillBlank\) shownRow = \{ \.\.\.r, fillBlank: \{ \.\.\.r\.fillBlank, name: p\.unit \} \};/);
+  assert.match(ui, /p && previewedHere && !r\.foldsInto && !d\.addInstead && r\.fillBlank && p\.outcome === "add"/);
+  assert.match(ui, /const sent = useMemo\(rowsToSend, \[preview\.rows, drafts, decisions, equipment\.items\]\);/);
 });
