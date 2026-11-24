@@ -1198,15 +1198,23 @@ export const countsAsCostable = (kind: string, lineCost: number | null) =>
   (ALWAYS_COSTED_KINDS as readonly string[]).includes(kind) || (kind !== "discount" && !isHistoryLabor(kind) && lineCost != null);
 
 /**
- * An invoice's known cost, how many of the lines that count (countsAsCostable) have one, its profit after the discount
- * (every line's sell, less the discount, less the known cost), and the sell of the counted lines with no cost yet.
+ * An invoice's known cost, how many of the lines that count (countsAsCostable) have one, whether any is missing, its
+ * profit after the discount (every line's sell, less the discount, less the cost: only when none is missing), and the
+ * sell of the counted lines with no cost yet.
  */
-export function historyInvoiceCost(lines: CostedLine[], discount: number): { cost: number; costedLines: number; totalLines: number; subtotal: number; profit: number; uncostedSell: number } {
+export function historyInvoiceCost(
+  lines: CostedLine[],
+  discount: number,
+): { cost: number; costedLines: number; totalLines: number; subtotal: number; partial: boolean; profit: number | null; uncostedSell: number } {
   const items = lines.filter((l) => l.kind !== "discount");
   const subtotal = round2(items.reduce((s, l) => s + (l.amount ?? 0), 0));
   const costable = items.filter((l) => countsAsCostable(l.kind, l.lineCost));
   const costed = costable.filter((l) => l.lineCost != null);
   const cost = round2(costed.reduce((s, l) => s + (l.lineCost ?? 0), 0));
   const uncostedSell = round2(costable.filter((l) => l.lineCost == null).reduce((s, l) => s + (l.amount ?? 0), 0));
-  return { cost, costedLines: costed.length, totalLines: costable.length, subtotal, profit: round2(subtotal - discount - cost), uncostedSell };
+  // The Profit report's rule (groupTotals, billProfitTotals): an invoice has a profit only when every line that needs a
+  // cost has one, so a part with no cost never counts its whole sell as profit (Jesus, 11/24). Labor and trip only is
+  // fully costed, at cost 0.
+  const partial = costed.length < costable.length;
+  return { cost, costedLines: costed.length, totalLines: costable.length, subtotal, partial, profit: partial ? null : round2(subtotal - discount - cost), uncostedSell };
 }

@@ -96,11 +96,26 @@ export type HistoryBill = {
   discount: number;
   /** Cost known (parts and equipment, and any other line the file costed). */
   cost: number;
-  /** Sell of parts, filters and equipment with no cost yet. */
-  uncostedSell: number;
+  /** Some line that needs a cost has none: no profit, and its net goes to Uncosted Sell. */
+  partial: boolean;
+  /** Sell − discount − cost; null when partial. */
+  profit: number | null;
 };
 
-export type HistoryTotals = { bills: number; sell: number; discount: number; cost: number; profit: number; uncostedSell: number };
+/**
+ * Like groupTotals: cost and profit add up the fully costed bills only, Margin % is profit over their net, and the
+ * partial bills' net is Uncosted Sell.
+ */
+export type HistoryTotals = {
+  bills: number;
+  sell: number;
+  discount: number;
+  cost: number;
+  profit: number;
+  marginPct: number | null;
+  uncostedSell: number;
+  partialBills: number;
+};
 
 export type HistorySection = {
   byYear: (HistoryTotals & { key: string; label: string })[];
@@ -108,15 +123,27 @@ export type HistorySection = {
   totals: HistoryTotals;
   /** Left out: Service Dept (internal), and work orders whose ticket already counts above as a billed ticket. */
   excluded: { serviceDept: number; billedTicket: number };
+  /** Labor lines, and their share of each discount, left out (the person's labor switch is off). */
+  laborHidden: boolean;
   note: string;
 };
 
 export function historyTotals(bills: HistoryBill[]): HistoryTotals {
-  const sum = (f: (b: HistoryBill) => number) => round2(bills.reduce((a, b) => a + f(b), 0));
-  const sell = sum((b) => b.sell);
-  const discount = sum((b) => b.discount);
-  const cost = sum((b) => b.cost);
-  return { bills: bills.length, sell, discount, cost, profit: round2(sell - discount - cost), uncostedSell: sum((b) => b.uncostedSell) };
+  const sum = (list: HistoryBill[], f: (b: HistoryBill) => number) => round2(list.reduce((a, b) => a + f(b), 0));
+  const costed = bills.filter((b) => !b.partial && b.profit != null);
+  const partial = bills.filter((b) => b.partial || b.profit == null);
+  const profit = sum(costed, (b) => b.profit ?? 0);
+  const costedNet = sum(costed, (b) => b.sell - b.discount);
+  return {
+    bills: bills.length,
+    sell: sum(bills, (b) => b.sell),
+    discount: sum(bills, (b) => b.discount),
+    cost: sum(costed, (b) => b.cost),
+    profit,
+    marginPct: costedNet > 0 ? round2((profit / costedNet) * 100) : null,
+    uncostedSell: sum(partial, (b) => b.sell - b.discount),
+    partialBills: partial.length,
+  };
 }
 
 function historyGroup(bills: HistoryBill[], key: (b: HistoryBill) => string, label: (b: HistoryBill) => string) {
@@ -125,12 +152,16 @@ function historyGroup(bills: HistoryBill[], key: (b: HistoryBill) => string, lab
   return [...by.entries()].map(([k, list]) => ({ key: k, label: label(list[0]!), ...historyTotals(list) }));
 }
 
-export function historySection(bills: HistoryBill[], excluded: { serviceDept: number; billedTicket: number }): HistorySection {
+export function historySection(bills: HistoryBill[], excluded: { serviceDept: number; billedTicket: number }, opts: { laborHidden?: boolean } = {}): HistorySection {
+  const partial = bills.filter((b) => b.partial || b.profit == null).length;
   const left = [
+    opts.laborHidden ? "labor not shown" : null,
+    partial ? `${partial} partial ${partial === 1 ? "bill" : "bills"}: ${partial === 1 ? "its" : "their"} sell is in Uncosted Sell` : null,
     excluded.serviceDept ? `${excluded.serviceDept} Service Dept left out (internal account)` : null,
     excluded.billedTicket ? `${excluded.billedTicket} left out: its ticket already counts above as a billed ticket` : null,
   ].filter(Boolean);
   return {
+    laborHidden: !!opts.laborHidden,
     // Oldest year first; a work order with no date last.
     byYear: historyGroup(bills, (b) => b.year, (b) => b.year || "(no date)").sort((a, b) => (a.key || "9999").localeCompare(b.key || "9999")),
     byCustomer: historyGroup(bills, (b) => b.customerKey, (b) => b.customer).sort((a, b) => b.sell - a.sell || a.key.localeCompare(b.key)),
@@ -140,13 +171,13 @@ export function historySection(bills: HistoryBill[], excluded: { serviceDept: nu
   };
 }
 
-const HISTORY_COLUMNS = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount", "Uncosted Sell"];
-const HISTORY_WEIGHTS = [50, 80, 80, 80, 90, 80];
+const HISTORY_COLUMNS = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount (costed bills)", "Margin %", "Uncosted Sell", "Partial Bills"];
+const HISTORY_WEIGHTS = [50, 80, 80, 80, 100, 60, 80, 60];
 
 /** The history section as two download tables: by year (with the total), and by customer. */
 export function historyReportTables(h: HistorySection) {
   const m = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-  const cells = (g: HistoryTotals) => [String(g.bills), m(g.sell), m(g.discount), m(g.cost), m(g.profit), m(g.uncostedSell)];
+  const cells = (g: HistoryTotals) => [String(g.bills), m(g.sell), m(g.discount), m(g.cost), m(g.profit), g.marginPct == null ? "—" : `${g.marginPct}%`, m(g.uncostedSell), String(g.partialBills)];
   return [
     { title: `${HISTORY_SECTION_TITLE}: By Year`, sheet: "QB History By Year", columns: ["Year", ...HISTORY_COLUMNS], weights: [60, ...HISTORY_WEIGHTS], rows: [...h.byYear.map((g) => [g.label, ...cells(g)]), ["Total", ...cells(h.totals)]] },
     { title: `${HISTORY_SECTION_TITLE}: By Customer`, sheet: "QB History By Customer", columns: ["Customer", ...HISTORY_COLUMNS], weights: [140, ...HISTORY_WEIGHTS], rows: h.byCustomer.map((g) => [g.label || "(none)", ...cells(g)]) },

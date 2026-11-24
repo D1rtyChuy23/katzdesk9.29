@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PartThumb } from "./part-thumb";
+
+/** Why a partial invoice shows no profit or margin (Jesus, 11/24). */
+const NOT_EVERY_PART = "Not every part line has a cost yet";
 import { cn } from "@/lib/utils";
 
 const money = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString("en-US", { style: "currency", currency: "USD" }));
@@ -249,15 +252,27 @@ function InvoicePanel({ h }: { h: WoHistoryDetail }) {
               <>
                 <div>
                   <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Profit after discount</dt>
-                  <dd className="font-medium tabular">{inv.cost.profit == null ? "—" : money(inv.cost.profit)}</dd>
+                  <dd className="font-medium tabular" title={inv.cost.partial ? NOT_EVERY_PART : undefined}>
+                    {inv.cost.profit == null ? "—" : money(inv.cost.profit)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">Margin</dt>
-                  <dd className="font-medium tabular">{inv.cost.margin == null ? "—" : `${inv.cost.margin}%`}</dd>
+                  <dd className="font-medium tabular" title={inv.cost.partial ? NOT_EVERY_PART : undefined}>
+                    {inv.cost.margin == null ? "—" : `${inv.cost.margin}%`}
+                  </dd>
                 </div>
               </>
             )}
           </dl>
+          {inv.cost.partial && !inv.cost.internal ? (
+            <p className="mt-2 flex flex-wrap items-center gap-2 text-xs" data-testid="wo-history-partial">
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">Partial</span>
+              <span className="text-muted-foreground">
+                {inv.cost.costedLines} of {inv.cost.totalLines} lines costed · {money(inv.cost.uncostedSell)} sell with no cost yet. {NOT_EVERY_PART}.
+              </span>
+            </p>
+          ) : null}
           <p className="mt-1 text-xs text-muted-foreground">
             {inv.cost.note}. {inv.cost.costedLines} of {inv.cost.totalLines} lines costed.
           </p>

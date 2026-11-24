@@ -129,6 +129,7 @@ export function HistoryLineCostImportButton() {
     mutationFn: async () => {
       const rows: CostSaveRow[] = ticked.map((l) => ({
         lineId: l.lineId!,
+        ref: l.row.ref,
         sort: l.row.sort,
         lineType: l.row.lineType,
         itemCode: l.row.itemCode,
