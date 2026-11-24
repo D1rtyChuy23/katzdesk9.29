@@ -9,6 +9,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const IMP = await import("../src/lib/ops/account-equip-import.ts");
 const R = await import("../src/lib/ops/account-equip-retire.ts");
 const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
@@ -27,9 +28,12 @@ async function fresh() {
   const unit = async (customer, model, serial, extra = {}) =>
     Number(
       (
-        await query(
-          "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date, ownership, part_number) values ($1, $2, $2, $3, $4, $5, $6, $7) returning id",
-          [customer, model, serial, serial ? serial.toLowerCase() : null, extra.installDate ?? null, extra.ownership ?? null, extra.partNumber ?? null],
+        // Old duplicates may be set up here: the check is off for the fixture's own insert (11/23).
+        await withDuplicates(pg, () =>
+          query(
+            "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date, ownership, part_number) values ($1, $2, $2, $3, $4, $5, $6, $7) returning id",
+            [customer, model, serial, serial ? serial.toLowerCase() : null, extra.installDate ?? null, extra.ownership ?? null, extra.partNumber ?? null],
+          ),
         )
       )[0].id,
     );
