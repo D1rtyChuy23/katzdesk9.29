@@ -72,9 +72,11 @@ export async function applySerialNormalizeFor(
   sql: Sql,
   userId: string,
   data: { rows: { unitId: number; oldSerial: string }[] },
-): Promise<{ written: number[] }> {
+): Promise<{ written: number[]; refused: number[] }> {
   await assertAdmin(sql, userId);
   const written: number[] = [];
+  /** Units left because another unit has the cleaned serial (migration 0137): the preview's "Same serial on". */
+  const refused: number[] = [];
   for (const r of data.rows) {
     const newSerial = parseSerial(r.oldSerial);
     if (!newSerial) continue;
@@ -87,12 +89,15 @@ export async function applySerialNormalizeFor(
       );
     } catch (e) {
       // Another unit has that serial (migration 0137): this one is left, the rest are still written.
-      if (serialClashMessage(e)) continue;
+      if (serialClashMessage(e)) {
+        refused.push(r.unitId);
+        continue;
+      }
       throw e;
     }
     if (out[0]) written.push(Number(out[0].id));
   }
-  return { written };
+  return { written, refused };
 }
 
 const ready = async () => {

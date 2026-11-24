@@ -534,6 +534,18 @@ export async function pullSerial(sql: Sql, userId: string, data: SerialPullInput
             moveAsked: true,
           };
         }
+        // A second unit with this serial (old data) would block the new account's unit after the old one came off: the
+        // move is refused before anything moves (review, 11/23, migration 0137).
+        const second = (
+          await sql.query<{ customer: string; name: string | null }>(
+            `select customer, coalesce(nullif(btrim(equipment_name), ''), catalog_model) as name from account_equipment
+              where katz_serial_counts($1) and id <> $2
+                and (serial_key = $1 or (coalesce(serial_key, '') = '' and katz_serial_key(serial) = $1))
+              limit 1`,
+            [serialKey(shown), accountHit.id],
+          )
+        )[0];
+        if (second) throw new Error(`Serial ${shown} is also on ${second.customer}${second.name ? ` (${second.name})` : ""}. Merge or fix that one first, then move it.`);
         const before = (
           await sql.query<{ equipment: string | null; serial: string | null; power_voltage: string | null; machines: string | null; wo: string | null }>(
             "select equipment, serial, power_voltage, machines, wo from installs where id = $1",

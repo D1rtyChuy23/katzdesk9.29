@@ -183,6 +183,7 @@ test("serial cleanup leaves a unit whose cleaned serial another unit has, and wr
     const r = await applySerialNormalizeFor(sql, "zz-admin", { rows: [{ unitId: stale.id, oldSerial: await stored(stale.id) }, { unitId: ok.id, oldSerial: await stored(ok.id) }] });
     // The stale unit's cleaned key is the one Zz Cafe A has: left as it was. The other is written.
     assert.deepEqual(r.written, [ok.id]);
+    assert.deepEqual(r.refused, [stale.id]);
     assert.equal((await q("select serial_key from account_equipment where id = $1", [stale.id]))[0].serial_key, "stale-key");
   } finally {
     await pg.close();
@@ -198,7 +199,7 @@ test("serialClashMessage reads the refusal and nothing else", () => {
 
 test("serial cleanup catches the refusal per unit", () => {
   const src = readFileSync(new URL("../src/lib/ops/serial-normalize.ts", import.meta.url), "utf8");
-  assert.match(src, /if \(serialClashMessage\(e\)\) continue;/);
+  assert.match(src, /if \(serialClashMessage\(e\)\) \{\n\s+refused\.push\(r\.unitId\);\n\s+continue;/);
 });
 
 const sqlOf = (pg) => {
@@ -243,6 +244,104 @@ test("a pre-inspection whose list has a serial on another account still opens; t
     const onB = await q("select serial from account_equipment where customer = 'Zz Cafe B' order by id");
     assert.deepEqual(onB.map((r) => r.serial), ["ZZ-200"]);
     assert.equal((await q("select count(*)::int as n from account_equipment where serial_key = 'zz-100'"))[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: Merge counts a unit stored without its key, and the merge is all or nothing", async () => {
+  const { pg, q } = await db();
+  try {
+    const { mergeEquipmentUnits } = await import("../src/lib/ops/account-equip-import.ts");
+    const { withDuplicates } = await import("./dup-fixture.mjs");
+    const sql = sqlOf(pg);
+    await unit(q, "Zz Cafe Y", "Grinder", "QQ-900", null);
+    const [keep] = await unit(q, "Zz Cafe A", "Grinder", null, null);
+    const [drop] = await withDuplicates(pg, () => unit(q, "Zz Cafe A", "Grinder", "QQ-900"));
+    await assert.rejects(mergeEquipmentUnits(sql, keep.id, drop.id), /Serial QQ-900 is also on Zz Cafe Y \(Grinder\)/);
+    assert.deepEqual((await q("select id, serial from account_equipment where customer = 'Zz Cafe A' order by id")).map((r) => [r.id, r.serial]), [
+      [keep.id, null],
+      [drop.id, "QQ-900"],
+    ]);
+    assert.equal((await q("select count(*)::int as n from account_equipment_retired"))[0].n, 0);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: Merge takes a 2-character leftover or a placeholder even when another unit has the same", async () => {
+  const { pg, q } = await db();
+  try {
+    const { mergeEquipmentUnits } = await import("../src/lib/ops/account-equip-import.ts");
+    const sql = sqlOf(pg);
+    await unit(q, "Zz Cafe X", "Grinder", "L");
+    await unit(q, "Zz Cafe X", "Grinder", "N/A", "n/a");
+    for (const s of ["L", "N/A"]) {
+      const [keep] = await unit(q, "Zz Cafe A", "Grinder", null, null);
+      const [drop] = await unit(q, "Zz Cafe A", "Grinder", s, s.toLowerCase());
+      await mergeEquipmentUnits(sql, keep.id, drop.id);
+    }
+    assert.equal((await q("select count(*)::int as n from account_equipment where customer = 'Zz Cafe A'"))[0].n, 2);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: the pre-inspection says where the serial is, and loading again doesn't try the refused insert", async () => {
+  const { pg, q } = await db();
+  try {
+    const { readInspection } = await import("../src/lib/ops/inspection-api.ts");
+    const sql = sqlOf(pg);
+    await q("insert into directory_customers (name) values ('Zz Cafe A'), ('Zz Cafe B')");
+    await unit(q, "Zz Cafe A", "Grinder #1", "ZZ-100");
+    const id = (await q("insert into installs (customer, equipment, machines) values ('Zz Cafe B', 'Zz Grinder', $1) returning id", [JSON.stringify([{ equipment: "Zz Grinder", serial: "ZZ-100", powerVoltage: "" }])]))[0].id;
+    const seq = async () => (await q("select last_value::int as v from account_equipment_id_seq"))[0].v;
+    const before = await seq();
+    await readInspection(sql, id);
+    await readInspection(sql, id);
+    assert.equal(await seq(), before, "no insert was tried");
+    assert.equal((await q("select serial_notice from installs where id = $1", [id]))[0].serial_notice, "SN ZZ-100 is already on Zz Cafe A (Grinder #1), so it isn't added to Zz Cafe B. Fix the serial, or move that unit.");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: the database key is the desk's key: a no-break space, full-width letters and invisible characters", async () => {
+  const { pg, q } = await db();
+  try {
+    for (const [a, b] of [
+      ["AB 123", "AB 123"],
+      ["ABC123", "ＡＢＣ１２３"],
+      ["XY-55", "XY-​55"],
+    ]) {
+      const tsA = AE.serialKey(a);
+      assert.equal(tsA, AE.serialKey(b), `${a} / ${b} in the desk`);
+      assert.equal((await q("select katz_serial_key($1) as k", [b]))[0].k, tsA);
+      await asset(q, a);
+      await refused(asset(q, b));
+    }
+    for (const p of ["TBD", "No serial", "???"]) {
+      await unit(q, "Zz Cafe A", "G", p, AE.serialKey(p));
+      await unit(q, "Zz Cafe B", "G", p, AE.serialKey(p));
+    }
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: an import row refused by the database is skipped and the rest of the file saves", async () => {
+  const { pg, q } = await db();
+  try {
+    const IMP = await import("../src/lib/ops/account-equip-import.ts");
+    const sql = sqlOf(pg);
+    await q("insert into directory_customers (name) values ('Zz Cafe A'), ('Zz Cafe B')");
+    await q("insert into directory_equipment (name) values ('Zz Grinder')");
+    // An old unit whose stored key is out of date: its serial reads AA-1, its key says bb-2.
+    await unit(q, "Zz Cafe A", "Grinder", "AA-1", "bb-2");
+    const row = (key, serial) => ({ key, fileCustomer: "Zz Cafe B", customer: "Zz Cafe B", equipmentName: `Grinder ${key}`, fileModel: "Zz Grinder", catalogModel: "Zz Grinder", serial, installDate: null, ownership: null, action: "add", existingId: null });
+    const r = await IMP.applyAccountEquipImportFor(sql, { rows: [row("r0", "CC-3"), row("r1", "BB-2"), row("r2", "DD-4")] });
+    assert.deepEqual([r.added, r.skipped], [2, 1]);
+    assert.deepEqual((await q("select serial from account_equipment where customer = 'Zz Cafe B' order by id")).map((x) => x.serial), ["CC-3", "DD-4"]);
   } finally {
     await pg.close();
   }

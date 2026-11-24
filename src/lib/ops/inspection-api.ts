@@ -328,6 +328,26 @@ async function dropUnusedUnit(sql: Sql, id: number, opts?: { madeBy?: number }):
     .catch(() => undefined);
 }
 
+/** Where a serial already is, by the database's serial rule (migration 0137), or null. */
+async function serialHeldElsewhere(sql: Sql, serial: string | null | undefined): Promise<string | null> {
+  const key = serialKey(serial);
+  if (!key) return null;
+  const hit = (
+    await sql.query<{ customer: string; name: string | null }>(
+      `select customer, coalesce(nullif(btrim(equipment_name), ''), catalog_model) as name from account_equipment
+        where katz_serial_counts($1) and (serial_key = $1 or (coalesce(serial_key, '') = '' and katz_serial_key(serial) = $1))
+        order by id limit 1`,
+      [key],
+    )
+  )[0];
+  return hit ? `${hit.customer}${hit.name ? ` (${hit.name})` : ""}` : null;
+}
+
+/** The install's serial notice, written only when it changes (a load may run this). */
+async function noteSerialHeld(sql: Sql, installId: number, notice: string): Promise<void> {
+  await sql.query("update installs set serial_notice = $2 where id = $1 and serial_notice is distinct from $2", [installId, notice]);
+}
+
 async function insertEquipment(
   sql: Sql,
   installId: number,
@@ -1214,11 +1234,17 @@ export async function syncInstallUnits(
     }
     let id = hit?.id;
     if (!id) {
+      // Its serial is on another unit (old data, or an install made from a deal: a save of such a row is refused before
+      // it gets here). Looked up first, by the database's rule, so a load doesn't try a refused insert every time; the
+      // row stays on the install with no unit, as a skipped row does, and the install says where the serial is (11/23).
+      const held = await serialHeldElsewhere(sql, piece.serial);
+      if (held) {
+        await noteSerialHeld(sql, installId, `SN ${piece.serial.trim()} is already on ${held}, so it isn't added to ${row.customer}. Fix the serial, or move that unit.`);
+        continue;
+      }
       try {
         id = await insertEquipment(sql, installId, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
       } catch (e) {
-        // Its serial is on another unit (migration 0137, old data: a save of such a row is refused before it gets here).
-        // The row stays on the install with no unit, as a skipped row does, and the window still opens.
         if (serialClashMessage(e)) continue;
         throw e;
       }

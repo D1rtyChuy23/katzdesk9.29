@@ -3,8 +3,8 @@
 -- a serial is never refused).
 --
 -- Two serials are the same when they read the same after trimming, spaces and "#", any case: the key the desk matches
--- by (serialKey in src/lib/ops/account-equip.ts). Placeholders ("N/A", "none", "-") and keys under 3 characters are no
--- serial, as on the duplicate list.
+-- by (serialKey in src/lib/ops/account-equip.ts). Placeholders ("N/A", "none", "TBD", "-") and keys under 3
+-- characters are no serial.
 --
 -- 1. Customer machines (account_equipment): a serial another customer machine has is refused.
 -- 2. Warehouse records (assets): a serial another warehouse record that isn't sold has is refused. A sold record is
@@ -14,14 +14,17 @@
 -- The checks run when the save is committed (deferred constraint triggers), so one statement that takes a serial off
 -- one unit and puts it on another passes. The error has SQLSTATE KZ001 (src/lib/ops/serial-guard.ts).
 
+-- The same as SERIAL_KEY_SQL in src/lib/ops/account-equip.ts (NFKC first, so a no-break space is a space).
 create or replace function katz_serial_key(raw text) returns text language sql immutable as $$
-  select nullif(lower(regexp_replace(btrim(coalesce(raw, '')), '[#[:space:]​‌‍⁠﻿­]', '', 'g')), '')
+  select nullif(lower(regexp_replace(regexp_replace(normalize(btrim(coalesce(raw, '')), NFKC), '[​-‍⁠﻿­]', '', 'g'), '[#[:space:]]', '', 'g')), '')
 $$;
 
--- A key that counts as a serial: not a placeholder, at least 3 characters.
+-- A key that counts as a serial: at least 3 characters, a letter or digit in it, and not a placeholder people type for
+-- "no serial" (review, 11/23: "TBD", "No serial").
 create or replace function katz_serial_counts(k text) returns boolean language sql immutable as $$
-  select k is not null and length(k) >= 3
-     and k not in ('n/a', 'na', 'none', 'null', 'unknown', 'notavailable', 'notavail', '-', '—', '–')
+  select k is not null and length(k) >= 3 and k ~ '[[:alnum:]]'
+     and k not in ('n/a', 'na', 'none', 'null', 'unknown', 'notavailable', 'notavail', 'tbd', 'tba', 'noserial', 'nosn',
+                   'nos/n', 'n/s', 'missing', 'unk', 'notlisted', 'notfound', 'noserialnumber', 'unreadable', 'illegible')
 $$;
 
 create or replace function account_equipment_serial_guard() returns trigger language plpgsql as $$
