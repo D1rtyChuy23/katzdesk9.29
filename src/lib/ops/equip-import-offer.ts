@@ -16,6 +16,8 @@ export type OfferRow = {
   fillBlankIf?: { id: number; name: string } | null;
   /** The earlier row of the file whose added unit this row joins (11/23). */
   foldsInto?: string | null;
+  /** Where the save takes a joining row when its earlier row isn't imported (11/23). */
+  aloneMatch?: { id: number; name: string; fills: boolean } | null;
 };
 
 /** The row's account and model as the preview matched them (not changed on the screen). */
@@ -38,16 +40,21 @@ export function addInsteadOffer(
   if (!row.serial?.trim() || row.lockedNote || row.foreignAccount || row.action === "skip") return none;
   const previewed = asPreviewed(row, draft);
   if (row.fillBlank && previewed && row.foldsInto && opts.earlierRowGoes === false) {
-    // The save matches the row again on its own: it may still fill another serial-less unit (review, 11/23).
-    const model = draft.catalogModel.trim() || "this model";
-    const account = draft.customer.trim() || "the account";
-    return {
-      offer: true,
-      hint: {
-        on: `The earlier row isn't imported. Adds this one on its own, even if ${account} has a ${model} with no serial.`,
-        off: `The earlier row isn't imported. If ${account} has a ${model} with no serial, this row's serial fills it; otherwise it's added on its own.`,
-      },
-    };
+    // The save matches the row again on its own: the preview worked out where that takes it (aloneMatch, 11/23).
+    const alone = row.aloneMatch;
+    if (alone?.fills) {
+      const name = alone.name || "the unit with no serial";
+      return {
+        offer: true,
+        hint: { on: `The earlier row isn't imported. Adds this one on its own; ${name} stays as it is.`, off: `The earlier row isn't imported, so this row's serial fills ${name}, which has none.` },
+      };
+    }
+    if (alone) {
+      const name = alone.name || "the unit";
+      return { offer: true, hint: { on: `The earlier row isn't imported. Adds this one on its own; ${name} stays as it is.`, off: `The earlier row isn't imported, so this row updates ${name}.` } };
+    }
+    const alone2 = "The earlier row isn't imported, so this row is added on its own.";
+    return { offer: true, hint: { on: alone2, off: alone2 } };
   }
   if (row.fillBlank && previewed) {
     const name = row.fillBlank.name || "the unit with no serial";
