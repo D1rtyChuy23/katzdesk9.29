@@ -32,7 +32,7 @@
   ],
   "kits": [
     { "ev": "EV108358", "name": "Brew module Standard", "module": "Brew module", "interval": 12, "qty": 1,
-      "note": "Cameo brew kit (tube 108149 is 320 mm). Not the Enigma kit EV117077." },
+      "note": "Cameo brew kit (tube 108149, Ø4/Ø2, 320 mm). Not the Enigma kit EV117077." },
     { "ev": "EV108304", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36, "qty": 1,
       "note": "Now 36 months; 100281 removed." },
     { "ev": "EV102865", "name": "Hydraulic add-on (C'choco / automatic hot cleaning)", "module": "Hydraulic module", "interval": 36, "qty": 1,
@@ -75,7 +75,7 @@
       "when": { "model": ["2ms"], "step15": ["yes"] }, "note": "Cut tubes to the machine's dimensions." },
 
     { "ev": "EV109706", "name": "C'choco Standard", "module": "C'choco", "interval": 12, "qty": 1,
-      "when": { "choco": ["yes"] }, "note": "O-ring 118259 x2 in the V4.0 kit." }
+      "when": { "choco": ["yes"] }, "note": "O-ring 118259 x2 (Ø6.07x1.78) in the V4.0 kit." }
   ],
   "steps": [
     { "module": "Grinder module", "items": [
@@ -109,7 +109,7 @@
     { "module": "Frame", "items": [
       { "id": "frame-std", "text": "Fit EV108359.", "ref": "Manual p.18", "when": { "pm": ["36"] } },
       { "id": "frame-kit", "text": "Fit the frame add-on listed in section 2 (EV108351 or EV108364).", "ref": "Manual p.18", "when": { "model": ["2ms"] } },
-      { "id": "frame-tubes", "text": "Cut hose 104719 to length (270 mm + 55 mm). Clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.18", "when": { "model": ["2ms"] } }
+      { "id": "frame-tubes", "text": "Cut silicone hose 104719 (Ø9/3, 1 m) to length (270 mm + 55 mm). Clean the 1.5-Step outlet, the fitting silicone pipe and the aerator.", "ref": "Manual p.18", "when": { "model": ["2ms"] } }
     ] },
     { "module": "C'choco", "when": { "choco": ["yes"] }, "items": [
       { "id": "choco-kit", "text": "Fit EV109706.", "ref": "Manual p.20" }
@@ -126,7 +126,7 @@
       ["EV108340, EV108359, EV108312, EV108391", "Same numbers", "Now 36 months. EV108359 contents changed."],
       ["EV102865", "Same number", "C'choco / auto hot cleaning add-on: 102167 and 100217 removed; now 36 months."],
       ["EV108339", "Same number", "Filter 101326 removed. Steam injector now 117430."],
-      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 (Ø6.07x1.78) added (x2)."],
       ["EV108341", "None", "Cold foam add-on. Deleted."],
       ["EV108348, EV108349, EV108352", "None", "Frame outlet V1, outlet V2 and inlet V1 add-ons. Deleted."],
       ["EV114994, EV115575", "None", "Americano and banjo fitting add-ons. Deleted (banjo plug EV114733 is current)."],

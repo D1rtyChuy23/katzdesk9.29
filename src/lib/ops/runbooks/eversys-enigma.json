@@ -41,7 +41,7 @@
   "kits": [
     { "ev": "EV117077", "name": "Brew module Standard", "module": "Brew module", "interval": 12,
       "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
-      "note": "One per brew unit. Includes tubes 108153 (245 mm) and 104528 (180 mm)." },
+      "note": "One per brew unit. Includes tube 108153 (Ø4/Ø2, 245 mm) and tube 104528 (Ø4/Ø2, 180 mm)." },
     { "ev": "EV109586", "name": "Hydraulic module Standard", "module": "Hydraulic module", "interval": 36,
       "qty": { "by": "model", "map": { "2c": 1, "2s": 1, "2ms": 1, "4s": 2, "4ms": 2, "6s": 3, "6ms": 3 } },
       "note": "Now 36 months." },
@@ -97,9 +97,9 @@
       "when": { "model": ["4ms", "6ms"], "steps": ["2"] }, "note": "Cut tubes to the machine's dimensions." },
 
     { "ev": "EV109706", "name": "E'choco Standard", "module": "E'choco", "interval": 12, "qty": 1,
-      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 in the V4.0 kit." },
+      "when": { "choco": ["1", "2"] }, "note": "O-ring 118259 x2 (Ø6.07x1.78) in the V4.0 kit." },
     { "ev": "EV111934", "name": "E'choco add-on, 2 outlets", "module": "E'choco", "interval": 12, "qty": 1,
-      "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms"] }, "note": "Silicone pipe 110301 x2 (cut from 1 m pipe 111629)." }
+      "when": { "choco": ["2"], "model": ["4ms", "6s", "6ms"] }, "note": "Silicone pipe 110301 x2 (Ø9/6, 70 mm, cut from 1 m pipe 111629)." }
   ],
   "steps": [
     { "module": "Grinder module", "items": [
@@ -149,14 +149,14 @@
       ["EV108391, EV108312", "Same numbers", "Everfoam and milk steam add-ons now 36 months."],
       ["EV109568, EV109570, EV108390", "Same numbers", "Hot water / tea add-ons now 36 months; 102167 and 100217 removed. EV109568 is automatic hot water (the US shop title \"PR. VALVE/24M\" is out of date)."],
       ["EV108339", "Same number", "Filter 101326 removed. Steam injector now 117430."],
-      ["EV109706", "Same number", "101667 removed, O-ring 118259 added (x2)."],
+      ["EV109706", "Same number", "101667 removed, O-ring 118259 (Ø6.07x1.78) added (x2)."],
       ["EV114467", "None", "Grinder Standard 24 mo. Deleted."],
       ["EV110005, EV108349", "None", "Frame Standard 24 mo and outlet V2. Deleted."]
     ],
     "contents": [
       "EV109586 Hydraulic Standard: now 36 months.",
       "EV108339 Milk Standard: filter 101326 removed; steam injector 117430.",
-      "EV109706 E'choco Standard: 101667 removed, 118259 O-ring x2 added.",
+      "EV109706 E'choco Standard: 101667 removed, O-ring 118259 (Ø6.07x1.78) x2 added.",
       "EV109568, EV109570, EV108390 hot water kits: 102167 and 100217 removed; PTFE seal 100544 x2."
     ]
   },
