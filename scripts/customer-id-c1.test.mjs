@@ -152,7 +152,9 @@ test("Link Check shows the id links on the five tables", async () => {
     const t = r.nameLinks.find((l) => l.table === "service_jobs");
     assert.deepEqual(t.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0, offRule: 1 });
     assert.ok(r.nameLinks.find((l) => l.table === "installs").ids);
-    assert.equal(r.nameLinks.find((l) => l.table === "account_equipment").ids, undefined);
+    // Phase C2 links account equipment too; a column with no id beside it still has none.
+    assert.ok(r.nameLinks.find((l) => l.table === "account_equipment").ids);
+    assert.equal(r.nameLinks.find((l) => l.table === "wo_history").ids, undefined);
   } finally {
     await pg.close();
   }

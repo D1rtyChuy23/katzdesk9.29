@@ -11,23 +11,30 @@ import { isWalkIn, normalizeCustomerKey } from "@/lib/ops/customer-key";
 export const LINK_CHECK_ADMIN_ONLY = "Link Check is for admins: sign in as an admin to see it.";
 
 /** A table and the column that stores a customer by name. `rewritten`: rename and merge rewrite it today. */
-export type NameLink = { table: string; column: string; label: string; rewritten: boolean };
+export type NameLink = {
+  table: string;
+  column: string;
+  label: string;
+  rewritten: boolean;
+  /** The account id beside this name (phases C1 and C2), when it has one. */
+  idColumn?: string;
+};
 
 export const NAME_LINKS: NameLink[] = [
-  { table: "service_jobs", column: "customer", label: "Tickets", rewritten: true },
-  { table: "pm_jobs", column: "customer", label: "PMs", rewritten: true },
-  { table: "installs", column: "customer", label: "Installs", rewritten: true },
-  { table: "deals", column: "customer", label: "Deals", rewritten: true },
-  { table: "recipes", column: "customer", label: "Recipes", rewritten: true },
-  { table: "account_equipment", column: "customer", label: "Account equipment", rewritten: true },
-  { table: "account_equipment_retired", column: "customer", label: "Retired equipment", rewritten: true },
-  { table: "assets", column: "customer_owned", label: "Warehouse: customer-owned", rewritten: true },
-  { table: "assets", column: "sold_to", label: "Warehouse: sold to", rewritten: true },
-  { table: "assets", column: "stock_hold_customer", label: "Warehouse: held for", rewritten: true },
+  { table: "service_jobs", column: "customer", label: "Tickets", rewritten: true, idColumn: "customer_id" },
+  { table: "pm_jobs", column: "customer", label: "PMs", rewritten: true, idColumn: "customer_id" },
+  { table: "installs", column: "customer", label: "Installs", rewritten: true, idColumn: "customer_id" },
+  { table: "deals", column: "customer", label: "Deals", rewritten: true, idColumn: "customer_id" },
+  { table: "recipes", column: "customer", label: "Recipes", rewritten: true, idColumn: "customer_id" },
+  { table: "account_equipment", column: "customer", label: "Account equipment", rewritten: true, idColumn: "customer_id" },
+  { table: "account_equipment_retired", column: "customer", label: "Retired equipment", rewritten: true, idColumn: "customer_id" },
+  { table: "assets", column: "customer_owned", label: "Warehouse: customer-owned", rewritten: true, idColumn: "customer_owned_id" },
+  { table: "assets", column: "sold_to", label: "Warehouse: sold to", rewritten: true, idColumn: "sold_to_id" },
+  { table: "assets", column: "stock_hold_customer", label: "Warehouse: held for", rewritten: true, idColumn: "stock_hold_customer_id" },
   // Rename rewrites only the pending ones; decided ones keep the old name.
-  { table: "asset_stock_actions", column: "customer", label: "Stock actions (pending only renamed)", rewritten: false },
-  { table: "rebuilds", column: "account", label: "Rebuilds", rewritten: true },
-  { table: "modules", column: "assigned_customer", label: "Modules", rewritten: true },
+  { table: "asset_stock_actions", column: "customer", label: "Stock actions (pending only renamed)", rewritten: false, idColumn: "customer_id" },
+  { table: "rebuilds", column: "account", label: "Rebuilds", rewritten: true, idColumn: "account_id" },
+  { table: "modules", column: "assigned_customer", label: "Modules", rewritten: true, idColumn: "assigned_customer_id" },
   { table: "modules", column: "location", label: "Modules: location", rewritten: true },
   { table: "directory_customers", column: "parent_account", label: "Accounts: parent account", rewritten: false },
   { table: "wo_history", column: "customer", label: "Work order history", rewritten: true },
@@ -127,7 +134,7 @@ export type NameLinkReport = {
   /** Rows whose one listed account is Inactive or Retired (they link, but the account takes no new work). */
   inactiveRows: number;
   /**
-   * Tables linked by account id (phase C1 on): rows with an id, without one (a name that isn't blank or walk-in), and
+   * Columns linked by account id (phases C1 and C2): rows with an id, without one (a name that isn't blank or walk-in), and
    * rows whose id's account has another name than the row (after a rename these should be none).
    */
   /** `offRule`: rows whose id isn't what the rule gives for their name now (should be none). */
@@ -242,16 +249,19 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
       `select ${link.column}::text as name, count(*)::int as n from ${link.table} group by 1`,
     );
     const report = reportNameLink(link, counts.map((c) => ({ name: c.name, n: n(c.n) })), ix);
-    if (link.column === "customer" && has(link.table, "customer_id")) {
+    if (link.idColumn && has(link.table, link.idColumn)) {
+      // Column names come from NAME_LINKS above, never from a request.
+      const name = `t.${link.column}`;
+      const id = `t.${link.idColumn}`;
       const ids = (
         await sql.query<Record<string, number>>(
-          `select count(*) filter (where t.customer_id is not null)::int as linked,
-                  count(*) filter (where t.customer_id is null and coalesce(btrim(t.customer), '') <> ''
-                                     and regexp_replace(lower(t.customer), '[^a-z0-9]+', '', 'g') <> 'walkin')::int as unlinked,
-                  count(*) filter (where d.id is not null and lower(btrim(d.name)) <> lower(btrim(coalesce(t.customer, ''))))::int as disagree,
+          `select count(*) filter (where ${id} is not null)::int as linked,
+                  count(*) filter (where ${id} is null and coalesce(btrim(${name}), '') <> ''
+                                     and regexp_replace(lower(${name}), '[^a-z0-9]+', '', 'g') <> 'walkin')::int as unlinked,
+                  count(*) filter (where d.id is not null and lower(btrim(d.name)) <> lower(btrim(coalesce(${name}, ''))))::int as disagree,
                   count(*) filter (where d.archived)::int as on_removed,
-                  count(*) filter (where t.customer_id is distinct from katz_customer_id(t.customer))::int as off_rule
-             from ${link.table} t left join directory_customers d on d.id = t.customer_id`,
+                  count(*) filter (where ${id} is distinct from katz_customer_id(${name}))::int as off_rule
+             from ${link.table} t left join directory_customers d on d.id = ${id}`,
         )
       )[0]!;
       report.ids = { linked: n(ids.linked), unlinked: n(ids.unlinked), disagree: n(ids.disagree), onRemoved: n(ids.on_removed), offRule: n(ids.off_rule) };
