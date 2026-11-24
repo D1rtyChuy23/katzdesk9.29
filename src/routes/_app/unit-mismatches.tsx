@@ -30,6 +30,12 @@ function Page() {
           ("L") that a unit already on the account likely is. Nothing here changes on its own: open the install, and on its
           Equipment tab add each machine to the list, take it off the pre-inspection, or link it to the unit it is.
         </p>
+        <p className="mt-1 text-sm">
+          <Link to="/link-check" className="underline underline-offset-2" data-testid="link-check-link">
+            Link Check
+          </Link>{" "}
+          <span className="text-muted-foreground">(admins): how every record points at customers and machines.</span>
+        </p>
       </header>
 
       {q.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Checking every install…</p> : null}

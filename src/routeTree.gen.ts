@@ -22,6 +22,7 @@ import { Route as AppHandoffRouteImport } from './routes/_app/handoff'
 import { Route as AppInstallsRouteImport } from './routes/_app/installs'
 import { Route as AppInvoicesRouteImport } from './routes/_app/invoices'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
+import { Route as AppLinkCheckRouteImport } from './routes/_app/link-check'
 import { Route as AppLocationsRouteImport } from './routes/_app/locations'
 import { Route as AppMapRouteImport } from './routes/_app/map'
 import { Route as AppModulesRouteImport } from './routes/_app/modules'
@@ -109,6 +110,11 @@ const AppInvoicesRoute = AppInvoicesRouteImport.update({
 const AppLibraryRoute = AppLibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLinkCheckRoute = AppLinkCheckRouteImport.update({
+  id: '/link-check',
+  path: '/link-check',
   getParentRoute: () => AppRoute,
 } as any)
 const AppLocationsRoute = AppLocationsRouteImport.update({
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/installs': typeof AppInstallsRoute
   '/invoices': typeof AppInvoicesRoute
   '/library': typeof AppLibraryRoute
+  '/link-check': typeof AppLinkCheckRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
   '/modules': typeof AppModulesRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/installs': typeof AppInstallsRoute
   '/invoices': typeof AppInvoicesRoute
   '/library': typeof AppLibraryRoute
+  '/link-check': typeof AppLinkCheckRoute
   '/locations': typeof AppLocationsRoute
   '/map': typeof AppMapRoute
   '/modules': typeof AppModulesRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/_app/installs': typeof AppInstallsRoute
   '/_app/invoices': typeof AppInvoicesRoute
   '/_app/library': typeof AppLibraryRoute
+  '/_app/link-check': typeof AppLinkCheckRoute
   '/_app/locations': typeof AppLocationsRoute
   '/_app/map': typeof AppMapRoute
   '/_app/modules': typeof AppModulesRoute
@@ -364,6 +373,7 @@ export interface FileRouteTypes {
     | '/installs'
     | '/invoices'
     | '/library'
+    | '/link-check'
     | '/locations'
     | '/map'
     | '/modules'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/installs'
     | '/invoices'
     | '/library'
+    | '/link-check'
     | '/locations'
     | '/map'
     | '/modules'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/_app/installs'
     | '/_app/invoices'
     | '/_app/library'
+    | '/_app/link-check'
     | '/_app/locations'
     | '/_app/map'
     | '/_app/modules'
@@ -570,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof AppLibraryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/link-check': {
+      id: '/_app/link-check'
+      path: '/link-check'
+      fullPath: '/link-check'
+      preLoaderRoute: typeof AppLinkCheckRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/locations': {
@@ -754,6 +773,7 @@ interface AppRouteChildren {
   AppInstallsRoute: typeof AppInstallsRoute
   AppInvoicesRoute: typeof AppInvoicesRoute
   AppLibraryRoute: typeof AppLibraryRoute
+  AppLinkCheckRoute: typeof AppLinkCheckRoute
   AppLocationsRoute: typeof AppLocationsRoute
   AppMapRoute: typeof AppMapRoute
   AppModulesRoute: typeof AppModulesRoute
@@ -785,6 +805,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInstallsRoute: AppInstallsRoute,
   AppInvoicesRoute: AppInvoicesRoute,
   AppLibraryRoute: AppLibraryRoute,
+  AppLinkCheckRoute: AppLinkCheckRoute,
   AppLocationsRoute: AppLocationsRoute,
   AppMapRoute: AppMapRoute,
   AppModulesRoute: AppModulesRoute,
