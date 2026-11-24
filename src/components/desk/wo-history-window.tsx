@@ -274,7 +274,7 @@ function InvoicePanel({ h }: { h: WoHistoryDetail }) {
             </p>
           ) : null}
           <p className="mt-1 text-xs text-muted-foreground">
-            {inv.cost.note}. {inv.cost.costedLines} of {inv.cost.totalLines} lines costed.
+            {inv.cost.note}.{inv.cost.partial && !inv.cost.internal ? "" : ` ${inv.cost.costedLines} of ${inv.cost.totalLines} lines costed.`}
           </p>
         </div>
       ) : null}
