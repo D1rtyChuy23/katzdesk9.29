@@ -4,6 +4,7 @@
  * whose serial or key would change, from what to what, and any other account with the same serial; it writes nothing.
  * Apply writes only the previewed units whose serial is still what the preview read.
  */
+import { serialClashMessage } from "@/lib/ops/serial-guard";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
@@ -77,11 +78,18 @@ export async function applySerialNormalizeFor(
   for (const r of data.rows) {
     const newSerial = parseSerial(r.oldSerial);
     if (!newSerial) continue;
-    const out = await sql.query<{ id: number }>(
-      `update account_equipment set serial = $3, serial_key = $4, updated_at = now()
-        where id = $1 and serial = $2 and locked_at is null returning id`,
-      [r.unitId, r.oldSerial, newSerial, serialKey(r.oldSerial) || null],
-    );
+    let out: { id: number }[];
+    try {
+      out = await sql.query<{ id: number }>(
+        `update account_equipment set serial = $3, serial_key = $4, updated_at = now()
+          where id = $1 and serial = $2 and locked_at is null returning id`,
+        [r.unitId, r.oldSerial, newSerial, serialKey(r.oldSerial) || null],
+      );
+    } catch (e) {
+      // Another unit has that serial (migration 0137): this one is left, the rest are still written.
+      if (serialClashMessage(e)) continue;
+      throw e;
+    }
     if (out[0]) written.push(Number(out[0].id));
   }
   return { written };
