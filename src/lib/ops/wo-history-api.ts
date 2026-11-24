@@ -1084,9 +1084,9 @@ export type WoHistorySummary = {
   locationNeeded: boolean;
   /**
    * Only for cost viewers (Settings → Who Sees Cost and Margin, 11/24): the known QuickBooks parts cost and profit after
-   * the discount. Profit is null on Katz Coffee Service Dept. (an internal account, left out of profit) or with no lines.
+   * the discount. Profit is null on Katz Coffee Service Dept. (an internal account, left out of profit), with no lines, or
+   * when partial: some line that needs a cost has none (Jesus, 11/24).
    */
-  /** partial: some line that needs a cost has none, so there's no profit (Jesus, 11/24). */
   cost?: { cost: number; profit: number | null; costedLines: number; totalLines: number; partial: boolean; internal: boolean };
 };
 
@@ -1189,8 +1189,10 @@ export type WoHistoryDetail = WoHistorySummary & {
     total: number;
     invoiceDate: string | null;
     differs: boolean;
-    /** Only for cost viewers: known parts cost, lines costed, and profit after the discount (null on Service Dept.). */
-    /** partial: some line that needs a cost has none, so profit and margin are null and uncostedSell is that sell. */
+    /**
+     * Only for cost viewers: known parts cost, lines costed, and profit after the discount (null on Service Dept.).
+     * partial: some line that needs a cost has none, so profit and margin are null and uncostedSell is that sell.
+     */
     cost?: { cost: number; costedLines: number; totalLines: number; partial: boolean; uncostedSell: number; profit: number | null; margin: number | null; internal: boolean; note: string };
   } | null;
 };

@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PartThumb } from "./part-thumb";
+import { cn } from "@/lib/utils";
 
 /** Why a partial invoice shows no profit or margin (Jesus, 11/24). */
 const NOT_EVERY_PART = "Not every part line has a cost yet";
-import { cn } from "@/lib/utils";
 
 const money = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString("en-US", { style: "currency", currency: "USD" }));
 const day = (s: string | null | undefined) => (s ? historyDay(s.slice(0, 10)) : "—");

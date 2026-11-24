@@ -1277,9 +1277,23 @@ test("history profit: with labor hidden, labor's sell and its share of the disco
   assert.match(off.note, /labor not shown/);
 });
 
-test("history profit: the profit report passes the labor switch to the history section", async () => {
-  const src = (await import("node:fs")).readFileSync(new URL("../src/lib/ops/profit-report-api.ts", import.meta.url), "utf8");
-  assert.match(src, /historyProfitSection\(sql, f, \{ laborHidden \}\)/);
+test("history profit: the profit report and its download follow each person's labor switch", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history set invoice_date = '2026-07-24' where history_ref = $1", [WO]);
+  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('zz-admin', 'zzadmin', true, true, 'admin'), ('zz-svc', 'zzsvc', true, false, 'service')");
+  // Service sees cost; the labor switch is off (the default).
+  await pg.query(`insert into desk_settings (key, value, updated_at) values ('cost_visible_roles', '["service"]', now()), ('cost_options', '{"showLabor":false}', now())`);
+  const R = await import("../src/lib/ops/profit-report-api.ts");
+  const y2026 = (r) => r.history.byYear.find((g) => g.key === "2026");
+  const svc = await R.profitReportFor(sql, {}, "zz-svc");
+  assert.deepEqual([svc.laborHidden, y2026(svc).sell, y2026(svc).discount, y2026(svc).profit], [true, 190, 19, 147]);
+  assert.match(svc.history.note, /labor not shown/);
+  const admin = await R.profitReportFor(sql, {}, "zz-admin");
+  assert.deepEqual([admin.laborHidden, y2026(admin).sell, y2026(admin).profit], [false, 415, 349.5]);
+  const file = await R.profitReportFileFor(sql, { filters: {}, format: "xlsx" }, "zz-svc");
+  assert.ok(file.base64.length > 0, "the download builds from the same report");
 });
 
 test("history profit: a partial invoice has no profit in the account list or the invoice panel", async () => {
@@ -1305,6 +1319,9 @@ test("history profit: a partial invoice has no profit in the account list or the
   const internal = await api.historyDetail(sql, wid, { showCost: true });
   assert.deepEqual([internal.invoice.cost.internal, internal.invoice.cost.profit], [true, null]);
   assert.equal((await api.historyDetail(sql, wid)).invoice.cost, undefined);
+  const internalRow = (await api.accountHistory(sql, "Katz Coffee Service Dept.", { showCost: true })).find((h) => h.ref === WO);
+  assert.deepEqual([internalRow.cost.internal, internalRow.cost.profit], [true, null]);
+  assert.ok((await api.accountHistory(sql, "Alpha Cafe")).every((h) => h.cost === undefined), "no cost for a non-cost viewer");
 });
 
 test("cost save guard: a line on another History Ref is skipped; the right ref fills; a blank ref is refused", async () => {

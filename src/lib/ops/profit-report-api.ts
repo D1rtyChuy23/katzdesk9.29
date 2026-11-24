@@ -252,7 +252,9 @@ export const getProfitReport = createServerFn({ method: "POST" })
 /** The body of downloadProfitReport: the same report as a PDF, Excel or Word file. */
 export async function profitReportFileFor(sql: Sql, data: { filters: Filters; format: ExportFormat }, userId: string): Promise<{ filename: string; mime: string; base64: string; records: number }> {
   const r = await profitReportFor(sql, data.filters, userId);
-  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: `${r.scope}. QuickBooks history: ${r.history.note}` });
+  // "labor not shown" is already in the scope; the history note doesn't say it again.
+  const historyNote = r.history.note.split(" · ").filter((p) => p !== "labor not shown").join(" · ");
+  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: `${r.scope}. QuickBooks history: ${historyNote}` });
   const filename = profitReportFileName(todayChicago(), data.format);
   const mime = EXPORT_FORMATS.find((x) => x.format === data.format)!.mime;
   const records = report.records.rows.length;
