@@ -25,7 +25,9 @@ import { costView } from "@/lib/ops/cost-access";
 import { discountFromRow } from "@/lib/ops/discount";
 import { billProfit, type LineCostTable } from "@/lib/ops/line-cost";
 import type { BillProfitTotals } from "@/lib/ops/part-pricing";
-import { COSTED_FROM, JOB_TYPES, buildProfitReportFile, groupBy, groupTotals, profitReportFileName, type GroupTotals, type ProfitBill } from "@/lib/ops/profit-report";
+import { COSTED_FROM, JOB_TYPES, buildProfitReportFile, groupBy, groupTotals, historySection, profitReportFileName, type GroupTotals, type HistoryBill, type HistorySection, type ProfitBill } from "@/lib/ops/profit-report";
+import { historyInvoiceCost } from "@/lib/ops/wo-history";
+import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
 import { reportDocx, reportPdf } from "@/lib/ops/report-files";
 
 async function ready(): Promise<Sql> {
@@ -47,6 +49,8 @@ export type ProfitReport = {
   scope: string;
   /** Labor is left out for this person (the labor switch is off). */
   laborHidden: boolean;
+  /** QuickBooks history (2024–2026), its own section: never in byType, byCustomer or totals. */
+  history: HistorySection;
 };
 
 export const REFUSED = "Profit shows cost and margin, so it's for Admins and the roles ticked in Settings → Who Sees Cost and Margin.";
@@ -139,6 +143,55 @@ async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLab
   return out;
 }
 
+/**
+ * The QuickBooks history section (Jesus, 11/24): each Work Order History invoice in the range (its invoice date, else
+ * completed), with the parts cost the line-cost import filled. Leaves out Service Dept, and any work order whose
+ * ticket already counts in this report as a billed ticket, so nothing is counted twice.
+ */
+export async function historyProfitSection(sql: Sql, f: Filters, billedTickets: Set<number>): Promise<HistorySection> {
+  const DAY = "coalesce(h.invoice_date, h.completed::date)";
+  const rows = await sql.query<{ id: number; customer: string; job_id: number | null; day: string | null }>(
+    `select h.id, h.customer, h.job_id, to_char(${DAY}, 'YYYY-MM-DD') as day
+       from wo_history h
+      where exists (select 1 from wo_history_lines l where l.history_id = h.id)
+        and ($1::date is null or ${DAY} >= $1::date)
+        and ($2::date is null or ${DAY} <= $2::date)
+      order by h.id`,
+    [f.from ?? null, f.to ?? null],
+  );
+  const lines = await sql.query<{ history_id: number; kind: string; amount: string | null; line_cost: string | null }>(
+    `select l.history_id, l.kind, l.amount::text as amount, l.line_cost::text as line_cost
+       from wo_history_lines l join wo_history h on h.id = l.history_id
+      where ($1::date is null or ${DAY} >= $1::date)
+        and ($2::date is null or ${DAY} <= $2::date)`,
+    [f.from ?? null, f.to ?? null],
+  );
+  const num = (v: string | null) => (v == null ? null : Number(v));
+  const byId = new Map<number, { kind: string; amount: number | null; lineCost: number | null }[]>();
+  for (const l of lines) {
+    const id = Number(l.history_id);
+    byId.set(id, [...(byId.get(id) ?? []), { kind: l.kind, amount: num(l.amount), lineCost: num(l.line_cost) }]);
+  }
+  const bills: HistoryBill[] = [];
+  const excluded = { serviceDept: 0, billedTicket: 0 };
+  for (const r of rows) {
+    if (isServiceDeptAccount(r.customer)) {
+      excluded.serviceDept += 1;
+      continue;
+    }
+    if (r.job_id != null && billedTickets.has(Number(r.job_id))) {
+      excluded.billedTicket += 1;
+      continue;
+    }
+    // The discount from its Discount lines, as the invoice panel shows it (a positive number).
+    const own = byId.get(Number(r.id)) ?? [];
+    const discount = Math.round(-own.filter((l) => l.kind === "discount").reduce((n, l) => n + (l.amount ?? 0), 0) * 100) / 100;
+    const c = historyInvoiceCost(own, discount);
+    bills.push({ year: r.day ? r.day.slice(0, 4) : "", customer: r.customer.trim(), customerKey: normalizeCustomerKey(r.customer), sell: c.subtotal, discount, cost: c.cost, uncostedSell: c.uncostedSell });
+  }
+  return historySection(bills, excluded);
+}
+
 const niceDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 /** The body of getProfitReport. */
@@ -156,12 +209,14 @@ export async function profitReportFor(sql: Sql, f: Filters, userId: string): Pro
     laborHidden ? "labor not shown" : null,
     "a PM billed on a ticket counts with the ticket",
   ].filter(Boolean);
+  const history = await historyProfitSection(sql, f, new Set(tickets.map((t) => t.id)));
   return {
     byType: groupBy(bills, (b) => b.type, JOB_TYPES.map((t) => t.key)),
     byCustomer: groupBy(bills, (b) => b.customerKey, undefined, (b) => b.customer),
     totals,
     scope: `${range} · ${notes.join(" · ")}`,
     laborHidden,
+    history,
   };
 }
 
@@ -173,7 +228,7 @@ export const getProfitReport = createServerFn({ method: "POST" })
 /** The body of downloadProfitReport: the same report as a PDF, Excel or Word file. */
 export async function profitReportFileFor(sql: Sql, data: { filters: Filters; format: ExportFormat }, userId: string): Promise<{ filename: string; mime: string; base64: string; records: number }> {
   const r = await profitReportFor(sql, data.filters, userId);
-  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: r.scope });
+  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: `${r.scope}. QuickBooks history: ${r.history.note}` });
   const filename = profitReportFileName(todayChicago(), data.format);
   const mime = EXPORT_FORMATS.find((x) => x.format === data.format)!.mime;
   const records = report.records.rows.length;

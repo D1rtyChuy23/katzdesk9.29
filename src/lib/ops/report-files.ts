@@ -151,7 +151,8 @@ export function reportDocx(report: AnalyticsReport, deflate?: Deflate): Uint8Arr
     para("", 18, false, 200) +
     para(report.records.title, 24, true, 80) +
     wordTable(report.records) +
-    para("", 18);
+    para("", 18) +
+    (report.extra ?? []).map((t) => para("", 18, false, 200) + para(t.title, 24, true, 80) + wordTable(t) + para("", 18)).join("");
   const document =
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
     `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}` +
@@ -333,6 +334,7 @@ export function reportPdf(report: AnalyticsReport): Uint8Array {
   };
   table(report.summary);
   table(report.records);
+  for (const t of report.extra ?? []) table(t);
 
   pages.forEach((p, i) => {
     const foot = winAnsi(`${report.title} · Page ${i + 1} of ${pages.length}`);

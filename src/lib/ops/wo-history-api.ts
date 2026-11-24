@@ -823,7 +823,7 @@ rr as (
     from rback b
   returning id
 ), run as (
-  update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null returning id
+  update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null and kind = 'history' returning id
 )
 select (select count(*) from gone)::int as removed, (select count(*) from restore)::int as restored,
        (select count(*) from lgone)::int as lines_removed, (select count(*) from hrev)::int as rows_cleared,
@@ -1070,13 +1070,14 @@ const SUMMARY_COLS = `h.id, h.history_ref, h.wo, h.completed::text as completed,
 /** The cost columns a summary reads, only when the caller may see cost. */
 const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount') as cost_known,
   (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount' and l.line_cost is not null)::int as costed_lines,
+  (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip'))::int as costable_lines,
   h.customer as cost_customer`;
 
 function withCost(base: WoHistorySummary, r: Record<string, unknown>): WoHistorySummary {
   const cost = Math.round(Number(r.cost_known ?? 0) * 100) / 100;
   const internal = isServiceDeptAccount(str(r.cost_customer));
   const profit = internal || base.linesTotal == null ? null : Math.round((base.linesTotal - cost) * 100) / 100;
-  return { ...base, cost: { cost, profit, costedLines: Number(r.costed_lines ?? 0), totalLines: base.lineCount, internal } };
+  return { ...base, cost: { cost, profit, costedLines: Number(r.costed_lines ?? 0), totalLines: Number(r.costable_lines ?? 0), internal } };
 }
 
 function summary(r: Record<string, unknown>): WoHistorySummary {

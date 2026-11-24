@@ -1174,12 +1174,16 @@ export const HISTORY_COST_NOTE = "Parts cost only; labor cost not included";
 
 export type CostedLine = { kind: string; amount: number | null; lineCost: number | null };
 
-/** An invoice's known cost, how many of its item lines have one, and its profit after the discount. */
+/**
+ * An invoice's known cost, how many of the lines that can take a cost have one (not labor or trip, which never do), its
+ * profit after the discount (parts cost only), and the sell of the lines that could have a cost but don't.
+ */
 export function historyInvoiceCost(lines: CostedLine[], discount: number): { cost: number; costedLines: number; totalLines: number; subtotal: number; profit: number; uncostedSell: number } {
   const items = lines.filter((l) => l.kind !== "discount");
   const subtotal = round2(items.reduce((s, l) => s + (l.amount ?? 0), 0));
-  const costed = items.filter((l) => l.lineCost != null);
+  const costable = items.filter((l) => !isHistoryLabor(l.kind));
+  const costed = costable.filter((l) => l.lineCost != null);
   const cost = round2(costed.reduce((s, l) => s + (l.lineCost ?? 0), 0));
-  const uncostedSell = round2(items.filter((l) => l.lineCost == null).reduce((s, l) => s + (l.amount ?? 0), 0));
-  return { cost, costedLines: costed.length, totalLines: items.length, subtotal, profit: round2(subtotal - discount - cost), uncostedSell };
+  const uncostedSell = round2(costable.filter((l) => l.lineCost == null).reduce((s, l) => s + (l.amount ?? 0), 0));
+  return { cost, costedLines: costed.length, totalLines: costable.length, subtotal, profit: round2(subtotal - discount - cost), uncostedSell };
 }
