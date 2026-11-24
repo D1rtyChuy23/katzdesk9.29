@@ -98,11 +98,13 @@ test("Normalize serials: Admin only, the preview lists every change and writes n
     // A serial changed after the preview is left as it was.
     await pg.query("update account_equipment set serial = 'ITCB154148X', serial_key = 'itcb154148x' where id = $1", [a]);
     const res = await N.applySerialNormalizeFor(sql, "u_boss", { rows: preview.rows.map((r) => ({ unitId: r.unitId, oldSerial: r.oldSerial })) });
-    assert.deepEqual(res.written.sort((x, y) => x - y), [b, d]);
+    // d's cleaned key is ZZ Two Step Tacos's serial: left as it was, since migration 0137 refuses a new duplicate
+    // (11/23). The preview flagged it (alsoOn above).
+    assert.deepEqual(res.written.sort((x, y) => x - y), [b]);
     const after = Object.fromEntries((await pg.query("select id, serial, serial_key from account_equipment")).rows.map((r) => [r.id, [r.serial, r.serial_key]]));
     assert.deepEqual(after[a], ["ITCB154148X", "itcb154148x"]);
     assert.deepEqual(after[b], ["ITCB 076334", "itcb076334"]);
-    assert.deepEqual(after[d], ["ITCB999", "itcb999"]);
+    assert.deepEqual(after[d], ["itcb​999", "itcb​999"]);
   } finally {
     await pg.close();
   }

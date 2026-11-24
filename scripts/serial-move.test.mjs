@@ -12,6 +12,7 @@ import { PGlite } from "@electric-sql/pglite";
 register(new URL("./ts-alias-hook.mjs", import.meta.url));
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const P = await import("../src/lib/ops/serial-pull.ts");
 const { removeEquipmentUnit, putBackEquipmentUnit } = await import("../src/lib/ops/account-equip-import.ts");
 const { listRetiredUnits } = await import("../src/lib/ops/account-equip-retire.ts");
@@ -31,9 +32,14 @@ async function fresh() {
   await pg.query("insert into desk_accounts (user_id, username, approved, is_admin) values ('u_sam', 'sam.zz', true, true)");
   const unit = async (customer, serial) =>
     (
-      await pg.query(
-        "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, $2, $2, $3, $4) returning id",
-        [customer, MODEL, serial, P.serialKey(serial)],
+      // An old duplicate may be set up here: the check is off for the fixture's own insert (11/23).
+      await withDuplicates(pg, () =>
+        pg.query("insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, $2, $2, $3, $4) returning id", [
+          customer,
+          MODEL,
+          serial,
+          P.serialKey(serial),
+        ]),
       )
     ).rows[0].id;
   const install = async (customer, wo = "1120") =>

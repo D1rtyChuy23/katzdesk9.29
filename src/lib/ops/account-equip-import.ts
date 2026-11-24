@@ -1,3 +1,4 @@
+import { serialClashMessage } from "@/lib/ops/serial-guard";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -1120,7 +1121,17 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
         }
         continue;
       }
-      await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
+      try {
+        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
+      } catch (e) {
+        // Another unit has that serial by the database's rule (a stored key out of date, migration 0137): this row is
+        // skipped and the rest of the file still saves (review, 11/23).
+        if (serialClashMessage(e)) {
+          skipped += 1;
+          continue;
+        }
+        throw e;
+      }
       existing = existing.map((e) =>
         e.id === unit.existingId
           ? { ...e, catalogModel, equipmentName, serial, serialKey: key }
@@ -1157,7 +1168,21 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
   const chunk = 50;
   for (let i = 0; i < inserts.length; i += chunk) {
     const slice = inserts.slice(i, i + chunk);
-    await sql.query(importInsertUnitsSql(slice.length), slice.flat());
+    try {
+      await sql.query(importInsertUnitsSql(slice.length), slice.flat());
+    } catch (e) {
+      if (!serialClashMessage(e)) throw e;
+      // One row of the chunk has a serial another unit has: the chunk one row at a time, skipping the refused ones.
+      for (const one of slice) {
+        try {
+          await sql.query(importInsertUnitsSql(1), one);
+        } catch (err) {
+          if (!serialClashMessage(err)) throw err;
+          added -= 1;
+          skipped += 1;
+        }
+      }
+    }
   }
 
   return { added, updated, skipped, catalogAdded, partsFilled };
@@ -1360,11 +1385,24 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   // The kept unit's Part #, or the other's when it has none (11/9).
   const keepPart = (keep.part_number ?? "").trim();
   const partNumber = keepPart || (drop.part_number ?? "").trim() || null;
-  if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim() || (partNumber ?? "") !== keepPart) {
-    await sql.query(
-      "update account_equipment set serial = $2, serial_key = $3, electrical = $4, part_number = $5, updated_at = now() where id = $1",
-      [keep.id, serial || null, serial ? serialKey(serial) : null, electrical, partNumber],
-    );
+  // A serial the kept unit takes from the dropped one is written once the dropped one is gone (migration 0137 refuses
+  // a serial another unit still has). A third unit with it would block that: refused here, before anything moves.
+  const takesSerial = serial !== keepSerial;
+  if (takesSerial && serialKey(serial)) {
+    // The database's own rule (review, 11/23): the same key, a unit stored without its key, placeholders not counted.
+    const third = (
+      await sql.query<{ customer: string; name: string | null }>(
+        `select customer, coalesce(nullif(btrim(equipment_name), ''), catalog_model) as name from account_equipment
+          where katz_serial_counts($1) and id <> all($2::int[])
+            and (serial_key = $1 or (coalesce(serial_key, '') = '' and katz_serial_key(serial) = $1))
+          limit 1`,
+        [serialKey(serial), [keep.id, drop.id]],
+      )
+    )[0];
+    if (third) throw new Error(`Serial ${serial} is also on ${third.customer}${third.name ? ` (${third.name})` : ""}. Merge or fix that one first.`);
+  }
+  if (electrical !== (keep.electrical ?? "").trim() || (partNumber ?? "") !== keepPart) {
+    await sql.query("update account_equipment set electrical = $2, part_number = $3, updated_at = now() where id = $1", [keep.id, electrical, partNumber]);
   }
   // The other details too (11/19): the kept unit takes the dropped one's Ownership, Install date and Condition where
   // it has none. Nothing it has is blanked.
@@ -1513,7 +1551,14 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   // undone. It says what it was merged into, and who merged it.
   const by = opts?.by ?? null;
   await retireUnitRecord(sql, drop.id, by, { reason: `Merged into ${unitWord(serial, "the unit with no serial")}`, mergedInto: keep.id, mergedSerial: serial || null });
-  await asActor(sql, by?.name ?? null, "merge").query("delete from account_equipment where id = $1", [drop.id]);
+  // The dropped unit goes and the kept one takes its serial in one statement: the serial check runs when it commits,
+  // so the two happen together or not at all (review, 11/23).
+  await asActor(sql, by?.name ?? null, "merge").query(
+    `with gone as (delete from account_equipment where id = $1 returning id)
+     update account_equipment set serial = $3, serial_key = $4, updated_at = now()
+      where id = $2 and $5::boolean and exists (select 1 from gone)`,
+    [drop.id, keep.id, serial || null, serial ? serialKey(serial) : null, takesSerial],
+  );
   await logOnAccount(sql, keep.customer, keep.id, by?.name, `Merged ${unitWord(dropSerial)} into ${unitWord(serial, "the unit with no serial")}`);
   return { keepId: keep.id, serial };
 }
