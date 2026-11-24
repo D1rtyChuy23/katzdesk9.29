@@ -905,3 +905,308 @@ export function saveBatches(orders: WoOrder[], lines: WoLine[], maxOrders = SAVE
   if (cur.orders.length) out.push(cur);
   return out;
 }
+
+// ── Line costs (Jesus, 11/24) ────────────────────────────────────────────────────────────────────────────────────────
+//
+// QuickBooks purchase cost on history lines, from one CSV (Tickets → Import → Update History Line Costs). A file row
+// is keyed by History Ref + Line Sort (the line's 0-based position among that ref's rows in the Items file, Discount
+// lines counted), and that key is verified, never trusted: it matches only when exactly one saved line has that sort
+// and the same line type, item code (any case and spacing), qty and amount (to the cent). Anything else is a
+// Mismatch and is never written. Only blank cost is ever filled; a different cost is shown, never overwritten.
+
+export const LINE_COST_COLUMNS = {
+  ref: "History Ref",
+  sort: "Line Sort",
+  lineType: "Line Type",
+  itemCode: "Item Code",
+  qty: "Qty",
+  unitPrice: "Unit Price",
+  amount: "Amount",
+  unitCost: "Unit Cost",
+  lineCost: "Line Cost",
+  costBasis: "Cost Basis",
+  costDate: "Cost Date",
+  costSource: "Cost Source",
+  costFlag: "Cost Flag",
+} as const;
+const LINE_COST_REQUIRED: (keyof typeof LINE_COST_COLUMNS)[] = [
+  "ref",
+  "sort",
+  "lineType",
+  "itemCode",
+  "qty",
+  "unitPrice",
+  "amount",
+  "unitCost",
+  "lineCost",
+  "costBasis",
+  "costDate",
+  "costSource",
+];
+
+/** How a cost was found: the last purchase on or before the invoice (the default), else flagged. */
+export const COST_BASES = ["last_on_or_before", "first_after", "wtd_avg"] as const;
+export type CostBasis = (typeof COST_BASES)[number];
+export const COST_BASIS_LABEL: Record<CostBasis, string> = {
+  last_on_or_before: "Last purchase on or before the invoice",
+  first_after: "First purchase after the invoice",
+  wtd_avg: "Weighted average",
+};
+/** Line types that never take a cost: this data has no labor or trip cost, and a discount isn't an item. */
+export const NO_COST_LINE_TYPES = ["Discount", "Labor", "Trip Charge"] as const;
+
+export type LineCostRow = {
+  /** The file's own line number (the header is line 1). */
+  line: number;
+  ref: string;
+  sort: number;
+  lineType: string;
+  itemCode: string;
+  qty: number | null;
+  unitPrice: number | null;
+  amount: number | null;
+  unitCost: number;
+  lineCost: number;
+  costBasis: CostBasis;
+  costDate: string | null;
+  costSource: string;
+  costFlag: string | null;
+};
+
+export type LineCostRead = { rows: LineCostRow[]; problems: string[] };
+
+const round4 = (n: number) => Math.round((n + Number.EPSILON) * 10_000) / 10_000;
+
+/** A YYYY-MM-DD that is a real calendar day (not 2025-02-30). */
+export function isRealDay(d: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d);
+  if (!m) return false;
+  const t = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return t.getUTCFullYear() === Number(m[1]) && t.getUTCMonth() === Number(m[2]) - 1 && t.getUTCDate() === Number(m[3]);
+}
+
+/** Line Cost is Qty × Unit Cost (a blank Qty bills one), within a cent. */
+export const lineCostAddsUp = (qty: number | null, unitCost: number, lineCost: number) => Math.abs(round2((qty ?? 1) * unitCost) - lineCost) <= 0.01 + 1e-9;
+export const isNoCostLineType = (t: string) => (NO_COST_LINE_TYPES as readonly string[]).some((x) => x.toLowerCase() === t.trim().toLowerCase());
+
+/** Read and check the line-cost file. Any problem stops the import: nothing is previewed or saved. */
+export function readHistoryLineCosts(text: string): LineCostRead {
+  const problems: string[] = [];
+  const problem = (p: string) => {
+    if (problems.length < MAX_PROBLEMS) problems.push(p);
+  };
+  const all = parseCsv(text);
+  if (!all.length) return { rows: [], problems: ["The file is empty."] };
+  const idx = headerIndex(all[0]!, LINE_COST_COLUMNS);
+  const missing = LINE_COST_REQUIRED.filter((k) => idx[k] < 0).map((k) => LINE_COST_COLUMNS[k]);
+  if (missing.length) return { rows: [], problems: [`The file has no ${missing.map((c) => `“${c}”`).join(", ")} column.`] };
+  const rows: LineCostRow[] = [];
+  const seen = new Map<string, number>();
+  all.slice(1).forEach((cells, n) => {
+    const line = n + 2;
+    const c = (k: keyof typeof LINE_COST_COLUMNS) => (idx[k] >= 0 ? String(cells[idx[k]] ?? "").trim() : "");
+    if (cells.every((x) => !String(x ?? "").trim())) return;
+    const ref = c("ref");
+    if (!ref) return problem(`Line ${line}: no History Ref.`);
+    const where = `Line ${line} (${ref})`;
+    const sortRaw = c("sort");
+    const sort = /^\d+$/.test(sortRaw) ? Number(sortRaw) : Number.NaN;
+    if (!Number.isInteger(sort)) return problem(`${where}: Line Sort “${sortRaw}” isn't a whole number.`);
+    const key = `${ref.toLowerCase()}#${sort}`;
+    if (seen.has(key)) return problem(`${where}: Line Sort ${sort} is also on line ${seen.get(key)}.`);
+    seen.set(key, line);
+    const lineType = c("lineType");
+    if (isNoCostLineType(lineType))
+      return problem(`${where}: a ${lineType} line doesn't take a cost; only part, filter and other item lines do.`);
+    const numberOf = (k: "qty" | "unitPrice" | "amount" | "unitCost" | "lineCost") => {
+      const v = readNumber(c(k));
+      if (Number.isNaN(v)) problem(`${where}: ${LINE_COST_COLUMNS[k]} “${c(k)}” isn't a number.`);
+      return v;
+    };
+    const qty = numberOf("qty");
+    const unitPrice = numberOf("unitPrice");
+    const amount = numberOf("amount");
+    const unitCost = numberOf("unitCost");
+    const lineCost = numberOf("lineCost");
+    if ([qty, unitPrice, amount, unitCost, lineCost].some((v) => Number.isNaN(v))) return;
+    if (unitCost == null) return problem(`${where}: no Unit Cost.`);
+    if (unitCost < 0) return problem(`${where}: Unit Cost ${unitCost} is below zero.`);
+    if (lineCost == null) return problem(`${where}: no Line Cost.`);
+    // A blank Qty bills one, as QuickBooks reads it.
+    const expect = round2((qty ?? 1) * unitCost);
+    if (Math.abs(expect - lineCost) > 0.01 + 1e-9)
+      return problem(`${where}: Line Cost ${lineCost} isn't Qty × Unit Cost (${qty ?? 1} × ${unitCost} = ${expect}).`);
+    const basis = c("costBasis").toLowerCase();
+    if (!(COST_BASES as readonly string[]).includes(basis))
+      return problem(`${where}: Cost Basis “${c("costBasis")}” isn't one of ${COST_BASES.join(", ")}.`);
+    const costDate = readDay(c("costDate"));
+    if (costDate === undefined || (c("costDate") && !isRealDay(c("costDate"))))
+      return problem(`${where}: Cost Date “${c("costDate")}” isn't YYYY-MM-DD.`);
+    const costSource = c("costSource").toLowerCase();
+    if (costSource !== "quickbooks") return problem(`${where}: Cost Source “${c("costSource")}” isn't quickbooks.`);
+    rows.push({
+      line,
+      ref,
+      sort,
+      lineType,
+      itemCode: c("itemCode"),
+      qty,
+      unitPrice,
+      amount,
+      unitCost: round4(unitCost),
+      lineCost: round2(lineCost),
+      costBasis: basis as CostBasis,
+      costDate: costDate ?? null,
+      costSource,
+      costFlag: c("costFlag") || null,
+    });
+  });
+  return { rows, problems };
+}
+
+/** A saved history line, as the planner and the save compare it. */
+export type SavedCostLine = {
+  id: number;
+  sort: number;
+  lineType: string;
+  itemCode: string | null;
+  qty: number | null;
+  amount: number | null;
+  unitCost: number | null;
+  lineCost: number | null;
+  costBasis: string | null;
+  costDate: string | null;
+  costSource: string | null;
+  costFlag: string | null;
+};
+
+/** A saved history work order: its account is removed, and its lines. */
+export type SavedCostOrder = { historyId: number; customer: string; removed: boolean; lines: SavedCostLine[] };
+
+export type LineCostStatus = "fill" | "same" | "different" | "mismatch" | "noHistory" | "removed";
+export const LINE_COST_STATUSES: LineCostStatus[] = ["fill", "same", "different", "mismatch", "noHistory", "removed"];
+export const LINE_COST_STATUS_LABEL: Record<LineCostStatus, string> = {
+  fill: "Will Fill Cost",
+  same: "No Change",
+  different: "Has Different Cost",
+  mismatch: "Mismatch",
+  noHistory: "No History WO",
+  removed: "Removed Account",
+};
+/** Only Will Fill starts ticked; Removed Account can be ticked by hand. Nothing else is ever written. */
+export const lineCostSaveable = (s: LineCostStatus) => s === "fill" || s === "removed";
+export const lineCostStartsTicked = (s: LineCostStatus) => s === "fill";
+
+export type LineCostPlanLine = {
+  row: LineCostRow;
+  status: LineCostStatus;
+  lineId: number | null;
+  historyId: number | null;
+  customer: string | null;
+  /** What differs (Mismatch), or the cost already saved (Has Different Cost). */
+  reason: string | null;
+  saved: Pick<SavedCostLine, "unitCost" | "lineCost" | "costBasis" | "costDate" | "costSource" | "costFlag"> | null;
+};
+
+/** Item codes as compared: any case, no spaces. */
+export const itemCodeKey = (s: string | null | undefined) => String(s ?? "").replace(/\s+/g, "").toLowerCase();
+const sameCents = (a: number | null, b: number | null) => (a == null || b == null ? a == null && b == null : Math.abs(round2(a) - round2(b)) < 0.005);
+const sameCost = (a: number | null, b: number | null) => (a == null || b == null ? a == null && b == null : Math.abs(round4(a) - round4(b)) < 0.00005);
+const hasAnyCost = (l: SavedCostLine) => l.unitCost != null || l.lineCost != null || !!l.costBasis || !!l.costDate || !!l.costSource || !!l.costFlag;
+
+/** The plan for each file row against what's saved (keyed by History Ref, any case). Pure. */
+export function planLineCosts(rows: LineCostRow[], saved: Map<string, SavedCostOrder>): LineCostPlanLine[] {
+  return rows.map((row) => {
+    const order = saved.get(row.ref.toLowerCase());
+    const base = { row, lineId: null, historyId: order?.historyId ?? null, customer: order?.customer ?? null, reason: null, saved: null };
+    if (!order) return { ...base, status: "noHistory" as const, reason: "This History Ref isn't saved in KatzDesk." };
+    const at = order.lines.filter((l) => l.sort === row.sort);
+    if (at.length !== 1)
+      return { ...base, status: "mismatch" as const, reason: at.length ? `${at.length} saved lines have Line Sort ${row.sort}.` : `No saved line has Line Sort ${row.sort}.` };
+    const l = at[0]!;
+    const diffs: string[] = [];
+    if (l.lineType.toLowerCase() !== row.lineType.toLowerCase()) diffs.push(`line type is ${l.lineType}, the file says ${row.lineType}`);
+    if (itemCodeKey(l.itemCode) !== itemCodeKey(row.itemCode)) diffs.push(`item is ${l.itemCode || "(blank)"}, the file says ${row.itemCode || "(blank)"}`);
+    if (!sameCents(l.qty, row.qty)) diffs.push(`qty is ${l.qty ?? "(blank)"}, the file says ${row.qty ?? "(blank)"}`);
+    if (!sameCents(l.amount, row.amount)) diffs.push(`amount is ${l.amount ?? "(blank)"}, the file says ${row.amount ?? "(blank)"}`);
+    const savedCost = { unitCost: l.unitCost, lineCost: l.lineCost, costBasis: l.costBasis, costDate: l.costDate, costSource: l.costSource, costFlag: l.costFlag };
+    const matched = { ...base, lineId: l.id };
+    if (diffs.length) return { ...matched, lineId: null, status: "mismatch" as const, reason: `At Line Sort ${row.sort} the ${diffs.join("; ")}.` };
+    if (hasAnyCost(l)) {
+      const same =
+        sameCost(l.unitCost, row.unitCost) &&
+        sameCents(l.lineCost, row.lineCost) &&
+        (l.costBasis ?? "") === row.costBasis &&
+        (l.costDate ?? "") === (row.costDate ?? "") &&
+        (l.costSource ?? "") === row.costSource &&
+        (l.costFlag ?? "") === (row.costFlag ?? "");
+      return { ...matched, status: same ? ("same" as const) : ("different" as const), saved: savedCost };
+    }
+    if (order.removed) return { ...matched, status: "removed" as const, reason: `${order.customer} is a removed account.` };
+    return { ...matched, status: "fill" as const };
+  });
+}
+
+export type LineCostCounts = Record<LineCostStatus, number> & {
+  /** What Will Fill would add: the lines' billed amount, their cost, and amount − cost. */
+  fillSell: number;
+  fillCost: number;
+  fillProfit: number;
+};
+
+export function countLineCostPlan(plan: LineCostPlanLine[]): LineCostCounts {
+  const out = { fill: 0, same: 0, different: 0, mismatch: 0, noHistory: 0, removed: 0, fillSell: 0, fillCost: 0, fillProfit: 0 };
+  for (const p of plan) {
+    out[p.status] += 1;
+    if (p.status === "fill") {
+      out.fillSell += p.row.amount ?? 0;
+      out.fillCost += p.row.lineCost;
+    }
+  }
+  out.fillSell = round2(out.fillSell);
+  out.fillCost = round2(out.fillCost);
+  out.fillProfit = round2(out.fillSell - out.fillCost);
+  return out;
+}
+
+/** Lines and the cost text they're saved with, in batches of up to `size` for the save. */
+export function lineCostBatches<T>(items: T[], size = 1000): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+// ── History profit (Jesus, 11/24) ────────────────────────────────────────────────────────────────────────────────────
+//
+// Parts cost only: labor, trip, service and install lines have no cost in this data, and today's Labor Cost Rate is
+// never applied. Profit is counted after the invoice's discount. Katz Coffee Service Dept. is left out of every profit
+// total (shown with its cost, never a profit).
+
+export const HISTORY_COST_NOTE = "Parts cost only; labor cost not included";
+
+export type CostedLine = { kind: string; amount: number | null; lineCost: number | null };
+
+/** Lines that are bought, so a missing cost is work left to do: they always count in "N of M lines costed". */
+export const ALWAYS_COSTED_KINDS = ["part", "filter", "equipment"] as const;
+
+/**
+ * Whether a line counts toward "N of M lines costed" and Uncosted Sell (Jesus, 11/24, choice C): parts, filters and
+ * equipment always; install fees, service and other charges only once they hold a cost (they're usually our own work,
+ * with a cost only when something like a subcontractor bill backs them); labor, trip and discounts never.
+ */
+export const countsAsCostable = (kind: string, lineCost: number | null) =>
+  (ALWAYS_COSTED_KINDS as readonly string[]).includes(kind) || (kind !== "discount" && !isHistoryLabor(kind) && lineCost != null);
+
+/**
+ * An invoice's known cost, how many of the lines that count (countsAsCostable) have one, its profit after the discount
+ * (every line's sell, less the discount, less the known cost), and the sell of the counted lines with no cost yet.
+ */
+export function historyInvoiceCost(lines: CostedLine[], discount: number): { cost: number; costedLines: number; totalLines: number; subtotal: number; profit: number; uncostedSell: number } {
+  const items = lines.filter((l) => l.kind !== "discount");
+  const subtotal = round2(items.reduce((s, l) => s + (l.amount ?? 0), 0));
+  const costable = items.filter((l) => countsAsCostable(l.kind, l.lineCost));
+  const costed = costable.filter((l) => l.lineCost != null);
+  const cost = round2(costed.reduce((s, l) => s + (l.lineCost ?? 0), 0));
+  const uncostedSell = round2(costable.filter((l) => l.lineCost == null).reduce((s, l) => s + (l.amount ?? 0), 0));
+  return { cost, costedLines: costed.length, totalLines: costable.length, subtotal, profit: round2(subtotal - discount - cost), uncostedSell };
+}

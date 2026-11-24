@@ -126,7 +126,7 @@ export function monthCounts(rows: AnalyticsRow[]): MonthCount[] {
   return out;
 }
 
-export type ReportTable = { title: string; columns: string[]; weights: number[]; rows: string[][] };
+export type ReportTable = { title: string; columns: string[]; weights: number[]; rows: string[][]; /** Excel sheet name (31 characters at most), when not the title. */ sheet?: string };
 
 /** What every export is written from. PDF, Excel and Word each print exactly these lines and these two tables. */
 export type AnalyticsReport = {
@@ -135,6 +135,8 @@ export type AnalyticsReport = {
   scope: string;
   summary: ReportTable;
   records: ReportTable;
+  /** More tables after these two (Profit's QuickBooks history section). */
+  extra?: ReportTable[];
 };
 
 function niceDay(d: string): string {
@@ -206,5 +208,6 @@ export function reportSheets(report: AnalyticsReport): { name: string; aoa: stri
   return [
     { name: report.summary.title, aoa: [...head, report.summary.columns, ...report.summary.rows] },
     { name: report.records.title, aoa: [...head, report.records.columns, ...report.records.rows] },
+    ...(report.extra ?? []).map((t) => ({ name: t.sheet ?? t.title, aoa: [...head, t.columns, ...t.rows] })),
   ];
 }

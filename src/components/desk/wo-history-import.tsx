@@ -238,6 +238,12 @@ export function WoHistoryImportButton() {
   const undo = useMutation({
     mutationFn: (runId: number) => undoWoHistoryRun({ data: { runId } }),
     onSuccess: (r) => {
+      if (r.kind === "line_costs") {
+        toast.success(`Undone: cost cleared on ${plural(r.cleared, "line")}`);
+        if (r.kept) toast.warning(`${plural(r.kept, "line")} kept their cost, because it changed since that run.`);
+        for (const key of ["wo-history-runs", "wo-history-account", "wo-history-job", "wo-history", "profit-report"]) void qc.invalidateQueries({ queryKey: [key] });
+        return;
+      }
       toast.success(
         `Undone: ${plural(r.removed, "work order")} removed, ${plural(r.linesRemoved, "added line")} removed, ${plural(r.rowsCleared, "filled work order")} and ${plural(r.restored, "ticket")} put back${
           r.accountsBack.length ? `, ${plural(r.accountsBack.length, "account")} removed again` : ""
@@ -520,6 +526,11 @@ export function WoHistoryImportButton() {
 
             <LocationNeeded rows={need.data ?? []} />
             <Runs runs={runs.data ?? []} busy={undo.isPending || save.isPending} onUndo={(r) => {
+              if (r.kind === "line_costs") {
+                if (window.confirm(`Undo the ${when(r.createdAt)} line-cost import? The cost it wrote is cleared on ${plural(r.costLines, "line")}, except lines whose cost changed since. Nothing is deleted.`))
+                  undo.mutate(r.id);
+                return;
+              }
               if (
                 window.confirm(
                   `Undo the ${when(r.createdAt)} import? ${plural(r.current, "history work order")} and their invoice lines are deleted, lines it added are deleted, fields it filled are put back while they still hold what it wrote, and accounts it restored as Retired are removed again if nothing was added to them since. Account renames stay.`,
@@ -648,7 +659,7 @@ function LocationNeeded({ rows }: { rows: { id: number; ref: string; wo: string 
   );
 }
 
-function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onUndo: (r: WoHistoryRun) => void }) {
+export function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onUndo: (r: WoHistoryRun) => void }) {
   if (!runs.length) return null;
   return (
     <section className="border-t border-border pt-3" data-testid="wo-history-runs">
@@ -656,6 +667,13 @@ function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onU
       <ul className="mt-1 space-y-1 text-xs text-muted-foreground">
         {runs.map((r) => (
           <li key={r.id} className="flex flex-wrap items-center gap-2 break-words">
+            {r.kind === "line_costs" ? (
+              <span>
+                <span className="text-foreground">#{r.id} · {when(r.createdAt)}</span> · {r.createdBy ?? "Admin"}: line costs from {r.filename ?? "a file"} ·{" "}
+                {r.undoneAt ? `filled ${plural(r.lines, "line")}` : `cost on ${plural(r.costLines, "line")}`}
+                {r.undoneAt ? ` · undone by ${r.undoneBy ?? "Admin"} ${when(r.undoneAt)}` : r.finishedAt ? "" : " · didn't finish"}
+              </span>
+            ) : (
             <span>
               <span className="text-foreground">#{r.id} · {when(r.createdAt)}</span> · {r.createdBy ?? "Admin"}: created {n(r.created)}, attached {n(r.attached)},{" "}
               {r.itemLines != null && r.discountLines != null
@@ -666,6 +684,7 @@ function Runs({ runs, busy, onUndo }: { runs: WoHistoryRun[]; busy: boolean; onU
               {r.retired.length ? ` · retired ${r.retired.join(", ")}` : ""}
               {r.undoneAt ? ` · undone by ${r.undoneBy ?? "Admin"} ${when(r.undoneAt)}` : r.finishedAt ? "" : " · didn't finish"}
             </span>
+            )}
             {!r.undoneAt ? (
               <Button type="button" size="sm" variant="outline" className="h-7" disabled={busy} onClick={() => onUndo(r)} data-testid={`wo-history-undo-${r.id}`}>
                 <Undo2 className="size-3.5" />

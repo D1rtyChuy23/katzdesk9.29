@@ -890,3 +890,339 @@ test("the kept Walk-In mark: export says Yes, NetSuite import never updates it, 
   assert.ok(pair, "same address and phone is a pair");
   assert.equal(pair.keep?.id, 2, "never the Walk-In, even with more history");
 });
+
+// ── Line costs (Jesus, 11/24) ────────────────────────────────────────────────────────────────────────────────────────
+
+const C = await import("../src/lib/ops/wo-history.ts");
+const C_HEAD = ["Cost Flag", "History Ref", "Line Sort", "Line Type", "Item Code", "Qty", "Unit Price", "Amount", "Unit Cost", "Line Cost", "Cost Basis", "Cost Date", "Cost Source"];
+const costRow = (ref, sort, type, code, qty, price, amount, unit, lineCost, extra = {}) => ({
+  "History Ref": ref,
+  "Line Sort": String(sort),
+  "Line Type": type,
+  "Item Code": code,
+  Qty: qty,
+  "Unit Price": price,
+  Amount: amount,
+  "Unit Cost": unit,
+  "Line Cost": lineCost,
+  "Cost Basis": extra.basis ?? "last_on_or_before",
+  "Cost Date": extra.date ?? "2025-01-15",
+  "Cost Source": extra.source ?? "quickbooks",
+  "Cost Flag": extra.flag ?? "",
+});
+const readCosts = (rows) => C.readHistoryLineCosts(csv(C_HEAD, rows));
+
+test("line costs: reading by header name, with every check", () => {
+  const ok = readCosts([
+    costRow("WO-1", 2, "Part", "VALVE1", "2", "20", "40", "12.005", "24.01"),
+    costRow("WO-1", 3, "Filter", "F 1", "", "9", "9", "3", "3", { basis: "wtd_avg", date: "" }),
+    costRow("WO-2", 0, "Part", "X", "1", "5", "5", "1", "1", { basis: "first_after", flag: "Cost from later purchase" }),
+  ]);
+  assert.deepEqual(ok.problems, []);
+  assert.equal(ok.rows.length, 3);
+  assert.deepEqual(
+    { sort: ok.rows[0].sort, unitCost: ok.rows[0].unitCost, lineCost: ok.rows[0].lineCost, basis: ok.rows[0].costBasis, date: ok.rows[0].costDate, flag: ok.rows[0].costFlag },
+    { sort: 2, unitCost: 12.005, lineCost: 24.01, basis: "last_on_or_before", date: "2025-01-15", flag: null },
+  );
+  assert.equal(ok.rows[1].qty, null, "a blank Qty stays blank; the line-cost check counts it as 1");
+  assert.equal(ok.rows[1].costDate, null);
+  assert.equal(ok.rows[2].costFlag, "Cost from later purchase");
+
+  const bad = readCosts([
+    costRow("WO-1", 0, "Part", "A", "1", "5", "5", "-1", "-1"),
+    costRow("WO-1", 1, "Part", "A", "2", "5", "10", "3", "6.02"),
+    costRow("WO-1", 2, "Part", "A", "1", "5", "5", "1", "1", { basis: "fifo" }),
+    costRow("WO-1", 3, "Part", "A", "1", "5", "5", "1", "1", { date: "01/15/2025" }),
+    costRow("WO-1", 4, "Discount", "CLD", "", "-5", "-5", "0", "0"),
+    costRow("WO-1", 5, "Labor", "SERVICELABOR", "1", "150", "150", "0", "0"),
+    costRow("WO-1", 6, "Trip Charge", "TRIP", "1", "150", "150", "0", "0"),
+    costRow("WO-1", 6, "Part", "A", "1", "5", "5", "1", "1"),
+    costRow("WO-1", 7, "Part", "A", "1", "5", "5", "1", "1", { source: "netsuite" }),
+  ]);
+  assert.equal(bad.rows.length, 0);
+  assert.match(bad.problems.join("\n"), /Line Sort 6 is also on line 8/);
+  assert.match(bad.problems.join("\n"), /Unit Cost -1 is below zero/);
+  assert.match(bad.problems.join("\n"), /Line Cost 6\.02 isn't Qty × Unit Cost \(2 × 3 = 6\)/);
+  assert.match(bad.problems.join("\n"), /Cost Basis “fifo”/);
+  assert.match(bad.problems.join("\n"), /Cost Date “01\/15\/2025” isn't YYYY-MM-DD/);
+  assert.match(bad.problems.join("\n"), /a Discount line doesn't take a cost/);
+  assert.match(bad.problems.join("\n"), /a Labor line doesn't take a cost/);
+  assert.match(bad.problems.join("\n"), /a Trip Charge line doesn't take a cost/);
+  assert.match(bad.problems.join("\n"), /Cost Source “netsuite”/);
+  assert.ok(readCosts([costRow("WO-1", 1, "Part", "A", "2", "5", "10", "3", "6.01")]).problems.length === 0, "within a cent passes");
+  assert.match(readCosts([costRow("WO-1", 1, "Part", "A", "1", "5", "5", "1", "1"), costRow("wo-1", 1, "Part", "A", "1", "5", "5", "1", "1")]).problems[0], /also on line 2/);
+  assert.match(C.readHistoryLineCosts("History Ref,Line Sort\nWO-1,0\n").problems[0], /no “Line Type”/);
+});
+
+const savedLine = (id, sort, lineType, itemCode, qty, amount, cost = {}) => ({
+  id, sort, lineType, itemCode, qty, amount,
+  unitCost: cost.unitCost ?? null, lineCost: cost.lineCost ?? null, costBasis: cost.costBasis ?? null, costDate: cost.costDate ?? null, costSource: cost.costSource ?? null, costFlag: cost.costFlag ?? null,
+});
+
+test("line costs: the planner gives each status, and a wrong item at the right sort is a Mismatch", () => {
+  const rows = readCosts([
+    costRow("WO-1", 0, "Part", "VALVE 1", "2", "20", "40", "12", "24"), // fill (item matches with spaces and case)
+    costRow("WO-1", 1, "Part", "GASKET", "1", "5", "5", "2", "2"), // same
+    costRow("WO-1", 2, "Part", "PUMP", "1", "50", "50", "30", "30"), // different
+    costRow("WO-1", 3, "Part", "WRONG", "1", "5", "5", "1", "1"), // mismatch: wrong item at the right sort
+    costRow("WO-1", 9, "Part", "VALVE1", "1", "5", "5", "1", "1"), // mismatch: no such sort
+    costRow("WO-1", 4, "Part", "SEAL", "1", "5", "6", "1", "1"), // mismatch: amount off
+    costRow("WO-9", 0, "Part", "A", "1", "5", "5", "1", "1"), // noHistory
+    costRow("WO-2", 0, "Part", "A", "1", "5", "5", "1", "1"), // removed
+  ]).rows;
+  const saved = new Map([
+    ["wo-1", { historyId: 1, customer: "Alpha Cafe", removed: false, lines: [
+      savedLine(10, 0, "Part", "valve1", 2, 40),
+      savedLine(11, 1, "Part", "GASKET", 1, 5, { unitCost: 2, lineCost: 2, costBasis: "last_on_or_before", costDate: "2025-01-15", costSource: "quickbooks" }),
+      savedLine(12, 2, "Part", "PUMP", 1, 50, { unitCost: 25, lineCost: 25, costBasis: "last_on_or_before", costDate: "2025-01-15", costSource: "quickbooks" }),
+      savedLine(13, 3, "Part", "RIGHT", 1, 5),
+      savedLine(14, 4, "Part", "SEAL", 1, 5),
+    ] }],
+    ["wo-2", { historyId: 2, customer: "Gone Place", removed: true, lines: [savedLine(20, 0, "Part", "A", 1, 5)] }],
+  ]);
+  const plan = C.planLineCosts(rows, saved);
+  assert.deepEqual(plan.map((p) => p.status), ["fill", "same", "different", "mismatch", "mismatch", "mismatch", "noHistory", "removed"]);
+  assert.equal(plan[0].lineId, 10);
+  assert.equal(plan[3].lineId, null, "a Mismatch never carries a line to write");
+  assert.match(plan[3].reason, /item is RIGHT, the file says WRONG/);
+  assert.match(plan[4].reason, /No saved line has Line Sort 9/);
+  assert.match(plan[5].reason, /amount is 5, the file says 6/);
+  assert.equal(plan[2].saved.unitCost, 25, "Has Different Cost shows what's saved");
+  assert.equal(plan.filter((p) => C.lineCostStartsTicked(p.status)).length, 1, "only Will Fill starts ticked");
+  assert.ok(C.lineCostSaveable("removed") && !C.lineCostSaveable("different") && !C.lineCostSaveable("mismatch"));
+  const n = C.countLineCostPlan(plan);
+  assert.deepEqual([n.fill, n.same, n.different, n.mismatch, n.noHistory, n.removed, n.fillSell, n.fillCost, n.fillProfit], [1, 1, 1, 3, 1, 1, 40, 24, 16]);
+});
+
+/** Save the default ticked plan (or the lines given) under a new cost run, as the screen does. */
+async function saveCosts(sql, rows, opts = {}) {
+  const plan = await api.previewLineCosts(sql, rows);
+  const ticked = plan.filter((p) => (opts.pick ? opts.pick(p) : C.lineCostStartsTicked(p.status)) && p.lineId != null);
+  const runId = await api.startCostRun(sql, { filename: "costs.csv", rowCount: rows.length, counts: C.countLineCostPlan(plan), who: "chuy" });
+  let filled = 0;
+  let skipped = 0;
+  for (const b of C.lineCostBatches(ticked, opts.batch ?? 1000)) {
+    const r = await api.saveCostBatch(sql, { runId, rows: b.map((p) => ({ ...p.row, lineId: p.lineId })) });
+    filled += r.filled;
+    skipped += r.skipped;
+  }
+  await api.finishRun(sql, runId);
+  return { plan, runId, filled, skipped };
+}
+
+const WO = "WO-0211 (2026-07-24)";
+const costFile = () =>
+  readCosts([
+    costRow(WO, 2, "Part", "VALVE1", "2", "20", "40", "12", "24"),
+    costRow("WO-1500", 0, "Part", "NOTAPART", "0", "12.5", "0", "4", "0"),
+    costRow("WO-1500", 1, "Install Fee", "INSTALLATIONFEE", "1", "373.53", "373.53", "100", "100", { flag: "Non-parts QB category" }),
+  ]).rows;
+
+test("line costs: save fills blanks only, never overwrites, and a re-run fills nothing", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  // A line someone already costed by hand stays as it is.
+  await pg.query("update wo_history_lines set unit_cost = 99, line_cost = 99, cost_source = 'hand' where item_code = 'INSTALLATIONFEE'");
+  const first = await saveCosts(sql, costFile(), { batch: 1 });
+  assert.deepEqual(first.plan.map((p) => p.status), ["fill", "fill", "different"]);
+  assert.deepEqual([first.filled, first.skipped], [2, 0]);
+  const rows = (await pg.query("select item_code, unit_cost::text, line_cost::text, cost_basis, cost_date::text, cost_source, cost_run_id from wo_history_lines where unit_cost is not null order by item_code")).rows;
+  assert.deepEqual(rows, [
+    { item_code: "INSTALLATIONFEE", unit_cost: "99.0000", line_cost: "99.00", cost_basis: null, cost_date: null, cost_source: "hand", cost_run_id: null },
+    { item_code: "NOTAPART", unit_cost: "4.0000", line_cost: "0.00", cost_basis: "last_on_or_before", cost_date: "2025-01-15", cost_source: "quickbooks", cost_run_id: first.runId },
+    { item_code: "VALVE1", unit_cost: "12.0000", line_cost: "24.00", cost_basis: "last_on_or_before", cost_date: "2025-01-15", cost_source: "quickbooks", cost_run_id: first.runId },
+  ]);
+  assert.equal((await pg.query("select kind, lines from wo_history_runs where id = $1", [first.runId])).rows[0].kind, "line_costs");
+
+  // Forcing the different line through the save still doesn't overwrite it.
+  const forced = await saveCosts(sql, costFile(), { pick: () => true });
+  assert.deepEqual(forced.plan.map((p) => p.status), ["same", "same", "different"]);
+  assert.deepEqual([forced.filled, forced.skipped], [0, 3]);
+  assert.equal((await pg.query("select unit_cost::text from wo_history_lines where item_code = 'INSTALLATIONFEE'")).rows[0].unit_cost, "99.0000");
+
+  // A line edited after the preview (here: its amount) is skipped by the save's own check.
+  await pg.query("update wo_history_lines set unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_run_id = null, cost_run_values = null where item_code = 'VALVE1'");
+  const plan = await api.previewLineCosts(sql, costFile());
+  await pg.query("update wo_history_lines set amount = 41 where item_code = 'VALVE1'");
+  const runId = await api.startCostRun(sql, { filename: "x.csv", rowCount: 1, counts: C.countLineCostPlan(plan), who: "chuy" });
+  const r = await api.saveCostBatch(sql, { runId, rows: [{ ...plan[0].row, lineId: plan[0].lineId }] });
+  assert.deepEqual(r, { filled: 0, skipped: 1 });
+});
+
+test("line costs: Removed Account starts unticked; ticked, it saves", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await pg.query("update wo_history set customer = 'Gone Place' where history_ref = 'WO-1500'");
+  const { plan, filled } = await saveCosts(sql, costFile());
+  assert.deepEqual(plan.map((p) => p.status), ["fill", "removed", "removed"]);
+  assert.equal(filled, 1);
+  const ticked = await saveCosts(sql, costFile(), { pick: (p) => C.lineCostSaveable(p.status) });
+  assert.equal(ticked.filled, 2);
+});
+
+test("line costs: undo clears only what the run wrote and is unchanged; a hand edit stays; history undo is as before", async () => {
+  const { pg, sql } = await fresh();
+  const hist = await runAll(sql, files());
+  const { runId } = await saveCosts(sql, costFile());
+  await pg.query("update wo_history_lines set unit_cost = 13, line_cost = 26 where item_code = 'VALVE1'");
+  const runs = await api.recentRuns(sql);
+  const mine = runs.find((r) => r.id === runId);
+  assert.deepEqual([mine.kind, mine.costLines], ["line_costs", 3]);
+  assert.equal(runs.find((r) => r.id === hist.runId).kind, "history");
+
+  await assert.rejects(() => api.undoRun(sql, { runId, who: "chuy" }), "the history undo never takes a cost run");
+  const u = await api.undoAnyRun(sql, { runId, who: "chuy" });
+  assert.deepEqual(u, { kind: "line_costs", cleared: 2, kept: 1 });
+  const left = (await pg.query("select item_code, unit_cost::text, line_cost::text from wo_history_lines where unit_cost is not null")).rows;
+  assert.deepEqual(left, [{ item_code: "VALVE1", unit_cost: "13.0000", line_cost: "26.00" }]);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history_lines")).rows[0].n, 6, "nothing is deleted");
+  await assert.rejects(() => api.undoAnyRun(sql, { runId, who: "chuy" }), /already undone/);
+
+  // Undoing the history run still removes its work orders (and their lines).
+  const h = await api.undoAnyRun(sql, { runId: hist.runId, who: "chuy" });
+  assert.equal(h.kind, "history");
+  assert.equal(h.removed, 4);
+  assert.equal((await pg.query("select count(*)::int as n from wo_history")).rows[0].n, 0);
+});
+
+test("history profit: after the discount on the invoice, nothing for a non-cost viewer, Service Dept never in profit", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  const id = (await pg.query("select id from wo_history where history_ref = $1", [WO])).rows[0].id;
+
+  const d = await api.historyDetail(sql, id, { showCost: true });
+  // 225 labor + 150 trip + 40 part − 41.50 discount; parts cost 24.
+  assert.deepEqual(
+    { subtotal: d.invoice.subtotal, discount: d.invoice.discount, cost: d.invoice.cost.cost, profit: d.invoice.cost.profit, margin: d.invoice.cost.margin, costed: d.invoice.cost.costedLines, of: d.invoice.cost.totalLines },
+    { subtotal: 415, discount: 41.5, cost: 24, profit: 349.5, margin: 93.6, costed: 1, of: 1 },
+  );
+  assert.equal(d.invoice.cost.note, "Parts cost only; labor cost not included");
+  const part = d.lines.find((l) => l.itemCode === "VALVE1");
+  assert.equal(part.cost.discountShare, 4, "40 of 415 of the 41.50 discount");
+  assert.equal(part.cost.profit, 12, "40 − 4 − 24");
+  assert.equal(d.lines.find((l) => l.kind === "labor").cost.lineCost, null);
+
+  const plain = await api.historyDetail(sql, id);
+  assert.equal(plain.invoice.cost, undefined);
+  assert.ok(plain.lines.every((l) => l.cost === undefined));
+  assert.doesNotMatch(JSON.stringify(plain), /unitCost|lineCost|costBasis|"profit"/);
+  const acct = await api.accountHistory(sql, "Alpha Cafe");
+  assert.ok(acct.every((h) => h.cost === undefined));
+  const acctCost = await api.accountHistory(sql, "Alpha Cafe", { showCost: true });
+  const row = acctCost.find((h) => h.ref === WO);
+  assert.deepEqual([row.cost.cost, row.cost.profit, row.cost.costedLines, row.cost.totalLines], [24, 349.5, 1, 1]);
+
+  // Service Dept: cost shown, never a profit.
+  await pg.query("insert into directory_customers (name) values ('Katz Coffee Service Dept.')");
+  await pg.query("update wo_history set customer = 'Katz Coffee Service Dept.' where id = $1", [id]);
+  const internal = await api.historyDetail(sql, id, { showCost: true });
+  assert.deepEqual([internal.invoice.cost.cost, internal.invoice.cost.profit, internal.invoice.cost.internal], [24, null, true]);
+  assert.equal(internal.lines.find((l) => l.itemCode === "VALVE1").cost.profit, null);
+});
+
+test("profit report: QuickBooks history by year and customer, apart; Service Dept and tickets already billed left out", async () => {
+  const { pg, sql } = await fresh();
+  await pg.query("insert into service_jobs (kind, call_id, customer, wo, received, status) values ('service', 'SC-202607-1', 'Alpha Cafe', 'WO-0211', '2026-07-20', 'Completed')");
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history set invoice_date = '2026-07-24' where history_ref = $1", [WO]);
+  const R = await import("../src/lib/ops/profit-report-api.ts");
+  const P = await import("../src/lib/ops/profit-report.ts");
+  const all = await R.historyProfitSection(sql, {});
+  // WO-0211 (2026): 415 sell, 41.50 off, 24 cost. WO-1500 (2025): 373.53 sell, cost 0 (NOTAPART) + 100 (install fee).
+  // WO-1501 has no lines; WO-1504 (2025) has none either.
+  assert.deepEqual(all.byYear.map((g) => [g.label, g.bills, g.sell, g.discount, g.cost, g.profit, g.uncostedSell]), [
+    ["2025", 1, 373.53, 0, 100, 273.53, 0],
+    ["2026", 1, 415, 41.5, 24, 349.5, 0],
+  ]);
+  assert.deepEqual([all.totals.bills, all.totals.sell, all.totals.profit], [2, 788.53, 623.03]);
+  assert.deepEqual(all.byCustomer.map((g) => [g.label, g.bills]), [["Alpha Cafe", 2]]);
+  assert.match(all.note, /^Parts cost only; labor cost not included$/);
+
+  const job = (await pg.query("select job_id from wo_history where history_ref = $1", [WO])).rows[0].job_id;
+  assert.ok(job != null, "WO-0211 is on its ticket");
+  // Its ticket is billed (Sales Order, a charge), on a day after July.
+  await pg.query("update service_jobs set ns_so = 'SO-1', billed_at = '2026-08-02' where id = $1", [job]);
+  await pg.query("insert into ticket_charges (job_id, item, qty, rate) values ($1, 'VALVE1', 1, 20)", [job]);
+  await pg.query("update wo_history set customer = 'Katz Coffee Service Dept.' where history_ref = 'WO-1500'");
+  const left = await R.historyProfitSection(sql, { from: "2024-01-01", to: "2026-12-31" });
+  assert.deepEqual(left.excluded, { serviceDept: 1, billedTicket: 1 });
+  assert.match(left.note, /1 Service Dept left out/);
+  // The exclusion doesn't depend on the range: a ticket billed after the range still keeps its history row out.
+  {
+    const july = await R.historyProfitSection(sql, { from: "2026-07-01", to: "2026-07-31" });
+    assert.deepEqual([july.totals.bills, july.excluded.billedTicket], [0, 1]);
+    await pg.query("update service_jobs set ns_so = null where id = $1", [job]);
+    const unbilled = await R.historyProfitSection(sql, { from: "2026-07-01", to: "2026-07-31" });
+    assert.deepEqual([unbilled.totals.bills, unbilled.excluded.billedTicket], [1, 0], "an unbilled ticket's history counts");
+  }
+  const only2025 = await R.historyProfitSection(sql, { from: "2025-01-01", to: "2025-12-31" });
+  assert.deepEqual([only2025.totals.bills, only2025.excluded.serviceDept], [0, 1], "the range applies; Service Dept is left out");
+
+  // The downloads carry the section as its own two tables, after the job-type and customer tables.
+  const file = P.buildProfitReportFile({ byType: [], byCustomer: [], totals: P.groupTotals([]), history: all }, { generated: "now", scope: "All" });
+  assert.deepEqual(file.extra.map((t) => [t.title, t.sheet, t.rows.length]), [
+    ["QuickBooks history (2024–2026): By Year", "QB History By Year", 3],
+    ["QuickBooks history (2024–2026): By Customer", "QB History By Customer", 1],
+  ]);
+  assert.deepEqual(file.extra[0].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "$0.00"]);
+  const { reportSheets } = await import("../src/lib/ops/analytics.ts");
+  assert.deepEqual(reportSheets(file).map((s) => s.name), ["By Job Type", "By Customer", "QB History By Year", "QB History By Customer"]);
+});
+
+test("line costs: the server repeats the file checks, and never costs a labor, trip or discount line", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  assert.match(readCosts([costRow(WO, 2, "Part", "VALVE1", "2", "20", "40", "12", "24", { date: "2025-02-30" })]).problems[0], /Cost Date “2025-02-30”/);
+  const plan = await api.previewLineCosts(sql, costFile());
+  const runId = await api.startCostRun(sql, { filename: "x.csv", rowCount: 3, counts: C.countLineCostPlan(plan), who: "chuy" });
+  const good = { ...plan[0].row, lineId: plan[0].lineId };
+  const check = (rows) => api.checkCostSaveRows(rows);
+  assert.equal(check([good]), null);
+  assert.match(check([{ ...good, lineType: "Labor" }]), /doesn't take a cost/);
+  assert.match(check([{ ...good, lineCost: 30 }]), /isn't Qty × Unit Cost/);
+  assert.match(check([{ ...good, costDate: "2025-02-30" }]), /isn't a real day/);
+  assert.match(check([good, good]), /twice/);
+  // Even straight to the save, a labor line is never written.
+  const labor = (await pg.query("select id, sort, qty::float8 as qty, amount::float8 as amount from wo_history_lines where line_type = 'Labor' limit 1")).rows[0];
+  const r = await api.saveCostBatch(sql, { runId, rows: [{ ...good, lineId: labor.id, sort: labor.sort, lineType: "Labor", itemCode: "SERVICELABOR", qty: labor.qty, amount: labor.amount, unitCost: 1, lineCost: 1.5 }] });
+  assert.deepEqual(r, { filled: 0, skipped: 1 });
+});
+
+test("Past imports keeps the latest of each kind: ten newer history runs never hide a cost run", async () => {
+  const { sql } = await fresh();
+  const cost = await api.startCostRun(sql, { filename: "c.csv", rowCount: 0, counts: {}, who: "chuy" });
+  for (let i = 0; i < 11; i++) await api.startRun(sql, { filename: `h${i}.csv`, rowCount: 0, counts: {}, who: "chuy" });
+  const runs = await api.recentRuns(sql);
+  assert.deepEqual([runs.filter((r) => r.kind === "history").length, runs.some((r) => r.id === cost)], [10, true]);
+});
+
+test("costed lines (choice C): parts, filters and equipment always count; install, service and other only once costed", async () => {
+  const pure = C.historyInvoiceCost(
+    [
+      { kind: "part", amount: 40, lineCost: 22.5 },
+      { kind: "equipment", amount: 900, lineCost: null },
+      { kind: "service", amount: 150, lineCost: null },
+      { kind: "install", amount: 373.53, lineCost: 100 },
+      { kind: "other", amount: 25, lineCost: null },
+      { kind: "labor", amount: 225, lineCost: null },
+      { kind: "discount", amount: -10, lineCost: null },
+    ],
+    10,
+  );
+  // Counted: the part, the equipment, and the costed install fee. The uncosted service and other charge never are.
+  assert.deepEqual([pure.costedLines, pure.totalLines, pure.cost, pure.uncostedSell], [2, 3, 122.5, 900]);
+  assert.equal(pure.profit, Math.round((40 + 900 + 150 + 373.53 + 25 + 225 - 10 - 122.5) * 100) / 100, "every line's sell is still in the profit");
+
+  // The account list counts the same way as the invoice panel.
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history_lines set line_type = 'Service', kind = 'service', unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_run_id = null, cost_run_values = null where item_code = 'INSTALLATIONFEE'");
+  const row = (await api.accountHistory(sql, "Alpha Cafe", { showCost: true })).find((h) => h.ref === "WO-1500");
+  assert.deepEqual([row.cost.costedLines, row.cost.totalLines], [1, 1], "an uncosted Service line isn't waiting on a cost");
+  const id = (await pg.query("select id from wo_history where history_ref = 'WO-1500'")).rows[0].id;
+  const d = await api.historyDetail(sql, id, { showCost: true });
+  assert.deepEqual([d.invoice.cost.costedLines, d.invoice.cost.totalLines], [1, 1]);
+});

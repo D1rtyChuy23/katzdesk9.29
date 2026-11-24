@@ -37,7 +37,22 @@ import {
   type WoOrder,
   type WoPlanInput,
   type WoPlanLine,
+  historyInvoiceCost,
+  isNoCostLineType,
+  isRealDay,
+  lineCostAddsUp,
+  itemCodeKey,
+  planLineCosts,
+  HISTORY_COST_NOTE,
+  COST_BASES,
+  type LineCostCounts,
+  type LineCostPlanLine,
+  type LineCostRow,
+  type SavedCostOrder,
 } from "@/lib/ops/wo-history";
+import { costView } from "@/lib/ops/cost-access";
+import { discountShares } from "@/lib/ops/part-pricing";
+import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
 
 type Query = Pick<Sql, "query">;
 
@@ -647,6 +662,10 @@ export async function finishRun(sql: Query, runId: number) {
 
 export type WoHistoryRun = {
   id: number;
+  /** 'history' (work orders and their lines) or 'line_costs' (QuickBooks cost on saved lines, 11/24). */
+  kind: "history" | "line_costs";
+  /** A cost run: the lines that still hold the cost it wrote. */
+  costLines: number;
   filename: string | null;
   rowCount: number;
   counts: WoCounts | null;
@@ -675,6 +694,7 @@ export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]
     `select r.*, (select count(*) from wo_history h where h.run_id = r.id)::int as current, c.item_lines, c.discount_lines,
             (select count(distinct f.history_id) from wo_history_fills f where f.run_id = r.id and f.target = 'history' and f.field not in ('discount', 'lines_total'))::int as rows_filled,
             (select count(*) from wo_history_lines l where l.run_id = r.id)::int as lines_added,
+            (select count(*) from wo_history_lines l where l.cost_run_id = r.id)::int as cost_lines,
             (select coalesce(array_agg(x.name order by x.name), '{}') from wo_history_retired x where x.run_id = r.id and x.undone_at is null) as retired
        from wo_history_runs r
        left join lateral (
@@ -683,11 +703,16 @@ export async function recentRuns(sql: Query, limit = 10): Promise<WoHistoryRun[]
            from wo_history h join wo_history_lines l on l.history_id = h.id
           where h.run_id = r.id and l.run_id is null
        ) c on true
-      order by r.created_at desc, r.id desc limit $1`,
+      -- The latest of each kind, so ten history runs never hide a cost run's Undo, or the reverse.
+      where r.id in (select t.id from (select x.id, row_number() over (partition by x.kind order by x.created_at desc, x.id desc) as n
+                                         from wo_history_runs x) t where t.n <= $1)
+      order by r.created_at desc, r.id desc`,
     [limit],
   );
   return rows.map((r) => ({
     id: Number(r.id),
+    kind: r.kind === "line_costs" ? ("line_costs" as const) : ("history" as const),
+    costLines: Number(r.cost_lines ?? 0),
     filename: str(r.filename),
     rowCount: Number(r.row_count ?? 0),
     counts: r.counts == null ? null : ((typeof r.counts === "string" ? JSON.parse(r.counts) : r.counts) as WoCounts),
@@ -722,7 +747,7 @@ const undoCol = (alias: string, fills: string, key: string, field: string, type:
 
 const UNDO_SQL = `
 with live as (
-  select id from wo_history_runs where id = $1 and undone_at is null
+  select id from wo_history_runs where id = $1 and undone_at is null and kind = 'history'
 ), h as (
   select * from wo_history where run_id = (select id from live)
 ), tfl as (
@@ -803,7 +828,7 @@ rr as (
     from rback b
   returning id
 ), run as (
-  update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null returning id
+  update wo_history_runs set undone_at = now(), undone_by = $2 where id = $1 and undone_at is null and kind = 'history' returning id
 )
 select (select count(*) from gone)::int as removed, (select count(*) from restore)::int as restored,
        (select count(*) from lgone)::int as lines_removed, (select count(*) from hrev)::int as rows_cleared,
@@ -812,6 +837,7 @@ select (select count(*) from gone)::int as removed, (select count(*) from restor
        (select count(*) from run)::int as ok, (select count(*) from act)::int + (select count(*) from ract)::int + (select count(*) from rdone)::int as logged`;
 
 export type UndoResult = {
+  kind?: "history";
   /** History work orders this run saved, now deleted. */
   removed: number;
   /** Tickets whose filled fields were put back. */
@@ -844,6 +870,162 @@ export async function undoRun(sql: Query, input: { runId: number; who: string })
     accountsBack: list(r.accounts_back),
     accountsKept: list(r.accounts_kept),
   };
+}
+
+// ── Line costs (Jesus, 11/24) ────────────────────────────────────────────────────────────────────────────────────────
+
+/** The cost a line holds, as one text. The save stores it on the line, and Undo clears only while it still holds it. */
+const costKeySql = (u: string, lc: string, basis: string, date: string, src: string, flag: string) =>
+  `concat_ws('|', coalesce(to_char(${u}, 'FM9999999990.0000'), ''), coalesce(to_char(${lc}, 'FM9999999990.00'), ''),
+             coalesce(${basis}, ''), coalesce(${date}::text, ''), coalesce(${src}, ''), coalesce(${flag}, ''))`;
+
+/** The saved work orders for these History Refs, with their lines and whether their account is removed. */
+export async function loadCostOrders(sql: Query, refs: string[]): Promise<Map<string, SavedCostOrder>> {
+  const keys = [...new Set(refs.map((r) => r.toLowerCase()))];
+  const out = new Map<string, SavedCostOrder>();
+  if (!keys.length) return out;
+  const rows = await sql.query<Record<string, unknown>>(
+    `select h.id as history_id, lower(h.history_ref) as ref, h.customer,
+            not exists (select 1 from directory_customers d where d.archived = false and lower(btrim(d.name)) = lower(btrim(h.customer))) as removed,
+            l.id, l.sort, l.line_type, l.item_code, l.qty, l.amount, l.unit_cost, l.line_cost, l.cost_basis, l.cost_date::text as cost_date,
+            l.cost_source, l.cost_flag
+       from wo_history h left join wo_history_lines l on l.history_id = h.id
+      where lower(h.history_ref) = any($1::text[])
+      order by h.id, l.sort, l.id`,
+    [keys],
+  );
+  for (const r of rows) {
+    const ref = String(r.ref);
+    let o = out.get(ref);
+    if (!o) {
+      o = { historyId: Number(r.history_id), customer: String(r.customer ?? ""), removed: r.removed === true, lines: [] };
+      out.set(ref, o);
+    }
+    if (r.id == null) continue;
+    o.lines.push({
+      id: Number(r.id),
+      sort: Number(r.sort),
+      lineType: String(r.line_type),
+      itemCode: str(r.item_code),
+      qty: num(r.qty),
+      amount: num(r.amount),
+      unitCost: num(r.unit_cost),
+      lineCost: num(r.line_cost),
+      costBasis: str(r.cost_basis),
+      costDate: str(r.cost_date),
+      costSource: str(r.cost_source),
+      costFlag: str(r.cost_flag),
+    });
+  }
+  return out;
+}
+
+export async function previewLineCosts(sql: Query, rows: LineCostRow[]): Promise<LineCostPlanLine[]> {
+  return planLineCosts(rows, await loadCostOrders(sql, rows.map((r) => r.ref)));
+}
+
+export async function startCostRun(sql: Query, input: { filename: string; rowCount: number; counts: LineCostCounts; who: string }): Promise<number> {
+  const r = await sql.query<{ id: number }>(
+    "insert into wo_history_runs (filename, row_count, counts, created_by, kind) values ($1, $2, $3::jsonb, $4, 'line_costs') returning id",
+    [input.filename, input.rowCount, JSON.stringify(input.counts), input.who],
+  );
+  return Number(r[0]!.id);
+}
+
+export type CostSaveRow = Pick<LineCostRow, "sort" | "lineType" | "itemCode" | "qty" | "amount" | "unitCost" | "lineCost" | "costBasis" | "costDate" | "costSource" | "costFlag"> & { lineId: number };
+
+const COST_SAVE_SQL = `
+with x as (
+  select * from jsonb_to_recordset($2::jsonb) as x(
+    line_id int, sort int, line_type text, item_key text, qty numeric, amount numeric,
+    unit_cost numeric, line_cost numeric, cost_basis text, cost_date date, cost_source text, cost_flag text)
+), run as (
+  select id from wo_history_runs where id = $1 and kind = 'line_costs' and undone_at is null
+)
+update wo_history_lines l
+   set unit_cost = round(x.unit_cost, 4), line_cost = round(x.line_cost, 2), cost_basis = x.cost_basis, cost_date = x.cost_date,
+       cost_source = x.cost_source, cost_flag = x.cost_flag, cost_run_id = (select id from run),
+       cost_run_values = ${costKeySql("round(x.unit_cost, 4)", "round(x.line_cost, 2)", "x.cost_basis", "x.cost_date", "x.cost_source", "x.cost_flag")}
+  from x
+ where exists (select 1 from run) and l.id = x.line_id
+   -- Only a line with no cost at all, and still the line the preview matched (sort, type, item, qty and amount).
+   and l.unit_cost is null and l.line_cost is null and l.cost_basis is null and l.cost_date is null and l.cost_source is null and l.cost_flag is null
+   and l.sort = x.sort and lower(l.line_type) = lower(x.line_type) and l.kind not in ('discount', 'labor', 'trip')
+   and lower(regexp_replace(coalesce(l.item_code, ''), '\\s+', '', 'g')) = x.item_key
+   and l.qty is not distinct from round(x.qty, 2) and l.amount is not distinct from round(x.amount, 2)
+returning l.id`;
+
+/** The file's checks again on the server, for what the save is sent. Null when every row passes. */
+export function checkCostSaveRows(rows: CostSaveRow[]): string | null {
+  const seen = new Set<number>();
+  for (const r of rows) {
+    const at = `Line Sort ${r.sort} (${r.itemCode || "no item"})`;
+    if (seen.has(r.lineId)) return `${at}: the same line is in the save twice.`;
+    seen.add(r.lineId);
+    if (isNoCostLineType(r.lineType)) return `${at}: a ${r.lineType} line doesn't take a cost.`;
+    if (!(r.unitCost >= 0)) return `${at}: Unit Cost is below zero.`;
+    if (!lineCostAddsUp(r.qty, r.unitCost, r.lineCost)) return `${at}: Line Cost ${r.lineCost} isn't Qty × Unit Cost.`;
+    if (!(COST_BASES as readonly string[]).includes(r.costBasis)) return `${at}: Cost Basis ${r.costBasis} isn't known.`;
+    if (r.costDate != null && !isRealDay(r.costDate)) return `${at}: Cost Date ${r.costDate} isn't a real day.`;
+    if (r.costSource !== "quickbooks") return `${at}: Cost Source isn't quickbooks.`;
+  }
+  return null;
+}
+
+/** Fill the cost on these lines. A line that has any cost, or changed since the preview, is skipped. */
+export async function saveCostBatch(sql: Query, input: { runId: number; rows: CostSaveRow[] }): Promise<{ filled: number; skipped: number }> {
+  if (!input.rows.length) return { filled: 0, skipped: 0 };
+  const payload = input.rows.map((r) => ({
+    line_id: r.lineId,
+    sort: r.sort,
+    line_type: r.lineType,
+    item_key: itemCodeKey(r.itemCode),
+    qty: r.qty,
+    amount: r.amount,
+    unit_cost: r.unitCost,
+    line_cost: r.lineCost,
+    cost_basis: r.costBasis,
+    cost_date: r.costDate,
+    cost_source: r.costSource,
+    cost_flag: r.costFlag,
+  }));
+  const done = await sql.query<{ id: number }>(COST_SAVE_SQL, [input.runId, JSON.stringify(payload)]);
+  await sql.query("update wo_history_runs set lines = lines + $2 where id = $1", [input.runId, done.length]);
+  return { filled: done.length, skipped: input.rows.length - done.length };
+}
+
+const COST_UNDO_SQL = `
+with run as (
+  update wo_history_runs set undone_at = now(), undone_by = $2
+   where id = $1 and kind = 'line_costs' and undone_at is null
+  returning id
+), mine as (
+  select l.id, l.cost_run_values is not distinct from ${costKeySql("l.unit_cost", "l.line_cost", "l.cost_basis", "l.cost_date", "l.cost_source", "l.cost_flag")} as unchanged
+    from wo_history_lines l where l.cost_run_id = (select id from run)
+), cleared as (
+  update wo_history_lines l
+     set unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_flag = null,
+         cost_run_id = null, cost_run_values = null
+    from mine m where l.id = m.id and m.unchanged
+  returning l.id
+)
+select (select count(*) from run)::int as ok, (select count(*) from cleared)::int as cleared,
+       (select count(*) from mine where not unchanged)::int as kept`;
+
+export type CostUndoResult = { kind: "line_costs"; cleared: number; kept: number };
+
+/** Undo a cost run: clear the cost it wrote, only on lines that still hold exactly that. Nothing is deleted. */
+export async function undoCostRun(sql: Query, input: { runId: number; who: string }): Promise<CostUndoResult> {
+  const r = (await sql.query<{ ok: number; cleared: number; kept: number }>(COST_UNDO_SQL, [input.runId, input.who]))[0];
+  if (!r || !Number(r.ok)) throw new Error("That run isn't on the list or was already undone.");
+  return { kind: "line_costs", cleared: Number(r.cleared), kept: Number(r.kept) };
+}
+
+/** Undo any run: a history run as before, a cost run its own way. */
+export async function undoAnyRun(sql: Query, input: { runId: number; who: string }): Promise<UndoResult | CostUndoResult> {
+  const kind = (await sql.query<{ kind: string }>("select kind from wo_history_runs where id = $1", [input.runId]))[0]?.kind;
+  if (kind === "line_costs") return undoCostRun(sql, input);
+  return { kind: "history", ...(await undoRun(sql, input)) };
 }
 
 // ── Location Needed ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -896,11 +1078,31 @@ export type WoHistorySummary = {
   invoiceDate: string | null;
   jobId: number | null;
   locationNeeded: boolean;
+  /**
+   * Only for cost viewers (Settings → Who Sees Cost and Margin, 11/24): the known QuickBooks parts cost and profit after
+   * the discount. Profit is null on Katz Coffee Service Dept. (an internal account, left out of profit) or with no lines.
+   */
+  cost?: { cost: number; profit: number | null; costedLines: number; totalLines: number; internal: boolean };
 };
 
 const SUMMARY_COLS = `h.id, h.history_ref, h.wo, h.completed::text as completed, h.technician, h.original_tech, h.call_category,
   left(h.problem, 240) as problem, h.invoice_total, h.lines_total, h.invoice_date::text as invoice_date, h.job_id, h.location_needed,
   (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind <> 'discount')::int as line_count`;
+
+/** The cost columns a summary reads, only when the caller may see cost. */
+const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip')) as cost_known,
+  (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip') and l.line_cost is not null)::int as costed_lines,
+  -- Counted as countsAsCostable does: parts, filters and equipment always; other non-labor lines once they hold a cost.
+  (select count(*) from wo_history_lines l where l.history_id = h.id
+      and (l.kind in ('part', 'filter', 'equipment') or (l.kind not in ('discount', 'labor', 'trip') and l.line_cost is not null)))::int as costable_lines,
+  h.customer as cost_customer`;
+
+function withCost(base: WoHistorySummary, r: Record<string, unknown>): WoHistorySummary {
+  const cost = Math.round(Number(r.cost_known ?? 0) * 100) / 100;
+  const internal = isServiceDeptAccount(str(r.cost_customer));
+  const profit = internal || base.linesTotal == null ? null : Math.round((base.linesTotal - cost) * 100) / 100;
+  return { ...base, cost: { cost, profit, costedLines: Number(r.costed_lines ?? 0), totalLines: Number(r.costable_lines ?? 0), internal } };
+}
 
 function summary(r: Record<string, unknown>): WoHistorySummary {
   return {
@@ -921,14 +1123,14 @@ function summary(r: Record<string, unknown>): WoHistorySummary {
   };
 }
 
-export async function accountHistory(sql: Query, customer: string): Promise<WoHistorySummary[]> {
+export async function accountHistory(sql: Query, customer: string, opts: { showCost?: boolean } = {}): Promise<WoHistorySummary[]> {
   const name = customer.trim();
   if (!name) return [];
   const rows = await sql.query<Record<string, unknown>>(
-    `select ${SUMMARY_COLS} from wo_history h where lower(btrim(h.customer)) = lower(btrim($1)) order by h.completed desc nulls last, h.id desc`,
+    `select ${SUMMARY_COLS}${opts.showCost ? COST_SUMMARY_COLS : ""} from wo_history h where lower(btrim(h.customer)) = lower(btrim($1)) order by h.completed desc nulls last, h.id desc`,
     [name],
   );
-  return rows.map(summary);
+  return rows.map((r) => (opts.showCost ? withCost(summary(r), r) : summary(r)));
 }
 
 export async function jobHistory(sql: Query, jobId: number): Promise<WoHistorySummary[]> {
@@ -947,6 +1149,8 @@ export type WoHistoryLineView = {
   amount: number | null;
   invoiceDate: string | null;
   part: PartRef | null;
+  /** Only for cost viewers (11/24): QuickBooks purchase cost, and this line's share of the invoice discount. */
+  cost?: { unitCost: number | null; lineCost: number | null; costBasis: string | null; costDate: string | null; costFlag: string | null; discountShare: number; profit: number | null };
 };
 
 export type WoHistoryDetail = WoHistorySummary & {
@@ -968,10 +1172,20 @@ export type WoHistoryDetail = WoHistorySummary & {
   reviewFlags: string | null;
   jobCallId: string | null;
   lines: WoHistoryLineView[];
-  invoice: { parts: number; labor: number; subtotal: number; discount: number; total: number; invoiceDate: string | null; differs: boolean } | null;
+  invoice: {
+    parts: number;
+    labor: number;
+    subtotal: number;
+    discount: number;
+    total: number;
+    invoiceDate: string | null;
+    differs: boolean;
+    /** Only for cost viewers: known parts cost, lines costed, and profit after the discount (null on Service Dept.). */
+    cost?: { cost: number; costedLines: number; totalLines: number; profit: number | null; margin: number | null; internal: boolean; note: string };
+  } | null;
 };
 
-export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDetail> {
+export async function historyDetail(sql: Query, id: number, opts: { showCost?: boolean } = {}): Promise<WoHistoryDetail> {
   const h = (
     await sql.query<Record<string, unknown>>(
       `select ${SUMMARY_COLS}, h.problem as full_problem, h.customer, h.file_customer, h.service_location, h.location_source, h.service_type,
@@ -985,6 +1199,7 @@ export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDe
   if (!h) throw new Error("That history work order isn't on the list any more.");
   const lineRows = await sql.query<Record<string, unknown>>(
     `select l.id, l.line_type, l.kind, l.item_code, l.description, l.qty, l.unit_price, l.amount, l.invoice_date::text as invoice_date,
+            ${opts.showCost ? "l.unit_cost, l.line_cost, l.cost_basis, l.cost_date::text as cost_date, l.cost_flag," : ""}
             p.id as pid, p.sku, p.mfr_part, (p.image is not null) as has_image,
             case when p.image is null then null else extract(epoch from p.image_updated_at)::bigint::text end as image_version
        from wo_history_lines l
@@ -1016,6 +1231,42 @@ export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDe
     ? historyInvoice(all.map((l) => ({ lineType: l.lineType, itemCode: l.itemCode ?? "", description: l.description ?? "", qty: l.qty, unitPrice: l.unitPrice, amount: l.amount, invoiceDate: l.invoiceDate })))
     : null;
   const base = summary(h);
+  // Cost only for cost viewers; never in the data otherwise.
+  const items = all.filter((l) => l.kind !== "discount");
+  let lines: WoHistoryLineView[] = items;
+  let costSummary: NonNullable<WoHistoryDetail["invoice"]>["cost"] | undefined;
+  if (opts.showCost && inv) {
+    const byId = new Map(lineRows.map((r) => [Number(r.id), r]));
+    const shares = discountShares(items.map((l) => l.amount ?? 0), inv.discount);
+    const internal = isServiceDeptAccount(str(h.customer));
+    lines = items.map((l, i) => {
+      const r = byId.get(l.id)!;
+      const lineCost = num(r.line_cost);
+      return {
+        ...l,
+        cost: {
+          unitCost: num(r.unit_cost),
+          lineCost,
+          costBasis: str(r.cost_basis),
+          costDate: str(r.cost_date),
+          costFlag: str(r.cost_flag),
+          discountShare: shares[i] ?? 0,
+          profit: internal || lineCost == null ? null : Math.round(((l.amount ?? 0) - (shares[i] ?? 0) - lineCost) * 100) / 100,
+        },
+      };
+    });
+    const c = historyInvoiceCost(items.map((l) => ({ kind: l.kind, amount: l.amount, lineCost: num(byId.get(l.id)!.line_cost) })), inv.discount);
+    const after = inv.subtotal - inv.discount;
+    costSummary = {
+      cost: c.cost,
+      costedLines: c.costedLines,
+      totalLines: c.totalLines,
+      profit: internal ? null : c.profit,
+      margin: internal || !(after > 0) ? null : Math.round((c.profit / after) * 1000) / 10,
+      internal,
+      note: HISTORY_COST_NOTE,
+    };
+  }
   return {
     ...base,
     problem: str(h.full_problem),
@@ -1035,7 +1286,7 @@ export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDe
     hasItems: str(h.has_items),
     reviewFlags: str(h.review_flags),
     jobCallId: str(h.job_call_id),
-    lines: all.filter((l) => l.kind !== "discount"),
+    lines,
     invoice: inv
       ? {
           parts: inv.parts,
@@ -1045,6 +1296,7 @@ export async function historyDetail(sql: Query, id: number): Promise<WoHistoryDe
           total: inv.total,
           invoiceDate: inv.invoiceDate,
           differs: totalsDiffer(inv.total, base.invoiceTotal),
+          ...(costSummary ? { cost: costSummary } : {}),
         }
       : null,
   };
@@ -1184,7 +1436,63 @@ export const undoWoHistoryRun = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sql = await ready();
     await requireImporter(sql, context.userId);
-    return undoRun(sql, { runId: data.runId, who: await actor(sql, context.userId) });
+    return undoAnyRun(sql, { runId: data.runId, who: await actor(sql, context.userId) });
+  });
+
+const costRow = z.object({
+  line: z.number().int().nonnegative(),
+  ref: short(80).min(1),
+  sort: z.number().int().nonnegative(),
+  lineType: short(60),
+  itemCode: short(300),
+  qty: nnum,
+  unitPrice: nnum,
+  amount: nnum,
+  unitCost: z.number().finite().nonnegative(),
+  lineCost: z.number().finite(),
+  costBasis: z.enum(COST_BASES),
+  costDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(isRealDay, "isn't a real day").nullable(),
+  costSource: z.literal("quickbooks"),
+  costFlag: short(300).nullable(),
+});
+
+/** Preview a slice of the line-cost file (Admin only). Writes nothing. */
+export const previewHistoryLineCosts = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { rows: LineCostRow[] }) => z.object({ rows: z.array(costRow).max(5000) }).parse(d))
+  .handler(async ({ data, context }): Promise<LineCostPlanLine[]> => {
+    const sql = await ready();
+    await requireImporter(sql, context.userId);
+    return previewLineCosts(sql, data.rows as LineCostRow[]);
+  });
+
+export const startHistoryCostRun = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { filename: string; rowCount: number; counts: LineCostCounts }) =>
+    z.object({ filename: short(300), rowCount: z.number().int().nonnegative(), counts: z.record(z.string(), z.number()) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    await requireImporter(sql, context.userId);
+    return { runId: await startCostRun(sql, { filename: data.filename, rowCount: data.rowCount, counts: data.counts as LineCostCounts, who: await actor(sql, context.userId) }) };
+  });
+
+export const saveHistoryCostBatch = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: { runId: number; rows: CostSaveRow[] }) =>
+    z
+      .object({
+        runId: z.number().int().positive(),
+        rows: z.array(costRow.pick({ sort: true, lineType: true, itemCode: true, qty: true, amount: true, unitCost: true, lineCost: true, costBasis: true, costDate: true, costSource: true, costFlag: true }).extend({ lineId: z.number().int().positive() })).max(2000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const sql = await ready();
+    await requireImporter(sql, context.userId);
+    const bad = checkCostSaveRows(data.rows as CostSaveRow[]);
+    if (bad) throw new Error(bad);
+    return saveCostBatch(sql, data as { runId: number; rows: CostSaveRow[] });
   });
 
 export const listWoHistoryLocationNeeded = createServerFn({ method: "GET" })
@@ -1207,7 +1515,10 @@ export const setWoHistoryLocation = createServerFn({ method: "POST" })
 export const listAccountWoHistory = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { customer: string }) => z.object({ customer: short(300) }).parse(d))
-  .handler(async ({ data }): Promise<WoHistorySummary[]> => accountHistory(await ready(), data.customer));
+  .handler(async ({ data, context }): Promise<WoHistorySummary[]> => {
+    const sql = await ready();
+    return accountHistory(sql, data.customer, { showCost: (await costView(sql, context.userId)).showCost });
+  });
 
 export const listJobWoHistory = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
@@ -1217,5 +1528,8 @@ export const listJobWoHistory = createServerFn({ method: "POST" })
 export const getWoHistory = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: { id: number }) => z.object({ id: z.number().int().positive() }).parse(d))
-  .handler(async ({ data }): Promise<WoHistoryDetail> => historyDetail(await ready(), data.id));
+  .handler(async ({ data, context }): Promise<WoHistoryDetail> => {
+    const sql = await ready();
+    return historyDetail(sql, data.id, { showCost: (await costView(sql, context.userId)).showCost });
+  });
 

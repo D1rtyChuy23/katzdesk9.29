@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { downloadAnalytics, getAnalytics } from "@/lib/ops/analytics-api";
 import { downloadPartsProfit, getPartsProfit } from "@/lib/ops/parts-profit-api";
 import { downloadProfitReport, getCostVisibility, getProfitReport } from "@/lib/ops/profit-report-api";
-import { jobTypeLabel, type GroupTotals } from "@/lib/ops/profit-report";
+import { HISTORY_SECTION_TITLE, jobTypeLabel, type GroupTotals, type HistorySection, type HistoryTotals } from "@/lib/ops/profit-report";
 import { ANALYTICS_LABEL, ANALYTICS_TYPES, NO_REP, type AnalyticsFilters, type AnalyticsRow, type AnalyticsType, type ExportFormat } from "@/lib/ops/analytics";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { formatRep } from "@/lib/ops/rep-match";
@@ -573,8 +573,97 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
         testId="profit-by-customer"
         more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
       />
+      {d ? <HistoryProfit history={d.history} /> : null}
       </div>
     </div>
+  );
+}
+
+/** QuickBooks history (Jesus, 11/24): its own section, never added into the tables or totals above. */
+function HistoryProfit({ history }: { history: HistorySection }) {
+  const [shown, setShown] = useState(PAGE);
+  const customers = history.byCustomer;
+  return (
+    <section className="mt-8" data-testid="profit-history">
+      <h2 className="font-display text-xl font-medium tracking-tight">{HISTORY_SECTION_TITLE}</h2>
+      <p className="mt-1 text-xs text-muted-foreground" data-testid="profit-history-note">
+        Work Order History invoices, apart from the bills above. {history.note}.
+      </p>
+      <HistoryTable title="By Year" first="Year" rows={history.byYear} total={history.totals} testId="profit-history-by-year" />
+      <HistoryTable
+        title="By Customer"
+        first="Customer"
+        rows={customers.slice(0, shown)}
+        testId="profit-history-by-customer"
+        more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
+      />
+    </section>
+  );
+}
+
+function HistoryTable({
+  title,
+  first,
+  rows,
+  total = null,
+  testId,
+  more = null,
+}: {
+  title: string;
+  first: string;
+  rows: (HistoryTotals & { key: string; label: string })[];
+  total?: HistoryTotals | null;
+  testId: string;
+  more?: { shown: number; total: number; onMore: () => void } | null;
+}) {
+  const row = (r: HistoryTotals & { label: string }, key: string, bold = false) => (
+    <tr key={key} className={`border-b border-border align-top last:border-b-0 ${CARD_ROW} ${bold ? "font-medium" : ""}`} data-testid="profit-history-row">
+      <td className={`px-4 py-2 font-medium ${CARD_LINE}`}>{r.label || "(no customer)"}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Bills']`}>{r.bills}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Sell']`}>{money(r.sell)}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Discount']`}>{money(r.discount)}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>{money(r.cost)}</td>
+      <td className={`tabular px-2 py-2 text-right font-medium ${r.profit < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Profit']`}>{money(r.profit)}</td>
+      <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Uncosted']`}>{money(r.uncostedSell)}</td>
+    </tr>
+  );
+  return (
+    <section className="mt-4 overflow-hidden rounded-xl border border-border bg-card" data-testid={testId}>
+      <h3 className="border-b border-border px-4 py-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h3>
+      {rows.length ? (
+        <div className="overflow-x-auto">
+          <table className={`w-full text-sm sm:min-w-[46rem] ${CARD_TABLE}`}>
+            <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
+              <tr className="border-b border-border">
+                <th className="px-4 py-2.5 font-medium">{first}</th>
+                <th className="px-2 py-2.5 text-right font-medium">Bills</th>
+                <th className="px-2 py-2.5 text-right font-medium">Sell</th>
+                <th className="px-2 py-2.5 text-right font-medium">Discount</th>
+                <th className="px-2 py-2.5 text-right font-medium">Cost (Parts and Equipment)</th>
+                <th className="px-2 py-2.5 text-right font-medium">Profit After Discount</th>
+                <th className="px-2 py-2.5 pr-4 text-right font-medium">Uncosted Sell</th>
+              </tr>
+            </thead>
+            <tbody className={CARD_BODY}>
+              {rows.map((r) => row(r, r.key))}
+              {total ? row({ ...total, label: "Total" }, "__total", true) : null}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="px-4 py-8 text-sm text-muted-foreground">No Work Order History in this range.</p>
+      )}
+      {more ? (
+        <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground">
+          <span>
+            Showing {more.shown} of {more.total}. An export has all {more.total}.
+          </span>
+          <Button type="button" size="sm" variant="outline" onClick={more.onMore}>
+            Show More
+          </Button>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
