@@ -281,8 +281,16 @@ test("merge: the drop's WOs, missing machine rows, notes, activity and new visit
     });
     await sql.query("insert into install_work_orders (install_id, wo, match_key, status) values ($1, 'WO-0831', '831', null), ($2, 'WO-0855', '855', 'Completed'), ($2, 'WO-0831', '831', 'Completed')", [keep, drop]);
     await syncInstallUnits(sql, keep);
-    // The same machine on two copies of the account: old data, from before the serial check (11/23).
-    await withDuplicates(pg, () => syncInstallUnits(sql, drop));
+    // The same machine on two copies of the account: old data, from before the serial check (11/23). Sync no longer
+    // makes that second unit, so it is set up here with the check off, as it was made then.
+    await withDuplicates(pg, async () => {
+      const [u] = await sql.query(
+        "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, created_by_install) values ('Baldi Management', $1, $1, 'E-1', 'e-1', $2) returning id",
+        ["Eversys e'4m", drop],
+      );
+      await sql.query("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [drop, u.id]);
+    });
+    await syncInstallUnits(sql, drop);
     const units = await sql.query("select id, customer, equipment_name, serial, created_by_install from account_equipment order by id");
     const grinder = units.find((u) => u.serial === "M-9");
     const dropMachine = units.find((u) => u.customer === "Baldi Management" && u.serial === "E-1");
