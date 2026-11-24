@@ -1197,3 +1197,32 @@ test("Past imports keeps the latest of each kind: ten newer history runs never h
   const runs = await api.recentRuns(sql);
   assert.deepEqual([runs.filter((r) => r.kind === "history").length, runs.some((r) => r.id === cost)], [10, true]);
 });
+
+test("costed lines (choice C): parts, filters and equipment always count; install, service and other only once costed", async () => {
+  const pure = C.historyInvoiceCost(
+    [
+      { kind: "part", amount: 40, lineCost: 22.5 },
+      { kind: "equipment", amount: 900, lineCost: null },
+      { kind: "service", amount: 150, lineCost: null },
+      { kind: "install", amount: 373.53, lineCost: 100 },
+      { kind: "other", amount: 25, lineCost: null },
+      { kind: "labor", amount: 225, lineCost: null },
+      { kind: "discount", amount: -10, lineCost: null },
+    ],
+    10,
+  );
+  // Counted: the part, the equipment, and the costed install fee. The uncosted service and other charge never are.
+  assert.deepEqual([pure.costedLines, pure.totalLines, pure.cost, pure.uncostedSell], [2, 3, 122.5, 900]);
+  assert.equal(pure.profit, Math.round((40 + 900 + 150 + 373.53 + 25 + 225 - 10 - 122.5) * 100) / 100, "every line's sell is still in the profit");
+
+  // The account list counts the same way as the invoice panel.
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history_lines set line_type = 'Service', kind = 'service', unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_run_id = null, cost_run_values = null where item_code = 'INSTALLATIONFEE'");
+  const row = (await api.accountHistory(sql, "Alpha Cafe", { showCost: true })).find((h) => h.ref === "WO-1500");
+  assert.deepEqual([row.cost.costedLines, row.cost.totalLines], [1, 1], "an uncosted Service line isn't waiting on a cost");
+  const id = (await pg.query("select id from wo_history where history_ref = 'WO-1500'")).rows[0].id;
+  const d = await api.historyDetail(sql, id, { showCost: true });
+  assert.deepEqual([d.invoice.cost.costedLines, d.invoice.cost.totalLines], [1, 1]);
+});

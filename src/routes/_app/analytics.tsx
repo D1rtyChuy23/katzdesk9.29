@@ -622,7 +622,7 @@ function HistoryTable({
       <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Bills']`}>{r.bills}</td>
       <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Sell']`}>{money(r.sell)}</td>
       <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Discount']`}>{money(r.discount)}</td>
-      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Parts_cost']`}>{money(r.cost)}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>{money(r.cost)}</td>
       <td className={`tabular px-2 py-2 text-right font-medium ${r.profit < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Profit']`}>{money(r.profit)}</td>
       <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Uncosted']`}>{money(r.uncostedSell)}</td>
     </tr>
@@ -639,7 +639,7 @@ function HistoryTable({
                 <th className="px-2 py-2.5 text-right font-medium">Bills</th>
                 <th className="px-2 py-2.5 text-right font-medium">Sell</th>
                 <th className="px-2 py-2.5 text-right font-medium">Discount</th>
-                <th className="px-2 py-2.5 text-right font-medium">Parts Cost</th>
+                <th className="px-2 py-2.5 text-right font-medium">Cost (Parts and Equipment)</th>
                 <th className="px-2 py-2.5 text-right font-medium">Profit After Discount</th>
                 <th className="px-2 py-2.5 pr-4 text-right font-medium">Uncosted Sell</th>
               </tr>

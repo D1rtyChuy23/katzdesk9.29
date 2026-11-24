@@ -1186,14 +1186,25 @@ export const HISTORY_COST_NOTE = "Parts cost only; labor cost not included";
 
 export type CostedLine = { kind: string; amount: number | null; lineCost: number | null };
 
+/** Lines that are bought, so a missing cost is work left to do: they always count in "N of M lines costed". */
+export const ALWAYS_COSTED_KINDS = ["part", "filter", "equipment"] as const;
+
 /**
- * An invoice's known cost, how many of the lines that can take a cost have one (not labor or trip, which never do), its
- * profit after the discount (parts cost only), and the sell of the lines that could have a cost but don't.
+ * Whether a line counts toward "N of M lines costed" and Uncosted Sell (Jesus, 11/24, choice C): parts, filters and
+ * equipment always; install fees, service and other charges only once they hold a cost (they're usually our own work,
+ * with a cost only when something like a subcontractor bill backs them); labor, trip and discounts never.
+ */
+export const countsAsCostable = (kind: string, lineCost: number | null) =>
+  (ALWAYS_COSTED_KINDS as readonly string[]).includes(kind) || (kind !== "discount" && !isHistoryLabor(kind) && lineCost != null);
+
+/**
+ * An invoice's known cost, how many of the lines that count (countsAsCostable) have one, its profit after the discount
+ * (every line's sell, less the discount, less the known cost), and the sell of the counted lines with no cost yet.
  */
 export function historyInvoiceCost(lines: CostedLine[], discount: number): { cost: number; costedLines: number; totalLines: number; subtotal: number; profit: number; uncostedSell: number } {
   const items = lines.filter((l) => l.kind !== "discount");
   const subtotal = round2(items.reduce((s, l) => s + (l.amount ?? 0), 0));
-  const costable = items.filter((l) => !isHistoryLabor(l.kind));
+  const costable = items.filter((l) => countsAsCostable(l.kind, l.lineCost));
   const costed = costable.filter((l) => l.lineCost != null);
   const cost = round2(costed.reduce((s, l) => s + (l.lineCost ?? 0), 0));
   const uncostedSell = round2(costable.filter((l) => l.lineCost == null).reduce((s, l) => s + (l.amount ?? 0), 0));

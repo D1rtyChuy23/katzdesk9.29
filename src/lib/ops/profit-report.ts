@@ -94,9 +94,9 @@ export type HistoryBill = {
   /** Before the discount. */
   sell: number;
   discount: number;
-  /** Parts cost known. */
+  /** Cost known (parts and equipment, and any other line the file costed). */
   cost: number;
-  /** Sell of part lines with no cost yet. */
+  /** Sell of parts, filters and equipment with no cost yet. */
   uncostedSell: number;
 };
 
@@ -140,7 +140,7 @@ export function historySection(bills: HistoryBill[], excluded: { serviceDept: nu
   };
 }
 
-const HISTORY_COLUMNS = ["Bills", "Sell", "Discount", "Parts Cost", "Profit After Discount", "Uncosted Sell"];
+const HISTORY_COLUMNS = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount", "Uncosted Sell"];
 const HISTORY_WEIGHTS = [50, 80, 80, 80, 90, 80];
 
 /** The history section as two download tables: by year (with the total), and by customer. */

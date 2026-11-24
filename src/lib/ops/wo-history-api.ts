@@ -1092,7 +1092,9 @@ const SUMMARY_COLS = `h.id, h.history_ref, h.wo, h.completed::text as completed,
 /** The cost columns a summary reads, only when the caller may see cost. */
 const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip')) as cost_known,
   (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip') and l.line_cost is not null)::int as costed_lines,
-  (select count(*) from wo_history_lines l where l.history_id = h.id and l.kind not in ('discount', 'labor', 'trip'))::int as costable_lines,
+  -- Counted as countsAsCostable does: parts, filters and equipment always; other non-labor lines once they hold a cost.
+  (select count(*) from wo_history_lines l where l.history_id = h.id
+      and (l.kind in ('part', 'filter', 'equipment') or (l.kind not in ('discount', 'labor', 'trip') and l.line_cost is not null)))::int as costable_lines,
   h.customer as cost_customer`;
 
 function withCost(base: WoHistorySummary, r: Record<string, unknown>): WoHistorySummary {
