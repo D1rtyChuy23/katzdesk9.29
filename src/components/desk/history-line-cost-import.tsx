@@ -267,7 +267,7 @@ export function HistoryLineCostImportButton() {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground" data-testid="history-costs-adds">
-                  Will Fill adds {money(counts.fillCost)} of cost on {money(counts.fillSell)} billed: {money(counts.fillProfit)} before discounts. {HISTORY_COST_NOTE}.
+                  Will Fill adds {money(counts.fillCost)} of cost on {money(counts.fillSell)} billed, a profit of {money(counts.fillProfit)} on those lines before any discount. {HISTORY_COST_NOTE}.
                 </p>
                 {lineCostSaveable(group) && groupLines.length ? (
                   <div className="flex flex-wrap items-center gap-x-3 text-xs">
