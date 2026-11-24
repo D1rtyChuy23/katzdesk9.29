@@ -10,6 +10,7 @@ await register("./node-resolve-hook.mjs", import.meta.url);
 // Keep this file off the preview database. db.ts boots PGLite on import when DATABASE_URL is unset.
 process.env.DATABASE_URL ||= "postgres://127.0.0.1/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const inspection = await import("../src/lib/ops/inspection-api.ts");
 const { readInspection, syncInstallUnits, removeInspectionUnit, removeInstallRow, addUnitOntoList, findUnitMismatches } = inspection;
 const { parseMachinesJson, serializeMachines } = await import("../src/lib/ops/machines.ts");
@@ -553,9 +554,12 @@ async function waysideWithCopies(pg, sql, copies = 2) {
   for (let i = 0; i < copies; i++) {
     pb.push(
       (
-        await pg.query(
-          `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Bar By The Wayside', $1, $1, 'PB001708', 'pb001708') returning id`,
-          [LINEA],
+        // Old copies, from before the serial check (11/23): set up with it off; the link runs with it on.
+        await withDuplicates(pg, () =>
+          pg.query(
+            `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ('Bar By The Wayside', $1, $1, 'PB001708', 'pb001708') returning id`,
+            [LINEA],
+          ),
         )
       ).rows[0].id,
     );

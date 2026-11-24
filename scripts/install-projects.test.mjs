@@ -10,6 +10,7 @@ import { PGlite } from "@electric-sql/pglite";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
+import { withDuplicates } from "./dup-fixture.mjs";
 const { parseCorrigoMatrix, settleInstallRows } = await import("../src/lib/ops/corrigo.ts");
 const corrigoImport = await import("../src/lib/ops/corrigo-import.ts");
 const { applyCorrigoRows } = corrigoImport;
@@ -280,7 +281,8 @@ test("merge: the drop's WOs, missing machine rows, notes, activity and new visit
     });
     await sql.query("insert into install_work_orders (install_id, wo, match_key, status) values ($1, 'WO-0831', '831', null), ($2, 'WO-0855', '855', 'Completed'), ($2, 'WO-0831', '831', 'Completed')", [keep, drop]);
     await syncInstallUnits(sql, keep);
-    await syncInstallUnits(sql, drop);
+    // The same machine on two copies of the account: old data, from before the serial check (11/23).
+    await withDuplicates(pg, () => syncInstallUnits(sql, drop));
     const units = await sql.query("select id, customer, equipment_name, serial, created_by_install from account_equipment order by id");
     const grinder = units.find((u) => u.serial === "M-9");
     const dropMachine = units.find((u) => u.customer === "Baldi Management" && u.serial === "E-1");

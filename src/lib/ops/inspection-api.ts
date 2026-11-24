@@ -1,3 +1,4 @@
+import { serialClashMessage } from "@/lib/ops/serial-guard";
 import { createServerFn } from "@tanstack/react-start";
 import { fillInstallDatesFor } from "./install-date-fill";
 import { z } from "zod";
@@ -1213,7 +1214,14 @@ export async function syncInstallUnits(
     }
     let id = hit?.id;
     if (!id) {
-      id = await insertEquipment(sql, installId, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
+      try {
+        id = await insertEquipment(sql, installId, row.customer, piece.equipment, piece.serial || null, piece.powerVoltage || null);
+      } catch (e) {
+        // Its serial is on another unit (migration 0137, old data: a save of such a row is refused before it gets here).
+        // The row stays on the install with no unit, as a skipped row does, and the window still opens.
+        if (serialClashMessage(e)) continue;
+        throw e;
+      }
       hit = {
         id,
         catalog_model: piece.equipment,

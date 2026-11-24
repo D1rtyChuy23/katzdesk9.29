@@ -200,3 +200,50 @@ test("serial cleanup catches the refusal per unit", () => {
   const src = readFileSync(new URL("../src/lib/ops/serial-normalize.ts", import.meta.url), "utf8");
   assert.match(src, /if \(serialClashMessage\(e\)\) continue;/);
 });
+
+const sqlOf = (pg) => {
+  const run = async (t, p) => (await pg.query(t, p)).rows;
+  return Object.assign(async (strings, ...values) => run(strings.reduce((a, x, i) => `${a}$${i}${x}`), values), { query: run });
+};
+
+test("Merge: the kept unit takes the dropped one's serial once that one is gone; a third unit with it refuses the merge up front", async () => {
+  const { pg, q } = await db();
+  try {
+    const { mergeEquipmentUnits } = await import("../src/lib/ops/account-equip-import.ts");
+    const { withDuplicates } = await import("./dup-fixture.mjs");
+    const sql = sqlOf(pg);
+    const [keep] = await unit(q, "Zz Cafe A", "Grinder", null, null);
+    const [drop] = await unit(q, "Zz Cafe A", "Grinder", "ZZ-100");
+    await mergeEquipmentUnits(sql, keep.id, drop.id);
+    assert.deepEqual(await q("select id, serial from account_equipment"), [{ id: keep.id, serial: "ZZ-100" }]);
+    // An old trio: refused before anything moves.
+    const [k2] = await unit(q, "Zz Cafe B", "Grinder", null, null);
+    const [d2] = await withDuplicates(pg, () => unit(q, "Zz Cafe B", "Grinder", "ZZ-100"));
+    await assert.rejects(mergeEquipmentUnits(sql, k2.id, d2.id), /^Error: Serial ZZ-100 is also on Zz Cafe A \(Grinder\)\. Merge or fix that one first\.$/);
+    assert.equal((await q("select count(*)::int as n from account_equipment where customer = 'Zz Cafe B'"))[0].n, 2);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a pre-inspection whose list has a serial on another account still opens; that row gets no unit", async () => {
+  const { pg, q } = await db();
+  try {
+    const { readInspection } = await import("../src/lib/ops/inspection-api.ts");
+    const sql = sqlOf(pg);
+    await q("insert into directory_customers (name) values ('Zz Cafe A'), ('Zz Cafe B')");
+    await unit(q, "Zz Cafe A", "Grinder #1", "ZZ-100");
+    const rows = [
+      { equipment: "Zz Grinder", serial: "ZZ-100", powerVoltage: "" },
+      { equipment: "Zz Brewer", serial: "ZZ-200", powerVoltage: "" },
+    ];
+    const id = (await q("insert into installs (customer, equipment, machines) values ('Zz Cafe B', 'Zz Grinder', $1) returning id", [JSON.stringify(rows)]))[0].id;
+    const view = await readInspection(sql, id);
+    assert.ok(view);
+    const onB = await q("select serial from account_equipment where customer = 'Zz Cafe B' order by id");
+    assert.deepEqual(onB.map((r) => r.serial), ["ZZ-200"]);
+    assert.equal((await q("select count(*)::int as n from account_equipment where serial_key = 'zz-100'"))[0].n, 1);
+  } finally {
+    await pg.close();
+  }
+});

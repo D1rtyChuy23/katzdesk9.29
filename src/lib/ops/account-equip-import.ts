@@ -1339,11 +1339,20 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   // The kept unit's Part #, or the other's when it has none (11/9).
   const keepPart = (keep.part_number ?? "").trim();
   const partNumber = keepPart || (drop.part_number ?? "").trim() || null;
-  if (serial !== keepSerial || electrical !== (keep.electrical ?? "").trim() || (partNumber ?? "") !== keepPart) {
-    await sql.query(
-      "update account_equipment set serial = $2, serial_key = $3, electrical = $4, part_number = $5, updated_at = now() where id = $1",
-      [keep.id, serial || null, serial ? serialKey(serial) : null, electrical, partNumber],
-    );
+  // A serial the kept unit takes from the dropped one is written once the dropped one is gone (migration 0137 refuses
+  // a serial another unit still has). A third unit with it would block that: refused here, before anything moves.
+  const takesSerial = serial !== keepSerial;
+  if (takesSerial && serialKey(serial)) {
+    const third = (
+      await sql.query<{ customer: string; name: string | null }>(
+        "select customer, coalesce(nullif(btrim(equipment_name), ''), catalog_model) as name from account_equipment where serial_key = $1 and id <> all($2::int[]) limit 1",
+        [serialKey(serial), [keep.id, drop.id]],
+      )
+    )[0];
+    if (third) throw new Error(`Serial ${serial} is also on ${third.customer}${third.name ? ` (${third.name})` : ""}. Merge or fix that one first.`);
+  }
+  if (electrical !== (keep.electrical ?? "").trim() || (partNumber ?? "") !== keepPart) {
+    await sql.query("update account_equipment set electrical = $2, part_number = $3, updated_at = now() where id = $1", [keep.id, electrical, partNumber]);
   }
   // The other details too (11/19): the kept unit takes the dropped one's Ownership, Install date and Condition where
   // it has none. Nothing it has is blanked.
@@ -1493,6 +1502,13 @@ export async function mergeEquipmentUnits(sql: Sql, keepId: number, dropId: numb
   const by = opts?.by ?? null;
   await retireUnitRecord(sql, drop.id, by, { reason: `Merged into ${unitWord(serial, "the unit with no serial")}`, mergedInto: keep.id, mergedSerial: serial || null });
   await asActor(sql, by?.name ?? null, "merge").query("delete from account_equipment where id = $1", [drop.id]);
+  if (takesSerial) {
+    await asActor(sql, by?.name ?? null, "merge").query("update account_equipment set serial = $2, serial_key = $3, updated_at = now() where id = $1", [
+      keep.id,
+      serial || null,
+      serial ? serialKey(serial) : null,
+    ]);
+  }
   await logOnAccount(sql, keep.customer, keep.id, by?.name, `Merged ${unitWord(dropSerial)} into ${unitWord(serial, "the unit with no serial")}`);
   return { keepId: keep.id, serial };
 }
