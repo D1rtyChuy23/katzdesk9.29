@@ -63,3 +63,32 @@ async function db() {
   return { pg, sql: { query: async (t, p) => (await pg.query(t, p)).rows } };
 }
 const applyRow = (key, equipmentName, serial, o = {}) => ({ key, fileCustomer: CAFE, customer: CAFE, equipmentName, fileModel: G, catalogModel: G, serial, installDate: null, ownership: null, action: "add", existingId: null, ...o });
+
+test("review: a numbered row goes to the unit with its own number before an unnamed one, in any file order", () => {
+  const existing = [unitOf(1, G), unitOf(2, "Zz Swift Grinder #2")];
+  for (const order of [["#2", "#1"], ["#1", "#2"]]) {
+    const rows = IMP.previewRowsInFileOrder(order.map((n) => rec(`Zz Swift Grinder ${n}`)), accounts, [G], existing);
+    const by = Object.fromEntries(rows.map((r, i) => [order[i], [r.action, r.existingId]]));
+    assert.deepEqual(by["#2"], ["update", 2]);
+    assert.deepEqual(by["#1"], ["update", 1]);
+  }
+});
+
+test("review: No. 1 / No. 2 against an unnamed unit behave as #1 / #2; a plain row matches No. 1", () => {
+  const rows = IMP.previewRowsInFileOrder([rec("Zz Swift Grinder No. 1"), rec("Zz Swift Grinder No. 2")], accounts, [G], [unitOf(1, G)]);
+  assert.deepEqual(rows.map((r) => [r.action, r.existingId]), [["update", 1], ["add", null]]);
+  assert.equal(AE.matchExistingUnit({ customer: CAFE, catalogModel: G, equipmentName: G, serial: null, existing: [unitOf(1, "Zz Swift Grinder No. 1")] }).action, "update");
+});
+
+test("review: a serial row fills the blank unit with its own number first", () => {
+  const m = AE.matchExistingUnit({ customer: CAFE, catalogModel: G, equipmentName: "Zz Swift Grinder #1", serial: "6803", existing: [unitOf(1, "Zz Swift Grinder #2"), unitOf(2, "Zz Swift Grinder #1")] });
+  assert.deepEqual([m.existingId, m.matchKind], [2, "fill-blank"]);
+});
+
+test("review: the last unit number counts; 'No 3 Phase' and 'num 3 group' are not unit numbers", () => {
+  assert.equal(AE.unitNumber("Store #12 Grinder #1"), "1");
+  assert.equal(AE.unitNumber("Model No. 5000 #2"), "2");
+  assert.equal(AE.unitNumber("Zz Brewer No 3 Phase"), null);
+  assert.equal(AE.unitNumber("Zz Brewer num 3 group"), null);
+  assert.equal(AE.unitNumber("Zz Swift Grinder Number 4"), "4");
+});

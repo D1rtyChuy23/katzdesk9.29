@@ -599,10 +599,15 @@ const sameFileName = (a: string, b: string) => !!fileNameKey(a) && fileNameKey(a
  * The number a name gives one of several of a machine (11/23): "#2", "# 02", "No. 2" are "2". Only written that way:
  * a model's own digits ("Linea 2AV", "G9-2T") are not a unit number, and "Grinder 2" is left as a name.
  */
+const UNIT_NUMBER = /(?:#|\bno\.|\bnumber\b)\s*0*(\d+)\b/gi;
 export function unitNumber(name: string | null | undefined): string | null {
-  const m = String(name ?? "").match(/(?:#|\b(?:no|nbr|num|number)\.?)\s*0*(\d+)\b/i);
-  return m ? m[1]! : null;
+  // The last one: "Store #12 Grinder #1" is grinder 1 (review, 11/23). "No 3 Phase" is not a unit number.
+  const all = [...String(name ?? "").matchAll(UNIT_NUMBER)];
+  return all.length ? all[all.length - 1]![1]! : null;
 }
+/** The name without its unit number: "Grinder No. 1" and "Grinder" are one machine's label. */
+const withoutNumber = (name: string) => String(name ?? "").replace(UNIT_NUMBER, " ");
+const sameLabelBesidesNumber = (a: string, b: string) => sameEquipLabel(withoutNumber(a), withoutNumber(b));
 /** Two names that each carry a unit number, and not the same one: two machines. */
 const otherNumber = (a: string, b: string) => {
   const x = unitNumber(a);
@@ -642,16 +647,22 @@ export function matchExistingUnit(opts: {
         !e.lockedBy &&
         (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
     );
-    const fill = blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ?? blank[0];
+    // Its own name first ("#1" before "#2", review 11/23), then the same label, then any.
+    const fill =
+      blank.find((e) => sameFileName(e.equipmentName, opts.equipmentName)) ??
+      blank.find((e) => sameEquipLabel(e.equipmentName, opts.equipmentName)) ??
+      blank[0];
     if (fill) return { action: "update", existingId: fill.id, foreignAccount: null, matchKind: "fill-blank" };
     return { action: "add", existingId: null, foreignAccount: null, matchKind: null };
   }
-  const same = opts.existing.find(
+  const named = opts.existing.filter(
     (e) =>
       normalizeCustomerKey(e.customer) === customerKey &&
       sameCatalogModel(e.catalogModel, opts.catalogModel) &&
       // The same label, or the same name as written ("#2" and "No. 2", 11/23).
-      (sameEquipLabel(e.equipmentName, opts.equipmentName) || sameFileName(e.equipmentName, opts.equipmentName)) &&
+      (sameEquipLabel(e.equipmentName, opts.equipmentName) ||
+        sameFileName(e.equipmentName, opts.equipmentName) ||
+        sameLabelBesidesNumber(e.equipmentName, opts.equipmentName)) &&
       !serialKey(e.serial) &&
       // A row added earlier in the same import is the same machine only by the same name as written (11/23).
       (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)) &&
@@ -659,6 +670,8 @@ export function matchExistingUnit(opts: {
       // row with a serial still fills a serial-less "#2", with "Add as new unit instead" to keep it apart, #187.)
       !otherNumber(e.equipmentName, opts.equipmentName),
   );
+  // The unit with this very name first, so "#2" goes to the "#2" and not to an unnamed one (review, 11/23).
+  const same = named.find((e) => sameFileName(e.equipmentName, opts.equipmentName)) ?? named[0];
   if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-name" };
   return { action: "add", existingId: null, foreignAccount: null, matchKind: null };
 }
