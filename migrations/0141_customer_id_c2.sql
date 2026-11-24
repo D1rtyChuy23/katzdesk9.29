@@ -22,13 +22,15 @@
 -- no id. A decided stock action keeps the name it was decided under, so after a rename its id follows the rule and is
 -- blank until C4 sets ids directly.
 --
--- None of the existing triggers on these tables fire on these columns: the equipment history trigger records only its
--- listed fields, and the serial guards fire on serial and status. So filling an id writes no history and no check.
+-- Filling an id writes no history and runs no check: the serial guards fire only on serial (and status), and the
+-- equipment history trigger, which runs on every account_equipment update, writes a row only when one of its listed
+-- fields changes, and the ids aren't among them.
 
 set local lock_timeout = '15s';
 
--- A record's ids, for tables whose name columns aren't all called "customer", or that have several: the trigger's
--- arguments are pairs of (name column, id column). The same logic as katz_fill_customer_id in 0138, per pair.
+-- A record's ids, for tables whose name column isn't "customer", or that have several: the trigger's arguments are
+-- pairs of (name column, id column). The same logic as katz_fill_customer_id in 0138, per pair. Tables whose column is
+-- "customer" use 0138's function as C1's do. A wrong argument stops the save rather than linking nothing quietly.
 create or replace function katz_fill_customer_ids() returns trigger language plpgsql as $$
 declare
   i int := 0;
@@ -38,12 +40,18 @@ declare
   name_col text;
   id_col text;
 begin
+  if tg_nargs = 0 or tg_nargs % 2 <> 0 then
+    raise exception 'katz_fill_customer_ids on %: arguments must be (name column, id column) pairs', tg_table_name;
+  end if;
   if tg_op = 'UPDATE' then rec_old := to_jsonb(old); end if;
   while i + 1 < tg_nargs loop
     name_col := tg_argv[i];
     id_col := tg_argv[i + 1];
+    if not (rec_new ? name_col and rec_new ? id_col) then
+      raise exception 'katz_fill_customer_ids on %: no column % or %', tg_table_name, name_col, id_col;
+    end if;
     if tg_op = 'INSERT' then
-      if rec_new -> id_col = 'null'::jsonb or not (rec_new ? id_col) then
+      if rec_new -> id_col = 'null'::jsonb then
         patch := patch || jsonb_build_object(id_col, katz_customer_id(rec_new ->> name_col));
       end if;
     -- The name changed and the statement didn't set the id itself: the id is the name's, or none.
@@ -77,16 +85,17 @@ create index if not exists modules_assigned_customer_key_idx on modules (lower(b
 
 drop trigger if exists account_equipment_customer_id on account_equipment;
 create trigger account_equipment_customer_id before insert or update of customer on account_equipment
-  for each row execute function katz_fill_customer_ids('customer', 'customer_id');
+  for each row execute function katz_fill_customer_id();
 drop trigger if exists account_equipment_retired_customer_id on account_equipment_retired;
+-- 0138's function: a retired row can hold large photo links, which the jsonb one would copy on every save.
 create trigger account_equipment_retired_customer_id before insert or update of customer on account_equipment_retired
-  for each row execute function katz_fill_customer_ids('customer', 'customer_id');
+  for each row execute function katz_fill_customer_id();
 drop trigger if exists assets_customer_ids on assets;
 create trigger assets_customer_ids before insert or update of customer_owned, sold_to, stock_hold_customer on assets
   for each row execute function katz_fill_customer_ids('customer_owned', 'customer_owned_id', 'sold_to', 'sold_to_id', 'stock_hold_customer', 'stock_hold_customer_id');
 drop trigger if exists asset_stock_actions_customer_id on asset_stock_actions;
 create trigger asset_stock_actions_customer_id before insert or update of customer on asset_stock_actions
-  for each row execute function katz_fill_customer_ids('customer', 'customer_id');
+  for each row execute function katz_fill_customer_id();
 drop trigger if exists rebuilds_account_id on rebuilds;
 create trigger rebuilds_account_id before insert or update of account on rebuilds
   for each row execute function katz_fill_customer_ids('account', 'account_id');

@@ -1,6 +1,8 @@
 -- Customers by id, phase C2, part 2: fill the ids 0141 added on the records already there, by the rule in 0138. Its
--- own file so the table locks 0141 takes are short; this one takes row locks only. Each update writes only an id
--- column, so no record trigger fires (no equipment history row, no serial check) and no name or date changes.
+-- own file so the table locks 0141 takes are short; the fill takes row locks, and the id indexes at the end briefly hold
+-- writes to their tables while they build (these tables are small). Each update writes only an id column, so no name
+-- trigger or serial check fires, the equipment history trigger finds no listed field changed and writes nothing, and no
+-- name or date changes.
 
 set local lock_timeout = '15s';
 -- The accounts hold still while the rows are filled (an account removed mid-fill would leave its id on rows not yet

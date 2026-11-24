@@ -215,3 +215,53 @@ test("Link Check shows the id links on every C2 column", async () => {
     await pg.close();
   }
 });
+
+test("review: putting a unit back on an install takes its id from its name now, not the snapshot's", async () => {
+  const { pg, q } = await all();
+  try {
+    const { keepRemovedSql, putBackInstallUnitSql } = await import("../src/lib/ops/inspection-api.ts");
+    const a = await accounts(q);
+    const [inst] = await q("insert into installs (customer, equipment) values ('Zz Cafe', 'G') returning id");
+    const [unit] = await q("insert into account_equipment (customer, catalog_model, equipment_name) values ('Zz Cafe', 'Zz Brewer', 'Zz Brewer') returning id, customer_id");
+    assert.equal(unit.customer_id, a["Zz Cafe"]);
+    await q("insert into install_inspection_units (install_id, equipment_id) values ($1, $2)", [inst.id, unit.id]);
+    await q(keepRemovedSql(), [inst.id, unit.id, "{}"]);
+    const [removed] = await q("select id from install_units_removed where unit_id = $1", [unit.id]);
+    await q("delete from install_inspection_units where equipment_id = $1", [unit.id]);
+    await q("delete from account_equipment where id = $1", [unit.id]);
+    // The account is removed while the unit is off the install.
+    await q("update directory_customers set archived = true where id = $1", [a["Zz Cafe"]]);
+    await q(putBackInstallUnitSql(), [removed.id, "zz"]);
+    const [back] = await q("select customer, customer_id from account_equipment where id = $1", [unit.id]);
+    assert.deepEqual(back, { customer: "Zz Cafe", customer_id: null }, "a removed account's id never comes back with the unit");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: a hard-deleted account leaves its C2 records with no id", async () => {
+  const { pg, q } = await all();
+  try {
+    const a = await accounts(q);
+    const rows = [];
+    for (const l of LINKS) rows.push({ l, row: (await l.add(q, "Zz Bar-Grill"))[0] });
+    await q("delete from directory_customers where id = $1", [a["Zz Bar-Grill"]]);
+    for (const { l, row } of rows) assert.equal(await idOf(q, l, row.id), null, `${l.table}.${l.name}`);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: the generic id trigger refuses arguments that don't name real column pairs", async () => {
+  const { pg, q } = await all();
+  try {
+    await q("create table zz_probe (id serial primary key, who text, who_id int)");
+    await q("create trigger zz_probe_bad before insert on zz_probe for each row execute function katz_fill_customer_ids('who', 'whom_id')");
+    await assert.rejects(() => q("insert into zz_probe (who) values ('Zz Cafe')"), /no column who or whom_id/);
+    await q("drop trigger zz_probe_bad on zz_probe");
+    await q("create trigger zz_probe_odd before insert on zz_probe for each row execute function katz_fill_customer_ids('who')");
+    await assert.rejects(() => q("insert into zz_probe (who) values ('Zz Cafe')"), /pairs/);
+  } finally {
+    await pg.close();
+  }
+});
