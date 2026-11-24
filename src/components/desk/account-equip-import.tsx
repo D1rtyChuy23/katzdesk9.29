@@ -3,7 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   applyAccountEquipImport,
+  planAccountEquipImport,
   previewAccountEquipImport,
+  type EquipImportPlan,
   type EquipPairing,
   type EquipPreview,
   type EquipPreviewRow,
@@ -295,8 +297,33 @@ function PreviewBody({
   /** Without its earlier row, a joining row the save takes to an existing unit (11/23): an update, not an add. */
   const aloneUpdate = (r: EquipPreviewRow) => !!r.foldsInto && !earlierGoes(r) && !asNewRow(r) && !!r.aloneMatch;
   // Without its earlier row, a folding row is an add of its own (review, 11/23).
-  const selectedAdds = preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || (!!r.foldsInto && !aloneUpdate(r)))).length;
-  const selectedUpdates = preview.rows.filter((r) => goes(r) && r.action === "update" && !asNewRow(r) && (!r.foldsInto || aloneUpdate(r))).length;
+  // The save's own dry run for the rows as ticked (11/23): labels and counts follow it once it's in, so they match
+  // what Confirm does whatever is ticked. Until then (and if it fails), the preview's own reckoning below.
+  const sent = rowsToSend();
+  const sentSig = JSON.stringify(sent);
+  const [planned, setPlanned] = useState<{ sig: string; data: EquipImportPlan } | null>(null);
+  const planSeq = useRef(0);
+  useEffect(() => {
+    if (!sent.length) return;
+    const n = ++planSeq.current;
+    const t = setTimeout(() => {
+      planAccountEquipImport({ data: { rows: sent } })
+        .then((data) => {
+          if (n === planSeq.current) setPlanned({ sig: sentSig, data });
+        })
+        .catch(() => undefined);
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sentSig stands for sent
+  }, [sentSig]);
+  const plan = planned && planned.sig === sentSig ? planned.data : null;
+  const planOf = (r: EquipPreviewRow) => (plan && goes(r) ? plan.plan[r.key] : undefined);
+  const selectedAdds = plan
+    ? plan.added
+    : preview.rows.filter((r) => goes(r) && !folds(r) && (r.action !== "update" || asNewRow(r) || (!!r.foldsInto && !aloneUpdate(r)))).length;
+  const selectedUpdates = plan
+    ? plan.updated
+    : preview.rows.filter((r) => goes(r) && r.action === "update" && !asNewRow(r) && (!r.foldsInto || aloneUpdate(r))).length;
   /** Every ticked row the save is sent, a folding one included: it gates Confirm and the unticked count. */
   const selectedCount = preview.rows.filter((r) => goes(r)).length;
   /** Rows still held: a site that doesn't match and not ticked, or a pairing still to confirm. */
@@ -340,9 +367,9 @@ function PreviewBody({
     });
   }
 
-  function confirm() {
-    if (blocked.length || selectedCount === 0) return;
-    const rows = preview.rows.flatMap((row) => {
+  /** The rows the save is sent, as the ticks and edits stand. */
+  function rowsToSend(): EquipPreviewRow[] {
+    return preview.rows.flatMap((row) => {
       const d = drafts[row.key] ?? draftFor(row);
       if (!d.selected || !rowReady(row, d)) return [];
       const catalogModel = d.catalogModel.trim();
@@ -365,7 +392,11 @@ function PreviewBody({
         },
       ];
     });
-    onConfirm(rows);
+  }
+
+  function confirm() {
+    if (blocked.length || selectedCount === 0) return;
+    onConfirm(rowsToSend());
   }
 
   return (
@@ -465,7 +496,17 @@ function PreviewBody({
               const ready = rowReady(r, d);
               const needsReview = !ready;
               // A joining row's hint follows the earlier row's tick; the box and the save don't (11/23).
-              const offer = addInsteadOffer(r, d, { earlierRowGoes: r.foldsInto ? earlierGoes(r) : undefined });
+              const p = planOf(r);
+              // A joining row's hint as the dry run has it: where the save takes it when its earlier row doesn't go.
+              const shownRow = p && r.foldsInto ? { ...r, aloneMatch: p.outcome === "update" ? { id: 0, name: p.unit, fills: p.fills } : null } : r;
+              const offer = addInsteadOffer(shownRow, d, { earlierRowGoes: r.foldsInto ? (p ? p.outcome === "join" : earlierGoes(r)) : undefined });
+              // A row the dry run sends somewhere else than the preview showed, said in a line (an earlier row took its unit).
+              const planNote =
+                p && !r.foldsInto && !d.addInstead && r.fillBlank && p.outcome === "add"
+                  ? `${r.fillBlank.name || "The unit with no serial"} is taken by an earlier row, so this row is added on its own.`
+                  : p && !r.foldsInto && r.action === "add" && p.outcome === "update"
+                    ? `With the rows as ticked, this row's serial fills ${p.unit || "a unit with no serial"}${p.fills ? ", which has none" : ""}.`
+                    : null;
               const asNew = ready && offer.offer && !!d.addInstead;
               // A locked unit's Part # fill takes the row as previewed: it can't be pointed at another account or model.
               const showPickers = !r.lockedNote && (needsReview || !!editing[r.key]);
@@ -610,7 +651,19 @@ function PreviewBody({
                     <span className="block text-[11px] font-medium tracking-wide uppercase">
                       {needsReview
                         ? "Needs review"
-                        : r.lockedNote
+                        : p
+                          ? p.outcome === "join"
+                            ? "Same unit as an earlier row"
+                            : p.outcome === "update"
+                              ? "Update existing"
+                              : p.outcome === "part"
+                                ? "Fill Part # only"
+                                : p.outcome === "skip"
+                                  ? "Not saved"
+                                  : r.action === "add" && !r.foldsInto && !asNew
+                                    ? "Matched"
+                                    : "Add new"
+                          : r.lockedNote
                           ? "Fill Part # only"
                           : asNew
                             ? "Add new"
@@ -625,7 +678,12 @@ function PreviewBody({
                                 : "Matched"}
                     </span>
                     {r.lockedNote ? <span className="mt-0.5 block text-[11px] text-muted-foreground">{r.lockedNote}</span> : null}
-                    {r.fillBlankIf && !needsReview && asPreviewed(r, d) ? (
+                    {planNote ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground" data-testid="equip-plan-note">
+                        {planNote}
+                      </span>
+                    ) : null}
+                    {r.fillBlankIf && !needsReview && asPreviewed(r, d) && !p ? (
                       <span className="mt-0.5 block text-[11px] text-muted-foreground" data-testid="equip-fill-blank-if">
                         An earlier row fills {r.fillBlankIf.name || "a unit with no serial"}. If that row isn't imported as shown, this one may fill it.
                       </span>

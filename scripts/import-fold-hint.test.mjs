@@ -44,7 +44,7 @@ test("after the earlier row is unticked, the joining row reads the add wording, 
 test("the screen passes the earlier row's tick to the hint", () => {
   const ui = src("src/components/desk/account-equip-import.tsx");
   assert.match(ui, /return !!e && goes\(e\) && asPreviewed\(e, drafts\[e\.key\]!\);/);
-  assert.match(ui, /const offer = addInsteadOffer\(r, d, \{ earlierRowGoes: r\.foldsInto \? earlierGoes\(r\) : undefined \}\);/);
+  assert.match(ui, /const offer = addInsteadOffer\(shownRow, d, \{ earlierRowGoes: r\.foldsInto \? \(p \? p\.outcome === "join" : earlierGoes\(r\)\) : undefined \}\);/);
 });
 
 async function db() {

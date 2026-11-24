@@ -154,6 +154,18 @@ export type EquipApplyResult = {
   partsFilled: number;
 };
 
+/**
+ * What the save does with each row it is sent (11/23): a dry run of the save itself, so the preview's labels and
+ * counts follow the ticks exactly. `join`: the row folds into the unit an earlier row of the file adds (`joins`).
+ */
+export type EquipRowPlan =
+  | { outcome: "add" }
+  | { outcome: "update"; unit: string; fills: boolean }
+  | { outcome: "join"; joins: string | null }
+  | { outcome: "part" }
+  | { outcome: "skip" };
+export type EquipImportPlan = EquipApplyResult & { plan: Record<string, EquipRowPlan> };
+
 const HEADER_KEYS: Record<string, EquipCol> = {
   // The verified units list's own headers (11/12), so it loads as it is.
   "equipment name as entered": "equipmentName",
@@ -1012,7 +1024,17 @@ export function importInsertUnitsSql(count: number): string {
 }
 
 /** The body of applyAccountEquipImport: the confirmed rows, matched again here against the units as they are now. */
-export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>): Promise<EquipApplyResult> {
+export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>): Promise<EquipApplyResult>;
+export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof applyInput>, opts: { dryRun: true }): Promise<EquipImportPlan>;
+export async function applyAccountEquipImportFor(
+  sql: Sql,
+  data: z.input<typeof applyInput>,
+  opts?: { dryRun?: boolean },
+): Promise<EquipApplyResult | EquipImportPlan> {
+  // A dry run makes every decision the save makes and writes nothing (11/23).
+  const dry = !!opts?.dryRun;
+  const plan: Record<string, EquipRowPlan> = {};
+  const tempOwner = new Map<number, string>();
   const accounts = await loadAccounts(sql);
   const accountByKey = new Map(accounts.map((a) => [a.name.toLowerCase(), a]));
   const catalog = await loadCatalog(sql);
@@ -1029,33 +1051,38 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
   for (const row of data.rows) {
     if (row.action === "skip" || row.action === "review") {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
     const customerName = (row.customer ?? "").trim();
     if (!customerName || isWalkIn(customerName)) {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
     const account = accountByKey.get(customerName.toLowerCase());
     if (!account) {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
     let catalogModel = (row.catalogModel ?? "").trim();
     if (!catalogModel) {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
     const known = catalogByKey.get(catalogModel.toLowerCase());
     if (known) {
       catalogModel = known;
     } else if (row.addCatalog) {
-      const made = await ensureCatalogModel(sql, catalogModel);
+      const made = dry ? { name: catalogModel, created: true } : await ensureCatalogModel(sql, catalogModel);
       catalogModel = made.name;
       catalogByKey.set(catalogModel.toLowerCase(), catalogModel);
       if (made.created) catalogAdded += 1;
     } else {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
 
@@ -1070,17 +1097,20 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
     });
     if (unit.foreignAccount) {
       skipped += 1;
+      plan[row.key] = { outcome: "skip" };
       continue;
     }
     // A locked unit is left as it is, but for a blank Part # the file fills with a live part (Chuy, 11/20).
     const lockedUnit = existing.find((e) => e.id === unit.existingId && !!e.lockedBy);
     if (lockedUnit) {
       const fill = lockedPartFill(lockedUnit, { partNumber: row.partNumber, catalogModel, serial }, fillParts);
-      if (fill && (await sql.query(lockedPartFillSql(), [lockedUnit.id, fill])).length) {
+      if (fill && (dry || (await sql.query(lockedPartFillSql(), [lockedUnit.id, fill])).length)) {
         existing = existing.map((e) => (e.id === lockedUnit.id ? { ...e, partNumber: fill } : e));
         partsFilled += 1;
+        plan[row.key] = { outcome: "part" };
       } else {
         skipped += 1;
+        plan[row.key] = { outcome: "skip" };
       }
       continue;
     }
@@ -1119,10 +1149,12 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
               : e,
           );
         }
+        plan[row.key] = { outcome: "join", joins: tempOwner.get(unit.existingId) ?? null };
         continue;
       }
+      const target = existing.find((e) => e.id === unit.existingId);
       try {
-        await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
+        if (!dry) await sql.query(importUpdateUnitSql(), [unit.existingId, catalogModel, equipmentName, serial, key, installDate, electrical, ownership, partNumber, condition]);
       } catch (e) {
         // Another unit has that serial by the database's rule (a stored key out of date, migration 0137): this row is
         // skipped and the rest of the file still saves (review, 11/23).
@@ -1138,6 +1170,7 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
           : e,
       );
       updated += 1;
+      plan[row.key] = { outcome: "update", unit: (target?.equipmentName || target?.catalogModel || "").trim(), fills: unit.matchKind === "fill-blank" };
       continue;
     }
 
@@ -1163,7 +1196,11 @@ export async function applyAccountEquipImportFor(sql: Sql, data: z.input<typeof 
       serialKey: key,
     });
     added += 1;
+    tempOwner.set(tempId, row.key);
+    plan[row.key] = { outcome: "add" };
   }
+
+  if (dry) return { added, updated, skipped, catalogAdded, partsFilled, plan };
 
   const chunk = 50;
   for (let i = 0; i < inserts.length; i += chunk) {
@@ -1192,6 +1229,12 @@ export const applyAccountEquipImport = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof applyInput>) => applyInput.parse(d))
   .handler(async ({ data }): Promise<EquipApplyResult> => applyAccountEquipImportFor(await ready(), data));
+
+/** The save's dry run for the rows the preview would send: what each becomes, and the counts (11/23). */
+export const planAccountEquipImport = createServerFn({ method: "POST" })
+  .middleware([deskMiddleware])
+  .validator((d: z.infer<typeof applyInput>) => applyInput.parse(d))
+  .handler(async ({ data }): Promise<EquipImportPlan> => applyAccountEquipImportFor(await ready(), data, { dryRun: true }));
 
 const listInput = z.object({
   customer: z.string().optional(),
