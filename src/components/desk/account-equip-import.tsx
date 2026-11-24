@@ -457,7 +457,10 @@ function PreviewBody({
               const d = drafts[r.key] ?? draftFor(r);
               const ready = rowReady(r, d);
               const needsReview = !ready;
-              const offer = addInsteadOffer(r, d);
+              // A joining row's hint follows the earlier row's tick; the box and the save don't (11/23).
+              const earlier = r.foldsInto ? rowByKey.get(r.foldsInto) : undefined;
+              const earlierGoes = earlier ? goes(earlier) && asPreviewed(earlier, drafts[earlier.key]!) : undefined;
+              const offer = addInsteadOffer(r, d, { earlierRowGoes: earlierGoes });
               const asNew = ready && offer.offer && !!d.addInstead;
               // A locked unit's Part # fill takes the row as previewed: it can't be pointed at another account or model.
               const showPickers = !r.lockedNote && (needsReview || !!editing[r.key]);

@@ -14,6 +14,8 @@ export type OfferRow = {
   fillBlank?: { id: number; name: string } | null;
   /** A serial-less unit an earlier row of the file fills; this row would fill it if that row doesn't (11/23). */
   fillBlankIf?: { id: number; name: string } | null;
+  /** The earlier row of the file whose added unit this row joins (11/23). */
+  foldsInto?: string | null;
 };
 
 /** The row's account and model as the preview matched them (not changed on the screen). */
@@ -22,10 +24,31 @@ export function asPreviewed(row: { customer: string | null; catalogModel: string
   return same(row.customer, draft.customer) && same(row.catalogModel, draft.catalogModel);
 }
 
-export function addInsteadOffer(row: OfferRow, draft: { customer: string; catalogModel: string }): { offer: boolean; hint: { on: string; off: string } } {
+/**
+ * `earlierRowGoes`: for a row that joins an earlier row's unit, whether that row is ticked on the screen (11/23, found
+ * live after #188). Unticked, nothing is filled, so the hint says the row is added on its own. Text only: whether the
+ * box is offered, and what the save does, don't change.
+ */
+export function addInsteadOffer(
+  row: OfferRow,
+  draft: { customer: string; catalogModel: string },
+  opts: { earlierRowGoes?: boolean } = {},
+): { offer: boolean; hint: { on: string; off: string } } {
   const none = { offer: false, hint: { on: "", off: "" } };
   if (!row.serial?.trim() || row.lockedNote || row.foreignAccount || row.action === "skip") return none;
   const previewed = asPreviewed(row, draft);
+  if (row.fillBlank && previewed && row.foldsInto && opts.earlierRowGoes === false) {
+    // The save matches the row again on its own: it may still fill another serial-less unit (review, 11/23).
+    const model = draft.catalogModel.trim() || "this model";
+    const account = draft.customer.trim() || "the account";
+    return {
+      offer: true,
+      hint: {
+        on: `The earlier row isn't imported. Adds this one on its own, even if ${account} has a ${model} with no serial.`,
+        off: `The earlier row isn't imported. If ${account} has a ${model} with no serial, this row's serial fills it; otherwise it's added on its own.`,
+      },
+    };
+  }
   if (row.fillBlank && previewed) {
     const name = row.fillBlank.name || "the unit with no serial";
     return { offer: true, hint: { on: `Adds it on its own; ${name} stays as it is.`, off: `Otherwise its serial fills ${name}, which has none.` } };
