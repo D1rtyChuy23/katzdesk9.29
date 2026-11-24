@@ -68,26 +68,51 @@ create trigger deals_customer_id before insert or update of customer on deals fo
 drop trigger if exists recipes_customer_id on recipes;
 create trigger recipes_customer_id before insert or update of customer on recipes for each row execute function katz_fill_customer_id();
 
--- An account added, renamed, removed or restored: the records under its old and new name follow the rule again.
-create or replace function katz_relink_customer_names() returns trigger language plpgsql as $$
+-- An account added, renamed, removed, restored or deleted: the records under its old and new name follow the rule
+-- again. Once per statement (a NetSuite file or a remove batch touches thousands of accounts at once).
+create or replace function katz_relink_customer_keys(keys text[]) returns void language plpgsql as $$
 declare
-  keys text[] := array[lower(btrim(coalesce(new.name, '')))];
   t text;
 begin
-  if tg_op = 'UPDATE' then keys := keys || lower(btrim(coalesce(old.name, ''))); end if;
+  if keys is null or cardinality(keys) = 0 then return; end if;
   foreach t in array array['service_jobs', 'pm_jobs', 'installs', 'deals', 'recipes'] loop
     execute format(
       'update %I set customer_id = katz_customer_id(customer)
         where lower(btrim(customer)) = any($1) and customer_id is distinct from katz_customer_id(customer)', t)
       using keys;
   end loop;
+end $$;
+
+create or replace function katz_relink_after_insert() returns trigger language plpgsql as $$
+begin
+  perform katz_relink_customer_keys(array(select distinct lower(btrim(coalesce(name, ''))) from new_rows));
+  return null;
+end $$;
+
+create or replace function katz_relink_after_update() returns trigger language plpgsql as $$
+begin
+  perform katz_relink_customer_keys(array(
+    select distinct v.key from (
+      select lower(btrim(coalesce(o.name, ''))) as was, lower(btrim(coalesce(n.name, ''))) as now
+        from old_rows o join new_rows n on n.id = o.id
+       where o.name is distinct from n.name or o.archived is distinct from n.archived
+    ) c, lateral (values (c.was), (c.now)) v(key)
+  ));
+  return null;
+end $$;
+
+create or replace function katz_relink_after_delete() returns trigger language plpgsql as $$
+begin
+  perform katz_relink_customer_keys(array(select distinct lower(btrim(coalesce(name, ''))) from old_rows));
   return null;
 end $$;
 
 drop trigger if exists directory_customers_relink_insert on directory_customers;
 create trigger directory_customers_relink_insert after insert on directory_customers
-  for each row execute function katz_relink_customer_names();
+  referencing new table as new_rows for each statement execute function katz_relink_after_insert();
 drop trigger if exists directory_customers_relink_update on directory_customers;
-create trigger directory_customers_relink_update after update of name, archived on directory_customers
-  for each row when (old.name is distinct from new.name or old.archived is distinct from new.archived)
-  execute function katz_relink_customer_names();
+create trigger directory_customers_relink_update after update on directory_customers
+  referencing old table as old_rows new table as new_rows for each statement execute function katz_relink_after_update();
+drop trigger if exists directory_customers_relink_delete on directory_customers;
+create trigger directory_customers_relink_delete after delete on directory_customers
+  referencing old table as old_rows for each statement execute function katz_relink_after_delete();

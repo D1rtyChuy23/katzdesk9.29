@@ -84,6 +84,7 @@ function Page() {
                             By id: {fmt(l.ids.linked)} linked · {fmt(l.ids.unlinked)} not
                             {l.ids.disagree ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.disagree)} with another name</span> : null}
                             {l.ids.onRemoved ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.onRemoved)} on a removed account</span> : null}
+                            {l.ids.offRule ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.offRule)} not what the name gives now</span> : null}
                           </span>
                         ) : null}
                       </td>

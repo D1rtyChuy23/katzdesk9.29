@@ -150,7 +150,7 @@ test("Link Check shows the id links on the five tables", async () => {
     const { linkCheckFor } = await import("../src/lib/ops/link-check.ts");
     const r = await linkCheckFor(sql, "zz-admin");
     const t = r.nameLinks.find((l) => l.table === "service_jobs");
-    assert.deepEqual(t.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0 });
+    assert.deepEqual(t.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0, offRule: 1 });
     assert.ok(r.nameLinks.find((l) => l.table === "installs").ids);
     assert.equal(r.nameLinks.find((l) => l.table === "account_equipment").ids, undefined);
   } finally {
@@ -212,6 +212,25 @@ test("review: merging onto a removed twin's name links the twin's records to the
     assert.deepEqual(ids, [r.id, r.id, r.id]);
     const active = (await q("select id from directory_customers where id = $1 and archived = false", [r.id])).length;
     assert.equal(active, 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: deleting an account relinks the records it made ambiguous; a bulk statement relinks once", async () => {
+  const { pg, q } = await all();
+  try {
+    await q("insert into directory_customers (name) values ('Zz Aa'), ('ZZ AA')");
+    const [t] = await ticket(q, "zz aa");
+    assert.equal(t.customer_id, null);
+    await q("delete from directory_customers where name = 'ZZ AA'");
+    assert.equal(await idOf(q, "service_jobs", t.id), (await q("select id from directory_customers where name = 'Zz Aa'"))[0].id);
+    // Many accounts in one statement: each gets its records.
+    for (let i = 0; i < 50; i++) await ticket(q, `zz bulk ${i}`);
+    await q("insert into directory_customers (name) select 'Zz Bulk ' || g from generate_series(0, 49) g");
+    assert.equal((await q("select count(*)::int as n from service_jobs where customer like 'zz bulk %' and customer_id is null"))[0].n, 0);
+    await q("update directory_customers set archived = true where name like 'Zz Bulk %'");
+    assert.equal((await q("select count(*)::int as n from service_jobs where customer like 'zz bulk %' and customer_id is not null"))[0].n, 0);
   } finally {
     await pg.close();
   }

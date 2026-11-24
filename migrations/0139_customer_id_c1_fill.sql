@@ -3,12 +3,15 @@
 -- record trigger fires and no name, date or other column changes.
 
 set local lock_timeout = '15s';
+-- The accounts hold still while the rows are filled (an account removed mid-fill would leave its id on rows not yet
+-- reached); reads go on, writes to the account list wait the few seconds this takes.
+lock table directory_customers in share mode;
 
-update service_jobs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '';
-update pm_jobs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '';
-update installs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '';
-update deals set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '';
-update recipes set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '';
+update service_jobs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '' and katz_customer_id(customer) is not null;
+update pm_jobs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '' and katz_customer_id(customer) is not null;
+update installs set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '' and katz_customer_id(customer) is not null;
+update deals set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '' and katz_customer_id(customer) is not null;
+update recipes set customer_id = katz_customer_id(customer) where customer_id is null and coalesce(btrim(customer), '') <> '' and katz_customer_id(customer) is not null;
 
 -- The id indexes after the fill, so the fill doesn't keep them up row by row.
 create index if not exists service_jobs_customer_id_idx on service_jobs (customer_id);
