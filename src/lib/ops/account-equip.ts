@@ -588,11 +588,27 @@ export function fileNameKey(x: string): string {
     .toLowerCase()
     .replace(/\b(?:no|nbr|num|number)\.?\s*(?=\d)/g, "#")
     .replace(/#\s+(?=\d)/g, "#")
+    .replace(/#0+(?=\d)/g, "#")
     .replace(/[^a-z0-9#]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 const sameFileName = (a: string, b: string) => !!fileNameKey(a) && fileNameKey(a) === fileNameKey(b);
+
+/**
+ * The number a name gives one of several of a machine (11/23): "#2", "# 02", "No. 2" are "2". Only written that way:
+ * a model's own digits ("Linea 2AV", "G9-2T") are not a unit number, and "Grinder 2" is left as a name.
+ */
+export function unitNumber(name: string | null | undefined): string | null {
+  const m = String(name ?? "").match(/(?:#|\b(?:no|nbr|num|number)\.?)\s*0*(\d+)\b/i);
+  return m ? m[1]! : null;
+}
+/** Two names that each carry a unit number, and not the same one: two machines. */
+const otherNumber = (a: string, b: string) => {
+  const x = unitNumber(a);
+  const y = unitNumber(b);
+  return !!x && !!y && x !== y;
+};
 
 export function matchExistingUnit(opts: {
   customer: string;
@@ -634,10 +650,14 @@ export function matchExistingUnit(opts: {
     (e) =>
       normalizeCustomerKey(e.customer) === customerKey &&
       sameCatalogModel(e.catalogModel, opts.catalogModel) &&
-      sameEquipLabel(e.equipmentName, opts.equipmentName) &&
+      // The same label, or the same name as written ("#2" and "No. 2", 11/23).
+      (sameEquipLabel(e.equipmentName, opts.equipmentName) || sameFileName(e.equipmentName, opts.equipmentName)) &&
       !serialKey(e.serial) &&
       // A row added earlier in the same import is the same machine only by the same name as written (11/23).
-      (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)),
+      (e.id > 0 || sameFileName(e.equipmentName, opts.equipmentName)) &&
+      // A serial-less row is never the unit that carries another number: "#1" and "#2" are two machines (11/23). (A
+      // row with a serial still fills a serial-less "#2", with "Add as new unit instead" to keep it apart, #187.)
+      !otherNumber(e.equipmentName, opts.equipmentName),
   );
   if (same) return { action: "update", existingId: same.id, foreignAccount: null, matchKind: "same-name" };
   return { action: "add", existingId: null, foreignAccount: null, matchKind: null };
