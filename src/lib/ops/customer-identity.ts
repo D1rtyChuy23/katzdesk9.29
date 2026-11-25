@@ -23,7 +23,8 @@ function missingOnly(e: unknown): undefined {
  * ends moves with the rest. `x` is the row's alias; `name`/`id` its columns; `$name`/`$id` the parameters.
  */
 const theAccounts = (x: string, name: string, id: string, $name: string, $id: string) =>
-  `(${x}.${id} = ${$id}::int or (${x}.${id} is null and lower(${x}.${name}) = lower(${$name})))`;
+  // The lower(btrim(...)) test adds nothing to the match; it lets the name's key index (0138, 0141, 0145) find the rows.
+  `(${x}.${id} = ${$id}::int or (${x}.${id} is null and lower(btrim(${x}.${name})) = lower(btrim(${$name})) and lower(${x}.${name}) = lower(${$name})))`;
 
 /**
  * The rows that already hold `to` for the link checks (dropLinksAlreadyOn): on a merge (`toId` another account) the
@@ -107,9 +108,10 @@ const FOLLOW: Follow[] = [
  * capitals, else the oldest. The others stay as they were (their id goes when the account takes its new name, so Link
  * Check lists them), and a row another account holds under the new name is never doubled: a rename never fails on it.
  *
- * The id is set with the name. When only the name changes (the row was already on `toId`), the record's trigger
- * works the id out from the new name, which no account has until the account itself is renamed last; the account's
- * rename links them again (0138).
+ * The id is set with the name. When the row was already on `toId`, the record's trigger works the id out again from
+ * the new name (0138), which no account has until the account itself is renamed last, or which another account has by
+ * the rule's last step ("Zz B " for "Zz B"). So moveRecords sets it once more on the rows the trigger changed. It
+ * returns each moved row's id and the id it ended with.
  */
 function moveSql(f: Follow): string {
   const mine = (x: string) => theAccounts(x, f.name, f.id, "$2", "$3") + (f.only ? ` and ${f.only(x)}` : "");
@@ -122,7 +124,8 @@ function moveSql(f: Follow): string {
        and not exists (select 1 from ${f.table} b
                         where b.id <> t.id and lower(b.${f.name}) = lower($1) and ${f.key("b", "t")} and not ${mine("b")})`;
   }
-  return text;
+  return `${text}
+     returning t.id, t.${f.id} as now_id`;
 }
 
 /**
@@ -145,7 +148,12 @@ const MODULE_PLACE = `update modules set location = $1, updated_at = now() where
 
 /** Every record that follows the account: the rows of `fromId` (see theAccounts) take `to` and the id `toId`. */
 async function moveRecords(sql: Sql, from: string, to: string, fromId: number, toId: number): Promise<void> {
-  for (const f of FOLLOW) await sql.query(moveSql(f), [to, from, fromId, toId]).catch(missingOnly);
+  for (const f of FOLLOW) {
+    const moved = (await sql.query<{ id: number; now_id: number | null }>(moveSql(f), [to, from, fromId, toId]).catch(missingOnly)) ?? [];
+    const off = moved.filter((r) => r.now_id == null || Number(r.now_id) !== toId).map((r) => Number(r.id));
+    // Only the id column: no record trigger works it out again.
+    if (off.length) await sql.query(`update ${f.table} set ${f.id} = $2::int where id = any($1::int[])`, [off, toId]);
+  }
   await sql.query(ORIGIN_NAMES, [to, from]).catch(missingOnly);
   await sql.query(MODULE_PLACE, [to, from]).catch(missingOnly);
 }
@@ -172,6 +180,8 @@ async function moveHistory(sql: Sql, droppedId: number, keptId: number): Promise
  * (the same account on a rename, the kept one on a merge). The same name in other capitals only changes the capitals.
  */
 export async function retargetCustomer(sql: Sql, fromRaw: string, toRaw: string, fromId: number, toId: number): Promise<void> {
+  // Without the ids no record linked to the account would be found (and nothing would say so).
+  if (!Number.isInteger(fromId) || !Number.isInteger(toId)) throw new Error("retargetCustomer needs the account ids");
   const from = fromRaw.trim();
   const to = toRaw.trim();
   if (!from || !to) return;

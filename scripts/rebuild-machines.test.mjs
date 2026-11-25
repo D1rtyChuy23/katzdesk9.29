@@ -903,7 +903,7 @@ test("a customer rename carries its rebuilds and their machines' records, so a p
     const beanId = Number((await pg.query("select id from directory_customers where name = 'Bean Test Cafe'")).rows[0].id);
     const plan = await planCustomerRename(sql, beanId, SD);
     assert.deepEqual([plan.kind, plan.moving?.rebuilds], ["merge", 1]);
-    await retargetCustomer(sql, "Bean Test Cafe", "Bean Renamed Cafe");
+    await retargetCustomer(sql, "Bean Test Cafe", "Bean Renamed Cafe", beanId, beanId);
     assert.equal((await pg.query("select account from rebuilds where id = $1", [bean])).rows[0].account, "Bean Renamed Cafe");
     const row = (await R.listRebuildsFor(sql, "u-tech")).rows.find((r) => r.id === bean);
     assert.equal(row.machines[0].moved, null, "the rebuild still has its unit");
