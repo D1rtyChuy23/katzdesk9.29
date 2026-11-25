@@ -2872,7 +2872,8 @@ export function putBackInstallUnitSql(): string {
   return `with r as (select * from install_units_removed where id = $1 and put_back_at is null),
           unit as (
             insert into account_equipment
-            select x.* from r, jsonb_populate_record(null::account_equipment, r.links->'unit') x
+            -- Its account id comes from its name now (the trigger), never the snapshot's: the account may be gone.
+            select x.* from r, jsonb_populate_record(null::account_equipment, (r.links->'unit') - 'customer_id') x
              where r.links->'unit' is not null and r.links->'unit' <> 'null'::jsonb
                and not exists (select 1 from account_equipment a where a.id = r.unit_id)
             returning id
