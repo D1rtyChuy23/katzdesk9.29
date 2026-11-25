@@ -1134,7 +1134,7 @@ async function patchCustomerIdentity(sql: Sql) {
       const extra = await sql.query<{ name: string }>(`select name from directory_customers where id = $1`, [extraId]);
       try {
         if (extra[0] && extra[0].name !== keepName) {
-          await retargetCustomer(sql, extra[0].name, keepName);
+          await retargetCustomer(sql, extra[0].name, keepName, extraId, ids[0]!);
         }
       } catch (err) {
         console.error("[katz-desk] customer merge skipped", extraId, err);

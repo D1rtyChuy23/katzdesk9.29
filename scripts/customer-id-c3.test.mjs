@@ -223,7 +223,7 @@ test("stock actions (C2) keep their id like the other history rows: a decided on
   }
 });
 
-test("merge: rows that follow the account move to the kept one; history rows stay on the merged-away account until C4", async () => {
+test("merge: every C3 row moves to the kept one; history rows by id (C4)", async () => {
   const { pg, q, sql } = await all();
   try {
     const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
@@ -233,8 +233,9 @@ test("merge: rows that follow the account move to the kept one; history rows sta
     const r = await renameOrMergeCustomer(sql, a["Zz Bar-Grill"], "Zz Cafe", { force: true });
     assert.equal(r.merged, true);
     for (const { l, row } of rows) {
-      const want = l.sticky ? a["Zz Bar-Grill"] : r.id;
-      assert.equal(await idOf(q, l, row.id), want, `${l.table}.${l.name}`);
+      assert.equal(await idOf(q, l, row.id), r.id, `${l.table}.${l.name}`);
+      const name = (await q(`select ${l.name} as v from ${l.table} where id = $1`, [row.id]))[0].v;
+      assert.equal(name, l.sticky ? "Zz Bar-Grill" : "Zz Cafe", `${l.table}.${l.name}: a history row keeps its name`);
     }
   } finally {
     await pg.close();
