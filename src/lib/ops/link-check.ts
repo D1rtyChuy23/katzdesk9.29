@@ -195,7 +195,18 @@ export type MachineReport = {
    * check), which should equal total less empty. unlinked: records that should have a machine and don't. offSerial:
    * records whose serial isn't their machine's (both should be 0).
    */
-  machines?: { total: number; withSerial: number; noSerial: number; empty: number; expected: number; unlinked: { account: number; retired: number; warehouse: number }; offSerial: number };
+  machines?: {
+    total: number;
+    withSerial: number;
+    noSerial: number;
+    /** No record points at it, and it wasn't merged into another (a serial cleared off its only record). */
+    empty: number;
+    /** Its records all went to another machine (merged_into). */
+    merged: number;
+    expected: number;
+    unlinked: { account: number; retired: number; warehouse: number };
+    offSerial: number;
+  };
   links: { rebuildMachinesNoAsset: number; rebuildMachinesMissingAsset: number; modulesMissingUnit: number; ticketUnits: number; inspectionUnits: number };
   /** Installs whose machine list has rows, and those rows without a unit id. */
   installLists: { installs: number; rows: number; rowsWithoutUnit: number; rowsDangling: number };
@@ -332,22 +343,28 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
     ? (
         await sql.query<Record<string, number>>(
           `with recs as (
-             select ${UNIT_KEY} as k, machine_id, 'account' as t, id, null::int as unit_id from account_equipment
+             select ${UNIT_KEY} as k, machine_id, 'account' as t, id, null::int as unit_id, null::int as merged_to from account_equipment
              union all
-             select katz_serial_key(serial), machine_id, 'warehouse', id, null from assets
+             select katz_serial_key(serial), machine_id, 'warehouse', id, null, null from assets
               where kind <> 'module' and (coalesce(qty, 1) <= 1 or katz_serial_counts(katz_serial_key(serial)))
              union all
-             select ${UNIT_KEY}, machine_id, 'retired', id, unit_id from account_equipment_retired
+             select ${UNIT_KEY}, machine_id, 'retired', id, unit_id,
+                    case when coalesce(links ->> 'merged_into', '') ~ '^[0-9]+$' then (links ->> 'merged_into')::int end
+               from account_equipment_retired
            )
            select (select count(*) from machines)::int as total,
                   (select count(*) from machines where serial_key is not null)::int as with_serial,
+                  (select count(*) from machines where merged_into is not null)::int as merged,
                   (select count(*) from machines m
-                    where not exists (select 1 from account_equipment a where a.machine_id = m.id)
+                    where m.merged_into is null
+                      and not exists (select 1 from account_equipment a where a.machine_id = m.id)
                       and not exists (select 1 from assets a where a.machine_id = m.id)
                       and not exists (select 1 from account_equipment_retired r where r.machine_id = m.id))::int as empty,
                   (select count(distinct k) from recs where katz_serial_counts(k))::int as distinct_keys,
                   (select count(*) from recs r where not katz_serial_counts(r.k)
-                      and not (r.t = 'retired' and exists (select 1 from account_equipment a where a.id = r.unit_id)))::int as no_serial,
+                      -- A retired unit with no serial shares a machine when its unit is back on an account, or it
+                      -- was merged into a unit that is.
+                      and not (r.t = 'retired' and exists (select 1 from account_equipment a where a.id = r.unit_id or a.id = r.merged_to)))::int as no_serial,
                   (select count(*) from recs where machine_id is null and t = 'account')::int as unlinked_account,
                   (select count(*) from recs where machine_id is null and t = 'retired')::int as unlinked_retired,
                   (select count(*) from recs where machine_id is null and t = 'warehouse')::int as unlinked_warehouse,
@@ -438,6 +455,7 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
               withSerial: n(machineRow.with_serial),
               noSerial: n(machineRow.total) - n(machineRow.with_serial),
               empty: n(machineRow.empty),
+              merged: n(machineRow.merged),
               expected: n(machineRow.distinct_keys) + n(machineRow.no_serial),
               unlinked: { account: n(machineRow.unlinked_account), retired: n(machineRow.unlinked_retired), warehouse: n(machineRow.unlinked_warehouse) },
               offSerial: n(machineRow.off_serial),

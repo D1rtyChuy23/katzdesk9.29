@@ -138,8 +138,22 @@ function Page() {
                   {/* Phase M1: the check is machines with a record = distinct serials + units with no serial. */}
                   Machine records: {fmt(r.machines.machines.total)} · {fmt(r.machines.machines.withSerial)} by serial · {fmt(r.machines.machines.noSerial)} with no
                   serial · expected {fmt(r.machines.machines.expected)} (distinct serials + units with no serial)
-                  {r.machines.machines.total - r.machines.machines.empty === r.machines.machines.expected ? " ✓" : null}
-                  {r.machines.machines.empty ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(r.machines.machines.empty)} with no record left</span> : null}
+                  {(() => {
+                    const m = r.machines.machines!;
+                    const live = m.total - m.empty - m.merged;
+                    return live === m.expected ? (
+                      " ✓"
+                    ) : (
+                      <span className="font-medium text-amber-700 dark:text-amber-400">
+                        {" "}
+                        · {fmt(live)} in use, off by {fmt(live - m.expected)}
+                      </span>
+                    );
+                  })()}
+                  {r.machines.machines.merged ? ` · ${fmt(r.machines.machines.merged)} merged into another` : null}
+                  {r.machines.machines.empty ? (
+                    <span className="text-muted-foreground"> · {fmt(r.machines.machines.empty)} left with no record (a serial cleared off its only record)</span>
+                  ) : null}
                   {r.machines.machines.unlinked.account + r.machines.machines.unlinked.retired + r.machines.machines.unlinked.warehouse ? (
                     <span className="font-medium text-amber-700 dark:text-amber-400">
                       {" "}

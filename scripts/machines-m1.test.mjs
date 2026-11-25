@@ -108,7 +108,7 @@ test("new records link as they're saved: a known serial finds its machine, a new
   }
 });
 
-test("editing a serial: a typo fix keeps the machine; another machine's serial moves to it; clearing it keeps the machine", async () => {
+test("editing a serial: a typo fix keeps the machine; another machine's serial moves to it; clearing it leaves that machine", async () => {
   const { pg, q } = await all();
   try {
     const u = await unit(q, "SN-TYPO1");
@@ -190,7 +190,101 @@ test("Link Check shows the machine counts, and the expected count matches", asyn
     await retired(q, "SN-C300", 9001);
     const { linkCheckFor } = await import("../src/lib/ops/link-check.ts");
     const r = await linkCheckFor(sql, "zz-admin");
-    assert.deepEqual(r.machines.machines, { total: 3, withSerial: 2, noSerial: 1, empty: 0, expected: 3, unlinked: { account: 0, retired: 0, warehouse: 0 }, offSerial: 0 });
+    assert.deepEqual(r.machines.machines, { total: 3, withSerial: 2, noSerial: 1, empty: 0, merged: 0, expected: 3, unlinked: { account: 0, retired: 0, warehouse: 0 }, offSerial: 0 });
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: a typo fixed on both records of a deployed machine ends on one machine, the old one marked merged into it", async () => {
+  const { pg, q } = await all();
+  try {
+    const w = await asset(q, "SN-TYPO", { status: "sold" });
+    const u = await unit(q, "SN-TYPO");
+    const old = u.machine_id;
+    assert.equal(w.machine_id, old);
+    await q("update account_equipment set serial = 'SN-RIGHT', serial_key = null where id = $1", [u.id]);
+    await q("update assets set serial = 'SN-RIGHT' where id = $1", [w.id]);
+    const now = await machineOf(q, "account_equipment", u.id);
+    assert.equal(await machineOf(q, "assets", w.id), now);
+    assert.equal((await q("select merged_into from machines where id = $1", [old]))[0].merged_into, now, "the old machine points at the one its records went to");
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: merging a duplicate with no serial puts its retired record on the kept unit's machine", async () => {
+  const { pg, q } = await all();
+  try {
+    const { retireUnitSql } = await import("../src/lib/ops/account-equip-retire.ts");
+    const keep = await unit(q, "SN-KEEP");
+    const drop = await unit(q, null);
+    const [r] = await q(retireUnitSql(), [drop.id, "zz", "Zz", JSON.stringify({ reason: "Merged", merged_into: keep.id, merged_serial: "SN-KEEP" })]);
+    await q("delete from account_equipment where id = $1", [drop.id]);
+    assert.equal(await machineOf(q, "account_equipment_retired", r.id), keep.machine_id);
+    assert.equal((await q("select merged_into from machines where id = $1", [drop.machine_id]))[0].merged_into, keep.machine_id);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: the backfill puts a merged duplicate's retired record on the kept unit's machine", async () => {
+  const { pg, q, runM1 } = await beforeM1();
+  try {
+    const keep = await unit(q, "SN-KEEP2");
+    const [r] = await q(
+      "insert into account_equipment_retired (unit_id, customer, catalog_model, equipment_name, serial, unit, links) values (9100, 'Zz Cafe', 'Zz Brewer', 'Zz Brewer', 'ab', '{}', $1) returning id",
+      [JSON.stringify({ merged_into: keep.id })],
+    );
+    await runM1();
+    assert.equal(await machineOf(q, "account_equipment_retired", r.id), await machineOf(q, "account_equipment", keep.id));
+    assert.equal(await machineCount(q), 1);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: a retire from the old code (no machine sent) keeps the unit's machine from its copy", async () => {
+  const { pg, q } = await all();
+  try {
+    const u = await unit(q, null);
+    const [r] = await q(
+      "insert into account_equipment_retired (unit_id, customer, catalog_model, equipment_name, serial, unit) select a.id, a.customer, a.catalog_model, a.equipment_name, a.serial, to_jsonb(a) from account_equipment a where a.id = $1 returning id",
+      [u.id],
+    );
+    assert.equal(await machineOf(q, "account_equipment_retired", r.id), u.machine_id);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: the machine keeps the serial as the unit stores it; quantity edits reuse a record's machine", async () => {
+  const { pg, q } = await all();
+  try {
+    const u = await unit(q, "sn-low1");
+    const [m] = await q("select m.serial, a.serial as unit_serial from machines m join account_equipment a on a.machine_id = m.id where a.id = $1", [u.id]);
+    assert.equal(m.serial, m.unit_serial);
+    const w = await asset(q, null);
+    for (const qty of [3, 1, 4, 1]) await q("update assets set qty = $2 where id = $1", [w.id, qty]);
+    assert.equal(await machineOf(q, "assets", w.id), w.machine_id);
+    assert.equal(await machineCount(q), 2);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("review: Link Check says when the machine count is off, and leaves merged machines out of empty", async () => {
+  const { pg, q, sql } = await all();
+  try {
+    await q("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('zz-admin', 'zzadmin', true, true, 'admin')");
+    const w = await asset(q, "SN-TYPO", { status: "sold" });
+    const u = await unit(q, "SN-TYPO");
+    await q("update account_equipment set serial = 'SN-RIGHT', serial_key = null where id = $1", [u.id]);
+    await q("update assets set serial = 'SN-RIGHT' where id = $1", [w.id]);
+    await q("insert into machines (serial_key, serial, model, origin_table, origin_id) values ('zz-stray', 'ZZ-STRAY', 'x', 'assets', 0)");
+    const { linkCheckFor } = await import("../src/lib/ops/link-check.ts");
+    const r = (await linkCheckFor(sql, "zz-admin")).machines.machines;
+    assert.deepEqual([r.total, r.merged, r.empty, r.expected], [3, 1, 1, 1]);
   } finally {
     await pg.close();
   }

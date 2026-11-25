@@ -63,7 +63,12 @@ update assets a set machine_id = m.id
   from machines m
  where a.machine_id is null and m.serial_key is null and m.origin_table = 'assets' and m.origin_id = a.id;
 
--- 4. A retired unit with no serial: the machine of its unit if that unit is on an account again, else its own.
+-- 4. A retired unit with no serial: the machine of the unit it was merged into, else of its own unit if that unit is
+--    on an account again, else its own.
+update account_equipment_retired r set machine_id = a.machine_id
+  from account_equipment a
+ where r.machine_id is null and coalesce(r.links ->> 'merged_into', '') ~ '^[0-9]+$'
+   and a.id = (r.links ->> 'merged_into')::int and a.machine_id is not null;
 update account_equipment_retired r set machine_id = a.machine_id
   from account_equipment a
  where r.machine_id is null and a.id = r.unit_id and a.machine_id is not null;
