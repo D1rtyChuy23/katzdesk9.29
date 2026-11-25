@@ -154,7 +154,7 @@ test("Link Check shows the id links on the five tables", async () => {
     assert.ok(r.nameLinks.find((l) => l.table === "installs").ids);
     // Phase C2 links account equipment too; a column with no id beside it still has none.
     assert.ok(r.nameLinks.find((l) => l.table === "account_equipment").ids);
-    assert.equal(r.nameLinks.find((l) => l.table === "wo_history").ids, undefined);
+    assert.equal(r.nameLinks.find((l) => l.table === "equipment_history").ids, undefined);
   } finally {
     await pg.close();
   }

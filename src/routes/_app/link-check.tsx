@@ -82,9 +82,27 @@ function Page() {
                         {l.ids ? (
                           <span className="mt-0.5 block text-xs text-muted-foreground" data-testid={`link-ids-${l.table}`}>
                             By id: {fmt(l.ids.linked)} linked · {fmt(l.ids.unlinked)} not
-                            {l.ids.disagree ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.disagree)} with another name</span> : null}
-                            {l.ids.onRemoved ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.onRemoved)} on a removed account</span> : null}
-                            {l.ids.offRule ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(l.ids.offRule)} not what the name gives now</span> : null}
+                            {l.sticky ? " · kept through a rename" : null}
+                            {/* A history row keeps its id (C3): another name or a removed account is how a rename or a
+                                removal leaves it, so those read as plain counts. Off the rule is a row that could link and doesn't. */}
+                            {l.ids.disagree ? (
+                              <span className={l.sticky ? "" : "font-medium text-amber-700 dark:text-amber-400"}>
+                                {" "}
+                                · {fmt(l.ids.disagree)} {l.sticky ? "under an earlier name" : "with another name"}
+                              </span>
+                            ) : null}
+                            {l.ids.onRemoved ? (
+                              <span className={l.sticky ? "" : "font-medium text-amber-700 dark:text-amber-400"}>
+                                {" "}
+                                · {fmt(l.ids.onRemoved)} on a removed or merged account
+                              </span>
+                            ) : null}
+                            {l.ids.offRule ? (
+                              <span className="font-medium text-amber-700 dark:text-amber-400">
+                                {" "}
+                                · {fmt(l.ids.offRule)} {l.sticky ? "with no id that could have one" : "not what the name gives now"}
+                              </span>
+                            ) : null}
                           </span>
                         ) : null}
                       </td>

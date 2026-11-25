@@ -52,6 +52,8 @@ const LINKS = [
   { table: "assets", name: "stock_hold_customer", id: "stock_hold_customer_id", add: (q, v) => q("insert into assets (kind, model, site, stock_hold_customer) values ('equip', 'Zz Brewer', 'Barn', $1) returning *", [v]) },
   {
     table: "asset_stock_actions",
+    // A history row from C3 on: its id is kept through a rename or a removal.
+    sticky: true,
     name: "customer",
     id: "customer_id",
     add: (q, v) => q("insert into asset_stock_actions (asset_id, kind, status, customer, asked_by) values ($1, 'assign', 'pending', $2, 'zz') returning *", [++seq, v]),
@@ -145,7 +147,7 @@ test("an account added, restored or removed later links or unlinks the C2 record
       assert.equal(await idOf(q, l, g.id), gone, `${l.table}.${l.name} restored`);
     }
     await q("update directory_customers set archived = true where id = $1", [gone]);
-    for (const { l, gone: g } of rows) assert.equal(await idOf(q, l, g.id), null, `${l.table}.${l.name} removed`);
+    for (const { l, gone: g } of rows) assert.equal(await idOf(q, l, g.id), l.sticky ? gone : null, `${l.table}.${l.name} removed`);
     assert.equal((await q("select count(*)::int as n from equipment_history"))[0].n, historyBefore, "relinking writes no equipment history");
   } finally {
     await pg.close();
@@ -177,21 +179,6 @@ test("rename keeps every C2 record on its account; merge moves the dropped accou
   }
 });
 
-test("a decided stock action keeps the name it was decided under, so a rename unlinks it until C4", async () => {
-  const { pg, q, sql } = await all();
-  try {
-    const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
-    const a = await accounts(q);
-    const [done] = await q("insert into asset_stock_actions (asset_id, kind, status, customer, asked_by) values (1, 'assign', 'approved', 'Zz Cafe', 'zz') returning *");
-    assert.equal(done.customer_id, a["Zz Cafe"]);
-    await renameOrMergeCustomer(sql, a["Zz Cafe"], "Zz Cafe Downtown");
-    const [after] = await q("select customer, customer_id from asset_stock_actions where id = $1", [done.id]);
-    assert.deepEqual(after, { customer: "Zz Cafe", customer_id: null });
-  } finally {
-    await pg.close();
-  }
-});
-
 test("Link Check shows the id links on every C2 column", async () => {
   const { pg, q, sql } = await all();
   try {
@@ -209,7 +196,7 @@ test("Link Check shows the id links on every C2 column", async () => {
     for (const l of LINKS) {
       const row = report.nameLinks.find((x) => x.table === l.table && x.column === l.name);
       // assets rows also carry the other two columns blank, which never count as unlinked.
-      assert.deepEqual(row.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0, offRule: 1 }, `${l.table}.${l.name}`);
+      assert.deepEqual(row.ids, { linked: 2, unlinked: 1, disagree: 1, onRemoved: 0, offRule: l.sticky ? 0 : 1 }, `${l.table}.${l.name}`);
     }
     // A place, not an account: no id.
     assert.equal(report.nameLinks.find((x) => x.table === "modules" && x.column === "location").ids, undefined);

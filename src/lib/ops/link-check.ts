@@ -16,8 +16,14 @@ export type NameLink = {
   column: string;
   label: string;
   rewritten: boolean;
-  /** The account id beside this name (phases C1 and C2), when it has one. */
+  /** The account id beside this name (phases C1, C2 and C3), when it has one. */
   idColumn?: string;
+  /**
+   * A history row (phase C3): its name stays as it was (choice 2), so its id is kept through a rename, a removal or a
+   * merge. Another account's name, or a removed account, is how a rename leaves it, not a problem; off the rule means a
+   * row with no id whose name finds an account now.
+   */
+  sticky?: boolean;
 };
 
 export const NAME_LINKS: NameLink[] = [
@@ -32,21 +38,21 @@ export const NAME_LINKS: NameLink[] = [
   { table: "assets", column: "sold_to", label: "Warehouse: sold to", rewritten: true, idColumn: "sold_to_id" },
   { table: "assets", column: "stock_hold_customer", label: "Warehouse: held for", rewritten: true, idColumn: "stock_hold_customer_id" },
   // Rename rewrites only the pending ones; decided ones keep the old name.
-  { table: "asset_stock_actions", column: "customer", label: "Stock actions (pending only renamed)", rewritten: false, idColumn: "customer_id" },
+  { table: "asset_stock_actions", column: "customer", label: "Stock actions (pending only renamed)", rewritten: false, idColumn: "customer_id", sticky: true },
   { table: "rebuilds", column: "account", label: "Rebuilds", rewritten: true, idColumn: "account_id" },
   { table: "modules", column: "assigned_customer", label: "Modules", rewritten: true, idColumn: "assigned_customer_id" },
   { table: "modules", column: "location", label: "Modules: location", rewritten: true },
   { table: "directory_customers", column: "parent_account", label: "Accounts: parent account", rewritten: false },
-  { table: "wo_history", column: "customer", label: "Work order history", rewritten: true },
-  { table: "network_accounts", column: "customer", label: "Network accounts", rewritten: true },
-  { table: "customer_providers", column: "customer", label: "Customer providers", rewritten: true },
-  { table: "invoices", column: "customer", label: "Invoices: customer", rewritten: false },
+  { table: "wo_history", column: "customer", label: "Work order history", rewritten: true, idColumn: "customer_id" },
+  { table: "network_accounts", column: "customer", label: "Network accounts", rewritten: true, idColumn: "customer_id" },
+  { table: "customer_providers", column: "customer", label: "Customer providers", rewritten: true, idColumn: "customer_id" },
+  { table: "invoices", column: "customer", label: "Invoices: customer", rewritten: false, idColumn: "customer_id", sticky: true },
   { table: "invoices", column: "bill_account", label: "Invoices: bill account", rewritten: false },
   { table: "invoices", column: "bill_name", label: "Invoices: bill name", rewritten: false },
-  { table: "module_stops", column: "customer", label: "Module stops", rewritten: false },
+  { table: "module_stops", column: "customer", label: "Module stops", rewritten: false, idColumn: "customer_id", sticky: true },
   { table: "equipment_history", column: "customer", label: "Equipment history", rewritten: false },
-  { table: "equipment_move_requests", column: "from_customer", label: "Move requests: from", rewritten: false },
-  { table: "equipment_move_requests", column: "to_customer", label: "Move requests: to", rewritten: false },
+  { table: "equipment_move_requests", column: "from_customer", label: "Move requests: from", rewritten: false, idColumn: "from_customer_id", sticky: true },
+  { table: "equipment_move_requests", column: "to_customer", label: "Move requests: to", rewritten: false, idColumn: "to_customer_id", sticky: true },
   { table: "desk_notifications", column: "customer", label: "Notifications", rewritten: false },
 ];
 
@@ -125,6 +131,8 @@ export type NameLinkReport = {
   column: string;
   label: string;
   rewritten: boolean;
+  /** A history row whose id is kept through a rename (NameLink.sticky). */
+  sticky?: boolean;
   /** False when this database has no such table or column. */
   present: boolean;
   rows: number;
@@ -277,7 +285,7 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
                                      and regexp_replace(lower(${name}), '[^a-z0-9]+', '', 'g') <> 'walkin')::int as unlinked,
                   count(*) filter (where d.id is not null and lower(btrim(d.name)) <> lower(btrim(coalesce(${name}, ''))))::int as disagree,
                   count(*) filter (where d.archived)::int as on_removed,
-                  count(*) filter (where ${id} is distinct from katz_customer_id(${name}))::int as off_rule
+                  count(*) filter (where ${link.sticky ? `${id} is null and katz_customer_id(${name}) is not null` : `${id} is distinct from katz_customer_id(${name})`})::int as off_rule
              from ${link.table} t left join directory_customers d on d.id = ${id}`,
         )
       )[0]!;
