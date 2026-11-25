@@ -242,3 +242,103 @@ test("Link Check counts each kind of row with its machine, and lists one that's 
     await pg.close();
   }
 });
+
+/** Retire a unit the way Retire leaves it: a retired record with its machine, and the unit gone. */
+async function retire(q, unitId) {
+  const [u] = await q("select * from account_equipment where id = $1", [unitId]);
+  await q(
+    "insert into account_equipment_retired (unit_id, customer, catalog_model, equipment_name, unit, machine_id) values ($1, $2, $3, $4, '{}', $5)",
+    [u.id, u.customer, u.catalog_model, u.equipment_name, u.machine_id],
+  );
+  await q("delete from account_equipment where id = $1", [unitId]);
+  return u.machine_id;
+}
+
+test("0148 finds a retired unit's machine for the rows still naming it", async () => {
+  const { pg, q, runM2 } = await beforeM2();
+  try {
+    const w = await world(q);
+    const [{ id: u3 }] = await q("insert into account_equipment (customer, catalog_model, equipment_name) values ('Zz Cafe', 'Zz Brewer', 'Zz Brewer') returning id");
+    const [{ id: mod }] = await q("insert into modules (module_id, assigned_unit_id) values ('ZZM-R', $1) returning id", [u3]);
+    await q("insert into pm_runbook_units (pm_job_id, unit_key, runbook_id) values ($1, $2, 'rb')", [w.pm, `acct:${u3}`]);
+    const [{ id: move }] = await q("insert into equipment_move_requests (unit_id, from_customer, to_customer, serial, asked_by) values ($1, 'Zz Cafe', 'Walk-In', 'N/A', 'zz') returning id", [u3]);
+    const m3 = await retire(q, u3);
+    await runM2();
+    assert.equal((await q("select machine_id from modules where id = $1", [mod]))[0].machine_id, m3);
+    assert.equal((await q("select machine_id from pm_runbook_units where unit_key = $1", [`acct:${u3}`]))[0].machine_id, m3);
+    assert.equal((await q("select machine_id from equipment_move_requests where id = $1", [move]))[0].machine_id, m3);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a PM saved after its unit is retired keeps the machine; a unit put back under its id gives its machine back", async () => {
+  const { pg, q } = await all();
+  try {
+    const w = await world(q);
+    await retire(q, w.u2);
+    // The PM's runbook saves (an interval, a kit) write serial_key again.
+    await q("update pm_runbook_units set serial_key = null, interval_mo = '6' where unit_key = $1", [`acct:${w.u2}`]);
+    assert.equal((await machines(q, w)).pmAcct, w.m2);
+    // A module on a unit id that isn't there yet, then the unit comes (back) under that id.
+    const [{ id: mod }] = await q("insert into modules (module_id, assigned_unit_id) values ('ZZM-P', 999999) returning id, machine_id");
+    assert.equal((await q("select machine_id from modules where id = $1", [mod]))[0].machine_id, null);
+    await q("insert into account_equipment (id, customer, catalog_model, equipment_name) values (999999, 'Zz Cafe', 'Zz Brewer', 'Zz Brewer')");
+    const mNew = (await q("select machine_id from account_equipment where id = 999999"))[0].machine_id;
+    assert.ok(mNew);
+    assert.equal((await q("select machine_id from modules where id = $1", [mod]))[0].machine_id, mNew);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("rows held by a serial follow a machine merged into another", async () => {
+  const { pg, q } = await all();
+  try {
+    const w = await world(q);
+    const [{ id: u3, machine_id: m3 }] = await q(
+      "insert into account_equipment (customer, catalog_model, equipment_name, serial) values ('Zz Cafe', 'Zz Brewer', 'Zz Brewer', 'ZZSN-300') returning id, machine_id",
+    );
+    const [rb] = await q("insert into rebuild_machines (rebuild_id, model, serial) values ($1, 'Zz Brewer', 'ZZSN-300') returning id, machine_id", [w.rebuild]);
+    const [part] = await q("insert into machine_parts (pm_job_id, piece_key, serial_key, machine_label, item) values ($1, 'p9', 'zzsn-300', 'Zz Brewer', 'Gasket') returning id, machine_id", [w.pm]);
+    assert.deepEqual([rb.machine_id, part.machine_id], [m3, m3]);
+    // The serial was a typo of the warehouse grinder's.
+    await q("update account_equipment set serial = 'ZZSN-200' where id = $1", [u3]);
+    assert.equal((await q("select merged_into from machines where id = $1", [m3]))[0].merged_into, w.mAsset);
+    assert.equal((await q("select machine_id from rebuild_machines where id = $1", [rb.id]))[0].machine_id, w.mAsset);
+    assert.equal((await q("select machine_id from machine_parts where id = $1", [part.id]))[0].machine_id, w.mAsset);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a serial typed before any record has it gets its machine when one comes", async () => {
+  const { pg, q } = await all();
+  try {
+    const w = await world(q);
+    const [rb] = await q("insert into rebuild_machines (rebuild_id, model, serial) values ($1, 'Zz Brewer', 'ZZSN-777') returning id, machine_id", [w.rebuild]);
+    await q("insert into pm_runbook_units (pm_job_id, unit_key, runbook_id) values ($1, 'zzsn-777', 'rb')", [w.pm]);
+    assert.equal(rb.machine_id, null);
+    const [{ machine_id: m7 }] = await q("insert into assets (kind, model, site, serial) values ('equip', 'Zz Brewer', 'Barn', 'zzsn-777') returning machine_id");
+    assert.ok(m7);
+    assert.equal((await q("select machine_id from rebuild_machines where id = $1", [rb.id]))[0].machine_id, m7);
+    assert.equal((await q("select machine_id from pm_runbook_units where unit_key = 'zzsn-777'"))[0].machine_id, m7);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a warehouse record that stops being a machine leaves its rebuild machine its serial's; an over-long unit key is none", async () => {
+  const { pg, q, sql } = await all();
+  try {
+    const w = await world(q);
+    await q("update assets set kind = 'module' where id = $1", [w.asset]);
+    assert.equal((await q("select machine_id from assets where id = $1", [w.asset]))[0].machine_id, null);
+    assert.equal((await machines(q, w)).rebuild, w.mAsset, "its serial's machine");
+    await q("insert into pm_runbook_units (pm_job_id, unit_key, runbook_id) values ($1, 'acct:99999999999', 'rb')", [w.pm]);
+    assert.equal((await q("select machine_id from pm_runbook_units where unit_key = 'acct:99999999999'"))[0].machine_id, null);
+    assert.ok((await linkCheckFor(sql, "zz-admin")).machines.machineLinks);
+  } finally {
+    await pg.close();
+  }
+});
