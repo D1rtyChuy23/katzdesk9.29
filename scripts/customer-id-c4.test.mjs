@@ -1,8 +1,8 @@
 // Customers by id, phase C4 ("One Record Per Machine Plan", Chuy approved 11/24): rename and merge go by the account's
 // id. A rename moves every record linked to the account (names with spaces at the ends too) and never one the rule
 // gives another account; a merge moves the merged-away account's records, history rows included, onto the kept one by
-// id, and history rows keep the name they had (choice 2). Migration 0147 links an invoice whose name finds no account
-// to its ticket's, PM's, install's, rebuild's or deal's account. Made-up data.
+// id, and history rows keep the name they had (choice 2). No migration: Link Check after C3 (11/25) showed every
+// invoice linked, so none needs its record's account. Made-up data.
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { register } from "node:module";
@@ -17,25 +17,14 @@ const { linkCheckFor } = await import("../src/lib/ops/link-check.ts");
 
 const dir = new URL("../migrations/", import.meta.url);
 const files = readdirSync(dir).filter((n) => n.endsWith(".sql")).sort();
-const C4 = "0147_customer_id_c4.sql";
-
-async function beforeC4() {
+async function all() {
   const pg = new PGlite();
-  for (const f of files.filter((f) => f < C4)) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
+  for (const f of files) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
   // Live also has names unique in any capitals (seed.server.ts).
   await pg.exec("create unique index if not exists directory_customers_name_lower_uidx on directory_customers (lower(name))");
   const q = async (t, p) => (await pg.query(t, p)).rows;
-  const runC4 = async () => {
-    for (const f of files.filter((f) => f >= C4 && f < "0148")) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
-  };
-  return { pg, q, runC4, sql: { query: q } };
-}
-async function all() {
-  const b = await beforeC4();
-  await b.runC4();
-  for (const f of files.filter((f) => f >= "0148")) await b.pg.exec(readFileSync(new URL(f, dir), "utf8"));
-  await b.q("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('zz-admin', 'zzadmin', true, true, 'admin')");
-  return b;
+  await q("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('zz-admin', 'zzadmin', true, true, 'admin')");
+  return { pg, q, sql: { query: q } };
 }
 const accounts = async (q) => {
   await q("insert into directory_customers (name) values ('Zz Cafe'), ('Zz Bar-Grill'), ('Zz Other')");
@@ -306,72 +295,6 @@ test("the merge question counts the records linked to the account, names with sp
     const plan = await planCustomerRename(sql, a["Zz Bar-Grill"], "Zz Cafe");
     assert.equal(plan.kind, "merge");
     assert.deepEqual([plan.moving.calls, plan.moving.equipment, plan.moving.woHistory], [1, 1, 1]);
-  } finally {
-    await pg.close();
-  }
-});
-
-test("0147: an invoice whose name finds no account takes its record's account when that account had the name", async () => {
-  const { pg, q, runC4 } = await beforeC4();
-  try {
-    const a = await accounts(q);
-    const cafe = a["Zz Cafe"];
-    const rec = async (text) => (await q(text))[0].id;
-    const svc = await rec("insert into service_jobs (kind, call_id, customer, status) values ('service', 'SC-ZZ1', 'Zz Cafe', 'Open') returning id");
-    const tlc = await rec("insert into service_jobs (kind, call_id, customer, status) values ('tlc', 'TLC-ZZ1', 'Zz Cafe', 'Open') returning id");
-    const pm = await rec("insert into pm_jobs (customer) values ('Zz Cafe') returning id");
-    const inst = await rec("insert into installs (customer, equipment) values ('Zz Cafe', 'G') returning id");
-    const rb = await rec("insert into rebuilds (title, account) values ('Zz rebuild', 'Zz Cafe') returning id");
-    const deal = await rec("insert into deals (customer) values ('Zz Cafe') returning id");
-    const inv = async (type, id, name) => (await q("insert into invoices (entity_type, entity_id, customer) values ($1, $2, $3) returning id, customer_id", [type, id, name]))[0];
-
-    // Zz Cafe's old names: on the Clean Names report, renamed in its history, and an account merged into it.
-    const [{ id: run }] = await q("insert into customer_clean_runs (filename) values ('zz.csv') returning id");
-    await q("insert into customer_clean_items (run_id, kind, customer_id, katz_name, clean_name) values ($1, 'similar', $2, 'Zz Cafe (Old)', 'Zz Cafe')", [run, cafe]);
-    await q(
-      `insert into activity (entity_type, entity_id, actor_name, action, detail) values
-         ('customer', $1, 'zz', 'renamed', 'Renamed from “ZZ Cafe Inc” to “Zz Cafe”'),
-         ('customer', $1, 'zz', 'merged', '“Zz Cafe Annex” (#77) was merged into this account. Filled in from it: phone.'),
-         ('customer', $1, 'zz', 'merged', 'Renamed from “Zz Bistro” to “Zz Cafe”; the old account “Zz Corner” (#78) was merged into it.'),
-         ('customer', $2, 'zz', 'renamed', 'Renamed from “Zz Elsewhere” to “Zz Bar-Grill”')`,
-      [cafe, a["Zz Bar-Grill"]],
-    );
-    const filled = [
-      await inv("service", svc, "Zz Cafe (Old)"),
-      await inv("tlc", tlc, "zz cafe inc"),
-      await inv("pm", pm, "Zz Cafe Annex"),
-      await inv("install", inst, "Zz Bistro"),
-      await inv("rebuild", rb, "Zz Corner "),
-    ];
-    for (const r of filled) assert.equal(r.customer_id, null);
-
-    // Left as they are:
-    const left = [
-      // the record's account never had the name (a rebuild moved, its Sales Order billed someone else)
-      await inv("deal", deal, "Zz Some Other Shop"),
-      // another account had it
-      await inv("service", await rec("insert into service_jobs (kind, call_id, customer, status) values ('service', 'SC-ZZ2', 'Zz Cafe', 'Open') returning id"), "Zz Elsewhere"),
-      // a record with no account
-      await inv("service", await rec("insert into service_jobs (kind, call_id, customer, status) values ('service', 'SC-ZZ3', 'Zz Nowhere', 'Open') returning id"), "Zz Cafe (Old)"),
-      // no record, a blank name
-      await inv("pm", 999999, "Zz Cafe (Old)"),
-      await inv("install", 888888, "  "),
-    ];
-    // An id already set, and a name that finds an account.
-    const given = await inv("deal", 777777, "Zz Cafe (Old)");
-    await q("update invoices set customer_id = $1 where id = $2", [a["Zz Other"], given.id]);
-    const named = await inv("service", await rec("insert into service_jobs (kind, call_id, customer, status) values ('service', 'SC-ZZ4', 'Zz Cafe', 'Open') returning id"), "Zz Bar-Grill");
-
-    const before = await q("select * from invoices order by id");
-    await runC4();
-    const after = await q("select * from invoices order by id");
-    const idOf = (id) => after.find((r) => r.id === id).customer_id;
-    for (const r of filled) assert.equal(idOf(r.id), cafe, `invoice ${r.id}`);
-    for (const r of left) assert.equal(idOf(r.id), null, `invoice ${r.id}`);
-    assert.equal(idOf(given.id), a["Zz Other"]);
-    assert.equal(idOf(named.id), a["Zz Bar-Grill"]);
-    const strip = (r) => ({ ...r, customer_id: undefined });
-    assert.deepEqual(after.map(strip), before.map(strip), "only customer_id changes");
   } finally {
     await pg.close();
   }
