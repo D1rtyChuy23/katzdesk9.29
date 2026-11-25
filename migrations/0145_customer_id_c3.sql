@@ -17,9 +17,13 @@
 --                                                                decided under)
 --
 -- A kept id is set the same way (0138's rule, when the row is saved, and again whenever the row's own name changes),
--- and an account added or restored fills the rows under its name that have none. A rename, a removal or a merge never
--- clears it: the row still belongs to that account, as the name it shows says it did. C4 moves a merged account's rows
--- by id. A hard delete of the account clears it (the foreign key).
+-- and any account event (added, renamed, removed, restored) fills the rows under its old and new name that have none,
+-- by the rule at that moment. An account event never clears or changes one: the row still belongs to that account, as
+-- the name it shows says it did. Two ways it does change:
+--   - the row's own name is saved again as another name (an invoice approved again after its ticket moved): the id is
+--     that name's, or none when it finds no listed account;
+--   - a hard delete of the account (the foreign key) clears it.
+-- C4 moves a merged account's rows by id, and takes an invoice's account from its ticket, PM or install.
 
 set local lock_timeout = '15s';
 
@@ -32,7 +36,7 @@ alter table equipment_move_requests add column if not exists from_customer_id in
 alter table equipment_move_requests add column if not exists to_customer_id integer references directory_customers (id) on delete set null;
 
 -- The records under a name, for the relink.
-create index if not exists wo_history_customer_key_idx on wo_history (lower(btrim(customer)));
+-- (wo_history already has this one: wo_history_customer_idx, from 0100.)
 create index if not exists network_accounts_customer_key_idx on network_accounts (lower(btrim(customer)));
 create index if not exists customer_providers_customer_key_idx on customer_providers (lower(btrim(customer)));
 create index if not exists invoices_customer_key_idx on invoices (lower(btrim(customer))) where customer is not null;

@@ -1,7 +1,8 @@
 -- Customers by id, phase C3, part 2: fill the ids 0145 added on the rows already there, by the rule in 0138. Its own
--- file so 0145's table locks are short; the fill takes row locks, and the id indexes at the end briefly hold writes to
--- their tables while they build. Each update writes only an id column, so no name trigger fires and no name or date
--- changes. A history row's name is the one it had then; one that finds no account today stays without an id.
+-- file, as in C1 and C2, so 0145's locks are held only while it adds the columns and indexes; the fill takes row
+-- locks, and the id indexes at the end briefly hold writes to their tables while they build. Each update writes only
+-- an id column, so no name trigger fires and no name or date changes. A history row's name is the one it had then;
+-- one that finds no account today stays without an id.
 
 set local lock_timeout = '15s';
 -- The accounts hold still while the rows are filled (reads go on; writes to the account list wait).

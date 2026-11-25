@@ -88,7 +88,7 @@ function Page() {
                             {l.ids.disagree ? (
                               <span className={l.sticky ? "" : "font-medium text-amber-700 dark:text-amber-400"}>
                                 {" "}
-                                · {fmt(l.ids.disagree)} {l.sticky ? "under an earlier name" : "with another name"}
+                                · {fmt(l.ids.disagree)} {l.sticky ? "under another name (as a rename leaves it)" : "with another name"}
                               </span>
                             ) : null}
                             {l.ids.onRemoved ? (

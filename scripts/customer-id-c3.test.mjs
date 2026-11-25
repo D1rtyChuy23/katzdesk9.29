@@ -44,7 +44,7 @@ const moduleId = async (q) => (await q("insert into modules (module_id) values (
 /** Every name column C3 links. sticky: keeps its id through a rename or removal. */
 const LINKS = [
   { table: "wo_history", name: "customer", id: "customer_id", add: async (q, v) => q("insert into wo_history (run_id, history_ref, customer) values ($1, $2, $3) returning *", [await runId(q), `ZZ-${++seq}`, v]) },
-  { table: "network_accounts", name: "customer", id: "customer_id", add: (q, v) => q("insert into network_accounts (customer) values ($1) returning *", [`${v}${"​".repeat(0)}`]).catch(() => q("insert into network_accounts (customer) values ($1) returning *", [`${v} ${++seq}`])) },
+  { table: "network_accounts", name: "customer", id: "customer_id", add: (q, v) => q("insert into network_accounts (customer) values ($1) returning *", [v]) },
   { table: "customer_providers", name: "customer", id: "customer_id", add: async (q, v) => q("insert into customer_providers (customer, provider_id) values ($1, $2) returning *", [v, await providerId(q)]) },
   { table: "invoices", name: "customer", id: "customer_id", sticky: true, add: (q, v) => q("insert into invoices (entity_type, entity_id, customer) values ('service', $1, $2) returning *", [++seq, v]) },
   { table: "module_stops", name: "customer", id: "customer_id", sticky: true, add: async (q, v) => q("insert into module_stops (module_id, kind, customer) values ($1, 'assigned', $2) returning *", [await moduleId(q), v]) },
@@ -218,6 +218,45 @@ test("stock actions (C2) keep their id like the other history rows: a decided on
       { id: done.id, customer: "Zz Cafe", customer_id: a["Zz Cafe"] },
       { id: open.id, customer: "Zz Cafe Downtown", customer_id: a["Zz Cafe"] },
     ]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("merge: rows that follow the account move to the kept one; history rows stay on the merged-away account until C4", async () => {
+  const { pg, q, sql } = await all();
+  try {
+    const { renameOrMergeCustomer } = await import("../src/lib/ops/customer-identity.ts");
+    const a = await accounts(q);
+    const rows = [];
+    for (const l of LINKS) rows.push({ l, row: (await l.add(q, "Zz Bar-Grill"))[0] });
+    const r = await renameOrMergeCustomer(sql, a["Zz Bar-Grill"], "Zz Cafe", { force: true });
+    assert.equal(r.merged, true);
+    for (const { l, row } of rows) {
+      const want = l.sticky ? a["Zz Bar-Grill"] : r.id;
+      assert.equal(await idOf(q, l, row.id), want, `${l.table}.${l.name}`);
+    }
+  } finally {
+    await pg.close();
+  }
+});
+
+test("an invoice saved again (ON CONFLICT DO UPDATE) keeps its id with the same name and follows a new one", async () => {
+  const { pg, q } = await all();
+  try {
+    const a = await accounts(q);
+    const upsert = (name) =>
+      q(
+        `insert into invoices (entity_type, entity_id, customer) values ('service', 4242, $1)
+         on conflict (entity_type, entity_id) do update set customer = excluded.customer, updated_at = now()
+         returning customer_id`,
+        [name],
+      );
+    assert.equal((await upsert("Zz Cafe"))[0].customer_id, a["Zz Cafe"]);
+    // Kept through a rename: the invoice still reads "Zz Cafe".
+    await q("update directory_customers set name = 'Zz Cafe Downtown' where id = $1", [a["Zz Cafe"]]);
+    assert.equal((await upsert("Zz Cafe"))[0].customer_id, a["Zz Cafe"], "the same name keeps the id");
+    assert.equal((await upsert("Zz Bar-Grill"))[0].customer_id, a["Zz Bar-Grill"], "a new name takes its own account's id");
   } finally {
     await pg.close();
   }
