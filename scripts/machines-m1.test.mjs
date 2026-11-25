@@ -121,9 +121,20 @@ test("editing a serial: a typo fix keeps the machine; another machine's serial m
     await q("update account_equipment set serial = 'SN-SHARED', serial_key = null where id = $1", [u.id]);
     assert.equal(await machineOf(q, "account_equipment", u.id), w.machine_id);
 
-    const z = await unit(q, "SN-ZED");
-    await q("update account_equipment set serial = null, serial_key = null where id = $1", [z.id]);
-    assert.equal(await machineOf(q, "account_equipment", z.id), z.machine_id, "clearing a serial keeps the physical machine");
+    // Clearing a serial says it isn't this unit's: the unit leaves that serial's machine for one of its own. This is how
+    // the install machine list moves a serial typed on the wrong row to the right one.
+    const wrong = await unit(q, "SN-WRONGROW");
+    const right = await unit(q, null);
+    await q("update account_equipment set serial = null, serial_key = null where id = $1", [wrong.id]);
+    await q("update account_equipment set serial = 'SN-WRONGROW', serial_key = null where id = $1", [right.id]);
+    const wrongNow = await machineOf(q, "account_equipment", wrong.id);
+    assert.equal(await machineOf(q, "account_equipment", right.id), wrong.machine_id, "the serial's machine goes with the serial");
+    assert.ok(wrongNow && wrongNow !== wrong.machine_id, "the unit it was cleared on has its own machine");
+    assert.equal((await q("select serial_key from machines where id = $1", [wrongNow]))[0].serial_key, null);
+    // A unit already on a machine with no serial keeps it.
+    const plain = await unit(q, null);
+    await q("update account_equipment set serial = '', serial_key = null where id = $1", [plain.id]);
+    assert.equal(await machineOf(q, "account_equipment", plain.id), plain.machine_id);
     // A warehouse record that becomes bulk, or a module, leaves the machine list.
     const b = await asset(q, "SN-BULKME");
     await q("update assets set qty = 3, serial = null where id = $1", [b.id]);

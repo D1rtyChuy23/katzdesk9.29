@@ -14,8 +14,9 @@
 --   - A serial finds its machine, or makes one. A record whose serial changes to one no machine has yet keeps its
 --     machine and gives it the new serial when no other record shares it (a typo fixed is the same machine); otherwise
 --     it gets a new one.
---   - A record with no serial keeps the machine it has, or the one the save brings (Retire and Put Back carry it), or
---     gets a new one. Clearing a serial keeps the machine: it's still the same physical machine.
+--   - A record with no serial keeps the machine with no serial it has, or the one the save brings (Retire and Put Back
+--     carry it), or gets a new one. Clearing a serial says it wasn't this record's (the install machine list moves a
+--     serial typed on the wrong row this way), so the record leaves that serial's machine for one of its own.
 --   - Nothing here deletes a machine. One no record points at any more is counted on Link Check.
 --
 -- None of the existing triggers fire on machine_id: the equipment history trigger records only its listed fields, the
@@ -50,7 +51,9 @@ declare
   shared boolean;
 begin
   if not katz_serial_counts(k) then
-    if given is not null and exists (select 1 from machines where id = given) then return given; end if;
+    -- Kept only when it's a machine with no serial. A serial cleared off a record says it isn't this machine's (the
+    -- install list moves a serial typed on the wrong row this way), so the record leaves that serial's machine.
+    if given is not null and exists (select 1 from machines where id = given and serial_key is null) then return given; end if;
     insert into machines (serial_key, serial, model, origin_table, origin_id)
     values (null, nullif(btrim(coalesce(raw_serial, '')), ''), model_name, self_table, self_id)
     returning id into m;
