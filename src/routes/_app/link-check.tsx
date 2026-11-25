@@ -195,6 +195,27 @@ function Page() {
                 {r.machines.links.rebuildMachinesMissingAsset ? ` · ${fmt(r.machines.links.rebuildMachinesMissingAsset)} pointing at a missing one` : ""}
                 {r.machines.links.modulesMissingUnit ? ` · ${fmt(r.machines.links.modulesMissingUnit)} modules on a unit that's gone` : ""}
               </li>
+              {r.machines.machineLinks ? (
+                <li data-testid="link-check-machine-links">
+                  {/* Phase M2: every row whose link gives a machine has it. */}
+                  On their machine:{" "}
+                  {r.machines.machineLinks.map((l, i) => (
+                    <span key={l.table}>
+                      {i ? " · " : ""}
+                      {l.label} {fmt(l.linked)} of {fmt(l.rows)}
+                      {l.missing || l.off ? (
+                        <span className="font-medium text-amber-700 dark:text-amber-400">
+                          {l.missing ? ` (${fmt(l.missing)} without theirs` : " ("}
+                          {l.missing && l.off ? ", " : ""}
+                          {l.off ? `${fmt(l.off)} on another machine` : ""})
+                        </span>
+                      ) : null}
+                    </span>
+                  ))}
+                  {r.machines.machineLinks.every((l) => !l.missing && !l.off) ? " ✓" : null}
+                  <span className="text-muted-foreground"> (a module on no unit, or a rebuild or PM unit with no warehouse record or serial, has none)</span>
+                </li>
+              ) : null}
             </ul>
           </section>
 
