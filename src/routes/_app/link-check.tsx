@@ -133,6 +133,25 @@ function Page() {
                 {r.machines.serials.accountTwice ? ` · ${fmt(r.machines.serials.accountTwice)} on more than one account unit` : ""}
                 {r.machines.serials.warehouseTwice ? ` · ${fmt(r.machines.serials.warehouseTwice)} on more than one unsold warehouse record` : ""}
               </li>
+              {r.machines.machines ? (
+                <li data-testid="link-check-machines">
+                  {/* Phase M1: the check is machines with a record = distinct serials + units with no serial. */}
+                  Machine records: {fmt(r.machines.machines.total)} · {fmt(r.machines.machines.withSerial)} by serial · {fmt(r.machines.machines.noSerial)} with no
+                  serial · expected {fmt(r.machines.machines.expected)} (distinct serials + units with no serial)
+                  {r.machines.machines.total - r.machines.machines.empty === r.machines.machines.expected ? " ✓" : null}
+                  {r.machines.machines.empty ? <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(r.machines.machines.empty)} with no record left</span> : null}
+                  {r.machines.machines.unlinked.account + r.machines.machines.unlinked.retired + r.machines.machines.unlinked.warehouse ? (
+                    <span className="font-medium text-amber-700 dark:text-amber-400">
+                      {" "}
+                      · without a machine: {fmt(r.machines.machines.unlinked.account)} account, {fmt(r.machines.machines.unlinked.retired)} retired,{" "}
+                      {fmt(r.machines.machines.unlinked.warehouse)} warehouse
+                    </span>
+                  ) : null}
+                  {r.machines.machines.offSerial ? (
+                    <span className="font-medium text-amber-700 dark:text-amber-400"> · {fmt(r.machines.machines.offSerial)} on a machine with another serial</span>
+                  ) : null}
+                </li>
+              ) : null}
               <li>
                 Install lists: {fmt(r.machines.installLists.rows)} machine rows on {fmt(r.machines.installLists.installs)} installs ·{" "}
                 {fmt(r.machines.installLists.rowsWithoutUnit)} without a unit link
