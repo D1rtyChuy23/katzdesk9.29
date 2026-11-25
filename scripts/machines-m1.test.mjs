@@ -48,7 +48,7 @@ test("the backfill: one machine per serial, one per unit with no serial; bulk an
     const a3 = await unit(q, null);
     const a4 = await unit(q, "N/A"); // a placeholder: no serial
     const w1 = await asset(q, "SN-A100", { status: "sold" }); // the account's machine, sold earlier
-    const w2 = await asset(q, "SN-B200");
+    await asset(q, "SN-B200");
     const w3 = await asset(q, null);
     const w4 = await asset(q, null, { qty: 5 }); // bulk
     const w5 = await asset(q, "MOD-1", { kind: "module" });
@@ -80,7 +80,7 @@ test("the backfill: one machine per serial, one per unit with no serial; bulk an
     const [ma] = await q("select serial, serial_key, model, origin_table, origin_id from machines where id = $1", [A]);
     assert.deepEqual(ma, { serial: "SN-A100", serial_key: "sn-a100", model: "Zz Brewer", origin_table: "account_equipment", origin_id: a1.id });
 
-    const strip = (rows) => rows.map(({ machine_id, ...r }) => r);
+    const strip = (rows) => rows.map(({ machine_id: _machine, ...r }) => r);
     assert.deepEqual(strip(await q("select * from account_equipment order by id")), before.a);
     assert.deepEqual(strip(await q("select * from assets order by id")), before.w);
     assert.deepEqual(strip(await q("select * from account_equipment_retired order by id")), before.r);
