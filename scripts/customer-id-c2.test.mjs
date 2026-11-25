@@ -19,14 +19,16 @@ async function beforeC2() {
   const pg = new PGlite();
   for (const f of files.filter((f) => f < C2)) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
   const q = async (t, p) => (await pg.query(t, p)).rows;
+  // C2's own files (0141, 0142); later phases run after, in all().
   const runC2 = async () => {
-    for (const f of files.filter((f) => f >= C2)) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
+    for (const f of files.filter((f) => f >= C2 && f < "0143")) await pg.exec(readFileSync(new URL(f, dir), "utf8"));
   };
   return { pg, q, runC2, sql: { query: q } };
 }
 async function all() {
   const b = await beforeC2();
   await b.runC2();
+  for (const f of files.filter((f) => f >= "0143")) await b.pg.exec(readFileSync(new URL(f, dir), "utf8"));
   return b;
 }
 const accounts = async (q) => {

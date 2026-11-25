@@ -44,8 +44,9 @@ const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", 
 export function retireUnitSql(): string {
   return `insert into account_equipment_retired
             (unit_id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
-             unit, links, retired_by, retired_name)
+             machine_id, unit, links, retired_by, retired_name)
           select a.id, a.customer, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.install_date, a.electrical, a.ownership, a.part_number, a.condition,
+                 a.machine_id,
                  to_jsonb(a),
                  jsonb_build_object(
                    'inspection_units', coalesce((select jsonb_agg(to_jsonb(u)) from install_inspection_units u where u.equipment_id = a.id), '[]'::jsonb),
@@ -141,8 +142,10 @@ export function restoreUnitSql(): string {
           unit as (
             insert into account_equipment
                    (id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
-                    created_by_install, created_at, updated_at)
+                    machine_id, created_by_install, created_at, updated_at)
             select r.unit_id, $2, r.catalog_model, r.equipment_name, r.serial, r.serial_key, r.install_date, r.electrical, r.ownership, r.part_number, r.condition,
+                   -- The same machine it was (M1): kept on the retired row, or in its copy of the unit.
+                   coalesce(r.machine_id, nullif(r.unit->>'machine_id', '')::int),
                    (select i.id from installs i where i.id = (r.unit->>'created_by_install')::int),
                    coalesce((r.unit->>'created_at')::timestamptz, now()), now()
               from r
