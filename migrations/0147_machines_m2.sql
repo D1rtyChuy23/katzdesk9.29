@@ -25,7 +25,9 @@
 --   - a machine that gets a serial (made, or re-keyed): the rows held by that serial with no machine yet (a rebuild or
 --     PM part typed before any record had the serial).
 -- Those updates write only machine_id, so no other trigger records anything (the install visit history records adds,
--- removals and the visit kind; the customer id triggers fire on names).
+-- removals and the visit kind; the customer id triggers fire on names). They run when the save is done (deferred to
+-- the end of its transaction), not inside it: a save that makes a unit and then writes a row linked to it in the same
+-- statement (a refurb machine going into stock) would otherwise find that row already changed under it.
 
 set local lock_timeout = '15s';
 
@@ -138,8 +140,8 @@ begin
   return null;
 end $$;
 drop trigger if exists account_equipment_machine_follow on account_equipment;
-create trigger account_equipment_machine_follow after insert or update on account_equipment
-  for each row execute function katz_unit_machine_follow();
+create constraint trigger account_equipment_machine_follow after insert or update on account_equipment
+  deferrable initially deferred for each row execute function katz_unit_machine_follow();
 
 -- So does a warehouse record, for the rebuild machines it went onto.
 create or replace function katz_asset_machine_follow() returns trigger language plpgsql as $$
@@ -151,8 +153,8 @@ begin
   return null;
 end $$;
 drop trigger if exists assets_machine_follow on assets;
-create trigger assets_machine_follow after update on assets
-  for each row execute function katz_asset_machine_follow();
+create constraint trigger assets_machine_follow after update on assets
+  deferrable initially deferred for each row execute function katz_asset_machine_follow();
 
 -- A machine merged into another: every row on it moves to that one.
 create or replace function katz_machine_merged_follow() returns trigger language plpgsql as $$
@@ -169,8 +171,8 @@ begin
   return null;
 end $$;
 drop trigger if exists machines_merged_follow on machines;
-create trigger machines_merged_follow after update of merged_into on machines
-  for each row execute function katz_machine_merged_follow();
+create constraint trigger machines_merged_follow after update of merged_into on machines
+  deferrable initially deferred for each row execute function katz_machine_merged_follow();
 
 -- A machine that gets a serial: the rows held by that serial with no machine yet take it.
 create or replace function katz_machine_serial_follow() returns trigger language plpgsql as $$
@@ -192,5 +194,5 @@ begin
   return null;
 end $$;
 drop trigger if exists machines_serial_follow on machines;
-create trigger machines_serial_follow after insert or update of serial_key on machines
-  for each row execute function katz_machine_serial_follow();
+create constraint trigger machines_serial_follow after insert or update of serial_key on machines
+  deferrable initially deferred for each row execute function katz_machine_serial_follow();
