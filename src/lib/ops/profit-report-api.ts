@@ -24,7 +24,7 @@ import { ticketProfitBills } from "@/lib/ops/charges-api";
 import { costView } from "@/lib/ops/cost-access";
 import { discountFromRow } from "@/lib/ops/discount";
 import { billProfit, type LineCostTable } from "@/lib/ops/line-cost";
-import type { BillProfitTotals } from "@/lib/ops/part-pricing";
+import { discountShares, type BillProfitTotals } from "@/lib/ops/part-pricing";
 import { COSTED_FROM, JOB_TYPES, buildProfitReportFile, groupBy, groupTotals, historySection, profitReportFileName, type GroupTotals, type HistoryBill, type HistorySection, type ProfitBill } from "@/lib/ops/profit-report";
 import { historyInvoiceCost } from "@/lib/ops/wo-history";
 import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
@@ -150,7 +150,7 @@ async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLab
  * completed), with the parts cost the line-cost import filled. Leaves out Service Dept, and any work order whose
  * ticket already counts in this report as a billed ticket, so nothing is counted twice.
  */
-export async function historyProfitSection(sql: Sql, f: Filters): Promise<HistorySection> {
+export async function historyProfitSection(sql: Sql, f: Filters, opts: { laborHidden?: boolean } = {}): Promise<HistorySection> {
   const DAY = "coalesce(h.invoice_date, h.completed::date)";
   // Tickets that count as billed tickets in this report on any dates (the same rule as ticketProfitBills, without the
   // range), so a work order and its ticket billed on either side of a range edge never both count (review, 11/24).
@@ -175,7 +175,8 @@ export async function historyProfitSection(sql: Sql, f: Filters): Promise<Histor
     `select l.history_id, l.kind, l.amount::text as amount, l.line_cost::text as line_cost
        from wo_history_lines l join wo_history h on h.id = l.history_id
       where ($1::date is null or ${DAY} >= $1::date)
-        and ($2::date is null or ${DAY} <= $2::date)`,
+        and ($2::date is null or ${DAY} <= $2::date)
+      order by l.history_id, l.sort, l.id`,
     [f.from ?? null, f.to ?? null],
   );
   const num = (v: string | null) => (v == null ? null : Number(v));
@@ -197,11 +198,21 @@ export async function historyProfitSection(sql: Sql, f: Filters): Promise<Histor
     }
     // The discount from its Discount lines, as the invoice panel shows it (a positive number).
     const own = byId.get(Number(r.id)) ?? [];
-    const discount = Math.round(-own.filter((l) => l.kind === "discount").reduce((n, l) => n + (l.amount ?? 0), 0) * 100) / 100;
-    const c = historyInvoiceCost(own, discount);
-    bills.push({ year: r.day ? r.day.slice(0, 4) : "", customer: r.customer.trim(), customerKey: normalizeCustomerKey(r.customer), sell: c.subtotal, discount, cost: c.cost, uncostedSell: c.uncostedSell });
+    let discount = Math.round(-own.filter((l) => l.kind === "discount").reduce((n, l) => n + (l.amount ?? 0), 0) * 100) / 100;
+    let kept = own;
+    if (opts.laborHidden) {
+      // As billProfitTotals(..., hideLabor) does for tickets: labor's sell and its share of the discount come out, so
+      // nothing about labor can be worked out. Trip lines stay, as there (it drops only kind labor).
+      const items = own.filter((l) => l.kind !== "discount");
+      const shares = discountShares(items.map((l) => l.amount ?? 0), discount);
+      const laborOff = items.reduce((n, l, i) => n + (l.kind === "labor" ? (shares[i] ?? 0) : 0), 0);
+      discount = Math.round((discount - laborOff) * 100) / 100;
+      kept = own.filter((l) => l.kind !== "labor");
+    }
+    const c = historyInvoiceCost(kept, discount);
+    bills.push({ year: r.day ? r.day.slice(0, 4) : "", customer: r.customer.trim(), customerKey: normalizeCustomerKey(r.customer), sell: c.subtotal, discount, cost: c.cost, partial: c.partial, profit: c.profit });
   }
-  return historySection(bills, excluded);
+  return historySection(bills, excluded, { laborHidden: opts.laborHidden });
 }
 
 const niceDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -221,7 +232,8 @@ export async function profitReportFor(sql: Sql, f: Filters, userId: string): Pro
     laborHidden ? "labor not shown" : null,
     "a PM billed on a ticket counts with the ticket",
   ].filter(Boolean);
-  const history = await historyProfitSection(sql, f);
+  // The history section follows the same labor switch as the rest of Profit (Jesus, 11/24).
+  const history = await historyProfitSection(sql, f, { laborHidden });
   return {
     byType: groupBy(bills, (b) => b.type, JOB_TYPES.map((t) => t.key)),
     byCustomer: groupBy(bills, (b) => b.customerKey, undefined, (b) => b.customer),
@@ -240,7 +252,9 @@ export const getProfitReport = createServerFn({ method: "POST" })
 /** The body of downloadProfitReport: the same report as a PDF, Excel or Word file. */
 export async function profitReportFileFor(sql: Sql, data: { filters: Filters; format: ExportFormat }, userId: string): Promise<{ filename: string; mime: string; base64: string; records: number }> {
   const r = await profitReportFor(sql, data.filters, userId);
-  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: `${r.scope}. QuickBooks history: ${r.history.note}` });
+  // "labor not shown" is already in the scope; the history note doesn't say it again.
+  const historyNote = r.history.note.split(" · ").filter((p) => p !== "labor not shown").join(" · ");
+  const report = buildProfitReportFile(r, { generated: formatNowChicago().stamp, scope: `${r.scope}. QuickBooks history: ${historyNote}` });
   const filename = profitReportFileName(todayChicago(), data.format);
   const mime = EXPORT_FORMATS.find((x) => x.format === data.format)!.mime;
   const records = report.records.rows.length;

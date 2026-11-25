@@ -624,7 +624,9 @@ function HistoryTable({
       <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Discount']`}>{money(r.discount)}</td>
       <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Cost']`}>{money(r.cost)}</td>
       <td className={`tabular px-2 py-2 text-right font-medium ${r.profit < 0 ? "text-destructive" : ""} ${CARD_VALUE} max-sm:before:content-['Profit']`}>{money(r.profit)}</td>
-      <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Uncosted']`}>{money(r.uncostedSell)}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Margin']`}>{r.marginPct == null ? "—" : `${r.marginPct}%`}</td>
+      <td className={`tabular px-2 py-2 text-right ${CARD_VALUE} max-sm:before:content-['Uncosted']`}>{money(r.uncostedSell)}</td>
+      <td className={`tabular px-2 py-2 pr-4 text-right ${CARD_VALUE} max-sm:before:content-['Partial']`}>{r.partialBills}</td>
     </tr>
   );
   return (
@@ -632,7 +634,7 @@ function HistoryTable({
       <h3 className="border-b border-border px-4 py-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h3>
       {rows.length ? (
         <div className="overflow-x-auto">
-          <table className={`w-full text-sm sm:min-w-[46rem] ${CARD_TABLE}`}>
+          <table className={`w-full text-sm sm:min-w-[56rem] ${CARD_TABLE}`}>
             <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
               <tr className="border-b border-border">
                 <th className="px-4 py-2.5 font-medium">{first}</th>
@@ -640,8 +642,10 @@ function HistoryTable({
                 <th className="px-2 py-2.5 text-right font-medium">Sell</th>
                 <th className="px-2 py-2.5 text-right font-medium">Discount</th>
                 <th className="px-2 py-2.5 text-right font-medium">Cost (Parts and Equipment)</th>
-                <th className="px-2 py-2.5 text-right font-medium">Profit After Discount</th>
-                <th className="px-2 py-2.5 pr-4 text-right font-medium">Uncosted Sell</th>
+                <th className="px-2 py-2.5 text-right font-medium">Profit After Discount (costed bills)</th>
+                <th className="px-2 py-2.5 text-right font-medium">Margin %</th>
+                <th className="px-2 py-2.5 text-right font-medium">Uncosted Sell</th>
+                <th className="px-2 py-2.5 pr-4 text-right font-medium">Partial Bills</th>
               </tr>
             </thead>
             <tbody className={CARD_BODY}>

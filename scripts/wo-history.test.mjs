@@ -1166,7 +1166,7 @@ test("profit report: QuickBooks history by year and customer, apart; Service Dep
     ["QuickBooks history (2024–2026): By Year", "QB History By Year", 3],
     ["QuickBooks history (2024–2026): By Customer", "QB History By Customer", 1],
   ]);
-  assert.deepEqual(file.extra[0].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "$0.00"]);
+  assert.deepEqual(file.extra[0].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "83.4%", "$0.00", "0"]);
   const { reportSheets } = await import("../src/lib/ops/analytics.ts");
   assert.deepEqual(reportSheets(file).map((s) => s.name), ["By Job Type", "By Customer", "QB History By Year", "QB History By Customer"]);
 });
@@ -1213,7 +1213,8 @@ test("costed lines (choice C): parts, filters and equipment always count; instal
   );
   // Counted: the part, the equipment, and the costed install fee. The uncosted service and other charge never are.
   assert.deepEqual([pure.costedLines, pure.totalLines, pure.cost, pure.uncostedSell], [2, 3, 122.5, 900]);
-  assert.equal(pure.profit, Math.round((40 + 900 + 150 + 373.53 + 25 + 225 - 10 - 122.5) * 100) / 100, "every line's sell is still in the profit");
+  // The uncosted equipment line needs a cost, so the invoice is partial and has no profit (follow-up, 11/24).
+  assert.deepEqual([pure.partial, pure.profit], [true, null]);
 
   // The account list counts the same way as the invoice panel.
   const { pg, sql } = await fresh();
@@ -1225,4 +1226,114 @@ test("costed lines (choice C): parts, filters and equipment always count; instal
   const id = (await pg.query("select id from wo_history where history_ref = 'WO-1500'")).rows[0].id;
   const d = await api.historyDetail(sql, id, { showCost: true });
   assert.deepEqual([d.invoice.cost.costedLines, d.invoice.cost.totalLines], [1, 1]);
+});
+
+// ── History profit counts only fully costed invoices (Jesus, 11/24, follow-up to #195) ─────────────────────────────
+
+test("history profit: an invoice is fully costed only when every line that needs a cost has one", () => {
+  const full = C.historyInvoiceCost([{ kind: "part", amount: 40, lineCost: 22.5 }, { kind: "labor", amount: 225, lineCost: null }, { kind: "discount", amount: -10, lineCost: null }], 10);
+  assert.deepEqual([full.partial, full.profit, full.uncostedSell], [false, 232.5, 0]);
+  const part = C.historyInvoiceCost([{ kind: "part", amount: 40, lineCost: 22.5 }, { kind: "part", amount: 12, lineCost: null }], 0);
+  assert.deepEqual([part.partial, part.profit, part.uncostedSell, part.cost, part.costedLines, part.totalLines], [true, null, 12, 22.5, 1, 2]);
+  const laborOnly = C.historyInvoiceCost([{ kind: "labor", amount: 225, lineCost: null }, { kind: "trip", amount: 150, lineCost: null }], 0);
+  assert.deepEqual([laborOnly.partial, laborOnly.cost, laborOnly.profit, laborOnly.totalLines], [false, 0, 375, 0]);
+  // Choice C: an uncosted install fee or service line doesn't need a cost.
+  const service = C.historyInvoiceCost([{ kind: "part", amount: 40, lineCost: 22.5 }, { kind: "service", amount: 150, lineCost: null }, { kind: "install", amount: 300, lineCost: null }], 0);
+  assert.deepEqual([service.partial, service.profit], [false, 467.5]);
+});
+
+test("history profit: totals count cost and profit on fully costed bills only; partial bills go to Uncosted Sell", async () => {
+  const P = await import("../src/lib/ops/profit-report.ts");
+  const bill = (o) => ({ year: "2025", customer: "Alpha Cafe", customerKey: "alphacafe", ...o });
+  const bills = [
+    bill({ sell: 100, discount: 10, cost: 40, partial: false, profit: 50 }),
+    bill({ sell: 200, discount: 20, cost: 30, partial: true, profit: null }),
+  ];
+  const t = P.historyTotals(bills);
+  assert.deepEqual(t, { bills: 2, sell: 300, discount: 30, cost: 40, profit: 50, marginPct: 55.56, uncostedSell: 180, partialBills: 1 });
+  assert.equal(P.historyTotals([bill({ sell: 50, discount: 0, cost: 0, partial: true, profit: null })]).marginPct, null, "no costed bill: no margin");
+  const s = P.historySection(bills, { serviceDept: 0, billedTicket: 0 });
+  assert.match(s.note, /1 partial bill: its sell is in Uncosted Sell/);
+  const [byYear, byCustomer] = P.historyReportTables(s);
+  const cols = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount (costed bills)", "Margin %", "Uncosted Sell", "Partial Bills"];
+  assert.deepEqual(byYear.columns, ["Year", ...cols]);
+  assert.deepEqual(byCustomer.columns, ["Customer", ...cols]);
+  assert.deepEqual(byYear.rows.at(-1), ["Total", "2", "$300.00", "$30.00", "$40.00", "$50.00", "55.56%", "$180.00", "1"]);
+});
+
+test("history profit: with labor hidden, labor's sell and its share of the discount come out; admins and labor-on are unchanged", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history set invoice_date = '2026-07-24' where history_ref = $1", [WO]);
+  const R = await import("../src/lib/ops/profit-report-api.ts");
+  const y2026 = (s) => s.byYear.find((g) => g.key === "2026");
+  // WO-0211: labor 225, trip 150, part 40 (cost 24), discount 41.50 spread 22.50 / 15.00 / 4.00.
+  const on = await R.historyProfitSection(sql, {});
+  assert.deepEqual([y2026(on).sell, y2026(on).discount, y2026(on).profit], [415, 41.5, 349.5]);
+  assert.doesNotMatch(on.note, /labor not shown/);
+  const off = await R.historyProfitSection(sql, {}, { laborHidden: true });
+  assert.deepEqual([y2026(off).sell, y2026(off).discount, y2026(off).cost, y2026(off).profit], [190, 19, 24, 147], "trip stays, as billProfitTotals keeps it");
+  assert.match(off.note, /labor not shown/);
+});
+
+test("history profit: the profit report and its download follow each person's labor switch", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  await pg.query("update wo_history set invoice_date = '2026-07-24' where history_ref = $1", [WO]);
+  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('zz-admin', 'zzadmin', true, true, 'admin'), ('zz-svc', 'zzsvc', true, false, 'service')");
+  // Service sees cost; the labor switch is off (the default).
+  await pg.query(`insert into desk_settings (key, value, updated_at) values ('cost_visible_roles', '["service"]', now()), ('cost_options', '{"showLabor":false}', now())`);
+  const R = await import("../src/lib/ops/profit-report-api.ts");
+  const y2026 = (r) => r.history.byYear.find((g) => g.key === "2026");
+  const svc = await R.profitReportFor(sql, {}, "zz-svc");
+  assert.deepEqual([svc.laborHidden, y2026(svc).sell, y2026(svc).discount, y2026(svc).profit], [true, 190, 19, 147]);
+  assert.match(svc.history.note, /labor not shown/);
+  const admin = await R.profitReportFor(sql, {}, "zz-admin");
+  assert.deepEqual([admin.laborHidden, y2026(admin).sell, y2026(admin).profit], [false, 415, 349.5]);
+  const file = await R.profitReportFileFor(sql, { filters: {}, format: "xlsx" }, "zz-svc");
+  assert.ok(file.base64.length > 0, "the download builds from the same report");
+});
+
+test("history profit: a partial invoice has no profit in the account list or the invoice panel", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  await saveCosts(sql, costFile());
+  // WO-1500: NOTAPART (a part) loses its cost; the install fee keeps its own.
+  await pg.query("update wo_history_lines set unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_run_id = null, cost_run_values = null where item_code = 'NOTAPART'");
+  const row = (await api.accountHistory(sql, "Alpha Cafe", { showCost: true })).find((h) => h.ref === "WO-1500");
+  assert.deepEqual([row.cost.partial, row.cost.profit, row.cost.costedLines, row.cost.totalLines], [true, null, 1, 2]);
+  const full = (await api.accountHistory(sql, "Alpha Cafe", { showCost: true })).find((h) => h.ref === WO);
+  assert.deepEqual([full.cost.partial, full.cost.profit], [false, 349.5]);
+  const id = (await pg.query("select id from wo_history where history_ref = 'WO-1500'")).rows[0].id;
+  const d = await api.historyDetail(sql, id, { showCost: true });
+  assert.deepEqual([d.invoice.cost.partial, d.invoice.cost.profit, d.invoice.cost.margin, d.invoice.cost.uncostedSell], [true, null, null, 0]);
+  // Not costed at all: still partial, nothing costed.
+  await pg.query("update wo_history_lines set unit_cost = null, line_cost = null, cost_basis = null, cost_date = null, cost_source = null, cost_run_id = null, cost_run_values = null where history_id = $1", [id]);
+  const none = (await api.accountHistory(sql, "Alpha Cafe", { showCost: true })).find((h) => h.ref === "WO-1500");
+  assert.deepEqual([none.cost.partial, none.cost.profit, none.cost.costedLines], [true, null, 0]);
+  // Service Dept: internal, no profit; a non-cost viewer: no cost at all.
+  await pg.query("update wo_history set customer = 'Katz Coffee Service Dept.' where history_ref = $1", [WO]);
+  const wid = (await pg.query("select id from wo_history where history_ref = $1", [WO])).rows[0].id;
+  const internal = await api.historyDetail(sql, wid, { showCost: true });
+  assert.deepEqual([internal.invoice.cost.internal, internal.invoice.cost.profit], [true, null]);
+  assert.equal((await api.historyDetail(sql, wid)).invoice.cost, undefined);
+  const internalRow = (await api.accountHistory(sql, "Katz Coffee Service Dept.", { showCost: true })).find((h) => h.ref === WO);
+  assert.deepEqual([internalRow.cost.internal, internalRow.cost.profit], [true, null]);
+  assert.ok((await api.accountHistory(sql, "Alpha Cafe")).every((h) => h.cost === undefined), "no cost for a non-cost viewer");
+});
+
+test("cost save guard: a line on another History Ref is skipped; the right ref fills; a blank ref is refused", async () => {
+  const { pg, sql } = await fresh();
+  await runAll(sql, files());
+  const plan = await api.previewLineCosts(sql, costFile());
+  const runId = await api.startCostRun(sql, { filename: "x.csv", rowCount: 1, counts: C.countLineCostPlan(plan), who: "chuy" });
+  const valve = { ...plan[0].row, lineId: plan[0].lineId };
+  assert.equal(valve.ref, WO);
+  const wrong = await api.saveCostBatch(sql, { runId, rows: [{ ...valve, ref: "WO-1500" }] });
+  assert.deepEqual(wrong, { filled: 0, skipped: 1 });
+  assert.equal((await pg.query("select unit_cost from wo_history_lines where id = $1", [valve.lineId])).rows[0].unit_cost, null);
+  assert.deepEqual(await api.saveCostBatch(sql, { runId, rows: [{ ...valve, ref: ` ${WO.toLowerCase()} ` }] }), { filled: 1, skipped: 0 });
+  assert.match(api.checkCostSaveRows([{ ...valve, ref: " " }]), /no History Ref/);
 });

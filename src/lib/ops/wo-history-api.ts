@@ -932,12 +932,12 @@ export async function startCostRun(sql: Query, input: { filename: string; rowCou
   return Number(r[0]!.id);
 }
 
-export type CostSaveRow = Pick<LineCostRow, "sort" | "lineType" | "itemCode" | "qty" | "amount" | "unitCost" | "lineCost" | "costBasis" | "costDate" | "costSource" | "costFlag"> & { lineId: number };
+export type CostSaveRow = Pick<LineCostRow, "ref" | "sort" | "lineType" | "itemCode" | "qty" | "amount" | "unitCost" | "lineCost" | "costBasis" | "costDate" | "costSource" | "costFlag"> & { lineId: number };
 
 const COST_SAVE_SQL = `
 with x as (
   select * from jsonb_to_recordset($2::jsonb) as x(
-    line_id int, sort int, line_type text, item_key text, qty numeric, amount numeric,
+    line_id int, ref text, sort int, line_type text, item_key text, qty numeric, amount numeric,
     unit_cost numeric, line_cost numeric, cost_basis text, cost_date date, cost_source text, cost_flag text)
 ), run as (
   select id from wo_history_runs where id = $1 and kind = 'line_costs' and undone_at is null
@@ -946,8 +946,10 @@ update wo_history_lines l
    set unit_cost = round(x.unit_cost, 4), line_cost = round(x.line_cost, 2), cost_basis = x.cost_basis, cost_date = x.cost_date,
        cost_source = x.cost_source, cost_flag = x.cost_flag, cost_run_id = (select id from run),
        cost_run_values = ${costKeySql("round(x.unit_cost, 4)", "round(x.line_cost, 2)", "x.cost_basis", "x.cost_date", "x.cost_source", "x.cost_flag")}
-  from x
+  from x, wo_history h
  where exists (select 1 from run) and l.id = x.line_id
+   -- The line belongs to the work order the file names, not just any line with that id (Jesus, 11/24).
+   and h.id = l.history_id and lower(btrim(h.history_ref)) = lower(btrim(x.ref))
    -- Only a line with no cost at all, and still the line the preview matched (sort, type, item, qty and amount).
    and l.unit_cost is null and l.line_cost is null and l.cost_basis is null and l.cost_date is null and l.cost_source is null and l.cost_flag is null
    and l.sort = x.sort and lower(l.line_type) = lower(x.line_type) and l.kind not in ('discount', 'labor', 'trip')
@@ -960,6 +962,7 @@ export function checkCostSaveRows(rows: CostSaveRow[]): string | null {
   const seen = new Set<number>();
   for (const r of rows) {
     const at = `Line Sort ${r.sort} (${r.itemCode || "no item"})`;
+    if (!String(r.ref ?? "").trim()) return `${at}: no History Ref.`;
     if (seen.has(r.lineId)) return `${at}: the same line is in the save twice.`;
     seen.add(r.lineId);
     if (isNoCostLineType(r.lineType)) return `${at}: a ${r.lineType} line doesn't take a cost.`;
@@ -977,6 +980,7 @@ export async function saveCostBatch(sql: Query, input: { runId: number; rows: Co
   if (!input.rows.length) return { filled: 0, skipped: 0 };
   const payload = input.rows.map((r) => ({
     line_id: r.lineId,
+    ref: r.ref,
     sort: r.sort,
     line_type: r.lineType,
     item_key: itemCodeKey(r.itemCode),
@@ -1080,9 +1084,10 @@ export type WoHistorySummary = {
   locationNeeded: boolean;
   /**
    * Only for cost viewers (Settings → Who Sees Cost and Margin, 11/24): the known QuickBooks parts cost and profit after
-   * the discount. Profit is null on Katz Coffee Service Dept. (an internal account, left out of profit) or with no lines.
+   * the discount. Profit is null on Katz Coffee Service Dept. (an internal account, left out of profit), with no lines, or
+   * when partial: some line that needs a cost has none (Jesus, 11/24).
    */
-  cost?: { cost: number; profit: number | null; costedLines: number; totalLines: number; internal: boolean };
+  cost?: { cost: number; profit: number | null; costedLines: number; totalLines: number; partial: boolean; internal: boolean };
 };
 
 const SUMMARY_COLS = `h.id, h.history_ref, h.wo, h.completed::text as completed, h.technician, h.original_tech, h.call_category,
@@ -1100,8 +1105,12 @@ const COST_SUMMARY_COLS = `, (select coalesce(sum(l.line_cost), 0) from wo_histo
 function withCost(base: WoHistorySummary, r: Record<string, unknown>): WoHistorySummary {
   const cost = Math.round(Number(r.cost_known ?? 0) * 100) / 100;
   const internal = isServiceDeptAccount(str(r.cost_customer));
-  const profit = internal || base.linesTotal == null ? null : Math.round((base.linesTotal - cost) * 100) / 100;
-  return { ...base, cost: { cost, profit, costedLines: Number(r.costed_lines ?? 0), totalLines: Number(r.costable_lines ?? 0), internal } };
+  const costedLines = Number(r.costed_lines ?? 0);
+  const totalLines = Number(r.costable_lines ?? 0);
+  // The same rule as historyInvoiceCost: a profit only when every line that needs a cost has one.
+  const partial = costedLines < totalLines;
+  const profit = internal || partial || base.linesTotal == null ? null : Math.round((base.linesTotal - cost) * 100) / 100;
+  return { ...base, cost: { cost, profit, costedLines, totalLines, partial, internal } };
 }
 
 function summary(r: Record<string, unknown>): WoHistorySummary {
@@ -1180,8 +1189,11 @@ export type WoHistoryDetail = WoHistorySummary & {
     total: number;
     invoiceDate: string | null;
     differs: boolean;
-    /** Only for cost viewers: known parts cost, lines costed, and profit after the discount (null on Service Dept.). */
-    cost?: { cost: number; costedLines: number; totalLines: number; profit: number | null; margin: number | null; internal: boolean; note: string };
+    /**
+     * Only for cost viewers: known parts cost, lines costed, and profit after the discount (null on Service Dept.).
+     * partial: some line that needs a cost has none, so profit and margin are null and uncostedSell is that sell.
+     */
+    cost?: { cost: number; costedLines: number; totalLines: number; partial: boolean; uncostedSell: number; profit: number | null; margin: number | null; internal: boolean; note: string };
   } | null;
 };
 
@@ -1261,8 +1273,10 @@ export async function historyDetail(sql: Query, id: number, opts: { showCost?: b
       cost: c.cost,
       costedLines: c.costedLines,
       totalLines: c.totalLines,
+      partial: c.partial,
+      uncostedSell: c.uncostedSell,
       profit: internal ? null : c.profit,
-      margin: internal || !(after > 0) ? null : Math.round((c.profit / after) * 1000) / 10,
+      margin: internal || c.profit == null || !(after > 0) ? null : Math.round((c.profit / after) * 1000) / 10,
       internal,
       note: HISTORY_COST_NOTE,
     };
@@ -1483,7 +1497,7 @@ export const saveHistoryCostBatch = createServerFn({ method: "POST" })
     z
       .object({
         runId: z.number().int().positive(),
-        rows: z.array(costRow.pick({ sort: true, lineType: true, itemCode: true, qty: true, amount: true, unitCost: true, lineCost: true, costBasis: true, costDate: true, costSource: true, costFlag: true }).extend({ lineId: z.number().int().positive() })).max(2000),
+        rows: z.array(costRow.pick({ ref: true, sort: true, lineType: true, itemCode: true, qty: true, amount: true, unitCost: true, lineCost: true, costBasis: true, costDate: true, costSource: true, costFlag: true }).extend({ lineId: z.number().int().positive() })).max(2000),
       })
       .parse(d),
   )
