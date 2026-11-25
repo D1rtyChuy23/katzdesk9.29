@@ -66,7 +66,7 @@ create trigger equipment_move_requests_customer_ids before insert or update of f
 
 -- The relink covers C1, C2 and C3. Replaces 0141's version (same name and arguments, so the account triggers that call
 -- it stay as they are). A kept column only fills rows with no id. Each update writes only an id column, so no record
--- trigger fires.
+-- trigger fires. A table or column this database doesn't have is passed over.
 create or replace function katz_relink_customer_keys(keys text[]) returns void language plpgsql as $$
 declare
   l record;
@@ -96,6 +96,11 @@ begin
       ('equipment_move_requests', 'to_customer', 'to_customer_id', true)
     ) v(tbl, name_col, id_col, kept)
   loop
+    -- A database without one of these tables or columns (an older one) passes over it, as the rename does.
+    if not exists (select 1 from pg_attribute
+                    where attrelid = to_regclass(l.tbl) and attname = l.id_col and not attisdropped) then
+      continue;
+    end if;
     if l.kept then
       execute format(
         'update %I set %I = katz_customer_id(%I)
