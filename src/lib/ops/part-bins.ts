@@ -23,8 +23,7 @@ export function cleanBinValue(raw: unknown): string | null {
   const s = String(raw ?? "")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/^'(?=[=+\-@\s])/, "")
-    .trim();
+    .replace(/^'(?=[=+\-@])/, "");
   return s || null;
 }
 

@@ -11,8 +11,12 @@ export function spreadsheetText(s: string): string {
   return s;
 }
 
-/** A CSV cell: made safe as above, then quoted when it holds a quote, comma or line break. */
+/**
+ * A CSV cell: made safe as above, then quoted when it holds a quote, comma or line break. A real number is written as
+ * a number whatever it looks like ("-1e-7" stays a number); one that is not finite is left blank.
+ */
 export function safeCsvCell(v: unknown): string {
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
   const s = spreadsheetText(v == null ? "" : String(v));
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

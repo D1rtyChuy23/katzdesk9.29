@@ -27,6 +27,10 @@ test("a CSV cell: guarded, then quoted when it holds a quote, comma or line brea
   assert.equal(safeCsvCell("line\r\nbreak"), '"line\r\nbreak"');
   assert.equal(safeCsvCell('=HYPERLINK("x","y")'), `"'=HYPERLINK(""x"",""y"")"`);
   assert.equal(safeCsvCell("\r=1"), `"'\r=1"`, "a leading return is guarded and quoted");
+  assert.equal(safeCsvCell(-1e-7), "-1e-7", "a real number stays a number, however it prints");
+  assert.equal(safeCsvCell(-1e21), "-1e+21");
+  assert.equal(safeCsvCell(-Infinity), "");
+  assert.equal(safeCsvCell(Number.NaN), "");
 });
 
 test("every CSV writer uses the one rule", async () => {
@@ -37,23 +41,46 @@ test("every CSV writer uses the one rule", async () => {
     assert.equal(f("\t=1"), "'\t=1");
     assert.equal(f(-40), "-40", "a credit stays a number");
   }
-  const { reviewCsv } = await import("../src/lib/ops/customer-geocode.ts");
+  // The Library import log and Export Reports need a database to run: check that their writers use the rule.
   const { readFileSync } = await import("node:fs");
-  // The rest call it inside; check the source uses it rather than its own escaper.
-  for (const [file, name] of [
-    ["netsuite-customers.ts", "safeCsvCell"],
-    ["library-import.ts", "safeCsvCell"],
-    ["export-reports.ts", "safeCsvCell"],
-    ["pm-runbook-readiness.ts", "spreadsheetText"],
-    ["customer-geocode.ts", "safeCsvCell"],
+  for (const [file, uses] of [
+    ["library-import.ts", /const csvCell = safeCsvCell;/],
+    ["export-reports.ts", /const esc = \(v: string\) => safeCsvCell\(v\);/],
   ]) {
     const src = readFileSync(new URL(`../src/lib/ops/${file}`, import.meta.url), "utf8");
-    assert.match(src, new RegExp(`import \\{ ${name} \\} from "(\\./|@/lib/ops/)csv-safe`), file);
+    assert.match(src, uses, file);
+    assert.doesNotMatch(src, /replace\(\/"\/g, '""'\)/, `${file} has no escaper of its own left`);
   }
   const { readinessCsv } = await import("../src/lib/ops/pm-runbook-readiness.ts");
   const gaps = readinessCsv([
     { pmId: 7, customer: "-2+HYPERLINK(1)", status: "Open", piece: "=cmd", runbookId: "x", accountId: null, serial: null, installDate: null, gaps: ["no-serial"] },
   ]);
   assert.match(gaps.split("\n")[1], /^"7","'-2\+HYPERLINK\(1\)","Open","'=cmd",/, "readiness CSV: every cell still quoted, formulas kept as text");
-  assert.equal(typeof reviewCsv, "function");
+
+  const { netsuitePreviewCsv } = await import("../src/lib/ops/netsuite-customers.ts");
+  const ns = netsuitePreviewCsv(
+    [{ status: "create", line: 2, internalId: "@123", accountNumber: "-2+1", companyName: "=cmd|' /C calc'!A0", accountName: null, matchedBy: null, changes: [], reason: "", notes: [] }],
+    new Set([2]),
+  );
+  const nsRow = ns.replace(/^\uFEFF/, "").split(/\r?\n/)[1];
+  assert.ok(nsRow.includes(",'@123,'-2+1,'=cmd|' /C calc'!A0,"), nsRow);
+
+  const { reviewCsv } = await import("../src/lib/ops/customer-geocode.ts");
+  const geo = reviewCsv([
+    { review: true, status: "unmatched", line: 4, name: "+Tea Bar", account: "", internalId: "", accountName: null, matchedBy: null, address: "\t=1+1", result: "", matchedAddress: "", latitude: 29.76, longitude: -95.37, reviewReason: "-check" },
+  ]);
+  const geoRow = geo.replace(/^\uFEFF/, "").split("\r\n")[1];
+  assert.ok(geoRow.startsWith("4,'+Tea Bar,"), geoRow);
+  assert.ok(geoRow.includes(",'\t=1+1,"), "a tab then = stays text");
+  assert.ok(geoRow.includes(",29.76,-95.37,No,'-check"), "a negative longitude stays a number");
+});
+
+test("the parts bin template reads back what it wrote", async () => {
+  const { csvCell } = await import("../src/lib/ops/charges.ts");
+  const { cleanBinValue } = await import("../src/lib/ops/part-bins.ts");
+  for (const v of ["-A1", "=1", "+3", "@x", "-12", "-", "A-3", "Shelf 2"]) {
+    const cell = csvCell(v);
+    const unquoted = cell.startsWith('"') ? cell.slice(1, -1).replace(/""/g, '"') : cell;
+    assert.equal(cleanBinValue(unquoted), v, `${v} → ${cell}`);
+  }
 });
