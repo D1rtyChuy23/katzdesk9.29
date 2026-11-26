@@ -27,6 +27,7 @@ import {
   type LibrarySection,
 } from "@/lib/ops/library-file-rules";
 import { cleanMpn, cleanSourceUrl, mpnKey, sameMpn, tieError } from "@/lib/ops/mpn-rules";
+import { safeCsvCell } from "@/lib/ops/csv-safe";
 
 const DUPLICATE_MARKER = "Duplicate To Delete";
 const CAMEO_FILE = "5700105620";
@@ -98,10 +99,8 @@ function markedDuplicateName(name: string): string {
   return `${name.slice(0, name.length - ext[1]!.length)} - ${DUPLICATE_MARKER}${ext[1]}`;
 }
 
-function csvCell(value: unknown): string {
-  const text = value == null ? "" : String(value);
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
+/** A CSV cell: quoted when needed, and it can't start a spreadsheet formula (csv-safe.ts). */
+const csvCell = safeCsvCell;
 
 function sectionOf(value: string): LibrarySection | null {
   return value === "spec" || value === "manuals" || value === "parts" ? value : null;

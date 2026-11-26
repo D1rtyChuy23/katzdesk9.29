@@ -4,6 +4,7 @@
  * exactly as stored: never a number, so never "1.2E+11" and never a lost leading zero.
  */
 import { tidyAddress } from "./address-report.ts";
+import { safeCsvCell } from "./csv-safe.ts";
 import { isWalkInName } from "./clean-names.ts";
 import { formatAddress } from "./netsuite-customers.ts";
 
@@ -187,11 +188,9 @@ export function customerExportRows(accounts: ExportAccount[]): string[][] {
     });
 }
 
-/** A CSV cell: quoted when needed, and a leading = + @ or -word can't start a spreadsheet formula. */
+/** A CSV cell: quoted when needed, and it can't start a spreadsheet formula (csv-safe.ts). */
 export function csvCell(v: unknown): string {
-  let s = String(v ?? "");
-  if (/^[=+@]/.test(s) || /^-[^\d]/.test(s)) s = `'${s}`;
-  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  return safeCsvCell(v);
 }
 
 /** Header and rows as CSV text (no byte-order mark: the download adds it, so Excel reads accents right). */
