@@ -19,7 +19,7 @@ import {
   unassignAssetFromService,
   updateJob,
 } from "@/lib/ops/api";
-import { moduleAccount } from "@/lib/ops/eversys";
+import { modulesOnAccount } from "@/lib/ops/eversys";
 import { cn } from "@/lib/utils";
 import { CALL_STATUSES, CALL_TYPES, URGENCIES } from "@/lib/ops/lookups";
 import { formatLongDate } from "@/lib/ops/clock";
@@ -41,6 +41,7 @@ import { TicketBillingFlags, TicketInvoicesPanel } from "./ticket-invoices";
 import { RepairQuotePanel } from "./repair-quote-panel";
 import { CustomerCombo, EquipmentMultiCombo, LockedCustomer, useDirectory } from "./directory-fields";
 import { ProviderDispatchBlock } from "./provider-dispatch";
+import { useReadsById } from "./use-read-by-id";
 import { listedEquipment } from "@/lib/ops/equipment";
 import type { ServiceJob } from "@/lib/ops/types";
 import { toast } from "sonner";
@@ -217,16 +218,21 @@ export function JobSheet({
     if (tab === "equipment") setEquipSeen(tabKey);
   }, [tab, tabKey]);
   const keepEquipment = tab === "equipment" || equipSeen === tabKey;
-  // The account's equipment and schedules: the same queries the account window reads.
-  const accountEquip = useAccountEquipment(tabbed ? customer : null);
+  // The account's equipment and schedules: the same queries the account window reads. Once Tickets reads by id (phase
+  // C5, Link Check), the account is the ticket's own, not the one its name finds.
+  const readsTickets = useReadsById("tickets");
+  const ticketAccountId = j?.customerId ?? null;
+  const accountEquip = useAccountEquipment(tabbed ? customer : null, ticketAccountId, "tickets");
   const directory = useQuery({
     queryKey: ["directory", "customer"],
     queryFn: () => listDirectory({ data: { kind: "customer" } }),
-    enabled: tabbed,
+    enabled: tabbed && !(readsTickets && ticketAccountId != null),
   });
-  const accountId = tabbed
-    ? ((directory.data ?? []).find((c) => c.name.trim().toLowerCase() === customer.toLowerCase())?.id ?? null)
-    : null;
+  const accountId = !tabbed
+    ? null
+    : readsTickets && ticketAccountId != null
+      ? ticketAccountId
+      : ((directory.data ?? []).find((c) => c.name.trim().toLowerCase() === customer.toLowerCase())?.id ?? null);
   const history = useQuery({
     queryKey: ["customer-history", accountId],
     queryFn: () => getCustomerHistory({ data: { id: accountId! } }),
@@ -376,7 +382,7 @@ export function JobSheet({
       ))}
       {j.customer ? (
         <div className="sm:col-span-2">
-          <ProviderDispatchBlock customer={j.customer} />
+          <ProviderDispatchBlock customer={j.customer} customerId={j.customerId ?? null} area="tickets" />
         </div>
       ) : null}
       <div className="sm:col-span-2">
@@ -561,14 +567,21 @@ export function JobSheet({
                         >
                           <TicketUnitsPicker jobId={j.id} />
                           <div className="border-b border-border p-5">
-                            <AccountEquipmentList customer={customer || null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} className="mt-0" />
+                            <AccountEquipmentList
+                              customer={customer || null}
+                              customerId={ticketAccountId}
+                              area="tickets"
+                              rows={accountEquip.data ?? []}
+                              loading={accountEquip.isLoading}
+                              className="mt-0"
+                            />
                           </div>
                           <section className="border-b border-border p-5" data-testid="ticket-pull-from-barn">
                             <h3 className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">Pull From Barn</h3>
                             <div className="mt-3">{pullBlock}</div>
                           </section>
                           <JobPulledUnits jobId={j.id} />
-                          <AccountModules customer={customer} />
+                          <AccountModules customer={customer} customerId={readsTickets ? ticketAccountId : null} />
                         </Tabs.Content>
 
                         <Tabs.Content value="invoicing" forceMount className={KEEP_MOUNTED} data-testid="ticket-panel-invoicing">
@@ -660,12 +673,15 @@ export function JobSheet({
   );
 }
 
-/** Eversys modules on the account; each opens its trail, swaps and work log (the module record from Modules). */
-function AccountModules({ customer }: { customer: string }) {
+/**
+ * Eversys modules on the account; each opens its trail, swaps and work log (the module record from Modules). With the
+ * account's id (Tickets reads by id, phase C5), a module assigned to an account goes by that account's id; one with no
+ * id still goes by its name or its place.
+ */
+function AccountModules({ customer, customerId }: { customer: string; customerId: number | null }) {
   const modules = useQuery({ queryKey: ["modules"], queryFn: () => listModules() });
   const [openId, setOpenId] = useState<number | null>(null);
-  const key = customer.trim().toLowerCase();
-  const rows = (modules.data ?? []).filter((m) => moduleAccount(m)?.toLowerCase() === key);
+  const rows = modulesOnAccount(modules.data ?? [], customer, customerId);
   return (
     <section className="p-5" data-testid="ticket-asset-history">
       <p className="flex items-center gap-2 px-1">

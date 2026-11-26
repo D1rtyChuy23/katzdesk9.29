@@ -17,16 +17,22 @@ import { Mail, Phone } from "lucide-react";
 
 export function ProviderDispatchBlock({
   customer,
+  customerId = null,
+  area = "accounts",
   assignable = false,
 }: {
   customer: string;
+  /** The account's id: the list reads by it once this window's Reading by id switch is on (phase C5). */
+  customerId?: number | null;
+  /** Whose switch: the account window's or the ticket window's. */
+  area?: "accounts" | "tickets";
   assignable?: boolean;
 }) {
   const name = customer.trim();
   const qc = useQueryClient();
   const links = useQuery({
-    queryKey: ["customer-providers", name],
-    queryFn: () => getCustomerProviders({ data: { customer: name } }),
+    queryKey: ["customer-providers", name, customerId, area],
+    queryFn: () => getCustomerProviders({ data: { customer: name, ...(customerId != null ? { customerId, area } : {}) } }),
     enabled: name.length > 0,
   });
   const drop = useMutation({

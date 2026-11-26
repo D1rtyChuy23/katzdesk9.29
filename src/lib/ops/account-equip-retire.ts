@@ -7,7 +7,7 @@
  * own id, with the links whose install or PM still exists.
  */
 import type { Sql } from "@/lib/db";
-import { ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { ofAccount, readsById, type ReadArea } from "@/lib/ops/read-by-id";
 
 export type RetiredUnit = {
   id: number;
@@ -90,9 +90,9 @@ export async function dropRetiredRecord(sql: Sql, retiredId: number): Promise<vo
  * and the Accounts switch on (phase C5, Link Check), by the account's id (a copy whose id names no listed account by its
  * name); otherwise by the name in any capitals.
  */
-export async function listRetiredUnits(sql: Sql, customer: string, customerId: number | null = null): Promise<RetiredUnit[]> {
+export async function listRetiredUnits(sql: Sql, customer: string, customerId: number | null = null, area: ReadArea = "accounts"): Promise<RetiredUnit[]> {
   const name = customer.trim();
-  const byId = customerId != null && (await readsById(sql, "accounts"));
+  const byId = customerId != null && (await readsById(sql, area));
   const rows = await sql.query<{
     id: number;
     unit_id: number;

@@ -22,16 +22,25 @@ export const READ_BY_ID_ADMIN_ONLY = "Reading by id is switched on Link Check: s
 /** Postgres's integer, the account id's type. */
 export const ACCOUNT_ID_MAX = 2147483647;
 
-export type ReadArea = "accounts";
+export type ReadArea = "accounts" | "tickets";
 
 export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
   {
     area: "accounts",
     label: "Accounts",
     covers:
-      "The Customers list's counts, and the account window: its tickets, PMs, installs, deals and recipes (the ticket window's account schedules read the same list), equipment and retired equipment, work order history, invoices and install photos.",
+      "The Customers list's counts, and the account window: its tickets, PMs, installs, deals and recipes (the ticket window's account schedules read the same list), equipment and retired equipment, Out Of Network providers, work order history, invoices and install photos.",
+  },
+  {
+    area: "tickets",
+    label: "Tickets",
+    covers:
+      "The ticket window: the account it opens for its schedules (by the ticket's id), the account's equipment and retired equipment, its Out Of Network providers, and the Eversys modules under Asset History.",
   },
 ];
+
+/** For a request: which area's switch a shared read follows (the account window's, or the ticket window's). */
+export const READ_AREA_INPUT = z.enum(["accounts", "tickets"]);
 
 type Query = Pick<Sql, "query">;
 
@@ -110,8 +119,22 @@ export function perAccountJoin(o: { table: string; alias: string; where: string;
        ) ${o.alias} on ${o.alias}.k = lower(d.name)`;
 }
 
-/** A list an area reads per account, for the side-by-side on Link Check. Each table's name column is `customer`, its id `customer_id`. */
-export type AccountList = { key: string; label: string; table: string; match: NameMatch; where?: string };
+/** A list an area reads per account, for the side-by-side on Link Check. */
+export type AccountList = {
+  key: string;
+  label: string;
+  table: string;
+  match: NameMatch;
+  where?: string;
+  /** The row's name and id columns, when they aren't `customer` and `customer_id`. */
+  name?: string;
+  id?: string;
+  /** The accounts the screen's name match looks in, as a condition on `dc` (directory_customers), when not every listed one. */
+  nameAccounts?: string;
+};
+
+/** A provider link whose provider is still on the network (getCustomerProviders). */
+const PROVIDER_LIVE = "exists (select 1 from network_providers p where p.id = t.provider_id and p.archived = false)";
 
 /** The Accounts area's lists, with the filters the account window and the Customers list use. */
 export const ACCOUNT_LISTS: AccountList[] = [
@@ -128,6 +151,7 @@ export const ACCOUNT_LISTS: AccountList[] = [
     match: "lower",
     where: "not exists (select 1 from account_equipment a where a.id = t.unit_id)",
   },
+  { key: "providers", label: "Out Of Network providers", table: "customer_providers", match: "lower", where: PROVIDER_LIVE },
   { key: "woHistory", label: "Work order history", table: "wo_history", match: "trim" },
   // As the Invoices tab reads them (listAccountInvoicesFor): a merged ticket's own invoice is left out.
   {
@@ -175,32 +199,39 @@ export async function compareLists(sql: Query, lists: AccountList[], has: (table
   const out: ListDiff[] = [];
   for (const l of lists) {
     const base = { key: l.key, label: l.label };
-    if (!has(l.table, "customer") || !has(l.table, "customer_id")) {
+    const nameCol = l.name ?? "customer";
+    const idCol = l.id ?? "customer_id";
+    if (!has(l.table, nameCol) || !has(l.table, idCol)) {
       out.push({ ...base, present: false, byName: 0, byId: 0, accounts: 0, onlyByName: 0, onlyById: 0, samples: [] });
       continue;
     }
-    // Tables and filters come from ACCOUNT_LISTS above, never from a request. `d` is the listed accounts.
+    // Tables and filters come from the lists above, never from a request. `d` is the listed accounts; `dn`, the ones the
+    // screen's name match looks in (all listed, unless the list says otherwise).
     const where = l.where ?? "true";
-    const match = nameIs("t.customer", "d.name", l.match);
+    const match = nameIs(`t.${nameCol}`, "d.name", l.match);
+    const matchN = nameIs(`t.${nameCol}`, "dn.name", l.match);
+    const tid = `t.${idCol}`;
+    const accounts = `d as (select id, name from directory_customers where archived = false),
+            dn as (select id, name from directory_customers dc where dc.archived = false and ${l.nameAccounts ?? "true"})`;
     const totals = (
       await sql.query<{ by_name: number; by_id: number }>(
-        `with d as (select id, name from directory_customers where archived = false)
-         select (select count(*) from ${l.table} t join d on ${match} where ${where})::int as by_name,
-                ((select count(*) from ${l.table} t join d on d.id = t.customer_id where ${where})
-                 + (select count(*) from ${l.table} t join d on ${match}
-                     where ${where} and not exists (select 1 from d o where o.id = t.customer_id)))::int as by_id`,
+        `with ${accounts}
+         select (select count(*) from ${l.table} t join dn on ${matchN} where ${where})::int as by_name,
+                ((select count(*) from ${l.table} t join d on d.id = ${tid} where ${where})
+                 + (select count(*) from ${l.table} t join dn on ${matchN}
+                     where ${where} and not exists (select 1 from d o where o.id = ${tid})))::int as by_id`,
       )
     )[0];
     const rows = await sql.query<{ id: number; name: string; by_name: number; dropped: number; added: number }>(
-      `with d as (select id, name from directory_customers where archived = false),
-            named as (select d.id as acct, o.id as tid
-                        from ${l.table} t join d on ${match} left join d o on o.id = t.customer_id
+      `with ${accounts},
+            named as (select dn.id as acct, o.id as tid
+                        from ${l.table} t join dn on ${matchN} left join d o on o.id = ${tid}
                        where ${where}),
             n as (select acct, count(*)::int as by_name, count(*) filter (where tid is not null and tid <> acct)::int as dropped
                     from named group by 1),
-            a as (select t.customer_id as acct, count(*)::int as added
-                    from ${l.table} t join d on d.id = t.customer_id
-                   where ${where} and not coalesce(${match}, false)
+            a as (select ${tid} as acct, count(*)::int as added
+                    from ${l.table} t join d on d.id = ${tid}
+                   where ${where} and not coalesce(${match} and d.id in (select id from dn), false)
                    group by 1)
        select d.id, d.name, coalesce(n.by_name, 0)::int as by_name, coalesce(n.dropped, 0)::int as dropped, coalesce(a.added, 0)::int as added
          from d left join n on n.acct = d.id left join a on a.acct = d.id
@@ -280,7 +311,27 @@ export type ReadByIdArea = { area: ReadArea; label: string; covers: string; on: 
 /** `toSet`: every id column, with the rows Set ids would change (a switch turns on only when they're all 0). */
 export type ReadById = { toSet: IdFix[]; areas: ReadByIdArea[] };
 
-const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS };
+/**
+ * The Tickets area's lists. "Tickets" is the account each ticket opens for its schedules: by name, the listed account
+ * (not Inactive) its name finds once spaces at the ends are dropped, as the ticket window matched it; by id, the
+ * ticket's own, Inactive or not.
+ */
+export const TICKET_LISTS: AccountList[] = [
+  // The ticket window's name match looked in the account picker's list, which leaves Inactive accounts out.
+  { key: "ticketAccount", label: "Tickets: the account they open", table: "service_jobs", match: "trim", nameAccounts: "dc.inactive = false" },
+  { key: "equipment", label: "Equipment", table: "account_equipment", match: "lower" },
+  {
+    key: "retired",
+    label: "Retired equipment",
+    table: "account_equipment_retired",
+    match: "lower",
+    where: "not exists (select 1 from account_equipment a where a.id = t.unit_id)",
+  },
+  { key: "providers", label: "Out Of Network providers", table: "customer_providers", match: "lower", where: PROVIDER_LIVE },
+  { key: "modules", label: "Eversys modules (Asset History)", table: "modules", match: "trim", name: "assigned_customer", id: "assigned_customer_id" },
+];
+
+const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS };
 
 export async function readByIdFor(sql: Sql, userId: string): Promise<ReadById> {
   if (!(await canReviewNames(sql, userId))) throw new Error(READ_BY_ID_ADMIN_ONLY);
@@ -325,6 +376,14 @@ export async function setReadByIdFor(sql: Sql, userId: string, data: { area: Rea
   );
   return { area: data.area, on: data.on };
 }
+
+/** Which areas read by id, for any signed-in desk user (a screen that picks the account itself needs it). */
+export const getReadSwitches = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async (): Promise<Record<ReadArea, boolean>> => {
+    const on = await readSwitches(await getSql());
+    return Object.fromEntries(READ_AREAS.map((a) => [a.area, !!on[a.area]])) as Record<ReadArea, boolean>;
+  });
 
 export const getReadById = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])

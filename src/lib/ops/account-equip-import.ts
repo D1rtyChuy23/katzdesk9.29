@@ -11,7 +11,7 @@ import { mpnKey } from "@/lib/ops/mpn-rules";
 import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
-import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { ACCOUNT_ID_MAX, READ_AREA_INPUT, ofAccount, readsById, type ReadArea } from "@/lib/ops/read-by-id";
 import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
 import {
   cleanPartNumber,
@@ -1263,6 +1263,8 @@ export const planAccountEquipImport = createServerFn({ method: "POST" })
 const listInput = z.object({
   customer: z.string().optional(),
   customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional(),
+  /** Whose switch the read follows: the account window's (the default) or the ticket window's. */
+  area: READ_AREA_INPUT.optional(),
 });
 
 const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
@@ -1275,9 +1277,9 @@ type UnitDbRow = Parameters<typeof mapDbUnit>[0];
  * (phase C5, Link Check), by the account's id (a unit whose id names no listed account by its name); otherwise by the
  * name in any capitals.
  */
-export async function readAccountUnits(sql: Sql, customer?: string | null, customerId?: number | null): Promise<AccountEquipRow[]> {
+export async function readAccountUnits(sql: Sql, customer?: string | null, customerId?: number | null, area: ReadArea = "accounts"): Promise<AccountEquipRow[]> {
   const name = customer?.trim();
-  const byId = !!name && customerId != null && (await readsById(sql, "accounts"));
+  const byId = !!name && customerId != null && (await readsById(sql, area));
   const rows = name
     ? await sql.query<UnitDbRow>(
         `select ${UNIT_COLS}
@@ -1303,7 +1305,7 @@ export async function readAccountUnit(sql: Sql, id: number): Promise<AccountEqui
 export const listAccountEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof listInput>) => listInput.parse(d ?? {}))
-  .handler(async ({ data }): Promise<AccountEquipRow[]> => readAccountUnits(await ready(), data.customer, data.customerId ?? null));
+  .handler(async ({ data }): Promise<AccountEquipRow[]> => readAccountUnits(await ready(), data.customer, data.customerId ?? null, data.area ?? "accounts"));
 
 async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: number) {
   await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
@@ -1367,10 +1369,12 @@ export const removeAccountEquipment = createServerFn({ method: "POST" })
 /** An account's retired machines (11/9); by the account's id once the Accounts switch is on (phase C5). */
 export const listRetiredEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string; customerId?: number }) =>
-    z.object({ customer: z.string().min(1).max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d),
+  .validator((d: { customer: string; customerId?: number; area?: ReadArea }) =>
+    z
+      .object({ customer: z.string().min(1).max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional(), area: READ_AREA_INPUT.optional() })
+      .parse(d),
   )
-  .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer, data.customerId ?? null));
+  .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer, data.customerId ?? null, data.area ?? "accounts"));
 
 /** "SN ZZB1234", or "a unit with no serial". */
 const unitWord = (serial: string | null | undefined, none = "a unit with no serial") => (serial?.trim() ? `SN ${serial.trim()}` : none);

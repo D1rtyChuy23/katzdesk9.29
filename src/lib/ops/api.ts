@@ -230,6 +230,8 @@ export function mapJob(r: any, today: any) {
 		phone: r.phone,
 		received,
 		customer: r.customer,
+		// The account the ticket is on (phase C1); the ticket window opens it by this once Tickets reads by id (C5).
+		customerId: r.customer_id == null ? null : Number(r.customer_id),
 		equipment: r.equipment,
 		issue: r.issue,
 		callType: r.call_type,
@@ -415,6 +417,7 @@ function mapModule(r: any) {
 		notes: r.notes ?? null,
 		updatedAt: String(r.updated_at),
 		assignedCustomer: r.assigned_customer ?? null,
+		assignedCustomerId: r.assigned_customer_id == null ? null : Number(r.assigned_customer_id),
 		assignedUnitId: r.assigned_unit_id ?? null,
 		assignedUnitLabel: r.assigned_unit_label ?? null,
 		assignedAt: r.assigned_at ? String(r.assigned_at) : null,
