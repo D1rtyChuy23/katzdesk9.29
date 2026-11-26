@@ -59,10 +59,36 @@ test("a PM's runbook account: its id with PMs on and the PM's own name, else by 
   assert.equal(await pmAccountId(sql, pm, SITE), null, "switch off");
   await pmsOn(run);
   assert.equal(await pmAccountId(sql, pm, SITE), cafe);
-  assert.equal(await pmAccountId(sql, pm, "zz model-cafe"), cafe, "the same name in other capitals and punctuation");
   assert.equal(await pmAccountId(sql, pm, "ZZ Other Cafe"), null, "a save that changes the PM's customer plans by the new name");
+  assert.equal(await pmAccountId(sql, pm, "zz model cafe"), null, "any change to the name, capitals too, plans by the new name");
   const loose = await pmAt(run, "ZZ No Such Place");
   assert.equal(await pmAccountId(sql, loose, "ZZ No Such Place"), null, "a PM with no account id");
+});
+
+test("a completion that moves a PM to an account whose name differs only in punctuation plans by the new name", async () => {
+  const { run, sql } = await fresh();
+  await run("insert into directory_customers (name) values ('Joe''s ZZ Cafe'), ('Joes ZZ Cafe')");
+  const pm = await pmAt(run, "Joe's ZZ Cafe");
+  await pmsOn(run);
+  assert.equal(await pmAccountId(sql, pm, "Joes ZZ Cafe"), null);
+});
+
+test("a PM whose id names a removed account plans by its name", async () => {
+  const { run, sql } = await fresh();
+  const gone = (await run("insert into directory_customers (name) values ('ZZ Gone Cafe') returning id"))[0].id;
+  const pm = await pmAt(run, "ZZ Gone Cafe");
+  await run("update directory_customers set archived = true where id = $1", [gone]);
+  await run("update pm_jobs set customer_id = $2 where id = $1", [pm, gone]);
+  await pmsOn(run);
+  assert.equal(await pmAccountId(sql, pm, "ZZ Gone Cafe"), null);
+});
+
+test("the plan says which account it read by, for the runbook's saves and visits", async () => {
+  const { run, sql, cafe } = await fresh();
+  const pm = await pmAt(run, SITE);
+  assert.equal((await loadPmRunbookPlan(sql, SITE, "Linea PB", pm)).accountId, null);
+  await pmsOn(run);
+  assert.equal((await loadPmRunbookPlan(sql, SITE, "Linea PB", pm)).accountId, cafe);
 });
 
 test("the runbook plans the PM account's units: by name, then by id", async () => {
@@ -98,6 +124,8 @@ test("the runbook's own saves take a unit on the PM's account by its id once it 
   assert.equal(sameAccountAsPm({ customer: "zz model-cafe", customer_id: null }, SITE, 5), true, "no id: by name");
   assert.equal(sameAccountAsPm({ customer: OLD, customer_id: 5 }, SITE, null), false, "by name: as before");
   assert.equal(sameAccountAsPm({ customer: "ZZ MODEL CAFE", customer_id: 9 }, SITE, null), true);
+  assert.equal(sameAccountAsPm({ customer: SITE, customer_id: 9, listed: false }, SITE, 5), true, "an id naming a removed account: by name");
+  assert.equal(sameAccountAsPm({ customer: OLD, customer_id: 9, listed: false }, SITE, 5), false);
 });
 
 test("Runbook Readiness: a PM with its account id takes that account's units, and units with no listed id by name", () => {
@@ -126,6 +154,19 @@ test("a unit's model change re-pins the PMs on its account by id once PMs reads 
   assert.deepEqual(pins.map((p) => p.pm), [pm]);
 });
 
+test("a model change still re-pins a PM its account's name finds but no id does, read by id or not", async () => {
+  const { run, sql } = await fresh();
+  // Two accounts whose names differ only by a space at the end: " ZZ Model Cafe" finds both, so it gets no id.
+  await run("insert into directory_customers (name) values ('ZZ Model Cafe ')");
+  const unit = await unitAt(run, SITE);
+  const pm = await pmAt(run, " ZZ Model Cafe");
+  assert.equal((await run("select customer_id from pm_jobs where id = $1", [pm]))[0].customer_id, null);
+  const pins = async () => (await planModelChange(sql, { id: unit, customer: SITE, catalogModel: "Linea PB" }, "Linea Classic")).pins.map((p) => p.pm);
+  assert.deepEqual(await pins(), [pm]);
+  await pmsOn(run);
+  assert.deepEqual(await pins(), [pm]);
+});
+
 test("Link Check's PMs side by side", async () => {
   const { run, sql, cafe } = await fresh();
   await unitAt(run, OLD, cafe);
@@ -139,4 +180,9 @@ test("Link Check's PMs side by side", async () => {
   assert.deepEqual(list("runbookUnits"), [true, 0, 1, 1, 0, 1]);
   assert.deepEqual(list("earlierPms"), [true, 0, 1, 1, 0, 1]);
   assert.deepEqual(list("openPms"), [true, 1, 1, 0, 0, 0]);
+  // Walk-in PMs aren't on Runbook Readiness, so not in its list either.
+  await run("insert into directory_customers (name) values ('Walk - In')");
+  await pmAt(run, "Walk - In");
+  const again = (await readByIdFor(sql, "zz-admin")).areas.find((a) => a.area === "pms").lists.find((x) => x.key === "openPms");
+  assert.deepEqual([again.byName, again.byId], [1, 1]);
 });

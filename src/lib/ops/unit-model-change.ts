@@ -56,7 +56,8 @@ export async function planModelChange(
   const accountId = (await readsById(sql, "pms"))
     ? ((await sql.query<{ customer_id: number | null }>("select customer_id from account_equipment where id = $1", [unit.id]))[0]?.customer_id ?? null)
     : null;
-  // Each PM is planned under its own name when read by id (its runbook plans by its own account), else the unit's.
+  // A PM found by the account's id is planned under its own name (its runbook then plans by that id); one found by name
+  // (no listed id) under the unit's, as before.
   const pms =
     accountId == null
       ? (
@@ -65,12 +66,14 @@ export async function planModelChange(
             [unit.customer],
           )
         ).map((p) => ({ ...p, customer: unit.customer }))
-      : await sql.query<{ id: number; equipment: string | null; customer: string }>(
-          `select p.id, p.equipment, coalesce(p.customer, '') as customer from pm_jobs p
-            where ${ofAccount({ name: "p.customer", id: "p.customer_id", match: "trim", byId: true, nameParam: "$1", idParam: "$2" })}
-            order by p.id`,
-          [unit.customer, Number(accountId)],
-        );
+      : (
+          await sql.query<{ id: number; equipment: string | null; customer: string; by_id: boolean }>(
+            `select p.id, p.equipment, coalesce(p.customer, '') as customer, coalesce(p.customer_id = $2::int, false) as by_id from pm_jobs p
+              where ${ofAccount({ name: "p.customer", id: "p.customer_id", match: "trim", byId: true, nameParam: "$1", idParam: "$2" })}
+              order by p.id`,
+            [unit.customer, Number(accountId)],
+          )
+        ).map((p) => ({ id: p.id, equipment: p.equipment, customer: p.by_id ? p.customer : unit.customer }));
   const pins: ModelChangePlan["pins"] = [];
   if (pms.length) {
     const { loadPmRunbookPlan } = await import("./pm-runbook-api");

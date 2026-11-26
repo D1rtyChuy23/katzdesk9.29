@@ -101,7 +101,7 @@ async function machinesFor(
     let kits: BillMachine["kits"] = [];
     let ticks: string[] = [];
     if (rb && unit) {
-      const config = await loadVisitConfig(sql, rb.def, { id: pm.id, customer: pm.customer, style: pm.style }, unit);
+      const config = await loadVisitConfig(sql, rb.def, { id: pm.id, customer: pm.customer, style: pm.style, accountId: plan.accountId }, unit);
       const fromUnit = addedByUnit.get(unit.unitKey) ?? [];
       const fromPiece = unit.unitKey === machine.pieceKey ? [] : (addedByUnit.get(machine.pieceKey) ?? []);
       const added = [...fromUnit];

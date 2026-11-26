@@ -9,7 +9,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey, parseSerial, serialKey } from "@/lib/ops/account-equip";
-import { pmAccountId, pmAccountUnits, pmEarlierVisits, sameAccountAsPm } from "@/lib/ops/pm-account";
+import { pmAccountId, pmAccountUnits, pmEarlierVisits, sameAccountAsPm, UNIT_LISTED_SQL } from "@/lib/ops/pm-account";
 import { matchRunbookPiece, matchRunbookSerial, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
@@ -196,13 +196,15 @@ export async function recordCompletedRunbook(
     "select id, unit_key, options from unit_runbook_options where unit_key = any($1::text[])",
     [keys],
   );
+  // The account the runbook reads by, once for every unit (PMs reads by id, phase C5).
+  const accountId = await pmAccountId(sql, pmId, job.customer);
   for (const u of units) {
     const rb = runbookById(u.runbookId);
     if (!rb || !u.optionsKey) continue;
     const s = saved.find((x) => x.unit_key === u.unitKey);
     const optRow = optRows.find((r) => r.unit_key === u.optionsKey);
     const options = optRow ? asJson(optRow.options) : s?.options ? asJson(s.options) : {};
-    const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style }, u, when);
+    const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: job.customer, style, accountId }, u, when);
     const ticked = new Set(checks.filter((c) => c.unit_key === u.unitKey).map((c) => c.key));
     const confirmed = unitModelPicked(savedModel(s, u.runbookId), u.model);
     const modelLabel =
@@ -309,7 +311,7 @@ export function earlierVisitsForUnit(
 export async function loadVisitConfig(
   sql: Sql,
   def: RunbookDefinition,
-  pm: { id: number; customer: string; style: string | null },
+  pm: { id: number; customer: string; style: string | null; accountId?: number | null },
   unit: PlannedUnit,
   now = new Date(),
 ): Promise<RunbookConfig> {
@@ -322,8 +324,9 @@ export async function loadVisitConfig(
   const opt = unit.optionsKey
     ? (await sql.query<{ options: unknown }>("select options from unit_runbook_options where unit_key = $1", [unit.optionsKey]))[0]
     : null;
-  // By the PM's account id once PMs reads by id (phase C5); by its name until then.
-  const accountId = await pmAccountId(sql, pm.id, pm.customer);
+  // By the PM's account id once PMs reads by id (phase C5); by its name until then. A caller that planned the PM passes
+  // the account its plan read by (loadPmRunbookPlan's accountId), so both agree.
+  const accountId = pm.accountId !== undefined ? pm.accountId : await pmAccountId(sql, pm.id, pm.customer);
   const doneRows = await pmEarlierVisits(sql, pm.customer, pm.id, accountId);
   const ids = doneRows.map((r) => r.id);
   const savedIntervals = ids.length
@@ -383,7 +386,14 @@ export async function loadPmRunbookPlan(
   customer: string,
   equipment: string | null,
   pmId: number,
-): Promise<{ planned: PlannedUnit[]; machines: PlannedMachine[]; accountUnits: RunbookAccountUnit[]; rows: AccountUnitRow[] }> {
+): Promise<{
+  planned: PlannedUnit[];
+  machines: PlannedMachine[];
+  accountUnits: RunbookAccountUnit[];
+  rows: AccountUnitRow[];
+  /** The account id the units were read by (PMs reads by id, phase C5), or null when read by name. */
+  accountId: number | null;
+}> {
   // By the PM's account id once PMs reads by id (phase C5); by its name until then.
   const accountId = await pmAccountId(sql, pmId, customer);
   const acct = await pmAccountUnits<{ id: number; customer: string; catalog_model: string; equipment_name: string; serial: string | null; install_date: string | null }>(
@@ -407,6 +417,7 @@ export async function loadPmRunbookPlan(
     machines: planMachines(equipment, rows, pmMatcher, pinned, matchRunbookSerial),
     accountUnits: rows.map((r) => ({ id: r.id, name: r.equipmentName || r.catalogModel, serial: r.serial, installDate: r.installDate ?? null })),
     rows,
+    accountId,
   };
 }
 
@@ -770,7 +781,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
     )[0];
     if (!pm) return empty;
 
-    const { planned, machines, accountUnits, rows } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
+    const { planned, machines, accountUnits, rows, accountId: planAccount } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     const parts = await loadMachineParts(sql, data.pmId);
     const partsLocked = await pmPartsLock(sql, data.pmId);
     const earlierByPiece = await earlierPartNotes(sql, data.pmId, machines);
@@ -922,7 +933,7 @@ export const getPmRunbook = createServerFn({ method: "GET" })
 
     // Full (completed) PMs on each unit, oldest first: same account matched by account unit, plus any PM that
     // carries the unit's serial (the unit may have been serviced under another account).
-    const doneRows = await pmEarlierVisits(sql, pm.customer, data.pmId, await pmAccountId(sql, data.pmId, pm.customer));
+    const doneRows = await pmEarlierVisits(sql, pm.customer, data.pmId, planAccount);
     const bySerial = serialKeys.length
       ? await sql.query<{ id: number; style: string | null; completed_at: string | null; unit_key: string; interval_mo: string | null; serial_key: string }>(
           `select p.id, p.style, p.completed_at::text as completed_at, r.unit_key, r.interval_mo, r.serial_key
@@ -1047,9 +1058,8 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId])
     )[0];
     if (!pm) throw new Error("PM not found");
-    const { planned, machines } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     // The account the runbook listed its units by: the PM's id once PMs reads by id (phase C5), else its name.
-    const pmAccount = await pmAccountId(sql, data.pmId, pm.customer);
+    const { planned, machines, accountId: pmAccount } = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     const line = machines.find((m) => m.pieceKey === data.pieceKey);
     if (!line) throw new Error("That machine is not on this PM.");
     const plannedLine = planned.find((u) => u.pieceKey === line.pieceKey);
@@ -1059,8 +1069,8 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
 
     const claimSerial = async (parsed: string, key: string): Promise<number | null> => {
       const dup = (
-        await sql.query<{ id: number; customer: string; customer_id: number | null }>(
-          "select id, customer, customer_id from account_equipment where serial_key = $1 limit 1",
+        await sql.query<{ id: number; customer: string; customer_id: number | null; listed: boolean }>(
+          `select a.id, a.customer, a.customer_id, ${UNIT_LISTED_SQL} from account_equipment a where a.serial_key = $1 limit 1`,
           [key],
         )
       )[0];
@@ -1131,8 +1141,9 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       }
     } else {
       const row = (
-        await sql.query<{ id: number; customer: string; customer_id: number | null; serial: string | null; serial_key: string | null; install_date: string | null }>(
-          "select id, customer, customer_id, serial, serial_key, install_date::text as install_date from account_equipment where id = $1",
+        await sql.query<{ id: number; customer: string; customer_id: number | null; listed: boolean; serial: string | null; serial_key: string | null; install_date: string | null }>(
+          `select a.id, a.customer, a.customer_id, ${UNIT_LISTED_SQL}, a.serial, a.serial_key, a.install_date::text as install_date
+             from account_equipment a where a.id = $1`,
           [accountId],
         )
       )[0];
@@ -1290,7 +1301,7 @@ export async function visitLockForTick(
   if (!unit) return null;
   const rb = runbookById(unit.runbookId);
   if (!rb) return null;
-  const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: pm.customer, style: pm.style }, unit, now);
+  const config = await loadVisitConfig(sql, rb.def, { id: pmId, customer: pm.customer, style: pm.style, accountId: plan.accountId }, unit, now);
   return config.pm ? { runbookId: unit.runbookId, interval: config.pm } : null;
 }
 
@@ -1354,7 +1365,7 @@ export const setRunbookAddedKit = createServerFn({ method: "POST" })
     const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, data.pmId);
     const unit = plan.planned.find((u) => u.unitKey === data.unitKey && u.runbookId === data.runbookId);
     if (!unit) throw new Error("This unit is not on this PM.");
-    const config = await loadVisitConfig(sql, rb.def, { id: data.pmId, customer: pm.customer, style: pm.style }, unit);
+    const config = await loadVisitConfig(sql, rb.def, { id: data.pmId, customer: pm.customer, style: pm.style, accountId: plan.accountId }, unit);
     const next = changeAddedKits(rb.def, config, data.on ? [] : [data.ev], data.ev, data.on);
     if (!next.ok) throw new Error(next.reason);
     const detail = addedKitDetail(addedKitSentence(rb.def, data.ev, data.on), unit.unitKey, unit.pieceKey);

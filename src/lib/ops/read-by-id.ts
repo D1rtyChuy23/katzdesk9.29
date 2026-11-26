@@ -4,6 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { NAME_LINKS } from "@/lib/ops/link-check";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
+import { notWalkInSql } from "@/lib/ops/walk-in-account";
 
 /**
  * Reading by id (phase C5 of "One Record Per Machine Plan", Chuy approved 11/24). Screens find an account's records by
@@ -201,10 +202,23 @@ const SAMPLES = 25;
 const num = (v: unknown) => Number(v ?? 0) || 0;
 
 /** By name and by id, side by side, for each of the lists, by the same rules as ofAccount. */
-export async function compareLists(sql: Query, lists: AccountList[], has: (table: string, column: string) => boolean): Promise<ListDiff[]> {
+export async function compareLists(
+  sql: Query,
+  lists: AccountList[],
+  has: (table: string, column: string) => boolean,
+  /** Comparisons already run for the same table and rules (another area's list), reused rather than run again. */
+  seen: Map<string, ListDiff> = new Map(),
+): Promise<ListDiff[]> {
   const out: ListDiff[] = [];
   for (const l of lists) {
     const base = { key: l.key, label: l.label };
+    const same = JSON.stringify([l.table, l.match, l.where ?? "", l.name ?? "", l.id ?? "", l.nameAccounts ?? ""]);
+    const earlier = seen.get(same);
+    if (earlier) {
+      out.push({ ...earlier, ...base });
+      continue;
+    }
+    const before = out.length;
     const nameCol = l.name ?? "customer";
     const idCol = l.id ?? "customer_id";
     if (!has(l.table, nameCol) || !has(l.table, idCol)) {
@@ -259,6 +273,7 @@ export async function compareLists(sql: Query, lists: AccountList[], has: (table
         byId: num(r.by_name) - num(r.dropped) + num(r.added),
       })),
     });
+    if (out.length > before) seen.set(same, out[out.length - 1]!);
   }
   return out;
 }
@@ -344,7 +359,13 @@ export const TICKET_LISTS: AccountList[] = [
 export const PM_LISTS: AccountList[] = [
   { key: "runbookUnits", label: "Runbook units (the account's equipment)", table: "account_equipment", match: "lower" },
   { key: "earlierPms", label: "Earlier PMs (for intervals)", table: "pm_jobs", match: "lower", where: "(t.completed_at is not null or t.status = 'Completed')" },
-  { key: "openPms", label: "Open PMs (Runbook Readiness)", table: "pm_jobs", match: "lower", where: "t.status not in ('Completed', 'Cancelled') and t.moved_job_id is null" },
+  {
+    key: "openPms",
+    label: "Open PMs (Runbook Readiness)",
+    table: "pm_jobs",
+    match: "lower",
+    where: `t.status not in ('Completed', 'Cancelled') and t.moved_job_id is null and ${notWalkInSql("t.customer")}`,
+  },
 ];
 
 const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS, pms: PM_LISTS };
@@ -353,8 +374,9 @@ export async function readByIdFor(sql: Sql, userId: string): Promise<ReadById> {
   if (!(await canReviewNames(sql, userId))) throw new Error(READ_BY_ID_ADMIN_ONLY);
   const has = await columnsOf(sql);
   const switches = await readSwitches(sql);
+  const seen = new Map<string, ListDiff>();
   const areas: ReadByIdArea[] = [];
-  for (const a of READ_AREAS) areas.push({ ...a, on: switches[a.area] ?? null, lists: await compareLists(sql, LISTS_OF[a.area], has) });
+  for (const a of READ_AREAS) areas.push({ ...a, on: switches[a.area] ?? null, lists: await compareLists(sql, LISTS_OF[a.area], has, seen) });
   return { toSet: await idsToSet(sql, has), areas };
 }
 

@@ -5,15 +5,21 @@ import { ofAccount, readsById } from "@/lib/ops/read-by-id";
 /**
  * The account a PM's runbook reads by (phase C5 part 3, the PMs switch on Link Check → Reading by id).
  *
- * The PM's own account id, when PMs reads by id, the PM has one, and the runbook is planned for the name the PM is saved
- * under (every runbook read passes the PM's own name; a save that changes the PM's customer plans by the new name, and
- * so by name). Otherwise null: the runbook goes by the name, as before C5.
+ * The PM's own account id, when PMs reads by id, the PM's id names a listed account, and the runbook is planned for
+ * exactly the name the PM is saved under (every runbook read passes the PM's own name; a save that changes the PM's
+ * customer at all plans by the new name, and so by name). Otherwise null: the runbook goes by the name, as before C5.
  */
 export async function pmAccountId(sql: Pick<Sql, "query">, pmId: number, customer: string | null | undefined): Promise<number | null> {
   if (!(await readsById(sql, "pms"))) return null;
-  const pm = (await sql.query<{ customer: string | null; customer_id: number | null }>("select customer, customer_id from pm_jobs where id = $1", [pmId]))[0];
+  const pm = (
+    await sql.query<{ customer: string | null; customer_id: number | null }>(
+      `select p.customer, p.customer_id from pm_jobs p
+        where p.id = $1 and exists (select 1 from directory_customers d where d.id = p.customer_id and d.archived = false)`,
+      [pmId],
+    )
+  )[0];
   if (!pm || pm.customer_id == null) return null;
-  return normalizeCustomerKey(pm.customer) === normalizeCustomerKey(customer) ? Number(pm.customer_id) : null;
+  return (pm.customer ?? "") === (customer ?? "") ? Number(pm.customer_id) : null;
 }
 
 /**
@@ -52,9 +58,17 @@ export async function pmEarlierVisits(
 
 /**
  * Whether a unit is on the PM's account, for the runbook's own saves (log a unit, claim a serial): the same account id
- * when the runbook reads by it, else the same name once punctuation and capitals are dropped, as before.
+ * when the runbook reads by it and the unit's id names a listed account (`listed`), else the same name once punctuation
+ * and capitals are dropped, as before.
  */
-export function sameAccountAsPm(unit: { customer: string | null; customer_id?: number | null }, pmCustomer: string, accountId: number | null): boolean {
-  if (accountId != null && unit.customer_id != null) return Number(unit.customer_id) === accountId;
+export function sameAccountAsPm(
+  unit: { customer: string | null; customer_id?: number | null; listed?: boolean | null },
+  pmCustomer: string,
+  accountId: number | null,
+): boolean {
+  if (accountId != null && unit.customer_id != null && unit.listed !== false) return Number(unit.customer_id) === accountId;
   return normalizeCustomerKey(unit.customer) === normalizeCustomerKey(pmCustomer);
 }
+
+/** A unit's id names a listed account, as a select column on `account_equipment a` (for sameAccountAsPm). */
+export const UNIT_LISTED_SQL = "exists (select 1 from directory_customers d where d.id = a.customer_id and d.archived = false) as listed";
