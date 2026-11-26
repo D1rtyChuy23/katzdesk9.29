@@ -6,8 +6,10 @@
 import { normalizeCustomerKey } from "./account-equip.ts";
 import { planUnits, type AccountUnitRow, type SerialMatcher } from "./pm-runbook-units.ts";
 
-export type ReadinessPm = { id: number; customer: string; equipment: string | null; status: string };
-export type ReadinessAccountUnit = AccountUnitRow & { customer: string };
+/** `customerId`: the PM's account, when PMs reads by id (phase C5); otherwise left out and the PM goes by its name. */
+export type ReadinessPm = { id: number; customer: string; equipment: string | null; status: string; customerId?: number | null };
+/** `customerId` and `listed` (its id names an account on the list): read when PMs reads by id. */
+export type ReadinessAccountUnit = AccountUnitRow & { customer: string; customerId?: number | null; listed?: boolean };
 
 export type ReadinessGap = "no-account-unit" | "no-serial" | "no-install-date";
 
@@ -36,16 +38,34 @@ export function buildReadiness(
   pinsByPm?: Readonly<Record<number, Readonly<Record<string, number>>>> | null,
   bySerial?: SerialMatcher,
 ): ReadinessRow[] {
-  const byCustomer = new Map<string, AccountUnitRow[]>();
+  const byCustomer = new Map<string, ReadinessAccountUnit[]>();
   for (const u of units) {
     const k = normalizeCustomerKey(u.customer);
     const list = byCustomer.get(k) ?? [];
     list.push(u);
     byCustomer.set(k, list);
   }
+  const byAccount = new Map<number, ReadinessAccountUnit[]>();
+  for (const u of units) {
+    if (u.customerId == null || !u.listed) continue;
+    const list = byAccount.get(u.customerId) ?? [];
+    list.push(u);
+    byAccount.set(u.customerId, list);
+  }
   const out: ReadinessRow[] = [];
   for (const pm of pms) {
-    const rows = byCustomer.get(normalizeCustomerKey(pm.customer)) ?? [];
+    // By the PM's account id (PMs reads by id): its units, and units whose id names no listed account by name, as the
+    // runbook plans them (pmAccountUnits). Otherwise by name, as before.
+    const lower = pm.customer.toLowerCase();
+    const rows: AccountUnitRow[] =
+      pm.customerId != null
+        ? [
+            ...(byAccount.get(pm.customerId) ?? []),
+            ...(byCustomer.get(normalizeCustomerKey(pm.customer)) ?? []).filter(
+              (u) => (u.customerId == null || !u.listed) && u.customer.toLowerCase() === lower,
+            ),
+          ].sort((a, b) => a.id - b.id)
+        : (byCustomer.get(normalizeCustomerKey(pm.customer)) ?? []);
     for (const u of planUnits(pm.equipment, rows, match, pinsByPm?.[pm.id], bySerial)) {
       const gaps: ReadinessGap[] = [];
       if (u.accountId == null) gaps.push("no-account-unit");

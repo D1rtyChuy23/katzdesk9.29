@@ -281,7 +281,22 @@ const dayOf = (iso: string) => {
 };
 
 /** The screens and lists that change when reading by id is switched or the ids are set. */
-const READ_KEYS = ["read-by-id", "link-check", "customers", "customer-history", "account-equipment", "account-equipment-retired", "wo-history-account", "account-invoices", "photos"];
+const READ_KEYS = [
+  "read-by-id",
+  "link-check",
+  "customers",
+  "customer-history",
+  "account-equipment",
+  "account-equipment-retired",
+  "wo-history-account",
+  "account-invoices",
+  "photos",
+  "customer-providers",
+  "pm-runbook",
+  "pm-bill",
+  "module-runbook",
+  "runbook-readiness",
+];
 
 /**
  * Reading by id (phase C5): Set ids first, then each area's lists by name and by id side by side, and the switch that

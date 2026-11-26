@@ -22,7 +22,7 @@ export const READ_BY_ID_ADMIN_ONLY = "Reading by id is switched on Link Check: s
 /** Postgres's integer, the account id's type. */
 export const ACCOUNT_ID_MAX = 2147483647;
 
-export type ReadArea = "accounts" | "tickets";
+export type ReadArea = "accounts" | "tickets" | "pms";
 
 export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
   {
@@ -36,6 +36,12 @@ export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
     label: "Tickets",
     covers:
       "The ticket window: the account it opens for its schedules (by the ticket's id), the account's equipment and retired equipment, its Out Of Network providers, and the Eversys modules under Asset History.",
+  },
+  {
+    area: "pms",
+    label: "PMs",
+    covers:
+      "The PM window's runbook: the PM account's units it plans and bills, and the account's earlier PMs it takes intervals from (by the PM's id); Runbook Readiness; and the PMs a unit's model change re-pins. The PM stack still matches by name (it moves with its save check, in C6).",
   },
 ];
 
@@ -331,7 +337,17 @@ export const TICKET_LISTS: AccountList[] = [
   { key: "modules", label: "Eversys modules (Asset History)", table: "modules", match: "trim", name: "assigned_customer", id: "assigned_customer_id" },
 ];
 
-const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS };
+/**
+ * The PMs area's lists: the units a PM's runbook plans (its account's equipment) and the earlier PMs it takes
+ * intervals from (the account's completed PMs).
+ */
+export const PM_LISTS: AccountList[] = [
+  { key: "runbookUnits", label: "Runbook units (the account's equipment)", table: "account_equipment", match: "lower" },
+  { key: "earlierPms", label: "Earlier PMs (for intervals)", table: "pm_jobs", match: "lower", where: "(t.completed_at is not null or t.status = 'Completed')" },
+  { key: "openPms", label: "Open PMs (Runbook Readiness)", table: "pm_jobs", match: "lower", where: "t.status not in ('Completed', 'Cancelled') and t.moved_job_id is null" },
+];
+
+const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS, pms: PM_LISTS };
 
 export async function readByIdFor(sql: Sql, userId: string): Promise<ReadById> {
   if (!(await canReviewNames(sql, userId))) throw new Error(READ_BY_ID_ADMIN_ONLY);
