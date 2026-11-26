@@ -298,7 +298,7 @@ export function CustomerHistorySheet({
                     </p>
                   ) : null}
                   <div className="mt-4">
-                    <ProviderDispatchBlock customer={data.name} assignable />
+                    <ProviderDispatchBlock customer={data.name} customerId={data.id} assignable />
                   </div>
                   {/* Recipes are not a tab of their own: the account has its six tabs, and its recipes sit under Details. */}
                   <div className="mt-4" data-testid="account-recipes">

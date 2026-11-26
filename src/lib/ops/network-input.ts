@@ -27,6 +27,14 @@ const address = z.object({
 
 export const customerInput = checked(z.object({ customer: line }));
 
+/**
+ * An account's providers: with its id, the read goes by the id once that window's Reading by id switch is on (phase
+ * C5): the account window's ("accounts") or the ticket window's ("tickets").
+ */
+export const customerProvidersInput = checked(
+  z.object({ customer: line, customerId: rowId.max(2147483647).optional(), area: z.enum(["accounts", "tickets"]).optional() }),
+);
+
 export const providerInput = checked(
   z.object({
     id: rowId.optional(),

@@ -20,6 +20,8 @@ export type ServiceJob = {
   phone: string | null;
   received: string | null;
   customer: string | null;
+  /** The account's id (phase C1). Optional: some lists build tickets without it. */
+  customerId?: number | null;
   equipment: string | null;
   issue: string | null;
   callType: string | null;
@@ -111,6 +113,8 @@ export type ModuleRow = {
   updatedAt: string;
   /** Account the module is attached to (via an Eversys unit). Null = not assigned. */
   assignedCustomer: string | null;
+  /** That account's id (phase C2). */
+  assignedCustomerId?: number | null;
   assignedUnitId: number | null;
   assignedUnitLabel: string | null;
   assignedAt: string | null;

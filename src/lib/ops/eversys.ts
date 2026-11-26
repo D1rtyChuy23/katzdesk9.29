@@ -38,6 +38,22 @@ export function moduleAvailability(m: { status: string; assignedCustomer?: strin
   return "hq";
 }
 
+/**
+ * The modules on an account, as the ticket window's Asset History lists them. With the account's id (Tickets reads by
+ * id, phase C5), a module assigned to an account goes by that account's id; one with no id still goes by the account
+ * it names or the place it's at (moduleAccount), in any capitals.
+ */
+export function modulesOnAccount<T extends { status: string; assignedCustomer?: string | null; assignedCustomerId?: number | null; location?: string | null }>(
+  modules: T[],
+  customer: string,
+  customerId: number | null,
+): T[] {
+  const key = customer.trim().toLowerCase();
+  return modules.filter((m) =>
+    customerId != null && m.assignedCustomerId != null ? m.assignedCustomerId === customerId : moduleAccount(m)?.toLowerCase() === key,
+  );
+}
+
 /** Account a module sits on (new assignment first, then the legacy location text). */
 export function moduleAccount(m: { status: string; assignedCustomer?: string | null; location?: string | null }): string | null {
   if (m.assignedCustomer?.trim()) return m.assignedCustomer.trim();

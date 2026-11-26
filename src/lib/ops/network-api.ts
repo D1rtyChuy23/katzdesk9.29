@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getSql } from "@/lib/db";
+import { getSql, type Sql } from "@/lib/db";
+import { ofAccount, readsById, type ReadArea } from "@/lib/ops/read-by-id";
 import { renameOrMergeProvider } from "@/lib/ops/customer-identity";
 import { deskMiddleware } from "@/lib/ops/access";
 import { idInput } from "@/lib/ops/access-input";
@@ -7,6 +8,7 @@ import { todayChicago } from "@/lib/ops/clock";
 import {
   assignProviderInput,
   customerInput,
+  customerProvidersInput,
   linkIdInput,
   providerAddressInput,
   providerContactInput,
@@ -591,29 +593,35 @@ export const archiveProvider = createServerFn({ method: "POST" })
 
 export const getCustomerProviders = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator(customerInput)
-  .handler(async ({ data }): Promise<CustomerProviderLink[]> => {
-    const customer = data.customer.trim();
-    if (!customer) return [];
-    const sql = await ready();
-    const rows = await sql.query<ProviderRow & { link_id: number; role: ProviderRole; customer: string }>(
-      `select p.*,
-              (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'primary') as primary_for,
-              (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'secondary') as secondary_for,
-              c.id as link_id, c.customer, c.role
-       from network_providers p
-       join customer_providers c on c.provider_id = p.id
-       where p.archived = false and lower(c.customer) = lower($1)
-       order by case c.role when 'primary' then 0 when 'secondary' then 1 else 2 end, lower(p.name)`,
-      [customer],
-    );
-    return rows.map((r) => ({
-      linkId: r.link_id as number,
-      customer: String(r.customer),
-      role: r.role,
-      provider: mapProvider(r),
-    }));
-  });
+  .validator(customerProvidersInput)
+  .handler(async ({ data }): Promise<CustomerProviderLink[]> => customerProvidersFor(await ready(), data.customer, data.customerId ?? null, data.area ?? "accounts"));
+
+/**
+ * An account's Out Of Network providers. With `customerId` and that window's Reading by id switch on (phase C5), by the
+ * account's id (a link whose id names no listed account by its name); otherwise by the name in any capitals.
+ */
+export async function customerProvidersFor(sql: Sql, customerName: string, customerId: number | null = null, area: ReadArea = "accounts"): Promise<CustomerProviderLink[]> {
+  const customer = customerName.trim();
+  if (!customer) return [];
+  const byId = customerId != null && (await readsById(sql, area));
+  const rows = await sql.query<ProviderRow & { link_id: number; role: ProviderRole; customer: string }>(
+    `select p.*,
+            (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'primary') as primary_for,
+            (select count(*)::int from customer_providers x where x.provider_id = p.id and x.role = 'secondary') as secondary_for,
+            c.id as link_id, c.customer, c.role
+     from network_providers p
+     join customer_providers c on c.provider_id = p.id
+     where p.archived = false and ${ofAccount({ name: "c.customer", id: "c.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
+     order by case c.role when 'primary' then 0 when 'secondary' then 1 else 2 end, lower(p.name)`,
+    byId ? [customer, customerId] : [customer],
+  );
+  return rows.map((r) => ({
+    linkId: r.link_id as number,
+    customer: String(r.customer),
+    role: r.role,
+    provider: mapProvider(r),
+  }));
+}
 
 export const assignCustomerProvider = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
