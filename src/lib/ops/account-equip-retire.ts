@@ -87,8 +87,8 @@ export async function dropRetiredRecord(sql: Sql, retiredId: number): Promise<vo
 
 /**
  * An account's retired machines, newest first. A unit that is on the account (again) isn't listed. With `customerId`
- * and the Accounts switch on (phase C5, Link Check), by the account's id (a copy with no id by its name); otherwise by
- * the name in any capitals.
+ * and the Accounts switch on (phase C5, Link Check), by the account's id (a copy whose id names no listed account by its
+ * name); otherwise by the name in any capitals.
  */
 export async function listRetiredUnits(sql: Sql, customer: string, customerId: number | null = null): Promise<RetiredUnit[]> {
   const name = customer.trim();

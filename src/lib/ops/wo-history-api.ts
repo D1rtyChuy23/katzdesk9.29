@@ -1135,7 +1135,7 @@ function summary(r: Record<string, unknown>): WoHistorySummary {
 
 /**
  * An account's work orders. With `customerId` and the Accounts switch on (phase C5, Link Check), by the account's id (a
- * row with no id by its name); otherwise by its name, spaces at the ends dropped.
+ * row whose id names no listed account by its name); otherwise by its name, spaces at the ends dropped.
  */
 export async function accountHistory(sql: Query, customer: string, opts: { showCost?: boolean; customerId?: number | null } = {}): Promise<WoHistorySummary[]> {
   const name = customer.trim();

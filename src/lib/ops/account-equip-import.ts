@@ -1272,7 +1272,8 @@ type UnitDbRow = Parameters<typeof mapDbUnit>[0];
 
 /**
  * An account's units (or every account's), as the Equipment tab lists them. With `customerId` and the Accounts switch on
- * (phase C5, Link Check), by the account's id (a unit with no id by its name); otherwise by the name in any capitals.
+ * (phase C5, Link Check), by the account's id (a unit whose id names no listed account by its name); otherwise by the
+ * name in any capitals.
  */
 export async function readAccountUnits(sql: Sql, customer?: string | null, customerId?: number | null): Promise<AccountEquipRow[]> {
   const name = customer?.trim();

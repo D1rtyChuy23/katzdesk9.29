@@ -144,7 +144,16 @@ test("a moved PM can't be edited, and leaves the PM board, search and the accoun
     await assert.rejects(updatePmFor(sql, { id, notes: "late edit" }, "u_boss"), /moved to a service ticket/);
     const api = readFileSync(new URL("../src/lib/ops/api.ts", import.meta.url), "utf8");
     assert.match(api, /select \* from pm_jobs where moved_job_id is null order by received desc/);
-    assert.match(api, /where lower\(customer\) = lower\(\$\{name\}\) and moved_job_id is null/);
+    // The account's PMs (phase C5 moved the account window's lists to account-reads.ts): a moved PM isn't one of
+    // them, read by name or by id.
+    const { accountRecordRows } = await import("../src/lib/ops/account-reads.ts");
+    const stays = await pm({ wo: "WO-1108", corrigo_id: "C-1108" });
+    const name = "ZZ Halcyon - Southtown";
+    const acct = (await query("select id from directory_customers where name = $1", [name]))[0].id;
+    for (const byId of [false, true]) {
+      assert.deepEqual((await accountRecordRows(sql, { id: acct, name }, byId)).pms.map((p) => Number(p.id)), [stays], `by id: ${byId}`);
+    }
+    await query("delete from pm_jobs where id = $1", [stays]);
     for (const [file, text] of [
       ["src/lib/ops/analytics-api.ts", "from pm_jobs where moved_job_id is null"],
       ["src/lib/ops/export-reports.ts", "from pm_jobs where moved_job_id is null"],
