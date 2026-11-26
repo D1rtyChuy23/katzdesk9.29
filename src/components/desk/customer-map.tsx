@@ -4,7 +4,26 @@ import { useFromHere } from "@/lib/ops/search-params";
 import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
-import { DeskMap, type MapPin } from "./desk-map";
+import { DeskMap, type MapBounds, type MapPin } from "./desk-map";
+import {
+  DownloadProspects,
+  ElevationLine,
+  LayerControls,
+  PlaceCard,
+  PlacesKey,
+  PlacesNote,
+  placePinId,
+  placePins,
+  PopulationKey,
+  TapReadout,
+  useMapLayerPrefs,
+  useMarketAccess,
+  usePlaces,
+  useZipStats,
+  ZipCard,
+  zipPinId,
+  zipPins,
+} from "./map-layers";
 import { needsAttention, openWork, pointOf, scrollUnderHeader, useGeoIndex } from "./geo-data";
 import { FilterChip } from "./desk-charts";
 import { ListToolbar, ToolbarSearch, TOOLBAR_SELECT } from "./list-toolbar";
@@ -31,6 +50,8 @@ import { listProviderGeo, MAX_PROVIDER_PINS, PROVIDER_GEO_KEY, type ProviderGeo 
 import { firstEmail, statusTone, telHref, websiteHref, websiteLabel } from "@/lib/ops/network";
 import { formatLongDate } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
+import { inBounds, ZIP_MIN_ZOOM, zipFromAddress, type ZipStat } from "@/lib/ops/market-map";
+import { matchAccounts, padBounds, type AccountPoint, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
 
 type ColorBy = "rep" | "work" | "pms" | "type";
 
@@ -78,6 +99,8 @@ const RED = "#b3261e";
 const AMBER = "#a3580b";
 const BLUE = "#2563eb";
 const GRAY = "#a8a29e";
+
+const NO_ZIPS: ZipStat[] = [];
 
 const MAP_HEIGHT = "h-[55vh] min-h-72 lg:h-[calc(100vh-14rem)] lg:min-h-[28rem]";
 const LIST_STEP = 50;
@@ -242,6 +265,15 @@ export function CustomerMap({
   /** The picked service provider pin (its address id); a provider and an account are never picked together. */
   const [providerPick, setProviderPick] = useState<number | null>(null);
   const [focus, setFocus] = useState<LatLng | null>(null);
+  // Map layers (Chuy, 11/26): Terrain for everyone; Population and Prospects for Admin and Sales.
+  const market = useMarketAccess();
+  const [layers, setLayers] = useMapLayerPrefs(userId);
+  const [mapView, setMapView] = useState<MapBounds | null>(null);
+  /** The picked ZIP circle or prospect place; like a provider, never picked together with anything else. */
+  const [zipPick, setZipPick] = useState<string | null>(null);
+  const [placePick, setPlacePick] = useState<string | null>(null);
+  /** Where the viewer last tapped the terrain map (its elevation shows top right). */
+  const [tapAt, setTapAt] = useState<LatLng | null>(null);
   const mapBox = useRef<HTMLDivElement>(null);
   const panelBox = useRef<HTMLElement>(null);
   const listPane = useRef<HTMLDivElement>(null);
@@ -307,6 +339,8 @@ export function CustomerMap({
       return "";
     });
     setProviderPick(null);
+    setZipPick(null);
+    setPlacePick(null);
     setSelectedId(a.id);
     const p = pointOf(a);
     if (p) setFocus({ lat: p.lat, lng: p.lng });
@@ -419,8 +453,87 @@ export function CustomerMap({
   // Provider diamonds draw over the account dots. With accounts on the map the view fits the accounts only, so showing
   // both never zooms the map out to every state the providers cover; with no account pins left (a search that matches
   // nothing) it shows the default view. Service Providers alone fits the providers.
-  const mapPins = useMemo(() => (providerPins.length ? [...pins, ...providerPins] : pins), [pins, providerPins]);
   const fitTo = useMemo(() => (showAccounts ? pins : providerPins).map((p) => ({ lat: p.lat, lng: p.lng })), [showAccounts, pins, providerPins]);
+
+  // ---- Map layers. Every pinned account (whatever the filters) is what "already an account" and the ZIP counts use.
+  const populationOn = market && layers.population;
+  const placesOn = market && layers.places;
+  const accountPoints = useMemo<AccountPoint[]>(
+    () => accounts.flatMap((a) => (a.lat != null && a.lng != null ? [{ id: a.id, name: a.name, lat: a.lat, lng: a.lng, address: a.address ?? a.geocodeAddress, rep: a.rep }] : [])),
+    [accounts],
+  );
+  const zipQ = useZipStats(mapView, populationOn);
+  const zipShown = populationOn && !!mapView && mapView.zoom >= ZIP_MIN_ZOOM;
+  const zipRows = useMemo(() => (zipShown ? (zipQ.data?.zips ?? NO_ZIPS) : NO_ZIPS), [zipShown, zipQ.data]);
+  const zipByCode = useMemo(() => new Map(zipRows.map((z) => [z.zip, z])), [zipRows]);
+  const zipLayer = useMemo(() => zipPins(zipRows), [zipRows]);
+  const placesQ = usePlaces(mapView, placesOn, layers.categories);
+  const allPlaces = useMemo(() => [...placesQ.places.values()], [placesQ.places]);
+  // A name match is that account (a current account, not a prospect); a street-address match alone stays a prospect.
+  const placeMatches = useMemo(() => (allPlaces.length ? matchAccounts(allPlaces, accountPoints) : new Map<string, PlaceMatch>()), [allPlaces, accountPoints]);
+  const currentAccounts = useMemo(() => {
+    const m = new Map<string, AccountPoint>();
+    for (const [id, match] of placeMatches) if (match.how === "name") m.set(id, match.account);
+    return m;
+  }, [placeMatches]);
+  const placeById = useMemo(() => new Map(allPlaces.map((p) => [p.id, p])), [allPlaces]);
+  // Places of the picked types (current accounts left off unless asked for) near the screen: drawn; on screen: counted.
+  const { placesDrawn, placesInView, prospectsInView } = useMemo(() => {
+    if (!placesOn || !mapView) return { placesDrawn: [], placesInView: [], prospectsInView: [] };
+    const wanted = new Set<PlaceCategory>(layers.categories);
+    const near = padBounds(mapView, 1);
+    const drawn = allPlaces.filter((p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near));
+    const inView = drawn.filter((p) => inBounds(p, mapView));
+    return { placesDrawn: drawn, placesInView: inView, prospectsInView: inView.filter((p) => !currentAccounts.has(p.id)) };
+  }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, currentAccounts]);
+  const placeLayer = useMemo(() => placePins(placesDrawn, currentAccounts), [placesDrawn, currentAccounts]);
+  const placeCounts = useMemo(() => {
+    const m = new Map<PlaceCategory, number>();
+    for (const c of layers.categories) m.set(c, 0);
+    for (const p of placesInView) m.set(p.category, (m.get(p.category) ?? 0) + 1);
+    return m;
+  }, [placesInView, layers.categories]);
+  const accountsByZip = useMemo(() => {
+    const m = new Map<string, AccountPoint[]>();
+    for (const a of accountPoints) {
+      const zip = zipFromAddress(a.address);
+      if (!zip) continue;
+      const list = m.get(zip);
+      if (list) list.push(a);
+      else m.set(zip, [a]);
+    }
+    return m;
+  }, [accountPoints]);
+  const selectedZip = zipPick ? (zipByCode.get(zipPick) ?? null) : null;
+  const selectedPlace = placePick ? (placeById.get(placePick) ?? null) : null;
+  // The tapped spot on the terrain map, as a small dark dot.
+  const tapPin = useMemo<MapPin[]>(() => (tapAt ? [{ id: "tap", lat: tapAt.lat, lng: tapAt.lng, color: "#1c1917", size: 4, title: "Tapped here" }] : []), [tapAt]);
+
+  // ZIP circles underneath everything, then places, then accounts, then provider diamonds on top.
+  const mapPins = useMemo(
+    () => (zipLayer.length || placeLayer.length || providerPins.length || tapPin.length ? [...zipLayer, ...placeLayer, ...pins, ...providerPins, ...tapPin] : pins),
+    [zipLayer, placeLayer, pins, providerPins, tapPin],
+  );
+
+  /** Pick a ZIP circle or a place: whatever else was picked closes. */
+  function pickLayer(kind: "zip" | "place", id: string) {
+    setSelectedId(null);
+    setProviderPick(null);
+    appliedAccount.current = null;
+    onSelectAccount?.(null);
+    setZipPick(kind === "zip" ? id : null);
+    setPlacePick(kind === "place" ? id : null);
+  }
+  function closeLayerPick() {
+    setZipPick(null);
+    setPlacePick(null);
+  }
+  function changeLayers(change: Parameters<typeof setLayers>[0]) {
+    if (change.population === false) setZipPick(null);
+    if (change.places === false) setPlacePick(null);
+    if (change.base === "streets") setTapAt(null);
+    setLayers(change);
+  }
 
   const legend = useMemo<LegendItem[]>(() => {
     const items: LegendItem[] = [];
@@ -502,6 +615,7 @@ export function CustomerMap({
   function pick(a: AccountGeo, fromList: boolean) {
     const top = listPane.current?.scrollTop;
     setProviderPick(null);
+    closeLayerPick();
     setSelectedId(a.id);
     appliedAccount.current = a.id;
     const p = pointOf(a);
@@ -516,6 +630,7 @@ export function CustomerMap({
 
   function pickProvider(p: ProviderGeo, fromList: boolean) {
     setSelectedId(null);
+    closeLayerPick();
     appliedAccount.current = null;
     onSelectAccount?.(null);
     setProviderPick(p.addressId);
@@ -638,6 +753,7 @@ export function CustomerMap({
           </div>
         ) : null}
       </div>
+      <LayerControls prefs={layers} onChange={changeLayers} market={market} />
 
       {/* Counts and key sit above the map on a wide screen; on a phone the key and the import note move under it. */}
       <div className="mt-4 space-y-2">
@@ -669,14 +785,56 @@ export function CustomerMap({
           )}
         </p>
         <MapLegend items={mapLegend} className="hidden lg:flex" />
+        {populationOn ? <PopulationKey /> : null}
+        {placesOn ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" data-testid="map-places-summary">
+            {placesQ.status === "ready" || placesQ.status === "loading" ? (
+              <>
+                <span className="text-xs font-medium" data-testid="map-prospect-count">
+                  {plural(prospectsInView.length, "prospect")} on screen
+                  {!layers.hideCustomers && placesInView.length > prospectsInView.length ? (
+                    <span className="font-normal text-muted-foreground"> · {plural(placesInView.length - prospectsInView.length, "current account")} in gray</span>
+                  ) : null}
+                </span>
+                <PlacesKey counts={placeCounts} />
+                <DownloadProspects places={prospectsInView} accounts={accountPoints} />
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {!layers.categories.length ? "Pick at least one place type to see prospects." : placesQ.status === "zoom" ? "Zoom in on the map to see prospects (about a city's width or closer)." : null}
+              </span>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-3 flex flex-col gap-4 lg:flex-row">
         <div ref={mapBox} className="min-w-0 scroll-mt-32 lg:flex-1 lg:scroll-mt-20">
           <DeskMap
             pins={mapPins}
-            selectedId={selectedProvider ? providerPinId(selectedProvider.addressId) : (selected?.id ?? null)}
+            selectedId={
+              selectedZip
+                ? zipPinId(selectedZip.zip)
+                : selectedPlace
+                  ? placePinId(selectedPlace.id)
+                  : selectedProvider
+                    ? providerPinId(selectedProvider.addressId)
+                    : (selected?.id ?? null)
+            }
+            base={layers.base}
+            onMapTap={layers.base === "terrain" ? setTapAt : undefined}
+            onViewSettled={populationOn || placesOn ? setMapView : undefined}
             onPinClick={(pin) => {
+              const key = String(pin.id);
+              if (key === "tap") return;
+              if (key.startsWith("zip:")) {
+                pickLayer("zip", key.slice(4));
+                return;
+              }
+              if (key.startsWith("place:")) {
+                pickLayer("place", key.slice(6));
+                return;
+              }
               const provider = providerByPin.get(String(pin.id));
               if (provider) {
                 pickProvider(provider, false);
@@ -697,6 +855,41 @@ export function CustomerMap({
                 <p className="max-w-xs rounded-lg border border-border bg-card/95 px-4 py-3 text-center text-sm text-muted-foreground shadow-[var(--shadow-soft)]" data-testid="map-note">
                   {mapNote}
                 </p>
+              </div>
+            ) : null}
+            {tapAt || populationOn || placesOn ? (
+              // Layer notes, top right. On a phone they sit under the picked-item bar that shows at the top.
+              <div
+                className={cn(
+                  "pointer-events-none absolute top-2.5 right-2.5 z-10 flex max-w-[calc(100%-4rem)] flex-col items-end gap-1.5",
+                  (selectedProvider || selected || selectedZip || selectedPlace) && "max-sm:top-16",
+                )}
+              >
+                {tapAt ? <TapReadout at={tapAt} onClose={() => setTapAt(null)} /> : null}
+                {populationOn && mapView && mapView.zoom < ZIP_MIN_ZOOM ? (
+                  <p className="rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs shadow-[var(--shadow-soft)]" data-testid="map-population-note">
+                    Zoom in to see population by ZIP
+                  </p>
+                ) : null}
+                {populationOn && zipShown && zipQ.data?.truncated ? (
+                  <p className="rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs shadow-[var(--shadow-soft)]" data-testid="map-population-truncated">
+                    Showing the {zipQ.data.zips.length.toLocaleString("en-US")} most populated ZIPs here. Zoom in for all of them.
+                  </p>
+                ) : null}
+                {populationOn && zipQ.isError ? (
+                  <p className="rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs text-destructive shadow-[var(--shadow-soft)]" data-testid="map-population-error">
+                    {zipQ.error instanceof Error ? zipQ.error.message : "Population could not load."}
+                  </p>
+                ) : null}
+                {placesOn ? <PlacesNote status={placesQ.status} truncated={placesQ.truncated} onRetry={placesQ.retry} /> : null}
+              </div>
+            ) : null}
+            {selectedZip || selectedPlace ? (
+              <div className="absolute right-2 bottom-7 left-2 z-10 flex items-center gap-2 rounded-lg border border-border bg-card/95 py-1.5 pr-1.5 pl-3 shadow-[var(--shadow-soft)] max-sm:top-2 max-sm:bottom-auto max-sm:left-14 lg:hidden">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{selectedZip ? `ZIP ${selectedZip.zip}` : selectedPlace?.name}</span>
+                <Button type="button" size="sm" variant="outline" className="h-9 px-3" onClick={() => scrollUnderHeader(panelBox.current)} data-testid="map-details-jump">
+                  Details
+                </Button>
               </div>
             ) : null}
             {selectedProvider || selected ? (
@@ -731,7 +924,25 @@ export function CustomerMap({
           aria-label={show === "providers" ? "Service providers on the map" : show === "both" ? "Accounts and service providers on the map" : "Accounts on the map"}
           data-testid="map-panel"
         >
-          {selectedProvider ? (
+          {selectedZip ? (
+            <ZipCard
+              zip={selectedZip}
+              accounts={accountsByZip.get(selectedZip.zip) ?? []}
+              onClose={closeLayerPick}
+            />
+          ) : selectedPlace ? (
+            <PlaceCard
+              place={selectedPlace}
+              account={currentAccounts.get(selectedPlace.id) ?? null}
+              sameAddress={placeMatches.get(selectedPlace.id)?.how === "address" ? placeMatches.get(selectedPlace.id)!.account : null}
+              accounts={accountPoints}
+              onOpenAccount={(id) => {
+                const a = byId.get(id);
+                if (a) pick(a, false);
+              }}
+              onClose={closeLayerPick}
+            />
+          ) : selectedProvider ? (
             <ProviderCard provider={selectedProvider} onClose={() => setProviderPick(null)} />
           ) : selected ? (
             <AccountCard account={selected} type={colorBy === "type" ? accountType(selected) : null} onClose={closeAccount} />
@@ -944,6 +1155,8 @@ function AccountCard({ account: a, type, onClose }: { account: AccountGeo; type:
       <p className={cn("text-xs", a.quality === "close" ? "text-warning" : "text-muted-foreground")} data-testid="map-pin-quality">
         {a.manual ? "Exact pin (entered by hand)" : a.quality ? QUALITY_LABEL[a.quality] : point ? "Pin placed, match not recorded" : "No pin yet"}
       </p>
+      {/* A ZIP area pin's height is the ZIP's center, not the building: only street-level pins get one. */}
+      {point && a.quality !== "approx" ? <ElevationLine point={point} className="mt-1" /> : null}
 
       <ul className="mt-3 space-y-0.5 text-xs">
         {lines.length ? lines.map((l, i) => <li key={i}>{l}</li>) : <li className="text-muted-foreground">No open work.</li>}
