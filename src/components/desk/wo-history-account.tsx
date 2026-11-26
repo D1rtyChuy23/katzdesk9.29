@@ -55,8 +55,12 @@ function Row({ h, mode, onOpen }: { h: WoHistorySummary; mode: "tickets" | "invo
  * The account's work orders from the old ticket system (QuickBooks history), read-only.
  * Tickets tab: work orders that aren't already a KatzDesk ticket. Invoices tab: every one with invoice lines.
  */
-export function AccountWoHistory({ customer, mode }: { customer: string; mode: "tickets" | "invoices" }) {
-  const q = useQuery({ queryKey: ["wo-history-account", customer.toLowerCase()], queryFn: () => listAccountWoHistory({ data: { customer } }) });
+export function AccountWoHistory({ customer, customerId, mode }: { customer: string; customerId?: number | null; mode: "tickets" | "invoices" }) {
+  // The account's id makes it read by id once the Accounts switch is on (phase C5, Link Check).
+  const q = useQuery({
+    queryKey: ["wo-history-account", customer.toLowerCase(), customerId ?? null],
+    queryFn: () => listAccountWoHistory({ data: { customer, ...(customerId != null ? { customerId } : {}) } }),
+  });
   const [open, setOpen] = useState<number | null>(null);
   const [shown, setShown] = useState(mode === "invoices");
   const [all, setAll] = useState(false);

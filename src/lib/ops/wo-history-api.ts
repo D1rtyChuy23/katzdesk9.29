@@ -53,6 +53,7 @@ import {
 import { costView } from "@/lib/ops/cost-access";
 import { discountShares } from "@/lib/ops/part-pricing";
 import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 
 type Query = Pick<Sql, "query">;
 
@@ -1132,12 +1133,18 @@ function summary(r: Record<string, unknown>): WoHistorySummary {
   };
 }
 
-export async function accountHistory(sql: Query, customer: string, opts: { showCost?: boolean } = {}): Promise<WoHistorySummary[]> {
+/**
+ * An account's work orders. With `customerId` and the Accounts switch on (phase C5, Link Check), by the account's id (a
+ * row whose id names no listed account by its name); otherwise by its name, spaces at the ends dropped.
+ */
+export async function accountHistory(sql: Query, customer: string, opts: { showCost?: boolean; customerId?: number | null } = {}): Promise<WoHistorySummary[]> {
   const name = customer.trim();
   if (!name) return [];
+  const byId = opts.customerId != null && (await readsById(sql, "accounts"));
+  const where = ofAccount({ name: "h.customer", id: "h.customer_id", match: "trim", byId, nameParam: "$1", idParam: "$2" });
   const rows = await sql.query<Record<string, unknown>>(
-    `select ${SUMMARY_COLS}${opts.showCost ? COST_SUMMARY_COLS : ""} from wo_history h where lower(btrim(h.customer)) = lower(btrim($1)) order by h.completed desc nulls last, h.id desc`,
-    [name],
+    `select ${SUMMARY_COLS}${opts.showCost ? COST_SUMMARY_COLS : ""} from wo_history h where ${where} order by h.completed desc nulls last, h.id desc`,
+    byId ? [name, opts.customerId] : [name],
   );
   return rows.map((r) => (opts.showCost ? withCost(summary(r), r) : summary(r)));
 }
@@ -1528,10 +1535,10 @@ export const setWoHistoryLocation = createServerFn({ method: "POST" })
 
 export const listAccountWoHistory = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string }) => z.object({ customer: short(300) }).parse(d))
+  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: short(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d))
   .handler(async ({ data, context }): Promise<WoHistorySummary[]> => {
     const sql = await ready();
-    return accountHistory(sql, data.customer, { showCost: (await costView(sql, context.userId)).showCost });
+    return accountHistory(sql, data.customer, { showCost: (await costView(sql, context.userId)).showCost, customerId: data.customerId ?? null });
   });
 
 export const listJobWoHistory = createServerFn({ method: "POST" })

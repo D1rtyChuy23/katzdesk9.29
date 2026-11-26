@@ -7,6 +7,7 @@
  * own id, with the links whose install or PM still exists.
  */
 import type { Sql } from "@/lib/db";
+import { ofAccount, readsById } from "@/lib/ops/read-by-id";
 
 export type RetiredUnit = {
   id: number;
@@ -84,8 +85,14 @@ export async function dropRetiredRecord(sql: Sql, retiredId: number): Promise<vo
   await sql.query("delete from account_equipment_retired where id = $1", [retiredId]);
 }
 
-/** An account's retired machines, newest first. A unit that is on the account (again) isn't listed. */
-export async function listRetiredUnits(sql: Sql, customer: string): Promise<RetiredUnit[]> {
+/**
+ * An account's retired machines, newest first. A unit that is on the account (again) isn't listed. With `customerId`
+ * and the Accounts switch on (phase C5, Link Check), by the account's id (a copy whose id names no listed account by its
+ * name); otherwise by the name in any capitals.
+ */
+export async function listRetiredUnits(sql: Sql, customer: string, customerId: number | null = null): Promise<RetiredUnit[]> {
+  const name = customer.trim();
+  const byId = customerId != null && (await readsById(sql, "accounts"));
   const rows = await sql.query<{
     id: number;
     unit_id: number;
@@ -111,10 +118,10 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
             r.links->>'merged_serial' as merged_serial, r.machine_id,
             (${LINK_KEYS.map((k) => `jsonb_array_length(coalesce(r.links->'${k}', '[]'::jsonb))`).join(" + ")})::int as records
        from account_equipment_retired r
-      where lower(r.customer) = lower($1)
+      where ${ofAccount({ name: "r.customer", id: "r.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
         and not exists (select 1 from account_equipment a where a.id = r.unit_id)
       order by r.retired_at desc, r.id desc`,
-    [customer.trim()],
+    byId ? [name, customerId] : [name],
   );
   return rows.map((r) => ({
     id: Number(r.id),

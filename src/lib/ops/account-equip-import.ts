@@ -11,6 +11,7 @@ import { mpnKey } from "@/lib/ops/mpn-rules";
 import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
 import {
   cleanPartNumber,
@@ -1261,6 +1262,7 @@ export const planAccountEquipImport = createServerFn({ method: "POST" })
 
 const listInput = z.object({
   customer: z.string().optional(),
+  customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional(),
 });
 
 const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
@@ -1268,16 +1270,21 @@ const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_k
 
 type UnitDbRow = Parameters<typeof mapDbUnit>[0];
 
-/** An account's units (or every account's), as the Equipment tab lists them. */
-export async function readAccountUnits(sql: Sql, customer?: string | null): Promise<AccountEquipRow[]> {
+/**
+ * An account's units (or every account's), as the Equipment tab lists them. With `customerId` and the Accounts switch on
+ * (phase C5, Link Check), by the account's id (a unit whose id names no listed account by its name); otherwise by the
+ * name in any capitals.
+ */
+export async function readAccountUnits(sql: Sql, customer?: string | null, customerId?: number | null): Promise<AccountEquipRow[]> {
   const name = customer?.trim();
+  const byId = !!name && customerId != null && (await readsById(sql, "accounts"));
   const rows = name
     ? await sql.query<UnitDbRow>(
         `select ${UNIT_COLS}
-           from account_equipment
-          where lower(customer) = lower($1)
+           from account_equipment a
+          where ${ofAccount({ name: "a.customer", id: "a.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
           order by lower(catalog_model), id`,
-        [name],
+        byId ? [name, customerId] : [name],
       )
     : await sql.query<UnitDbRow>(
         `select ${UNIT_COLS}
@@ -1296,7 +1303,7 @@ export async function readAccountUnit(sql: Sql, id: number): Promise<AccountEqui
 export const listAccountEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: z.infer<typeof listInput>) => listInput.parse(d ?? {}))
-  .handler(async ({ data }): Promise<AccountEquipRow[]> => readAccountUnits(await ready(), data.customer));
+  .handler(async ({ data }): Promise<AccountEquipRow[]> => readAccountUnits(await ready(), data.customer, data.customerId ?? null));
 
 async function dropEquipmentLinks(sql: Awaited<ReturnType<typeof ready>>, id: number) {
   await sql.query("delete from install_inspection_units where equipment_id = $1", [id]);
@@ -1357,11 +1364,13 @@ export const removeAccountEquipment = createServerFn({ method: "POST" })
     return removeEquipmentUnit(asActor(sql, by.name, "retire"), data.id, by);
   });
 
-/** An account's retired machines (11/9). */
+/** An account's retired machines (11/9); by the account's id once the Accounts switch is on (phase C5). */
 export const listRetiredEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string }) => z.object({ customer: z.string().min(1).max(300) }).parse(d))
-  .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer));
+  .validator((d: { customer: string; customerId?: number }) =>
+    z.object({ customer: z.string().min(1).max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d),
+  )
+  .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer, data.customerId ?? null));
 
 /** "SN ZZB1234", or "a unit with no serial". */
 const unitWord = (serial: string | null | undefined, none = "a unit with no serial") => (serial?.trim() ? `SN ${serial.trim()}` : none);

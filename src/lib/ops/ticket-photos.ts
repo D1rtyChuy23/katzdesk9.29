@@ -10,6 +10,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { accountRepOf } from "@/lib/ops/reps";
+import { ofAccount, readsById } from "@/lib/ops/read-by-id";
 import {
   MAX_ID,
   PHOTO_ADDED_ELSEWHERE,
@@ -266,17 +267,19 @@ const accountInput = z.object({ customerId: z.number().int().positive().max(MAX_
 
 /**
  * The account's install photos for its Photos tab, by install, newest install first: the same installs its history
- * lists (on the desk, under the account's name). A ticket's or a PM's photos stay on that ticket (Chuy, 11/4).
+ * lists (by the account's id once the Accounts switch is on, phase C5; by its name until then). A ticket's or a PM's
+ * photos stay on that ticket (Chuy, 11/4).
  */
 export async function listAccountPhotosFor(sql: Sql, userId: string, data: z.infer<typeof accountInput>): Promise<AccountPhotos | null> {
   const account = (await sql.query<{ id: number; name: string }>("select id, name from directory_customers where id = $1 and archived = false", [data.customerId]))[0];
   if (!account) return null;
+  const byId = await readsById(sql, "accounts");
   const installs = await sql.query<{ id: number; customer: string; wo: string | null; day: string | null; complete: unknown; equip_status: string | null; equipment: string | null }>(
     `select id, customer, wo, to_char(coalesce(install_date, received), 'YYYY-MM-DD') as day, complete, equip_status, equipment
-       from installs
-      where archived = false and lower(customer) = lower($1)
+       from installs i
+      where i.archived = false and ${ofAccount({ name: "i.customer", id: "i.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
       order by install_date desc nulls last, id desc`,
-    [account.name],
+    byId ? [account.name, account.id] : [account.name],
   );
   const ids = installs.map((i) => Number(i.id));
   const photos = ids.length

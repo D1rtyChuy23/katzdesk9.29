@@ -7,6 +7,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { isWalkIn } from "@/lib/ops/customer-key";
+import { accountRecordRows, customerRecordsSql } from "@/lib/ops/account-reads";
+import { readsById } from "@/lib/ops/read-by-id";
 import { assertWalkInMove, assertWalkInSite, WALK_IN_MOVE, walkInAccountName } from "@/lib/ops/walk-in-account";
 import { canReviewNames, deskMiddleware, salesRepScope } from "@/lib/ops/access";
 import { CLOSED_CALL, CLOSED_PM } from "./lookups";
@@ -2881,81 +2883,7 @@ export const listCustomerRecords = createServerFn({ method: "GET" }).middleware(
 	const sql = await ready();
 	const { ensureAccountMarks } = await import("./reps");
 	await ensureAccountMarks(sql);
-	return (await sql.query(`select
-         d.id,
-         d.name,
-         d.avi_katz,
-         d.account_rep,
-         d.name_locked,
-         d.removal_flag,
-         d.account_number,
-         d.inactive,
-         d.retired_at,
-         coalesce(svc.n, 0)::int as calls,
-         coalesce(svc.p, 0)::int as pending_calls,
-         coalesce(tlc.n, 0)::int as tlcs,
-         coalesce(tlc.p, 0)::int as pending_tlcs,
-         coalesce(pm.n, 0)::int as pms,
-         coalesce(pm.p, 0)::int as pending_pms,
-         coalesce(inst.n, 0)::int as installs,
-         coalesce(inst.p, 0)::int as pending_installs,
-         coalesce(deal.n, 0)::int as deals,
-         coalesce(rcp.n, 0)::int as recipes
-       from directory_customers d
-       left join (
-         select lower(customer) as k,
-                count(*)::int as n,
-                count(*) filter (
-                  where not done and status not in ('Completed', 'Cancelled', 'Phone Resolved')
-                )::int as p
-         from service_jobs
-         where coalesce(kind, 'service') = 'service' and coalesce(customer, '') <> ''
-         group by 1
-       ) svc on svc.k = lower(d.name)
-       left join (
-         select lower(customer) as k,
-                count(*)::int as n,
-                count(*) filter (
-                  where not done and status not in ('Completed', 'Cancelled', 'Phone Resolved')
-                )::int as p
-         from service_jobs
-         where kind = 'tlc' and coalesce(customer, '') <> ''
-         group by 1
-       ) tlc on tlc.k = lower(d.name)
-       left join (
-         select lower(customer) as k,
-                count(*)::int as n,
-                count(*) filter (
-                  where not done and status not in ('Completed', 'Cancelled')
-                )::int as p
-         from pm_jobs
-         where coalesce(customer, '') <> '' and moved_job_id is null
-         group by 1
-       ) pm on pm.k = lower(d.name)
-       left join (
-         select lower(customer) as k,
-                count(*)::int as n,
-                count(*) filter (
-                  where not complete and coalesce(equip_status, '') <> 'Installed'
-                )::int as p
-         from installs
-         where archived = false and coalesce(customer, '') <> ''
-         group by 1
-       ) inst on inst.k = lower(d.name)
-       left join (
-         select lower(customer) as k, count(*)::int as n
-         from deals
-         where archived = false and coalesce(customer, '') <> ''
-         group by 1
-       ) deal on deal.k = lower(d.name)
-       left join (
-         select lower(customer) as k, count(*)::int as n
-         from recipes
-         where coalesce(customer, '') <> ''
-         group by 1
-       ) rcp on rcp.k = lower(d.name)
-       where d.archived = false
-       order by lower(d.name)`)).map((r) => ({
+	return (await sql.query(customerRecordsSql(await readsById(sql, "accounts")))).map((r) => ({
 		id: r.id,
 		name: r.name,
 		calls: r.calls,
@@ -2988,26 +2916,8 @@ export const getCustomerHistory = createServerFn({ method: "GET" }).middleware([
 	const today = todayChicago();
 	const week = weekBounds(today);
 	const catalog = await loadEquipCatalog(sql);
-	const jobs = await sql`
-      select * from service_jobs
-      where lower(customer) = lower(${name})
-      order by received desc nulls last, id desc`;
-	const pms = await sql`
-      select * from pm_jobs
-      where lower(customer) = lower(${name}) and moved_job_id is null
-      order by received desc nulls last, id desc`;
-	const installs = await sql`
-      select * from installs
-      where archived = false and lower(customer) = lower(${name})
-      order by install_date desc nulls last, id desc`;
-	const deals = await sql`
-      select * from deals
-      where archived = false and lower(customer) = lower(${name})
-      order by date_of_deal desc nulls last, id desc`;
-	const recipes = await sql`
-      select * from recipes
-      where lower(customer) = lower(${name})
-      order by equipment_model`;
+	// By the account's id once the Accounts switch is on (phase C5, Link Check); by its name until then.
+	const { jobs, pms, installs, deals, recipes } = await accountRecordRows(sql, { id: Number(account.id), name }, await readsById(sql, "accounts"));
 	return {
 		id: account.id,
 		name,

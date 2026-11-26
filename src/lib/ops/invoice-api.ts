@@ -24,6 +24,7 @@ import { BILLED_INVOICES_ON_INSTALL, BILLED_ON_INSTALL, STANDING_NS_INVOICES, vo
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 import {
   SERVICE_DEPT_KEYS,
   invoicePowers,
@@ -1044,8 +1045,8 @@ export type AccountInvoice = {
  */
 export const listAccountInvoices = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string }) => z.object({ customer: z.string().max(300) }).parse(d))
-  .handler(async ({ data, context }): Promise<AccountInvoice[]> => listAccountInvoicesFor(await ready(), data.customer, context.userId));
+  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: z.string().max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d))
+  .handler(async ({ data, context }): Promise<AccountInvoice[]> => listAccountInvoicesFor(await ready(), data.customer, context.userId, data.customerId ?? null));
 
 /** A ticket merged as billed on NetSuite invoices alone: ", Voided now" (all), " (INV1 Voided now)" (some), or "". */
 function voidedNote(t: { billed_invoices: string | null; standing: string | null }): string {
@@ -1054,11 +1055,19 @@ function voidedNote(t: { billed_invoices: string | null; standing: string | null
   return t.standing ? ` (${voided.join(", ")} Voided now)` : ", Voided now";
 }
 
-/** The body of listAccountInvoices. Warehouse doesn't read accounts' invoices. */
-export async function listAccountInvoicesFor(sql: Sql, customer: string, userId: string): Promise<AccountInvoice[]> {
+/**
+ * The body of listAccountInvoices. Warehouse doesn't read accounts' invoices. With `customerId` and the Accounts switch
+ * on (phase C5, Link Check), by the account's id: an invoice keeps its id through a rename, so the renamed account still
+ * lists it under the old name. Otherwise by the name, spaces at the ends dropped.
+ */
+export async function listAccountInvoicesFor(sql: Sql, customer: string, userId: string, customerId: number | null = null): Promise<AccountInvoice[]> {
   if ((await invoiceViewer(sql, userId)).warehouse) throw new Error(WAREHOUSE_REBUILDS_ONLY);
   const name = customer.trim();
   if (!name) return [];
+  const byId = customerId != null && (await readsById(sql, "accounts"));
+  const params = byId ? [name, customerId] : [name];
+  const ofV = ofAccount({ name: "v.customer", id: "v.customer_id", match: "trim", byId, nameParam: "$1", idParam: "$2" });
+  const ofJ = ofAccount({ name: "j.customer", id: "j.customer_id", match: "trim", byId, nameParam: "$1", idParam: "$2" });
   const approved = await sql.query<{
     entity_type: InvoiceTarget;
     entity_id: number;
@@ -1072,11 +1081,11 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
     // A merged ticket's own invoice is left out: its charges are on the ticket or install it was merged into (10/30).
     `select entity_type, entity_id, total, approved_at, approved_by, submitted_at, submitted_by, po
        from invoices v
-      where lower(btrim(v.customer)) = lower($1) and (v.approved_at is not null or v.submitted_at is not null)
+      where ${ofV} and (v.approved_at is not null or v.submitted_at is not null)
         and not (v.entity_type in ('service', 'tlc')
                  and exists (select 1 from service_jobs j where j.id = v.entity_id and j.duplicate_of is not null))
       order by coalesce(v.approved_at, v.submitted_at) desc`,
-    [name],
+    params,
   );
   // A ticket merged into an install as billed (10/30) stays listed, as billed: its charges never went on the install's
   // invoice, so this is the one place they show on the account.
@@ -1086,10 +1095,10 @@ export async function listAccountInvoicesFor(sql: Sql, customer: string, userId:
             ${BILLED_ON_INSTALL("j.id")} as billed_on, j.merged_install_id,
             ${BILLED_INVOICES_ON_INSTALL("j.id")} as billed_invoices, ${STANDING_NS_INVOICES("j.id")} as standing
        from service_jobs j join ticket_charges c on c.job_id = j.id
-      where lower(btrim(j.customer)) = lower($1) and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
+      where ${ofJ} and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
       group by j.id
       order by j.id desc`,
-    [name],
+    params,
   );
   const out: AccountInvoice[] = [];
   const seen = new Set<string>();
