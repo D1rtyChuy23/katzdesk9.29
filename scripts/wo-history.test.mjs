@@ -1138,6 +1138,7 @@ test("profit report: QuickBooks history by year and customer, apart; Service Dep
   ]);
   assert.deepEqual([all.totals.bills, all.totals.sell, all.totals.profit], [2, 788.53, 623.03]);
   assert.deepEqual(all.byCustomer.map((g) => [g.label, g.bills]), [["Alpha Cafe", 2]]);
+  assert.deepEqual(all.byAccount.map((g) => [g.label, g.bills]), [["Alpha Cafe", 2]]);
   assert.match(all.note, /^Parts cost only; labor cost not included$/);
 
   const job = (await pg.query("select job_id from wo_history where history_ref = $1", [WO])).rows[0].job_id;
@@ -1160,15 +1161,16 @@ test("profit report: QuickBooks history by year and customer, apart; Service Dep
   const only2025 = await R.historyProfitSection(sql, { from: "2025-01-01", to: "2025-12-31" });
   assert.deepEqual([only2025.totals.bills, only2025.excluded.serviceDept], [0, 1], "the range applies; Service Dept is left out");
 
-  // The downloads carry the section as its own two tables, after the job-type and customer tables.
-  const file = P.buildProfitReportFile({ byType: [], byCustomer: [], totals: P.groupTotals([]), history: all }, { generated: "now", scope: "All" });
-  assert.deepEqual(file.extra.map((t) => [t.title, t.sheet, t.rows.length]), [
+  // The downloads carry the section as its own tables, after the job-type and customer tables.
+  const file = P.buildProfitReportFile({ byType: [], byCustomer: [], byAccount: [], totals: P.groupTotals([]), history: all }, { generated: "now", scope: "All" });
+  assert.deepEqual(file.extra.slice(1).map((t) => [t.title, t.sheet, t.rows.length]), [
     ["QuickBooks history (2024–2026): By Year", "QB History By Year", 3],
-    ["QuickBooks history (2024–2026): By Customer", "QB History By Customer", 1],
+    ["QuickBooks history (2024–2026): By Account", "QB History By Account", 1],
+    ["QuickBooks history (2024–2026): By Name Billed", "QB History By Name Billed", 1],
   ]);
-  assert.deepEqual(file.extra[0].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "83.4%", "$0.00", "0"]);
+  assert.deepEqual(file.extra[1].rows[2], ["Total", "2", "$788.53", "$41.50", "$124.00", "$623.03", "83.4%", "$0.00", "0"]);
   const { reportSheets } = await import("../src/lib/ops/analytics.ts");
-  assert.deepEqual(reportSheets(file).map((s) => s.name), ["By Job Type", "By Customer", "QB History By Year", "QB History By Customer"]);
+  assert.deepEqual(reportSheets(file).map((s) => s.name), ["By Job Type", "By Account", "By Name Billed", "QB History By Year", "QB History By Account", "QB History By Name Billed"]);
 });
 
 test("line costs: the server repeats the file checks, and never costs a labor, trip or discount line", async () => {
@@ -1244,7 +1246,7 @@ test("history profit: an invoice is fully costed only when every line that needs
 
 test("history profit: totals count cost and profit on fully costed bills only; partial bills go to Uncosted Sell", async () => {
   const P = await import("../src/lib/ops/profit-report.ts");
-  const bill = (o) => ({ year: "2025", customer: "Alpha Cafe", customerKey: "alphacafe", ...o });
+  const bill = (o) => ({ year: "2025", customer: "Alpha Cafe", customerKey: "alphacafe", accountKey: "a:1", accountLabel: "Alpha Cafe", ...o });
   const bills = [
     bill({ sell: 100, discount: 10, cost: 40, partial: false, profit: 50 }),
     bill({ sell: 200, discount: 20, cost: 30, partial: true, profit: null }),
@@ -1254,10 +1256,11 @@ test("history profit: totals count cost and profit on fully costed bills only; p
   assert.equal(P.historyTotals([bill({ sell: 50, discount: 0, cost: 0, partial: true, profit: null })]).marginPct, null, "no costed bill: no margin");
   const s = P.historySection(bills, { serviceDept: 0, billedTicket: 0 });
   assert.match(s.note, /1 partial bill: its sell is in Uncosted Sell/);
-  const [byYear, byCustomer] = P.historyReportTables(s);
+  const [byYear, byAccount, byName] = P.historyReportTables(s);
   const cols = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount (costed bills)", "Margin %", "Uncosted Sell", "Partial Bills"];
   assert.deepEqual(byYear.columns, ["Year", ...cols]);
-  assert.deepEqual(byCustomer.columns, ["Customer", ...cols]);
+  assert.deepEqual(byAccount.columns, ["Account", ...cols]);
+  assert.deepEqual(byName.columns, ["Name Billed", ...cols]);
   assert.deepEqual(byYear.rows.at(-1), ["Total", "2", "$300.00", "$30.00", "$40.00", "$50.00", "55.56%", "$180.00", "1"]);
 });
 

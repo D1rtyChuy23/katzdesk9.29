@@ -25,12 +25,13 @@ import { costView } from "@/lib/ops/cost-access";
 import { discountFromRow } from "@/lib/ops/discount";
 import { billProfit, type LineCostTable } from "@/lib/ops/line-cost";
 import { discountShares, type BillProfitTotals } from "@/lib/ops/part-pricing";
-import { COSTED_FROM, JOB_TYPES, buildProfitReportFile, groupBy, groupTotals, historySection, profitReportFileName, type GroupTotals, type HistoryBill, type HistorySection, type ProfitBill } from "@/lib/ops/profit-report";
+import { COSTED_FROM, JOB_TYPES, accountGroupOf, buildProfitReportFile, groupBy, groupTotals, historySection, profitReportFileName, type GroupTotals, type HistoryBill, type HistorySection, type ProfitBill } from "@/lib/ops/profit-report";
 import { historyInvoiceCost } from "@/lib/ops/wo-history";
 import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
 import { reportDocx, reportPdf } from "@/lib/ops/report-files";
+import { accountNames, listedAccountSql } from "@/lib/ops/bill-account";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -46,12 +47,15 @@ type Filters = z.infer<typeof filterInput>;
 
 export type ProfitReport = {
   byType: (GroupTotals & { key: string })[];
+  /** By name billed. */
   byCustomer: (GroupTotals & { key: string; label: string })[];
+  /** By account (Chuy, 11/26): each listed account on one row under its name now. */
+  byAccount: (GroupTotals & { key: string; label: string })[];
   totals: GroupTotals;
   scope: string;
   /** Labor is left out for this person (the labor switch is off). */
   laborHidden: boolean;
-  /** QuickBooks history (2024–2026), its own section: never in byType, byCustomer or totals. */
+  /** QuickBooks history (2024–2026), its own section: never in byType, byCustomer, byAccount or totals. */
   history: HistorySection;
 };
 
@@ -69,12 +73,18 @@ async function viewOf(sql: Sql, userId: string) {
   return { admin: await canReviewNames(sql, userId), showLabor: v.showLabor };
 }
 
-function asBill(type: string, customer: string, date: string, t: BillProfitTotals, estimated: boolean): ProfitBill {
+/** A bill before By Account's name is known: its listed account's id (listedAccountSql), or null. */
+type RawBill = Omit<ProfitBill, "accountKey" | "accountLabel"> & { accountId: number | null };
+
+const idOrNull = (v: number | string | null | undefined) => (v == null ? null : Number(v));
+
+function asBill(type: string, customer: string, accountId: number | null, date: string, t: BillProfitTotals, estimated: boolean): RawBill {
   const before2026 = date < COSTED_FROM;
   return {
     type,
     customer: customer.trim(),
     customerKey: normalizeCustomerKey(customer),
+    accountId,
     date,
     sell: t.sell,
     discount: t.ticketDiscount,
@@ -85,20 +95,34 @@ function asBill(type: string, customer: string, date: string, t: BillProfitTotal
   };
 }
 
-async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLabor: boolean }): Promise<ProfitBill[]> {
+/** Each bill's By Account row: its listed account under the account's name now, else its name (accountGroupOf). */
+async function withAccounts<T extends { customer: string; customerKey: string; accountId: number | null }>(sql: Sql, bills: T[]): Promise<(Omit<T, "accountId"> & { accountKey: string; accountLabel: string })[]> {
+  const names = await accountNames(sql, bills.map((b) => b.accountId));
+  return bills.map(({ accountId, ...b }) => ({ ...b, ...accountGroupOf(accountId, b.customer, b.customerKey, names) }));
+}
+
+async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLabor: boolean }): Promise<RawBill[]> {
   const range = [f.from ?? null, f.to ?? null];
   // An install's or PM's NetSuite lines, when it has any, stand in for its own invoice.
   const NS_HAS = `exists (select 1 from record_ns_billing b join record_ns_charges c on c.billing_id = b.id
                            where (v.entity_type = 'install' and b.install_id = v.entity_id) or (v.entity_type = 'pm' and b.pm_id = v.entity_id))`;
-  const invoices = await sql.query<{ id: number; type: string; customer: string | null; day: string; dk: string | null; dv: string | null; ds: string | null }>(
-    `select v.id, v.entity_type as type,
-            -- The record's customer as it is now (a rename updates the records, not the invoice's copy).
-            coalesce(nullif(btrim(case v.entity_type
+  // The record's customer as it is now (a rename updates the records, not the invoice's copy), and its id with it; the
+  // invoice's own copy only when the record has no name (or is gone).
+  const RECORD_NAME = `nullif(btrim(case v.entity_type
                        when 'pm' then (select m.customer from pm_jobs m where m.id = v.entity_id)
                        when 'install' then (select i.customer from installs i where i.id = v.entity_id)
                        when 'deal' then (select d.customer from deals d where d.id = v.entity_id)
-                       when 'rebuild' then (select r.account from rebuilds r where r.id = v.entity_id) end), ''),
-                     nullif(btrim(v.customer), ''), nullif(btrim(v.bill_name), ''), '') as customer,
+                       when 'rebuild' then (select r.account from rebuilds r where r.id = v.entity_id) end), '')`;
+  const RECORD_ID = `case v.entity_type
+                       when 'pm' then (select m.customer_id from pm_jobs m where m.id = v.entity_id)
+                       when 'install' then (select i.customer_id from installs i where i.id = v.entity_id)
+                       when 'deal' then (select d.customer_id from deals d where d.id = v.entity_id)
+                       when 'rebuild' then (select r.account_id from rebuilds r where r.id = v.entity_id) end`;
+  const invoices = await sql.query<{ id: number; type: string; customer: string | null; account_id: number | null; day: string; dk: string | null; dv: string | null; ds: string | null }>(
+    `select x.*, ${listedAccountSql("x.own_id", "x.customer")} as account_id from (
+     select v.id, v.entity_type as type,
+            coalesce(${RECORD_NAME}, nullif(btrim(v.customer), ''), nullif(btrim(v.bill_name), ''), '') as customer,
+            case when ${RECORD_NAME} is not null then ${RECORD_ID} else v.customer_id end as own_id,
             to_char((v.approved_at at time zone 'America/Chicago')::date, 'YYYY-MM-DD') as day, v.discount_kind as dk, v.discount_value::text as dv, v.discount_scope as ds
        from invoices v
       where v.approved_at is not null and v.entity_type in ('pm', 'install', 'rebuild', 'deal')
@@ -109,12 +133,14 @@ async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLab
         and not (v.entity_type = 'pm' and exists (select 1 from pm_jobs m where m.id = v.entity_id and m.stacked_job_id is not null))
         and ($1::date is null or (v.approved_at at time zone 'America/Chicago')::date >= $1::date)
         and ($2::date is null or (v.approved_at at time zone 'America/Chicago')::date <= $2::date)
-      order by v.id`,
+     ) x
+      order by x.id`,
     range,
   );
-  const ns = await sql.query<{ id: number; type: string; customer: string | null; day: string | null; dk: string | null; dv: string | null }>(
+  const ns = await sql.query<{ id: number; type: string; customer: string | null; account_id: number | null; day: string | null; dk: string | null; dv: string | null }>(
     `select b.id, case when b.install_id is not null then 'install' else 'pm' end as type,
             coalesce(i.customer, m.customer, '') as customer,
+            ${listedAccountSql("case when i.customer is not null then i.customer_id else m.customer_id end", "coalesce(i.customer, m.customer, '')")} as account_id,
             -- Billed, else its first NetSuite invoice, else when the backfill wrote it: every NetSuite bill has a day, so it
             -- never hides the record's own invoice and then drops out itself (review, 11/20).
             to_char(coalesce((b.billed_at at time zone 'America/Chicago')::date,
@@ -130,17 +156,17 @@ async function recordBills(sql: Sql, f: Filters, view: { admin: boolean; showLab
         and (m.id is null or m.stacked_job_id is null)
       order by b.id`,
   );
-  const out: ProfitBill[] = [];
+  const out: RawBill[] = [];
   const cache = { rule: await loadDiscountRule(sql), laborRate: await loadLaborRate(sql) };
-  const add = async (table: LineCostTable, id: number, type: string, customer: string, day: string, d: ReturnType<typeof discountFromRow>) => {
+  const add = async (table: LineCostTable, id: number, type: string, customer: string, accountId: number | null, day: string, d: ReturnType<typeof discountFromRow>) => {
     const p = await billProfit(sql, table, id, d, view.admin, view.showLabor, cache);
-    out.push(asBill(type, customer, day, p.totals, p.profit.some((x) => x != null && !x.stored)));
+    out.push(asBill(type, customer, accountId, day, p.totals, p.profit.some((x) => x != null && !x.stored)));
   };
-  for (const v of invoices) await add("invoice_lines", Number(v.id), v.type, v.customer ?? "", v.day, discountFromRow(v.dk, v.dv, v.ds));
+  for (const v of invoices) await add("invoice_lines", Number(v.id), v.type, v.customer ?? "", idOrNull(v.account_id), v.day, discountFromRow(v.dk, v.dv, v.ds));
   for (const b of ns) {
     if (!b.day) continue;
     if ((f.from && b.day < f.from) || (f.to && b.day > f.to)) continue;
-    await add("record_ns_charges", Number(b.id), b.type, b.customer ?? "", b.day, discountFromRow(b.dk, b.dv));
+    await add("record_ns_charges", Number(b.id), b.type, b.customer ?? "", idOrNull(b.account_id), b.day, discountFromRow(b.dk, b.dv));
   }
   return out;
 }
@@ -162,8 +188,8 @@ export async function historyProfitSection(sql: Sql, f: Filters, opts: { laborHi
         and exists (select 1 from ticket_charges c where c.job_id = j.id)`,
   );
   const billedTickets = new Set(billed.map((r) => Number(r.id)));
-  const rows = await sql.query<{ id: number; customer: string; job_id: number | null; day: string | null }>(
-    `select h.id, h.customer, h.job_id, to_char(${DAY}, 'YYYY-MM-DD') as day
+  const rows = await sql.query<{ id: number; customer: string; account_id: number | null; job_id: number | null; day: string | null }>(
+    `select h.id, h.customer, ${listedAccountSql("h.customer_id", "h.customer")} as account_id, h.job_id, to_char(${DAY}, 'YYYY-MM-DD') as day
        from wo_history h
       where exists (select 1 from wo_history_lines l where l.history_id = h.id)
         and ($1::date is null or ${DAY} >= $1::date)
@@ -185,7 +211,7 @@ export async function historyProfitSection(sql: Sql, f: Filters, opts: { laborHi
     const id = Number(l.history_id);
     byId.set(id, [...(byId.get(id) ?? []), { kind: l.kind, amount: num(l.amount), lineCost: num(l.line_cost) }]);
   }
-  const bills: HistoryBill[] = [];
+  const bills: (Omit<HistoryBill, "accountKey" | "accountLabel"> & { accountId: number | null })[] = [];
   const excluded = { serviceDept: 0, billedTicket: 0 };
   for (const r of rows) {
     if (isServiceDeptAccount(r.customer)) {
@@ -210,9 +236,19 @@ export async function historyProfitSection(sql: Sql, f: Filters, opts: { laborHi
       kept = own.filter((l) => l.kind !== "labor");
     }
     const c = historyInvoiceCost(kept, discount);
-    bills.push({ year: r.day ? r.day.slice(0, 4) : "", customer: r.customer.trim(), customerKey: normalizeCustomerKey(r.customer), sell: c.subtotal, discount, cost: c.cost, partial: c.partial, profit: c.profit });
+    bills.push({
+      year: r.day ? r.day.slice(0, 4) : "",
+      customer: r.customer.trim(),
+      customerKey: normalizeCustomerKey(r.customer),
+      accountId: idOrNull(r.account_id),
+      sell: c.subtotal,
+      discount,
+      cost: c.cost,
+      partial: c.partial,
+      profit: c.profit,
+    });
   }
-  return historySection(bills, excluded, { laborHidden: opts.laborHidden });
+  return historySection(await withAccounts(sql, bills), excluded, { laborHidden: opts.laborHidden });
 }
 
 const niceDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -221,7 +257,10 @@ const niceDay = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString("en-
 export async function profitReportFor(sql: Sql, f: Filters, userId: string): Promise<ProfitReport> {
   const view = await viewOf(sql, userId);
   const tickets = await ticketProfitBills(sql, { from: f.from ?? null, to: f.to ?? null }, { showCost: true, ...view });
-  const bills = [...tickets.map((t) => asBill(t.kind === "tlc" ? "tlc" : "service", t.customer, t.date, t.totals, t.estimated)), ...(await recordBills(sql, f, view))];
+  const bills = await withAccounts(sql, [
+    ...tickets.map((t) => asBill(t.kind === "tlc" ? "tlc" : "service", t.customer, t.accountId, t.date, t.totals, t.estimated)),
+    ...(await recordBills(sql, f, view)),
+  ]);
   const totals = groupTotals(bills);
   const laborHidden = !view.admin && !view.showLabor;
   const range = f.from && f.to ? `${niceDay(f.from)} to ${niceDay(f.to)}` : f.from ? `From ${niceDay(f.from)}` : f.to ? `Through ${niceDay(f.to)}` : "All dates";
@@ -237,6 +276,7 @@ export async function profitReportFor(sql: Sql, f: Filters, userId: string): Pro
   return {
     byType: groupBy(bills, (b) => b.type, JOB_TYPES.map((t) => t.key)),
     byCustomer: groupBy(bills, (b) => b.customerKey, undefined, (b) => b.customer),
+    byAccount: groupBy(bills, (b) => b.accountKey, undefined, (b) => b.accountLabel),
     totals,
     scope: `${range} · ${notes.join(" · ")}`,
     laborHidden,

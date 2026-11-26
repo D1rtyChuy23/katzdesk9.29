@@ -21,6 +21,9 @@ export type ProfitBill = {
   customer: string;
   /** The customer as grouped: case, spaces and punctuation don't split a customer. */
   customerKey: string;
+  /** By Account's row (accountGroupOf). */
+  accountKey: string;
+  accountLabel: string;
   /** YYYY-MM-DD: billed (tickets, NetSuite) or approved (invoices). */
   date: string;
   sell: number;
@@ -71,10 +74,32 @@ export function groupBy(bills: ProfitBill[], key: (b: ProfitBill) => string, ord
   const by = new Map<string, ProfitBill[]>();
   for (const b of bills) by.set(key(b), [...(by.get(key(b)) ?? []), b]);
   const rows = [...by.entries()].map(([k, list]) => ({ key: k, label: label(list[0]!), ...groupTotals(list) }));
-  return order ? rows.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key)) : rows.sort((a, b) => b.sell - a.sell || a.key.localeCompare(b.key));
+  return order ? rows.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key)) : rows.sort(bySell);
 }
 
 export const jobTypeLabel = (key: string) => JOB_TYPES.find((t) => t.key === key)?.label ?? key;
+
+/**
+ * The two customer tables (Chuy, 11/26: "Allow both reports"). By Account: each listed account on one row under its name
+ * now, by the account's id. By Name Billed: each name as billed, as before (capitals, spaces and punctuation don't split a
+ * name).
+ */
+export const CUSTOMER_GROUPINGS = [
+  { id: "account", title: "By Account", first: "Account", sheet: "By Account" },
+  { id: "name", title: "By Name Billed", first: "Name Billed", sheet: "By Name Billed" },
+] as const;
+export type CustomerGrouping = (typeof CUSTOMER_GROUPINGS)[number]["id"];
+
+/**
+ * A bill's By Account row: its listed account ("a:<id>", the account's name now), or, with none, its name as By Name
+ * Billed groups it ("n:<customerKey>").
+ */
+export function accountGroupOf(accountId: number | null, customer: string, customerKey: string, names: ReadonlyMap<number, string>): { accountKey: string; accountLabel: string } {
+  const name = accountId == null ? undefined : names.get(accountId);
+  return name == null ? { accountKey: `n:${customerKey}`, accountLabel: customer } : { accountKey: `a:${accountId}`, accountLabel: name };
+}
+
+const bySell = <T extends { sell: number; key: string }>(a: T, b: T) => b.sell - a.sell || a.key.localeCompare(b.key);
 
 const COLUMNS = ["Bills", "Sell", "Discount", "Cost", "Margin", "Margin %", "Sell With No Cost", "Estimated"];
 const WEIGHTS = [50, 80, 80, 80, 80, 60, 90, 60];
@@ -91,6 +116,9 @@ export type HistoryBill = {
   year: string;
   customer: string;
   customerKey: string;
+  /** By Account's row (accountGroupOf). */
+  accountKey: string;
+  accountLabel: string;
   /** Before the discount. */
   sell: number;
   discount: number;
@@ -119,7 +147,9 @@ export type HistoryTotals = {
 
 export type HistorySection = {
   byYear: (HistoryTotals & { key: string; label: string })[];
+  /** By name billed. */
   byCustomer: (HistoryTotals & { key: string; label: string })[];
+  byAccount: (HistoryTotals & { key: string; label: string })[];
   totals: HistoryTotals;
   /** Left out: Service Dept (internal), and work orders whose ticket already counts above as a billed ticket. */
   excluded: { serviceDept: number; billedTicket: number };
@@ -164,7 +194,8 @@ export function historySection(bills: HistoryBill[], excluded: { serviceDept: nu
     laborHidden: !!opts.laborHidden,
     // Oldest year first; a work order with no date last.
     byYear: historyGroup(bills, (b) => b.year, (b) => b.year || "(no date)").sort((a, b) => (a.key || "9999").localeCompare(b.key || "9999")),
-    byCustomer: historyGroup(bills, (b) => b.customerKey, (b) => b.customer).sort((a, b) => b.sell - a.sell || a.key.localeCompare(b.key)),
+    byCustomer: historyGroup(bills, (b) => b.customerKey, (b) => b.customer).sort(bySell),
+    byAccount: historyGroup(bills, (b) => b.accountKey, (b) => b.accountLabel).sort(bySell),
     totals: historyTotals(bills),
     excluded,
     note: [HISTORY_SECTION_NOTE, ...left].join(" · "),
@@ -174,27 +205,45 @@ export function historySection(bills: HistoryBill[], excluded: { serviceDept: nu
 const HISTORY_COLUMNS = ["Bills", "Sell", "Discount", "Cost (Parts and Equipment)", "Profit After Discount (costed bills)", "Margin %", "Uncosted Sell", "Partial Bills"];
 const HISTORY_WEIGHTS = [50, 80, 80, 80, 100, 60, 80, 60];
 
-/** The history section as two download tables: by year (with the total), and by customer. */
+/** The history section as three download tables: by year (with the total), by account, and by name billed. */
 export function historyReportTables(h: HistorySection) {
   const m = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const cells = (g: HistoryTotals) => [String(g.bills), m(g.sell), m(g.discount), m(g.cost), m(g.profit), g.marginPct == null ? "—" : `${g.marginPct}%`, m(g.uncostedSell), String(g.partialBills)];
+  const customers = CUSTOMER_GROUPINGS.map((g) => ({
+    title: `${HISTORY_SECTION_TITLE}: ${g.title}`,
+    sheet: `QB History ${g.sheet}`,
+    columns: [g.first, ...HISTORY_COLUMNS],
+    weights: [140, ...HISTORY_WEIGHTS],
+    rows: (g.id === "account" ? h.byAccount : h.byCustomer).map((r) => [r.label || "(none)", ...cells(r)]),
+  }));
   return [
     { title: `${HISTORY_SECTION_TITLE}: By Year`, sheet: "QB History By Year", columns: ["Year", ...HISTORY_COLUMNS], weights: [60, ...HISTORY_WEIGHTS], rows: [...h.byYear.map((g) => [g.label, ...cells(g)]), ["Total", ...cells(h.totals)]] },
-    { title: `${HISTORY_SECTION_TITLE}: By Customer`, sheet: "QB History By Customer", columns: ["Customer", ...HISTORY_COLUMNS], weights: [140, ...HISTORY_WEIGHTS], rows: h.byCustomer.map((g) => [g.label || "(none)", ...cells(g)]) },
+    ...customers,
   ];
 }
 
-/** One report for every download: a table by job type (with the total), and one by customer. */
-export function buildProfitReportFile(r: { byType: (GroupTotals & { key: string })[]; byCustomer: (GroupTotals & { key: string; label: string })[]; totals: GroupTotals; history?: HistorySection | null }, opts: { generated: string; scope: string }) {
+type Groups = (GroupTotals & { key: string; label: string })[];
+
+/**
+ * One report for every download: a table by job type (with the total), then the customer tables by account and by name
+ * billed, then the QuickBooks history's.
+ */
+export function buildProfitReportFile(r: { byType: (GroupTotals & { key: string })[]; byCustomer: Groups; byAccount: Groups; totals: GroupTotals; history?: HistorySection | null }, opts: { generated: string; scope: string }) {
   const m = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const cells = (g: GroupTotals) => [String(g.bills), m(g.sell), m(g.discount), m(g.cost), m(g.margin), g.marginPct == null ? "—" : `${g.marginPct}%`, m(g.uncostedSell), String(g.estimated)];
+  const [account, name] = CUSTOMER_GROUPINGS.map((g) => ({
+    title: g.title,
+    columns: [g.first, ...COLUMNS],
+    weights: [140, ...WEIGHTS],
+    rows: (g.id === "account" ? r.byAccount : r.byCustomer).map((x) => [x.label || "(none)", ...cells(x)]),
+  }));
   return {
     title: "Katz Desk Profit",
     generated: `Generated ${opts.generated}`,
     scope: opts.scope,
     summary: { title: "By Job Type", columns: ["Job Type", ...COLUMNS], weights: [80, ...WEIGHTS], rows: [...r.byType.map((g) => [jobTypeLabel(g.key), ...cells(g)]), ["Total", ...cells(r.totals)]] },
-    records: { title: "By Customer", columns: ["Customer", ...COLUMNS], weights: [140, ...WEIGHTS], rows: r.byCustomer.map((g) => [g.label || "(none)", ...cells(g)]) },
-    extra: r.history ? historyReportTables(r.history) : [],
+    records: account!,
+    extra: [name!, ...(r.history ? historyReportTables(r.history) : [])],
   };
 }
 
