@@ -11,7 +11,7 @@ import { mpnKey } from "@/lib/ops/mpn-rules";
 import { catalogNames, dropMergedRow, putUnitBackOnOpenInstalls, takeUnitOffOpenInstalls } from "@/lib/ops/inspection-api";
 import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { installMachines, serializeMachines } from "@/lib/ops/machines";
-import { ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 import { dropRetiredRecord, listDuplicateSerials, listRetiredUnits, restoreRetiredUnit, retireUnitRecord, type RetiredBy } from "@/lib/ops/account-equip-retire";
 import {
   cleanPartNumber,
@@ -1262,7 +1262,7 @@ export const planAccountEquipImport = createServerFn({ method: "POST" })
 
 const listInput = z.object({
   customer: z.string().optional(),
-  customerId: z.number().int().positive().optional(),
+  customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional(),
 });
 
 const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
@@ -1280,8 +1280,8 @@ export async function readAccountUnits(sql: Sql, customer?: string | null, custo
   const rows = name
     ? await sql.query<UnitDbRow>(
         `select ${UNIT_COLS}
-           from account_equipment
-          where ${ofAccount({ name: "customer", id: "customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
+           from account_equipment a
+          where ${ofAccount({ name: "a.customer", id: "a.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
           order by lower(catalog_model), id`,
         byId ? [name, customerId] : [name],
       )
@@ -1367,7 +1367,7 @@ export const removeAccountEquipment = createServerFn({ method: "POST" })
 export const listRetiredEquipment = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator((d: { customer: string; customerId?: number }) =>
-    z.object({ customer: z.string().min(1).max(300), customerId: z.number().int().positive().optional() }).parse(d),
+    z.object({ customer: z.string().min(1).max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d),
   )
   .handler(async ({ data }) => listRetiredUnits(await ready(), data.customer, data.customerId ?? null));
 

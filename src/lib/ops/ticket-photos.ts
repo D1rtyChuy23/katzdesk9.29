@@ -276,8 +276,8 @@ export async function listAccountPhotosFor(sql: Sql, userId: string, data: z.inf
   const byId = await readsById(sql, "accounts");
   const installs = await sql.query<{ id: number; customer: string; wo: string | null; day: string | null; complete: unknown; equip_status: string | null; equipment: string | null }>(
     `select id, customer, wo, to_char(coalesce(install_date, received), 'YYYY-MM-DD') as day, complete, equip_status, equipment
-       from installs
-      where archived = false and ${ofAccount({ name: "customer", id: "customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
+       from installs i
+      where i.archived = false and ${ofAccount({ name: "i.customer", id: "i.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" })}
       order by install_date desc nulls last, id desc`,
     byId ? [account.name, account.id] : [account.name],
   );

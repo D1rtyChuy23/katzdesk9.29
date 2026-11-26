@@ -67,15 +67,15 @@ export type AccountRecordRows = {
 
 /** The account window's tickets, PMs, installs, deals and recipes, newest first (getCustomerHistory). */
 export async function accountRecordRows(sql: Pick<Sql, "query">, account: { id: number; name: string }, byId: boolean): Promise<AccountRecordRows> {
-  const of = ofAccount({ name: "customer", id: "customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" });
+  const of = ofAccount({ name: "t.customer", id: "t.customer_id", match: "lower", byId, nameParam: "$1", idParam: "$2" });
   // The id is sent only when the where clause has a place for it (Postgres won't type an unused parameter).
   const params = byId ? [account.name, account.id] : [account.name];
   const rows = (text: string) => sql.query<Record<string, any>>(text, params);
   return {
-    jobs: await rows(`select * from service_jobs where ${of} order by received desc nulls last, id desc`),
-    pms: await rows(`select * from pm_jobs where ${of} and moved_job_id is null order by received desc nulls last, id desc`),
-    installs: await rows(`select * from installs where archived = false and ${of} order by install_date desc nulls last, id desc`),
-    deals: await rows(`select * from deals where archived = false and ${of} order by date_of_deal desc nulls last, id desc`),
-    recipes: await rows(`select * from recipes where ${of} order by equipment_model`),
+    jobs: await rows(`select t.* from service_jobs t where ${of} order by t.received desc nulls last, t.id desc`),
+    pms: await rows(`select t.* from pm_jobs t where ${of} and t.moved_job_id is null order by t.received desc nulls last, t.id desc`),
+    installs: await rows(`select t.* from installs t where t.archived = false and ${of} order by t.install_date desc nulls last, t.id desc`),
+    deals: await rows(`select t.* from deals t where t.archived = false and ${of} order by t.date_of_deal desc nulls last, t.id desc`),
+    recipes: await rows(`select t.* from recipes t where ${of} order by t.equipment_model`),
   };
 }

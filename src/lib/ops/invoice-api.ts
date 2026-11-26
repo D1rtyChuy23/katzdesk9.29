@@ -24,7 +24,7 @@ import { BILLED_INVOICES_ON_INSTALL, BILLED_ON_INSTALL, STANDING_NS_INVOICES, vo
 import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
-import { ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 import {
   SERVICE_DEPT_KEYS,
   invoicePowers,
@@ -1045,7 +1045,7 @@ export type AccountInvoice = {
  */
 export const listAccountInvoices = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: z.string().max(300), customerId: z.number().int().positive().optional() }).parse(d))
+  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: z.string().max(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d))
   .handler(async ({ data, context }): Promise<AccountInvoice[]> => listAccountInvoicesFor(await ready(), data.customer, context.userId, data.customerId ?? null));
 
 /** A ticket merged as billed on NetSuite invoices alone: ", Voided now" (all), " (INV1 Voided now)" (some), or "". */

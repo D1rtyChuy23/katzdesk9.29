@@ -53,7 +53,7 @@ import {
 import { costView } from "@/lib/ops/cost-access";
 import { discountShares } from "@/lib/ops/part-pricing";
 import { isServiceDeptAccount } from "@/lib/ops/warehouse-invoice";
-import { ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
 
 type Query = Pick<Sql, "query">;
 
@@ -1535,7 +1535,7 @@ export const setWoHistoryLocation = createServerFn({ method: "POST" })
 
 export const listAccountWoHistory = createServerFn({ method: "POST" })
   .middleware([deskMiddleware])
-  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: short(300), customerId: z.number().int().positive().optional() }).parse(d))
+  .validator((d: { customer: string; customerId?: number }) => z.object({ customer: short(300), customerId: z.number().int().positive().max(ACCOUNT_ID_MAX).optional() }).parse(d))
   .handler(async ({ data, context }): Promise<WoHistorySummary[]> => {
     const sql = await ready();
     return accountHistory(sql, data.customer, { showCost: (await costView(sql, context.userId)).showCost, customerId: data.customerId ?? null });

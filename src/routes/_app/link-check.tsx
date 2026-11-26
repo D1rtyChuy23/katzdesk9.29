@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getLinkCheck, type NameLinkReport, type NameSample } from "@/lib/ops/link-check";
 import { notLoadedText } from "@/lib/ops/load-problem";
-import { getReadById, setReadById, type ListDiff, type ReadByIdArea, type SetReadByIdResult } from "@/lib/ops/read-by-id";
+import { getReadById, setReadById, sweepReadIds, type IdFix, type ListDiff, type ReadByIdArea } from "@/lib/ops/read-by-id";
 
 export const Route = createFileRoute("/_app/link-check")({ component: Page });
 
@@ -280,47 +280,81 @@ const dayOf = (iso: string) => {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "numeric", day: "numeric" });
 };
 
+/** The screens and lists that change when reading by id is switched or the ids are set. */
+const READ_KEYS = ["read-by-id", "link-check", "customers", "customer-history", "account-equipment", "account-equipment-retired", "wo-history-account", "account-invoices", "photos"];
+
 /**
- * Reading by id (phase C5): each area's lists by name and by id side by side, and the switch that makes that area's
- * screens read by id. Turning one on sets the ids first.
+ * Reading by id (phase C5): Set ids first, then each area's lists by name and by id side by side, and the switch that
+ * makes that area's screens read by id.
  */
 function ReadByIdSection() {
+  const qc = useQueryClient();
   const q = useQuery({ queryKey: ["read-by-id"], queryFn: () => getReadById(), staleTime: 60_000 });
+  const [fixed, setFixed] = useState<IdFix[] | null>(null);
+  const sweep = useMutation({
+    mutationFn: () => sweepReadIds(),
+    onSuccess: (r) => {
+      setFixed(r);
+      const n = r.reduce((s, c) => s + c.n, 0);
+      toast.success(n ? `Set ${fmt(n)} ${n === 1 ? "id" : "ids"}` : "Every record already had its id");
+      for (const key of READ_KEYS) void qc.invalidateQueries({ queryKey: [key] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not set the ids"),
+  });
+  const toSet = (q.data?.toSet ?? []).filter((c) => c.n > 0);
+  const left = toSet.reduce((s, c) => s + c.n, 0);
+  const changed = (fixed ?? []).filter((c) => c.n > 0);
   return (
     <section className="mt-8" data-testid="link-check-read-by-id">
       <h2 className="text-lg font-medium">Reading by id</h2>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Screens can find an account's records by its id instead of its name, one area at a time. A record with no id still
-        goes by its name. Before turning an area on, compare its lists: by name and by id should match, except records a rename
-        left under the old name (invoices keep theirs) and names with spaces at the ends. Turning an area on first gives every
-        record the id its name finds now; turning it off goes back to names.
+        Screens can find an account's records by its id instead of its name, one area at a time. A record with no id, or one
+        whose id names a removed account, still goes by its name. First set the ids, then compare an area's lists: by name and
+        by id should match, except records a rename left under the old name (invoices keep theirs) and names with spaces at
+        the ends. Turning an area off goes back to names.
       </p>
       {q.isLoading ? <p className="mt-3 text-sm text-muted-foreground">Comparing…</p> : null}
       {q.isError ? <p className="mt-3 text-sm text-destructive">{notLoadedText(q, "reading by id")}</p> : null}
-      {q.data?.areas.map((a) => <ReadArea key={a.area} area={a} />)}
+      {q.data ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm" data-testid="read-ids-to-set">
+          {left ? (
+            <>
+              <span className="font-medium text-amber-700 dark:text-amber-400">
+                Ids to set: {fmt(left)} ({toSet.map((c) => `${c.label} ${fmt(c.n)}`).join(" · ")})
+              </span>
+              <Button size="sm" disabled={sweep.isPending} onClick={() => sweep.mutate()} data-testid="read-ids-set">
+                {sweep.isPending ? "Setting ids…" : "Set ids"}
+              </Button>
+            </>
+          ) : (
+            <span>✓ Every record has the id its name finds.</span>
+          )}
+          {fixed ? (
+            <span className="text-muted-foreground" data-testid="read-ids-set-result">
+              {changed.length ? `Set just now: ${changed.map((c) => `${c.label} ${fmt(c.n)}`).join(" · ")}` : "Set just now: none needed."}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {q.data?.areas.map((a) => <ReadArea key={a.area} area={a} idsLeft={left} onConfirm={() => void q.refetch()} />)}
     </section>
   );
 }
 
-function ReadArea({ area }: { area: ReadByIdArea }) {
+function ReadArea({ area, idsLeft, onConfirm }: { area: ReadByIdArea; idsLeft: number; onConfirm: () => void }) {
   const qc = useQueryClient();
   const [confirming, setConfirming] = useState(false);
-  const [swept, setSwept] = useState<SetReadByIdResult | null>(null);
   const flip = useMutation({
     mutationFn: (on: boolean) => setReadById({ data: { area: area.area, on } }),
     onSuccess: (r) => {
       setConfirming(false);
-      setSwept(r.on ? r : null);
-      const fixed = r.swept.reduce((n, c) => n + c.fixed, 0);
-      toast.success(r.on ? `${area.label} read by id now${fixed ? ` · ${fmt(fixed)} ids set` : ""}` : `${area.label} read by name again`);
-      for (const key of ["read-by-id", "link-check", "customers", "customer-history", "account-equipment", "account-equipment-retired", "wo-history-account", "account-invoices", "photos"]) {
-        void qc.invalidateQueries({ queryKey: [key] });
-      }
+      toast.success(r.on ? `${area.label} read by id now` : `${area.label} read by name again`);
+      for (const key of READ_KEYS) void qc.invalidateQueries({ queryKey: [key] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Could not change it"),
   });
-  const differ = area.lists.filter((l) => l.present && l.accounts > 0);
-  const fixedCols = swept?.swept.filter((c) => c.fixed > 0) ?? [];
+  const present = area.lists.filter((l) => l.present);
+  const differ = present.filter((l) => l.accounts > 0);
   return (
     <div className="mt-3 rounded-lg border border-border bg-card p-3" data-testid={`read-area-${area.area}`}>
       <div className="flex flex-wrap items-center gap-2">
@@ -335,40 +369,47 @@ function ReadArea({ area }: { area: ReadByIdArea }) {
             By name
           </Badge>
         )}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           {area.on ? (
             <Button size="sm" variant="outline" disabled={flip.isPending} onClick={() => flip.mutate(false)} data-testid={`read-area-${area.area}-turn-off`}>
               Turn off
             </Button>
           ) : !confirming ? (
-            <Button size="sm" disabled={flip.isPending} onClick={() => setConfirming(true)} data-testid={`read-area-${area.area}-turn-on`}>
-              Turn on…
-            </Button>
+            <>
+              {idsLeft ? <span className="text-xs text-muted-foreground">Set the ids first</span> : null}
+              <Button
+                size="sm"
+                disabled={flip.isPending || idsLeft > 0}
+                onClick={() => {
+                  setConfirming(true);
+                  // Compare with the numbers as they are now, not a minute ago.
+                  onConfirm();
+                }}
+                data-testid={`read-area-${area.area}-turn-on`}
+              >
+                Turn on…
+              </Button>
+            </>
           ) : null}
         </div>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">{area.covers}</p>
-      {confirming ? (
+      {confirming && !area.on ? (
         <div className="mt-2 rounded-md border border-primary/40 bg-muted/40 p-2.5 text-sm" data-testid={`read-area-${area.area}-confirm`}>
           <p>
-            First every record gets the account id its name finds now (the amber "not what the name gives now" counts under
-            Records that name a customer go to 0), then these screens read by id. You can turn it off again.
+            These screens will read by id, as the By id column below counts them
+            {differ.length ? `: ${differ.length} ${differ.length === 1 ? "list differs" : "lists differ"} from today (open them below)` : ", the same as today"}. You
+            can turn it off again.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <Button size="sm" disabled={flip.isPending} onClick={() => flip.mutate(true)} data-testid={`read-area-${area.area}-sweep`}>
-              {flip.isPending ? "Setting ids…" : "Set ids and turn on"}
+            <Button size="sm" disabled={flip.isPending || idsLeft > 0} onClick={() => flip.mutate(true)} data-testid={`read-area-${area.area}-confirm-on`}>
+              {flip.isPending ? "Turning on…" : "Turn on"}
             </Button>
             <Button size="sm" variant="ghost" disabled={flip.isPending} onClick={() => setConfirming(false)}>
               Cancel
             </Button>
           </div>
         </div>
-      ) : null}
-      {swept ? (
-        <p className="mt-2 text-sm" data-testid={`read-area-${area.area}-swept`}>
-          Ids set first:{" "}
-          {fixedCols.length ? fixedCols.map((c) => `${c.label} ${fmt(c.fixed)}`).join(" · ") : "none needed, every record already had its id."}
-        </p>
       ) : null}
       <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[640px] text-sm">
@@ -401,7 +442,7 @@ function ReadArea({ area }: { area: ReadByIdArea }) {
       </div>
       <p className="mt-2 text-xs text-muted-foreground" data-testid={`read-area-${area.area}-summary`}>
         {differ.length
-          ? `${differ.length} of ${area.lists.length} lists differ. Only by name: the record's id names another account, so it moves there. Only by id: the record's name doesn't find the account (a rename left the old name, or spaces at the ends).`
+          ? `${differ.length} of ${present.length} lists differ. Only by name: the record's id names another account, so it shows there instead. Only by id: the record's name doesn't find the account (a rename left the old name, or spaces at the ends).`
           : "✓ Every list is the same by name and by id."}
       </p>
       {differ.length ? (
