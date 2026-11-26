@@ -8,6 +8,7 @@ import { canonicalRepName, isNoRep, DEFAULT_REPS } from "@/lib/ops/rep-match";
 import { cityFromAddress, isPoint, type PinQuality } from "@/lib/ops/geo";
 import { MANUAL_PIN_MATCH, pinQuality } from "@/lib/ops/account-pin";
 import { isWalkIn } from "@/lib/ops/customer-key";
+import { perAccountJoin, readsById } from "@/lib/ops/read-by-id";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -108,50 +109,18 @@ const quality = (v: string | null): PinQuality | null => pinQuality(v);
  * included, gets the work counts on every account, so each Rep filter on the Map shows that rep's real numbers (the
  * Tickets and PMs pages keep their own sales-rep scope).
  */
-export const listAccountGeo = createServerFn({ method: "GET" })
-  .middleware([deskMiddleware])
-  .handler(async (): Promise<AccountGeoData> => {
-    const sql = await ready();
-    const today = todayChicago();
-    const rows = await sql.query<Row>(
-      `with svc as (
-         select lower(customer) as k,
-                count(*) filter (where kind = 'service')::int as open_calls,
-                count(*) filter (where kind = 'tlc')::int as open_tlcs,
-                count(*) filter (where scheduled < $1::date)::int as past_due_calls,
-                count(*) filter (where kind = 'service' and scheduled < $1::date)::int as past_due_service
-           from service_jobs
-          where not done and status not in ('Completed', 'Cancelled', 'Phone Resolved')
-            and duplicate_of is null and coalesce(customer, '') <> ''
-          group by 1
-       ), pm as (
-         select lower(customer) as k,
-                count(*)::int as open_pms,
-                count(*) filter (where projected < $1::date)::int as pms_past_due,
-                count(*) filter (where projected >= $1::date and projected <= $1::date + $2::int)::int as pms_due_soon,
-                count(*) filter (where projected is null)::int as pms_no_date,
-                min(projected) filter (where projected >= $1::date) as next_pm
-           from pm_jobs
-          where not done and status not in ('Completed', 'Cancelled') and coalesce(customer, '') <> ''
-          group by 1
-       ), inst as (
-         select lower(customer) as k, count(*)::int as open_installs,
-                min(install_date) filter (where install_date >= $1::date) as next_install
-           from installs
-          where archived = false and not complete and coalesce(equip_status, '') <> 'Installed'
-            and coalesce(customer, '') <> ''
-          group by 1
-       ), oon as (
-         select lower(cp.customer) as k
-           from customer_providers cp
-           join network_providers np on np.id = cp.provider_id
-          where np.archived = false and coalesce(cp.customer, '') <> ''
-         union
-         select lower(customer)
-           from network_accounts
-          where coalesce(customer, '') <> ''
-       )
-       select d.id, d.name, d.account_rep, d.avi_katz, (oon.k is not null) as out_of_network, d.account_number, d.address,
+/**
+ * The Map's accounts with their open work, as one query ($1 today, $2 the PM due-soon days). By id, a record counts
+ * under the listed account its id names, or else the one its name finds in any capitals; otherwise by name, as before.
+ */
+export function accountGeoSql(byId: boolean): string {
+  const join = (table: string, alias: string, where: string, counts: string) => perAccountJoin({ table, alias, where, counts, byId });
+  // Out of Network: on the Out of Network accounts list, or a provider that is not archived is assigned.
+  const oon = `(select cp.customer, cp.customer_id from customer_providers cp join network_providers np on np.id = cp.provider_id
+                 where np.archived = false
+                union all
+                select na.customer, na.customer_id from network_accounts na)`;
+  return `select d.id, d.name, d.account_rep, d.avi_katz, (coalesce(oon.n, 0) > 0) as out_of_network, d.account_number, d.address,
               d.latitude, d.longitude, d.geocode_match, d.geocode_address,
               coalesce(svc.open_calls, 0) as open_calls, coalesce(svc.open_tlcs, 0) as open_tlcs,
               coalesce(svc.past_due_calls, 0) as past_due_calls, coalesce(svc.past_due_service, 0) as past_due_service,
@@ -159,14 +128,43 @@ export const listAccountGeo = createServerFn({ method: "GET" })
               coalesce(pm.pms_due_soon, 0) as pms_due_soon, coalesce(pm.pms_no_date, 0) as pms_no_date, pm.next_pm,
               coalesce(inst.open_installs, 0) as open_installs, inst.next_install
          from directory_customers d
-         left join svc on svc.k = lower(d.name)
-         left join pm on pm.k = lower(d.name)
-         left join inst on inst.k = lower(d.name)
-         left join oon on oon.k = lower(d.name)
+         ${join(
+           "service_jobs",
+           "svc",
+           "not t.done and t.status not in ('Completed', 'Cancelled', 'Phone Resolved') and t.duplicate_of is null and coalesce(t.customer, '') <> ''",
+           `count(*) filter (where t.kind = 'service')::int as open_calls,
+            count(*) filter (where t.kind = 'tlc')::int as open_tlcs,
+            count(*) filter (where t.scheduled < $1::date)::int as past_due_calls,
+            count(*) filter (where t.kind = 'service' and t.scheduled < $1::date)::int as past_due_service`,
+         )}
+         ${join(
+           "pm_jobs",
+           "pm",
+           "not t.done and t.status not in ('Completed', 'Cancelled') and coalesce(t.customer, '') <> ''",
+           `count(*)::int as open_pms,
+            count(*) filter (where t.projected < $1::date)::int as pms_past_due,
+            count(*) filter (where t.projected >= $1::date and t.projected <= $1::date + $2::int)::int as pms_due_soon,
+            count(*) filter (where t.projected is null)::int as pms_no_date,
+            min(t.projected) filter (where t.projected >= $1::date) as next_pm`,
+         )}
+         ${join(
+           "installs",
+           "inst",
+           "t.archived = false and not t.complete and coalesce(t.equip_status, '') <> 'Installed' and coalesce(t.customer, '') <> ''",
+           `count(*)::int as open_installs, min(t.install_date) filter (where t.install_date >= $1::date) as next_install`,
+         )}
+         ${join(oon, "oon", "coalesce(t.customer, '') <> ''", "count(*)::int as n")}
         where d.archived = false
-        order by lower(d.name), d.id`,
-      [today, PM_DUE_DAYS],
-    );
+        order by lower(d.name), d.id`;
+}
+
+export const listAccountGeo = createServerFn({ method: "GET" })
+  .middleware([deskMiddleware])
+  .handler(async (): Promise<AccountGeoData> => {
+    const sql = await ready();
+    const today = todayChicago();
+    // By each account's id once the Map reads by id (phase C5, Link Check → Reading by id); by its name until then.
+    const rows = await sql.query<Row>(accountGeoSql(await readsById(sql, "map")), [today, PM_DUE_DAYS]);
     const seen = new Set<string>();
     const accounts: AccountGeo[] = [];
     for (const r of rows) {
