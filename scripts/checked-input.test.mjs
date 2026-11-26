@@ -61,6 +61,8 @@ const SENT = {
   repActiveInput: [{ id: 3, active: false }],
   // Out Of Network: provider-sheet.tsx, provider-people.tsx, provider-locations.tsx, provider-dispatch.tsx.
   customerInput: [{ customer: "ZZ Test Diner" }, { customer: "" }],
+  // An account's providers: the account window and the ticket window send the account's id (Reading by id, C5).
+  customerProvidersInput: [{ customer: "ZZ Test Diner" }, { customer: "ZZ Test Diner", customerId: 12, area: "accounts" }, { customer: "ZZ Test Diner", customerId: 12, area: "tickets" }],
   providerInput: [
     // A new provider, with what was typed before the first save.
     {
@@ -102,6 +104,7 @@ const WRONG = {
   pingInput: [{ body: 5 }, {}, { body: "hi", usernames: "sam" }, { body: "hi", usernames: [1] }, { body: "hi", entityId: "12" }, { body: "hi", toUserId: 7 }, { body: "x".repeat(20_001) }],
   repActiveInput: [{ id: 3, active: "false" }, { id: "3", active: true }, { id: 3 }],
   customerInput: [{ customer: 5 }, {}, { customer: ["a"] }, { customer: "x".repeat(3000) }],
+  customerProvidersInput: [{}, { customer: 5 }, { customer: "ZZ", customerId: "12" }, { customer: "ZZ", customerId: 0 }, { customer: "ZZ", customerId: 2147483648 }, { customer: "ZZ", area: "warehouse" }],
   providerInput: [
     {}, { name: 5 }, { name: "ZZ", id: "12" }, { name: "ZZ", notes: 5 }, { name: "ZZ", status: {} },
     { name: "ZZ", locations: "TX" }, { name: "ZZ", locations: [{ city: "Houston", zip: null }] }, { name: "ZZ", people: [{ name: 1, role: null, phone: null, email: null }] },
