@@ -8,7 +8,9 @@ import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, ZIP_MI
 import {
   DEFAULT_PLACE_CATEGORIES,
   isPlaceCategory,
+  formatPhone,
   missingCategories,
+  nearestAccount,
   nearestRep,
   osmUrl,
   overpassQuery,
@@ -526,8 +528,7 @@ export function DownloadProspects({ places, accounts }: { places: readonly Place
       className="h-8 px-2.5"
       disabled={!places.length}
       onClick={() => {
-        const withRep = accounts.filter((a) => !!a.rep);
-        const rows = prospectRows(places, (p) => nearestRep(p, withRep));
+        const rows = prospectRows(places, accounts);
         saveCsv(`KatzDesk-Prospects-${todayChicago()}.csv`, toCsv(PROSPECT_COLUMNS, rows));
       }}
       data-testid="map-download-prospects"
@@ -542,7 +543,9 @@ export function PlaceCard({ place: p, account, accounts, onOpenAccount, onClose 
   const def = PLACE_CATEGORY.get(p.category);
   const address = placeAddress(p);
   const site = websiteUrl(p.website);
-  const near = useMemo(() => (account ? null : nearestRep(p, accounts)), [account, accounts, p]);
+  const near = useMemo(() => (account ? null : nearestAccount(p, accounts)), [account, accounts, p]);
+  const repNear = useMemo(() => (account || !near || near.account.rep ? null : nearestRep(p, accounts)), [account, near, accounts, p]);
+  const phone = formatPhone(p.phone);
   const url = directionsUrl({ point: p, quality: "exact" });
   return (
     <section className="shrink-0 border-b border-border p-4" aria-label={`Selected place: ${p.name}`} data-testid="map-place-card">
@@ -579,24 +582,30 @@ export function PlaceCard({ place: p, account, accounts, onOpenAccount, onClose 
           {near ? (
             <>
               {" "}
-              Nearest account {near.account.name} is {milesLabel(near.miles)} away
+              Nearest account: {near.account.name}, {milesLabel(near.miles)}
               {near.account.rep ? (
                 <>
                   {" ("}
                   <RepName name={near.account.rep} />)
                 </>
-              ) : null}
+              ) : " (no rep)"}
               .
+            </>
+          ) : null}
+          {repNear?.account.rep ? (
+            <>
+              {" "}
+              Nearest rep: <RepName name={repNear.account.rep} /> ({repNear.account.name}, {milesLabel(repNear.miles)}).
             </>
           ) : null}
         </p>
       )}
       <ul className="mt-2 space-y-1 text-xs">
-        {p.phone ? (
+        {phone ? (
           <li className="flex items-center gap-1.5">
             <Phone className="size-3.5 text-muted-foreground" aria-hidden />
-            <a href={`tel:${p.phone.replace(/[^\d+]/g, "")}`} className="text-primary underline-offset-4 hover:underline">
-              {p.phone}
+            <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="text-primary underline-offset-4 hover:underline">
+              {phone}
             </a>
           </li>
         ) : null}

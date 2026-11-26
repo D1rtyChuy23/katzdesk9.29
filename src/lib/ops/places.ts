@@ -227,6 +227,15 @@ export function websiteUrl(raw: string | null | undefined): string | null {
 
 export const osmUrl = (id: string) => `https://www.openstreetmap.org/${id}`;
 
+/** A U.S. number as "(713) 227-1392" (OpenStreetMap writes "+1-713-227-1392"); anything else as it was listed. */
+export function formatPhone(raw: string | null | undefined): string | null {
+  const s = String(raw ?? "").split(";")[0]!.trim();
+  if (!s) return null;
+  const d = s.replace(/\D/g, "");
+  const ten = d.length === 11 && d.startsWith("1") ? d.slice(1) : d.length === 10 ? d : null;
+  return ten ? `(${ten.slice(0, 3)}) ${ten.slice(3, 6)}-${ten.slice(6)}` : s;
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Already a customer?
 
@@ -415,25 +424,44 @@ export function readPlaceCache(raw: string | null, now: number): CachedFetch[] {
 // ---------------------------------------------------------------------------------------------------------------------
 // The prospect list
 
-export const PROSPECT_COLUMNS = ["Name", "Type", "Address", "City", "ZIP", "Phone", "Website", "Latitude", "Longitude", "Nearest Account", "Its Rep", "Miles Away", "OpenStreetMap"] as const;
+export const PROSPECT_COLUMNS = [
+  "Name",
+  "Type",
+  "Address",
+  "City",
+  "ZIP",
+  "Phone",
+  "Website",
+  "Latitude",
+  "Longitude",
+  "Nearest Account",
+  "Miles Away",
+  "Nearest Rep",
+  "OpenStreetMap",
+] as const;
 
-/** One CSV row per place, for the download. `near` gives each place's nearest account with a rep. */
-export function prospectRows(places: readonly Place[], near: (p: Place) => { account: AccountPoint; miles: number } | null): string[][] {
+/**
+ * One CSV row per place, for the download: the nearest account (any), how far, and the rep of the nearest account that
+ * has one (the rep whose area it likely is).
+ */
+export function prospectRows(places: readonly Place[], accounts: readonly AccountPoint[]): string[][] {
+  const withRep = accounts.filter((a) => !!a.rep);
   return places.map((p) => {
-    const n = near(p);
+    const n = nearestAccount(p, accounts);
+    const r = nearestAccount(p, withRep);
     return [
       p.name,
       PLACE_CATEGORY.get(p.category)?.label ?? p.category,
       p.street ?? "",
       p.city ?? "",
       p.zip ?? "",
-      p.phone ?? "",
+      formatPhone(p.phone) ?? "",
       websiteUrl(p.website) ?? "",
       p.lat.toFixed(6),
       p.lng.toFixed(6),
       n?.account.name ?? "",
-      n?.account.rep ?? "",
       n ? n.miles.toFixed(1) : "",
+      r?.account.rep ?? "",
       osmUrl(p.id),
     ];
   });

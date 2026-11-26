@@ -168,11 +168,20 @@ test("which part of the map still needs asking for; the box grows and snaps", ()
   assert.deepEqual(places.missingCategories({ ...view, east: -95.0 }, ["coffee"], done), ["coffee"], "a part not seen yet");
 });
 
-test("the prospect list: one row per place with its nearest rep", () => {
-  const p = { id: "node/9", name: "=Cafe Formula", category: "coffee", lat: 29.1, lng: -95.1, street: "1 A St", city: "Houston", zip: "77002", phone: null, website: "x.example" };
-  const rows = places.prospectRows([p], () => ({ account: { id: 1, name: "Acct", lat: 0, lng: 0, address: null, rep: "Rosa" }, miles: 1.234 }));
-  assert.deepEqual(rows[0], ["=Cafe Formula", "Coffee Shops & Cafés", "1 A St", "Houston", "77002", "", "https://x.example", "29.100000", "-95.100000", "Acct", "Rosa", "1.2", "https://www.openstreetmap.org/node/9"]);
+test("the prospect list: one row per place with the nearest account and the nearest rep; tidy phone numbers", () => {
+  const p = { id: "node/9", name: "=Cafe Formula", category: "coffee", lat: 29.1, lng: -95.1, street: "1 A St", city: "Houston", zip: "77002", phone: "+1-713-555-0101", website: "x.example" };
+  const accounts = [
+    { id: 1, name: "Next Door", lat: 29.1005, lng: -95.1, address: null, rep: null },
+    { id: 2, name: "Up The Road", lat: 29.13, lng: -95.1, address: null, rep: "Rosa" },
+  ];
+  const rows = places.prospectRows([p], accounts);
+  assert.deepEqual(rows[0], ["=Cafe Formula", "Coffee Shops & Cafés", "1 A St", "Houston", "77002", "(713) 555-0101", "https://x.example", "29.100000", "-95.100000", "Next Door", "0.0", "Rosa", "https://www.openstreetmap.org/node/9"]);
   assert.equal(rows[0].length, places.PROSPECT_COLUMNS.length);
+  assert.deepEqual(places.prospectRows([p], [])[0].slice(9, 12), ["", "", ""], "no accounts at all");
+  assert.equal(places.formatPhone("+1 832-618-1149"), "(832) 618-1149");
+  assert.equal(places.formatPhone("7135550101;+1 713 555 0102"), "(713) 555-0101", "the first of several");
+  assert.equal(places.formatPhone("+44 20 7946 0958"), "+44 20 7946 0958", "not U.S.: as listed");
+  assert.equal(places.formatPhone(""), null);
 });
 
 test("elevation: the right tile and pixel, and terrarium heights", () => {

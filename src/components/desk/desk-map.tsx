@@ -220,7 +220,10 @@ function TileGrid({
           draggable={false}
           alt=""
           data-tile={key}
-          onLoad={() => onDone(key, true)}
+          onLoad={(e) => {
+            e.currentTarget.style.visibility = "";
+            onDone(key, true);
+          }}
           onError={(e) => {
             e.currentTarget.style.visibility = "hidden";
             onDone(key, false);
@@ -829,7 +832,8 @@ function MapSurface({
       <div className="desk-map-tiles absolute inset-0">
         {/* One keyed list, newest level last (on top): a level moving between "current" and "older" keeps its loaded images. */}
         {[...oldLevels.filter((l) => l.z !== level.z && Math.abs(l.z - level.z) <= 4), level].map((l) => (
-          <TileGrid key={l.z} level={l} view={cam} width={width} height={height} base={mapBase} onDone={engine.onTileDone} />
+          // Keyed by base map too: switching gets fresh images (a street tile that failed and hid itself must not hide the terrain one).
+          <TileGrid key={`${mapBase}-${l.z}`} level={l} view={cam} width={width} height={height} base={mapBase} onDone={engine.onTileDone} />
         ))}
       </div>
       <svg width={width} height={height} className="pointer-events-none absolute top-0 left-0" style={{ overflow: "visible", "--pin-k": 1 / k } as CSSProperties}>
