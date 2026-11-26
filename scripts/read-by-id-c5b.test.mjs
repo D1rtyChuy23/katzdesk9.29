@@ -39,7 +39,7 @@ let seq = 0;
 
 test("Tickets is its own area: its switch is separate from Accounts'", async () => {
   const { q, sql } = await all();
-  assert.deepEqual(READ_AREAS.map((a) => a.area), ["accounts", "tickets"]);
+  assert.deepEqual(READ_AREAS.map((a) => a.area).slice(0, 2), ["accounts", "tickets"]);
   await setReadByIdFor(sql, "zz-admin", { area: "tickets", on: true });
   assert.equal(await readsById(sql, "tickets"), true);
   assert.equal(await readsById(sql, "accounts"), false);

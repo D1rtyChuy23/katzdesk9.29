@@ -4,6 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { NAME_LINKS } from "@/lib/ops/link-check";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
+import { notWalkInSql } from "@/lib/ops/walk-in-account";
 
 /**
  * Reading by id (phase C5 of "One Record Per Machine Plan", Chuy approved 11/24). Screens find an account's records by
@@ -22,7 +23,7 @@ export const READ_BY_ID_ADMIN_ONLY = "Reading by id is switched on Link Check: s
 /** Postgres's integer, the account id's type. */
 export const ACCOUNT_ID_MAX = 2147483647;
 
-export type ReadArea = "accounts" | "tickets";
+export type ReadArea = "accounts" | "tickets" | "pms";
 
 export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
   {
@@ -36,6 +37,12 @@ export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
     label: "Tickets",
     covers:
       "The ticket window: the account it opens for its schedules (by the ticket's id), the account's equipment and retired equipment, its Out Of Network providers, and the Eversys modules under Asset History.",
+  },
+  {
+    area: "pms",
+    label: "PMs",
+    covers:
+      "The PM window's runbook: the PM account's units it plans and bills, and the account's earlier PMs it takes intervals from (by the PM's id); Runbook Readiness; and the PMs a unit's model change re-pins. The PM stack still matches by name (it moves with its save check, in C6).",
   },
 ];
 
@@ -195,10 +202,23 @@ const SAMPLES = 25;
 const num = (v: unknown) => Number(v ?? 0) || 0;
 
 /** By name and by id, side by side, for each of the lists, by the same rules as ofAccount. */
-export async function compareLists(sql: Query, lists: AccountList[], has: (table: string, column: string) => boolean): Promise<ListDiff[]> {
+export async function compareLists(
+  sql: Query,
+  lists: AccountList[],
+  has: (table: string, column: string) => boolean,
+  /** Comparisons already run for the same table and rules (another area's list), reused rather than run again. */
+  seen: Map<string, ListDiff> = new Map(),
+): Promise<ListDiff[]> {
   const out: ListDiff[] = [];
   for (const l of lists) {
     const base = { key: l.key, label: l.label };
+    const same = JSON.stringify([l.table, l.match, l.where ?? "", l.name ?? "", l.id ?? "", l.nameAccounts ?? ""]);
+    const earlier = seen.get(same);
+    if (earlier) {
+      out.push({ ...earlier, ...base });
+      continue;
+    }
+    const before = out.length;
     const nameCol = l.name ?? "customer";
     const idCol = l.id ?? "customer_id";
     if (!has(l.table, nameCol) || !has(l.table, idCol)) {
@@ -253,6 +273,7 @@ export async function compareLists(sql: Query, lists: AccountList[], has: (table
         byId: num(r.by_name) - num(r.dropped) + num(r.added),
       })),
     });
+    if (out.length > before) seen.set(same, out[out.length - 1]!);
   }
   return out;
 }
@@ -331,14 +352,31 @@ export const TICKET_LISTS: AccountList[] = [
   { key: "modules", label: "Eversys modules (Asset History)", table: "modules", match: "trim", name: "assigned_customer", id: "assigned_customer_id" },
 ];
 
-const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS };
+/**
+ * The PMs area's lists: the units a PM's runbook plans (its account's equipment) and the earlier PMs it takes
+ * intervals from (the account's completed PMs).
+ */
+export const PM_LISTS: AccountList[] = [
+  { key: "runbookUnits", label: "Runbook units (the account's equipment)", table: "account_equipment", match: "lower" },
+  { key: "earlierPms", label: "Earlier PMs (for intervals)", table: "pm_jobs", match: "lower", where: "(t.completed_at is not null or t.status = 'Completed')" },
+  {
+    key: "openPms",
+    label: "Open PMs (Runbook Readiness)",
+    table: "pm_jobs",
+    match: "lower",
+    where: `t.status not in ('Completed', 'Cancelled') and t.moved_job_id is null and ${notWalkInSql("t.customer")}`,
+  },
+];
+
+const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS, pms: PM_LISTS };
 
 export async function readByIdFor(sql: Sql, userId: string): Promise<ReadById> {
   if (!(await canReviewNames(sql, userId))) throw new Error(READ_BY_ID_ADMIN_ONLY);
   const has = await columnsOf(sql);
   const switches = await readSwitches(sql);
+  const seen = new Map<string, ListDiff>();
   const areas: ReadByIdArea[] = [];
-  for (const a of READ_AREAS) areas.push({ ...a, on: switches[a.area] ?? null, lists: await compareLists(sql, LISTS_OF[a.area], has) });
+  for (const a of READ_AREAS) areas.push({ ...a, on: switches[a.area] ?? null, lists: await compareLists(sql, LISTS_OF[a.area], has, seen) });
   return { toSet: await idsToSet(sql, has), areas };
 }
 

@@ -20,6 +20,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
+import { ofAccount, readsById } from "@/lib/ops/read-by-id";
 
 type Query = Pick<Sql, "query">;
 
@@ -50,16 +51,34 @@ export async function planModelChange(
 ): Promise<ModelChangePlan> {
   const { listRowsForModelChange } = await import("./inspection-api");
   const installs = await listRowsForModelChange(sql, unit.id, unit.catalogModel, newModel);
-  // Every PM on the account, completed ones too: their runbook view, bills and analytics plan the units again on each read.
-  const pms = await sql.query<{ id: number; equipment: string | null }>(
-    "select id, equipment from pm_jobs where lower(btrim(customer)) = lower(btrim($1)) order by id",
-    [unit.customer],
-  );
+  // Every PM on the account, completed ones too: their runbook view, bills and analytics plan the units again on each
+  // read. By the unit's account id once PMs reads by id (phase C5, Link Check), as those runbooks then plan by it.
+  const accountId = (await readsById(sql, "pms"))
+    ? ((await sql.query<{ customer_id: number | null }>("select customer_id from account_equipment where id = $1", [unit.id]))[0]?.customer_id ?? null)
+    : null;
+  // A PM found by the account's id is planned under its own name (its runbook then plans by that id); one found by name
+  // (no listed id) under the unit's, as before.
+  const pms =
+    accountId == null
+      ? (
+          await sql.query<{ id: number; equipment: string | null }>(
+            "select id, equipment from pm_jobs where lower(btrim(customer)) = lower(btrim($1)) order by id",
+            [unit.customer],
+          )
+        ).map((p) => ({ ...p, customer: unit.customer }))
+      : (
+          await sql.query<{ id: number; equipment: string | null; customer: string; by_id: boolean }>(
+            `select p.id, p.equipment, coalesce(p.customer, '') as customer, coalesce(p.customer_id = $2::int, false) as by_id from pm_jobs p
+              where ${ofAccount({ name: "p.customer", id: "p.customer_id", match: "trim", byId: true, nameParam: "$1", idParam: "$2" })}
+              order by p.id`,
+            [unit.customer, Number(accountId)],
+          )
+        ).map((p) => ({ id: p.id, equipment: p.equipment, customer: p.by_id ? p.customer : unit.customer }));
   const pins: ModelChangePlan["pins"] = [];
   if (pms.length) {
     const { loadPmRunbookPlan } = await import("./pm-runbook-api");
     for (const pm of pms) {
-      const plan = await loadPmRunbookPlan(sql, unit.customer, pm.equipment, pm.id);
+      const plan = await loadPmRunbookPlan(sql, pm.customer, pm.equipment, pm.id);
       const pinned = await sql.query<{ piece_key: string }>("select piece_key from pm_runbook_unit_links where pm_job_id = $1", [pm.id]);
       const taken = new Set(pinned.map((r) => r.piece_key));
       for (const p of plan.planned) if (p.accountId === unit.id && !taken.has(p.pieceKey)) pins.push({ pm: pm.id, piece_key: p.pieceKey });

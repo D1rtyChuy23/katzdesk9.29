@@ -7,8 +7,10 @@ import {
   buildReadiness,
   readinessSummary,
   type ReadinessAccountUnit,
+  type ReadinessPm,
   type ReadinessRow,
 } from "@/lib/ops/pm-runbook-readiness";
+import { readsById } from "@/lib/ops/read-by-id";
 import { splitEquipment } from "@/lib/ops/equipment";
 import { notWalkInSql } from "@/lib/ops/walk-in-account";
 
@@ -31,28 +33,45 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .handler(async (): Promise<RunbookReadiness> => {
     const sql = await ready();
-    const all = await sql.query<{ id: number; customer: string; equipment: string | null; status: string }>(
-      `select id, customer, equipment, status from pm_jobs where status not in ('Completed', 'Cancelled') and moved_job_id is null and ${notWalkInSql("customer")} order by id`,
+    // By each PM's account id once PMs reads by id (phase C5, Link Check), as its runbook plans its units.
+    const byId = await readsById(sql, "pms");
+    const all = await sql.query<{ id: number; customer: string; customer_id: number | null; equipment: string | null; status: string }>(
+      `select id, customer, customer_id, equipment, status from pm_jobs where status not in ('Completed', 'Cancelled') and moved_job_id is null and ${notWalkInSql("customer")} order by id`,
     );
-    const pms = all.filter((p) => splitEquipment(p.equipment).some((piece) => matchPiece(piece)));
+    const pms: ReadinessPm[] = all
+      .filter((p) => splitEquipment(p.equipment).some((piece) => matchPiece(piece)))
+      .map((p) => ({
+        id: p.id,
+        customer: p.customer,
+        equipment: p.equipment,
+        status: p.status,
+        ...(byId && p.customer_id != null ? { customerId: Number(p.customer_id) } : {}),
+      }));
     const names = [...new Set(pms.map((p) => p.customer.toLowerCase()))];
+    const accountIds = [...new Set(pms.flatMap((p) => (p.customerId != null ? [p.customerId] : [])))];
     const units = names.length
       ? await sql.query<{
           id: number;
           customer: string;
+          customer_id: number | null;
+          listed: boolean;
           catalog_model: string;
           equipment_name: string;
           serial: string | null;
           install_date: string | null;
         }>(
-          `select id, customer, catalog_model, equipment_name, serial, install_date::text as install_date
-             from account_equipment where lower(customer) = any($1::text[]) order by id`,
-          [names],
+          `select a.id, a.customer, a.customer_id,
+                  exists (select 1 from directory_customers d where d.id = a.customer_id and d.archived = false) as listed,
+                  a.catalog_model, a.equipment_name, a.serial, a.install_date::text as install_date
+             from account_equipment a where lower(a.customer) = any($1::text[]) or a.customer_id = any($2::int[]) order by a.id`,
+          [names, accountIds],
         )
       : [];
     const mapped: ReadinessAccountUnit[] = units.map((u) => ({
       id: u.id,
       customer: u.customer,
+      customerId: u.customer_id == null ? null : Number(u.customer_id),
+      listed: u.listed === true || String(u.listed) === "true",
       catalogModel: u.catalog_model,
       equipmentName: u.equipment_name,
       serial: u.serial,
