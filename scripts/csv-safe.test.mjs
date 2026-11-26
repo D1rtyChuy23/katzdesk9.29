@@ -37,7 +37,6 @@ test("every CSV writer uses the one rule", async () => {
     assert.equal(f("\t=1"), "'\t=1");
     assert.equal(f(-40), "-40", "a credit stays a number");
   }
-  const { readinessCsv } = await import("../src/lib/ops/pm-runbook-readiness.ts");
   const { reviewCsv } = await import("../src/lib/ops/customer-geocode.ts");
   const { readFileSync } = await import("node:fs");
   // The rest call it inside; check the source uses it rather than its own escaper.
@@ -51,7 +50,8 @@ test("every CSV writer uses the one rule", async () => {
     const src = readFileSync(new URL(`../src/lib/ops/${file}`, import.meta.url), "utf8");
     assert.match(src, new RegExp(`import \\{ ${name} \\} from "(\\./|@/lib/ops/)csv-safe`), file);
   }
-  const gaps = (await import("../src/lib/ops/pm-runbook-readiness.ts")).readinessCsv([
+  const { readinessCsv } = await import("../src/lib/ops/pm-runbook-readiness.ts");
+  const gaps = readinessCsv([
     { pmId: 7, customer: "-2+HYPERLINK(1)", status: "Open", piece: "=cmd", runbookId: "x", accountId: null, serial: null, installDate: null, gaps: ["no-serial"] },
   ]);
   assert.match(gaps.split("\n")[1], /^"7","'-2\+HYPERLINK\(1\)","Open","'=cmd",/, "readiness CSV: every cell still quoted, formulas kept as text");
