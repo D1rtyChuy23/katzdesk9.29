@@ -13,13 +13,21 @@ import { cn } from "@/lib/utils";
 import { isPoint, type LatLng } from "@/lib/ops/geo";
 
 /**
- * Street tiles from OpenStreetMap (free, attribution required: it is shown in the corner). To switch to another tile
- * provider, change this one function. Tiles load in the viewer's browser; pins and routes still draw if they fail.
+ * The map underneath the pins. Streets: OpenStreetMap's tiles. Terrain (Chuy, 11/26): OpenTopoMap, the same map with
+ * hill shading, contour lines and spot heights, so elevation shows at a glance. Both are free with the attribution shown
+ * in the corner. Tiles load in the viewer's browser; pins and routes still draw if they fail.
  */
-export function tileUrl(x: number, y: number, z: number, dpr?: number): string {
-  void dpr;
-  return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+export type MapBase = "streets" | "terrain";
+
+/** The most detailed zoom each base map has; past it the last level is scaled up. */
+const BASE_MAX_ZOOM: Record<MapBase, number> = { streets: 19, terrain: 17 };
+
+export function tileUrl(x: number, y: number, z: number, base: MapBase = "streets"): string {
+  return base === "terrain" ? `https://tile.opentopomap.org/${z}/${x}/${y}.png` : `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
 }
+
+/** The map's edges on screen and its zoom, reported when it comes to rest. */
+export type MapBounds = { south: number; west: number; north: number; east: number; zoom: number };
 
 export type MapPin = {
   id: string | number;
@@ -35,8 +43,15 @@ export type MapPin = {
   label?: string;
   /** Native tooltip. */
   title?: string;
-  /** Dot (default) or diamond: diamonds mark Out of Network service providers on the customer map. */
-  shape?: "circle" | "diamond";
+  /**
+   * Dot (default), diamond or square: diamonds mark Out of Network service providers on the customer map, small
+   * squares mark prospect places (the Places layer).
+   */
+  shape?: "circle" | "diamond" | "square";
+  /** How solid the fill is (default 0.92). The Population layer's ZIP circles are see-through. */
+  opacity?: number;
+  /** No white edge (the Population layer's circles, which overlap). */
+  plain?: boolean;
 };
 
 /** A diamond around 0,0 with the same area as a dot of radius r. */
@@ -144,9 +159,9 @@ export function fitView(points: readonly LatLng[], width: number, height: number
 /** One zoom level's block of tiles. Tiles load at the nearest whole zoom and are scaled to fractional zooms. */
 type Level = { z: number; minX: number; maxX: number; minY: number; maxY: number };
 
-/** The tiles that cover a width × height map showing `view`. */
-function levelFor(view: View, width: number, height: number): Level {
-  const z = Math.round(view.zoom);
+/** The tiles that cover a width × height map showing `view` (no more detailed than `maxZ`: past it they are scaled up). */
+function levelFor(view: View, width: number, height: number, maxZ = MAX_ZOOM): Level {
+  const z = Math.min(maxZ, Math.round(view.zoom));
   const s = 2 ** (view.zoom - z);
   const cx = lngToX(view.center[1], z);
   const cy = latToY(view.center[0], z);
@@ -169,7 +184,21 @@ function tilesOf(level: Level): { key: string; x: number; y: number }[] {
  * Draws one level's tiles for the current view: a block of 256 px images, moved and scaled as one piece. A tile that
  * fails to load hides itself (no broken-image icon) and reports it.
  */
-function TileGrid({ level, view, width, height, onDone }: { level: Level; view: View; width: number; height: number; onDone: (key: string, ok: boolean) => void }) {
+function TileGrid({
+  level,
+  view,
+  width,
+  height,
+  base,
+  onDone,
+}: {
+  level: Level;
+  view: View;
+  width: number;
+  height: number;
+  base: MapBase;
+  onDone: (key: string, ok: boolean) => void;
+}) {
   const n = 2 ** level.z;
   const s = 2 ** (view.zoom - level.z);
   let tx = width / 2 + s * (level.minX * TILE - lngToX(view.center[1], level.z));
@@ -184,7 +213,7 @@ function TileGrid({ level, view, width, height, onDone }: { level: Level; view: 
       {tilesOf(level).map(({ key, x, y }) => (
         <img
           key={key}
-          src={tileUrl(((x % n) + n) % n, y, level.z)}
+          src={tileUrl(((x % n) + n) % n, y, level.z, base)}
           width={TILE}
           height={TILE}
           loading="lazy"
@@ -229,6 +258,8 @@ type Drag = {
   follow: Point | null;
   /** No fling on release before this time (just after a pinch). */
   noFlingUntil: number;
+  /** The press started on a pin or a control: a tap there is not a tap on the map. */
+  onPin?: boolean;
 };
 type Pinch = { kind: "pinch"; startMid: Point; startDist: number; startZoom: number; anchor: Point; mid: Point; zoom: number };
 type Gesture = Drag | Pinch;
@@ -256,6 +287,8 @@ function MapSurface({
   routeDashed = true,
   selectedId,
   onPinClick,
+  onMapTap,
+  mapBase,
 }: {
   width: number;
   height: number;
@@ -268,6 +301,8 @@ function MapSurface({
   routeDashed?: boolean;
   selectedId?: string | number | null;
   onPinClick?: (pin: MapPin) => void;
+  onMapTap?: (at: LatLng) => void;
+  mapBase: MapBase;
 }) {
   const surface = useRef<HTMLDivElement>(null);
   const [cam, setCam] = useState(view);
@@ -278,9 +313,10 @@ function MapSurface({
   const shown = useRef(view); // the camera last handed to React
   const placed = useRef(view); // mirrors `base`
   const settled = useRef(view); // the view last reported through onViewChange
-  const latest = useRef({ width, height, onViewChange, onTiles, onPinClick });
+  const maxTileZoom = BASE_MAX_ZOOM[mapBase];
+  const latest = useRef({ width, height, onViewChange, onTiles, onPinClick, onMapTap, maxTileZoom });
   useEffect(() => {
-    latest.current = { width, height, onViewChange, onTiles, onPinClick };
+    latest.current = { width, height, onViewChange, onTiles, onPinClick, onMapTap, maxTileZoom };
   });
 
   // The gesture and animation engine. It only touches refs and state setters, so it is made once.
@@ -315,16 +351,16 @@ function MapSurface({
       if (next === prev) return;
       const { width: w, height: h } = latest.current;
       if (Math.round(next.zoom) !== Math.round(prev.zoom)) {
-        const now = levelFor(next, w, h);
+        const now = levelFor(next, w, h, latest.current.maxTileZoom);
         const finished = finishedTiles();
         pending = new Set(tilesOf(now).map((t) => t.key).filter((k) => !finished.has(k)));
         if (pending.size) {
-          const before = levelFor(prev, w, h);
+          const before = levelFor(prev, w, h, latest.current.maxTileZoom);
           setOldLevels((old) => [...old.filter((l) => l.z !== now.z && l.z !== before.z && Math.abs(l.z - now.z) <= 4).slice(-2), before]);
         } else setOldLevels((old) => (old.length ? [] : old));
       } else if (pending.size) {
         // Tiles that left the view (e.g. later in a zoom animation) will never finish; stop waiting for them.
-        const inView = new Set(tilesOf(levelFor(next, w, h)).map((t) => t.key));
+        const inView = new Set(tilesOf(levelFor(next, w, h, latest.current.maxTileZoom)).map((t) => t.key));
         for (const k of pending) if (!inView.has(k)) pending.delete(k);
         if (!pending.size) setOldLevels((old) => (old.length ? [] : old));
       }
@@ -522,6 +558,12 @@ function MapSurface({
       if (left) return;
       gesture = null;
       rect = null;
+      // A tap on the map itself (not a pin, not a drag, not the second tap of a double tap, which zooms).
+      if (g?.kind === "drag" && !g.moved && !g.onPin && canFling && !anim && latest.current.onMapTap) {
+        const { width: w, height: h } = latest.current;
+        const [lat, lng] = pixelToLatLng(g.start, live.current, w, h);
+        latest.current.onMapTap({ lat, lng });
+      }
       // No fling while a zoom is still animating (after a pinch or double tap): it finishes and rests on its own.
       if (g?.kind === "drag" && g.moved && canFling && !anim && performance.now() >= g.noFlingUntil && fling(g)) return;
       if (!anim) settle();
@@ -562,6 +604,7 @@ function MapSurface({
           }
           lastTap = { t: now, at };
           gesture = dragFrom(e.pointerId, at);
+          gesture.onPin = !!target.closest("[data-pin-id]");
         } else if (pointers.size === 2) {
           startPinch();
           for (const id of pointers.keys()) capture(id);
@@ -709,7 +752,7 @@ function MapSurface({
               {/* Scaled back while the map zooms, so dots keep their size. */}
               <g style={{ transform: "scale(var(--pin-k, 1))" }}>
                 {/* Larger invisible hit area for fingers. */}
-                <circle r={Math.max(r + 4, 10)} fill="transparent" />
+                <circle r={p.plain ? r : Math.max(r + 4, 10)} fill="transparent" />
                 {p.shape === "diamond" ? (
                   <>
                     {selected ? <path d={diamondPath(r + 5)} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} strokeLinejoin="round" /> : null}
@@ -724,14 +767,30 @@ function MapSurface({
                       data-pin-shape="diamond"
                     />
                   </>
+                ) : p.shape === "square" ? (
+                  <>
+                    {selected ? <rect x={-r - 4} y={-r - 4} width={(r + 4) * 2} height={(r + 4) * 2} rx={2} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.6} /> : null}
+                    <rect
+                      x={-r * 0.85}
+                      y={-r * 0.85}
+                      width={r * 1.7}
+                      height={r * 1.7}
+                      rx={1.5}
+                      fill={p.color}
+                      fillOpacity={p.opacity ?? 0.92}
+                      stroke="var(--color-card)"
+                      strokeWidth={1.25}
+                      data-pin-shape="square"
+                    />
+                  </>
                 ) : (
                   <>
-                    {selected ? <circle r={r + 5} fill="none" stroke={p.color} strokeWidth={2} strokeOpacity={0.5} /> : null}
+                    {selected ? <circle r={r + (p.plain ? 2 : 5)} fill="none" stroke={p.plain ? "var(--color-foreground)" : p.color} strokeWidth={2} strokeOpacity={p.plain ? 0.8 : 0.5} /> : null}
                     <circle
                       r={r}
                       fill={p.hollow ? "var(--color-card)" : p.color}
-                      fillOpacity={p.hollow ? 0.85 : 0.92}
-                      stroke={p.hollow ? p.color : "var(--color-card)"}
+                      fillOpacity={p.hollow ? 0.85 : (p.opacity ?? 0.92)}
+                      stroke={p.plain ? "none" : p.hollow ? p.color : "var(--color-card)"}
                       strokeWidth={p.hollow ? 2.5 : 1.5}
                       strokeDasharray={p.hollow ? "3 2" : undefined}
                     />
@@ -754,7 +813,7 @@ function MapSurface({
   const k = 2 ** (cam.zoom - base.zoom);
   const ox = width / 2 + k * (lngToX(base.center[1], base.zoom) - lngToX(cam.center[1], base.zoom));
   const oy = height / 2 + k * (latToY(base.center[0], base.zoom) - latToY(cam.center[0], base.zoom));
-  const level = levelFor(cam, width, height);
+  const level = levelFor(cam, width, height, maxTileZoom);
 
   return (
     <div
@@ -770,7 +829,7 @@ function MapSurface({
       <div className="desk-map-tiles absolute inset-0">
         {/* One keyed list, newest level last (on top): a level moving between "current" and "older" keeps its loaded images. */}
         {[...oldLevels.filter((l) => l.z !== level.z && Math.abs(l.z - level.z) <= 4), level].map((l) => (
-          <TileGrid key={l.z} level={l} view={cam} width={width} height={height} onDone={engine.onTileDone} />
+          <TileGrid key={l.z} level={l} view={cam} width={width} height={height} base={mapBase} onDone={engine.onTileDone} />
         ))}
       </div>
       <svg width={width} height={height} className="pointer-events-none absolute top-0 left-0" style={{ overflow: "visible", "--pin-k": 1 / k } as CSSProperties}>
@@ -785,11 +844,20 @@ function MapSurface({
         </button>
       </div>
       <div className="absolute right-0 bottom-0 bg-card/70 px-[5px] py-[2px] text-foreground" style={{ fontSize: 11, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-        <span className="text-[10px]">
+        <span className="text-[10px]" data-testid="desk-map-attribution">
           ©{" "}
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
             OpenStreetMap
           </a>
+          {mapBase === "terrain" ? (
+            <>
+              {", SRTM · © "}
+              <a href="https://opentopomap.org/about" target="_blank" rel="noreferrer">
+                OpenTopoMap
+              </a>{" "}
+              (CC-BY-SA)
+            </>
+          ) : null}
         </span>
       </div>
     </div>
@@ -814,6 +882,9 @@ export function DeskMap({
   className,
   children,
   label = "Map",
+  base = "streets",
+  onMapTap,
+  onViewSettled,
 }: {
   pins: readonly MapPin[];
   route?: readonly LatLng[];
@@ -830,6 +901,12 @@ export function DeskMap({
   className?: string;
   children?: ReactNode;
   label?: string;
+  /** Streets (default) or Terrain underneath the pins. */
+  base?: MapBase;
+  /** A tap on the map where there is no pin (e.g. to read the elevation there). */
+  onMapTap?: (at: LatLng) => void;
+  /** The map's edges and zoom each time it comes to rest (and once it first shows). */
+  onViewSettled?: (b: MapBounds) => void;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
@@ -866,6 +943,18 @@ export function DeskMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refit only when the fit key or the box size changes
   }, [key, size]);
 
+  // Tell the owner where the map rests, for layers that load what is on screen.
+  const settledRef = useRef(onViewSettled);
+  useEffect(() => {
+    settledRef.current = onViewSettled;
+  });
+  useEffect(() => {
+    if (!size || !view || !settledRef.current) return;
+    const [north, west] = pixelToLatLng([0, 0], view, size.w, size.h);
+    const [south, east] = pixelToLatLng([size.w, size.h], view, size.w, size.h);
+    settledRef.current({ south, west, north, east, zoom: view.zoom });
+  }, [view, size]);
+
   // Each new focus object pans the map, even to the same point again (after the user has panned away). Callers keep
   // focus in state, so it only changes when they ask for a pan.
   useEffect(() => {
@@ -893,6 +982,8 @@ export function DeskMap({
           routeDashed={routeDashed}
           selectedId={selectedId}
           onPinClick={onPinClick}
+          onMapTap={onMapTap}
+          mapBase={base}
         />
       ) : null}
       {tiles === "failed" ? (
@@ -901,7 +992,7 @@ export function DeskMap({
           className="pointer-events-none absolute bottom-2 left-2 z-10 rounded-sm bg-card/90 px-2 py-1 text-xs text-muted-foreground max-sm:max-w-[calc(100%-6.5rem)]"
           data-testid="desk-map-tiles-failed"
         >
-          The street map could not load. Pins still show.
+          {base === "terrain" ? "The terrain map could not load. Pins still show." : "The street map could not load. Pins still show."}
         </p>
       ) : null}
       {children}
