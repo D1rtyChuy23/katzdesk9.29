@@ -67,9 +67,12 @@ test("Remove retires a machine: it leaves the account, and its record and inspec
     assert.equal((await query("select count(*)::int as n from install_inspection_items"))[0].n, 0);
     const retired = await R.listRetiredUnits(sql, "test steakhouse");
     assert.equal(retired.length, 1);
+    // The retired copy keeps the unit's machine (M1), for its Machine page (M3).
+    const machine = (await query("select machine_id from account_equipment_retired"))[0].machine_id;
+    assert.ok(machine);
     assert.deepEqual(
       { ...retired[0], id: 0, retiredAt: "" },
-      { id: 0, unitId: id, customer: "Test Steakhouse", equipmentName: "Test Grinder", catalogModel: "Test Grinder", serial: "TG-1", partNumber: "33200.0000", ownership: "Loaned", installDate: "2025-11-14", retiredAt: "", retiredName: "boss", records: 4, movedNote: null, reason: null, mergedInto: null, mergedSerial: null },
+      { id: 0, unitId: id, customer: "Test Steakhouse", equipmentName: "Test Grinder", catalogModel: "Test Grinder", serial: "TG-1", partNumber: "33200.0000", ownership: "Loaned", installDate: "2025-11-14", retiredAt: "", retiredName: "boss", records: 4, movedNote: null, reason: null, mergedInto: null, mergedSerial: null, machineId: machine },
     );
     assert.match(retired[0].retiredAt, /^\d{4}-\d{2}-\d{2}/);
     const kept = (await query("select unit, links from account_equipment_retired"))[0];
