@@ -216,9 +216,29 @@ export type MachineReport = {
     offSerial: number;
   };
   links: { rebuildMachinesNoAsset: number; rebuildMachinesMissingAsset: number; modulesMissingUnit: number; ticketUnits: number; inspectionUnits: number };
+  /**
+   * The rows that name one of a machine's records, with the machine itself (phase M2), when they have the column.
+   * missing: the row's link gives a machine and the row has none; off: the row is on another machine (both should be 0).
+   * Rows whose link gives none (a module on no unit, a PM unit keyed by a piece with no serial) count in rows only.
+   */
+  machineLinks?: MachineLinkRow[];
   /** Installs whose machine list has rows, and those rows without a unit id. */
   installLists: { installs: number; rows: number; rowsWithoutUnit: number; rowsDangling: number };
 };
+
+export type MachineLinkRow = { table: string; label: string; rows: number; linked: number; missing: number; off: number };
+
+/** Migration 0147's tables, in the order Link Check lists them. */
+export const MACHINE_LINKS: { table: string; label: string }[] = [
+  { table: "ticket_units", label: "Ticket units" },
+  { table: "install_inspection_units", label: "Install machine lists" },
+  { table: "pm_runbook_units", label: "PM runbook units" },
+  { table: "pm_runbook_unit_links", label: "PM unit links" },
+  { table: "machine_parts", label: "PM parts" },
+  { table: "modules", label: "Modules" },
+  { table: "equipment_move_requests", label: "Move requests" },
+  { table: "rebuild_machines", label: "Rebuild machines" },
+];
 
 export type LinkCheck = {
   at: string;
@@ -421,6 +441,20 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
     }
   }
 
+  // Phase M2: by the same rule the rows' triggers use (0147's katz_link_machine_of).
+  const machineLinks: MachineLinkRow[] = [];
+  for (const l of MACHINE_LINKS) {
+    if (!has(l.table, "machine_id")) continue;
+    const [row] = await sql.query<{ rows: number; linked: number; missing: number; off: number }>(
+      `select count(*)::int as rows, count(machine_id)::int as linked,
+              count(*) filter (where machine_id is null and m is not null)::int as missing,
+              count(*) filter (where machine_id is not null and m is not null and machine_id <> m)::int as off
+         from (select t.machine_id, katz_link_machine_of($1, to_jsonb(t)) as m from ${l.table} t) x`,
+      [l.table],
+    );
+    machineLinks.push({ ...l, rows: n(row?.rows), linked: n(row?.linked), missing: n(row?.missing), off: n(row?.off) });
+  }
+
   const tableRows: { table: string; rows: number }[] = [];
   for (const t of [...new Set(NAME_LINKS.map((l) => l.table))]) {
     if (!has(t, "id") && ![...cols].some((c) => c.startsWith(`${t}.`))) continue;
@@ -470,6 +504,7 @@ export async function linkCheckFor(sql: Sql, userId: string): Promise<LinkCheck>
             },
           }
         : {}),
+      ...(machineLinks.length ? { machineLinks } : {}),
       installLists: { installs: listInstalls, rows: rowsTotal, rowsWithoutUnit, rowsDangling },
     },
     tableRows,
