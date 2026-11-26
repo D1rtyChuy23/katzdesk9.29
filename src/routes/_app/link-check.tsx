@@ -442,7 +442,7 @@ function ReadArea({ area, idsLeft, onConfirm }: { area: ReadByIdArea; idsLeft: n
       </div>
       <p className="mt-2 text-xs text-muted-foreground" data-testid={`read-area-${area.area}-summary`}>
         {differ.length
-          ? `${differ.length} of ${present.length} lists differ. Only by name: the record's id names another account, so it shows there instead. Only by id: the record's name doesn't find the account (a rename left the old name, or spaces at the ends).`
+          ? `${differ.length} of ${present.length} lists differ. Only by name: the record's id names another account, so it shows there instead. Only by id: the record's name doesn't find the account (a rename left the old name, spaces at the ends, or for a ticket an Inactive account the picker leaves out).`
           : "✓ Every list is the same by name and by id."}
       </p>
       {differ.length ? (
