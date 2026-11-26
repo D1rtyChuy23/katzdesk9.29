@@ -30,6 +30,8 @@ export type RetiredUnit = {
   /** The unit a merge kept, when it was merged. */
   mergedInto: number | null;
   mergedSerial: string | null;
+  /** The machine it was (M1): its Machine page. */
+  machineId?: number | null;
 };
 
 export type RetiredBy = { userId: string | null; name: string | null };
@@ -101,11 +103,12 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     reason: string | null;
     merged_into: string | null;
     merged_serial: string | null;
+    machine_id: number | null;
   }>(
     `select r.id, r.unit_id, r.customer, r.equipment_name, r.catalog_model, r.serial, r.part_number, r.ownership, r.install_date,
             to_char(r.retired_at at time zone 'America/Chicago', 'YYYY-MM-DD') as retired_at, r.retired_name,
             r.links->>'moved_note' as moved_note, r.links->>'reason' as reason, r.links->>'merged_into' as merged_into,
-            r.links->>'merged_serial' as merged_serial,
+            r.links->>'merged_serial' as merged_serial, r.machine_id,
             (${LINK_KEYS.map((k) => `jsonb_array_length(coalesce(r.links->'${k}', '[]'::jsonb))`).join(" + ")})::int as records
        from account_equipment_retired r
       where lower(r.customer) = lower($1)
@@ -130,6 +133,7 @@ export async function listRetiredUnits(sql: Sql, customer: string): Promise<Reti
     reason: r.reason ?? null,
     mergedInto: r.merged_into ? Number(r.merged_into) : null,
     mergedSerial: r.merged_serial ?? null,
+    machineId: r.machine_id == null ? null : Number(r.machine_id),
   }));
 }
 

@@ -28,6 +28,7 @@ import { CustomerCombo, EquipmentCombo } from "./directory-fields";
 import { UnitPlaceField, emptyPlaceDraft, type PlaceDraft } from "./unit-place-field";
 import { LockBadge, LockToggle } from "./lock-badge";
 import { releasedByReturn } from "@/lib/ops/equipment-lock-rules";
+import { MachineLink } from "./machine-link";
 import { StockActions } from "./stock-actions";
 import { isWarehouseStockPlace } from "@/lib/ops/stock-action-rules";
 import { setAssetPlace } from "@/lib/ops/unit-place";
@@ -163,8 +164,9 @@ export function AssetSheet({
                 {asset.missingSerial ? <StatusBadge status="Serial missing" /> : null}
                 <LockBadge lockedBy={asset.lockedBy} />
               </div>
-              <div className="mt-2">
+              <div className="mt-2 flex flex-wrap items-center gap-3">
                 <LockToggle kind="asset" id={asset.id} locked={!!asset.lockedAt} onDone={() => void qc.invalidateQueries({ queryKey: ["assets"] })} />
+                <MachineLink machineId={asset.machineId} />
               </div>
             </SheetHeader>
             <SheetBody>

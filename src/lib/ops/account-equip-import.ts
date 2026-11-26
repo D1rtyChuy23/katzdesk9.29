@@ -49,6 +49,8 @@ export type AccountEquipRow = {
   /** Locked by the owner: Remove and Merge are off until it is unlocked. */
   lockedAt: string | null;
   lockedBy: string | null;
+  /** The machine it is (One Record Per Machine, M1): its Machine page. */
+  machineId?: number | null;
 };
 
 export type EquipPreviewRow = {
@@ -338,6 +340,7 @@ function mapDbUnit(r: {
   seen?: string;
   locked_at?: unknown;
   locked_by?: string | null;
+  machine_id?: number | null;
 }): AccountEquipRow {
   const lockedAt = r.locked_at instanceof Date ? r.locked_at.toISOString() : r.locked_at ? String(r.locked_at) : null;
   return {
@@ -356,6 +359,7 @@ function mapDbUnit(r: {
     condition: r.condition ?? null,
     updatedAt: String(r.updated_at ?? ""),
     seen: r.seen ?? "",
+    machineId: r.machine_id == null ? null : Number(r.machine_id),
   };
 }
 
@@ -1260,7 +1264,7 @@ const listInput = z.object({
 });
 
 const UNIT_COLS = `id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
-              updated_at, updated_at::text as seen, locked_at, locked_by`;
+              updated_at, updated_at::text as seen, locked_at, locked_by, machine_id`;
 
 type UnitDbRow = Parameters<typeof mapDbUnit>[0];
 
