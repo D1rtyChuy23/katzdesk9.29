@@ -39,6 +39,7 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppTlcRouteImport } from './routes/_app/tlc'
 import { Route as AppUnitMismatchesRouteImport } from './routes/_app/unit-mismatches'
 import { Route as AppWarehouseRouteImport } from './routes/_app/warehouse'
+import { Route as AppMachinesMachineIdRouteImport } from './routes/_app/machines.$machineId'
 import { Route as ApiAdminPartsExportRouteImport } from './routes/api/admin/parts-export'
 import { Route as ApiAdminTicketsInWindowRouteImport } from './routes/api/admin/tickets-in-window'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -197,6 +198,11 @@ const AppWarehouseRoute = AppWarehouseRouteImport.update({
   path: '/warehouse',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMachinesMachineIdRoute = AppMachinesMachineIdRouteImport.update({
+  id: '/machines/$machineId',
+  path: '/machines/$machineId',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiAdminPartsExportRoute = ApiAdminPartsExportRouteImport.update({
   id: '/api/admin/parts-export',
   path: '/api/admin/parts-export',
@@ -269,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/tlc': typeof AppTlcRoute
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
+  '/machines/$machineId': typeof AppMachinesMachineIdRoute
   '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -308,6 +315,7 @@ export interface FileRoutesByTo {
   '/unit-mismatches': typeof AppUnitMismatchesRoute
   '/warehouse': typeof AppWarehouseRoute
   '/': typeof AppIndexRoute
+  '/machines/$machineId': typeof AppMachinesMachineIdRoute
   '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/_app/unit-mismatches': typeof AppUnitMismatchesRoute
   '/_app/warehouse': typeof AppWarehouseRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/machines/$machineId': typeof AppMachinesMachineIdRoute
   '/api/admin/parts-export': typeof ApiAdminPartsExportRoute
   '/api/admin/tickets-in-window': typeof ApiAdminTicketsInWindowRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/tlc'
     | '/unit-mismatches'
     | '/warehouse'
+    | '/machines/$machineId'
     | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/unit-mismatches'
     | '/warehouse'
     | '/'
+    | '/machines/$machineId'
     | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/_app/unit-mismatches'
     | '/_app/warehouse'
     | '/_app/'
+    | '/_app/machines/$machineId'
     | '/api/admin/parts-export'
     | '/api/admin/tickets-in-window'
     | '/api/auth/$'
@@ -703,6 +715,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWarehouseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/machines/$machineId': {
+      id: '/_app/machines/$machineId'
+      path: '/machines/$machineId'
+      fullPath: '/machines/$machineId'
+      preLoaderRoute: typeof AppMachinesMachineIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/admin/parts-export': {
       id: '/api/admin/parts-export'
       path: '/api/admin/parts-export'
@@ -791,6 +810,7 @@ interface AppRouteChildren {
   AppUnitMismatchesRoute: typeof AppUnitMismatchesRoute
   AppWarehouseRoute: typeof AppWarehouseRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppMachinesMachineIdRoute: typeof AppMachinesMachineIdRoute
   AppInstallsInstallIdPrintRoute: typeof AppInstallsInstallIdPrintRoute
 }
 
@@ -823,6 +843,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUnitMismatchesRoute: AppUnitMismatchesRoute,
   AppWarehouseRoute: AppWarehouseRoute,
   AppIndexRoute: AppIndexRoute,
+  AppMachinesMachineIdRoute: AppMachinesMachineIdRoute,
   AppInstallsInstallIdPrintRoute: AppInstallsInstallIdPrintRoute,
 }
 

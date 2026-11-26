@@ -480,7 +480,8 @@ function mapAsset(r: any) {
 		stockHoldReason: r.stock_hold_reason ?? null,
 		stockHoldBy: r.stock_hold_by ?? null,
 		lockedAt: r.locked_at ? (r.locked_at instanceof Date ? r.locked_at.toISOString() : String(r.locked_at)) : null,
-		lockedBy: r.locked_at ? r.locked_by ?? null : null
+		lockedBy: r.locked_at ? r.locked_by ?? null : null,
+		machineId: r.machine_id == null ? null : Number(r.machine_id)
 	};
 }
 function mapRecipe(r: any) {

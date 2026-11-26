@@ -466,6 +466,8 @@ export type Asset = {
   /** Locked: no move, return, sale or removal until the owner unlocks it. Assigning or selling stamps it. */
   lockedAt: string | null;
   lockedBy: string | null;
+  /** The machine it is (One Record Per Machine, M1): its Machine page. Bulk and modules have none. */
+  machineId?: number | null;
 };
 
 export type Recipe = {

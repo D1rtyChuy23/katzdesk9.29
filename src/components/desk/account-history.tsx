@@ -12,6 +12,7 @@ import {
   removeAccountEquipment,
   restoreAccountEquipment,
 } from "@/lib/ops/account-equip-import";
+import { MachineLink } from "./machine-link";
 import type { RetiredUnit } from "@/lib/ops/account-equip-retire";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { detectBoard } from "@/lib/ops/corrigo";
@@ -187,6 +188,8 @@ export function AccountEquipmentList({
     seen?: string;
     /** Locked by the owner: Remove and Merge are off until it is unlocked. */
     lockedBy?: string | null;
+    /** Its machine (M1): a link to the Machine page. */
+    machineId?: number | null;
   }[];
   loading: boolean;
   className?: string;
@@ -273,6 +276,12 @@ export function AccountEquipmentList({
                   ]
                     .filter(Boolean)
                     .join(" · ")}
+                  {row.machineId ? (
+                    <>
+                      {" · "}
+                      <MachineLink machineId={row.machineId} />
+                    </>
+                  ) : null}
                 </p>
                 {row.id ? (
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -511,6 +520,12 @@ function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: ()
                 ]
                   .filter(Boolean)
                   .join(" · ")}
+                {r.machineId ? (
+                  <>
+                    {" · "}
+                    <MachineLink machineId={r.machineId} />
+                  </>
+                ) : null}
               </span>
             </span>
             <Button type="button" size="sm" variant="outline" className="max-sm:h-10" disabled={putBack.isPending} data-testid="put-back-unit" onClick={() => setAsking(r)}>
