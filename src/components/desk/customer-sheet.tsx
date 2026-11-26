@@ -102,7 +102,7 @@ export function CustomerHistorySheet({
     queryFn: () => listDirectory({ data: { kind: "equipment" } }),
     enabled: customerId != null,
   });
-  const accountEquip = useAccountEquipment(history.data?.name);
+  const accountEquip = useAccountEquipment(history.data?.name, history.data?.id ?? null);
   const houseRecipes = useQuery({
     queryKey: ["recipes"],
     queryFn: () => listRecipes(),
@@ -316,7 +316,7 @@ export function CustomerHistorySheet({
                 </Tabs.Content>
 
                 <Tabs.Content value="equipment" className="p-5 outline-none" data-testid="account-panel-equipment">
-                  <AccountEquipmentList customer={history.data?.name ?? null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
+                  <AccountEquipmentList customer={history.data?.name ?? null} customerId={history.data?.id ?? null} rows={accountEquip.data ?? []} loading={accountEquip.isLoading} />
                 </Tabs.Content>
 
                 <Tabs.Content value="tickets" className="p-5 outline-none" data-testid="account-panel-tickets">
@@ -374,12 +374,12 @@ export function CustomerHistorySheet({
                     ))}
                   </ul>
                   {!visible.length ? <p className="mt-3 text-sm text-muted-foreground">Nothing on this account matches.</p> : null}
-                  <AccountWoHistory customer={data.name} mode="tickets" />
+                  <AccountWoHistory customer={data.name} customerId={data.id} mode="tickets" />
                 </Tabs.Content>
 
                 <Tabs.Content value="invoices" className="p-5 outline-none" data-testid="account-panel-invoices">
-                  <AccountInvoices customer={data.name} />
-                  <AccountWoHistory customer={data.name} mode="invoices" />
+                  <AccountInvoices customer={data.name} customerId={data.id} />
+                  <AccountWoHistory customer={data.name} customerId={data.id} mode="invoices" />
                 </Tabs.Content>
 
                 <Tabs.Content value="pre-inspection" className="p-5 outline-none" data-testid="account-panel-pre-inspection">
@@ -1014,8 +1014,9 @@ function AccountMarksForm({
  * The account's invoices: approved ones on any record, ones Warehouse saved for an Admin to approve, and tickets with
  * charges not approved yet. Each opens the Invoice window.
  */
-function AccountInvoices({ customer }: { customer: string }) {
-  const q = useQuery({ queryKey: ["account-invoices", customer.toLowerCase()], queryFn: () => listAccountInvoices({ data: { customer } }) });
+function AccountInvoices({ customer, customerId }: { customer: string; customerId: number }) {
+  // Its id makes the list read by id once the Accounts switch is on (phase C5, Link Check).
+  const q = useQuery({ queryKey: ["account-invoices", customer.toLowerCase(), customerId], queryFn: () => listAccountInvoices({ data: { customer, customerId } }) });
   const [open, setOpen] = useState<{ type: InvoiceTarget; id: number } | null>(null);
   const rows = q.data ?? [];
   return (

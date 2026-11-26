@@ -150,11 +150,14 @@ export function pendingSchedules(
   return [...visits, ...pms];
 }
 
-/** The account's imported equipment (one query, shared by the account window and the ticket window). */
-export function useAccountEquipment(customer: string | null | undefined) {
+/**
+ * The account's imported equipment (one query, shared by the account window and the ticket window). The account window
+ * sends its id too, so its list reads by id once the Accounts switch is on (phase C5, Link Check).
+ */
+export function useAccountEquipment(customer: string | null | undefined, customerId?: number | null) {
   return useQuery({
-    queryKey: ["account-equipment", customer],
-    queryFn: () => listAccountEquipment({ data: { customer: customer! } }),
+    queryKey: ["account-equipment", customer, customerId ?? null],
+    queryFn: () => listAccountEquipment({ data: { customer: customer!, ...(customerId != null ? { customerId } : {}) } }),
     enabled: !!customer,
   });
 }
@@ -167,12 +170,15 @@ export function useAccountEquipment(customer: string | null | undefined) {
  */
 export function AccountEquipmentList({
   customer,
+  customerId,
   rows,
   loading,
   className = "mt-4",
 }: {
   /** The account's name. Without one there's nothing to add equipment to. */
   customer?: string | null;
+  /** The account's id, from the account window: its retired list reads by id once the Accounts switch is on. */
+  customerId?: number | null;
   rows: {
     id?: number;
     catalogModel: string;
@@ -345,7 +351,7 @@ export function AccountEquipmentList({
       ) : (
         <p className="mt-2 text-sm text-muted-foreground">No imported equipment on this account yet.</p>
       )}
-      {customer ? <RetiredUnits customer={customer} onChanged={refresh} /> : null}
+      {customer ? <RetiredUnits customer={customer} customerId={customerId ?? null} onChanged={refresh} /> : null}
       {asking ? (
         <MergeDialog
           keep={asking.keep}
@@ -484,10 +490,10 @@ function PutBackDialog({ unit, busy, onCancel, onPutBack }: { unit: RetiredUnit;
 /**
  * Machines taken off this account (11/9): each keeps its record and can be put back. Shown only when there are any.
  */
-function RetiredUnits({ customer, onChanged }: { customer: string; onChanged: () => void }) {
+function RetiredUnits({ customer, customerId, onChanged }: { customer: string; customerId: number | null; onChanged: () => void }) {
   const retired = useQuery({
-    queryKey: ["account-equipment-retired", customer.toLowerCase()],
-    queryFn: () => listRetiredEquipment({ data: { customer } }),
+    queryKey: ["account-equipment-retired", customer.toLowerCase(), customerId],
+    queryFn: () => listRetiredEquipment({ data: { customer, ...(customerId != null ? { customerId } : {}) } }),
   });
   const [asking, setAsking] = useState<RetiredUnit | null>(null);
   const putBack = useMutation({

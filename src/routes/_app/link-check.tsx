@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getLinkCheck, type NameLinkReport, type NameSample } from "@/lib/ops/link-check";
 import { notLoadedText } from "@/lib/ops/load-problem";
+import { getReadById, setReadById, type ListDiff, type ReadByIdArea, type SetReadByIdResult } from "@/lib/ops/read-by-id";
 
 export const Route = createFileRoute("/_app/link-check")({ component: Page });
 
@@ -20,8 +24,9 @@ function Page() {
       <header>
         <h1 className="font-display text-3xl font-medium tracking-tight">Link Check</h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          How records point at customers and machines today. Nothing here changes anything. Names that find no account, or more
-          than one, are the ones a person decides before records are linked by account id. See also{" "}
+          How records point at customers and machines today. Nothing here changes anything except the Reading by id switches.
+          Names that find no account, or more than one, are the ones a person decides before records are linked by account id.
+          See also{" "}
           <Link to="/unit-mismatches" className="underline underline-offset-2">
             Equipment Mismatches
           </Link>
@@ -42,6 +47,8 @@ function Page() {
               {r.accounts.sameNameOtherCase ? ` · ${fmt(r.accounts.sameNameOtherCase)} listed accounts share a name in other capitals` : ""}
             </p>
           </section>
+
+          <ReadByIdSection />
 
           <section className="mt-8" data-testid="link-check-names">
             <h2 className="text-lg font-medium">Records that name a customer</h2>
@@ -264,6 +271,169 @@ function Samples({ link }: { link: NameLinkReport }) {
             </ul>
           </div>
         ))}
+    </details>
+  );
+}
+
+const dayOf = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-US", { month: "numeric", day: "numeric" });
+};
+
+/**
+ * Reading by id (phase C5): each area's lists by name and by id side by side, and the switch that makes that area's
+ * screens read by id. Turning one on sets the ids first.
+ */
+function ReadByIdSection() {
+  const q = useQuery({ queryKey: ["read-by-id"], queryFn: () => getReadById(), staleTime: 60_000 });
+  return (
+    <section className="mt-8" data-testid="link-check-read-by-id">
+      <h2 className="text-lg font-medium">Reading by id</h2>
+      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+        Screens can find an account's records by its id instead of its name, one area at a time. A record with no id still
+        goes by its name. Before turning an area on, compare its lists: by name and by id should match, except records a rename
+        left under the old name (invoices keep theirs) and names with spaces at the ends. Turning an area on first gives every
+        record the id its name finds now; turning it off goes back to names.
+      </p>
+      {q.isLoading ? <p className="mt-3 text-sm text-muted-foreground">Comparing…</p> : null}
+      {q.isError ? <p className="mt-3 text-sm text-destructive">{notLoadedText(q, "reading by id")}</p> : null}
+      {q.data?.areas.map((a) => <ReadArea key={a.area} area={a} />)}
+    </section>
+  );
+}
+
+function ReadArea({ area }: { area: ReadByIdArea }) {
+  const qc = useQueryClient();
+  const [confirming, setConfirming] = useState(false);
+  const [swept, setSwept] = useState<SetReadByIdResult | null>(null);
+  const flip = useMutation({
+    mutationFn: (on: boolean) => setReadById({ data: { area: area.area, on } }),
+    onSuccess: (r) => {
+      setConfirming(false);
+      setSwept(r.on ? r : null);
+      const fixed = r.swept.reduce((n, c) => n + c.fixed, 0);
+      toast.success(r.on ? `${area.label} read by id now${fixed ? ` · ${fmt(fixed)} ids set` : ""}` : `${area.label} read by name again`);
+      for (const key of ["read-by-id", "link-check", "customers", "customer-history", "account-equipment", "account-equipment-retired", "wo-history-account", "account-invoices", "photos"]) {
+        void qc.invalidateQueries({ queryKey: [key] });
+      }
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not change it"),
+  });
+  const differ = area.lists.filter((l) => l.present && l.accounts > 0);
+  const fixedCols = swept?.swept.filter((c) => c.fixed > 0) ?? [];
+  return (
+    <div className="mt-3 rounded-lg border border-border bg-card p-3" data-testid={`read-area-${area.area}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="font-medium">{area.label}</h3>
+        {area.on ? (
+          <Badge size="tight" data-testid={`read-area-${area.area}-on`}>
+            By id · since {dayOf(area.on.at)}
+            {area.on.by ? ` by ${area.on.by}` : ""}
+          </Badge>
+        ) : (
+          <Badge size="tight" variant="outline" data-testid={`read-area-${area.area}-off`}>
+            By name
+          </Badge>
+        )}
+        <div className="ml-auto">
+          {area.on ? (
+            <Button size="sm" variant="outline" disabled={flip.isPending} onClick={() => flip.mutate(false)} data-testid={`read-area-${area.area}-turn-off`}>
+              Turn off
+            </Button>
+          ) : !confirming ? (
+            <Button size="sm" disabled={flip.isPending} onClick={() => setConfirming(true)} data-testid={`read-area-${area.area}-turn-on`}>
+              Turn on…
+            </Button>
+          ) : null}
+        </div>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">{area.covers}</p>
+      {confirming ? (
+        <div className="mt-2 rounded-md border border-primary/40 bg-muted/40 p-2.5 text-sm" data-testid={`read-area-${area.area}-confirm`}>
+          <p>
+            First every record gets the account id its name finds now (the amber "not what the name gives now" counts under
+            Records that name a customer go to 0), then these screens read by id. You can turn it off again.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button size="sm" disabled={flip.isPending} onClick={() => flip.mutate(true)} data-testid={`read-area-${area.area}-sweep`}>
+              {flip.isPending ? "Setting ids…" : "Set ids and turn on"}
+            </Button>
+            <Button size="sm" variant="ghost" disabled={flip.isPending} onClick={() => setConfirming(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {swept ? (
+        <p className="mt-2 text-sm" data-testid={`read-area-${area.area}-swept`}>
+          Ids set first:{" "}
+          {fixedCols.length ? fixedCols.map((c) => `${c.label} ${fmt(c.fixed)}`).join(" · ") : "none needed, every record already had its id."}
+        </p>
+      ) : null}
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead className="text-left text-xs text-muted-foreground">
+            <tr>
+              <th className="py-1 pr-3 font-medium">List</th>
+              <th className="py-1 pr-3 text-right font-medium">By name</th>
+              <th className="py-1 pr-3 text-right font-medium">By id</th>
+              <th className="py-1 pr-3 text-right font-medium">Accounts that differ</th>
+              <th className="py-1 pr-3 text-right font-medium">Only by name</th>
+              <th className="py-1 text-right font-medium">Only by id</th>
+            </tr>
+          </thead>
+          <tbody>
+            {area.lists.map((l) => (
+              <tr key={l.key} className="border-t border-border" data-testid={`read-list-${l.key}`}>
+                <td className="py-1.5 pr-3">
+                  {l.label}
+                  {!l.present ? <span className="ml-2 text-xs text-muted-foreground">(not on this database)</span> : null}
+                </td>
+                <td className="py-1.5 pr-3 text-right tabular-nums">{fmt(l.byName)}</td>
+                <td className="py-1.5 pr-3 text-right tabular-nums">{fmt(l.byId)}</td>
+                <td className="py-1.5 pr-3 text-right tabular-nums">{l.accounts ? fmt(l.accounts) : "—"}</td>
+                <td className="py-1.5 pr-3 text-right tabular-nums">{fmt(l.onlyByName)}</td>
+                <td className="py-1.5 text-right tabular-nums">{fmt(l.onlyById)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground" data-testid={`read-area-${area.area}-summary`}>
+        {differ.length
+          ? `${differ.length} of ${area.lists.length} lists differ. Only by name: the record's id names another account, so it moves there. Only by id: the record's name doesn't find the account (a rename left the old name, or spaces at the ends).`
+          : "✓ Every list is the same by name and by id."}
+      </p>
+      {differ.length ? (
+        <div className="mt-2 grid gap-2">
+          {differ.map((l) => (
+            <DiffAccounts key={l.key} list={l} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DiffAccounts({ list }: { list: ListDiff }) {
+  return (
+    <details className="rounded-md border border-border p-2.5" data-testid={`read-diff-${list.key}`}>
+      <summary className="cursor-pointer text-sm font-medium">
+        {list.label}: {fmt(list.accounts)} {list.accounts === 1 ? "account" : "accounts"}
+      </summary>
+      <ul className="mt-1 grid gap-0.5 text-sm">
+        {list.samples.map((s) => (
+          <li key={s.id} className="break-words">
+            <span className="font-medium">{s.name}</span>{" "}
+            <span className="text-muted-foreground">
+              · by name {fmt(s.byName)} → by id {fmt(s.byId)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {list.accounts > list.samples.length ? (
+        <p className="mt-1 text-xs text-muted-foreground">and {fmt(list.accounts - list.samples.length)} more</p>
+      ) : null}
     </details>
   );
 }
