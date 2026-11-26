@@ -25,7 +25,7 @@ export type MachineEvent = {
 
 export type MachineRecord =
   | { where: "account"; id: number; customer: string; customerId: number | null; model: string; serial: string | null }
-  | { where: "retired"; id: number; unitId: number; customer: string; model: string; serial: string | null; retiredAt: string }
+  | { where: "retired"; id: number; unitId: number; customer: string; model: string; serial: string | null; retiredAt: string; why: string }
   | { where: "warehouse"; id: number; model: string; serial: string | null; status: string | null; site: string | null; soldTo: string | null };
 
 export type MachinePage = {
@@ -38,10 +38,21 @@ export type MachinePage = {
   /** Modules on it now. */
   modules: { id: number; moduleId: string }[];
   events: MachineEvent[];
+  /** More equipment or warehouse lines than the page reads: the oldest aren't shown. */
+  capped: boolean;
 };
 
 export const MACHINE_NOT_FOUND = "That machine isn't in the desk.";
 
+/** How a retired copy left its account: a merge or a move says so; otherwise it was retired. */
+function retiredWhy(r: { customer: string; reason: string | null; moved: string | null }): string {
+  if (r.moved) return r.moved;
+  if (r.reason) return `${r.reason} (was on ${r.customer})`;
+  return `Retired from ${r.customer}`;
+}
+
+const HISTORY_LIMIT = 400;
+const ACTIVITY_LIMIT = 200;
 const AT = (col: string) => `to_char(${col} at time zone 'America/Chicago', 'YYYY-MM-DD HH24:MI')`;
 const DAY = (col: string) => `to_char(${col}, 'YYYY-MM-DD')`;
 const str = (v: unknown) => (v == null ? null : String(v));
@@ -68,9 +79,13 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
        from account_equipment where machine_id = any($1::int[]) order by id`,
     [ids],
   );
-  const retired = await sql.query<{ id: number; unit_id: number; customer: string; model: string; serial: string | null; at: string; by: string | null }>(
-    `select id, unit_id, customer, coalesce(nullif(btrim(catalog_model), ''), equipment_name) as model, serial, ${AT("retired_at")} as at, retired_by as by
-       from account_equipment_retired where machine_id = any($1::int[]) order by retired_at desc, id desc`,
+  // Its retired copies (Retire, a move to another account, a merge). One put back on the account is the account unit.
+  const retired = await sql.query<{ id: number; unit_id: number; customer: string; model: string; serial: string | null; at: string; by: string | null; reason: string | null; moved: string | null }>(
+    `select r.id, r.unit_id, r.customer, coalesce(nullif(btrim(r.catalog_model), ''), r.equipment_name) as model, r.serial, ${AT("r.retired_at")} as at,
+            r.retired_name as by, r.links ->> 'reason' as reason, r.links ->> 'moved_note' as moved
+       from account_equipment_retired r
+      where r.machine_id = any($1::int[]) and not exists (select 1 from account_equipment a where a.id = r.unit_id)
+      order by r.retired_at desc, r.id desc`,
     [ids],
   );
   const warehouse = await sql.query<{ id: number; model: string; serial: string | null; status: string | null; site: string | null; sold_to: string | null }>(
@@ -80,10 +95,15 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
   const records: MachineRecord[] = [
     ...account.map((r) => ({ where: "account" as const, id: Number(r.id), customer: r.customer, customerId: r.customer_id == null ? null : Number(r.customer_id), model: r.model, serial: r.serial })),
     ...warehouse.map((r) => ({ where: "warehouse" as const, id: Number(r.id), model: r.model, serial: r.serial, status: r.status, site: r.site, soldTo: r.sold_to })),
-    ...retired.map((r) => ({ where: "retired" as const, id: Number(r.id), unitId: Number(r.unit_id), customer: r.customer, model: r.model, serial: r.serial, retiredAt: r.at })),
+    ...retired.map((r) => ({ where: "retired" as const, id: Number(r.id), unitId: Number(r.unit_id), customer: r.customer, model: r.model, serial: r.serial, retiredAt: r.at, why: retiredWhy(r) })),
   ];
   // The machine's units, now and before (a retired unit's id is the one its history and module stops name).
-  const unitIds = [...new Set([...account.map((r) => Number(r.id)), ...retired.map((r) => Number(r.unit_id))])];
+  const unitIds = [
+    ...new Set([
+      ...account.map((r) => Number(r.id)),
+      ...(await sql.query<{ unit_id: number }>("select unit_id from account_equipment_retired where machine_id = any($1::int[])", [ids])).map((r) => Number(r.unit_id)),
+    ]),
+  ];
   const assetIds = warehouse.map((r) => Number(r.id));
 
   const events: MachineEvent[] = [];
@@ -93,20 +113,33 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
   // writes a line per field; they read as one.
   type H = { unit_id: number; at: string; action: string; field: string | null; old_value: string | null; new_value: string | null; actor: string; customer: string | null; install_id: number | null; note: string | null };
   const history = await sql.query<H>(
-    `select unit_id, ${AT("at")} as at, action, field, old_value, new_value, actor, customer, install_id, note
-       from equipment_history where unit_id = any($1::int[]) order by at desc, id desc limit 400`,
+    `select h.unit_id, ${AT("h.at")} as at, h.action, h.field, h.old_value, h.new_value, h.actor, h.customer, h.install_id, h.note
+       from equipment_history h where h.unit_id = any($1::int[]) order by h.at desc, h.id desc limit ${HISTORY_LIMIT}`,
     [unitIds],
   );
+  // A unit made (added, put back, made by a move) writes a line per field with nothing before it.
+  const madeField = (x: H) => x.field != null && x.old_value == null && x.field !== "install" && x.field !== "visit_kind";
   for (let i = 0; i < history.length; i++) {
     const h = history[i]!;
-    if (h.action === "create") {
+    if (madeField(h)) {
       const same = [h];
-      while (history[i + 1] && history[i + 1]!.action === "create" && history[i + 1]!.at === h.at && history[i + 1]!.unit_id === h.unit_id) same.push(history[++i]!);
-      const fields = same
-        .filter((x) => x.new_value && x.field !== "customer" && x.field !== "equipment_name")
-        .map((x) => `${historyFieldLabel(x.field)} ${x.new_value}`)
-        .reverse();
-      add({ at: h.at, kind: "history", text: `Added to ${h.customer ?? "an account"}${fields.length ? `: ${fields.join(" · ")}` : ""}`, who: h.actor, link: null });
+      while (history[i + 1] && madeField(history[i + 1]!) && history[i + 1]!.action === h.action && history[i + 1]!.at === h.at && history[i + 1]!.unit_id === h.unit_id) {
+        same.push(history[++i]!);
+      }
+      if (same.length > 1 || h.action !== "update") {
+        const fields = same
+          .filter((x) => x.new_value && x.field !== "customer" && x.field !== "equipment_name")
+          .map((x) => `${historyFieldLabel(x.field)} ${x.new_value}`)
+          .reverse();
+        const verb = h.action === "create" ? "Added to" : h.action === "put_back" ? "Put back on" : h.action === "move" ? "Moved to" : `${historyActionLabel(h.action)} on`;
+        add({ at: h.at, kind: "history", text: `${verb} ${h.customer ?? "an account"}${fields.length ? `: ${fields.join(" · ")}` : ""}`, who: h.actor, link: null });
+        continue;
+      }
+    }
+    // The unit leaving its account (retired, moved, merged or removed): one line, the 0130 trigger's delete row.
+    if (h.field == null && h.new_value == null && h.old_value != null) {
+      const verb = h.action === "remove" ? "Removed from" : h.action === "move" ? "Moved off" : h.action === "merge" ? "Merged away from" : `${historyActionLabel(h.action)} from`;
+      add({ at: h.at, kind: "history", text: `${verb} ${h.customer ?? "its account"}${h.note ? ` · ${h.note}` : ""}`, who: h.actor, link: null });
       continue;
     }
     if (h.action === "add_to_install" || h.action === "remove_from_install") {
@@ -130,7 +163,7 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
   // Tickets and TLCs it was on.
   for (const t of await sql.query<{ id: number; kind: string; call_id: string; status: string; customer: string; at: string | null }>(
     `select j.id, j.kind, j.call_id, j.status, j.customer,
-            coalesce(${DAY("j.completed_at")}, ${DAY("j.scheduled")}, ${DAY("j.received")}, ${AT("j.updated_at")}) as at
+            coalesce(${DAY("j.completed_at")}, ${DAY("j.received")}, ${AT("j.updated_at")}) as at
        from service_jobs j
       where j.id in (select job_id from ticket_units where machine_id = any($1::int[]) union ${KEPT("ticket_links", "job_id")})`,
     [ids],
@@ -142,7 +175,7 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
   // PMs that covered it (its runbook unit, or a unit link on the PM).
   for (const p of await sql.query<{ id: number; status: string; customer: string; at: string | null }>(
     `select distinct p.id, p.status, p.customer,
-            coalesce(${DAY("p.completed_at")}, ${DAY("p.projected")}, ${DAY("p.received")}) as at
+            coalesce(${DAY("p.completed_at")}, ${DAY("p.received")}, ${AT("p.updated_at")}) as at
        from pm_jobs p
       where p.id in (select pm_job_id from pm_runbook_units where machine_id = any($1::int[])
                      union select pm_job_id from pm_runbook_unit_links where machine_id = any($1::int[])
@@ -213,9 +246,10 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
   }
 
   // Its warehouse records: stock requests and their activity.
+  let activityCapped = false;
   if (assetIds.length) {
-    for (const a of await sql.query<{ asset_id: number; kind: string; status: string; customer: string | null; asked: string; asked_by: string; decided: string | null; decided_by: string | null }>(
-      `select asset_id, kind, status, customer, ${AT("asked_at")} as asked, asked_by, ${AT("decided_at")} as decided, decided_by
+    for (const a of await sql.query<{ asset_id: number; kind: string; status: string; customer: string | null; asked: string; asked_by: string | null; decided: string | null; decided_by: string | null }>(
+      `select asset_id, kind, status, customer, ${AT("asked_at")} as asked, asked_name as asked_by, ${AT("decided_at")} as decided, decided_name as decided_by
          from asset_stock_actions where asset_id = any($1::int[])`,
       [assetIds],
     )) {
@@ -223,19 +257,22 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
       add({ at: a.asked, kind: "stock", text: what, who: a.asked_by, link: { kind: "asset", id: Number(a.asset_id) } });
       if (a.decided) add({ at: a.decided, kind: "stock", text: `${what}: ${a.status}`, who: a.decided_by, link: { kind: "asset", id: Number(a.asset_id) } });
     }
-    for (const a of await sql.query<{ entity_id: number; action: string; detail: string | null; at: string; actor_name: string | null }>(
+    const activityRows = await sql.query<{ entity_id: number; action: string; detail: string | null; at: string; actor_name: string | null }>(
       `select entity_id, action, detail, ${AT("created_at")} as at, actor_name
-         from activity where entity_type = 'asset' and entity_id = any($1::int[]) order by created_at desc limit 200`,
+         from activity where entity_type = 'asset' and entity_id = any($1::int[]) order by created_at desc limit ${ACTIVITY_LIMIT}`,
       [assetIds],
-    )) {
+    );
+    activityCapped = activityRows.length >= ACTIVITY_LIMIT;
+    for (const a of activityRows) {
       add({ at: a.at, kind: "warehouse", text: a.detail || a.action, who: a.actor_name, link: { kind: "asset", id: Number(a.entity_id) } });
     }
   }
 
-  // Retired from an account (the equipment history has the line too when the trigger saw it; this keeps older ones).
+  // A unit that left before the equipment history began (11/19) has only its retired copy to say so.
+  const left = new Set(history.filter((h) => h.field == null && h.new_value == null && h.old_value != null).map((h) => Number(h.unit_id)));
   for (const r of retired) {
-    if (events.some((e) => e.kind === "history" && e.at === r.at && e.text.startsWith(historyActionLabel("retire")))) continue;
-    add({ at: r.at, kind: "retired", text: `Retired from ${r.customer}`, who: r.by, link: null });
+    if (left.has(Number(r.unit_id))) continue;
+    add({ at: r.at, kind: "retired", text: retiredWhy(r), who: r.by, link: null });
   }
 
   events.sort((a, b) => (a.at === b.at ? 0 : a.at < b.at ? 1 : -1));
@@ -248,6 +285,7 @@ export async function machinePageFor(sql: Sql, id: number): Promise<MachinePage>
     records,
     modules: modules.map((x) => ({ id: Number(x.id), moduleId: x.module_id })),
     events,
+    capped: history.length >= HISTORY_LIMIT || activityCapped,
   };
 }
 

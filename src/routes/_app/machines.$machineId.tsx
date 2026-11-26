@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getMachinePage, type MachineEvent, type MachineRecord } from "@/lib/ops/machine-page";
+import { getMachinePage, MACHINE_NOT_FOUND, type MachineEvent, type MachineRecord } from "@/lib/ops/machine-page";
 import { notLoadedText } from "@/lib/ops/load-problem";
 import { OpenLink } from "@/components/desk/open-link";
 
@@ -27,30 +27,38 @@ const KIND_LABEL: Record<MachineEvent["kind"], string> = {
 function Page() {
   const { machineId } = Route.useParams();
   const id = Number(machineId);
-  const q = useQuery({ queryKey: ["machine-page", id], queryFn: () => getMachinePage({ data: { id } }), enabled: id > 0 });
+  const valid = Number.isInteger(id) && id > 0;
+  const q = useQuery({ queryKey: ["machine-page", id], queryFn: () => getMachinePage({ data: { id } }), enabled: valid });
   const m = q.data;
+  const notFound = !valid || (q.isError && String((q.error as Error)?.message ?? "").includes(MACHINE_NOT_FOUND));
   return (
     <div>
       <header>
         <p className="text-xs tracking-wide text-muted-foreground uppercase">Machine</p>
         <h1 className="font-display text-3xl font-medium tracking-tight" data-testid="machine-title">
-          {m ? (m.serial ? `SN ${m.serial}` : "No serial") : "…"}
+          {m ? (m.serial ? `SN ${m.serial}` : "No serial") : q.isLoading ? "…" : "Machine"}
         </h1>
         {m?.model ? <p className="mt-1 text-sm text-muted-foreground">{m.model}</p> : null}
       </header>
 
       {q.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Reading its records…</p> : null}
-      {q.isError ? <p className="mt-6 text-sm text-destructive">{notLoadedText(q, "machine")}</p> : null}
+      {notFound ? (
+        <p className="mt-6 text-sm text-muted-foreground" data-testid="machine-not-found">
+          {MACHINE_NOT_FOUND}
+        </p>
+      ) : q.isError ? (
+        <p className="mt-6 text-sm text-destructive">{notLoadedText(q, "machine page")}</p>
+      ) : null}
 
       {m ? (
         <>
           {m.mergedInto ? (
             <p className="mt-4 text-sm" data-testid="machine-merged">
-              Its records all went to{" "}
+              Its records and history went to{" "}
               <Link to="/machines/$machineId" params={{ machineId: String(m.mergedInto) }} className="underline underline-offset-2">
                 another machine
-              </Link>
-              . Its history up to then is below.
+              </Link>{" "}
+              (the same serial, fixed).
             </p>
           ) : null}
 
@@ -109,6 +117,7 @@ function Page() {
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Nothing names this machine yet.</p>
             )}
+            {m.capped ? <p className="mt-2 text-xs text-muted-foreground">Older equipment and warehouse lines aren't shown.</p> : null}
           </section>
         </>
       ) : null}
@@ -148,7 +157,7 @@ function RecordLine({ r }: { r: MachineRecord }) {
   }
   return (
     <span className="text-muted-foreground">
-      Retired from {r.customer} {r.retiredAt} · {r.model}
+      {r.why} {r.retiredAt} · {r.model}
       {r.serial ? ` · SN ${r.serial}` : ""}
     </span>
   );

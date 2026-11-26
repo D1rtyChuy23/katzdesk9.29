@@ -33,7 +33,8 @@ async function grinder(q) {
     "insert into service_jobs (kind, call_id, customer, status, received) values ('service', 'SC-ZZ1', 'Zz Cafe', 'Open', '2026-11-02') returning id",
   );
   await q("insert into ticket_units (job_id, account_equipment_id) values ($1, $2)", [job, unit.id]);
-  const [{ id: pm }] = await q("insert into pm_jobs (customer, status, projected) values ('Zz Cafe', 'Scheduled', '2026-11-10') returning id");
+  // Planned for later: the page dates it from when it came in.
+  const [{ id: pm }] = await q("insert into pm_jobs (customer, status, received, projected) values ('Zz Cafe', 'Scheduled', '2026-11-01', '2026-12-10') returning id");
   await q("insert into pm_runbook_units (pm_job_id, unit_key, runbook_id, serial_key) values ($1, 'zzsn-1', 'rb', 'zzsn-1')", [pm]);
   await q(
     "insert into machine_parts (pm_job_id, piece_key, account_equipment_id, serial_key, machine_label, item, qty, added_by) values ($1, 'p1', $2, 'zzsn-1', 'Zz Grinder', 'Burr set', 2, 'liz')",
@@ -59,7 +60,7 @@ test("the page lists the machine's records and every row that names it, newest f
     assert.deepEqual(page.modules, [{ id: g.mod, moduleId: "ZZM-1" }]);
     const byKind = (k) => page.events.filter((e) => e.kind === k);
     assert.deepEqual(byKind("ticket").map((e) => [e.text, e.link]), [["Ticket SC-ZZ1 · Open · Zz Cafe", { kind: "service", id: g.job }]]);
-    assert.deepEqual(byKind("pm").map((e) => [e.at, e.link]), [["2026-11-10", { kind: "pm", id: g.pm }]]);
+    assert.deepEqual(byKind("pm").map((e) => [e.at, e.link]), [["2026-11-01", { kind: "pm", id: g.pm }]]);
     assert.deepEqual(byKind("part").map((e) => [e.text, e.who, e.link]), [["Part Burr set × 2", "liz", { kind: "pm", id: g.pm }]]);
     assert.deepEqual(byKind("install").map((e) => [e.at, e.link]), [["2026-10-20", { kind: "install", id: g.install }]]);
     assert.deepEqual(byKind("module").map((e) => [e.text, e.who]), [["Module ZZM-1 put on · Zz Cafe", "tess"]]);
@@ -80,16 +81,22 @@ test("a retired unit and a warehouse record of the same machine are both on its 
     const [asset] = await q("insert into assets (kind, model, site, serial, status) values ('equip', 'Zz Grinder', 'Barn', 'zzsn-1', 'ready') returning id, machine_id");
     assert.equal(asset.machine_id, g.machine, "one machine per serial");
     await q("insert into activity (entity_type, entity_id, actor_name, action, detail) values ('asset', $1, 'wh', 'moved', 'To rack B-2')", [asset.id]);
-    await q("insert into asset_stock_actions (asset_id, kind, status, customer, asked_by) values ($1, 'assign', 'pending', 'Zz Cafe', 'wh')", [asset.id]);
+    await q("insert into asset_stock_actions (asset_id, kind, status, customer, asked_by, asked_name) values ($1, 'assign', 'pending', 'Zz Cafe', 'u-wes', 'wes')", [asset.id]);
     // Retire the account unit: Retire keeps a copy with its links, then the unit goes.
     await retireUnitRecord(sql, g.unit, { userId: "u-chuy", name: "chuy" });
     await q("delete from account_equipment where id = $1", [g.unit]);
 
     const page = await machinePageFor(sql, g.machine);
-    assert.deepEqual(page.records.map((r) => r.where), ["warehouse", "retired"]);
+    assert.deepEqual(page.records.map((r) => [r.where, r.why ?? null]), [["warehouse", null], ["retired", "Retired from Zz Cafe"]]);
     assert.ok(page.events.some((e) => e.kind === "warehouse" && e.text === "To rack B-2" && e.link?.kind === "asset"));
-    assert.ok(page.events.some((e) => e.kind === "stock" && e.text === "Asked to send to Zz Cafe"));
-    assert.ok(page.events.some((e) => (e.kind === "retired" || e.kind === "history") && /Retired/.test(e.text)), "the retire");
+    assert.deepEqual(
+      page.events.filter((e) => e.kind === "stock").map((e) => [e.text, e.who]),
+      [["Asked to send to Zz Cafe", "wes"]],
+      "a person's name, not their user id",
+    );
+    // The unit leaving reads once, from its equipment history.
+    const leaving = page.events.filter((e) => /from Zz Cafe/.test(e.text) && (e.kind === "history" || e.kind === "retired"));
+    assert.deepEqual(leaving.map((e) => e.text), ["Removed from Zz Cafe · Kept: it can be put back"]);
     // The unit's history before it was retired is still there.
     assert.ok(page.events.some((e) => e.kind === "ticket"));
     assert.ok(page.events.some((e) => e.kind === "module"));
@@ -137,6 +144,35 @@ test("account units and retired units carry their machine, for the Machine histo
     await q("delete from account_equipment where id = $1", [g.unit]);
     const retired = await listRetiredUnits(sql, "Zz Cafe");
     assert.deepEqual(retired.map((r) => r.machineId), [g.machine]);
+  } finally {
+    await pg.close();
+  }
+});
+
+test("a unit put back reads as one line, and an open ticket dates from when it came in", async () => {
+  const { pg, q, sql } = await fresh();
+  try {
+    const g = await grinder(q);
+    await q("update service_jobs set scheduled = '2099-01-01' where id = $1", [g.job]);
+    await retireUnitRecord(sql, g.unit, { userId: "u-chuy", name: "chuy" });
+    await pg.transaction(async (tx) => {
+      await tx.query("select set_config('katz.action', 'retire', true), set_config('katz.actor', 'chuy', true)");
+      await tx.query("delete from account_equipment where id = $1", [g.unit]);
+    });
+    await pg.transaction(async (tx) => {
+      await tx.query("select set_config('katz.action', 'put_back', true), set_config('katz.actor', 'chuy', true)");
+      await tx.query(
+        "insert into account_equipment (id, customer, catalog_model, equipment_name, serial, machine_id) values ($1, 'Zz Cafe', 'Zz Grinder', 'Zz Grinder', 'ZZSN-1', $2)",
+        [g.unit, g.machine],
+      );
+    });
+    const page = await machinePageFor(sql, g.machine);
+    const lines = page.events.filter((e) => e.kind === "history").map((e) => [e.text, e.who]);
+    assert.ok(lines.some(([t, w]) => t === "Put back on Zz Cafe: Model Zz Grinder · Serial ZZSN-1" && w === "chuy"), JSON.stringify(lines));
+    assert.ok(lines.some(([t]) => t === "Retired from Zz Cafe · Kept: it can be put back"));
+    assert.equal(lines.filter(([t]) => /^Put back/.test(t)).length, 1, "one line for the put back");
+    assert.deepEqual(page.records.map((r) => r.where), ["account"], "the retired copy is the unit again");
+    assert.equal(page.events.find((e) => e.kind === "ticket")?.at, "2026-11-02", "the day it came in, not a planned day");
   } finally {
     await pg.close();
   }
