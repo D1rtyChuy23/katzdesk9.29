@@ -32,18 +32,18 @@ function zipStats(): Promise<ZipStat[]> {
 
 export type ZipStatsResult = { zips: ZipStat[]; truncated: boolean; source: string };
 
-export async function listZipStatsFor(sql: Sql, userId: string, box: unknown, all?: ZipStat[]): Promise<ZipStatsResult> {
+export async function listZipStatsFor(sql: Sql, userId: string, box: unknown, all?: ZipStat[], limit = ZIP_LIMIT): Promise<ZipStatsResult> {
   if (!(await canUseMarketLayers(sql, userId))) throw new Error(MARKET_REFUSAL);
   const b = cleanBounds(box as Parameters<typeof cleanBounds>[0]);
   if (!b) throw new Error("That part of the map could not be read.");
-  const { zips, truncated } = zipsIn(all ?? (await zipStats()), b, ZIP_LIMIT);
+  const { zips, truncated } = zipsIn(all ?? (await zipStats()), b, Math.max(1, Math.min(ZIP_LIMIT, Math.floor(limit))));
   return { zips, truncated, source: ZIP_SOURCE };
 }
 
-const boundsInput = z.object({ south: z.number(), west: z.number(), north: z.number(), east: z.number() });
+const boundsInput = z.object({ south: z.number(), west: z.number(), north: z.number(), east: z.number(), limit: z.number().int().min(1).max(ZIP_LIMIT).optional() });
 
 /** ZIP areas in the box on screen, most people first (Admin and Sales). */
 export const listZipStats = createServerFn({ method: "GET" })
   .middleware([deskMiddleware])
   .validator(boundsInput)
-  .handler(async ({ data, context }): Promise<ZipStatsResult> => listZipStatsFor(await getSql(), context.userId, data));
+  .handler(async ({ data, context }): Promise<ZipStatsResult> => listZipStatsFor(await getSql(), context.userId, data, undefined, data.limit));

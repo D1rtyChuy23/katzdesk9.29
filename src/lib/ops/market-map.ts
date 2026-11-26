@@ -36,6 +36,18 @@ export const ZIP_MIN_ZOOM = 7;
 /** At most this many ZIP circles at once (the most populated ones in view). */
 export const ZIP_LIMIT = 2500;
 
+/**
+ * How many ZIP circles to ask for at a zoom, and the grid the asked-for box snaps to. Zoomed out to a state, a few
+ * hundred of the biggest are what reads (and keeps a phone's answer small); a coarse grid lets a pan reuse the answer.
+ */
+export function zipRequest(zoom: number): { limit: number; snap: number } {
+  if (zoom < 8) return { limit: 600, snap: 1 };
+  if (zoom < 9) return { limit: 1000, snap: 0.5 };
+  if (zoom < 10) return { limit: 1500, snap: 0.25 };
+  if (zoom < 12) return { limit: ZIP_LIMIT, snap: 0.1 };
+  return { limit: ZIP_LIMIT, snap: 0.02 };
+}
+
 const num = (s: string | undefined) => {
   const n = Number(s);
   return s != null && s !== "" && Number.isFinite(n) ? n : null;

@@ -51,7 +51,7 @@ import { firstEmail, statusTone, telHref, websiteHref, websiteLabel } from "@/li
 import { formatLongDate } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
 import { inBounds, ZIP_MIN_ZOOM, zipFromAddress, type ZipStat } from "@/lib/ops/market-map";
-import { matchAccounts, padBounds, type AccountPoint, type PlaceCategory } from "@/lib/ops/places";
+import { matchAccounts, padBounds, type AccountPoint, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
 
 type ColorBy = "rep" | "work" | "pms" | "type";
 
@@ -469,18 +469,24 @@ export function CustomerMap({
   const zipLayer = useMemo(() => zipPins(zipRows), [zipRows]);
   const placesQ = usePlaces(mapView, placesOn, layers.categories);
   const allPlaces = useMemo(() => [...placesQ.places.values()], [placesQ.places]);
-  const placeMatches = useMemo(() => (allPlaces.length ? matchAccounts(allPlaces, accountPoints) : new Map<string, AccountPoint>()), [allPlaces, accountPoints]);
+  // A name match is that account (a current account, not a prospect); a street-address match alone stays a prospect.
+  const placeMatches = useMemo(() => (allPlaces.length ? matchAccounts(allPlaces, accountPoints) : new Map<string, PlaceMatch>()), [allPlaces, accountPoints]);
+  const currentAccounts = useMemo(() => {
+    const m = new Map<string, AccountPoint>();
+    for (const [id, match] of placeMatches) if (match.how === "name") m.set(id, match.account);
+    return m;
+  }, [placeMatches]);
   const placeById = useMemo(() => new Map(allPlaces.map((p) => [p.id, p])), [allPlaces]);
   // Places of the picked types (current accounts left off unless asked for) near the screen: drawn; on screen: counted.
   const { placesDrawn, placesInView, prospectsInView } = useMemo(() => {
     if (!placesOn || !mapView) return { placesDrawn: [], placesInView: [], prospectsInView: [] };
     const wanted = new Set<PlaceCategory>(layers.categories);
     const near = padBounds(mapView, 1);
-    const drawn = allPlaces.filter((p) => wanted.has(p.category) && (!layers.hideCustomers || !placeMatches.has(p.id)) && inBounds(p, near));
+    const drawn = allPlaces.filter((p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near));
     const inView = drawn.filter((p) => inBounds(p, mapView));
-    return { placesDrawn: drawn, placesInView: inView, prospectsInView: inView.filter((p) => !placeMatches.has(p.id)) };
-  }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, placeMatches]);
-  const placeLayer = useMemo(() => placePins(placesDrawn, placeMatches), [placesDrawn, placeMatches]);
+    return { placesDrawn: drawn, placesInView: inView, prospectsInView: inView.filter((p) => !currentAccounts.has(p.id)) };
+  }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, currentAccounts]);
+  const placeLayer = useMemo(() => placePins(placesDrawn, currentAccounts), [placesDrawn, currentAccounts]);
   const placeCounts = useMemo(() => {
     const m = new Map<PlaceCategory, number>();
     for (const c of layers.categories) m.set(c, 0);
@@ -817,7 +823,7 @@ export function CustomerMap({
             }
             base={layers.base}
             onMapTap={layers.base === "terrain" ? setTapAt : undefined}
-            onViewSettled={setMapView}
+            onViewSettled={populationOn || placesOn ? setMapView : undefined}
             onPinClick={(pin) => {
               const key = String(pin.id);
               if (key === "tap") return;
@@ -851,7 +857,7 @@ export function CustomerMap({
                 </p>
               </div>
             ) : null}
-            {tapAt || (populationOn && mapView && mapView.zoom < ZIP_MIN_ZOOM) || (populationOn && zipQ.isError) || placesOn ? (
+            {tapAt || populationOn || placesOn ? (
               // Layer notes, top right. On a phone they sit under the picked-item bar that shows at the top.
               <div
                 className={cn(
@@ -863,6 +869,11 @@ export function CustomerMap({
                 {populationOn && mapView && mapView.zoom < ZIP_MIN_ZOOM ? (
                   <p className="rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs shadow-[var(--shadow-soft)]" data-testid="map-population-note">
                     Zoom in to see population by ZIP
+                  </p>
+                ) : null}
+                {populationOn && zipShown && zipQ.data?.truncated ? (
+                  <p className="rounded-lg border border-border bg-card/95 px-3 py-1.5 text-xs shadow-[var(--shadow-soft)]" data-testid="map-population-truncated">
+                    Showing the {zipQ.data.zips.length.toLocaleString("en-US")} most populated ZIPs here. Zoom in for all of them.
                   </p>
                 ) : null}
                 {populationOn && zipQ.isError ? (
@@ -917,13 +928,13 @@ export function CustomerMap({
             <ZipCard
               zip={selectedZip}
               accounts={accountsByZip.get(selectedZip.zip) ?? []}
-              prospects={placesOn ? allPlaces.filter((p) => p.zip === selectedZip.zip && layers.categories.includes(p.category) && !placeMatches.has(p.id)).length : null}
               onClose={closeLayerPick}
             />
           ) : selectedPlace ? (
             <PlaceCard
               place={selectedPlace}
-              account={placeMatches.get(selectedPlace.id) ?? null}
+              account={currentAccounts.get(selectedPlace.id) ?? null}
+              sameAddress={placeMatches.get(selectedPlace.id)?.how === "address" ? placeMatches.get(selectedPlace.id)!.account : null}
               accounts={accountPoints}
               onOpenAccount={(id) => {
                 const a = byId.get(id);

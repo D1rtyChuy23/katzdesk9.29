@@ -4,10 +4,11 @@ import { Download, ExternalLink, Globe, Mountain, Navigation, Phone, RotateCcw, 
 import { getMyAccess } from "@/lib/ops/access";
 import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { listZipStats } from "@/lib/ops/market-api";
-import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, ZIP_MIN_ZOOM, ZIP_SOURCE, type Bounds, type ZipStat } from "@/lib/ops/market-map";
+import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, zipRequest, ZIP_MIN_ZOOM, ZIP_SOURCE, type Bounds, type ZipStat } from "@/lib/ops/market-map";
 import {
   DEFAULT_PLACE_CATEGORIES,
   isPlaceCategory,
+  containsBounds,
   formatPhone,
   missingCategories,
   nearestAccount,
@@ -32,7 +33,6 @@ import {
   type CachedFetch,
   type Place,
   type PlaceCategory,
-  type PlaceFetch,
 } from "@/lib/ops/places";
 import { decodeTerrarium, elevationLabel, elevationPixel, ELEVATION_SOURCE, terrariumUrl } from "@/lib/ops/elevation";
 import { directionsUrl, milesLabel, type LatLng } from "@/lib/ops/geo";
@@ -201,10 +201,11 @@ export function TapReadout({ at, onClose }: { at: LatLng; onClose: () => void })
 
 /** The ZIP areas on screen (Admin and Sales), while the layer is on and the map is zoomed in enough. */
 export function useZipStats(view: MapBounds | null, on: boolean) {
-  const box = view && on && view.zoom >= ZIP_MIN_ZOOM ? padBounds(view, 0.25) : null;
+  const ask = view ? zipRequest(view.zoom) : null;
+  const box = view && ask && on && view.zoom >= ZIP_MIN_ZOOM ? padBounds(view, 0.25, ask.snap) : null;
   return useQuery({
-    queryKey: ["zip-stats", box?.south, box?.west, box?.north, box?.east],
-    queryFn: () => listZipStats({ data: box! }),
+    queryKey: ["zip-stats", box?.south, box?.west, box?.north, box?.east, ask?.limit],
+    queryFn: () => listZipStats({ data: { ...box!, limit: ask!.limit } }),
     enabled: !!box,
     staleTime: 60 * 60_000,
     placeholderData: keepPreviousData,
@@ -249,7 +250,7 @@ export function PopulationKey({ className }: { className?: string }) {
   );
 }
 
-export function ZipCard({ zip: z, accounts, prospects, onClose }: { zip: ZipStat; accounts: readonly AccountPoint[]; prospects: number | null; onClose: () => void }) {
+export function ZipCard({ zip: z, accounts, onClose }: { zip: ZipStat; accounts: readonly AccountPoint[]; onClose: () => void }) {
   const d = density(z);
   const reps = useMemo(() => [...new Set(accounts.map((a) => a.rep).filter((r): r is string => !!r))].sort(), [accounts]);
   const food = z.cafes + z.restaurants + z.bars;
@@ -290,7 +291,6 @@ export function ZipCard({ zip: z, accounts, prospects, onClose }: { zip: ZipStat
             ))}
           </p>
         ) : null}
-        {prospects != null ? <p className="mt-0.5 text-muted-foreground">Prospect places loaded on the map in this ZIP: {count(prospects)}</p> : null}
       </div>
       <ElevationLine point={z} className="mt-2" />
       <p className="mt-2 text-[11px] text-muted-foreground">{ZIP_SOURCE} The circle sits at the ZIP area&apos;s center.</p>
@@ -324,8 +324,8 @@ function loadPlaceCache(): CachedFetch[] {
   }
 }
 function savePlaceCache(entries: CachedFetch[]) {
-  // Oldest first out when the browser's storage is full.
-  for (let list = entries.slice(-PLACE_CACHE_MAX); list.length; list = list.slice(1)) {
+  // When the browser's storage is full, the older half goes, then half again.
+  for (let list = entries.slice(-PLACE_CACHE_MAX); list.length; list = list.slice(Math.ceil(list.length / 2))) {
     try {
       window.localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify(list));
       return;
@@ -336,7 +336,7 @@ function savePlaceCache(entries: CachedFetch[]) {
 }
 
 /** Asks each Overpass server in turn until one answers with places (a busy server says so with 429 or 504). */
-async function fetchPlaces(b: Bounds, categories: readonly PlaceCategory[], signal: AbortSignal): Promise<Place[]> {
+async function fetchPlaces(b: Bounds, categories: readonly PlaceCategory[], signal: AbortSignal): Promise<{ places: Place[]; rows: number }> {
   const query = overpassQuery(b, categories);
   let problem: unknown = null;
   for (const [i, server] of OVERPASS_SERVERS.entries()) {
@@ -350,7 +350,9 @@ async function fetchPlaces(b: Bounds, categories: readonly PlaceCategory[], sign
       const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: ctrl.signal });
       const text = await res.text();
       if (!res.ok || !text.startsWith("@type")) throw new Error(`${server} answered ${res.status}`);
-      return parseOverpassCsv(text);
+      // Rows as the server sent them (some are skipped as places), to tell whether it stopped at the limit.
+      const rows = text.split("\n").filter((l) => l.trim()).length - 1;
+      return { places: parseOverpassCsv(text), rows };
     } catch (e) {
       if (signal.aborted) throw e;
       problem = e;
@@ -364,35 +366,51 @@ async function fetchPlaces(b: Bounds, categories: readonly PlaceCategory[], sign
 
 export type PlacesStatus = "off" | "zoom" | "loading" | "error" | "ready";
 
-/** Keep at most this many places in memory; the oldest go first. */
+/** Keep at most about this many places in memory; the oldest answers go first, whole. */
 const PLACES_KEPT = 20_000;
 
+type InFlight = { box: Bounds; categories: readonly PlaceCategory[]; ctrl: AbortController };
+
 /**
- * Places on screen for the categories picked. Asks only for what no earlier answer covers (a category newly turned on,
- * or a part of the map not seen yet), a little wider than the screen so small pans need nothing new.
+ * Places on screen for the categories picked. Asks only for what no complete answer covers (a category newly turned
+ * on, or a part of the map not seen yet), a little wider than the screen so small pans need nothing new. A request
+ * already on its way that covers the new view is left to finish rather than started again.
  */
 export function usePlaces(view: MapBounds | null, on: boolean, categories: readonly PlaceCategory[]) {
   const [places, setPlaces] = useState<Map<string, Place>>(() => new Map());
   const [status, setStatus] = useState<PlacesStatus>("off");
   const [truncated, setTruncated] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const done = useRef<PlaceFetch[]>([]);
-  const saved = useRef<CachedFetch[] | null>(null);
+  /** Complete answers, oldest first: what counts as covered, and what this browser keeps for a week. */
+  const answers = useRef<CachedFetch[]>([]);
+  /** The latest answer that stopped at the limit: drawn, but not counted as covering its box. */
+  const partial = useRef<Place[]>([]);
+  const cacheRead = useRef(false);
+  const inFlight = useRef<InFlight | null>(null);
   const catKey = categories.join(",");
-  // Answers from earlier visits (this browser, last 7 days), loaded the first time the layer is on.
+
+  /** The places from the answers kept, dropping the oldest answers whole when there are too many (so nothing dropped still counts as covered). */
+  function rebuild() {
+    let total = partial.current.length + answers.current.reduce((n, a) => n + a.places.length, 0);
+    while (answers.current.length > 1 && total > PLACES_KEPT) total -= answers.current.shift()!.places.length;
+    const next = new Map<string, Place>();
+    for (const a of answers.current) for (const p of a.places) next.set(p.id, p);
+    for (const p of partial.current) next.set(p.id, p);
+    setPlaces(next);
+  }
+
+  // Answers from earlier visits (this browser, last 7 days), read the first time the layer is on.
   useEffect(() => {
-    if (!on || saved.current) return;
-    saved.current = loadPlaceCache();
-    if (!saved.current.length) return;
-    done.current = saved.current.map(({ bounds, categories: c }) => ({ bounds, categories: c }));
-    setPlaces((prev) => {
-      const next = new Map(prev);
-      for (const e of saved.current!) for (const p of e.places) next.set(p.id, p);
-      return next;
-    });
+    if (!on || cacheRead.current) return;
+    cacheRead.current = true;
+    answers.current = loadPlaceCache();
+    if (answers.current.length) rebuild();
   }, [on]);
+
   useEffect(() => {
     if (!on || !view || !categories.length) {
+      inFlight.current?.ctrl.abort();
+      inFlight.current = null;
       setStatus("off");
       return;
     }
@@ -400,45 +418,49 @@ export function usePlaces(view: MapBounds | null, on: boolean, categories: reado
       setStatus("zoom");
       return;
     }
-    const missing = missingCategories(view, categories, done.current);
+    const missing = missingCategories(view, categories, answers.current);
     if (!missing.length) {
+      setTruncated(false);
       setStatus("ready");
       return;
     }
-    const ctrl = new AbortController();
+    const going = inFlight.current;
+    if (going && containsBounds(going.box, view) && missing.every((c) => going.categories.includes(c))) {
+      setStatus("loading");
+      return;
+    }
     // Wait a moment: the map reports each place it comes to rest, and a quick second pan replaces this one.
     const timer = setTimeout(() => {
-      setStatus("loading");
+      inFlight.current?.ctrl.abort();
       const box = padBounds(view);
-      fetchPlaces(box, missing, ctrl.signal)
-        .then((found) => {
-          if (ctrl.signal.aborted) return;
-          const full = found.length >= PLACES_LIMIT;
+      const mine: InFlight = { box, categories: missing, ctrl: new AbortController() };
+      inFlight.current = mine;
+      setStatus("loading");
+      fetchPlaces(box, missing, mine.ctrl.signal)
+        .then(({ places: found, rows }) => {
+          if (inFlight.current !== mine) return;
+          inFlight.current = null;
+          const full = rows >= PLACES_LIMIT;
           setTruncated(full);
-          // A cut-off answer does not count as covering the box: zooming in asks again for a smaller one.
-          if (!full) {
-            done.current = [...done.current.slice(-60), { bounds: box, categories: missing }];
-            saved.current = [...(saved.current ?? []), { bounds: box, categories: missing, at: Date.now(), places: found }].slice(-PLACE_CACHE_MAX);
-            savePlaceCache(saved.current);
+          if (full) partial.current = found;
+          else {
+            answers.current = [...answers.current, { bounds: box, categories: missing, at: Date.now(), places: found }];
+            savePlaceCache(answers.current);
           }
-          setPlaces((prev) => {
-            const next = new Map(prev);
-            for (const p of found) next.set(p.id, p);
-            while (next.size > PLACES_KEPT) next.delete(next.keys().next().value!);
-            return next;
-          });
+          rebuild();
           setStatus("ready");
         })
         .catch(() => {
-          if (!ctrl.signal.aborted) setStatus("error");
+          if (inFlight.current !== mine) return;
+          inFlight.current = null;
+          setStatus("error");
         });
     }, 350);
-    return () => {
-      clearTimeout(timer);
-      ctrl.abort();
-    };
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- categories is keyed by catKey
   }, [on, view, catKey, attempt]);
+
+  useEffect(() => () => inFlight.current?.ctrl.abort(), []);
   return { places, status, truncated, retry: () => setAttempt((n) => n + 1) };
 }
 
@@ -539,7 +561,23 @@ export function DownloadProspects({ places, accounts }: { places: readonly Place
   );
 }
 
-export function PlaceCard({ place: p, account, accounts, onOpenAccount, onClose }: { place: Place; account: AccountPoint | null; accounts: readonly AccountPoint[]; onOpenAccount: (id: number) => void; onClose: () => void }) {
+export function PlaceCard({
+  place: p,
+  account,
+  sameAddress,
+  accounts,
+  onOpenAccount,
+  onClose,
+}: {
+  place: Place;
+  /** The account this place is (same name, close by). */
+  account: AccountPoint | null;
+  /** An account at the same street address under another name: maybe the same place, maybe a neighbor. */
+  sameAddress: AccountPoint | null;
+  accounts: readonly AccountPoint[];
+  onOpenAccount: (id: number) => void;
+  onClose: () => void;
+}) {
   const def = PLACE_CATEGORY.get(p.category);
   const address = placeAddress(p);
   const site = websiteUrl(p.website);
@@ -596,6 +634,16 @@ export function PlaceCard({ place: p, account, accounts, onOpenAccount, onClose 
             <>
               {" "}
               Nearest rep: <RepName name={repNear.account.rep} /> ({repNear.account.name}, {milesLabel(repNear.miles)}).
+            </>
+          ) : null}
+          {sameAddress ? (
+            <>
+              {" "}
+              Same street address as our account{" "}
+              <button type="button" className="font-medium text-primary underline-offset-4 hover:underline" onClick={() => onOpenAccount(sameAddress.id)} data-testid="map-place-same-address">
+                {sameAddress.name}
+              </button>
+              : it may be the same place under another name, or a neighbor in the same building.
             </>
           ) : null}
         </p>

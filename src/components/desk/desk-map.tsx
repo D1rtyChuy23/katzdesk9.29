@@ -261,8 +261,11 @@ type Drag = {
   follow: Point | null;
   /** No fling on release before this time (just after a pinch). */
   noFlingUntil: number;
-  /** The press started on a pin or a control: a tap there is not a tap on the map. */
-  onPin?: boolean;
+  /**
+   * A plain first press on the map itself (not a pin, not after a pinch, not the second tap of a double tap): if it
+   * lifts without moving, it is a tap on the map.
+   */
+  tap?: boolean;
 };
 type Pinch = { kind: "pinch"; startMid: Point; startDist: number; startZoom: number; anchor: Point; mid: Point; zoom: number };
 type Gesture = Drag | Pinch;
@@ -336,6 +339,7 @@ function MapSurface({
     // Views this map reported itself. The owner hands each one back as `view`; that echo is not a request to move.
     const reported = new WeakSet<View>();
     let watching = false; // window listens for pointer releases while any pointer is down
+    let tapTimer: ReturnType<typeof setTimeout> | null = null; // a tap on the map, waiting out the double-tap window
 
     /** Tiles drawn right now that have finished (loaded or failed). Unmounted tiles do not count: a new <img> must load. */
     function finishedTiles(): Set<string> {
@@ -561,11 +565,15 @@ function MapSurface({
       if (left) return;
       gesture = null;
       rect = null;
-      // A tap on the map itself (not a pin, not a drag, not the second tap of a double tap, which zooms).
-      if (g?.kind === "drag" && !g.moved && !g.onPin && canFling && !anim && latest.current.onMapTap) {
+      // A tap on the map itself. It is told after the double-tap window, so the first tap of a double tap (a zoom) is not one.
+      if (g?.kind === "drag" && !g.moved && g.tap && canFling && latest.current.onMapTap) {
         const { width: w, height: h } = latest.current;
         const [lat, lng] = pixelToLatLng(g.start, live.current, w, h);
-        latest.current.onMapTap({ lat, lng });
+        if (tapTimer) clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => {
+          tapTimer = null;
+          latest.current.onMapTap?.({ lat, lng });
+        }, DOUBLE_TAP_MS);
       }
       // No fling while a zoom is still animating (after a pinch or double tap): it finishes and rests on its own.
       if (g?.kind === "drag" && g.moved && canFling && !anim && performance.now() >= g.noFlingUntil && fling(g)) return;
@@ -576,6 +584,8 @@ function MapSurface({
       goTo,
       zoomBy,
       dispose() {
+        if (tapTimer) clearTimeout(tapTimer);
+        tapTimer = null;
         if (frame !== null) cancelAnimationFrame(frame);
         frame = null;
         stopAnimation();
@@ -592,6 +602,11 @@ function MapSurface({
           pointers.clear(); // a mouse has one pointer; drop any that never reported its release
         }
         if (!pointers.size) rect = surface.current?.getBoundingClientRect() ?? null;
+        // A new press inside the double-tap window: the earlier tap was not a tap on its own.
+        if (tapTimer) {
+          clearTimeout(tapTimer);
+          tapTimer = null;
+        }
         const at = local(e);
         pointers.set(e.pointerId, at);
         watchRelease(true);
@@ -599,7 +614,8 @@ function MapSurface({
         if (pointers.size === 1) {
           const now = performance.now();
           const prev = lastTap;
-          if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(at[0] - prev.at[0], at[1] - prev.at[1]) < 30 && !target.closest("[data-pin-id]")) {
+          // A double tap zooms, also on a see-through area circle (only real pins catch a double tap as two taps).
+          if (prev && now - prev.t < DOUBLE_TAP_MS && Math.hypot(at[0] - prev.at[0], at[1] - prev.at[1]) < 30 && !target.closest("[data-pin-id]:not([data-pin-plain])")) {
             lastTap = null;
             zoomAround(at, clampZoom(live.current.zoom + 1));
             gesture = dragFrom(e.pointerId, at); // the finger can pan while it zooms
@@ -607,7 +623,7 @@ function MapSurface({
           }
           lastTap = { t: now, at };
           gesture = dragFrom(e.pointerId, at);
-          gesture.onPin = !!target.closest("[data-pin-id]");
+          gesture.tap = !target.closest("[data-pin-id]");
         } else if (pointers.size === 2) {
           startPinch();
           for (const id of pointers.keys()) capture(id);
@@ -750,6 +766,7 @@ function MapSurface({
               onClick={clickable ? (e) => engine.onPinClick(e, p) : undefined}
               data-testid="map-pin"
               data-pin-id={String(p.id)}
+              data-pin-plain={p.plain ? "" : undefined}
             >
               {p.title ? <title>{p.title}</title> : null}
               {/* Scaled back while the map zooms, so dots keep their size. */}
@@ -919,6 +936,8 @@ export function DeskMap({
   // Street tiles: once one loads the map is fine; if only failures arrive, say so (pins and routes still work).
   const [tiles, setTiles] = useState<"unknown" | "ok" | "failed">("unknown");
   const onTiles = useCallback((ok: boolean) => setTiles((cur) => (cur === "ok" ? cur : ok ? "ok" : "failed")), []);
+  // A new base map starts over: streets that loaded say nothing about whether the terrain tiles will.
+  useEffect(() => setTiles("unknown"), [base]);
 
   useEffect(() => {
     const el = box.current;
@@ -952,12 +971,13 @@ export function DeskMap({
   useEffect(() => {
     settledRef.current = onViewSettled;
   });
+  const listening = !!onViewSettled;
   useEffect(() => {
     if (!size || !view || !settledRef.current) return;
     const [north, west] = pixelToLatLng([0, 0], view, size.w, size.h);
     const [south, east] = pixelToLatLng([size.w, size.h], view, size.w, size.h);
     settledRef.current({ south, west, north, east, zoom: view.zoom });
-  }, [view, size]);
+  }, [view, size, listening]);
 
   // Each new focus object pans the map, even to the same point again (after the user has panned away). Callers keep
   // focus in state, so it only changes when they ask for a pan.

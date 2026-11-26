@@ -116,17 +116,22 @@ export function overpassQuery(b: Bounds, categories: readonly PlaceCategory[], l
   const parts = Object.entries(byKey)
     .sort(([a], [c]) => a.localeCompare(c))
     .map(([key, set]) => `nwr["${key}"~"^(${[...set].sort().join("|")})$"]["name"]${box};`);
+  // Donut and coffee chains are often tagged fast food: they count as Bakeries and Coffee (categoryOf), so ask for them
+  // with those, not only when Fast Food is on.
+  if (categories.includes("coffee") || categories.includes("bakery")) parts.push(`nwr["amenity"="fast_food"]["cuisine"~"${FAST_FOOD_TREATS.source}",i]["name"]${box};`);
   const fields = CSV_FIELDS.map((f) => (f.startsWith("::") ? f : `"${f}"`)).join(",");
   return `[out:csv(${fields};true;"|")][timeout:25];(${parts.join("")});out center ${limit};`;
 }
 
+/** A fast-food cuisine that makes the place a coffee shop or a bakery (the query asks for exactly these). */
+const FAST_FOOD_TREATS = /coffee|donut|bakery|kolache/;
+
 /** Which category a place's tags put it in (the first match in PLACE_CATEGORIES order), or null. */
 export function categoryOf(tags: { amenity?: string | null; shop?: string | null; tourism?: string | null; cuisine?: string | null }): PlaceCategory | null {
   // A fast-food place that sells coffee or donuts counts as coffee or bakery (a donut shop is a prospect, a burger chain less so).
-  if (tags.amenity === "fast_food" && tags.cuisine) {
-    const cuisines = tags.cuisine.toLowerCase().split(/[;,]/).map((s) => s.trim());
-    if (cuisines.some((c) => c === "coffee_shop" || c === "coffee")) return "coffee";
-    if (cuisines.some((c) => c === "donut" || c === "donuts" || c === "bakery" || c === "kolache")) return "bakery";
+  if (tags.amenity === "fast_food" && tags.cuisine && FAST_FOOD_TREATS.test(tags.cuisine.toLowerCase())) {
+    // A donut shop that also lists coffee (most do) is a donut shop.
+    return /donut|bakery|kolache/.test(tags.cuisine.toLowerCase()) ? "bakery" : "coffee";
   }
   for (const def of PLACE_CATEGORIES) {
     for (const [key, values] of Object.entries(def.tags)) {
@@ -279,17 +284,22 @@ export function nameTokens(name: string | null | undefined): string[] {
     .replace(/['’]/g, "")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
-  const kept = words.filter((w) => !GENERIC.has(w));
+  // One-letter words ("A&M", "M Bar") say too little to tell places apart.
+  const kept = words.filter((w) => !GENERIC.has(w) && w.length > 1);
   return kept.length ? kept : words;
 }
 
-/** The same business by name: every word of the shorter name is in the longer one ("Star Cinema Grill" in "Star Cinema Grill - Cypress"). */
+/**
+ * The same business by name: the shorter name's words start the longer one's, in order ("Star Cinema Grill" and "Star
+ * Cinema Grill - Cypress", "Bean There Cafe" and "Bean There Coffee Co."). "Cafe Express" is not "Panda Express", and
+ * "Hilton Houston" is not "Hilton Garden Inn Houston".
+ */
 export function sameName(a: string | null | undefined, b: string | null | undefined): boolean {
   const x = nameTokens(a);
   const y = nameTokens(b);
   if (!x.length || !y.length) return false;
-  const [short, long] = x.length <= y.length ? [x, new Set(y)] : [y, new Set(x)];
-  return short.every((w) => long.has(w));
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  return short.every((w, i) => long[i] === w);
 }
 
 const streetKey = (s: string | null | undefined) => {
@@ -314,10 +324,14 @@ export const SAME_ADDRESS_MILES = 0.1;
 export type AccountPoint = { id: number; name: string; lat: number; lng: number; address: string | null; rep: string | null };
 
 /**
- * For each place, the account it already is, if any: an account with the same name within SAME_NAME_MILES, or the same
- * street address within SAME_ADDRESS_MILES. Accounts are bucketed on a small grid so thousands of each stay quick.
+ * How a place lines up with our accounts. "name": an account with the same name within SAME_NAME_MILES, so it is that
+ * account (left off the map as a prospect). "address": only the same street address within SAME_ADDRESS_MILES, which
+ * may be the same place under a legal name, or a neighbor in the same strip center: still a prospect, with a note.
  */
-export function matchAccounts(places: readonly Place[], accounts: readonly AccountPoint[]): Map<string, AccountPoint> {
+export type PlaceMatch = { account: AccountPoint; how: "name" | "address" };
+
+/** For each place that lines up with an account, the closest one; a name match wins over an address match. Accounts are bucketed on a grid so thousands of each stay quick. */
+export function matchAccounts(places: readonly Place[], accounts: readonly AccountPoint[]): Map<string, PlaceMatch> {
   const CELL = 0.01; // degrees, about 0.7 mile: a place only looks at its own cell and the ones around it
   const grid = new Map<string, AccountPoint[]>();
   const cell = (lat: number, lng: number) => `${Math.floor(lat / CELL)}:${Math.floor(lng / CELL)}`;
@@ -327,21 +341,23 @@ export function matchAccounts(places: readonly Place[], accounts: readonly Accou
     if (list) list.push(a);
     else grid.set(k, [a]);
   }
-  const out = new Map<string, AccountPoint>();
+  const out = new Map<string, PlaceMatch>();
   for (const p of places) {
     const cy = Math.floor(p.lat / CELL);
     const cx = Math.floor(p.lng / CELL);
-    let best: { a: AccountPoint; miles: number } | null = null;
+    let byName: { a: AccountPoint; miles: number } | null = null;
+    let byAddress: { a: AccountPoint; miles: number } | null = null;
     for (let dy = -1; dy <= 1; dy++) {
       for (let dx = -1; dx <= 1; dx++) {
         for (const a of grid.get(`${cy + dy}:${cx + dx}`) ?? []) {
           const miles = milesBetween(p, a);
-          const hit = (miles <= SAME_NAME_MILES && sameName(p.name, a.name)) || (miles <= SAME_ADDRESS_MILES && sameStreet(p.street, a.address));
-          if (hit && (!best || miles < best.miles)) best = { a, miles };
+          if (miles <= SAME_NAME_MILES && sameName(p.name, a.name) && (!byName || miles < byName.miles)) byName = { a, miles };
+          else if (miles <= SAME_ADDRESS_MILES && sameStreet(p.street, a.address) && (!byAddress || miles < byAddress.miles)) byAddress = { a, miles };
         }
       }
     }
-    if (best) out.set(p.id, best.a);
+    if (byName) out.set(p.id, { account: byName.a, how: "name" });
+    else if (byAddress) out.set(p.id, { account: byAddress.a, how: "address" });
   }
   return out;
 }
@@ -367,11 +383,10 @@ export function nearestRep(point: LatLng, accounts: readonly AccountPoint[]): { 
 // ---------------------------------------------------------------------------------------------------------------------
 // Which part of the map still needs asking for
 
-/** A box grown by `share` of its size on every side and snapped outward to a 0.01° grid, so small pans reuse it. */
-export function padBounds(b: Bounds, share = 0.25): Bounds {
+/** A box grown by `share` of its size on every side and snapped outward to a `snap`° grid, so small pans reuse it. */
+export function padBounds(b: Bounds, share = 0.25, snap = 0.01): Bounds {
   const h = (b.north - b.south) * share;
   const w = (b.east - b.west) * share;
-  const snap = 0.01;
   return {
     south: Math.max(-90, Math.floor((b.south - h) / snap) * snap),
     west: Math.floor((b.west - w) / snap) * snap,
@@ -441,6 +456,14 @@ export const PROSPECT_COLUMNS = [
 ] as const;
 
 /**
+ * Text from OpenStreetMap that a spreadsheet would run as a formula ("-2+HYPERLINK(…)", a tab then "="): an apostrophe
+ * in front keeps it text. The CSV writer catches "=", "+" and "@" itself; this adds a leading "-", tab or return.
+ */
+export function sheetText(s: string): string {
+  return /^[-\t\r]/.test(s) ? `'${s}` : s;
+}
+
+/**
  * One CSV row per place, for the download: the nearest account (any), how far, and the rep of the nearest account that
  * has one (the rep whose area it likely is).
  */
@@ -450,18 +473,18 @@ export function prospectRows(places: readonly Place[], accounts: readonly Accoun
     const n = nearestAccount(p, accounts);
     const r = nearestAccount(p, withRep);
     return [
-      p.name,
+      sheetText(p.name),
       PLACE_CATEGORY.get(p.category)?.label ?? p.category,
-      p.street ?? "",
-      p.city ?? "",
+      sheetText(p.street ?? ""),
+      sheetText(p.city ?? ""),
       p.zip ?? "",
       formatPhone(p.phone) ?? "",
       websiteUrl(p.website) ?? "",
       p.lat.toFixed(6),
       p.lng.toFixed(6),
-      n?.account.name ?? "",
+      sheetText(n?.account.name ?? ""),
       n ? n.miles.toFixed(1) : "",
-      r?.account.rep ?? "",
+      sheetText(r?.account.rep ?? ""),
       osmUrl(p.id),
     ];
   });

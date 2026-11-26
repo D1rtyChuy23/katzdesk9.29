@@ -145,9 +145,9 @@ test("a place that is already an account: same name close by, or the same street
     { id: "node/4", name: "Brand New Bistro", category: "restaurant", lat: 29.7626, lng: -95.3673, street: "77 Other St" },
   ];
   const m = places.matchAccounts(list, accounts);
-  assert.equal(m.get("node/1")?.id, 10, "same name words (Coffee Co. and Cafe are generic), 20 m apart; the far Bean There is not it");
-  assert.equal(m.get("node/2")?.id, 11, "different names, same street address");
-  assert.equal(m.get("node/3")?.id, 12, "Star Cinema Grill is in Star Cinema Grill - Cypress");
+  assert.deepEqual([m.get("node/1")?.account.id, m.get("node/1")?.how], [10, "name"], "same name words (Coffee Co. and Cafe are generic), 20 m apart; the far Bean There is not it");
+  assert.deepEqual([m.get("node/2")?.account.id, m.get("node/2")?.how], [11, "address"], "different names, same street address: flagged, not taken as the account");
+  assert.deepEqual([m.get("node/3")?.account.id, m.get("node/3")?.how], [12, "name"], "Star Cinema Grill starts Star Cinema Grill - Cypress");
   assert.equal(m.has("node/4"), false, "a new name next door is a prospect");
   assert.equal(places.sameName("The Coffee House", "Coffee Shop"), false, "names made only of generic words fall back to all words");
   assert.equal(places.sameStreet("502 Texas Avenue", "502 Texas Ave, Houston"), true);
@@ -233,4 +233,52 @@ test("a restaurant that also lists coffee stays a restaurant; a fast-food coffee
   assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "donut" }), "bakery");
   assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "burger" }), "fastfood");
   assert.equal(places.categoryOf({ amenity: "bench" }), null);
+});
+
+test("review follow-ups: tenants of one address, one-word names, donut and coffee fast food, spreadsheet text", () => {
+  // Fable review 11/26: a strip center's account must not hide its neighbors.
+  const center = [{ id: 20, name: "Nobu", lat: 29.7383, lng: -95.4630, address: "5085 Westheimer Rd Ste 100, Houston, TX 77056", rep: "Rosa" }];
+  const tenants = [
+    { id: "node/20", name: "Nobu Houston", category: "restaurant", lat: 29.7384, lng: -95.4631, street: "5085 Westheimer Road" },
+    { id: "node/21", name: "Shake Shack", category: "fastfood", lat: 29.7385, lng: -95.4629, street: "5085 Westheimer Road" },
+  ];
+  const m = places.matchAccounts(tenants, center);
+  assert.equal(m.get("node/20")?.how, "name");
+  assert.equal(m.get("node/21")?.how, "address", "the neighbor is only flagged as the same address, so it stays a prospect");
+  // One distinguishing word is not enough unless it starts the other name.
+  assert.equal(places.sameName("Cafe Express", "Panda Express"), false);
+  assert.equal(places.sameName("Texas A&M", "M Bar"), false);
+  assert.equal(places.sameName("Hilton Houston", "Hilton Garden Inn Houston"), false);
+  assert.equal(places.sameName("Starbucks", "Starbucks - Heights Blvd"), true);
+  assert.equal(places.sameName("Black Rock - Pearland", "Black Rock Coffee Bar"), true);
+  // The query asks for what categoryOf files under Coffee and Bakeries.
+  const q = places.overpassQuery({ south: 29, west: -96, north: 30, east: -95 }, ["bakery"]);
+  assert.match(q, /nwr\["amenity"="fast_food"\]\["cuisine"~"coffee\|donut\|bakery\|kolache",i\]\["name"\]/);
+  assert.doesNotMatch(places.overpassQuery({ south: 29, west: -96, north: 30, east: -95 }, ["hotel"]), /fast_food/);
+  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "donut;coffee_shop" }), "bakery", "a donut shop that sells coffee");
+  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "coffee_shop;breakfast" }), "coffee");
+  // Formula-looking names stay text in the download.
+  const row = places.prospectRows([{ id: "node/1", name: "-2+HYPERLINK(\"x\")", category: "coffee", lat: 29, lng: -95, street: "\t=1+1", city: "Houston", zip: null, phone: null, website: null }], [])[0];
+  assert.equal(row[0], "'-2+HYPERLINK(\"x\")");
+  assert.equal(row[2], "'\t=1+1");
+  assert.equal(row[8], "-95.000000", "a negative longitude is a number, left alone");
+});
+
+test("ZIP requests by zoom: fewer circles and a coarser box zoomed out; the server keeps the limit in range", async () => {
+  assert.deepEqual(market.zipRequest(7), { limit: 600, snap: 1 });
+  assert.deepEqual(market.zipRequest(9.5), { limit: 1500, snap: 0.25 });
+  assert.deepEqual(market.zipRequest(13), { limit: market.ZIP_LIMIT, snap: 0.02 });
+  for (let z = 7; z < 18; z += 0.5) assert.ok(market.zipRequest(z).limit >= market.zipRequest(z - 0.5).limit, "never fewer when zooming in");
+  const texas = places.padBounds({ south: 26, west: -106, north: 36, east: -94 }, 0.25, 1);
+  assert.deepEqual(texas, { south: 23, west: -109, north: 39, east: -91 }, "a whole-degree grid");
+  const all = market.parseZipStats(ZIP_FILE);
+  const pg = new PGlite();
+  const MIGRATIONS = new URL("../migrations/", import.meta.url);
+  for (const name of readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
+  await pg.query("insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values ('u-sales', 'sam', true, false, 'sales')");
+  const sql = Object.assign(async () => [], { query: async (text, params) => (await pg.query(text, params)).rows });
+  const r = await listZipStatsFor(sql, "u-sales", texas, all, 600);
+  assert.equal(r.zips.length, 600);
+  assert.equal(r.truncated, true);
+  assert.equal((await listZipStatsFor(sql, "u-sales", texas, all, 99_999)).zips.length, market.ZIP_LIMIT, "capped");
 });
