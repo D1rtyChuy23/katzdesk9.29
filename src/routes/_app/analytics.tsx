@@ -484,8 +484,9 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
   const [range, setRange] = useState<RangeId>("year");
   const [dates, setDates] = useState(() => rangeDates("year", today));
   const [shown, setShown] = useState(PAGE);
+  const [grouping, setGrouping] = useCustomerGrouping();
   const filters = { from: dates.from || null, to: dates.to || null };
-  useEffect(() => setShown(PAGE), [dates.from, dates.to]);
+  useEffect(() => setShown(PAGE), [dates.from, dates.to, grouping]);
   const view = useQuery({ queryKey: ["profit-report", filters], queryFn: () => getProfitReport({ data: filters }), placeholderData: keepPreviousData });
   const file = useMutation({
     mutationFn: (format: ExportFormat) => downloadProfitReport({ data: { filters, format } }),
@@ -498,7 +499,6 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
   const building = (format: ExportFormat) => file.isPending && file.variables === format;
   const d = view.data;
   const t = d?.totals;
-  const [grouping, setGrouping] = useCustomerGrouping();
   const customers = (grouping === "account" ? d?.byAccount : d?.byCustomer) ?? [];
   return (
     <div data-testid="profit-report">
@@ -650,6 +650,7 @@ function TableHead({ title, actions, as: Tag }: { title: string; actions?: React
 /** QuickBooks history (Jesus, 11/24): its own section, never added into the tables or totals above. */
 function HistoryProfit({ history, grouping, onGrouping }: { history: HistorySection; grouping: CustomerGrouping; onGrouping: (v: CustomerGrouping) => void }) {
   const [shown, setShown] = useState(PAGE);
+  useEffect(() => setShown(PAGE), [grouping]);
   const customers = grouping === "account" ? history.byAccount : history.byCustomer;
   return (
     <section className="mt-8" data-testid="profit-history">

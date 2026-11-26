@@ -107,6 +107,43 @@ test("an invoice goes with its record's account now, as By Name Billed takes the
   assert.deepEqual(r.byAccount.map((g) => [g.key, g.label]), [[`a:${beta}`, "Beta Bakery"]]);
 });
 
+test("NetSuite lines go with their install's account id", async () => {
+  const sql = await fresh();
+  const grill = await account(sql, "Gamma Grill");
+  const inst = await idOf(sql, "insert into installs (customer, complete, equip_status, archived) values ('Gamma Grill Kitchen', false, 'Not Ready', false) returning id");
+  // Its id names Gamma Grill though its name finds no account (a save that set the id itself).
+  await sql.query("update installs set customer_id = $1 where id = $2", [grill, inst]);
+  const b = await idOf(sql, "insert into record_ns_billing (install_id, wo, wo_key, ns_so, billed_at) values ($1, 'WO-PA-8', '8', 'SO-PA-8', '2026-10-20') returning id", [inst]);
+  await sql.query("insert into record_ns_charges (billing_id, item, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', 4, 45, 'part', 1)", [b]);
+  const r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.deepEqual(rows(r.byCustomer), [["Gamma Grill Kitchen", 1]]);
+  assert.deepEqual(r.byAccount.map((g) => [g.key, g.label, g.bills]), [[`a:${grill}`, "Gamma Grill", 1]]);
+});
+
+test("a merged account's bills land on the kept account, NetSuite lines and an invoice that kept its name too", async () => {
+  const sql = await fresh();
+  const kept = await account(sql, "Gamma Grill");
+  const dropped = await account(sql, "Gamma Grill Downtown");
+  const inst = await idOf(sql, "insert into installs (customer, complete, equip_status, archived) values ('Gamma Grill Downtown', false, 'Not Ready', false) returning id");
+  const b = await idOf(sql, "insert into record_ns_billing (install_id, wo, wo_key, ns_so, billed_at) values ($1, 'WO-PA-9', '9', 'SO-PA-9', '2026-10-20') returning id", [inst]);
+  await sql.query("insert into record_ns_charges (billing_id, item, qty, rate, kind, sort) values ($1, 'PARTS : TEST-A', 4, 45, 'part', 1)", [b]);
+  // A deal invoice whose deal is gone keeps the dropped account's name; a merge moves its id.
+  const deal = await idOf(sql, "insert into deals (customer) values ('Gamma Grill Downtown') returning id");
+  await I.approveInvoiceFor(sql, { type: "deal", id: deal, lines: LINES, lineIds: [], discount: null, seen: null }, "u-owner");
+  await sql.query("delete from deals where id = $1", [deal]);
+  await billedTicket(sql, "Gamma Grill");
+  {
+    const r = await R.profitReportFor(sql, ALL, "u-owner");
+    assert.deepEqual(rows(r.byAccount), [["Gamma Grill", 1], ["Gamma Grill Downtown", 2]], "the NetSuite lines are under the install's account");
+  }
+  const merged = await CI.renameOrMergeCustomer(sql, dropped, "Gamma Grill");
+  assert.ok(merged.merged && [kept, dropped].includes(merged.id));
+  const r = await R.profitReportFor(sql, ALL, "u-owner");
+  assert.deepEqual(rows(r.byAccount), [["Gamma Grill", 3]], "after the merge, one row");
+  assert.equal(r.byAccount[0].key, `a:${merged.id}`);
+  assert.deepEqual(rows(r.byCustomer), [["Gamma Grill", 2], ["Gamma Grill Downtown", 1]], "by name: the invoice keeps its name");
+});
+
 test("QuickBooks history has both tables too", async () => {
   const sql = await fresh();
   const alpha = await account(sql, "Alpha Cafe");
@@ -124,6 +161,7 @@ test("QuickBooks history has both tables too", async () => {
   assert.deepEqual(rows(s.byCustomer).map((r) => r[1]), [3], "by name: punctuation doesn't split a name");
   assert.deepEqual(rows(s.byAccount), [["Alpha Cafe", 2], ["Alpha Cafe.", 1]]);
   assert.deepEqual(s.byAccount.map((g) => g.key).sort(), [`a:${alpha}`, `a:${dotted}`].sort());
+  assert.equal(s.byAccount.reduce((n, g) => n + g.sell, 0), s.totals.sell, "every history bill is in exactly one account row");
 });
 
 test("the downloads carry both customer tables, and both history ones", async () => {
