@@ -3,11 +3,12 @@
  * listings bundled for Prospects (Overture Maps places, src/lib/ops/places-tiles/, refreshed monthly), including the
  * ones Overture marks permanently closed:
  *
- * - same:      listed under our name at our pin, at our street address.
+ * - same:      listed under our name at our pin, or at our street address within SAME_ADDRESS_MILES of the pin (a big
+ *              site such as a hotel campus: the geocoder and the listing put the point on different buildings).
  * - different: listed under our name at our pin, at another street address (one of the two is out of date).
  * - closed:    listed under our name at our pin (or at our address), and marked permanently closed, with no open
  *              listing nearby.
- * - elsewhere: listed under our name away from our pin: at our own address (the pin is off), or somewhere else within
+ * - elsewhere: listed under our name away from our pin: at our own address farther off (the pin is off), or somewhere else within
  *              reach (10 miles of a street pin, 25 of a ZIP-area one), when it is the only open listing under our name
  *              within 25 miles and carries no chain brand: it may have moved, or our pin may be wrong.
  * - none:      no listing under our name around. Not proof of anything: the listings cover the Prospects types
@@ -39,6 +40,8 @@ export type WebCheck = {
 
 /** Our pin and the listing this close (miles) are the same place: one block, to allow for where each map put it. */
 export const HERE_MILES = 0.15;
+/** A listing at our very street address this close (miles) is at our address: one site, mapped on another building. */
+export const SAME_ADDRESS_MILES = 0.5;
 /** How far to look for the same name when it is not at our pin: a street pin is trusted more than a ZIP-area one. */
 export const ELSEWHERE_MILES = 25;
 export const ELSEWHERE_MILES_STREET_PIN = 10;
@@ -111,11 +114,17 @@ export function kindWords(name: string | null | undefined): string[] {
  * three with the same kind word ("Katz Coffee"). "La Bar" is not "La Sicilia"; "Hugo's Cocina" is not "Hugo's".
  */
 export function sameBusiness(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
-  const ours = businessWords(baseName(accountName));
-  const theirs = businessWords(baseName(listingName));
+  if (sameWords(baseName(listingName), baseName(accountName))) return true;
+  // The listing may carry our location without a separator: "Tostada Regia Long Point" is "Tostada Regia - Long Point".
+  return baseName(accountName) !== String(accountName ?? "").trim() && sameWords(listingName, accountName);
+}
+
+function sameWords(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
+  const ours = businessWords(accountName);
+  const theirs = businessWords(listingName);
   if (!ours.length || ours.length !== theirs.length || !ours.every((w, i) => w === theirs[i])) return false;
-  const ka = kindWords(baseName(accountName)).join(" ");
-  const kb = kindWords(baseName(listingName)).join(" ");
+  const ka = kindWords(accountName).join(" ");
+  const kb = kindWords(listingName).join(" ");
   if (ours.length >= 2) return ka === kb || !ka || !kb;
   return ka === kb && (ours[0]!.length >= 5 || (!!ka && ours[0]!.length >= 3));
 }
@@ -206,9 +215,9 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
     listedAddress: listedAddress(x.p),
     sameAddress: x.street,
   });
-  // A listing at our very address is ours, whatever else is near: at our pin, or a little off it (the pin is off).
+  // A listing at our very address is ours, whatever else is near: on our site, or farther off (then the pin is off).
   const ourStreet = named.find((x) => !x.p.closed && x.street === true);
-  if (ourStreet) return found(ourStreet.miles <= HERE_MILES ? "same" : "elsewhere", ourStreet);
+  if (ourStreet) return found(ourStreet.miles <= SAME_ADDRESS_MILES ? "same" : "elsewhere", ourStreet);
   const here = named.filter((x) => x.miles <= HERE_MILES);
   const openHere = here.find((x) => !x.p.closed);
   // Only a clear "another street" is "different"; no house number on either side is no evidence either way.
@@ -254,11 +263,24 @@ export type WebCheckRow = {
 export const WEB_STATUS_ORDER: readonly WebStatus[] = ["closed", "different", "elsewhere", "none", "nopin", "same"];
 
 /** "Listed as permanently closed" → one line for the card, with the listing's details. */
+/** How far the listing's point is from ours, for a listing at our address: "under 50 ft", "300 ft", "0.4 mi". */
+function pinGap(miles: number): string {
+  const ft = Math.round((miles * 5280) / 50) * 50;
+  return ft < 50 ? "under 50 ft" : ft < 1000 ? `${ft} ft` : `${miles.toFixed(1)} mi`;
+}
+
 export function webCheckLine(c: WebCheck): string {
   const label = WEB_STATUS_LABEL[c.status];
   if (!c.place) return label;
   const where = placeAddress(c.place);
-  const far = c.status === "elsewhere" && c.miles != null ? ` (${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin)` : "";
+  const far =
+    c.miles == null
+      ? ""
+      : c.status === "elsewhere"
+        ? ` (${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin)`
+        : c.status === "same"
+          ? ` (${pinGap(c.miles)} from our pin)`
+          : "";
   const pinOff = c.status === "elsewhere" && c.sameAddress ? ". Same address as ours: the map pin looks off" : "";
   return `${label}${where ? `: ${where}` : ""}${far}${pinOff}`;
 }
