@@ -4,17 +4,32 @@
  */
 import { isWalkIn, normalizeCustomerKey } from "./customer-key.ts";
 import { LIVE_INVOICE_SQL } from "./billing-rules.ts";
+import { listedAccountSql } from "./bill-account.ts";
 
-export type StackPm = {
+/**
+ * A PM's or ticket's customer for the stack. `account`: the listed account it belongs to (its id when that names a listed
+ * account, else the account its name finds), read only when PMs reads by id (Link Check → Reading by id, C6); left out
+ * or undefined, the stack goes by the name as before.
+ */
+export type StackSide = { customer: string | null; account?: number | null };
+
+/**
+ * Whether two records are the same customer for a stack. By their accounts when both have one; otherwise by the name,
+ * as before (capitals, spaces and punctuation don't count).
+ */
+export function sameStackCustomer(a: StackSide, b: StackSide): boolean {
+  if (a.account != null && b.account != null) return a.account === b.account;
+  return normalizeCustomerKey(a.customer) === normalizeCustomerKey(b.customer);
+}
+
+export type StackPm = StackSide & {
   id: number;
-  customer: string | null;
   status: string;
   stackedJobId: number | null;
 };
 
-export type StackTicket = {
+export type StackTicket = StackSide & {
   id: number;
-  customer: string | null;
   status: string;
   nsSo: string | null;
   duplicateOf: number | null;
@@ -52,7 +67,7 @@ export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: num
   if (!pmKey || !ticketKey || isWalkIn(pm.customer) || isWalkIn(ticket.customer)) {
     return "Only a PM and ticket for a real customer can be stacked.";
   }
-  if (pmKey !== ticketKey) {
+  if (!sameStackCustomer(pm, ticket)) {
     return `PM #${pm.id} is for ${(pm.customer ?? "").trim()}, but ticket #${ticket.id} is for ${(ticket.customer ?? "").trim()}.`;
   }
   if (stackedCount >= 10) return `Ticket #${ticket.id} already carries 10 PMs.`;
@@ -61,20 +76,23 @@ export function stackRefusal(pm: StackPm, ticket: StackTicket, stackedCount: num
   return null;
 }
 
+const asSide = (v: StackSide | string | null | undefined): StackSide => (v != null && typeof v === "object" ? v : { customer: v ?? null });
+
 /**
- * Null when the customer key is not changing, and when every stacked partner already has the new key.
- * Otherwise the sentence for the side that is being edited.
+ * Null when the customer is not changing (sameStackCustomer), and when every stacked partner is already the new
+ * customer. Otherwise the sentence for the side that is being edited. A name, or a StackSide with its account when PMs
+ * reads by id.
  */
 export function stackCustomerRefusal(
-  current: string | null | undefined,
-  next: string | null | undefined,
-  partners: { id: number; customer: string | null }[],
+  current: StackSide | string | null | undefined,
+  next: StackSide | string | null | undefined,
+  partners: (StackSide & { id: number })[],
   side: "pm" | "ticket",
 ): string | null {
-  if (normalizeCustomerKey(current) === normalizeCustomerKey(next)) return null;
-  const nextKey = normalizeCustomerKey(next);
-  if (partners.length > 0 && partners.every((p) => normalizeCustomerKey(p.customer) === nextKey)) return null;
-  const bad = partners.find((p) => normalizeCustomerKey(p.customer) !== nextKey);
+  const was = asSide(current);
+  const now = asSide(next);
+  if (sameStackCustomer(was, now)) return null;
+  const bad = partners.find((p) => !sameStackCustomer(p, now));
   if (!bad) return null;
   const name = (bad.customer ?? "").trim() || "another customer";
   if (side === "pm") return `This PM is stacked on ticket #${bad.id} (${name}). Unstack it first.`;
@@ -82,20 +100,32 @@ export function stackCustomerRefusal(
 }
 
 /**
- * One statement. Locks the ticket, stacks the PM when every rule holds, and writes both activity rows.
- * $1 pm id, $2 ticket id, $3 actor. 0 rows means the caller re-reads and throws stackRefusal.
+ * The stack's customer rule in SQL, for records `a` and `b` with these name and id columns: by their listed accounts
+ * when `byId` and both have one (sameStackCustomer), else by the name key.
  */
-export function stackPmSql(): string {
+export function sameStackCustomerSql(a: { name: string; id: string }, b: { name: string; id: string }, byId: boolean): string {
+  const byName = `${customerKeySql(a.name)} = ${customerKeySql(b.name)}`;
+  if (!byId) return byName;
+  const accountA = listedAccountSql(a.id, a.name);
+  const accountB = listedAccountSql(b.id, b.name);
+  return `(case when ${accountA} is not null and ${accountB} is not null then ${accountA} = ${accountB} else ${byName} end)`;
+}
+
+/**
+ * One statement. Locks the ticket, stacks the PM when every rule holds, and writes both activity rows.
+ * $1 pm id, $2 ticket id, $3 actor. 0 rows means the caller re-reads and throws stackRefusal. `byId`: PMs reads by id.
+ */
+export function stackPmSql(byId = false): string {
   const pmKey = customerKeySql("pm.customer");
   const ticketKey = customerKeySql("ticket.customer");
   return `with ticket as (
-       select j.id, j.kind, j.customer, j.status, j.ns_so, j.duplicate_of, j.phone_resolved, j.wo, j.call_id,
+       select j.id, j.kind, j.customer, j.customer_id, j.status, j.ns_so, j.duplicate_of, j.phone_resolved, j.wo, j.call_id,
               (select count(*)::int from pm_jobs p where p.stacked_job_id = j.id) as stacked
          from service_jobs j
         where j.id = $2
         for update
      ), pm as (
-       select p.id, p.customer, p.status, p.stacked_job_id, p.moved_job_id
+       select p.id, p.customer, p.customer_id, p.status, p.stacked_job_id, p.moved_job_id
          from pm_jobs p
         where p.id = $1
         for update
@@ -116,7 +146,7 @@ export function stackPmSql(): string {
           and ${pmKey} <> 'walkin'
           and ${ticketKey} <> ''
           and ${ticketKey} <> 'walkin'
-          and ${pmKey} = ${ticketKey}
+          and ${sameStackCustomerSql({ name: "pm.customer", id: "pm.customer_id" }, { name: "ticket.customer", id: "ticket.customer_id" }, byId)}
           and ticket.stacked < 10
           -- A volatile function reads with a fresh snapshot, so an own-invoice approve that committed while this
           -- statement waited for the PM lock is seen (a plain subquery here would use the statement's old snapshot).

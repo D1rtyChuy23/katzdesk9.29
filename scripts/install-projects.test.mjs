@@ -360,6 +360,8 @@ test("customer: an Admin changes it (11/19: it moves units), the install's own u
   try {
     const id = await install(sql, "Baldi Management", { machines: [{ equipment: "Bunn TB3", serial: "T-1", powerVoltage: "" }, "Bunn ITCB", "Eversys e'4m"] });
     const other = await install(sql, "Baldi Management", { machines: ["Bunn ITCB"] });
+    // An install moves only to a listed account (C6, 11/26), as a ticket does.
+    await sql.query("insert into directory_customers (name) values ('Baldi Management Group Inc.'), ('Somewhere Else') on conflict do nothing");
     await syncInstallUnits(sql, id);
     const units = await sql.query("select id, equipment_name from account_equipment where created_by_install = $1 order by id", [id]);
     const itcb = units.find((u) => u.equipment_name === "Bunn ITCB");

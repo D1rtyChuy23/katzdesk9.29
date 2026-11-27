@@ -8,8 +8,14 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { canWriteRunbook, type RunbookRole } from "@/lib/ops/pm-runbook";
-import { stackCustomerRefusal, stackPmSql, stackRefusal, unstackPmSql, type StackPm, type StackTicket } from "@/lib/ops/pm-stack";
+import { sameStackCustomer, sameStackCustomerSql, stackCustomerRefusal, stackPmSql, stackRefusal, unstackPmSql, type StackPm, type StackSide, type StackTicket } from "@/lib/ops/pm-stack";
 import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
+import { listedAccountSql } from "@/lib/ops/bill-account";
+import { readsById } from "@/lib/ops/read-by-id";
+
+/** A PM's or ticket's listed account, as a select column, when PMs reads by id (C6); null otherwise. */
+const accountColumn = (byId: boolean, alias: string) => (byId ? listedAccountSql(`${alias}.customer_id`, `${alias}.customer`) : "null::int");
+const accountOf = (v: number | string | null | undefined, byId: boolean) => (byId ? (v == null ? null : Number(v)) : undefined);
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -28,17 +34,19 @@ async function requireWriter(sql: Sql, userId: string): Promise<string> {
   return r?.username || "Teammate";
 }
 
-async function loadStackPair(
-  sql: Sql,
+/** The PM and ticket as the stack's refusal reads them; with their accounts when PMs reads by id. */
+export async function loadStackPair(
+  sql: Pick<Sql, "query">,
   pmId: number,
   jobId: number,
 ): Promise<{ pm: StackPm; ticket: StackTicket; stackedCount: number; pmInvoiceHasLines: boolean; pmNetSuite: string | null } | null> {
-  const pm = (await sql.query<{ id: number; customer: string | null; status: string; stacked_job_id: number | null }>(
-    "select id, customer, status, stacked_job_id from pm_jobs where id = $1",
+  const byId = await readsById(sql, "pms");
+  const pm = (await sql.query<{ id: number; customer: string | null; account: number | null; status: string; stacked_job_id: number | null }>(
+    `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.stacked_job_id from pm_jobs p where p.id = $1`,
     [pmId],
   ))[0];
-  const ticket = (await sql.query<{ id: number; customer: string | null; status: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null; invoiced: string | null }>(
-    `select j.id, j.customer, j.status, j.ns_so, j.duplicate_of, j.merged_install_id, j.phone_resolved, j.wo, j.call_id,
+  const ticket = (await sql.query<{ id: number; customer: string | null; account: number | null; status: string; ns_so: string | null; duplicate_of: number | null; merged_install_id: number | null; phone_resolved: boolean; wo: string | null; call_id: string | null; invoiced: string | null }>(
+    `select j.id, j.customer, ${accountColumn(byId, "j")} as account, j.status, j.ns_so, j.duplicate_of, j.merged_install_id, j.phone_resolved, j.wo, j.call_id,
             (select ti.ns_invoice from ticket_invoices ti
               where ti.job_id = j.id and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')
               order by ti.invoice_date desc nulls last, ti.id desc limit 1) as invoiced
@@ -67,10 +75,11 @@ async function loadStackPair(
     [pmId],
   ))[0];
   return {
-    pm: { id: Number(pm.id), customer: pm.customer, status: pm.status, stackedJobId: pm.stacked_job_id == null ? null : Number(pm.stacked_job_id) },
+    pm: { id: Number(pm.id), customer: pm.customer, account: accountOf(pm.account, byId), status: pm.status, stackedJobId: pm.stacked_job_id == null ? null : Number(pm.stacked_job_id) },
     ticket: {
       id: Number(ticket.id),
       customer: ticket.customer,
+      account: accountOf(ticket.account, byId),
       status: ticket.status,
       nsSo: ticket.ns_so,
       duplicateOf: ticket.duplicate_of == null ? null : Number(ticket.duplicate_of),
@@ -94,7 +103,7 @@ export const stackPmOnTicket = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sql = await ready();
     const actor = await requireWriter(sql, context.userId);
-    const saved = await sql.query<{ id: number }>(stackPmSql(), [data.pmId, data.jobId, actor]);
+    const saved = await sql.query<{ id: number }>(stackPmSql(await readsById(sql, "pms")), [data.pmId, data.jobId, actor]);
     if (!saved[0]) {
       const pair = await loadStackPair(sql, data.pmId, data.jobId);
       if (!pair) throw new Error("That PM or ticket is no longer on the list.");
@@ -184,68 +193,83 @@ const TICKET_WHERE = `
   and not ${LIVE_INVOICE_SQL("j.id")}
   and j.status not in ('Cancelled', 'Phone Resolved')
   and coalesce(j.phone_resolved, false) = false
-  and regexp_replace(lower(coalesce(j.customer, '')), '[^a-z0-9]+', '', 'g') = $1
 `;
 
-export async function listForPm(sql: Sql, pmId: number) {
-  const pm = (await sql.query<{ customer: string | null; stacked_job_id: number | null }>("select customer, stacked_job_id from pm_jobs where id = $1", [pmId]))[0];
+/**
+ * The tickets a PM can stack on: the PM's customer's open, unbilled tickets (sameStackCustomer: by account when PMs
+ * reads by id, else by name).
+ */
+export async function listForPm(sql: Pick<Sql, "query">, pmId: number) {
+  const byId = await readsById(sql, "pms");
+  const pm = (await sql.query<{ customer: string | null; customer_id: number | null; account: number | null; stacked_job_id: number | null }>(
+    `select p.customer, p.customer_id, ${accountColumn(byId, "p")} as account, p.stacked_job_id from pm_jobs p where p.id = $1`,
+    [pmId],
+  ))[0];
   if (!pm) return { stackedOn: null, candidates: [] as StackedOn[] };
   const key = normalizeCustomerKey(pm.customer);
-  const stackedOn = pm.stacked_job_id
-    ? await readTicket(sql, Number(pm.stacked_job_id), key)
-    : null;
+  const side: StackSide = { customer: pm.customer, account: accountOf(pm.account, byId) };
+  const stackedOn = pm.stacked_job_id ? await readTicket(sql, Number(pm.stacked_job_id), side, byId) : null;
   const rows = key
-    ? await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; customer: string | null; status: string }>(
-        `select j.id, j.kind, j.wo, j.call_id, j.customer, j.status
+    ? await sql.query<TicketRow>(
+        `select j.id, j.kind, j.wo, j.call_id, j.customer, ${accountColumn(byId, "j")} as account, j.status
            from service_jobs j
           where true ${TICKET_WHERE}
+            and ${sameStackCustomerSql({ name: "$1::text", id: "$3::int" }, { name: "j.customer", id: "j.customer_id" }, byId)}
             and j.id is distinct from $2
           order by coalesce(j.completed_at, j.scheduled, j.received) desc nulls last, j.id desc
           limit 20`,
-        [key, pm.stacked_job_id ?? 0],
+        byId ? [pm.customer, pm.stacked_job_id ?? 0, pm.customer_id] : [pm.customer, pm.stacked_job_id ?? 0],
       )
     : [];
   return {
     stackedOn,
-    candidates: rows.map((r) => toTicket(r, key)),
+    candidates: rows.map((r) => toTicket(r, side, byId)),
   };
 }
 
-async function readTicket(sql: Sql, jobId: number, pmKey: string): Promise<StackedOn | null> {
-  const r = (await sql.query<{ id: number; kind: string; wo: string | null; call_id: string | null; customer: string | null; status: string }>(
-    "select id, kind, wo, call_id, customer, status from service_jobs where id = $1",
+type TicketRow = { id: number; kind: string; wo: string | null; call_id: string | null; customer: string | null; account: number | null; status: string };
+
+async function readTicket(sql: Pick<Sql, "query">, jobId: number, pm: StackSide, byId: boolean): Promise<StackedOn | null> {
+  const r = (await sql.query<TicketRow>(
+    `select j.id, j.kind, j.wo, j.call_id, j.customer, ${accountColumn(byId, "j")} as account, j.status from service_jobs j where j.id = $1`,
     [jobId],
   ))[0];
-  return r ? toTicket(r, pmKey) : null;
+  return r ? toTicket(r, pm, byId) : null;
 }
 
-function toTicket(r: { id: number; kind: string; wo: string | null; call_id: string | null; customer: string | null; status: string }, pmKey: string): StackedOn {
+function toTicket(r: TicketRow, pm: StackSide, byId: boolean): StackedOn {
   return {
     jobId: Number(r.id),
     kind: r.kind === "tlc" ? "tlc" : "service",
     wo: r.wo,
     callId: r.call_id,
     customer: (r.customer ?? "").trim(),
-    customerMatches: normalizeCustomerKey(r.customer) === pmKey && pmKey !== "",
+    customerMatches: normalizeCustomerKey(pm.customer) !== "" && sameStackCustomer({ customer: r.customer, account: accountOf(r.account, byId) }, pm),
     status: r.status,
   };
 }
 
-export async function listForJob(sql: Sql, jobId: number) {
-  const job = (await sql.query<{ customer: string | null }>("select customer from service_jobs where id = $1", [jobId]))[0];
+/** The PMs on a ticket, and the PMs it can take: the ticket's customer's open, unbilled PMs (as listForPm matches). */
+export async function listForJob(sql: Pick<Sql, "query">, jobId: number) {
+  const byId = await readsById(sql, "pms");
+  const job = (await sql.query<{ customer: string | null; customer_id: number | null; account: number | null }>(
+    `select j.customer, j.customer_id, ${accountColumn(byId, "j")} as account from service_jobs j where j.id = $1`,
+    [jobId],
+  ))[0];
   const key = normalizeCustomerKey(job?.customer);
-  const stacked = await sql.query<{ id: number; customer: string | null; status: string; equipment: string | null }>(
-    `select id, customer, status, equipment from pm_jobs where stacked_job_id = $1 order by id desc limit 10`,
+  const side: StackSide = { customer: job?.customer ?? null, account: accountOf(job?.account, byId) };
+  const stacked = await sql.query<PmRow>(
+    `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.equipment from pm_jobs p where p.stacked_job_id = $1 order by p.id desc limit 10`,
     [jobId],
   );
   const candidates = key
-    ? await sql.query<{ id: number; customer: string | null; status: string; equipment: string | null }>(
-        `select p.id, p.customer, p.status, p.equipment
+    ? await sql.query<PmRow>(
+        `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.equipment
            from pm_jobs p
           where p.stacked_job_id is null
             and p.moved_job_id is null
             and p.status <> 'Cancelled'
-            and regexp_replace(lower(coalesce(p.customer, '')), '[^a-z0-9]+', '', 'g') = $1
+            and ${sameStackCustomerSql({ name: "$1::text", id: "$2::int" }, { name: "p.customer", id: "p.customer_id" }, byId)}
             and not exists (
               select 1 from invoices i
               join invoice_lines l on l.invoice_id = i.id
@@ -255,17 +279,55 @@ export async function listForJob(sql: Sql, jobId: number) {
             and not pm_netsuite_billed(p.id)
           order by coalesce(p.completed_at, p.projected, p.received) desc nulls last, p.id desc
           limit 20`,
-        [key],
+        byId ? [job?.customer ?? null, job?.customer_id ?? null] : [job?.customer ?? null],
       )
     : [];
-  const row = (r: { id: number; customer: string | null; status: string; equipment: string | null }): StackedPmRow => ({
+  const row = (r: PmRow): StackedPmRow => ({
     pmId: Number(r.id),
     customer: (r.customer ?? "").trim(),
     status: r.status,
     equipment: r.equipment,
-    customerMatches: normalizeCustomerKey(r.customer) === key && key !== "",
+    customerMatches: key !== "" && sameStackCustomer({ customer: r.customer, account: accountOf(r.account, byId) }, side),
   });
   return { stacked: stacked.map(row), candidates: candidates.map(row) };
+}
+
+type PmRow = { id: number; customer: string | null; account: number | null; status: string; equipment: string | null };
+
+/**
+ * Why a ticket (`side` "ticket") or PM ("pm") on a stack can't move to the customer `next`: stackCustomerRefusal over the
+ * record, the name it would be saved under, and its stacked partners (a ticket's PMs, or the PM's ticket). When PMs reads
+ * by id, by their accounts: the record's listed account, the account `next` finds (the same one when the name is
+ * unchanged), and each partner's.
+ */
+export async function stackEditRefusal(sql: Pick<Sql, "query">, side: "ticket" | "pm", id: number, next: string | null | undefined): Promise<string | null> {
+  const byId = await readsById(sql, "pms");
+  const table = side === "ticket" ? "service_jobs" : "pm_jobs";
+  const cur = (await sql.query<{ customer: string | null; account: number | null; stacked_job_id: number | null }>(
+    `select r.customer, ${accountColumn(byId, "r")} as account, ${side === "pm" ? "r.stacked_job_id" : "null::int"} as stacked_job_id from ${table} r where r.id = $1`,
+    [id],
+  ))[0];
+  if (!cur) return null;
+  const partners = await sql.query<{ id: number; customer: string | null; account: number | null }>(
+    side === "ticket"
+      ? `select p.id, p.customer, ${accountColumn(byId, "p")} as account from pm_jobs p where p.stacked_job_id = $1`
+      : `select j.id, j.customer, ${accountColumn(byId, "j")} as account from service_jobs j where j.id = $1`,
+    [side === "ticket" ? id : (cur.stacked_job_id ?? 0)],
+  );
+  if (!partners.length) return null;
+  const nextName = next ?? null;
+  const same = (nextName ?? "").trim() === (cur.customer ?? "").trim();
+  const nextAccount = !byId
+    ? undefined
+    : same
+      ? accountOf(cur.account, byId)
+      : accountOf((await sql.query<{ id: number | null }>("select katz_customer_id($1) as id", [nextName]))[0]?.id, byId);
+  return stackCustomerRefusal(
+    { customer: cur.customer, account: accountOf(cur.account, byId) },
+    { customer: nextName, account: nextAccount },
+    partners.map((p) => ({ id: Number(p.id), customer: p.customer, account: accountOf(p.account, byId) })),
+    side,
+  );
 }
 
 export { stackCustomerRefusal };
