@@ -5,7 +5,7 @@ import { Check, Download, ExternalLink, Globe, Phone, RotateCcw, Search } from "
 import { toast } from "sonner";
 import { approveAddressSuggestion } from "@/lib/ops/address-report-api";
 import { getAccountWebCheck, listWebChecks } from "@/lib/ops/account-web-api";
-import { maybeAddressNote, pinDistance, WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { maybeAddressNote, offeredAddress, pinDistance, WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { formatPhone, PLACE_CATEGORY, placeAddress, searchUrl, websiteUrl } from "@/lib/ops/places";
 import { toCsv } from "@/lib/ops/customer-export";
 import { todayChicago } from "@/lib/ops/clock";
@@ -168,7 +168,7 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
   const fromHere = useFromHere("/customers");
   const c = r.check;
   const p = c.place;
-  const canApprove = canEdit && !!c.listedAddress && c.sameAddress === false && (c.status === "different" || c.status === "elsewhere");
+  const canApprove = canEdit && offeredAddress(c) != null;
   const pinOff = c.status === "elsewhere" && c.sameAddress === true;
   return (
     <li className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4" data-testid="web-check-row" data-status={c.status}>
@@ -205,12 +205,18 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
         {c.status === "maybe" ? (
           <p className="mt-1 text-xs text-muted-foreground" data-testid="web-check-maybe">
             No listing under our name. This one at our pin has a similar name: check it is the same business before using its details.
-            {maybeAddressNote(c.sameAddress) ? ` ${maybeAddressNote(c.sameAddress)}` : ""}
+            {maybeAddressNote(c) ? ` ${maybeAddressNote(c)}` : ""}
           </p>
         ) : null}
         {pinOff ? (
           <p className="mt-1 text-xs text-warning" data-testid="web-check-pin-off">
             Same address as ours, so the address is right and the map pin looks off. Fix the pin on the account (Account Details → Map Pin).
+          </p>
+        ) : null}
+        {c.status !== "maybe" && c.zipOnly ? (
+          <p className="mt-1 text-xs text-warning" data-testid="web-check-zip-only">
+            {maybeAddressNote(c)}
+            {c.status === "elsewhere" ? " Most likely another town, so its address is not offered." : " Only the ZIP would change."}
           </p>
         ) : null}
       </div>

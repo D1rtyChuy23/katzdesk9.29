@@ -38,6 +38,8 @@ export type WebCheck = {
    * elsewhere at our own address means the address is right and the map pin is off.
    */
   sameAddress: boolean | null;
+  /** Our house number and street, but another ZIP (sameAddress is then false): the two ZIPs. */
+  zipOnly?: { theirs: string; ours: string } | null;
 };
 
 /** Our pin and the listing this close (miles) are the same place: one block, to allow for where each map put it. */
@@ -103,8 +105,25 @@ function nameWords(name: string | null | undefined): string[] {
 }
 
 /** Whether a possible match's street address is ours, in words for the card and the report row. */
-export function maybeAddressNote(sameAddress: boolean | null): string {
-  return sameAddress === true ? "Its street address is ours." : sameAddress === false ? "Its street address differs from ours too." : "";
+export function maybeAddressNote(c: Pick<WebCheck, "sameAddress" | "zipOnly">): string {
+  if (c.zipOnly) return zipNote(c.zipOnly);
+  return c.sameAddress === true ? "Its street address is ours." : c.sameAddress === false ? "Its street address differs from ours too." : "";
+}
+
+function zipNote(z: { theirs: string; ours: string }): string {
+  return `Its street is ours, but its ZIP is ${z.theirs} (ours ${z.ours}).`;
+}
+
+/**
+ * The address an Admin may take from the listing (Use Listed Address), or null. At our pin a listing at another
+ * address, or only another ZIP, is offered: it is the same place, and one of the two is out of date. Somewhere else,
+ * only another street is: our street in another ZIP is most likely another town, so nothing is offered.
+ */
+export function offeredAddress(c: Pick<WebCheck, "status" | "sameAddress" | "zipOnly" | "listedAddress">): string | null {
+  if (c.sameAddress !== false || !c.listedAddress) return null;
+  if (c.status === "different") return c.listedAddress;
+  if (c.status === "elsewhere" && !c.zipOnly) return c.listedAddress;
+  return null;
 }
 
 /** The words that tell one business from another, in order; one-letter words count ("C & D Motors" is not "J O Motors"). */
@@ -194,6 +213,19 @@ function zipOf(address: string | null | undefined): string | null {
  * Whether two addresses are the same street address (house number and street, and the ZIP when both give one); null
  * when either has no house number to compare.
  */
+/** Our house number and street with another ZIP: the two ZIPs; null otherwise (or when either has no ZIP). */
+export function zipOnlyDifference(
+  listingStreet: string | null | undefined,
+  listingZip: string | null | undefined,
+  ourAddress: string | null | undefined,
+): { theirs: string; ours: string } | null {
+  const x = streetKey(listingStreet);
+  const y = streetKey(ourAddress);
+  const theirs = listingZip ?? zipOf(listingStreet);
+  const ours = zipOf(ourAddress);
+  return x != null && x === y && theirs && ours && theirs !== ours ? { theirs, ours } : null;
+}
+
 export function sameStreetAddress(a: string | null | undefined, b: string | null | undefined, zipA?: string | null, zipB?: string | null): boolean | null {
   const x = streetKey(a);
   const y = streetKey(b);
@@ -228,7 +260,7 @@ type Named = { p: Place; miles: number; street: boolean | null };
  * name's first word within ELSEWHERE_MILES).
  */
 export function webCheck(account: WebAccount, candidates: readonly Place[]): WebCheck {
-  const none = (status: WebStatus): WebCheck => ({ status, place: null, miles: null, listedAddress: null, sameAddress: null });
+  const none = (status: WebStatus): WebCheck => ({ status, place: null, miles: null, listedAddress: null, sameAddress: null, zipOnly: null });
   if (account.lat == null || account.lng == null) return none("nopin");
   const pin: LatLng = { lat: account.lat, lng: account.lng };
   const reach = account.approx ? ELSEWHERE_MILES : ELSEWHERE_MILES_STREET_PIN;
@@ -244,6 +276,7 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
     miles: Math.round(x.miles * 100) / 100,
     listedAddress: listedAddress(x.p),
     sameAddress: x.street,
+    zipOnly: x.street === false && account.address ? zipOnlyDifference(x.p.street, x.p.zip, account.address) : null,
   });
   // A listing at our very address is ours, whatever else is near: on our site, or farther off (then the pin is off).
   const ourStreet = named.find((x) => !x.p.closed && x.street === true);
@@ -268,7 +301,8 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
       .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || a.miles - b.miles)[0];
     if (maybe) {
       const street = account.address && maybe.p.street ? sameStreetAddress(maybe.p.street, account.address, maybe.p.zip, null) : null;
-      return { status: "maybe", place: maybe.p, miles: Math.round(maybe.miles * 100) / 100, listedAddress: null, sameAddress: street };
+      const zipOnly = street === false ? zipOnlyDifference(maybe.p.street, maybe.p.zip, account.address) : null;
+      return { status: "maybe", place: maybe.p, miles: Math.round(maybe.miles * 100) / 100, listedAddress: null, sameAddress: street, zipOnly };
     }
   }
   return none("none");
@@ -329,8 +363,10 @@ export function webCheckLine(c: WebCheck): string {
     c.status === "elsewhere" && c.sameAddress
       ? ". Same address as ours: the map pin looks off"
       : c.status === "maybe"
-        ? `. The name differs from ours: check it is the same business.${maybeAddressNote(c.sameAddress) ? ` ${maybeAddressNote(c.sameAddress)}` : ""}`
-        : "";
+        ? `. The name differs from ours: check it is the same business.${maybeAddressNote(c) ? ` ${maybeAddressNote(c)}` : ""}`
+        : (c.status === "elsewhere" || c.status === "different") && c.zipOnly
+          ? `. ${zipNote(c.zipOnly)}`
+          : "";
   // A possible match names the listing: its name is the thing to check.
   const what = c.status === "maybe" ? [c.place.name, where].filter(Boolean).join(" · ") : where;
   return `${label}${what ? `: ${what}` : ""}${far}${pinOff}`;

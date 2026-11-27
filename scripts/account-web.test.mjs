@@ -333,3 +333,31 @@ test("store numbers: \"Boondocks Cafe #2\" is \"Boondocks Cafe\"", () => {
   assert.deepEqual([m2.status, m2.sameAddress], ["maybe", false]);
   assert.match(web.webCheckLine(m2), /Its street address differs from ours too\.$/);
 });
+
+test("a ZIP-only difference is said as one, and offered only at our pin", () => {
+  // Bar Loretta: our house number and street, another ZIP.
+  const bl = place("bl", "Bar Loretta Restaurant", 29.4, -98.5, { street: "401 S Alamo St", city: "San Antonio", zip: "78204" });
+  const at = web.webCheck(acct("Bar Loretta Restaurant", 29.4, -98.5, "401 S Alamo St, San Antonio, TX 78210"), [bl]);
+  assert.deepEqual([at.status, at.sameAddress, at.zipOnly], ["different", false, { theirs: "78204", ours: "78210" }]);
+  assert.match(web.webCheckLine(at), /Its street is ours, but its ZIP is 78204 \(ours 78210\)\.$/);
+  assert.equal(web.offeredAddress(at), "401 S Alamo St, San Antonio, TX 78204", "at our pin: the same place, one ZIP is out of date");
+  // As a possible match (the live case: the listing is "Bar Loretta", ours "Bar Loretta Restaurant").
+  const blm = place("blm", "Bar Loretta", 29.4, -98.5, { street: "401 S Alamo St", zip: "78204" });
+  const may = web.webCheck(acct("Bar Loretta Restaurant", 29.4, -98.5, "401 S Alamo St, San Antonio, TX 78210"), [blm]);
+  assert.equal(may.status, "maybe");
+  assert.equal(web.maybeAddressNote(may), "Its street is ours, but its ZIP is 78204 (ours 78210).");
+  assert.doesNotMatch(web.webCheckLine(may), /differs from ours too/);
+  // Somewhere else: our street in another ZIP is another town; nothing offered.
+  const far = place("far", "Marigold Grill", 29.5, -95.4, { street: "100 Main St", zip: "77378" });
+  const el = web.webCheck(acct("Marigold Grill", 29.4, -95.4, "100 Main St, Conroe, TX 77301"), [far]);
+  assert.deepEqual([el.status, el.zipOnly], ["elsewhere", { theirs: "77378", ours: "77301" }]);
+  assert.match(web.webCheckLine(el), /Its street is ours, but its ZIP is 77378 \(ours 77301\)\.$/);
+  assert.equal(web.offeredAddress(el), null);
+  // Another street altogether: as before.
+  const other = web.webCheck(acct("Marigold Grill", 29.4, -95.4, "9 Oak St, Conroe, TX 77301"), [far]);
+  assert.equal(other.zipOnly, null);
+  assert.equal(web.offeredAddress(other), "100 Main St, Houston, TX 77378");
+  assert.equal(web.maybeAddressNote({ sameAddress: false, zipOnly: null }), "Its street address differs from ours too.");
+  assert.equal(web.maybeAddressNote({ sameAddress: true, zipOnly: null }), "Its street address is ours.");
+  assert.equal(web.zipOnlyDifference("401 S Alamo St", "78204", "401 S Alamo St, San Antonio"), null, "no ZIP of ours to compare");
+});
