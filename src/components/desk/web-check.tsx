@@ -5,7 +5,7 @@ import { Check, Download, ExternalLink, Globe, Phone, RotateCcw, Search } from "
 import { toast } from "sonner";
 import { approveAddressSuggestion } from "@/lib/ops/address-report-api";
 import { getAccountWebCheck, listWebChecks } from "@/lib/ops/account-web-api";
-import { pinDistance, WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { maybeAddressNote, pinDistance, WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { formatPhone, PLACE_CATEGORY, placeAddress, searchUrl, websiteUrl } from "@/lib/ops/places";
 import { toCsv } from "@/lib/ops/customer-export";
 import { todayChicago } from "@/lib/ops/clock";
@@ -205,6 +205,7 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
         {c.status === "maybe" ? (
           <p className="mt-1 text-xs text-muted-foreground" data-testid="web-check-maybe">
             No listing under our name. This one at our pin has a similar name: check it is the same business before using its details.
+            {maybeAddressNote(c.sameAddress) ? ` ${maybeAddressNote(c.sameAddress)}` : ""}
           </p>
         ) : null}
         {pinOff ? (

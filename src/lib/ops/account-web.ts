@@ -96,8 +96,15 @@ function nameWords(name: string | null | undefined): string[] {
     .toLowerCase()
     .replace(/&/g, " and ")
     .replace(/['’]/g, "")
+    // A store number says which store, not which business: "Boondocks Cafe #2" is "Boondocks Cafe".
+    .replace(/#\s*\d+[a-z]?\b/g, " ")
     .split(/[^a-z0-9]+/)
     .filter((w) => w && !NOISE.has(w));
+}
+
+/** Whether a possible match's street address is ours, in words for the card and the report row. */
+export function maybeAddressNote(sameAddress: boolean | null): string {
+  return sameAddress === true ? "Its street address is ours." : sameAddress === false ? "Its street address differs from ours too." : "";
 }
 
 /** The words that tell one business from another, in order; one-letter words count ("C & D Motors" is not "J O Motors"). */
@@ -322,7 +329,7 @@ export function webCheckLine(c: WebCheck): string {
     c.status === "elsewhere" && c.sameAddress
       ? ". Same address as ours: the map pin looks off"
       : c.status === "maybe"
-        ? ". The name differs from ours: check it is the same business"
+        ? `. The name differs from ours: check it is the same business.${maybeAddressNote(c.sameAddress) ? ` ${maybeAddressNote(c.sameAddress)}` : ""}`
         : "";
   // A possible match names the listing: its name is the thing to check.
   const what = c.status === "maybe" ? [c.place.name, where].filter(Boolean).join(" · ") : where;
