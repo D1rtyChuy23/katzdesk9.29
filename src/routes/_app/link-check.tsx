@@ -296,6 +296,8 @@ const READ_KEYS = [
   "pm-bill",
   "module-runbook",
   "runbook-readiness",
+  "account-geo",
+  "address-report",
 ];
 
 /**

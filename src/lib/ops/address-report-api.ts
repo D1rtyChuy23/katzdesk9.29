@@ -14,6 +14,7 @@ import {
   type AddressSource,
   type AddressSuggestion,
 } from "@/lib/ops/address-report";
+import { ofAccount, readsById } from "@/lib/ops/read-by-id";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -87,9 +88,12 @@ type SourceRow = { customer_id: number; kind: string; address: string };
  * with the account's list ID or the same name (ignoring case and punctuation, as the clean-list review matches them),
  * and the bill-to address on the account's invoices.
  */
-async function loadSources(sql: Sql, ids: number[]): Promise<Map<number, { cleanList: string[]; invoices: string[] }>> {
+export async function loadSources(sql: Sql, ids: number[]): Promise<Map<number, { cleanList: string[]; invoices: string[] }>> {
   const out = new Map<number, { cleanList: string[]; invoices: string[] }>();
   if (!ids.length) return out;
+  // An account's invoices: by its id once the Address Report reads by id (phase C5, Link Check), by its name until then.
+  const byId = await readsById(sql, "map");
+  const invoiceOf = ofAccount({ name: "v.customer", id: "v.customer_id", match: "trim", byId, nameParam: "a.name", idParam: "a.id" });
   const rows = await sql.query<SourceRow>(
     `with acct as (
        select id, name, netsuite_id from directory_customers where id = any($1::int[])
@@ -111,7 +115,7 @@ async function loadSources(sql: Sql, ids: number[]): Promise<Map<number, { clean
        union all
        select a.id, 'invoice', v.bill_address, 2, v.id, 0
          from invoices v
-         join acct a on lower(btrim(v.customer)) = lower(btrim(a.name))
+         join acct a on ${invoiceOf}
         where coalesce(btrim(v.bill_address), '') <> ''
      ) s
      order by customer_id, tier, o1 desc, o2 desc
@@ -125,6 +129,27 @@ async function loadSources(sql: Sql, ids: number[]): Promise<Map<number, { clean
     out.set(id, cur);
   }
   return out;
+}
+
+/**
+ * Each account's invoice bill-to addresses, for the report's leads. By id: under the listed account an invoice's id
+ * names, or else the one its name finds once spaces at the ends are dropped (column `acct`). By name, as before
+ * (column `name_key`).
+ */
+export function billsSql(byId: boolean): string {
+  return byId
+    ? `
+         select coalesce(own.id, nm.id) as acct, array_agg(distinct ${norm("t.bill_address")}) as ks
+           from invoices t
+           left join directory_customers own on own.id = t.customer_id and own.archived = false
+           left join directory_customers nm on own.id is null and nm.archived = false and lower(btrim(nm.name)) = lower(btrim(t.customer))
+          where coalesce(btrim(t.bill_address), '') <> '' and coalesce(btrim(t.customer), '') <> ''
+          group by 1`
+    : `
+         select lower(btrim(customer)) as name_key, array_agg(distinct ${norm("bill_address")}) as ks
+           from invoices
+          where coalesce(btrim(bill_address), '') <> '' and coalesce(btrim(customer), '') <> ''
+          group by 1`;
 }
 
 const listInput = z.object({
@@ -162,6 +187,8 @@ export const listAddressReport = createServerFn({ method: "GET" })
   .validator((d: z.input<typeof listInput>) => listInput.parse(d))
   .handler(async ({ data, context }): Promise<AddressReport> => {
     const sql = await ready();
+    // Invoice bill-to addresses by each account's id once the Address Report reads by id (phase C5); by name until then.
+    const byId = await readsById(sql, "map");
     const words = data.account ? [] : searchWords(data.search);
     const params: unknown[] = [data.account ?? null, data.skipped ? "skipped" : "open", data.pageSize, (data.page - 1) * data.pageSize];
     const searchSql = words
@@ -202,11 +229,7 @@ export const listAddressReport = createServerFn({ method: "GET" })
          select btrim(r.internal_id) as internal_id, regexp_replace(lower(r.name), '[^a-z0-9]+', '', 'g') as name_key, ${norm("r.address")} as k
            from customer_clean_rows r
           where r.run_id = (select max(id) from customer_clean_runs) and coalesce(btrim(r.address), '') <> ''
-       ), bills as (
-         select lower(btrim(customer)) as name_key, array_agg(distinct ${norm("bill_address")}) as ks
-           from invoices
-          where coalesce(btrim(bill_address), '') <> '' and coalesce(btrim(customer), '') <> ''
-          group by 1
+       ), bills as (${billsSql(byId)}
        ), page as (
          select p.*,
                 -- Never null, so "desc" cannot put unknowns first.
@@ -225,7 +248,7 @@ export const listAddressReport = createServerFn({ method: "GET" })
                 ) as has_lead
            from picked p
            left join clean_items ci on ci.customer_id = p.id
-           left join bills bl on bl.name_key = lower(btrim(p.name))
+           left join bills bl on ${byId ? "bl.acct = p.id" : "bl.name_key = lower(btrim(p.name))"}
           order by has_lead desc, lower(p.name), p.id
           limit $3::int offset $4::int
        )

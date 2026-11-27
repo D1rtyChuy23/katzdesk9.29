@@ -48,6 +48,7 @@ import {
   type ChargeLine,
 } from "@/lib/ops/charges";
 import { BILLED_ON_INSTALL, BILLED_ON_INSTALL_SO, mergedTicketRefusal, type MergedTicketRow } from "./merged-ticket";
+import { listedAccountSql } from "./bill-account";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -428,15 +429,15 @@ export async function ticketProfitBills(
   sql: Sql,
   range: { from: string | null; to: string | null },
   view: ChargeView,
-): Promise<{ id: number; kind: string; customer: string; date: string; totals: ProfitTotals; estimated: boolean }[]> {
+): Promise<{ id: number; kind: string; customer: string; accountId: number | null; date: string; totals: ProfitTotals; estimated: boolean }[]> {
   // The day a ticket was billed: its Sales Order date, else its first NetSuite invoice, else completed, else received.
   // Chicago days, the same for the range and the report (review, 11/20).
   const DAY = `coalesce((j.billed_at at time zone 'America/Chicago')::date,
                  (select min(ti.invoice_date) from ticket_invoices ti where ti.job_id = j.id
                      and lower(regexp_replace(ti.status, '[^A-Za-z]+', '', 'g')) not in ('voided', 'void')),
                  j.completed_at, j.received)`;
-  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; day: string | null }>(
-    `select j.id, j.kind, j.customer, to_char(${DAY}, 'YYYY-MM-DD') as day from service_jobs j
+  const jobs = await sql.query<{ id: number; kind: string; customer: string | null; account_id: number | null; day: string | null }>(
+    `select j.id, j.kind, j.customer, ${listedAccountSql("j.customer_id", "j.customer")} as account_id, to_char(${DAY}, 'YYYY-MM-DD') as day from service_jobs j
       where (j.ns_so is not null or ${LIVE_INVOICE_SQL("j.id")})
         and (j.duplicate_of is null or ${BILLED_ON_INSTALL("j.id")} is not null)
         and ($1::date is null or ${DAY} >= $1::date)
@@ -450,7 +451,15 @@ export async function ticketProfitBills(
   for (const j of jobs) {
     const c = await loadCharges(sql, Number(j.id), { ...view, showCost: true }, cache);
     if (!c.profitTotals || !j.day) continue;
-    out.push({ id: Number(j.id), kind: j.kind, customer: j.customer ?? "", date: j.day, totals: c.profitTotals, estimated: (c.profit ?? []).some((p) => p != null && !p.stored) });
+    out.push({
+      id: Number(j.id),
+      kind: j.kind,
+      customer: j.customer ?? "",
+      accountId: j.account_id == null ? null : Number(j.account_id),
+      date: j.day,
+      totals: c.profitTotals,
+      estimated: (c.profit ?? []).some((p) => p != null && !p.stored),
+    });
   }
   return out;
 }

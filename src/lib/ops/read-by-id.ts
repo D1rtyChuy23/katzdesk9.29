@@ -23,7 +23,7 @@ export const READ_BY_ID_ADMIN_ONLY = "Reading by id is switched on Link Check: s
 /** Postgres's integer, the account id's type. */
 export const ACCOUNT_ID_MAX = 2147483647;
 
-export type ReadArea = "accounts" | "tickets" | "pms";
+export type ReadArea = "accounts" | "tickets" | "pms" | "map";
 
 export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
   {
@@ -43,6 +43,12 @@ export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
     label: "PMs",
     covers:
       "The PM window's runbook: the PM account's units it plans and bills, and the account's earlier PMs it takes intervals from (by the PM's id); Runbook Readiness; and the PMs a unit's model change re-pins. The PM stack still matches by name (it moves with its save check, in C6).",
+  },
+  {
+    area: "map",
+    label: "Map and Address Report",
+    covers:
+      "The Map and Nearby: each account's open calls, TLCs, past-due work, PMs, installs and its Out Of Network mark. The Address Report: the bill-to addresses on an account's invoices.",
   },
 ];
 
@@ -103,27 +109,39 @@ export function ofAccount(o: { name: string; id: string; match: NameMatch; byId:
 }
 
 /**
- * One count per account, for a list that counts an account's rows (the Customers list), as a subquery to left join to
- * `directory_customers d`. By id, a row counts under the listed account its id names, or else under the listed account
- * its name finds in any capitals. Otherwise under its name in any capitals, as before C5. Columns in `where` and
- * `counts` are on `t`, the counted table.
+ * One count per account, for a list that counts an account's rows (the Customers list, the Map), as a subquery to left
+ * join to the accounts (`directory_customers d`, or `account`). By id, a row counts under the listed account its id
+ * names, or else under the listed account its name finds. Otherwise under its name, as before C5. The name is matched
+ * in any capitals, or with spaces at the ends dropped too (`match`). Columns in `where` and `counts` are on `t`, the
+ * counted table (a table, or a parenthesised select with `customer` and `customer_id` columns).
  */
-export function perAccountJoin(o: { table: string; alias: string; where: string; counts: string; byId: boolean }): string {
+export function perAccountJoin(o: {
+  table: string;
+  alias: string;
+  where: string;
+  counts: string;
+  byId: boolean;
+  match?: NameMatch;
+  account?: string;
+}): string {
+  const d = o.account ?? "d";
+  const match = o.match ?? "lower";
+  const key = (col: string) => (match === "trim" ? `lower(btrim(${col}))` : `lower(${col})`);
   return o.byId
     ? `left join (
          select coalesce(own.id, nm.id) as acct, ${o.counts}
            from ${o.table} t
            left join directory_customers own on own.id = t.customer_id and own.archived = false
-           left join directory_customers nm on own.id is null and nm.archived = false and lower(nm.name) = lower(t.customer)
+           left join directory_customers nm on own.id is null and nm.archived = false and ${nameIs("nm.name", "t.customer", match)}
           where ${o.where}
           group by 1
-       ) ${o.alias} on ${o.alias}.acct = d.id`
+       ) ${o.alias} on ${o.alias}.acct = ${d}.id`
     : `left join (
-         select lower(t.customer) as k, ${o.counts}
+         select ${key("t.customer")} as k, ${o.counts}
            from ${o.table} t
           where ${o.where}
           group by 1
-       ) ${o.alias} on ${o.alias}.k = lower(d.name)`;
+       ) ${o.alias} on ${o.alias}.k = ${key(`${d}.name`)}`;
 }
 
 /** A list an area reads per account, for the side-by-side on Link Check. */
@@ -368,7 +386,29 @@ export const PM_LISTS: AccountList[] = [
   },
 ];
 
-const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS, pms: PM_LISTS };
+/** The Map's and the Address Report's lists, with the filters they count by. */
+export const MAP_LISTS: AccountList[] = [
+  {
+    key: "openTickets",
+    label: "Open calls and TLCs",
+    table: "service_jobs",
+    match: "lower",
+    where: "not t.done and t.status not in ('Completed', 'Cancelled', 'Phone Resolved') and t.duplicate_of is null",
+  },
+  { key: "openPms", label: "Open PMs", table: "pm_jobs", match: "lower", where: "not t.done and t.status not in ('Completed', 'Cancelled')" },
+  {
+    key: "openInstalls",
+    label: "Open installs",
+    table: "installs",
+    match: "lower",
+    where: "t.archived = false and not t.complete and coalesce(t.equip_status, '') <> 'Installed'",
+  },
+  { key: "providers", label: "Out Of Network: providers", table: "customer_providers", match: "lower", where: PROVIDER_LIVE },
+  { key: "networkAccounts", label: "Out Of Network: accounts list", table: "network_accounts", match: "lower" },
+  { key: "billTo", label: "Address Report: invoice bill-to", table: "invoices", match: "trim", where: "coalesce(btrim(t.bill_address), '') <> ''" },
+];
+
+const LISTS_OF: Record<ReadArea, AccountList[]> = { accounts: ACCOUNT_LISTS, tickets: TICKET_LISTS, pms: PM_LISTS, map: MAP_LISTS };
 
 export async function readByIdFor(sql: Sql, userId: string): Promise<ReadById> {
   if (!(await canReviewNames(sql, userId))) throw new Error(READ_BY_ID_ADMIN_ONLY);
