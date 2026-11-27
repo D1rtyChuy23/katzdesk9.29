@@ -314,10 +314,16 @@ async function finalizeAssign(
  * The account a waiting request is approved onto (11/9): the account on the customer list now, spelled as the list
  * has it. A request for a name that is no longer an account (removed, or merged away since it was asked) is refused.
  */
-export async function accountForApproval(sql: Sql, raw: string | null | undefined): Promise<string> {
+export async function accountForApproval(sql: Sql, raw: string | null | undefined, id: number | null = null): Promise<string> {
   const name = String(raw ?? "").trim();
   if (!name) throw new Error("That request has no account.");
-  const rows = await sql.query<{ name: string }>("select name from directory_customers where archived = false and lower(name) = lower($1) limit 1", [name]);
+  // The account its id names while that's listed (C6), else the one its name finds in any capitals, as before.
+  const rows = await sql.query<{ name: string }>(
+    `select name from directory_customers
+      where archived = false and (id = $2::int or lower(name) = lower($1))
+      order by (id = $2::int) desc nulls last, id limit 1`,
+    [name, id],
+  );
   if (!rows[0]) throw new Error(`${name} is no longer on the customer list. Reject this request, then ask again for the account as it is named now.`);
   return rows[0].name;
 }
@@ -556,7 +562,7 @@ export const decideStockAction = createServerFn({ method: "POST" })
       await assertRemovable(sql, row);
       await finalizeRemove(sql, row, action.reason || "Removed", (action.note ?? "").trim(), action.asked_name || "Warehouse", who.name);
     } else {
-      const customer = await accountForApproval(sql, action.customer);
+      const customer = await accountForApproval(sql, action.customer, action.customer_id ?? null);
       await finalizeAssign(sql, row, customer, action.place_site, action.asked_name || "Warehouse", who.name, action.customer_id ?? null);
     }
     await sql.query(

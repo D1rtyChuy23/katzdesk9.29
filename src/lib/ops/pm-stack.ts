@@ -112,6 +112,17 @@ export function sameStackCustomerSql(a: { name: string; id: string }, b: { name:
 }
 
 /**
+ * The stack's customer rule for list rows: the row's account (`rowAccount`, worked out once) against the other record's
+ * account and name, given as parameters (`account`, `name`). By id when both have an account, else by the name key; by
+ * the name key alone when not `byId`.
+ */
+export function stackRowMatchesSql(row: { name: string; account: string }, other: { name: string; account: string }, byId: boolean): string {
+  const byName = `${customerKeySql(row.name)} = ${customerKeySql(other.name)}`;
+  if (!byId) return byName;
+  return `(case when ${other.account} is not null and ${row.account} is not null then ${row.account} = ${other.account} else ${byName} end)`;
+}
+
+/**
  * One statement. Locks the ticket, stacks the PM when every rule holds, and writes both activity rows.
  * $1 pm id, $2 ticket id, $3 actor. 0 rows means the caller re-reads and throws stackRefusal. `byId`: PMs reads by id.
  */

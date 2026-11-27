@@ -635,7 +635,8 @@ export function approvePmInvoiceSql(): string {
               ${invoiceAccountSql("$1::text", "$2::int", "$3::text")}
          from open_pm
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, customer_id = excluded.customer_id, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
          approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
@@ -704,7 +705,8 @@ export function approveRecordInvoiceSql(): string {
           -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
           and ($12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int))
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, customer_id = excluded.customer_id, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
          approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
@@ -762,7 +764,8 @@ export function saveForApprovalSql(): string {
        select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now(), 'all', ${invoiceAccountSql("'rebuild'", "r.id", "$2::text")}
          from rb r
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, customer_id = excluded.customer_id, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, submitted_by = excluded.submitted_by,
          submitted_at = now(), updated_at = now(), discount_scope = 'all'
@@ -896,7 +899,8 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
       `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, customer_id)
        values ($1, $2, $3, null, null, $4, $5, $6, $7, $8, $9, now(), now(), ${invoiceAccountSql("$1::text", "$2::int", "$3::text")})
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, customer_id = excluded.customer_id, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
          total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()`,
       [ref.type, data.id, ref.customer || null, ...billing],

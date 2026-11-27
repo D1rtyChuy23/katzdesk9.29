@@ -225,3 +225,51 @@ test("copies carry the account id: a module's stop, a move request, and an insta
   const made = await run("select customer, customer_id from account_equipment where created_by_install = $1", [loaded]);
   assert.deepEqual(made.map((u) => [u.customer, u.customer_id]), [[name, alpha]]);
 });
+
+test("review fixes: stock approval and put-back go by the account's id, and the name beside it is the account's now", async () => {
+  const { sql, run } = await fresh();
+  const { alpha, name } = await lagging(run);
+  const SA2 = await import("../src/lib/ops/stock-actions.ts");
+  assert.equal(await SA2.accountForApproval(sql, name, alpha), "ZZ Alpha Cafe", "a request whose id names the account");
+  await assert.rejects(SA2.accountForApproval(sql, name), /no longer on the customer list/, "by name alone, as before");
+
+  const I = await import("../src/lib/ops/inspection-api.ts");
+  const CI = await import("../src/lib/ops/customer-identity.ts");
+  const inst = await idOf(run, "insert into installs (customer, complete, equip_status, archived) values ('ZZ Alpha Cafe', false, 'Not Ready', false) returning id");
+  const unit = await idOf(run, "insert into account_equipment (customer, catalog_model, equipment_name) values ('ZZ Alpha Cafe', 'Bunn TB3', 'Bunn TB3') returning id");
+  const snap = (await run("select to_jsonb(a) as j from account_equipment a where a.id = $1", [unit]))[0].j;
+  await run("delete from account_equipment where id = $1", [unit]);
+  await CI.renameOrMergeCustomer(sql, alpha, "ZZ Alpha Roasters");
+  const removed = await idOf(run, "insert into install_units_removed (install_id, unit_id, list_row, links) values ($1, $2, '{}'::jsonb, jsonb_build_object('unit', $3::jsonb)) returning id", [inst, unit, JSON.stringify(snap)]);
+  await run(I.putBackInstallUnitSql(), [removed, "zzadmin"]);
+  const back = (await run("select customer, customer_id from account_equipment where id = $1", [unit]))[0];
+  assert.deepEqual([back.customer, back.customer_id], ["ZZ Alpha Roasters", alpha], "back on its renamed account, under the name it has now");
+});
+
+test("review fixes: re-approving an invoice keeps its account when its record's account is gone", async () => {
+  const { sql, run } = await fresh();
+  const alpha = await account(run, "ZZ Alpha Cafe");
+  const I = await import("../src/lib/ops/invoice-api.ts");
+  const p = await pm(run, "ZZ Alpha Cafe");
+  await I.approveInvoiceFor(sql, { type: "pm", id: p, lines: LINES, lineIds: [], discount: null, seen: null }, "zz-admin");
+  await run("update directory_customers set archived = true where id = $1", [alpha]);
+  const seen = (await run("select invoice_version('pm', $1) as v", [p]))[0].v;
+  await I.approveInvoiceFor(sql, { type: "pm", id: p, lines: [...LINES, ...LINES], lineIds: [], discount: null, seen }, "zz-admin");
+  const inv = (await run("select customer_id, total from invoices where entity_type = 'pm' and entity_id = $1", [p]))[0];
+  assert.equal(Number(inv.total), 300, "approved again");
+  assert.equal(inv.customer_id, alpha, "a kept id is never cleared (C3)");
+});
+
+test("an update copy that moves a record to another account takes that account's id: an install's units", async () => {
+  const { sql, run } = await fresh();
+  const alpha = await account(run, "ZZ Alpha Cafe");
+  const beta = await account(run, "ZZ Beta Cafe");
+  const inst = await idOf(run, "insert into installs (customer, complete, equip_status, archived) values ('ZZ Beta Kitchen', false, 'Not Ready', false) returning id");
+  await run("update installs set customer_id = $2 where id = $1", [inst, beta]);
+  const unit = await idOf(run, "insert into account_equipment (customer, catalog_model, equipment_name, created_by_install) values ('ZZ Alpha Cafe', 'Bunn TB3', 'Bunn TB3', $1) returning id", [inst]);
+  assert.equal(Number((await run("select customer_id from account_equipment where id = $1", [unit]))[0].customer_id), alpha);
+  const { moveInstallUnits } = await import("../src/lib/ops/install-projects.ts");
+  await moveInstallUnits(sql, inst, "ZZ Alpha Cafe", "ZZ Beta Kitchen");
+  const moved = (await run("select customer, customer_id from account_equipment where id = $1", [unit]))[0];
+  assert.deepEqual([moved.customer, moved.customer_id], ["ZZ Beta Kitchen", beta]);
+});

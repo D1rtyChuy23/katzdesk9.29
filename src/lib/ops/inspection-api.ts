@@ -2875,10 +2875,15 @@ export function putBackInstallUnitSql(): string {
   return `with r as (select * from install_units_removed where id = $1 and put_back_at is null),
           unit as (
             insert into account_equipment
-            -- Its account: the snapshot's while that account is still listed (C6), else the one its name finds now.
-            select x.* from r, jsonb_populate_record(
+            -- Its account: the snapshot's while that account is still listed (C6), under the account's name now; else
+            -- the one its name finds.
+            select x.* from r
+              cross join lateral (select ${listedAccountSql("(r.links->'unit'->>'customer_id')::int", "r.links->'unit'->>'customer'")} as id) acct
+              cross join lateral jsonb_populate_record(
                      null::account_equipment,
-                     (r.links->'unit') || jsonb_build_object('customer_id', ${listedAccountSql("(r.links->'unit'->>'customer_id')::int", "r.links->'unit'->>'customer'")})
+                     (r.links->'unit') || jsonb_build_object(
+                       'customer_id', acct.id,
+                       'customer', coalesce((select d.name from directory_customers d where d.id = acct.id), r.links->'unit'->>'customer'))
                    ) x
              where r.links->'unit' is not null and r.links->'unit' <> 'null'::jsonb
                and not exists (select 1 from account_equipment a where a.id = r.unit_id)

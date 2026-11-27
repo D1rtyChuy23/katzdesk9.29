@@ -8,7 +8,7 @@ import { deskMiddleware } from "@/lib/ops/access";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { canWriteRunbook, type RunbookRole } from "@/lib/ops/pm-runbook";
-import { sameStackCustomer, sameStackCustomerSql, stackCustomerRefusal, stackPmSql, stackRefusal, unstackPmSql, type StackPm, type StackSide, type StackTicket } from "@/lib/ops/pm-stack";
+import { sameStackCustomer, stackCustomerRefusal, stackRowMatchesSql, stackPmSql, stackRefusal, unstackPmSql, type StackPm, type StackSide, type StackTicket } from "@/lib/ops/pm-stack";
 import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
 import { listedAccountSql } from "@/lib/ops/bill-account";
 import { readsById } from "@/lib/ops/read-by-id";
@@ -211,14 +211,15 @@ export async function listForPm(sql: Pick<Sql, "query">, pmId: number) {
   const stackedOn = pm.stacked_job_id ? await readTicket(sql, Number(pm.stacked_job_id), side, byId) : null;
   const rows = key
     ? await sql.query<TicketRow>(
-        `select j.id, j.kind, j.wo, j.call_id, j.customer, ${accountColumn(byId, "j")} as account, j.status
+        `select j.id, j.kind, j.wo, j.call_id, j.customer, ra.account, j.status
            from service_jobs j
+          cross join lateral (select ${accountColumn(byId, "j")} as account) ra
           where true ${TICKET_WHERE}
-            and ${sameStackCustomerSql({ name: "$1::text", id: "$3::int" }, { name: "j.customer", id: "j.customer_id" }, byId)}
+            and ${stackRowMatchesSql({ name: "j.customer", account: "ra.account" }, { name: "$1::text", account: "$3::int" }, byId)}
             and j.id is distinct from $2
           order by coalesce(j.completed_at, j.scheduled, j.received) desc nulls last, j.id desc
           limit 20`,
-        byId ? [pm.customer, pm.stacked_job_id ?? 0, pm.customer_id] : [pm.customer, pm.stacked_job_id ?? 0],
+        byId ? [pm.customer, pm.stacked_job_id ?? 0, side.account ?? null] : [pm.customer, pm.stacked_job_id ?? 0],
       )
     : [];
   return {
@@ -264,12 +265,13 @@ export async function listForJob(sql: Pick<Sql, "query">, jobId: number) {
   );
   const candidates = key
     ? await sql.query<PmRow>(
-        `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.equipment
+        `select p.id, p.customer, ra.account, p.status, p.equipment
            from pm_jobs p
+          cross join lateral (select ${accountColumn(byId, "p")} as account) ra
           where p.stacked_job_id is null
             and p.moved_job_id is null
             and p.status <> 'Cancelled'
-            and ${sameStackCustomerSql({ name: "$1::text", id: "$2::int" }, { name: "p.customer", id: "p.customer_id" }, byId)}
+            and ${stackRowMatchesSql({ name: "p.customer", account: "ra.account" }, { name: "$1::text", account: "$2::int" }, byId)}
             and not exists (
               select 1 from invoices i
               join invoice_lines l on l.invoice_id = i.id
@@ -279,7 +281,7 @@ export async function listForJob(sql: Pick<Sql, "query">, jobId: number) {
             and not pm_netsuite_billed(p.id)
           order by coalesce(p.completed_at, p.projected, p.received) desc nulls last, p.id desc
           limit 20`,
-        byId ? [job?.customer ?? null, job?.customer_id ?? null] : [job?.customer ?? null],
+        byId ? [job?.customer ?? null, side.account ?? null] : [job?.customer ?? null],
       )
     : [];
   const row = (r: PmRow): StackedPmRow => ({

@@ -1088,9 +1088,8 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
         [data.pmId, dup.id, data.pieceKey],
       );
       if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
-      // A locked unit stays on its account until the owner unlocks it.
+      // A locked unit stays on its account until the owner unlocks it. Moved, it takes the PM's account with its name (C6).
       await assertUnitUnlocked(sql, Number(dup.id));
-      // The unit takes the PM's account with its name (C6).
       await sql.query("update account_equipment set customer = $2, customer_id = $3, updated_at = now() where id = $1", [Number(dup.id), pm.customer, pm.account]);
       const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
         "select id, assigned_unit_label from modules where assigned_unit_id = $1",
