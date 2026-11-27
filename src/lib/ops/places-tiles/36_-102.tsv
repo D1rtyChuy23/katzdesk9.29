@@ -1,57 +1,59 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-3e69b77a643c	216 Main	bakery		36.19969	-101.19352	216 Main St	Spearman	79081	+18066440216			0.94
-23efc08def36	Spearman Donuts	bakery	donut shop	36.18906	-101.20523	821 TX-207	Spearman	79081	+18066545484	http://facebook.com/spearmandonuts		0.95
-6e5be614cca6	El Bandolero	bar		36.03566	-101.99867	318 Stoney Dr	Cactus	79029	+18062311668			0.93
-02f589159339	La Desvelada Bar	bar		36.03773	-101.99918	302 Stoney Dr	Cactus	79029	+18069664996	https://thewayco.com/network-business/la-desvelada-bar-bar-cactus...		0.93
-8f72f49a75d5	Greater Texas Ford Dealers	cardealer		36.26255	-101.40679	531 Main St	Gruver	79040	+18067332431		Greater Texas Ford Dealers	0.98
-add38b08fbc6	Sergio's Motors Llc	cardealer	used auto dealer	36.20036	-101.19540	101 Main St	Spearman	79081	+18066599971			0.92
-40074723be2c	Lyric Cinema	cinema		36.20020	-101.19494	113 Main St	Spearman	79081	+18066442812	https://lyriccinemacafe.com		0.92
-bc50e399cf29	Gruver Cafe	coffee		36.26441	-101.39831	301 Cooper Ave	Gruver	79040	+18063381345			0.92
-f56a15bb0a17	Prime Coffee	coffee		36.19973	-101.19437	203 Main St	Spearman	79081				0.92
-2e494225533d	Quench Alka-Hydration	coffee		36.20030	-101.19521	107 Main St	Spearman	79081				0.67
-60fbb1da6918	Allsup's	convenience		36.26880	-101.40510	101 Main St	Gruver	79040	+18067332953	https://www.allsups.com/	Allsup’s	0.92
-d1cae21ab071	Allsup's	convenience		36.19800	-101.19704	305 W Kenneth Ave	Spearman	79081	+18066593135	https://www.allsups.com/	Allsup’s	0.92
-39fc6d71ed13	Allsup's Convenience Store	convenience		36.26503	-101.40627	101 Main St	Gruver	79040	+18067332953	https://www.allsups.com/		0.85
-b248dd460a3f	Allsup's Convenience Store	convenience		36.01770	-101.82487	700 Main St	Sunray	79086	+18069485313	https://www.allsups.com/	Allsup’s	0.92
-3e0304fab8e6	Bp	convenience		36.20243	-101.19244	406 N Bernice St	Spearman	79081	+18066592646	https://www.bp.com		0.92
-1c5920c46cff	CEFCO Convenience Store	convenience		36.19839	-101.19752	107 Collard St	Spearman	79081	+18066592043	https://www.cefcostores.com/		0.92
-b0443901de7a	Country Store	convenience		36.02122	-101.82497	100-198 W 4th St	Sunray	79086	+18069485442	http://www.terrellcountrystore.com		0.77
-223c009810f3	GRUB'S MARKET 2	convenience		36.03009	-101.99641	616 BIRCH	Cactus	79013		https://locations.valero.com/en-us/LocationDetails/Index/616-BIRCH/0000001356	Valero	0.80
-56e8c3d0bfc2	Laredo Petroleum Inc	convenience		36.18608	-101.19937	511 W 11th Ave	Spearman	79081	+18066595088	https://www.vitalenergy.com		0.65
-c0ac4c39695a	Phillips 66	convenience		36.19329	-101.20300	414 Texas 207, Spearman, TX, USA	Spearman	79081	+18066593776	https://www.phillips66gas.com/		0.92
-c8c16d2bdbac	R&S Quik Stop	convenience		36.19972	-101.19608	323 Sanders St	Spearman	79081	+18066449463			0.92
-0ddd1712f78c	TOOT' N TOTUM #118	convenience		36.01910	-101.82430	513 Main St	Sunray	79086		https://locations.valero.com/en-us/LocationDetails/Index/513-MAIN-ST/0000012676	Valero	0.80
-a10d210efc18	Toot'n Totum	convenience		36.02120	-101.82480	308 Main St	Sunray	79086	+18069485442	https://location.westernunion.com/us/tx/sunray/b36c49367284f15837b11f3677ccac56	Toot'n Totum	0.92
-9b80775a8f0c	Valero	convenience		36.19775	-101.19697	305 W Kenneth Ave	Spearman	79081	+12103452000	https://www.valero.com		0.65
-520d01291095	Dairy Queen	fastfood		36.01914	-101.82500	514 Avenue M	Sunray	79086	+18069484320	https://www.dqtexas.com/?y_source=1_MjkzMzkyMjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
-676e349ae430	Dairy Queen	fastfood		36.19039	-101.20490	700 TX-207 700 S Highway 207	Spearman	79081	+18066595601	https://dqtexas.com/?y_source=1_MjkzMzkyODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.80
-279f533a8c43	Over the Rainbow	fastfood		36.19781	-101.19057	21 S Endicott St	Spearman	79081				0.91
-383145f5edb9	Pizza Hut	fastfood	pizza restaurant	36.18899	-101.20586	207 S Hwy Hansford	Spearman	79081	+18066592547	https://locations.pizzahut.com/tx/spearman/207-s-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297361	Pizza Hut	0.98
-8b7d62a61431	Etter Grocery & Market	grocery		36.03014	-101.99670	598 S US Highway 287	Dumas	79029	+18069665237	http://valero.com		0.87
-5a6a9fe33c5a	Lowe's Market	grocery		36.19231	-101.20266	505 TX-207	Spearman	79081	+18066593212	https://lowes-market-place.hub.biz/	Lowe's Market	0.92
-d17188b70e0f	Neighbors Grocery	grocery		36.26315	-101.40710	615 Main St	Gruver	79040	+18067332471	https://neighbors-grocery-tx.hub.biz		0.92
-d48c95e058c4	Hansford County Hospital	hospital		36.19036	-101.19960	707 Roland St	Spearman	79081	+18066592535	http://www.hchd.net/		0.92
-4b45ef7077ee	Hansford Home Care	hospital		36.18985	-101.20058	720 S Roland St	Spearman	79081	+18066592457	http://hchd.net/		0.92
-ad3a29b15531	MS Paula’s Gymnastics	hotel		36.18833	-101.25304	504 Main St	Gruver	79040	+18067368838			0.81
-4a25e14e8fb4	Nursanickel Motel	hotel	motel	36.18966	-101.20414	815 TX-207	Spearman	79081	+18066593737	http://www.nursanickelmotel.com/		0.95
-880a5fbb16a2	Texas True Threads	office	clothing company	36.18667	-101.20696	1011 S Highway 207	Spearman	79081	+18066449663	https://texastruethreads.com/		0.99
-980bf12cb39d	Brickstreet Grill	restaurant	bar and grill restaurant	36.19936	-101.19394	217 Main St	Spearman	79081	+18066447455			0.92
-21bdbb75b608	Bynum's Bar & Grill	restaurant	bar and grill restaurant	36.19356	-101.19894	402 S Archer St	Spearman	79081		http://www.stearmanbarandgrill.com/		0.82
-97f18ea0e57a	Diego's Tacos	restaurant	mexican restaurant	36.19335	-101.20256	417 TX-207	Spearman	79081	+18063300430	https://sites.google.com/view/diegostacos/home		0.98
-b4cac090741e	El Alacran gorditas and burritos	restaurant	mexican restaurant	36.19257	-101.20364	504 TX-207	Spearman	79081	+18066445459			0.92
-c14820a16bec	El Mariachi Restaurant	restaurant	mexican restaurant	36.19233	-101.20235	511 TX-207	Spearman	79081	+18067361058			0.92
-51bd275c7f66	El Vaquero Restaurant	restaurant	texmex restaurant	36.26411	-101.40651	425 Main Ave	Gruver	79040	+18063380738	https://www.vaquerorestaurant.com/#!	El Vaquero Mexican Restaurant North Columbus	0.96
-5a66a432c01a	El Vaquero Restaurant	restaurant		36.26867	-101.40390		Gruver		+18063380738			0.66
-88f0ddb377ab	Gordon's Fountain LLC	restaurant	diner	36.19901	-101.19292	314 Main St	Spearman	79081	+18066592141			0.97
-cf72285b7570	Judy's Cafe	restaurant	comfort food restaurant	36.01458	-101.82530	205 Ranch Rd 119	Sunray	79086				0.92
-bdb4b11b7bf5	La Casita	restaurant	mexican restaurant	36.01571	-101.82452	811 Main St	Sunray	79086	+18069481008	https://la-casita-tx-25.hub.biz		0.96
-4ee55adf9298	Los Socios | Mexican	restaurant	mexican restaurant	36.19067	-101.20241	719 W 7th Ave	Spearman	79081	+18066448035			0.92
-a87477d19280	Mi Cafe	restaurant	comfort food restaurant	36.01949	-101.82441	505-511 Main St	Sunray	79086	+18069480089	https://www.facebook.com/profile.php?id=100083684755541		0.92
-165bc73f319e	Murmurs	restaurant	burger restaurant	36.19673	-101.20015	100 S Roland St	Spearman	79081	+18066593580	http://www.cine-tamaris.com/agnes-varda		0.97
-8758520d65fe	Pollos Chavira	restaurant	chicken restaurant	36.19830	-101.19341	102 W Kenneth Ave	Spearman	79081	+18062700527			0.99
-448f942c9505	Safari Restaurant: A Taste of East Africa	restaurant	middle eastern restaurant	36.05280	-101.99829	287 Center Dr	Cactus	79013	+18065533530			0.96
-7e229f467340	Salt and Light	restaurant		36.19581	-101.20148	212 TX-207	Spearman	79081	+18062028723			0.98
-1aafaa8813ca	Taco Stop	restaurant	mexican restaurant	36.03578	-101.99847	318 Stoney Dr	Cactus	79013	+18064214678			0.92
-81631775aea7	Taqueria La Hacienda Mexican Restaurant+	restaurant	mexican restaurant	36.19202	-101.20240		Spearman					0.58
-017a6fd7155c	Thai Country Cafe	restaurant	thai restaurant	36.01558	-101.82486	813 Main St	Sunray	79086	+18069481330	http://thaicountrycafe.placeweb.site/		0.94
-71d652c06572	Hansford Manor	senior	retirement home	36.19064	-101.20000	707 Roland St	Spearman	79081	+18066595535	http://Www.hchd.net/		0.99
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+3e69b77a643c	216 Main	bakery		36.19969	-101.19352	216 Main St	Spearman	79081	+18066440216			0.94	
+23efc08def36	Spearman Donuts	bakery	donut shop	36.18906	-101.20523	821 TX-207	Spearman	79081	+18066545484	http://facebook.com/spearmandonuts		0.95	
+6e5be614cca6	El Bandolero	bar		36.03566	-101.99867	318 Stoney Dr	Cactus	79029	+18062311668			0.93	
+02f589159339	La Desvelada Bar	bar		36.03773	-101.99918	302 Stoney Dr	Cactus	79029	+18069664996	https://thewayco.com/network-business/la-desvelada-bar-bar-cactus...		0.93	
+8f72f49a75d5	Greater Texas Ford Dealers	cardealer		36.26255	-101.40679	531 Main St	Gruver	79040	+18067332431		Greater Texas Ford Dealers	0.98	
+add38b08fbc6	Sergio's Motors Llc	cardealer	used auto dealer	36.20036	-101.19540	101 Main St	Spearman	79081	+18066599971			0.92	
+40074723be2c	Lyric Cinema	cinema		36.20020	-101.19494	113 Main St	Spearman	79081	+18066442812	https://lyriccinemacafe.com		0.92	
+bc50e399cf29	Gruver Cafe	coffee		36.26441	-101.39831	301 Cooper Ave	Gruver	79040	+18063381345			0.92	
+f56a15bb0a17	Prime Coffee	coffee		36.19973	-101.19437	203 Main St	Spearman	79081				0.92	
+2e494225533d	Quench Alka-Hydration	coffee		36.20030	-101.19521	107 Main St	Spearman	79081				0.67	
+60fbb1da6918	Allsup's	convenience		36.26880	-101.40510	101 Main St	Gruver	79040	+18067332953	https://www.allsups.com/	Allsup’s	0.92	
+d1cae21ab071	Allsup's	convenience		36.19800	-101.19704	305 W Kenneth Ave	Spearman	79081	+18066593135	https://www.allsups.com/	Allsup’s	0.92	
+39fc6d71ed13	Allsup's Convenience Store	convenience		36.26503	-101.40627	101 Main St	Gruver	79040	+18067332953	https://www.allsups.com/		0.85	
+b248dd460a3f	Allsup's Convenience Store	convenience		36.01770	-101.82487	700 Main St	Sunray	79086	+18069485313	https://www.allsups.com/	Allsup’s	0.92	
+3e0304fab8e6	Bp	convenience		36.20243	-101.19244	406 N Bernice St	Spearman	79081	+18066592646	https://www.bp.com		0.92	
+1c5920c46cff	CEFCO Convenience Store	convenience		36.19839	-101.19752	107 Collard St	Spearman	79081	+18066592043	https://www.cefcostores.com/		0.92	
+b0443901de7a	Country Store	convenience		36.02122	-101.82497	100-198 W 4th St	Sunray	79086	+18069485442	http://www.terrellcountrystore.com		0.77	
+223c009810f3	GRUB'S MARKET 2	convenience		36.03009	-101.99641	616 BIRCH	Cactus	79013		https://locations.valero.com/en-us/LocationDetails/Index/616-BIRCH/0000001356	Valero	0.80	
+56e8c3d0bfc2	Laredo Petroleum Inc	convenience		36.18608	-101.19937	511 W 11th Ave	Spearman	79081	+18066595088	https://www.vitalenergy.com		0.65	
+c0ac4c39695a	Phillips 66	convenience		36.19329	-101.20300	414 Texas 207, Spearman, TX, USA	Spearman	79081	+18066593776	https://www.phillips66gas.com/		0.92	
+c8c16d2bdbac	R&S Quik Stop	convenience		36.19972	-101.19608	323 Sanders St	Spearman	79081	+18066449463			0.92	
+0ddd1712f78c	TOOT' N TOTUM #118	convenience		36.01910	-101.82430	513 Main St	Sunray	79086		https://locations.valero.com/en-us/LocationDetails/Index/513-MAIN-ST/0000012676	Valero	0.80	
+a10d210efc18	Toot'n Totum	convenience		36.02120	-101.82480	308 Main St	Sunray	79086	+18069485442	https://location.westernunion.com/us/tx/sunray/b36c49367284f15837b11f3677ccac56	Toot'n Totum	0.92	
+9b80775a8f0c	Valero	convenience		36.19775	-101.19697	305 W Kenneth Ave	Spearman	79081	+12103452000	https://www.valero.com		0.65	
+520d01291095	Dairy Queen	fastfood		36.01914	-101.82500	514 Avenue M	Sunray	79086	+18069484320	https://www.dqtexas.com/?y_source=1_MjkzMzkyMjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97	
+676e349ae430	Dairy Queen	fastfood		36.19039	-101.20490	700 TX-207 700 S Highway 207	Spearman	79081	+18066595601	https://dqtexas.com/?y_source=1_MjkzMzkyODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.80	
+64c40c8f3a79	La Famila	fastfood		36.19786	-101.19366	14 Haney St	Spearman	79081	+18066591088	https://la-familia-tx-9.hub.biz		0.96	closed
+279f533a8c43	Over the Rainbow	fastfood		36.19781	-101.19057	21 S Endicott St	Spearman	79081				0.91	
+383145f5edb9	Pizza Hut	fastfood	pizza restaurant	36.18899	-101.20586	207 S Hwy Hansford	Spearman	79081	+18066592547	https://locations.pizzahut.com/tx/spearman/207-s-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297361	Pizza Hut	0.98	
+8b7d62a61431	Etter Grocery & Market	grocery		36.03014	-101.99670	598 S US Highway 287	Dumas	79029	+18069665237	http://valero.com		0.87	
+5a6a9fe33c5a	Lowe's Market	grocery		36.19231	-101.20266	505 TX-207	Spearman	79081	+18066593212	https://lowes-market-place.hub.biz/	Lowe's Market	0.92	
+d17188b70e0f	Neighbors Grocery	grocery		36.26315	-101.40710	615 Main St	Gruver	79040	+18067332471	https://neighbors-grocery-tx.hub.biz		0.92	
+d48c95e058c4	Hansford County Hospital	hospital		36.19036	-101.19960	707 Roland St	Spearman	79081	+18066592535	http://www.hchd.net/		0.92	
+4b45ef7077ee	Hansford Home Care	hospital		36.18985	-101.20058	720 S Roland St	Spearman	79081	+18066592457	http://hchd.net/		0.92	
+ad3a29b15531	MS Paula’s Gymnastics	hotel		36.18833	-101.25304	504 Main St	Gruver	79040	+18067368838			0.81	
+4a25e14e8fb4	Nursanickel Motel	hotel	motel	36.18966	-101.20414	815 TX-207	Spearman	79081	+18066593737	http://www.nursanickelmotel.com/		0.95	
+880a5fbb16a2	Texas True Threads	office	clothing company	36.18667	-101.20696	1011 S Highway 207	Spearman	79081	+18066449663	https://texastruethreads.com/		0.99	
+980bf12cb39d	Brickstreet Grill	restaurant	bar and grill restaurant	36.19936	-101.19394	217 Main St	Spearman	79081	+18066447455			0.92	
+21bdbb75b608	Bynum's Bar & Grill	restaurant	bar and grill restaurant	36.19356	-101.19894	402 S Archer St	Spearman	79081		http://www.stearmanbarandgrill.com/		0.82	
+97f18ea0e57a	Diego's Tacos	restaurant	mexican restaurant	36.19335	-101.20256	417 TX-207	Spearman	79081	+18063300430	https://sites.google.com/view/diegostacos/home		0.98	
+b4cac090741e	El Alacran gorditas and burritos	restaurant	mexican restaurant	36.19257	-101.20364	504 TX-207	Spearman	79081	+18066445459			0.92	
+c14820a16bec	El Mariachi Restaurant	restaurant	mexican restaurant	36.19233	-101.20235	511 TX-207	Spearman	79081	+18067361058			0.92	
+51bd275c7f66	El Vaquero Restaurant	restaurant	texmex restaurant	36.26411	-101.40651	425 Main Ave	Gruver	79040	+18063380738	https://www.vaquerorestaurant.com/#!	El Vaquero Mexican Restaurant North Columbus	0.96	
+5a66a432c01a	El Vaquero Restaurant	restaurant		36.26867	-101.40390		Gruver		+18063380738			0.66	
+88f0ddb377ab	Gordon's Fountain LLC	restaurant	diner	36.19901	-101.19292	314 Main St	Spearman	79081	+18066592141			0.97	
+cf72285b7570	Judy's Cafe	restaurant	comfort food restaurant	36.01458	-101.82530	205 Ranch Rd 119	Sunray	79086				0.92	
+bdb4b11b7bf5	La Casita	restaurant	mexican restaurant	36.01571	-101.82452	811 Main St	Sunray	79086	+18069481008	https://la-casita-tx-25.hub.biz		0.96	
+4ee55adf9298	Los Socios | Mexican	restaurant	mexican restaurant	36.19067	-101.20241	719 W 7th Ave	Spearman	79081	+18066448035			0.92	
+a87477d19280	Mi Cafe	restaurant	comfort food restaurant	36.01949	-101.82441	505-511 Main St	Sunray	79086	+18069480089	https://www.facebook.com/profile.php?id=100083684755541		0.92	
+165bc73f319e	Murmurs	restaurant	burger restaurant	36.19673	-101.20015	100 S Roland St	Spearman	79081	+18066593580	http://www.cine-tamaris.com/agnes-varda		0.97	
+8758520d65fe	Pollos Chavira	restaurant	chicken restaurant	36.19830	-101.19341	102 W Kenneth Ave	Spearman	79081	+18062700527			0.99	
+448f942c9505	Safari Restaurant: A Taste of East Africa	restaurant	middle eastern restaurant	36.05280	-101.99829	287 Center Dr	Cactus	79013	+18065533530			0.96	
+7e229f467340	Salt and Light	restaurant		36.19581	-101.20148	212 TX-207	Spearman	79081	+18062028723			0.98	
+1aafaa8813ca	Taco Stop	restaurant	mexican restaurant	36.03578	-101.99847	318 Stoney Dr	Cactus	79013	+18064214678			0.92	
+81631775aea7	Taqueria La Hacienda Mexican Restaurant+	restaurant	mexican restaurant	36.19202	-101.20240		Spearman					0.58	
+017a6fd7155c	Thai Country Cafe	restaurant	thai restaurant	36.01558	-101.82486	813 Main St	Sunray	79086	+18069481330	http://thaicountrycafe.placeweb.site/		0.94	
+e857f28dd64d	The Hungry Cowboy	restaurant	barbecue restaurant	36.18644	-101.20818	1020 S Highway 207	Spearman	79081	+18066595151	https://hungry-cowboy-restaurant-catering.hub.biz		0.92	closed
+71d652c06572	Hansford Manor	senior	retirement home	36.19064	-101.20000	707 Roland St	Spearman	79081	+18066595535	http://Www.hchd.net/		0.99	

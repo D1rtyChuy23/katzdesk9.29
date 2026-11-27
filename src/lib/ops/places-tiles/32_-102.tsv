@@ -1,483 +1,495 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-ccdcb0374ffe	Alesaiah's Stop N Shop	bakery		32.73101	-101.95081	311 S 2nd St	Lamesa	79331	+18068724662	http://alesaiahsstopnshop.com		0.75
-b8c365d1cf63	Baker Hughes	bakery		32.24675	-101.51311	6401 W Interstate 20	Big Spring	79720	+14322647429	www.bakerhughes.com		0.63
-9a933910cac2	Fresh Kolache and Donuts	bakery	donut shop	32.23346	-101.47168	2110 S Gregg St	Big Spring	79720	+14322647078			0.96
-4348b025f387	Good Morning Donuts	bakery	donut shop	32.73639	-101.95372	817 N 4th St	Lamesa	79331	+18068724607	https://start.cortera.com/.../research/k5r0lyn8q/good-morning-donuts		0.66
-b7b31d3b29af	Jack ‘n’ Jill Donuts Greenwood	bakery	donut shop	32.01886	-101.93549	1804 S Co Rd 1105	Midland	79706	+14322475444		Jack 'N' Jill Donuts	0.96
-53a718731e93	Jeel Donuts	bakery	donut shop	32.24170	-101.44904	1608 E FM 700	Big Spring	79720	+14329356018			0.75
-e1a2e8300535	Lamesa Donuts	bakery	donut shop	32.75050	-101.95132	1904 Lubbock Hwy	Lamesa	79331	+18068720002	https://lamesa-donut-shop.hub.biz/		0.94
-2a1b31d5f34e	Lucy's Flour Shop	bakery		32.73476	-101.95381	320 N Austin Ave	Lamesa	79331	+18062018598			0.97
-f3c11b28efe4	Sweet Katees Bakery	bakery		32.25452	-101.47227	501 E 3rd St	Big Spring	79720	+14325174034	http://sweetkatees.com/		0.97
-883d6f6bac4e	The Original Fried Pie Shop	bakery		32.73478	-101.96207	1100 Seminole Rd	Lamesa	79331	+18068723082	http://theoriginalfriedpieshop.com/		0.92
-1317e36080c5	Valley Bakery	bakery		32.12841	-101.79276	400 W Front St	Stanton	79782	+14323121092			0.92
-afc28c14f4c1	Agave Bar and Nightclub	bar		32.24693	-101.49103	308 Price St	Big Spring	79720	+14322716739			0.99
-41635453850a	Apt. 9 Saloon	bar		32.27179	-101.45731	1800 N Birdwell Ln	Big Spring	79720	+14325174248			0.76
-ab4f2978afa5	Crossroads Saloon	bar		32.22224	-101.46941	3101 S Us Highway 87	Big Spring	79720	+14325174533			0.92
-71cff1ea5097	Desert Flower Art Bar & Lounge	bar		32.25357	-101.47722	123 S Main St	Big Spring	79720	+14322968440	http://desertflowerartbar.com/		0.93
-f46668cd64bf	Interstate Winery	bar	winery	32.27330	-101.37231	6808 S Service Rd	Big Spring	79720	+19704626989			0.91
-7e3c9cd35062	Out Yonder Saloon	bar		32.26788	-101.39165	5620 I-20	Big Spring	79720	+15174577	http://outyonder.net		0.92
-3e09d0f2e451	outyondersaloon	bar		32.25732	-101.50945	5620 IH 20 East\n	Big Spring	79720	+14325174577			0.66
-e8160eb6f76a	Pharmacy Bar & Parlor	bar	cocktail bar	32.25293	-101.47557	200 E 3rd St	Big Spring	79720	+14322677500	http://www.hotelsettles.com/		0.92
-2bf60625bb2d	Rooster’s Backyard	bar		32.01073	-101.97315	6221 FM-307	Midland	79706	+14325593417	http://www.roostersbackyardmtx.com/		0.97
-c319f286c084	The Pub Downtown	bar		32.25301	-101.47602	125 E 3rd St	Big Spring	79720	+14322700976			0.99
-292b371d5bd9	The Train Car	bar	cocktail bar	32.25414	-101.47785	100 S Main St	Big Spring	79720	+14322706113	http://shop.thetraincar.com/		0.99
-013a08ca6eef	TJ's Steakhouse	bar	pub	32.25858	-101.50858	2104 W Interstate 20 Frontage Rd	Big Spring	79720	+14322631651	http://www.tjssteakhouse.com/		0.95
-1319393946a4	Wild West Wingz	bar	sports bar	32.25824	-101.45564	1506 E 4th St	Big Spring	79720	+14325174368	http://www.wildwestwingz.com/		0.99
-d903b83f903b	87 Auto Sales, Inc.	cardealer	used auto dealer	32.25185	-101.47987	210 S Gregg St	Big Spring	79720	+14322678787	https://87autosales.com		0.65
-06e370ebd01b	Alpha 1 Motorsportz	cardealer		32.03590	-101.99852	5405 E Hwy 80	Midland	79706	+14322188535	https://alpha1motorsportz.com/		0.92
-0845df36d0a0	Bailey Toliver Ford	cardealer		32.13020	-101.78867	201 E Saint Anna St	Stanton	79782	+14327563321	https://www.baileytoliverford.net	Ford Motor Company	0.97
-7f18d743ebbe	BF White Motor Co	cardealer		32.13024	-101.78858	201 E. Saint Anna St	Stanton	79782	+14327563321	http://whitemotor-hub.com		0.77
-6a1fe08455a5	Buy a car from Jamie	cardealer		32.26260	-101.49094	821 I-20 W	Big Spring	79720	+14323127268	https://www.bigspringcars.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb		0.61
-ec46b890400f	Charlie Clark Chevrolet Buick GMC	cardealer		32.12545	-101.80166	102 N Lamesa Hwy	Stanton	79782	+14322370950	https://www.charlieclarkchevygmc.com/	Chevrolet	0.99
-ba4db59dca0f	Circle H Auto sales	cardealer		32.29186	-101.31330	500 I-20 Frontage Rd	Coahoma	79511	+14323944885	http://www.circlehautosales.com/		0.96
-bf79bda5f732	Classic Auto Sales	cardealer	used auto dealer	32.24250	-101.44954	1607 E FM-700	Big Spring	79720	+14325174412	https://www.classicautosalestexas.com/		0.92
-c67d76692b26	Cornerstone Co.	cardealer	used auto dealer	32.11419	-101.82866	3224 I 20 Service Rd	Stanton	79782	+14327563300	http://cornerstone.com		0.77
-49fa5e913888	Harris Auto Sales	cardealer	used auto dealer	32.25312	-101.47989	111 S Gregg St	Big Spring	79720	+14325174227	http://harrisautosales.net/		0.92
-fe2563f8a0c0	Kathleen At Ronnie Smith Motors	cardealer		32.24625	-101.43946	2900 E FM-700	Big Spring	79720	+13252718890	https://ronniesmithmotorsofbigspring.v12soft.com/		0.73
-b011df0fb62a	Mitch Hall Chevrolet Buick GMC Service and Parts Department	cardealer		32.75760	-101.94558	2713 Lubbock Hwy	Lamesa	79331	+18667250807	https://www.mitchhallchgmc.com/	GMC	0.92
-ffa1aa382f0e	Pollard Chevrolet Service	cardealer		32.25826	-101.45907	1501 E 4th St	Big Spring	79720	+14322677421	http://pollardchevy.com/	Chevrolet	0.97
-0a3f018d85f1	Premier Chrysler Dodge Jeep Ram of Lamesa	cardealer		32.74787	-101.95081	1611 Lubbock Hwy	Lamesa	79331	+18066055092	https://www.trucktowntexas.com/	Chrysler	1.00
-156f897075f5	Premier Ford of Lamesa	cardealer		32.72164	-101.94547	1207 S Lynn Ave	Lamesa	79331	+18068722188	https://www.premierfordoflamesatx.com/		1.00
-1dd2e81de0a8	Rafter M Equipment	cardealer		32.72552	-101.94873	902 S Dallas Ave	Lamesa	79331	+18062005224	https://raftermequip.com/		0.80
-c2d3e95ac046	Ragz To Richez Custom Sales	cardealer		32.26215	-101.47079	704 W 3rd St	Big Spring	79720	+14325174553			0.98
-90d550591d26	Roy Motor Co Inc	cardealer		32.74618	-101.95173	1415 Lubbock Hwy	Lamesa	79331	+18068725444	https://roymotorco.com/		0.92
-87f6108dc181	Sander's Auto Broker Services	cardealer		32.73103	-101.95080	311 S 2nd St	Lamesa	79331	+18062018660	http://Www.facebook.com/sandersautobrokerservices		0.66
-a4bfe11a5fff	Shroyer Motor Company	cardealer		32.25373	-101.47231	424 E 3rd St	Big Spring	79720	+14322637625	http://www.shroyermotorcompany.com/	GMC	1.00
-3e66c378006a	South Plains Implement - Lamesa John Deere Dealer	cardealer		32.76730	-101.94019	1605 US-87	Lamesa	79331	+18068725474	http://www.deere.com/	John Deere	0.92
-642fd369157f	Star Chrysler Dodge Jeep Ram of Big Spring	cardealer		32.26185	-101.49371	821 W Interstate 20	Big Spring	79720	+14326066508	http://bigspringcars.com/		0.97
-c6aec0557cd4	Star Chrysler Dodge Jeep Ram of Big Spring	cardealer	used auto dealer	32.25605	-101.46802	821 W I-20	Big Spring	79720	+14325476200	https://www.bigspringcars.com/		0.85
-a1330a0e3087	Star Ford Big Spring	cardealer		32.24974	-101.48112	500 W 4th St	Big Spring	79720	+14322677424	https://www.starfordbigspring.com/		1.00
-92a5b819e89a	Tim Phillips. Your Salesman and Friend	cardealer		32.24969	-101.48143	500 W 4th St	Big Spring	79720	+14322712867	http://bigspringford.com/		0.93
-fa651e60933f	TONY at the STAR	cardealer		32.26355	-101.49332	821 I-20 W	Big Spring	79720	+14322501185	https://bit.ly/3vlXMyc		0.68
-708a674620e2	Wes-Tex auto’s	cardealer		32.74797	-101.95081	1611 Lubbock Hwy	Lamesa	79331	+18065595193	http://Www.premiercdjroflamesa.com/		0.61
-cc7d5daa5df0	Wheeler Motor Company	cardealer		32.12523	-101.80135	102 Lamesa Hwy	Stanton	79782	+14327562341	http://www.wheelermotor.com		0.98
-c651634fee6a	Cinemark Cinema Big Spring	cinema		32.24449	-101.44636	1801 FM700	Big Spring	79720	+14322632252	https://www.cinemark.com/theatres/tx-big-spring/cinemark-cinema-4?utm_medium=organic&utm_source=fb&utm_campaign=local_listing_theater&utm_content=fb_listing&y_source=1_MTc0OTMwMjctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Cinemark	0.95
-9b71a7d99770	Cinemark Cinema Big Spring 4	cinema		32.25075	-101.43581	1801 East FM 700	Big Spring	79720		https://www.cinemark.com/theatres/tx-big-spring/cinemark-cinema-big-spring-4	Cinemark	0.80
-a0dde7dc41e0	Lamesa Movieland Theater	cinema		32.73727	-101.95465	604 N Austin Ave	Lamesa	79331	+18068722750	http://www.lamesamovieland.com		0.92
-e9a718f8ebca	Premiere Cinemas	cinema		32.25098	-101.47701	109 W 4th St	Big Spring	79720	+18885239755	https://www.pccmovies.com		0.75
-085b39195c82	350 Cafe & Convenience	coffee		32.40274	-101.34387	17601 E State Highway 350	Coahoma	79511	+14329653500			0.97
-9170f9d51fa4	7 Brew Coffee	coffee		32.23294	-101.47169	2200 S Gregg St	Big Spring	79720	+14793589274	https://7brew.com/location/texas-big-spring-000087		0.96
-1216966950aa	Beans World Cafe	coffee		32.25401	-101.47807	100 S Main St	Big Spring	79720	+14322631133	http://www.beansworldcafe.com/		0.92
-51bd8eec285d	Blue Paw Cafe	coffee		32.77005	-101.44405	108 S Elm St	Gail	79738	+18067564464	https://www.bluepawcafe.com		0.92
-326fef0b1bea	Blue Ribbon Cafe	coffee		32.24976	-101.47627	505 Scurry St	Big Spring	79720	+14326065011	http://www.blueribbonbigspring.com		0.92
-25afd1d691ef	Bubbly Kittea - Boba Tea, Mochi Donuts, and more	coffee	bubble tea shop	32.23623	-101.47213	1901 S Gregg St Ste A	Big Spring	79720	+14325174195			0.92
-f836c7073a30	Bucks One Stop Cafe	coffee		32.35595	-101.00616		Westbrook	79565	+13256445222	http://bucksonestopcafe.placeweb.site		0.92
-a0639fe12350	Corner House Cafe	coffee		32.23824	-101.47143	1701 Scurry St	Big Spring	79720	+18662972151	http://www.mycornerhousecoffee.com		0.77
-5b42d8c9a9b9	Daddios Burrito Express	coffee		32.73181	-101.94903	202 S 2nd St	Lamesa	79331	+18068701313			0.96
-c191bd0ea95d	Dunkin'	coffee		32.24626	-101.49904	2000 Interstate 20	Big Spring	79720	+14322126354	https://locations.dunkindonuts.com/en/tx/big-spring/2000-interstate-20/365751?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=365751&y_source=1_MjAyNTExNTA3My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.85
-8b7c8a15eb48	Four Sands Cafe	coffee		32.11282	-101.36612	403 Rex Ave	Forsan	79733	+14324551097			0.86
-dcae3b86988c	Healthy Vibes Nutrition	coffee	tea room	32.73470	-101.95358	312 N Austin Ave	Lamesa	79331	+13252071480	https://taylorbarrera.goherbalife.com/		0.81
-46bcddfa1567	HTeaO	coffee	tea room	32.24527	-101.47520	911 S Gregg St	Big Spring	79720	+14326532562	https://hteao.com/locations/big-spring-tx/	HTeaO	0.95
-898b5f3b10b0	HTeaO - Midland (Greenwood)	coffee	tea room	32.01875	-101.93715	8521 Farm to Market 307	Midland	79706	+14322564062	https://hteao.com/locations/midland-tx-greenwood/	HTeaO	0.96
-4ebe4718c7e8	Mesa Coffee Co.	coffee		32.73571	-101.95431	501 N 4th St	Lamesa	79331	+18062005060	http://mesacoffeeco.com/		0.86
-6790630a49aa	Mighty Joe's Coffee	coffee		32.24497	-101.47469	1000 Scurry St	Big Spring	79720	+14326065170	http://mightywashtx.com		0.92
-9f8e42d81748	Ol Joes Cafe 2	coffee		32.52623	-101.71612	301 5th St	Ackerly	79713	+14323534746			0.92
-df09504fb435	Red Rooster Cafe & Antiques	coffee		32.08640	-101.83982	3401 Interstate 20	Stanton	79782	+14327563663			0.59
-008d0862826f	Rustic Café	coffee		32.02992	-101.98788	5800 I-20	Midland	79706	+14326838424	https://kentkwik.com/rustic-cafe/		0.99
-347998c58916	Sealed In Sweetness	coffee		32.29740	-101.30653	212 N 1st St	Coahoma	79511	+14322142023	https://www.google.com/search?client=safari&hs=OCVp&sca_esv=517629e0db3c0ca4&hl=en-us&biw=402&bih=660&sxsrf=ANbL-n51-2a5fngslZ5wkN7lJmlpjmZ2Hw%3A1773244784882&q=sealed+in+sweetness+big+spring+reviews&uds=ALYpb_lV1VNdGIh00wGuojX4xrR9VhVtqBdPtxmmPYr6mmK7lcF9CTjtlt3zjjkLqe6e6vXi18p_6dfivE8jZUgafcXfJOfR4G-lfgRPPHeIX_LcgNsYdZH76Hq5mwk14rlJU4-VwEsWfU5fS6aitxIvAm88FBU4PMGG7gmY_xAKbb3L-kLiOpZXxwjBT4ekAlR-vnGRjlhLUr-EylIHFCcezpUKYndt__gcAobhASaHjOuaHtOUfmNwaztfkcAfsR9UK-yXgPyrP_XVjDWhiCQntzsF0hxYCTZPlWhcbrtBEHxDLcsp_zfI16aG5jZDLZuyOCf3VM7pqo5SswdonVRXWN0GuuNiHNr5WmwL1DLuZ095VyPK1jNEoJ6LOgjGoBv7vAnYRzkV8u2x94L08mXcAfKj66R3jy51UpjHwL-5rsT8ug2x07QZaF8yXCYHo2nlKy5bEwDvhfJJb6xKfhwlGjUhPPcxyw&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOWwBoLvqoFAx-noDkBSP73cXQJ3UdWxu7jRGNMkdNVyaGDtiRD9xXxfkXzCBXKHLAsAyvSxcG41ijJj_fsx5gM0_s4vl_oJDYBXfaFDPhjehA2t6cQ%3D%3D&sa=X&ved=2ahUKEwisuoLMm5iTAxU7mmoFHXtLA-AQk8gLegQIGhAB&ictx=1&stq=1&cs=0&lei=cJGxaazCNbu0qtsP-5aNgA4#ebo=4		0.98
-cf6422242405	Shebrews	coffee		32.25159	-101.47836	209 W 3rd St	Big Spring	79720	+12547073262			0.96
-a1d245da7a4c	Starbucks	coffee		32.26251	-101.49129	801 I-20 Frontage Rd	Big Spring	79720	+13254364585	https://www.starbucks.com/store-locator/store/1019196	Starbucks	1.00
-70d17c71d05b	Tea2Go	coffee	tea room	32.73577	-101.95161	402 N Dallas Ave	Lamesa	79331			Tea2go	0.92
-c4eb2592ae96	Tea2Go	coffee		32.24380	-101.47454	1101 S Gregg St	Big Spring	79720	+14322178078	http://Tea2Go.us/	Tea2go	0.92
-0a2e658c930d	Tea2Go TeaN’ergy Greenwood	coffee	tea room	32.01908	-101.93607	1805 S County Road 1105	Midland	79706	+14322471160	http://Tea2Go.US/	Tea2go	0.79
-69d217621501	Texas Finest Cafe	coffee		32.74835	-101.95155	1703 Lubbock Hwy	Lamesa	79331	+18068701256			0.95
-17bdd5495d37	The Burrito Stop	coffee		32.24487	-101.50057	2001 W 3rd St	Big Spring	79720		www.newswest9.com/.../armed-robbery-under-investigation-in-big-spring		0.92
-b72ef9439c33	Tin Bucks Coffee Shop	coffee		32.73196	-101.95322	506 S 1st St	Lamesa	79331	+18063198758			0.92
-0080a55167ca	Bureau Of Economic Geology - Midland Core Research Center	college		32.03387	-101.99790	5310 E Highway 80	Midland	79706	+14326869902	https://www.beg.utexas.edu		0.81
-30e920b456be	G. C. Broughton Ag Complex	college		32.25349	-101.44433	1511 Echols St	Big Spring	79720				0.68
-0555aa247e8d	Howard College	college		32.25054	-101.45127	1001 Birdwell Ln	Big Spring	79720	+14322645000	http://www.howardcollege.edu	Howard College San Angelo	0.97
-f9b0d3907909	Howard College	college		32.75003	-101.95152	1810 Lubbock Hwy	Lamesa	79331	+18068722223	http://www.howardcollege.edu/	Howard College San Angelo	0.92
-7047636fa882	Howard College Agricultural Sciences Department	college		32.25006	-101.44988	1001 Birdwell Ln	Big Spring	79720	+14322645110	https://howardcollege.edu/academics/agriculture/	Howard College San Angelo	0.78
-8a39160adcff	Howard College Arena	college		32.25814	-101.41355		Big Spring			http://www.howardcollege.edu/	Howard College San Angelo	0.72
-7827c6ef5bde	Howard College Lady Hawk Softball Field	college		32.25378	-101.44315		Big Spring					0.72
-50767e76b456	SWCD	college		32.22816	-101.50229	3200 Avenue C	Big Spring	79720	+14322643700	http://www.howardcollege.edu/swcd		0.97
-c4d9d7aef690	180 Express Convenience Store	convenience		32.73468	-101.96915	1800 Seminole Rd	Lamesa	79331	+18068728789			0.92
-0cbab7767ace	7-Eleven	convenience		32.75101	-101.95137	1912 N Dallas Ave	Lamesa	79331	+18068728521	https://www.7-eleven.com/		1.00
-20540b2556fc	7-Eleven	convenience		32.13733	-101.80499	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.7-eleven.com/		1.00
-217e88937f07	7-Eleven	convenience		32.26230	-101.49002	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.7-eleven.com/		1.00
-ab33258acf73	7-Eleven	convenience		32.21559	-101.49308	2310 Wasson Rd	Big Spring	79720	+14322671591	http://www.7eleven.com/	7-Eleven	0.56
-bd7c852ad21c	7-Eleven	convenience		32.73658	-101.94953	411 N Lynn Avenue	Lamesa	79331	+18068720110	https://www.7-eleven.com/		1.00
-ed18619a3a25	7-Eleven	convenience		32.29354	-101.30515	101 E Broadway	Coahoma	79511	+14323944970	https://www.7-eleven.com/		1.00
-520d10b87292	Allsup's	convenience		32.97129	-101.83624	3037 US Highway 87	Odonnell	79351	+18064283532	https://www.allsups.com/	Allsup’s	0.99
-79432e891ba1	Allsup's Convenience Store	convenience		32.73806	-101.95106	248 N 5th St	Lamesa	79331	+18068725101	https://www.allsups.com/	Allsup’s	0.92
-ab97539d25cb	Allsup's Convenience Store	convenience		32.97172	-101.83612	3037 87	O'Donnell	79351	+18064283532	http://www.allsups.com/		0.92
-cf42e76edcf4	Allsup's Convenience Store	convenience		32.96371	-101.83266	3037 US Highway 87	Odonnell	79351	+18064283532	https://www.allsups.com/		0.85
-98ca138f66e3	Allsups Convenience Store	convenience		32.96594	-101.84219	3024 US Highway 87	Odonnell	79351	+18064283279	http://www.allsups.com/	Allsup's Convenience store #207	0.97
-41652eb11d73	Alon	convenience		32.21520	-101.49316	2310 Wasson Rd	Big Spring	79720	+14322671591	http://myalon.com/		0.92
-61903e4dc8f3	Alon	convenience		32.25536	-101.46896	300 Owens St	Big Spring	79720	+14322632291	http://myalon.com/		0.92
-62444895b02a	Alon	convenience		32.73432	-101.96187	1111 Seminole Rd	Lamesa	79331	+18068728629	https://alonbrands.com/	Alon	0.92
-7c776c84e42d	Alon	convenience		32.25853	-101.45396	401 Birdwell Ln	Big Spring	79720	+14322671881	http://myalon.com/		0.99
-8bd090be1f68	Alon	convenience		32.24240	-101.44862	1701 E Marcy Dr	Big Spring	79720	+14322671971	http://myalon.com/		0.99
-a53769ef71d6	ALON	convenience		32.25275	-101.43489	3315 E Marcy Drive E FM 700	Big Spring	79720	+14322637400	https://myalon.com/stations/ALON-Gas-Station-7050-3315-E-FM-700-BIG-SPRING-TX-79720		0.85
-c09518cd3043	ALON	convenience		32.27602	-101.36856	7011 N Service Rd	Big Spring	79720	+14323935839	https://alonfuel.com/stations/alon-gas-station-9607-7011-north-service-road-big-spring-tx-79720/	Alon Gas Station	1.00
-e10f25f5c6d6	Alon	convenience		32.24751	-101.45910	1209 E 11th Pl	Big Spring	79720	+14322672231	http://myalon.com/		0.92
-f938dfe070bc	Alon	convenience		32.23769	-101.50755	902 Willia St	Big Spring	79720	+14322672311	http://myalon.com/		0.92
-08ad6051a50e	ALON Gas Station	convenience		32.18476	-101.47361	4911 U.S. 87	Big Spring	79720	+14322675050	https://alonfuel.com/stations/alon-gas-station-3281-4911-s-us-highway-87-big-spring-tx-79720/		1.00
-54a9d4bfbfec	Alon Gas Station	convenience		32.27824	-101.37280	7011 N Service Rd	Big Spring	79720	+14323935839	http://myalon.com/		0.85
-99c0e0d64f2f	Alon Gas Station	convenience		32.26228	-101.48920	1106 Lamesa Hwy	Big Spring	79720	+14322677132	http://myalon.com/		0.92
-a5f5860866f4	ALON Gas Station	convenience		32.02645	-101.90008	10706 Farm to Market 307	Midland	79706	+14326850639	https://alonfuel.com/stations/alon-gas-station-1070-10706-us-307-greenwood-tx-79706/		1.00
-c920f38ef61b	Alon Gas Station	convenience		32.23642	-101.47234	1801 S Gregg St	Big Spring	79720	+14322671452	http://myalon.com/		0.85
-f7ef63d8f584	ALON Gas Station	convenience		32.25040	-101.47875	4911 Highway 87	Big Spring	79720	+14322675050	https://alonfuel.com/stations/alon-gas-station-3281-4911-s-us-highway-87-big-spring-tx-79720		0.85
-4e60ee12cbea	Anita's Corner Store	convenience		32.88576	-101.14904	1011 Main St	Fluvanna	79517	+13252070427		Corner Store	0.92
-3ff7807aaaa7	Buck Easy's	convenience		32.23787	-101.47301	1700 S Gregg St	Big Spring	79720	+14322672825	http://buckeasys.placeweb.site		0.92
-99b1f676017e	Buffalo Country Fina	convenience		32.18468	-101.47350	4911 S US Highway 87	Big Spring	79720	+14322675050			0.62
-5c54663b68e9	CAT Scale	convenience	truck gas station	32.26554	-101.47559	706 IH 20 E	Big Spring	79720	+14322647490	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
-298e5474fc2e	Chevron	convenience		32.08991	-101.88684	2848 Interstate 20	Stanton	79782	+14324583255	http://www.chevron.com		0.58
-2b070a6acaf3	Chevron	convenience		32.26255	-101.48895	1100 N LAMESA	Big Spring	79720		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1100-N-LAMESA-BIG-SPRING-TX-79720-id359090	Chevron	0.95
-9790b92024f6	Chevron	convenience		32.25294	-101.47208	410 EAST 4TH	Big Spring	79720		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/410-EAST-4TH-BIG-SPRING-TX-79720-2635-id358286	Chevron	0.80
-a718d1ffe917	Chevron	convenience		32.03027	-101.98795	5800 E INTERSTATE 20	Midland	79706		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/5800-E-INTERSTATE-20-MIDLAND-TX-79706-4495-id386682	Chevron	0.80
-b4906f66b3db	Chevron	convenience		32.23948	-101.45322	17008 N FM 1584	Big Spring	79720	+14323994463	http://www.chevron.com		0.77
-ed6476261613	Chevron Station Big Spring	convenience		32.25134	-101.47900	311 S Gregg St	Big Spring	79720	+14322630033			0.92
-75819a79ed4b	Circle K	convenience		32.01109	-101.97870	1821 S CR 1130 A	Midland	79706	+14328974980	https://www.circlek.com		1.00
-751fb875a74c	Country Store	convenience		32.41362	-101.58202	4496 W FM 846	Knott	79748	+14323534812	http://www.countrystorecatalog.com	Country Store	0.62
-15aa95e57834	Coyote Country Store	convenience		32.77034	-101.44624	100 W Wasson Ave	Gail	79738	+18067564330	http://www.thecoyotestore.com/		0.92
-09a9979be7a4	DK Gas Station	convenience		32.24766	-101.45916	1209 East 11th Place	Big Spring	79720	+14322635806	https://dkfuel.com/stations/dk-gas-station-2409-1209-11th-place-big-spring-tx-79720/		0.92
-239a071b8759	DK Gas Station	convenience		32.30179	-101.85700	3403 Texas 176	Lenorah	79749	+14322370665	https://dkfuel.com/stations/dk-gas-station-0104-3403-state-highway-176-lenorah-tx-79749/		0.92
-357cb6efddc5	DK Gas Station	convenience		32.03341	-101.98805	5907 East Interstate 20	Midland	79706	+14324008754	https://dkfuel.com/stations/dk-gas-station-5549-5907-e-i20-midland-tx-79706/		1.00
-4b4f18904890	DK Gas Station	convenience		32.24275	-101.44879	1701 East Marcy Drive	Big Spring	79720	+14322635804	https://dkfuel.com/stations/dk-gas-station-2407-1701-e-marcy-drive-big-spring-tx-79720/		0.92
-51c68f5049ee	DK Gas Station	convenience		32.23762	-101.50771	902 Willia Street	Big Spring	79720	+14322635805	https://dkfuel.com/stations/dk-gas-station-2499-902-willia-big-spring-tx-79720/		0.92
-5f294b4f9ee8	DK Gas Station	convenience		32.23678	-101.47276	1800 South Gregg Street	Big Spring	79720	+14322632447	https://dkfuel.com/stations/dk-gas-station-1317-1800-s-gregg-st-big-spring-tx-79720/		0.92
-77454d6c31a9	DK Gas Station	convenience		32.21534	-101.49322	2310 Wasson Road	Big Spring	79720	+14322635803	https://dkfuel.com/stations/dk-gas-station-2402-2310-wasson-big-spring-tx-79720/		0.92
-80d533fbcaae	DK Gas Station	convenience		32.25277	-101.43488	3315 Farm to Market Road 700	Big Spring	79720	+14322637400	https://dkfuel.com/stations/dk-gas-station-7050-3315-e-fm-700-big-spring-tx-79720/		0.92
-9cee01a9cdc1	DK Gas Station	convenience		32.73803	-101.95142	248 North 5th Street	Lamesa	79331	+18068725101	https://dkfuel.com/stations/dk-gas-station-0799-248-n-5th-st-lamesa-tx-79331/		1.00
-cdafaa60f391	DK Gas Station	convenience		32.25857	-101.45373	401 Birdwell Lane	Big Spring	79720	+14322671881	https://dkfuel.com/stations/dk-gas-station-2410-401-birdwell-big-spring-tx-79720/		0.95
-fd4f4c4b36e1	DK Gas Station	convenience		32.25532	-101.46913	300 Owens St	Big Spring	79720	+14322632291	https://dkfuel.com/stations/dk-gas-station-2413-300-owens-st-big-spring-tx-79720		0.92
-fef900c0d16a	DK Gas Station	convenience		32.73417	-101.96185	1111 Seminole Road	Lamesa	79331	+18068728629	https://dkfuel.com/stations/dk-gas-station-8931-1111-seminole-rd-lamesa-tx-79331/		1.00
-c9fc4aac57b0	Dollar General	convenience		32.01112	-101.96941	6507 Fm 307	Midland	79706	+14322198922	https://www.dollargeneral.com/store-directory/tx/midland/14238		0.92
-3e3b8263a524	Exxon	convenience		32.25568	-101.46893	800 W I 20	Big Spring	79720	+14322635571	https://www.exxon.com/en/find-station/exxon-bigspring-tx-kwikchek70-200313492?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
-c2182b8a9c11	Exxon	convenience		32.26411	-101.49157	800 West I 20	Big Spring	79720	+14322635571	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
-8b08d2f6552b	Fast Stop	convenience		32.21790	-101.48606	3104 Parkway Rd	Big Spring	79720	+14322631921	http://faststopmarkets.com	Fast Stop Markets	0.92
-ae73dc01b41e	Fast Stop	convenience		32.25780	-101.45921	1500 E 4th St	Big Spring	79720	+14322631191	https://east-fourth-fast-stop-tx.hub.biz/		0.92
-55cabda554a6	Gas Card	convenience		32.18472	-101.47318		Big Spring					0.61
-d882b36ec920	Horseshoe Number 3 Convenience Store	convenience		32.25264	-101.43504	3315 FM700	Big Spring	79720	+14322637400	http://alonbrands.com		0.84
-329fce2f9fd4	Kent Kwik	convenience		32.25094	-101.47840	311 S Gregg St	Big Spring	79720	+14322634498	https://kentkwik.com/		0.92
-7d060e773699	Kent Kwik	convenience		32.03015	-101.98809	5800 E Interstate 20	Midland	79706	+14326995824	https://kentkwik.com/		0.99
-a5cd2af09641	Kent Kwik	convenience		32.26243	-101.48868	1100 Lamesa Hwy	Big Spring	79720	+14322677132	http://www.thekentcompanies.com	Kent Kwik Convenience Stores	0.92
-dc7e3083643e	Kwik Kar Oil & Lube	convenience		32.73584	-101.95354	411 N 4th St	Lamesa	79331	+18068728826			0.92
-d28021118952	Kwikie	convenience		32.25830	-101.48309	510 Lamesa Hwy	Big Spring	79720	+14322683413	http://avantmgt.com/		0.92
-883912be94cc	Kwikie Grocery	convenience		32.23801	-101.50697	3000 W Hwy 80	Big Spring	79720	+14327144926	https://kwikie-grocery-inc-no-2.hub.biz/		0.92
-9ef3347ba48d	Kydees Last Stop	convenience		32.20362	-101.47626	4220 US-87 US-87	Big Spring	79720	+14326614697	https://kydees.hub.biz/		0.96
-d15b55f206b8	Lamesa Butane	convenience		32.73558	-101.94950	311 N Lynn Ave	Lamesa	79331	+18068722565	http://lamesabutane.com		0.55
-47e337786e38	Love's Travel Stop	convenience		32.24656	-101.49763	1801 W I-20	Big Spring	79720	+14326066003	https://www.loves.com/locations/976		0.85
-553efa816927	Murphy USA	convenience		32.22922	-101.46925	201 W Marcy Dr	Big Spring	79720	+14322635550	http://www.murphyusa.com/	Murphy USA	0.92
-d9c405f4e9cb	Neighbors Convenience	convenience		32.25264	-101.43504	3315 E FM-700	Big Spring	79720	+14322637400	http://alonbrands.com		0.92
-2697fa52b84c	OXXO	convenience		32.03370	-101.98816	5907 East Interstate 20	Midland	79706	+14324008754	https://oxxo-us.com/stores/oxxo-convenience-store-1822-5907-e-interstate-20-midland-tx-79706/		0.95
-3daea0e53bd3	Phillips 66	convenience		32.29338	-101.30514	101 NE Broadway	Coahoma	79511	+14323944970	https://www.phillips66gas.com/		1.00
-5157aa2d2b80	Phillips 66	convenience		32.26233	-101.48992	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.phillips66gas.com/		1.00
-653475d6c126	Phillips 66	convenience		32.75118	-101.95119	1912 N Dallas Ave	Lamesa	79331	+18322343656	https://www.phillips66gas.com/		1.00
-c2def8f8c6fa	Phillips 66	convenience		32.73480	-101.96201	510 N Bryan Ave	Lamesa	79331	+18068723082	https://www.phillips66gas.com/		0.92
-f23f293f51ca	Phillips 66	convenience		32.13737	-101.80488	1356 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.phillips66gas.com/		0.92
-99a09c105a7e	Pilot Travel Center	convenience		32.26564	-101.47436	706 I-20 Frontage Rd	Big Spring	79720	+14322235832	https://locations.pilotflyingj.com/us/tx/big-spring/706-e-i-20-frontage-rd	Pilot Flying J	0.97
-c4375161e9d8	QuikTrip	convenience		32.26338	-101.43381	3430 I-20	Big Spring	79720	+14326066177	https://locations.quiktrip.com/tx/big-spring/3430-e-interstate-20?utm_source=fb&utm_medium=yext&y_source=1_MjA0NzAwOTUyMS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	QuikTrip	0.61
-7dd86b3b5efd	SEI FUELS STORE 42417-88	convenience		32.75097	-101.95143	1912 N DALLAS ST	Lamesa	79331			Phillips 66	0.80
-6adcb1972ca9	SEI FUELS STORE 42567-5035	convenience		32.13725	-101.80492	1308 N LAMESA HWY	Stanton	79782			Phillips 66	0.80
-015593e75683	Shell	convenience		32.26458	-101.49015	704 W Interstate 20	Big Spring	79720	+14322644444	http://www.shell.us/	Shell	0.92
-505c89b4e89c	Shell	convenience		32.26828	-101.47392	Ih 20 & State 350	Big Spring	79720	+14322647445	http://www.shell.us/	Shell	1.00
-6c6de5f04e13	Shell	convenience		32.22908	-101.47011	2501 S Gregg St	Big Spring	79720	+14322632290	https://find.shell.com/us/fuel/10006400-2501-s-gregg-st	Shell	0.92
-8c7041297703	Shell	convenience		32.12722	-101.79527	612 W Front St	Stanton	79782	+14327562635	https://find.shell.com/us/fuel/10006394-612-w-front-st	Shell	0.92
-9ed9f42da9ba	Shell	convenience		32.23379	-101.52463	4806 W Us Highway 80	Big Spring	79720	+14325174364	https://find.shell.com/us/fuel/10004529-4806-w-us-highway-80	Shell	0.99
-460bdb994dd1	Star Stop	convenience		32.25004	-101.47847	400 S Gregg St	Big Spring	79720	+14322630028	http://www.shell.com/		0.92
-3dddfd670c9b	Star Stop Food Mart	convenience		32.39119	-101.69075	4498 FM-846	Knott	79748	+14323534812			0.59
-b53d0207e39f	Star Stop Food Mart	convenience		32.22996	-101.47065	2501 Gregg	Big Spring	79720	+14322647445	http://shell.com		0.92
-20dc35880b0c	Stripes	convenience		32.29356	-101.30527	101 E. Broadway	Coahoma	79511	+14323944970	http://www.stripesstores.com	Stripes	1.00
-608c9dee356b	Stripes	convenience		32.73654	-101.94969	411 N Lynn Ave	Lamesa	79331	+18068720110	http://www.stripesstores.com	Stripes	0.97
-6a20e752284f	Stripes	convenience		32.75105	-101.95134	1912 N Dallas Ave	Lamesa	79331	+18068728521	http://www.stripesstores.com	Stripes	1.00
-d382fe72ac93	Stripes	convenience		32.26231	-101.48994	1101 Lamesa Hwy	Big Spring	79720	+14322633480	http://www.stripesstores.com	Stripes	1.00
-ff35b8340f88	Stripes	convenience		32.13739	-101.80497	1308 N. Lamesa	Stanton	79782	+14327562115	http://www.stripesstores.com		1.00
-0a68997286fb	Sunoco	convenience		32.26254	-101.48971	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.sunoco.com/locations/store/1101-lamesa-dr-big-spring-tx-0825851900		0.92
-25c2a6575092	Sunoco	convenience		32.25005	-101.47870	400 S Gregg St	Big Spring	79720	+13256587521	http://www.sunoco.com	Sunoco	1.00
-97a15a7fda15	Sunoco	convenience		32.25842	-101.45606	1500 E 4th St	Big Spring	79720	+14322631191	https://www.sunoco.com/locations/store/1500-e-4th-st-big-spring-tx-8002510601		0.92
-b4c80f3e47a8	Sunoco	convenience		32.29334	-101.30516	101 NE Broadway	Coahoma	79511	+14323944970	https://www.sunoco.com/locations/store/101-e-broadway-ave-coahoma-tx-0149865800		0.97
-c5f9467ef193	Sunoco	convenience		32.25536	-101.46896	300 Owens St	Big Spring	79720	+14322632291	https://www.sunoco.com/		0.92
-ced8904483e2	Sunoco Gas Station	convenience		32.73654	-101.94939	411 N Lynn Ave	Lamesa	79331	+18068720110	https://www.sunoco.com/find-a-station		0.92
-730b6d960904	Swift Stop	convenience		32.73466	-101.96210	1100 Seminole Rd	Lamesa	79331	+18068723082	http://swiftstop.biz/locations	Swift Stop	0.99
-b6479356e592	TA Truck Service	convenience		32.26543	-101.49104	704 W Interstate 20	Big Spring	79720	+14322741382	https://www.ta-petro.com/	TravelCenters-TA-Petro	0.99
-d58dc9bcd39c	TARZAN & JANE-STANTON	convenience		32.13900	-101.80631	3399 I 20	Stanton	79782		https://locations.valero.com/en-us/LocationDetails/Index/3399-I-20/0000028925	Valero	0.89
-a6e25cc72ed9	TARZAN & JANE-TARZAN	convenience		32.30490	-101.97491	2752 State Highway 176	Tarzan	79783		https://locations.valero.com/en-us/LocationDetails/Index/2752-STATE-HIGHWAY-176/0000029155	Valero	0.80
-c11465c5ee7c	Tarzan and Jane Greenwood	convenience		32.01840	-101.93750	8521 FM 307	Midland	79706		https://locations.valero.com/en-us/LocationDetails/Index/8521-FM-307/0000031228	Valero	0.80
-77fe449755c8	Texaco	convenience		32.25294	-101.47208	410 E 4th St	Big Spring	79720		https://www.texaco.com		0.75
-cccce6a7dbcf	TOOT'N TOTUM #131	convenience		32.75660	-101.94650	2301 Lubbock HWY	Lamesa	79931		https://locations.valero.com/en-us/LocationDetails/Index/2301-LUBBOCK-HWY/0000031923	Valero	0.80
-61b26b687fb1	Twice The Ice	convenience		32.73677	-101.95133	411 N Main Ave	Lamesa	79331		http://twicetheice.com		0.92
-3b395240f0b6	Txb	convenience		32.26411	-101.49162	800 W Interstate 20	Big Spring	79720	+14322635571	https://www.txbstores.com		0.75
-72d33e16476c	Uncle's Store	convenience		32.27612	-101.36863	I-20 Frontage Rd	Big Spring	79720	+14323935837			0.92
-c685044148af	Uncles Store	convenience		32.01126	-101.96786	6601 FM-307	Midland	79706	+14326850639			0.96
-ece77777a6f3	Wes-t-go Conoco	convenience		32.23675	-101.47292	1800 S Gregg St	Big Spring	79720	+14322632447	https://www.phillips66.com		0.55
-d4d16989f956	West Texas Gas	convenience		32.29473	-101.50012	3614 N US Highway 87	Big Spring	79720	+14322641509	http://www.westtexasgas.com		0.58
-224d1530dbca	White's Seven Till Eleven	convenience		32.73399	-101.95478	305 N Houston Ave	Lamesa	79331	+18068728546		7-Eleven	0.92
-7ab79280a0a8	Wiley's Food Store	convenience		32.72704	-101.95974	502 S Bryan Ave	Lamesa	79331	+18068725051	http://conocophillips.com		0.92
-089cb13e2af1	Yesway	convenience		32.73821	-101.95133	248 N 5th St	Lamesa	79331	+18068727050	https://yesway.com/	Yesway	0.76
-253cc1428a40	Yesway	convenience		32.73404	-101.96184	1111 Seminole Rd	Lamesa	79331	+18068728629	https://yesway.com/	Yesway	0.92
-fa92bbe42576	Yesway	convenience		32.23675	-101.47276	1800 S Gregg St	Big Spring	79720	+14325385157	https://yesway.com/	Yesway	0.92
-7d8d484abc26	Albertos Crystal Cafe	fastfood		32.25670	-101.48171	300 N Gregg St	Big Spring	79720	+14322672310	http://www.albertoscrystalcafe.com		0.95
-3b613ed678ce	Arby's	fastfood		32.26193	-101.50073	1801 W Interstate 20	Big Spring	79720	+14326066009		Arby's	0.96
-7f61db4fedf9	Arby's	fastfood		32.23291	-101.47116	2201 S. Gregg St. Suite 100 S Gregg St & W 20 Th St	Big Spring	79720	+14323482820	https://www.arbys.com/locations/us/tx/big-spring/2201-s--gregg-st/store-8955/	Arby's	0.92
-b84698311bd8	Arby's	fastfood	sandwich shop	32.25933	-101.50398	1801 I-20	Big Spring	79720		https://www.arbys.com/locations/us/tx/big-spring/1801-i-20/store-10147/	Arby's	0.96
-f0d258daa0a6	Bush's Chicken	fastfood		32.73805	-101.95209	602 N Dallas Ave	Lamesa	79331	+18068704445	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.98
-6963f0751275	Champs Chicken	fastfood		32.01159	-101.96793	6601 Farm to Market 307	Midland	79706	+14326850639	https://locator.champschicken.com/uncles-convenience-store-130203-new-owner-midland-tx/	Champs Chicken	0.94
-d637448b2d97	Chick-fil-A	fastfood		32.23170	-101.46220	502 E FM 700	Big Spring	79720	+14328970351	https://www.chick-fil-a.com/locations/tx/big-spring-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.96
-d038a0b6b0da	Chicken Express	fastfood		32.24329	-101.44502	2000 FM700	Big Spring	79720	+14322632300	https://chickene.com/	Chicken Express	0.98
-347b3a79fb79	Dairy Queen	fastfood		32.26196	-101.48935	1009 Lamesa Hwy	Big Spring	79720	+14322675412	https://www.dairyqueen.com/en-us/locations/tx/big-spring/1009-lamesa-hwy/13865/?y_source=1_MjkzMzg5NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
-50b61417b522	Dairy Queen	fastfood		32.73607	-101.95504	512 N 4th St 512 N 4th St	Lamesa	79331	+18068728155	https://www.dairyqueen.com/en-us/locations/tx/lamesa/512-n-4th-st/14339/?y_source=1_MjkzMzkzNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
-f136c2820dfe	Dairy Queen	fastfood		32.29324	-101.30573	108 Nw Broadway 108 Nw Broadway	Coahoma	79511	+14323944283	https://www.dairyqueen.com/en-us/locations/tx/coahoma/108-nw-broadway/13924/?y_source=1_MjkzMzg5ODMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
-9c15d3dab03d	Domino's	fastfood	pizza restaurant	32.23356	-101.47144	2111 S. Gregg St.	Big Spring	79721	+14322674111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-e44be9b90a75	Domino's	fastfood	pizza restaurant	32.73834	-101.95239	604 N Dallas Ave	Lamesa	79331	+18063327200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
-e5d5ae1135fd	Domino's	fastfood	pizza restaurant	32.00944	-101.97735	6009 Farm To Market 307	Midland	79706	+14326823030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-7b5cf9d0bcc8	DQ Grill & Chill	fastfood		32.73623	-101.95508	512 N 4th St	Lamesa	79331		https://www.dairyqueen.com/en-us/locations/tx/lamesa/512-n-4th-st/4112	DQ Grill & Chill	0.80
-95bea631a97a	DQ Grill & Chill	fastfood		32.26189	-101.48933	1009 Lamesa Hwy	Big Spring	79720		https://www.dairyqueen.com/en-us/locations/tx/big-spring/1009-lamesa-hwy/3638	DQ Grill & Chill	0.80
-bb6923ba38af	DQ Grill & Chill	fastfood		32.29324	-101.30584	108 NW Broadway	Coahoma	79511		https://www.dairyqueen.com/en-us/locations/tx/coahoma/108-nw-broadway/3697	DQ Grill & Chill	0.80
-b6f69796cbee	Dunkin Donuts	fastfood		32.25974	-101.50581	2000 Interstate 20	Big Spring	79720		https://www.dunkindonuts.com/locations/us/tx/big-spring/2000-interstate-20/store-365751/	Dunkin'	0.96
-1afa53a4395d	Gills Fried Chicken	fastfood		32.23360	-101.47200	2100 S Gregg St	Big Spring	79720	+14322634391	https://www.gillsfriedchickentx.com/		0.92
-06d56627dd9a	Golden Chick	fastfood		32.24929	-101.47839	500 S Gregg St	Big Spring	79720	+14325174415	https://locations.goldenchick.com/tx/big-spring/1339/	Golden Chick	0.95
-d5044a87eb38	KFC	fastfood		32.23746	-101.47244	1711 Gregg Street	Big Spring	79720	+14322713779	http://www.kfc.com/	KFC	0.92
-3fc827fa8a40	Little Caesars Pizza	fastfood	pizza restaurant	32.24854	-101.47720	601 S Gregg St	Big Spring	79720	+14326065064	https://littlecaesars.com/en-us/store/11409	Little Caesars	0.93
-7f03cde8de51	Long John Silver's	fastfood		32.23075	-101.47055	2403 S Gregg St	Big Spring	79720	+14322672290	https://www.ljsilvers.com/?y_source=1_MTc1NzMxNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.98
-1af1d886ce60	McDonald's	fastfood		32.22886	-101.47096	2600 S Gregg	Big Spring	79720	+14322647730	https://www.mcdonalds.com/us/en-us/location/tx/big-spring/2600-s-gregg/25711.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
-3de034fb1feb	McDonald's	fastfood		32.73761	-101.95107	505 N Dallas	Lamesa	79331	+18068726541	https://www.mcdonalds.com/us/en-us/location/tx/lamesa/505-n-dallas/8070.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
-660c630b5730	McDonald's	fastfood		32.26559	-101.47472	706 I-20	Big Spring	79720	+14322647552	https://www.mcdonalds.com/us/en-us/location/tx/big-spring/706-e-i20/36685.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
-1db8b2751609	Modern grill and steakhouse	fastfood		32.52271	-101.71536	1161 Laurel Lane	Ackerly	79713				0.76
-6001e4be4e54	Papa John's Pizza	fastfood	pizza restaurant	32.22835	-101.46937	2503 S Gregg St Ste H	Big Spring	79720	+14322647507	https://www.papajohns.com/		0.92
-b33db5364560	Papa Johns Big Springs	fastfood	pizza restaurant	32.23210	-101.47095	2305 S Gregg St	Big Spring	79720	+4322647507	https://www.papajohns.com/	Papa Johns Honduras	0.63
-4c68863b5853	Pizza Hut	fastfood	pizza restaurant	32.23295	-101.47116	2201 S Gregg St Howard	Big Spring	79720	+14322674153	https://locations.pizzahut.com/tx/big-spring/2201-s-gregg-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314894	Pizza Hut	0.97
-7d15bb0b9b9e	Pizza Hut	fastfood	pizza restaurant	32.22763	-101.46985	2601 S Gregg St	Big Spring	79720	+14322674153	https://locations.pizzahut.com/tx/big-spring/2601-gregg-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295650	Pizza Hut	0.97
-7f0961ea7250	Pizza Hut	fastfood	pizza restaurant	32.73643	-101.95109	804 N Lynn Ave	Lamesa	79331	+18068728309	https://order.pizzahut.com/	Pizza Hut	0.99
-74a17498c3ea	Popeyes	fastfood		32.26471	-101.48999	704 W Interstate 20	Big Spring	79720	+14322644444	https://www.popeyes.com/store-locator/store/restaurant_83751	Popeyes Louisiana Kitchen	0.97
-05d649daaa6c	Sonic Drive In	fastfood		32.24284	-101.47463	1200 S. Gregg	Big Spring	79720	+14322636790	https://locations.sonicdrivein.com/tx/bigspring/1200-s.-gregg.html	Sonic Drive-In	0.99
-52987e059e67	Sonic Drive In	fastfood		32.23321	-101.46230	601 East Marcy Fm 700	Big Spring	79720	+14322681307	https://locations.sonicdrivein.com/tx/bigspring/601-east-marcy-fm-700.html	Sonic Drive-In	0.99
-73b83c356687	Sonic Drive In	fastfood		32.13623	-101.80549	1218 N. La Mesa Hwy	Stanton	79782	+14327563022	https://locations.sonicdrivein.com/tx/stanton/1218-n.-la-mesa-hwy.html	Sonic Drive-In	0.96
-937364aaa4f0	Sonic Drive In	fastfood		32.73607	-101.95306	401 N. Fourth	Lamesa	79331	+18068725943	https://locations.sonicdrivein.com/tx/lamesa/401-n.-fourth.html	Sonic Drive-In	0.96
-29b7bea1dfcb	Subway	fastfood	sandwich shop	32.24467	-101.47555	1000 South Gregg St	Big Spring	79720	+14322677827	https://restaurants.subway.com/united-states/tx/big-spring/1000-south-gregg-st	Subway	0.98
-4b2dbcdba760	Subway	fastfood	sandwich shop	32.73644	-101.95036	203 N. 4th Street Suite A	Lamesa	79331	+18068725003	https://restaurants.subway.com/united-states/tx/lamesa/203-n-4th-street	Subway	0.97
-4d094ba9b426	Subway	fastfood	sandwich shop	32.01872	-101.93598	1805 S Co Rd 1105	Midland	79706	+14322198300	https://restaurants.subway.com/united-states/tx/midland/1805-scr-1105	Subway	0.96
-bbd05a451e4b	Subway	fastfood	sandwich shop	32.13736	-101.80489	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://restaurants.subway.com/united-states/tx/stanton/1308-n-lamesa-hwy	Subway	0.95
-f613659bbb77	Subway	fastfood	sandwich shop	32.26489	-101.49007	704 W Interstate 20	Big Spring	79720	+14322644444	https://www.order.subway.com		0.99
-1b2fcb8ed83b	Taco Bell	fastfood		32.23074	-101.47059	2403 S Gregg St	Big Spring	79720	+14326065010	http://www.tacobell.com/	Taco Bell	0.98
-cea6b9a7892e	Taco Bell	fastfood		32.73977	-101.95166	802 North Lynn Avenue	Lamesa	79331	+18068700011	http://www.tacobell.com/	Taco Bell	0.96
-1f91cce08b6d	Tarzan Grill - Stanton, Tx	fastfood		32.13907	-101.80717	3399 I-20	Stanton	79782	+14326072500	https://tjtravelcenters.com/		0.95
-ec18b8b1bfbb	Wendy's	fastfood		32.23156	-101.47063	2311 S. Gregg St.	Big Spring	79720	+14326062252	https://locations.wendys.com/united-states/tx/big-spring/2311-s-gregg-st	Wendy's	0.98
-f2bec69b17f0	Wendy's	fastfood		32.75644	-101.94683	2301 Lubbock Hwy	Lamesa	79331	+18063387451	https://locations.wendys.com/united-states/tx/lamesa/2301-lubbock-hwy	Wendy's	0.97
-f2c9d3d9af52	Whataburger	fastfood	burger restaurant	32.24332	-101.47481	1110 S GREGG ST	Big Spring	79720	+14322637359	https://locations.whataburger.com/tx/big-spring/1110-s-gregg-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-ea9250c1d0d9	Wingstop	fastfood	chicken restaurant	32.22829	-101.46992	2503 S. Gregg Street Suite D	Big Spring	79720	+14326069464	https://www.wingstop.com/location/wingstop-1932-big-spring-tx-79720/menu?y_source=1_NTUyMDc5OTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-1cdc1788cf37	Big Spring H-E-B	grocery		32.23444	-101.47251	2000 SOUTH GREGG	Big Spring	79720		https://www.heb.com/heb-store/us/tx/big-spring/big-spring-h-e-b-51	H-E-B	0.80
-5cfb09e5f785	Claiborne's Thriftway	grocery		32.73556	-101.95731	710 N 4th St	Lamesa	79331	+18068725196	https://www.claibornesthriftway.com		0.96
-1b64de8d603b	Coahoma Onestop	grocery		32.29487	-101.30571	101 S 1st St	Coahoma	79511	+14323944425	https://coahomaonestop.com		0.92
-c62494f22306	Field of Dreams Dairy & Farm	grocery		32.94718	-101.62722	800 County Road 144	Odonnell	79351	+18064396316	http://www.fieldofdreamsdairy.com		0.77
-a342e665dc74	H-E-B	grocery		32.23447	-101.47238	2000 S Gregg St	Big Spring	79720	+14322633000	https://www.heb.com/heb-store/US/tx/big-spring/big-spring-h-e-b-51	H-E-B	0.97
-dcd0e2de82ca	Hull's Meat Company Inc.	grocery		32.26307	-101.45512	500 N Birdwell Ln	Big Spring	79720	+14322677781	http://hullsmeat.com/		0.92
-e8b59e1f8200	J.b. Claiborne Inc.	grocery		32.73578	-101.95725	710 N 4th St	Lamesa	79331	+14325237261			0.95
-d1feaf625fd6	Jeanne's Fancy Pecans	grocery		32.73209	-101.95087	311 S 1st St	Lamesa	79331	+18068723997	https://www.jeannesfancypecans.com		0.92
-4edf7188c390	Law Enforcement Sales Usa	grocery		32.73104	-101.95536	703 S 1st St Ste 4	Lamesa	79331		https://www.lesalesusa.com		0.95
-f6f4de904e0b	Lawrence Bros	grocery		32.12757	-101.80200	304 N Lamesa Hwy	Stanton	79782	+14327563375	http://Lawrencebrostx.com/		1.00
-0d5af2361f67	Lowe's Market	grocery		32.25735	-101.45279	501 Birdwell Ln	Big Spring	79720	+14322964540	https://www.lowesmarket.com/	Lowe's Market	0.92
-cafd7b9e1775	Porter's	grocery		32.25734	-101.45213	501 Birdwell Ln	Big Spring	79720	+14322964540	https://www.myporters.net		0.92
-80d6775c3679	United Supermarkets	grocery		32.75548	-101.94949	2302 Lubbock Hwy	Lamesa	79331	+18068728838	https://local.unitedsupermarkets.com/tx/lamesa/2302-lubbock-hwy.html	United Supermarkets	0.92
-f2da088211cb	Big Spring State Hospital	hospital		32.26965	-101.49461	1901 North Highway 87	Big Spring	79720	+14322687222			0.92
-5cb6c4fb8d96	Family Medical Center Dr Johnson	hospital		32.24591	-101.47369	910 S Main St	Big Spring	79720	+14327144650			0.83
-40fc7ec423de	Kindred at Home	hospital		32.23625	-101.47153	1900 Scurry St	Big Spring	79720	+14327144510	https://www.kindredhealthcare.com/locations/home-health/big-spring-tx-3525		0.77
-8293cf0933c4	Martin County Hospital District	hospital		32.13999	-101.78775	600 I-20	Stanton	79782	+14326073200	http://www.martincountyhospital.org	Martin County Hospital District	0.92
-a90b7f89bf74	Martin County Hospital District	hospital		32.13105	-101.78443	600 E Front St	Stanton	79782	+14326073200			0.85
-b1fabdec2356	Martin County Hospital District	hospital		32.13820	-101.80384	600 W Interstate 20	Stanton	79782	+14326073200	https://martincountyhospital.org/	Martin County Hospital District	0.97
-f96a7f81fe27	Martin County Hospital District	hospital		32.14074	-101.78003	600 Interstate 20 Frontage Rd	Stanton	79782	+14326073200	https://martincountyhospital.org/		0.85
-065b05228d98	Medical Arts Hospital	hospital		32.74983	-101.96739	2200 N Bryan Ave	Lamesa	79331	+18068722183	https://www.medicalartshospital.org/		0.92
-12c3cf920b16	Scenic Mountain Medical Group - Internal Medicine	hospital		32.24593	-101.47365	910 S Main St	Big Spring	79720	+14327144650			0.92
-e81b9563a41f	Scenic Mountain Medical Group, Gregg Street Family Medicine	hospital		32.23209	-101.47052	2301 S Gregg St	Big Spring	79720	+14322675531	https://www.scenicmountainmedicalgroup.com/services/family-medicine/		0.97
-6ebadb037be8	Shannon Medical Center Big Spring	hospital		32.23666	-101.49147	1601 W 11th Pl	Big Spring	79720	+14326065200	https://www.shannonhealth.com/big-spring/	Quorum Health	0.99
-ae56d5fc1202	Specialty Clinic of Big Spring	hospital		32.24829	-101.47746	616 S Gregg St	Big Spring	79720	+14322678226			0.59
-3f9c945cb360	Veteran Hospital	hospital		32.23013	-101.47116	300 W Veterans Blvd	Big Spring	79720	+14322637361	http://www.va.gov/health		0.92
-fe392d28a740	Advantage Inn and Suite	hotel	motel	32.26363	-101.49287	804 West, I-20	Big Spring	79720	+14322635200			0.93
-d54bbafb70ff	Baymont by Wyndham Big Spring	hotel		32.26097	-101.48829	917 Lamesa Highway	Big Spring	79720	+14322680568	https://www.wyndhamhotels.com/baymont/big-spring-texas/baymont-inn-and-suites-big-spring/overview		0.77
-f6b426893cd7	Bent Tree	hotel		32.22672	-101.47800	1 Courtney Pl	Big Spring	79720	+14322671621	http://www.benttreeapartments.net		0.92
-a9f24c1f9565	Best Western Lamesa Inn & Suites	hotel		32.73731	-101.95250	506 N Dallas Ave	Lamesa	79331	+18068723888	https://www.bestwestern.com/en_US/book/hotel-rooms.44650.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44650	Best Western Hotels & Resorts	1.00
-7fdc45cf988c	Best Western Palace Inn & Suites	hotel		32.26067	-101.48776	915 Lamesa Hwy	Big Spring	79720	+14322641500	https://www.bestwestern.com/en_US/book/hotel-rooms.44621.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44621	Best Western Hotels & Resorts	1.00
-2658f64f705e	Best Western Stanton	hotel		32.13899	-101.80009	3432 Interstate 20	Stanton	79782		https://www.bestwestern.com/en_US/book/hotels-in-stanton/best-western-stanton/propertyCode.44816.html	Best Western	0.80
-072581e9d5dc	BRADBURY INN	hotel	motel	32.25732	-101.46436	1202 E 3rd St	Big Spring	79720	+14322672581	http://bookroomsnow.com		1.00
-79cd3b8556a7	Budget Host Inn	hotel	motel	32.72595	-101.94753	901 S Dallas Ave	Lamesa	79331	+18068722118	http://www.budgethost.com/hotels/Budget_Host_Inn_Lamesa_TX.aspx	Budget Host St Ignace	0.95
-a1bdc5ac5f7d	Budget Inn - Big Spring	hotel	resort	32.23899	-101.50636	2900 W Highway 80	Big Spring	79720	+14322675582			0.96
-b6748bd9ba81	Camelot INN	hotel	motel	32.25991	-101.44972	2902 I-20	Big Spring	79720	+14322689926	http://camlotinn.biz		0.92
-987b89d84ba8	Coahoma Inn	hotel	motel	32.29441	-101.30054	210 S 6th St	Coahoma	79511	+14323944248			0.95
-f4c458f2fdb0	Comfort Inn	hotel		32.13772	-101.80304	800 W Interstate 20	Stanton	79782	+14322370002	https://www.choicehotels.com/texas/stanton/comfort-inn-hotels/txf12?pmf=yext&mc=llyxyxpx	Choice Hotels	0.97
-d5e9bcdc5bf9	Comfort Inn & Suites	hotel		32.26298	-101.48843	1109 N Aylesford St	Big Spring	79720	+14322635400	https://www.choicehotels.com/texas/big-spring/comfort-inn-hotels/txj66?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-309c4534d6f8	Corporate Hospitality Housing - Big Spring	hotel		32.26016	-101.45132	300 Tulane Ave	Big Spring	79720	+14698715023	https://www.chsoilfield.com/location/big-spring-tx-lodging/		0.92
-8237c01c7407	Custom Touch Village	hotel		32.06354	-101.94730	8703 E Hwy 80	Midland	79706	+14322271181	https://customtouchvillage.com/midland-tx/		0.91
-78e4e869b746	Days Inn and Suites	hotel		32.22731	-101.46994	2701 S Gregg St	Big Spring	79720	+14322675237	https://www.wyndhamhotels.com/days-inn/big-spring-texas/days-inn-and-suites-big-spring/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A11193	Days Inn	1.00
-447fcd5c0825	Delux Inn	hotel	motel	32.25784	-101.48212	400 N Gregg St	Big Spring	79720	+14329990025			0.99
-ef725bcde855	Dominion Oilfield Rv & Cabins	hotel		32.30036	-101.46572	3508 Gail Hwy	Big Spring	79720	+14322705861			0.98
-2e4ee0f8faa1	Eagle's Den Suites Big Spring a Travelodge by Wyndham	hotel	resort	32.25526	-101.46711	901 E Interstate 20	Big Spring	79720	+14322715316	https://www.wyndhamhotels.com/travelodge/big-spring-texas/eagles-den-suites-big-spring-a-travelodge/overview		0.85
-fb5721d24b83	Eagle's Den Suites Big Spring a Travelodge by Wyndham	hotel	resort	32.26941	-101.47071	901 E Interstate 20 20	Big Spring	79720	+14322715316	https://www.wyndhamhotels.com/travelodge/big-spring-texas/eagles-den-suites-big-spring-a-travelodge/overview?CID=LC:g22xy9tahqskhx3:57986&iata=00093796		0.97
-db3f0a8f6463	Economy Inn By OYO, Lamesa TX	hotel		32.74156	-101.95219	N Dallas Ave, Lamesa TX	Lamesa Tx			https://www.oyorooms.com/us/301875/	OYO	0.80
-520847096cdb	Hampton Inn & Suites	hotel		32.26228	-101.49222	805 W Interstate 20	Big Spring	79720	+14322649800	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
-8a1f8fa23362	Home2 Suites by Hilton Big Spring	hotel		32.26176	-101.49152	809 West Interstate 20	Big Spring	79720	432-271-5535	https://www.hilton.com/en/hotels/hcabsht-home2-suites-big-spring/	Home2 Suites by Hilton	0.98
-8a4f70b3f23c	Hotel Settles	hotel		32.25273	-101.47543	200 E 3rd St	Big Spring	79720	+14322677500	http://www.hotelsettles.com/		1.00
-580ccc2aac70	Knights Inn Big Spring	hotel	motel	32.24761	-101.48743	1000 W 4th St	Big Spring	79720	+14329356757	https://www.knightsinn.com/us/tx/big-spring/knights-inn-big-spring	Knights Inn Port Charlotte FL	0.99
-cce8ad0886a7	La Quinta Inn & Suites	hotel		32.26359	-101.49637	1102 I-20	Big Spring	79720	+14322714152	http://www.laquintabigspring.com/?cid=local_6401	La Quinta by Wyndham	0.99
-ee4b30158aa5	La Quinta Inn & Suites Big Spring	hotel	resort	32.30132	-101.55544	1102 Ih 20 W	Big Spring	79720	+14322640222	http://www.laquintabigspring.com/?cid=local_6401		0.85
-dc705458e830	Lamesa Motel	hotel	motel	32.73446	-101.96346	1210 Seminole Rd	Lamesa	79331	+18068725112			0.92
-46f44b037a79	Mainstay Suites	hotel		32.26535	-101.47889	306 NE 12th St	Big Spring	79720	+14322715630	http://www.choicehotels.com/texas/big-spring/hotels	Choice Hotels	1.00
-59665d7170df	Motel 6	hotel		32.26534	-101.48853	600 W Interstate 20	Big Spring	79720	+14322671695	https://verdevalleyinn.com		0.92
-f846379338a0	Motel 6 Lamesa, TX	hotel		32.72570	-101.94827	901 S Dallas Ave, Lamesa TX	Lamesa Tx			https://www.oyorooms.com/us/353508/	OYO	0.80
-37fdf1a69135	Pbry Hotels Inc	hotel		32.26532	-101.48907	700 W Interstate 20	Big Spring	79720	+14322671601			0.65
-e3846e6b9041	Plaza Inn	hotel	motel	32.26522	-101.48917	700 W Interstate 20	Big Spring	79720	+14322671601	http://www.plazainnbigspring.us		0.99
-33caa8077215	Quality Inn & Suites	hotel	resort	32.26044	-101.45164	300 Tulane Ave	Big Spring	79720	+14322647086	https://www.choicehotels.com/texas/big-spring/quality-inn-hotels/txb24?mc=llbillpx&pmf=local		0.92
-e8162690185f	Quality Inn & Suites Big Spring	hotel	resort	32.26140	-101.48804	917 Lamesa Hwy	Big Spring	79720	+14323489212	https://www.choicehotels.com/texas/big-spring/quality-inn-hotels/txr19		1.00
-9808fb548297	Settles Hotel Development Co.	hotel		32.24695	-101.47684	710 S Gregg St	Big Spring	79720	+14322640317	http://www.hotelsettles.com/		0.82
-f3790e7e51de	Shiloh Inn	hotel	motel	32.74923	-101.95134	1707 Lubbock Hwy	Lamesa	79331	+18068726721	https://reservation.magnusonhotels.com/bbe/page1.aspx?pcode=M19499		0.99
-128d35d3eaea	Sleep Inn	hotel		32.26536	-101.47887	306 NE 12th St Building A	Big Spring	79720	+14323489213	https://www.choicehotels.com/texas/big-spring/sleep-inn-hotels/txg61?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-7db4f1004d49	Southern Inn and Suites	hotel		32.75932	-101.94577	1617 US-87	Lamesa	79331	+18062005111			0.96
-ee74a39736b9	Spring City Inn	hotel		32.26288	-101.48849	1109 N Aylesford St	Big Spring	79720	+18774113436	http://www.ichotelsgroup.com/h/d/ex/1/en/hd/HBSTX;jsessionid=MNR02LNEIRME1JICRYZSJBVFAKHDIIY4?rateCode=&rateDesc=&country=		0.74
-c015c6c8ea85	Ssts, Llc	hotel		32.22724	-101.46991	2701 S Gregg St	Big Spring	79720				0.95
-4e6d3b58cc64	Stanton Inn & Suites	hotel		32.13635	-101.80747	3394 I-20	Stanton	79782	+14327562077	http://www.staycobblestone.com		0.94
-97bd6ae32900	Super 8 By Wyndham Big Spring Tx	hotel		32.25983	-101.45012	2900 E Interstate 20	Big Spring	79720	+18005369326	https://www.wyndhamhotels.com		0.55
-ab1c13fbddfd	Super 8 by Wyndham Stanton	hotel	resort	32.13929	-101.80029	3432 Interstate 20	Stanton	79782	+14326072090	https://www.wyndhamhotels.com/super-8/stanton-texas/super-8-stanton/overview		1.00
-b0b2fea8dcb4	TownePlace Suites	hotel		32.26174	-101.49072	1011 North San Antonio Street	Big Spring	79720	+14326065166	http://towneplacesuites.marriott.com/	TownePlace Suites by Marriott	1.00
-bf3e0b2529b0	Us Retail Ventures Llc	hotel		32.26063	-101.48790	915 Lamesa Hwy	Big Spring	79720				0.95
-39c78cf2ae7a	Zena Milan Hotels Llc	hotel		32.26295	-101.48859	1109 N Aylesford St	Big Spring	79720				0.95
-a90e5a2f0a90	Apex Energy Services	office		32.07105	-101.95588	8401 E County Road 62	Midland	79706	+14322791285	https://apexenergydrink.com		0.75
-9a5e5313be84	Big Spring Correctional Center	office		32.26041	-101.50209	1801 W Interstate 20	Big Spring	79720	+14322638532	www.bop.gov		0.92
-457ac5594b8b	Ceram-Kote Coatings Inc.	office	industrial company	32.28771	-101.49789	3118 N. Hwy 87	Big Spring	79720	+14322638497	http://www.ceram-kote.com/		0.92
-f596834c2ce6	Citation Oil & Gas Corporation	office	energy company	32.29375	-101.30596	120 S 1st St	Coahoma	79511	+14323944101	http://www.cogc.com		0.74
-4f324dc5b036	D-Xtract Minerals and Consulting Services	office		32.23063	-101.43900	2404 Merrily Dr	Big Spring	79720	+14322671125	http://www.d-xtract.com		0.92
-3ae404181b5c	Energy Intermediates	office	energy company	32.03536	-101.99592	5500 I-20 Frontage Rd	Midland	79706	+14325706799	http://enerchem.com		0.92
-2428ce5b6e17	Fiberspar Linepipe LLC	office	plastics company	32.03617	-101.99824	5405 E Hwy 80	Midland	79706	+14326867375	http://fgspipe.com		0.92
-f008d9dec3ab	K&b Oilfield Services	office		32.06151	-101.95203	3202 N County Road 1106	Midland	79706	+19036463822			0.65
-3c1c917bad7b	Mk Constructors	office		32.06311	-101.95270	3307 N County Road 1106	Midland	79706	+14097690089	https://mkconstructors.com		0.65
-9fbee79a3949	Prescription Services, Inc.	office	pharmaceutical company	32.24528	-101.47317	1002 S Main St	Big Spring	79720	+14322672711	https://www.prescription-services-inc.business.site		0.92
-6a169f62b20f	Red River Oilfield Services	office		32.07023	-101.95922	8211 E County Road 62	Midland	79706	+18173083306	https://www.redriveroilfield.com		0.75
-bb8a1233404a	Stine Equipment, LLC	office	energy company	32.02903	-101.91437	1522 S County Road 1090	Midland	79706	+15125454527	http://www.stineequipment.com/		0.92
-e67111752b57	Suddenlink Communications	office	telecommunications company	32.23990	-101.44824	2006 Birdwell Ln	Big Spring	79720	+14322673821	http://www.suddenlink.com/		0.92
-09ec9bbec9a3	Watermill Express	office	bottled water company	32.24441	-101.47522	1002 S Gregg St	Big Spring	79720	+18004879643	https://watermillexpress.com/	Watermill Express	0.99
-0fb9aa3a0499	WesTex	office	telecommunications company	32.12420	-101.80445	1500 W Business 20	Stanton	79782	+14327563393	http://www.westex.coop/		0.56
-4743c9ffae1d	Acevedo's	restaurant	texmex restaurant	32.73050	-101.94985	312 S Dallas Ave	Lamesa	79331	+18068725715	https://acevedo-restaurant.hub.biz		0.96
-d87eb644291a	Adalyn's Burrito Stop	restaurant	breakfast and brunch restaurant	32.34723	-101.28006		Big Spring		+4325555555			0.68
-bb46bd02502f	Al's & Son Bar-B-Q	restaurant	barbecue restaurant	32.23631	-101.47266	1810 S Gregg St	Big Spring	79720	+14322678921	http://alsandsonbbq.com/		0.95
-fbaa828a3542	Alberto's Crystal Cafe	restaurant	texmex restaurant	32.23112	-101.47050	2401 S Gregg St	Big Spring	79720	+14322672310	http://albertoscrystalcafe.com/		1.00
-23cf31e810d5	Alyesford International Inc	restaurant		32.23520	-101.47086	2010 Scurry St	Big Spring	79720				0.95
-99a59e6e4ebf	Arroyo Grill	restaurant	bar and grill restaurant	32.24126	-101.44888	1904 Birdwell Ln	Big Spring	79720	+14325174157			0.92
-5e8c141d5a64	At Box	restaurant	italian restaurant	32.25721	-101.46842	903 E 2nd St	Big Spring	79720	+14356448697			0.71
-90cbeeacf5a1	B3’s Peckin’ Good Chicken & BBQ	restaurant		32.96653	-101.83161	713 6th St	Odonnell	79351	+18064283240			0.81
-10b36efeb907	Backyard BBQ food truck	restaurant	barbecue restaurant	32.24933	-101.47953	209 W 3rd St	Big Spring	79720	+14322316131			0.79
-e7f97ceeb86a	Basin Poker Club LLC	restaurant	bar and grill restaurant	32.02337	-101.95889	7400 E CR-90	Midland	79706	+14326180166	http://www.basinpokerclub.com/		0.59
-c8c33137b32d	Big A S 2	restaurant		32.23690	-101.47250	1811 S Gregg St	Big Spring	79720				0.95
-624b418a92a9	Big John's Feed Lot	restaurant	barbecue restaurant	32.24924	-101.48486	802 W 3rd St	Big Spring	79720	+14322647555	https://bjfl.site/		0.98
-8e70a43ccd25	Bohot Todd, Inc	restaurant		32.23046	-101.46478	404 E Marcy Dr	Big Spring	79720				0.95
-3e40dc790d58	Brenda's Hilltop Cafe	restaurant		32.25747	-101.46232	1307 E 4th St	Big Spring	79720		brendashilltopcafe.com		0.95
-a109eb157ae4	Brick Oven Pizzeria	restaurant	pizza restaurant	32.35567	-101.00629	8773 E Interstate 20	Westbrook	79565	+13255150030	https://www.brickovenpizzeriatx.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.96
-0af4cfa4dcd0	Burrito Express	restaurant	mexican restaurant	32.23712	-101.50746	3101 W Hwy 80	Big Spring	79720		http://www.burritoexpressinc.com	Burrito Express 1 LLC	0.92
-767e671c37a0	Burrito Express II	restaurant	mexican restaurant	32.23292	-101.47174	2200 S Gregg St	Big Spring	79720	+14322646341	http://burritoeater.com/		0.92
-e26a75f2565f	Carlos' Restaurant | Mexican	restaurant	mexican restaurant	32.25630	-101.48277	308 NW 3rd St	Big Spring	79720	+14325174646			0.94
-85078ca28b96	Casa Blanca Restaurant	restaurant	mexican restaurant	32.26150	-101.48863	1005 Lamesa Hwy	Big Spring	79720	+14322631162	http://www.casablancamexican.com/		0.93
-0e189f753b9e	Chelos Mexican Restaurant	restaurant		32.72654	-101.96040	503 S Avenue K	Lamesa	79331				0.69
-e10dcb5b1b6d	Coahoma Cafe	restaurant	diner	32.29358	-101.30400	211 NE Broadway	Coahoma	79511	+14323944098			0.95
-784ece5f512f	Country Pride	restaurant		32.26485	-101.49006	704 West Interstate 20	Big Spring	79720	+14322644444	https://www.ta-petro.com/amenities/restaurants/country-pride		0.96
-f4926f6280d0	Cowboy's Steakhouse and Restaurant	restaurant	steakhouse	32.23045	-101.46471	404 E Marcy Dr	Big Spring	79720	+14322630181	https://www.wtxtogo.com/order/restaurant/cowboys-steakhouse-menu/311		0.99
-fe9c3baa1d17	D&M INC	restaurant	bar and grill restaurant	32.25354	-101.47624	214 Runnels St	Big Spring	79720	+4328169620	http://Honesthvacllc.com/		0.86
-a567ad4f3357	Dell's Cafe	restaurant	breakfast and brunch restaurant	32.25835	-101.45464	1608 E 4th St	Big Spring	79720	+14322679323			0.92
-077ad6ab97fa	Devour	restaurant	italian restaurant	32.25222	-101.47543	322 Runnels St	Big Spring	79720	+14325174687	http://www.devourbigspring.com/		0.95
-307ddd0a332b	Dia Del Taco	restaurant	mexican restaurant	32.25779	-101.47537	110 N Nolan St	Big Spring	79720	+4322701700			0.83
-722ee98b18c5	Dickey's Barbecue Pit	restaurant	barbecue restaurant	32.22768	-101.47062	2602 S Gregg St Ste E-2	Big Spring	79720	+14327144733	https://www.dickeys.com/locations/Texas/Big-Spring/big-spring	Dickey's Barbecue Pit National	0.99
-19f8684e9df1	DL Showpigs	restaurant		32.67390	-101.77201	2101 County Road 24	Lamesa	79331	+18064382916	http://www.dlshowpigs.com		0.77
-3d895eb10a74	Dragon China Buffet	restaurant	buffet restaurant	32.24163	-101.47447	1300 S Gregg St	Big Spring	79720	+14322688888	https://www.dragonchinabuffettx.com		0.97
-578142e2dd34	Eagle Store	restaurant		32.96893	-101.83001	311 Small St	O'Donnell	79351	+18064283410			0.92
-ebfe227f2535	EJ's Cotton Pickin' Dive	restaurant	comfort food restaurant	32.12820	-101.80250	410 Lamesa Hwy	Stanton	79782	+14327562444	http://Orders.cake.net/10794173		0.96
-52d4251b58d5	El Buen Pollo | Mexican	restaurant	mexican restaurant	32.23660	-101.50979	3300 W Hwy 80	Big Spring	79720	+14322631400	http://elbuenpollo.placeweb.site		0.92
-5859ffdaf1f2	El Jalisco Bar and Grill	restaurant	mexican restaurant	32.25473	-101.46906	310 Owens St	Big Spring	79720	+14329356900			0.97
-3427dc863aa1	El Nopal Cafe	restaurant	mexican restaurant	32.24642	-101.47659	800 S Gregg St	Big Spring	79720	+14322671499	https://local.yahoo.com/info-19495680-el-nopal-cafe-big-spring		0.92
-61ffc58549f4	El Rincon Mexican Food	restaurant	texmex restaurant	32.24094	-101.47231	1407 Scurry St	Big Spring	79720	+14322708010			0.94
-109a270ff3f0	El Salzon Authentic Mexican Restaurant	restaurant	mexican restaurant	32.26125	-101.48733	910 Lamesa Hwy	Big Spring	79720	+14322640042	http://elsazonauthenticmexicanfoodtx.com		0.77
-941d5acd0911	El Sazón de la Abuela | Mexican	restaurant	mexican restaurant	32.26125	-101.48735	910 Lamesa Hwy	Big Spring	79720	+14322706033	http://elsazonauthenticmexicanfoodtx.com		1.00
-aeca24f845e8	Eli's	restaurant	mexican restaurant	32.24807	-101.48423	400 Abrams St	Big Spring	79720	+14322341653			0.92
-f37c7a0c9bcc	Estella's Country Corner Cafe	restaurant	mexican restaurant	32.28493	-101.49710	3004 N US Highway 87	Big Spring	79720	+14322309387	http://countrycornercafe.net/		0.92
-b48af215b51f	Evita's Fine Mexican Cuisine	restaurant	texmex restaurant	32.24470	-101.44585	1801 E FM-700	Big Spring	79720	+14322677121	https://evitascuisine.com		0.94
-d97d2a10a0a3	Farm Bureau Insurance: Forest Shane	restaurant		32.24769	-101.45959	1205 E 11th Pl	Big Spring	79720	+14322640912	https://www.txfb-ins.com		0.95
-84022e24eb18	Fatbacks Smokehouse	restaurant	barbecue restaurant	32.73623	-101.95222		Lamesa			https://www.lamesaampmdelivery.com/fatbacks		0.71
-6d6d9a1d4af7	G & G Roughneck BBQ	restaurant	barbecue restaurant	32.72891	-101.95461	312 S Avenue F	Lamesa	79331				0.62
-e63e999f99d7	Gilli’s Mobile Diner	restaurant	american restaurant	32.01096	-101.97308	6221 FM-307	Midland	79706	+14329675549			0.69
-9aeae1ab0546	Golden Buffet Inc	restaurant	chinese restaurant	32.74183	-101.95224	920 N Dallas Ave	Lamesa	79331	+18068728889			0.92
-c217488d68ba	Gomezminjarez, Inc	restaurant		32.25639	-101.48218	308 NW 3rd St	Big Spring	79720				0.95
-1108d8e02f2e	Gorditos Smokehouse BBQ	restaurant		32.73444	-101.96075	1007 N 4th St	Lamesa	79331	+18062003929			0.78
-772cae46b061	Gordo's Taqueria & Grocery	restaurant	mexican restaurant	32.03740	-101.99677	5501 E Hwy 80	Midland	79705	+14328137477			0.99
-fbdcf4b069a2	Greenwood Bjj	restaurant	mexican restaurant	32.01879	-101.93575	1805 S Co Road 1105, -	Midland	79706	+14327708750	https://greenwoodbjj.my.canva.site/		0.85
-b2bba1199f96	Hibachi Express | Japanese	restaurant	japanese restaurant	32.22848	-101.46996	2503 S Gregg St	Big Spring	79720	+14322638888	http://www.hibachiexpresstx.com		1.00
-8b024dec4c37	Hog Heaven BBQ	restaurant	barbecue restaurant	32.23452	-101.51670	4009 W Highway 80	Big Spring	79720	+14322640905	http://hogheavenbarbque.ewbz.net/		0.92
-fbef7a086ac4	Hunan Chinese Restaurant	restaurant	chinese restaurant	32.24281	-101.47478	1200 S Gregg St	Big Spring	79720	+14322674509	https://hunan-chinese-restaurant-chinese-restaurant.business.site		0.96
-3aa9c37348b9	Hungry Bear Pizza	restaurant	american restaurant	32.73439	-101.96653	1504 Seminole Rd	Lamesa	79331	+18068722773	https://hungry-bear-pizza.hub.biz		0.92
-cfc36a32e8e8	IHOP	restaurant	breakfast and brunch restaurant	32.26489	-101.49008	704 W Interstate 20 20	Big Spring	79720	+14322424600	https://restaurants.ihop.com/en-us/tx/big-spring/breakfast-704-west-interstate-20-5705		0.99
-ef58e7fd7c56	J Jayz Bar and Grill	restaurant	bar and grill restaurant	32.25382	-101.47751	113 S Main St	Big Spring	79720	+14325174332	http://jjayz.com/		0.93
-50b5c0a27102	Joe's Italian Bistro	restaurant	italian restaurant	32.24075	-101.45279	1513 FM700	Big Spring	79720	+14322640118	http://www.joesitalianbistro.com		0.94
-e3f433ac2177	K-BOB'S Steakhouse | Lamesa	restaurant	steakhouse	32.75434	-101.94970	2200 Lubbock Hwy	Lamesa	79331	+18064050011	https://www.k-bobs.com	K-BOB'S Restaurants, Clovis, NM	0.92
-e71816686387	La Cocina De Catita	restaurant	mexican restaurant	32.24839	-101.48307	703 W 4th St	Big Spring	79720	+14322702922			0.92
-e0f09cfde29b	La Mexicana	restaurant	mexican restaurant	32.30347	-101.98917	HWY 176, West of FM 1212	Tarzan		+18067526234			0.87
-2e90802d3237	La Posada Restaurant	restaurant		32.25781	-101.48186	206 Sgt Paredez St	Big Spring	79720	+14322679112			0.83
-1bd0d997fabd	La Trailita Taqueria	restaurant	texmex restaurant	32.26132	-101.48743	910 Lamesa Hwy	Big Spring	79720	+13254302848			0.80
-66fd44cbcdce	Laredo Taco Company	restaurant		32.26230	-101.49002	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.laredotacocompany.com/		0.92
-871b7866d003	Laredo Taco Company	restaurant		32.29354	-101.30515	101 E Broadway	Coahoma	79511	+14323944970	https://www.laredotacocompany.com/		1.00
-8dfed16ab283	Laredo Taco Company	restaurant		32.73658	-101.94953	411 N Lynn Avenue	Lamesa	79331	+18068720110	https://www.laredotacocompany.com/		0.92
-d7b470c370c8	Laredo Taco Company	restaurant		32.75101	-101.95137	1912 N Dallas Ave	Lamesa	79331	+18068728521	https://www.laredotacocompany.com/		0.92
-e3619227cc69	Laredo Taco Company	restaurant		32.13733	-101.80499	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.laredotacocompany.com/		1.00
-9391996c4733	Las Cazuelas Grill	restaurant	mexican restaurant	32.22688	-101.47069	2606 S Gregg St	Big Spring	79720	+14325174312	http://www.lascazuelasgrill.com/		0.92
-8163164767f0	Las Chulas	restaurant	mexican restaurant	32.25738	-101.46227	1307 E 4th St	Big Spring	79720				0.92
-089d288b6aee	Ledgens Pizza	restaurant	pizza restaurant	32.01879	-101.93575	1805 S Co Rd 1105	Midland	79706	+14328971400	https://ledgenspizza.com/home-copy/		0.92
-2d2eb5b394f7	Locals	restaurant	delicatessen	32.21898	-101.48292	1600 Wasson Rd	Big Spring	79720	+14322138876			0.92
-565ab6f9332f	Los Amigos Grill & Bar	restaurant	mexican restaurant	32.25542	-101.46905	310 Owens St	Big Spring	79720	+14322641711			0.95
-268455417762	Lost Texan Cafe	restaurant	barbecue restaurant	32.73871	-101.95235	608 N Dallas Ave	Lamesa	79331	+18068729234	https://www.restaurant.com/lost-texan-cafe-lamesa-pid=198232		0.98
-ccd2f31ec4c2	Marthas Cafe	restaurant		32.25747	-101.46232	1307 E 4th St	Big Spring	79720				0.95
-57ae41aafeda	Mary’s cafe #2	restaurant		32.29367	-101.30400	211 NE Broadway	Coahoma	79511	+14323944098			0.99
-ab6a90aa6356	McAlister's Deli	restaurant	delicatessen	32.26223	-101.48840	1010 Lamesa Hwy	Big Spring	79720	+14325586468	https://locations.mcalistersdeli.com/tx/big-spring/1010-lamesa-hwy?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.97
-0f49920c61f9	Mountain View Mercantile	restaurant	american restaurant	32.26924	-101.38602	5907 N Service Rd	Big Spring	79720	+14322641913	http://mountainviewmercantile.com		0.77
-394b52539bb7	Mr Gatti's Pizza	restaurant	buffet restaurant	32.25249	-101.47320	400 Nolan St	Big Spring	79720	+14323489949	https://mrgattispizza.com/homepage/locations/mr-gattis-pizza-big-spring/?y_source=1_MjAyODY1OTU3MS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Mr Gatti's Pizza	0.96
-727469c006ab	Neo Continental Corp	restaurant		32.73634	-101.95384	412 N 4th St	Lamesa	79331				0.95
-663ae1e3eb37	Neutral Ways Eatery	restaurant	american restaurant	32.25844	-101.45449		Big Spring		+4322706027			0.59
-3aadead8870c	Nina's Table	restaurant		32.26941	-101.38593	5909 N Service Rd	Big Spring	79720	+14326386621			0.63
-d2c406fdd3e1	O'hana Japanese Steak Restaurant	restaurant	japanese restaurant	32.73690	-101.95132	501 N Dallas Ave	Lamesa	79331	+18068720400	http://www.ohanasteakhouse.com/		0.97
-69adfac1ddc1	One & Dunn	restaurant	breakfast and brunch restaurant	32.73176	-101.94894	202 S 2nd St	Lamesa	79331	+18068701313			0.92
-f1b714eb255b	One Guy from Italy - Lamesa	restaurant	italian restaurant	32.73204	-101.95291	118 Austin Ave	Lamesa	79331	+18062005141	https://www.toasttab.com/local/order/one-guy-from-italy-lamesa-118-austin-ave		0.95
-a364de00fec5	Papa Chon's Mexican Restaurant	restaurant	mexican restaurant	32.25481	-101.46902	310 Owen St	Big Spring	79720	+14322641711	http://www.qualityinnbigspring.com		0.92
-ac0e5b343169	Papa Georgio's Pizza	restaurant	pizza restaurant	32.22771	-101.47089	2602 S Gregg St	Big Spring	79720	+14322632222	http://www.papageorgiospizza.com		0.92
-efbb84b47dd7	Papa Tacho's Greenwood	restaurant	mexican restaurant	32.01868	-101.93536	1805 S Co Rd 1105 Unit J	Midland	79706	+14322471124			0.97
-431a851590f5	Pedroza's Restaurant	restaurant	texmex restaurant	32.74678	-101.95176	1501 N Dallas Ave	Lamesa	79331	+18068722884	http://www.pedrozasrestaurant.com/		0.92
-dead678b52b7	Pizza Inn	restaurant	buffet restaurant	32.23275	-101.46108	700 FM700 Ste. 150	Big Spring	79720	+14322631381	https://www.pizzainn.com/locations/big-spring-tx/	Pizza Inn	0.96
-0bbc3f478b53	Pizza Marie	restaurant	pizza restaurant	32.13048	-101.78631	405 E Front St	Stanton	79782	+14327564536	https://orders.cake.net/11384544		0.98
-3c77ee550d30	Pizza Pro	restaurant	pizza restaurant	32.12898	-101.78845	304 N Highway 137	Stanton	79782	+14327563377	http://www.pizzapro.com		0.77
-0e7d32d33efc	Rc Testing Llc	restaurant		32.02763	-101.91525	9703 E County Road 97	Midland	79706	+14322539274			0.65
-bf0893f0efb9	Rocket Cafe	restaurant		32.26951	-101.38670	5909 N Service Rd	Big Spring	79720	+14326064932			0.68
-de7f44ced207	Rocky's Burgers	restaurant	burger restaurant	32.72794	-101.94904	606 S Dallas Ave	Lamesa	79331	+18068727968	http://lubbockmenu.com/rockys-burgers-super-dog-menu-lamesa		0.96
-8251a556f6ad	Rustic Cafe - Midland	restaurant		32.03516	-101.98516	5800 I-20 E	Midland	79706	+14326838424	https://kentkwik.com/rustic-cafe/		0.97
-c32f2a744aac	Sandy's Barnhouse Grill	restaurant	bar and grill restaurant	32.39741	-101.66502	7310 FM 846	Knott	79748	+14323534270	http://sandysbarnhousegrill.com		0.96
-d891d105dd8c	Sbarro	restaurant	pizza restaurant	32.03357	-101.98818	5907 E Interstate 20	Midland	79706	+14324008754	https://sbarro.com/locations/tx/midland/dk-gas-station/?utm_source=facebook&utm_medium=local&utm_campaign=fb	Sbarro	0.92
-27a66ed603b0	SBK BBQ at Rooster’s Backyard	restaurant	barbecue restaurant	32.01066	-101.97210	6221 Farm to Market 307	Midland	79706	+15757070338	http://sbkbbq.square.site/		0.97
-b135b91111b3	Sissy's Dive	restaurant	diner	32.74719	-101.95212	1510 Lubbock Hwy	Lamesa	79331	+18068707867			0.97
-36aa4d1d653c	Spanish Inn Restaurant | Mexican	restaurant	mexican restaurant	32.25690	-101.48112	200 NW 3rd St	Big Spring	79720	+14322675871	https://www.dandb.com/businessdirectory/spanishinn-bigspring-tx...		0.94
-ae0204ac8839	Starlee’s Kitchen	restaurant		32.24970	-101.47655	505 Scurry St, Big Spring, TX 79720-2735, United States	Big Spring	79720	+14325174483			0.93
-a36e09c0c2ba	Sub-Way Greenwood	restaurant		32.01941	-101.93671	1804 S CR-1105	Midland	79706				0.83
-8dedf8e5e279	Sunny Side Up Cafe	restaurant	breakfast and brunch restaurant	32.24092	-101.44839	1907 Birdwell Ln	Big Spring	79720	+14326065031			0.92
-496ac06b17a6	Taco Villa	restaurant	texmex restaurant	32.23999	-101.47324	1501 S Gregg St	Big Spring	79720	+14322633511	https://tacovilla.net/	Taco Villa Fanatics	0.98
-bfa7ed78d49c	Taco Villa	restaurant	texmex restaurant	32.73716	-101.95048	206 N 4th St	Lamesa	79331	+18068723321	http://www.tacovilla.com	Taco Villa Fanatics	0.95
-396b3979b449	Tamale Hombres	restaurant	mexican restaurant	32.74581	-101.95219	1410 Lubbock Hwy	Lamesa	79331	+18062003872	https://www.tamalehombres.com/		0.86
-a7043a5d190b	Taqueria Jalisco	restaurant	mexican restaurant	32.25681	-101.46670	1001 E 3rd St	Big Spring	79720	+14325174880		Taqueria Taxco	0.97
-b16ed33fc181	Taqueria Jalisco	restaurant	mexican restaurant	32.72535	-101.94798	903 S Dallas Ave	Lamesa	79331	+18068722946	http://taqueriajalisco.net		0.94
-c955c9068518	Taquería El Valle | Mexican	restaurant	mexican restaurant	32.73423	-101.96645	1504 Seminole Rd	Lamesa	79331	+18066013684			0.92
-25788073c04b	Tarzan Grill - Tarzan, TX	restaurant	burger restaurant	32.30492	-101.97483	2752 TX-176	Tarzan	79783	+14324592245	http://www.tjtravelcenters.com/		0.97
-a753d9bc6525	Texas Cajun Cafe	restaurant	cajun and creole restaurant	32.26396	-101.49219	802 W Interstate 20	Big Spring	79720	+14322647686	https://local.yahoo.com/info-43321558-texas-cajun-cafe-big-spring		0.97
-3797b40d5778	Texas Cajun Seafood and Steak	restaurant	cajun and creole restaurant	32.73635	-101.95121	305 N 4th St	Lamesa	79331	+18068700017	http://texas-cajun-la-mesa.edan.io		0.96
-83d40651289d	The Mayo	restaurant		32.25294	-101.47750	206 S Main St	Big Spring	79720	+14322138212	http://thefarmstandfarmersmarket.org/		0.89
-8974204e50b9	The Mayo Sauce	restaurant		32.25296	-101.47750	2414 Scurry St	Big Spring	79720	+14329351144	http://themayosauce.com		0.91
-789871bceb7e	Tita's Kitchen	restaurant	mexican restaurant	32.73577	-101.95461	507 N 4th St	Lamesa	79331	+18068727527			0.92
-d1f053dd730e	Tita's Mexican Kitchen	restaurant	mexican restaurant	32.25618	-101.46745	904 E 3rd St	Big Spring	79720	+14325174455	https://titas-mexican-kitchen.square.site/		0.92
-3fa32614b3b0	Twisted Sugar - Greenwood	restaurant		32.00855	-101.97849	6009 FM-307	Midland	79706	+14322272756	http://twistedsugar.com/	Twisted Sugar NWI	0.70
-94848b73bbe4	Tío Lencho's	restaurant	mexican restaurant	32.23790	-101.47155	1705 Scurry St	Big Spring	79720	+14327144447	https://piyw.top/tio-lencho-s		0.96
-9fc821e5e1ef	W Squared BBQ	restaurant		32.26782	-101.36863	6901 E Midway Rd	Big Spring	79720	+14324661833			0.82
-9648a044fe15	Wagon Wheel Drive In	restaurant	theme restaurant	32.23464	-101.47083	2010 Scurry St	Big Spring	79720	+14325174097	http://wagonwheeldriveinno2bigspring.snackbars.website		0.97
-5941248dd822	Woodshack Burritos	restaurant	mexican restaurant	32.25889	-101.48381	608 N Lamesa Hwy	Big Spring	79720	+14326065130			0.69
-bde86b711fb8	Yasumi Big Spring	restaurant	japanese restaurant	32.25724	-101.48203	300 N Gregg St	Big Spring	79720	+14325174112	http://www.TheYasumiHouse.com/		0.70
-0f9456d20120	Yo Mama's	restaurant		32.25323	-101.47736	206 S Main St	Big Spring	79720	+14325174327			0.92
-1893b6aecf0c	BeeHive Homes of Lamesa TX	senior	retirement home	32.75998	-101.95122	101 N 27th St	Lamesa	79331	+18064525883	https://beehivehomes.com/locations/lamesa/	Beehive Homes of Page- Elk Road	0.97
-e9f7cc004905	Big Spring Center for Skilled Care	senior	retirement home	32.21100	-101.49193	3701 Wasson Rd	Big Spring	79720	+14326065012	http://www.bigspringcenterforskilledcare.com/index.php		0.92
-75ed4c9e8332	Comanche Flats	senior	retirement home	32.24849	-101.43399	1315 Baylor Blvd	Big Spring	79720	+14322631408			0.92
-b41a5298c94b	Focused Care at Lamesa	senior	retirement home	32.74407	-101.96633	1201 N 15th St	Lamesa	79331	+18068722141	http://fpacp.com/Lamesa.html	Focused Care at Center	0.92
-b0f14b30bde1	HC Nursing Big Spring	senior	retirement home	32.25006	-101.44988	1001 Birdwell Ln	Big Spring	79720	+14322645070	http://www.howardcollege.edu/come-to-hc/health-professions/nursing/rn-registered-nurse.html		0.84
-fcbca3c66cab	Heritage Heights at Big Spring	senior	retirement home	32.23528	-101.50674	120 Airbase Rd	Big Spring	79720	+18777574821	https://heritageheightsatbigspring.com/		0.98
-95c1745a5a48	Lamun - Lusk - Sanchez Texas State Veterans Home	senior	retirement home	32.26750	-101.49446	1809 N US Highway 87	Big Spring	79720	+14322688387	https://vlb.texas.gov/veterans-homes/locations/big-spring/index.html		1.00
-f25586adcaed	Northridge Retirement Center	senior	retirement home	32.76119	-101.95105	100 NE 27th St	Lamesa	79331	+18068729255	http://northridgeretirement.com/		0.92
-ba0bafd61b10	Northside Community Center	senior	retirement home	32.26074	-101.48013	110 NE 8th St	Big Spring	79720	+14322632673			0.72
-a875ed0273b4	Parkplace Retirement Living	senior	retirement home	32.23703	-101.47541	501 W 17th St	Big Spring	79720	+14322671353	http://parkplaceretirementliving.com/		0.92
-d78b6653e794	Parkview Nursing and Rehabilitation Center	senior	retirement home	32.21680	-101.48600	3200 Parkway Rd	Big Spring	79720	+14322634041	http://www.parkviewnursing.net/		1.00
-672f17b50565	Sage Healthcare Center	senior	retirement home	32.74391	-101.96623	1201 15th St	Lamesa	79331	+18068722141	https://sagenursingrehab.com/		0.99
-19445c04a12c	Trustwell Living at Marcy Place	senior	retirement home	32.21510	-101.49214	2301 Wasson Rd	Big Spring	79720	+14323026001	https://www.trustwellliving.com/communities/marcy-place/?utm_source=facebook&utm_medium=organic&utm_campaign=social	Trustwell Living at Westwood Place	0.92
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+ccdcb0374ffe	Alesaiah's Stop N Shop	bakery		32.73101	-101.95081	311 S 2nd St	Lamesa	79331	+18068724662	http://alesaiahsstopnshop.com		0.75	
+b8c365d1cf63	Baker Hughes	bakery		32.24675	-101.51311	6401 W Interstate 20	Big Spring	79720	+14322647429	www.bakerhughes.com		0.63	
+9a933910cac2	Fresh Kolache and Donuts	bakery	donut shop	32.23346	-101.47168	2110 S Gregg St	Big Spring	79720	+14322647078			0.96	
+4348b025f387	Good Morning Donuts	bakery	donut shop	32.73639	-101.95372	817 N 4th St	Lamesa	79331	+18068724607	https://start.cortera.com/.../research/k5r0lyn8q/good-morning-donuts		0.66	
+b7b31d3b29af	Jack ‘n’ Jill Donuts Greenwood	bakery	donut shop	32.01886	-101.93549	1804 S Co Rd 1105	Midland	79706	+14322475444		Jack 'N' Jill Donuts	0.96	
+53a718731e93	Jeel Donuts	bakery	donut shop	32.24170	-101.44904	1608 E FM 700	Big Spring	79720	+14329356018			0.75	
+e1a2e8300535	Lamesa Donuts	bakery	donut shop	32.75050	-101.95132	1904 Lubbock Hwy	Lamesa	79331	+18068720002	https://lamesa-donut-shop.hub.biz/		0.94	
+2a1b31d5f34e	Lucy's Flour Shop	bakery		32.73476	-101.95381	320 N Austin Ave	Lamesa	79331	+18062018598			0.97	
+f3c11b28efe4	Sweet Katees Bakery	bakery		32.25452	-101.47227	501 E 3rd St	Big Spring	79720	+14325174034	http://sweetkatees.com/		0.97	
+883d6f6bac4e	The Original Fried Pie Shop	bakery		32.73478	-101.96207	1100 Seminole Rd	Lamesa	79331	+18068723082	http://theoriginalfriedpieshop.com/		0.92	
+1317e36080c5	Valley Bakery	bakery		32.12841	-101.79276	400 W Front St	Stanton	79782	+14323121092			0.92	
+afc28c14f4c1	Agave Bar and Nightclub	bar		32.24693	-101.49103	308 Price St	Big Spring	79720	+14322716739			0.99	
+41635453850a	Apt. 9 Saloon	bar		32.27179	-101.45731	1800 N Birdwell Ln	Big Spring	79720	+14325174248			0.76	
+ab4f2978afa5	Crossroads Saloon	bar		32.22224	-101.46941	3101 S Us Highway 87	Big Spring	79720	+14325174533			0.92	
+71cff1ea5097	Desert Flower Art Bar & Lounge	bar		32.25357	-101.47722	123 S Main St	Big Spring	79720	+14322968440	http://desertflowerartbar.com/		0.93	
+f46668cd64bf	Interstate Winery	bar	winery	32.27330	-101.37231	6808 S Service Rd	Big Spring	79720	+19704626989			0.91	
+f666830ba921	Mixology	bar	cocktail bar	32.23418	-101.47094	2100 Scurry St	Big Spring	79720	+14326065040	http://beta.abc.go.com/shows/mixology		0.92	closed
+7e3c9cd35062	Out Yonder Saloon	bar		32.26788	-101.39165	5620 I-20	Big Spring	79720	+15174577	http://outyonder.net		0.92	
+3e09d0f2e451	outyondersaloon	bar		32.25732	-101.50945	5620 IH 20 East\n	Big Spring	79720	+14325174577			0.66	
+e8160eb6f76a	Pharmacy Bar & Parlor	bar	cocktail bar	32.25293	-101.47557	200 E 3rd St	Big Spring	79720	+14322677500	http://www.hotelsettles.com/		0.92	
+2bf60625bb2d	Rooster’s Backyard	bar		32.01073	-101.97315	6221 FM-307	Midland	79706	+14325593417	http://www.roostersbackyardmtx.com/		0.97	
+c319f286c084	The Pub Downtown	bar		32.25301	-101.47602	125 E 3rd St	Big Spring	79720	+14322700976			0.99	
+292b371d5bd9	The Train Car	bar	cocktail bar	32.25414	-101.47785	100 S Main St	Big Spring	79720	+14322706113	http://shop.thetraincar.com/		0.99	
+013a08ca6eef	TJ's Steakhouse	bar	pub	32.25858	-101.50858	2104 W Interstate 20 Frontage Rd	Big Spring	79720	+14322631651	http://www.tjssteakhouse.com/		0.95	
+1319393946a4	Wild West Wingz	bar	sports bar	32.25824	-101.45564	1506 E 4th St	Big Spring	79720	+14325174368	http://www.wildwestwingz.com/		0.99	
+d903b83f903b	87 Auto Sales, Inc.	cardealer	used auto dealer	32.25185	-101.47987	210 S Gregg St	Big Spring	79720	+14322678787	https://87autosales.com		0.65	
+06e370ebd01b	Alpha 1 Motorsportz	cardealer		32.03590	-101.99852	5405 E Hwy 80	Midland	79706	+14322188535	https://alpha1motorsportz.com/		0.92	
+0845df36d0a0	Bailey Toliver Ford	cardealer		32.13020	-101.78867	201 E Saint Anna St	Stanton	79782	+14327563321	https://www.baileytoliverford.net	Ford Motor Company	0.97	
+7f18d743ebbe	BF White Motor Co	cardealer		32.13024	-101.78858	201 E. Saint Anna St	Stanton	79782	+14327563321	http://whitemotor-hub.com		0.77	
+6a1fe08455a5	Buy a car from Jamie	cardealer		32.26260	-101.49094	821 I-20 W	Big Spring	79720	+14323127268	https://www.bigspringcars.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb		0.61	
+ec46b890400f	Charlie Clark Chevrolet Buick GMC	cardealer		32.12545	-101.80166	102 N Lamesa Hwy	Stanton	79782	+14322370950	https://www.charlieclarkchevygmc.com/	Chevrolet	0.99	
+ba4db59dca0f	Circle H Auto sales	cardealer		32.29186	-101.31330	500 I-20 Frontage Rd	Coahoma	79511	+14323944885	http://www.circlehautosales.com/		0.96	
+bf79bda5f732	Classic Auto Sales	cardealer	used auto dealer	32.24250	-101.44954	1607 E FM-700	Big Spring	79720	+14325174412	https://www.classicautosalestexas.com/		0.92	
+c67d76692b26	Cornerstone Co.	cardealer	used auto dealer	32.11419	-101.82866	3224 I 20 Service Rd	Stanton	79782	+14327563300	http://cornerstone.com		0.77	
+49fa5e913888	Harris Auto Sales	cardealer	used auto dealer	32.25312	-101.47989	111 S Gregg St	Big Spring	79720	+14325174227	http://harrisautosales.net/		0.92	
+fe2563f8a0c0	Kathleen At Ronnie Smith Motors	cardealer		32.24625	-101.43946	2900 E FM-700	Big Spring	79720	+13252718890	https://ronniesmithmotorsofbigspring.v12soft.com/		0.73	
+b011df0fb62a	Mitch Hall Chevrolet Buick GMC Service and Parts Department	cardealer		32.75760	-101.94558	2713 Lubbock Hwy	Lamesa	79331	+18667250807	https://www.mitchhallchgmc.com/	GMC	0.92	
+ffa1aa382f0e	Pollard Chevrolet Service	cardealer		32.25826	-101.45907	1501 E 4th St	Big Spring	79720	+14322677421	http://pollardchevy.com/	Chevrolet	0.97	
+0a3f018d85f1	Premier Chrysler Dodge Jeep Ram of Lamesa	cardealer		32.74787	-101.95081	1611 Lubbock Hwy	Lamesa	79331	+18066055092	https://www.trucktowntexas.com/	Chrysler	1.00	
+156f897075f5	Premier Ford of Lamesa	cardealer		32.72164	-101.94547	1207 S Lynn Ave	Lamesa	79331	+18068722188	https://www.premierfordoflamesatx.com/		1.00	
+1dd2e81de0a8	Rafter M Equipment	cardealer		32.72552	-101.94873	902 S Dallas Ave	Lamesa	79331	+18062005224	https://raftermequip.com/		0.80	
+c2d3e95ac046	Ragz To Richez Custom Sales	cardealer		32.26215	-101.47079	704 W 3rd St	Big Spring	79720	+14325174553			0.98	
+90d550591d26	Roy Motor Co Inc	cardealer		32.74618	-101.95173	1415 Lubbock Hwy	Lamesa	79331	+18068725444	https://roymotorco.com/		0.92	
+87f6108dc181	Sander's Auto Broker Services	cardealer		32.73103	-101.95080	311 S 2nd St	Lamesa	79331	+18062018660	http://Www.facebook.com/sandersautobrokerservices		0.66	
+a4bfe11a5fff	Shroyer Motor Company	cardealer		32.25373	-101.47231	424 E 3rd St	Big Spring	79720	+14322637625	http://www.shroyermotorcompany.com/	GMC	1.00	
+3e66c378006a	South Plains Implement - Lamesa John Deere Dealer	cardealer		32.76730	-101.94019	1605 US-87	Lamesa	79331	+18068725474	http://www.deere.com/	John Deere	0.92	
+642fd369157f	Star Chrysler Dodge Jeep Ram of Big Spring	cardealer		32.26185	-101.49371	821 W Interstate 20	Big Spring	79720	+14326066508	http://bigspringcars.com/		0.97	
+c6aec0557cd4	Star Chrysler Dodge Jeep Ram of Big Spring	cardealer	used auto dealer	32.25605	-101.46802	821 W I-20	Big Spring	79720	+14325476200	https://www.bigspringcars.com/		0.85	
+a1330a0e3087	Star Ford Big Spring	cardealer		32.24974	-101.48112	500 W 4th St	Big Spring	79720	+14322677424	https://www.starfordbigspring.com/		1.00	
+92a5b819e89a	Tim Phillips. Your Salesman and Friend	cardealer		32.24969	-101.48143	500 W 4th St	Big Spring	79720	+14322712867	http://bigspringford.com/		0.93	
+fa651e60933f	TONY at the STAR	cardealer		32.26355	-101.49332	821 I-20 W	Big Spring	79720	+14322501185	https://bit.ly/3vlXMyc		0.68	
+708a674620e2	Wes-Tex auto’s	cardealer		32.74797	-101.95081	1611 Lubbock Hwy	Lamesa	79331	+18065595193	http://Www.premiercdjroflamesa.com/		0.61	
+cc7d5daa5df0	Wheeler Motor Company	cardealer		32.12523	-101.80135	102 Lamesa Hwy	Stanton	79782	+14327562341	http://www.wheelermotor.com		0.98	
+c651634fee6a	Cinemark Cinema Big Spring	cinema		32.24449	-101.44636	1801 FM700	Big Spring	79720	+14322632252	https://www.cinemark.com/theatres/tx-big-spring/cinemark-cinema-4?utm_medium=organic&utm_source=fb&utm_campaign=local_listing_theater&utm_content=fb_listing&y_source=1_MTc0OTMwMjctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Cinemark	0.95	
+9b71a7d99770	Cinemark Cinema Big Spring 4	cinema		32.25075	-101.43581	1801 East FM 700	Big Spring	79720		https://www.cinemark.com/theatres/tx-big-spring/cinemark-cinema-big-spring-4	Cinemark	0.80	
+a0dde7dc41e0	Lamesa Movieland Theater	cinema		32.73727	-101.95465	604 N Austin Ave	Lamesa	79331	+18068722750	http://www.lamesamovieland.com		0.92	
+e9a718f8ebca	Premiere Cinemas	cinema		32.25098	-101.47701	109 W 4th St	Big Spring	79720	+18885239755	https://www.pccmovies.com		0.75	
+085b39195c82	350 Cafe & Convenience	coffee		32.40274	-101.34387	17601 E State Highway 350	Coahoma	79511	+14329653500			0.97	
+9170f9d51fa4	7 Brew Coffee	coffee		32.23294	-101.47169	2200 S Gregg St	Big Spring	79720	+14793589274	https://7brew.com/location/texas-big-spring-000087		0.96	
+1216966950aa	Beans World Cafe	coffee		32.25401	-101.47807	100 S Main St	Big Spring	79720	+14322631133	http://www.beansworldcafe.com/		0.92	
+51bd8eec285d	Blue Paw Cafe	coffee		32.77005	-101.44405	108 S Elm St	Gail	79738	+18067564464	https://www.bluepawcafe.com		0.92	
+326fef0b1bea	Blue Ribbon Cafe	coffee		32.24976	-101.47627	505 Scurry St	Big Spring	79720	+14326065011	http://www.blueribbonbigspring.com		0.92	
+25afd1d691ef	Bubbly Kittea - Boba Tea, Mochi Donuts, and more	coffee	bubble tea shop	32.23623	-101.47213	1901 S Gregg St Ste A	Big Spring	79720	+14325174195			0.92	
+f836c7073a30	Bucks One Stop Cafe	coffee		32.35595	-101.00616		Westbrook	79565	+13256445222	http://bucksonestopcafe.placeweb.site		0.92	
+a0639fe12350	Corner House Cafe	coffee		32.23824	-101.47143	1701 Scurry St	Big Spring	79720	+18662972151	http://www.mycornerhousecoffee.com		0.77	
+5b42d8c9a9b9	Daddios Burrito Express	coffee		32.73181	-101.94903	202 S 2nd St	Lamesa	79331	+18068701313			0.96	
+c191bd0ea95d	Dunkin'	coffee		32.24626	-101.49904	2000 Interstate 20	Big Spring	79720	+14322126354	https://locations.dunkindonuts.com/en/tx/big-spring/2000-interstate-20/365751?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=365751&y_source=1_MjAyNTExNTA3My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.85	
+8b7c8a15eb48	Four Sands Cafe	coffee		32.11282	-101.36612	403 Rex Ave	Forsan	79733	+14324551097			0.86	
+dcae3b86988c	Healthy Vibes Nutrition	coffee	tea room	32.73470	-101.95358	312 N Austin Ave	Lamesa	79331	+13252071480	https://taylorbarrera.goherbalife.com/		0.81	
+46bcddfa1567	HTeaO	coffee	tea room	32.24527	-101.47520	911 S Gregg St	Big Spring	79720	+14326532562	https://hteao.com/locations/big-spring-tx/	HTeaO	0.95	
+898b5f3b10b0	HTeaO - Midland (Greenwood)	coffee	tea room	32.01875	-101.93715	8521 Farm to Market 307	Midland	79706	+14322564062	https://hteao.com/locations/midland-tx-greenwood/	HTeaO	0.96	
+4ebe4718c7e8	Mesa Coffee Co.	coffee		32.73571	-101.95431	501 N 4th St	Lamesa	79331	+18062005060	http://mesacoffeeco.com/		0.86	
+6790630a49aa	Mighty Joe's Coffee	coffee		32.24497	-101.47469	1000 Scurry St	Big Spring	79720	+14326065170	http://mightywashtx.com		0.92	
+9f8e42d81748	Ol Joes Cafe 2	coffee		32.52623	-101.71612	301 5th St	Ackerly	79713	+14323534746			0.92	
+df09504fb435	Red Rooster Cafe & Antiques	coffee		32.08640	-101.83982	3401 Interstate 20	Stanton	79782	+14327563663			0.59	
+008d0862826f	Rustic Café	coffee		32.02992	-101.98788	5800 I-20	Midland	79706	+14326838424	https://kentkwik.com/rustic-cafe/		0.99	
+347998c58916	Sealed In Sweetness	coffee		32.29740	-101.30653	212 N 1st St	Coahoma	79511	+14322142023	https://www.google.com/search?client=safari&hs=OCVp&sca_esv=517629e0db3c0ca4&hl=en-us&biw=402&bih=660&sxsrf=ANbL-n51-2a5fngslZ5wkN7lJmlpjmZ2Hw%3A1773244784882&q=sealed+in+sweetness+big+spring+reviews&uds=ALYpb_lV1VNdGIh00wGuojX4xrR9VhVtqBdPtxmmPYr6mmK7lcF9CTjtlt3zjjkLqe6e6vXi18p_6dfivE8jZUgafcXfJOfR4G-lfgRPPHeIX_LcgNsYdZH76Hq5mwk14rlJU4-VwEsWfU5fS6aitxIvAm88FBU4PMGG7gmY_xAKbb3L-kLiOpZXxwjBT4ekAlR-vnGRjlhLUr-EylIHFCcezpUKYndt__gcAobhASaHjOuaHtOUfmNwaztfkcAfsR9UK-yXgPyrP_XVjDWhiCQntzsF0hxYCTZPlWhcbrtBEHxDLcsp_zfI16aG5jZDLZuyOCf3VM7pqo5SswdonVRXWN0GuuNiHNr5WmwL1DLuZ095VyPK1jNEoJ6LOgjGoBv7vAnYRzkV8u2x94L08mXcAfKj66R3jy51UpjHwL-5rsT8ug2x07QZaF8yXCYHo2nlKy5bEwDvhfJJb6xKfhwlGjUhPPcxyw&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOWwBoLvqoFAx-noDkBSP73cXQJ3UdWxu7jRGNMkdNVyaGDtiRD9xXxfkXzCBXKHLAsAyvSxcG41ijJj_fsx5gM0_s4vl_oJDYBXfaFDPhjehA2t6cQ%3D%3D&sa=X&ved=2ahUKEwisuoLMm5iTAxU7mmoFHXtLA-AQk8gLegQIGhAB&ictx=1&stq=1&cs=0&lei=cJGxaazCNbu0qtsP-5aNgA4#ebo=4		0.98	
+cf6422242405	Shebrews	coffee		32.25159	-101.47836	209 W 3rd St	Big Spring	79720	+12547073262			0.96	
+a1d245da7a4c	Starbucks	coffee		32.26251	-101.49129	801 I-20 Frontage Rd	Big Spring	79720	+13254364585	https://www.starbucks.com/store-locator/store/1019196	Starbucks	1.00	
+70d17c71d05b	Tea2Go	coffee	tea room	32.73577	-101.95161	402 N Dallas Ave	Lamesa	79331			Tea2go	0.92	
+c4eb2592ae96	Tea2Go	coffee		32.24380	-101.47454	1101 S Gregg St	Big Spring	79720	+14322178078	http://Tea2Go.us/	Tea2go	0.92	
+0a2e658c930d	Tea2Go TeaN’ergy Greenwood	coffee	tea room	32.01908	-101.93607	1805 S County Road 1105	Midland	79706	+14322471160	http://Tea2Go.US/	Tea2go	0.79	
+69d217621501	Texas Finest Cafe	coffee		32.74835	-101.95155	1703 Lubbock Hwy	Lamesa	79331	+18068701256			0.95	
+17bdd5495d37	The Burrito Stop	coffee		32.24487	-101.50057	2001 W 3rd St	Big Spring	79720		www.newswest9.com/.../armed-robbery-under-investigation-in-big-spring		0.92	
+b72ef9439c33	Tin Bucks Coffee Shop	coffee		32.73196	-101.95322	506 S 1st St	Lamesa	79331	+18063198758			0.92	
+0080a55167ca	Bureau Of Economic Geology - Midland Core Research Center	college		32.03387	-101.99790	5310 E Highway 80	Midland	79706	+14326869902	https://www.beg.utexas.edu		0.81	
+30e920b456be	G. C. Broughton Ag Complex	college		32.25349	-101.44433	1511 Echols St	Big Spring	79720				0.68	
+0555aa247e8d	Howard College	college		32.25054	-101.45127	1001 Birdwell Ln	Big Spring	79720	+14322645000	http://www.howardcollege.edu	Howard College San Angelo	0.97	
+f9b0d3907909	Howard College	college		32.75003	-101.95152	1810 Lubbock Hwy	Lamesa	79331	+18068722223	http://www.howardcollege.edu/	Howard College San Angelo	0.92	
+7047636fa882	Howard College Agricultural Sciences Department	college		32.25006	-101.44988	1001 Birdwell Ln	Big Spring	79720	+14322645110	https://howardcollege.edu/academics/agriculture/	Howard College San Angelo	0.78	
+8a39160adcff	Howard College Arena	college		32.25814	-101.41355		Big Spring			http://www.howardcollege.edu/	Howard College San Angelo	0.72	
+7827c6ef5bde	Howard College Lady Hawk Softball Field	college		32.25378	-101.44315		Big Spring					0.72	
+50767e76b456	SWCD	college		32.22816	-101.50229	3200 Avenue C	Big Spring	79720	+14322643700	http://www.howardcollege.edu/swcd		0.97	
+c4d9d7aef690	180 Express Convenience Store	convenience		32.73468	-101.96915	1800 Seminole Rd	Lamesa	79331	+18068728789			0.92	
+0cbab7767ace	7-Eleven	convenience		32.75101	-101.95137	1912 N Dallas Ave	Lamesa	79331	+18068728521	https://www.7-eleven.com/		1.00	
+20540b2556fc	7-Eleven	convenience		32.13733	-101.80499	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.7-eleven.com/		1.00	
+217e88937f07	7-Eleven	convenience		32.26230	-101.49002	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.7-eleven.com/		1.00	
+ab33258acf73	7-Eleven	convenience		32.21559	-101.49308	2310 Wasson Rd	Big Spring	79720	+14322671591	http://www.7eleven.com/	7-Eleven	0.56	
+bd7c852ad21c	7-Eleven	convenience		32.73658	-101.94953	411 N Lynn Avenue	Lamesa	79331	+18068720110	https://www.7-eleven.com/		1.00	
+ed18619a3a25	7-Eleven	convenience		32.29354	-101.30515	101 E Broadway	Coahoma	79511	+14323944970	https://www.7-eleven.com/		1.00	
+520d10b87292	Allsup's	convenience		32.97129	-101.83624	3037 US Highway 87	Odonnell	79351	+18064283532	https://www.allsups.com/	Allsup’s	0.99	
+79432e891ba1	Allsup's Convenience Store	convenience		32.73806	-101.95106	248 N 5th St	Lamesa	79331	+18068725101	https://www.allsups.com/	Allsup’s	0.92	
+ab97539d25cb	Allsup's Convenience Store	convenience		32.97172	-101.83612	3037 87	O'Donnell	79351	+18064283532	http://www.allsups.com/		0.92	
+cf42e76edcf4	Allsup's Convenience Store	convenience		32.96371	-101.83266	3037 US Highway 87	Odonnell	79351	+18064283532	https://www.allsups.com/		0.85	
+98ca138f66e3	Allsups Convenience Store	convenience		32.96594	-101.84219	3024 US Highway 87	Odonnell	79351	+18064283279	http://www.allsups.com/	Allsup's Convenience store #207	0.97	
+41652eb11d73	Alon	convenience		32.21520	-101.49316	2310 Wasson Rd	Big Spring	79720	+14322671591	http://myalon.com/		0.92	
+61903e4dc8f3	Alon	convenience		32.25536	-101.46896	300 Owens St	Big Spring	79720	+14322632291	http://myalon.com/		0.92	
+62444895b02a	Alon	convenience		32.73432	-101.96187	1111 Seminole Rd	Lamesa	79331	+18068728629	https://alonbrands.com/	Alon	0.92	
+7c776c84e42d	Alon	convenience		32.25853	-101.45396	401 Birdwell Ln	Big Spring	79720	+14322671881	http://myalon.com/		0.99	
+8bd090be1f68	Alon	convenience		32.24240	-101.44862	1701 E Marcy Dr	Big Spring	79720	+14322671971	http://myalon.com/		0.99	
+a53769ef71d6	ALON	convenience		32.25275	-101.43489	3315 E Marcy Drive E FM 700	Big Spring	79720	+14322637400	https://myalon.com/stations/ALON-Gas-Station-7050-3315-E-FM-700-BIG-SPRING-TX-79720		0.85	
+c09518cd3043	ALON	convenience		32.27602	-101.36856	7011 N Service Rd	Big Spring	79720	+14323935839	https://alonfuel.com/stations/alon-gas-station-9607-7011-north-service-road-big-spring-tx-79720/	Alon Gas Station	1.00	
+e10f25f5c6d6	Alon	convenience		32.24751	-101.45910	1209 E 11th Pl	Big Spring	79720	+14322672231	http://myalon.com/		0.92	
+f938dfe070bc	Alon	convenience		32.23769	-101.50755	902 Willia St	Big Spring	79720	+14322672311	http://myalon.com/		0.92	
+08ad6051a50e	ALON Gas Station	convenience		32.18476	-101.47361	4911 U.S. 87	Big Spring	79720	+14322675050	https://alonfuel.com/stations/alon-gas-station-3281-4911-s-us-highway-87-big-spring-tx-79720/		1.00	
+54a9d4bfbfec	Alon Gas Station	convenience		32.27824	-101.37280	7011 N Service Rd	Big Spring	79720	+14323935839	http://myalon.com/		0.85	
+99c0e0d64f2f	Alon Gas Station	convenience		32.26228	-101.48920	1106 Lamesa Hwy	Big Spring	79720	+14322677132	http://myalon.com/		0.92	
+a5f5860866f4	ALON Gas Station	convenience		32.02645	-101.90008	10706 Farm to Market 307	Midland	79706	+14326850639	https://alonfuel.com/stations/alon-gas-station-1070-10706-us-307-greenwood-tx-79706/		1.00	
+c920f38ef61b	Alon Gas Station	convenience		32.23642	-101.47234	1801 S Gregg St	Big Spring	79720	+14322671452	http://myalon.com/		0.85	
+f7ef63d8f584	ALON Gas Station	convenience		32.25040	-101.47875	4911 Highway 87	Big Spring	79720	+14322675050	https://alonfuel.com/stations/alon-gas-station-3281-4911-s-us-highway-87-big-spring-tx-79720		0.85	
+4e60ee12cbea	Anita's Corner Store	convenience		32.88576	-101.14904	1011 Main St	Fluvanna	79517	+13252070427		Corner Store	0.92	
+3ff7807aaaa7	Buck Easy's	convenience		32.23787	-101.47301	1700 S Gregg St	Big Spring	79720	+14322672825	http://buckeasys.placeweb.site		0.92	
+99b1f676017e	Buffalo Country Fina	convenience		32.18468	-101.47350	4911 S US Highway 87	Big Spring	79720	+14322675050			0.62	
+5c54663b68e9	CAT Scale	convenience	truck gas station	32.26554	-101.47559	706 IH 20 E	Big Spring	79720	+14322647490	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92	
+298e5474fc2e	Chevron	convenience		32.08991	-101.88684	2848 Interstate 20	Stanton	79782	+14324583255	http://www.chevron.com		0.58	
+2b070a6acaf3	Chevron	convenience		32.26255	-101.48895	1100 N LAMESA	Big Spring	79720		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1100-N-LAMESA-BIG-SPRING-TX-79720-id359090	Chevron	0.95	
+9790b92024f6	Chevron	convenience		32.25294	-101.47208	410 EAST 4TH	Big Spring	79720		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/410-EAST-4TH-BIG-SPRING-TX-79720-2635-id358286	Chevron	0.80	
+a718d1ffe917	Chevron	convenience		32.03027	-101.98795	5800 E INTERSTATE 20	Midland	79706		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/5800-E-INTERSTATE-20-MIDLAND-TX-79706-4495-id386682	Chevron	0.80	
+b4906f66b3db	Chevron	convenience		32.23948	-101.45322	17008 N FM 1584	Big Spring	79720	+14323994463	http://www.chevron.com		0.77	
+ed6476261613	Chevron Station Big Spring	convenience		32.25134	-101.47900	311 S Gregg St	Big Spring	79720	+14322630033			0.92	
+75819a79ed4b	Circle K	convenience		32.01109	-101.97870	1821 S CR 1130 A	Midland	79706	+14328974980	https://www.circlek.com		1.00	
+751fb875a74c	Country Store	convenience		32.41362	-101.58202	4496 W FM 846	Knott	79748	+14323534812	http://www.countrystorecatalog.com	Country Store	0.62	
+15aa95e57834	Coyote Country Store	convenience		32.77034	-101.44624	100 W Wasson Ave	Gail	79738	+18067564330	http://www.thecoyotestore.com/		0.92	
+09a9979be7a4	DK Gas Station	convenience		32.24766	-101.45916	1209 East 11th Place	Big Spring	79720	+14322635806	https://dkfuel.com/stations/dk-gas-station-2409-1209-11th-place-big-spring-tx-79720/		0.92	
+239a071b8759	DK Gas Station	convenience		32.30179	-101.85700	3403 Texas 176	Lenorah	79749	+14322370665	https://dkfuel.com/stations/dk-gas-station-0104-3403-state-highway-176-lenorah-tx-79749/		0.92	
+357cb6efddc5	DK Gas Station	convenience		32.03341	-101.98805	5907 East Interstate 20	Midland	79706	+14324008754	https://dkfuel.com/stations/dk-gas-station-5549-5907-e-i20-midland-tx-79706/		1.00	
+4b4f18904890	DK Gas Station	convenience		32.24275	-101.44879	1701 East Marcy Drive	Big Spring	79720	+14322635804	https://dkfuel.com/stations/dk-gas-station-2407-1701-e-marcy-drive-big-spring-tx-79720/		0.92	
+51c68f5049ee	DK Gas Station	convenience		32.23762	-101.50771	902 Willia Street	Big Spring	79720	+14322635805	https://dkfuel.com/stations/dk-gas-station-2499-902-willia-big-spring-tx-79720/		0.92	
+5f294b4f9ee8	DK Gas Station	convenience		32.23678	-101.47276	1800 South Gregg Street	Big Spring	79720	+14322632447	https://dkfuel.com/stations/dk-gas-station-1317-1800-s-gregg-st-big-spring-tx-79720/		0.92	
+77454d6c31a9	DK Gas Station	convenience		32.21534	-101.49322	2310 Wasson Road	Big Spring	79720	+14322635803	https://dkfuel.com/stations/dk-gas-station-2402-2310-wasson-big-spring-tx-79720/		0.92	
+80d533fbcaae	DK Gas Station	convenience		32.25277	-101.43488	3315 Farm to Market Road 700	Big Spring	79720	+14322637400	https://dkfuel.com/stations/dk-gas-station-7050-3315-e-fm-700-big-spring-tx-79720/		0.92	
+9cee01a9cdc1	DK Gas Station	convenience		32.73803	-101.95142	248 North 5th Street	Lamesa	79331	+18068725101	https://dkfuel.com/stations/dk-gas-station-0799-248-n-5th-st-lamesa-tx-79331/		1.00	
+cdafaa60f391	DK Gas Station	convenience		32.25857	-101.45373	401 Birdwell Lane	Big Spring	79720	+14322671881	https://dkfuel.com/stations/dk-gas-station-2410-401-birdwell-big-spring-tx-79720/		0.95	
+fd4f4c4b36e1	DK Gas Station	convenience		32.25532	-101.46913	300 Owens St	Big Spring	79720	+14322632291	https://dkfuel.com/stations/dk-gas-station-2413-300-owens-st-big-spring-tx-79720		0.92	
+fef900c0d16a	DK Gas Station	convenience		32.73417	-101.96185	1111 Seminole Road	Lamesa	79331	+18068728629	https://dkfuel.com/stations/dk-gas-station-8931-1111-seminole-rd-lamesa-tx-79331/		1.00	
+c9fc4aac57b0	Dollar General	convenience		32.01112	-101.96941	6507 Fm 307	Midland	79706	+14322198922	https://www.dollargeneral.com/store-directory/tx/midland/14238		0.92	
+3e3b8263a524	Exxon	convenience		32.25568	-101.46893	800 W I 20	Big Spring	79720	+14322635571	https://www.exxon.com/en/find-station/exxon-bigspring-tx-kwikchek70-200313492?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85	
+c2182b8a9c11	Exxon	convenience		32.26411	-101.49157	800 West I 20	Big Spring	79720	+14322635571	https://www.exxon.com/en	Exxon & Mobil Stations	1.00	
+8b08d2f6552b	Fast Stop	convenience		32.21790	-101.48606	3104 Parkway Rd	Big Spring	79720	+14322631921	http://faststopmarkets.com	Fast Stop Markets	0.92	
+ae73dc01b41e	Fast Stop	convenience		32.25780	-101.45921	1500 E 4th St	Big Spring	79720	+14322631191	https://east-fourth-fast-stop-tx.hub.biz/		0.92	
+55cabda554a6	Gas Card	convenience		32.18472	-101.47318		Big Spring					0.61	
+d882b36ec920	Horseshoe Number 3 Convenience Store	convenience		32.25264	-101.43504	3315 FM700	Big Spring	79720	+14322637400	http://alonbrands.com		0.84	
+329fce2f9fd4	Kent Kwik	convenience		32.25094	-101.47840	311 S Gregg St	Big Spring	79720	+14322634498	https://kentkwik.com/		0.92	
+7d060e773699	Kent Kwik	convenience		32.03015	-101.98809	5800 E Interstate 20	Midland	79706	+14326995824	https://kentkwik.com/		0.99	
+a5cd2af09641	Kent Kwik	convenience		32.26243	-101.48868	1100 Lamesa Hwy	Big Spring	79720	+14322677132	http://www.thekentcompanies.com	Kent Kwik Convenience Stores	0.92	
+dc7e3083643e	Kwik Kar Oil & Lube	convenience		32.73584	-101.95354	411 N 4th St	Lamesa	79331	+18068728826			0.92	
+d28021118952	Kwikie	convenience		32.25830	-101.48309	510 Lamesa Hwy	Big Spring	79720	+14322683413	http://avantmgt.com/		0.92	
+883912be94cc	Kwikie Grocery	convenience		32.23801	-101.50697	3000 W Hwy 80	Big Spring	79720	+14327144926	https://kwikie-grocery-inc-no-2.hub.biz/		0.92	
+9ef3347ba48d	Kydees Last Stop	convenience		32.20362	-101.47626	4220 US-87 US-87	Big Spring	79720	+14326614697	https://kydees.hub.biz/		0.96	
+d15b55f206b8	Lamesa Butane	convenience		32.73558	-101.94950	311 N Lynn Ave	Lamesa	79331	+18068722565	http://lamesabutane.com		0.55	
+47e337786e38	Love's Travel Stop	convenience		32.24656	-101.49763	1801 W I-20	Big Spring	79720	+14326066003	https://www.loves.com/locations/976		0.85	
+553efa816927	Murphy USA	convenience		32.22922	-101.46925	201 W Marcy Dr	Big Spring	79720	+14322635550	http://www.murphyusa.com/	Murphy USA	0.92	
+d9c405f4e9cb	Neighbors Convenience	convenience		32.25264	-101.43504	3315 E FM-700	Big Spring	79720	+14322637400	http://alonbrands.com		0.92	
+2697fa52b84c	OXXO	convenience		32.03370	-101.98816	5907 East Interstate 20	Midland	79706	+14324008754	https://oxxo-us.com/stores/oxxo-convenience-store-1822-5907-e-interstate-20-midland-tx-79706/		0.95	
+3daea0e53bd3	Phillips 66	convenience		32.29338	-101.30514	101 NE Broadway	Coahoma	79511	+14323944970	https://www.phillips66gas.com/		1.00	
+5157aa2d2b80	Phillips 66	convenience		32.26233	-101.48992	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.phillips66gas.com/		1.00	
+653475d6c126	Phillips 66	convenience		32.75118	-101.95119	1912 N Dallas Ave	Lamesa	79331	+18322343656	https://www.phillips66gas.com/		1.00	
+c2def8f8c6fa	Phillips 66	convenience		32.73480	-101.96201	510 N Bryan Ave	Lamesa	79331	+18068723082	https://www.phillips66gas.com/		0.92	
+f23f293f51ca	Phillips 66	convenience		32.13737	-101.80488	1356 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.phillips66gas.com/		0.92	
+99a09c105a7e	Pilot Travel Center	convenience		32.26564	-101.47436	706 I-20 Frontage Rd	Big Spring	79720	+14322235832	https://locations.pilotflyingj.com/us/tx/big-spring/706-e-i-20-frontage-rd	Pilot Flying J	0.97	
+c4375161e9d8	QuikTrip	convenience		32.26338	-101.43381	3430 I-20	Big Spring	79720	+14326066177	https://locations.quiktrip.com/tx/big-spring/3430-e-interstate-20?utm_source=fb&utm_medium=yext&y_source=1_MjA0NzAwOTUyMS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	QuikTrip	0.61	
+7dd86b3b5efd	SEI FUELS STORE 42417-88	convenience		32.75097	-101.95143	1912 N DALLAS ST	Lamesa	79331			Phillips 66	0.80	
+6adcb1972ca9	SEI FUELS STORE 42567-5035	convenience		32.13725	-101.80492	1308 N LAMESA HWY	Stanton	79782			Phillips 66	0.80	
+015593e75683	Shell	convenience		32.26458	-101.49015	704 W Interstate 20	Big Spring	79720	+14322644444	http://www.shell.us/	Shell	0.92	
+505c89b4e89c	Shell	convenience		32.26828	-101.47392	Ih 20 & State 350	Big Spring	79720	+14322647445	http://www.shell.us/	Shell	1.00	
+6c6de5f04e13	Shell	convenience		32.22908	-101.47011	2501 S Gregg St	Big Spring	79720	+14322632290	https://find.shell.com/us/fuel/10006400-2501-s-gregg-st	Shell	0.92	
+8c7041297703	Shell	convenience		32.12722	-101.79527	612 W Front St	Stanton	79782	+14327562635	https://find.shell.com/us/fuel/10006394-612-w-front-st	Shell	0.92	
+9ed9f42da9ba	Shell	convenience		32.23379	-101.52463	4806 W Us Highway 80	Big Spring	79720	+14325174364	https://find.shell.com/us/fuel/10004529-4806-w-us-highway-80	Shell	0.99	
+460bdb994dd1	Star Stop	convenience		32.25004	-101.47847	400 S Gregg St	Big Spring	79720	+14322630028	http://www.shell.com/		0.92	
+3dddfd670c9b	Star Stop Food Mart	convenience		32.39119	-101.69075	4498 FM-846	Knott	79748	+14323534812			0.59	
+b53d0207e39f	Star Stop Food Mart	convenience		32.22996	-101.47065	2501 Gregg	Big Spring	79720	+14322647445	http://shell.com		0.92	
+20dc35880b0c	Stripes	convenience		32.29356	-101.30527	101 E. Broadway	Coahoma	79511	+14323944970	http://www.stripesstores.com	Stripes	1.00	
+608c9dee356b	Stripes	convenience		32.73654	-101.94969	411 N Lynn Ave	Lamesa	79331	+18068720110	http://www.stripesstores.com	Stripes	0.97	
+6a20e752284f	Stripes	convenience		32.75105	-101.95134	1912 N Dallas Ave	Lamesa	79331	+18068728521	http://www.stripesstores.com	Stripes	1.00	
+d382fe72ac93	Stripes	convenience		32.26231	-101.48994	1101 Lamesa Hwy	Big Spring	79720	+14322633480	http://www.stripesstores.com	Stripes	1.00	
+ff35b8340f88	Stripes	convenience		32.13739	-101.80497	1308 N. Lamesa	Stanton	79782	+14327562115	http://www.stripesstores.com		1.00	
+0a68997286fb	Sunoco	convenience		32.26254	-101.48971	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.sunoco.com/locations/store/1101-lamesa-dr-big-spring-tx-0825851900		0.92	
+25c2a6575092	Sunoco	convenience		32.25005	-101.47870	400 S Gregg St	Big Spring	79720	+13256587521	http://www.sunoco.com	Sunoco	1.00	
+97a15a7fda15	Sunoco	convenience		32.25842	-101.45606	1500 E 4th St	Big Spring	79720	+14322631191	https://www.sunoco.com/locations/store/1500-e-4th-st-big-spring-tx-8002510601		0.92	
+b4c80f3e47a8	Sunoco	convenience		32.29334	-101.30516	101 NE Broadway	Coahoma	79511	+14323944970	https://www.sunoco.com/locations/store/101-e-broadway-ave-coahoma-tx-0149865800		0.97	
+c5f9467ef193	Sunoco	convenience		32.25536	-101.46896	300 Owens St	Big Spring	79720	+14322632291	https://www.sunoco.com/		0.92	
+ced8904483e2	Sunoco Gas Station	convenience		32.73654	-101.94939	411 N Lynn Ave	Lamesa	79331	+18068720110	https://www.sunoco.com/find-a-station		0.92	
+730b6d960904	Swift Stop	convenience		32.73466	-101.96210	1100 Seminole Rd	Lamesa	79331	+18068723082	http://swiftstop.biz/locations	Swift Stop	0.99	
+b6479356e592	TA Truck Service	convenience		32.26543	-101.49104	704 W Interstate 20	Big Spring	79720	+14322741382	https://www.ta-petro.com/	TravelCenters-TA-Petro	0.99	
+d58dc9bcd39c	TARZAN & JANE-STANTON	convenience		32.13900	-101.80631	3399 I 20	Stanton	79782		https://locations.valero.com/en-us/LocationDetails/Index/3399-I-20/0000028925	Valero	0.89	
+a6e25cc72ed9	TARZAN & JANE-TARZAN	convenience		32.30490	-101.97491	2752 State Highway 176	Tarzan	79783		https://locations.valero.com/en-us/LocationDetails/Index/2752-STATE-HIGHWAY-176/0000029155	Valero	0.80	
+c11465c5ee7c	Tarzan and Jane Greenwood	convenience		32.01840	-101.93750	8521 FM 307	Midland	79706		https://locations.valero.com/en-us/LocationDetails/Index/8521-FM-307/0000031228	Valero	0.80	
+77fe449755c8	Texaco	convenience		32.25294	-101.47208	410 E 4th St	Big Spring	79720		https://www.texaco.com		0.75	
+cccce6a7dbcf	TOOT'N TOTUM #131	convenience		32.75660	-101.94650	2301 Lubbock HWY	Lamesa	79931		https://locations.valero.com/en-us/LocationDetails/Index/2301-LUBBOCK-HWY/0000031923	Valero	0.80	
+61b26b687fb1	Twice The Ice	convenience		32.73677	-101.95133	411 N Main Ave	Lamesa	79331		http://twicetheice.com		0.92	
+3b395240f0b6	Txb	convenience		32.26411	-101.49162	800 W Interstate 20	Big Spring	79720	+14322635571	https://www.txbstores.com		0.75	
+72d33e16476c	Uncle's Store	convenience		32.27612	-101.36863	I-20 Frontage Rd	Big Spring	79720	+14323935837			0.92	
+c685044148af	Uncles Store	convenience		32.01126	-101.96786	6601 FM-307	Midland	79706	+14326850639			0.96	
+ece77777a6f3	Wes-t-go Conoco	convenience		32.23675	-101.47292	1800 S Gregg St	Big Spring	79720	+14322632447	https://www.phillips66.com		0.55	
+d4d16989f956	West Texas Gas	convenience		32.29473	-101.50012	3614 N US Highway 87	Big Spring	79720	+14322641509	http://www.westtexasgas.com		0.58	
+224d1530dbca	White's Seven Till Eleven	convenience		32.73399	-101.95478	305 N Houston Ave	Lamesa	79331	+18068728546		7-Eleven	0.92	
+7ab79280a0a8	Wiley's Food Store	convenience		32.72704	-101.95974	502 S Bryan Ave	Lamesa	79331	+18068725051	http://conocophillips.com		0.92	
+089cb13e2af1	Yesway	convenience		32.73821	-101.95133	248 N 5th St	Lamesa	79331	+18068727050	https://yesway.com/	Yesway	0.76	
+253cc1428a40	Yesway	convenience		32.73404	-101.96184	1111 Seminole Rd	Lamesa	79331	+18068728629	https://yesway.com/	Yesway	0.92	
+fa92bbe42576	Yesway	convenience		32.23675	-101.47276	1800 S Gregg St	Big Spring	79720	+14325385157	https://yesway.com/	Yesway	0.92	
+7d8d484abc26	Albertos Crystal Cafe	fastfood		32.25670	-101.48171	300 N Gregg St	Big Spring	79720	+14322672310	http://www.albertoscrystalcafe.com		0.95	
+3b613ed678ce	Arby's	fastfood		32.26193	-101.50073	1801 W Interstate 20	Big Spring	79720	+14326066009		Arby's	0.96	
+7f61db4fedf9	Arby's	fastfood		32.23291	-101.47116	2201 S. Gregg St. Suite 100 S Gregg St & W 20 Th St	Big Spring	79720	+14323482820	https://www.arbys.com/locations/us/tx/big-spring/2201-s--gregg-st/store-8955/	Arby's	0.92	
+b84698311bd8	Arby's	fastfood	sandwich shop	32.25933	-101.50398	1801 I-20	Big Spring	79720		https://www.arbys.com/locations/us/tx/big-spring/1801-i-20/store-10147/	Arby's	0.96	
+f0d258daa0a6	Bush's Chicken	fastfood		32.73805	-101.95209	602 N Dallas Ave	Lamesa	79331	+18068704445	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.98	
+6963f0751275	Champs Chicken	fastfood		32.01159	-101.96793	6601 Farm to Market 307	Midland	79706	+14326850639	https://locator.champschicken.com/uncles-convenience-store-130203-new-owner-midland-tx/	Champs Chicken	0.94	
+d637448b2d97	Chick-fil-A	fastfood		32.23170	-101.46220	502 E FM 700	Big Spring	79720	+14328970351	https://www.chick-fil-a.com/locations/tx/big-spring-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.96	
+d038a0b6b0da	Chicken Express	fastfood		32.24329	-101.44502	2000 FM700	Big Spring	79720	+14322632300	https://chickene.com/	Chicken Express	0.98	
+347b3a79fb79	Dairy Queen	fastfood		32.26196	-101.48935	1009 Lamesa Hwy	Big Spring	79720	+14322675412	https://www.dairyqueen.com/en-us/locations/tx/big-spring/1009-lamesa-hwy/13865/?y_source=1_MjkzMzg5NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98	
+50b61417b522	Dairy Queen	fastfood		32.73607	-101.95504	512 N 4th St 512 N 4th St	Lamesa	79331	+18068728155	https://www.dairyqueen.com/en-us/locations/tx/lamesa/512-n-4th-st/14339/?y_source=1_MjkzMzkzNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95	
+f136c2820dfe	Dairy Queen	fastfood		32.29324	-101.30573	108 Nw Broadway 108 Nw Broadway	Coahoma	79511	+14323944283	https://www.dairyqueen.com/en-us/locations/tx/coahoma/108-nw-broadway/13924/?y_source=1_MjkzMzg5ODMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97	
+9c15d3dab03d	Domino's	fastfood	pizza restaurant	32.23356	-101.47144	2111 S. Gregg St.	Big Spring	79721	+14322674111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98	
+e44be9b90a75	Domino's	fastfood	pizza restaurant	32.73834	-101.95239	604 N Dallas Ave	Lamesa	79331	+18063327200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94	
+e5d5ae1135fd	Domino's	fastfood	pizza restaurant	32.00944	-101.97735	6009 Farm To Market 307	Midland	79706	+14326823030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96	
+7b5cf9d0bcc8	DQ Grill & Chill	fastfood		32.73623	-101.95508	512 N 4th St	Lamesa	79331		https://www.dairyqueen.com/en-us/locations/tx/lamesa/512-n-4th-st/4112	DQ Grill & Chill	0.80	
+95bea631a97a	DQ Grill & Chill	fastfood		32.26189	-101.48933	1009 Lamesa Hwy	Big Spring	79720		https://www.dairyqueen.com/en-us/locations/tx/big-spring/1009-lamesa-hwy/3638	DQ Grill & Chill	0.80	
+bb6923ba38af	DQ Grill & Chill	fastfood		32.29324	-101.30584	108 NW Broadway	Coahoma	79511		https://www.dairyqueen.com/en-us/locations/tx/coahoma/108-nw-broadway/3697	DQ Grill & Chill	0.80	
+b6f69796cbee	Dunkin Donuts	fastfood		32.25974	-101.50581	2000 Interstate 20	Big Spring	79720		https://www.dunkindonuts.com/locations/us/tx/big-spring/2000-interstate-20/store-365751/	Dunkin'	0.96	
+1afa53a4395d	Gills Fried Chicken	fastfood		32.23360	-101.47200	2100 S Gregg St	Big Spring	79720	+14322634391	https://www.gillsfriedchickentx.com/		0.92	
+06d56627dd9a	Golden Chick	fastfood		32.24929	-101.47839	500 S Gregg St	Big Spring	79720	+14325174415	https://locations.goldenchick.com/tx/big-spring/1339/	Golden Chick	0.95	
+d5044a87eb38	KFC	fastfood		32.23746	-101.47244	1711 Gregg Street	Big Spring	79720	+14322713779	http://www.kfc.com/	KFC	0.92	
+3fc827fa8a40	Little Caesars Pizza	fastfood	pizza restaurant	32.24854	-101.47720	601 S Gregg St	Big Spring	79720	+14326065064	https://littlecaesars.com/en-us/store/11409	Little Caesars	0.93	
+7f03cde8de51	Long John Silver's	fastfood		32.23075	-101.47055	2403 S Gregg St	Big Spring	79720	+14322672290	https://www.ljsilvers.com/?y_source=1_MTc1NzMxNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.98	
+1af1d886ce60	McDonald's	fastfood		32.22886	-101.47096	2600 S Gregg	Big Spring	79720	+14322647730	https://www.mcdonalds.com/us/en-us/location/tx/big-spring/2600-s-gregg/25711.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95	
+3de034fb1feb	McDonald's	fastfood		32.73761	-101.95107	505 N Dallas	Lamesa	79331	+18068726541	https://www.mcdonalds.com/us/en-us/location/tx/lamesa/505-n-dallas/8070.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97	
+660c630b5730	McDonald's	fastfood		32.26559	-101.47472	706 I-20	Big Spring	79720	+14322647552	https://www.mcdonalds.com/us/en-us/location/tx/big-spring/706-e-i20/36685.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98	
+1db8b2751609	Modern grill and steakhouse	fastfood		32.52271	-101.71536	1161 Laurel Lane	Ackerly	79713				0.76	
+6001e4be4e54	Papa John's Pizza	fastfood	pizza restaurant	32.22835	-101.46937	2503 S Gregg St Ste H	Big Spring	79720	+14322647507	https://www.papajohns.com/		0.92	
+b33db5364560	Papa Johns Big Springs	fastfood	pizza restaurant	32.23210	-101.47095	2305 S Gregg St	Big Spring	79720	+4322647507	https://www.papajohns.com/	Papa Johns Honduras	0.63	
+4c68863b5853	Pizza Hut	fastfood	pizza restaurant	32.23295	-101.47116	2201 S Gregg St Howard	Big Spring	79720	+14322674153	https://locations.pizzahut.com/tx/big-spring/2201-s-gregg-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314894	Pizza Hut	0.97	
+7d15bb0b9b9e	Pizza Hut	fastfood	pizza restaurant	32.22763	-101.46985	2601 S Gregg St	Big Spring	79720	+14322674153	https://locations.pizzahut.com/tx/big-spring/2601-gregg-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295650	Pizza Hut	0.97	
+7f0961ea7250	Pizza Hut	fastfood	pizza restaurant	32.73643	-101.95109	804 N Lynn Ave	Lamesa	79331	+18068728309	https://order.pizzahut.com/	Pizza Hut	0.99	
+74a17498c3ea	Popeyes	fastfood		32.26471	-101.48999	704 W Interstate 20	Big Spring	79720	+14322644444	https://www.popeyes.com/store-locator/store/restaurant_83751	Popeyes Louisiana Kitchen	0.97	
+da65815991e6	Rocky's	fastfood		32.24366	-101.47514	1100 S Gregg St	Big Spring	79720	+14322671738	http://rockys.com/		0.95	closed
+05d649daaa6c	Sonic Drive In	fastfood		32.24284	-101.47463	1200 S. Gregg	Big Spring	79720	+14322636790	https://locations.sonicdrivein.com/tx/bigspring/1200-s.-gregg.html	Sonic Drive-In	0.99	
+52987e059e67	Sonic Drive In	fastfood		32.23321	-101.46230	601 East Marcy Fm 700	Big Spring	79720	+14322681307	https://locations.sonicdrivein.com/tx/bigspring/601-east-marcy-fm-700.html	Sonic Drive-In	0.99	
+73b83c356687	Sonic Drive In	fastfood		32.13623	-101.80549	1218 N. La Mesa Hwy	Stanton	79782	+14327563022	https://locations.sonicdrivein.com/tx/stanton/1218-n.-la-mesa-hwy.html	Sonic Drive-In	0.96	
+937364aaa4f0	Sonic Drive In	fastfood		32.73607	-101.95306	401 N. Fourth	Lamesa	79331	+18068725943	https://locations.sonicdrivein.com/tx/lamesa/401-n.-fourth.html	Sonic Drive-In	0.96	
+29b7bea1dfcb	Subway	fastfood	sandwich shop	32.24467	-101.47555	1000 South Gregg St	Big Spring	79720	+14322677827	https://restaurants.subway.com/united-states/tx/big-spring/1000-south-gregg-st	Subway	0.98	
+4b2dbcdba760	Subway	fastfood	sandwich shop	32.73644	-101.95036	203 N. 4th Street Suite A	Lamesa	79331	+18068725003	https://restaurants.subway.com/united-states/tx/lamesa/203-n-4th-street	Subway	0.97	
+4d094ba9b426	Subway	fastfood	sandwich shop	32.01872	-101.93598	1805 S Co Rd 1105	Midland	79706	+14322198300	https://restaurants.subway.com/united-states/tx/midland/1805-scr-1105	Subway	0.96	
+bbd05a451e4b	Subway	fastfood	sandwich shop	32.13736	-101.80489	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://restaurants.subway.com/united-states/tx/stanton/1308-n-lamesa-hwy	Subway	0.95	
+f613659bbb77	Subway	fastfood	sandwich shop	32.26489	-101.49007	704 W Interstate 20	Big Spring	79720	+14322644444	https://www.order.subway.com		0.99	
+1b2fcb8ed83b	Taco Bell	fastfood		32.23074	-101.47059	2403 S Gregg St	Big Spring	79720	+14326065010	http://www.tacobell.com/	Taco Bell	0.98	
+cea6b9a7892e	Taco Bell	fastfood		32.73977	-101.95166	802 North Lynn Avenue	Lamesa	79331	+18068700011	http://www.tacobell.com/	Taco Bell	0.96	
+1f91cce08b6d	Tarzan Grill - Stanton, Tx	fastfood		32.13907	-101.80717	3399 I-20	Stanton	79782	+14326072500	https://tjtravelcenters.com/		0.95	
+ec18b8b1bfbb	Wendy's	fastfood		32.23156	-101.47063	2311 S. Gregg St.	Big Spring	79720	+14326062252	https://locations.wendys.com/united-states/tx/big-spring/2311-s-gregg-st	Wendy's	0.98	
+f2bec69b17f0	Wendy's	fastfood		32.75644	-101.94683	2301 Lubbock Hwy	Lamesa	79331	+18063387451	https://locations.wendys.com/united-states/tx/lamesa/2301-lubbock-hwy	Wendy's	0.97	
+f2c9d3d9af52	Whataburger	fastfood	burger restaurant	32.24332	-101.47481	1110 S GREGG ST	Big Spring	79720	+14322637359	https://locations.whataburger.com/tx/big-spring/1110-s-gregg-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98	
+ea9250c1d0d9	Wingstop	fastfood	chicken restaurant	32.22829	-101.46992	2503 S. Gregg Street Suite D	Big Spring	79720	+14326069464	https://www.wingstop.com/location/wingstop-1932-big-spring-tx-79720/menu?y_source=1_NTUyMDc5OTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96	
+1cdc1788cf37	Big Spring H-E-B	grocery		32.23444	-101.47251	2000 SOUTH GREGG	Big Spring	79720		https://www.heb.com/heb-store/us/tx/big-spring/big-spring-h-e-b-51	H-E-B	0.80	
+5cfb09e5f785	Claiborne's Thriftway	grocery		32.73556	-101.95731	710 N 4th St	Lamesa	79331	+18068725196	https://www.claibornesthriftway.com		0.96	
+1b64de8d603b	Coahoma Onestop	grocery		32.29487	-101.30571	101 S 1st St	Coahoma	79511	+14323944425	https://coahomaonestop.com		0.92	
+c62494f22306	Field of Dreams Dairy & Farm	grocery		32.94718	-101.62722	800 County Road 144	Odonnell	79351	+18064396316	http://www.fieldofdreamsdairy.com		0.77	
+a342e665dc74	H-E-B	grocery		32.23447	-101.47238	2000 S Gregg St	Big Spring	79720	+14322633000	https://www.heb.com/heb-store/US/tx/big-spring/big-spring-h-e-b-51	H-E-B	0.97	
+dcd0e2de82ca	Hull's Meat Company Inc.	grocery		32.26307	-101.45512	500 N Birdwell Ln	Big Spring	79720	+14322677781	http://hullsmeat.com/		0.92	
+e8b59e1f8200	J.b. Claiborne Inc.	grocery		32.73578	-101.95725	710 N 4th St	Lamesa	79331	+14325237261			0.95	
+d1feaf625fd6	Jeanne's Fancy Pecans	grocery		32.73209	-101.95087	311 S 1st St	Lamesa	79331	+18068723997	https://www.jeannesfancypecans.com		0.92	
+4edf7188c390	Law Enforcement Sales Usa	grocery		32.73104	-101.95536	703 S 1st St Ste 4	Lamesa	79331		https://www.lesalesusa.com		0.95	
+f6f4de904e0b	Lawrence Bros	grocery		32.12757	-101.80200	304 N Lamesa Hwy	Stanton	79782	+14327563375	http://Lawrencebrostx.com/		1.00	
+0d5af2361f67	Lowe's Market	grocery		32.25735	-101.45279	501 Birdwell Ln	Big Spring	79720	+14322964540	https://www.lowesmarket.com/	Lowe's Market	0.92	
+cafd7b9e1775	Porter's	grocery		32.25734	-101.45213	501 Birdwell Ln	Big Spring	79720	+14322964540	https://www.myporters.net		0.92	
+80d6775c3679	United Supermarkets	grocery		32.75548	-101.94949	2302 Lubbock Hwy	Lamesa	79331	+18068728838	https://local.unitedsupermarkets.com/tx/lamesa/2302-lubbock-hwy.html	United Supermarkets	0.92	
+f2da088211cb	Big Spring State Hospital	hospital		32.26965	-101.49461	1901 North Highway 87	Big Spring	79720	+14322687222			0.92	
+5cb6c4fb8d96	Family Medical Center Dr Johnson	hospital		32.24591	-101.47369	910 S Main St	Big Spring	79720	+14327144650			0.83	
+40fc7ec423de	Kindred at Home	hospital		32.23625	-101.47153	1900 Scurry St	Big Spring	79720	+14327144510	https://www.kindredhealthcare.com/locations/home-health/big-spring-tx-3525		0.77	
+8293cf0933c4	Martin County Hospital District	hospital		32.13999	-101.78775	600 I-20	Stanton	79782	+14326073200	http://www.martincountyhospital.org	Martin County Hospital District	0.92	
+a90b7f89bf74	Martin County Hospital District	hospital		32.13105	-101.78443	600 E Front St	Stanton	79782	+14326073200			0.85	
+b1fabdec2356	Martin County Hospital District	hospital		32.13820	-101.80384	600 W Interstate 20	Stanton	79782	+14326073200	https://martincountyhospital.org/	Martin County Hospital District	0.97	
+f96a7f81fe27	Martin County Hospital District	hospital		32.14074	-101.78003	600 Interstate 20 Frontage Rd	Stanton	79782	+14326073200	https://martincountyhospital.org/		0.85	
+065b05228d98	Medical Arts Hospital	hospital		32.74983	-101.96739	2200 N Bryan Ave	Lamesa	79331	+18068722183	https://www.medicalartshospital.org/		0.92	
+12c3cf920b16	Scenic Mountain Medical Group - Internal Medicine	hospital		32.24593	-101.47365	910 S Main St	Big Spring	79720	+14327144650			0.92	
+e81b9563a41f	Scenic Mountain Medical Group, Gregg Street Family Medicine	hospital		32.23209	-101.47052	2301 S Gregg St	Big Spring	79720	+14322675531	https://www.scenicmountainmedicalgroup.com/services/family-medicine/		0.97	
+6ebadb037be8	Shannon Medical Center Big Spring	hospital		32.23666	-101.49147	1601 W 11th Pl	Big Spring	79720	+14326065200	https://www.shannonhealth.com/big-spring/	Quorum Health	0.99	
+ae56d5fc1202	Specialty Clinic of Big Spring	hospital		32.24829	-101.47746	616 S Gregg St	Big Spring	79720	+14322678226			0.59	
+3f9c945cb360	Veteran Hospital	hospital		32.23013	-101.47116	300 W Veterans Blvd	Big Spring	79720	+14322637361	http://www.va.gov/health		0.92	
+fe392d28a740	Advantage Inn and Suite	hotel	motel	32.26363	-101.49287	804 West, I-20	Big Spring	79720	+14322635200			0.93	
+d54bbafb70ff	Baymont by Wyndham Big Spring	hotel		32.26097	-101.48829	917 Lamesa Highway	Big Spring	79720	+14322680568	https://www.wyndhamhotels.com/baymont/big-spring-texas/baymont-inn-and-suites-big-spring/overview		0.77	
+f6b426893cd7	Bent Tree	hotel		32.22672	-101.47800	1 Courtney Pl	Big Spring	79720	+14322671621	http://www.benttreeapartments.net		0.92	
+a9f24c1f9565	Best Western Lamesa Inn & Suites	hotel		32.73731	-101.95250	506 N Dallas Ave	Lamesa	79331	+18068723888	https://www.bestwestern.com/en_US/book/hotel-rooms.44650.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44650	Best Western Hotels & Resorts	1.00	
+7fdc45cf988c	Best Western Palace Inn & Suites	hotel		32.26067	-101.48776	915 Lamesa Hwy	Big Spring	79720	+14322641500	https://www.bestwestern.com/en_US/book/hotel-rooms.44621.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44621	Best Western Hotels & Resorts	1.00	
+2658f64f705e	Best Western Stanton	hotel		32.13899	-101.80009	3432 Interstate 20	Stanton	79782		https://www.bestwestern.com/en_US/book/hotels-in-stanton/best-western-stanton/propertyCode.44816.html	Best Western	0.80	
+072581e9d5dc	BRADBURY INN	hotel	motel	32.25732	-101.46436	1202 E 3rd St	Big Spring	79720	+14322672581	http://bookroomsnow.com		1.00	
+79cd3b8556a7	Budget Host Inn	hotel	motel	32.72595	-101.94753	901 S Dallas Ave	Lamesa	79331	+18068722118	http://www.budgethost.com/hotels/Budget_Host_Inn_Lamesa_TX.aspx	Budget Host St Ignace	0.95	
+a1bdc5ac5f7d	Budget Inn - Big Spring	hotel	resort	32.23899	-101.50636	2900 W Highway 80	Big Spring	79720	+14322675582			0.96	
+b6748bd9ba81	Camelot INN	hotel	motel	32.25991	-101.44972	2902 I-20	Big Spring	79720	+14322689926	http://camlotinn.biz		0.92	
+987b89d84ba8	Coahoma Inn	hotel	motel	32.29441	-101.30054	210 S 6th St	Coahoma	79511	+14323944248			0.95	
+f4c458f2fdb0	Comfort Inn	hotel		32.13772	-101.80304	800 W Interstate 20	Stanton	79782	+14322370002	https://www.choicehotels.com/texas/stanton/comfort-inn-hotels/txf12?pmf=yext&mc=llyxyxpx	Choice Hotels	0.97	
+d5e9bcdc5bf9	Comfort Inn & Suites	hotel		32.26298	-101.48843	1109 N Aylesford St	Big Spring	79720	+14322635400	https://www.choicehotels.com/texas/big-spring/comfort-inn-hotels/txj66?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00	
+309c4534d6f8	Corporate Hospitality Housing - Big Spring	hotel		32.26016	-101.45132	300 Tulane Ave	Big Spring	79720	+14698715023	https://www.chsoilfield.com/location/big-spring-tx-lodging/		0.92	
+8237c01c7407	Custom Touch Village	hotel		32.06354	-101.94730	8703 E Hwy 80	Midland	79706	+14322271181	https://customtouchvillage.com/midland-tx/		0.91	
+78e4e869b746	Days Inn and Suites	hotel		32.22731	-101.46994	2701 S Gregg St	Big Spring	79720	+14322675237	https://www.wyndhamhotels.com/days-inn/big-spring-texas/days-inn-and-suites-big-spring/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A11193	Days Inn	1.00	
+447fcd5c0825	Delux Inn	hotel	motel	32.25784	-101.48212	400 N Gregg St	Big Spring	79720	+14329990025			0.99	
+ef725bcde855	Dominion Oilfield Rv & Cabins	hotel		32.30036	-101.46572	3508 Gail Hwy	Big Spring	79720	+14322705861			0.98	
+2e4ee0f8faa1	Eagle's Den Suites Big Spring a Travelodge by Wyndham	hotel	resort	32.25526	-101.46711	901 E Interstate 20	Big Spring	79720	+14322715316	https://www.wyndhamhotels.com/travelodge/big-spring-texas/eagles-den-suites-big-spring-a-travelodge/overview		0.85	
+fb5721d24b83	Eagle's Den Suites Big Spring a Travelodge by Wyndham	hotel	resort	32.26941	-101.47071	901 E Interstate 20 20	Big Spring	79720	+14322715316	https://www.wyndhamhotels.com/travelodge/big-spring-texas/eagles-den-suites-big-spring-a-travelodge/overview?CID=LC:g22xy9tahqskhx3:57986&iata=00093796		0.97	
+db3f0a8f6463	Economy Inn By OYO, Lamesa TX	hotel		32.74156	-101.95219	N Dallas Ave, Lamesa TX	Lamesa Tx			https://www.oyorooms.com/us/301875/	OYO	0.80	
+520847096cdb	Hampton Inn & Suites	hotel		32.26228	-101.49222	805 W Interstate 20	Big Spring	79720	+14322649800	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00	
+2e842666c4a2	Holiday Inn Express Big Spring	hotel		32.26300	-101.48859	1109 N Aylesford St	Big Spring	79720	+14322635400	http://www.ihg.com/holidayinnexpress/		0.92	closed
+8a1f8fa23362	Home2 Suites by Hilton Big Spring	hotel		32.26176	-101.49152	809 West Interstate 20	Big Spring	79720	432-271-5535	https://www.hilton.com/en/hotels/hcabsht-home2-suites-big-spring/	Home2 Suites by Hilton	0.98	
+8a4f70b3f23c	Hotel Settles	hotel		32.25273	-101.47543	200 E 3rd St	Big Spring	79720	+14322677500	http://www.hotelsettles.com/		1.00	
+580ccc2aac70	Knights Inn Big Spring	hotel	motel	32.24761	-101.48743	1000 W 4th St	Big Spring	79720	+14329356757	https://www.knightsinn.com/us/tx/big-spring/knights-inn-big-spring	Knights Inn Port Charlotte FL	0.99	
+cce8ad0886a7	La Quinta Inn & Suites	hotel		32.26359	-101.49637	1102 I-20	Big Spring	79720	+14322714152	http://www.laquintabigspring.com/?cid=local_6401	La Quinta by Wyndham	0.99	
+ee4b30158aa5	La Quinta Inn & Suites Big Spring	hotel	resort	32.30132	-101.55544	1102 Ih 20 W	Big Spring	79720	+14322640222	http://www.laquintabigspring.com/?cid=local_6401		0.85	
+dc705458e830	Lamesa Motel	hotel	motel	32.73446	-101.96346	1210 Seminole Rd	Lamesa	79331	+18068725112			0.92	
+46f44b037a79	Mainstay Suites	hotel		32.26535	-101.47889	306 NE 12th St	Big Spring	79720	+14322715630	http://www.choicehotels.com/texas/big-spring/hotels	Choice Hotels	1.00	
+59665d7170df	Motel 6	hotel		32.26534	-101.48853	600 W Interstate 20	Big Spring	79720	+14322671695	https://verdevalleyinn.com		0.92	
+f846379338a0	Motel 6 Lamesa, TX	hotel		32.72570	-101.94827	901 S Dallas Ave, Lamesa TX	Lamesa Tx			https://www.oyorooms.com/us/353508/	OYO	0.80	
+37fdf1a69135	Pbry Hotels Inc	hotel		32.26532	-101.48907	700 W Interstate 20	Big Spring	79720	+14322671601			0.65	
+e3846e6b9041	Plaza Inn	hotel	motel	32.26522	-101.48917	700 W Interstate 20	Big Spring	79720	+14322671601	http://www.plazainnbigspring.us		0.99	
+33caa8077215	Quality Inn & Suites	hotel	resort	32.26044	-101.45164	300 Tulane Ave	Big Spring	79720	+14322647086	https://www.choicehotels.com/texas/big-spring/quality-inn-hotels/txb24?mc=llbillpx&pmf=local		0.92	
+e8162690185f	Quality Inn & Suites Big Spring	hotel	resort	32.26140	-101.48804	917 Lamesa Hwy	Big Spring	79720	+14323489212	https://www.choicehotels.com/texas/big-spring/quality-inn-hotels/txr19		1.00	
+9808fb548297	Settles Hotel Development Co.	hotel		32.24695	-101.47684	710 S Gregg St	Big Spring	79720	+14322640317	http://www.hotelsettles.com/		0.82	
+f3790e7e51de	Shiloh Inn	hotel	motel	32.74923	-101.95134	1707 Lubbock Hwy	Lamesa	79331	+18068726721	https://reservation.magnusonhotels.com/bbe/page1.aspx?pcode=M19499		0.99	
+128d35d3eaea	Sleep Inn	hotel		32.26536	-101.47887	306 NE 12th St Building A	Big Spring	79720	+14323489213	https://www.choicehotels.com/texas/big-spring/sleep-inn-hotels/txg61?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00	
+7db4f1004d49	Southern Inn and Suites	hotel		32.75932	-101.94577	1617 US-87	Lamesa	79331	+18062005111			0.96	
+ee74a39736b9	Spring City Inn	hotel		32.26288	-101.48849	1109 N Aylesford St	Big Spring	79720	+18774113436	http://www.ichotelsgroup.com/h/d/ex/1/en/hd/HBSTX;jsessionid=MNR02LNEIRME1JICRYZSJBVFAKHDIIY4?rateCode=&rateDesc=&country=		0.74	
+c015c6c8ea85	Ssts, Llc	hotel		32.22724	-101.46991	2701 S Gregg St	Big Spring	79720				0.95	
+4e6d3b58cc64	Stanton Inn & Suites	hotel		32.13635	-101.80747	3394 I-20	Stanton	79782	+14327562077	http://www.staycobblestone.com		0.94	
+97bd6ae32900	Super 8 By Wyndham Big Spring Tx	hotel		32.25983	-101.45012	2900 E Interstate 20	Big Spring	79720	+18005369326	https://www.wyndhamhotels.com		0.55	
+ab1c13fbddfd	Super 8 by Wyndham Stanton	hotel	resort	32.13929	-101.80029	3432 Interstate 20	Stanton	79782	+14326072090	https://www.wyndhamhotels.com/super-8/stanton-texas/super-8-stanton/overview		1.00	
+b0b2fea8dcb4	TownePlace Suites	hotel		32.26174	-101.49072	1011 North San Antonio Street	Big Spring	79720	+14326065166	http://towneplacesuites.marriott.com/	TownePlace Suites by Marriott	1.00	
+bf3e0b2529b0	Us Retail Ventures Llc	hotel		32.26063	-101.48790	915 Lamesa Hwy	Big Spring	79720				0.95	
+39c78cf2ae7a	Zena Milan Hotels Llc	hotel		32.26295	-101.48859	1109 N Aylesford St	Big Spring	79720				0.95	
+a90e5a2f0a90	Apex Energy Services	office		32.07105	-101.95588	8401 E County Road 62	Midland	79706	+14322791285	https://apexenergydrink.com		0.75	
+9a5e5313be84	Big Spring Correctional Center	office		32.26041	-101.50209	1801 W Interstate 20	Big Spring	79720	+14322638532	www.bop.gov		0.92	
+457ac5594b8b	Ceram-Kote Coatings Inc.	office	industrial company	32.28771	-101.49789	3118 N. Hwy 87	Big Spring	79720	+14322638497	http://www.ceram-kote.com/		0.92	
+f596834c2ce6	Citation Oil & Gas Corporation	office	energy company	32.29375	-101.30596	120 S 1st St	Coahoma	79511	+14323944101	http://www.cogc.com		0.74	
+4f324dc5b036	D-Xtract Minerals and Consulting Services	office		32.23063	-101.43900	2404 Merrily Dr	Big Spring	79720	+14322671125	http://www.d-xtract.com		0.92	
+3ae404181b5c	Energy Intermediates	office	energy company	32.03536	-101.99592	5500 I-20 Frontage Rd	Midland	79706	+14325706799	http://enerchem.com		0.92	
+2428ce5b6e17	Fiberspar Linepipe LLC	office	plastics company	32.03617	-101.99824	5405 E Hwy 80	Midland	79706	+14326867375	http://fgspipe.com		0.92	
+f008d9dec3ab	K&b Oilfield Services	office		32.06151	-101.95203	3202 N County Road 1106	Midland	79706	+19036463822			0.65	
+3c1c917bad7b	Mk Constructors	office		32.06311	-101.95270	3307 N County Road 1106	Midland	79706	+14097690089	https://mkconstructors.com		0.65	
+9fbee79a3949	Prescription Services, Inc.	office	pharmaceutical company	32.24528	-101.47317	1002 S Main St	Big Spring	79720	+14322672711	https://www.prescription-services-inc.business.site		0.92	
+6a169f62b20f	Red River Oilfield Services	office		32.07023	-101.95922	8211 E County Road 62	Midland	79706	+18173083306	https://www.redriveroilfield.com		0.75	
+07cbf6f16208	Rtw & Associates Inc	office	bottled water company	32.24121	-101.45241	1509 E FM 700	Big Spring	79720	+14322638781	https://www.tateandassociates-law.com		0.65	closed
+4b2dea173e38	Solar Of Big Spring	office	energy company	32.25465	-101.47629	101 Runnels St	Big Spring	79720	+18302544389	horizoncosolarcompany.xyz		0.65	closed
+bb8a1233404a	Stine Equipment, LLC	office	energy company	32.02903	-101.91437	1522 S County Road 1090	Midland	79706	+15125454527	http://www.stineequipment.com/		0.92	
+e67111752b57	Suddenlink Communications	office	telecommunications company	32.23990	-101.44824	2006 Birdwell Ln	Big Spring	79720	+14322673821	http://www.suddenlink.com/		0.92	
+09ec9bbec9a3	Watermill Express	office	bottled water company	32.24441	-101.47522	1002 S Gregg St	Big Spring	79720	+18004879643	https://watermillexpress.com/	Watermill Express	0.99	
+0fb9aa3a0499	WesTex	office	telecommunications company	32.12420	-101.80445	1500 W Business 20	Stanton	79782	+14327563393	http://www.westex.coop/		0.56	
+4743c9ffae1d	Acevedo's	restaurant	texmex restaurant	32.73050	-101.94985	312 S Dallas Ave	Lamesa	79331	+18068725715	https://acevedo-restaurant.hub.biz		0.96	
+d87eb644291a	Adalyn's Burrito Stop	restaurant	breakfast and brunch restaurant	32.34723	-101.28006		Big Spring		+4325555555			0.68	
+bb46bd02502f	Al's & Son Bar-B-Q	restaurant	barbecue restaurant	32.23631	-101.47266	1810 S Gregg St	Big Spring	79720	+14322678921	http://alsandsonbbq.com/		0.95	
+fbaa828a3542	Alberto's Crystal Cafe	restaurant	texmex restaurant	32.23112	-101.47050	2401 S Gregg St	Big Spring	79720	+14322672310	http://albertoscrystalcafe.com/		1.00	
+23cf31e810d5	Alyesford International Inc	restaurant		32.23520	-101.47086	2010 Scurry St	Big Spring	79720				0.95	
+99a59e6e4ebf	Arroyo Grill	restaurant	bar and grill restaurant	32.24126	-101.44888	1904 Birdwell Ln	Big Spring	79720	+14325174157			0.92	
+5e8c141d5a64	At Box	restaurant	italian restaurant	32.25721	-101.46842	903 E 2nd St	Big Spring	79720	+14356448697			0.71	
+90cbeeacf5a1	B3’s Peckin’ Good Chicken & BBQ	restaurant		32.96653	-101.83161	713 6th St	Odonnell	79351	+18064283240			0.81	
+10b36efeb907	Backyard BBQ food truck	restaurant	barbecue restaurant	32.24933	-101.47953	209 W 3rd St	Big Spring	79720	+14322316131			0.79	
+e7f97ceeb86a	Basin Poker Club LLC	restaurant	bar and grill restaurant	32.02337	-101.95889	7400 E CR-90	Midland	79706	+14326180166	http://www.basinpokerclub.com/		0.59	
+c8c33137b32d	Big A S 2	restaurant		32.23690	-101.47250	1811 S Gregg St	Big Spring	79720				0.95	
+624b418a92a9	Big John's Feed Lot	restaurant	barbecue restaurant	32.24924	-101.48486	802 W 3rd St	Big Spring	79720	+14322647555	https://bjfl.site/		0.98	
+8e70a43ccd25	Bohot Todd, Inc	restaurant		32.23046	-101.46478	404 E Marcy Dr	Big Spring	79720				0.95	
+3e40dc790d58	Brenda's Hilltop Cafe	restaurant		32.25747	-101.46232	1307 E 4th St	Big Spring	79720		brendashilltopcafe.com		0.95	
+a109eb157ae4	Brick Oven Pizzeria	restaurant	pizza restaurant	32.35567	-101.00629	8773 E Interstate 20	Westbrook	79565	+13255150030	https://www.brickovenpizzeriatx.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.96	
+0af4cfa4dcd0	Burrito Express	restaurant	mexican restaurant	32.23712	-101.50746	3101 W Hwy 80	Big Spring	79720		http://www.burritoexpressinc.com	Burrito Express 1 LLC	0.92	
+767e671c37a0	Burrito Express II	restaurant	mexican restaurant	32.23292	-101.47174	2200 S Gregg St	Big Spring	79720	+14322646341	http://burritoeater.com/		0.92	
+e26a75f2565f	Carlos' Restaurant | Mexican	restaurant	mexican restaurant	32.25630	-101.48277	308 NW 3rd St	Big Spring	79720	+14325174646			0.94	
+85078ca28b96	Casa Blanca Restaurant	restaurant	mexican restaurant	32.26150	-101.48863	1005 Lamesa Hwy	Big Spring	79720	+14322631162	http://www.casablancamexican.com/		0.93	
+e820a02894ac	Casa Chiquita	restaurant	mexican restaurant	32.73358	-101.96343	412 N Avenue L	Lamesa	79331	+18068728061			0.92	closed
+0e189f753b9e	Chelos Mexican Restaurant	restaurant		32.72654	-101.96040	503 S Avenue K	Lamesa	79331				0.69	
+e10dcb5b1b6d	Coahoma Cafe	restaurant	diner	32.29358	-101.30400	211 NE Broadway	Coahoma	79511	+14323944098			0.95	
+784ece5f512f	Country Pride	restaurant		32.26485	-101.49006	704 West Interstate 20	Big Spring	79720	+14322644444	https://www.ta-petro.com/amenities/restaurants/country-pride		0.96	
+f4926f6280d0	Cowboy's Steakhouse and Restaurant	restaurant	steakhouse	32.23045	-101.46471	404 E Marcy Dr	Big Spring	79720	+14322630181	https://www.wtxtogo.com/order/restaurant/cowboys-steakhouse-menu/311		0.99	
+c80c5dda076e	Crispy's Cafe	restaurant	american restaurant	32.24123	-101.44908	1904 Birdwell Ln	Big Spring	79720	+14325174520	http://crispyscafebigspring.com		0.92	closed
+fe9c3baa1d17	D&M INC	restaurant	bar and grill restaurant	32.25354	-101.47624	214 Runnels St	Big Spring	79720	+4328169620	http://Honesthvacllc.com/		0.86	
+a567ad4f3357	Dell's Cafe	restaurant	breakfast and brunch restaurant	32.25835	-101.45464	1608 E 4th St	Big Spring	79720	+14322679323			0.92	
+72f6c6dc1df9	Denny's	restaurant	breakfast and brunch restaurant	32.26003	-101.45426	1710 E 3rd St	Big Spring	79720	+14322672201	http://locations.dennys.com/TX/BIG-SPRING/246027/		0.99	closed
+077ad6ab97fa	Devour	restaurant	italian restaurant	32.25222	-101.47543	322 Runnels St	Big Spring	79720	+14325174687	http://www.devourbigspring.com/		0.95	
+307ddd0a332b	Dia Del Taco	restaurant	mexican restaurant	32.25779	-101.47537	110 N Nolan St	Big Spring	79720	+4322701700			0.83	
+722ee98b18c5	Dickey's Barbecue Pit	restaurant	barbecue restaurant	32.22768	-101.47062	2602 S Gregg St Ste E-2	Big Spring	79720	+14327144733	https://www.dickeys.com/locations/Texas/Big-Spring/big-spring	Dickey's Barbecue Pit National	0.99	
+19f8684e9df1	DL Showpigs	restaurant		32.67390	-101.77201	2101 County Road 24	Lamesa	79331	+18064382916	http://www.dlshowpigs.com		0.77	
+3d895eb10a74	Dragon China Buffet	restaurant	buffet restaurant	32.24163	-101.47447	1300 S Gregg St	Big Spring	79720	+14322688888	https://www.dragonchinabuffettx.com		0.97	
+578142e2dd34	Eagle Store	restaurant		32.96893	-101.83001	311 Small St	O'Donnell	79351	+18064283410			0.92	
+ebfe227f2535	EJ's Cotton Pickin' Dive	restaurant	comfort food restaurant	32.12820	-101.80250	410 Lamesa Hwy	Stanton	79782	+14327562444	http://Orders.cake.net/10794173		0.96	
+52d4251b58d5	El Buen Pollo | Mexican	restaurant	mexican restaurant	32.23660	-101.50979	3300 W Hwy 80	Big Spring	79720	+14322631400	http://elbuenpollo.placeweb.site		0.92	
+5859ffdaf1f2	El Jalisco Bar and Grill	restaurant	mexican restaurant	32.25473	-101.46906	310 Owens St	Big Spring	79720	+14329356900			0.97	
+3427dc863aa1	El Nopal Cafe	restaurant	mexican restaurant	32.24642	-101.47659	800 S Gregg St	Big Spring	79720	+14322671499	https://local.yahoo.com/info-19495680-el-nopal-cafe-big-spring		0.92	
+61ffc58549f4	El Rincon Mexican Food	restaurant	texmex restaurant	32.24094	-101.47231	1407 Scurry St	Big Spring	79720	+14322708010			0.94	
+109a270ff3f0	El Salzon Authentic Mexican Restaurant	restaurant	mexican restaurant	32.26125	-101.48733	910 Lamesa Hwy	Big Spring	79720	+14322640042	http://elsazonauthenticmexicanfoodtx.com		0.77	
+941d5acd0911	El Sazón de la Abuela | Mexican	restaurant	mexican restaurant	32.26125	-101.48735	910 Lamesa Hwy	Big Spring	79720	+14322706033	http://elsazonauthenticmexicanfoodtx.com		1.00	
+aeca24f845e8	Eli's	restaurant	mexican restaurant	32.24807	-101.48423	400 Abrams St	Big Spring	79720	+14322341653			0.92	
+f37c7a0c9bcc	Estella's Country Corner Cafe	restaurant	mexican restaurant	32.28493	-101.49710	3004 N US Highway 87	Big Spring	79720	+14322309387	http://countrycornercafe.net/		0.92	
+b48af215b51f	Evita's Fine Mexican Cuisine	restaurant	texmex restaurant	32.24470	-101.44585	1801 E FM-700	Big Spring	79720	+14322677121	https://evitascuisine.com		0.94	
+d97d2a10a0a3	Farm Bureau Insurance: Forest Shane	restaurant		32.24769	-101.45959	1205 E 11th Pl	Big Spring	79720	+14322640912	https://www.txfb-ins.com		0.95	
+84022e24eb18	Fatbacks Smokehouse	restaurant	barbecue restaurant	32.73623	-101.95222		Lamesa			https://www.lamesaampmdelivery.com/fatbacks		0.71	
+c4eb5c706502	Furr's	restaurant	american restaurant	32.22832	-101.46966	2503 S Gregg St	Big Spring	79720	+14322672895	http://www.furrs.net		0.92	closed
+6d6d9a1d4af7	G & G Roughneck BBQ	restaurant	barbecue restaurant	32.72891	-101.95461	312 S Avenue F	Lamesa	79331				0.62	
+e63e999f99d7	Gilli’s Mobile Diner	restaurant	american restaurant	32.01096	-101.97308	6221 FM-307	Midland	79706	+14329675549			0.69	
+9aeae1ab0546	Golden Buffet Inc	restaurant	chinese restaurant	32.74183	-101.95224	920 N Dallas Ave	Lamesa	79331	+18068728889			0.92	
+c217488d68ba	Gomezminjarez, Inc	restaurant		32.25639	-101.48218	308 NW 3rd St	Big Spring	79720				0.95	
+1108d8e02f2e	Gorditos Smokehouse BBQ	restaurant		32.73444	-101.96075	1007 N 4th St	Lamesa	79331	+18062003929			0.78	
+772cae46b061	Gordo's Taqueria & Grocery	restaurant	mexican restaurant	32.03740	-101.99677	5501 E Hwy 80	Midland	79705	+14328137477			0.99	
+fbdcf4b069a2	Greenwood Bjj	restaurant	mexican restaurant	32.01879	-101.93575	1805 S Co Road 1105, -	Midland	79706	+14327708750	https://greenwoodbjj.my.canva.site/		0.85	
+55f722dfa6bd	Happy Buffet	restaurant	chinese restaurant	32.74177	-101.95226	920 N Dallas Ave	Lamesa	79331	+18068725588	http://www.happybuffet.net		0.92	closed
+b2bba1199f96	Hibachi Express | Japanese	restaurant	japanese restaurant	32.22848	-101.46996	2503 S Gregg St	Big Spring	79720	+14322638888	http://www.hibachiexpresstx.com		1.00	
+8b024dec4c37	Hog Heaven BBQ	restaurant	barbecue restaurant	32.23452	-101.51670	4009 W Highway 80	Big Spring	79720	+14322640905	http://hogheavenbarbque.ewbz.net/		0.92	
+fbef7a086ac4	Hunan Chinese Restaurant	restaurant	chinese restaurant	32.24281	-101.47478	1200 S Gregg St	Big Spring	79720	+14322674509	https://hunan-chinese-restaurant-chinese-restaurant.business.site		0.96	
+3aa9c37348b9	Hungry Bear Pizza	restaurant	american restaurant	32.73439	-101.96653	1504 Seminole Rd	Lamesa	79331	+18068722773	https://hungry-bear-pizza.hub.biz		0.92	
+cfc36a32e8e8	IHOP	restaurant	breakfast and brunch restaurant	32.26489	-101.49008	704 W Interstate 20 20	Big Spring	79720	+14322424600	https://restaurants.ihop.com/en-us/tx/big-spring/breakfast-704-west-interstate-20-5705		0.99	
+ef58e7fd7c56	J Jayz Bar and Grill	restaurant	bar and grill restaurant	32.25382	-101.47751	113 S Main St	Big Spring	79720	+14325174332	http://jjayz.com/		0.93	
+50b5c0a27102	Joe's Italian Bistro	restaurant	italian restaurant	32.24075	-101.45279	1513 FM700	Big Spring	79720	+14322640118	http://www.joesitalianbistro.com		0.94	
+e3f433ac2177	K-BOB'S Steakhouse | Lamesa	restaurant	steakhouse	32.75434	-101.94970	2200 Lubbock Hwy	Lamesa	79331	+18064050011	https://www.k-bobs.com	K-BOB'S Restaurants, Clovis, NM	0.92	
+e71816686387	La Cocina De Catita	restaurant	mexican restaurant	32.24839	-101.48307	703 W 4th St	Big Spring	79720	+14322702922			0.92	
+e0f09cfde29b	La Mexicana	restaurant	mexican restaurant	32.30347	-101.98917	HWY 176, West of FM 1212	Tarzan		+18067526234			0.87	
+2e90802d3237	La Posada Restaurant	restaurant		32.25781	-101.48186	206 Sgt Paredez St	Big Spring	79720	+14322679112			0.83	
+1bd0d997fabd	La Trailita Taqueria	restaurant	texmex restaurant	32.26132	-101.48743	910 Lamesa Hwy	Big Spring	79720	+13254302848			0.80	
+66fd44cbcdce	Laredo Taco Company	restaurant		32.26230	-101.49002	1101 Lamesa Hwy	Big Spring	79720	+14322633480	https://www.laredotacocompany.com/		0.92	
+871b7866d003	Laredo Taco Company	restaurant		32.29354	-101.30515	101 E Broadway	Coahoma	79511	+14323944970	https://www.laredotacocompany.com/		1.00	
+8dfed16ab283	Laredo Taco Company	restaurant		32.73658	-101.94953	411 N Lynn Avenue	Lamesa	79331	+18068720110	https://www.laredotacocompany.com/		0.92	
+d7b470c370c8	Laredo Taco Company	restaurant		32.75101	-101.95137	1912 N Dallas Ave	Lamesa	79331	+18068728521	https://www.laredotacocompany.com/		0.92	
+e3619227cc69	Laredo Taco Company	restaurant		32.13733	-101.80499	1308 N Lamesa Hwy	Stanton	79782	+14327562115	https://www.laredotacocompany.com/		1.00	
+9391996c4733	Las Cazuelas Grill	restaurant	mexican restaurant	32.22688	-101.47069	2606 S Gregg St	Big Spring	79720	+14325174312	http://www.lascazuelasgrill.com/		0.92	
+8163164767f0	Las Chulas	restaurant	mexican restaurant	32.25738	-101.46227	1307 E 4th St	Big Spring	79720				0.92	
+089d288b6aee	Ledgens Pizza	restaurant	pizza restaurant	32.01879	-101.93575	1805 S Co Rd 1105	Midland	79706	+14328971400	https://ledgenspizza.com/home-copy/		0.92	
+2d2eb5b394f7	Locals	restaurant	delicatessen	32.21898	-101.48292	1600 Wasson Rd	Big Spring	79720	+14322138876			0.92	
+565ab6f9332f	Los Amigos Grill & Bar	restaurant	mexican restaurant	32.25542	-101.46905	310 Owens St	Big Spring	79720	+14322641711			0.95	
+268455417762	Lost Texan Cafe	restaurant	barbecue restaurant	32.73871	-101.95235	608 N Dallas Ave	Lamesa	79331	+18068729234	https://www.restaurant.com/lost-texan-cafe-lamesa-pid=198232		0.98	
+ccd2f31ec4c2	Marthas Cafe	restaurant		32.25747	-101.46232	1307 E 4th St	Big Spring	79720				0.95	
+57ae41aafeda	Mary’s cafe #2	restaurant		32.29367	-101.30400	211 NE Broadway	Coahoma	79511	+14323944098			0.99	
+ab6a90aa6356	McAlister's Deli	restaurant	delicatessen	32.26223	-101.48840	1010 Lamesa Hwy	Big Spring	79720	+14325586468	https://locations.mcalistersdeli.com/tx/big-spring/1010-lamesa-hwy?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.97	
+0f49920c61f9	Mountain View Mercantile	restaurant	american restaurant	32.26924	-101.38602	5907 N Service Rd	Big Spring	79720	+14322641913	http://mountainviewmercantile.com		0.77	
+394b52539bb7	Mr Gatti's Pizza	restaurant	buffet restaurant	32.25249	-101.47320	400 Nolan St	Big Spring	79720	+14323489949	https://mrgattispizza.com/homepage/locations/mr-gattis-pizza-big-spring/?y_source=1_MjAyODY1OTU3MS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Mr Gatti's Pizza	0.96	
+727469c006ab	Neo Continental Corp	restaurant		32.73634	-101.95384	412 N 4th St	Lamesa	79331				0.95	
+663ae1e3eb37	Neutral Ways Eatery	restaurant	american restaurant	32.25844	-101.45449		Big Spring		+4322706027			0.59	
+3aadead8870c	Nina's Table	restaurant		32.26941	-101.38593	5909 N Service Rd	Big Spring	79720	+14326386621			0.63	
+d2c406fdd3e1	O'hana Japanese Steak Restaurant	restaurant	japanese restaurant	32.73690	-101.95132	501 N Dallas Ave	Lamesa	79331	+18068720400	http://www.ohanasteakhouse.com/		0.97	
+69adfac1ddc1	One & Dunn	restaurant	breakfast and brunch restaurant	32.73176	-101.94894	202 S 2nd St	Lamesa	79331	+18068701313			0.92	
+f1b714eb255b	One Guy from Italy - Lamesa	restaurant	italian restaurant	32.73204	-101.95291	118 Austin Ave	Lamesa	79331	+18062005141	https://www.toasttab.com/local/order/one-guy-from-italy-lamesa-118-austin-ave		0.95	
+a364de00fec5	Papa Chon's Mexican Restaurant	restaurant	mexican restaurant	32.25481	-101.46902	310 Owen St	Big Spring	79720	+14322641711	http://www.qualityinnbigspring.com		0.92	
+ac0e5b343169	Papa Georgio's Pizza	restaurant	pizza restaurant	32.22771	-101.47089	2602 S Gregg St	Big Spring	79720	+14322632222	http://www.papageorgiospizza.com		0.92	
+efbb84b47dd7	Papa Tacho's Greenwood	restaurant	mexican restaurant	32.01868	-101.93536	1805 S Co Rd 1105 Unit J	Midland	79706	+14322471124			0.97	
+431a851590f5	Pedroza's Restaurant	restaurant	texmex restaurant	32.74678	-101.95176	1501 N Dallas Ave	Lamesa	79331	+18068722884	http://www.pedrozasrestaurant.com/		0.92	
+dead678b52b7	Pizza Inn	restaurant	buffet restaurant	32.23275	-101.46108	700 FM700 Ste. 150	Big Spring	79720	+14322631381	https://www.pizzainn.com/locations/big-spring-tx/	Pizza Inn	0.96	
+0bbc3f478b53	Pizza Marie	restaurant	pizza restaurant	32.13048	-101.78631	405 E Front St	Stanton	79782	+14327564536	https://orders.cake.net/11384544		0.98	
+3c77ee550d30	Pizza Pro	restaurant	pizza restaurant	32.12898	-101.78845	304 N Highway 137	Stanton	79782	+14327563377	http://www.pizzapro.com		0.77	
+0e7d32d33efc	Rc Testing Llc	restaurant		32.02763	-101.91525	9703 E County Road 97	Midland	79706	+14322539274			0.65	
+fa73df0d643c	Red's "fun On A Bun"	restaurant	burger restaurant	32.25734	-101.45213	501 Birdwell Ln	Big Spring	79720	+14322128908			0.65	closed
+bf0893f0efb9	Rocket Cafe	restaurant		32.26951	-101.38670	5909 N Service Rd	Big Spring	79720	+14326064932			0.68	
+de7f44ced207	Rocky's Burgers	restaurant	burger restaurant	32.72794	-101.94904	606 S Dallas Ave	Lamesa	79331	+18068727968	http://lubbockmenu.com/rockys-burgers-super-dog-menu-lamesa		0.96	
+8251a556f6ad	Rustic Cafe - Midland	restaurant		32.03516	-101.98516	5800 I-20 E	Midland	79706	+14326838424	https://kentkwik.com/rustic-cafe/		0.97	
+c32f2a744aac	Sandy's Barnhouse Grill	restaurant	bar and grill restaurant	32.39741	-101.66502	7310 FM 846	Knott	79748	+14323534270	http://sandysbarnhousegrill.com		0.96	
+d891d105dd8c	Sbarro	restaurant	pizza restaurant	32.03357	-101.98818	5907 E Interstate 20	Midland	79706	+14324008754	https://sbarro.com/locations/tx/midland/dk-gas-station/?utm_source=facebook&utm_medium=local&utm_campaign=fb	Sbarro	0.92	
+27a66ed603b0	SBK BBQ at Rooster’s Backyard	restaurant	barbecue restaurant	32.01066	-101.97210	6221 Farm to Market 307	Midland	79706	+15757070338	http://sbkbbq.square.site/		0.97	
+b135b91111b3	Sissy's Dive	restaurant	diner	32.74719	-101.95212	1510 Lubbock Hwy	Lamesa	79331	+18068707867			0.97	
+36aa4d1d653c	Spanish Inn Restaurant | Mexican	restaurant	mexican restaurant	32.25690	-101.48112	200 NW 3rd St	Big Spring	79720	+14322675871	https://www.dandb.com/businessdirectory/spanishinn-bigspring-tx...		0.94	
+ae0204ac8839	Starlee’s Kitchen	restaurant		32.24970	-101.47655	505 Scurry St, Big Spring, TX 79720-2735, United States	Big Spring	79720	+14325174483			0.93	
+a36e09c0c2ba	Sub-Way Greenwood	restaurant		32.01941	-101.93671	1804 S CR-1105	Midland	79706				0.83	
+8dedf8e5e279	Sunny Side Up Cafe	restaurant	breakfast and brunch restaurant	32.24092	-101.44839	1907 Birdwell Ln	Big Spring	79720	+14326065031			0.92	
+496ac06b17a6	Taco Villa	restaurant	texmex restaurant	32.23999	-101.47324	1501 S Gregg St	Big Spring	79720	+14322633511	https://tacovilla.net/	Taco Villa Fanatics	0.98	
+bfa7ed78d49c	Taco Villa	restaurant	texmex restaurant	32.73716	-101.95048	206 N 4th St	Lamesa	79331	+18068723321	http://www.tacovilla.com	Taco Villa Fanatics	0.95	
+396b3979b449	Tamale Hombres	restaurant	mexican restaurant	32.74581	-101.95219	1410 Lubbock Hwy	Lamesa	79331	+18062003872	https://www.tamalehombres.com/		0.86	
+a7043a5d190b	Taqueria Jalisco	restaurant	mexican restaurant	32.25681	-101.46670	1001 E 3rd St	Big Spring	79720	+14325174880		Taqueria Taxco	0.97	
+b16ed33fc181	Taqueria Jalisco	restaurant	mexican restaurant	32.72535	-101.94798	903 S Dallas Ave	Lamesa	79331	+18068722946	http://taqueriajalisco.net		0.94	
+c955c9068518	Taquería El Valle | Mexican	restaurant	mexican restaurant	32.73423	-101.96645	1504 Seminole Rd	Lamesa	79331	+18066013684			0.92	
+25788073c04b	Tarzan Grill - Tarzan, TX	restaurant	burger restaurant	32.30492	-101.97483	2752 TX-176	Tarzan	79783	+14324592245	http://www.tjtravelcenters.com/		0.97	
+a753d9bc6525	Texas Cajun Cafe	restaurant	cajun and creole restaurant	32.26396	-101.49219	802 W Interstate 20	Big Spring	79720	+14322647686	https://local.yahoo.com/info-43321558-texas-cajun-cafe-big-spring		0.97	
+3797b40d5778	Texas Cajun Seafood and Steak	restaurant	cajun and creole restaurant	32.73635	-101.95121	305 N 4th St	Lamesa	79331	+18068700017	http://texas-cajun-la-mesa.edan.io		0.96	
+83d40651289d	The Mayo	restaurant		32.25294	-101.47750	206 S Main St	Big Spring	79720	+14322138212	http://thefarmstandfarmersmarket.org/		0.89	
+8974204e50b9	The Mayo Sauce	restaurant		32.25296	-101.47750	2414 Scurry St	Big Spring	79720	+14329351144	http://themayosauce.com		0.91	
+789871bceb7e	Tita's Kitchen	restaurant	mexican restaurant	32.73577	-101.95461	507 N 4th St	Lamesa	79331	+18068727527			0.92	
+d1f053dd730e	Tita's Mexican Kitchen	restaurant	mexican restaurant	32.25618	-101.46745	904 E 3rd St	Big Spring	79720	+14325174455	https://titas-mexican-kitchen.square.site/		0.92	
+3fa32614b3b0	Twisted Sugar - Greenwood	restaurant		32.00855	-101.97849	6009 FM-307	Midland	79706	+14322272756	http://twistedsugar.com/	Twisted Sugar NWI	0.70	
+94848b73bbe4	Tío Lencho's	restaurant	mexican restaurant	32.23790	-101.47155	1705 Scurry St	Big Spring	79720	+14327144447	https://piyw.top/tio-lencho-s		0.96	
+9fc821e5e1ef	W Squared BBQ	restaurant		32.26782	-101.36863	6901 E Midway Rd	Big Spring	79720	+14324661833			0.82	
+9648a044fe15	Wagon Wheel Drive In	restaurant	theme restaurant	32.23464	-101.47083	2010 Scurry St	Big Spring	79720	+14325174097	http://wagonwheeldriveinno2bigspring.snackbars.website		0.97	
+5941248dd822	Woodshack Burritos	restaurant	mexican restaurant	32.25889	-101.48381	608 N Lamesa Hwy	Big Spring	79720	+14326065130			0.69	
+bde86b711fb8	Yasumi Big Spring	restaurant	japanese restaurant	32.25724	-101.48203	300 N Gregg St	Big Spring	79720	+14325174112	http://www.TheYasumiHouse.com/		0.70	
+0f9456d20120	Yo Mama's	restaurant		32.25323	-101.47736	206 S Main St	Big Spring	79720	+14325174327			0.92	
+33b45c03efb1	Z's Burgers	restaurant	burger restaurant	32.02679	-101.90147	10605 FM 307	Midland	79706	+14326871700	http://www.zsburgersmidland.com		0.92	closed
+1893b6aecf0c	BeeHive Homes of Lamesa TX	senior	retirement home	32.75998	-101.95122	101 N 27th St	Lamesa	79331	+18064525883	https://beehivehomes.com/locations/lamesa/	Beehive Homes of Page- Elk Road	0.97	
+e9f7cc004905	Big Spring Center for Skilled Care	senior	retirement home	32.21100	-101.49193	3701 Wasson Rd	Big Spring	79720	+14326065012	http://www.bigspringcenterforskilledcare.com/index.php		0.92	
+75ed4c9e8332	Comanche Flats	senior	retirement home	32.24849	-101.43399	1315 Baylor Blvd	Big Spring	79720	+14322631408			0.92	
+b41a5298c94b	Focused Care at Lamesa	senior	retirement home	32.74407	-101.96633	1201 N 15th St	Lamesa	79331	+18068722141	http://fpacp.com/Lamesa.html	Focused Care at Center	0.92	
+b0f14b30bde1	HC Nursing Big Spring	senior	retirement home	32.25006	-101.44988	1001 Birdwell Ln	Big Spring	79720	+14322645070	http://www.howardcollege.edu/come-to-hc/health-professions/nursing/rn-registered-nurse.html		0.84	
+fcbca3c66cab	Heritage Heights at Big Spring	senior	retirement home	32.23528	-101.50674	120 Airbase Rd	Big Spring	79720	+18777574821	https://heritageheightsatbigspring.com/		0.98	
+95c1745a5a48	Lamun - Lusk - Sanchez Texas State Veterans Home	senior	retirement home	32.26750	-101.49446	1809 N US Highway 87	Big Spring	79720	+14322688387	https://vlb.texas.gov/veterans-homes/locations/big-spring/index.html		1.00	
+f25586adcaed	Northridge Retirement Center	senior	retirement home	32.76119	-101.95105	100 NE 27th St	Lamesa	79331	+18068729255	http://northridgeretirement.com/		0.92	
+ba0bafd61b10	Northside Community Center	senior	retirement home	32.26074	-101.48013	110 NE 8th St	Big Spring	79720	+14322632673			0.72	
+a875ed0273b4	Parkplace Retirement Living	senior	retirement home	32.23703	-101.47541	501 W 17th St	Big Spring	79720	+14322671353	http://parkplaceretirementliving.com/		0.92	
+d78b6653e794	Parkview Nursing and Rehabilitation Center	senior	retirement home	32.21680	-101.48600	3200 Parkway Rd	Big Spring	79720	+14322634041	http://www.parkviewnursing.net/		1.00	
+672f17b50565	Sage Healthcare Center	senior	retirement home	32.74391	-101.96623	1201 15th St	Lamesa	79331	+18068722141	https://sagenursingrehab.com/		0.99	
+19445c04a12c	Trustwell Living at Marcy Place	senior	retirement home	32.21510	-101.49214	2301 Wasson Rd	Big Spring	79720	+14323026001	https://www.trustwellliving.com/communities/marcy-place/?utm_source=facebook&utm_medium=organic&utm_campaign=social	Trustwell Living at Westwood Place	0.92	

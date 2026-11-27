@@ -1,2 +1,2 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-4d03138afe50	Kwick Food Mart	convenience		34.45222	-94.48242	701 S Eastman Rd	Longview	75602	+19037588989	http://www.exxonmobilstations.com/14609-kwick-food-mart-2-longview		0.78
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+4d03138afe50	Kwick Food Mart	convenience		34.45222	-94.48242	701 S Eastman Rd	Longview	75602	+19037588989	http://www.exxonmobilstations.com/14609-kwick-food-mart-2-longview		0.78	

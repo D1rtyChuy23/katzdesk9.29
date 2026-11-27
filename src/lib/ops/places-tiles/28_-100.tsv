@@ -1,508 +1,518 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-be063b3a1667	Canela's Bakery	bakery		28.68509	-99.83407	222 W Sabine St	Crystal City	78839	+18303743642	https://www.paypal.com/ncp/payment/KVAPX2KGMRAUS		0.96
-8208946e35c2	Cinnabon	bakery		28.45259	-99.23819	921 I-35	Cotulla	78014	+18308769754	https://locations.cinnabon.com/tx/cotulla/921-n-ih-35?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.94
-b79b16ad5a40	Cinnabon	bakery		28.04691	-99.34866	45 TX-44	Encinal	78019	+18306632940	https://locations.cinnabon.com/tx/encinal/45-e-texas-state-hwy-44?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	1.00
-94c2de4fab80	Daylight Donuts	bakery	donut shop	28.52387	-99.85860	309 W Nopal St	Carrizo Springs	78834	+18308763122	http://daylightdonuts.com		0.92
-6150d5f128c5	Donut Palace	bakery	donut shop	28.89963	-99.09372	203 Arnold St	Pearsall	78061	+18303343314	http://donutpalace.com/		0.96
-8911d951611e	Donut Palace in Dilley	bakery	donut shop	28.67542	-99.17394	302 W FM 117	Dilley	78017	+18327840888			0.92
-3e5130b48fda	GiGi's Bakery	bakery		28.52185	-99.85539	211 E Alamo St	Carrizo Springs	78834	+12102434344			0.92
-6ae7eaffab29	La Popular Bakery	bakery		28.89122	-99.09985	315 W Comal St	Pearsall	78061	+18303342484	https://la-popular-bakery-tx-4.hub.biz		0.92
-a76f5af08c56	Lu’s Sweets & Treats	bakery		28.52308	-99.85901	301 N 4th St	Carrizo Springs	78834				0.81
-2b0e3bf25260	Mabely's Bakery	bakery		28.67720	-99.17558	500 W FM 117	Dilley	78017	+18309632190			0.96
-f51dd58307f3	Mabely's Bakery	bakery		28.67432	-99.17221	428 W FM 117	Dilley	78017	+18309652190			0.56
-7417b6bcac41	Robert's Bakery	bakery		28.67954	-99.82049	121 S 7th Ave	Crystal City	78839	+18303743171			0.92
-f9fde0e23d89	The Donut Palace	bakery	donut shop	28.44203	-99.24580	961 FM468	Cotulla	78014	+18302023044	http://www.thedonutpalace.com	Donut Palace Carthage, MO	0.96
-08dc10a1f6de	Valdez Bakery	bakery		28.43447	-99.23460	204 S Main St	Cotulla	78014	+18308793450	https://printgraphex3.wixsite.com/website		0.96
-59ff3e5bbf83	Amigo's Place	bar		28.90155	-99.10858	211 N Lopez St	Pearsall	78061	+18305057401			0.92
-278717812a03	CODE 3 BAR	bar		28.52158	-99.85678	109 N 1st St	Carrizo Springs	78834	+18302550549			0.96
-eb2d535a2dd7	Cotulla City Limits	bar		28.44007	-99.23566	408 N Main St	Cotulla	78014				0.92
-33a34307ffa1	Cowboys Sports Bar in Cotulla	bar	sports bar	28.43026	-99.23613	511 S Main St	Cotulla	78014				0.64
-a4f97b6e4d5d	Dos Hermanos Peaks	bar		28.11279	-99.82612		Carrizo Springs					0.58
-a8176125a687	El Centenario Nite Club	bar	pub	28.89371	-99.09810	126 N Peach St	Pearsall	78061		http://www.clubplanet.com/Venues/128863/Pearsall/Robertos-Nite-Club/Photos		0.92
-02fddaa3f1df	Horseshoe Bar	bar		28.44304	-99.25156	182 I-35 Frontage Rd	Cotulla	78014				0.92
-408edcb79863	Jefe's Sports Bar	bar	sports bar	28.54932	-99.85673	794 Loop 517	Carrizo Springs	78834				0.96
-8cd51b315595	Jmj's Daiquiris LLC	bar	cocktail bar	28.89171	-99.10359	814 W Comal St	Pearsall	78061	+18303176789			0.98
-7d1e3f61609d	JOHNS BAR & GRILL	bar	sports bar	28.64386	-99.85188	5850 Farm to Market 191	Crystal City	78839	+18304439367			0.85
-0b7380ec1c4a	La Perlita Bar	bar		28.89362	-99.09827	Peach St	Pearsall	78061				0.67
-c26bf9fc317d	Las Diablitas Lounge	bar		28.68548	-99.83307	114 W Sabine St	Crystal City	78839				0.74
-e4f72182cffc	Locked and Loaded Saloon	bar		28.43619	-99.23424	100 N Front	Cotulla	78014	+18302020525	https://locked-and-loaded-saloon.hub.biz		0.92
-2e2828ad5ac9	Meme's Bar	bar		28.44140	-99.76201	909 Carter St	Asherton	78827	+18304689305	www.usbizplace.com/tx-m/memes-bar.html		0.92
-98c248bee6ba	Miller's Bar	bar		28.89301	-99.09875	103 N Peach St	Pearsall	78061				0.96
-803c430bd5d7	MVPs Sports Bar	bar		28.68064	-99.83009	409 W Zavala St	Crystal City	78839		https://www.instagram.com/mvpssportsbartx?igsh=MWNneG42bmY4NmFucA%3D%3D&utm_source=qr		0.96
-6665ddb09e50	Pancho's Cantina	bar		28.68526	-99.83270	114 W Sabine St	Crystal City	78839	+18304488828			0.92
-b00107d2ac02	Pearsall Lions Civic Center	bar		28.91749	-99.09332	433 County Road 1056	Pearsall	78061	+18303344202	http://www.lionsclubs.org		0.92
-da6974aac18d	Reyna’s Saloon	bar		28.89370	-99.09809	126 N Peach St	Pearsall	78061	+18305057333			0.89
-e8790990f6c9	Silver Spurs Gentleman's Club	bar		28.04508	-99.34876	302 E Texas State Hwy 44	Encinal	78019	+19569485177			0.92
-26dbb9853152	Tejano 830	bar		28.68581	-99.83347	1015 N Avenue A	Crystal City	78839	+19103406128			0.56
-a71cba671cf9	The Lounge Carrizo Springs	bar		28.52138	-99.85700	109 N 1st St	Carrizo Springs	78834	+12109520668			0.98
-98d9f9463743	Velasquez Bar	bar		28.42997	-99.23322	310 Thornton St	Cotulla	78014	+18308794617			0.97
-931dbe9ca56e	Zamora’s Bar	bar		28.44141	-99.75120		Asherton					0.75
-8a85f71ac8e5	Botello Auto Sales	cardealer		28.52207	-99.86160	602 Pena St	Carrizo Springs	78834	+18308762039			0.92
-a487d4a2dd5c	Comal Auto Sales	cardealer	used auto dealer	28.89376	-99.10757	1311 W Comal St	Pearsall	78061	+18303349366			0.92
-4a19af18e63a	Frio Chevrolet	cardealer		28.67240	-99.18256	16919 S Interstate Highway 35	Dilley	78017	+18304691187	http://www.friochevrolet.net		0.92
-0a952dfac6d5	Joel's Used Cars & Parts	cardealer		28.67913	-99.82681	498 S FM 393	Crystal City	78839	+18303743106			0.65
-73ab840d27dc	Joel's Used Cars & Parts	cardealer	used auto dealer	28.69704	-99.84242	498 Farm to Market Rd 393	Crystal City	78839	+18303743106	https://joels-used-cars-parts.hub.biz		0.92
-b5c14b4e6904	Petty Tire And Auto Service	cardealer		28.88142	-99.09933	1424 S Oak St	Pearsall	78061				0.78
-441d7d616c16	Rush Truck Center-Cotulla	cardealer		28.44402	-99.24722	137 Deer Run	Cotulla	78014	+19567641470	http://www.rushtruckcenters.com/locations/location-search/1032-cotulla	Rush Towing Systems	0.74
-a13a2e4d1b65	Tellus Equipment	cardealer		28.88999	-99.11825	750 I-35	Pearsall	78061	+18303343634	https://www.tellusequip.com/about-us/locations/pearsall-tx/	Tellus Equipment Solutions	0.92
-5a785fa39da8	Used Cars, Inc.	cardealer	used auto dealer	28.89358	-99.09391	314 E Rio Grande St	Pearsall	78061		https://www.ucarsinc.com		0.95
-b566587a6555	Worfe Chevrolet LLC	cardealer		28.67211	-99.18287	16919 I-35 S	Dilley	78017	+18309651661	http://www.friochevrolet.com/?cs%3Apro=yext		0.70
-8a100941047b	Oaks Theater	cinema		28.89091	-99.09541	210 S Oak St	Pearsall	78061				0.91
-59847bee8f7c	Cafe Suzanna	coffee		28.52357	-99.85963	305 N 5th St	Carrizo Springs	78834	+18302190052			0.92
-fc4da59080ff	Desi's	coffee		28.96110	-99.62088	14560 E US Hwy 57	Batesville	78829	+18303764403			0.90
-95c0501753a3	Elvira Mia Cafeteria	coffee		28.66998	-99.17835	554 W Miller St	Dilley	78017	+18302671608	https://cash.app/$elviramiacafeteria		0.56
-eb2ce284d068	Flying	coffee		28.45308	-99.23830	13 Freddie Copps	Cotulla	78014				0.66
-7f4048e17968	Gridiron Cafe	coffee		28.69611	-99.82880	2206 US-83	Crystal City	78839	+18304485051			0.92
-c59c0ccdcab1	Mom's Kitchen	coffee		28.43359	-99.23467	303 S Main St	Cotulla	78014	+18303262551			0.90
-0cd5066f669f	People's Truck Stop Cafe	coffee		28.94983	-99.84965	19358 US-83	La Pryor	78872	+18303654222	http://peoples-cafe.edan.io		0.96
-3d6b8fcf5859	Starbucks	coffee		28.89687	-99.11215	1804 W Comal St	Pearsall	78061	+18305051485	https://www.starbucks.com/store-locator/store/1038296/w-comal-st-louise-ln-1804-w-comal-pearsall-tx-78061-us	Starbucks	0.96
-78666519ba03	Tapioca Tea House	coffee	tea room	28.89224	-99.09479	307 E Colorado St	Pearsall	78061	+18307469044	http://www.tapiocateahouse.com		0.92
-4cc88ea554ec	The Mav Lab	coffee		28.89310	-99.09473	202 N Oak St	Pearsall	78061	+18305384766	http://karenalvarado.herbalife.com/en-us/u		0.92
-1fc69b93d83c	Carrizo Springs Jr.High	college		28.52181	-99.85699		Carrizo Springs					0.64
-7ed605f95b8b	Southwest Texas Junior College	college		28.67877	-99.82958	215 W Zavala St	Crystal City	78839	+18303743378	http://www.swtjc.net	Southwest Texas College	0.92
-8a7a3ec39385	Southwest Texas Junior College	college		28.89755	-99.09088	415 E Florida St	Pearsall	78061	+18302245007	http://www.swtjc.net/		0.95
-3fc3afe08d00	5 Points Market 15	convenience		28.52162	-99.85760	102 N 1st St	Carrizo Springs	78834	+18308769451	http://exxonmobilstations.com		0.92
-70257c0b6d05	7-Eleven	convenience		28.45144	-99.23914	795 Ih 35	Cotulla	78014	+18308795354	https://www.7-eleven.com/locations/tx/cotulla/795-ih-35-40535	7-Eleven	0.99
-8a217d39fcc8	7-Eleven	convenience		28.52046	-99.85717	101 S First St	Carrizo Springs	78834	+18308763359	https://www.7-eleven.com/locations/tx/carrizo-springs/101-s-first-street-east-40532	7-Eleven	0.98
-ace5d80f0fdd	7-Eleven	convenience		28.54512	-99.84544	2525 N US Hwy 83	Carrizo Springs	78834	+18308763601	https://www.7-eleven.com/		1.00
-d8c87b7acfdf	7-Eleven	convenience		28.49909	-99.82790	2525 N US Highway 83	Carrizo Springs	78834	+18002550711	https://www.7-eleven.com/locations/tx/carrizo-springs/2525-n-us-hwy-83-40536		0.85
-ccfb3e5247f0	83 Fuel Stop	convenience		28.34800	-99.61380	19575 TX-83	Catarina	78836		https://locations.valero.com/en-us/LocationDetails/Index/19575-TX-83/0000031247	Valero	0.80
-d94507c67e07	AMIGO DILLEY	convenience		28.68100	-99.18170	16290 I-35 S PO Box 287	Dilley	78017		https://locations.valero.com/en-us/LocationDetails/Index/16290-I-35-S-PO-BOX-287/0000027206	Valero	0.80
-44c3cb22aba3	Amigo's Travel Center	convenience		28.96000	-99.62321	14404 E US Hwy 57	Batesville	78829	+18303764040			0.96
-2970bc8b7da5	Amigos Food Mart	convenience		28.89151	-99.10242	604 W Comal St	Pearsall	78061	+18303343444	https://amigos-food-mart-tx-2.hub.biz/		0.96
-e3a755692cd9	Batesville One Stop	convenience		28.96002	-99.62318	14404 E US Hwy 57	Batesville	78829	+18303764040	https://batesville-one-stop-inc.hub.biz/		0.74
-08d984441af7	BIG'S #301	convenience		28.44390	-99.24790	1162 East FM 468	Cotulla	78014		https://locations.valero.com/en-us/LocationDetails/Index/1162-EAST-FM-468/0000002165	Valero	0.92
-6512bdd1214e	BIG'S 301	convenience		28.45377	-99.26555	1162 W FM 468	Cotulla	78014	+18308793109			0.64
-0a69e4564ff9	BIG's 302	convenience		28.43709	-99.23504	202 N Main St #202	Cotulla	78014	+18308793677	https://bigs-302.hub.biz/		0.96
-f2832e1e9604	BIgs 303	convenience		28.66749	-99.18417	17294 I-35 S	Dilley	78017	+18309651818	https://www.shell.com		0.92
-869f3deb6b5b	Bucks Country Store	convenience		28.52219	-99.85725	208 N 1st St	Carrizo Springs	78834	+18308763377	http://www.buckscountrystoretx.com		0.92
-4c668b705f8a	Carrizo Spring Pilot	convenience		28.51130	-99.84860	1045 US Highway 83	Carrizo Springs	78834		https://locations.valero.com/en-us/LocationDetails/Index/1045-US-HIGHWAY-83/0000031251	Valero	0.80
-09ba965e9c48	Castillo's Convenience Store	convenience		28.68731	-99.82229	906 E Crockett St	Crystal City	78839	+18303749050	https://start.cortera.com/.../k9o6oyp4p/castillos-convenience-store		0.92
-1e6b4116b20f	CAT Scale	convenience	truck gas station	28.45331	-99.23841	921 N Interstate 35	Cotulla	78014	+18308795363	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
-3f3ce7f9f729	CAT Scale	convenience	truck gas station	28.04556	-99.34882	28527 I- 35	Encinal	78019	+19569487044	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
-48402f1d5b76	CAT Scale	convenience	truck gas station	28.90020	-99.11723	110 S. I-35 Frontage Rd	Pearsall	78061	+18303348222	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
-bd3ee807f531	CAT Scale	convenience	truck gas station	28.51163	-99.84795	1045 S US Highway 83	Carrizo Springs	78834	+18308769754	http://catscale.com/?utm_medium=yext&utm_source=bing		0.97
-d85ce9aa6cf3	CAT Scale	convenience	truck gas station	28.45152	-99.23911	795 IH 35	Cotulla	78014	+18308795354	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
-cc863f0e3be7	Catarina Food Mart	convenience		28.34817	-99.61324	172 E San Francisco St	Catarina	78836	+18309995000			0.92
-589972ba39c7	Catarina One Stop	convenience		28.34639	-99.61464	19682 US-83 S	Catarina	78836	+18309993350	http://www.krispykrunchy.com	One Stop	0.92
-78d142ea87ef	Chevron	convenience		28.90479	-99.09109	1518 N OAK STREET	Pearsall	78061		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1518-N-OAK-STREET-PEARSALL-TX-78061-id380640	Chevron	0.95
-95e377112c33	Chevron	convenience		28.44398	-99.25002	50 I 35	Cotulla	78014	+18308794863	https://www.chevronwithtechron.com/en_us/home/find-a-station.html?/station/50-I-35-COTULLA-TX-78014-2486-id208080	Chevron Horseshoe Bend	0.92
-ddeda53f6821	Chevron	convenience		28.45133	-99.23825	795 N INTERSTATE 35	Cotulla	78014		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/795-N-INTERSTATE-35-COTULLA-TX-78014-5163-id390225	Chevron	0.80
-de0fce3f7f39	Chevron	convenience		28.04645	-99.35103	28442 S 35	Encinal	78019		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/28442-S-35-ENCINAL-TX-78019-0000-id387741	Chevron	0.80
-4a82fb830b97	Chevron Station Cotulla	convenience		28.43561	-99.23495	50 S I H 35	Cotulla	78014	+12108215900			0.85
-c02a048a52e7	Chevron Station Pearsall	convenience		28.89823	-99.11404	130 S I H 35	Pearsall	78061	+18309312135			0.99
-0b13404d8f6a	Circle K	convenience		28.89677	-99.09350	604 N Oak St	Pearsall	78061	+18303342220	https://www.circlek.com/		0.92
-49b916f0451d	Corner Store	convenience		28.89690	-99.09370	604 N Oak St	Pearsall	78061	+18303342220			0.92
-5f0130c50b71	Cotulla One Stop	convenience		28.43268	-99.23434	402 S Main St	Cotulla	78014	+18308792744			0.92
-a8b511c2e6f0	Crystal City Drive-Thru Market	convenience		28.69158	-99.83445	1608 US-83	Crystal City	78839	+18303742000			0.97
-248f38bbb95d	Dilley Truck Stop	convenience		28.73660	-99.14600	16250 S Interstate Hwy 35	Dilley	78017		https://locations.valero.com/en-us/LocationDetails/Index/16250-S-INTERSTATE-HWY-35/0000030790	Valero	0.80
-95aaf51eb3dd	Dilley Truck Stop	convenience		28.68237	-99.18114	16250 S Interstate Highway 35	Dilley	78017	+18303264334			0.92
-0a76f9d0c187	Double D Beverage Barn	convenience		28.94296	-99.85018	18881 N US Hwy 83	La Pryor	78872	+18303654487			0.93
-1ebfdca2baa6	Exxon	convenience		28.44336	-99.24866	1206 Fm 468	Cotulla	78014	+18308792710	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
-6748d1fb60ef	Exxon	convenience		28.52143	-99.85770	102 N. 1 St St	Carrizo Springs	78834	+18308769451	https://www.exxonmobilfuels.com/en/find-gas-station/200310165		1.00
-a576316d2a2f	Exxon	convenience		28.90046	-99.11504	111 N Interstate 35	Pearsall	78061	+18303349296	http://www.exxon.com		0.92
-cdd1d6b10f24	Exxon	convenience		28.96209	-99.61862	14718 Hwy 57	Batesville	78829	+18303764224	http://www.exxon.com		1.00
-f8bb608df42e	FIVE POINTS MARKET	convenience		28.52241	-99.85641	305 N 1ST ST	Carrizo Springs	78834		https://www.exxon.com/en/find-station/mobil-carrizosprings-tx-fivepointsmarket-200325821	Mobil	0.80
-3b40708ef7b7	Flying J Travel Center	convenience		28.44798	-99.23728	921 N Interstate 35	Cotulla	78014	+18308795363	https://www.pilotflyingj.com/stores/488		0.85
-dd80483e4d00	Flying J Travel Center	convenience		28.45278	-99.23856	921 I-35 S	Cotulla	78014	+18308795363	https://locations.pilotflyingj.com/us/tx/cotulla/921-n-i-35	Pilot Flying J	0.92
-c669306f2023	Frio Self Serve	convenience		28.66809	-99.18488	17250 S Interstate Hwy 35	Dilley	78017	+18309651537	https://locations.valero.com/en-us/LocationDetails/Index/17250-IH-35-SOUTH/0000001806		0.99
-821d88274454	Fuel America Travel Center - Encinal	convenience		28.03077	-99.33701	23183 I-35 N	Encinal	78019	+12018243892	http://fuelamericatravelcenter.com/		0.97
-d1cc8f7fd774	FUEL Station	convenience		28.89151	-99.09399	408 E Colorado St	Pearsall	78061	+18303342223			0.62
-093796949f29	Goasis	convenience		28.89963	-99.11546	110 Interstate 35	Pearsall	78061	+18303348222			0.90
-9a174e3f929b	Hop-In	convenience		28.89166	-99.09386	E Colorado St	Pearsall	78061	+18303342223			0.75
-ffff494d3d74	Igo's Trojan House	convenience		28.43988	-99.76362	1114 FM 190	Asherton	78827	+18304683800			0.96
-248af0b3fd8f	Jerry's Corner Mart	convenience		28.94407	-99.84115	270 US-57	La Pryor	78872	+18303654723	http://conocophillips.com		0.92
-d900f600408c	Kwik Chek	convenience		28.53018	-99.86013	1000 N 9th St	Carrizo Springs	78834	+18308763434	https://www.kwikchekstores.com		0.75
-b8c8d43c27a3	Kwik Chek now TXB	convenience		28.44178	-99.76019	780 Carter St	Asherton	78827	+18304683382	https://www.kwikchekstores.com		1.00
-f0ead3ae201d	L&S Kwik STOP	convenience		28.04336	-99.35347	505 Fresno St	Encinal	78019	+19564899650			0.79
-4fd67ef10b96	Lone Star Market Dilley Truck Stop	convenience	truck gas station	28.73451	-99.16972	16250 I-35	Dilley	78017	+18309630548	https://lonestarmarket.com/		0.85
-6b4a88e2a05b	Love's Travel Stop	convenience	truck gas station	28.41639	-99.25032	1963 S I-35	Cotulla	78014	+18308797101	https://www.loves.com/locations/862		0.97
-cddabb1a3cb1	Love's Travel Stop	convenience		28.04558	-99.34880	28527 I-35	Encinal	78019	+19569487044	https://www.loves.com/locations/298		0.97
-99f2238f96d8	LOWES FUEL 145	convenience		28.44755	-99.23717	1203 N MAIN	Cotulla	78014			Phillips 66	0.80
-f4089657f88e	LOWES FUEL 148	convenience		28.66821	-99.18249	17255 IH 35 S	Dilley	78017			Phillips 66	0.80
-00c50acaec96	M & D Mini Mart	convenience		28.45108	-99.76106	333 Fresno St	Asherton	78827	+18304683663			0.92
-cd868df0ea62	MAX-E-MART #1	convenience		28.44325	-99.24861	1206 FM 468	Cotulla	78014		https://www.exxon.com/en/find-station/exxon-cotulla-tx-maxemart1-200314052	Exxon	0.80
-1133465f06cb	Mobil	convenience		28.66798	-99.18203	17285 Ih. 35 South	Dilley	78017	+18309631482	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
-77acef1575b9	Mobil	convenience		28.52238	-99.85645	305 N 1st St	Carrizo Springs	78834		https://www.exxon.com/en/find-station/mobil-carrizosprings-tx-fivepointsmarket-200325821?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
-c705c6ba9a97	Mr B Number 11	convenience		28.69372	-99.83128	1900 US-83	Crystal City	78839	+18303743232	http://valero.com		0.73
-f847b8609bff	Mr. B's	convenience		28.94159	-99.84830	North, 184 US-57	La Pryor	78872	+18303654404	https://mr-b-no-15.hub.biz/		0.92
-9318abeceb9f	Mr. B.	convenience		28.53022	-99.86047	1000 N 9th St	Carrizo Springs	78834	+18308763434			0.92
-7a3f79ea989e	Munchy's	convenience		28.67957	-99.82114	726 E Lake St	Crystal City	78839	+18303744485	http://www.munchys.com		0.92
-31b1aab7122d	Munchys	convenience		28.52420	-99.86707	1301 Pena St	Carrizo Springs	78834	+18308769968	http://www.munchys.com	Munchy's	0.92
-a3783b443159	Muñiz First Stop	convenience		28.90487	-99.09148	1503 N Oak St	Pearsall	78061	+18303345312			0.92
-0eb0555f500f	Neal One Stop	convenience		28.67734	-99.82935	102 W Lake St	Crystal City	78839	+18303745686	http://neal.com		0.92
-2930862a9438	Pawlik's Ace Mart	convenience		28.90461	-99.09106	1518 N Oak St	Pearsall	78061	+18303342916			0.63
-5adbe1fec2aa	Petro Travel Center	convenience		28.89956	-99.11580	110 I-35 Frontage Rd	Pearsall	78061	+18303348222	https://www.ta-petro.com/location/tx/petro-pearsall	TravelCenters-TA-Petro	1.00
-2dc88c5a6c21	Phillips 66	convenience		28.68253	-99.18140	16250 S Interstate Highway 35	Dilley	78017	+18309630548	https://www.phillips66gas.com/	Phillips 66 Gas	0.68
-50f29f5e1151	Phillips 66	convenience		28.66898	-99.18172	842 TX-85	Dilley	78017	+18309651211	https://www.phillips66gas.com/		0.92
-ba08ed8f6046	Phillips 66	convenience		28.44960	-99.23771	1203 N Main St	Cotulla	78014	+18308792625	https://www.phillips66gas.com/		0.92
-f4fa40f40bd6	Phillips 66	convenience		28.66529	-99.18266	17255 S I H 35	Dilley	78017	+18309651211	https://www.phillips66gas.com/station/66-LOWES-FUEL-148-0000865767/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
-229364ad212f	Pico Convenience Store	convenience		28.52240	-99.85637	305 N 1st St	Carrizo Springs	78834	+18308769766	https://www.shell.com		0.92
-7321e39b58a9	Pilot Travel Center	convenience	truck gas station	28.51082	-99.84798	1045 S US Highway 83	Carrizo Springs	78834	+18308769754	https://www.pilotflyingj.com/stores/1026		0.92
-8b4d94b06e28	Plo's Oil & Gas Services Lp	convenience		28.52188	-99.85748	204 N 1st St	Carrizo Springs	78834	+18308761198			0.92
-fed23d15efd8	Propane Energy	convenience		28.42929	-99.23227	502 Thornton	Cotulla	78014	+18308762135			0.55
-f5ba0ec35dc4	Quik Service	convenience		28.89464	-99.09459	319 N Oak St	Pearsall	78061	+18303342226	http://locations.goldenchick.com/tx/pearsall/1032/		0.92
-aefa23dda375	Refuel 1345	convenience		28.89160	-99.09400	408 E. Colorado St	Pearsall	78061		https://locations.valero.com/en-us/LocationDetails/Index/408-E-COLORADO-ST/0000032150	Valero	0.80
-0f69d73c4503	Refuel 350	convenience		28.90057	-99.09298	967 S Interstate 35	Pearsall	78061			Refuel	0.80
-d323764e0089	RJ's Convienence Store	convenience		28.57346	-99.57353	1825 Grand Ave	Big Wells	78830	+18304579388			0.56
-8a4ece2ab8e5	Road Ranger	convenience		28.04673	-99.34850	45 TX-44	Encinal	78019	+18159777374	https://road-ranger-tx-2.hub.biz	Road Ranger	0.97
-00b2fb0de4df	Royal Mart	convenience		28.49891	-99.82806	2496 S US Hwy 83	Carrizo Springs	78834	+18308762486	https://royal-mart-tx-3.hub.biz/		0.96
-4188721d3474	Shell	convenience		28.66748	-99.18446	17295 I-35 S	Dilley	78017	+18309651818	http://www.shell.us/	Shell	0.92
-6ec55212ed83	Shell	convenience		28.89203	-99.10561	1104 W Comal St	Pearsall	78061	+18303342944	https://find.shell.com/us/fuel/10003566-1104-w-comal-st	Shell	0.92
-a416d9adf1b3	Shell	convenience		28.69429	-99.83141	1901 N Highway 83	Crystal City	78839	+18303740044	https://find.shell.com/us/fuel/10013870-1901-n-highway-83		0.92
-ff99620ac6eb	Shell	convenience		28.73013	-99.17347	17295 S INTERSTATE HIGHWAY 35	Dilley	78017	+18309651818	https://find.shell.com/us/fuel/10003757-17295-s-interstate-highway-35/en_US		1.00
-5d98a922997a	Stripes	convenience		28.52034	-99.85688	101 S First St	Carrizo Springs	78834	+18308763359	https://stripesstores.com/		1.00
-6ffc656ab714	Stripes	convenience		28.45150	-99.23898	795 I-35	Cotulla	78014	+18308795354	https://www.7-eleven.com/	Stripes	0.97
-8d05354df555	Stripes	convenience		28.54503	-99.84555	2525 US-83	Carrizo Springs	78834	+18308763601	https://www.7-eleven.com/	Stripes	1.00
-648d4602cb3a	Stuckey’s Carrizo Springs	convenience		28.51101	-99.84873	1045 S US Hwy 83	Carrizo Springs	78834	+18303225018	https://www.stuckeyscarrizosprings.com/		0.70
-3474728176fc	Sunoco	convenience		28.57299	-99.57235	1710 Grand Avenue	Big Wells	78830	+18304572602	https://www.sunoco.com/locations/store/1710-grand-ave-big-wells-tx-0966855900		0.97
-bf55ddec34bd	Sunoco	convenience		28.34642	-99.61448	19682 South U.S. 83	Catarina	78836	+18309993350	https://www.sunoco.com/		0.99
-3c8cc8304ca2	Tetco	convenience		28.44425	-99.25046	50 S Interstate 35	Cotulla	78014	+18308796398	http://www.tetcorewards.com		0.92
-cbf41f141a4d	TEX BEST #506	convenience		28.66803	-99.18194	17285 IH. 35 SOUTH	Dilley	78017		https://www.exxon.com/en/find-station/mobil-dilley-tx-texbest506-200319999	Mobil	0.80
-fbeca9898c6a	Tex Best Travel Center	convenience		28.66817	-99.18174	17285 I-35	Dilley	78017	+18309631482	http://www.exxonmobilstations.com/2015895-tex-best-506-dilley	Tex-Best Travel Centers	1.00
-f6ab5daa5a63	The Pit Stop	convenience		28.66678	-99.16968	TX-85 & S Commerce St, 118 Harris St	Dilley	78017	+18309652024			0.92
-92f4d00c0c4b	TXB	convenience		28.52312	-99.85620	401 N 1st St	Carrizo Springs	78834	+18308764139	http://www.txbstores.com/		0.92
-e0848b83b4db	TXB	convenience		28.94175	-99.84827	481 Us 57 N	La Pryor	78872	+18303654404	http://www.txbstores.com/		0.97
-8a3c9a4b986d	TXB 86	convenience		28.69350	-99.83100	1900 N HIGHWAY 83	Crystal City	78839		https://locations.valero.com/en-us/LocationDetails/Index/1900-N-HIGHWAY-83/0000006018	Valero	0.80
-03e988c98b30	Valero	convenience		28.44377	-99.24785	1162 E FM 468	Cotulla	78014	+12103452000	http://www.valero.com	Valero Energy	0.92
-3c05f505a6d0	Valero	convenience		28.53026	-99.86035	1000 N 9th Street	Carrizo Springs	78834	+18308763434	http://www.valero.com	Valero Energy	0.92
-648b8c82ce41	Valero	convenience		28.43717	-99.23490	202 N Main St # 202	Cotulla	78014	+12103452000	https://www.valero.com		0.92
-65450685fee7	Valero	convenience		28.94163	-99.84810	481 N Hwy 57	La Pryor	78872	+18303654404	http://www.valero.com	Valero Energy	0.97
-719a112df07c	Valero	convenience		28.57318	-99.57257	1710 Grand Ave	Big Wells	78830	+18304572602	http://www.valero.com	Valero Energy	0.81
-80f7957ae3d1	Valero	convenience		28.44148	-99.76012	780 FM 190	Asherton	78827	+18304683382	https://locations.valero.com/en-us/LocationDetails/Index/780-CARTER-ST/0000012737	Valero	0.92
-cab5c271f05b	Valero	convenience		28.52312	-99.85592	401 N 1st St	Carrizo Springs	78834	+12103452000	https://www.valero.com		0.65
-7a1285a0bbeb	VALERO 2740996	convenience		28.89680	-99.09351	604 N OAK ST	Pearsall	78061		https://locations.valero.com/en-us/LocationDetails/Index/604-N-OAK-ST/0000020996	Valero	0.93
-275b62bcc1db	Valley Mart 12	convenience		28.90066	-99.11517	111 N Interstate 35	Pearsall	78061	+18303349296	http://www.exxonmobil.com		0.92
-d12504cc02cf	ZAVALA FOOD MART	convenience		28.96195	-99.61868	14718 HWY 57	Batesville	78829		https://www.exxon.com/en/find-station/exxon-batesville-tx-zavalafoodmart-200316990	Exxon	0.94
-cea3ef29af32	Arby's	fastfood		28.41637	-99.25003	1963 I-35	Cotulla	78014	+18308797101	https://locations.arbys.com/tx/cotulla/1963-s.-ih-35-suite-a.html	Arby's	0.96
-61ed41b20453	Burger King	fastfood	burger restaurant	28.89948	-99.11591	110 S Interstate 35	Pearsall	78061	+18303348222	https://burgerking.com/store-locator/store/restaurant_65567		0.92
-82dca1395442	Burger King	fastfood	burger restaurant	28.66821	-99.18180	17585 S Interstate Hwy 35	Dilley	78017	+18309658538	https://burgerking.com/store-locator/store/16809	Burger King	0.96
-906098d13411	Champs Chicken	fastfood		28.66727	-99.18439	17294 S Interstate Hwy 35	Dilley	78017	+17133345526	https://locator.champschicken.com/dilley-express-dilley-tx/	Champs Chicken	0.96
-86d71ed04e1c	Church's Chicken	fastfood	chicken restaurant	28.66529	-99.18287	16220 S Interstate Highway 35	Dilley	78017	+18309630222	https://locations.churchs.com/tx/dilley/16220-ih-35-south		0.77
-ceb026379f82	Church's Chicken	fastfood	chicken wings restaurant	28.69425	-99.83167	1901 N US Highway 83	Crystal City	78839	+18303740600	https://churchs.com		0.76
-d539673f5ad6	Church's Chicken	fastfood		28.90062	-99.11530	111 N Interstate 35	Pearsall	78061	+18303343131	https://churchs.com		0.92
-88fff0aea470	Church's Texas Chicken	fastfood		28.68242	-99.18116	16220 I-35	Dilley	78017	+18309630222	https://locations.churchs.com/tx/dilley/16220-ih-35-s.	Church's Chicken	0.94
-aac52143d0e6	Church's Texas Chicken	fastfood		28.04703	-99.34882	43 TX-44	Encinal	78019	+19569484010	https://locations.churchs.com/tx/encinal/43-e.-texas-state-highway-44	Church's Chicken	0.98
-ed8c8f2f8d8f	Church's Texas Chicken	fastfood		28.52182	-99.85667	203 First Street	Carrizo Springs	78834	+18308765901	https://locations.churchs.com/tx/carrizo-springs/203-first-street	Church's Chicken	0.97
-033f4a2c4976	Dairy Kreme	fastfood		28.68520	-99.83044	219 E Crockett St	Crystal City	78839	+18303743929	http://dairykreme.dinehere.us/		0.95
-3aa7fad9b062	Dairy Queen	fastfood		28.88812	-99.09617	508 S Oak St 508 S Oak St	Pearsall	78061	+18303343636	https://www.dairyqueen.com/en-us/locations/tx/pearsall/508-s-oak-st/14481/?y_source=1_MjkzMzkyMTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
-3cc41e938543	Dairy Queen	fastfood		28.66952	-99.16994	1363 W FM 117	Dilley	78017	+18309651833	https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/14026/?y_source=1_MjkzMzg4NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	1.00
-60c0f1e85fdd	Dairy Queen	fastfood		28.69503	-99.82944	2100 N Hwy 83 2100 N Hwy 83	Crystal City	78839	+18303745212	https://www.dairyqueen.com/en-us/locations/tx/crystal-city/2100-n-hwy-83/13961/?y_source=1_MjkzMzkxODktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
-6641ecf3b00a	Dairy Queen	fastfood		28.68266	-99.18343	FM RD 117 AT I-35	Dilley	78017	+18309651833	https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/14026/?y_source=1_MjkzMzg4NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
-7e75f5a883da	Dairy Queen	fastfood		28.44332	-99.24716	1092 FM468 1092 E Fm 468	Cotulla	78014	+18308792801	https://www.dairyqueen.com/en-us/locations/tx/cotulla/1092-e-fm-468/13953/?y_source=1_MjkzMzg5MDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
-e72ea1323e77	Dairy Queen	fastfood		28.52381	-99.85644	408 N 1st St	Carrizo Springs	78834	+18308765977	https://www.dairyqueen.com/en-us/locations/tx/carrizo-springs/408-n-1st-st/13899/?y_source=1_MjkzMzkxODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
-a40304991153	Domino's	fastfood	pizza restaurant	28.89572	-99.11238	1702 Louise Lane	Pearsall	78061	+18302679220	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-1b398c29d133	DQ Grill & Chill	fastfood		28.69505	-99.82939	2100 N Hwy 83	Crystal City	78839		https://www.dairyqueen.com/en-us/locations/tx/crystal-city/2100-n-hwy-83/3734	DQ Grill & Chill	0.80
-5897c5bc7a8d	DQ Grill & Chill	fastfood		28.52385	-99.85651	408 N 1st St	Carrizo Springs	78834		https://www.dairyqueen.com/en-us/locations/tx/carrizo-springs/408-n-1st-st/3672	DQ Grill & Chill	0.80
-6d6e325cf4ab	DQ Grill & Chill	fastfood		28.44338	-99.24713	1092 E FM 468	Cotulla	78014		https://www.dairyqueen.com/en-us/locations/tx/cotulla/1092-e-fm-468/3726	DQ Grill & Chill	0.80
-dcba793a1680	DQ Grill & Chill	fastfood		28.68262	-99.18342	1363 W FM 117	Dilley	78017		https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/3799	DQ Grill & Chill	0.80
-e78ee8782371	DQ Grill & Chill	fastfood		28.88809	-99.09605	508 S Oak St	Pearsall	78061		https://www.dairyqueen.com/en-us/locations/tx/pearsall/508-s-oak-st/4253	DQ Grill & Chill	0.80
-9fe2392b3b88	El Rodeo	fastfood		28.89096	-99.09688	222 S Elm St	Pearsall	78061	+18303345776	http://www.elrodeopa.com		0.92
-0f03ca3e21f7	Golden Chick	fastfood		28.43690	-99.23500	688 Las Palmas Blvd	Cotulla	78014	+18304839269	https://locations.goldenchick.com/tx/cotulla/1197/		0.97
-381923fa8117	Golden Chick	fastfood		28.68296	-99.83125	701 N Ave B	Crystal City	78839	+18304489067	https://locations.goldenchick.com/tx/crystal-city/1008/	Golden Chick	0.96
-b2f8cdbeb0c2	Golden Chick	fastfood		28.89621	-99.09371	508 N Oak St	Pearsall	78061	+18303342025	https://locations.goldenchick.com/tx/pearsall/1032/	Golden Chick	0.92
-707521ea3798	Little Caesars Pizza	fastfood	pizza restaurant	28.52262	-99.85520	209 E Nopal St	Carrizo Springs	78834	+18308760333	https://littlecaesars.com/en-us/store/8182	Little Caesars	0.96
-c1223c08ff14	Little Caesars Pizza	fastfood	pizza restaurant	28.89689	-99.11338	1809 Louise Ln	Pearsall	78061	+18303349004	https://littlecaesars.com/en-us/store/10633	Little Caesars	0.96
-0858f68ba031	McDonald's	fastfood		28.52358	-99.85601	503 N 1st St	Carrizo Springs	78834	+18308765400	https://www.mcdonalds.com/us/en-us/location/tx/carrizo-springs/503-n-1st-st/17635.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
-0ab972e881df	McDonald's	fastfood		28.45042	-99.23961	719 N Ih 35	Cotulla	78014	+18308794711	https://www.mcdonalds.com/us/en-us/location/tx/cotulla/719-n-ih-35/37374.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
-1817af636117	McDonald's	fastfood		28.89765	-99.09395	625 N Oak St	Pearsall	78061	+18303342203	https://www.mcdonalds.com/us/en-us/location/tx/pearsall/625-n-oak-st/26349.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
-4a49f612e8ec	McDonald's	fastfood		28.44418	-99.25046	Farm to Market Road 468	Cotulla	78014	+18308794600	http://mcdonalds.com		0.97
-aac3d4061dbf	MG's Drive Up	fastfood		28.53023	-99.85317	1505 N 1st St	Carrizo Springs	78834	+18308765130	http://mgsdriveup.com		0.98
-9edf97597306	Mother Pluckers	fastfood		28.04607	-99.34729	228 E Texas State Hwy 44	Encinal	78019	+19567711919			0.73
-e96152c069b0	Mr. B's	fastfood		28.44168	-99.76012	780 Carter St	Asherton	78827	+18304683382			0.83
-43306d9edb6d	Pizza Hut	fastfood	pizza restaurant	28.44569	-99.24328	649 Las Palmas Blvd. La Salle	Cotulla	78014	+18308794080	https://locations.pizzahut.com/tx/cotulla/649-las-palmas-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309828	Pizza Hut	0.96
-46511682dc11	Pizza Hut	fastfood	pizza restaurant	28.89881	-99.09299	814 N Oak St	Pearsall	78061	+18303348051	https://locations.pizzahut.com/tx/pearsall/814-north-oak?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285595	Pizza Hut	0.99
-61c585b883f2	Pizza Hut	fastfood	pizza restaurant	28.69349	-99.83252	1801 N US Highway 83 Zavala	Crystal City	78839	+18303742387	https://locations.pizzahut.com/tx/crystal-city/1801-n-us-highway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285040	Pizza Hut	0.98
-ab415d47896b	Pizza Hut	fastfood	pizza restaurant	28.52144	-99.85835	201 Pena St	Carrizo Springs	78834	+18308763553	https://locations.pizzahut.com/tx/carrizo-springs/201-pena?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285183	Pizza Hut	0.98
-c5ce9082ad8c	Sonic Drive In	fastfood		28.52426	-99.85616	502 North First Street	Carrizo Springs	78834	+18308763535	https://locations.sonicdrivein.com/tx/carrizosprings/502-north-first-street.html	Sonic Drive-In	0.98
-e8251259dca1	Sonic Drive In	fastfood		28.89857	-99.09298	814 N. Oak	Pearsall	78061	+18303343049	https://locations.sonicdrivein.com/tx/pearsall/814-n.-oak.html	Sonic Drive-In	0.98
-862303df68eb	Sonic Drive-In	fastfood	burger restaurant	28.44968	-99.24147	619 N Interstate 35	Cotulla	78014	+18308794410	https://locations.sonicdrivein.com/tx/cotulla/619-north-interstate-35.html		0.97
-dc74ad8a2751	Sonic Drive-In	fastfood	theme restaurant	28.67994	-99.18237	16290 I-35 S	Dilley	78017		https://locations.sonicdrivein.com/tx/dilley/16290-i-35-south.html	Sonic Drive-In	0.84
-fe18aa0f857c	Sonic Drive-In	fastfood		28.05274	-99.34997	23138 Interstate 35 Frontage Rd	Encinal	78019	+19569485307	https://locations.sonicdrivein.com/tx/encinal/23138-i-35-frontage-rd.html		0.85
-08b67ae21972	Subway	fastfood	sandwich shop	28.04573	-99.34894	28527 I-35	Encinal	78019	+19569487044	http://www.subway.com/en-us	Subway	0.93
-13b8b2cf90f1	Subway	fastfood	sandwich shop	28.66823	-99.18483	17250 I-35	Dilley	78017	+18309651537	https://restaurants.subway.com/united-states/tx/dilley/17250-s-ih-35	Subway	0.98
-376c8deeac08	Subway	fastfood	sandwich shop	28.52308	-99.85606	401 N 1st St	Carrizo Springs	78834	+18308765411	https://restaurants.subway.com/united-states/tx/carrizo-springs/401-n-1st-street?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.97
-4881ba23c2b1	Subway	fastfood	sandwich shop	28.44135	-99.76005	780 Carter	Asherton	78827	+18304683464	https://restaurants.subway.com/united-states/tx/asherton/780-carter?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=56606&utm_campaign=evergreen-2020&y_source=1_MTQ4OTM5NTUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-52e012b87644	Subway	fastfood	sandwich shop	28.45265	-99.23818	921 N Interstate 35	Cotulla	78014	+18308795353	https://restaurants.subway.com/united-states/tx/cotulla/921-n-interstate-35?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=59029&utm_campaign=evergreen-2020&y_source=1_MTQ4OTc2NTAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
-73a23e067136	Subway	fastfood	sandwich shop	28.90075	-99.11523	111 I-35	Pearsall	78061	+18303343978	http://www.subway.com/en-us	Subway	0.98
-7c36e9f1ddae	Subway	fastfood	sandwich shop	28.45262	-99.23816	921 I-35 S	Cotulla	78014	+18308795353	http://www.subway.com/en-us	Subway	1.00
-85523859c28e	Subway	fastfood	sandwich shop	28.41850	-99.25000	921 N Interstate 35, Pilot Gas Station/C-Store #488	Cotulla	78014			Subway	0.80
-8fff7d3da89a	Subway	fastfood	sandwich shop	28.76255	-99.13485	111 N Interstate 35	Pearsall	78061	+18303348018	http://www.subway.com		0.77
-9adb9c0b2abe	Subway	fastfood		28.44316	-99.24836	1167 East FM 468	Cotulla	78014	+18308794151	https://restaurants.subway.com/united-states/tx/cotulla/1167-east-fm-468?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=48077&utm_campaign=evergreen-2020&y_source=1_MTQ5MDg0MTItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
-e59f733a2db0	Subway	fastfood	sandwich shop	28.69406	-99.83154	1901 Hwy 83	Crystal City	78839	+18303745200	https://restaurants.subway.com/united-states/tx/crystal-city/1901-hwy-83	Subway	0.98
-fcddb3661e51	Subway	fastfood	sandwich shop	28.94147	-99.84797	481 N. Hwy 57	La Pryor	78872	+18303654484	https://restaurants.subway.com/united-states/tx/la-pryor/481-n-hwy-57	Subway	0.96
-7167f03db9b6	Taco Palenque Cotulla	fastfood		28.43937	-99.23564	358 I-35	Cotulla	78014	+18308794956	https://www.tacopalenque.com/		0.85
-517e4aad42c2	Wendy's	fastfood		28.44330	-99.24825	35 FM468	Cotulla	78014	+18308793343	https://locations.wendys.com/united-states/tx/cotulla/35-w-fm-468	Wendy's	0.97
-398f1c4081f0	Whataburger	fastfood		28.89750	-99.11385	135 South IH-35	Pearsall	78061		https://locations.whataburger.com/tx/pearsall/135-south-ih-35.html	Whataburger	0.80
-23cb15edb1d4	A&A Quick Stop	grocery		28.67805	-99.82736	115 E Lake St	Crystal City	78839	+18304485183			0.92
-ac09f87be954	Asherton Country Store	grocery		28.44183	-99.76035		Asherton			http://www.myplaceashertonofdublin.com/		0.72
-b15123bb6e29	Asherton Martinez Store	grocery		28.45128	-99.76016	300 Pena St	Asherton	78827	+18304689394			0.70
-29099f56fba7	Carrizo Springs H-E-B	grocery		28.53664	-99.85176	2030 N 1st St	Carrizo Springs	78834	+18308763521			0.97
-48ab5314c452	Crystal City H-E-B	grocery		28.68170	-99.82957	514 E. ZAVALA	Crystal City	78839		https://www.heb.com/heb-store/us/tx/crystal-city/crystal-city-h-e-b-117	H-E-B	0.80
-036f322bf24a	Dilley's Refreshment Barn	grocery		28.66819	-99.17065	200 S Main St	Dilley	78017	+18303263300			0.96
-56b3b7462802	GasFusion Encinal	grocery		28.06122	-99.34892	28442 I-35 S	Encinal	78019				0.66
-7f463df99171	H-E-B	grocery		28.53698	-99.85146	2030 N 1st St	Carrizo Springs	78834	+18308763521	https://www.heb.com/heb-store/US/tx/carrizo-springs/carrizo-springs-h-e-b-671	H-E-B	1.00
-b06a10b5f6f8	H-E-B	grocery		28.89506	-99.11475	225 I-35	Pearsall	78061	+18303343374	https://www.heb.com/heb-store/US/tx/pearsall/pearsall-h-e-b-620	H-E-B	1.00
-ec1aa56c7349	H-E-B	grocery		28.68206	-99.82891	514 E Zavala St	Crystal City	78839	+18303742305	https://www.heb.com/heb-store/US/tx/crystal-city/crystal-city-h-e-b-117	H-E-B	0.96
-9ba6e0dbeb64	Lowe's Market	grocery		28.44906	-99.23818	1203 N Main St	Cotulla	78014	+18308792625	http://www.lowesmarket.com/	Lowe's Market	0.96
-d85bbfe71e9f	Lowe's Market	grocery		28.73656	-99.14601	17255 South Interstate Highway 35	Dilley	78017		https://www.lowesmarket.com/StoreLocator/Store/?L=148	Lowe's Market	0.80
-da44aa0a70ef	Lowe's Market	grocery		28.66907	-99.18210	17255 S Interstate Hwy 35 P.O. Box 2120	Dilley	78017	+18309651211	http://www.lowesmarket.com/	Lowe's Market	1.00
-d29a10c07ede	Pearsall H-E-B	grocery		28.89518	-99.11463	225 SOUTH IH 35	Pearsall	78061		https://www.heb.com/heb-store/us/tx/pearsall/pearsall-h-e-b-620	H-E-B	0.80
-e54101aff7a1	Pico Store	grocery		28.89148	-99.09389	408 E Colorado St	Pearsall	78061	+18303342223	http://pico-store.edan.io		0.92
-9ca0b3802746	Quality Peanut Co.	grocery		28.87763	-99.10016	319 E Carter St	Pearsall	78061	+18303343648	https://www.heiserusa.com/home		0.57
-6c20a2593d2d	Snake Hill, Pearsall, Tx	grocery	organic grocery store	28.86390	-99.04894		Pearsall					0.97
-45e1111707ad	Zavala Food Mart	grocery		28.96206	-99.61855	14718 E US-57	Batesville	78829	+18303764224	https://zavala-food-mart.hub.biz		0.92
-d78882960deb	Bigwells Medical Clinic	hospital		28.57203	-99.56882	75 S Commerce St	Big Wells	78830	+18304579201			0.59
-6f8544972405	Centro De Salud	hospital		28.67648	-99.82372	308 Cesar Chavez	Crystal City	78839	+18303742301	https://centro-de-salud-tx.hub.biz		0.85
-bd0260bcd45c	Dimmit memorial. Hospital carriso springs. Tex.	hospital		28.51924	-99.86311		Carrizo Springs			http://www.memhosp.com/		0.83
-878c229d95fb	Dimmit Regional Hospital	hospital		28.51934	-99.86341	704 Hospital Drive	Carrizo Springs	78834	+18308762424	http://www.dimmitregionalhospital.com		0.97
-27e8e6c235e8	Frio Regional Hospital	hospital		28.89666	-99.11716	200 S Ih 35	Pearsall	78061	+18303343617	http://www.frioregionalhospital.com/		1.00
-73e4e2157899	Outreach For Smiles	hospital		28.52131	-99.85191	405 E Nopal St	Carrizo Springs	78834	+18308763674	http://www.carrizosmiles.com/		0.60
-3c6302a5d8c2	Pearsall Hospital	hospital		28.89686	-99.11690		Pearsall			www.yellowpages.com/pearsall-tx/emergency-room		0.84
-ffd2ec619d86	Southwest Texas Rural Health	hospital		28.51428	-99.86727	902 S 5th St	Carrizo Springs	78834	+18308793047	southtexasruralhealth.com		0.92
-1aacd39f9ab0	Americas Best Value Inn Extended Stay Dilley	hotel		28.66677	-99.18626	1115 W Highway 85	Dilley	78017	+18309633390	https://www.kingsinnmichigancity.com		0.90
-96ae0345466d	Artemis Lodge	hotel		28.49364	-99.82523	143 Service Company Rd	Carrizo Springs	78834	+18774771687	https://www.pacificmobile.com/artemis.php		0.77
-963679839842	Baymont by Wyndham Cotulla	hotel		28.43505	-99.23483	222 N Interstate 35 35	Cotulla	78014	+18308795700	https://www.wyndhamhotels.com/baymont/cotulla-texas/baymont-inn-and-suites-cotulla/overview?CID=LC:BU::BING:RIO:National:48071&iata=00093796		0.85
-a968cd9b9a56	Baymont by Wyndham Pearsall	hotel		28.89735	-99.11265	1808 W Comal St	Pearsall	78061	+18303344900	http://www.wyndhamhotels.com/	Baymont by Wyndham	1.00
-8648f9919526	Baymont Inn & Suites Cotulla	hotel		28.44487	-99.24564	222 N Interstate 35	Cotulla	78014	+18308795700	https://www.wyndhamhotels.com/baymont/cotulla-texas/baymont-inn-and-suites-cotulla/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A48071	Baymont by Wyndham	0.93
-35fdae7b7e94	Baymont Inn & Suites Crystal City	hotel		28.72839	-99.83943	4964 N US Highway 83	Crystal City	78839	+18303745600	http://www.baymontinns.com/hotels/texas/crystal-city/baymont-inn-and-suites-crystal-city/hotel-overview?WID=LC:BU:20160226:RIO:Local:SM-buwsct		0.85
-fd4afe380d80	Best Western Plus Carrizo Springs Inn & Suites	hotel		28.54449	-99.84599	2474 N 1st St	Carrizo Springs	78834	+18302191025	http://www.bestwestern.com	Best Western Hotels & Resorts	1.00
-1a8025b36b4e	Best Western Plus Dilley Inn & Suites	hotel		28.67814	-99.18104	16491 S Interstate Highway 35	Dilley	78017	+18303263220	https://www.bestwestern.com/en_US/book/hotel-rooms.44714.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44714	Best Western Hotels & Resorts	1.00
-edc8d472272d	Budget Inn	hotel	motel	28.67844	-99.18306	16408 S Interstate Highway 35	Dilley	78017	+18309637777	http://www.budgetinn.com		0.96
-b4b4b96a3c96	Candlewood Suites Cotulla By Ihg	hotel		28.44441	-99.24103	547 Las Palmas Blvd	Cotulla	78014	+18308792727	https://www.ihg.com		0.97
-0109c30f74d0	Carrizo Executive Inn	hotel	motel	28.52415	-99.86812	1402 Pena St	Carrizo Springs	78834	+18308762451	https://www.eventseeker.com/venue/427495-carrizo-springs-executive-inn-carrizo-springs	Carrizo Springs Civic Center	0.98
-53151716a594	Carrizo Inn	hotel	motel	28.52357	-99.86436	100 N 10th St	Carrizo Springs	78834	+18308765800	http://book.bestwestern.com/bestwestern/US/TX/Carrizo-Springs-hotels/BEST-WESTERN-PLUS-Carrizo-Springs-Inn---Suites/Hotel-Overview.do?propertyCode=44684&sob=YEXTGEN&cm_mmc=BL-_-YEXTGEN-_-GEN-_-LINK		0.97
-ca843f03a8b2	Casa Monte Lodge	hotel		28.42889	-99.93036	8545 FM 186	Carrizo Springs	78834	+18302556201	http://www.casamontelodge.com/		1.00
-1d52e0a4b395	Catarina Royal Palm Hotel	hotel		28.35194	-99.61439	Highway 83 South	Catarina	78836	+18309999999	https://www.flickr.com/photos/matthigh/3040585752		0.93
-d7d445f94824	Comfort Suites Cotulla	hotel		28.44495	-99.24358	617 Las Palmas Blvd	Cotulla	78014	+18304834011	https://www.choicehotels.com/texas/cotulla/comfort-suites-hotels/txf84?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
-54fe93082876	Cotton Logistics Carrizo Springs Man Camp	hotel		28.54113	-99.84754	2265 N 1st St	Carrizo Springs	78834	+18774272947	https://www.cottonlogistics.com/solutions/onelodge/carrizo-springs/		0.92
-94df37c5cde0	Cotulla Cabins & RV Park	hotel		28.43564	-99.23286	244 Market St	Cotulla	78014	+18302202640	http://www.cotullacabins.com		0.93
-2dcf4a67ff79	Cotulla Executive Inn	hotel	resort	28.43253	-99.23447	900 S Interstate 35	Cotulla	78014	+18308792488	https://www.cotullaexeinn.com/		0.85
-70e76cb2ff15	Cotulla Executive Inn	hotel	motel	28.44234	-99.24949	900 I-35	Cotulla	78014	+18308792488	http://www.cotullaexecutiveinn.us/		0.95
-2f4425687348	Cotulla Express Inn	hotel	resort	28.43599	-99.25089	333 N Interstate 35 35	Cotulla	78014	+18304835312	https://www.cotullaexpressinn.com/		0.98
-b3731b07ee30	Cotulla Homes	hotel	motel	28.44290	-99.24167	632 N Baylor	Cotulla	78014	+18304835073	http://www.cotullahomes.com		0.98
-94850093f163	Cotulla Motel	hotel	motel	28.43806	-99.23547	301 N Main St	Cotulla	78014	+18308792336	https://www.cotullajet.com		0.92
-b4f7c5b64d4b	Cowboy Inn	hotel		28.44521	-99.25175	145 W FM 468	Cotulla	78014	+18308793100	https://www.lacasadelzorro.com		0.55
-ea8bb9544860	Cuatro Esquinas Ranch	hotel		28.66866	-99.18173		Dilley		+18308766501	http://www.cuatroesquinasranch.com/		0.56
-7b12eee5c81f	Days Inn & Suites-Cotulla	hotel		28.44238	-99.24951	333 N Interstate 35	Cotulla	78014	+18304835312	http://www.wyndhamhotelgroup.com		0.57
-4bf7b6d4e9e4	Days Inn by Wyndham Dilley	hotel	resort	28.66748	-99.17060	16361 S Interstate Highway 35 35	Dilley	78017	+18309632219	https://www.wyndhamhotels.com/days-inn/dilley-texas/days-inn-dilley/overview?CID=LC:DI::BING:RIO:National:46754&iata=00093796		0.85
-ff3e530021cc	Days Inn by Wyndham Pearsall	hotel	resort	28.89101	-99.11775	605 S Ih # 35	Pearsall	78061	+18305057121	https://www.wyndhamhotels.com/days-inn/pearsall-texas/days-inn-pearsall/overview?CID=LC:DI::BING:RIO:National:47298&iata=00065402		0.85
-a82d0b547ef0	Days Inn Dilley	hotel		28.67940	-99.18027	16361 I-35 S	Dilley	78017	+18309632219	https://www.wyndhamhotels.com/days-inn/dilley-texas/days-inn-dilley/overview?cid=local	Days Inn	1.00
-02900ae39ba1	Dilley Lodge	hotel	motel	28.69383	-99.17470	1100 County Road 4600	Dilley	78017	+18309631779	https://www.dilleylodge.com		0.97
-d9373a7b49f3	Dilley Lodging Llc	hotel		28.67805	-99.18119	16491 S Interstate Highway 35	Dilley	78017		https://www.dilleylodge.com		0.95
-504d5e83725a	Dilley Motor Inn	hotel		28.67771	-99.17722	807 W FM 117	Dilley	78017	+18303263045	http://www.dilleymotorinn.com		0.96
-02c2823884b8	Double C Resort Village	hotel		28.62551	-99.85891	5241 N FM-1407	Crystal City	78839	+18303749975	http://www.doublecresortvillage.com/		0.99
-58b51ec387c2	Eagle Ford Crossing	hotel		28.45344	-99.25207	113 American Dr	Cotulla	78014	+19565804663	http://www.eaglefordcrossing.net/eagleford/		0.92
-00189bab8cb6	Eagle Inn & Suites	hotel	motel	28.66595	-99.18462	17360 S Interstate Highway 35	Dilley	78017	+18309639802	http://www.eagleinnandsuites.com		0.92
-72e46c9f1598	Eagle's Den Suites Cotulla	hotel		28.44342	-99.24178	638 N Baylor St	Cotulla	78014	+18309658995	http://eaglesdensuites.com/		1.00
-fff7590c3e6a	Eagles Den Suites Carrizo Springs	hotel	service apartment	28.54407	-99.84753	122 LOOP 517	Carrizo Springs	78834	+18303269668	http://eaglesdensuites.com/contact_us.html		1.00
-03f5c6ccaecd	Efs Housing & Suites Carrizo Springs, Tx	hotel		28.49209	-99.82769	250 Service County Rd	Carrizo Springs	78834		https://efs-housing-llc-carrizo-springs.booked.net		0.95
-eeab89ed3775	Fairfield	hotel		28.44831	-99.24378	417 North IH-35	Cotulla	78014	+18308794748	https://fairfield.marriott.com/	Fairfield by Marriott	0.92
-8bd04c522a0c	Fairfield Inn & Suites by Marriott Cotulla	hotel	resort	28.45104	-99.23851	417 N Ih-35	Cotulla	78014	+18308794748			0.89
-bf71ddad8472	Fairfield Inn & Suites Cotulla	hotel		28.43665	-99.25092	399 N Ih 35	Cotulla	78014	+18308794748	https://www.marriott.com/en-us/hotels/cotfi-fairfield-inn-and-suites-cotulla/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	0.98
-6bc8793d9591	Frio Inn	hotel		28.89515	-99.11747	256 I-35 S	Pearsall	78061	+18303343232			0.96
-dd82cbe69b7c	Hampton Inn Carrizo Springs	hotel		28.54587	-99.84393	2651 US-83	Carrizo Springs	78834	+18308769160	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-carrizo-springs-SATCSHX/index.html	Hampton by Hilton	1.00
-f5231eefcdab	Hampton Inn Cotulla	hotel		28.44399	-99.24358	659 N Baylor Ave	Cotulla	78014	+18308795123	https://www.hilton.com/en/hotels/cotbahx-hampton-cotulla/	Hampton by Hilton	1.00
-268b25462b7e	Holiday Inn Express & Suites	hotel		28.52908	-99.87535	2469 US-277	Carrizo Springs	78834	+18308762700	https://www.ihg.com/holidayinnexpress/hotels/us/en/carrizo-springs/egpcs/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-EGPCS	Holiday Inn Express	1.00
-bb5c45aa3ace	Holiday Inn Express & Suites Cotulla	hotel		28.44545	-99.24267	624 Las Palmas Blvd	Cotulla	78014	+18308792000	https://www.ihg.com/holidayinnexpress/hotels/us/en/cotulla/lrdct/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-LRDCT	Holiday Inn Express	1.00
-6b31b12a3a1c	Holiday Inn Express & Suites Pearsall	hotel		28.89392	-99.11755	412 S Interstate 35	Pearsall	78061	+18303342200	http://www.hiexpress.com/	Holiday Inn Express	1.00
-3aa6bc0d7344	Horizon Inn & Suites	hotel		28.89144	-99.11618	605 S Interstate 35	Pearsall	78061	+18305057450			0.98
-4c86f99e9fc1	Hotel Cotulla	hotel		28.44555	-99.24861	51 I-35 Frontage Rd	Cotulla	78014	+18308795268	http://www.hotelcotulla.com/		0.92
-c548f7c26d44	Hotel Dilley Grand	hotel		28.66901	-99.17062	110 S Main St	Dilley	78017	+18302712377	https://www.hoteldilley.com/	OYO USA	0.92
-471026c2cfbd	Hotel O Bien Venido Pearsall I-35	hotel		28.89834	-99.11598	I-35, Pearsall TX	Pearsall Tx			https://www.oyorooms.com/us/305009/	OYO	0.80
-dd10aa74764e	Hotel O Dilley Main St Tx	hotel		28.66881	-99.17066	110 S Main	Dilley	78017	+16282412208	https://www.oyolasvegas.com		1.00
-41b4b8054aaf	Independent (SPHC) Cotulla Inn	hotel		28.44778	-99.24493	333 I-35	Cotulla	78014		https://www.ihg.com/spnd/hotels/us/en/cotulla/cotgr/hoteldetail		0.80
-36dac3ddf0e9	InstaLodge Hotel and Suites	hotel		28.44883	-99.25467	490 W FM 468	Cotulla	78014	+18007693874	http://www.instalodge.com		0.92
-2d32b62f5f6b	Knights Inn Pearsall	hotel		28.88940	-99.09448	320 S Ash St	Pearsall	78061	+18884240138	https://www.kingsinnmichigancity.com		0.55
-ef2d35b3c8ca	La Quinta Inn & Suites Cotulla	hotel	resort	28.43659	-99.23676	677 N Baylor	Cotulla	78014	+18308792200	http://www.laquintacotulla.com/?cid=local_6595		0.85
-4981ccd89dcb	La Quinta Inn & Suites Pearsall	hotel	resort	28.89441	-99.11624	170 Medical Dr	Pearsall	78061	+18308723277	http://www.laquintapearsall.com/?cid=local_6576		0.85
-74c74a4e8665	La Quinta Inn and Suites	hotel		28.89805	-99.11925	170 Medical Dr	Pearsall	78061	+18302679016	http://www.laquintapearsall.com/?cid=local_6576	La Quinta by Wyndham	1.00
-d7352874a869	La Quinta Inn and Suites	hotel		28.44476	-99.24498	677 N Baylor Ave	Cotulla	78014	+18308792200	http://www.laquintacotulla.com/?cid=local_6595	La Quinta by Wyndham	0.97
-39a289a985af	La Salle Motel	hotel	motel	28.44120	-99.23645	601 N Main St	Cotulla	78014	+18308792703			0.92
-a3c7d14913af	Laxmi Of Cotulla Llc	hotel		28.44459	-99.24540	677 N Baylor	Cotulla	78014				0.95
-427534679b85	MainStay Suites Cotulla	hotel		28.44738	-99.24538	565 N. IH35	Cotulla	78014		https://www.choicehotels.com/texas/cotulla/mainstay-hotels	MainStay Suites	0.80
-c305ff1a258e	MainStay Suites Cotulla	hotel	service apartment	28.44951	-99.24214	565 IH 35	Cotulla	78014	+18304835566	https://www.choicehotels.com/texas/cotulla/mainstay-hotels/txg15?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-859958fa875a	Malana Hotels & Suites	hotel		28.44552	-99.23813	165 Mars Dr	Cotulla	78014	+18308794400	http://www.malanahotels.com/		1.00
-6fa1c451f792	Microtel Inn & Suites	hotel		28.43429	-99.25040	499 IH 35	Cotulla	78014	+18003370055			0.77
-0c2749bd3422	Microtel Inn & Suites by Wyndham Cotulla	hotel		28.44884	-99.24287	499 I-35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview		0.99
-a2638c38f128	Microtel Inn & Suites by Wyndham Cotulla	hotel	resort	28.44014	-99.23579	499 N Interstate 35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview		1.00
-c2db69f5dc92	Microtel Inn & Suites by Wyndham Cotulla	hotel	resort	28.43370	-99.23460	499 N Interstate 35 35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview?CID=LC:MT::BING:RIO:National:46715&iata=00093796		0.85
-6632082e490d	OYO Hotel	hotel		28.88848	-99.11814	Interstate 35 South, Pearsall TX, United States - 78061	Pearsall	78061	+12819388696	https://www.oyorooms.com/us/248322?utm_source=YEXT&utm_medium=YEXT&utm_campaign=US_PER003	OYO USA	0.97
-764baf3e4e55	OYO Hotel	hotel		28.66879	-99.17052	101 S Main St	Dilley	78017	+16282412208	https://www.oyorooms.com/us/103700/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_DLL001	OYO USA	0.80
-a1abc2fc472a	OYO Hotel Pearsall I-35 West	hotel	motel	28.89833	-99.11584	112 I-35 Frontage Rd	Pearsall	78061	+18302011339	https://www.oyorooms.com/us/88628/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_PER001	OYO Rooms	0.95
-468856b517ae	Pearsall Executive Inn	hotel	motel	28.89712	-99.09403	613 N Oak St	Pearsall	78061	+18303343693	http://www.executiveinnpearsall.com		0.94
-9f9b8f13fd00	Pearsall Hotel	hotel		28.88869	-99.11728	605 S Interstate 35	Pearsall	78061	+18305057170	http://www.daysn.com		0.58
-670fe68beb2a	Pearsall Inn and Suites	hotel	motel	28.89682	-99.11127	1707 W Comal St	Pearsall	78061	+18303342622	http://www.LaquintaPearsall.com/		0.98
-6b7f18958c3c	PetroStay Inn and Suites	hotel		28.44483	-99.24563	222 I-35	Cotulla	78014	+18308795700	https://www.petrostayinn.com/		0.92
-71f7a8c4121c	Quality Inn & Suites	hotel	resort	28.89529	-99.11173	604 Lindsey Ln	Pearsall	78061	+18302679167	https://www.choicehotels.com/texas/pearsall/quality-inn-hotels/txp40?mc=llbillpx&pmf=local		0.97
-003eec29d268	Quality Inn & Suites Carrizo Springs North	hotel		28.54541	-99.84425	2611 N US Highway 83	Carrizo Springs	78834	+18308763838	https://www.choicehotels.com		0.99
-902ae48657c6	Quality Inn & Suites Cotulla I-35	hotel		28.44676	-99.24079	435 Mars Dr	Cotulla	78014	+18304835390	https://www.choicehotels.com/texas/cotulla/quality-inn-hotels/txg21?pmf=yext&mc=llyxyxpx	Choice Hotels	0.59
-5624547b4944	Quality Inn & Suites Pearsall	hotel		28.89529	-99.11173	604 South Lindsey Lane	Pearsall	78061		https://www.choicehotels.com/texas/pearsall/quality-inn-hotels	Quality Inn	0.80
-1a2931591128	R&R Ranch	hotel		28.89683	-99.07320		Pearsall					0.74
-9f8206c9e480	Relax Inn	hotel	motel	28.68031	-99.17908	1062 FM 117	Dilley	78017	+18309654447	http://relaxinndilley.com		0.99
-7149224b3b14	Residency Suites Cotulla Texas	hotel		28.44447	-99.25384	287 FM468	Cotulla	78014	+18304835330	http://www.residencysuitescotullatx.com/		0.97
-d9d2b50da460	Residency Suites Cotulla Texas	hotel	resort	28.43882	-99.23637	287 Fm 468	Cotulla	78014	+18304835330	http://www.residencysuitescotullatx.com/		0.85
-f91adca72b01	Riata Inn	hotel	motel	28.69109	-99.83560	1531 US-83	Crystal City	78839	+18303745665	http://www.riatainncrystalcity.com		0.94
-ead4b0404c45	Rio Frio Motel	hotel		28.89627	-99.11055	1625 W Comal St	Pearsall	78061	+18303344131	https://rio-frio-motel.hub.biz		0.92
-c0c245c5714f	Rodeway Inn	hotel	resort	28.66631	-99.18556	1115 W Highway 85	Dilley	78017	+18309633390	https://www.choicehotels.com/texas/dilley/rodeway-inn-hotels/txr57?mc=llbillpx&pmf=local		0.96
-c090e80076b9	Royal Inn Pearsall	hotel	motel	28.89835	-99.11314	1903 FM140	Pearsall	78061	+18303348901	http://www.royalinnpearsall.us		0.98
-41b04ddbcf16	Sagebrush hotel	hotel		28.71334	-99.83340	3964 N Highway 83	Crystal City	78839	+18303745600	http://sagebrushhotel.com/		0.98
-b95d2433d922	Sagebrush Hotel	hotel		28.73230	-99.84083	4964 N Highway 83	Crystal City	78839	+18302553193	https://www.booking.com/hotel/us/sagebrush-crystal-city.html?aid=311088&label=sagebrush-crystal-city-v8Wo2seHpzv_6qULaEIO9wS625974339780%3Apl%3Ata%3Ap1%3Ap2%3Aac%3Aap%3Aneg%3Afi%3Atikwd-4224684381%3Alp9028336%3Ali%3Adec%3Adm%3Appccp%3DUmFuZG9tSVYkc2RlIyh9YbbZAlxiWh21nxNbr91JuRM&sid=34876c6827dabf2bb38f04eddeab2b6d&all_sr_blocks=213196801_438725952_4_0_0&checkin=2026-10-26&checkout=2026-10-27&dest_id=20127460&dest_type=city&dist=0&group_adults=2&group_children=0&hapos=1&highlighted_blocks=213196801_438725952_4_0_0&hpos=1&matching_block_id=213196801_438725952_4_0_0&no_rooms=1&req_adults=2&req_children=0&room1=A%2CA&sb_price_type=total&sr_order=popularity&sr_pri_blocks=213196801_438725952_4_0_0__7123&srepoch=1792601752&srpvid=9fe2770a2a2d00bf&type=total&ucfs=1&		0.68
-4c3de286b4c4	Sai Unity Lodging Inc Dba Comfort Suites	hotel		28.44499	-99.24352	617 Las Palmas Blvd	Cotulla	78014				0.95
-df4097f2b4e1	Scottish Inns & Suites	hotel	resort	28.44679	-99.24069	435 Mars Dr	Cotulla	78014	+18304835390	https://www.stayhihotels.com/property/scottish-inns-and-suites-cotulla-tx/?utm_source=Bing&utm_medium=Referral&utm_campaign=Places		0.96
-3b8408074c85	Sona Inn	hotel	motel	28.68255	-99.18063	16222 S Interstate Hwy 35	Dilley	78017	+18309651100	http://www.sonainntx.com		0.94
-bdda0a94405c	Southern Inn and Suites Pearsall	hotel	resort	28.89817	-99.11568	112 S Interstate 35	Pearsall	78061	+18303343502	http://bmhotelgroup.com/southern-inn-suites-pearsall.html		0.92
-6656c1bda9b5	Studio 6 Suites Pearsall- Tx	hotel	resort	28.89517	-99.11201	604 Lindsey Ln	Pearsall	78061	+18305057243			0.97
-70c3dbaf1266	Super 8 by Wyndham Carrizo Springs	hotel		28.47304	-99.97611	137 La Lomita Dr	Carrizo Springs	78834	+18308769001	https://www.wyndhamhotels.com/super-8/carrizo-springs-texas/super-8-carrizo-springs/overview?CID=LC:7xnkh22o63wf5qj:47414		0.85
-ad22067af326	Super 8 by Wyndham Cotulla TX	hotel	resort	28.44439	-99.24417	669 N Baylor	Cotulla	78014	+18302674250	https://www.wyndhamhotels.com/super-8/cotulla-texas/super-8-cotulla-tx/overview?CID=LC:7xnkh22o63wf5qj:45714		1.00
-61127b3a70c7	Super 8 by Wyndham Dilley TX	hotel	resort	28.67950	-99.18060	16301 S Interstate Highway 35 35	Dilley	78017	+18302560649			1.00
-b9589f953518	SureStay Hotel by Best Western Cotulla	hotel		28.43599	-99.25089	333 N Interstate 35	Cotulla	78014	+18304835312	https://www.bestwestern.com/en_US/book/hotel-rooms.54030.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54030	SureStay Hotels	0.77
-9146792d365a	Talbert L Bar Ranch	hotel		28.42402	-99.27625	1620 Cochina Ranch Rd	Cotulla	78014	+18308795585	http://www.talbertlbarranch.com/		0.76
-33dc519f07a2	Texan Inn	hotel	motel	28.54282	-99.84712	2300 N 1st St	Carrizo Springs	78834	+18308769090	http://www.texaninn.com		0.92
-a87ee48322f7	Village Inn	hotel		28.44294	-99.24674	1110 FM468	Cotulla	78014	+18308792311	http://villageinnmotel.com/	Village Inn - Extended Stay • Cotulla	0.89
-29a58feebb7e	Watts Ranch	hotel		28.59236	-99.35898	1929 Watts Ranch Rd	Cotulla	78014	+17139066770	http://www.wattsranch.net/		0.86
-58aa694d5488	White House Inn Dilley	hotel		28.66899	-99.17050	110 S Main St	Dilley	78017	+18309633434	http://whitehouseinndilley.us/		0.92
-a39216f86806	White Wing Motel	hotel	motel	28.45783	-99.78629	6383 US-83	Asherton	78827	+18304683364			0.92
-37d979fe4cb7	Wintergarden Inn	hotel	motel	28.70062	-99.82823	2516 US-83	Crystal City	78839	+18303740300	https://www.wintergarden-hotel.com		0.92
-934d204f769c	Wotel One	hotel		28.49305	-99.82678	150 Service County Rd	Carrizo Springs	78834	+12103178302	http://www.mywotel.com/		0.88
-281f1b6d3085	4L Oilfield Services	office	energy company	28.42734	-99.23876	902 S Main St	Cotulla	78014	+18308795300	https://www.4loilfield.com/		0.92
-8b9d8fb1fef2	Baker Hughes	office	energy company	28.49295	-99.81717	3309 US-83	Carrizo Springs	78834	+18308762555	http://bakerhughes.com		0.92
-f6da0e808ff5	Carrizo Water Tree	office	bottled water company	28.53852	-99.84822	2209 N 1st St	Carrizo Springs	78834	+18308769191			0.92
-010370b92bdd	Dimmit County Swd	office		28.57136	-99.67872	13238 FM 190	Carrizo Springs	78834	+18308768672	https://dimmitcountyswdllc.godaddysites.com		0.65
-e3da58dea9df	NuStar Gardendale	office	energy company	28.49753	-99.22223	4259 I-35 Frontage Rd	Cotulla	78014	+12106205054			0.92
-b21c48879ccb	Petroleum Measurement Equipment Company	office	energy company	28.89396	-99.09694	210 N Cherry St	Pearsall	78061	+19367601020	http://www.petroleummeasurement.us		0.92
-2d0e1162f00b	Rio Grande Electric Co-Op, Inc.	office		28.53020	-99.88081	3204 Valley St	Carrizo Springs	78834	+18004600674	http://www.rgec.coop		0.92
-51a9b88339f1	Watermill Express	office	bottled water company	28.52362	-99.85831	307 W Nopal St	Carrizo Springs	78834	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
-d2a9744e7ab3	5D Grill & Lounge	restaurant	steakhouse	28.54310	-99.84674	2418 N 1st St	Carrizo Springs	78834	+18308763300	http://www.5dgrillandlounge.com		0.92
-ec9773930100	5D Steakhouse - Carrizo Springs	restaurant	steakhouse	28.54357	-99.84653	2418 N 1st St	Carrizo Springs	78834	+18302190118	http://www.5dsteakhouse.com/	5D Steakhouse - Yorktown	0.97
-aa9d75f05fbe	Aguascalientes Grill and Bar	restaurant	bar and grill restaurant	28.90422	-99.09168	1409 N Oak St	Pearsall	78061	+18305057425			0.71
-989570862812	Aine's Sabor Casero	restaurant		28.89112	-99.09406	403 E San Marcos St	Pearsall	78061	+18305057343			0.84
-be9bd1363964	Andy's Restaurant	restaurant	american restaurant	28.52102	-99.85708	101 N 1st St	Carrizo Springs	78834	+18308769622	http://www.andys-restaurant.com	Andy's of Malvern	0.92
-45a630659df2	Anthony’s Mexican seafood and grill	restaurant	seafood restaurant	28.69555	-99.82922	2110 N Highway 83	Crystal City	78839	+18308542032			0.87
-919562d6a9a9	Archy's Homestyle Burgers	restaurant	burger restaurant	28.44863	-99.23974	638 N I-35	Cotulla	78014	+18304835552			0.92
-38cf44d6183a	Arturo's Tacos	restaurant	mexican restaurant	28.69145	-99.83234	1524 N 1st Ave	Crystal City	78839	+18308542200	http://www.arturos-tacos.com	Arturo's Tacos	0.92
-92905e94d5e9	BEEF SAYS WHAAAT!!!	restaurant	burger restaurant	28.89464	-99.09421	310 N Oak St	Pearsall	78061	+12102907401	http://beefsayswhaaat.com/		0.99
-a1419e16621c	Ben's Taco Stand	restaurant	taco restaurant	28.89224	-99.10445	911 W Comal St	Pearsall	78061	+18307469070			0.96
-d2f6db39a347	Bibi's Place	restaurant	texmex restaurant	28.94069	-99.83958	418 S Miller Ave	La Pryor	78872	+18306942930			0.92
-e30be5f5494e	Big Lou's Food Barn	restaurant	comfort food restaurant	28.52689	-99.85463	807 N 1st St	Carrizo Springs	78834	+18302190199			0.96
-c2521fc984c9	Brush Country Herbs & Spice	restaurant		28.35115	-99.27036	5477 FM 469	Cotulla	78014	+18308793711	http://www.candlewoodsuitescotulla.com		0.77
-2e9d0ebdb340	Brush Country Steakhouse	restaurant	steakhouse	28.89136	-99.09518	120 S Oak St	Pearsall	78061	+18303344676			0.65
-0b456b2e4543	Cattlemens Of Cotulla	restaurant	seafood restaurant	28.43582	-99.23418	101 N Front	Cotulla	78014	+12107224949	http://www.cattlemensofcotulla.com		0.96
-65341b1c0c5f	Champs Chicken	restaurant	chicken restaurant	28.73667	-99.14597	17294 S I H 35	Dilley	78017	+18309651818	https://champschicken.com/locations/big-s-303-dilley-tx/		0.85
-78a594e59dd0	Champs Chicken	restaurant	chicken restaurant	28.43389	-99.23335	1162 Fm 468	Cotulla	78014	+18308793109	https://champschicken.com/locations/bigs-301-cotulla-cotulla-tx/		0.85
-921949d4e48b	Champs Chicken	restaurant	chicken restaurant	28.44376	-99.24799	1162 FM468	Cotulla	78014	+18308793109	https://champschicken.com/locations/bigs-301-cotulla-cotulla-tx/	Champs Chicken	0.96
-a25f9bb6576a	Charleys Cheesesteaks	restaurant	sandwich shop	28.03975	-99.35088	23813 I-35	Encinal	78019	+12108243892	https://www.charleys.com/locations/fuel-america-tc-2/		0.85
-c6d7548c8fc7	Chester's Chicken	restaurant	chicken restaurant	28.04555	-99.34888	28527 I-35	Encinal	78019	+19569487044	https://www.chesterschicken.com/		0.96
-f088ebcfe52d	Chester's Chicken	restaurant	chicken restaurant	28.68108	-99.18191	16290 IH 35 South	Dilley	78017	+18303263096	https://www.chesterschicken.com/		0.96
-9d316acab29c	Chuy's Taco Stand	restaurant	mexican restaurant	28.67937	-99.82122		Crystal City		+18304489902	http://washingtondc.menupages.com/restaurants/chuys		0.92
-94eb85d46689	Cinnabon	restaurant		28.51022	-99.84826	1045 N Highway 83	Carrizo Springs	78834	+18308769754	https://www.cinnabon.com/		0.94
-64290a53b07c	Cleo Bustamante Enterprises	restaurant		28.52985	-99.86006	1003 N 9th St	Carrizo Springs	78834	+18308769666			0.75
-be4b527788e8	Cleo's Mexican Food	restaurant	mexican restaurant	28.52178	-99.85664	203 N 1st St	Carrizo Springs	78834	+18308765901			0.98
-236f58c879cf	Cotulla Provisions and Cookhouse	restaurant		28.44567	-99.23801	165 Mars Dr	Cotulla	78014	+18308794800	http://malanahotels.com		0.92
-d39f22091c1f	Country Snack Shack bbq & More	restaurant		28.66419	-99.16450	318 E Spruill St	Dilley	78017	+18309657397	http://www.countrysnackshack.com/?page_id=9		0.98
-7c85b5c5cc10	Country Store	restaurant	american restaurant	28.44443	-99.24729		Cotulla	78014	+18308793319	http://conocophillips.com		0.92
-a2e94aa2ef5e	County LINE GRILL	restaurant	barbecue restaurant	28.04576	-99.34512		Encinal		+19567711919	http://www.texasoutlawgrill.com/		0.64
-99123db204d5	Cowpokes Bar-B-Q	restaurant	barbecue restaurant	28.89752	-99.11315	1854 W Comal St	Pearsall	78061	+18303348000	http://cowpokes-q.poi.place		0.98
-39d0e547abfc	Eddies Mexican Restaurant	restaurant	texmex restaurant	28.88663	-99.09772	204 E Frio St	Pearsall	78061	+18303179657			0.92
-f4cc161e8b3c	El Chico	restaurant	mexican restaurant	28.67898	-99.82062	124 S 7th Ave	Crystal City	78839	+18303743202	http://www.elchico.com/		0.97
-693e89f9f257	El Paraiso Tejano	restaurant	texmex restaurant	28.57293	-99.56993	32 S Franklin St	Big Wells	78830	+18304575001			0.92
-8e4b6815d9da	El Patron Mexican bar and grill	restaurant	mexican restaurant	28.44670	-99.24232	474 Mars Dr	Cotulla	78014	+18308794661			0.92
-e3f8bfc86728	El Rancho Grande	restaurant	mexican restaurant	28.93075	-99.82868	CR 4012	La Pryor	78872		http://www.elranchogrande.info/		0.65
-67dcf714cf59	Elia’s kitchen	restaurant		28.43163	-99.23802	504 1st St	Cotulla	78014	+18304835033			0.81
-90e740ddd2e8	Encinia BBQ	restaurant		28.43162	-99.23355	413 S Front St	Cotulla	78014	+13612541374			0.61
-ac1d509111bb	Full Moon Saloon	restaurant	bar and grill restaurant	28.89164	-99.09499	101 S Ash St	Pearsall	78061	+12109094400			0.92
-657c39e4bd69	Garcia's Bar & Grill	restaurant	texmex restaurant	28.89107	-99.09564	205 S Oak St	Pearsall	78061	+18303348800	https://garcia-s-bar-grill-tx.hub.biz/		0.92
-9f1826dc4d0c	Garcia’s On 35 Mexican Grill	restaurant	texmex restaurant	28.68017	-99.17921	1062 W FM 117	Dilley	78017	+18303263014			0.92
-3d4ce364f0ca	Genies	restaurant	theme restaurant	28.94868	-99.85058	Railroad St	La Pryor	78872	+18304071540			0.58
-fa606720cadc	Gibo's	restaurant		28.57512	-99.57141	1652 Leon St	Big Wells	78830				0.92
-0f7f554032db	Gonzales Taco Stand	restaurant	taco restaurant	28.67323	-99.16897	500 N Main St	Dilley	78017	+18309652090	https://local.yahoo.com/info-33846031-gonzales-taco-stand-dilley		0.92
-d1b7f687ee8e	Gonzalez Kitchen	restaurant	texmex restaurant	28.89484	-99.09433	310 N Oak St	Pearsall	78061		http://www.gonzalezkitchen.com/		0.94
-71f3f67f22c8	Hamsa HTX	restaurant		28.61346	-99.14062	5555 Morningside Drive Suite 100	Houston	77005	+12816123515	https://www.hamsahtx.com/		0.95
-c716ec78a7ca	Highway 83 Road House Bar & Grill	restaurant	bar and grill restaurant	28.67932	-99.83745	503 N Highway 83	Crystal City	78839	+18303745555			0.77
-0ed0e4dc715a	Iron Skillet	restaurant	diner	28.89965	-99.11594	110 S Interstate 35	Pearsall	78061	+18303342345	http://www.petrotruckstops.com/iron_skillet.sstg		0.92
-a88d18d27122	Jalisco's Bar & Grill	restaurant	mexican restaurant	28.89733	-99.11161	1711 W Comal St #1711	Pearsall	78061	+18303344360	http://www.jaliscorestaurant.com/		0.98
-469adcbd4e69	Jaliscos Mexican Restaurant & Bar	restaurant	mexican restaurant	28.89787	-99.11195	1711 W Comal St	Pearsall	78061	+18303344360	http://www.jaliscosbarandgrill.net		0.98
-978518c41043	Javelina Cafe	restaurant	mexican restaurant	28.68729	-99.82235	906 E Crockett St	Crystal City	78839	+18303749050			0.92
-11f035eb24af	Kevin's Cafe	restaurant	mexican restaurant	28.68158	-99.82940	504 E Zavala St	Crystal City	78839	+18303749127	https://kevin-s-cafe.hub.biz		0.95
-2d90fbfe7b53	Kim's Kitchen	restaurant	asian restaurant	28.52238	-99.85505	210 E Nopal St	Carrizo Springs	78834	+18308765550	http://www.kimskitchencarrizo.com		0.92
-9c94af874572	La Barbaqoa Co.	restaurant	barbecue restaurant	28.52205	-99.85484	202 Purser St	Carrizo Springs	78834	+18308766004	http://Labarbaqoaco.com/		0.92
-93783ee823bb	La Esquinita	restaurant		28.53145	-99.85867	1208 N 9th St	Carrizo Springs	78834	+18302551308			0.96
-d7e7ad880780	La Familia Restaurant	restaurant	mexican restaurant	28.89279	-99.10644	1206 W Comal St	Pearsall	78061	+18304446869			0.68
-a49372d3503c	La Parrillada	restaurant	texmex restaurant	28.89240	-99.09577	211 E Colorado St	Pearsall	78061	+18305057379			0.92
-fda95be00afb	La Rivera Resort	restaurant	american restaurant	28.77799	-99.15951	1758 County Road 4425	Dilley	78017	+18888186102	http://www.lariveraresort.com		0.77
-892e1407ce9c	La Salle County Steakhouse	restaurant	steakhouse	28.44284	-99.25129	182 S I-35	Cotulla	78014	+18308794108	http://www.lasallecountysteakhouse.com/ordereze/default.aspx		0.96
-29512e44b91a	Laredo Taco Company	restaurant	taco restaurant	28.45152	-99.23904	795 Ih 35	Cotulla	78014	+18308795354	https://www.laredotacocompany.com/		0.95
-4716b4230ff8	Laredo Taco Company	restaurant		28.54512	-99.84544	2525 N US Hwy 83	Carrizo Springs	78834	+18308763601	https://www.laredotacocompany.com/		0.95
-fde4a3db2584	Laredo Taco Company	restaurant		28.52034	-99.85688	101 S First St	Carrizo Springs	78834	+18308763359	https://www.laredotacocompany.com/		0.95
-b7a96aaf488e	Limits Kitchen	restaurant	american restaurant	28.44002	-99.23569	408 N Main St	Cotulla	78014				0.96
-65c159d94181	Linares Bar-B-Que	restaurant	barbecue restaurant	28.44872	-99.23760	1173 N Main St	Cotulla	78014	+18303227277			0.79
-b4cd87c9384f	Linares BBQ	restaurant	barbecue restaurant	28.44169	-99.24536	902 Live Oak St	Cotulla	78014	+18303227277			0.97
-aa6793e572ab	Little Joe's BBQ	restaurant	barbecue restaurant	28.88931	-99.09532	309 E San Antonio St	Pearsall	78061	+12104143286			0.97
-c45baed179fd	Los Alteños Bar and Grill	restaurant	bar and grill restaurant	28.89124	-99.09531	120 S Oak St	Pearsall	78061	+18307469019			0.92
-1cacbdde875e	Mana Burger	restaurant	burger restaurant	28.43291	-99.23019	301 Goft	Cotulla	78014	+18302027740			0.67
-083ac179df34	Martita's Cocina	restaurant	mexican restaurant	28.53019	-99.86087	903 Eaton St	Carrizo Springs	78834	+18302190900	http://www.martitascocina.com/		0.96
-521cf291ac37	Mi Cabaña Mexican Restaurant	restaurant	mexican restaurant	28.66984	-99.17033	106 N Main St	Dilley	78017	+18303263311			0.92
-950e1a954406	Mi Casa Cafe	restaurant	mexican restaurant	28.88489	-99.09739	821 S Oak St	Pearsall	78061	+18303343577	http://www.micasacafe.com	Mi Casa Glil Yam	0.96
-e6bec01fb3d2	Miguelito's Mexican Grill and Cantina	restaurant	mexican restaurant	28.54512	-99.84621	101 Petry Pl	Carrizo Springs	78834	+18308763565	http://www.miguelitosmexicangrillandcantina.com/		0.97
-6d72043288b9	Miguelitos Mexican Grill	restaurant	texmex restaurant	28.68673	-99.83141	1023 N 1st Ave	Crystal City	78839	+18303743461	http://www.miguelitosmexicangrillandcantina.com		0.97
-e6f9207730e3	Miko&#39 S Llc	restaurant		28.68664	-99.83141	1023 N 1st Ave	Crystal City	78839				0.95
-42028f3a3e71	Millies Mexican Restaurant	restaurant	mexican restaurant	28.67446	-99.18295	16777 S Interstate Hwy 35	Dilley	78017	+18309651114	https://start.cortera.com/.../k3s4jyl1q/millies-mexican-restaurant		0.96
-4515ab36e791	Mimi's	restaurant	mexican restaurant	28.52150	-99.85999	504 Pena St	Carrizo Springs	78834	+18303225030			0.55
-31256f4123a8	MJ's Mexican Restaurant	restaurant	texmex restaurant	28.52195	-99.85332	317 E Nopal St	Carrizo Springs	78834	+18302190117			0.95
-352bbd716602	Moe's Southwest Grill	restaurant	mexican restaurant	28.51064	-99.84791	1045 S Highway 83	Carrizo Springs	78834	+18308769739	http://www.moes.com		0.77
-14240bb184bc	My Hamburger Stand	restaurant	burger restaurant	28.94998	-99.85453		La Pryor	78872	+18303654312		Hamburger Stand	0.92
-c0ce971f0382	Nena's Mexican Food	restaurant	mexican restaurant	28.93758	-99.84120	620 S Pryor Ave	La Pryor	78872	+18302792210			0.69
-1f9f1846ef6d	Nina's	restaurant		28.57106	-99.57022	1508 Missouri Ave	Big Wells	78830	+18304572000			0.99
-a37a1b8ca32c	Nini’s Burger-stand	restaurant		28.95333	-99.61261	473 Ramos St	Batesville	78829	+18302751819			0.97
-db1ea22827a4	Ninos Lunch Box	restaurant		28.04462	-99.35491	711 N Front St	Encinal	78019				0.57
-f8f246393f04	Norma's Peace of Heaven	restaurant	comfort food restaurant	28.67525	-99.16554	138 E Colunga St	Dilley	78017	+18303261895			0.92
-9cc51850bbc2	Oak Street Taco House	restaurant	taco restaurant	28.89007	-99.09606	305 S Oak St	Pearsall	78061	+18305057330	https://oaksttacohouse-305.square.site/s/order		0.92
-6eb127ad760b	Oasis Restaurant	restaurant	mexican restaurant	28.69880	-99.82870	2313 US-83	Crystal City	78839	+18303743337	http://oasis-austin.com		0.99
-c451772c2afd	Pacho's Cafe	restaurant		28.68010	-99.17919	1062 W FM 117	Dilley	78017				0.95
-34ac916fbee9	Panchos	restaurant	mexican restaurant	28.94513	-99.83817	686 US-57	La Pryor	78872	+18303654411			0.96
-e4c991793d5c	PC Country Store	restaurant	american restaurant	28.44445	-99.24720	78 I-35	Cotulla	78014	+18308793319	http://conocophillips.com		0.92
-eaaf687df5dd	Peppers Grill	restaurant		28.43967	-99.23611	501 N Main St	Cotulla	78014	+18308792904	http://peppersgrill.com/		0.92
-9733a8be634e	Phat Boy'z	restaurant	texmex restaurant	28.53149	-99.85868	1208 N 9th St	Carrizo Springs	78834	+18302190071			0.92
-b8dc809b1e6c	Pizz-A-Ghetti	restaurant	pizza restaurant	28.89057	-99.09650	222 S Elm St	Pearsall	78061	+18303348730	http://www.pizzagetti.com		0.95
-723ebaee6129	Pom E Landia Laredo Texas	restaurant	mexican restaurant	28.43825	-99.23751	Pom’s	Cotulla	78046	+19562354135			0.79
-285c80783e95	Ponchos Mexican Resteraunt	restaurant	mexican restaurant	28.94569	-99.83611	686 E US Hwy 57	La Pryor	78872	+18303654411			0.94
-d5e02fea2481	Ponderosa's Take Out	restaurant	burger restaurant	28.51461	-99.21410	176 N Gray Ave	Cotulla	78014	+18308794705	http://gmail.com		0.92
-421e6249b87f	Rebecca's Mexican Restaurant	restaurant	mexican restaurant	28.67853	-99.82959	207 N Ave B	Crystal City	78839	+18304485443			0.92
-523c3420cd1d	Rosita's Barbacoa	restaurant	mexican restaurant	28.90079	-99.11520	111 I-35	Pearsall	78061	+18303342626			0.92
-56379c5a0e15	Rosita's Barbacoa	restaurant	mexican restaurant	28.66888	-99.17655	404 W Leona St	Dilley	78017	+18303261161			0.96
-0a4d0303608d	Rositas Barbacoa	restaurant	texmex restaurant	28.43006	-99.23569	506 S Main St	Cotulla	78014	+18302023001			0.92
-af19507ad290	Rositas Restaurant	restaurant	texmex restaurant	28.52516	-99.85603	604 N 1st St	Carrizo Springs	78834	+18308763825	http://rositasrestaurant.com		0.92
-cc27d975c67b	Royal Palace Dance Hall Restaurant	restaurant		28.49807	-99.82757	2578 S US Hwy 83	Carrizo Springs	78834	+18308769377	http://www.trinitystogo.com		0.92
-326d2f55f776	Sanchez BBQ and Gorditas	restaurant	texmex restaurant	28.43373	-99.23259	106 Goft St	Cotulla	78014	+18308792564			0.90
-2d5e9a1105e4	Sergio’s BBQ	restaurant	barbecue restaurant	28.94702	-99.61357	108 Santiago St	Batesville	78829	+14324889779			0.63
-e9a79f28b898	Stars Drive-In	restaurant	theme restaurant	28.53405	-99.85200	1906 N 1st St	Carrizo Springs	78834	+18308769568	http://starsdrivein.com	Stars Drive-In	0.96
-0332eac237d2	Stars Restaurants, Llc	restaurant		28.53418	-99.85227	1906 N 1st St	Carrizo Springs	78834				0.95
-34d9724da74c	Taco House	restaurant	texmex restaurant	28.52491	-99.85555	603 N 1st St	Carrizo Springs	78834	+18302190197	http://www.tacohouse.org/		0.94
-0c1c8715506d	Taco Palenque	restaurant	mexican restaurant	28.44626	-99.24348	358 I-35	Cotulla	78014	+18308794956	https://tacopalenque.com/	Taco Palenque	0.96
-d173c8fd64ea	Taco the Town	restaurant		28.53078	-99.85945	1201 N 9th St	Carrizo Springs	78834	+18303222446			0.92
-82d42637fe2d	Tacos 2 Hermanos	restaurant	mexican restaurant	28.89749	-99.09334	626 N Oak St	Pearsall	78061	+18305057472			0.98
-48bc55d84db0	Tacos El Rey	restaurant	taco restaurant	28.52567	-99.85497	701 N 1st St	Carrizo Springs	78834	+18303258687			0.96
-d9128bb32374	Tacos el sabrocito	restaurant		28.89569	-99.10643	129 W Washington St	Pearsall	78061	+18303176404	http://ingoodcompanymaine.com		0.66
-ed32b23e34ec	Taqueria 2 Hermanos	restaurant	mexican restaurant	28.89749	-99.09334	626 N Oak St	Pearsall	78061	+18305057472	http://taqueriajalisco.net		0.57
-e5429dd97c1b	Taqueria Jalisco	restaurant	mexican restaurant	28.89744	-99.09319	626 N Oak St	Pearsall	78061	+18303344360			0.90
-ec613d740606	Taqueria Jalisco	restaurant	mexican restaurant	28.67379	-99.16851	511 N Main St	Dilley	78017	+18309638888	https://taqueriajalisco.cloveronline.com/menu/all		0.95
-c935a1e6bc65	Taqueria Jalisco in Pearsall Txs	restaurant	mexican restaurant	28.89738	-99.11139		Pearsall					0.79
-36c3d125ea36	Taqueria Mexico	restaurant	mexican restaurant	28.89232	-99.10443	911 W Comal St	Pearsall	78061	+18303344380	http://taqueria-jalisco.com		0.92
-ba66094b4c29	Taqueria Tres Potrillos	restaurant	mexican restaurant	28.52237	-99.85704		Carrizo Springs	78834	+12103224542			0.96
-d3987fa53354	The Cabins at Carrizo	restaurant	american restaurant	28.49371	-99.82563	150 Service County Rd	Carrizo Springs	78834	+18308762588	http://www.cabinsatcarrizo.com/		0.70
-87cf48f8172d	The Front Porch on Oak Street	restaurant		28.89008	-99.09593	305 S Oak St	Pearsall	78061	+18305057132			0.98
-a263d6d0f11d	The Smoking Crab & Seafood Co Carrizo Springs, TX	restaurant	seafood restaurant	28.52337	-99.86557	1102 Pena St	Carrizo Springs	78834	+18302064822			0.92
-db34244d401a	The Snack Shack	restaurant	sandwich shop	28.68601	-99.82798	421 E Crockett St	Crystal City	78839	+18304488741			0.96
-f430e39173ba	The Stand	restaurant		28.44207	-99.76110	833 Fm Rd 190	Asherton	78827	+18307540005			0.87
-ed4927786901	Tina's Tacos	restaurant	mexican restaurant	28.49641	-99.82360	2824 US-83	Carrizo Springs	78834	+18302556575			0.92
-2a6cea050bd8	Tio Non's Joint	restaurant		28.43998	-99.23612	409 N Main St	Cotulla	78014		tio-nons-joint.business.site		0.92
-ddc23d55548c	Tracy's Table	restaurant		28.44770	-99.24551	13 Pena Rd	Cotulla	78014	+18155666083			0.77
-84a358b152a6	Trinitys	restaurant	diner	28.44983	-99.76079	Crockett	Asherton	78827	+18302558888	http://www.trinitystogo.com		0.95
-d1f2748cb3b4	Trinitys	restaurant	barbecue restaurant	28.49804	-99.82756	2578 S US Hwy 83	Carrizo Springs	78834	+18304991458	http://Www.Trinitystogo.com/		0.96
-5449c9f19a73	ValdezBakery Pizzas & Wings To-Go	restaurant	pizza restaurant	28.88375	-99.09963	205 W Ward St	Pearsall	78061	+18305050404	https://printgraphex3.wixsite.com/valdezmenu		0.92
-1b0f5d929776	Yolie’s Steakhouse & Mexican Food	restaurant	steakhouse	28.69059	-99.83644	1511 US-83	Crystal City	78839	+18303742772	https://order.taptoeat.com/a9997219e0219aeab342e2ec21b65e3394dc4e9cddc75fa6e3373e91147321cb		0.98
-7ca3b77b9e66	Crystal City Housing Authority	senior	retirement home	28.69500	-99.82508	1600 N 7th Ave	Crystal City	78839	+18303743433	http://ninfa-authority.gaaq.net		0.94
-6751bddd50b2	Las Palmas Skilled Nursing and Rehabilitation	senior	retirement home	28.44553	-99.24014	369 Mars Dr	Cotulla	78014	+18308794628	https://slpoperations.com/		0.92
-fe711ef00516	Pearsall Manor Senior Citizens	senior	retirement home	28.89835	-99.08307	600 Berry Ranch Rd	Pearsall	78061	+18303345334			0.92
-c6eb0cc80b9e	Pearsall Nursing and Rehabilitation Center	senior	retirement home	28.89713	-99.11911	169 Medical Dr	Pearsall	78061	+18303343371	https://wellsentialhealth.org/location/pearsall-nursing-rehabilitation-center/		0.92
-38409e519ccd	Whispering Springs Rehabilitation and Healthcare Center	senior	retirement home	28.51817	-99.86341	506 S 7th St	Carrizo Springs	78834	+18308765011	https://www.nexion-health.com/whisperingsprings/		0.99
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+be063b3a1667	Canela's Bakery	bakery		28.68509	-99.83407	222 W Sabine St	Crystal City	78839	+18303743642	https://www.paypal.com/ncp/payment/KVAPX2KGMRAUS		0.96	
+8208946e35c2	Cinnabon	bakery		28.45259	-99.23819	921 I-35	Cotulla	78014	+18308769754	https://locations.cinnabon.com/tx/cotulla/921-n-ih-35?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.94	
+b79b16ad5a40	Cinnabon	bakery		28.04691	-99.34866	45 TX-44	Encinal	78019	+18306632940	https://locations.cinnabon.com/tx/encinal/45-e-texas-state-hwy-44?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	1.00	
+94c2de4fab80	Daylight Donuts	bakery	donut shop	28.52387	-99.85860	309 W Nopal St	Carrizo Springs	78834	+18308763122	http://daylightdonuts.com		0.92	
+6150d5f128c5	Donut Palace	bakery	donut shop	28.89963	-99.09372	203 Arnold St	Pearsall	78061	+18303343314	http://donutpalace.com/		0.96	
+8911d951611e	Donut Palace in Dilley	bakery	donut shop	28.67542	-99.17394	302 W FM 117	Dilley	78017	+18327840888			0.92	
+3e5130b48fda	GiGi's Bakery	bakery		28.52185	-99.85539	211 E Alamo St	Carrizo Springs	78834	+12102434344			0.92	
+6ae7eaffab29	La Popular Bakery	bakery		28.89122	-99.09985	315 W Comal St	Pearsall	78061	+18303342484	https://la-popular-bakery-tx-4.hub.biz		0.92	
+a76f5af08c56	Lu’s Sweets & Treats	bakery		28.52308	-99.85901	301 N 4th St	Carrizo Springs	78834				0.81	
+2b0e3bf25260	Mabely's Bakery	bakery		28.67720	-99.17558	500 W FM 117	Dilley	78017	+18309632190			0.96	
+f51dd58307f3	Mabely's Bakery	bakery		28.67432	-99.17221	428 W FM 117	Dilley	78017	+18309652190			0.56	
+7417b6bcac41	Robert's Bakery	bakery		28.67954	-99.82049	121 S 7th Ave	Crystal City	78839	+18303743171			0.92	
+f9fde0e23d89	The Donut Palace	bakery	donut shop	28.44203	-99.24580	961 FM468	Cotulla	78014	+18302023044	http://www.thedonutpalace.com	Donut Palace Carthage, MO	0.96	
+08dc10a1f6de	Valdez Bakery	bakery		28.43447	-99.23460	204 S Main St	Cotulla	78014	+18308793450	https://printgraphex3.wixsite.com/website		0.96	
+59ff3e5bbf83	Amigo's Place	bar		28.90155	-99.10858	211 N Lopez St	Pearsall	78061	+18305057401			0.92	
+3622c0c5d002	Benuli's Long Horn Sports Bar and Grill	bar	sports bar	28.53273	-99.85199	1805 N 1st St	Carrizo Springs	78834	+18308765151	http://www.thelonghorncafe.com		0.92	closed
+278717812a03	CODE 3 BAR	bar		28.52158	-99.85678	109 N 1st St	Carrizo Springs	78834	+18302550549			0.96	
+eb2d535a2dd7	Cotulla City Limits	bar		28.44007	-99.23566	408 N Main St	Cotulla	78014				0.92	
+33a34307ffa1	Cowboys Sports Bar in Cotulla	bar	sports bar	28.43026	-99.23613	511 S Main St	Cotulla	78014				0.64	
+a4f97b6e4d5d	Dos Hermanos Peaks	bar		28.11279	-99.82612		Carrizo Springs					0.58	
+a8176125a687	El Centenario Nite Club	bar	pub	28.89371	-99.09810	126 N Peach St	Pearsall	78061		http://www.clubplanet.com/Venues/128863/Pearsall/Robertos-Nite-Club/Photos		0.92	
+02fddaa3f1df	Horseshoe Bar	bar		28.44304	-99.25156	182 I-35 Frontage Rd	Cotulla	78014				0.92	
+408edcb79863	Jefe's Sports Bar	bar	sports bar	28.54932	-99.85673	794 Loop 517	Carrizo Springs	78834				0.96	
+8cd51b315595	Jmj's Daiquiris LLC	bar	cocktail bar	28.89171	-99.10359	814 W Comal St	Pearsall	78061	+18303176789			0.98	
+7d1e3f61609d	JOHNS BAR & GRILL	bar	sports bar	28.64386	-99.85188	5850 Farm to Market 191	Crystal City	78839	+18304439367			0.85	
+0b7380ec1c4a	La Perlita Bar	bar		28.89362	-99.09827	Peach St	Pearsall	78061				0.67	
+c26bf9fc317d	Las Diablitas Lounge	bar		28.68548	-99.83307	114 W Sabine St	Crystal City	78839				0.74	
+e4f72182cffc	Locked and Loaded Saloon	bar		28.43619	-99.23424	100 N Front	Cotulla	78014	+18302020525	https://locked-and-loaded-saloon.hub.biz		0.92	
+2e2828ad5ac9	Meme's Bar	bar		28.44140	-99.76201	909 Carter St	Asherton	78827	+18304689305	www.usbizplace.com/tx-m/memes-bar.html		0.92	
+98c248bee6ba	Miller's Bar	bar		28.89301	-99.09875	103 N Peach St	Pearsall	78061				0.96	
+803c430bd5d7	MVPs Sports Bar	bar		28.68064	-99.83009	409 W Zavala St	Crystal City	78839		https://www.instagram.com/mvpssportsbartx?igsh=MWNneG42bmY4NmFucA%3D%3D&utm_source=qr		0.96	
+6665ddb09e50	Pancho's Cantina	bar		28.68526	-99.83270	114 W Sabine St	Crystal City	78839	+18304488828			0.92	
+b00107d2ac02	Pearsall Lions Civic Center	bar		28.91749	-99.09332	433 County Road 1056	Pearsall	78061	+18303344202	http://www.lionsclubs.org		0.92	
+da6974aac18d	Reyna’s Saloon	bar		28.89370	-99.09809	126 N Peach St	Pearsall	78061	+18305057333			0.89	
+e8790990f6c9	Silver Spurs Gentleman's Club	bar		28.04508	-99.34876	302 E Texas State Hwy 44	Encinal	78019	+19569485177			0.92	
+26dbb9853152	Tejano 830	bar		28.68581	-99.83347	1015 N Avenue A	Crystal City	78839	+19103406128			0.56	
+a71cba671cf9	The Lounge Carrizo Springs	bar		28.52138	-99.85700	109 N 1st St	Carrizo Springs	78834	+12109520668			0.98	
+98d9f9463743	Velasquez Bar	bar		28.42997	-99.23322	310 Thornton St	Cotulla	78014	+18308794617			0.97	
+931dbe9ca56e	Zamora’s Bar	bar		28.44141	-99.75120		Asherton					0.75	
+8a85f71ac8e5	Botello Auto Sales	cardealer		28.52207	-99.86160	602 Pena St	Carrizo Springs	78834	+18308762039			0.92	
+a487d4a2dd5c	Comal Auto Sales	cardealer	used auto dealer	28.89376	-99.10757	1311 W Comal St	Pearsall	78061	+18303349366			0.92	
+4a19af18e63a	Frio Chevrolet	cardealer		28.67240	-99.18256	16919 S Interstate Highway 35	Dilley	78017	+18304691187	http://www.friochevrolet.net		0.92	
+0a952dfac6d5	Joel's Used Cars & Parts	cardealer		28.67913	-99.82681	498 S FM 393	Crystal City	78839	+18303743106			0.65	
+73ab840d27dc	Joel's Used Cars & Parts	cardealer	used auto dealer	28.69704	-99.84242	498 Farm to Market Rd 393	Crystal City	78839	+18303743106	https://joels-used-cars-parts.hub.biz		0.92	
+b5c14b4e6904	Petty Tire And Auto Service	cardealer		28.88142	-99.09933	1424 S Oak St	Pearsall	78061				0.78	
+441d7d616c16	Rush Truck Center-Cotulla	cardealer		28.44402	-99.24722	137 Deer Run	Cotulla	78014	+19567641470	http://www.rushtruckcenters.com/locations/location-search/1032-cotulla	Rush Towing Systems	0.74	
+a13a2e4d1b65	Tellus Equipment	cardealer		28.88999	-99.11825	750 I-35	Pearsall	78061	+18303343634	https://www.tellusequip.com/about-us/locations/pearsall-tx/	Tellus Equipment Solutions	0.92	
+5a785fa39da8	Used Cars, Inc.	cardealer	used auto dealer	28.89358	-99.09391	314 E Rio Grande St	Pearsall	78061		https://www.ucarsinc.com		0.95	
+b566587a6555	Worfe Chevrolet LLC	cardealer		28.67211	-99.18287	16919 I-35 S	Dilley	78017	+18309651661	http://www.friochevrolet.com/?cs%3Apro=yext		0.70	
+8a100941047b	Oaks Theater	cinema		28.89091	-99.09541	210 S Oak St	Pearsall	78061				0.91	
+59847bee8f7c	Cafe Suzanna	coffee		28.52357	-99.85963	305 N 5th St	Carrizo Springs	78834	+18302190052			0.92	
+fc4da59080ff	Desi's	coffee		28.96110	-99.62088	14560 E US Hwy 57	Batesville	78829	+18303764403			0.90	
+95c0501753a3	Elvira Mia Cafeteria	coffee		28.66998	-99.17835	554 W Miller St	Dilley	78017	+18302671608	https://cash.app/$elviramiacafeteria		0.56	
+eb2ce284d068	Flying	coffee		28.45308	-99.23830	13 Freddie Copps	Cotulla	78014				0.66	
+7f4048e17968	Gridiron Cafe	coffee		28.69611	-99.82880	2206 US-83	Crystal City	78839	+18304485051			0.92	
+c59c0ccdcab1	Mom's Kitchen	coffee		28.43359	-99.23467	303 S Main St	Cotulla	78014	+18303262551			0.90	
+0cd5066f669f	People's Truck Stop Cafe	coffee		28.94983	-99.84965	19358 US-83	La Pryor	78872	+18303654222	http://peoples-cafe.edan.io		0.96	
+a466fc27f924	Recreation Center Cafe	coffee		28.04453	-99.35367	604 N Main St	Encinal	78019	+19569485400	http://www.recreationcentercafe.com		0.92	closed
+3d6b8fcf5859	Starbucks	coffee		28.89687	-99.11215	1804 W Comal St	Pearsall	78061	+18305051485	https://www.starbucks.com/store-locator/store/1038296/w-comal-st-louise-ln-1804-w-comal-pearsall-tx-78061-us	Starbucks	0.96	
+78666519ba03	Tapioca Tea House	coffee	tea room	28.89224	-99.09479	307 E Colorado St	Pearsall	78061	+18307469044	http://www.tapiocateahouse.com		0.92	
+4cc88ea554ec	The Mav Lab	coffee		28.89310	-99.09473	202 N Oak St	Pearsall	78061	+18305384766	http://karenalvarado.herbalife.com/en-us/u		0.92	
+1fc69b93d83c	Carrizo Springs Jr.High	college		28.52181	-99.85699		Carrizo Springs					0.64	
+7ed605f95b8b	Southwest Texas Junior College	college		28.67877	-99.82958	215 W Zavala St	Crystal City	78839	+18303743378	http://www.swtjc.net	Southwest Texas College	0.92	
+8a7a3ec39385	Southwest Texas Junior College	college		28.89755	-99.09088	415 E Florida St	Pearsall	78061	+18302245007	http://www.swtjc.net/		0.95	
+3fc3afe08d00	5 Points Market 15	convenience		28.52162	-99.85760	102 N 1st St	Carrizo Springs	78834	+18308769451	http://exxonmobilstations.com		0.92	
+70257c0b6d05	7-Eleven	convenience		28.45144	-99.23914	795 Ih 35	Cotulla	78014	+18308795354	https://www.7-eleven.com/locations/tx/cotulla/795-ih-35-40535	7-Eleven	0.99	
+8a217d39fcc8	7-Eleven	convenience		28.52046	-99.85717	101 S First St	Carrizo Springs	78834	+18308763359	https://www.7-eleven.com/locations/tx/carrizo-springs/101-s-first-street-east-40532	7-Eleven	0.98	
+ace5d80f0fdd	7-Eleven	convenience		28.54512	-99.84544	2525 N US Hwy 83	Carrizo Springs	78834	+18308763601	https://www.7-eleven.com/		1.00	
+d8c87b7acfdf	7-Eleven	convenience		28.49909	-99.82790	2525 N US Highway 83	Carrizo Springs	78834	+18002550711	https://www.7-eleven.com/locations/tx/carrizo-springs/2525-n-us-hwy-83-40536		0.85	
+ccfb3e5247f0	83 Fuel Stop	convenience		28.34800	-99.61380	19575 TX-83	Catarina	78836		https://locations.valero.com/en-us/LocationDetails/Index/19575-TX-83/0000031247	Valero	0.80	
+d94507c67e07	AMIGO DILLEY	convenience		28.68100	-99.18170	16290 I-35 S PO Box 287	Dilley	78017		https://locations.valero.com/en-us/LocationDetails/Index/16290-I-35-S-PO-BOX-287/0000027206	Valero	0.80	
+44c3cb22aba3	Amigo's Travel Center	convenience		28.96000	-99.62321	14404 E US Hwy 57	Batesville	78829	+18303764040			0.96	
+2970bc8b7da5	Amigos Food Mart	convenience		28.89151	-99.10242	604 W Comal St	Pearsall	78061	+18303343444	https://amigos-food-mart-tx-2.hub.biz/		0.96	
+e3a755692cd9	Batesville One Stop	convenience		28.96002	-99.62318	14404 E US Hwy 57	Batesville	78829	+18303764040	https://batesville-one-stop-inc.hub.biz/		0.74	
+08d984441af7	BIG'S #301	convenience		28.44390	-99.24790	1162 East FM 468	Cotulla	78014		https://locations.valero.com/en-us/LocationDetails/Index/1162-EAST-FM-468/0000002165	Valero	0.92	
+6512bdd1214e	BIG'S 301	convenience		28.45377	-99.26555	1162 W FM 468	Cotulla	78014	+18308793109			0.64	
+0a69e4564ff9	BIG's 302	convenience		28.43709	-99.23504	202 N Main St #202	Cotulla	78014	+18308793677	https://bigs-302.hub.biz/		0.96	
+f2832e1e9604	BIgs 303	convenience		28.66749	-99.18417	17294 I-35 S	Dilley	78017	+18309651818	https://www.shell.com		0.92	
+869f3deb6b5b	Bucks Country Store	convenience		28.52219	-99.85725	208 N 1st St	Carrizo Springs	78834	+18308763377	http://www.buckscountrystoretx.com		0.92	
+4c668b705f8a	Carrizo Spring Pilot	convenience		28.51130	-99.84860	1045 US Highway 83	Carrizo Springs	78834		https://locations.valero.com/en-us/LocationDetails/Index/1045-US-HIGHWAY-83/0000031251	Valero	0.80	
+09ba965e9c48	Castillo's Convenience Store	convenience		28.68731	-99.82229	906 E Crockett St	Crystal City	78839	+18303749050	https://start.cortera.com/.../k9o6oyp4p/castillos-convenience-store		0.92	
+1e6b4116b20f	CAT Scale	convenience	truck gas station	28.45331	-99.23841	921 N Interstate 35	Cotulla	78014	+18308795363	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85	
+3f3ce7f9f729	CAT Scale	convenience	truck gas station	28.04556	-99.34882	28527 I- 35	Encinal	78019	+19569487044	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85	
+48402f1d5b76	CAT Scale	convenience	truck gas station	28.90020	-99.11723	110 S. I-35 Frontage Rd	Pearsall	78061	+18303348222	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85	
+bd3ee807f531	CAT Scale	convenience	truck gas station	28.51163	-99.84795	1045 S US Highway 83	Carrizo Springs	78834	+18308769754	http://catscale.com/?utm_medium=yext&utm_source=bing		0.97	
+d85ce9aa6cf3	CAT Scale	convenience	truck gas station	28.45152	-99.23911	795 IH 35	Cotulla	78014	+18308795354	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85	
+cc863f0e3be7	Catarina Food Mart	convenience		28.34817	-99.61324	172 E San Francisco St	Catarina	78836	+18309995000			0.92	
+589972ba39c7	Catarina One Stop	convenience		28.34639	-99.61464	19682 US-83 S	Catarina	78836	+18309993350	http://www.krispykrunchy.com	One Stop	0.92	
+78d142ea87ef	Chevron	convenience		28.90479	-99.09109	1518 N OAK STREET	Pearsall	78061		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1518-N-OAK-STREET-PEARSALL-TX-78061-id380640	Chevron	0.95	
+95e377112c33	Chevron	convenience		28.44398	-99.25002	50 I 35	Cotulla	78014	+18308794863	https://www.chevronwithtechron.com/en_us/home/find-a-station.html?/station/50-I-35-COTULLA-TX-78014-2486-id208080	Chevron Horseshoe Bend	0.92	
+ddeda53f6821	Chevron	convenience		28.45133	-99.23825	795 N INTERSTATE 35	Cotulla	78014		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/795-N-INTERSTATE-35-COTULLA-TX-78014-5163-id390225	Chevron	0.80	
+de0fce3f7f39	Chevron	convenience		28.04645	-99.35103	28442 S 35	Encinal	78019		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/28442-S-35-ENCINAL-TX-78019-0000-id387741	Chevron	0.80	
+4a82fb830b97	Chevron Station Cotulla	convenience		28.43561	-99.23495	50 S I H 35	Cotulla	78014	+12108215900			0.85	
+c02a048a52e7	Chevron Station Pearsall	convenience		28.89823	-99.11404	130 S I H 35	Pearsall	78061	+18309312135			0.99	
+0b13404d8f6a	Circle K	convenience		28.89677	-99.09350	604 N Oak St	Pearsall	78061	+18303342220	https://www.circlek.com/		0.92	
+49b916f0451d	Corner Store	convenience		28.89690	-99.09370	604 N Oak St	Pearsall	78061	+18303342220			0.92	
+5f0130c50b71	Cotulla One Stop	convenience		28.43268	-99.23434	402 S Main St	Cotulla	78014	+18308792744			0.92	
+a8b511c2e6f0	Crystal City Drive-Thru Market	convenience		28.69158	-99.83445	1608 US-83	Crystal City	78839	+18303742000			0.97	
+248f38bbb95d	Dilley Truck Stop	convenience		28.73660	-99.14600	16250 S Interstate Hwy 35	Dilley	78017		https://locations.valero.com/en-us/LocationDetails/Index/16250-S-INTERSTATE-HWY-35/0000030790	Valero	0.80	
+95aaf51eb3dd	Dilley Truck Stop	convenience		28.68237	-99.18114	16250 S Interstate Highway 35	Dilley	78017	+18303264334			0.92	
+0a76f9d0c187	Double D Beverage Barn	convenience		28.94296	-99.85018	18881 N US Hwy 83	La Pryor	78872	+18303654487			0.93	
+1ebfdca2baa6	Exxon	convenience		28.44336	-99.24866	1206 Fm 468	Cotulla	78014	+18308792710	https://www.exxon.com/en	Exxon & Mobil Stations	1.00	
+6748d1fb60ef	Exxon	convenience		28.52143	-99.85770	102 N. 1 St St	Carrizo Springs	78834	+18308769451	https://www.exxonmobilfuels.com/en/find-gas-station/200310165		1.00	
+a576316d2a2f	Exxon	convenience		28.90046	-99.11504	111 N Interstate 35	Pearsall	78061	+18303349296	http://www.exxon.com		0.92	
+cdd1d6b10f24	Exxon	convenience		28.96209	-99.61862	14718 Hwy 57	Batesville	78829	+18303764224	http://www.exxon.com		1.00	
+f8bb608df42e	FIVE POINTS MARKET	convenience		28.52241	-99.85641	305 N 1ST ST	Carrizo Springs	78834		https://www.exxon.com/en/find-station/mobil-carrizosprings-tx-fivepointsmarket-200325821	Mobil	0.80	
+3b40708ef7b7	Flying J Travel Center	convenience		28.44798	-99.23728	921 N Interstate 35	Cotulla	78014	+18308795363	https://www.pilotflyingj.com/stores/488		0.85	
+dd80483e4d00	Flying J Travel Center	convenience		28.45278	-99.23856	921 I-35 S	Cotulla	78014	+18308795363	https://locations.pilotflyingj.com/us/tx/cotulla/921-n-i-35	Pilot Flying J	0.92	
+c669306f2023	Frio Self Serve	convenience		28.66809	-99.18488	17250 S Interstate Hwy 35	Dilley	78017	+18309651537	https://locations.valero.com/en-us/LocationDetails/Index/17250-IH-35-SOUTH/0000001806		0.99	
+821d88274454	Fuel America Travel Center - Encinal	convenience		28.03077	-99.33701	23183 I-35 N	Encinal	78019	+12018243892	http://fuelamericatravelcenter.com/		0.97	
+d1cc8f7fd774	FUEL Station	convenience		28.89151	-99.09399	408 E Colorado St	Pearsall	78061	+18303342223			0.62	
+093796949f29	Goasis	convenience		28.89963	-99.11546	110 Interstate 35	Pearsall	78061	+18303348222			0.90	
+9a174e3f929b	Hop-In	convenience		28.89166	-99.09386	E Colorado St	Pearsall	78061	+18303342223			0.75	
+ffff494d3d74	Igo's Trojan House	convenience		28.43988	-99.76362	1114 FM 190	Asherton	78827	+18304683800			0.96	
+248af0b3fd8f	Jerry's Corner Mart	convenience		28.94407	-99.84115	270 US-57	La Pryor	78872	+18303654723	http://conocophillips.com		0.92	
+d900f600408c	Kwik Chek	convenience		28.53018	-99.86013	1000 N 9th St	Carrizo Springs	78834	+18308763434	https://www.kwikchekstores.com		0.75	
+b8c8d43c27a3	Kwik Chek now TXB	convenience		28.44178	-99.76019	780 Carter St	Asherton	78827	+18304683382	https://www.kwikchekstores.com		1.00	
+f0ead3ae201d	L&S Kwik STOP	convenience		28.04336	-99.35347	505 Fresno St	Encinal	78019	+19564899650			0.79	
+4fd67ef10b96	Lone Star Market Dilley Truck Stop	convenience	truck gas station	28.73451	-99.16972	16250 I-35	Dilley	78017	+18309630548	https://lonestarmarket.com/		0.85	
+6b4a88e2a05b	Love's Travel Stop	convenience	truck gas station	28.41639	-99.25032	1963 S I-35	Cotulla	78014	+18308797101	https://www.loves.com/locations/862		0.97	
+cddabb1a3cb1	Love's Travel Stop	convenience		28.04558	-99.34880	28527 I-35	Encinal	78019	+19569487044	https://www.loves.com/locations/298		0.97	
+99f2238f96d8	LOWES FUEL 145	convenience		28.44755	-99.23717	1203 N MAIN	Cotulla	78014			Phillips 66	0.80	
+f4089657f88e	LOWES FUEL 148	convenience		28.66821	-99.18249	17255 IH 35 S	Dilley	78017			Phillips 66	0.80	
+00c50acaec96	M & D Mini Mart	convenience		28.45108	-99.76106	333 Fresno St	Asherton	78827	+18304683663			0.92	
+cd868df0ea62	MAX-E-MART #1	convenience		28.44325	-99.24861	1206 FM 468	Cotulla	78014		https://www.exxon.com/en/find-station/exxon-cotulla-tx-maxemart1-200314052	Exxon	0.80	
+1133465f06cb	Mobil	convenience		28.66798	-99.18203	17285 Ih. 35 South	Dilley	78017	+18309631482	https://www.exxon.com/en	Exxon & Mobil Stations	1.00	
+77acef1575b9	Mobil	convenience		28.52238	-99.85645	305 N 1st St	Carrizo Springs	78834		https://www.exxon.com/en/find-station/mobil-carrizosprings-tx-fivepointsmarket-200325821?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92	
+c705c6ba9a97	Mr B Number 11	convenience		28.69372	-99.83128	1900 US-83	Crystal City	78839	+18303743232	http://valero.com		0.73	
+f847b8609bff	Mr. B's	convenience		28.94159	-99.84830	North, 184 US-57	La Pryor	78872	+18303654404	https://mr-b-no-15.hub.biz/		0.92	
+9318abeceb9f	Mr. B.	convenience		28.53022	-99.86047	1000 N 9th St	Carrizo Springs	78834	+18308763434			0.92	
+7a3f79ea989e	Munchy's	convenience		28.67957	-99.82114	726 E Lake St	Crystal City	78839	+18303744485	http://www.munchys.com		0.92	
+31b1aab7122d	Munchys	convenience		28.52420	-99.86707	1301 Pena St	Carrizo Springs	78834	+18308769968	http://www.munchys.com	Munchy's	0.92	
+a3783b443159	Muñiz First Stop	convenience		28.90487	-99.09148	1503 N Oak St	Pearsall	78061	+18303345312			0.92	
+0eb0555f500f	Neal One Stop	convenience		28.67734	-99.82935	102 W Lake St	Crystal City	78839	+18303745686	http://neal.com		0.92	
+2930862a9438	Pawlik's Ace Mart	convenience		28.90461	-99.09106	1518 N Oak St	Pearsall	78061	+18303342916			0.63	
+5adbe1fec2aa	Petro Travel Center	convenience		28.89956	-99.11580	110 I-35 Frontage Rd	Pearsall	78061	+18303348222	https://www.ta-petro.com/location/tx/petro-pearsall	TravelCenters-TA-Petro	1.00	
+2dc88c5a6c21	Phillips 66	convenience		28.68253	-99.18140	16250 S Interstate Highway 35	Dilley	78017	+18309630548	https://www.phillips66gas.com/	Phillips 66 Gas	0.68	
+50f29f5e1151	Phillips 66	convenience		28.66898	-99.18172	842 TX-85	Dilley	78017	+18309651211	https://www.phillips66gas.com/		0.92	
+ba08ed8f6046	Phillips 66	convenience		28.44960	-99.23771	1203 N Main St	Cotulla	78014	+18308792625	https://www.phillips66gas.com/		0.92	
+f4fa40f40bd6	Phillips 66	convenience		28.66529	-99.18266	17255 S I H 35	Dilley	78017	+18309651211	https://www.phillips66gas.com/station/66-LOWES-FUEL-148-0000865767/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85	
+229364ad212f	Pico Convenience Store	convenience		28.52240	-99.85637	305 N 1st St	Carrizo Springs	78834	+18308769766	https://www.shell.com		0.92	
+7321e39b58a9	Pilot Travel Center	convenience	truck gas station	28.51082	-99.84798	1045 S US Highway 83	Carrizo Springs	78834	+18308769754	https://www.pilotflyingj.com/stores/1026		0.92	
+8b4d94b06e28	Plo's Oil & Gas Services Lp	convenience		28.52188	-99.85748	204 N 1st St	Carrizo Springs	78834	+18308761198			0.92	
+fed23d15efd8	Propane Energy	convenience		28.42929	-99.23227	502 Thornton	Cotulla	78014	+18308762135			0.55	
+f5ba0ec35dc4	Quik Service	convenience		28.89464	-99.09459	319 N Oak St	Pearsall	78061	+18303342226	http://locations.goldenchick.com/tx/pearsall/1032/		0.92	
+aefa23dda375	Refuel 1345	convenience		28.89160	-99.09400	408 E. Colorado St	Pearsall	78061		https://locations.valero.com/en-us/LocationDetails/Index/408-E-COLORADO-ST/0000032150	Valero	0.80	
+0f69d73c4503	Refuel 350	convenience		28.90057	-99.09298	967 S Interstate 35	Pearsall	78061			Refuel	0.80	
+d323764e0089	RJ's Convienence Store	convenience		28.57346	-99.57353	1825 Grand Ave	Big Wells	78830	+18304579388			0.56	
+8a4ece2ab8e5	Road Ranger	convenience		28.04673	-99.34850	45 TX-44	Encinal	78019	+18159777374	https://road-ranger-tx-2.hub.biz	Road Ranger	0.97	
+00b2fb0de4df	Royal Mart	convenience		28.49891	-99.82806	2496 S US Hwy 83	Carrizo Springs	78834	+18308762486	https://royal-mart-tx-3.hub.biz/		0.96	
+4188721d3474	Shell	convenience		28.66748	-99.18446	17295 I-35 S	Dilley	78017	+18309651818	http://www.shell.us/	Shell	0.92	
+6ec55212ed83	Shell	convenience		28.89203	-99.10561	1104 W Comal St	Pearsall	78061	+18303342944	https://find.shell.com/us/fuel/10003566-1104-w-comal-st	Shell	0.92	
+a416d9adf1b3	Shell	convenience		28.69429	-99.83141	1901 N Highway 83	Crystal City	78839	+18303740044	https://find.shell.com/us/fuel/10013870-1901-n-highway-83		0.92	
+ff99620ac6eb	Shell	convenience		28.73013	-99.17347	17295 S INTERSTATE HIGHWAY 35	Dilley	78017	+18309651818	https://find.shell.com/us/fuel/10003757-17295-s-interstate-highway-35/en_US		1.00	
+5d98a922997a	Stripes	convenience		28.52034	-99.85688	101 S First St	Carrizo Springs	78834	+18308763359	https://stripesstores.com/		1.00	
+6ffc656ab714	Stripes	convenience		28.45150	-99.23898	795 I-35	Cotulla	78014	+18308795354	https://www.7-eleven.com/	Stripes	0.97	
+8d05354df555	Stripes	convenience		28.54503	-99.84555	2525 US-83	Carrizo Springs	78834	+18308763601	https://www.7-eleven.com/	Stripes	1.00	
+648d4602cb3a	Stuckey’s Carrizo Springs	convenience		28.51101	-99.84873	1045 S US Hwy 83	Carrizo Springs	78834	+18303225018	https://www.stuckeyscarrizosprings.com/		0.70	
+3474728176fc	Sunoco	convenience		28.57299	-99.57235	1710 Grand Avenue	Big Wells	78830	+18304572602	https://www.sunoco.com/locations/store/1710-grand-ave-big-wells-tx-0966855900		0.97	
+bf55ddec34bd	Sunoco	convenience		28.34642	-99.61448	19682 South U.S. 83	Catarina	78836	+18309993350	https://www.sunoco.com/		0.99	
+3c8cc8304ca2	Tetco	convenience		28.44425	-99.25046	50 S Interstate 35	Cotulla	78014	+18308796398	http://www.tetcorewards.com		0.92	
+cbf41f141a4d	TEX BEST #506	convenience		28.66803	-99.18194	17285 IH. 35 SOUTH	Dilley	78017		https://www.exxon.com/en/find-station/mobil-dilley-tx-texbest506-200319999	Mobil	0.80	
+fbeca9898c6a	Tex Best Travel Center	convenience		28.66817	-99.18174	17285 I-35	Dilley	78017	+18309631482	http://www.exxonmobilstations.com/2015895-tex-best-506-dilley	Tex-Best Travel Centers	1.00	
+f6ab5daa5a63	The Pit Stop	convenience		28.66678	-99.16968	TX-85 & S Commerce St, 118 Harris St	Dilley	78017	+18309652024			0.92	
+92f4d00c0c4b	TXB	convenience		28.52312	-99.85620	401 N 1st St	Carrizo Springs	78834	+18308764139	http://www.txbstores.com/		0.92	
+e0848b83b4db	TXB	convenience		28.94175	-99.84827	481 Us 57 N	La Pryor	78872	+18303654404	http://www.txbstores.com/		0.97	
+8a3c9a4b986d	TXB 86	convenience		28.69350	-99.83100	1900 N HIGHWAY 83	Crystal City	78839		https://locations.valero.com/en-us/LocationDetails/Index/1900-N-HIGHWAY-83/0000006018	Valero	0.80	
+03e988c98b30	Valero	convenience		28.44377	-99.24785	1162 E FM 468	Cotulla	78014	+12103452000	http://www.valero.com	Valero Energy	0.92	
+3c05f505a6d0	Valero	convenience		28.53026	-99.86035	1000 N 9th Street	Carrizo Springs	78834	+18308763434	http://www.valero.com	Valero Energy	0.92	
+648b8c82ce41	Valero	convenience		28.43717	-99.23490	202 N Main St # 202	Cotulla	78014	+12103452000	https://www.valero.com		0.92	
+65450685fee7	Valero	convenience		28.94163	-99.84810	481 N Hwy 57	La Pryor	78872	+18303654404	http://www.valero.com	Valero Energy	0.97	
+719a112df07c	Valero	convenience		28.57318	-99.57257	1710 Grand Ave	Big Wells	78830	+18304572602	http://www.valero.com	Valero Energy	0.81	
+80f7957ae3d1	Valero	convenience		28.44148	-99.76012	780 FM 190	Asherton	78827	+18304683382	https://locations.valero.com/en-us/LocationDetails/Index/780-CARTER-ST/0000012737	Valero	0.92	
+cab5c271f05b	Valero	convenience		28.52312	-99.85592	401 N 1st St	Carrizo Springs	78834	+12103452000	https://www.valero.com		0.65	
+7a1285a0bbeb	VALERO 2740996	convenience		28.89680	-99.09351	604 N OAK ST	Pearsall	78061		https://locations.valero.com/en-us/LocationDetails/Index/604-N-OAK-ST/0000020996	Valero	0.93	
+275b62bcc1db	Valley Mart 12	convenience		28.90066	-99.11517	111 N Interstate 35	Pearsall	78061	+18303349296	http://www.exxonmobil.com		0.92	
+d12504cc02cf	ZAVALA FOOD MART	convenience		28.96195	-99.61868	14718 HWY 57	Batesville	78829		https://www.exxon.com/en/find-station/exxon-batesville-tx-zavalafoodmart-200316990	Exxon	0.94	
+cea3ef29af32	Arby's	fastfood		28.41637	-99.25003	1963 I-35	Cotulla	78014	+18308797101	https://locations.arbys.com/tx/cotulla/1963-s.-ih-35-suite-a.html	Arby's	0.96	
+61ed41b20453	Burger King	fastfood	burger restaurant	28.89948	-99.11591	110 S Interstate 35	Pearsall	78061	+18303348222	https://burgerking.com/store-locator/store/restaurant_65567		0.92	
+82dca1395442	Burger King	fastfood	burger restaurant	28.66821	-99.18180	17585 S Interstate Hwy 35	Dilley	78017	+18309658538	https://burgerking.com/store-locator/store/16809	Burger King	0.96	
+906098d13411	Champs Chicken	fastfood		28.66727	-99.18439	17294 S Interstate Hwy 35	Dilley	78017	+17133345526	https://locator.champschicken.com/dilley-express-dilley-tx/	Champs Chicken	0.96	
+86d71ed04e1c	Church's Chicken	fastfood	chicken restaurant	28.66529	-99.18287	16220 S Interstate Highway 35	Dilley	78017	+18309630222	https://locations.churchs.com/tx/dilley/16220-ih-35-south		0.77	
+ceb026379f82	Church's Chicken	fastfood	chicken wings restaurant	28.69425	-99.83167	1901 N US Highway 83	Crystal City	78839	+18303740600	https://churchs.com		0.76	
+d539673f5ad6	Church's Chicken	fastfood		28.90062	-99.11530	111 N Interstate 35	Pearsall	78061	+18303343131	https://churchs.com		0.92	
+88fff0aea470	Church's Texas Chicken	fastfood		28.68242	-99.18116	16220 I-35	Dilley	78017	+18309630222	https://locations.churchs.com/tx/dilley/16220-ih-35-s.	Church's Chicken	0.94	
+aac52143d0e6	Church's Texas Chicken	fastfood		28.04703	-99.34882	43 TX-44	Encinal	78019	+19569484010	https://locations.churchs.com/tx/encinal/43-e.-texas-state-highway-44	Church's Chicken	0.98	
+ed8c8f2f8d8f	Church's Texas Chicken	fastfood		28.52182	-99.85667	203 First Street	Carrizo Springs	78834	+18308765901	https://locations.churchs.com/tx/carrizo-springs/203-first-street	Church's Chicken	0.97	
+033f4a2c4976	Dairy Kreme	fastfood		28.68520	-99.83044	219 E Crockett St	Crystal City	78839	+18303743929	http://dairykreme.dinehere.us/		0.95	
+3aa7fad9b062	Dairy Queen	fastfood		28.88812	-99.09617	508 S Oak St 508 S Oak St	Pearsall	78061	+18303343636	https://www.dairyqueen.com/en-us/locations/tx/pearsall/508-s-oak-st/14481/?y_source=1_MjkzMzkyMTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94	
+3cc41e938543	Dairy Queen	fastfood		28.66952	-99.16994	1363 W FM 117	Dilley	78017	+18309651833	https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/14026/?y_source=1_MjkzMzg4NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	1.00	
+60c0f1e85fdd	Dairy Queen	fastfood		28.69503	-99.82944	2100 N Hwy 83 2100 N Hwy 83	Crystal City	78839	+18303745212	https://www.dairyqueen.com/en-us/locations/tx/crystal-city/2100-n-hwy-83/13961/?y_source=1_MjkzMzkxODktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96	
+6641ecf3b00a	Dairy Queen	fastfood		28.68266	-99.18343	FM RD 117 AT I-35	Dilley	78017	+18309651833	https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/14026/?y_source=1_MjkzMzg4NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97	
+7e75f5a883da	Dairy Queen	fastfood		28.44332	-99.24716	1092 FM468 1092 E Fm 468	Cotulla	78014	+18308792801	https://www.dairyqueen.com/en-us/locations/tx/cotulla/1092-e-fm-468/13953/?y_source=1_MjkzMzg5MDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96	
+e72ea1323e77	Dairy Queen	fastfood		28.52381	-99.85644	408 N 1st St	Carrizo Springs	78834	+18308765977	https://www.dairyqueen.com/en-us/locations/tx/carrizo-springs/408-n-1st-st/13899/?y_source=1_MjkzMzkxODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96	
+a40304991153	Domino's	fastfood	pizza restaurant	28.89572	-99.11238	1702 Louise Lane	Pearsall	78061	+18302679220	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96	
+1b398c29d133	DQ Grill & Chill	fastfood		28.69505	-99.82939	2100 N Hwy 83	Crystal City	78839		https://www.dairyqueen.com/en-us/locations/tx/crystal-city/2100-n-hwy-83/3734	DQ Grill & Chill	0.80	
+5897c5bc7a8d	DQ Grill & Chill	fastfood		28.52385	-99.85651	408 N 1st St	Carrizo Springs	78834		https://www.dairyqueen.com/en-us/locations/tx/carrizo-springs/408-n-1st-st/3672	DQ Grill & Chill	0.80	
+6d6e325cf4ab	DQ Grill & Chill	fastfood		28.44338	-99.24713	1092 E FM 468	Cotulla	78014		https://www.dairyqueen.com/en-us/locations/tx/cotulla/1092-e-fm-468/3726	DQ Grill & Chill	0.80	
+dcba793a1680	DQ Grill & Chill	fastfood		28.68262	-99.18342	1363 W FM 117	Dilley	78017		https://www.dairyqueen.com/en-us/locations/tx/dilley/1363-w-fm-117/3799	DQ Grill & Chill	0.80	
+e78ee8782371	DQ Grill & Chill	fastfood		28.88809	-99.09605	508 S Oak St	Pearsall	78061		https://www.dairyqueen.com/en-us/locations/tx/pearsall/508-s-oak-st/4253	DQ Grill & Chill	0.80	
+9fe2392b3b88	El Rodeo	fastfood		28.89096	-99.09688	222 S Elm St	Pearsall	78061	+18303345776	http://www.elrodeopa.com		0.92	
+0f03ca3e21f7	Golden Chick	fastfood		28.43690	-99.23500	688 Las Palmas Blvd	Cotulla	78014	+18304839269	https://locations.goldenchick.com/tx/cotulla/1197/		0.97	
+381923fa8117	Golden Chick	fastfood		28.68296	-99.83125	701 N Ave B	Crystal City	78839	+18304489067	https://locations.goldenchick.com/tx/crystal-city/1008/	Golden Chick	0.96	
+b2f8cdbeb0c2	Golden Chick	fastfood		28.89621	-99.09371	508 N Oak St	Pearsall	78061	+18303342025	https://locations.goldenchick.com/tx/pearsall/1032/	Golden Chick	0.92	
+707521ea3798	Little Caesars Pizza	fastfood	pizza restaurant	28.52262	-99.85520	209 E Nopal St	Carrizo Springs	78834	+18308760333	https://littlecaesars.com/en-us/store/8182	Little Caesars	0.96	
+c1223c08ff14	Little Caesars Pizza	fastfood	pizza restaurant	28.89689	-99.11338	1809 Louise Ln	Pearsall	78061	+18303349004	https://littlecaesars.com/en-us/store/10633	Little Caesars	0.96	
+0858f68ba031	McDonald's	fastfood		28.52358	-99.85601	503 N 1st St	Carrizo Springs	78834	+18308765400	https://www.mcdonalds.com/us/en-us/location/tx/carrizo-springs/503-n-1st-st/17635.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98	
+0ab972e881df	McDonald's	fastfood		28.45042	-99.23961	719 N Ih 35	Cotulla	78014	+18308794711	https://www.mcdonalds.com/us/en-us/location/tx/cotulla/719-n-ih-35/37374.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94	
+1817af636117	McDonald's	fastfood		28.89765	-99.09395	625 N Oak St	Pearsall	78061	+18303342203	https://www.mcdonalds.com/us/en-us/location/tx/pearsall/625-n-oak-st/26349.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96	
+4a49f612e8ec	McDonald's	fastfood		28.44418	-99.25046	Farm to Market Road 468	Cotulla	78014	+18308794600	http://mcdonalds.com		0.97	
+aac3d4061dbf	MG's Drive Up	fastfood		28.53023	-99.85317	1505 N 1st St	Carrizo Springs	78834	+18308765130	http://mgsdriveup.com		0.98	
+9edf97597306	Mother Pluckers	fastfood		28.04607	-99.34729	228 E Texas State Hwy 44	Encinal	78019	+19567711919			0.73	
+e96152c069b0	Mr. B's	fastfood		28.44168	-99.76012	780 Carter St	Asherton	78827	+18304683382			0.83	
+43306d9edb6d	Pizza Hut	fastfood	pizza restaurant	28.44569	-99.24328	649 Las Palmas Blvd. La Salle	Cotulla	78014	+18308794080	https://locations.pizzahut.com/tx/cotulla/649-las-palmas-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309828	Pizza Hut	0.96	
+46511682dc11	Pizza Hut	fastfood	pizza restaurant	28.89881	-99.09299	814 N Oak St	Pearsall	78061	+18303348051	https://locations.pizzahut.com/tx/pearsall/814-north-oak?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285595	Pizza Hut	0.99	
+61c585b883f2	Pizza Hut	fastfood	pizza restaurant	28.69349	-99.83252	1801 N US Highway 83 Zavala	Crystal City	78839	+18303742387	https://locations.pizzahut.com/tx/crystal-city/1801-n-us-highway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285040	Pizza Hut	0.98	
+ab415d47896b	Pizza Hut	fastfood	pizza restaurant	28.52144	-99.85835	201 Pena St	Carrizo Springs	78834	+18308763553	https://locations.pizzahut.com/tx/carrizo-springs/201-pena?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285183	Pizza Hut	0.98	
+c5ce9082ad8c	Sonic Drive In	fastfood		28.52426	-99.85616	502 North First Street	Carrizo Springs	78834	+18308763535	https://locations.sonicdrivein.com/tx/carrizosprings/502-north-first-street.html	Sonic Drive-In	0.98	
+e8251259dca1	Sonic Drive In	fastfood		28.89857	-99.09298	814 N. Oak	Pearsall	78061	+18303343049	https://locations.sonicdrivein.com/tx/pearsall/814-n.-oak.html	Sonic Drive-In	0.98	
+862303df68eb	Sonic Drive-In	fastfood	burger restaurant	28.44968	-99.24147	619 N Interstate 35	Cotulla	78014	+18308794410	https://locations.sonicdrivein.com/tx/cotulla/619-north-interstate-35.html		0.97	
+dc74ad8a2751	Sonic Drive-In	fastfood	theme restaurant	28.67994	-99.18237	16290 I-35 S	Dilley	78017		https://locations.sonicdrivein.com/tx/dilley/16290-i-35-south.html	Sonic Drive-In	0.84	
+fe18aa0f857c	Sonic Drive-In	fastfood		28.05274	-99.34997	23138 Interstate 35 Frontage Rd	Encinal	78019	+19569485307	https://locations.sonicdrivein.com/tx/encinal/23138-i-35-frontage-rd.html		0.85	
+08b67ae21972	Subway	fastfood	sandwich shop	28.04573	-99.34894	28527 I-35	Encinal	78019	+19569487044	http://www.subway.com/en-us	Subway	0.93	
+13b8b2cf90f1	Subway	fastfood	sandwich shop	28.66823	-99.18483	17250 I-35	Dilley	78017	+18309651537	https://restaurants.subway.com/united-states/tx/dilley/17250-s-ih-35	Subway	0.98	
+376c8deeac08	Subway	fastfood	sandwich shop	28.52308	-99.85606	401 N 1st St	Carrizo Springs	78834	+18308765411	https://restaurants.subway.com/united-states/tx/carrizo-springs/401-n-1st-street?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.97	
+4881ba23c2b1	Subway	fastfood	sandwich shop	28.44135	-99.76005	780 Carter	Asherton	78827	+18304683464	https://restaurants.subway.com/united-states/tx/asherton/780-carter?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=56606&utm_campaign=evergreen-2020&y_source=1_MTQ4OTM5NTUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95	
+52e012b87644	Subway	fastfood	sandwich shop	28.45265	-99.23818	921 N Interstate 35	Cotulla	78014	+18308795353	https://restaurants.subway.com/united-states/tx/cotulla/921-n-interstate-35?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=59029&utm_campaign=evergreen-2020&y_source=1_MTQ4OTc2NTAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97	
+73a23e067136	Subway	fastfood	sandwich shop	28.90075	-99.11523	111 I-35	Pearsall	78061	+18303343978	http://www.subway.com/en-us	Subway	0.98	
+7c36e9f1ddae	Subway	fastfood	sandwich shop	28.45262	-99.23816	921 I-35 S	Cotulla	78014	+18308795353	http://www.subway.com/en-us	Subway	1.00	
+85523859c28e	Subway	fastfood	sandwich shop	28.41850	-99.25000	921 N Interstate 35, Pilot Gas Station/C-Store #488	Cotulla	78014			Subway	0.80	
+8fff7d3da89a	Subway	fastfood	sandwich shop	28.76255	-99.13485	111 N Interstate 35	Pearsall	78061	+18303348018	http://www.subway.com		0.77	
+9adb9c0b2abe	Subway	fastfood		28.44316	-99.24836	1167 East FM 468	Cotulla	78014	+18308794151	https://restaurants.subway.com/united-states/tx/cotulla/1167-east-fm-468?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=48077&utm_campaign=evergreen-2020&y_source=1_MTQ5MDg0MTItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96	
+e59f733a2db0	Subway	fastfood	sandwich shop	28.69406	-99.83154	1901 Hwy 83	Crystal City	78839	+18303745200	https://restaurants.subway.com/united-states/tx/crystal-city/1901-hwy-83	Subway	0.98	
+fcddb3661e51	Subway	fastfood	sandwich shop	28.94147	-99.84797	481 N. Hwy 57	La Pryor	78872	+18303654484	https://restaurants.subway.com/united-states/tx/la-pryor/481-n-hwy-57	Subway	0.96	
+7167f03db9b6	Taco Palenque Cotulla	fastfood		28.43937	-99.23564	358 I-35	Cotulla	78014	+18308794956	https://www.tacopalenque.com/		0.85	
+517e4aad42c2	Wendy's	fastfood		28.44330	-99.24825	35 FM468	Cotulla	78014	+18308793343	https://locations.wendys.com/united-states/tx/cotulla/35-w-fm-468	Wendy's	0.97	
+398f1c4081f0	Whataburger	fastfood		28.89750	-99.11385	135 South IH-35	Pearsall	78061		https://locations.whataburger.com/tx/pearsall/135-south-ih-35.html	Whataburger	0.80	
+23cb15edb1d4	A&A Quick Stop	grocery		28.67805	-99.82736	115 E Lake St	Crystal City	78839	+18304485183			0.92	
+ac09f87be954	Asherton Country Store	grocery		28.44183	-99.76035		Asherton			http://www.myplaceashertonofdublin.com/		0.72	
+b15123bb6e29	Asherton Martinez Store	grocery		28.45128	-99.76016	300 Pena St	Asherton	78827	+18304689394			0.70	
+29099f56fba7	Carrizo Springs H-E-B	grocery		28.53664	-99.85176	2030 N 1st St	Carrizo Springs	78834	+18308763521			0.97	
+48ab5314c452	Crystal City H-E-B	grocery		28.68170	-99.82957	514 E. ZAVALA	Crystal City	78839		https://www.heb.com/heb-store/us/tx/crystal-city/crystal-city-h-e-b-117	H-E-B	0.80	
+036f322bf24a	Dilley's Refreshment Barn	grocery		28.66819	-99.17065	200 S Main St	Dilley	78017	+18303263300			0.96	
+56b3b7462802	GasFusion Encinal	grocery		28.06122	-99.34892	28442 I-35 S	Encinal	78019				0.66	
+7f463df99171	H-E-B	grocery		28.53698	-99.85146	2030 N 1st St	Carrizo Springs	78834	+18308763521	https://www.heb.com/heb-store/US/tx/carrizo-springs/carrizo-springs-h-e-b-671	H-E-B	1.00	
+b06a10b5f6f8	H-E-B	grocery		28.89506	-99.11475	225 I-35	Pearsall	78061	+18303343374	https://www.heb.com/heb-store/US/tx/pearsall/pearsall-h-e-b-620	H-E-B	1.00	
+ec1aa56c7349	H-E-B	grocery		28.68206	-99.82891	514 E Zavala St	Crystal City	78839	+18303742305	https://www.heb.com/heb-store/US/tx/crystal-city/crystal-city-h-e-b-117	H-E-B	0.96	
+9ba6e0dbeb64	Lowe's Market	grocery		28.44906	-99.23818	1203 N Main St	Cotulla	78014	+18308792625	http://www.lowesmarket.com/	Lowe's Market	0.96	
+d85bbfe71e9f	Lowe's Market	grocery		28.73656	-99.14601	17255 South Interstate Highway 35	Dilley	78017		https://www.lowesmarket.com/StoreLocator/Store/?L=148	Lowe's Market	0.80	
+da44aa0a70ef	Lowe's Market	grocery		28.66907	-99.18210	17255 S Interstate Hwy 35 P.O. Box 2120	Dilley	78017	+18309651211	http://www.lowesmarket.com/	Lowe's Market	1.00	
+d29a10c07ede	Pearsall H-E-B	grocery		28.89518	-99.11463	225 SOUTH IH 35	Pearsall	78061		https://www.heb.com/heb-store/us/tx/pearsall/pearsall-h-e-b-620	H-E-B	0.80	
+e54101aff7a1	Pico Store	grocery		28.89148	-99.09389	408 E Colorado St	Pearsall	78061	+18303342223	http://pico-store.edan.io		0.92	
+9ca0b3802746	Quality Peanut Co.	grocery		28.87763	-99.10016	319 E Carter St	Pearsall	78061	+18303343648	https://www.heiserusa.com/home		0.57	
+6c20a2593d2d	Snake Hill, Pearsall, Tx	grocery	organic grocery store	28.86390	-99.04894		Pearsall					0.97	
+45e1111707ad	Zavala Food Mart	grocery		28.96206	-99.61855	14718 E US-57	Batesville	78829	+18303764224	https://zavala-food-mart.hub.biz		0.92	
+d78882960deb	Bigwells Medical Clinic	hospital		28.57203	-99.56882	75 S Commerce St	Big Wells	78830	+18304579201			0.59	
+6f8544972405	Centro De Salud	hospital		28.67648	-99.82372	308 Cesar Chavez	Crystal City	78839	+18303742301	https://centro-de-salud-tx.hub.biz		0.85	
+bd0260bcd45c	Dimmit memorial. Hospital carriso springs. Tex.	hospital		28.51924	-99.86311		Carrizo Springs			http://www.memhosp.com/		0.83	
+878c229d95fb	Dimmit Regional Hospital	hospital		28.51934	-99.86341	704 Hospital Drive	Carrizo Springs	78834	+18308762424	http://www.dimmitregionalhospital.com		0.97	
+27e8e6c235e8	Frio Regional Hospital	hospital		28.89666	-99.11716	200 S Ih 35	Pearsall	78061	+18303343617	http://www.frioregionalhospital.com/		1.00	
+fada4d885bce	Frio Regional Hospital	hospital		28.90226	-99.08894	1990 Maverick Dr	Pearsall	78061		https://www.frioregionalhospital.com		0.65	closed
+73e4e2157899	Outreach For Smiles	hospital		28.52131	-99.85191	405 E Nopal St	Carrizo Springs	78834	+18308763674	http://www.carrizosmiles.com/		0.60	
+3c6302a5d8c2	Pearsall Hospital	hospital		28.89686	-99.11690		Pearsall			www.yellowpages.com/pearsall-tx/emergency-room		0.84	
+ffd2ec619d86	Southwest Texas Rural Health	hospital		28.51428	-99.86727	902 S 5th St	Carrizo Springs	78834	+18308793047	southtexasruralhealth.com		0.92	
+1aacd39f9ab0	Americas Best Value Inn Extended Stay Dilley	hotel		28.66677	-99.18626	1115 W Highway 85	Dilley	78017	+18309633390	https://www.kingsinnmichigancity.com		0.90	
+96ae0345466d	Artemis Lodge	hotel		28.49364	-99.82523	143 Service Company Rd	Carrizo Springs	78834	+18774771687	https://www.pacificmobile.com/artemis.php		0.77	
+963679839842	Baymont by Wyndham Cotulla	hotel		28.43505	-99.23483	222 N Interstate 35 35	Cotulla	78014	+18308795700	https://www.wyndhamhotels.com/baymont/cotulla-texas/baymont-inn-and-suites-cotulla/overview?CID=LC:BU::BING:RIO:National:48071&iata=00093796		0.85	
+a968cd9b9a56	Baymont by Wyndham Pearsall	hotel		28.89735	-99.11265	1808 W Comal St	Pearsall	78061	+18303344900	http://www.wyndhamhotels.com/	Baymont by Wyndham	1.00	
+8648f9919526	Baymont Inn & Suites Cotulla	hotel		28.44487	-99.24564	222 N Interstate 35	Cotulla	78014	+18308795700	https://www.wyndhamhotels.com/baymont/cotulla-texas/baymont-inn-and-suites-cotulla/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A48071	Baymont by Wyndham	0.93	
+35fdae7b7e94	Baymont Inn & Suites Crystal City	hotel		28.72839	-99.83943	4964 N US Highway 83	Crystal City	78839	+18303745600	http://www.baymontinns.com/hotels/texas/crystal-city/baymont-inn-and-suites-crystal-city/hotel-overview?WID=LC:BU:20160226:RIO:Local:SM-buwsct		0.85	
+fd4afe380d80	Best Western Plus Carrizo Springs Inn & Suites	hotel		28.54449	-99.84599	2474 N 1st St	Carrizo Springs	78834	+18302191025	http://www.bestwestern.com	Best Western Hotels & Resorts	1.00	
+1a8025b36b4e	Best Western Plus Dilley Inn & Suites	hotel		28.67814	-99.18104	16491 S Interstate Highway 35	Dilley	78017	+18303263220	https://www.bestwestern.com/en_US/book/hotel-rooms.44714.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44714	Best Western Hotels & Resorts	1.00	
+edc8d472272d	Budget Inn	hotel	motel	28.67844	-99.18306	16408 S Interstate Highway 35	Dilley	78017	+18309637777	http://www.budgetinn.com		0.96	
+b4b4b96a3c96	Candlewood Suites Cotulla By Ihg	hotel		28.44441	-99.24103	547 Las Palmas Blvd	Cotulla	78014	+18308792727	https://www.ihg.com		0.97	
+0109c30f74d0	Carrizo Executive Inn	hotel	motel	28.52415	-99.86812	1402 Pena St	Carrizo Springs	78834	+18308762451	https://www.eventseeker.com/venue/427495-carrizo-springs-executive-inn-carrizo-springs	Carrizo Springs Civic Center	0.98	
+53151716a594	Carrizo Inn	hotel	motel	28.52357	-99.86436	100 N 10th St	Carrizo Springs	78834	+18308765800	http://book.bestwestern.com/bestwestern/US/TX/Carrizo-Springs-hotels/BEST-WESTERN-PLUS-Carrizo-Springs-Inn---Suites/Hotel-Overview.do?propertyCode=44684&sob=YEXTGEN&cm_mmc=BL-_-YEXTGEN-_-GEN-_-LINK		0.97	
+ca843f03a8b2	Casa Monte Lodge	hotel		28.42889	-99.93036	8545 FM 186	Carrizo Springs	78834	+18302556201	http://www.casamontelodge.com/		1.00	
+1d52e0a4b395	Catarina Royal Palm Hotel	hotel		28.35194	-99.61439	Highway 83 South	Catarina	78836	+18309999999	https://www.flickr.com/photos/matthigh/3040585752		0.93	
+d7d445f94824	Comfort Suites Cotulla	hotel		28.44495	-99.24358	617 Las Palmas Blvd	Cotulla	78014	+18304834011	https://www.choicehotels.com/texas/cotulla/comfort-suites-hotels/txf84?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99	
+54fe93082876	Cotton Logistics Carrizo Springs Man Camp	hotel		28.54113	-99.84754	2265 N 1st St	Carrizo Springs	78834	+18774272947	https://www.cottonlogistics.com/solutions/onelodge/carrizo-springs/		0.92	
+94df37c5cde0	Cotulla Cabins & RV Park	hotel		28.43564	-99.23286	244 Market St	Cotulla	78014	+18302202640	http://www.cotullacabins.com		0.93	
+2dcf4a67ff79	Cotulla Executive Inn	hotel	resort	28.43253	-99.23447	900 S Interstate 35	Cotulla	78014	+18308792488	https://www.cotullaexeinn.com/		0.85	
+70e76cb2ff15	Cotulla Executive Inn	hotel	motel	28.44234	-99.24949	900 I-35	Cotulla	78014	+18308792488	http://www.cotullaexecutiveinn.us/		0.95	
+2f4425687348	Cotulla Express Inn	hotel	resort	28.43599	-99.25089	333 N Interstate 35 35	Cotulla	78014	+18304835312	https://www.cotullaexpressinn.com/		0.98	
+b3731b07ee30	Cotulla Homes	hotel	motel	28.44290	-99.24167	632 N Baylor	Cotulla	78014	+18304835073	http://www.cotullahomes.com		0.98	
+94850093f163	Cotulla Motel	hotel	motel	28.43806	-99.23547	301 N Main St	Cotulla	78014	+18308792336	https://www.cotullajet.com		0.92	
+b4f7c5b64d4b	Cowboy Inn	hotel		28.44521	-99.25175	145 W FM 468	Cotulla	78014	+18308793100	https://www.lacasadelzorro.com		0.55	
+ea8bb9544860	Cuatro Esquinas Ranch	hotel		28.66866	-99.18173		Dilley		+18308766501	http://www.cuatroesquinasranch.com/		0.56	
+7b12eee5c81f	Days Inn & Suites-Cotulla	hotel		28.44238	-99.24951	333 N Interstate 35	Cotulla	78014	+18304835312	http://www.wyndhamhotelgroup.com		0.57	
+4bf7b6d4e9e4	Days Inn by Wyndham Dilley	hotel	resort	28.66748	-99.17060	16361 S Interstate Highway 35 35	Dilley	78017	+18309632219	https://www.wyndhamhotels.com/days-inn/dilley-texas/days-inn-dilley/overview?CID=LC:DI::BING:RIO:National:46754&iata=00093796		0.85	
+ff3e530021cc	Days Inn by Wyndham Pearsall	hotel	resort	28.89101	-99.11775	605 S Ih # 35	Pearsall	78061	+18305057121	https://www.wyndhamhotels.com/days-inn/pearsall-texas/days-inn-pearsall/overview?CID=LC:DI::BING:RIO:National:47298&iata=00065402		0.85	
+a82d0b547ef0	Days Inn Dilley	hotel		28.67940	-99.18027	16361 I-35 S	Dilley	78017	+18309632219	https://www.wyndhamhotels.com/days-inn/dilley-texas/days-inn-dilley/overview?cid=local	Days Inn	1.00	
+02900ae39ba1	Dilley Lodge	hotel	motel	28.69383	-99.17470	1100 County Road 4600	Dilley	78017	+18309631779	https://www.dilleylodge.com		0.97	
+d9373a7b49f3	Dilley Lodging Llc	hotel		28.67805	-99.18119	16491 S Interstate Highway 35	Dilley	78017		https://www.dilleylodge.com		0.95	
+504d5e83725a	Dilley Motor Inn	hotel		28.67771	-99.17722	807 W FM 117	Dilley	78017	+18303263045	http://www.dilleymotorinn.com		0.96	
+02c2823884b8	Double C Resort Village	hotel		28.62551	-99.85891	5241 N FM-1407	Crystal City	78839	+18303749975	http://www.doublecresortvillage.com/		0.99	
+58b51ec387c2	Eagle Ford Crossing	hotel		28.45344	-99.25207	113 American Dr	Cotulla	78014	+19565804663	http://www.eaglefordcrossing.net/eagleford/		0.92	
+00189bab8cb6	Eagle Inn & Suites	hotel	motel	28.66595	-99.18462	17360 S Interstate Highway 35	Dilley	78017	+18309639802	http://www.eagleinnandsuites.com		0.92	
+72e46c9f1598	Eagle's Den Suites Cotulla	hotel		28.44342	-99.24178	638 N Baylor St	Cotulla	78014	+18309658995	http://eaglesdensuites.com/		1.00	
+fff7590c3e6a	Eagles Den Suites Carrizo Springs	hotel	service apartment	28.54407	-99.84753	122 LOOP 517	Carrizo Springs	78834	+18303269668	http://eaglesdensuites.com/contact_us.html		1.00	
+03f5c6ccaecd	Efs Housing & Suites Carrizo Springs, Tx	hotel		28.49209	-99.82769	250 Service County Rd	Carrizo Springs	78834		https://efs-housing-llc-carrizo-springs.booked.net		0.95	
+eeab89ed3775	Fairfield	hotel		28.44831	-99.24378	417 North IH-35	Cotulla	78014	+18308794748	https://fairfield.marriott.com/	Fairfield by Marriott	0.92	
+8bd04c522a0c	Fairfield Inn & Suites by Marriott Cotulla	hotel	resort	28.45104	-99.23851	417 N Ih-35	Cotulla	78014	+18308794748			0.89	
+bf71ddad8472	Fairfield Inn & Suites Cotulla	hotel		28.43665	-99.25092	399 N Ih 35	Cotulla	78014	+18308794748	https://www.marriott.com/en-us/hotels/cotfi-fairfield-inn-and-suites-cotulla/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	0.98	
+6bc8793d9591	Frio Inn	hotel		28.89515	-99.11747	256 I-35 S	Pearsall	78061	+18303343232			0.96	
+dd82cbe69b7c	Hampton Inn Carrizo Springs	hotel		28.54587	-99.84393	2651 US-83	Carrizo Springs	78834	+18308769160	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-carrizo-springs-SATCSHX/index.html	Hampton by Hilton	1.00	
+f5231eefcdab	Hampton Inn Cotulla	hotel		28.44399	-99.24358	659 N Baylor Ave	Cotulla	78014	+18308795123	https://www.hilton.com/en/hotels/cotbahx-hampton-cotulla/	Hampton by Hilton	1.00	
+268b25462b7e	Holiday Inn Express & Suites	hotel		28.52908	-99.87535	2469 US-277	Carrizo Springs	78834	+18308762700	https://www.ihg.com/holidayinnexpress/hotels/us/en/carrizo-springs/egpcs/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-EGPCS	Holiday Inn Express	1.00	
+bb5c45aa3ace	Holiday Inn Express & Suites Cotulla	hotel		28.44545	-99.24267	624 Las Palmas Blvd	Cotulla	78014	+18308792000	https://www.ihg.com/holidayinnexpress/hotels/us/en/cotulla/lrdct/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-LRDCT	Holiday Inn Express	1.00	
+6b31b12a3a1c	Holiday Inn Express & Suites Pearsall	hotel		28.89392	-99.11755	412 S Interstate 35	Pearsall	78061	+18303342200	http://www.hiexpress.com/	Holiday Inn Express	1.00	
+3aa6bc0d7344	Horizon Inn & Suites	hotel		28.89144	-99.11618	605 S Interstate 35	Pearsall	78061	+18305057450			0.98	
+4c86f99e9fc1	Hotel Cotulla	hotel		28.44555	-99.24861	51 I-35 Frontage Rd	Cotulla	78014	+18308795268	http://www.hotelcotulla.com/		0.92	
+c548f7c26d44	Hotel Dilley Grand	hotel		28.66901	-99.17062	110 S Main St	Dilley	78017	+18302712377	https://www.hoteldilley.com/	OYO USA	0.92	
+471026c2cfbd	Hotel O Bien Venido Pearsall I-35	hotel		28.89834	-99.11598	I-35, Pearsall TX	Pearsall Tx			https://www.oyorooms.com/us/305009/	OYO	0.80	
+dd10aa74764e	Hotel O Dilley Main St Tx	hotel		28.66881	-99.17066	110 S Main	Dilley	78017	+16282412208	https://www.oyolasvegas.com		1.00	
+41b4b8054aaf	Independent (SPHC) Cotulla Inn	hotel		28.44778	-99.24493	333 I-35	Cotulla	78014		https://www.ihg.com/spnd/hotels/us/en/cotulla/cotgr/hoteldetail		0.80	
+36dac3ddf0e9	InstaLodge Hotel and Suites	hotel		28.44883	-99.25467	490 W FM 468	Cotulla	78014	+18007693874	http://www.instalodge.com		0.92	
+2d32b62f5f6b	Knights Inn Pearsall	hotel		28.88940	-99.09448	320 S Ash St	Pearsall	78061	+18884240138	https://www.kingsinnmichigancity.com		0.55	
+ef2d35b3c8ca	La Quinta Inn & Suites Cotulla	hotel	resort	28.43659	-99.23676	677 N Baylor	Cotulla	78014	+18308792200	http://www.laquintacotulla.com/?cid=local_6595		0.85	
+4981ccd89dcb	La Quinta Inn & Suites Pearsall	hotel	resort	28.89441	-99.11624	170 Medical Dr	Pearsall	78061	+18308723277	http://www.laquintapearsall.com/?cid=local_6576		0.85	
+74c74a4e8665	La Quinta Inn and Suites	hotel		28.89805	-99.11925	170 Medical Dr	Pearsall	78061	+18302679016	http://www.laquintapearsall.com/?cid=local_6576	La Quinta by Wyndham	1.00	
+d7352874a869	La Quinta Inn and Suites	hotel		28.44476	-99.24498	677 N Baylor Ave	Cotulla	78014	+18308792200	http://www.laquintacotulla.com/?cid=local_6595	La Quinta by Wyndham	0.97	
+39a289a985af	La Salle Motel	hotel	motel	28.44120	-99.23645	601 N Main St	Cotulla	78014	+18308792703			0.92	
+a3c7d14913af	Laxmi Of Cotulla Llc	hotel		28.44459	-99.24540	677 N Baylor	Cotulla	78014				0.95	
+427534679b85	MainStay Suites Cotulla	hotel		28.44738	-99.24538	565 N. IH35	Cotulla	78014		https://www.choicehotels.com/texas/cotulla/mainstay-hotels	MainStay Suites	0.80	
+c305ff1a258e	MainStay Suites Cotulla	hotel	service apartment	28.44951	-99.24214	565 IH 35	Cotulla	78014	+18304835566	https://www.choicehotels.com/texas/cotulla/mainstay-hotels/txg15?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00	
+859958fa875a	Malana Hotels & Suites	hotel		28.44552	-99.23813	165 Mars Dr	Cotulla	78014	+18308794400	http://www.malanahotels.com/		1.00	
+6fa1c451f792	Microtel Inn & Suites	hotel		28.43429	-99.25040	499 IH 35	Cotulla	78014	+18003370055			0.77	
+0c2749bd3422	Microtel Inn & Suites by Wyndham Cotulla	hotel		28.44884	-99.24287	499 I-35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview		0.99	
+a2638c38f128	Microtel Inn & Suites by Wyndham Cotulla	hotel	resort	28.44014	-99.23579	499 N Interstate 35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview		1.00	
+c2db69f5dc92	Microtel Inn & Suites by Wyndham Cotulla	hotel	resort	28.43370	-99.23460	499 N Interstate 35 35	Cotulla	78014	+18304834193	https://www.wyndhamhotels.com/microtel/cotulla-texas/microtel-inn-and-suites-by-wyndham-cotulla/overview?CID=LC:MT::BING:RIO:National:46715&iata=00093796		0.85	
+6632082e490d	OYO Hotel	hotel		28.88848	-99.11814	Interstate 35 South, Pearsall TX, United States - 78061	Pearsall	78061	+12819388696	https://www.oyorooms.com/us/248322?utm_source=YEXT&utm_medium=YEXT&utm_campaign=US_PER003	OYO USA	0.97	
+764baf3e4e55	OYO Hotel	hotel		28.66879	-99.17052	101 S Main St	Dilley	78017	+16282412208	https://www.oyorooms.com/us/103700/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_DLL001	OYO USA	0.80	
+a1abc2fc472a	OYO Hotel Pearsall I-35 West	hotel	motel	28.89833	-99.11584	112 I-35 Frontage Rd	Pearsall	78061	+18302011339	https://www.oyorooms.com/us/88628/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_PER001	OYO Rooms	0.95	
+468856b517ae	Pearsall Executive Inn	hotel	motel	28.89712	-99.09403	613 N Oak St	Pearsall	78061	+18303343693	http://www.executiveinnpearsall.com		0.94	
+9f9b8f13fd00	Pearsall Hotel	hotel		28.88869	-99.11728	605 S Interstate 35	Pearsall	78061	+18305057170	http://www.daysn.com		0.58	
+670fe68beb2a	Pearsall Inn and Suites	hotel	motel	28.89682	-99.11127	1707 W Comal St	Pearsall	78061	+18303342622	http://www.LaquintaPearsall.com/		0.98	
+6b7f18958c3c	PetroStay Inn and Suites	hotel		28.44483	-99.24563	222 I-35	Cotulla	78014	+18308795700	https://www.petrostayinn.com/		0.92	
+71f7a8c4121c	Quality Inn & Suites	hotel	resort	28.89529	-99.11173	604 Lindsey Ln	Pearsall	78061	+18302679167	https://www.choicehotels.com/texas/pearsall/quality-inn-hotels/txp40?mc=llbillpx&pmf=local		0.97	
+003eec29d268	Quality Inn & Suites Carrizo Springs North	hotel		28.54541	-99.84425	2611 N US Highway 83	Carrizo Springs	78834	+18308763838	https://www.choicehotels.com		0.99	
+902ae48657c6	Quality Inn & Suites Cotulla I-35	hotel		28.44676	-99.24079	435 Mars Dr	Cotulla	78014	+18304835390	https://www.choicehotels.com/texas/cotulla/quality-inn-hotels/txg21?pmf=yext&mc=llyxyxpx	Choice Hotels	0.59	
+5624547b4944	Quality Inn & Suites Pearsall	hotel		28.89529	-99.11173	604 South Lindsey Lane	Pearsall	78061		https://www.choicehotels.com/texas/pearsall/quality-inn-hotels	Quality Inn	0.80	
+1a2931591128	R&R Ranch	hotel		28.89683	-99.07320		Pearsall					0.74	
+9f8206c9e480	Relax Inn	hotel	motel	28.68031	-99.17908	1062 FM 117	Dilley	78017	+18309654447	http://relaxinndilley.com		0.99	
+7149224b3b14	Residency Suites Cotulla Texas	hotel		28.44447	-99.25384	287 FM468	Cotulla	78014	+18304835330	http://www.residencysuitescotullatx.com/		0.97	
+d9d2b50da460	Residency Suites Cotulla Texas	hotel	resort	28.43882	-99.23637	287 Fm 468	Cotulla	78014	+18304835330	http://www.residencysuitescotullatx.com/		0.85	
+f91adca72b01	Riata Inn	hotel	motel	28.69109	-99.83560	1531 US-83	Crystal City	78839	+18303745665	http://www.riatainncrystalcity.com		0.94	
+ead4b0404c45	Rio Frio Motel	hotel		28.89627	-99.11055	1625 W Comal St	Pearsall	78061	+18303344131	https://rio-frio-motel.hub.biz		0.92	
+c0c245c5714f	Rodeway Inn	hotel	resort	28.66631	-99.18556	1115 W Highway 85	Dilley	78017	+18309633390	https://www.choicehotels.com/texas/dilley/rodeway-inn-hotels/txr57?mc=llbillpx&pmf=local		0.96	
+c090e80076b9	Royal Inn Pearsall	hotel	motel	28.89835	-99.11314	1903 FM140	Pearsall	78061	+18303348901	http://www.royalinnpearsall.us		0.98	
+41b04ddbcf16	Sagebrush hotel	hotel		28.71334	-99.83340	3964 N Highway 83	Crystal City	78839	+18303745600	http://sagebrushhotel.com/		0.98	
+b95d2433d922	Sagebrush Hotel	hotel		28.73230	-99.84083	4964 N Highway 83	Crystal City	78839	+18302553193	https://www.booking.com/hotel/us/sagebrush-crystal-city.html?aid=311088&label=sagebrush-crystal-city-v8Wo2seHpzv_6qULaEIO9wS625974339780%3Apl%3Ata%3Ap1%3Ap2%3Aac%3Aap%3Aneg%3Afi%3Atikwd-4224684381%3Alp9028336%3Ali%3Adec%3Adm%3Appccp%3DUmFuZG9tSVYkc2RlIyh9YbbZAlxiWh21nxNbr91JuRM&sid=34876c6827dabf2bb38f04eddeab2b6d&all_sr_blocks=213196801_438725952_4_0_0&checkin=2026-10-26&checkout=2026-10-27&dest_id=20127460&dest_type=city&dist=0&group_adults=2&group_children=0&hapos=1&highlighted_blocks=213196801_438725952_4_0_0&hpos=1&matching_block_id=213196801_438725952_4_0_0&no_rooms=1&req_adults=2&req_children=0&room1=A%2CA&sb_price_type=total&sr_order=popularity&sr_pri_blocks=213196801_438725952_4_0_0__7123&srepoch=1792601752&srpvid=9fe2770a2a2d00bf&type=total&ucfs=1&		0.68	
+4c3de286b4c4	Sai Unity Lodging Inc Dba Comfort Suites	hotel		28.44499	-99.24352	617 Las Palmas Blvd	Cotulla	78014				0.95	
+df4097f2b4e1	Scottish Inns & Suites	hotel	resort	28.44679	-99.24069	435 Mars Dr	Cotulla	78014	+18304835390	https://www.stayhihotels.com/property/scottish-inns-and-suites-cotulla-tx/?utm_source=Bing&utm_medium=Referral&utm_campaign=Places		0.96	
+3b8408074c85	Sona Inn	hotel	motel	28.68255	-99.18063	16222 S Interstate Hwy 35	Dilley	78017	+18309651100	http://www.sonainntx.com		0.94	
+bdda0a94405c	Southern Inn and Suites Pearsall	hotel	resort	28.89817	-99.11568	112 S Interstate 35	Pearsall	78061	+18303343502	http://bmhotelgroup.com/southern-inn-suites-pearsall.html		0.92	
+6656c1bda9b5	Studio 6 Suites Pearsall- Tx	hotel	resort	28.89517	-99.11201	604 Lindsey Ln	Pearsall	78061	+18305057243			0.97	
+70c3dbaf1266	Super 8 by Wyndham Carrizo Springs	hotel		28.47304	-99.97611	137 La Lomita Dr	Carrizo Springs	78834	+18308769001	https://www.wyndhamhotels.com/super-8/carrizo-springs-texas/super-8-carrizo-springs/overview?CID=LC:7xnkh22o63wf5qj:47414		0.85	
+ad22067af326	Super 8 by Wyndham Cotulla TX	hotel	resort	28.44439	-99.24417	669 N Baylor	Cotulla	78014	+18302674250	https://www.wyndhamhotels.com/super-8/cotulla-texas/super-8-cotulla-tx/overview?CID=LC:7xnkh22o63wf5qj:45714		1.00	
+61127b3a70c7	Super 8 by Wyndham Dilley TX	hotel	resort	28.67950	-99.18060	16301 S Interstate Highway 35 35	Dilley	78017	+18302560649			1.00	
+b9589f953518	SureStay Hotel by Best Western Cotulla	hotel		28.43599	-99.25089	333 N Interstate 35	Cotulla	78014	+18304835312	https://www.bestwestern.com/en_US/book/hotel-rooms.54030.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54030	SureStay Hotels	0.77	
+9146792d365a	Talbert L Bar Ranch	hotel		28.42402	-99.27625	1620 Cochina Ranch Rd	Cotulla	78014	+18308795585	http://www.talbertlbarranch.com/		0.76	
+33dc519f07a2	Texan Inn	hotel	motel	28.54282	-99.84712	2300 N 1st St	Carrizo Springs	78834	+18308769090	http://www.texaninn.com		0.92	
+a87ee48322f7	Village Inn	hotel		28.44294	-99.24674	1110 FM468	Cotulla	78014	+18308792311	http://villageinnmotel.com/	Village Inn - Extended Stay • Cotulla	0.89	
+29a58feebb7e	Watts Ranch	hotel		28.59236	-99.35898	1929 Watts Ranch Rd	Cotulla	78014	+17139066770	http://www.wattsranch.net/		0.86	
+58aa694d5488	White House Inn Dilley	hotel		28.66899	-99.17050	110 S Main St	Dilley	78017	+18309633434	http://whitehouseinndilley.us/		0.92	
+a39216f86806	White Wing Motel	hotel	motel	28.45783	-99.78629	6383 US-83	Asherton	78827	+18304683364			0.92	
+37d979fe4cb7	Wintergarden Inn	hotel	motel	28.70062	-99.82823	2516 US-83	Crystal City	78839	+18303740300	https://www.wintergarden-hotel.com		0.92	
+934d204f769c	Wotel One	hotel		28.49305	-99.82678	150 Service County Rd	Carrizo Springs	78834	+12103178302	http://www.mywotel.com/		0.88	
+281f1b6d3085	4L Oilfield Services	office	energy company	28.42734	-99.23876	902 S Main St	Cotulla	78014	+18308795300	https://www.4loilfield.com/		0.92	
+8b9d8fb1fef2	Baker Hughes	office	energy company	28.49295	-99.81717	3309 US-83	Carrizo Springs	78834	+18308762555	http://bakerhughes.com		0.92	
+f6da0e808ff5	Carrizo Water Tree	office	bottled water company	28.53852	-99.84822	2209 N 1st St	Carrizo Springs	78834	+18308769191			0.92	
+010370b92bdd	Dimmit County Swd	office		28.57136	-99.67872	13238 FM 190	Carrizo Springs	78834	+18308768672	https://dimmitcountyswdllc.godaddysites.com		0.65	
+e3da58dea9df	NuStar Gardendale	office	energy company	28.49753	-99.22223	4259 I-35 Frontage Rd	Cotulla	78014	+12106205054			0.92	
+b21c48879ccb	Petroleum Measurement Equipment Company	office	energy company	28.89396	-99.09694	210 N Cherry St	Pearsall	78061	+19367601020	http://www.petroleummeasurement.us		0.92	
+2d0e1162f00b	Rio Grande Electric Co-Op, Inc.	office		28.53020	-99.88081	3204 Valley St	Carrizo Springs	78834	+18004600674	http://www.rgec.coop		0.92	
+51a9b88339f1	Watermill Express	office	bottled water company	28.52362	-99.85831	307 W Nopal St	Carrizo Springs	78834	+18004879643	https://watermillexpress.com/	Watermill Express	0.92	
+0cb5cbe92c30	Well Optimizers	office		28.40265	-99.24706	708 FM 3408	Cotulla	78014	+18307654444			0.65	closed
+d2a9744e7ab3	5D Grill & Lounge	restaurant	steakhouse	28.54310	-99.84674	2418 N 1st St	Carrizo Springs	78834	+18308763300	http://www.5dgrillandlounge.com		0.92	
+ec9773930100	5D Steakhouse - Carrizo Springs	restaurant	steakhouse	28.54357	-99.84653	2418 N 1st St	Carrizo Springs	78834	+18302190118	http://www.5dsteakhouse.com/	5D Steakhouse - Yorktown	0.97	
+aa9d75f05fbe	Aguascalientes Grill and Bar	restaurant	bar and grill restaurant	28.90422	-99.09168	1409 N Oak St	Pearsall	78061	+18305057425			0.71	
+989570862812	Aine's Sabor Casero	restaurant		28.89112	-99.09406	403 E San Marcos St	Pearsall	78061	+18305057343			0.84	
+be9bd1363964	Andy's Restaurant	restaurant	american restaurant	28.52102	-99.85708	101 N 1st St	Carrizo Springs	78834	+18308769622	http://www.andys-restaurant.com	Andy's of Malvern	0.92	
+45a630659df2	Anthony’s Mexican seafood and grill	restaurant	seafood restaurant	28.69555	-99.82922	2110 N Highway 83	Crystal City	78839	+18308542032			0.87	
+919562d6a9a9	Archy's Homestyle Burgers	restaurant	burger restaurant	28.44863	-99.23974	638 N I-35	Cotulla	78014	+18304835552			0.92	
+38cf44d6183a	Arturo's Tacos	restaurant	mexican restaurant	28.69145	-99.83234	1524 N 1st Ave	Crystal City	78839	+18308542200	http://www.arturos-tacos.com	Arturo's Tacos	0.92	
+92905e94d5e9	BEEF SAYS WHAAAT!!!	restaurant	burger restaurant	28.89464	-99.09421	310 N Oak St	Pearsall	78061	+12102907401	http://beefsayswhaaat.com/		0.99	
+a1419e16621c	Ben's Taco Stand	restaurant	taco restaurant	28.89224	-99.10445	911 W Comal St	Pearsall	78061	+18307469070			0.96	
+d2f6db39a347	Bibi's Place	restaurant	texmex restaurant	28.94069	-99.83958	418 S Miller Ave	La Pryor	78872	+18306942930			0.92	
+e30be5f5494e	Big Lou's Food Barn	restaurant	comfort food restaurant	28.52689	-99.85463	807 N 1st St	Carrizo Springs	78834	+18302190199			0.96	
+c2521fc984c9	Brush Country Herbs & Spice	restaurant		28.35115	-99.27036	5477 FM 469	Cotulla	78014	+18308793711	http://www.candlewoodsuitescotulla.com		0.77	
+2e9d0ebdb340	Brush Country Steakhouse	restaurant	steakhouse	28.89136	-99.09518	120 S Oak St	Pearsall	78061	+18303344676			0.65	
+7cf4ae57bbc8	Cafe Paradiso	restaurant	diner	28.66524	-99.15803	700 E Highway 85	Dilley	78017	+18309651256	http://www.cafe-paradiso.com		0.92	closed
+0b456b2e4543	Cattlemens Of Cotulla	restaurant	seafood restaurant	28.43582	-99.23418	101 N Front	Cotulla	78014	+12107224949	http://www.cattlemensofcotulla.com		0.96	
+65341b1c0c5f	Champs Chicken	restaurant	chicken restaurant	28.73667	-99.14597	17294 S I H 35	Dilley	78017	+18309651818	https://champschicken.com/locations/big-s-303-dilley-tx/		0.85	
+78a594e59dd0	Champs Chicken	restaurant	chicken restaurant	28.43389	-99.23335	1162 Fm 468	Cotulla	78014	+18308793109	https://champschicken.com/locations/bigs-301-cotulla-cotulla-tx/		0.85	
+921949d4e48b	Champs Chicken	restaurant	chicken restaurant	28.44376	-99.24799	1162 FM468	Cotulla	78014	+18308793109	https://champschicken.com/locations/bigs-301-cotulla-cotulla-tx/	Champs Chicken	0.96	
+a25f9bb6576a	Charleys Cheesesteaks	restaurant	sandwich shop	28.03975	-99.35088	23813 I-35	Encinal	78019	+12108243892	https://www.charleys.com/locations/fuel-america-tc-2/		0.85	
+c6d7548c8fc7	Chester's Chicken	restaurant	chicken restaurant	28.04555	-99.34888	28527 I-35	Encinal	78019	+19569487044	https://www.chesterschicken.com/		0.96	
+f088ebcfe52d	Chester's Chicken	restaurant	chicken restaurant	28.68108	-99.18191	16290 IH 35 South	Dilley	78017	+18303263096	https://www.chesterschicken.com/		0.96	
+6df3db58d3e2	China Buffet	restaurant		28.89172	-99.09541	111 S Oak St	Pearsall	78061	+18303344888	http://www.chinabuffetpearsall.com/		0.92	closed
+9d316acab29c	Chuy's Taco Stand	restaurant	mexican restaurant	28.67937	-99.82122		Crystal City		+18304489902	http://washingtondc.menupages.com/restaurants/chuys		0.92	
+94eb85d46689	Cinnabon	restaurant		28.51022	-99.84826	1045 N Highway 83	Carrizo Springs	78834	+18308769754	https://www.cinnabon.com/		0.94	
+64290a53b07c	Cleo Bustamante Enterprises	restaurant		28.52985	-99.86006	1003 N 9th St	Carrizo Springs	78834	+18308769666			0.75	
+be4b527788e8	Cleo's Mexican Food	restaurant	mexican restaurant	28.52178	-99.85664	203 N 1st St	Carrizo Springs	78834	+18308765901			0.98	
+236f58c879cf	Cotulla Provisions and Cookhouse	restaurant		28.44567	-99.23801	165 Mars Dr	Cotulla	78014	+18308794800	http://malanahotels.com		0.92	
+d39f22091c1f	Country Snack Shack bbq & More	restaurant		28.66419	-99.16450	318 E Spruill St	Dilley	78017	+18309657397	http://www.countrysnackshack.com/?page_id=9		0.98	
+7c85b5c5cc10	Country Store	restaurant	american restaurant	28.44443	-99.24729		Cotulla	78014	+18308793319	http://conocophillips.com		0.92	
+a2e94aa2ef5e	County LINE GRILL	restaurant	barbecue restaurant	28.04576	-99.34512		Encinal		+19567711919	http://www.texasoutlawgrill.com/		0.64	
+99123db204d5	Cowpokes Bar-B-Q	restaurant	barbecue restaurant	28.89752	-99.11315	1854 W Comal St	Pearsall	78061	+18303348000	http://cowpokes-q.poi.place		0.98	
+39d0e547abfc	Eddies Mexican Restaurant	restaurant	texmex restaurant	28.88663	-99.09772	204 E Frio St	Pearsall	78061	+18303179657			0.92	
+f4cc161e8b3c	El Chico	restaurant	mexican restaurant	28.67898	-99.82062	124 S 7th Ave	Crystal City	78839	+18303743202	http://www.elchico.com/		0.97	
+693e89f9f257	El Paraiso Tejano	restaurant	texmex restaurant	28.57293	-99.56993	32 S Franklin St	Big Wells	78830	+18304575001			0.92	
+8e4b6815d9da	El Patron Mexican bar and grill	restaurant	mexican restaurant	28.44670	-99.24232	474 Mars Dr	Cotulla	78014	+18308794661			0.92	
+e3f8bfc86728	El Rancho Grande	restaurant	mexican restaurant	28.93075	-99.82868	CR 4012	La Pryor	78872		http://www.elranchogrande.info/		0.65	
+67dcf714cf59	Elia’s kitchen	restaurant		28.43163	-99.23802	504 1st St	Cotulla	78014	+18304835033			0.81	
+90e740ddd2e8	Encinia BBQ	restaurant		28.43162	-99.23355	413 S Front St	Cotulla	78014	+13612541374			0.61	
+150019cba96f	Familia Vasquez Restaurant	restaurant	mexican restaurant	28.96123	-99.62008	14612 E US Hwy 57	Batesville	78829	+18303764000	https://rezku.com/tx/batesville/familia-vasquez-restaurant/closed		0.92	closed
+31682276ce7b	Farmer's Harvest	restaurant		28.87166	-99.10057	155 FM 1582	Pearsall	78061	+18303343501	http://farmersharvest.net		0.92	closed
+ac1d509111bb	Full Moon Saloon	restaurant	bar and grill restaurant	28.89164	-99.09499	101 S Ash St	Pearsall	78061	+12109094400			0.92	
+657c39e4bd69	Garcia's Bar & Grill	restaurant	texmex restaurant	28.89107	-99.09564	205 S Oak St	Pearsall	78061	+18303348800	https://garcia-s-bar-grill-tx.hub.biz/		0.92	
+9f1826dc4d0c	Garcia’s On 35 Mexican Grill	restaurant	texmex restaurant	28.68017	-99.17921	1062 W FM 117	Dilley	78017	+18303263014			0.92	
+3d4ce364f0ca	Genies	restaurant	theme restaurant	28.94868	-99.85058	Railroad St	La Pryor	78872	+18304071540			0.58	
+fa606720cadc	Gibo's	restaurant		28.57512	-99.57141	1652 Leon St	Big Wells	78830				0.92	
+0f7f554032db	Gonzales Taco Stand	restaurant	taco restaurant	28.67323	-99.16897	500 N Main St	Dilley	78017	+18309652090	https://local.yahoo.com/info-33846031-gonzales-taco-stand-dilley		0.92	
+d1b7f687ee8e	Gonzalez Kitchen	restaurant	texmex restaurant	28.89484	-99.09433	310 N Oak St	Pearsall	78061		http://www.gonzalezkitchen.com/		0.94	
+71f3f67f22c8	Hamsa HTX	restaurant		28.61346	-99.14062	5555 Morningside Drive Suite 100	Houston	77005	+12816123515	https://www.hamsahtx.com/		0.95	
+c716ec78a7ca	Highway 83 Road House Bar & Grill	restaurant	bar and grill restaurant	28.67932	-99.83745	503 N Highway 83	Crystal City	78839	+18303745555			0.77	
+0ed0e4dc715a	Iron Skillet	restaurant	diner	28.89965	-99.11594	110 S Interstate 35	Pearsall	78061	+18303342345	http://www.petrotruckstops.com/iron_skillet.sstg		0.92	
+a88d18d27122	Jalisco's Bar & Grill	restaurant	mexican restaurant	28.89733	-99.11161	1711 W Comal St #1711	Pearsall	78061	+18303344360	http://www.jaliscorestaurant.com/		0.98	
+469adcbd4e69	Jaliscos Mexican Restaurant & Bar	restaurant	mexican restaurant	28.89787	-99.11195	1711 W Comal St	Pearsall	78061	+18303344360	http://www.jaliscosbarandgrill.net		0.98	
+978518c41043	Javelina Cafe	restaurant	mexican restaurant	28.68729	-99.82235	906 E Crockett St	Crystal City	78839	+18303749050			0.92	
+11f035eb24af	Kevin's Cafe	restaurant	mexican restaurant	28.68158	-99.82940	504 E Zavala St	Crystal City	78839	+18303749127	https://kevin-s-cafe.hub.biz		0.95	
+2d90fbfe7b53	Kim's Kitchen	restaurant	asian restaurant	28.52238	-99.85505	210 E Nopal St	Carrizo Springs	78834	+18308765550	http://www.kimskitchencarrizo.com		0.92	
+9c94af874572	La Barbaqoa Co.	restaurant	barbecue restaurant	28.52205	-99.85484	202 Purser St	Carrizo Springs	78834	+18308766004	http://Labarbaqoaco.com/		0.92	
+93783ee823bb	La Esquinita	restaurant		28.53145	-99.85867	1208 N 9th St	Carrizo Springs	78834	+18302551308			0.96	
+d7e7ad880780	La Familia Restaurant	restaurant	mexican restaurant	28.89279	-99.10644	1206 W Comal St	Pearsall	78061	+18304446869			0.68	
+a49372d3503c	La Parrillada	restaurant	texmex restaurant	28.89240	-99.09577	211 E Colorado St	Pearsall	78061	+18305057379			0.92	
+fda95be00afb	La Rivera Resort	restaurant	american restaurant	28.77799	-99.15951	1758 County Road 4425	Dilley	78017	+18888186102	http://www.lariveraresort.com		0.77	
+892e1407ce9c	La Salle County Steakhouse	restaurant	steakhouse	28.44284	-99.25129	182 S I-35	Cotulla	78014	+18308794108	http://www.lasallecountysteakhouse.com/ordereze/default.aspx		0.96	
+29512e44b91a	Laredo Taco Company	restaurant	taco restaurant	28.45152	-99.23904	795 Ih 35	Cotulla	78014	+18308795354	https://www.laredotacocompany.com/		0.95	
+4716b4230ff8	Laredo Taco Company	restaurant		28.54512	-99.84544	2525 N US Hwy 83	Carrizo Springs	78834	+18308763601	https://www.laredotacocompany.com/		0.95	
+fde4a3db2584	Laredo Taco Company	restaurant		28.52034	-99.85688	101 S First St	Carrizo Springs	78834	+18308763359	https://www.laredotacocompany.com/		0.95	
+b7a96aaf488e	Limits Kitchen	restaurant	american restaurant	28.44002	-99.23569	408 N Main St	Cotulla	78014				0.96	
+65c159d94181	Linares Bar-B-Que	restaurant	barbecue restaurant	28.44872	-99.23760	1173 N Main St	Cotulla	78014	+18303227277			0.79	
+b4cd87c9384f	Linares BBQ	restaurant	barbecue restaurant	28.44169	-99.24536	902 Live Oak St	Cotulla	78014	+18303227277			0.97	
+aa6793e572ab	Little Joe's BBQ	restaurant	barbecue restaurant	28.88931	-99.09532	309 E San Antonio St	Pearsall	78061	+12104143286			0.97	
+c45baed179fd	Los Alteños Bar and Grill	restaurant	bar and grill restaurant	28.89124	-99.09531	120 S Oak St	Pearsall	78061	+18307469019			0.92	
+1cacbdde875e	Mana Burger	restaurant	burger restaurant	28.43291	-99.23019	301 Goft	Cotulla	78014	+18302027740			0.67	
+083ac179df34	Martita's Cocina	restaurant	mexican restaurant	28.53019	-99.86087	903 Eaton St	Carrizo Springs	78834	+18302190900	http://www.martitascocina.com/		0.96	
+521cf291ac37	Mi Cabaña Mexican Restaurant	restaurant	mexican restaurant	28.66984	-99.17033	106 N Main St	Dilley	78017	+18303263311			0.92	
+950e1a954406	Mi Casa Cafe	restaurant	mexican restaurant	28.88489	-99.09739	821 S Oak St	Pearsall	78061	+18303343577	http://www.micasacafe.com	Mi Casa Glil Yam	0.96	
+e6bec01fb3d2	Miguelito's Mexican Grill and Cantina	restaurant	mexican restaurant	28.54512	-99.84621	101 Petry Pl	Carrizo Springs	78834	+18308763565	http://www.miguelitosmexicangrillandcantina.com/		0.97	
+6d72043288b9	Miguelitos Mexican Grill	restaurant	texmex restaurant	28.68673	-99.83141	1023 N 1st Ave	Crystal City	78839	+18303743461	http://www.miguelitosmexicangrillandcantina.com		0.97	
+e6f9207730e3	Miko&#39 S Llc	restaurant		28.68664	-99.83141	1023 N 1st Ave	Crystal City	78839				0.95	
+42028f3a3e71	Millies Mexican Restaurant	restaurant	mexican restaurant	28.67446	-99.18295	16777 S Interstate Hwy 35	Dilley	78017	+18309651114	https://start.cortera.com/.../k3s4jyl1q/millies-mexican-restaurant		0.96	
+4515ab36e791	Mimi's	restaurant	mexican restaurant	28.52150	-99.85999	504 Pena St	Carrizo Springs	78834	+18303225030			0.55	
+31256f4123a8	MJ's Mexican Restaurant	restaurant	texmex restaurant	28.52195	-99.85332	317 E Nopal St	Carrizo Springs	78834	+18302190117			0.95	
+352bbd716602	Moe's Southwest Grill	restaurant	mexican restaurant	28.51064	-99.84791	1045 S Highway 83	Carrizo Springs	78834	+18308769739	http://www.moes.com		0.77	
+14240bb184bc	My Hamburger Stand	restaurant	burger restaurant	28.94998	-99.85453		La Pryor	78872	+18303654312		Hamburger Stand	0.92	
+c0ce971f0382	Nena's Mexican Food	restaurant	mexican restaurant	28.93758	-99.84120	620 S Pryor Ave	La Pryor	78872	+18302792210			0.69	
+1f9f1846ef6d	Nina's	restaurant		28.57106	-99.57022	1508 Missouri Ave	Big Wells	78830	+18304572000			0.99	
+a37a1b8ca32c	Nini’s Burger-stand	restaurant		28.95333	-99.61261	473 Ramos St	Batesville	78829	+18302751819			0.97	
+db1ea22827a4	Ninos Lunch Box	restaurant		28.04462	-99.35491	711 N Front St	Encinal	78019				0.57	
+f8f246393f04	Norma's Peace of Heaven	restaurant	comfort food restaurant	28.67525	-99.16554	138 E Colunga St	Dilley	78017	+18303261895			0.92	
+9cc51850bbc2	Oak Street Taco House	restaurant	taco restaurant	28.89007	-99.09606	305 S Oak St	Pearsall	78061	+18305057330	https://oaksttacohouse-305.square.site/s/order		0.92	
+6eb127ad760b	Oasis Restaurant	restaurant	mexican restaurant	28.69880	-99.82870	2313 US-83	Crystal City	78839	+18303743337	http://oasis-austin.com		0.99	
+662142232936	Outlaw Bar and Grill	restaurant	burger restaurant	28.87889	-99.11579	1650 S Interstate 35	Pearsall	78061	+18303342141	http://outlawbarandgrill.com		0.92	closed
+c451772c2afd	Pacho's Cafe	restaurant		28.68010	-99.17919	1062 W FM 117	Dilley	78017				0.95	
+34ac916fbee9	Panchos	restaurant	mexican restaurant	28.94513	-99.83817	686 US-57	La Pryor	78872	+18303654411			0.96	
+e4c991793d5c	PC Country Store	restaurant	american restaurant	28.44445	-99.24720	78 I-35	Cotulla	78014	+18308793319	http://conocophillips.com		0.92	
+eaaf687df5dd	Peppers Grill	restaurant		28.43967	-99.23611	501 N Main St	Cotulla	78014	+18308792904	http://peppersgrill.com/		0.92	
+9733a8be634e	Phat Boy'z	restaurant	texmex restaurant	28.53149	-99.85868	1208 N 9th St	Carrizo Springs	78834	+18302190071			0.92	
+b8dc809b1e6c	Pizz-A-Ghetti	restaurant	pizza restaurant	28.89057	-99.09650	222 S Elm St	Pearsall	78061	+18303348730	http://www.pizzagetti.com		0.95	
+723ebaee6129	Pom E Landia Laredo Texas	restaurant	mexican restaurant	28.43825	-99.23751	Pom’s	Cotulla	78046	+19562354135			0.79	
+285c80783e95	Ponchos Mexican Resteraunt	restaurant	mexican restaurant	28.94569	-99.83611	686 E US Hwy 57	La Pryor	78872	+18303654411			0.94	
+d5e02fea2481	Ponderosa's Take Out	restaurant	burger restaurant	28.51461	-99.21410	176 N Gray Ave	Cotulla	78014	+18308794705	http://gmail.com		0.92	
+421e6249b87f	Rebecca's Mexican Restaurant	restaurant	mexican restaurant	28.67853	-99.82959	207 N Ave B	Crystal City	78839	+18304485443			0.92	
+523c3420cd1d	Rosita's Barbacoa	restaurant	mexican restaurant	28.90079	-99.11520	111 I-35	Pearsall	78061	+18303342626			0.92	
+56379c5a0e15	Rosita's Barbacoa	restaurant	mexican restaurant	28.66888	-99.17655	404 W Leona St	Dilley	78017	+18303261161			0.96	
+0a4d0303608d	Rositas Barbacoa	restaurant	texmex restaurant	28.43006	-99.23569	506 S Main St	Cotulla	78014	+18302023001			0.92	
+af19507ad290	Rositas Restaurant	restaurant	texmex restaurant	28.52516	-99.85603	604 N 1st St	Carrizo Springs	78834	+18308763825	http://rositasrestaurant.com		0.92	
+cc27d975c67b	Royal Palace Dance Hall Restaurant	restaurant		28.49807	-99.82757	2578 S US Hwy 83	Carrizo Springs	78834	+18308769377	http://www.trinitystogo.com		0.92	
+326d2f55f776	Sanchez BBQ and Gorditas	restaurant	texmex restaurant	28.43373	-99.23259	106 Goft St	Cotulla	78014	+18308792564			0.90	
+2d5e9a1105e4	Sergio’s BBQ	restaurant	barbecue restaurant	28.94702	-99.61357	108 Santiago St	Batesville	78829	+14324889779			0.63	
+99a601fcf7fc	Shoot The Bull Bbq	restaurant		28.67574	-99.18259	16675 S Interstate Highway 35	Dilley	78017	+18309630544			0.65	closed
+e9a79f28b898	Stars Drive-In	restaurant	theme restaurant	28.53405	-99.85200	1906 N 1st St	Carrizo Springs	78834	+18308769568	http://starsdrivein.com	Stars Drive-In	0.96	
+0332eac237d2	Stars Restaurants, Llc	restaurant		28.53418	-99.85227	1906 N 1st St	Carrizo Springs	78834				0.95	
+34d9724da74c	Taco House	restaurant	texmex restaurant	28.52491	-99.85555	603 N 1st St	Carrizo Springs	78834	+18302190197	http://www.tacohouse.org/		0.94	
+0c1c8715506d	Taco Palenque	restaurant	mexican restaurant	28.44626	-99.24348	358 I-35	Cotulla	78014	+18308794956	https://tacopalenque.com/	Taco Palenque	0.96	
+d173c8fd64ea	Taco the Town	restaurant		28.53078	-99.85945	1201 N 9th St	Carrizo Springs	78834	+18303222446			0.92	
+82d42637fe2d	Tacos 2 Hermanos	restaurant	mexican restaurant	28.89749	-99.09334	626 N Oak St	Pearsall	78061	+18305057472			0.98	
+48bc55d84db0	Tacos El Rey	restaurant	taco restaurant	28.52567	-99.85497	701 N 1st St	Carrizo Springs	78834	+18303258687			0.96	
+d9128bb32374	Tacos el sabrocito	restaurant		28.89569	-99.10643	129 W Washington St	Pearsall	78061	+18303176404	http://ingoodcompanymaine.com		0.66	
+ed32b23e34ec	Taqueria 2 Hermanos	restaurant	mexican restaurant	28.89749	-99.09334	626 N Oak St	Pearsall	78061	+18305057472	http://taqueriajalisco.net		0.57	
+e5429dd97c1b	Taqueria Jalisco	restaurant	mexican restaurant	28.89744	-99.09319	626 N Oak St	Pearsall	78061	+18303344360			0.90	
+ec613d740606	Taqueria Jalisco	restaurant	mexican restaurant	28.67379	-99.16851	511 N Main St	Dilley	78017	+18309638888	https://taqueriajalisco.cloveronline.com/menu/all		0.95	
+c935a1e6bc65	Taqueria Jalisco in Pearsall Txs	restaurant	mexican restaurant	28.89738	-99.11139		Pearsall					0.79	
+36c3d125ea36	Taqueria Mexico	restaurant	mexican restaurant	28.89232	-99.10443	911 W Comal St	Pearsall	78061	+18303344380	http://taqueria-jalisco.com		0.92	
+ba66094b4c29	Taqueria Tres Potrillos	restaurant	mexican restaurant	28.52237	-99.85704		Carrizo Springs	78834	+12103224542			0.96	
+d3987fa53354	The Cabins at Carrizo	restaurant	american restaurant	28.49371	-99.82563	150 Service County Rd	Carrizo Springs	78834	+18308762588	http://www.cabinsatcarrizo.com/		0.70	
+87cf48f8172d	The Front Porch on Oak Street	restaurant		28.89008	-99.09593	305 S Oak St	Pearsall	78061	+18305057132			0.98	
+a263d6d0f11d	The Smoking Crab & Seafood Co Carrizo Springs, TX	restaurant	seafood restaurant	28.52337	-99.86557	1102 Pena St	Carrizo Springs	78834	+18302064822			0.92	
+db34244d401a	The Snack Shack	restaurant	sandwich shop	28.68601	-99.82798	421 E Crockett St	Crystal City	78839	+18304488741			0.96	
+f430e39173ba	The Stand	restaurant		28.44207	-99.76110	833 Fm Rd 190	Asherton	78827	+18307540005			0.87	
+ed4927786901	Tina's Tacos	restaurant	mexican restaurant	28.49641	-99.82360	2824 US-83	Carrizo Springs	78834	+18302556575			0.92	
+2a6cea050bd8	Tio Non's Joint	restaurant		28.43998	-99.23612	409 N Main St	Cotulla	78014		tio-nons-joint.business.site		0.92	
+ddc23d55548c	Tracy's Table	restaurant		28.44770	-99.24551	13 Pena Rd	Cotulla	78014	+18155666083			0.77	
+84a358b152a6	Trinitys	restaurant	diner	28.44983	-99.76079	Crockett	Asherton	78827	+18302558888	http://www.trinitystogo.com		0.95	
+d1f2748cb3b4	Trinitys	restaurant	barbecue restaurant	28.49804	-99.82756	2578 S US Hwy 83	Carrizo Springs	78834	+18304991458	http://Www.Trinitystogo.com/		0.96	
+5449c9f19a73	ValdezBakery Pizzas & Wings To-Go	restaurant	pizza restaurant	28.88375	-99.09963	205 W Ward St	Pearsall	78061	+18305050404	https://printgraphex3.wixsite.com/valdezmenu		0.92	
+1b0f5d929776	Yolie’s Steakhouse & Mexican Food	restaurant	steakhouse	28.69059	-99.83644	1511 US-83	Crystal City	78839	+18303742772	https://order.taptoeat.com/a9997219e0219aeab342e2ec21b65e3394dc4e9cddc75fa6e3373e91147321cb		0.98	
+7ca3b77b9e66	Crystal City Housing Authority	senior	retirement home	28.69500	-99.82508	1600 N 7th Ave	Crystal City	78839	+18303743433	http://ninfa-authority.gaaq.net		0.94	
+6751bddd50b2	Las Palmas Skilled Nursing and Rehabilitation	senior	retirement home	28.44553	-99.24014	369 Mars Dr	Cotulla	78014	+18308794628	https://slpoperations.com/		0.92	
+fe711ef00516	Pearsall Manor Senior Citizens	senior	retirement home	28.89835	-99.08307	600 Berry Ranch Rd	Pearsall	78061	+18303345334			0.92	
+c6eb0cc80b9e	Pearsall Nursing and Rehabilitation Center	senior	retirement home	28.89713	-99.11911	169 Medical Dr	Pearsall	78061	+18303343371	https://wellsentialhealth.org/location/pearsall-nursing-rehabilitation-center/		0.92	
+38409e519ccd	Whispering Springs Rehabilitation and Healthcare Center	senior	retirement home	28.51817	-99.86341	506 S 7th St	Carrizo Springs	78834	+18308765011	https://www.nexion-health.com/whisperingsprings/		0.99	

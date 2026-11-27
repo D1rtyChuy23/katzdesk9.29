@@ -81,6 +81,8 @@ export type Place = {
   brand: string | null;
   /** How sure Overture is the place exists (0–1). */
   confidence: number;
+  /** Overture marks it permanently closed: never a prospect, but it tells the Web Check one of our customers closed. */
+  closed: boolean;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -106,7 +108,7 @@ export function placeTilesFor(b: Bounds, max = PLACE_TILES_MAX): { keys: string[
   return { keys, capped: false };
 }
 
-export const PLACE_TILE_COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence"] as const;
+export const PLACE_TILE_COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence", "status"] as const;
 
 const cell = (s: string | undefined) => {
   const t = (s ?? "").trim();
@@ -119,8 +121,9 @@ export function parsePlaceTile(text: string): Place[] {
   const out: Place[] = [];
   for (let i = 1; i < lines.length; i++) {
     const c = lines[i]!.split("\t");
-    if (c.length < PLACE_TILE_COLUMNS.length) continue;
-    const [id, name, category, kind, lat, lng, street, city, zip, phone, website, brand, confidence] = c;
+    // The status column came later (11/27): a row without it is an open place.
+    if (c.length < PLACE_TILE_COLUMNS.length - 1) continue;
+    const [id, name, category, kind, lat, lng, street, city, zip, phone, website, brand, confidence, status] = c;
     const la = Number(lat);
     const ln = Number(lng);
     if (!cell(id) || !cell(name) || !isPlaceCategory(category) || !Number.isFinite(la) || !Number.isFinite(ln)) continue;
@@ -138,6 +141,7 @@ export function parsePlaceTile(text: string): Place[] {
       website: cell(website),
       brand: cell(brand),
       confidence: Number(confidence) || 0,
+      closed: (status ?? "").trim() === "closed",
     });
   }
   return out;
@@ -163,7 +167,8 @@ export function placesIn(
   q = "",
 ): { places: Place[]; total: number } {
   const wanted = new Set(categories);
-  const hits = all.filter((p) => wanted.has(p.category) && p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east && placeFitsSearch(p, q));
+  // Closed places are never prospects.
+  const hits = all.filter((p) => !p.closed && wanted.has(p.category) && p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east && placeFitsSearch(p, q));
   hits.sort((a, c) => c.confidence - a.confidence || (a.id < c.id ? -1 : a.id > c.id ? 1 : 0));
   return { places: hits.slice(0, Math.max(0, limit)), total: hits.length };
 }

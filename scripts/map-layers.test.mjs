@@ -208,7 +208,7 @@ test("a place file: header, one place per line; a row with no name, an unknown t
   assert.equal(rows.length, 1);
   assert.deepEqual(rows[0], {
     id: "abc123", name: "Bean There", category: "coffee", kind: "coffee roastery", lat: 29.76263, lng: -95.3673, street: "502 Texas Ave",
-    city: "Houston", zip: "77002", phone: "+17135550101", website: "beanthere.example", brand: null, confidence: 0.97,
+    city: "Houston", zip: "77002", phone: "+17135550101", website: "beanthere.example", brand: null, confidence: 0.97, closed: false,
   });
   assert.equal(places.formatPhone(rows[0].phone), "(713) 555-0101");
 });

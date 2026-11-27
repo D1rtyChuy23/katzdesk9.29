@@ -1,158 +1,161 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-e9ad1693a8d5	L.J Sweets	bakery		26.90857	-99.27134	1305 Hidalgo Blvd	Zapata	78076	+19563372715			0.92
-276bb5277dc8	Los Pasteles Bakery and Coffee	bakery		26.91162	-99.27415	1701 Hidalgo Blvd	Zapata	78076	+19567656013	https://www.searchonamerica.com/place/los-pasteles-bakery_2143356.html		0.94
-59a83d4f036d	Penny's Pantry LLC	bakery		26.89074	-99.27481	114 Howard Dr	Zapata	78076	+19565000075	http://www.pennyspantrytx.com/		0.97
-1da210960e95	American Legion	bar	pub	26.91616	-99.27862	2213 N US Highway 83	Zapata	78076	+19567656071	http://www.legion.org/	American Legion	0.92
-32379c8ddd71	Aqua Bar	bar		26.88829	-99.26127	178 N Highway 83	Roma	78584	+19567651500	https://aqua-restaurant-bar-tx.hub.biz/		0.95
-8f8251786792	BootZ Sports Bar	bar	sports bar	26.92039	-99.28399	3014 US-83	Zapata	78076	+19567506670			0.96
-e5ac224eb518	Hawks Sport bar	bar	sports bar	26.92066	-99.28394	3086 US-83	Zapata	78076				0.92
-228d759f75cc	Las Alitas Sports & Wings - Roma	bar	sports bar	26.42464	-99.02322	1863 US-83	Roma	78584	+19568494899	http://www.lasalitassportsandwings.com/	Las Alitas Sports & Wings	1.00
-19b91c5a0509	VFW Lounge	bar		26.92063	-99.25166	1515 W 13th Ave	Zapata	78076	+19562981067			0.95
-f683936893ac	Z Wings Grill and Bar	bar	sports bar	26.90812	-99.27245	1309 US-83	Zapata	78076	+19567508800	http://www.zwingssportsbar.com/		0.95
-d6f4410e8600	D&G auto sales	cardealer		26.52567	-99.08839	2711 US-83	Roma	78584	+19562083852			0.92
-a384792f654f	Ortiz Auto & RV Sales	cardealer		26.40309	-99.01102	133 E Grant St	Roma	78584	+19562563637			0.92
-717b22dd4133	Starr County Precinct 2	cardealer		26.40169	-99.00417	500 E Grant St	Roma	78584	+19568497371	http://www.co.starr.tx.us		0.70
-2dd5c5cd4943	Texas Remarketing Auto Sales	cardealer		26.40134	-99.00151	738 E Grant St	Roma	78584	+19564377731			0.78
-fb972444177e	El Cafecito	coffee		26.90751	-99.26356	902 Carla St	Zapata	78076	+19562654061			0.92
-e2ae575fbeb7	FotoFino Coffee	coffee		26.94653	-99.31283	3262 US-83	Zapata	78076	+19567652162	http://www.fotofino.com/coffee		0.98
-e87a890732ad	3 G's Grocery & Drive-In	convenience		26.91945	-99.26205	615 Zapata Blvd	Zapata	78076	+19567650033			0.96
-c306ea5eb04d	7 Days Express #1	convenience		26.90007	-99.26630	503 US-83	Zapata	78076	+19567650940	http://chevron.com/		0.98
-bcb92e102995	7 Days Express #2	convenience		26.86340	-99.25131	3040 US Highway 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/3040-US-HIGHWAY-83/0000026062	Valero	0.85
-b456d5863f3d	7-Eleven	convenience		26.89674	-99.26356	102 N. Highway 83	Zapata	78076	+19567655536	https://www.7-eleven.com/locations/tx/zapata/102-n-highway-83-40901	7-Eleven	1.00
-a560b5484f73	83 Drive Thru	convenience		26.91154	-99.27440	1702 US-83	Zapata	78076	+19567655900			0.92
-d4c3eccf605d	Arguindeguis Pump N Shop	convenience		26.44176	-99.02584	1824 N US Highway 83	Roma	78584	+19567656343			0.58
-41e9c462919f	C. Street Snacks	convenience		26.91727	-99.27202	2001 Carla St	Zapata	78076	+19566145812			0.92
-255233976929	Catarrins Drive Thru	convenience		26.40624	-99.01562	601 N Garcia St	Roma	78584	+19565734867			0.92
-b0af9e16c3a6	Chevron	convenience		26.90004	-99.26624	503 US 83	Zapata	78076		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/503-US-83-ZAPATA-TX-78076-id201995	Chevron	0.95
-01dde4e6de88	Chevron Station Zapata	convenience		26.89198	-99.26220	503 US Highway 83	Zapata	78076	+19567650940			0.97
-68b9aec9988c	Circle K	convenience		26.90703	-99.27074	1202 N US Hwy 83	Zapata	78076	+19567659599	https://www.circlek.com/		1.00
-9c5289ea0823	Conoco	convenience		26.91265	-99.27621	1813 US-83	Zapata	78076	+19567656343	https://www.conoco.com/		0.92
-dec73dbef800	Corner Store	convenience		26.90672	-99.27118	1202 N Us Highway 83	Zapata	78076	+19567659599			0.92
-b9dc3a8a0524	El Puerto Barbacoa	convenience		26.41243	-99.01920	1475 N Garcia St	Roma	78584	+19568495544			0.79
-fc1680340b97	El Tigre	convenience		26.90782	-99.27173	1302 US-83	Zapata	78076	+19567653334	https://corporate.exxonmobil.com	El Tigre Food Stores	0.69
-d9b304d5a70d	Exxon	convenience		26.90782	-99.27172	1302 Hwy 83	Zapata	78076	+19567653334	https://www.exxon.com/en/find-station/exxon-zapata-tx-eltigre01-200311600?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
-0da4bbf1f0ba	Falcon Drive & Groceries	convenience		26.52590	-99.08839	2709 N Highway 83	Roma	78584	+19568485057			0.95
-8dd432120ebc	Hawks Quick Pick	convenience		26.91620	-99.25890	701 State HWY 16	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/701-STATE-HWY-16/0000026103	Valero	0.80
-5a8c8301a5f5	JM Drive Thru	convenience		26.41035	-99.01774	1104 N Garcia St	Roma	78584	+19568474041			0.94
-5c4dc4e5802a	Jr's Snack Bar & Groceries	convenience		26.52411	-99.08800	2701 N Highway 83	Roma	78584				0.94
-875eb9349aee	JUNIOR'S DRIVE IN & MEAT MARKET	convenience		26.91247	-99.26357	102 US HWY 16	Zapata	78076		https://www.exxon.com/en/find-station/mobil-zapata-tx-juniorsdriveinmeatmarket-200319764	Mobil	0.80
-662f95ea9d4d	Junior's Drive Inn	convenience		26.91247	-99.26358	102 TX-16	Zapata	78076	+19567659717	https://juniors-drive-inn-meat-market.hub.biz/		0.89
-7a13d6990b86	Mobil	convenience		26.91255	-99.26366	102 Us Hwy 16	Zapata	78076	+19567659717	http://www.mobil.com	Exxon & Mobil Stations	0.92
-58c6ddadbed8	O'Maria's	convenience		26.41259	-99.01997	1502 N Grant St	Roma	78584	+19568493654			0.92
-689a745d9052	Pump N Shop	convenience		26.91270	-99.27621	1824 US-83	Zapata	78076	+19567656343	http://www.conoco.com/station-finder		0.56
-bb9ed5a9bff4	Quick Stop Grocery and Drive Inn	convenience		26.91645	-99.27899	2214 US-83	Zapata	78076	+19562658100			0.91
-a95d28f562cc	SE40901 ZAPATA TX	convenience		26.89670	-99.26341	102 N US HIGHWAY 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/102-N-US-HIGHWAY-83/0000008016	Valero	0.80
-392b3eaf18bd	Six Pack Corner Reloaded	convenience		26.41313	-99.02026	1512 N Grant St	Roma	78584	+19562567240			0.92
-798fcb6bb080	Stripes	convenience		26.89676	-99.26348	102 N. Highway 83	Zapata	78076	+19567655536	https://stripesstores.com/		0.97
-9174c7b749e6	Sunoco	convenience		26.40323	-99.01299	73 E Grant St	Roma	78584	+19568471173		GoSunoco	1.00
-3bc43fd6f790	Sunoco Gas Station	convenience		26.90516	-99.27048	1009 Highway 83	Donna	78537	+19564616254	https://www.sunoco.com/find-a-station		0.85
-f0316c55c127	Texaco G & C	convenience		26.40312	-99.01306	73 E Grant St	Roma	78584	+19568471173	https://www.texaco.com/	Texaco	0.93
-643be117479a	Valero	convenience		26.89661	-99.26380	102 N US HIGHWAY 83	Zapata	78076	+19567655536	https://locations.valero.com/en-us/LocationDetails/Index/102-N-US-HIGHWAY-83/0000008016	Valero	0.92
-2fa4ab89f42c	VALERO 2741540	convenience		26.90680	-99.27091	1202 HWY 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/1202-HWY-83/0000021540	Valero	0.95
-ff32584c948e	Zapata Drive Inn	convenience		26.87818	-99.25720	1970 S US Highway 83	Zapata	78076	+19562659060			0.97
-dd3d9690bde4	ZAPATA PUMP N SHOP	convenience		26.88068	-99.25749	1823 HIGHWAY 83	Zapata	78076			Conoco	0.80
-1d8a31fdedb9	Burger King	fastfood		26.40175	-99.00632	390 E Grant St	Roma	78584	+19568495806	https://burgerking.com/store-locator/store/12501	Burger King	0.98
-882f2c7fd8ca	Burger King	fastfood		26.90241	-99.26706	702 & 706 N US Highway 83	Zapata	78076		https://www.bk.com/store-locator/store/restaurant_887141	Burger King	0.80
-750e35d55a90	Church's Texas Chicken	fastfood		26.89583	-99.26438	101 Highway 83	Zapata	78076	+19567656859	https://locations.churchs.com/tx/zapata/101-highway-83	Church's Chicken	0.96
-f111af9d9870	Church's Texas Chicken	fastfood	chicken restaurant	26.40342	-99.01517	207 Grant Street	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street		0.96
-dd222576b5cb	Church’s Texas Chicken	fastfood	chicken restaurant	26.40243	-99.00800	207 E Grant St	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street	Church's Chicken	1.00
-95ab7cea3761	Dairy Queen	fastfood		26.89607	-99.26450	103 US-83	Zapata	78076	+19567655591	https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/14742/?y_source=1_MjkzMzg4ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
-bfe9f9a4dba1	Dairy Queen	fastfood		26.41173	-99.01979	1403 N Grant St 1403 N Grant St	Roma	78584	+19568491921	https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/14533/?y_source=1_MjkzMzg5NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
-bad27e56e13d	Domino's Pizza	fastfood	pizza restaurant	26.40207	-99.01308	1004 E Grant St	Roma	78584	+19567652018	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
-792e28a7f613	DQ Grill & Chill	fastfood		26.41172	-99.01983	1403 N Grant St	Roma	78584		https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/4305	DQ Grill & Chill	0.80
-d74c15cb400d	DQ Grill & Chill	fastfood		26.89612	-99.26437	Hwy 83 N	Zapata	78076		https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/4514	DQ Grill & Chill	0.80
-b61d9caf858c	Jack in the Box	fastfood	taco restaurant	26.40327	-99.01445	201 E Grant St	Roma	78584	+19568471905	http://www.jackinthebox.com/locations/3932		0.95
-b5ab4cf64f11	Little Caesars Pizza	fastfood	pizza restaurant	26.91194	-99.27605	1803 US-83	Zapata	78076	+19567503379	https://littlecaesars.com/en-us/store/11233	Little Caesars	0.98
-4c512d263ba4	McDonald's	fastfood		26.40227	-99.01129	104 E Grant Street	Roma	78584	+19568491045	https://www.mcdonalds.com/us/en-us/location/tx/roma/104-e-grant-street/31585.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
-a2488c9bd1ff	McDonald's	fastfood		26.89416	-99.26367	116 South Us Hwy 83	Zapata	78076	+19567656700	https://www.mcdonalds.com/us/en-us/location/tx/zapata/116-south-us-hwy-83/18776.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
-bc15361945f2	MG's Restaurant	fastfood		26.89951	-99.26267	301 Glenn St	Zapata	78076	+19567503004			0.97
-4cb756ced70d	MidKnight Snack	fastfood		26.89949	-99.26633	410 Jackson St	Zapata	78076				0.59
-51a3781ee7ce	Pizza Hut	fastfood	pizza restaurant	26.89770	-99.26479	209 N St #83	Zapata	78076	+19567654882	https://locations.pizzahut.com/tx/zapata/209-n-hwy-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299108	Pizza Hut	0.98
-6e2cbcaacaac	Pizza Hut	fastfood	pizza restaurant	26.40267	-99.00838	229 East Grant Street Starr	Roma	78584	+19568494475	https://locations.pizzahut.com/tx/roma/229-east-grant-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281306	Pizza Hut	0.99
-42a86c638beb	Subway	fastfood	sandwich shop	26.41293	-99.02082	1505 N Grant St Ste 5	Roma	78584	+19568499087	https://restaurants.subway.com/united-states/tx/roma/1505-n-grant-st	Subway	0.98
-a8e68110b2f6	Subway	fastfood	sandwich shop	26.90021	-99.26526	408 US Hwy 83 Suite A	Zapata	78076	+19567653265	https://restaurants.subway.com/united-states/tx/zapata/408-us-hwy-83	Subway	0.97
-9302382892f7	Subway Roma Tx	fastfood	sandwich shop	26.40470	-99.01560		Roma			http://www.subway.com/	Subway	0.70
-ea9bb0ae84f6	The Sweet Spot Snacks	fastfood		26.91706	-99.27709	2205 Glenn St	Zapata	78076				0.91
-c51f449afbf7	Whataburger	fastfood		26.40242	-99.00643	505 US-83	Roma	78584	+19568494895	https://locations.whataburger.com/tx/roma/505-us-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
-e02111538273	Xtreme Hotdogs	fastfood		26.91894	-99.26151	702 Mier Ave	Zapata	78076	+19567540071			0.98
-683c787ac1b0	Donata's Grocery	grocery		26.40751	-99.01129	511 Bravo Ave	Roma	78584	+19568495741			0.96
-5cec292f8b28	E&S Corner store	grocery		26.87254	-99.28659	302 Crane St	Zapata	78076				0.75
-42f814150f8d	Jaripeo Drive In Grocery & Meat Market	grocery		26.41377	-99.02055	1612 N Grant St	Roma	78584	+19568491321			0.62
-96ee0530f22f	Lowe's Market	grocery		26.90416	-99.26945	909 US-83 P.O. Box 235	Zapata	78076	+19567654861	http://www.lowes.com/	Lowe's Market	0.92
-01bfcbd5a3ce	MB Corner Store	grocery		26.85878	-99.24765	5330 Davis Ln	Zapata	78076	+19567658106	http://www.city-data.com/city/Siesta-Shores-Texas.html		0.68
-5e8fd86b351c	Riverview Family Center	grocery		26.40209	-99.01266	80 E Grant St	Roma	78584	+19568492322	http://riverviewsupermarket.com/		0.92
-ee9600dac099	Riverview Family Center	grocery		26.89413	-99.26245	117 S US Highway 83	Zapata	78076	+19567654398	http://riverviewsupermarket.com/		0.96
-ee074deccd08	Saenz Mini Mart	grocery		26.41227	-99.01974	1408 E Grant St	Roma	78584	+19568491055	http://saenzminimart.com		0.77
-5130e55d1bfd	Super S Foods	grocery		26.90412	-99.26939	909 N US Highway 83	Zapata	78076	+19567654861	http://www.lowesmarket.com/?wpmm_location=lowes-155-zapata-tx		0.72
-a93ace269112	The Snack Shop	grocery		26.91364	-99.27109	1702 17th Ave	Zapata	78076	+19567559512			0.94
-d2ed7dbdcc03	Star County Roma Family Health Clinic	hospital		26.44098	-99.02708	1861 N Highway 83	Roma	78584	+19568490674	http://starrcountyhospital.com		0.70
-dd1911cf3628	Zapata Gateway Clinic	hospital		26.90161	-99.26902	210 Rathmell St	Zapata	78076		http://www.gatewaychc.com/		0.95
-2f1f6ce63588	Beacon Lodge	hotel		26.86875	-99.29342	313 Lakeshore St	Zapata	78076	+19567654616	https://www.beaconlodge.com		0.92
-71b79b84d429	City Of Zapata	hotel		26.89644	-99.26389		Zapata			https://county-of-zapata-tx-26.hub.biz/		0.75
-96e30429c020	Executive Inn Zapata	hotel		26.89156	-99.26167	143 S US Highway 83	Zapata	78076	+19567656982	www.falconexecutiveinn.com		0.98
-97a0cb4871df	Falcon Heights Motel and RV Park	hotel	motel	26.56307	-99.12402	616 FM2098	Falcon Heights	78545	+19568485229	https://falconheightsmotel.com		0.94
-a027bf392eb3	Four Seasons Mobile Home & Rv Resort	hotel		26.87372	-99.29312	126 Sunshine Ln	Zapata	78076	+19567654241	http://www.fourseasonsrvpark.com		0.82
-e001e8b1a7c5	Holiday Inn Express & Suites Zapata	hotel		26.88904	-99.26050	167 S US Highway 83	Zapata	78076	+19567651333	https://www.ihg.com/holidayinnexpress/hotels/us/en/zapata/zptex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ZPTEX	Holiday Inn Express	0.99
-4295b9e65bbf	Hotel Zapata	hotel		26.87906	-99.25751	1896 S US Highway 83	Zapata	78076	+19567658403		SureStay Hotels	0.78
-5a30d2ca8463	Lakefront Lodge	hotel	motel	26.88085	-99.27066	493 Oak St	Zapata	78076	+19567654346	http://texaslakefrontlodge.com/index.html		0.96
-30d9364b4fba	Oso Blanco Motel	hotel		26.90594	-99.26994	1102 US-83	Zapata	78076	+19567654339			0.91
-e27e95b2d268	Oso Blanco Motel and RV Park	hotel	motel	26.87507	-99.25923	2132 US-83	Zapata	78076	+19567654339	https://oso-blanco-lodge.hub.biz		0.92
-65372b986d90	Roma Bluffs Observation Deck	hotel		26.40612	-99.01958		Roma			https://cityofroma.net/files/ROMA		0.97
-1b436d218685	Sunbridge Inn and suits. (Zapata)	hotel		26.89014	-99.26074	163 S US Highway 83	Zapata	78076	+19567651221	http://sunbridgeinn.info		0.94
-e7fe4151d80e	SureStay Hotel by Best Western Zapata	hotel	resort	26.87918	-99.25714	1896 S US Highway 83	Zapata	78076	+19567658403			0.95
-d80850178f4a	C R Pena Enterprises, Llc	office		26.40109	-99.00129	776 E Grant St	Roma	78584	+19568493177			0.75
-7b9134b238c3	Ana's Kitchen	restaurant	american restaurant	26.92893	-99.25318	1908 Miraflores St	Zapata	78076	+19567503177			0.94
-bdade36e58f2	Antojitos Snacks	restaurant	mexican restaurant	26.92137	-99.25092	1607 TX-16	Zapata	78076	+19567503118			0.92
-bf74095eab3d	Arcoiris	restaurant		26.40236	-99.00686	351 E Grant St	Roma	78584	+19568446472	https://www.redfin.com/TX/Roma/LOS-SAENZ-78584/home/68115887		0.92
-194c370ec07d	Augie's Taqueria	restaurant	mexican restaurant	26.91203	-99.26399	98 W 13th Ave	Zapata	78076	+19567656006	http://www.augiestaqueria.com/		0.92
-be811f08a943	China Buffet	restaurant	chinese restaurant	26.91250	-99.27497	1802 N US Highway 83	Zapata	78076	+19567656006	http://www.chinabuffet.net/		0.92
-3735fcb495a5	Dulcería Mexicana y snak	restaurant	mexican restaurant	26.44214	-99.02622	1875 N Highway 83	Roma	78584	+19568479702			0.68
-d03cb18bcd02	El Mexicano Restaurant	restaurant	mexican restaurant	26.41458	-99.02122	Highway 83	Roma	78584	+19568494275	http://www.rosamexicano.com		0.77
-6141ac4928b9	El Paraiso Restaurant	restaurant	mexican restaurant	26.91307	-99.27684	1905 US-83	Zapata	78076	+19567653558	http://erslojistik.com		0.95
-120848d9d3b6	El Puerto Tortillas	restaurant		26.90608	-99.27083	1107 US-83	Zapata	78076	+19567650077	http://elpuertotortillas.com		0.96
-3fe622eea814	El Rincon De Los Angeles	restaurant	mexican restaurant	26.90007	-99.26320	1712 N US Highway 83	Zapata	78076	+19567658900	http://www.elrinconzapata.com		0.77
-975a80e7352f	El Rincon De Los Angeles	restaurant	mexican restaurant	26.91198	-99.27513	1712 N US-83	Zapata	78076	+19567658900			0.96
-b4caaa6a131e	El Taco Rico Restaurant	restaurant		26.40181	-99.00286	601 E Grant St	Roma	78584	+19568492435	http://www.tacorico.com		0.77
-4d4c9480a227	Fatima's Diner	restaurant	diner	26.89894	-99.26473	308 US-83	Zapata	78076	+19567503006			0.67
-5e3a50bb6241	Fiesta Restaurant	restaurant	mexican restaurant	26.40459	-99.01538	402 N Grant St	Roma	78584	+19568491922	https://tshaonline.org/handbook/online/articles/hgr06		0.96
-0256e29c191d	Genesis taqueria	restaurant	mexican restaurant	26.91860	-99.27576	2213 Elm St	Zapata	78076	+19567402632			0.93
-a2431139dc4e	Hawk's Landing Restaurant	restaurant	comfort food restaurant	26.91422	-99.27677	2002 US-83	Zapata	78076	+19567503009			0.97
-02aee85a04ea	Holiday Restaurant	restaurant	comfort food restaurant	26.90068	-99.26608	506 US-83	Zapata	78076	+19567654521	http://holiday-restaurant-zapatatx.com/		0.94
-d59afd9101cf	Johnny's BBQ	restaurant	barbecue restaurant	26.91423	-99.27682	2002 N US Highway 83	Zapata	78076	+19567503579	http://www.tonyromas.com		0.92
-afdf6509a0a2	Koko Bongo #2	restaurant		26.41089	-99.01907	1208 N Grant St	Roma	78584				0.96
-c32d68fa3c24	Kyomu Sushi Llc	restaurant		26.91845	-99.25547	1101 TX-16	Zapata	78076	+19566450308			0.92
-335833738b3d	Laredo Taco Company	restaurant		26.89676	-99.26348	102 U.S. 83, Zapata, TX 78043, United States	Zapata	78076	+19567655536	https://www.laredotacocompany.com/		0.95
-c1ed7dd4fa53	Loncheria Los Quates	restaurant	mexican restaurant	26.41038	-99.01688	206E La Fragua Ave	Roma	78584	+19568491520			0.92
-2495d3808e35	Los Lazos Ranch	restaurant	mexican restaurant	26.73162	-99.11127	4359 US-83	Zapata	78076	+19568485332	http://www.buzzfile.com/business/Los-Lazos-Ranch-956-848-5332		0.80
-730a414e1fc4	Mariscos El Jarocho	restaurant	mexican restaurant	26.91758	-99.28006	1910 US-83	Zapata	78076	+19567503195			0.92
-806c5cf1a2b4	Mariscos El Jarocho	restaurant	mexican restaurant	26.91371	-99.27629	1910 N US Highway 83	Zapata	78076	+19567503477	https://locality.com/place/mariscos-el-jarocho-zapata-tx		0.94
-6cba2b5c850e	Mi Ranchito	restaurant	mexican restaurant	26.91453	-99.27642	2001-2099 E Hidalgo Blvd	Zapata	78076	+19567658480	http://www.local.com/business/details/zapata-tx/mi-tierra-restaurant-98138933		0.92
-ab29ab56b546	Mr John's Taco	restaurant	mexican restaurant	26.91482	-99.26958	1702 Carla St	Zapata	78076	+19567659232	https://m.facebook.com/MrJohnsTaco	Taco John's	0.95
-31afb04f93b7	Patno's Patio	restaurant	bar and grill restaurant	26.86922	-99.29403	Beacon Lodge Cir	Zapata	78076		https://beaconlodgerv.com/bourbon-street-bar		0.92
-6e174af49ad9	Porcion 72 Vintage Tea Room	restaurant	breakfast and brunch restaurant	26.40576	-99.01899	208 Convent Ave	Roma	78584	+19562565485			0.97
-25d2a1261f5d	PURE Fresh Eatery	restaurant	health food restaurant	26.89729	-99.26414	202 US-83	Zapata	78076	+19562659565			0.96
-ff088c9f11f8	PURE Fresh Eatery	restaurant		26.90508	-99.27020	1007 N US Highway 83 Ste 3	Zapata	78076	+19562659565	https://cyrusramsey.com/places/pure-fresh-eatery		0.77
-4f11bc4981d4	Ramgar Investments, Llc	restaurant		26.90077	-99.26579	506 N US Highway 83	Zapata	78076				0.95
-d2189586c0be	Rancho Cafe & Gift Shop	restaurant	texmex restaurant	26.40154	-99.00021	871 E Grant St	Roma	78584	+19563536086	https://libino.top/rancho-cafe		0.97
-774781585f3a	Rex Tortilla Factory	restaurant	mexican restaurant	26.91578	-99.25915	607 TX-16	Zapata	78076	+19567654748	http://www.yellow-page-usa.com/listing/Rex+Tortilla+Factory.html?CID=9798853d03354590bc75ef37e2f78c6b7abd2492	Tortilla	0.92
-e2b541279578	Rico's Antojitos	restaurant	mexican restaurant	26.41121	-99.01951	1303 N Grant St	Roma	78584	+19562982445	http://ricos-antojitos-restaurant.business.site/		0.92
-ba15245ade0d	Robert's Fish N Tackle & Restaurant	restaurant	seafood restaurant	26.87321	-99.25562	2425 S US Highway 83	Zapata	78076	+19567651442	http://www.robertsfishntackle.com/		0.92
-b75e24a7bb83	Sashimi Sushi and Grill	restaurant	sushi restaurant	26.90804	-99.27248	1209 Glenn St	Zapata	78076	+19567503224			0.74
-ba0c898bf04e	Shorty's	restaurant	barbecue restaurant	26.91707	-99.27896	2302 Iturbide St	Zapata	78076	+19567654633	http://www.shortysnyc.com		0.92
-52c83c872481	Sissi's Smiles & Styles	restaurant		26.89989	-99.26543	408 US-83	Zapata	78076	+19562655306			0.92
-defedd9fbcb1	Tacos Alex	restaurant	mexican restaurant	26.62233	-99.09105	5168 W Highway 83	Roma	78584	+19562089984	https://qrco.de/beuKag		0.89
-f8a5edb20c4b	Tacos Alex	restaurant		26.40135	-99.00243	688 E Grant St	Roma	78584	+19562089984			0.81
-68b0d25f3bb5	Tacos El Tejano	restaurant	mexican restaurant	26.90316	-99.26723	710 US-83	Zapata	78076	+19567653362	https://start.cortera.com/company/research/l6r6mun0r/tacos-el-tejano		0.92
-9a97dacbec04	Tacos Rogelios	restaurant	taco restaurant	26.92371	-99.25999	1101 Bravo Ave	Zapata	78076	+9567503067			0.84
-61ee9e791395	Tacos y mas	restaurant		26.92048	-99.26633	402 Miraflores St	Zapata	78076	+19562655342			0.56
-6df16fedd4f0	Tamales N' Salsas	restaurant	mexican restaurant	26.40225	-99.00403	509 E Grant St	Roma	78584	+19566400216			0.92
-72e659830ad5	TaqueriaElAlfarero	restaurant	mexican restaurant	26.92124	-99.25355	1414 Diaz Ave	Zapata	78076	+19565080413	http://Www.taqueriaelalfarero.com/		0.66
-b176c6a9d2d9	The Steak House	restaurant	steakhouse	26.89474	-99.26293	111 US-83	Zapata	78076	+19567654523	http://steak-house-zapata.edan.io/		0.97
-d88f8766531e	The Steak House Llc	restaurant		26.89484	-99.26281	111 S US Highway 83	Zapata	78076		http://the-steak-house.keeq.io		0.95
-b937d1d340c9	Tina's Restaurant	restaurant	texmex restaurant	26.87804	-99.25713	1896 US-83	Zapata	78076	+19567503103	https://www.chamberofcommerce.com/zapata-tx/5068196-tinas-restaurant		0.92
-806c010cae23	Tony's Refresqueria	restaurant	mexican restaurant	26.91898	-99.26140	702 Juarez Ave	Zapata	78076	+19567658003	http://tonys-refresceria.jany.io		0.97
-955164b67459	Wings To Go	restaurant	chicken wings restaurant	26.89891	-99.26469	308 N US Highway 83	Zapata	78076	+19562658047	http://wingstogo.com		0.77
-6828c3135c67	Xtreme Hotdogs	restaurant	hot dog restaurant	26.91187	-99.26422	96 W 13th Ave	Zapata	78076	+19567540071			0.93
-69a73739419f	El Lago Day Care Center	senior	retirement home	26.90906	-99.26720	1202 Elm St	Zapata	78076	+19567656193			0.82
-dacd3b83b9a7	Falcon Lake Nursing Home	senior	retirement home	26.90089	-99.25816	200 Carla St	Zapata	78076	+19567653040	http://www.Falconlakenh.com/		0.92
-7bfe2e18fbd3	Roma Elderly Nutrition Center	senior	retirement home	26.41723	-99.01519	867 Morelos Ave	Roma	78584	+19568471477			0.92
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+e9ad1693a8d5	L.J Sweets	bakery		26.90857	-99.27134	1305 Hidalgo Blvd	Zapata	78076	+19563372715			0.92	
+276bb5277dc8	Los Pasteles Bakery and Coffee	bakery		26.91162	-99.27415	1701 Hidalgo Blvd	Zapata	78076	+19567656013	https://www.searchonamerica.com/place/los-pasteles-bakery_2143356.html		0.94	
+59a83d4f036d	Penny's Pantry LLC	bakery		26.89074	-99.27481	114 Howard Dr	Zapata	78076	+19565000075	http://www.pennyspantrytx.com/		0.97	
+1da210960e95	American Legion	bar	pub	26.91616	-99.27862	2213 N US Highway 83	Zapata	78076	+19567656071	http://www.legion.org/	American Legion	0.92	
+32379c8ddd71	Aqua Bar	bar		26.88829	-99.26127	178 N Highway 83	Roma	78584	+19567651500	https://aqua-restaurant-bar-tx.hub.biz/		0.95	
+8f8251786792	BootZ Sports Bar	bar	sports bar	26.92039	-99.28399	3014 US-83	Zapata	78076	+19567506670			0.96	
+e5ac224eb518	Hawks Sport bar	bar	sports bar	26.92066	-99.28394	3086 US-83	Zapata	78076				0.92	
+228d759f75cc	Las Alitas Sports & Wings - Roma	bar	sports bar	26.42464	-99.02322	1863 US-83	Roma	78584	+19568494899	http://www.lasalitassportsandwings.com/	Las Alitas Sports & Wings	1.00	
+12e3bf7074c7	Nuffy's Sports Grill	bar	sports bar	26.87170	-99.25591	2584 US-83	Zapata	78076	+19562659539	https://nuffys-sports-grill.hub.biz		0.92	closed
+19b91c5a0509	VFW Lounge	bar		26.92063	-99.25166	1515 W 13th Ave	Zapata	78076	+19562981067			0.95	
+f683936893ac	Z Wings Grill and Bar	bar	sports bar	26.90812	-99.27245	1309 US-83	Zapata	78076	+19567508800	http://www.zwingssportsbar.com/		0.95	
+d6f4410e8600	D&G auto sales	cardealer		26.52567	-99.08839	2711 US-83	Roma	78584	+19562083852			0.92	
+a384792f654f	Ortiz Auto & RV Sales	cardealer		26.40309	-99.01102	133 E Grant St	Roma	78584	+19562563637			0.92	
+717b22dd4133	Starr County Precinct 2	cardealer		26.40169	-99.00417	500 E Grant St	Roma	78584	+19568497371	http://www.co.starr.tx.us		0.70	
+2dd5c5cd4943	Texas Remarketing Auto Sales	cardealer		26.40134	-99.00151	738 E Grant St	Roma	78584	+19564377731			0.78	
+fb972444177e	El Cafecito	coffee		26.90751	-99.26356	902 Carla St	Zapata	78076	+19562654061			0.92	
+e2ae575fbeb7	FotoFino Coffee	coffee		26.94653	-99.31283	3262 US-83	Zapata	78076	+19567652162	http://www.fotofino.com/coffee		0.98	
+e87a890732ad	3 G's Grocery & Drive-In	convenience		26.91945	-99.26205	615 Zapata Blvd	Zapata	78076	+19567650033			0.96	
+c306ea5eb04d	7 Days Express #1	convenience		26.90007	-99.26630	503 US-83	Zapata	78076	+19567650940	http://chevron.com/		0.98	
+bcb92e102995	7 Days Express #2	convenience		26.86340	-99.25131	3040 US Highway 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/3040-US-HIGHWAY-83/0000026062	Valero	0.85	
+b456d5863f3d	7-Eleven	convenience		26.89674	-99.26356	102 N. Highway 83	Zapata	78076	+19567655536	https://www.7-eleven.com/locations/tx/zapata/102-n-highway-83-40901	7-Eleven	1.00	
+a560b5484f73	83 Drive Thru	convenience		26.91154	-99.27440	1702 US-83	Zapata	78076	+19567655900			0.92	
+d4c3eccf605d	Arguindeguis Pump N Shop	convenience		26.44176	-99.02584	1824 N US Highway 83	Roma	78584	+19567656343			0.58	
+41e9c462919f	C. Street Snacks	convenience		26.91727	-99.27202	2001 Carla St	Zapata	78076	+19566145812			0.92	
+255233976929	Catarrins Drive Thru	convenience		26.40624	-99.01562	601 N Garcia St	Roma	78584	+19565734867			0.92	
+b0af9e16c3a6	Chevron	convenience		26.90004	-99.26624	503 US 83	Zapata	78076		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/503-US-83-ZAPATA-TX-78076-id201995	Chevron	0.95	
+01dde4e6de88	Chevron Station Zapata	convenience		26.89198	-99.26220	503 US Highway 83	Zapata	78076	+19567650940			0.97	
+68b9aec9988c	Circle K	convenience		26.90703	-99.27074	1202 N US Hwy 83	Zapata	78076	+19567659599	https://www.circlek.com/		1.00	
+9c5289ea0823	Conoco	convenience		26.91265	-99.27621	1813 US-83	Zapata	78076	+19567656343	https://www.conoco.com/		0.92	
+dec73dbef800	Corner Store	convenience		26.90672	-99.27118	1202 N Us Highway 83	Zapata	78076	+19567659599			0.92	
+b9dc3a8a0524	El Puerto Barbacoa	convenience		26.41243	-99.01920	1475 N Garcia St	Roma	78584	+19568495544			0.79	
+fc1680340b97	El Tigre	convenience		26.90782	-99.27173	1302 US-83	Zapata	78076	+19567653334	https://corporate.exxonmobil.com	El Tigre Food Stores	0.69	
+d9b304d5a70d	Exxon	convenience		26.90782	-99.27172	1302 Hwy 83	Zapata	78076	+19567653334	https://www.exxon.com/en/find-station/exxon-zapata-tx-eltigre01-200311600?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92	
+0da4bbf1f0ba	Falcon Drive & Groceries	convenience		26.52590	-99.08839	2709 N Highway 83	Roma	78584	+19568485057			0.95	
+8dd432120ebc	Hawks Quick Pick	convenience		26.91620	-99.25890	701 State HWY 16	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/701-STATE-HWY-16/0000026103	Valero	0.80	
+5a8c8301a5f5	JM Drive Thru	convenience		26.41035	-99.01774	1104 N Garcia St	Roma	78584	+19568474041			0.94	
+5c4dc4e5802a	Jr's Snack Bar & Groceries	convenience		26.52411	-99.08800	2701 N Highway 83	Roma	78584				0.94	
+875eb9349aee	JUNIOR'S DRIVE IN & MEAT MARKET	convenience		26.91247	-99.26357	102 US HWY 16	Zapata	78076		https://www.exxon.com/en/find-station/mobil-zapata-tx-juniorsdriveinmeatmarket-200319764	Mobil	0.80	
+662f95ea9d4d	Junior's Drive Inn	convenience		26.91247	-99.26358	102 TX-16	Zapata	78076	+19567659717	https://juniors-drive-inn-meat-market.hub.biz/		0.89	
+7a13d6990b86	Mobil	convenience		26.91255	-99.26366	102 Us Hwy 16	Zapata	78076	+19567659717	http://www.mobil.com	Exxon & Mobil Stations	0.92	
+58c6ddadbed8	O'Maria's	convenience		26.41259	-99.01997	1502 N Grant St	Roma	78584	+19568493654			0.92	
+689a745d9052	Pump N Shop	convenience		26.91270	-99.27621	1824 US-83	Zapata	78076	+19567656343	http://www.conoco.com/station-finder		0.56	
+bb9ed5a9bff4	Quick Stop Grocery and Drive Inn	convenience		26.91645	-99.27899	2214 US-83	Zapata	78076	+19562658100			0.91	
+a95d28f562cc	SE40901 ZAPATA TX	convenience		26.89670	-99.26341	102 N US HIGHWAY 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/102-N-US-HIGHWAY-83/0000008016	Valero	0.80	
+392b3eaf18bd	Six Pack Corner Reloaded	convenience		26.41313	-99.02026	1512 N Grant St	Roma	78584	+19562567240			0.92	
+798fcb6bb080	Stripes	convenience		26.89676	-99.26348	102 N. Highway 83	Zapata	78076	+19567655536	https://stripesstores.com/		0.97	
+9174c7b749e6	Sunoco	convenience		26.40323	-99.01299	73 E Grant St	Roma	78584	+19568471173		GoSunoco	1.00	
+3bc43fd6f790	Sunoco Gas Station	convenience		26.90516	-99.27048	1009 Highway 83	Donna	78537	+19564616254	https://www.sunoco.com/find-a-station		0.85	
+f0316c55c127	Texaco G & C	convenience		26.40312	-99.01306	73 E Grant St	Roma	78584	+19568471173	https://www.texaco.com/	Texaco	0.93	
+643be117479a	Valero	convenience		26.89661	-99.26380	102 N US HIGHWAY 83	Zapata	78076	+19567655536	https://locations.valero.com/en-us/LocationDetails/Index/102-N-US-HIGHWAY-83/0000008016	Valero	0.92	
+2fa4ab89f42c	VALERO 2741540	convenience		26.90680	-99.27091	1202 HWY 83	Zapata	78076		https://locations.valero.com/en-us/LocationDetails/Index/1202-HWY-83/0000021540	Valero	0.95	
+ff32584c948e	Zapata Drive Inn	convenience		26.87818	-99.25720	1970 S US Highway 83	Zapata	78076	+19562659060			0.97	
+dd3d9690bde4	ZAPATA PUMP N SHOP	convenience		26.88068	-99.25749	1823 HIGHWAY 83	Zapata	78076			Conoco	0.80	
+1d8a31fdedb9	Burger King	fastfood		26.40175	-99.00632	390 E Grant St	Roma	78584	+19568495806	https://burgerking.com/store-locator/store/12501	Burger King	0.98	
+882f2c7fd8ca	Burger King	fastfood		26.90241	-99.26706	702 & 706 N US Highway 83	Zapata	78076		https://www.bk.com/store-locator/store/restaurant_887141	Burger King	0.80	
+750e35d55a90	Church's Texas Chicken	fastfood		26.89583	-99.26438	101 Highway 83	Zapata	78076	+19567656859	https://locations.churchs.com/tx/zapata/101-highway-83	Church's Chicken	0.96	
+f111af9d9870	Church's Texas Chicken	fastfood	chicken restaurant	26.40342	-99.01517	207 Grant Street	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street		0.96	
+dd222576b5cb	Church’s Texas Chicken	fastfood	chicken restaurant	26.40243	-99.00800	207 E Grant St	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street	Church's Chicken	1.00	
+95ab7cea3761	Dairy Queen	fastfood		26.89607	-99.26450	103 US-83	Zapata	78076	+19567655591	https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/14742/?y_source=1_MjkzMzg4ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97	
+bfe9f9a4dba1	Dairy Queen	fastfood		26.41173	-99.01979	1403 N Grant St 1403 N Grant St	Roma	78584	+19568491921	https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/14533/?y_source=1_MjkzMzg5NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97	
+bad27e56e13d	Domino's Pizza	fastfood	pizza restaurant	26.40207	-99.01308	1004 E Grant St	Roma	78584	+19567652018	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92	
+792e28a7f613	DQ Grill & Chill	fastfood		26.41172	-99.01983	1403 N Grant St	Roma	78584		https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/4305	DQ Grill & Chill	0.80	
+d74c15cb400d	DQ Grill & Chill	fastfood		26.89612	-99.26437	Hwy 83 N	Zapata	78076		https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/4514	DQ Grill & Chill	0.80	
+b61d9caf858c	Jack in the Box	fastfood	taco restaurant	26.40327	-99.01445	201 E Grant St	Roma	78584	+19568471905	http://www.jackinthebox.com/locations/3932		0.95	
+b5ab4cf64f11	Little Caesars Pizza	fastfood	pizza restaurant	26.91194	-99.27605	1803 US-83	Zapata	78076	+19567503379	https://littlecaesars.com/en-us/store/11233	Little Caesars	0.98	
+4c512d263ba4	McDonald's	fastfood		26.40227	-99.01129	104 E Grant Street	Roma	78584	+19568491045	https://www.mcdonalds.com/us/en-us/location/tx/roma/104-e-grant-street/31585.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96	
+a2488c9bd1ff	McDonald's	fastfood		26.89416	-99.26367	116 South Us Hwy 83	Zapata	78076	+19567656700	https://www.mcdonalds.com/us/en-us/location/tx/zapata/116-south-us-hwy-83/18776.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97	
+bc15361945f2	MG's Restaurant	fastfood		26.89951	-99.26267	301 Glenn St	Zapata	78076	+19567503004			0.97	
+4cb756ced70d	MidKnight Snack	fastfood		26.89949	-99.26633	410 Jackson St	Zapata	78076				0.59	
+51a3781ee7ce	Pizza Hut	fastfood	pizza restaurant	26.89770	-99.26479	209 N St #83	Zapata	78076	+19567654882	https://locations.pizzahut.com/tx/zapata/209-n-hwy-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299108	Pizza Hut	0.98	
+6e2cbcaacaac	Pizza Hut	fastfood	pizza restaurant	26.40267	-99.00838	229 East Grant Street Starr	Roma	78584	+19568494475	https://locations.pizzahut.com/tx/roma/229-east-grant-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281306	Pizza Hut	0.99	
+42a86c638beb	Subway	fastfood	sandwich shop	26.41293	-99.02082	1505 N Grant St Ste 5	Roma	78584	+19568499087	https://restaurants.subway.com/united-states/tx/roma/1505-n-grant-st	Subway	0.98	
+a8e68110b2f6	Subway	fastfood	sandwich shop	26.90021	-99.26526	408 US Hwy 83 Suite A	Zapata	78076	+19567653265	https://restaurants.subway.com/united-states/tx/zapata/408-us-hwy-83	Subway	0.97	
+9302382892f7	Subway Roma Tx	fastfood	sandwich shop	26.40470	-99.01560		Roma			http://www.subway.com/	Subway	0.70	
+ea9bb0ae84f6	The Sweet Spot Snacks	fastfood		26.91706	-99.27709	2205 Glenn St	Zapata	78076				0.91	
+c51f449afbf7	Whataburger	fastfood		26.40242	-99.00643	505 US-83	Roma	78584	+19568494895	https://locations.whataburger.com/tx/roma/505-us-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97	
+e02111538273	Xtreme Hotdogs	fastfood		26.91894	-99.26151	702 Mier Ave	Zapata	78076	+19567540071			0.98	
+683c787ac1b0	Donata's Grocery	grocery		26.40751	-99.01129	511 Bravo Ave	Roma	78584	+19568495741			0.96	
+5cec292f8b28	E&S Corner store	grocery		26.87254	-99.28659	302 Crane St	Zapata	78076				0.75	
+42f814150f8d	Jaripeo Drive In Grocery & Meat Market	grocery		26.41377	-99.02055	1612 N Grant St	Roma	78584	+19568491321			0.62	
+96ee0530f22f	Lowe's Market	grocery		26.90416	-99.26945	909 US-83 P.O. Box 235	Zapata	78076	+19567654861	http://www.lowes.com/	Lowe's Market	0.92	
+01bfcbd5a3ce	MB Corner Store	grocery		26.85878	-99.24765	5330 Davis Ln	Zapata	78076	+19567658106	http://www.city-data.com/city/Siesta-Shores-Texas.html		0.68	
+5e8fd86b351c	Riverview Family Center	grocery		26.40209	-99.01266	80 E Grant St	Roma	78584	+19568492322	http://riverviewsupermarket.com/		0.92	
+ee9600dac099	Riverview Family Center	grocery		26.89413	-99.26245	117 S US Highway 83	Zapata	78076	+19567654398	http://riverviewsupermarket.com/		0.96	
+ee074deccd08	Saenz Mini Mart	grocery		26.41227	-99.01974	1408 E Grant St	Roma	78584	+19568491055	http://saenzminimart.com		0.77	
+5130e55d1bfd	Super S Foods	grocery		26.90412	-99.26939	909 N US Highway 83	Zapata	78076	+19567654861	http://www.lowesmarket.com/?wpmm_location=lowes-155-zapata-tx		0.72	
+a93ace269112	The Snack Shop	grocery		26.91364	-99.27109	1702 17th Ave	Zapata	78076	+19567559512			0.94	
+d2ed7dbdcc03	Star County Roma Family Health Clinic	hospital		26.44098	-99.02708	1861 N Highway 83	Roma	78584	+19568490674	http://starrcountyhospital.com		0.70	
+dd1911cf3628	Zapata Gateway Clinic	hospital		26.90161	-99.26902	210 Rathmell St	Zapata	78076		http://www.gatewaychc.com/		0.95	
+2f1f6ce63588	Beacon Lodge	hotel		26.86875	-99.29342	313 Lakeshore St	Zapata	78076	+19567654616	https://www.beaconlodge.com		0.92	
+131759dfc54f	Best Western Inn by the Lake	hotel		26.87897	-99.25761	1896 S US Highway 83	Zapata	78076	+19567658403	https://www.bestwestern.com/en_US/book/hotel-rooms.44326.html?iata=00171890&ssob=BLBWI0003G		0.92	closed
+71b79b84d429	City Of Zapata	hotel		26.89644	-99.26389		Zapata			https://county-of-zapata-tx-26.hub.biz/		0.75	
+96e30429c020	Executive Inn Zapata	hotel		26.89156	-99.26167	143 S US Highway 83	Zapata	78076	+19567656982	www.falconexecutiveinn.com		0.98	
+97a0cb4871df	Falcon Heights Motel and RV Park	hotel	motel	26.56307	-99.12402	616 FM2098	Falcon Heights	78545	+19568485229	https://falconheightsmotel.com		0.94	
+a027bf392eb3	Four Seasons Mobile Home & Rv Resort	hotel		26.87372	-99.29312	126 Sunshine Ln	Zapata	78076	+19567654241	http://www.fourseasonsrvpark.com		0.82	
+e001e8b1a7c5	Holiday Inn Express & Suites Zapata	hotel		26.88904	-99.26050	167 S US Highway 83	Zapata	78076	+19567651333	https://www.ihg.com/holidayinnexpress/hotels/us/en/zapata/zptex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ZPTEX	Holiday Inn Express	0.99	
+4295b9e65bbf	Hotel Zapata	hotel		26.87906	-99.25751	1896 S US Highway 83	Zapata	78076	+19567658403		SureStay Hotels	0.78	
+5a30d2ca8463	Lakefront Lodge	hotel	motel	26.88085	-99.27066	493 Oak St	Zapata	78076	+19567654346	http://texaslakefrontlodge.com/index.html		0.96	
+30d9364b4fba	Oso Blanco Motel	hotel		26.90594	-99.26994	1102 US-83	Zapata	78076	+19567654339			0.91	
+e27e95b2d268	Oso Blanco Motel and RV Park	hotel	motel	26.87507	-99.25923	2132 US-83	Zapata	78076	+19567654339	https://oso-blanco-lodge.hub.biz		0.92	
+65372b986d90	Roma Bluffs Observation Deck	hotel		26.40612	-99.01958		Roma			https://cityofroma.net/files/ROMA		0.97	
+1b436d218685	Sunbridge Inn and suits. (Zapata)	hotel		26.89014	-99.26074	163 S US Highway 83	Zapata	78076	+19567651221	http://sunbridgeinn.info		0.94	
+e7fe4151d80e	SureStay Hotel by Best Western Zapata	hotel	resort	26.87918	-99.25714	1896 S US Highway 83	Zapata	78076	+19567658403			0.95	
+d80850178f4a	C R Pena Enterprises, Llc	office		26.40109	-99.00129	776 E Grant St	Roma	78584	+19568493177			0.75	
+7b9134b238c3	Ana's Kitchen	restaurant	american restaurant	26.92893	-99.25318	1908 Miraflores St	Zapata	78076	+19567503177			0.94	
+bdade36e58f2	Antojitos Snacks	restaurant	mexican restaurant	26.92137	-99.25092	1607 TX-16	Zapata	78076	+19567503118			0.92	
+bf74095eab3d	Arcoiris	restaurant		26.40236	-99.00686	351 E Grant St	Roma	78584	+19568446472	https://www.redfin.com/TX/Roma/LOS-SAENZ-78584/home/68115887		0.92	
+194c370ec07d	Augie's Taqueria	restaurant	mexican restaurant	26.91203	-99.26399	98 W 13th Ave	Zapata	78076	+19567656006	http://www.augiestaqueria.com/		0.92	
+be811f08a943	China Buffet	restaurant	chinese restaurant	26.91250	-99.27497	1802 N US Highway 83	Zapata	78076	+19567656006	http://www.chinabuffet.net/		0.92	
+775e416af9a8	Diana's	restaurant		26.91847	-99.25546	1101 US Highway 16	Zapata	78076	+19567655477	http://dianasluxury.com		0.95	closed
+3735fcb495a5	Dulcería Mexicana y snak	restaurant	mexican restaurant	26.44214	-99.02622	1875 N Highway 83	Roma	78584	+19568479702			0.68	
+d03cb18bcd02	El Mexicano Restaurant	restaurant	mexican restaurant	26.41458	-99.02122	Highway 83	Roma	78584	+19568494275	http://www.rosamexicano.com		0.77	
+6141ac4928b9	El Paraiso Restaurant	restaurant	mexican restaurant	26.91307	-99.27684	1905 US-83	Zapata	78076	+19567653558	http://erslojistik.com		0.95	
+120848d9d3b6	El Puerto Tortillas	restaurant		26.90608	-99.27083	1107 US-83	Zapata	78076	+19567650077	http://elpuertotortillas.com		0.96	
+3fe622eea814	El Rincon De Los Angeles	restaurant	mexican restaurant	26.90007	-99.26320	1712 N US Highway 83	Zapata	78076	+19567658900	http://www.elrinconzapata.com		0.77	
+975a80e7352f	El Rincon De Los Angeles	restaurant	mexican restaurant	26.91198	-99.27513	1712 N US-83	Zapata	78076	+19567658900			0.96	
+b4caaa6a131e	El Taco Rico Restaurant	restaurant		26.40181	-99.00286	601 E Grant St	Roma	78584	+19568492435	http://www.tacorico.com		0.77	
+4d4c9480a227	Fatima's Diner	restaurant	diner	26.89894	-99.26473	308 US-83	Zapata	78076	+19567503006			0.67	
+5e3a50bb6241	Fiesta Restaurant	restaurant	mexican restaurant	26.40459	-99.01538	402 N Grant St	Roma	78584	+19568491922	https://tshaonline.org/handbook/online/articles/hgr06		0.96	
+0256e29c191d	Genesis taqueria	restaurant	mexican restaurant	26.91860	-99.27576	2213 Elm St	Zapata	78076	+19567402632			0.93	
+a2431139dc4e	Hawk's Landing Restaurant	restaurant	comfort food restaurant	26.91422	-99.27677	2002 US-83	Zapata	78076	+19567503009			0.97	
+02aee85a04ea	Holiday Restaurant	restaurant	comfort food restaurant	26.90068	-99.26608	506 US-83	Zapata	78076	+19567654521	http://holiday-restaurant-zapatatx.com/		0.94	
+d59afd9101cf	Johnny's BBQ	restaurant	barbecue restaurant	26.91423	-99.27682	2002 N US Highway 83	Zapata	78076	+19567503579	http://www.tonyromas.com		0.92	
+afdf6509a0a2	Koko Bongo #2	restaurant		26.41089	-99.01907	1208 N Grant St	Roma	78584				0.96	
+c32d68fa3c24	Kyomu Sushi Llc	restaurant		26.91845	-99.25547	1101 TX-16	Zapata	78076	+19566450308			0.92	
+335833738b3d	Laredo Taco Company	restaurant		26.89676	-99.26348	102 U.S. 83, Zapata, TX 78043, United States	Zapata	78076	+19567655536	https://www.laredotacocompany.com/		0.95	
+c1ed7dd4fa53	Loncheria Los Quates	restaurant	mexican restaurant	26.41038	-99.01688	206E La Fragua Ave	Roma	78584	+19568491520			0.92	
+2495d3808e35	Los Lazos Ranch	restaurant	mexican restaurant	26.73162	-99.11127	4359 US-83	Zapata	78076	+19568485332	http://www.buzzfile.com/business/Los-Lazos-Ranch-956-848-5332		0.80	
+730a414e1fc4	Mariscos El Jarocho	restaurant	mexican restaurant	26.91758	-99.28006	1910 US-83	Zapata	78076	+19567503195			0.92	
+806c5cf1a2b4	Mariscos El Jarocho	restaurant	mexican restaurant	26.91371	-99.27629	1910 N US Highway 83	Zapata	78076	+19567503477	https://locality.com/place/mariscos-el-jarocho-zapata-tx		0.94	
+6cba2b5c850e	Mi Ranchito	restaurant	mexican restaurant	26.91453	-99.27642	2001-2099 E Hidalgo Blvd	Zapata	78076	+19567658480	http://www.local.com/business/details/zapata-tx/mi-tierra-restaurant-98138933		0.92	
+ab29ab56b546	Mr John's Taco	restaurant	mexican restaurant	26.91482	-99.26958	1702 Carla St	Zapata	78076	+19567659232	https://m.facebook.com/MrJohnsTaco	Taco John's	0.95	
+31afb04f93b7	Patno's Patio	restaurant	bar and grill restaurant	26.86922	-99.29403	Beacon Lodge Cir	Zapata	78076		https://beaconlodgerv.com/bourbon-street-bar		0.92	
+6e174af49ad9	Porcion 72 Vintage Tea Room	restaurant	breakfast and brunch restaurant	26.40576	-99.01899	208 Convent Ave	Roma	78584	+19562565485			0.97	
+25d2a1261f5d	PURE Fresh Eatery	restaurant	health food restaurant	26.89729	-99.26414	202 US-83	Zapata	78076	+19562659565			0.96	
+ff088c9f11f8	PURE Fresh Eatery	restaurant		26.90508	-99.27020	1007 N US Highway 83 Ste 3	Zapata	78076	+19562659565	https://cyrusramsey.com/places/pure-fresh-eatery		0.77	
+4f11bc4981d4	Ramgar Investments, Llc	restaurant		26.90077	-99.26579	506 N US Highway 83	Zapata	78076				0.95	
+d2189586c0be	Rancho Cafe & Gift Shop	restaurant	texmex restaurant	26.40154	-99.00021	871 E Grant St	Roma	78584	+19563536086	https://libino.top/rancho-cafe		0.97	
+774781585f3a	Rex Tortilla Factory	restaurant	mexican restaurant	26.91578	-99.25915	607 TX-16	Zapata	78076	+19567654748	http://www.yellow-page-usa.com/listing/Rex+Tortilla+Factory.html?CID=9798853d03354590bc75ef37e2f78c6b7abd2492	Tortilla	0.92	
+e2b541279578	Rico's Antojitos	restaurant	mexican restaurant	26.41121	-99.01951	1303 N Grant St	Roma	78584	+19562982445	http://ricos-antojitos-restaurant.business.site/		0.92	
+ba15245ade0d	Robert's Fish N Tackle & Restaurant	restaurant	seafood restaurant	26.87321	-99.25562	2425 S US Highway 83	Zapata	78076	+19567651442	http://www.robertsfishntackle.com/		0.92	
+b75e24a7bb83	Sashimi Sushi and Grill	restaurant	sushi restaurant	26.90804	-99.27248	1209 Glenn St	Zapata	78076	+19567503224			0.74	
+ba0c898bf04e	Shorty's	restaurant	barbecue restaurant	26.91707	-99.27896	2302 Iturbide St	Zapata	78076	+19567654633	http://www.shortysnyc.com		0.92	
+52c83c872481	Sissi's Smiles & Styles	restaurant		26.89989	-99.26543	408 US-83	Zapata	78076	+19562655306			0.92	
+defedd9fbcb1	Tacos Alex	restaurant	mexican restaurant	26.62233	-99.09105	5168 W Highway 83	Roma	78584	+19562089984	https://qrco.de/beuKag		0.89	
+f8a5edb20c4b	Tacos Alex	restaurant		26.40135	-99.00243	688 E Grant St	Roma	78584	+19562089984			0.81	
+68b0d25f3bb5	Tacos El Tejano	restaurant	mexican restaurant	26.90316	-99.26723	710 US-83	Zapata	78076	+19567653362	https://start.cortera.com/company/research/l6r6mun0r/tacos-el-tejano		0.92	
+9a97dacbec04	Tacos Rogelios	restaurant	taco restaurant	26.92371	-99.25999	1101 Bravo Ave	Zapata	78076	+9567503067			0.84	
+61ee9e791395	Tacos y mas	restaurant		26.92048	-99.26633	402 Miraflores St	Zapata	78076	+19562655342			0.56	
+6df16fedd4f0	Tamales N' Salsas	restaurant	mexican restaurant	26.40225	-99.00403	509 E Grant St	Roma	78584	+19566400216			0.92	
+72e659830ad5	TaqueriaElAlfarero	restaurant	mexican restaurant	26.92124	-99.25355	1414 Diaz Ave	Zapata	78076	+19565080413	http://Www.taqueriaelalfarero.com/		0.66	
+b176c6a9d2d9	The Steak House	restaurant	steakhouse	26.89474	-99.26293	111 US-83	Zapata	78076	+19567654523	http://steak-house-zapata.edan.io/		0.97	
+d88f8766531e	The Steak House Llc	restaurant		26.89484	-99.26281	111 S US Highway 83	Zapata	78076		http://the-steak-house.keeq.io		0.95	
+b937d1d340c9	Tina's Restaurant	restaurant	texmex restaurant	26.87804	-99.25713	1896 US-83	Zapata	78076	+19567503103	https://www.chamberofcommerce.com/zapata-tx/5068196-tinas-restaurant		0.92	
+806c010cae23	Tony's Refresqueria	restaurant	mexican restaurant	26.91898	-99.26140	702 Juarez Ave	Zapata	78076	+19567658003	http://tonys-refresceria.jany.io		0.97	
+955164b67459	Wings To Go	restaurant	chicken wings restaurant	26.89891	-99.26469	308 N US Highway 83	Zapata	78076	+19562658047	http://wingstogo.com		0.77	
+6828c3135c67	Xtreme Hotdogs	restaurant	hot dog restaurant	26.91187	-99.26422	96 W 13th Ave	Zapata	78076	+19567540071			0.93	
+69a73739419f	El Lago Day Care Center	senior	retirement home	26.90906	-99.26720	1202 Elm St	Zapata	78076	+19567656193			0.82	
+dacd3b83b9a7	Falcon Lake Nursing Home	senior	retirement home	26.90089	-99.25816	200 Carla St	Zapata	78076	+19567653040	http://www.Falconlakenh.com/		0.92	
+7bfe2e18fbd3	Roma Elderly Nutrition Center	senior	retirement home	26.41723	-99.01519	867 Morelos Ave	Roma	78584	+19568471477			0.92	

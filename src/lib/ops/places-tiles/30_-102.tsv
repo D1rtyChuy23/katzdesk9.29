@@ -1,80 +1,80 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-9e81214025f4	Ceci's Roadside Café	coffee		30.71888	-101.21114	3441 State Highway 137 N	Ozona	76943	+13252261786			0.70
-c5826ecd2a4a	The Cafe Next Door	coffee		30.70651	-101.20086	502 14th St	Ozona	76943	+13253925623	https://www.menuism.com		0.92
-8ea8e32216a2	Tin Cup Cafe	coffee		30.69115	-101.82827	9693 TX-290	Sheffield	79781	+14328364638			0.92
-28a42a1ceb4d	7-Eleven	convenience		30.70789	-101.20197	1206 Ave E	Ozona	76943	+13253922473	https://stripesstores.com		0.77
-8fbfc749e14c	7-Eleven	convenience		30.70639	-101.19958	1309 Avenue C	Ozona	76943	+13253925275	https://www.7-eleven.com/		1.00
-941890824c24	7-Eleven	convenience		30.70851	-101.20825	1101 Sheffield Road	Ozona	76943	+13253923779	https://www.7-eleven.com/		1.00
-a4a7e831b6e1	Allsup's Convenience Store	convenience		30.91425	-101.89896	120 E 6th St	Iraan	79744	+14325385089	https://www.allsups.com/	Allsup’s	1.00
-cb41c57daa0a	ALON Gas Station	convenience		30.91432	-101.89899	199 West 6th Street	Iraan	79744	+14326392531	https://alonfuel.com/stations/alon-gas-station-5037-199-west-6th-st-iraan-tx-79744/		1.00
-78e6bd010805	Chester's	convenience		30.69927	-101.09075		Ozona					0.70
-18b4336cdc84	Chevron Station Ozona	convenience		30.70889	-101.20417	201 Calle De Rio	Ozona	76943	+18322343600			0.85
-577f13e6a544	Chevron Station Ozona	convenience		30.70623	-101.19978	1309 Ave C	Ozona	76943	+18322343600			0.92
-0ab5f43a1eb0	Exxon	convenience		30.77584	-101.03503	County Road 108	Ozona	76943	+13253922637	http://www.exxon.com/		0.59
-1e76b967e440	Exxon in the Middle of Nowhere	convenience		30.69918	-101.09074	3331 I-10 E	Ozona	76943	+13253922637	http://exxon.com/		0.81
-92d91f86b2c9	LITTLE STORE	convenience		30.70640	-101.20130	504 14th Street	Ozona	76943		https://locations.valero.com/en-us/LocationDetails/Index/504-14TH-STREET/0000012924	Valero	0.92
-e9219685ab79	Phillips 66	convenience		30.70863	-101.20811	1101 Sheffield Rd	Ozona	76943	+13253923779	https://www.phillips66gas.com/		1.00
-f17502f45178	Phillips 66	convenience		30.70800	-101.20169	1206 Avenue E	Ozona	76943	+13253922473	https://www.phillips66gas.com/		1.00
-a8995a73be1a	Shell	convenience		30.91388	-101.89766	100 E 6TH ST	Iraan	79744	+19725672471	https://find.shell.com/us/fuel/13182510-100-e-6th-st/en_US		0.99
-29ea7fe00b07	Stripes	convenience		30.70789	-101.20197	1206 Avenue E	Ozona	76943	+13253922473	https://stripesstores.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97
-2d9ed840d67d	Stripes	convenience		30.70508	-101.20445	201 Del Rio St	Ozona	76943	+13253922307	https://stripesstores.com/		1.00
-c3f5fce6fc2e	Stripes	convenience		30.70642	-101.19962	1309 Av C	Ozona	76943	+13253925275	https://stripesstores.com/		0.85
-bd9cdf95b2b3	Stripes Convenience Store	convenience		30.91385	-101.89778	100 E 6th St	Iraan	79744	+14326392584	http://www.stripesstores.com		1.00
-170c8dea0502	Sunoco	convenience		30.69919	-101.09070	3331 Interstate 10	Ozona	76943	+12108243892	https://www.sunoco.com/		0.99
-4e33dc2713ed	Sunoco	convenience		30.70790	-101.20177	1206 Avenue E	Ozona	76943	+13253922473	https://www.sunoco.com/locations/store/1206-avenue-e-ozona-tx-0906887500		0.92
-8d025321ab14	Sunoco	convenience		30.70516	-101.20441	201 Del Rio St	Ozona	76943	+13253922307	http://www.sunoco.com	Sunoco	0.92
-b25064048f7c	Sunoco	convenience		30.70863	-101.20851	1101 Sheffield Rd	Ozona	76943	+13253923779	https://www.sunoco.com/locations/store/1101-sheffield-rd-ozona-tx-0195426200		0.92
-d84eafc020c3	Sunoco	convenience		30.70630	-101.19939	1309 Ave C	Ozona	76943	+13253925275	https://www.sunoco.com/locations/store/1309-avenue-c-ozona-tx-0112200100	Sunoco	0.92
-91c4039aa21f	Dairy Queen	fastfood		30.70649	-101.20031	402 14th St 402 14th St	Ozona	76943	+13253925000	https://www.dairyqueen.com/en-us/locations/tx/ozona/402-14th-st/12423/?y_source=1_MjkzMzkzMTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
-6aa38c709a1a	DQ Grill & Chill	fastfood		30.70646	-101.20036	402 14th St	Ozona	76943		https://www.dairyqueen.com/en-us/locations/tx/ozona/402-14th-st/2203	DQ Grill & Chill	0.80
-4a148148956d	Ortiz Burritos	fastfood		30.91236	-101.90042	206 W 4th St	Iraan	79744	+14323021066			0.92
-97fe0f63b302	Sip-N-Slurp	fastfood		30.91205	-101.89818	403 S Drake	Iraan	79744				0.88
-4853409f8a99	Sonic Drive In	fastfood		30.70647	-101.20294	704 East 14Th Street	Ozona	76943	+13253929501	https://locations.sonicdrivein.com/tx/ozona/704-east-14th-street.html	Sonic Drive-In	0.94
-ee0cc0ba631b	Subway	fastfood	sandwich shop	30.70829	-101.20187	1204 Ave E	Ozona	76943	+13253924782	http://www.subway.com/en-us	Subway	0.97
-a5cd62469ac5	Fruit and snacks Ozona	grocery		30.70166	-101.21104	111 Swaps St	Ozona	76943	+13252268332			0.74
-1b511f1d6389	Hilltop Tortilla Factory	grocery		30.70096	-101.19892	211 Buena Vista St	Ozona	76943	+3253924208			0.88
-8efe1c0a9459	Lowe's Market	grocery		30.71690	-101.20126	305 Avenue E P.O. Box 1949	Ozona	76943	+13253923324	http://www.lowesmarket.com/	Lowe's Market	0.92
-b32a61b2ce53	Super S Foods	grocery		30.91321	-101.89787	115 E 5th St	Iraan	79744	+14326392587			0.92
-2f4cd5c7c065	Iraan Clinic	hospital		30.91330	-101.90131	303 W 5TH St	Iraan	79744	+14326392580	http://www.igh-hospital.com/getpage.php?name=contact		0.77
-12bf426f0b2d	Iraan General Hospital	hospital		30.91488	-101.90744	600 HWY 349 North	Iraan	79744	+14326392575	http://www.igh-hospital.com		0.77
-d9e9a89c1ba3	Iraan General Hospital District	hospital		30.78970	-101.84258	600 N State Highway 349	Iraan	79744	+14326392575	http://www.igh-hospital.com/		0.92
-a6f9568e9116	Americas Best Value Inn	hotel	motel	30.71030	-101.20564	820 11th St	Ozona	76943	+13253922631	https://www.sonesta.com/americas-best-value-inn/tx/ozona/americas-best-value-inn-ozona		0.99
-545af565903e	Best Western Ozona Inn	hotel		30.70657	-101.19645	1307 Ave. A, Building B	Ozona	76943	+13253923791	https://www.choicehotels.com/texas/ozona/quality-inn-hotels/tx303?mc=llyxyxpx		0.77
-e0eccdd7a76f	Economy Inn & RV Park	hotel	motel	30.70851	-101.19668	1201 Ave A	Ozona	76943	+13253923394			0.92
-174ec84400c5	Hampton Inn Ozona	hotel		30.70668	-101.20529	816 14th St	Ozona	76943	+13253921449	https://www.hilton.com/en/hotels/ozahxhx-hampton-ozona/	Hampton by Hilton	1.00
-6a34a01bd8c0	Hillcrest Inn & Suites	hotel	motel	30.70789	-101.20996	1204 Sheffield Rd	Ozona	76943	+13253924000	http://www.hillcrestmotorinn.com		0.92
-611f3562bd68	Holiday Inn Express & Suites Ozona	hotel		30.70680	-101.20185	1308 Avenue E	Ozona	76943	+13253929000	https://www.ihg.com/holidayinnexpress/hotels/us/en/ozona/sjtoz/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SJTOZ	Holiday Inn Express	1.00
-d0d88bb0afdf	MainStay Suites Ozona I-10	hotel	resort	30.70708	-101.19659	1307 Ave A, Building A	Ozona	76943	+13253260166	https://www.choicehotels.com/texas/ozona/mainstay-hotels/txn04?mc=llbillpx&pmf=local		0.99
-1a23ed50bfa7	Mesa View Inn	hotel		30.91484	-101.90472	9289 Alley Oop Ln	Iraan	79744	+14326392202	http://www.mesa-view-inn.com/		0.92
-143defb77c05	Motel 6	hotel		30.70781	-101.20995	1204 Sheffield Road-Loop 466 West	Ozona	76943	+13253924000	https://www.motel6.com/en/motels.tx.ozona.8786.html		0.77
-7207afdb85a3	Quality Inn Ozona I-10	hotel		30.70664	-101.19644	1307 Ave A Building B	Ozona	76943	+13253085674	https://www.choicehotels.com/texas/ozona/quality-inn-hotels/tx303?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-4ab35130bb97	Super 8 by Wyndham Ozona	hotel	resort	30.69905	-101.09054	3331 10th E # I	Ozona	76943	+13253922611	https://www.wyndhamhotels.com/super-8/ozona-texas/super-8-ozona/overview?CID=LC:SE::BING:RIO:National:13432&iata=00093796		0.83
-0f2630ee234a	Trail West Lodge	hotel	motel	30.91364	-101.89314	406 E 6th St	Iraan	79744	+14326392548	https://trailwestlodgeiraan.com/		0.92
-320b4049cc74	Travelodge by Wyndham Ozona	hotel		30.71048	-101.19453	8 11th St	Ozona	76943	+13253924450	https://www.wyndhamhotels.com/en-ca/travelodge/ozona-texas/travelodge-ozona/overview		0.98
-63e373e6a402	Bonfire Energy	office	energy company	30.70689	-101.21027	1201 Sheffield Rd	Ozona	76943	+13253083006	http://bonfireenergy.com/		0.92
-fed952ff03ca	dcp Midstream	office	energy company	30.68771	-101.20855	594 TX-163	Ozona	76943	+19189777696	http://www.dcpmidstream.com		0.92
-192c323b4f02	Kinder Morgan Inc	office	energy company	30.91565	-101.90963	699 W 6th St	Iraan	79744	+14326396109	www.kindermorgan.com		0.92
-ee308b6768cf	Natgas Inc	office	energy company	30.71135	-101.20605	901 Ave H	Ozona	76943	+13253922201			0.92
-4cd877ff605c	Tejas Bank	office	coworking space	30.91311	-101.89832	109 West 5 th Street	Iraan	79744	+14326392543	http://www.transpecosbanks.com		0.77
-09b4303a6c0f	Bryan's Poco Taco	restaurant	mexican restaurant	30.71009	-101.20138	515 11th St	Ozona	76943	+13253922525			0.96
-be440933eccc	Country Kitchen	restaurant	american restaurant	30.70975	-101.20186	1106 Avenue E	Ozona	76943	+13253924402	http://countrykitchenrestaurants.com		0.92
-d3903d24625a	Destiny's Grill	restaurant	american restaurant	30.70141	-101.21069	107 Swaps St	Ozona	76943	+13253403002			0.97
-3178c4ec1cae	Godfather's Pizza	restaurant	pizza restaurant	30.91380	-101.89766	100 E 6th St	Iraan	79744	+14326392095	http://www.godfathers.com/		0.98
-b3f86e39f5dc	Godfather's Pizza	restaurant	pizza restaurant	30.70805	-101.20207	1206 Avenue E	Ozona	76943	+13253922473	http://www.godfathers.com/	Godfather's Pizza Dayton, OH	0.96
-76ac0fabfaaa	Grub Shack	restaurant	burger restaurant	30.91117	-101.89823	303 S Drake St	Iraan	79744	+14326392222			0.65
-3813802fea92	Hitchin Post Steak House	restaurant	steakhouse	30.70551	-101.21191	1301 Sheffield Rd	Ozona	76943	+13253925280	http://www.hitchinpoststeakhouse.com		0.92
-8bdc983ed64d	Isabella's	restaurant	comfort food restaurant	30.91389	-101.89632	204 E 6th St	Iraan	79744	+14326394001	https://isabellaskitchen.com/		0.92
-cf914af61fe4	Kenny's Donuts	restaurant		30.91435	-101.89956	201 W 6th St.	Iraan	79744	+14326392206	https://kennys-donuts-tx.hub.biz		0.95
-b8c076741766	La Parrilla Iraan Tx	restaurant	mexican restaurant	30.91107	-101.89818	303 Drake St	Iraan	79744	+14323020692		La Parrilla Cancún	0.92
-1a725cbca591	Laredo Taco Company	restaurant		30.70789	-101.20197	1206 Avenue E	Ozona	76943	+13253922473	https://www.laredotacocompany.com/		0.92
-477be5e6f3cf	Laredo Taco Company	restaurant	taco restaurant	30.91369	-101.89764	100 W 6th St	Iraan	79744	+14326392584	https://www.laredotacocompany.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97
-c9aa2f5e539b	Mi Familia	restaurant	texmex restaurant	30.71885	-101.20115	201 Avenue E	Ozona	76943		http://www.mifamiliacincy.com		0.95
-cca1c64fa141	Mi Taco	restaurant	mexican restaurant	30.70971	-101.20742	1002 Sheffield Rd	Ozona	76943	+13253923949	https://mi-taco.hub.biz		0.95
-d3ca8db35e45	Mingo'S Burritos	restaurant	mexican restaurant	30.70337	-101.20406	1606 Del Rio St	Ozona	76943	+13253924239			0.68
-f394c99007bf	Old House Cafe	restaurant	comfort food restaurant	30.91396	-101.90103	303 W 6th St	Iraan	79744	+14326395015	http://www.oldhousecafe.net/		0.96
-760943e14b11	Pepe's Cafe	restaurant	texmex restaurant	30.70900	-101.20767	1003 Sheffield Rd	Ozona	76943	+13253922923	https://www.chamberofcommerce.com/ozona-tx/30871983-pepes-cafe		0.98
-7fb73861bd11	Taqueria 163	restaurant	texmex restaurant	30.64645	-101.20435	1810 TX-163	Ozona	76943	+13253924400			0.68
-7a33c66ba0f8	Taqueria Mi Casita	restaurant	mexican restaurant	30.70122	-101.19861	Buena Vista St	Ozona	76943	+13253922281	http://www.taqueriamicasita.com/our-authentic-menu.html	Taqueria Mi Casita	0.97
-eb5ffb216fef	Taquitos Don Manuel	restaurant	mexican restaurant	30.91108	-101.89778	Drake St	Iraan	79744	+13252772655			0.95
-66c8d157ee10	Crockett County Care Center	senior	retirement home	30.72024	-101.20752	102 Medical Dr	Ozona	76943	+3253922672	http://www.care.com/		0.92
-a45dd327d95c	Crockett County Senior Center	senior	retirement home	30.89656	-101.16126	State Highway 163 North	Ozona	76943	+13253929094			0.91
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+9e81214025f4	Ceci's Roadside Café	coffee		30.71888	-101.21114	3441 State Highway 137 N	Ozona	76943	+13252261786			0.70	
+c5826ecd2a4a	The Cafe Next Door	coffee		30.70651	-101.20086	502 14th St	Ozona	76943	+13253925623	https://www.menuism.com		0.92	
+8ea8e32216a2	Tin Cup Cafe	coffee		30.69115	-101.82827	9693 TX-290	Sheffield	79781	+14328364638			0.92	
+28a42a1ceb4d	7-Eleven	convenience		30.70789	-101.20197	1206 Ave E	Ozona	76943	+13253922473	https://stripesstores.com		0.77	
+8fbfc749e14c	7-Eleven	convenience		30.70639	-101.19958	1309 Avenue C	Ozona	76943	+13253925275	https://www.7-eleven.com/		1.00	
+941890824c24	7-Eleven	convenience		30.70851	-101.20825	1101 Sheffield Road	Ozona	76943	+13253923779	https://www.7-eleven.com/		1.00	
+a4a7e831b6e1	Allsup's Convenience Store	convenience		30.91425	-101.89896	120 E 6th St	Iraan	79744	+14325385089	https://www.allsups.com/	Allsup’s	1.00	
+cb41c57daa0a	ALON Gas Station	convenience		30.91432	-101.89899	199 West 6th Street	Iraan	79744	+14326392531	https://alonfuel.com/stations/alon-gas-station-5037-199-west-6th-st-iraan-tx-79744/		1.00	
+78e6bd010805	Chester's	convenience		30.69927	-101.09075		Ozona					0.70	
+18b4336cdc84	Chevron Station Ozona	convenience		30.70889	-101.20417	201 Calle De Rio	Ozona	76943	+18322343600			0.85	
+577f13e6a544	Chevron Station Ozona	convenience		30.70623	-101.19978	1309 Ave C	Ozona	76943	+18322343600			0.92	
+0ab5f43a1eb0	Exxon	convenience		30.77584	-101.03503	County Road 108	Ozona	76943	+13253922637	http://www.exxon.com/		0.59	
+1e76b967e440	Exxon in the Middle of Nowhere	convenience		30.69918	-101.09074	3331 I-10 E	Ozona	76943	+13253922637	http://exxon.com/		0.81	
+92d91f86b2c9	LITTLE STORE	convenience		30.70640	-101.20130	504 14th Street	Ozona	76943		https://locations.valero.com/en-us/LocationDetails/Index/504-14TH-STREET/0000012924	Valero	0.92	
+e9219685ab79	Phillips 66	convenience		30.70863	-101.20811	1101 Sheffield Rd	Ozona	76943	+13253923779	https://www.phillips66gas.com/		1.00	
+f17502f45178	Phillips 66	convenience		30.70800	-101.20169	1206 Avenue E	Ozona	76943	+13253922473	https://www.phillips66gas.com/		1.00	
+a8995a73be1a	Shell	convenience		30.91388	-101.89766	100 E 6TH ST	Iraan	79744	+19725672471	https://find.shell.com/us/fuel/13182510-100-e-6th-st/en_US		0.99	
+29ea7fe00b07	Stripes	convenience		30.70789	-101.20197	1206 Avenue E	Ozona	76943	+13253922473	https://stripesstores.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97	
+2d9ed840d67d	Stripes	convenience		30.70508	-101.20445	201 Del Rio St	Ozona	76943	+13253922307	https://stripesstores.com/		1.00	
+c3f5fce6fc2e	Stripes	convenience		30.70642	-101.19962	1309 Av C	Ozona	76943	+13253925275	https://stripesstores.com/		0.85	
+bd9cdf95b2b3	Stripes Convenience Store	convenience		30.91385	-101.89778	100 E 6th St	Iraan	79744	+14326392584	http://www.stripesstores.com		1.00	
+170c8dea0502	Sunoco	convenience		30.69919	-101.09070	3331 Interstate 10	Ozona	76943	+12108243892	https://www.sunoco.com/		0.99	
+4e33dc2713ed	Sunoco	convenience		30.70790	-101.20177	1206 Avenue E	Ozona	76943	+13253922473	https://www.sunoco.com/locations/store/1206-avenue-e-ozona-tx-0906887500		0.92	
+8d025321ab14	Sunoco	convenience		30.70516	-101.20441	201 Del Rio St	Ozona	76943	+13253922307	http://www.sunoco.com	Sunoco	0.92	
+b25064048f7c	Sunoco	convenience		30.70863	-101.20851	1101 Sheffield Rd	Ozona	76943	+13253923779	https://www.sunoco.com/locations/store/1101-sheffield-rd-ozona-tx-0195426200		0.92	
+d84eafc020c3	Sunoco	convenience		30.70630	-101.19939	1309 Ave C	Ozona	76943	+13253925275	https://www.sunoco.com/locations/store/1309-avenue-c-ozona-tx-0112200100	Sunoco	0.92	
+91c4039aa21f	Dairy Queen	fastfood		30.70649	-101.20031	402 14th St 402 14th St	Ozona	76943	+13253925000	https://www.dairyqueen.com/en-us/locations/tx/ozona/402-14th-st/12423/?y_source=1_MjkzMzkzMTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94	
+6aa38c709a1a	DQ Grill & Chill	fastfood		30.70646	-101.20036	402 14th St	Ozona	76943		https://www.dairyqueen.com/en-us/locations/tx/ozona/402-14th-st/2203	DQ Grill & Chill	0.80	
+4a148148956d	Ortiz Burritos	fastfood		30.91236	-101.90042	206 W 4th St	Iraan	79744	+14323021066			0.92	
+97fe0f63b302	Sip-N-Slurp	fastfood		30.91205	-101.89818	403 S Drake	Iraan	79744				0.88	
+4853409f8a99	Sonic Drive In	fastfood		30.70647	-101.20294	704 East 14Th Street	Ozona	76943	+13253929501	https://locations.sonicdrivein.com/tx/ozona/704-east-14th-street.html	Sonic Drive-In	0.94	
+ee0cc0ba631b	Subway	fastfood	sandwich shop	30.70829	-101.20187	1204 Ave E	Ozona	76943	+13253924782	http://www.subway.com/en-us	Subway	0.97	
+a5cd62469ac5	Fruit and snacks Ozona	grocery		30.70166	-101.21104	111 Swaps St	Ozona	76943	+13252268332			0.74	
+1b511f1d6389	Hilltop Tortilla Factory	grocery		30.70096	-101.19892	211 Buena Vista St	Ozona	76943	+3253924208			0.88	
+8efe1c0a9459	Lowe's Market	grocery		30.71690	-101.20126	305 Avenue E P.O. Box 1949	Ozona	76943	+13253923324	http://www.lowesmarket.com/	Lowe's Market	0.92	
+b32a61b2ce53	Super S Foods	grocery		30.91321	-101.89787	115 E 5th St	Iraan	79744	+14326392587			0.92	
+2f4cd5c7c065	Iraan Clinic	hospital		30.91330	-101.90131	303 W 5TH St	Iraan	79744	+14326392580	http://www.igh-hospital.com/getpage.php?name=contact		0.77	
+12bf426f0b2d	Iraan General Hospital	hospital		30.91488	-101.90744	600 HWY 349 North	Iraan	79744	+14326392575	http://www.igh-hospital.com		0.77	
+d9e9a89c1ba3	Iraan General Hospital District	hospital		30.78970	-101.84258	600 N State Highway 349	Iraan	79744	+14326392575	http://www.igh-hospital.com/		0.92	
+a6f9568e9116	Americas Best Value Inn	hotel	motel	30.71030	-101.20564	820 11th St	Ozona	76943	+13253922631	https://www.sonesta.com/americas-best-value-inn/tx/ozona/americas-best-value-inn-ozona		0.99	
+545af565903e	Best Western Ozona Inn	hotel		30.70657	-101.19645	1307 Ave. A, Building B	Ozona	76943	+13253923791	https://www.choicehotels.com/texas/ozona/quality-inn-hotels/tx303?mc=llyxyxpx		0.77	
+e0eccdd7a76f	Economy Inn & RV Park	hotel	motel	30.70851	-101.19668	1201 Ave A	Ozona	76943	+13253923394			0.92	
+174ec84400c5	Hampton Inn Ozona	hotel		30.70668	-101.20529	816 14th St	Ozona	76943	+13253921449	https://www.hilton.com/en/hotels/ozahxhx-hampton-ozona/	Hampton by Hilton	1.00	
+6a34a01bd8c0	Hillcrest Inn & Suites	hotel	motel	30.70789	-101.20996	1204 Sheffield Rd	Ozona	76943	+13253924000	http://www.hillcrestmotorinn.com		0.92	
+611f3562bd68	Holiday Inn Express & Suites Ozona	hotel		30.70680	-101.20185	1308 Avenue E	Ozona	76943	+13253929000	https://www.ihg.com/holidayinnexpress/hotels/us/en/ozona/sjtoz/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SJTOZ	Holiday Inn Express	1.00	
+d0d88bb0afdf	MainStay Suites Ozona I-10	hotel	resort	30.70708	-101.19659	1307 Ave A, Building A	Ozona	76943	+13253260166	https://www.choicehotels.com/texas/ozona/mainstay-hotels/txn04?mc=llbillpx&pmf=local		0.99	
+1a23ed50bfa7	Mesa View Inn	hotel		30.91484	-101.90472	9289 Alley Oop Ln	Iraan	79744	+14326392202	http://www.mesa-view-inn.com/		0.92	
+143defb77c05	Motel 6	hotel		30.70781	-101.20995	1204 Sheffield Road-Loop 466 West	Ozona	76943	+13253924000	https://www.motel6.com/en/motels.tx.ozona.8786.html		0.77	
+7207afdb85a3	Quality Inn Ozona I-10	hotel		30.70664	-101.19644	1307 Ave A Building B	Ozona	76943	+13253085674	https://www.choicehotels.com/texas/ozona/quality-inn-hotels/tx303?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00	
+4ab35130bb97	Super 8 by Wyndham Ozona	hotel	resort	30.69905	-101.09054	3331 10th E # I	Ozona	76943	+13253922611	https://www.wyndhamhotels.com/super-8/ozona-texas/super-8-ozona/overview?CID=LC:SE::BING:RIO:National:13432&iata=00093796		0.83	
+0f2630ee234a	Trail West Lodge	hotel	motel	30.91364	-101.89314	406 E 6th St	Iraan	79744	+14326392548	https://trailwestlodgeiraan.com/		0.92	
+320b4049cc74	Travelodge by Wyndham Ozona	hotel		30.71048	-101.19453	8 11th St	Ozona	76943	+13253924450	https://www.wyndhamhotels.com/en-ca/travelodge/ozona-texas/travelodge-ozona/overview		0.98	
+63e373e6a402	Bonfire Energy	office	energy company	30.70689	-101.21027	1201 Sheffield Rd	Ozona	76943	+13253083006	http://bonfireenergy.com/		0.92	
+fed952ff03ca	dcp Midstream	office	energy company	30.68771	-101.20855	594 TX-163	Ozona	76943	+19189777696	http://www.dcpmidstream.com		0.92	
+192c323b4f02	Kinder Morgan Inc	office	energy company	30.91565	-101.90963	699 W 6th St	Iraan	79744	+14326396109	www.kindermorgan.com		0.92	
+ee308b6768cf	Natgas Inc	office	energy company	30.71135	-101.20605	901 Ave H	Ozona	76943	+13253922201			0.92	
+4cd877ff605c	Tejas Bank	office	coworking space	30.91311	-101.89832	109 West 5 th Street	Iraan	79744	+14326392543	http://www.transpecosbanks.com		0.77	
+09b4303a6c0f	Bryan's Poco Taco	restaurant	mexican restaurant	30.71009	-101.20138	515 11th St	Ozona	76943	+13253922525			0.96	
+be440933eccc	Country Kitchen	restaurant	american restaurant	30.70975	-101.20186	1106 Avenue E	Ozona	76943	+13253924402	http://countrykitchenrestaurants.com		0.92	
+d3903d24625a	Destiny's Grill	restaurant	american restaurant	30.70141	-101.21069	107 Swaps St	Ozona	76943	+13253403002			0.97	
+3178c4ec1cae	Godfather's Pizza	restaurant	pizza restaurant	30.91380	-101.89766	100 E 6th St	Iraan	79744	+14326392095	http://www.godfathers.com/		0.98	
+b3f86e39f5dc	Godfather's Pizza	restaurant	pizza restaurant	30.70805	-101.20207	1206 Avenue E	Ozona	76943	+13253922473	http://www.godfathers.com/	Godfather's Pizza Dayton, OH	0.96	
+76ac0fabfaaa	Grub Shack	restaurant	burger restaurant	30.91117	-101.89823	303 S Drake St	Iraan	79744	+14326392222			0.65	
+3813802fea92	Hitchin Post Steak House	restaurant	steakhouse	30.70551	-101.21191	1301 Sheffield Rd	Ozona	76943	+13253925280	http://www.hitchinpoststeakhouse.com		0.92	
+8bdc983ed64d	Isabella's	restaurant	comfort food restaurant	30.91389	-101.89632	204 E 6th St	Iraan	79744	+14326394001	https://isabellaskitchen.com/		0.92	
+cf914af61fe4	Kenny's Donuts	restaurant		30.91435	-101.89956	201 W 6th St.	Iraan	79744	+14326392206	https://kennys-donuts-tx.hub.biz		0.95	
+b8c076741766	La Parrilla Iraan Tx	restaurant	mexican restaurant	30.91107	-101.89818	303 Drake St	Iraan	79744	+14323020692		La Parrilla Cancún	0.92	
+1a725cbca591	Laredo Taco Company	restaurant		30.70789	-101.20197	1206 Avenue E	Ozona	76943	+13253922473	https://www.laredotacocompany.com/		0.92	
+477be5e6f3cf	Laredo Taco Company	restaurant	taco restaurant	30.91369	-101.89764	100 W 6th St	Iraan	79744	+14326392584	https://www.laredotacocompany.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97	
+c9aa2f5e539b	Mi Familia	restaurant	texmex restaurant	30.71885	-101.20115	201 Avenue E	Ozona	76943		http://www.mifamiliacincy.com		0.95	
+cca1c64fa141	Mi Taco	restaurant	mexican restaurant	30.70971	-101.20742	1002 Sheffield Rd	Ozona	76943	+13253923949	https://mi-taco.hub.biz		0.95	
+d3ca8db35e45	Mingo'S Burritos	restaurant	mexican restaurant	30.70337	-101.20406	1606 Del Rio St	Ozona	76943	+13253924239			0.68	
+f394c99007bf	Old House Cafe	restaurant	comfort food restaurant	30.91396	-101.90103	303 W 6th St	Iraan	79744	+14326395015	http://www.oldhousecafe.net/		0.96	
+760943e14b11	Pepe's Cafe	restaurant	texmex restaurant	30.70900	-101.20767	1003 Sheffield Rd	Ozona	76943	+13253922923	https://www.chamberofcommerce.com/ozona-tx/30871983-pepes-cafe		0.98	
+7fb73861bd11	Taqueria 163	restaurant	texmex restaurant	30.64645	-101.20435	1810 TX-163	Ozona	76943	+13253924400			0.68	
+7a33c66ba0f8	Taqueria Mi Casita	restaurant	mexican restaurant	30.70122	-101.19861	Buena Vista St	Ozona	76943	+13253922281	http://www.taqueriamicasita.com/our-authentic-menu.html	Taqueria Mi Casita	0.97	
+eb5ffb216fef	Taquitos Don Manuel	restaurant	mexican restaurant	30.91108	-101.89778	Drake St	Iraan	79744	+13252772655			0.95	
+66c8d157ee10	Crockett County Care Center	senior	retirement home	30.72024	-101.20752	102 Medical Dr	Ozona	76943	+3253922672	http://www.care.com/		0.92	
+a45dd327d95c	Crockett County Senior Center	senior	retirement home	30.89656	-101.16126	State Highway 163 North	Ozona	76943	+13253929094			0.91	

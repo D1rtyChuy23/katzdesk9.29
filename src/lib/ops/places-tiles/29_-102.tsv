@@ -1,11 +1,11 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-378a6eab8486	5 Points Market - Del Rio	convenience		29.46778	-101.00919		Del Rio					0.84
-b395cc96b2d2	Exxon	convenience		29.46747	-101.00907	11705 Hwy 90 W	Del Rio	78840	+18307752372	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
-20a640242dff	Five Points Market 26	convenience		29.46733	-101.00919	11705 HWY 90 W	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-fivepointsmarket26-200314491	Exxon	0.80
-a2ee4adf7a81	Neal One Stop	convenience		29.46738	-101.00931	11705 US-90	Del Rio	78840	+18307744402	www.exxonmobil.com		0.92
-b0f63637c718	Quick Stop	convenience		29.68702	-101.17385	32003 US-90	Comstock	78837	+14322924565	https://www.countryfiedcandle.com		0.92
-198175560454	Champions Inn and Cafe	hotel	motel	29.46619	-101.00848	11704 US-90	Del Rio	78840	+18303083805			0.92
-07c441adcce2	Champions Inn Del Rio Near Lake	hotel		29.46623	-101.00846	US-90, Del Rio, TX	Del Rio, Tx			https://www.oyorooms.com/us/365514/	OYO	0.80
-6564c8de6308	Comstock Motel	hotel	motel	29.68687	-101.17410	31984 US-90	Comstock	78837	+14322924484	http://www.merchantcircle.com/business/Comstock.Motel.Comstock.TX.1.432-292-4484		0.96
-601dd7e4aa27	Sizzling dogs	restaurant	hot dog restaurant	29.46715	-101.01556	11930 W US Highway 90	Del Rio	78840				0.97
-c28e39604da3	The J and P Bar n Grill	restaurant	bar and grill restaurant	29.68802	-101.17527	32137 US-90	Comstock	78837	+14322924338			0.92
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+378a6eab8486	5 Points Market - Del Rio	convenience		29.46778	-101.00919		Del Rio					0.84	
+b395cc96b2d2	Exxon	convenience		29.46747	-101.00907	11705 Hwy 90 W	Del Rio	78840	+18307752372	https://www.exxon.com/en	Exxon & Mobil Stations	1.00	
+20a640242dff	Five Points Market 26	convenience		29.46733	-101.00919	11705 HWY 90 W	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-fivepointsmarket26-200314491	Exxon	0.80	
+a2ee4adf7a81	Neal One Stop	convenience		29.46738	-101.00931	11705 US-90	Del Rio	78840	+18307744402	www.exxonmobil.com		0.92	
+b0f63637c718	Quick Stop	convenience		29.68702	-101.17385	32003 US-90	Comstock	78837	+14322924565	https://www.countryfiedcandle.com		0.92	
+198175560454	Champions Inn and Cafe	hotel	motel	29.46619	-101.00848	11704 US-90	Del Rio	78840	+18303083805			0.92	
+07c441adcce2	Champions Inn Del Rio Near Lake	hotel		29.46623	-101.00846	US-90, Del Rio, TX	Del Rio, Tx			https://www.oyorooms.com/us/365514/	OYO	0.80	
+6564c8de6308	Comstock Motel	hotel	motel	29.68687	-101.17410	31984 US-90	Comstock	78837	+14322924484	http://www.merchantcircle.com/business/Comstock.Motel.Comstock.TX.1.432-292-4484		0.96	
+601dd7e4aa27	Sizzling dogs	restaurant	hot dog restaurant	29.46715	-101.01556	11930 W US Highway 90	Del Rio	78840				0.97	
+c28e39604da3	The J and P Bar n Grill	restaurant	bar and grill restaurant	29.68802	-101.17527	32137 US-90	Comstock	78837	+14322924338			0.92	

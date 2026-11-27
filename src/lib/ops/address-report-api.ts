@@ -335,7 +335,9 @@ export const approveAddressSuggestion = createServerFn({ method: "POST" })
     if (shown(cur.address) === data.newAddress) return { status: "already", account: summary(data.newAddress) };
     if ((shown(cur.address) ?? "") !== (shown(data.expectedAddress) ?? "")) throw changedError(cur.name);
     const src = (await loadSources(sql, [cur.id])).get(cur.id);
-    const offered = buildSuggestions({ address: cur.address, geocodeAddress: cur.geocode_address, cleanList: src?.cleanList, invoices: src?.invoices });
+    const { webListingAddress } = await import("@/lib/ops/account-web-api");
+    const web = await webListingAddress(sql, cur.id);
+    const offered = buildSuggestions({ address: cur.address, geocodeAddress: cur.geocode_address, cleanList: src?.cleanList, invoices: src?.invoices, web });
     const pick = offered.find((s) => s.address === data.newAddress);
     if (!pick) throw new Error("That suggestion is no longer offered for this account.");
     const who = await actorName(sql, context.userId);

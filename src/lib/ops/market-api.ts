@@ -66,7 +66,7 @@ const placeTiles = new Map<string, Promise<Place[]>>();
 const PLACE_TILES_KEPT = 16;
 
 /** One square's places, read once and kept while it is in use; a square with no file (outside Texas) is empty. */
-function placeTile(key: string): Promise<Place[]> {
+export function placeTile(key: string): Promise<Place[]> {
   const hit = placeTiles.get(key);
   if (hit) {
     placeTiles.delete(key);

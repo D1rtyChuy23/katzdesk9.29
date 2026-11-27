@@ -1,203 +1,208 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-cf24ade256fc	Bromdale Bakery	bakery		34.93259	-100.88961	702 S Carhart St	Clarendon	79226	+18064069333	https://www.bromdale.com/		0.67
-c3799e754012	Childress Bakery Sandwich Shop	bakery		34.43005	-100.21490	1001 Ave F NW	Childress	79201	+19409378771	http://www.childressinn.com		0.97
-94c5e8660bb4	Cinnabon	bakery		34.43518	-100.23011	2301 Avenue F NW	Childress	79201	+19409378769	https://locations.cinnabon.com/tx/childress/2301-avenue-f-nw?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.97
-8a80dbf8d88f	The 'Novas Bakery	bakery		34.01369	-100.30773	1408 Richards St	Paducah	79248	+18322705377			0.67
-668bae8ef057	Wellington Donuts	bakery	donut shop	34.85613	-100.21178	1103 8th St	Wellington	79095	+14698417863			0.92
-905b39d4b2c7	BRIX Bar & Eatery	bar		34.85509	-100.21355	913 9th St	Wellington	79095	+18064470893			0.92
-ddcd6cd9a69e	Refz Sports Bar and Grill	bar	sports bar	34.93833	-100.88822	118 Kearney St	Clarendon	79226	+18068227339			0.96
-43ad82a24742	The Squirrel Hut	bar		34.01006	-100.75577	402 East U.S. 62	Matador	79244				0.77
-73dbed30aeed	Turkey Creek Winery	bar	winery	34.67314	-100.69864	203 Main St	Turkey	79261	+18064231005			0.75
-0f3103489f6b	Arvis Davis Chevrolet, Inc.	cardealer	used auto dealer	34.01213	-100.30220	1010 9th St	Paducah	79248	+18064923663	https://www.arvisdavischevy.com/		0.92
-8291fc138977	Bailey Autos	cardealer		34.93698	-100.88611	304 E 2nd St	Clarendon	79226	+18068745311	http://www.aaronhuey.com/		0.92
-0df273d8e21d	Cash For Cars Memphis	cardealer		34.72118	-100.53597	116 S 5th St	Memphis	79245	+18065848367			0.58
-f4d086edb2ea	Cowboy Carwash	cardealer		34.43297	-100.22234	1611 Ave F NW	Childress	79201	+19409376805	https://cowboy-carwash.hub.biz/		0.92
-1804eec858c2	Hill's Motors	cardealer		34.43173	-100.21990	1407 Avenue F NW	Childress	79201	+19409372011	http://www.hillsmotorsco.com/		0.92
-1ecac9b036df	Hills Motor	cardealer	used auto dealer	34.38550	-100.32997	1407 Avenue F NW	Childress	79201	+19405859999	https://childressautorepairs.com		0.77
-8ca07391ce35	Western Equipment | Childress	cardealer		34.44219	-100.24667	7769 US-287	Childress	79201	+19409373693	http://www.west-equip.com/	Western Equipment	0.92
-d58d4e7c0c90	Midway Drive-In	cinema		34.37456	-100.97540	11884 Highway 86	Quitaque	79255	+18064551237	http://www.cityseekr.com/quitaque/entertainment-venues/poi-midway-drive-in-641996.html		0.96
-b07c1f3efd1f	Sandell Drive In Theater in Clarendon, Texas	cinema		34.94685	-100.89674	12 Medical Center Dr	Clarendon	79226	+18068740685	http://www.sandelldrivein.com/		0.91
-eed9be70b3e3	Wellington Ritz Theatre Inc	cinema		34.85480	-100.21297	902 East Ave	Wellington	79095	+18064470090	http://wellingtonritztheatre.com/		0.92
-a61c7e4d2356	Bobcat Den	coffee		34.43476	-100.20950	800 Avenue L NW	Childress	79201	+19409376131	http://www.childressisd.net/		0.75
-cfeaf5c7ddc2	Crossroads Cafe	coffee		34.01461	-100.30175	820 Backus St	Paducah	79248	+18064724205			0.92
-119d4eecb512	Diamond Cones & Cafe	coffee		34.94201	-100.89510	800 2nd St	Clarendon	79226	+18066761006			0.80
-4d3584cc7b81	Home Grounds Coffee Bakery	coffee		34.85497	-100.21382	907 9th St	Wellington	79095		https://kentrollins.com/		0.92
-0c77f678f3c5	HTeaO	coffee	tea room	34.43139	-100.21865	1305 Ave F NW	Childress	79201	+19405360582	https://hteao.com/locations/childress-tx/	HTeaO	0.92
-a9c349d1320f	Starbucks	coffee		34.43371	-100.22461	1805 Ave F Nw	Childress	79201	+19402263141	https://www.starbucks.com/store-locator/store/1038372/hwy-287-us-62-1805-ave-f-nw-childress-tx-792013324-us	Starbucks	0.92
-a7d7b7a54957	The Buckin' Bean	coffee		34.93972	-100.89111	402 W 2nd St	Clarendon	79226	+18068742326	https://cyrusramsey.com/places/the-buckin-bean/		0.95
-37530ebc7c81	The Cottage	coffee		34.72611	-100.53596	121 S 5th St	Memphis	79245	+18062593520			0.97
-b09c18439cb7	The Gettin Spot	coffee		34.85345	-100.20474	1010 Houston St	Wellington	79095	+18064475830	http://the-gettin-spot.poi.place		0.92
-253634bf6ea7	Clarendon College	college		34.43516	-100.22495	1902 Ave G NW	Childress	79201	+19409372001	http://www.clarendoncollege.edu/	Clarendon College	0.92
-b767ec05849a	Clarendon College	college		34.94460	-100.90240	1122 College Dr	Clarendon	79226	+18068743571	http://www.clarendoncollege.edu/	Clarendon College	0.92
-0b402a780e1f	A-1 Fuel and Supply	convenience		34.72671	-100.53477	207 4th St	Memphis	79245	+18062592531			0.92
-07bd2c2d0f6b	Allsup's	convenience		34.42825	-100.21040	601 Ave F NW	Childress	79201	+19403380028	https://www.allsups.com/	Allsup’s	0.92
-6790661587d3	Allsup's	convenience		34.73321	-100.54288	1014 N Boykin Dr	Memphis	79245	+18062592391	https://www.allsups.com/	Allsup’s	0.92
-7f65df8b3c75	Allsup's	convenience		34.39323	-100.88975	100 N 9th St	Turkey	79261	+18066075185	https://www.allsups.com/	Allsup’s	1.00
-8d42d8ad8e9e	Allsup's	convenience		34.01233	-100.30984	1602 Easly St	Paducah	79248			Allsup's	0.92
-90f6ce1197f2	Allsup's	convenience		34.01188	-100.82878	1220 Bailey Ave	Matador	79244	+18063472373	https://www.allsups.com/	Allsup’s	1.00
-9fa36b317614	Allsup's	convenience		34.94186	-100.89693	805 W 2nd St	Clarendon	79226	+18068740187	https://www.allsups.com/	Allsup’s	1.00
-a065e0d19a8d	Allsup's	convenience		34.39350	-100.90633	109 Main St	Turkey	79261	+18064231239	http://www.allsups.com		0.77
-0ec099cda872	Allsup's Convenience Store	convenience		34.84936	-100.21400	1410 W Ave	Wellington	79095	+18064472148	https://www.allsups.com/		0.99
-48799b774ebf	Allsup's Convenience Store	convenience		34.85657	-100.20483	710 Houston St	Wellington	79095	+18064472819	http://www.allsups.com/		0.92
-0c7105ba93a2	Allsups	convenience		34.43297	-100.22098	1510 avenue f nw	Childress	79201	+19409373203	https://www.allsups.com		0.77
-e32381c0752c	Alon	convenience		34.43271	-100.22118	1510 Avenue F NW	Childress	79201	+19409373203	http://myalon.com/		0.92
-e5475f52f389	ALON	convenience		34.01242	-100.30987	1602 Easly St	Paducah	79248	+18064923947	https://www.allsups.com/	Allsup’s	1.00
-42b05dffb178	Alon Gas Station	convenience		34.93450	-100.88032	817 E 2nd St	Clarendon	79226	+18068742151	http://myalon.com/		0.97
-a863cce9e45c	CAT Scale	convenience	truck gas station	34.43493	-100.23102	2301 Avenue F NW	Childress	79201	+19409378769	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
-4f8c05c9a0eb	CEFCO Convenience Store	convenience		34.43501	-100.22673	2004 Avenue F NW	Childress	79201	+19409370040	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
-54bf229b988a	CEFCO Convenience Store	convenience		34.93936	-100.89037	302 W 2nd St	Clarendon	79226	+18068740076	https://www.cefcostores.com/		0.92
-75ac5fac3bf0	Chevron	convenience		34.93946	-100.89212	415 W 2nd St	Clarendon	79226	+18068740180	http://www.chevron.com		0.92
-c699ece44510	Clarendon Outpost	convenience		34.94060	-100.89421	619 W 2nd St	Clarendon	79226	+18068745201	http://www.clarendonoutpost.com/		0.96
-3bb22930859a	Conoco	convenience		34.42480	-100.20109	458-498 Avenue F NE	Childress	79201	+19409374075	https://www.conoco.com/		1.00
-49f995136f00	Conoco	convenience		34.42513	-100.20101	400 Avenue F NE	Childress	79201	+19409374075	https://www.conoco.com/	Conoco	1.00
-6893541a0386	Conoco	convenience		34.01236	-100.30154	817 Easly St	Paducah	79248	+18064922979	https://www.conoco.com/		0.92
-a3ae1c2fffb0	Conoco	convenience		34.93965	-100.89210	415 W 2nd St	Clarendon	79226	+18068740180	https://www.conoco.com/		0.92
-b93a868899ff	Conoco	convenience		34.72900	-100.53899	415 N Boykin Dr	Memphis	79245	+18062591103	https://www.conoco.com/		1.00
-2a977ee73707	Dollar Tree	convenience		34.43645	-100.23146	2305 Ave F NW Ste 500	Childress	79201	+19407326107	http://www.dollartree.com/locations/tx/childress/7781/		0.92
-d1b7b7d94a72	Exxon	convenience		34.93913	-100.88989	302 W 2nd St	Clarendon	79226	+18068743044	http://www.exxon.com		0.66
-305c67e23573	Family Dollar	convenience		34.85622	-100.20758	1501 8th St	Wellington	79095	+18065716003	http://www.familydollar.com/locations/tx/wellington/33186/		0.92
-41ca36cdbe97	Garrison Food Mart 7	convenience		34.72919	-100.53895	415 Boykin Dr	Memphis	79245	+18062591103	http://Hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.99
-b30c86ca3fd7	Garrison's Food Mart	convenience		34.42478	-100.20106	400 Ave F NE	Childress	79201	+19409374075	http://conoco.com	Garrison Food Mart Shamrock Texas	0.99
-d8ffad4052e9	Garrison's Food Mart	convenience		34.93960	-100.89206	415 W 2nd St	Clarendon	79226	+18068740180	http://hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.92
-cefa79f0f82e	HOP IN 430464	convenience		34.01246	-100.82882	1201 BAILEY	Matador	79244			Phillips 66	0.80
-87b3c2294588	Love's Travel Stops and Country Stores	convenience		34.72307	-100.53367	219 S Boykin Dr	Memphis	79245	+18062592300	https://www.loves.com/locations/247	Love	1.00
-0e458a5589bd	Murphy Usa	convenience		34.43654	-100.23320	2709 Avenue F NW	Childress	79201	+19409372926			1.00
-f9bdadc42733	PAK A SAK 21	convenience		34.43156	-100.21807	1300 AVE F NW	Childress	79201			Phillips 66	0.80
-2cea7bc6455f	Pak-A-Sak	convenience		34.43212	-100.21843	1300 Ave F NW	Childress	79201	+19409377015	http://pakasak.net		0.92
-053e7904dccf	Phillips 66	convenience		34.94090	-100.89463	619 W 2nd St	Clarendon	79226	+19722148695	https://www.phillips66gas.com/		0.92
-a267087b9512	Phillips 66	convenience		34.43198	-100.21834	1342 Avenue F NW	Childress	79201	+19409377015	https://www.phillips66gas.com/		0.92
-d0976b77ea19	Phillips 66	convenience		34.72903	-100.53904	415 N Boykin Dr	Memphis	79245	+18062591103	https://www.phillips66gas.com/station/CON-GARRISON-FOOD-MART-7-MEMPHIS-0000912066/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.92
-e25c66f72ec2	Phillips 66	convenience		34.01241	-100.82887	1137 Bailey Ave	Matador	79244	+18063472442	https://www.phillips66gas.com/		0.92
-be6fbd88b7a7	Phillips 66 Gas	convenience		34.01247	-100.30176	1001 9th St	Paducah	79248	+18064922979	https://www.phillips66gas.com/	Phillips 66 Gas	0.76
-f885cb274402	Pilot Travel Center	convenience		34.43533	-100.23026	2301 Ave F NW	Childress	79201	+19409378769	https://locations.pilotflyingj.com/us/tx/childress/2301-avenue-f-nw	Pilot Flying J	0.99
-b23a3bb15a01	THE STORE	convenience		34.01243	-100.30185	1001 9TH ST	Paducah	79248			Conoco	0.93
-317d2f67bd05	Valero	convenience		34.84953	-100.21384	1410 West Ave	Wellington	79095	+18064472148	https://www.valero.com		0.65
-61ed60c47e10	Valero	convenience		34.73323	-100.54293	1014 N Boykin Dr	Memphis	79245	+12103452000	https://www.valero.com		0.95
-72a23bd8d044	Valero	convenience		34.93928	-100.89030	302 W 2nd St	Clarendon	79226	+12547910009	http://www.valero.com	Valero Energy	0.84
-e327659eb9f9	Valero	convenience		34.43500	-100.22665	2004 Ave F NW	Childress	79201	+19409376960			0.92
-e5740d2f1c99	Valero	convenience		34.85654	-100.20435	710 Houston St	Wellington	79095	+18064472819	https://www.valero.com		0.65
-6ecdef7dbce8	Yesway	convenience		34.73325	-100.54295	1014 N Boykin Dr	Memphis	79245	+18062592391	http://www.yesway.com/	Yesway	0.95
-9b8461abcef8	Yesway	convenience		34.01254	-100.82884	1201 Bailey Avenue	Matador	79244	+18063472442	https://yesway.com/		0.85
-026980f2c616	Arby's	fastfood		34.43515	-100.23075	2301 Avenue F NW	Childress	79201	+19409378769	https://locations.arbys.com/tx/childress/2301-avenue-f-nw.html		0.97
-566d9b0fbd0a	Dairy Queen	fastfood		34.43008	-100.21351	900 Ave F NW	Childress	79201	+19409373677	https://www.dairyqueen.com/en-us/locations/tx/childress/900-ave-f-nw/13911/?y_source=1_MjkzMzk0MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
-3da4d38d907b	Dixie Maid Drive In	fastfood		34.01263	-100.31037	1618 Easly St	Paducah	79248	+18064923460	https://dixiemade.com/		0.96
-33caa007885e	DQ Grill & Chill	fastfood		34.43012	-100.21346	900 Ave F NW	Childress	79201		https://www.dairyqueen.com/en-us/locations/tx/childress/900-ave-f-nw/3684	DQ Grill & Chill	0.80
-3b19851450c9	Golden Chick	fastfood		34.43452	-100.22566	1910 Ave F NW	Childress	79201	+19409376869	https://locations.goldenchick.com/tx/childress/1108/	Golden Chick	0.96
-ee756db83d5a	Krispy Krunchy Chicken	fastfood		34.01220	-100.30171	1001 9th St	Paducah	79248	+15207051846	https://locations.krispykrunchy.com/tx/paducah/1001-9th-street	Krispy Krunchy Chicken	0.96
-1e855953557c	Little Caesars Pizza	fastfood	pizza restaurant	34.43501	-100.22671	2004 Ave F NW	Childress	79201	+19409378319	https://littlecaesars.com/en-us/store/11975	Little Caesars	0.96
-62bf8d7e0756	McDonald's	fastfood		34.43490	-100.22819	2111 Ave F Nw Us 287	Childress	79201	+19409373622	https://www.mcdonalds.com/us/en-us/location/tx/childress/2111-ave-f-nw-us-287/13489.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
-64e26b51b773	Pizza Hut	fastfood	pizza restaurant	34.43126	-100.21783	1209 Avenue F NW	Childress	79201	+19409373623	https://locations.pizzahut.com/tx/childress/1209-avenue-f-nw?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286171	Pizza Hut	0.96
-f088423d24ef	Pizza Hut	fastfood	pizza restaurant	34.94242	-100.89616	900 W. 2nd St. Donley	Clarendon	79226	+18068749494	https://locations.pizzahut.com/tx/clarendon/900-w-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282320	Pizza Hut	0.98
-e0fd433b182a	Sonic Drive In	fastfood		34.94246	-100.89651	812 West 2Nd Street	Clarendon	79226	+18068740483	https://locations.sonicdrivein.com/tx/clarendon/812-west-2nd-street.html	Sonic Drive-In	0.94
-eca6a87eadb0	Sonic Drive In	fastfood		34.43420	-100.22685	2001 Avenue F Nw	Childress	79201	+19409372446	https://locations.sonicdrivein.com/tx/childress/2001-avenue-f-nw.html	Sonic Drive-In	0.98
-f57454109281	Sonic Drive In	fastfood		34.72326	-100.53365	219 S Boykin @ 287	Memphis	79245	+18062593699	https://locations.sonicdrivein.com/tx/memphis/219-s-boykin-287.html	Sonic Drive-In	0.97
-df0d39d0ae1c	Subway	fastfood	sandwich shop	34.93937	-100.89027	302 W 2nd St	Clarendon	79226	+18068740021	https://www.subway.com		0.99
-e1c9831dfdd9	Subway	fastfood	sandwich shop	34.72326	-100.53365	219 S Boykin Dr	Memphis	79245	+18063587991	https://www.subway.com		0.97
-f7b2b9a9a6dd	Subway	fastfood	sandwich shop	34.43502	-100.22679	2004 Ave F NW	Childress	79201	+19409378319	https://restaurants.subway.com/united-states/tx/childress/2004-ave-f-nw	Subway	0.98
-0d65be881f1c	Taco Bell	fastfood		34.43653	-100.23235	2707 F NW	Childress	79201	+19409379090	http://www.tacobell.com/	Taco Bell	0.96
-ddc8f8288a6c	Garrisons Food Mart #6	grocery		34.42824	-100.20844	410 Avenue F NW	Childress	79201	+19409374075	http://hjgarrison.com/		0.89
-a863ae50577f	Lowe's Family Center #27	grocery		34.94075	-100.89212	401 W 2nd St	Clarendon	79226	+18068743164	https://www.acehardware.com/store-details/11903		1.00
-b77d0407a874	Lowes	grocery		34.94063	-100.89229	510 W 2nd St	Clarendon	79226		http://www.lowes.com/	Butterball	0.92
-e77a0c6cdf55	Market square	grocery		34.85680	-100.21190	1100 8th St	Wellington	79095	+18063344901	http://marketsquareonline.com		0.96
-2d492cd434a3	Moore Thriftway Supermarket	grocery		34.01125	-100.30179	1113 9th St	Paducah	79248	+18064923616			0.92
-7a4c4508de2a	Thriftway	grocery		34.72452	-100.54949	123 S 15th St	Memphis	79245	+18062593629	https://www.awginc.com		0.96
-60d671ca07eb	Turkey General Store	grocery		34.39295	-100.89738	301 Main St	Turkey	79261	+18064231330			0.55
-4cd0b3f60bb1	United Supermarkets	grocery		34.43390	-100.22785	2105 Ave. F Nw	Childress	79201	+19409373631	https://local.unitedsupermarkets.com/tx/childress/2105-ave-f-nw.html	United Supermarkets	1.00
-72c4900fbb26	United Supermarkets	grocery		34.43390	-100.22785	2105 Ave F NW	Childress	79201	+19409373631	https://local.unitedsupermarkets.com/tx/childress/2105-ave-f-nw.html	United Supermarkets	1.00
-c41da3d0a923	Childress Regional Medical Center	hospital		34.43914	-100.22739	Hwy 83 North	Childress	79201	+19409376371	http://www.childresshospital.com/		0.92
-41664ad2d34c	Collingsworth General Hospital	hospital		34.84895	-100.21236	1013 15th St	Wellington	79095	+18064472521	http://www.collingsworthgeneral.net		1.00
-2b22d733ac25	4h Hotels Llc	hotel		34.43521	-100.23242	400 Madison Ave	Childress	79201				0.95
-ccb8d339a12a	American Inn and Suites	hotel	motel	34.43240	-100.21994	1410 Ave F NW	Childress	79201	+19409372506	https://americaninnchildressbymagnuson.com/		0.97
-f5d69c4d18d4	Best Western Childress West Hotel	hotel		34.43538	-100.22757	2008 Ave F NW	Childress	79201	+19409373614	https://www.bestwestern.com/en_US/book/hotel-rooms.44788.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44788	Best Western Hotels & Resorts	1.00
-b1bf98166b19	Best Western Plus Red River Inn	hotel		34.94311	-100.89730	902 W 2nd St	Clarendon	79226	+18068740160	https://www.bestwestern.com/en_US/book/hotel-rooms.44548.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44548	Best Western Hotels & Resorts	1.00
-357922cbdc24	BUDGET INN	hotel	motel	34.73909	-100.54825	1400 Boykin Dr	Memphis	79245	+14328038180	http://www.budgetinn.com		0.97
-2dd9e414446e	Cherokee Inn Motel	hotel		34.85266	-100.20539	1105 Houston St	Wellington	79095	+18064472508			0.92
-2d453b81e6e6	Childress	hotel		34.43353	-100.22410	1801 Avenue F NW	Childress	79201	+19409376353	https://hitchinpostrv.com		0.55
-809d173a6ce5	Childress Inn	hotel	motel	34.43699	-100.23200	2804 Ave F NW	Childress	79201	+19409373686	http://www.childressinn.com		0.96
-ab0cb2c0a245	Days Inn	hotel		34.43659	-100.23096	2220 Avenue F NW	Childress	79201	+19402264718	http://www.daysinn.com	Days Inn	1.00
-f05febccd843	Days Inn by Wyndham Childress	hotel	resort	34.67424	-100.39153	2220 Ave F Highway 287	Childress	79201	+19402264718	https://www.wyndhamhotels.com/days-inn/childress-texas/days-inn-childress/overview?CID=LC:acbkp9kkmt716ab:12764&iata=00093796		0.85
-84e723d30c3a	Econo Lodge	hotel	resort	34.43309	-100.22405	1801 Avenue F NW	Childress	79201	+19409376353	https://www.choicehotels.com/texas/childress/econo-lodge-hotels/txm23?mc=llbillpx&pmf=local		0.99
-4e2f7fc0ec12	Faena Hotel Buenos Aires	hotel		34.43240	-100.21993	1410 Avenue F NW	Childress	79201	+19409372506	https://www.faena.com/buenos-aires?utm_source=google-gmb&utm_medium=organic&utm_campaign=gmb		0.61
-4335ba6acaa6	Hampton Inn & Suites Childress	hotel		34.43660	-100.23180	400 Madison Avenue	Childress	79201	+19409373500	https://www.hilton.com/en/hotels/clrsshx-hampton-suites-childress/?SEO_id=FB-AMER-HX-CLRSSHX	Hampton by Hilton	1.00
-e3558585f558	Historic Turkey Hotel, Turkey Texas	hotel		34.39404	-100.89799	201 N 3rd St	Turkey	79261				0.74
-e1f0d4370315	Holiday Inn Express & Suites Childress	hotel		34.43522	-100.23644	3001 Ave F NW	Childress	79201	+19409370900	https://www.ihg.com/holidayinnexpress/hotels/us/en/childress/chdex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-CHDEX	Holiday Inn Express	1.00
-fe6713044ee0	Hotel Childress Lofts	hotel	resort	34.42326	-100.20826	220 Ave B NW	Childress	79201	+19402264308	https://www.hotelchildresslofts.com/		0.97
-cbeab31bfc83	Hotel Turkey Restaurant	hotel		34.39394	-100.89773	201 3rd St	Turkey	79261	+18064231151	https://hotelturkeytexas.com/about-us/		0.92
-6153319203d4	Hunters Lodge Motel	hotel	motel	34.01335	-100.30463	902 N 11th St	Paducah	79248	+18064922167			0.99
-5dbba60a2011	Magnuson Hotel Childress	hotel	resort	34.43384	-100.22416	1804 Avenue F NW	Childress	79201	+19409376363			0.92
-a2055728b216	Motel 6	hotel	motel	34.43314	-100.22218	1612 Ave F NW	Childress	79201	+19402096071	http://www.motel6.com/	Motel 6	0.99
-5b4b37c5b5ff	Priceland Oasis Childress Tx	hotel		34.43335	-100.21734	13th St	Childress		+19404750346			0.77
-3a7e4bfb2e66	Quality Inn	hotel	resort	34.43619	-100.22752	2008 Avenue F NW	Childress	79201	+19409373434	https://www.choicehotels.com/texas/childress/quality-inn-hotels/tx979		0.92
-da6de9f89499	Red Roof Inn Childress	hotel	resort	34.43369	-100.22408	1801 Avenue F NW	Childress	79201	+19409376353	http://www.redroof.com/property/tx/childress/RRI489		0.92
-2446a7aa6936	Reddy Hospitality, Llc	hotel		34.43507	-100.23652	3001 Avenue F NW	Childress	79201				0.95
-e19876b64713	Rodeway Inn - Closed	hotel		34.43321	-100.22216	1612 F N W US 287	Childress	79201	+19409373695	https://www.choicehotels.com/texas/childress/rodeway-inn-hotels/tx320		0.77
-cdf5c841c8a2	Rodeway Inn Memphis	hotel	motel	34.74061	-100.54969	1600 N Boykin Dr	Memphis	79245		https://www.choicehotels.com/texas/memphis/rodeway-inn-hotels	Rodeway Inn	0.96
-510935b75bf8	Scott Lake, Childress, Tx	hotel		34.41324	-100.21695		Childress					0.86
-9380f80efe48	Super 8	hotel		34.42521	-100.20081	411 Avenue F NE	Childress	79201	+19405804325	https://www.wyndhamhotels.com/super-8/childress-texas/super-8-childress/overview		1.00
-7f4c436dfc9b	SureStay	hotel		34.43395	-100.22414	1804 Avenue F NW	Childress	79201	+19409376363	https://www.bestwestern.com/en_US/book/hotel-rooms.54145.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54145	SureStay Hotels	0.99
-90c52349302d	Trade Winds Motel	hotel	motel	34.43566	-100.22858	2014 Ave F NW	Childress	79201	+19409372555			0.99
-1a54d450cb65	Travelodge by Wyndham Memphis	hotel	resort	34.74046	-100.54957	1600 N Boykin Dr	Memphis	79245	+18062593583	https://www.wyndhamhotels.com/travelodge/memphis-texas/travelodge-memphis/overview?CID=LC:TL::GGL:RIO:National:15402&iata=00093796?CID=LC:g22xy9tahqskhx3:15402		0.97
-664ef9fcae62	Western Skies Motel	hotel	motel	34.94199	-100.89504	800 W 2nd St	Clarendon	79226	+18068743501			0.99
-070ab821a997	Plas-Mac Inc	office	plastics company	34.83308	-100.20460	3696 US-83 #4817	Wellington	79095	+18064470065	http://www.firetrucktanks.com/		0.92
-3dbe5bc98932	Suddenlink	office	telecommunications company	34.42387	-100.20742	241 Commerce St	Childress	79201	+18448747558	https://stores.suddenlink.com/tx/childress/241-commerce-street.html		0.92
-78676bc3e00b	Texas A&m Agrilife Extension Service	office		34.72478	-100.53639	512 W Main St Ste 2	Memphis	79245	+18062593015			0.65
-5b788a870716	Akshay Llc	restaurant		34.43410	-100.22405	1804 Avenue F NW	Childress	79201				0.95
-7d34cc2645cb	Angel's Subs & Sweets	restaurant	sandwich shop	34.85334	-100.20508	1011 Houston St	Wellington	79095	+18064475000	https://orders.cake.net/10203624		0.92
-d9d6589c2f60	B.O.B BBQ	restaurant	barbecue restaurant	34.01279	-100.30392	1020 Easly St	Paducah	79248	+18064921642			0.92
-cb00d62a721d	Bar H BBQ N More	restaurant	barbecue restaurant	34.93415	-100.88043	818 E. 2nd St.	Clarendon	79226	+18068740111	http://www.barhbbqnmore.com		0.77
-b4a4dccad3ec	Best Of Best Barbecue	restaurant	barbecue restaurant	34.01277	-100.30390	1020 Easly St	Paducah	79248	+18064921547			0.85
-6dbfb9472bd8	Billie Deans Cafe	restaurant	american restaurant	34.01209	-100.82904	1224 Bailey	Matador	79244	+18063472310	http://www.billiedeans.com		0.92
-0b066290b0db	Clarendon Outpost Diner	restaurant	diner	34.94064	-100.89422	619 W 2nd St C	Clarendon	79226	+18068745203	http://clarendonhomestylediner.com/		0.81
-51d367175347	Come and Get It	restaurant		34.85136	-100.20497	1209 Houston St	Wellington	79095	+18064470938			0.92
-40024b81a046	Daddy's	restaurant	diner	34.42633	-100.20353	107 Ave F NE	Childress	79201	+19409387124			0.92
-9356deab0ff1	Dawson's Family Restaurant	restaurant	comfort food restaurant	34.43319	-100.22347	1709 Avenue F NW	Childress	79201	+19409376070	http://foodeist.com/place/dawson-s-family-restaurant		0.92
-36229b275346	Dos Sombreros	restaurant		34.85589	-100.21271	808 East Ave	Wellington	79095		https://dossombreros.co.uk		0.95
-a51e12c83b79	Double G	restaurant	american restaurant	34.01280	-100.30478	1112 Easly St	Paducah	79248	+18064923171	https://double-g-s.hub.biz		0.92
-5fc00a932db2	Fat & Happy BBQ	restaurant	barbecue restaurant	34.72378	-100.53418	201 South Boykin Dr	Memphis	79245	+18062040950			0.92
-c78b9a5be264	Glorias Cafe	restaurant		34.72556	-100.53690	519 W Main St	Memphis	79245				0.95
-2073736cc41c	Godfather's Pizza Express	restaurant	pizza restaurant	34.72336	-100.53329	219 S Boykin Dr	Memphis	79245	+18062592300	http://www.godfathers.com/godfathers-pizza-44858		0.96
-2cf324902362	Goetz Barbecue Company	restaurant	barbecue restaurant	34.42397	-100.19854	610 Avenue F NE	Childress	79201	+19409387085			0.97
-544418c49343	Golden Dragon	restaurant	chinese restaurant	34.42702	-100.20551	200 Avenue F NW	Childress	79201	+19409373767	http://goldendragontucson.com/		0.59
-77f1e04c110b	Golden Dragon Restaurant	restaurant	chinese restaurant	34.42707	-100.20563	200 Avenue F NW	Childress	79201	+19409373331	https://www.goldendragonjacksonville.com		0.55
-11ffeba4771c	Grumpy's Pizza	restaurant	pizza restaurant	34.93426	-100.88084	812 E 2nd St	Clarendon	79226	+18068223287			0.92
-35f341994a2c	J T's Drive-In	restaurant	theme restaurant	34.42799	-100.20815	406 Avenue F NW	Childress	79201	+19409372688	https://start.cortera.com/company/research/k5q4jsp8r/j-ts-drivein		0.95
-1ca8a2381c52	J.D. StakeOut	restaurant	steakhouse	34.93910	-100.88977	210 W 2nd St	Clarendon	79226	+18068747777	http://j-d-steakout.edan.io		0.92
-eacbda15eb43	Jeanna's Blessings	restaurant	mexican restaurant	34.42644	-100.20418	101 Ave F NE	Childress	79201	+18069830356			0.92
-07eb205c2ee1	Jinda' Cafe	restaurant	thai restaurant	34.94118	-100.89420	700 W 2nd St	Clarendon	79226	+18068741771	http://jindacafe.food90.com/		0.97
-1ec5258b1d27	K-bob's Steakhouse	restaurant		34.43361	-100.22462	1805 Avenue F NW	Childress	79201		k-bobs.com		0.92
-c57869ec09e8	Kettle	restaurant	american restaurant	34.43442	-100.22504	1902 Avenue F NW	Childress	79201	+19409378496	http://kettle.com/		0.92
-b6a3a4fd48b6	La Unica Taqueria	restaurant	mexican restaurant	34.42235	-100.20522	200 2nd St NE	Childress	79201	+19409387010	http://www.launicachildress.com		0.96
-59fa90df20c0	Lakeview Grill	restaurant	comfort food restaurant	34.67405	-100.69621	101 Smith St	Lakeview	79239	+18068673022	http://frankieslakeviewgrill.com		0.96
-abaeda862773	Letty's Cafe	restaurant		34.39263	-100.89504	502 Main St	Turkey	79261				0.92
-6599ce4daa3b	Lucido's Italian Express	restaurant		34.43630	-100.23187	2305 Avenue F NW	Childress	79201	+19409378833	https://www.lucidositalianexpressmenu.com/?utm_source=organic_bing&utm_medium=bing_pw		0.92
-12b312503b7f	Main Street Cafe	restaurant	comfort food restaurant	34.01358	-100.82246	1023 Main St	Matador	79244		http://matadormainstreetcafe.com		0.96
-d7014bb6cbc1	Mi Casita	restaurant	mexican restaurant	34.72403	-100.54244	518 W Noel St	Memphis	79245	+18062591892	http://www.micasitafood.com		0.77
-f0c424f07177	Mi Casita Restaurant	restaurant	mexican restaurant	34.72401	-100.53677		Memphis	79245	+18062591892	http://yahoo.com/		0.92
-0998b11f0473	My-t Burger	restaurant	burger restaurant	34.84948	-100.21448	1411 West Ave	Wellington	79095	+18064475175			0.92
-54da4babded6	Newburger’s	restaurant		34.93666	-100.88889	315 S Kearney St	Clarendon	79226	+18062907434			0.74
-d6baedfba632	Ragin' Texan Bar-b-que	restaurant	barbecue restaurant	34.72783	-100.53724	317 N Boykin Dr	Memphis	79245	+18062591234			0.92
-b09dae444c17	Rock Inn Cafe	restaurant	american restaurant	34.73397	-100.54353	1022 Boykin Dr	Memphis	79245	+18062591200			0.98
-077a1819ff06	Rusty Spur Steakhouse & Saloon	restaurant	steakhouse	34.42353	-100.20640	241 N Main St	Childress	79201	+19409387040			0.97
-0de12c20c1e6	Sol's TEX MEX Cocina	restaurant	texmex restaurant	34.94007	-100.89286	603 W 2nd St	Clarendon	79226	+18063185413			0.96
-18343c8e0629	Stark Burgers	restaurant		34.54556	-100.44067	602 Wright St	Estelline	79233	+19405851054			0.91
-ba74962d1b8f	Street tacos	restaurant		34.00835	-100.30174	1409 9th St	Paducah	79248	+18066201534			0.57
-70e567e80294	Thai Kitchen	restaurant	thai restaurant	34.43302	-100.22173	1602 Ave F NW	Childress	79201	+19409372227	http://www.thaikitchenla.com		0.92
-fd40b49ebcde	The Drive-in Burger Wagon	restaurant	burger restaurant	34.43490	-100.22964		Childress		+19404751609			0.62
-eaff78ff085a	The Plaza Mexican Restaurant & Bar	restaurant	mexican restaurant	34.43214	-100.22070	1501 Ave F NW	Childress	79201	+19409378553	https://www.theplazarestaurant.com/	The Plaza Restaurant & Bar - Lubbock, Texas	0.98
-6ed48b10ebbd	The Twisted Sister Saloon	restaurant	bar and grill restaurant	34.43118	-100.21621	1110 Ave F NW	Childress	79201	+19409387078			0.92
-e28a50819568	Top Notch Texas BBQ	restaurant	barbecue restaurant	34.42598	-100.20253	211 Ave F NE	Childress	79201	+19409378658	http://www.topnotchtexasbbq.com		0.97
-7090cdaea0b3	Two Rivers Family Restaurant	restaurant	theme restaurant	34.85133	-100.20455	1270-1298 US-83	Wellington	79095	+18064472951			0.92
-563508504e54	Unos Tacos	restaurant	mexican restaurant	34.42569	-100.20459	504 N Main St	Childress	79201	+19405858018	http://www.unostacos.com		0.92
-d76da4fc53eb	Wheats Artisan Pizzeria	restaurant	pizza restaurant	34.42558	-100.20599	424 Commerce St	Childress	79201	+19409387036	instagram.com/wheatsartisanbakery		0.94
-b0d59905972f	Whitaker's Family Restaurant	restaurant	american restaurant	34.01279	-100.30470	1112 Easly St	Paducah	79248	+18064921515			0.92
-0534f1051748	Willie B’s Restaurant	restaurant		34.93996	-100.89295	603 W 2nd St	Clarendon	79226	+18062055007			0.70
-c788b5bf728a	Avir at Childress	senior	retirement home	34.43519	-100.20699	1200 7th St NW	Childress	79201	+19409378668	http://avirhg.com/	Senior Living Properties	0.98
-62443436cdd0	Clarendon Nursing Home	senior	retirement home	34.94575	-100.89680	10 Medical Dr	Clarendon	79226	+18068742273	https://longtermpsych.org/		0.92
-92c4644b6cbf	Community Care Center of Clarendon	senior	retirement home	34.94429	-100.89597	10 Medical Center Dr	Clarendon	79226	+18068745221	http://donleytx.com		0.60
-742b0467630c	Cottage Village of Childress	senior	retirement home	34.42150	-100.20199	204 5th St NE	Childress	79201	+19409372045	http://cottagevillageliving.com/		0.92
-a16be5210a34	Matador Health and Rehabilitation	senior	retirement home	34.02512	-100.82249	805 Harrison Ave	Matador	79244	+18063471000	http://matadornursing.com/		0.95
-11a79ec96677	Memphis Convalescent Center	senior	retirement home	34.73916	-100.55225	1415 N 18th St	Memphis	79245	+18062593566	http://www.memphisconvalescent.com/		0.92
-6e5e70172f36	Rhinehart Eldercare	senior	assisted living facility	34.93530	-100.88789	216 E 4th St	Clarendon	79226	+18065705569	http://www.rhineharteldercare.com/		0.92
-1b0399df69b7	Saints Roost Assisted Living	senior	assisted living facility	34.93407	-100.88548	502 E 4th St	Clarendon	79226	+18068741417			0.92
-c24638466286	Senior Living Properties	senior	retirement home	34.43520	-100.20693	1200 7th St NW	Childress	79201	+19409378668			0.92
-daec04906aee	Wellington Care Center	senior	retirement home	34.84801	-100.21659	1506 Childress St	Wellington	79095	+18064472513	http://wellingtoncarecenter.com/		0.92
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+cf24ade256fc	Bromdale Bakery	bakery		34.93259	-100.88961	702 S Carhart St	Clarendon	79226	+18064069333	https://www.bromdale.com/		0.67	
+c3799e754012	Childress Bakery Sandwich Shop	bakery		34.43005	-100.21490	1001 Ave F NW	Childress	79201	+19409378771	http://www.childressinn.com		0.97	
+94c5e8660bb4	Cinnabon	bakery		34.43518	-100.23011	2301 Avenue F NW	Childress	79201	+19409378769	https://locations.cinnabon.com/tx/childress/2301-avenue-f-nw?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.97	
+8a80dbf8d88f	The 'Novas Bakery	bakery		34.01369	-100.30773	1408 Richards St	Paducah	79248	+18322705377			0.67	
+668bae8ef057	Wellington Donuts	bakery	donut shop	34.85613	-100.21178	1103 8th St	Wellington	79095	+14698417863			0.92	
+905b39d4b2c7	BRIX Bar & Eatery	bar		34.85509	-100.21355	913 9th St	Wellington	79095	+18064470893			0.92	
+ddcd6cd9a69e	Refz Sports Bar and Grill	bar	sports bar	34.93833	-100.88822	118 Kearney St	Clarendon	79226	+18068227339			0.96	
+43ad82a24742	The Squirrel Hut	bar		34.01006	-100.75577	402 East U.S. 62	Matador	79244				0.77	
+73dbed30aeed	Turkey Creek Winery	bar	winery	34.67314	-100.69864	203 Main St	Turkey	79261	+18064231005			0.75	
+0f3103489f6b	Arvis Davis Chevrolet, Inc.	cardealer	used auto dealer	34.01213	-100.30220	1010 9th St	Paducah	79248	+18064923663	https://www.arvisdavischevy.com/		0.92	
+8291fc138977	Bailey Autos	cardealer		34.93698	-100.88611	304 E 2nd St	Clarendon	79226	+18068745311	http://www.aaronhuey.com/		0.92	
+0df273d8e21d	Cash For Cars Memphis	cardealer		34.72118	-100.53597	116 S 5th St	Memphis	79245	+18065848367			0.58	
+f4d086edb2ea	Cowboy Carwash	cardealer		34.43297	-100.22234	1611 Ave F NW	Childress	79201	+19409376805	https://cowboy-carwash.hub.biz/		0.92	
+1804eec858c2	Hill's Motors	cardealer		34.43173	-100.21990	1407 Avenue F NW	Childress	79201	+19409372011	http://www.hillsmotorsco.com/		0.92	
+1ecac9b036df	Hills Motor	cardealer	used auto dealer	34.38550	-100.32997	1407 Avenue F NW	Childress	79201	+19405859999	https://childressautorepairs.com		0.77	
+8ca07391ce35	Western Equipment | Childress	cardealer		34.44219	-100.24667	7769 US-287	Childress	79201	+19409373693	http://www.west-equip.com/	Western Equipment	0.92	
+d58d4e7c0c90	Midway Drive-In	cinema		34.37456	-100.97540	11884 Highway 86	Quitaque	79255	+18064551237	http://www.cityseekr.com/quitaque/entertainment-venues/poi-midway-drive-in-641996.html		0.96	
+b07c1f3efd1f	Sandell Drive In Theater in Clarendon, Texas	cinema		34.94685	-100.89674	12 Medical Center Dr	Clarendon	79226	+18068740685	http://www.sandelldrivein.com/		0.91	
+eed9be70b3e3	Wellington Ritz Theatre Inc	cinema		34.85480	-100.21297	902 East Ave	Wellington	79095	+18064470090	http://wellingtonritztheatre.com/		0.92	
+a61c7e4d2356	Bobcat Den	coffee		34.43476	-100.20950	800 Avenue L NW	Childress	79201	+19409376131	http://www.childressisd.net/		0.75	
+cfeaf5c7ddc2	Crossroads Cafe	coffee		34.01461	-100.30175	820 Backus St	Paducah	79248	+18064724205			0.92	
+119d4eecb512	Diamond Cones & Cafe	coffee		34.94201	-100.89510	800 2nd St	Clarendon	79226	+18066761006			0.80	
+4d3584cc7b81	Home Grounds Coffee Bakery	coffee		34.85497	-100.21382	907 9th St	Wellington	79095		https://kentrollins.com/		0.92	
+0c77f678f3c5	HTeaO	coffee	tea room	34.43139	-100.21865	1305 Ave F NW	Childress	79201	+19405360582	https://hteao.com/locations/childress-tx/	HTeaO	0.92	
+a9c349d1320f	Starbucks	coffee		34.43371	-100.22461	1805 Ave F Nw	Childress	79201	+19402263141	https://www.starbucks.com/store-locator/store/1038372/hwy-287-us-62-1805-ave-f-nw-childress-tx-792013324-us	Starbucks	0.92	
+a7d7b7a54957	The Buckin' Bean	coffee		34.93972	-100.89111	402 W 2nd St	Clarendon	79226	+18068742326	https://cyrusramsey.com/places/the-buckin-bean/		0.95	
+37530ebc7c81	The Cottage	coffee		34.72611	-100.53596	121 S 5th St	Memphis	79245	+18062593520			0.97	
+b09c18439cb7	The Gettin Spot	coffee		34.85345	-100.20474	1010 Houston St	Wellington	79095	+18064475830	http://the-gettin-spot.poi.place		0.92	
+253634bf6ea7	Clarendon College	college		34.43516	-100.22495	1902 Ave G NW	Childress	79201	+19409372001	http://www.clarendoncollege.edu/	Clarendon College	0.92	
+b767ec05849a	Clarendon College	college		34.94460	-100.90240	1122 College Dr	Clarendon	79226	+18068743571	http://www.clarendoncollege.edu/	Clarendon College	0.92	
+0b402a780e1f	A-1 Fuel and Supply	convenience		34.72671	-100.53477	207 4th St	Memphis	79245	+18062592531			0.92	
+07bd2c2d0f6b	Allsup's	convenience		34.42825	-100.21040	601 Ave F NW	Childress	79201	+19403380028	https://www.allsups.com/	Allsup’s	0.92	
+6790661587d3	Allsup's	convenience		34.73321	-100.54288	1014 N Boykin Dr	Memphis	79245	+18062592391	https://www.allsups.com/	Allsup’s	0.92	
+7f65df8b3c75	Allsup's	convenience		34.39323	-100.88975	100 N 9th St	Turkey	79261	+18066075185	https://www.allsups.com/	Allsup’s	1.00	
+8d42d8ad8e9e	Allsup's	convenience		34.01233	-100.30984	1602 Easly St	Paducah	79248			Allsup's	0.92	
+90f6ce1197f2	Allsup's	convenience		34.01188	-100.82878	1220 Bailey Ave	Matador	79244	+18063472373	https://www.allsups.com/	Allsup’s	1.00	
+9fa36b317614	Allsup's	convenience		34.94186	-100.89693	805 W 2nd St	Clarendon	79226	+18068740187	https://www.allsups.com/	Allsup’s	1.00	
+a065e0d19a8d	Allsup's	convenience		34.39350	-100.90633	109 Main St	Turkey	79261	+18064231239	http://www.allsups.com		0.77	
+0ec099cda872	Allsup's Convenience Store	convenience		34.84936	-100.21400	1410 W Ave	Wellington	79095	+18064472148	https://www.allsups.com/		0.99	
+48799b774ebf	Allsup's Convenience Store	convenience		34.85657	-100.20483	710 Houston St	Wellington	79095	+18064472819	http://www.allsups.com/		0.92	
+0c7105ba93a2	Allsups	convenience		34.43297	-100.22098	1510 avenue f nw	Childress	79201	+19409373203	https://www.allsups.com		0.77	
+e32381c0752c	Alon	convenience		34.43271	-100.22118	1510 Avenue F NW	Childress	79201	+19409373203	http://myalon.com/		0.92	
+e5475f52f389	ALON	convenience		34.01242	-100.30987	1602 Easly St	Paducah	79248	+18064923947	https://www.allsups.com/	Allsup’s	1.00	
+42b05dffb178	Alon Gas Station	convenience		34.93450	-100.88032	817 E 2nd St	Clarendon	79226	+18068742151	http://myalon.com/		0.97	
+a863cce9e45c	CAT Scale	convenience	truck gas station	34.43493	-100.23102	2301 Avenue F NW	Childress	79201	+19409378769	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92	
+4f8c05c9a0eb	CEFCO Convenience Store	convenience		34.43501	-100.22673	2004 Avenue F NW	Childress	79201	+19409370040	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92	
+54bf229b988a	CEFCO Convenience Store	convenience		34.93936	-100.89037	302 W 2nd St	Clarendon	79226	+18068740076	https://www.cefcostores.com/		0.92	
+75ac5fac3bf0	Chevron	convenience		34.93946	-100.89212	415 W 2nd St	Clarendon	79226	+18068740180	http://www.chevron.com		0.92	
+c699ece44510	Clarendon Outpost	convenience		34.94060	-100.89421	619 W 2nd St	Clarendon	79226	+18068745201	http://www.clarendonoutpost.com/		0.96	
+3bb22930859a	Conoco	convenience		34.42480	-100.20109	458-498 Avenue F NE	Childress	79201	+19409374075	https://www.conoco.com/		1.00	
+49f995136f00	Conoco	convenience		34.42513	-100.20101	400 Avenue F NE	Childress	79201	+19409374075	https://www.conoco.com/	Conoco	1.00	
+6893541a0386	Conoco	convenience		34.01236	-100.30154	817 Easly St	Paducah	79248	+18064922979	https://www.conoco.com/		0.92	
+a3ae1c2fffb0	Conoco	convenience		34.93965	-100.89210	415 W 2nd St	Clarendon	79226	+18068740180	https://www.conoco.com/		0.92	
+b93a868899ff	Conoco	convenience		34.72900	-100.53899	415 N Boykin Dr	Memphis	79245	+18062591103	https://www.conoco.com/		1.00	
+2a977ee73707	Dollar Tree	convenience		34.43645	-100.23146	2305 Ave F NW Ste 500	Childress	79201	+19407326107	http://www.dollartree.com/locations/tx/childress/7781/		0.92	
+d1b7b7d94a72	Exxon	convenience		34.93913	-100.88989	302 W 2nd St	Clarendon	79226	+18068743044	http://www.exxon.com		0.66	
+305c67e23573	Family Dollar	convenience		34.85622	-100.20758	1501 8th St	Wellington	79095	+18065716003	http://www.familydollar.com/locations/tx/wellington/33186/		0.92	
+41ca36cdbe97	Garrison Food Mart 7	convenience		34.72919	-100.53895	415 Boykin Dr	Memphis	79245	+18062591103	http://Hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.99	
+b30c86ca3fd7	Garrison's Food Mart	convenience		34.42478	-100.20106	400 Ave F NE	Childress	79201	+19409374075	http://conoco.com	Garrison Food Mart Shamrock Texas	0.99	
+d8ffad4052e9	Garrison's Food Mart	convenience		34.93960	-100.89206	415 W 2nd St	Clarendon	79226	+18068740180	http://hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.92	
+cefa79f0f82e	HOP IN 430464	convenience		34.01246	-100.82882	1201 BAILEY	Matador	79244			Phillips 66	0.80	
+87b3c2294588	Love's Travel Stops and Country Stores	convenience		34.72307	-100.53367	219 S Boykin Dr	Memphis	79245	+18062592300	https://www.loves.com/locations/247	Love	1.00	
+0e458a5589bd	Murphy Usa	convenience		34.43654	-100.23320	2709 Avenue F NW	Childress	79201	+19409372926			1.00	
+f9bdadc42733	PAK A SAK 21	convenience		34.43156	-100.21807	1300 AVE F NW	Childress	79201			Phillips 66	0.80	
+2cea7bc6455f	Pak-A-Sak	convenience		34.43212	-100.21843	1300 Ave F NW	Childress	79201	+19409377015	http://pakasak.net		0.92	
+053e7904dccf	Phillips 66	convenience		34.94090	-100.89463	619 W 2nd St	Clarendon	79226	+19722148695	https://www.phillips66gas.com/		0.92	
+3a824972b771	Phillips 66	convenience		34.85608	-100.21130	1108 8th St	Wellington	79095	+18064475125	https://www.phillips66.com		0.65	closed
+a267087b9512	Phillips 66	convenience		34.43198	-100.21834	1342 Avenue F NW	Childress	79201	+19409377015	https://www.phillips66gas.com/		0.92	
+d0976b77ea19	Phillips 66	convenience		34.72903	-100.53904	415 N Boykin Dr	Memphis	79245	+18062591103	https://www.phillips66gas.com/station/CON-GARRISON-FOOD-MART-7-MEMPHIS-0000912066/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.92	
+e25c66f72ec2	Phillips 66	convenience		34.01241	-100.82887	1137 Bailey Ave	Matador	79244	+18063472442	https://www.phillips66gas.com/		0.92	
+be6fbd88b7a7	Phillips 66 Gas	convenience		34.01247	-100.30176	1001 9th St	Paducah	79248	+18064922979	https://www.phillips66gas.com/	Phillips 66 Gas	0.76	
+f885cb274402	Pilot Travel Center	convenience		34.43533	-100.23026	2301 Ave F NW	Childress	79201	+19409378769	https://locations.pilotflyingj.com/us/tx/childress/2301-avenue-f-nw	Pilot Flying J	0.99	
+b23a3bb15a01	THE STORE	convenience		34.01243	-100.30185	1001 9TH ST	Paducah	79248			Conoco	0.93	
+317d2f67bd05	Valero	convenience		34.84953	-100.21384	1410 West Ave	Wellington	79095	+18064472148	https://www.valero.com		0.65	
+61ed60c47e10	Valero	convenience		34.73323	-100.54293	1014 N Boykin Dr	Memphis	79245	+12103452000	https://www.valero.com		0.95	
+72a23bd8d044	Valero	convenience		34.93928	-100.89030	302 W 2nd St	Clarendon	79226	+12547910009	http://www.valero.com	Valero Energy	0.84	
+e327659eb9f9	Valero	convenience		34.43500	-100.22665	2004 Ave F NW	Childress	79201	+19409376960			0.92	
+e5740d2f1c99	Valero	convenience		34.85654	-100.20435	710 Houston St	Wellington	79095	+18064472819	https://www.valero.com		0.65	
+6ecdef7dbce8	Yesway	convenience		34.73325	-100.54295	1014 N Boykin Dr	Memphis	79245	+18062592391	http://www.yesway.com/	Yesway	0.95	
+9b8461abcef8	Yesway	convenience		34.01254	-100.82884	1201 Bailey Avenue	Matador	79244	+18063472442	https://yesway.com/		0.85	
+026980f2c616	Arby's	fastfood		34.43515	-100.23075	2301 Avenue F NW	Childress	79201	+19409378769	https://locations.arbys.com/tx/childress/2301-avenue-f-nw.html		0.97	
+566d9b0fbd0a	Dairy Queen	fastfood		34.43008	-100.21351	900 Ave F NW	Childress	79201	+19409373677	https://www.dairyqueen.com/en-us/locations/tx/childress/900-ave-f-nw/13911/?y_source=1_MjkzMzk0MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99	
+3da4d38d907b	Dixie Maid Drive In	fastfood		34.01263	-100.31037	1618 Easly St	Paducah	79248	+18064923460	https://dixiemade.com/		0.96	
+33caa007885e	DQ Grill & Chill	fastfood		34.43012	-100.21346	900 Ave F NW	Childress	79201		https://www.dairyqueen.com/en-us/locations/tx/childress/900-ave-f-nw/3684	DQ Grill & Chill	0.80	
+3b19851450c9	Golden Chick	fastfood		34.43452	-100.22566	1910 Ave F NW	Childress	79201	+19409376869	https://locations.goldenchick.com/tx/childress/1108/	Golden Chick	0.96	
+ee756db83d5a	Krispy Krunchy Chicken	fastfood		34.01220	-100.30171	1001 9th St	Paducah	79248	+15207051846	https://locations.krispykrunchy.com/tx/paducah/1001-9th-street	Krispy Krunchy Chicken	0.96	
+1e855953557c	Little Caesars Pizza	fastfood	pizza restaurant	34.43501	-100.22671	2004 Ave F NW	Childress	79201	+19409378319	https://littlecaesars.com/en-us/store/11975	Little Caesars	0.96	
+62bf8d7e0756	McDonald's	fastfood		34.43490	-100.22819	2111 Ave F Nw Us 287	Childress	79201	+19409373622	https://www.mcdonalds.com/us/en-us/location/tx/childress/2111-ave-f-nw-us-287/13489.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98	
+64e26b51b773	Pizza Hut	fastfood	pizza restaurant	34.43126	-100.21783	1209 Avenue F NW	Childress	79201	+19409373623	https://locations.pizzahut.com/tx/childress/1209-avenue-f-nw?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286171	Pizza Hut	0.96	
+f088423d24ef	Pizza Hut	fastfood	pizza restaurant	34.94242	-100.89616	900 W. 2nd St. Donley	Clarendon	79226	+18068749494	https://locations.pizzahut.com/tx/clarendon/900-w-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282320	Pizza Hut	0.98	
+e0fd433b182a	Sonic Drive In	fastfood		34.94246	-100.89651	812 West 2Nd Street	Clarendon	79226	+18068740483	https://locations.sonicdrivein.com/tx/clarendon/812-west-2nd-street.html	Sonic Drive-In	0.94	
+eca6a87eadb0	Sonic Drive In	fastfood		34.43420	-100.22685	2001 Avenue F Nw	Childress	79201	+19409372446	https://locations.sonicdrivein.com/tx/childress/2001-avenue-f-nw.html	Sonic Drive-In	0.98	
+f57454109281	Sonic Drive In	fastfood		34.72326	-100.53365	219 S Boykin @ 287	Memphis	79245	+18062593699	https://locations.sonicdrivein.com/tx/memphis/219-s-boykin-287.html	Sonic Drive-In	0.97	
+df0d39d0ae1c	Subway	fastfood	sandwich shop	34.93937	-100.89027	302 W 2nd St	Clarendon	79226	+18068740021	https://www.subway.com		0.99	
+e1c9831dfdd9	Subway	fastfood	sandwich shop	34.72326	-100.53365	219 S Boykin Dr	Memphis	79245	+18063587991	https://www.subway.com		0.97	
+f7b2b9a9a6dd	Subway	fastfood	sandwich shop	34.43502	-100.22679	2004 Ave F NW	Childress	79201	+19409378319	https://restaurants.subway.com/united-states/tx/childress/2004-ave-f-nw	Subway	0.98	
+0d65be881f1c	Taco Bell	fastfood		34.43653	-100.23235	2707 F NW	Childress	79201	+19409379090	http://www.tacobell.com/	Taco Bell	0.96	
+ddc8f8288a6c	Garrisons Food Mart #6	grocery		34.42824	-100.20844	410 Avenue F NW	Childress	79201	+19409374075	http://hjgarrison.com/		0.89	
+a863ae50577f	Lowe's Family Center #27	grocery		34.94075	-100.89212	401 W 2nd St	Clarendon	79226	+18068743164	https://www.acehardware.com/store-details/11903		1.00	
+b77d0407a874	Lowes	grocery		34.94063	-100.89229	510 W 2nd St	Clarendon	79226		http://www.lowes.com/	Butterball	0.92	
+e77a0c6cdf55	Market square	grocery		34.85680	-100.21190	1100 8th St	Wellington	79095	+18063344901	http://marketsquareonline.com		0.96	
+2d492cd434a3	Moore Thriftway Supermarket	grocery		34.01125	-100.30179	1113 9th St	Paducah	79248	+18064923616			0.92	
+7a4c4508de2a	Thriftway	grocery		34.72452	-100.54949	123 S 15th St	Memphis	79245	+18062593629	https://www.awginc.com		0.96	
+60d671ca07eb	Turkey General Store	grocery		34.39295	-100.89738	301 Main St	Turkey	79261	+18064231330			0.55	
+4cd0b3f60bb1	United Supermarkets	grocery		34.43390	-100.22785	2105 Ave. F Nw	Childress	79201	+19409373631	https://local.unitedsupermarkets.com/tx/childress/2105-ave-f-nw.html	United Supermarkets	1.00	
+72c4900fbb26	United Supermarkets	grocery		34.43390	-100.22785	2105 Ave F NW	Childress	79201	+19409373631	https://local.unitedsupermarkets.com/tx/childress/2105-ave-f-nw.html	United Supermarkets	1.00	
+c41da3d0a923	Childress Regional Medical Center	hospital		34.43914	-100.22739	Hwy 83 North	Childress	79201	+19409376371	http://www.childresshospital.com/		0.92	
+41664ad2d34c	Collingsworth General Hospital	hospital		34.84895	-100.21236	1013 15th St	Wellington	79095	+18064472521	http://www.collingsworthgeneral.net		1.00	
+2b22d733ac25	4h Hotels Llc	hotel		34.43521	-100.23242	400 Madison Ave	Childress	79201				0.95	
+ccb8d339a12a	American Inn and Suites	hotel	motel	34.43240	-100.21994	1410 Ave F NW	Childress	79201	+19409372506	https://americaninnchildressbymagnuson.com/		0.97	
+f5d69c4d18d4	Best Western Childress West Hotel	hotel		34.43538	-100.22757	2008 Ave F NW	Childress	79201	+19409373614	https://www.bestwestern.com/en_US/book/hotel-rooms.44788.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44788	Best Western Hotels & Resorts	1.00	
+b1bf98166b19	Best Western Plus Red River Inn	hotel		34.94311	-100.89730	902 W 2nd St	Clarendon	79226	+18068740160	https://www.bestwestern.com/en_US/book/hotel-rooms.44548.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44548	Best Western Hotels & Resorts	1.00	
+357922cbdc24	BUDGET INN	hotel	motel	34.73909	-100.54825	1400 Boykin Dr	Memphis	79245	+14328038180	http://www.budgetinn.com		0.97	
+2dd9e414446e	Cherokee Inn Motel	hotel		34.85266	-100.20539	1105 Houston St	Wellington	79095	+18064472508			0.92	
+2d453b81e6e6	Childress	hotel		34.43353	-100.22410	1801 Avenue F NW	Childress	79201	+19409376353	https://hitchinpostrv.com		0.55	
+809d173a6ce5	Childress Inn	hotel	motel	34.43699	-100.23200	2804 Ave F NW	Childress	79201	+19409373686	http://www.childressinn.com		0.96	
+ab0cb2c0a245	Days Inn	hotel		34.43659	-100.23096	2220 Avenue F NW	Childress	79201	+19402264718	http://www.daysinn.com	Days Inn	1.00	
+f05febccd843	Days Inn by Wyndham Childress	hotel	resort	34.67424	-100.39153	2220 Ave F Highway 287	Childress	79201	+19402264718	https://www.wyndhamhotels.com/days-inn/childress-texas/days-inn-childress/overview?CID=LC:acbkp9kkmt716ab:12764&iata=00093796		0.85	
+84e723d30c3a	Econo Lodge	hotel	resort	34.43309	-100.22405	1801 Avenue F NW	Childress	79201	+19409376353	https://www.choicehotels.com/texas/childress/econo-lodge-hotels/txm23?mc=llbillpx&pmf=local		0.99	
+4e2f7fc0ec12	Faena Hotel Buenos Aires	hotel		34.43240	-100.21993	1410 Avenue F NW	Childress	79201	+19409372506	https://www.faena.com/buenos-aires?utm_source=google-gmb&utm_medium=organic&utm_campaign=gmb		0.61	
+4335ba6acaa6	Hampton Inn & Suites Childress	hotel		34.43660	-100.23180	400 Madison Avenue	Childress	79201	+19409373500	https://www.hilton.com/en/hotels/clrsshx-hampton-suites-childress/?SEO_id=FB-AMER-HX-CLRSSHX	Hampton by Hilton	1.00	
+e3558585f558	Historic Turkey Hotel, Turkey Texas	hotel		34.39404	-100.89799	201 N 3rd St	Turkey	79261				0.74	
+e1f0d4370315	Holiday Inn Express & Suites Childress	hotel		34.43522	-100.23644	3001 Ave F NW	Childress	79201	+19409370900	https://www.ihg.com/holidayinnexpress/hotels/us/en/childress/chdex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-CHDEX	Holiday Inn Express	1.00	
+fe6713044ee0	Hotel Childress Lofts	hotel	resort	34.42326	-100.20826	220 Ave B NW	Childress	79201	+19402264308	https://www.hotelchildresslofts.com/		0.97	
+cbeab31bfc83	Hotel Turkey Restaurant	hotel		34.39394	-100.89773	201 3rd St	Turkey	79261	+18064231151	https://hotelturkeytexas.com/about-us/		0.92	
+6153319203d4	Hunters Lodge Motel	hotel	motel	34.01335	-100.30463	902 N 11th St	Paducah	79248	+18064922167			0.99	
+5dbba60a2011	Magnuson Hotel Childress	hotel	resort	34.43384	-100.22416	1804 Avenue F NW	Childress	79201	+19409376363			0.92	
+a2055728b216	Motel 6	hotel	motel	34.43314	-100.22218	1612 Ave F NW	Childress	79201	+19402096071	http://www.motel6.com/	Motel 6	0.99	
+5b4b37c5b5ff	Priceland Oasis Childress Tx	hotel		34.43335	-100.21734	13th St	Childress		+19404750346			0.77	
+3a7e4bfb2e66	Quality Inn	hotel	resort	34.43619	-100.22752	2008 Avenue F NW	Childress	79201	+19409373434	https://www.choicehotels.com/texas/childress/quality-inn-hotels/tx979		0.92	
+da6de9f89499	Red Roof Inn Childress	hotel	resort	34.43369	-100.22408	1801 Avenue F NW	Childress	79201	+19409376353	http://www.redroof.com/property/tx/childress/RRI489		0.92	
+2446a7aa6936	Reddy Hospitality, Llc	hotel		34.43507	-100.23652	3001 Avenue F NW	Childress	79201				0.95	
+e19876b64713	Rodeway Inn - Closed	hotel		34.43321	-100.22216	1612 F N W US 287	Childress	79201	+19409373695	https://www.choicehotels.com/texas/childress/rodeway-inn-hotels/tx320		0.77	
+cdf5c841c8a2	Rodeway Inn Memphis	hotel	motel	34.74061	-100.54969	1600 N Boykin Dr	Memphis	79245		https://www.choicehotels.com/texas/memphis/rodeway-inn-hotels	Rodeway Inn	0.96	
+510935b75bf8	Scott Lake, Childress, Tx	hotel		34.41324	-100.21695		Childress					0.86	
+9380f80efe48	Super 8	hotel		34.42521	-100.20081	411 Avenue F NE	Childress	79201	+19405804325	https://www.wyndhamhotels.com/super-8/childress-texas/super-8-childress/overview		1.00	
+7f4c436dfc9b	SureStay	hotel		34.43395	-100.22414	1804 Avenue F NW	Childress	79201	+19409376363	https://www.bestwestern.com/en_US/book/hotel-rooms.54145.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54145	SureStay Hotels	0.99	
+90c52349302d	Trade Winds Motel	hotel	motel	34.43566	-100.22858	2014 Ave F NW	Childress	79201	+19409372555			0.99	
+1a54d450cb65	Travelodge by Wyndham Memphis	hotel	resort	34.74046	-100.54957	1600 N Boykin Dr	Memphis	79245	+18062593583	https://www.wyndhamhotels.com/travelodge/memphis-texas/travelodge-memphis/overview?CID=LC:TL::GGL:RIO:National:15402&iata=00093796?CID=LC:g22xy9tahqskhx3:15402		0.97	
+664ef9fcae62	Western Skies Motel	hotel	motel	34.94199	-100.89504	800 W 2nd St	Clarendon	79226	+18068743501			0.99	
+070ab821a997	Plas-Mac Inc	office	plastics company	34.83308	-100.20460	3696 US-83 #4817	Wellington	79095	+18064470065	http://www.firetrucktanks.com/		0.92	
+3dbe5bc98932	Suddenlink	office	telecommunications company	34.42387	-100.20742	241 Commerce St	Childress	79201	+18448747558	https://stores.suddenlink.com/tx/childress/241-commerce-street.html		0.92	
+78676bc3e00b	Texas A&m Agrilife Extension Service	office		34.72478	-100.53639	512 W Main St Ste 2	Memphis	79245	+18062593015			0.65	
+5b788a870716	Akshay Llc	restaurant		34.43410	-100.22405	1804 Avenue F NW	Childress	79201				0.95	
+7d34cc2645cb	Angel's Subs & Sweets	restaurant	sandwich shop	34.85334	-100.20508	1011 Houston St	Wellington	79095	+18064475000	https://orders.cake.net/10203624		0.92	
+d9d6589c2f60	B.O.B BBQ	restaurant	barbecue restaurant	34.01279	-100.30392	1020 Easly St	Paducah	79248	+18064921642			0.92	
+cb00d62a721d	Bar H BBQ N More	restaurant	barbecue restaurant	34.93415	-100.88043	818 E. 2nd St.	Clarendon	79226	+18068740111	http://www.barhbbqnmore.com		0.77	
+b4a4dccad3ec	Best Of Best Barbecue	restaurant	barbecue restaurant	34.01277	-100.30390	1020 Easly St	Paducah	79248	+18064921547			0.85	
+6dbfb9472bd8	Billie Deans Cafe	restaurant	american restaurant	34.01209	-100.82904	1224 Bailey	Matador	79244	+18063472310	http://www.billiedeans.com		0.92	
+034991c6304e	China Buffet	restaurant	chinese restaurant	34.43553	-100.22820	2012 Avenue F NW	Childress	79201	+19409373885	http://www.chinabuffet.net		0.92	closed
+0b066290b0db	Clarendon Outpost Diner	restaurant	diner	34.94064	-100.89422	619 W 2nd St C	Clarendon	79226	+18068745203	http://clarendonhomestylediner.com/		0.81	
+51d367175347	Come and Get It	restaurant		34.85136	-100.20497	1209 Houston St	Wellington	79095	+18064470938			0.92	
+9bcff5574776	Cyclone Central	restaurant	burger restaurant	34.73835	-100.54755	1313 N Boykin Dr	Memphis	79245	+18062591091			0.55	closed
+40024b81a046	Daddy's	restaurant	diner	34.42633	-100.20353	107 Ave F NE	Childress	79201	+19409387124			0.92	
+9356deab0ff1	Dawson's Family Restaurant	restaurant	comfort food restaurant	34.43319	-100.22347	1709 Avenue F NW	Childress	79201	+19409376070	http://foodeist.com/place/dawson-s-family-restaurant		0.92	
+36229b275346	Dos Sombreros	restaurant		34.85589	-100.21271	808 East Ave	Wellington	79095		https://dossombreros.co.uk		0.95	
+a51e12c83b79	Double G	restaurant	american restaurant	34.01280	-100.30478	1112 Easly St	Paducah	79248	+18064923171	https://double-g-s.hub.biz		0.92	
+5fc00a932db2	Fat & Happy BBQ	restaurant	barbecue restaurant	34.72378	-100.53418	201 South Boykin Dr	Memphis	79245	+18062040950			0.92	
+c78b9a5be264	Glorias Cafe	restaurant		34.72556	-100.53690	519 W Main St	Memphis	79245				0.95	
+2073736cc41c	Godfather's Pizza Express	restaurant	pizza restaurant	34.72336	-100.53329	219 S Boykin Dr	Memphis	79245	+18062592300	http://www.godfathers.com/godfathers-pizza-44858		0.96	
+2cf324902362	Goetz Barbecue Company	restaurant	barbecue restaurant	34.42397	-100.19854	610 Avenue F NE	Childress	79201	+19409387085			0.97	
+544418c49343	Golden Dragon	restaurant	chinese restaurant	34.42702	-100.20551	200 Avenue F NW	Childress	79201	+19409373767	http://goldendragontucson.com/		0.59	
+77f1e04c110b	Golden Dragon Restaurant	restaurant	chinese restaurant	34.42707	-100.20563	200 Avenue F NW	Childress	79201	+19409373331	https://www.goldendragonjacksonville.com		0.55	
+11ffeba4771c	Grumpy's Pizza	restaurant	pizza restaurant	34.93426	-100.88084	812 E 2nd St	Clarendon	79226	+18068223287			0.92	
+35f341994a2c	J T's Drive-In	restaurant	theme restaurant	34.42799	-100.20815	406 Avenue F NW	Childress	79201	+19409372688	https://start.cortera.com/company/research/k5q4jsp8r/j-ts-drivein		0.95	
+1ca8a2381c52	J.D. StakeOut	restaurant	steakhouse	34.93910	-100.88977	210 W 2nd St	Clarendon	79226	+18068747777	http://j-d-steakout.edan.io		0.92	
+eacbda15eb43	Jeanna's Blessings	restaurant	mexican restaurant	34.42644	-100.20418	101 Ave F NE	Childress	79201	+18069830356			0.92	
+07eb205c2ee1	Jinda' Cafe	restaurant	thai restaurant	34.94118	-100.89420	700 W 2nd St	Clarendon	79226	+18068741771	http://jindacafe.food90.com/		0.97	
+1ec5258b1d27	K-bob's Steakhouse	restaurant		34.43361	-100.22462	1805 Avenue F NW	Childress	79201		k-bobs.com		0.92	
+c57869ec09e8	Kettle	restaurant	american restaurant	34.43442	-100.22504	1902 Avenue F NW	Childress	79201	+19409378496	http://kettle.com/		0.92	
+b6a3a4fd48b6	La Unica Taqueria	restaurant	mexican restaurant	34.42235	-100.20522	200 2nd St NE	Childress	79201	+19409387010	http://www.launicachildress.com		0.96	
+59fa90df20c0	Lakeview Grill	restaurant	comfort food restaurant	34.67405	-100.69621	101 Smith St	Lakeview	79239	+18068673022	http://frankieslakeviewgrill.com		0.96	
+abaeda862773	Letty's Cafe	restaurant		34.39263	-100.89504	502 Main St	Turkey	79261				0.92	
+6599ce4daa3b	Lucido's Italian Express	restaurant		34.43630	-100.23187	2305 Avenue F NW	Childress	79201	+19409378833	https://www.lucidositalianexpressmenu.com/?utm_source=organic_bing&utm_medium=bing_pw		0.92	
+12b312503b7f	Main Street Cafe	restaurant	comfort food restaurant	34.01358	-100.82246	1023 Main St	Matador	79244		http://matadormainstreetcafe.com		0.96	
+d7014bb6cbc1	Mi Casita	restaurant	mexican restaurant	34.72403	-100.54244	518 W Noel St	Memphis	79245	+18062591892	http://www.micasitafood.com		0.77	
+f0c424f07177	Mi Casita Restaurant	restaurant	mexican restaurant	34.72401	-100.53677		Memphis	79245	+18062591892	http://yahoo.com/		0.92	
+0998b11f0473	My-t Burger	restaurant	burger restaurant	34.84948	-100.21448	1411 West Ave	Wellington	79095	+18064475175			0.92	
+54da4babded6	Newburger’s	restaurant		34.93666	-100.88889	315 S Kearney St	Clarendon	79226	+18062907434			0.74	
+d8229828cd66	Parkview Manor Cafeteria	restaurant	buffet restaurant	34.84827	-100.21279	1016 16th St Apt 9	Wellington	79095	+18064471187	http://www.collingsworthgeneral.net		0.92	closed
+d6baedfba632	Ragin' Texan Bar-b-que	restaurant	barbecue restaurant	34.72783	-100.53724	317 N Boykin Dr	Memphis	79245	+18062591234			0.92	
+b09dae444c17	Rock Inn Cafe	restaurant	american restaurant	34.73397	-100.54353	1022 Boykin Dr	Memphis	79245	+18062591200			0.98	
+077a1819ff06	Rusty Spur Steakhouse & Saloon	restaurant	steakhouse	34.42353	-100.20640	241 N Main St	Childress	79201	+19409387040			0.97	
+0de12c20c1e6	Sol's TEX MEX Cocina	restaurant	texmex restaurant	34.94007	-100.89286	603 W 2nd St	Clarendon	79226	+18063185413			0.96	
+18343c8e0629	Stark Burgers	restaurant		34.54556	-100.44067	602 Wright St	Estelline	79233	+19405851054			0.91	
+ba74962d1b8f	Street tacos	restaurant		34.00835	-100.30174	1409 9th St	Paducah	79248	+18066201534			0.57	
+247d131d1978	Taco Shack	restaurant	mexican restaurant	34.85598	-100.21183	1101 8th St	Wellington	79095	+18064470736	http://www.tacoshack.com		0.92	closed
+70e567e80294	Thai Kitchen	restaurant	thai restaurant	34.43302	-100.22173	1602 Ave F NW	Childress	79201	+19409372227	http://www.thaikitchenla.com		0.92	
+fd40b49ebcde	The Drive-in Burger Wagon	restaurant	burger restaurant	34.43490	-100.22964		Childress		+19404751609			0.62	
+eaff78ff085a	The Plaza Mexican Restaurant & Bar	restaurant	mexican restaurant	34.43214	-100.22070	1501 Ave F NW	Childress	79201	+19409378553	https://www.theplazarestaurant.com/	The Plaza Restaurant & Bar - Lubbock, Texas	0.98	
+6ed48b10ebbd	The Twisted Sister Saloon	restaurant	bar and grill restaurant	34.43118	-100.21621	1110 Ave F NW	Childress	79201	+19409387078			0.92	
+e28a50819568	Top Notch Texas BBQ	restaurant	barbecue restaurant	34.42598	-100.20253	211 Ave F NE	Childress	79201	+19409378658	http://www.topnotchtexasbbq.com		0.97	
+7090cdaea0b3	Two Rivers Family Restaurant	restaurant	theme restaurant	34.85133	-100.20455	1270-1298 US-83	Wellington	79095	+18064472951			0.92	
+563508504e54	Unos Tacos	restaurant	mexican restaurant	34.42569	-100.20459	504 N Main St	Childress	79201	+19405858018	http://www.unostacos.com		0.92	
+d76da4fc53eb	Wheats Artisan Pizzeria	restaurant	pizza restaurant	34.42558	-100.20599	424 Commerce St	Childress	79201	+19409387036	instagram.com/wheatsartisanbakery		0.94	
+b0d59905972f	Whitaker's Family Restaurant	restaurant	american restaurant	34.01279	-100.30470	1112 Easly St	Paducah	79248	+18064921515			0.92	
+0534f1051748	Willie B’s Restaurant	restaurant		34.93996	-100.89295	603 W 2nd St	Clarendon	79226	+18062055007			0.70	
+c788b5bf728a	Avir at Childress	senior	retirement home	34.43519	-100.20699	1200 7th St NW	Childress	79201	+19409378668	http://avirhg.com/	Senior Living Properties	0.98	
+62443436cdd0	Clarendon Nursing Home	senior	retirement home	34.94575	-100.89680	10 Medical Dr	Clarendon	79226	+18068742273	https://longtermpsych.org/		0.92	
+92c4644b6cbf	Community Care Center of Clarendon	senior	retirement home	34.94429	-100.89597	10 Medical Center Dr	Clarendon	79226	+18068745221	http://donleytx.com		0.60	
+742b0467630c	Cottage Village of Childress	senior	retirement home	34.42150	-100.20199	204 5th St NE	Childress	79201	+19409372045	http://cottagevillageliving.com/		0.92	
+a16be5210a34	Matador Health and Rehabilitation	senior	retirement home	34.02512	-100.82249	805 Harrison Ave	Matador	79244	+18063471000	http://matadornursing.com/		0.95	
+11a79ec96677	Memphis Convalescent Center	senior	retirement home	34.73916	-100.55225	1415 N 18th St	Memphis	79245	+18062593566	http://www.memphisconvalescent.com/		0.92	
+6e5e70172f36	Rhinehart Eldercare	senior	assisted living facility	34.93530	-100.88789	216 E 4th St	Clarendon	79226	+18065705569	http://www.rhineharteldercare.com/		0.92	
+1b0399df69b7	Saints Roost Assisted Living	senior	assisted living facility	34.93407	-100.88548	502 E 4th St	Clarendon	79226	+18068741417			0.92	
+c24638466286	Senior Living Properties	senior	retirement home	34.43520	-100.20693	1200 7th St NW	Childress	79201	+19409378668			0.92	
+daec04906aee	Wellington Care Center	senior	retirement home	34.84801	-100.21659	1506 Childress St	Wellington	79095	+18064472513	http://wellingtoncarecenter.com/		0.92	

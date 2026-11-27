@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { SheetTabs } from "./sheet-tabs";
+import { AccountWebInfo } from "./web-check";
 import { AccountPhotosPanel } from "./photos-panel";
 import { listAccountPhotos } from "@/lib/ops/ticket-photos";
 import { listAccountInvoices } from "@/lib/ops/invoice-api";
@@ -288,6 +289,7 @@ export function CustomerHistorySheet({
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
                   <AccountPinField id={data.id} pin={data.pin ?? null} canEdit={!!data.canEditPin} />
+                  <AccountWebInfo accountId={data.id} className="mt-2" />
                   <InactiveBlock id={data.id} netsuite={data.netsuite ?? null} admin={canRename} />
                   <NetsuiteDetails netsuite={data.netsuite ?? null} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />

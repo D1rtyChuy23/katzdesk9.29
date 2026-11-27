@@ -1,445 +1,453 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-5762b45a555b	AM Donuts And Kolaches	bakery	donut shop	32.44806	-100.39800	2006 Lamar St	Sweetwater	79556	+13252369996			0.97
-ecaae22b559e	C-City Donut	bakery		32.40993	-100.86087	2205 Hickory St	Colorado City	79512	+13257289449	https://c-city-donuts.edan.io		0.92
-45082200a673	Campus Donuts And Kolaches	bakery	donut shop	32.48302	-100.40083	1404 Hailey St	Sweetwater	79556	+13259336500			0.96
-2b2e693f81e7	Jack 'N' Jill Donuts	bakery	donut shop	32.70459	-100.91846	1810 37th St	Snyder	79549	+13255746899		Jack 'N' Jill Donuts	0.98
-9bdadd930e39	Merkel Doughnut Shop	bakery	donut shop	32.47098	-100.01276	105 Kent St	Merkel	79536	+13259285555	http://www.merkeltexas.com		0.96
-29756cdcd96d	Mustang Donuts	bakery	donut shop	32.47491	-100.39680	1106 E Broadway St	Sweetwater	79556	+13252351513			0.96
-b564b3d7007b	Tiger Donuts	bakery	donut shop	32.69592	-100.91902	4608 College Ave	Snyder	79549	+13255742588	https://tiger-donuts.hub.biz		0.92
-14bab68d029a	Tina's Cakes & Bakes	bakery		32.88507	-100.12604	13 N Central Ave	Hamlin	79520	+13255765002			0.97
-d0a7d304b973	TM Donuts	bakery	donut shop	32.85434	-100.46696	301 N Cleveland Ave	Rotan	79546	+13252731151			0.92
-7e90b79e352f	Azteca Bar And Grill	bar		32.47004	-100.40806	100 E Broadway St	Sweetwater	79556	+13252351233	http://www.aztecamex.com		0.92
-8afb36aed0f9	C City Sports LLC	bar	sports bar	32.40464	-100.86025	1724 Hickory St	Colorado City	79512	+13252421540			0.71
-b5bb974344ed	Carl's Place	bar		32.48008	-100.39410	1003 View St	Sweetwater	79556				0.97
-c016526b6620	GiVi's Pub	bar	sports bar	32.71690	-100.91698	2502 Avenue R	Snyder	79549	+13254360427	http://givispub.com/		0.95
-e054b08999f7	Port Hendrix	bar	pub	32.45688	-100.31248	County Road 245	Sweetwater	79556				0.95
-210fe8cd698e	Roundup Bar & Grill	bar	sports bar	32.47103	-100.41074	311 Pecan St	Sweetwater	79556	+13252361462	https://maps.apple.com/?address=311+Pecan+St%2C+Sweetwater%2C+TX++79556%2C+United+States&ll=32.471023%2C-100.410694&q=311+Pecan+St&t=m		0.96
-a23a873500e4	Sweetwater City Limit Nightclub	bar	pub	32.48201	-100.38327	2200 E Broadway St	Sweetwater	79556	+13252359934			0.92
-ac67f1855c8f	Sweetwater City Limit Nightclub	bar		32.48098	-100.41592	1500 Cypress St	Sweetwater	79556	+13252359934	https://g.co/kgs/vLMm2Z		0.92
-f07e81e0a431	Texas 777 Spin	bar		32.46986	-100.40947	102 W Broadway St	Sweetwater	79556	+13259334185			0.64
-de0bfe7d0b6e	The Hornytoad Pub And Grub	bar	pub	32.71688	-100.91687	2502 Avenue R	Snyder	79549	+13255157503			0.55
-7b03e472d95c	Turn Key Liqour or Beer and Wine Store For Rent in Sweetwater, Tx	bar		32.47222	-100.40453	411 E Broadway St	Sweetwater	79556				0.63
-33ccfafac090	4H Auto Sales	cardealer		32.49184	-100.16957	814 W Broadway St	Sweetwater	79556	+13252191942			0.85
-fd9bfa11cdfc	A&W Motors	cardealer		32.71726	-100.90947	1105 25th St	Snyder	79549	+13255741701	http://awmotors.net/		0.99
-87265034673e	Blake Fulenwider Snyder	cardealer		32.72675	-100.89915	305 16th St	Snyder	79549	+14696730202	https://www.blakefulenwidercdjr.com/		0.92
-0149c0808a38	Chester's Auto Sales	cardealer		32.73178	-100.91841	1001 College Ave	Snyder	79549	+13255737134	http://www.alexanderspest.com		0.92
-47a8194e08cd	Dupree Automotive	cardealer	used auto dealer	32.71660	-100.91103	1212 25th St	Snyder	79549	+13255739001			0.95
-09bd9129db75	Esco Leasing Llc	cardealer	auto leasing	32.46066	-100.43519	1918 W Broadway St	Sweetwater	79556	+13252351400	escoleasing.com		0.65
-e215a2030da8	Greater Texas Ford Dealers	cardealer		32.44773	-100.40446	603 SW Georgia Ave	Sweetwater	79556	+18009006896		Greater Texas Ford Dealers	0.90
-fc0bfa8f1d18	Greater Texas Ford Dealers	cardealer		32.70787	-100.88585	1101 E Coliseum Dr	Snyder	79549	+18883556803		Greater Texas Ford Dealers	0.93
-c3ca036546c9	I Deal Motors	cardealer	used auto dealer	32.46333	-100.40164	611 Lamar St	Sweetwater	79556	+13252354004	buyidealmotors.com		0.99
-90579266c67e	Lamar Auto Sales	cardealer	used auto dealer	32.45634	-100.39983	1309 Lamar St	Sweetwater	79556	+13252355858			0.92
-d33c21782a19	Miles Auto Sales	cardealer	used auto dealer	32.46545	-100.41779	815 W Broadway St	Sweetwater	79556	+13252351725			0.92
-cd6650f682f8	Piper Motors	cardealer		32.88509	-100.12562	NE Ave A	Hamlin	79520	+13255762420	http://www.pipermotors.com		0.74
-92c2db8bfe04	Rainbolt Auto Sales	cardealer		32.44739	-100.39791	2310 Lamar St	Sweetwater	79556	+13252354243			0.92
-5d12faa6d4d6	Stanley Ford Sweetwater	cardealer		32.44801	-100.40437	603 SW Georgia Ave	Sweetwater	79556	+13252366355	http://www.stanleyfordsweetwater.com/	Ford Motor Company	0.97
-9fd2b257001b	West Auto Sales	cardealer	used auto dealer	32.47260	-100.01249	211 Kent St	Merkel	79536	+13259280038	http://westautosalestexas.com/		0.92
-fe76f72f7a35	Wilson Motors	cardealer		32.70749	-100.88577	1101 E. Coliseum Dr., Snyder	Snyder	79549	+13255736351	https://www.wilsonmotors.net/	Wilson Motors Ballymena	0.92
-d322acc9baac	3 M Palace Theater	cinema		32.38800	-100.86737	137 Walnut St	Colorado City	79512	+13258297708	http://www.3mmpalacetheater.com/		1.00
-a869a77a9398	Cinema Snyder	cinema		32.70795	-100.91994	1907 Snyder Shopping	Snyder	79549	+13255734567	http://www.cinemasnyder.com		0.94
-e039ee912137	M3 Palace Theater	cinema		32.38800	-100.86737	137 Walnut St	Colorado City	79512	+13257289294	http://www.3mmpalacetheater.com/		0.98
-3fd285199682	Cactus Coffee Co	coffee		32.38836	-100.86686	121 E 2nd St	Colorado City	79512	+13257508000	https://www.cactuscoffeeco.com/		0.92
-b300a56a1a36	Hobbs Cafe & R V Park	coffee		32.77991	-100.59499	1317 FM1614	Rotan	79546	+13255744170			0.93
-b43ec72e2a13	HTeaO - Snyder	coffee	tea room	32.70313	-100.91872	3812 College Ave	Snyder	79549	+13256034545	https://hteao.com/locations/snyder-tx/	HTeaO	0.96
-b3bc6c33a51a	HTeaO - Sweetwater	coffee	tea room	32.45190	-100.39752	116 Jenny George Ln	Sweetwater	79556	+13252676597	https://hteao.com/locations/sweetwater-tx/	HTeaO	0.96
-be11aaab1c65	J316 Downtown Coffee House	coffee		32.71606	-100.91895	1900 26th St #3	Snyder	79549	+13259339872			0.92
-b74c601888e0	Joni's Cafe	coffee		32.70294	-100.91936	3809 College Ave	Snyder	79549	+13255742407			0.95
-0a5985249ef1	Lamar & I-20	coffee		32.45068	-100.39822	109 NE Georgia Ave	Sweetwater	79556			Scooter's Coffee	0.80
-a303ba88f202	Scooter's Coffee	coffee		32.45092	-100.39787	109 NE Georgia Ave	Sweetwater	79556	+18777191288	https://scooterscoffee.com/	Scooter's Coffee	0.96
-fdf038444823	Starbucks Coffee Company	coffee		32.45116	-100.39688	1806 Dent Street	Sweetwater	79556	+13252720164			0.92
-a4573f135e98	Stomping Coffee And Tea Co.	coffee		32.85181	-100.46746	204 W Sammy Baugh Ave	Rotan	79546				0.98
-66019fd3992c	The Manhattan Coffee House	coffee		32.71599	-100.91743		Snyder	79549	+13255733200	http://www.themanhattancoffeehouse.com		0.77
-dd41869932e5	Velvet Moon Coffee Co.	coffee		32.70434	-100.92004	Snyder, Tx	Snyder	79549	+13254363441			0.65
-e99a89f1ddbb	Velvet Moon Coffee Co.	coffee		32.70454	-100.92870		Snyder		+14323239570			0.63
-dc03f87718a3	Merkel ISD	college		32.46646	-100.01953	1512 S 5th	Merkel	79536	+13259285813	https://youtube.com/@merkelbadgermedia?si=3F-1ImANcAOv3VRl		0.97
-9eb067aa8432	Texas State Technical College In Sweetwater (tstc)	college		32.46178	-100.47287	300 Homer K Taylor Dr	Sweetwater	79556	+13252357300	https://www.tstc.edu/programs/roboticstechnology		0.97
-1850d17a5ec5	Upward Bound WTC	college		32.67895	-100.91473	6200 College Ave	Snyder	79549	+13255738511	http://www.wtc.edu/students/triogrants/upwardbound.html		0.69
-ef4e542aabdb	Wallace Alternative Campus	college		32.38348	-100.83730	149 S State Highway 208	Colorado City	79512	+13257663652			0.64
-a78387d7b6f3	Western Texas College	college		32.67908	-100.91476	6200 College Ave	Snyder	79549	+13255738511	http://www.wtc.edu/		0.97
-66b545b9bd5c	Western Texas College Opportunity Center	college		32.71704	-100.92336	2210 25th St	Snyder	79549	+13255746581	http://www.wtc.edu/cos		0.98
-0b401594bcc1	7-Eleven	convenience		32.71595	-100.90058	407 Coliseum Dr	Snyder	79549	+13255734481	http://www.7-eleven.com/	7-Eleven	0.92
-427158b7d46d	7-Eleven	convenience		32.43542	-100.53433	1101 Main St	Roscoe	79545	+13257663777	https://www.7-eleven.com/		1.00
-4c0683d23680	7-Eleven	convenience		32.70466	-100.90160	417 37th St	Snyder	79549	+13255734771	http://www.7-eleven.com/	7-Eleven	0.75
-62b478c95c44	7-Eleven	convenience		32.70482	-100.88439	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.7-eleven.com/		1.00
-69fc829ff5b7	7-Eleven	convenience		32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.7-eleven.com/		1.00
-99445d372e96	7-Eleven	convenience		32.73717	-100.91734	410 College Ave	Snyder	79549	+13255730111	https://www.7-eleven.com/		1.00
-c47226779ea1	7-Eleven	convenience		32.41141	-100.85967	101 E I-20	Colorado City	79512	+13257282359	https://www.7-eleven.com/		1.00
-eabb3b53c67f	7-Eleven	convenience		32.45081	-100.39837	1811 Lamar St	Sweetwater	79556	+18006273999	http://www.7-eleven.com/	7-Eleven	0.93
-22cd8a447cc6	Allsup's	convenience		32.70179	-100.91962	3911 College Ave	Snyder	79549	+13255733337			0.55
-4d95885f7dc2	Allsup's	convenience		32.40747	-100.84501	947 I-20	Colorado City	79512	+13253391297	https://www.allsups.com/	Allsup’s	1.00
-7c89013c68b1	Allsup's	convenience		32.74103	-100.91773	102 N College Ave	Snyder	79549	+13255730704	https://www.allsups.com/	Allsup’s	1.00
-b5954c50cf37	Allsup's	convenience		32.43493	-100.53545	800 12th St	Roscoe	79545	+13257663804	https://www.allsups.com/	Allsup’s	1.00
-d6207458f2a2	Allsup's	convenience		32.63476	-100.76351	7452 S US-84	Hermleigh	79526	+13253391121	https://www.allsups.com/	Allsup’s	1.00
-e95f6b19d679	Allsup's	convenience		32.47107	-100.40556	300 E Broadway Ave	Sweetwater	79556	+13252366839	https://www.allsups.com/	Allsup’s	0.92
-ec79cbd13802	Allsup's	convenience		32.71696	-100.93304	3200 Lamesa Hwy Lot 1	Snyder	79549	+13255746800	https://www.allsups.com/	Allsup’s	0.92
-40e5e8efc603	Allsup's Convenience Store	convenience		32.44938	-100.39802	2001 Lamar St	Sweetwater	79556	+13252358203	https://www.allsups.com/	Allsup’s	0.92
-55a0f91023f3	Allsup's Convenience Store	convenience		32.38817	-100.86456	947 E Interstate Rd	Colorado City	79512	+13257285239	https://www.allsups.com/		0.85
-916f57c9f978	Allsup's Convenience Store	convenience		32.47699	-100.01204	1101 N 7th St	Merkel	79536	+13259281505	https://www.allsups.com/	Allsup’s	0.92
-d4667b792a3d	Allsup's Convenience Store	convenience		32.38929	-100.87602	947 E Interstate 20	Colorado City	79512	+13257285239	http://www.allsups.com/		0.97
-2078697ba649	Alon	convenience		32.48419	-100.12313	540 S Main St	Trent	79561	+13258626291	http://myalon.com/		0.85
-8e415938d8de	Alon	convenience		32.70454	-100.90154	417 37th St	Snyder	79549	+13255734771	http://myalon.com/		0.97
-9acdaa89b790	ALON	convenience		32.49296	-100.12068	540 N Main St	Trent	79561	+13258626291	https://myalon.com/stations/ALON-Gas-Station-0202-542-N-Main-Trent-TX-79561		0.85
-9bb8e1226be5	Alon	convenience		32.71744	-100.93284	3200 Lamesa Hwy #1	Snyder	79549	+13255738735	http://myalon.com/		0.92
-b1f7a8b0f058	ALON	convenience		32.88360	-100.13234	444 W Lake Dr	Hamlin	79520	+13255762721	https://www.allsups.com/	Allsup’s	1.00
-bc714430108b	ALON	convenience		32.74551	-100.37638	203 S 1st St	Roby	79543	+13256772775	https://dkfuel.com/stations/DK-Gas-Station-1321-203-East-South-1st-ROBY-TX-79543		0.92
-bfc266ce071a	ALON	convenience		32.48279	-100.40081	1400 Hailey St	Sweetwater	79556	+13252351908	https://alonfuel.com/stations/alon-gas-station-2874-1400-hailey-st-sweetwater-tx-79556/		0.99
-c51658cdaa6d	Alon	convenience		32.74074	-100.91764	102 N College Ave	Snyder	79549	+13255730704	https://www.allsups.com/	Allsup’s	0.97
-fd8541281fe6	ALON	convenience		32.45168	-100.39905	1712 Lamar St	Sweetwater	79556	+13252910332	https://alonbrands.com/	Alon Gas Station	1.00
-329a57ebea2c	Alon Gas Station	convenience		32.70188	-100.91924	3911 College Ave	Snyder	79549	+19155738735	http://myalon.com/		0.92
-3c9640c51895	ALON Gas Station	convenience		32.85825	-100.46803	701 North Cleveland Avenue	Rotan	79546	+13257357001	https://alonfuel.com/stations/alon-gas-station-5635-701-n-cleveland-rotan-tx-79546/		1.00
-451965768c3c	ALON Gas Station	convenience		32.48279	-100.40081	1400 Hailey Street	Sweetwater	79556	+13252910331	https://alonfuel.com/stations/alon-gas-station-2874-1400-hailey-st-sweetwater-tx-79556/		0.95
-650404981ada	ALON Gas Station	convenience		32.38818	-100.86382	395 East 2nd Street	Colorado City	79512	+13252910317	https://alonfuel.com/stations/alon-gas-station-5207-395-e-2nd-st-colorado-city-tx-79512/		0.92
-9956f0b5aa06	Alon Gas Station	convenience		32.63446	-100.76401	7452 US-84	Hermleigh	79526	+19158632412	http://myalon.com/		0.92
-ae4d163a93a1	Alon Gas Station	convenience		32.71324	-100.89430	407 Coliseum Dr	Snyder	79549	+13255734481	http://myalon.com/		0.85
-c819810763eb	ALON Gas Station	convenience		32.71571	-100.90050	407 Coliseum Drive	Snyder	79549	+13252910328	https://alonfuel.com/stations/alon-gas-station-5088-407-coliseum-dr-snyder-tx-79549/		0.92
-d39913b58511	ALON Gas Station	convenience		32.39228	-100.86194	545 Hickory Street	Colorado City	79512	+13252910316	https://alonfuel.com/stations/alon-gas-station-5077-542-hickory-st-colorado-city-tx-79512/		1.00
-d40d12998443	ALON Gas Station	convenience		32.47753	-100.01479	1207 North 7th Street	Merkel	79536	+13252910319	https://alonfuel.com/stations/alon-gas-station-2870-1207-n-7th-st-merkel-tx-79536/		1.00
-5b9076bf44dc	Ampcng	convenience		32.45012	-100.44765	9422 S Interstate 20	Sweetwater	79556	+13123006700			0.74
-dc16a3bfd8ac	B's Place	convenience		32.41147	-100.71149		Loraine					0.79
-7693821f5bd1	C&C Country Store	convenience		32.39279	-100.91409	5889 W Interstate 20	Colorado City	79512	+13257285300			0.72
-ef559b153022	CAT Scale	convenience	truck gas station	32.44836	-100.44263	100 S Hopkins Rd	Sweetwater	79556	+13252358488	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
-b7b13ac83e89	CEFCO Convenience Store	convenience		32.47570	-100.39770	1101 E Broadway St	Sweetwater	79556	+13252368050	https://www.cefcostores.com/		0.92
-024ce93eb9fc	CEFCO Convenience Stores	convenience		32.70347	-100.87403	1999 E Roby Hwy	Snyder	79549	+14306663790		CEFCO Convenience Stores	1.00
-18d501da6b75	Check Mart	convenience		32.46067	-100.40160	900 Lamar St	Sweetwater	79556	+13252350144	http://lawrencebros.com/		0.92
-259933a916b7	Chevron	convenience		32.41301	-100.85975	100 IH-20 ACCESS RD	Colorado City	79512		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/100-IH-20-ACCESS-RD-COLORADO-CITY-TX-79512-id203372	Chevron	0.95
-998265019a3e	Circle C Grocery	convenience		32.85892	-100.46815	711 N Cleveland Ave	Rotan	79546	+13257352574			0.92
-4ac499477ea9	Conoco	convenience		32.88463	-100.12627	13 S Central Ave	Hamlin	79520	+13255762644	https://www.conoco.com/		0.92
-e8a90a41dbd7	Conoco	convenience		32.74546	-100.37636	203 S 1st St	Roby	79543	+13256772775	https://www.conoco.com/	Conoco	0.62
-f342a15989c7	Cooper Oil Co	convenience		32.88428	-100.12623	33 S Central Ave	Hamlin	79520	+13255763101	http://shell.com		0.92
-08f9c195f5c8	DK Gas Station	convenience		32.47115	-100.40550	300 East Broadway Avenue	Sweetwater	79556	+13252366839	https://dkfuel.com/stations/dk-gas-station-8167-300-e-broadway-sweetwater-tx-79556/		0.92
-0c46a8e38ec5	DK Gas Station	convenience		32.71695	-100.93288	3200 Lamesa Highway	Snyder	79549	+13255746800	https://dkfuel.com/stations/dk-gas-station-8009-3200-lamesa-hwy-1-snyder-tx-79549/		0.92
-1aa12aa900f2	DK Gas Station	convenience		32.44942	-100.39777	2001 Lamar Street	Sweetwater	79556	+13252358203	https://dkfuel.com/stations/dk-gas-station-1322-2001-lamar-sweetwater-tx-79556/		0.92
-395d3228fa59	DK Gas Station	convenience		32.43499	-100.53542	800 12th Street	Roscoe	79545	+13257663804	https://dkfuel.com/stations/dk-gas-station-1990-800-12th-st-roscoe-tx-79545/		1.00
-3fa8e8539066	DK Gas Station	convenience		32.49296	-100.12067	540 North Main Street	Trent	79561	+13252910334	https://dkfuel.com/stations/dk-gas-station-0202-542-n-main-trent-tx-79561/		0.95
-6697a4fd0ff1	DK Gas Station	convenience		32.40739	-100.84484	947 Interstate 20	Colorado City	79512	+13257285239	https://dkfuel.com/stations/dk-gas-station-0514-947-e-i-20-coloradocity-tx-79512/		0.99
-75d3d073f418	DK Gas Station	convenience		32.45109	-100.44314	50 Hopkins Road	Sweetwater	79556	+13252071444	https://dkfuel.com/stations/dk-gas-station-0814-50-hopkins-rd-sweetwater-tx-79556/		1.00
-87b3774e0cd6	DK Gas Station	convenience		32.74551	-100.37639	203 South 1st Street	Roby	79543	+13257762375	https://dkfuel.com/stations/dk-gas-station-1321-203-east-south-1st-roby-tx-79543/		0.92
-9dc7a12c11d8	DK Gas Station	convenience		32.88367	-100.13235	444 West Lake Drive	Hamlin	79520	+13255762721	https://dkfuel.com/stations/dk-gas-station-5165-444-w-lake-dr-hamlin-tx-79520/		0.95
-be8e4b4afdb5	DK Gas Station	convenience		32.74073	-100.91802	102 North College Avenue	Snyder	79549	+13255730704	https://dkfuel.com/stations/dk-gas-station-0738-102-n-college-ave-snyder-tx-79549/		0.92
-c7a33ad0c6d6	DK Gas Station	convenience		32.47694	-100.01196	1101 North 7th Street	Merkel	79536	+13259281505	https://dkfuel.com/stations/dk-gas-station-1319-9883-interstate-20-frontage-road-merkel-tx-79536/		1.00
-cc94c454669c	DK Gas Station	convenience		32.70476	-100.90172	417 37th Street	Snyder	79549	+13252910327	https://dkfuel.com/stations/dk-gas-station-5087-417-37th-st-snyder-tx-79549/		0.95
-cd2a2a50f8d5	DK Gas Station	convenience		32.38470	-100.96106	5889 Interstate 20	Colorado City	79512	+19186478147	https://dkfuel.com/stations/dk-gas-station-0031-5889-interstate-20-colorado-city-tx-79512/		0.99
-eff3367f757f	DK Gas Station	convenience		32.63461	-100.76370	7452 U.S. 84	Hermleigh	79526	+13258632412	https://dkfuel.com/stations/dk-gas-station-5186-7452-us-84-hermleigh-tx-79526/		0.99
-f3978448bb52	DK Gas Station	convenience		32.70164	-100.91943	3911 College Avenue	Snyder	79549	+19155738735	https://dkfuel.com/stations/dk-gas-station-5164-3911-college-avenue-snyder-tx-79549/		0.92
-c8f01324ca3c	E-Z Store	convenience		32.46608	-100.41726	810 W Broadway St	Sweetwater	79556				0.56
-9f36d171ca6c	Fina	convenience		32.85829	-100.46832	701 N Cleveland Ave	Rotan	79546	+13257352605			0.64
-8daaba6f2813	Garrett's	convenience		32.46734	-100.41470	610 W Broadway St	Sweetwater	79556	+13252369000			0.75
-d1f0c4f4446d	Gas 'n' Grub	convenience		32.39118	-100.83836	2001 State Highway 208	Colorado City	79512	+13257283622	http://www.pizzapro.com/		0.95
-f7c186808eb5	HOP IN 430462	convenience		32.88446	-100.12668	13 S CENTRAL	Hamlin	79520			Conoco	0.80
-cd98720feb3f	I-20 Travel Stop	convenience		32.43060	-100.55231	12825 S Interstate Hwy 20	Roscoe	79545		https://locations.valero.com/en-us/LocationDetails/Index/12825-S-INTERSTATE-HWY-20/0000027691	Valero	0.92
-a770edd4aa6a	Just E Nuff	convenience		32.41157	-100.71156	102 E Pacific Ave	Loraine	79532	+13257372323			0.73
-7dcf5e613583	Kent Kwik	convenience		32.41280	-100.85975	100 I-20	Colorado City	79512	+13257283107	http://www.thekentcompanies.com/	Kent Kwik Convenience Stores	0.92
-450c9f991747	Legacy Fuels	convenience		32.71788	-100.91608	2401 Avenue Q	Snyder	79549	+13255736365	http://www.legacy-fuels.com/		0.92
-b89ad3be810c	Love's RV Stop	convenience		32.44853	-100.50301	9418 N Interstate 20	Sweetwater	79556	+13252351241	https://www.camplife.com/campground/Love%2527s+RV+Stop-Sweetwater+TX+475		0.85
-34775c98ed64	Love's Travel Stop	convenience		32.45094	-100.44110	9418 N I-20	Sweetwater	79556	+13252351240	https://www.loves.com/locations/475?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=475		0.97
-f13ef215d914	M & M Fuels	convenience		32.63472	-100.76363	7104 S US Highway 84	Hermleigh	79526	+13258632227			0.83
-d8663cf91957	Moonshine's	convenience		32.08670	-100.31921	116 Main St	Blackwell	79506	+13252649845			0.92
-7c03c02dbc9f	Mullins, Barry-325 Travel Stop	convenience		32.43081	-100.55246	12825 I-20 E	Roscoe	79545	+13257663101			0.65
-4c283b03cbcc	Murphy Usa	convenience		32.45200	-100.39370	405 NE Georgia Ave	Sweetwater	79556	+13252351100			0.92
-dfc8cd6c0a52	Mustang Short Stop	convenience		32.47969	-100.38934	1803 E Broadway St	Sweetwater	79556	+13259334006	https://www.sunoco.com		0.95
-005cc4aba80b	Phillips 66	convenience		32.43528	-100.53451	1101 Main St	Roscoe	79545	+13257663777	https://www.phillips66gas.com/		1.00
-23bfb2eba6de	Phillips 66	convenience		32.44950	-100.39787	2001 Lamar St	Sweetwater	79556	+13256772775	https://www.phillips66gas.com/	Phillips 66 Gas	0.92
-56fcea2e6a5d	Phillips 66	convenience		32.73744	-100.91765	410 College Ave	Snyder	79549	+13255730111	https://www.phillips66gas.com/		1.00
-d89769340add	Phillips 66	convenience		32.41162	-100.86005	101 E Interstate 20	Colorado City	79512	+13257282359	https://www.phillips66gas.com/		1.00
-f569c3e5a29a	Phillips 66	convenience		32.40983	-100.84249	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.phillips66gas.com/		1.00
-b492de4c4608	Phillips 66 Gas	convenience		32.47689	-100.01186	1101 N 7th St	Merkel	79536	+13256772775	https://www.phillips66gas.com/	Phillips 66 Gas	0.94
-290ee295de09	Pilot Dealer	convenience		32.70526	-100.86586	1100 US-180	Snyder	79549	+13255735213	https://locations.pilotflyingj.com/us/tx/snyder/1100-us-180	Pilot Flying J	0.92
-2257ec8a4864	Rip Griffin's Truck Stop	convenience		32.70522	-100.86581	180 Snyder 79549 United Stat	Snyder	79549	+13255735213			0.89
-d417d70ebaef	Rockin liquor	convenience		32.43487	-100.53596	810 12th St	Roscoe	79545	+13259367000	https://rockin-scantina.hub.biz		0.92
-e234f4646580	Rustic Star	convenience		32.70078	-100.91852	4014 College Ave	Snyder	79549	+13255741117	http://profile.29prime.com/TX/Snyder/Liquor+Store/Rustic+Star+Liquor		0.92
-4aed76e02780	Shell	convenience		32.47952	-100.38933	1803 E Broadway St	Sweetwater	79556	+13252373919	https://find.shell.com/us/fuel/12566147-1803-e-broadway-st	Shell	0.92
-85d6a694adda	Skinny's	convenience		32.49292	-100.12084	542 N Main St	Trent	79561	+13258626291	http://www.skinnys.com		0.61
-3f984fed0243	Snyder Eagles Landing	convenience		32.70540	-100.86620	1100 E. Hwy 180	Snyder	79549		https://locations.valero.com/en-us/LocationDetails/Index/1100-E-HWY-180/0000013047	Valero	0.80
-e15662653b80	Snyder One Stop	convenience		32.71693	-100.92627	2500 25th St	Snyder	79549	+13255737812			0.82
-f49ff2b2883f	Spring Market Fuel Center	convenience		32.47919	-100.01045	1003 Telephone Cir	Merkel	79536	+19037473503	https://www.spring-market.com/fuel		1.00
-7271f7be194b	Steel Penny	convenience		32.45093	-100.44792	9456 N Interstate 20	Sweetwater	79556				0.97
-4303f85237d6	Stripes	convenience		32.43545	-100.53428	1101 Main St	Roscoe	79545	+13257663777	http://www.stripesstores.com	Stripes	1.00
-5bdfc33f6490	Stripes	convenience	truck gas station	32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://stripesstores.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97
-619e84060976	Stripes	convenience		32.73718	-100.91730	1900 King's Hwy	Snyder	79549	+13255730111	http://www.stripesstores.com	Stripes	1.00
-abc38a4d10b8	Stripes	convenience		32.70493	-100.88432	1300 E Coliseum Dr	Snyder	79549	+13255738341	http://www.stripesstores.com	Stripes	1.00
-15133a243086	Sunoco	convenience		32.73720	-100.91789	410 College Ave	Snyder	79549	+13255730111	http://www.sunoco.com	Sunoco	0.92
-603e52070168	Sunoco	convenience		32.41134	-100.85989	101 E Interstate 20	Colorado City	79512	+13257282359	https://www.sunoco.com/locations/store/101-e-interstate-20-colorado-city-tx-0364230300		0.92
-6c45c4df6bf5	Sunoco	convenience		32.40979	-100.84341	2272 Co Rd 139	Colorado City	79512	+13257289494	http://www.sunoco.com	GoSunoco	0.92
-ff71b82ce52d	Sunoco	convenience		32.43536	-100.53480	1101 Main St	Roscoe	79545	+13257663777	http://www.sunoco.com	Sunoco	0.92
-7d5a2f4e7982	Sunoco Gas Station	convenience		32.70475	-100.88409	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.sunoco.com/find-a-station		0.92
-7d897af33996	Sweetwater Cousins	convenience		32.45070	-100.39910	100 NW Georgia Ave	Sweetwater	79556	+13252366177	http://www.chevron.com/		0.92
-f867595008c8	The Red Junction Inc.	convenience		32.44693	-100.39790	2216 Lamar St	Sweetwater	79556	+13252197115	http://www.theredjunction.com/		0.94
-29b7e02d6874	Valero	convenience		32.39125	-100.83833	2001 TX-208 Apt 1	Colorado City	79512	+12103452000	http://www.valero.com	Valero Energy	0.92
-70edba29228e	Valero	convenience		32.70513	-100.86591	US-180	Snyder	79549	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/1100-E-HWY-180/0000013047	Valero	0.92
-00fc451dd898	Wes-t-go Conoco No 3	convenience		32.69946	-100.91944	4201 College Ave	Snyder	79549	+13255739422			0.76
-82430ee914d8	Wes-T-Go Convenience Stores	convenience		32.74565	-100.37640	104 N Angelo St	Roby	79543	+13257762375	http://conocophillips.com		0.92
-841e1583d20a	Wes-To-Go Convenient	convenience		32.88461	-100.12598	13 S Central Ave	Hamlin	79520	+13255762644	http://www.conoco.com/station-finder		0.92
-01b8e2dfc05f	Yesway	convenience		32.44942	-100.39777	2001 Lamar St	Sweetwater	79556	+13252358203	https://yesway.com/		0.93
-08f8c5b2f072	Yesway	convenience		32.74553	-100.37616	203 S 1st St	Roby	79543	+13252748483	https://yesway.com/	Yesway	1.00
-200e55b493e1	Yesway	convenience		32.69912	-100.91938	4201 College Ave	Snyder	79549	+13252387625	https://yesway.com/	Yesway	0.92
-a484000092e2	Yesway	convenience		32.88464	-100.12600	13 South Central Avenue	Hamlin	79520	+13255762644	https://yesway.com/		0.93
-b7a0a26fb546	Yesway	convenience		32.43494	-100.53548	800 12th St	Roscoe	79545	+13257663804	https://yesway.com/		0.92
-d6cace7a4e3a	Yesway	convenience		32.74103	-100.91773	102 N College Ave	Snyder	79549	+13255730704		Yesway	0.91
-9b838dfd5728	2 Profs Ice Cream - Sweetwater	fastfood		32.47008	-100.40719	109 Locust St	Sweetwater	79556	+13253206813	https://2profsicecream.com/		0.98
-07e9cadfaae1	Arby's	fastfood		32.45094	-100.44110	9418 N I-20	Sweetwater	79556	+13252351450	https://locations.arbys.com/tx/sweetwater/9418-north-i-20.html		0.98
-4769e6c79512	Burger King	fastfood		32.41289	-100.85890	101 E Interstate 20	Colorado City	79512	+19157282002	http://www.burgerking.com		0.92
-26ce23b306ac	Chicken Express	fastfood		32.69779	-100.91885	4308 College Ave	Snyder	79549	+13255741400	https://www.chickene.com	Chicken Express	0.96
-5bf7764fc17e	Dairy Queen	fastfood		32.88397	-100.12656	32 S Central Ave 32 S Central Ave	Hamlin	79520	+13255762741	https://www.dairyqueen.com/en-us/locations/tx/hamlin/32-s-central-ave/14190/?y_source=1_MjkzMzkyNjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
-8b12382eb4a2	Dairy Queen	fastfood		32.41321	-100.86076	2301 N State Highway 208 2301 N State Highway 208	Colorado City	79512	+13257282626	https://www.dairyqueen.com/en-us/locations/tx/colorado-city/2301-n-state-highway-208/13928/?y_source=1_MjkzMzg5MjYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
-bef594c15dc2	Dairy Queen	fastfood		32.85110	-100.46606	100 S Cleveland Ave	Rotan	79546	+13257352227	https://www.dairyqueen.com/en-us/locations/tx/rotan/100-s-cleveland-ave/14537/?y_source=1_MjkzMzg4NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
-da09581f4891	Dairy Queen	fastfood		32.71256	-100.89373	108 Coliseum Dr 108 Coliseum Dr	Snyder	79549	+13255732651	https://www.dairyqueen.com/en-us/locations/tx/snyder/108-coliseum-dr/14615/?y_source=1_MjkzMzg5ODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
-ed41fcd51d65	Dairy Queen	fastfood		32.45291	-100.39965	1608 Lamar St 1608 Lamar St	Sweetwater	79556	+13252355066	https://www.dairyqueen.com/en-us/locations/tx/sweetwater/1608-lamar-st/14636/?y_source=1_MjkzMzkwMDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
-20a6655e4973	Domino's	fastfood	pizza restaurant	32.69101	-100.91977	5107 College Ave.	Snyder	79549	+13255731333	http://www.dominos.com/	Domino's Pizza	0.96
-a8c2b695336a	Domino's	fastfood	pizza restaurant	32.44838	-100.39828	2014 Lamar St	Sweetwater	79556	+13252354400	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-5971258b3c83	Domino's Pizza	fastfood	pizza restaurant	32.45910	-100.40135	1010 Lamar St	Sweetwater	79556	+13252354400	https://www.dominos.com		0.55
-16f09f63b90f	DQ Grill & Chill	fastfood		32.45305	-100.39965	1608 Lamar St	Sweetwater	79556		https://www.dairyqueen.com/en-us/locations/tx/sweetwater/1608-lamar-st/4408	DQ Grill & Chill	0.80
-4bfeba185576	DQ Grill & Chill	fastfood		32.71252	-100.89375	108 Coliseum Dr	Snyder	79549		https://www.dairyqueen.com/en-us/locations/tx/snyder/108-coliseum-dr/4387	DQ Grill & Chill	0.80
-61a114409971	DQ Grill & Chill	fastfood		32.41328	-100.86080	2301 N State Highway 208	Colorado City	79512		https://www.dairyqueen.com/en-us/locations/tx/colorado-city/2301-n-state-highway-208/3701	DQ Grill & Chill	0.80
-72ea69332c14	DQ Grill & Chill	fastfood		32.88397	-100.12668	32 S Central Ave	Hamlin	79520		https://www.dairyqueen.com/en-us/locations/tx/hamlin/32-s-central-ave/3963	DQ Grill & Chill	0.80
-ceb4ea7da1c1	DQ Grill & Chill	fastfood		32.85112	-100.46603	100 S Cleveland Ave	Rotan	79546		https://www.dairyqueen.com/en-us/locations/tx/rotan/100-s-cleveland-ave/4309	DQ Grill & Chill	0.80
-f912c329b9de	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	32.45049	-100.44281	9438 N I H 20	Sweetwater	79556	+13252071495	https://www.freddys.com/location/sweetwater?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
-1a395dcae744	Gill's Chicken	fastfood		32.45951	-100.40133	1006 Lamar St	Sweetwater	79556	+13252351521	http://gills-chicken.edan.io		0.97
-0a9a327885b3	Golden Chick	fastfood		32.71192	-100.91817	3000 College Ave	Snyder	79549	+13254360197	https://locations.goldenchick.com/tx/snyder/1353/	Golden Chick	0.92
-503677022fce	Golden Chick	fastfood		32.45150	-100.39529	309 NE Georgia Ave	Sweetwater	79556	+13252366283	https://locations.goldenchick.com/tx/sweetwater/1204/	Golden Chick	0.94
-b77f6ca4ba88	Golden Chick	fastfood		32.41043	-100.86364	643 I-20	Colorado City	79512	+13257289373	https://locations.goldenchick.com/tx/colorado-city/1245/	Golden Chick	0.92
-c8b373e30c7f	Golden Chick	fastfood		32.38805	-100.85973	643 W Ih 20	Colorado City	79512	+13257289373	https://locations.goldenchick.com/tx/colorado-city/1245/		0.98
-76d25acbe056	Little Caesars Pizza	fastfood	pizza restaurant	32.45190	-100.39543	309 NE Georgia Ave	Sweetwater	79556	+13252354060	http://www.littlecaesars.com/	Little Caesars	0.70
-0e91910b1a53	McDonald's	fastfood		32.45100	-100.39720	201 Ne Georgia Street	Sweetwater	79556	+13252351520	https://www.mcdonalds.com/us/en-us/location/tx/sweetwater/201-ne-georgia-street/4742.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
-f0fb59c5cda1	McDonald's	fastfood		32.70736	-100.91877	3414 College Ave	Snyder	79549	+13255742100	https://www.mcdonalds.com/us/en-us/location/tx/snyder/3414-college-ave/7875.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
-02472972723f	Patch’s Back Porch	fastfood		32.08447	-100.32251		Blackwell					0.90
-bbdf76cb9917	Pizza Hut	fastfood	pizza restaurant	32.47365	-100.40056	800 E. Broadway Nolan	Sweetwater	79556	+13252358673	https://locations.pizzahut.com/tx/sweetwater/800-e-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283056	Pizza Hut	0.98
-d2a4922cf14e	Pizza Hut	fastfood	pizza restaurant	32.69381	-100.91881	4712 College Avenue	Snyder	79549		https://locations.pizzahut.com/tx/snyder/4712-college-avenue	Pizza Hut	0.80
-d33e82f1c010	Pizza Hut	fastfood	pizza restaurant	32.70208	-100.91956	3909 College Ave Scurry	Snyder	79549	+13255734919	https://locations.pizzahut.com/tx/snyder/3909-college-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290652	Pizza Hut	1.00
-fa2b37a1150a	Pizza Hut Express	fastfood	pizza restaurant	32.44869	-100.44349	I-20 9418 North	Sweetwater	79556	+18009488488		Pizza Hut	0.92
-ee983f5bb7b8	Popeyes	fastfood		32.44875	-100.44361	100 S Hopkins Rd	Sweetwater	79556	+13252358488	https://www.popeyes.com/store-locator/store/restaurant_83929	Popeyes Louisiana Kitchen	1.00
-1b90934502f0	Schlotzsky's	fastfood	sandwich shop	32.44966	-100.39744	204 SE Georgia Ave	Sweetwater	79556	+13252355000	https://locations.schlotzskys.com/tx/sweetwater/204-south-east-georgia-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98
-a42f9920c71f	Schlotzsky's	fastfood	sandwich shop	32.46778	-100.41113	204 S East Georgia St	Sweetwater	79556	+13252355000	http://www.schlotzskys.com/sweetwater/1629/home		0.85
-122cce423315	Sonic Drive In	fastfood		32.47815	-100.01031	9846 Interstate 20	Merkel	79536	+13259283000	https://locations.sonicdrivein.com/tx/merkel/9846-interstate-20.html	Sonic Drive-In	0.98
-ab7a663ac886	Sonic Drive In	fastfood		32.70063	-100.91895	4100 College	Snyder	79549	+13255737620	https://locations.sonicdrivein.com/tx/snyder/4100-college.html	Sonic Drive-In	0.97
-bdb172ebad19	Sonic Drive In	fastfood		32.47317	-100.40079	706 East Broadway	Sweetwater	79556	+13252366917	https://locations.sonicdrivein.com/tx/sweetwater/706-east-broadway.html	Sonic Drive-In	0.97
-952792fbd09e	Sonic Drive-In	fastfood		32.41177	-100.85873	125 E. And Ih20	Colorado City	79512	+13257283951	https://locations.sonicdrivein.com/tx/coloradocity/125-e.-and-ih20.html	Sonic Drive-In	0.97
-2d20f60d4b54	Subway	fastfood		32.47828	-100.01081	9882 Interstate 20	Merkel	79536	+13259283663	https://restaurants.subway.com/united-states/tx/merkel/9882-interstate-20	Subway	0.96
-46429f4d7c9d	Subway	fastfood	sandwich shop	32.45063	-100.39953	102 NW Georgia Ave	Sweetwater	79556	+13252354145	https://www.subway.com		0.98
-6c4e16f863fc	Subway	fastfood	sandwich shop	32.88498	-100.12688	12 N Central Ave	Hamlin	79520	+13255762775	http://www.subway.com/en-us	Subway	0.98
-a90aac28ee27	Subway	fastfood		32.41296	-100.85939	150 E I 20	Colorado City	79512	+13257288828	https://restaurants.subway.com/united-states/tx/colorado-city/150-e-i-20?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=16178&utm_campaign=evergreen-2020&y_source=1_MTQ5MDE2MjctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98
-d875d5cccd0b	Subway	fastfood	sandwich shop	32.70270	-100.91957	3903 College Ave	Snyder	79549	+13255739782	https://www.subway.com		0.97
-f01947d906ce	Subway	fastfood	sandwich shop	32.47279	-100.40250	602 E Broadway St	Sweetwater	79556	+13252366825	http://Subway.com/	Subway	1.00
-454f9d2e55f9	Taco Bell	fastfood		32.69685	-100.91868	4508 College Ave	Snyder	79549	+13255730068	http://www.tacobell.com/	Taco Bell	0.96
-bc5222991710	Taco Bell	fastfood		32.44969	-100.39678	206 SE Georgia Ave	Sweetwater	79556	+13252353888			0.99
-af421616e36e	The Ritz Diner	fastfood		32.71626	-100.91638	1715 26th St	Snyder	79549	+13255736038			0.58
-35afadf4cc42	Wendy's	fastfood	burger restaurant	32.70533	-100.86592	1100 E Us Highway 180	Snyder	79549	+13258661022	https://locations.wendys.com/united-states/tx/snyder/1100-e-us-highway-180		0.96
-d0dd135c21f8	Wendy's	fastfood		32.45170	-100.39445	403 Ne Georgia Ave	Sweetwater	79556	+13252368086	https://locations.wendys.com/united-states/tx/sweetwater/403-ne-georgia-ave	Wendy's	0.97
-8688f5d534f4	Whataburger	fastfood		32.45152	-100.39580	301 NE GEORGIA AVE	Sweetwater	79556	+13252351119	https://locations.whataburger.com/tx/sweetwater/301-ne-georgia-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
-bbe330ca55ba	Whataburger	fastfood		32.69550	-100.91879	4612 COLLEGE AVE	Snyder	79549	+13255734954	https://locations.whataburger.com/tx/snyder/4612-college-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-bbd1ffe7eef3	Brookshire's	grocery		32.47308	-100.40405	501 E Broadway St	Sweetwater	79556	+13252358426	https://www.brookshires.com/store-information/Sweetwater/117	Brookshire's	1.00
-6dd4c0790235	Brookshire's Food & Pharmacy	grocery		32.45978	-100.01762	1003 FM 126	Merkel	79536	+13259283743	https://www.brookshires.com		0.77
-452fd3ec096f	Cash Saver	grocery		32.88473	-100.12943	212 W Lake Dr	Hamlin	79520	+13255763551	http://www.cashsavertx.com/	Cash Saver Texas	0.96
-2c6791c7ef81	Defaid Emporium	grocery		32.70448	-100.91985	1908 37th St	Snyder	79549	+13255745954	http://www.defaidemporium.com/		0.92
-1e177a6041a7	Fuller Thriftway Foods	grocery		32.39089	-100.86282	405 Hickory St	Colorado City	79512	+13257283781			0.92
-a98ebf45253d	Glen's Thriftway	grocery		32.85498	-100.46651	310 N Cleveland Ave	Rotan	79546	+13257352246	https://glen-s-thriftway.hub.biz		0.92
-aef940334696	Lawrence Brothers Supermarket	grocery		32.88464	-100.12940	212 W Lake Dr	Hamlin	79520	+13255763470	lawrencebros.com		0.92
-773bdadc25d0	Lowe's Market	grocery		32.39063	-100.86269	405 Hickory St	Colorado City	79512	+13257283781	http://www.lowesmarket.com/	Lowe's Market	0.96
-31f9f3987519	Mal Enterprises Inc	grocery		32.47609	-100.39898	300 Hailey St	Sweetwater	79556	+13252366351			0.65
-97f6b82d991b	Merkel #725	grocery		32.47948	-100.01038	1003 Telephone Cir	Merkel	79536			Spring Market	0.80
-551cb1e3fe0f	Sheffield Enterprises	grocery		32.46030	-100.40109	909 Lamar St	Sweetwater	79556				0.95
-d20431cc958d	Skinny's Convenience Food Store	grocery		32.39192	-100.86213	545 Hickory St	Colorado City	79512	+13257283081	http://www.skinnys.com		0.92
-d2fda6fe4f65	Sweetwater #117	grocery		32.47220	-100.40405	501 E Broadway St	Sweetwater	79556			Brookshire's	0.80
-2f985364b048	Ta Sweetwater TX I-20	grocery		32.46467	-100.38400	S Interstate 20	Sweetwater	79556	+13252358488	http://www.tatravelcenters.com/location-details/ta-sweetwater		0.88
-f22f4acf380a	The Really Really Good Jerky Co.	grocery		32.29822	-100.33881	118 State Highway 153	Sweetwater	79556	+12145782353	http://reallygoodjerky.com		0.65
-110a21d0c6ab	United Express	grocery		32.70663	-100.91898	3500 College Ave	Snyder	79549	+13255741387	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92
-d916f1e12858	United Supermarkets	grocery		32.70678	-100.91785	3500 College Ave	Snyder	79549	+13255741667	https://local.unitedsupermarkets.com/tx/snyder/3500-college-ave.html	United Supermarkets	0.92
-358e43ce9da3	Cogdell Memorial Hospital	hospital		32.68780	-100.91734	1700 Cogdell Blvd	Snyder	79549	+13255736374	http://www.cogdellhospital.com/		1.00
-1484edc39b89	Cogdell Rehab and Wellness	hospital		32.68918	-100.91787	5206 Trinity Blvd	Snyder	79549	+13255747259	http://www.CogdellHospital.com/		0.92
-5c77f6233926	Dr. Ryan Morris	hospital		32.68793	-100.91744	1700 Cogdell Blvd	Snyder	79549	+13255731300			0.92
-be91364d8764	Fisher County Hospital District	hospital		32.83356	-100.43594	774 State Highway 70 N	Rotan	79546	+13257352256	http://www.fishercountyhospital.com		1.00
-b0907d6d094c	Fisher County Hospital Physical Therapy	hospital		32.85160	-100.46672	117 W Sammy Baugh Ave	Rotan	79546	+13257353434	http://www.fishercountyhospital.com/		0.92
-896a98672c09	Kindred at Home	hospital		32.38924	-100.86732	271 Walnut St	Colorado City	79512	+13257282657	https://www.kindredhealthcare.com/locations/home-health/colorado-city-tx-3543		0.77
-1a7b5d45323e	Mitchell County Ambulance Services	hospital		32.40313	-100.86296	1602 Chestnut St	Colorado City	79512	+13257283483	http://mitchellcountyhospital.com		0.98
-385692e16863	Mitchell County Hospital	hospital		32.40641	-100.87579	997 I-20	Colorado City	79512	+13257283431	http://www.mitchellcountyhospital.com		0.97
-786c057a9b0b	Rolling Plains Memorial Hospital	hospital		32.45329	-100.39732	200 E Arizona Ave	Sweetwater	79556	+13252351701	http://www.rpmh.net/		0.92
-aafaa294aa13	RPMH Obstetrics	hospital		32.45375	-100.39825	200 E Arizona Ave	Sweetwater	79556	+13252351701	https://www.rpmh.net/department/ob-gyn		0.79
-a469387803e8	RPMH Rural Health Clinic	hospital		32.45462	-100.39825	201 E Arizona Ave	Sweetwater	79556	+13252358641	http://www.rpmh.net/		1.00
-3971e1f9036a	American Inn	hotel	resort	32.41078	-100.85957	2310 Hickory St	Colorado City	79512	+13477524737	https://www.oyorooms.com/us/305014/?utm_source=GMB&utm_medium=Organic&utm_campaign=US_CLCT001		0.81
-809cc9bb9fcb	American Motor Inn	hotel	motel	32.70476	-100.88306	1307 E Coliseum Dr	Snyder	79549	+13255735432			0.68
-3f54ee7bb18c	Americas Best Value Inn & Suites Sonora	hotel		32.55479	-100.64913	270 Hwy 277 N	Sonora	76950		https://www.sonesta.com/americas-best-value-inn/tx/sonora/americas-best-value-inn-suites-sonora	Americas Best Value Inn	0.80
-78eb987e8e79	Baptist Student Center	hotel		32.67799	-100.91578		Snyder	79549	+13255731803			0.62
-5b55cbbd9832	Baymont Inn & Suites Snyder	hotel		32.70612	-100.86689	1005 E US Highway 180	Snyder	79549	+13255733700	https://www.wyndhamhotels.com/baymont/snyder-texas/baymont-inn-and-suites-snyder/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A23017	Baymont by Wyndham	1.00
-98512779635c	Beacon Lodge Motel and RV Campground	hotel		32.70152	-100.87762	1900 E Roby Hwy	Snyder	79549	+13255738526	http://www.beaconlodgemotel.com		0.97
-75cae183cdf5	Best Western Plus Lonestar Inn & Suites	hotel		32.41407	-100.85976	2304 N State Highway 208	Colorado City	79512	+13257282638	https://www.bestwestern.com/en_US/book/hotel-rooms.44732.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44732	Best Western Hotels & Resorts	1.00
-b894d2a78009	Best Western Plus Sweetwater Inn & Suites	hotel		32.45067	-100.40098	300 NW Georgia Ave	Sweetwater	79556	+13252366512	https://www.bestwestern.com/en_US/book/hotel-rooms.44609.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44609	Best Western Hotels & Resorts	1.00
-1ae3a4c544b8	Best Western Snyder Inn	hotel	motel	32.70807	-100.88791	810 E Coliseum Dr	Snyder	79549	+13255742200	https://www.bestwestern.com/en_US/book/hotel-rooms.44490.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44490	Best Western Hotels & Resorts	1.00
-93280bc50cd0	Budget Inn	hotel		32.45032	-100.40304	510 NW Georgia Ave	Sweetwater	79556	+13252354387	http://www.budgetinn.com	Budget Inn Myrtle Beach SC	0.92
-f892bbccef8e	Budget Inn	hotel	motel	32.71696	-100.90837	1006 25th St	Snyder	79549	+13255730565	http://www.budgetinn.com	Budget Inn	0.97
-97a77dd8d0cf	Comfort Inn and Suites	hotel		32.70631	-100.86797	1774 US-84	Snyder	79549	+13255157550	https://www.choicehotels.com/texas/snyder/comfort-inn-hotels/txg20?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-78fea2332989	Country Hearth Inn and Suites	hotel		32.44971	-100.39381	216 SE Georgia Ave	Sweetwater	79556	+13252355234	http://www.countryhearth.com/hotel-details.cfm?propid=73042		0.92
-be526c9f412a	Days Inn by Wyndham Snyder	hotel	resort	32.70849	-100.88840	800 E Coliseum Dr	Snyder	79549	+13255154018	https://www.wyndhamhotels.com/days-inn/snyder-texas/days-inn-snyder/overview?CID=LC:DI::BING:RIO:National:12151&iata=00093796		1.00
-d99a1d834c85	Econo Lodge Inn & Suites	hotel	motel	32.41068	-100.86268	2233 Vine St	Colorado City	79512		https://www.choicehotels.com/texas/colorado-city/econo-lodge-hotels	Econo Lodge	0.80
-3f43454c535d	Econo Lodge Inn and Suites	hotel	motel	32.44995	-100.39379	216 SE Georgia Ave	Sweetwater	79556	+13252355234	http://www.countryhearth.com/hotel-details.cfm?propid=73042	Choice Hotels	0.98
-d9a4b6248c4d	Executive Inn	hotel	motel	32.71497	-100.89912	314 Coliseum Dr	Snyder	79549	+13254360594	https://www.kayak.com/Snyder-Hotels-Executive-Inn.2065271.ksp		0.99
-1f4ddd9a33a2	Extended Stay Snyder Motel	hotel	motel	32.70369	-100.88759	700 E 37th St	Snyder	79549	+13254360266	http://www.extendedstayhotels.com/		1.00
-2f66f4327f0f	Fairfield by Marriott Inn & Suites Snyder	hotel		32.68991	-100.92045	5207 Big Spring Hwy	Snyder	79549	+13255731400	https://www.marriott.com/en-us/hotels/abisn-fairfield-inn-and-suites-snyder/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
-ba4ddb80de6e	Foster Home	hotel		32.49417	-100.38016	11 Vista Ct	Sweetwater	79556	+13252350563			0.92
-4d59b2ee8c37	Hampton Inn Snyder	hotel		32.70321	-100.87897	1801 E Roby Hwy	Snyder	79549	+13255157555	https://www.hilton.com/en/hotels/snksnhx-hampton-snyder/	Hampton by Hilton	1.00
-abf507585e61	Hampton Inn Sweetwater	hotel		32.45145	-100.39172	302 SE Georgia Ave	Sweetwater	79556	+13252353337	http://www.sweetwater.hamptoninn.com/	Hampton by Hilton	1.00
-52c254d9c211	Henrietta's Heritage House	hotel		32.88872	-100.12940	444 NW Avenue A	Hamlin	79520	+13256690808	http://www.henriettasheritagehouse.com		0.92
-96f789f93f9b	Holiday Inn Express & Suites Sweetwater	hotel		32.45104	-100.39259	300 SE Georgia Ave	Sweetwater	79556	+13252353500	https://www.ihg.com/holidayinnexpress/hotels/us/en/sweetwater/swwex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SWWEX	Holiday Inn Express	1.00
-ae772019986a	Holiday Inn Express and Suites Snyder	hotel		32.70552	-100.88353	1305 E Coliseum Dr	Snyder	79549	+13255730376	https://www.ihg.com/holidayinnexpress/hotels/us/en/snyder/abysy/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ABYSY	Holiday Inn Express	0.99
-1a2cf0eb53b6	La Quinta Inn & Suites by Wyndham Colorado City	hotel	resort	32.39009	-100.85653	880 E I20	Colorado City	79512	+13253075504			0.85
-127dcf4ec8b0	La Quinta Inn & Suites Colorado City	hotel	resort	32.40981	-100.84646	880 E I-20	Colorado City	79512	+13253075504	http://www.laquintacoloradocity.com/?cid=local_6675		1.00
-833b6c1bf0f4	La Quinta Inn and Suites by Wyndham Sweetwater East	hotel		32.45251	-100.39015	308 SE Georgia Ave	Sweetwater	79556	+13259336600	http://www.laquintasweetwatereast.com/?cid=local_6808	La Quinta by Wyndham	1.00
-f4c7c1c45b18	La Quinta Inn Sweetwater	hotel		32.45065	-100.40226	500 NW Georgia Ave	Sweetwater	79556	+13252366887	http://www.laquintasweetwater.com/?cid=local_6146	La Quinta by Wyndham	1.00
-ab40b303db47	Lifes Suites	hotel		32.87505	-100.12260	1013 S Central Ave	Hamlin	79520	+13253266326	https://www.lifessuites.com		0.97
-3ed904316a30	Microtel Inn and Suites by Wyndham Sweetwater	hotel		32.45041	-100.43996	9416 I-20	Sweetwater	79556	+13253075159	https://www.loves.com/en/loves-solutions/hotels/hotel-in-sweetwater		1.00
-ce217bfb8f61	Microtel Inn and Suites by Wyndham Sweetwater	hotel	resort	32.45048	-100.44588	9416 N Interstate 20 20	Sweetwater	79556	+13253075159	https://www.wyndhamhotels.com/microtel/sweetwater-texas/microtel-inn-and-suites-by-wyndham-sweetwater/overview?CID=LC:MT::BING:RIO:National:48154&iata=00093796		0.85
-1d423b81118b	Motel 6	hotel	motel	32.70384	-100.86560	1137 US-180	Snyder	79549	+13252165990	https://www.motel6.com/en/motels.tx.snyder.8697.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305	Motel 6	1.00
-5d6bc94d041c	Motel 6	hotel		32.47339	-100.40948	501 Locust St	Sweetwater	79556	+13252354387	http://www.motel6.com/	Motel 6 Morehead	0.91
-0c4c979406a1	Motel 6 Colorado City, TX	hotel	resort	32.41046	-100.86272	2333 Vine St	Colorado City	79512	+13257284100	https://www.motel6.com/en/home/motels.tx.colorado-city.8747.html?lid=Local_Milestone_8747&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.99
-7eceaedc44a8	Motel 6 Snyder, TX	hotel	resort	32.71726	-100.90990	1137 E US Highway 180	Snyder	79549	+13252165990	https://www.motel6.com/en/home/motels.tx.snyder.8697.html?lid=Local_Milestone_8697&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.97
-7acd630a2f6c	Motel 6 Sweetwater TX	hotel	motel	32.45637	-100.38985	501 NE Georgia Ave	Sweetwater	79556	+13259334443	https://www.staystudio6.com/en/motels.tx.sweetwater.5054.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305		0.99
-4afe022b2881	Pied Piper Inn	hotel	motel	32.87565	-100.12368	901 S Central Ave. Hwy, US-83	Hamlin	79520	+13253526448	https://www.opendi.us/hamlin-tx/6453505.html		0.92
-43629033fd12	Purple Sage By OYO Snyder TX	hotel	motel	32.70426	-100.88223	1501 US-180	Snyder	79549	+13255735491	http://purplesagemotelsnyder.com/		1.00
-d77083cd8d04	Quality Inn & Suites Colorado City, TX	hotel		32.40991	-100.84626	880 East I 20	Colorado City	79512		https://www.choicehotels.com/texas/colorado-city/econo-lodge-hotels	Quality Inn	0.80
-12715b0503e7	Quality Inn Sweetwater I-20 - King Room - Non-Smoking	hotel		32.45024	-100.40220		Sweetwater		+13252366887	https://www.choicehotels.com/texas/sweetwater/quality-inn-hotels/txj40?pmf=yext&mc=llyxyxpx	Choice Hotels	0.98
-0bddfabbc167	Ranch House Motel & Restaurant	hotel	motel	32.44892	-100.40028	301 SW Georgia Ave	Sweetwater	79556	+13252366341	http://www.sweetwaterranchhouse.com		0.94
-671de907aea8	Relax Inn	hotel	motel	32.38825	-100.85456	1041 Westpoint Ave	Colorado City	79512	+13257285742	https://www.magnusonhotels.com		0.92
-d876d1fae2da	Scottish Inns and Suites	hotel	motel	32.47782	-100.00861	9800 I-20 W	Merkel	79536	+13259284723	http://bookroomsnow.com	Scottish Inns	0.98
-b7174255ee0b	Studio 6	hotel		32.45586	-100.38978	501 NE Georgia Ave	Sweetwater	79556	+13252165988	https://www.staystudio6.com/#/home		1.00
-f3f12b0e73d6	Studio 6 Colorado City	hotel		32.41061	-100.87745	904 W Interstate 20	Colorado City	79512	+13255000012	https://www.staystudio6.com/en/motels.tx.colorado.city.5066.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305		0.94
-0ca704315b5b	Super 8	hotel		32.40943	-100.86523	2205 Chestnut St	Colorado City	79512	+13252000683	https://www.wyndhamhotels.com/super-8/colorado-city-texas/super-8-colorado-city/overview		1.00
-4c41841a18ba	Sweetwater Inn	hotel		32.44772	-100.40674	701 SW Georgia Ave	Sweetwater	79556	+13259336622	https://www.sweetwatertexasmotel.com		0.99
-ed02a9970839	Travelers Motel	hotel	motel	32.47688	-100.39279	1413 E Broadway Ave	Sweetwater	79556	+13252352850			0.87
-2e01f413c64b	Villa Inn Motel	hotel		32.41080	-100.85960	2310 Hickory St	Colorado City	79512	+13257285217			0.64
-bf0f99593304	West Lone Star Ltd	hotel		32.45086	-100.40119	300 NW Georgia Ave	Sweetwater	79556				0.95
-c910358b79dd	Windward Inn	hotel		32.85477	-100.46691	311 N Cleveland Ave	Rotan	79546	+13257353391	http://www.windwordinn.com		0.99
-fce59608b3c1	Wingate Fire Rescue - Texas	hotel		32.04306	-100.10953	1521 TX-153	Wingate	79566	+13257432726			0.92
-1fd43b8c5a32	Amadeus Wind, Llc	office		32.85128	-100.46521	111 S Cleveland Ave	Rotan	79546				0.75
-522a8c40427c	D&d Designtech, Ltd.	office		32.73590	-100.91968	1916 6th St	Snyder	79549	+13255741033	https://dddesigntech.com		0.92
-1bd0bf072440	Datroo Technologies	office	information technology company	32.70823	-100.91933	3405 College Ave	Snyder	79549	+13255734801	http://www.datroo.com/		0.92
-f8285ded51ba	Key Energy Services	office	energy company	32.73766	-100.92017	2001 Industrial St	Snyder	79549	+13255734343	http://www.keyenergy.com		0.92
-7eca9310d49a	Kinder Morgan CO2 Company	office	energy company	32.72834	-100.97430	4632 US-180	Snyder	79549	+13255731109	http://www.kindermorgan.com		0.98
-637e27fbacb5	Kinder Morgan Snyder Power Plant	office	energy company	32.74743	-100.95426	3693 County Rd 226	Snyder	79549	+13255741846	http://kindermorgan.com		0.92
-64f2af8d5b2b	Scurry County Wind LP	office	energy company	32.71021	-100.79102	6543 E US Highway 180	Snyder	79549	+13255741601	http://www.invenergy.com		0.90
-3c4c368a9bcf	Software Builders Inc	office	information technology company	32.71650	-100.91874	2513 College Ave	Snyder	79549	+13255730899	softwarebuildersinc.com		0.65
-052fd63d6cb2	Taylor Telecom	office	telecommunications company	32.47753	-100.00706	9798 I-20	Merkel	79536	+13258464111	https://online.taylortel.net/		0.95
-89cc929d06a0	Vestas American Wind Tech	office		32.46407	-100.40295	105 Alamo St	Sweetwater	79556	+15033272000	https://us.vestas.com/en-us		0.65
-8ef91a495996	Watermill Express	office	bottled water company	32.47244	-100.40324	710 E Broadway Ave	Sweetwater	79556	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
-3b7629948b3c	Wind Energy Turbine Services	office	energy company	32.48359	-100.37873	2503 E Broadway St	Sweetwater	79556	+13252351555	http://wetsinc.net		0.92
-48af86d61aa1	3B beer bakery bbq	restaurant	barbecue restaurant	32.08669	-100.31853	106 TX-70	Blackwell	79506	+13252643222	http://kaysbittycakes.com/		0.91
-d845862d356a	Allens Fried Chicken House	restaurant	chicken restaurant	32.47655	-100.39494	1301 E Broadway St	Sweetwater	79556	+13252320126	https://local.yahoo.com/info-19474339-allen-family-style-meals...		0.76
-2ae72bc0e672	Amole's Mexican Restaurant	restaurant	mexican restaurant	32.47617	-100.39631	1203 E Broadway St	Sweetwater	79556	+13259334208	https://amole-restaurant.hub.biz/		0.92
-53f20e289fc8	Amore Italian Restaurant & Bar	restaurant	italian restaurant	32.69648	-100.91872	4604 College Ave	Snyder	79549	+13255152080	https://www.amoreitalianrestaurantbar.com		0.92
-883c2e9f6e45	Behind the Church	restaurant	mexican restaurant	32.47478	-100.41125	610 Oak St	Sweetwater	79556	+13258295720			0.80
-b3d907de8adb	Bella Sera	restaurant	italian restaurant	32.70433	-100.91947	3703 College Ave	Snyder	79549	+13255741525	http://www.bellaserasnyder.com		0.92
-cb7d5982d474	Big Boy's Bar-B-Que	restaurant	barbecue restaurant	32.44804	-100.39713	2117 Lamar St	Sweetwater	79556	+13252352700	http://www.yellowpages.com/sweetwater-tx/mip/big-boys-barbecue-5161018		0.97
-8e602c45f2a1	Big Mama's Burger Shoppe	restaurant	burger restaurant	32.39890	-100.86092	1204 Hickory St	Colorado City	79512	+13257282175	http://www.bigmamasburgersandsmoothies.com		0.92
-0793d6c052d6	Bigg's Pizza and Grill	restaurant	pizza restaurant	32.47155	-100.40819	121 E 3rd St	Sweetwater	79556	+13258993738	http://Biggspizzatexas.com/		0.92
-9d23f9551c18	Bigg's Pizza and Grill	restaurant	pizza restaurant	32.38836	-100.86569	203 E 2nd St	Colorado City	79512	+13257283300	https://bigg-s-pizza-grill.hub.biz		0.98
-7c249707ca13	Blackland Smokehouse	restaurant	barbecue restaurant	32.44688	-100.39797	2216 Lamar St	Sweetwater	79556	+13257663374	http://www.blackland-smokehouse.com/		0.96
-940a5ca69cc9	Blackland Smokehouse	restaurant	barbecue restaurant	32.71623	-100.91574	1615 26th St	Snyder	79549	+13255152018	http://www.blackland-smokehouse.com/		0.98
-f33a59ff6a71	Blue Agave Bar and Mexican Kitchen	restaurant	mexican restaurant	32.70427	-100.91946	3703 College Ave	Snyder	79549	+13254360063	https://blueagavetx.com/	Blue Agave Bar & Mexican Kitchen	0.99
-c97c589d550c	Blue Burro Tx	restaurant		32.47246	-100.01202	210 Kent St	Merkel	79536	+13252712777	http://blueburrotx.com/		0.96
-2eb75545db08	Buck's Steaks & Bar-b-que	restaurant	steakhouse	32.44931	-100.39930	103 SW Georgia Ave	Sweetwater	79556	+13252354049	https://buckssteaksandbbq.com		0.96
-e6e521656799	Burri-To-Go	restaurant		32.85183	-100.46432	200-298 E Sammy Baugh Ave	Rotan	79546	+13257353383			0.93
-2d33cce2e3cb	Burritos El Buffalo	restaurant	mexican restaurant	32.71740	-100.92080	2011 25th St	Snyder	79549	+14029720931			0.93
-c37c73d9d997	Burritos Zacatecas	restaurant	mexican restaurant	32.44537	-100.53743	108 Main St	Roscoe	79545	+13252360304			0.93
-fc2791ebca94	Buzzi Unicem USA	restaurant	pizza restaurant	32.24385	-100.48454	10650 FM-608	Maryneal	79535	+13252883239	http://www.buzziunicemusa.com/		0.72
-4c5642768bba	Cardinal Cafe	restaurant	american restaurant	32.63605	-100.76038	540 James St	Hermleigh	79526	+13255751985			0.96
-1499bc31b830	Casa Morales Restaurant	restaurant	texmex restaurant	32.48217	-100.38561	2101 E Broadway Ave	Sweetwater	79556	+13252355779	https://www.groupon.com/biz/sweetwater-tx/casa-morales-restaurant-1		0.97
-3690c2043af3	Casey's	restaurant	pizza restaurant	32.70539	-100.87053	2091 E Roby Hwy	Snyder	79549	+13252220723	https://www.caseys.com		1.00
-34290ab25549	Cielo	restaurant	mexican restaurant	32.69909	-100.91887	4212 College Ave	Snyder	79549	+13254360441	http://Cielosnyder.com/		0.97
-375b4745c1d8	Cinnabon at Schlotzsky's	restaurant	sandwich shop	32.44984	-100.39746	204 SE Georgia Ave	Sweetwater	79556	+13252355000	https://www.cinnabon.com/		0.98
-e61fa66c16ee	City Cafe	restaurant	american restaurant	32.08544	-100.31728	204 N State Highway 70	Blackwell	79506	+13252823922	http://www.citycafescranton.com		0.77
-df94ce0ce29a	Cocina Economica El Arca	restaurant	mexican restaurant	32.46101	-100.40128	815 Lamar St	Sweetwater	79556	+13259336059			0.92
-95c104710d05	Cold Spot Cafe	restaurant	mexican restaurant	32.39956	-100.86099	1252 Hickory St	Colorado City	79512	+13257282745	http://www.thecoldspot.com	Cold Spot Cross Lanes	0.92
-fce8d29c50ca	country pride	restaurant	american restaurant	32.44865	-100.44342		Sweetwater					0.61
-4e3e8729dafd	Dairyland Old Fashion Burgers	restaurant	burger restaurant	32.47539	-100.39906	210 Hailey St	Sweetwater	79556	+13252352770	https://local.yahoo.com/info-19475368-dairy-land-sweetwater		0.92
-93a4b589bf77	Dee's Burrito Shop	restaurant	mexican restaurant	32.71686	-100.90993	1110 25th St	Snyder	79549	+13255732020	https://www.groupon.com/biz/snyder-tx/dees-burrito-shop		0.96
-fa3dbfdb9a5d	Dickey's Barbecue Pit	restaurant	barbecue restaurant	32.45115	-100.39687	1806 Dent Dr	Sweetwater	79556	+13252197037	https://www.dickeys.com		0.92
-6315063c3151	Dolphin's Restaurant & Grill	restaurant	diner	32.70469	-100.90009	401 37th St	Snyder	79549	+13255738139	http://www.ourmenuonline.com		0.92
-8a5b1129a70a	Don Jose's Cafe	restaurant	mexican restaurant	32.85426	-100.46678	301 N Cleveland Ave	Rotan	79546	+13257357009			0.92
-e26362312cc2	El Papagayo	restaurant	mexican restaurant	32.46111	-100.40121	815 Lamar St	Sweetwater	79556	+13258297568			0.55
-2a548bd3ed09	El Papagayo Burritos	restaurant	mexican restaurant	32.48064	-100.40077	1206 Hailey St	Sweetwater	79556	+13258297568			0.92
-317c594b95ba	Ely's Pit Stop BBQ	restaurant	barbecue restaurant	32.47150	-100.01228	132 Kent	Merkel	79536	+13259281177	http://elyspitstopbbq.com		0.92
-e30dfa4e67bd	GB's Burgers & More	restaurant		32.47115	-100.01244	128 Kent	Merkel	79536	+13257259288			0.65
-a3a4144d0c18	Gills Fried Chicken	restaurant	chicken restaurant	32.70440	-100.91885	3700 College Ave	Snyder	79549	+13255736831			0.85
-33cb256d0177	Golden Fried Chicken	restaurant		32.44827	-100.39826	2014 Lamar St	Sweetwater	79556	+19152353011	http://goldenchick.com/		0.92
-68e6d1ec79e1	Gran & Pop's BBQ & Burgers	restaurant	barbecue restaurant	32.70306	-100.91896	3812 College Ave	Snyder	79549	+13254360342			0.70
-bba40799cf1c	Gran & Pop's BBQ & Burgers	restaurant	barbecue restaurant	32.71682	-100.90783	1000 25th St	Snyder	79549	+13254360342			0.92
-03360184a8b2	Granes kitchen	restaurant		32.74648	-100.38698	512 W South 1st St	Roby	79543	+3252836838			0.74
-9e439ad1b825	Heff's Burgers	restaurant	burger restaurant	32.45115	-100.39686	1806 Dent Dr	Sweetwater	79556	+13252197070	https://thejonesassembly.com		0.96
-7403fdf306f6	Heff’s Burgers	restaurant	burger restaurant	32.69630	-100.91947	4509 College Ave	Snyder	79549	+13254360283	http://www.heffsburgers.com		0.92
-205f7e9de461	Hidalgo Restaurant	restaurant	texmex restaurant	32.38960	-100.84827	1336 Westpoint Ave	Colorado City	79512	+13257284011	http://foodeist.com/place/hidalgo-restaurant		0.94
-212ad5155bf2	Iron Skillet	restaurant		32.44861	-100.44324	100 Hopkins Road	Sweetwater	79556	+13252358488	https://www.ta-petro.com/location/tx/ta-sweetwater-426		0.96
-5c29bf159054	JACT up foods	restaurant	barbecue restaurant	32.70875	-100.91973	3403 College Ave	Snyder	79549	+18067730000			0.61
-9b9fcfc5ae96	Josie's Place	restaurant	texmex restaurant	32.74575	-100.91894	503 N College Ave	Snyder	79549	+13252078504			0.92
-5ec2cedc1131	JP's Drive Thru	restaurant	mexican restaurant	32.41254	-100.70635	500 W Pacific Ave	Loraine	79532	+13254368301			0.99
-63119efa9ab4	Kelley Cafe	restaurant	american restaurant	32.40168	-100.86535	1426 Walnut St	Colorado City	79512	+13255154035	https://www.kelleycafe.com		0.92
-cb1b59542669	Kim's Kitchen	restaurant	korean restaurant	32.47506	-100.39647	1112 E Broadway Ave	Sweetwater	79556				0.96
-7dd1c878e285	Kinfolks Grill	restaurant	american restaurant	32.46980	-100.40853	1 W Broadway St	Sweetwater	79556	+13259334230			0.96
-296519b4abc6	La Cocina Mexicana	restaurant	mexican restaurant	32.45884	-100.41117	907 W Alabama Ave	Sweetwater	79556	+13252352927	http://www.cityseekr.com/sweetwater/restaurants/poi-la-cocina-mexicana-948330.html		0.93
-610beb7d9800	La Fe Restaurant	restaurant	mexican restaurant	32.38863	-100.85130	1209 Westpoint Ave	Colorado City	79512	+13257289129	http://lafe.com		0.94
-7f7a4f8c7932	La Mexicana	restaurant	mexican restaurant	32.47517	-100.39851	1009 E Broadway Ave	Sweetwater	79556	+13259334401			0.92
-5606724e08a0	Laredo Taco Company	restaurant		32.73717	-100.91734	410 College Ave	Snyder	79549	+13255730111	https://www.laredotacocompany.com/		0.92
-77dccd0948dd	Laredo Taco Company	restaurant		32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.laredotacocompany.com/		1.00
-bfe51c84b3dc	Laredo Taco Company	restaurant		32.41141	-100.85967	101 E I-20	Colorado City	79512	+13257282359	https://www.laredotacocompany.com/		0.92
-c2b60029d163	Laredo Taco Company	restaurant		32.43542	-100.53433	1101 Main St	Roscoe	79545	+13257663777	https://www.laredotacocompany.com/		1.00
-eb9ac6c756fd	Laredo Taco Company	restaurant		32.70482	-100.88439	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.laredotacocompany.com/		0.92
-70112923a9c9	Lito's Burritos	restaurant	texmex restaurant	32.88022	-100.12534	434 S Central Ave	Hamlin	79520	+13255765070			0.92
-ef0f2ca4c012	Little Panda	restaurant	asian fusion restaurant	32.45219	-100.39546	309 Jenny George Lane	Sweetwater	79556	+13252369828	https://littlepandasweetwater.com/		0.94
-24efe8a59e3b	Lupita's Restaurante	restaurant	comfort food restaurant	32.46964	-100.40742	115 E 1st St	Sweetwater	79556	+13252197071	https://order.spoton.com/so-lupitas-restaurante-21575/sweetwater-tx/6734e100fe9cdbcf21221889		0.92
-7d526d7fc00c	Lupitas's Restaurante	restaurant	texmex restaurant	32.74362	-100.38379	512 W South 1st St	Roby	79543	+13257762129	https://www.callersmart.com/TX/Roby/325-776-2		0.95
-a86edd4356a6	Main Moon	restaurant	chinese restaurant	32.47505	-100.39635	1114 E Broadway St	Sweetwater	79556	+13252358313	http://www.mainmoon.com/		0.92
-6c1531018236	Main Street Artisan Pizza	restaurant	pizza restaurant	32.88210	-100.12605	242 S Central Ave	Hamlin	79520	+13256690808			0.99
-11a915383e61	Mama's Kitchen	restaurant		32.46173	-100.39947	809 Hill St	Sweetwater	79556	+13252358981			0.96
-ac7d0befa05a	Mary's Cafe	restaurant	american restaurant	32.38839	-100.86187	502 E 2nd St	Colorado City	79512	+13257288000			0.97
-80336751a1ce	Mayberry Diner	restaurant	diner	32.88419	-100.13044	310 W Lake Dr	Hamlin	79520	+13253594001			0.80
-be1fe13c17a2	Mi Familia	restaurant	mexican restaurant	32.39869	-100.86089	1200 Hickory St	Colorado City	79512	+13257285335			0.92
-b39431f80049	Mi Ranchito	restaurant	mexican restaurant	32.38353	-100.86601	237 Concho St	Colorado City	79512	+13257285591	http://www.miranchitokc.com/		0.97
-17f05222b96c	Mrs. Kathy's Apple Of My Pie	restaurant	comfort food restaurant	32.71638	-100.91687	2522 Avenue R	Snyder	79549	+13254360226	https://appleofmypie.business.site		0.92
-8d4b99642a37	muncy's	restaurant	burger restaurant	32.23449	-100.45612	107 County Road 386	Maryneal	79535	+13252883333	http://muncysplace.com		0.77
-fcab6b3d7938	Norma's Cafe	restaurant	mexican restaurant	32.74827	-100.91860	710 N College Ave	Snyder	79549	+13254360302	http://www.normascafe.com		0.97
-cf594e4205bb	North 40 Feedlot	restaurant		32.89981	-100.12790	1551 N Central Ave	Hamlin	79520	+13255763443	https://north-40-feed-lot.hub.biz/		0.92
-841c256a4fad	Oscars Mexican Restaurant	restaurant	texmex restaurant	32.47780	-100.00838	9800 I-20	Merkel	79536	+13252304015			0.92
-fe42783aed01	Pizza Inn	restaurant	pizza restaurant	32.70240	-100.91941	3907 College Ave	Snyder	79549	+13255733542	https://www.pizzainn.com/locations/snyder-tx/	Pizza Inn	0.97
-29a8bae549ba	Pizza Pro	restaurant	pizza restaurant	32.47138	-100.01269	131 Kent St	Merkel	79536	+13259284301	https://www.pizzapro.com		0.96
-58d7d9409209	Pizza Pro	restaurant	pizza restaurant	32.39122	-100.83829	2001 TX-208	Colorado City	79512	+13257283622	http://pizzapro.com/		0.98
-e69ce73c439b	Polynesian Garden	restaurant	chinese restaurant	32.70722	-100.92027	3415 Snyder Shopping Center	Snyder	79549	+13255730479	http://www.ourmenuonline.com/PDFMenus/Snyder/Snyder-PolynesianGardenChineseRestaurant.pdf		0.92
-ab7ed4738866	Ponderosa Restaurant	restaurant	texmex restaurant	32.72218	-100.94594	3044 US-180	Snyder	79549	+13255738887	http://www.ponderosasteakhouses.com/		0.98
-ec4b1a82202a	Pumpjack Saloon	restaurant	bar and grill restaurant	32.38885	-100.86693	102 E 2nd St	Colorado City	79512	+13254556969			0.96
-56998995b8e5	San pancho	restaurant	texmex restaurant	32.71434	-100.89719	208 Coliseum Dr	Snyder	79549	+18069396477			0.99
-3ed640ded365	Santiago's Restaurant	restaurant	mexican restaurant	32.38935	-100.87678	989 E Interstate 20	Colorado City	79512	+13257288393	http://ordersantiagosrestaurant.com/		0.85
-a2bc654c0bbc	Santiago's Restaurant	restaurant		32.40680	-100.84373	989 I-20	Colorado City	79512	+13257288393	http://www.santiagosrestauranttx.com/		0.97
-dd91bc828c4b	Sdi 6107 Of Merkel, Tx, L.l.c	restaurant		32.47827	-100.01022	9846 Interstate 20	Merkel	79536				0.95
-5a8b96a9a8c5	Sisters Plaza	restaurant	diner	32.74878	-100.92618	2401 Huffman Ave	Snyder	79549	+13255731231	http://www.bizapedia.com/tx/SISTERS-PLAZA-INC.html		0.92
-b20c32e3eae0	Skeet Texas Grill	restaurant	american restaurant	32.47730	-100.01325	1207 N 7th	Merkel	79536	+13259281039	http://www.skeetstxgrill.com/location#!		0.77
-03596275fb2d	Skeet's Texas Grill	restaurant	barbecue restaurant	32.45042	-100.39390	214 SE Georgia Ave	Sweetwater	79556	+13252351855	http://www.skeetstxgrill.com		0.98
-3954063d1ff4	Snyder Thai Restaurant	restaurant	thai restaurant	32.71585	-100.91751	1802 26th St	Snyder	79549	+13254360492			0.91
-78608d2846a5	Spanish Inn	restaurant	mexican restaurant	32.71950	-100.91798	2212 College Ave	Snyder	79549	+13255732355	www.menupix.com/texas/restaurants/4328717/Spanish-Inn-Snyder-TX		0.92
-f1c82e875bea	Sushi House	restaurant	sushi restaurant	32.69632	-100.91935	4509 College Ave	Snyder	79549	+13254360281	http://www.sushihousesnyder.com	KIBO Sushi House	0.96
-231f36ab3e09	Sweet Shop	restaurant	burger restaurant	32.71638	-100.90435	2505 Avenue G	Snyder	79549	+13255737452	http://sweet-shop-snyder.edan.io		0.92
-6417135389e3	Table Matters	restaurant		32.71631	-100.91695	2522 Avenue R	Snyder	79549	+13255753402	http://www.tablematterstx.com		0.95
-099a191ebdc4	Tacos Chacho's	restaurant	mexican restaurant	32.70180	-100.91890	4000 College Ave	Snyder	79549	+13255731212	http://tacotopia.net		0.92
-5e82d9398239	Taqueria El Charrito	restaurant	mexican restaurant	32.71626	-100.91268	1401 26th St	Snyder	79549	+13252075279			0.60
-fd832b52534d	Taqueria Guadalajara	restaurant	mexican restaurant	32.71205	-100.89271	102 E Coliseum Dr	Snyder	79549	+13255730116	http://www.taqueriasguadalajara.com		0.95
-3877eb61b12c	Taqueria La Gloria	restaurant	mexican restaurant	32.70472	-100.90756	1001 37th St	Snyder	79549	+13255730775	http://www.chow.com		0.95
-e3f2d6e8c695	Taqueria Ramirez	restaurant	mexican restaurant	32.71695	-100.91220	1310 25th St	Snyder	79549	+13255730046	https://taqueria-ramirez.hub.biz		0.96
-6c21414d464e	Taqueria Rodriguez	restaurant	mexican restaurant	32.47634	-100.39444	1304 E Broadway Ave	Sweetwater	79556	+13252197099			0.95
-56312e18d05c	Te3 Management, Inc	restaurant		32.69774	-100.91881	4308 College Ave	Snyder	79549				0.95
-b262ac4209a1	The Butcher's Block Eats and Drinks	restaurant	steakhouse	32.71693	-100.91492	1600 25th St	Snyder	79549	+13254360205	https://www.thebutchersblockeatsanddrinks.com/		1.00
-baeb47cb4b40	The Downtowner	restaurant	chicken restaurant	32.38844	-100.86687	121 E 2nd St	Colorado City	79512	+13257505066			0.61
-653a152c740f	The Lonestar Cantina LLC	restaurant	comfort food restaurant	32.88135	-100.12540	331 S Central Ave	Hamlin	79520	+13252980102			0.72
-d572ea4b5c60	THE SPRITZ GRILL & BAR	restaurant	bar and grill restaurant	32.44791	-100.40567	703 SW Georgia Ave	Sweetwater	79556	+13259334064	https://www.bestbarinsweetwatertx.com/		0.92
-746b8eb24dfe	Tita's Mexican Restaurant	restaurant	mexican restaurant	32.46973	-100.40806	116 Oak St	Sweetwater	79556	+13252366784	http://menutex.com/		0.96
-9ebbf6f4901a	Trent Country Club	restaurant	steakhouse	32.46805	-100.12995	1573 County Road 368	Trent	79561	+13258620400	http://www.trentcountyclub.club/		0.94
-c380b3e5e2f7	Two Sisters Nutrition	restaurant		32.74639	-100.37791	202 N Concho St	Roby	79543	+13259330274			0.81
-026c47377591	Velmas Burritos	restaurant		32.47140	-100.01166	1019 N 2nd St	Merkel	79536	+13259280008			0.84
-7f4e9ce67887	Wild Horse Bar & Grill at Centennial Golf Course	restaurant	bar and grill restaurant	32.40997	-100.83063	1417 Co Rd 137	Colorado City	79512	+18303854777			0.92
-2a0e2de7b56f	Yardley Snyder Texas Burger King, Llc	restaurant		32.70534	-100.86589	1100 E US Highway 180	Snyder	79549				0.95
-25211335332b	Amy’s Salon	senior	retirement home	32.52396	-100.38497	224 County Road 108	Sweetwater	79556	+12102462001			0.63
-461e5684740f	Avir at Snyder	senior	retirement home	32.70404	-100.89630	210 37th St	Snyder	79549	+13255739377	http://avirhg.com/	Senior Living Properties	0.98
-289ef3ebd340	Avir at Sweetwater	senior	retirement home	32.47921	-100.39058	1600 Josephine St	Sweetwater	79556	+13252366653	http://avirhg.com/	Senior Living Properties	0.97
-6415eb39df57	Eagle Lake Nursing And Rehab	senior	retirement home	32.39131	-100.85673	535 Austin St	Colorado City	79512	+19792342924			0.59
-76fa462b0f0c	Good Life Senior Living	senior	retirement home	32.68617	-100.91991	1904 Martha Ann Blvd	Snyder	79549	+13254360228	http://www.goodlifeseniorliving.com		0.92
-ac52a603f3d4	Homeplace Manor Healthcare Center	senior	retirement home	32.87881	-100.13214	425 SW Ave F	Hamlin	79520	+13255763643	https://geminihc.com/	Senior Living Properties	0.92
-5ed6d95c4f97	Hoyt Court	senior	retirement home	32.48812	-100.39061	1700 Hoyt St	Sweetwater	79556	+13252406464	https://cimaseniorliving.com/hoyt-court/		0.99
-cdd22259e308	Living Resources	senior	retirement home	32.46531	-100.40652	301 W Ave D	Sweetwater	79556	+13252352568	http://hillresource.com		0.92
-ab253446ab53	Mitchell County Nursing and Rehabiliation Center	senior	retirement home	32.40607	-100.86428	1941 Chestnut St	Colorado City	79512	+13257285247			0.97
-53fb70218db1	Nolan Nursing & Rehab	senior	assisted living facility	32.46241	-100.38538	705 NE Georgia Ave	Sweetwater	79556	+13252355417	http://www.daybreakventure.com/nolan-nursing-and-rehabilitation-lp-home.aspx		0.77
-4d2e5ce48720	Sterling Hills Rehabilitation and Healthcare Center	senior	retirement home	32.46220	-100.38506	705 NE Georgia Ave	Sweetwater	79556	+13252355417	http://www.daybreakventure.com/nolan-nursing-and-rehabilitation-lp-home.aspx		0.87
-e523d881056d	Sterling Hills Rehabilitation and Healthcare Center	senior	retirement home	32.44772	-100.40820	705 SW Georgia Ave	Sweetwater	79556	+13252355417	https://www.nexion-health.com/sterlinghills/		0.97
-d1c15cd68e99	Sweetwater Healthcare Center	senior	retirement home	32.47920	-100.39062	1600 Josephine St	Sweetwater	79556	+13252366653			0.92
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+5762b45a555b	AM Donuts And Kolaches	bakery	donut shop	32.44806	-100.39800	2006 Lamar St	Sweetwater	79556	+13252369996			0.97	
+ecaae22b559e	C-City Donut	bakery		32.40993	-100.86087	2205 Hickory St	Colorado City	79512	+13257289449	https://c-city-donuts.edan.io		0.92	
+45082200a673	Campus Donuts And Kolaches	bakery	donut shop	32.48302	-100.40083	1404 Hailey St	Sweetwater	79556	+13259336500			0.96	
+2b2e693f81e7	Jack 'N' Jill Donuts	bakery	donut shop	32.70459	-100.91846	1810 37th St	Snyder	79549	+13255746899		Jack 'N' Jill Donuts	0.98	
+9bdadd930e39	Merkel Doughnut Shop	bakery	donut shop	32.47098	-100.01276	105 Kent St	Merkel	79536	+13259285555	http://www.merkeltexas.com		0.96	
+29756cdcd96d	Mustang Donuts	bakery	donut shop	32.47491	-100.39680	1106 E Broadway St	Sweetwater	79556	+13252351513			0.96	
+b564b3d7007b	Tiger Donuts	bakery	donut shop	32.69592	-100.91902	4608 College Ave	Snyder	79549	+13255742588	https://tiger-donuts.hub.biz		0.92	
+14bab68d029a	Tina's Cakes & Bakes	bakery		32.88507	-100.12604	13 N Central Ave	Hamlin	79520	+13255765002			0.97	
+d0a7d304b973	TM Donuts	bakery	donut shop	32.85434	-100.46696	301 N Cleveland Ave	Rotan	79546	+13252731151			0.92	
+7e90b79e352f	Azteca Bar And Grill	bar		32.47004	-100.40806	100 E Broadway St	Sweetwater	79556	+13252351233	http://www.aztecamex.com		0.92	
+8afb36aed0f9	C City Sports LLC	bar	sports bar	32.40464	-100.86025	1724 Hickory St	Colorado City	79512	+13252421540			0.71	
+b5bb974344ed	Carl's Place	bar		32.48008	-100.39410	1003 View St	Sweetwater	79556				0.97	
+c016526b6620	GiVi's Pub	bar	sports bar	32.71690	-100.91698	2502 Avenue R	Snyder	79549	+13254360427	http://givispub.com/		0.95	
+e054b08999f7	Port Hendrix	bar	pub	32.45688	-100.31248	County Road 245	Sweetwater	79556				0.95	
+210fe8cd698e	Roundup Bar & Grill	bar	sports bar	32.47103	-100.41074	311 Pecan St	Sweetwater	79556	+13252361462	https://maps.apple.com/?address=311+Pecan+St%2C+Sweetwater%2C+TX++79556%2C+United+States&ll=32.471023%2C-100.410694&q=311+Pecan+St&t=m		0.96	
+a23a873500e4	Sweetwater City Limit Nightclub	bar	pub	32.48201	-100.38327	2200 E Broadway St	Sweetwater	79556	+13252359934			0.92	
+ac67f1855c8f	Sweetwater City Limit Nightclub	bar		32.48098	-100.41592	1500 Cypress St	Sweetwater	79556	+13252359934	https://g.co/kgs/vLMm2Z		0.92	
+f07e81e0a431	Texas 777 Spin	bar		32.46986	-100.40947	102 W Broadway St	Sweetwater	79556	+13259334185			0.64	
+de0bfe7d0b6e	The Hornytoad Pub And Grub	bar	pub	32.71688	-100.91687	2502 Avenue R	Snyder	79549	+13255157503			0.55	
+7b03e472d95c	Turn Key Liqour or Beer and Wine Store For Rent in Sweetwater, Tx	bar		32.47222	-100.40453	411 E Broadway St	Sweetwater	79556				0.63	
+33ccfafac090	4H Auto Sales	cardealer		32.49184	-100.16957	814 W Broadway St	Sweetwater	79556	+13252191942			0.85	
+fd9bfa11cdfc	A&W Motors	cardealer		32.71726	-100.90947	1105 25th St	Snyder	79549	+13255741701	http://awmotors.net/		0.99	
+87265034673e	Blake Fulenwider Snyder	cardealer		32.72675	-100.89915	305 16th St	Snyder	79549	+14696730202	https://www.blakefulenwidercdjr.com/		0.92	
+0149c0808a38	Chester's Auto Sales	cardealer		32.73178	-100.91841	1001 College Ave	Snyder	79549	+13255737134	http://www.alexanderspest.com		0.92	
+67a317da2dd1	Don Drum Equipment	cardealer	used auto dealer	32.71688	-100.90919	1100 25th St	Snyder	79549	+13255734425			0.65	closed
+47a8194e08cd	Dupree Automotive	cardealer	used auto dealer	32.71660	-100.91103	1212 25th St	Snyder	79549	+13255739001			0.95	
+09bd9129db75	Esco Leasing Llc	cardealer	auto leasing	32.46066	-100.43519	1918 W Broadway St	Sweetwater	79556	+13252351400	escoleasing.com		0.65	
+e215a2030da8	Greater Texas Ford Dealers	cardealer		32.44773	-100.40446	603 SW Georgia Ave	Sweetwater	79556	+18009006896		Greater Texas Ford Dealers	0.90	
+fc0bfa8f1d18	Greater Texas Ford Dealers	cardealer		32.70787	-100.88585	1101 E Coliseum Dr	Snyder	79549	+18883556803		Greater Texas Ford Dealers	0.93	
+c3ca036546c9	I Deal Motors	cardealer	used auto dealer	32.46333	-100.40164	611 Lamar St	Sweetwater	79556	+13252354004	buyidealmotors.com		0.99	
+90579266c67e	Lamar Auto Sales	cardealer	used auto dealer	32.45634	-100.39983	1309 Lamar St	Sweetwater	79556	+13252355858			0.92	
+d33c21782a19	Miles Auto Sales	cardealer	used auto dealer	32.46545	-100.41779	815 W Broadway St	Sweetwater	79556	+13252351725			0.92	
+cd6650f682f8	Piper Motors	cardealer		32.88509	-100.12562	NE Ave A	Hamlin	79520	+13255762420	http://www.pipermotors.com		0.74	
+92c2db8bfe04	Rainbolt Auto Sales	cardealer		32.44739	-100.39791	2310 Lamar St	Sweetwater	79556	+13252354243			0.92	
+5d12faa6d4d6	Stanley Ford Sweetwater	cardealer		32.44801	-100.40437	603 SW Georgia Ave	Sweetwater	79556	+13252366355	http://www.stanleyfordsweetwater.com/	Ford Motor Company	0.97	
+9fd2b257001b	West Auto Sales	cardealer	used auto dealer	32.47260	-100.01249	211 Kent St	Merkel	79536	+13259280038	http://westautosalestexas.com/		0.92	
+fe76f72f7a35	Wilson Motors	cardealer		32.70749	-100.88577	1101 E. Coliseum Dr., Snyder	Snyder	79549	+13255736351	https://www.wilsonmotors.net/	Wilson Motors Ballymena	0.92	
+d322acc9baac	3 M Palace Theater	cinema		32.38800	-100.86737	137 Walnut St	Colorado City	79512	+13258297708	http://www.3mmpalacetheater.com/		1.00	
+a869a77a9398	Cinema Snyder	cinema		32.70795	-100.91994	1907 Snyder Shopping	Snyder	79549	+13255734567	http://www.cinemasnyder.com		0.94	
+e039ee912137	M3 Palace Theater	cinema		32.38800	-100.86737	137 Walnut St	Colorado City	79512	+13257289294	http://www.3mmpalacetheater.com/		0.98	
+3fd285199682	Cactus Coffee Co	coffee		32.38836	-100.86686	121 E 2nd St	Colorado City	79512	+13257508000	https://www.cactuscoffeeco.com/		0.92	
+b300a56a1a36	Hobbs Cafe & R V Park	coffee		32.77991	-100.59499	1317 FM1614	Rotan	79546	+13255744170			0.93	
+b43ec72e2a13	HTeaO - Snyder	coffee	tea room	32.70313	-100.91872	3812 College Ave	Snyder	79549	+13256034545	https://hteao.com/locations/snyder-tx/	HTeaO	0.96	
+b3bc6c33a51a	HTeaO - Sweetwater	coffee	tea room	32.45190	-100.39752	116 Jenny George Ln	Sweetwater	79556	+13252676597	https://hteao.com/locations/sweetwater-tx/	HTeaO	0.96	
+be11aaab1c65	J316 Downtown Coffee House	coffee		32.71606	-100.91895	1900 26th St #3	Snyder	79549	+13259339872			0.92	
+b74c601888e0	Joni's Cafe	coffee		32.70294	-100.91936	3809 College Ave	Snyder	79549	+13255742407			0.95	
+0a5985249ef1	Lamar & I-20	coffee		32.45068	-100.39822	109 NE Georgia Ave	Sweetwater	79556			Scooter's Coffee	0.80	
+a303ba88f202	Scooter's Coffee	coffee		32.45092	-100.39787	109 NE Georgia Ave	Sweetwater	79556	+18777191288	https://scooterscoffee.com/	Scooter's Coffee	0.96	
+fdf038444823	Starbucks Coffee Company	coffee		32.45116	-100.39688	1806 Dent Street	Sweetwater	79556	+13252720164			0.92	
+a4573f135e98	Stomping Coffee And Tea Co.	coffee		32.85181	-100.46746	204 W Sammy Baugh Ave	Rotan	79546				0.98	
+66019fd3992c	The Manhattan Coffee House	coffee		32.71599	-100.91743		Snyder	79549	+13255733200	http://www.themanhattancoffeehouse.com		0.77	
+dd41869932e5	Velvet Moon Coffee Co.	coffee		32.70434	-100.92004	Snyder, Tx	Snyder	79549	+13254363441			0.65	
+e99a89f1ddbb	Velvet Moon Coffee Co.	coffee		32.70454	-100.92870		Snyder		+14323239570			0.63	
+dc03f87718a3	Merkel ISD	college		32.46646	-100.01953	1512 S 5th	Merkel	79536	+13259285813	https://youtube.com/@merkelbadgermedia?si=3F-1ImANcAOv3VRl		0.97	
+9eb067aa8432	Texas State Technical College In Sweetwater (tstc)	college		32.46178	-100.47287	300 Homer K Taylor Dr	Sweetwater	79556	+13252357300	https://www.tstc.edu/programs/roboticstechnology		0.97	
+1850d17a5ec5	Upward Bound WTC	college		32.67895	-100.91473	6200 College Ave	Snyder	79549	+13255738511	http://www.wtc.edu/students/triogrants/upwardbound.html		0.69	
+ef4e542aabdb	Wallace Alternative Campus	college		32.38348	-100.83730	149 S State Highway 208	Colorado City	79512	+13257663652			0.64	
+a78387d7b6f3	Western Texas College	college		32.67908	-100.91476	6200 College Ave	Snyder	79549	+13255738511	http://www.wtc.edu/		0.97	
+66b545b9bd5c	Western Texas College Opportunity Center	college		32.71704	-100.92336	2210 25th St	Snyder	79549	+13255746581	http://www.wtc.edu/cos		0.98	
+0b401594bcc1	7-Eleven	convenience		32.71595	-100.90058	407 Coliseum Dr	Snyder	79549	+13255734481	http://www.7-eleven.com/	7-Eleven	0.92	
+427158b7d46d	7-Eleven	convenience		32.43542	-100.53433	1101 Main St	Roscoe	79545	+13257663777	https://www.7-eleven.com/		1.00	
+4c0683d23680	7-Eleven	convenience		32.70466	-100.90160	417 37th St	Snyder	79549	+13255734771	http://www.7-eleven.com/	7-Eleven	0.75	
+62b478c95c44	7-Eleven	convenience		32.70482	-100.88439	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.7-eleven.com/		1.00	
+69fc829ff5b7	7-Eleven	convenience		32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.7-eleven.com/		1.00	
+99445d372e96	7-Eleven	convenience		32.73717	-100.91734	410 College Ave	Snyder	79549	+13255730111	https://www.7-eleven.com/		1.00	
+c47226779ea1	7-Eleven	convenience		32.41141	-100.85967	101 E I-20	Colorado City	79512	+13257282359	https://www.7-eleven.com/		1.00	
+eabb3b53c67f	7-Eleven	convenience		32.45081	-100.39837	1811 Lamar St	Sweetwater	79556	+18006273999	http://www.7-eleven.com/	7-Eleven	0.93	
+22cd8a447cc6	Allsup's	convenience		32.70179	-100.91962	3911 College Ave	Snyder	79549	+13255733337			0.55	
+4d95885f7dc2	Allsup's	convenience		32.40747	-100.84501	947 I-20	Colorado City	79512	+13253391297	https://www.allsups.com/	Allsup’s	1.00	
+7c89013c68b1	Allsup's	convenience		32.74103	-100.91773	102 N College Ave	Snyder	79549	+13255730704	https://www.allsups.com/	Allsup’s	1.00	
+b5954c50cf37	Allsup's	convenience		32.43493	-100.53545	800 12th St	Roscoe	79545	+13257663804	https://www.allsups.com/	Allsup’s	1.00	
+d6207458f2a2	Allsup's	convenience		32.63476	-100.76351	7452 S US-84	Hermleigh	79526	+13253391121	https://www.allsups.com/	Allsup’s	1.00	
+e95f6b19d679	Allsup's	convenience		32.47107	-100.40556	300 E Broadway Ave	Sweetwater	79556	+13252366839	https://www.allsups.com/	Allsup’s	0.92	
+ec79cbd13802	Allsup's	convenience		32.71696	-100.93304	3200 Lamesa Hwy Lot 1	Snyder	79549	+13255746800	https://www.allsups.com/	Allsup’s	0.92	
+40e5e8efc603	Allsup's Convenience Store	convenience		32.44938	-100.39802	2001 Lamar St	Sweetwater	79556	+13252358203	https://www.allsups.com/	Allsup’s	0.92	
+55a0f91023f3	Allsup's Convenience Store	convenience		32.38817	-100.86456	947 E Interstate Rd	Colorado City	79512	+13257285239	https://www.allsups.com/		0.85	
+916f57c9f978	Allsup's Convenience Store	convenience		32.47699	-100.01204	1101 N 7th St	Merkel	79536	+13259281505	https://www.allsups.com/	Allsup’s	0.92	
+d4667b792a3d	Allsup's Convenience Store	convenience		32.38929	-100.87602	947 E Interstate 20	Colorado City	79512	+13257285239	http://www.allsups.com/		0.97	
+2078697ba649	Alon	convenience		32.48419	-100.12313	540 S Main St	Trent	79561	+13258626291	http://myalon.com/		0.85	
+8e415938d8de	Alon	convenience		32.70454	-100.90154	417 37th St	Snyder	79549	+13255734771	http://myalon.com/		0.97	
+9acdaa89b790	ALON	convenience		32.49296	-100.12068	540 N Main St	Trent	79561	+13258626291	https://myalon.com/stations/ALON-Gas-Station-0202-542-N-Main-Trent-TX-79561		0.85	
+9bb8e1226be5	Alon	convenience		32.71744	-100.93284	3200 Lamesa Hwy #1	Snyder	79549	+13255738735	http://myalon.com/		0.92	
+b1f7a8b0f058	ALON	convenience		32.88360	-100.13234	444 W Lake Dr	Hamlin	79520	+13255762721	https://www.allsups.com/	Allsup’s	1.00	
+bc714430108b	ALON	convenience		32.74551	-100.37638	203 S 1st St	Roby	79543	+13256772775	https://dkfuel.com/stations/DK-Gas-Station-1321-203-East-South-1st-ROBY-TX-79543		0.92	
+bfc266ce071a	ALON	convenience		32.48279	-100.40081	1400 Hailey St	Sweetwater	79556	+13252351908	https://alonfuel.com/stations/alon-gas-station-2874-1400-hailey-st-sweetwater-tx-79556/		0.99	
+c51658cdaa6d	Alon	convenience		32.74074	-100.91764	102 N College Ave	Snyder	79549	+13255730704	https://www.allsups.com/	Allsup’s	0.97	
+fd8541281fe6	ALON	convenience		32.45168	-100.39905	1712 Lamar St	Sweetwater	79556	+13252910332	https://alonbrands.com/	Alon Gas Station	1.00	
+329a57ebea2c	Alon Gas Station	convenience		32.70188	-100.91924	3911 College Ave	Snyder	79549	+19155738735	http://myalon.com/		0.92	
+3c9640c51895	ALON Gas Station	convenience		32.85825	-100.46803	701 North Cleveland Avenue	Rotan	79546	+13257357001	https://alonfuel.com/stations/alon-gas-station-5635-701-n-cleveland-rotan-tx-79546/		1.00	
+451965768c3c	ALON Gas Station	convenience		32.48279	-100.40081	1400 Hailey Street	Sweetwater	79556	+13252910331	https://alonfuel.com/stations/alon-gas-station-2874-1400-hailey-st-sweetwater-tx-79556/		0.95	
+650404981ada	ALON Gas Station	convenience		32.38818	-100.86382	395 East 2nd Street	Colorado City	79512	+13252910317	https://alonfuel.com/stations/alon-gas-station-5207-395-e-2nd-st-colorado-city-tx-79512/		0.92	
+9956f0b5aa06	Alon Gas Station	convenience		32.63446	-100.76401	7452 US-84	Hermleigh	79526	+19158632412	http://myalon.com/		0.92	
+ae4d163a93a1	Alon Gas Station	convenience		32.71324	-100.89430	407 Coliseum Dr	Snyder	79549	+13255734481	http://myalon.com/		0.85	
+c819810763eb	ALON Gas Station	convenience		32.71571	-100.90050	407 Coliseum Drive	Snyder	79549	+13252910328	https://alonfuel.com/stations/alon-gas-station-5088-407-coliseum-dr-snyder-tx-79549/		0.92	
+d39913b58511	ALON Gas Station	convenience		32.39228	-100.86194	545 Hickory Street	Colorado City	79512	+13252910316	https://alonfuel.com/stations/alon-gas-station-5077-542-hickory-st-colorado-city-tx-79512/		1.00	
+d40d12998443	ALON Gas Station	convenience		32.47753	-100.01479	1207 North 7th Street	Merkel	79536	+13252910319	https://alonfuel.com/stations/alon-gas-station-2870-1207-n-7th-st-merkel-tx-79536/		1.00	
+5b9076bf44dc	Ampcng	convenience		32.45012	-100.44765	9422 S Interstate 20	Sweetwater	79556	+13123006700			0.74	
+dc16a3bfd8ac	B's Place	convenience		32.41147	-100.71149		Loraine					0.79	
+7693821f5bd1	C&C Country Store	convenience		32.39279	-100.91409	5889 W Interstate 20	Colorado City	79512	+13257285300			0.72	
+ef559b153022	CAT Scale	convenience	truck gas station	32.44836	-100.44263	100 S Hopkins Rd	Sweetwater	79556	+13252358488	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92	
+b7b13ac83e89	CEFCO Convenience Store	convenience		32.47570	-100.39770	1101 E Broadway St	Sweetwater	79556	+13252368050	https://www.cefcostores.com/		0.92	
+024ce93eb9fc	CEFCO Convenience Stores	convenience		32.70347	-100.87403	1999 E Roby Hwy	Snyder	79549	+14306663790		CEFCO Convenience Stores	1.00	
+18d501da6b75	Check Mart	convenience		32.46067	-100.40160	900 Lamar St	Sweetwater	79556	+13252350144	http://lawrencebros.com/		0.92	
+259933a916b7	Chevron	convenience		32.41301	-100.85975	100 IH-20 ACCESS RD	Colorado City	79512		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/100-IH-20-ACCESS-RD-COLORADO-CITY-TX-79512-id203372	Chevron	0.95	
+998265019a3e	Circle C Grocery	convenience		32.85892	-100.46815	711 N Cleveland Ave	Rotan	79546	+13257352574			0.92	
+4ac499477ea9	Conoco	convenience		32.88463	-100.12627	13 S Central Ave	Hamlin	79520	+13255762644	https://www.conoco.com/		0.92	
+e8a90a41dbd7	Conoco	convenience		32.74546	-100.37636	203 S 1st St	Roby	79543	+13256772775	https://www.conoco.com/	Conoco	0.62	
+f342a15989c7	Cooper Oil Co	convenience		32.88428	-100.12623	33 S Central Ave	Hamlin	79520	+13255763101	http://shell.com		0.92	
+08f9c195f5c8	DK Gas Station	convenience		32.47115	-100.40550	300 East Broadway Avenue	Sweetwater	79556	+13252366839	https://dkfuel.com/stations/dk-gas-station-8167-300-e-broadway-sweetwater-tx-79556/		0.92	
+0c46a8e38ec5	DK Gas Station	convenience		32.71695	-100.93288	3200 Lamesa Highway	Snyder	79549	+13255746800	https://dkfuel.com/stations/dk-gas-station-8009-3200-lamesa-hwy-1-snyder-tx-79549/		0.92	
+1aa12aa900f2	DK Gas Station	convenience		32.44942	-100.39777	2001 Lamar Street	Sweetwater	79556	+13252358203	https://dkfuel.com/stations/dk-gas-station-1322-2001-lamar-sweetwater-tx-79556/		0.92	
+395d3228fa59	DK Gas Station	convenience		32.43499	-100.53542	800 12th Street	Roscoe	79545	+13257663804	https://dkfuel.com/stations/dk-gas-station-1990-800-12th-st-roscoe-tx-79545/		1.00	
+3fa8e8539066	DK Gas Station	convenience		32.49296	-100.12067	540 North Main Street	Trent	79561	+13252910334	https://dkfuel.com/stations/dk-gas-station-0202-542-n-main-trent-tx-79561/		0.95	
+6697a4fd0ff1	DK Gas Station	convenience		32.40739	-100.84484	947 Interstate 20	Colorado City	79512	+13257285239	https://dkfuel.com/stations/dk-gas-station-0514-947-e-i-20-coloradocity-tx-79512/		0.99	
+75d3d073f418	DK Gas Station	convenience		32.45109	-100.44314	50 Hopkins Road	Sweetwater	79556	+13252071444	https://dkfuel.com/stations/dk-gas-station-0814-50-hopkins-rd-sweetwater-tx-79556/		1.00	
+87b3774e0cd6	DK Gas Station	convenience		32.74551	-100.37639	203 South 1st Street	Roby	79543	+13257762375	https://dkfuel.com/stations/dk-gas-station-1321-203-east-south-1st-roby-tx-79543/		0.92	
+9dc7a12c11d8	DK Gas Station	convenience		32.88367	-100.13235	444 West Lake Drive	Hamlin	79520	+13255762721	https://dkfuel.com/stations/dk-gas-station-5165-444-w-lake-dr-hamlin-tx-79520/		0.95	
+be8e4b4afdb5	DK Gas Station	convenience		32.74073	-100.91802	102 North College Avenue	Snyder	79549	+13255730704	https://dkfuel.com/stations/dk-gas-station-0738-102-n-college-ave-snyder-tx-79549/		0.92	
+c7a33ad0c6d6	DK Gas Station	convenience		32.47694	-100.01196	1101 North 7th Street	Merkel	79536	+13259281505	https://dkfuel.com/stations/dk-gas-station-1319-9883-interstate-20-frontage-road-merkel-tx-79536/		1.00	
+cc94c454669c	DK Gas Station	convenience		32.70476	-100.90172	417 37th Street	Snyder	79549	+13252910327	https://dkfuel.com/stations/dk-gas-station-5087-417-37th-st-snyder-tx-79549/		0.95	
+cd2a2a50f8d5	DK Gas Station	convenience		32.38470	-100.96106	5889 Interstate 20	Colorado City	79512	+19186478147	https://dkfuel.com/stations/dk-gas-station-0031-5889-interstate-20-colorado-city-tx-79512/		0.99	
+eff3367f757f	DK Gas Station	convenience		32.63461	-100.76370	7452 U.S. 84	Hermleigh	79526	+13258632412	https://dkfuel.com/stations/dk-gas-station-5186-7452-us-84-hermleigh-tx-79526/		0.99	
+f3978448bb52	DK Gas Station	convenience		32.70164	-100.91943	3911 College Avenue	Snyder	79549	+19155738735	https://dkfuel.com/stations/dk-gas-station-5164-3911-college-avenue-snyder-tx-79549/		0.92	
+c8f01324ca3c	E-Z Store	convenience		32.46608	-100.41726	810 W Broadway St	Sweetwater	79556				0.56	
+9f36d171ca6c	Fina	convenience		32.85829	-100.46832	701 N Cleveland Ave	Rotan	79546	+13257352605			0.64	
+8daaba6f2813	Garrett's	convenience		32.46734	-100.41470	610 W Broadway St	Sweetwater	79556	+13252369000			0.75	
+d1f0c4f4446d	Gas 'n' Grub	convenience		32.39118	-100.83836	2001 State Highway 208	Colorado City	79512	+13257283622	http://www.pizzapro.com/		0.95	
+f7c186808eb5	HOP IN 430462	convenience		32.88446	-100.12668	13 S CENTRAL	Hamlin	79520			Conoco	0.80	
+cd98720feb3f	I-20 Travel Stop	convenience		32.43060	-100.55231	12825 S Interstate Hwy 20	Roscoe	79545		https://locations.valero.com/en-us/LocationDetails/Index/12825-S-INTERSTATE-HWY-20/0000027691	Valero	0.92	
+a770edd4aa6a	Just E Nuff	convenience		32.41157	-100.71156	102 E Pacific Ave	Loraine	79532	+13257372323			0.73	
+7dcf5e613583	Kent Kwik	convenience		32.41280	-100.85975	100 I-20	Colorado City	79512	+13257283107	http://www.thekentcompanies.com/	Kent Kwik Convenience Stores	0.92	
+450c9f991747	Legacy Fuels	convenience		32.71788	-100.91608	2401 Avenue Q	Snyder	79549	+13255736365	http://www.legacy-fuels.com/		0.92	
+b89ad3be810c	Love's RV Stop	convenience		32.44853	-100.50301	9418 N Interstate 20	Sweetwater	79556	+13252351241	https://www.camplife.com/campground/Love%2527s+RV+Stop-Sweetwater+TX+475		0.85	
+34775c98ed64	Love's Travel Stop	convenience		32.45094	-100.44110	9418 N I-20	Sweetwater	79556	+13252351240	https://www.loves.com/locations/475?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=475		0.97	
+f13ef215d914	M & M Fuels	convenience		32.63472	-100.76363	7104 S US Highway 84	Hermleigh	79526	+13258632227			0.83	
+d8663cf91957	Moonshine's	convenience		32.08670	-100.31921	116 Main St	Blackwell	79506	+13252649845			0.92	
+7c03c02dbc9f	Mullins, Barry-325 Travel Stop	convenience		32.43081	-100.55246	12825 I-20 E	Roscoe	79545	+13257663101			0.65	
+4c283b03cbcc	Murphy Usa	convenience		32.45200	-100.39370	405 NE Georgia Ave	Sweetwater	79556	+13252351100			0.92	
+dfc8cd6c0a52	Mustang Short Stop	convenience		32.47969	-100.38934	1803 E Broadway St	Sweetwater	79556	+13259334006	https://www.sunoco.com		0.95	
+005cc4aba80b	Phillips 66	convenience		32.43528	-100.53451	1101 Main St	Roscoe	79545	+13257663777	https://www.phillips66gas.com/		1.00	
+23bfb2eba6de	Phillips 66	convenience		32.44950	-100.39787	2001 Lamar St	Sweetwater	79556	+13256772775	https://www.phillips66gas.com/	Phillips 66 Gas	0.92	
+56fcea2e6a5d	Phillips 66	convenience		32.73744	-100.91765	410 College Ave	Snyder	79549	+13255730111	https://www.phillips66gas.com/		1.00	
+7b306515778f	Phillips 66	convenience		32.70347	-100.91873	3800 College Ave	Snyder	79549	+13255736680	https://www.phillips66.com		0.65	closed
+d89769340add	Phillips 66	convenience		32.41162	-100.86005	101 E Interstate 20	Colorado City	79512	+13257282359	https://www.phillips66gas.com/		1.00	
+de4435a23203	Phillips 66	convenience		32.70663	-100.91874	3500-3616 College Ave	Snyder	79549	+13255741387	https://www.phillips66gas.com/		1.00	closed
+f569c3e5a29a	Phillips 66	convenience		32.40983	-100.84249	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.phillips66gas.com/		1.00	
+b492de4c4608	Phillips 66 Gas	convenience		32.47689	-100.01186	1101 N 7th St	Merkel	79536	+13256772775	https://www.phillips66gas.com/	Phillips 66 Gas	0.94	
+290ee295de09	Pilot Dealer	convenience		32.70526	-100.86586	1100 US-180	Snyder	79549	+13255735213	https://locations.pilotflyingj.com/us/tx/snyder/1100-us-180	Pilot Flying J	0.92	
+2257ec8a4864	Rip Griffin's Truck Stop	convenience		32.70522	-100.86581	180 Snyder 79549 United Stat	Snyder	79549	+13255735213			0.89	
+d417d70ebaef	Rockin liquor	convenience		32.43487	-100.53596	810 12th St	Roscoe	79545	+13259367000	https://rockin-scantina.hub.biz		0.92	
+e234f4646580	Rustic Star	convenience		32.70078	-100.91852	4014 College Ave	Snyder	79549	+13255741117	http://profile.29prime.com/TX/Snyder/Liquor+Store/Rustic+Star+Liquor		0.92	
+4aed76e02780	Shell	convenience		32.47952	-100.38933	1803 E Broadway St	Sweetwater	79556	+13252373919	https://find.shell.com/us/fuel/12566147-1803-e-broadway-st	Shell	0.92	
+85d6a694adda	Skinny's	convenience		32.49292	-100.12084	542 N Main St	Trent	79561	+13258626291	http://www.skinnys.com		0.61	
+3f984fed0243	Snyder Eagles Landing	convenience		32.70540	-100.86620	1100 E. Hwy 180	Snyder	79549		https://locations.valero.com/en-us/LocationDetails/Index/1100-E-HWY-180/0000013047	Valero	0.80	
+e15662653b80	Snyder One Stop	convenience		32.71693	-100.92627	2500 25th St	Snyder	79549	+13255737812			0.82	
+f49ff2b2883f	Spring Market Fuel Center	convenience		32.47919	-100.01045	1003 Telephone Cir	Merkel	79536	+19037473503	https://www.spring-market.com/fuel		1.00	
+7271f7be194b	Steel Penny	convenience		32.45093	-100.44792	9456 N Interstate 20	Sweetwater	79556				0.97	
+4303f85237d6	Stripes	convenience		32.43545	-100.53428	1101 Main St	Roscoe	79545	+13257663777	http://www.stripesstores.com	Stripes	1.00	
+5bdfc33f6490	Stripes	convenience	truck gas station	32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://stripesstores.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.97	
+619e84060976	Stripes	convenience		32.73718	-100.91730	1900 King's Hwy	Snyder	79549	+13255730111	http://www.stripesstores.com	Stripes	1.00	
+abc38a4d10b8	Stripes	convenience		32.70493	-100.88432	1300 E Coliseum Dr	Snyder	79549	+13255738341	http://www.stripesstores.com	Stripes	1.00	
+15133a243086	Sunoco	convenience		32.73720	-100.91789	410 College Ave	Snyder	79549	+13255730111	http://www.sunoco.com	Sunoco	0.92	
+603e52070168	Sunoco	convenience		32.41134	-100.85989	101 E Interstate 20	Colorado City	79512	+13257282359	https://www.sunoco.com/locations/store/101-e-interstate-20-colorado-city-tx-0364230300		0.92	
+6c45c4df6bf5	Sunoco	convenience		32.40979	-100.84341	2272 Co Rd 139	Colorado City	79512	+13257289494	http://www.sunoco.com	GoSunoco	0.92	
+ff71b82ce52d	Sunoco	convenience		32.43536	-100.53480	1101 Main St	Roscoe	79545	+13257663777	http://www.sunoco.com	Sunoco	0.92	
+7d5a2f4e7982	Sunoco Gas Station	convenience		32.70475	-100.88409	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.sunoco.com/find-a-station		0.92	
+7d897af33996	Sweetwater Cousins	convenience		32.45070	-100.39910	100 NW Georgia Ave	Sweetwater	79556	+13252366177	http://www.chevron.com/		0.92	
+f867595008c8	The Red Junction Inc.	convenience		32.44693	-100.39790	2216 Lamar St	Sweetwater	79556	+13252197115	http://www.theredjunction.com/		0.94	
+29b7e02d6874	Valero	convenience		32.39125	-100.83833	2001 TX-208 Apt 1	Colorado City	79512	+12103452000	http://www.valero.com	Valero Energy	0.92	
+70edba29228e	Valero	convenience		32.70513	-100.86591	US-180	Snyder	79549	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/1100-E-HWY-180/0000013047	Valero	0.92	
+00fc451dd898	Wes-t-go Conoco No 3	convenience		32.69946	-100.91944	4201 College Ave	Snyder	79549	+13255739422			0.76	
+82430ee914d8	Wes-T-Go Convenience Stores	convenience		32.74565	-100.37640	104 N Angelo St	Roby	79543	+13257762375	http://conocophillips.com		0.92	
+841e1583d20a	Wes-To-Go Convenient	convenience		32.88461	-100.12598	13 S Central Ave	Hamlin	79520	+13255762644	http://www.conoco.com/station-finder		0.92	
+01b8e2dfc05f	Yesway	convenience		32.44942	-100.39777	2001 Lamar St	Sweetwater	79556	+13252358203	https://yesway.com/		0.93	
+08f8c5b2f072	Yesway	convenience		32.74553	-100.37616	203 S 1st St	Roby	79543	+13252748483	https://yesway.com/	Yesway	1.00	
+200e55b493e1	Yesway	convenience		32.69912	-100.91938	4201 College Ave	Snyder	79549	+13252387625	https://yesway.com/	Yesway	0.92	
+a484000092e2	Yesway	convenience		32.88464	-100.12600	13 South Central Avenue	Hamlin	79520	+13255762644	https://yesway.com/		0.93	
+b7a0a26fb546	Yesway	convenience		32.43494	-100.53548	800 12th St	Roscoe	79545	+13257663804	https://yesway.com/		0.92	
+d6cace7a4e3a	Yesway	convenience		32.74103	-100.91773	102 N College Ave	Snyder	79549	+13255730704		Yesway	0.91	
+9b838dfd5728	2 Profs Ice Cream - Sweetwater	fastfood		32.47008	-100.40719	109 Locust St	Sweetwater	79556	+13253206813	https://2profsicecream.com/		0.98	
+07e9cadfaae1	Arby's	fastfood		32.45094	-100.44110	9418 N I-20	Sweetwater	79556	+13252351450	https://locations.arbys.com/tx/sweetwater/9418-north-i-20.html		0.98	
+4769e6c79512	Burger King	fastfood		32.41289	-100.85890	101 E Interstate 20	Colorado City	79512	+19157282002	http://www.burgerking.com		0.92	
+26ce23b306ac	Chicken Express	fastfood		32.69779	-100.91885	4308 College Ave	Snyder	79549	+13255741400	https://www.chickene.com	Chicken Express	0.96	
+5bf7764fc17e	Dairy Queen	fastfood		32.88397	-100.12656	32 S Central Ave 32 S Central Ave	Hamlin	79520	+13255762741	https://www.dairyqueen.com/en-us/locations/tx/hamlin/32-s-central-ave/14190/?y_source=1_MjkzMzkyNjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96	
+8b12382eb4a2	Dairy Queen	fastfood		32.41321	-100.86076	2301 N State Highway 208 2301 N State Highway 208	Colorado City	79512	+13257282626	https://www.dairyqueen.com/en-us/locations/tx/colorado-city/2301-n-state-highway-208/13928/?y_source=1_MjkzMzg5MjYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98	
+bef594c15dc2	Dairy Queen	fastfood		32.85110	-100.46606	100 S Cleveland Ave	Rotan	79546	+13257352227	https://www.dairyqueen.com/en-us/locations/tx/rotan/100-s-cleveland-ave/14537/?y_source=1_MjkzMzg4NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94	
+da09581f4891	Dairy Queen	fastfood		32.71256	-100.89373	108 Coliseum Dr 108 Coliseum Dr	Snyder	79549	+13255732651	https://www.dairyqueen.com/en-us/locations/tx/snyder/108-coliseum-dr/14615/?y_source=1_MjkzMzg5ODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98	
+ed41fcd51d65	Dairy Queen	fastfood		32.45291	-100.39965	1608 Lamar St 1608 Lamar St	Sweetwater	79556	+13252355066	https://www.dairyqueen.com/en-us/locations/tx/sweetwater/1608-lamar-st/14636/?y_source=1_MjkzMzkwMDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98	
+20a6655e4973	Domino's	fastfood	pizza restaurant	32.69101	-100.91977	5107 College Ave.	Snyder	79549	+13255731333	http://www.dominos.com/	Domino's Pizza	0.96	
+a8c2b695336a	Domino's	fastfood	pizza restaurant	32.44838	-100.39828	2014 Lamar St	Sweetwater	79556	+13252354400	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98	
+5971258b3c83	Domino's Pizza	fastfood	pizza restaurant	32.45910	-100.40135	1010 Lamar St	Sweetwater	79556	+13252354400	https://www.dominos.com		0.55	
+16f09f63b90f	DQ Grill & Chill	fastfood		32.45305	-100.39965	1608 Lamar St	Sweetwater	79556		https://www.dairyqueen.com/en-us/locations/tx/sweetwater/1608-lamar-st/4408	DQ Grill & Chill	0.80	
+4bfeba185576	DQ Grill & Chill	fastfood		32.71252	-100.89375	108 Coliseum Dr	Snyder	79549		https://www.dairyqueen.com/en-us/locations/tx/snyder/108-coliseum-dr/4387	DQ Grill & Chill	0.80	
+61a114409971	DQ Grill & Chill	fastfood		32.41328	-100.86080	2301 N State Highway 208	Colorado City	79512		https://www.dairyqueen.com/en-us/locations/tx/colorado-city/2301-n-state-highway-208/3701	DQ Grill & Chill	0.80	
+72ea69332c14	DQ Grill & Chill	fastfood		32.88397	-100.12668	32 S Central Ave	Hamlin	79520		https://www.dairyqueen.com/en-us/locations/tx/hamlin/32-s-central-ave/3963	DQ Grill & Chill	0.80	
+ceb4ea7da1c1	DQ Grill & Chill	fastfood		32.85112	-100.46603	100 S Cleveland Ave	Rotan	79546		https://www.dairyqueen.com/en-us/locations/tx/rotan/100-s-cleveland-ave/4309	DQ Grill & Chill	0.80	
+f912c329b9de	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	32.45049	-100.44281	9438 N I H 20	Sweetwater	79556	+13252071495	https://www.freddys.com/location/sweetwater?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97	
+1a395dcae744	Gill's Chicken	fastfood		32.45951	-100.40133	1006 Lamar St	Sweetwater	79556	+13252351521	http://gills-chicken.edan.io		0.97	
+0a9a327885b3	Golden Chick	fastfood		32.71192	-100.91817	3000 College Ave	Snyder	79549	+13254360197	https://locations.goldenchick.com/tx/snyder/1353/	Golden Chick	0.92	
+503677022fce	Golden Chick	fastfood		32.45150	-100.39529	309 NE Georgia Ave	Sweetwater	79556	+13252366283	https://locations.goldenchick.com/tx/sweetwater/1204/	Golden Chick	0.94	
+b77f6ca4ba88	Golden Chick	fastfood		32.41043	-100.86364	643 I-20	Colorado City	79512	+13257289373	https://locations.goldenchick.com/tx/colorado-city/1245/	Golden Chick	0.92	
+c8b373e30c7f	Golden Chick	fastfood		32.38805	-100.85973	643 W Ih 20	Colorado City	79512	+13257289373	https://locations.goldenchick.com/tx/colorado-city/1245/		0.98	
+76d25acbe056	Little Caesars Pizza	fastfood	pizza restaurant	32.45190	-100.39543	309 NE Georgia Ave	Sweetwater	79556	+13252354060	http://www.littlecaesars.com/	Little Caesars	0.70	
+cf4711421a30	Little Caesars Pizza	fastfood	pizza restaurant	32.69592	-100.91981	4511 COLLEGE AVE	Snyder	79549	+13252071751	https://littlecaesars.com/en-us/store/11908		0.92	closed
+0e91910b1a53	McDonald's	fastfood		32.45100	-100.39720	201 Ne Georgia Street	Sweetwater	79556	+13252351520	https://www.mcdonalds.com/us/en-us/location/tx/sweetwater/201-ne-georgia-street/4742.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98	
+f0fb59c5cda1	McDonald's	fastfood		32.70736	-100.91877	3414 College Ave	Snyder	79549	+13255742100	https://www.mcdonalds.com/us/en-us/location/tx/snyder/3414-college-ave/7875.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99	
+02472972723f	Patch’s Back Porch	fastfood		32.08447	-100.32251		Blackwell					0.90	
+bbdf76cb9917	Pizza Hut	fastfood	pizza restaurant	32.47365	-100.40056	800 E. Broadway Nolan	Sweetwater	79556	+13252358673	https://locations.pizzahut.com/tx/sweetwater/800-e-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283056	Pizza Hut	0.98	
+d2a4922cf14e	Pizza Hut	fastfood	pizza restaurant	32.69381	-100.91881	4712 College Avenue	Snyder	79549		https://locations.pizzahut.com/tx/snyder/4712-college-avenue	Pizza Hut	0.80	
+d33e82f1c010	Pizza Hut	fastfood	pizza restaurant	32.70208	-100.91956	3909 College Ave Scurry	Snyder	79549	+13255734919	https://locations.pizzahut.com/tx/snyder/3909-college-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290652	Pizza Hut	1.00	
+d4c8be62c9b5	Pizza Hut	fastfood		32.41034	-100.86094	2215 Hickory St	Colorado City	79512	+13257285282	https://locations.pizzahut.com/tx/colorado-city/2215-hickory-st	Pizza Hut	0.92	closed
+fa2b37a1150a	Pizza Hut Express	fastfood	pizza restaurant	32.44869	-100.44349	I-20 9418 North	Sweetwater	79556	+18009488488		Pizza Hut	0.92	
+ee983f5bb7b8	Popeyes	fastfood		32.44875	-100.44361	100 S Hopkins Rd	Sweetwater	79556	+13252358488	https://www.popeyes.com/store-locator/store/restaurant_83929	Popeyes Louisiana Kitchen	1.00	
+1b90934502f0	Schlotzsky's	fastfood	sandwich shop	32.44966	-100.39744	204 SE Georgia Ave	Sweetwater	79556	+13252355000	https://locations.schlotzskys.com/tx/sweetwater/204-south-east-georgia-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98	
+a42f9920c71f	Schlotzsky's	fastfood	sandwich shop	32.46778	-100.41113	204 S East Georgia St	Sweetwater	79556	+13252355000	http://www.schlotzskys.com/sweetwater/1629/home		0.85	
+122cce423315	Sonic Drive In	fastfood		32.47815	-100.01031	9846 Interstate 20	Merkel	79536	+13259283000	https://locations.sonicdrivein.com/tx/merkel/9846-interstate-20.html	Sonic Drive-In	0.98	
+ab7a663ac886	Sonic Drive In	fastfood		32.70063	-100.91895	4100 College	Snyder	79549	+13255737620	https://locations.sonicdrivein.com/tx/snyder/4100-college.html	Sonic Drive-In	0.97	
+bdb172ebad19	Sonic Drive In	fastfood		32.47317	-100.40079	706 East Broadway	Sweetwater	79556	+13252366917	https://locations.sonicdrivein.com/tx/sweetwater/706-east-broadway.html	Sonic Drive-In	0.97	
+952792fbd09e	Sonic Drive-In	fastfood		32.41177	-100.85873	125 E. And Ih20	Colorado City	79512	+13257283951	https://locations.sonicdrivein.com/tx/coloradocity/125-e.-and-ih20.html	Sonic Drive-In	0.97	
+2d20f60d4b54	Subway	fastfood		32.47828	-100.01081	9882 Interstate 20	Merkel	79536	+13259283663	https://restaurants.subway.com/united-states/tx/merkel/9882-interstate-20	Subway	0.96	
+46429f4d7c9d	Subway	fastfood	sandwich shop	32.45063	-100.39953	102 NW Georgia Ave	Sweetwater	79556	+13252354145	https://www.subway.com		0.98	
+6c4e16f863fc	Subway	fastfood	sandwich shop	32.88498	-100.12688	12 N Central Ave	Hamlin	79520	+13255762775	http://www.subway.com/en-us	Subway	0.98	
+a90aac28ee27	Subway	fastfood		32.41296	-100.85939	150 E I 20	Colorado City	79512	+13257288828	https://restaurants.subway.com/united-states/tx/colorado-city/150-e-i-20?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=16178&utm_campaign=evergreen-2020&y_source=1_MTQ5MDE2MjctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98	
+d875d5cccd0b	Subway	fastfood	sandwich shop	32.70270	-100.91957	3903 College Ave	Snyder	79549	+13255739782	https://www.subway.com		0.97	
+f01947d906ce	Subway	fastfood	sandwich shop	32.47279	-100.40250	602 E Broadway St	Sweetwater	79556	+13252366825	http://Subway.com/	Subway	1.00	
+454f9d2e55f9	Taco Bell	fastfood		32.69685	-100.91868	4508 College Ave	Snyder	79549	+13255730068	http://www.tacobell.com/	Taco Bell	0.96	
+bc5222991710	Taco Bell	fastfood		32.44969	-100.39678	206 SE Georgia Ave	Sweetwater	79556	+13252353888			0.99	
+af421616e36e	The Ritz Diner	fastfood		32.71626	-100.91638	1715 26th St	Snyder	79549	+13255736038			0.58	
+35afadf4cc42	Wendy's	fastfood	burger restaurant	32.70533	-100.86592	1100 E Us Highway 180	Snyder	79549	+13258661022	https://locations.wendys.com/united-states/tx/snyder/1100-e-us-highway-180		0.96	
+d0dd135c21f8	Wendy's	fastfood		32.45170	-100.39445	403 Ne Georgia Ave	Sweetwater	79556	+13252368086	https://locations.wendys.com/united-states/tx/sweetwater/403-ne-georgia-ave	Wendy's	0.97	
+8688f5d534f4	Whataburger	fastfood		32.45152	-100.39580	301 NE GEORGIA AVE	Sweetwater	79556	+13252351119	https://locations.whataburger.com/tx/sweetwater/301-ne-georgia-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97	
+bbe330ca55ba	Whataburger	fastfood		32.69550	-100.91879	4612 COLLEGE AVE	Snyder	79549	+13255734954	https://locations.whataburger.com/tx/snyder/4612-college-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98	
+bbd1ffe7eef3	Brookshire's	grocery		32.47308	-100.40405	501 E Broadway St	Sweetwater	79556	+13252358426	https://www.brookshires.com/store-information/Sweetwater/117	Brookshire's	1.00	
+6dd4c0790235	Brookshire's Food & Pharmacy	grocery		32.45978	-100.01762	1003 FM 126	Merkel	79536	+13259283743	https://www.brookshires.com		0.77	
+452fd3ec096f	Cash Saver	grocery		32.88473	-100.12943	212 W Lake Dr	Hamlin	79520	+13255763551	http://www.cashsavertx.com/	Cash Saver Texas	0.96	
+2c6791c7ef81	Defaid Emporium	grocery		32.70448	-100.91985	1908 37th St	Snyder	79549	+13255745954	http://www.defaidemporium.com/		0.92	
+1e177a6041a7	Fuller Thriftway Foods	grocery		32.39089	-100.86282	405 Hickory St	Colorado City	79512	+13257283781			0.92	
+a98ebf45253d	Glen's Thriftway	grocery		32.85498	-100.46651	310 N Cleveland Ave	Rotan	79546	+13257352246	https://glen-s-thriftway.hub.biz		0.92	
+aef940334696	Lawrence Brothers Supermarket	grocery		32.88464	-100.12940	212 W Lake Dr	Hamlin	79520	+13255763470	lawrencebros.com		0.92	
+773bdadc25d0	Lowe's Market	grocery		32.39063	-100.86269	405 Hickory St	Colorado City	79512	+13257283781	http://www.lowesmarket.com/	Lowe's Market	0.96	
+31f9f3987519	Mal Enterprises Inc	grocery		32.47609	-100.39898	300 Hailey St	Sweetwater	79556	+13252366351			0.65	
+97f6b82d991b	Merkel #725	grocery		32.47948	-100.01038	1003 Telephone Cir	Merkel	79536			Spring Market	0.80	
+551cb1e3fe0f	Sheffield Enterprises	grocery		32.46030	-100.40109	909 Lamar St	Sweetwater	79556				0.95	
+d20431cc958d	Skinny's Convenience Food Store	grocery		32.39192	-100.86213	545 Hickory St	Colorado City	79512	+13257283081	http://www.skinnys.com		0.92	
+d2fda6fe4f65	Sweetwater #117	grocery		32.47220	-100.40405	501 E Broadway St	Sweetwater	79556			Brookshire's	0.80	
+2f985364b048	Ta Sweetwater TX I-20	grocery		32.46467	-100.38400	S Interstate 20	Sweetwater	79556	+13252358488	http://www.tatravelcenters.com/location-details/ta-sweetwater		0.88	
+f22f4acf380a	The Really Really Good Jerky Co.	grocery		32.29822	-100.33881	118 State Highway 153	Sweetwater	79556	+12145782353	http://reallygoodjerky.com		0.65	
+110a21d0c6ab	United Express	grocery		32.70663	-100.91898	3500 College Ave	Snyder	79549	+13255741387	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92	
+d916f1e12858	United Supermarkets	grocery		32.70678	-100.91785	3500 College Ave	Snyder	79549	+13255741667	https://local.unitedsupermarkets.com/tx/snyder/3500-college-ave.html	United Supermarkets	0.92	
+358e43ce9da3	Cogdell Memorial Hospital	hospital		32.68780	-100.91734	1700 Cogdell Blvd	Snyder	79549	+13255736374	http://www.cogdellhospital.com/		1.00	
+1484edc39b89	Cogdell Rehab and Wellness	hospital		32.68918	-100.91787	5206 Trinity Blvd	Snyder	79549	+13255747259	http://www.CogdellHospital.com/		0.92	
+5c77f6233926	Dr. Ryan Morris	hospital		32.68793	-100.91744	1700 Cogdell Blvd	Snyder	79549	+13255731300			0.92	
+be91364d8764	Fisher County Hospital District	hospital		32.83356	-100.43594	774 State Highway 70 N	Rotan	79546	+13257352256	http://www.fishercountyhospital.com		1.00	
+b0907d6d094c	Fisher County Hospital Physical Therapy	hospital		32.85160	-100.46672	117 W Sammy Baugh Ave	Rotan	79546	+13257353434	http://www.fishercountyhospital.com/		0.92	
+896a98672c09	Kindred at Home	hospital		32.38924	-100.86732	271 Walnut St	Colorado City	79512	+13257282657	https://www.kindredhealthcare.com/locations/home-health/colorado-city-tx-3543		0.77	
+1a7b5d45323e	Mitchell County Ambulance Services	hospital		32.40313	-100.86296	1602 Chestnut St	Colorado City	79512	+13257283483	http://mitchellcountyhospital.com		0.98	
+385692e16863	Mitchell County Hospital	hospital		32.40641	-100.87579	997 I-20	Colorado City	79512	+13257283431	http://www.mitchellcountyhospital.com		0.97	
+786c057a9b0b	Rolling Plains Memorial Hospital	hospital		32.45329	-100.39732	200 E Arizona Ave	Sweetwater	79556	+13252351701	http://www.rpmh.net/		0.92	
+aafaa294aa13	RPMH Obstetrics	hospital		32.45375	-100.39825	200 E Arizona Ave	Sweetwater	79556	+13252351701	https://www.rpmh.net/department/ob-gyn		0.79	
+a469387803e8	RPMH Rural Health Clinic	hospital		32.45462	-100.39825	201 E Arizona Ave	Sweetwater	79556	+13252358641	http://www.rpmh.net/		1.00	
+3971e1f9036a	American Inn	hotel	resort	32.41078	-100.85957	2310 Hickory St	Colorado City	79512	+13477524737	https://www.oyorooms.com/us/305014/?utm_source=GMB&utm_medium=Organic&utm_campaign=US_CLCT001		0.81	
+809cc9bb9fcb	American Motor Inn	hotel	motel	32.70476	-100.88306	1307 E Coliseum Dr	Snyder	79549	+13255735432			0.68	
+3f54ee7bb18c	Americas Best Value Inn & Suites Sonora	hotel		32.55479	-100.64913	270 Hwy 277 N	Sonora	76950		https://www.sonesta.com/americas-best-value-inn/tx/sonora/americas-best-value-inn-suites-sonora	Americas Best Value Inn	0.80	
+78eb987e8e79	Baptist Student Center	hotel		32.67799	-100.91578		Snyder	79549	+13255731803			0.62	
+5b55cbbd9832	Baymont Inn & Suites Snyder	hotel		32.70612	-100.86689	1005 E US Highway 180	Snyder	79549	+13255733700	https://www.wyndhamhotels.com/baymont/snyder-texas/baymont-inn-and-suites-snyder/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A23017	Baymont by Wyndham	1.00	
+98512779635c	Beacon Lodge Motel and RV Campground	hotel		32.70152	-100.87762	1900 E Roby Hwy	Snyder	79549	+13255738526	http://www.beaconlodgemotel.com		0.97	
+75cae183cdf5	Best Western Plus Lonestar Inn & Suites	hotel		32.41407	-100.85976	2304 N State Highway 208	Colorado City	79512	+13257282638	https://www.bestwestern.com/en_US/book/hotel-rooms.44732.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44732	Best Western Hotels & Resorts	1.00	
+b894d2a78009	Best Western Plus Sweetwater Inn & Suites	hotel		32.45067	-100.40098	300 NW Georgia Ave	Sweetwater	79556	+13252366512	https://www.bestwestern.com/en_US/book/hotel-rooms.44609.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44609	Best Western Hotels & Resorts	1.00	
+1ae3a4c544b8	Best Western Snyder Inn	hotel	motel	32.70807	-100.88791	810 E Coliseum Dr	Snyder	79549	+13255742200	https://www.bestwestern.com/en_US/book/hotel-rooms.44490.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44490	Best Western Hotels & Resorts	1.00	
+93280bc50cd0	Budget Inn	hotel		32.45032	-100.40304	510 NW Georgia Ave	Sweetwater	79556	+13252354387	http://www.budgetinn.com	Budget Inn Myrtle Beach SC	0.92	
+f892bbccef8e	Budget Inn	hotel	motel	32.71696	-100.90837	1006 25th St	Snyder	79549	+13255730565	http://www.budgetinn.com	Budget Inn	0.97	
+97a77dd8d0cf	Comfort Inn and Suites	hotel		32.70631	-100.86797	1774 US-84	Snyder	79549	+13255157550	https://www.choicehotels.com/texas/snyder/comfort-inn-hotels/txg20?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00	
+78fea2332989	Country Hearth Inn and Suites	hotel		32.44971	-100.39381	216 SE Georgia Ave	Sweetwater	79556	+13252355234	http://www.countryhearth.com/hotel-details.cfm?propid=73042		0.92	
+be526c9f412a	Days Inn by Wyndham Snyder	hotel	resort	32.70849	-100.88840	800 E Coliseum Dr	Snyder	79549	+13255154018	https://www.wyndhamhotels.com/days-inn/snyder-texas/days-inn-snyder/overview?CID=LC:DI::BING:RIO:National:12151&iata=00093796		1.00	
+d99a1d834c85	Econo Lodge Inn & Suites	hotel	motel	32.41068	-100.86268	2233 Vine St	Colorado City	79512		https://www.choicehotels.com/texas/colorado-city/econo-lodge-hotels	Econo Lodge	0.80	
+3f43454c535d	Econo Lodge Inn and Suites	hotel	motel	32.44995	-100.39379	216 SE Georgia Ave	Sweetwater	79556	+13252355234	http://www.countryhearth.com/hotel-details.cfm?propid=73042	Choice Hotels	0.98	
+d9a4b6248c4d	Executive Inn	hotel	motel	32.71497	-100.89912	314 Coliseum Dr	Snyder	79549	+13254360594	https://www.kayak.com/Snyder-Hotels-Executive-Inn.2065271.ksp		0.99	
+1f4ddd9a33a2	Extended Stay Snyder Motel	hotel	motel	32.70369	-100.88759	700 E 37th St	Snyder	79549	+13254360266	http://www.extendedstayhotels.com/		1.00	
+2f66f4327f0f	Fairfield by Marriott Inn & Suites Snyder	hotel		32.68991	-100.92045	5207 Big Spring Hwy	Snyder	79549	+13255731400	https://www.marriott.com/en-us/hotels/abisn-fairfield-inn-and-suites-snyder/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00	
+ba4ddb80de6e	Foster Home	hotel		32.49417	-100.38016	11 Vista Ct	Sweetwater	79556	+13252350563			0.92	
+4d59b2ee8c37	Hampton Inn Snyder	hotel		32.70321	-100.87897	1801 E Roby Hwy	Snyder	79549	+13255157555	https://www.hilton.com/en/hotels/snksnhx-hampton-snyder/	Hampton by Hilton	1.00	
+abf507585e61	Hampton Inn Sweetwater	hotel		32.45145	-100.39172	302 SE Georgia Ave	Sweetwater	79556	+13252353337	http://www.sweetwater.hamptoninn.com/	Hampton by Hilton	1.00	
+52c254d9c211	Henrietta's Heritage House	hotel		32.88872	-100.12940	444 NW Avenue A	Hamlin	79520	+13256690808	http://www.henriettasheritagehouse.com		0.92	
+96f789f93f9b	Holiday Inn Express & Suites Sweetwater	hotel		32.45104	-100.39259	300 SE Georgia Ave	Sweetwater	79556	+13252353500	https://www.ihg.com/holidayinnexpress/hotels/us/en/sweetwater/swwex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SWWEX	Holiday Inn Express	1.00	
+ae772019986a	Holiday Inn Express and Suites Snyder	hotel		32.70552	-100.88353	1305 E Coliseum Dr	Snyder	79549	+13255730376	https://www.ihg.com/holidayinnexpress/hotels/us/en/snyder/abysy/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ABYSY	Holiday Inn Express	0.99	
+1a2cf0eb53b6	La Quinta Inn & Suites by Wyndham Colorado City	hotel	resort	32.39009	-100.85653	880 E I20	Colorado City	79512	+13253075504			0.85	
+127dcf4ec8b0	La Quinta Inn & Suites Colorado City	hotel	resort	32.40981	-100.84646	880 E I-20	Colorado City	79512	+13253075504	http://www.laquintacoloradocity.com/?cid=local_6675		1.00	
+833b6c1bf0f4	La Quinta Inn and Suites by Wyndham Sweetwater East	hotel		32.45251	-100.39015	308 SE Georgia Ave	Sweetwater	79556	+13259336600	http://www.laquintasweetwatereast.com/?cid=local_6808	La Quinta by Wyndham	1.00	
+f4c7c1c45b18	La Quinta Inn Sweetwater	hotel		32.45065	-100.40226	500 NW Georgia Ave	Sweetwater	79556	+13252366887	http://www.laquintasweetwater.com/?cid=local_6146	La Quinta by Wyndham	1.00	
+ab40b303db47	Lifes Suites	hotel		32.87505	-100.12260	1013 S Central Ave	Hamlin	79520	+13253266326	https://www.lifessuites.com		0.97	
+3ed904316a30	Microtel Inn and Suites by Wyndham Sweetwater	hotel		32.45041	-100.43996	9416 I-20	Sweetwater	79556	+13253075159	https://www.loves.com/en/loves-solutions/hotels/hotel-in-sweetwater		1.00	
+ce217bfb8f61	Microtel Inn and Suites by Wyndham Sweetwater	hotel	resort	32.45048	-100.44588	9416 N Interstate 20 20	Sweetwater	79556	+13253075159	https://www.wyndhamhotels.com/microtel/sweetwater-texas/microtel-inn-and-suites-by-wyndham-sweetwater/overview?CID=LC:MT::BING:RIO:National:48154&iata=00093796		0.85	
+1d423b81118b	Motel 6	hotel	motel	32.70384	-100.86560	1137 US-180	Snyder	79549	+13252165990	https://www.motel6.com/en/motels.tx.snyder.8697.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305	Motel 6	1.00	
+5d6bc94d041c	Motel 6	hotel		32.47339	-100.40948	501 Locust St	Sweetwater	79556	+13252354387	http://www.motel6.com/	Motel 6 Morehead	0.91	
+0c4c979406a1	Motel 6 Colorado City, TX	hotel	resort	32.41046	-100.86272	2333 Vine St	Colorado City	79512	+13257284100	https://www.motel6.com/en/home/motels.tx.colorado-city.8747.html?lid=Local_Milestone_8747&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.99	
+7eceaedc44a8	Motel 6 Snyder, TX	hotel	resort	32.71726	-100.90990	1137 E US Highway 180	Snyder	79549	+13252165990	https://www.motel6.com/en/home/motels.tx.snyder.8697.html?lid=Local_Milestone_8697&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.97	
+7acd630a2f6c	Motel 6 Sweetwater TX	hotel	motel	32.45637	-100.38985	501 NE Georgia Ave	Sweetwater	79556	+13259334443	https://www.staystudio6.com/en/motels.tx.sweetwater.5054.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305		0.99	
+4afe022b2881	Pied Piper Inn	hotel	motel	32.87565	-100.12368	901 S Central Ave. Hwy, US-83	Hamlin	79520	+13253526448	https://www.opendi.us/hamlin-tx/6453505.html		0.92	
+43629033fd12	Purple Sage By OYO Snyder TX	hotel	motel	32.70426	-100.88223	1501 US-180	Snyder	79549	+13255735491	http://purplesagemotelsnyder.com/		1.00	
+d77083cd8d04	Quality Inn & Suites Colorado City, TX	hotel		32.40991	-100.84626	880 East I 20	Colorado City	79512		https://www.choicehotels.com/texas/colorado-city/econo-lodge-hotels	Quality Inn	0.80	
+12715b0503e7	Quality Inn Sweetwater I-20 - King Room - Non-Smoking	hotel		32.45024	-100.40220		Sweetwater		+13252366887	https://www.choicehotels.com/texas/sweetwater/quality-inn-hotels/txj40?pmf=yext&mc=llyxyxpx	Choice Hotels	0.98	
+0bddfabbc167	Ranch House Motel & Restaurant	hotel	motel	32.44892	-100.40028	301 SW Georgia Ave	Sweetwater	79556	+13252366341	http://www.sweetwaterranchhouse.com		0.94	
+671de907aea8	Relax Inn	hotel	motel	32.38825	-100.85456	1041 Westpoint Ave	Colorado City	79512	+13257285742	https://www.magnusonhotels.com		0.92	
+d876d1fae2da	Scottish Inns and Suites	hotel	motel	32.47782	-100.00861	9800 I-20 W	Merkel	79536	+13259284723	http://bookroomsnow.com	Scottish Inns	0.98	
+b7174255ee0b	Studio 6	hotel		32.45586	-100.38978	501 NE Georgia Ave	Sweetwater	79556	+13252165988	https://www.staystudio6.com/#/home		1.00	
+f3f12b0e73d6	Studio 6 Colorado City	hotel		32.41061	-100.87745	904 W Interstate 20	Colorado City	79512	+13255000012	https://www.staystudio6.com/en/motels.tx.colorado.city.5066.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305		0.94	
+0ca704315b5b	Super 8	hotel		32.40943	-100.86523	2205 Chestnut St	Colorado City	79512	+13252000683	https://www.wyndhamhotels.com/super-8/colorado-city-texas/super-8-colorado-city/overview		1.00	
+4c41841a18ba	Sweetwater Inn	hotel		32.44772	-100.40674	701 SW Georgia Ave	Sweetwater	79556	+13259336622	https://www.sweetwatertexasmotel.com		0.99	
+ed02a9970839	Travelers Motel	hotel	motel	32.47688	-100.39279	1413 E Broadway Ave	Sweetwater	79556	+13252352850			0.87	
+2e01f413c64b	Villa Inn Motel	hotel		32.41080	-100.85960	2310 Hickory St	Colorado City	79512	+13257285217			0.64	
+bf0f99593304	West Lone Star Ltd	hotel		32.45086	-100.40119	300 NW Georgia Ave	Sweetwater	79556				0.95	
+c910358b79dd	Windward Inn	hotel		32.85477	-100.46691	311 N Cleveland Ave	Rotan	79546	+13257353391	http://www.windwordinn.com		0.99	
+fce59608b3c1	Wingate Fire Rescue - Texas	hotel		32.04306	-100.10953	1521 TX-153	Wingate	79566	+13257432726			0.92	
+1fd43b8c5a32	Amadeus Wind, Llc	office		32.85128	-100.46521	111 S Cleveland Ave	Rotan	79546				0.75	
+522a8c40427c	D&d Designtech, Ltd.	office		32.73590	-100.91968	1916 6th St	Snyder	79549	+13255741033	https://dddesigntech.com		0.92	
+1bd0bf072440	Datroo Technologies	office	information technology company	32.70823	-100.91933	3405 College Ave	Snyder	79549	+13255734801	http://www.datroo.com/		0.92	
+f8285ded51ba	Key Energy Services	office	energy company	32.73766	-100.92017	2001 Industrial St	Snyder	79549	+13255734343	http://www.keyenergy.com		0.92	
+7eca9310d49a	Kinder Morgan CO2 Company	office	energy company	32.72834	-100.97430	4632 US-180	Snyder	79549	+13255731109	http://www.kindermorgan.com		0.98	
+637e27fbacb5	Kinder Morgan Snyder Power Plant	office	energy company	32.74743	-100.95426	3693 County Rd 226	Snyder	79549	+13255741846	http://kindermorgan.com		0.92	
+64f2af8d5b2b	Scurry County Wind LP	office	energy company	32.71021	-100.79102	6543 E US Highway 180	Snyder	79549	+13255741601	http://www.invenergy.com		0.90	
+3c4c368a9bcf	Software Builders Inc	office	information technology company	32.71650	-100.91874	2513 College Ave	Snyder	79549	+13255730899	softwarebuildersinc.com		0.65	
+052fd63d6cb2	Taylor Telecom	office	telecommunications company	32.47753	-100.00706	9798 I-20	Merkel	79536	+13258464111	https://online.taylortel.net/		0.95	
+89cc929d06a0	Vestas American Wind Tech	office		32.46407	-100.40295	105 Alamo St	Sweetwater	79556	+15033272000	https://us.vestas.com/en-us		0.65	
+8ef91a495996	Watermill Express	office	bottled water company	32.47244	-100.40324	710 E Broadway Ave	Sweetwater	79556	+18004879643	https://watermillexpress.com/	Watermill Express	0.92	
+3b7629948b3c	Wind Energy Turbine Services	office	energy company	32.48359	-100.37873	2503 E Broadway St	Sweetwater	79556	+13252351555	http://wetsinc.net		0.92	
+48af86d61aa1	3B beer bakery bbq	restaurant	barbecue restaurant	32.08669	-100.31853	106 TX-70	Blackwell	79506	+13252643222	http://kaysbittycakes.com/		0.91	
+d845862d356a	Allens Fried Chicken House	restaurant	chicken restaurant	32.47655	-100.39494	1301 E Broadway St	Sweetwater	79556	+13252320126	https://local.yahoo.com/info-19474339-allen-family-style-meals...		0.76	
+2ae72bc0e672	Amole's Mexican Restaurant	restaurant	mexican restaurant	32.47617	-100.39631	1203 E Broadway St	Sweetwater	79556	+13259334208	https://amole-restaurant.hub.biz/		0.92	
+53f20e289fc8	Amore Italian Restaurant & Bar	restaurant	italian restaurant	32.69648	-100.91872	4604 College Ave	Snyder	79549	+13255152080	https://www.amoreitalianrestaurantbar.com		0.92	
+883c2e9f6e45	Behind the Church	restaurant	mexican restaurant	32.47478	-100.41125	610 Oak St	Sweetwater	79556	+13258295720			0.80	
+b3d907de8adb	Bella Sera	restaurant	italian restaurant	32.70433	-100.91947	3703 College Ave	Snyder	79549	+13255741525	http://www.bellaserasnyder.com		0.92	
+cb7d5982d474	Big Boy's Bar-B-Que	restaurant	barbecue restaurant	32.44804	-100.39713	2117 Lamar St	Sweetwater	79556	+13252352700	http://www.yellowpages.com/sweetwater-tx/mip/big-boys-barbecue-5161018		0.97	
+8e602c45f2a1	Big Mama's Burger Shoppe	restaurant	burger restaurant	32.39890	-100.86092	1204 Hickory St	Colorado City	79512	+13257282175	http://www.bigmamasburgersandsmoothies.com		0.92	
+0793d6c052d6	Bigg's Pizza and Grill	restaurant	pizza restaurant	32.47155	-100.40819	121 E 3rd St	Sweetwater	79556	+13258993738	http://Biggspizzatexas.com/		0.92	
+9d23f9551c18	Bigg's Pizza and Grill	restaurant	pizza restaurant	32.38836	-100.86569	203 E 2nd St	Colorado City	79512	+13257283300	https://bigg-s-pizza-grill.hub.biz		0.98	
+7c249707ca13	Blackland Smokehouse	restaurant	barbecue restaurant	32.44688	-100.39797	2216 Lamar St	Sweetwater	79556	+13257663374	http://www.blackland-smokehouse.com/		0.96	
+940a5ca69cc9	Blackland Smokehouse	restaurant	barbecue restaurant	32.71623	-100.91574	1615 26th St	Snyder	79549	+13255152018	http://www.blackland-smokehouse.com/		0.98	
+f33a59ff6a71	Blue Agave Bar and Mexican Kitchen	restaurant	mexican restaurant	32.70427	-100.91946	3703 College Ave	Snyder	79549	+13254360063	https://blueagavetx.com/	Blue Agave Bar & Mexican Kitchen	0.99	
+c97c589d550c	Blue Burro Tx	restaurant		32.47246	-100.01202	210 Kent St	Merkel	79536	+13252712777	http://blueburrotx.com/		0.96	
+2eb75545db08	Buck's Steaks & Bar-b-que	restaurant	steakhouse	32.44931	-100.39930	103 SW Georgia Ave	Sweetwater	79556	+13252354049	https://buckssteaksandbbq.com		0.96	
+e6e521656799	Burri-To-Go	restaurant		32.85183	-100.46432	200-298 E Sammy Baugh Ave	Rotan	79546	+13257353383			0.93	
+2d33cce2e3cb	Burritos El Buffalo	restaurant	mexican restaurant	32.71740	-100.92080	2011 25th St	Snyder	79549	+14029720931			0.93	
+c37c73d9d997	Burritos Zacatecas	restaurant	mexican restaurant	32.44537	-100.53743	108 Main St	Roscoe	79545	+13252360304			0.93	
+fc2791ebca94	Buzzi Unicem USA	restaurant	pizza restaurant	32.24385	-100.48454	10650 FM-608	Maryneal	79535	+13252883239	http://www.buzziunicemusa.com/		0.72	
+4c5642768bba	Cardinal Cafe	restaurant	american restaurant	32.63605	-100.76038	540 James St	Hermleigh	79526	+13255751985			0.96	
+1499bc31b830	Casa Morales Restaurant	restaurant	texmex restaurant	32.48217	-100.38561	2101 E Broadway Ave	Sweetwater	79556	+13252355779	https://www.groupon.com/biz/sweetwater-tx/casa-morales-restaurant-1		0.97	
+3690c2043af3	Casey's	restaurant	pizza restaurant	32.70539	-100.87053	2091 E Roby Hwy	Snyder	79549	+13252220723	https://www.caseys.com		1.00	
+34290ab25549	Cielo	restaurant	mexican restaurant	32.69909	-100.91887	4212 College Ave	Snyder	79549	+13254360441	http://Cielosnyder.com/		0.97	
+375b4745c1d8	Cinnabon at Schlotzsky's	restaurant	sandwich shop	32.44984	-100.39746	204 SE Georgia Ave	Sweetwater	79556	+13252355000	https://www.cinnabon.com/		0.98	
+e61fa66c16ee	City Cafe	restaurant	american restaurant	32.08544	-100.31728	204 N State Highway 70	Blackwell	79506	+13252823922	http://www.citycafescranton.com		0.77	
+df94ce0ce29a	Cocina Economica El Arca	restaurant	mexican restaurant	32.46101	-100.40128	815 Lamar St	Sweetwater	79556	+13259336059			0.92	
+95c104710d05	Cold Spot Cafe	restaurant	mexican restaurant	32.39956	-100.86099	1252 Hickory St	Colorado City	79512	+13257282745	http://www.thecoldspot.com	Cold Spot Cross Lanes	0.92	
+fce8d29c50ca	country pride	restaurant	american restaurant	32.44865	-100.44342		Sweetwater					0.61	
+4e3e8729dafd	Dairyland Old Fashion Burgers	restaurant	burger restaurant	32.47539	-100.39906	210 Hailey St	Sweetwater	79556	+13252352770	https://local.yahoo.com/info-19475368-dairy-land-sweetwater		0.92	
+93a4b589bf77	Dee's Burrito Shop	restaurant	mexican restaurant	32.71686	-100.90993	1110 25th St	Snyder	79549	+13255732020	https://www.groupon.com/biz/snyder-tx/dees-burrito-shop		0.96	
+fa3dbfdb9a5d	Dickey's Barbecue Pit	restaurant	barbecue restaurant	32.45115	-100.39687	1806 Dent Dr	Sweetwater	79556	+13252197037	https://www.dickeys.com		0.92	
+6315063c3151	Dolphin's Restaurant & Grill	restaurant	diner	32.70469	-100.90009	401 37th St	Snyder	79549	+13255738139	http://www.ourmenuonline.com		0.92	
+8a5b1129a70a	Don Jose's Cafe	restaurant	mexican restaurant	32.85426	-100.46678	301 N Cleveland Ave	Rotan	79546	+13257357009			0.92	
+e26362312cc2	El Papagayo	restaurant	mexican restaurant	32.46111	-100.40121	815 Lamar St	Sweetwater	79556	+13258297568			0.55	
+2a548bd3ed09	El Papagayo Burritos	restaurant	mexican restaurant	32.48064	-100.40077	1206 Hailey St	Sweetwater	79556	+13258297568			0.92	
+317c594b95ba	Ely's Pit Stop BBQ	restaurant	barbecue restaurant	32.47150	-100.01228	132 Kent	Merkel	79536	+13259281177	http://elyspitstopbbq.com		0.92	
+e30dfa4e67bd	GB's Burgers & More	restaurant		32.47115	-100.01244	128 Kent	Merkel	79536	+13257259288			0.65	
+a3a4144d0c18	Gills Fried Chicken	restaurant	chicken restaurant	32.70440	-100.91885	3700 College Ave	Snyder	79549	+13255736831			0.85	
+33cb256d0177	Golden Fried Chicken	restaurant		32.44827	-100.39826	2014 Lamar St	Sweetwater	79556	+19152353011	http://goldenchick.com/		0.92	
+68e6d1ec79e1	Gran & Pop's BBQ & Burgers	restaurant	barbecue restaurant	32.70306	-100.91896	3812 College Ave	Snyder	79549	+13254360342			0.70	
+bba40799cf1c	Gran & Pop's BBQ & Burgers	restaurant	barbecue restaurant	32.71682	-100.90783	1000 25th St	Snyder	79549	+13254360342			0.92	
+03360184a8b2	Granes kitchen	restaurant		32.74648	-100.38698	512 W South 1st St	Roby	79543	+3252836838			0.74	
+9e439ad1b825	Heff's Burgers	restaurant	burger restaurant	32.45115	-100.39686	1806 Dent Dr	Sweetwater	79556	+13252197070	https://thejonesassembly.com		0.96	
+7403fdf306f6	Heff’s Burgers	restaurant	burger restaurant	32.69630	-100.91947	4509 College Ave	Snyder	79549	+13254360283	http://www.heffsburgers.com		0.92	
+205f7e9de461	Hidalgo Restaurant	restaurant	texmex restaurant	32.38960	-100.84827	1336 Westpoint Ave	Colorado City	79512	+13257284011	http://foodeist.com/place/hidalgo-restaurant		0.94	
+212ad5155bf2	Iron Skillet	restaurant		32.44861	-100.44324	100 Hopkins Road	Sweetwater	79556	+13252358488	https://www.ta-petro.com/location/tx/ta-sweetwater-426		0.96	
+5c29bf159054	JACT up foods	restaurant	barbecue restaurant	32.70875	-100.91973	3403 College Ave	Snyder	79549	+18067730000			0.61	
+9b9fcfc5ae96	Josie's Place	restaurant	texmex restaurant	32.74575	-100.91894	503 N College Ave	Snyder	79549	+13252078504			0.92	
+5ec2cedc1131	JP's Drive Thru	restaurant	mexican restaurant	32.41254	-100.70635	500 W Pacific Ave	Loraine	79532	+13254368301			0.99	
+63119efa9ab4	Kelley Cafe	restaurant	american restaurant	32.40168	-100.86535	1426 Walnut St	Colorado City	79512	+13255154035	https://www.kelleycafe.com		0.92	
+cb1b59542669	Kim's Kitchen	restaurant	korean restaurant	32.47506	-100.39647	1112 E Broadway Ave	Sweetwater	79556				0.96	
+7dd1c878e285	Kinfolks Grill	restaurant	american restaurant	32.46980	-100.40853	1 W Broadway St	Sweetwater	79556	+13259334230			0.96	
+296519b4abc6	La Cocina Mexicana	restaurant	mexican restaurant	32.45884	-100.41117	907 W Alabama Ave	Sweetwater	79556	+13252352927	http://www.cityseekr.com/sweetwater/restaurants/poi-la-cocina-mexicana-948330.html		0.93	
+610beb7d9800	La Fe Restaurant	restaurant	mexican restaurant	32.38863	-100.85130	1209 Westpoint Ave	Colorado City	79512	+13257289129	http://lafe.com		0.94	
+7f7a4f8c7932	La Mexicana	restaurant	mexican restaurant	32.47517	-100.39851	1009 E Broadway Ave	Sweetwater	79556	+13259334401			0.92	
+5606724e08a0	Laredo Taco Company	restaurant		32.73717	-100.91734	410 College Ave	Snyder	79549	+13255730111	https://www.laredotacocompany.com/		0.92	
+77dccd0948dd	Laredo Taco Company	restaurant		32.40982	-100.84296	2272 County Rd 139	Colorado City	79512	+13257289494	https://www.laredotacocompany.com/		1.00	
+bfe51c84b3dc	Laredo Taco Company	restaurant		32.41141	-100.85967	101 E I-20	Colorado City	79512	+13257282359	https://www.laredotacocompany.com/		0.92	
+c2b60029d163	Laredo Taco Company	restaurant		32.43542	-100.53433	1101 Main St	Roscoe	79545	+13257663777	https://www.laredotacocompany.com/		1.00	
+eb9ac6c756fd	Laredo Taco Company	restaurant		32.70482	-100.88439	1300 E Coliseum Dr	Snyder	79549	+13255738341	https://www.laredotacocompany.com/		0.92	
+70112923a9c9	Lito's Burritos	restaurant	texmex restaurant	32.88022	-100.12534	434 S Central Ave	Hamlin	79520	+13255765070			0.92	
+ef0f2ca4c012	Little Panda	restaurant	asian fusion restaurant	32.45219	-100.39546	309 Jenny George Lane	Sweetwater	79556	+13252369828	https://littlepandasweetwater.com/		0.94	
+24efe8a59e3b	Lupita's Restaurante	restaurant	comfort food restaurant	32.46964	-100.40742	115 E 1st St	Sweetwater	79556	+13252197071	https://order.spoton.com/so-lupitas-restaurante-21575/sweetwater-tx/6734e100fe9cdbcf21221889		0.92	
+7d526d7fc00c	Lupitas's Restaurante	restaurant	texmex restaurant	32.74362	-100.38379	512 W South 1st St	Roby	79543	+13257762129	https://www.callersmart.com/TX/Roby/325-776-2		0.95	
+a86edd4356a6	Main Moon	restaurant	chinese restaurant	32.47505	-100.39635	1114 E Broadway St	Sweetwater	79556	+13252358313	http://www.mainmoon.com/		0.92	
+6c1531018236	Main Street Artisan Pizza	restaurant	pizza restaurant	32.88210	-100.12605	242 S Central Ave	Hamlin	79520	+13256690808			0.99	
+11a915383e61	Mama's Kitchen	restaurant		32.46173	-100.39947	809 Hill St	Sweetwater	79556	+13252358981			0.96	
+ac7d0befa05a	Mary's Cafe	restaurant	american restaurant	32.38839	-100.86187	502 E 2nd St	Colorado City	79512	+13257288000			0.97	
+80336751a1ce	Mayberry Diner	restaurant	diner	32.88419	-100.13044	310 W Lake Dr	Hamlin	79520	+13253594001			0.80	
+be1fe13c17a2	Mi Familia	restaurant	mexican restaurant	32.39869	-100.86089	1200 Hickory St	Colorado City	79512	+13257285335			0.92	
+b39431f80049	Mi Ranchito	restaurant	mexican restaurant	32.38353	-100.86601	237 Concho St	Colorado City	79512	+13257285591	http://www.miranchitokc.com/		0.97	
+17f05222b96c	Mrs. Kathy's Apple Of My Pie	restaurant	comfort food restaurant	32.71638	-100.91687	2522 Avenue R	Snyder	79549	+13254360226	https://appleofmypie.business.site		0.92	
+8d4b99642a37	muncy's	restaurant	burger restaurant	32.23449	-100.45612	107 County Road 386	Maryneal	79535	+13252883333	http://muncysplace.com		0.77	
+fcab6b3d7938	Norma's Cafe	restaurant	mexican restaurant	32.74827	-100.91860	710 N College Ave	Snyder	79549	+13254360302	http://www.normascafe.com		0.97	
+cf594e4205bb	North 40 Feedlot	restaurant		32.89981	-100.12790	1551 N Central Ave	Hamlin	79520	+13255763443	https://north-40-feed-lot.hub.biz/		0.92	
+841c256a4fad	Oscars Mexican Restaurant	restaurant	texmex restaurant	32.47780	-100.00838	9800 I-20	Merkel	79536	+13252304015			0.92	
+fe42783aed01	Pizza Inn	restaurant	pizza restaurant	32.70240	-100.91941	3907 College Ave	Snyder	79549	+13255733542	https://www.pizzainn.com/locations/snyder-tx/	Pizza Inn	0.97	
+29a8bae549ba	Pizza Pro	restaurant	pizza restaurant	32.47138	-100.01269	131 Kent St	Merkel	79536	+13259284301	https://www.pizzapro.com		0.96	
+58d7d9409209	Pizza Pro	restaurant	pizza restaurant	32.39122	-100.83829	2001 TX-208	Colorado City	79512	+13257283622	http://pizzapro.com/		0.98	
+e69ce73c439b	Polynesian Garden	restaurant	chinese restaurant	32.70722	-100.92027	3415 Snyder Shopping Center	Snyder	79549	+13255730479	http://www.ourmenuonline.com/PDFMenus/Snyder/Snyder-PolynesianGardenChineseRestaurant.pdf		0.92	
+ab7ed4738866	Ponderosa Restaurant	restaurant	texmex restaurant	32.72218	-100.94594	3044 US-180	Snyder	79549	+13255738887	http://www.ponderosasteakhouses.com/		0.98	
+ec4b1a82202a	Pumpjack Saloon	restaurant	bar and grill restaurant	32.38885	-100.86693	102 E 2nd St	Colorado City	79512	+13254556969			0.96	
+56998995b8e5	San pancho	restaurant	texmex restaurant	32.71434	-100.89719	208 Coliseum Dr	Snyder	79549	+18069396477			0.99	
+3ed640ded365	Santiago's Restaurant	restaurant	mexican restaurant	32.38935	-100.87678	989 E Interstate 20	Colorado City	79512	+13257288393	http://ordersantiagosrestaurant.com/		0.85	
+a2bc654c0bbc	Santiago's Restaurant	restaurant		32.40680	-100.84373	989 I-20	Colorado City	79512	+13257288393	http://www.santiagosrestauranttx.com/		0.97	
+dd91bc828c4b	Sdi 6107 Of Merkel, Tx, L.l.c	restaurant		32.47827	-100.01022	9846 Interstate 20	Merkel	79536				0.95	
+5a8b96a9a8c5	Sisters Plaza	restaurant	diner	32.74878	-100.92618	2401 Huffman Ave	Snyder	79549	+13255731231	http://www.bizapedia.com/tx/SISTERS-PLAZA-INC.html		0.92	
+b20c32e3eae0	Skeet Texas Grill	restaurant	american restaurant	32.47730	-100.01325	1207 N 7th	Merkel	79536	+13259281039	http://www.skeetstxgrill.com/location#!		0.77	
+03596275fb2d	Skeet's Texas Grill	restaurant	barbecue restaurant	32.45042	-100.39390	214 SE Georgia Ave	Sweetwater	79556	+13252351855	http://www.skeetstxgrill.com		0.98	
+65234d959698	Skeet's Texas Grill No 4	restaurant	american restaurant	32.69920	-100.91872	4212 College Ave	Snyder	79549	+13255730669	http://www.skeetstxgrill.com		0.92	closed
+3954063d1ff4	Snyder Thai Restaurant	restaurant	thai restaurant	32.71585	-100.91751	1802 26th St	Snyder	79549	+13254360492			0.91	
+78608d2846a5	Spanish Inn	restaurant	mexican restaurant	32.71950	-100.91798	2212 College Ave	Snyder	79549	+13255732355	www.menupix.com/texas/restaurants/4328717/Spanish-Inn-Snyder-TX		0.92	
+f1c82e875bea	Sushi House	restaurant	sushi restaurant	32.69632	-100.91935	4509 College Ave	Snyder	79549	+13254360281	http://www.sushihousesnyder.com	KIBO Sushi House	0.96	
+231f36ab3e09	Sweet Shop	restaurant	burger restaurant	32.71638	-100.90435	2505 Avenue G	Snyder	79549	+13255737452	http://sweet-shop-snyder.edan.io		0.92	
+6417135389e3	Table Matters	restaurant		32.71631	-100.91695	2522 Avenue R	Snyder	79549	+13255753402	http://www.tablematterstx.com		0.95	
+099a191ebdc4	Tacos Chacho's	restaurant	mexican restaurant	32.70180	-100.91890	4000 College Ave	Snyder	79549	+13255731212	http://tacotopia.net		0.92	
+5e82d9398239	Taqueria El Charrito	restaurant	mexican restaurant	32.71626	-100.91268	1401 26th St	Snyder	79549	+13252075279			0.60	
+fd832b52534d	Taqueria Guadalajara	restaurant	mexican restaurant	32.71205	-100.89271	102 E Coliseum Dr	Snyder	79549	+13255730116	http://www.taqueriasguadalajara.com		0.95	
+3877eb61b12c	Taqueria La Gloria	restaurant	mexican restaurant	32.70472	-100.90756	1001 37th St	Snyder	79549	+13255730775	http://www.chow.com		0.95	
+e3f2d6e8c695	Taqueria Ramirez	restaurant	mexican restaurant	32.71695	-100.91220	1310 25th St	Snyder	79549	+13255730046	https://taqueria-ramirez.hub.biz		0.96	
+6c21414d464e	Taqueria Rodriguez	restaurant	mexican restaurant	32.47634	-100.39444	1304 E Broadway Ave	Sweetwater	79556	+13252197099			0.95	
+56312e18d05c	Te3 Management, Inc	restaurant		32.69774	-100.91881	4308 College Ave	Snyder	79549				0.95	
+f38f9eb8c1ec	Tejano Bar	restaurant		32.74395	-100.91962	307 N College Ave	Snyder	79549	+13255730400	https://tshaonline.org/handbook/online/articles/fsn09		0.92	closed
+b262ac4209a1	The Butcher's Block Eats and Drinks	restaurant	steakhouse	32.71693	-100.91492	1600 25th St	Snyder	79549	+13254360205	https://www.thebutchersblockeatsanddrinks.com/		1.00	
+eda201067e8e	The Double E Diner	restaurant	diner	32.48066	-100.40063	1206 Hailey St	Sweetwater	79556	+13252366646	https://www.thedoubleediner.com		0.92	closed
+baeb47cb4b40	The Downtowner	restaurant	chicken restaurant	32.38844	-100.86687	121 E 2nd St	Colorado City	79512	+13257505066			0.61	
+653a152c740f	The Lonestar Cantina LLC	restaurant	comfort food restaurant	32.88135	-100.12540	331 S Central Ave	Hamlin	79520	+13252980102			0.72	
+d572ea4b5c60	THE SPRITZ GRILL & BAR	restaurant	bar and grill restaurant	32.44791	-100.40567	703 SW Georgia Ave	Sweetwater	79556	+13259334064	https://www.bestbarinsweetwatertx.com/		0.92	
+746b8eb24dfe	Tita's Mexican Restaurant	restaurant	mexican restaurant	32.46973	-100.40806	116 Oak St	Sweetwater	79556	+13252366784	http://menutex.com/		0.96	
+9ebbf6f4901a	Trent Country Club	restaurant	steakhouse	32.46805	-100.12995	1573 County Road 368	Trent	79561	+13258620400	http://www.trentcountyclub.club/		0.94	
+c380b3e5e2f7	Two Sisters Nutrition	restaurant		32.74639	-100.37791	202 N Concho St	Roby	79543	+13259330274			0.81	
+026c47377591	Velmas Burritos	restaurant		32.47140	-100.01166	1019 N 2nd St	Merkel	79536	+13259280008			0.84	
+7f4e9ce67887	Wild Horse Bar & Grill at Centennial Golf Course	restaurant	bar and grill restaurant	32.40997	-100.83063	1417 Co Rd 137	Colorado City	79512	+18303854777			0.92	
+2a0e2de7b56f	Yardley Snyder Texas Burger King, Llc	restaurant		32.70534	-100.86589	1100 E US Highway 180	Snyder	79549				0.95	
+25211335332b	Amy’s Salon	senior	retirement home	32.52396	-100.38497	224 County Road 108	Sweetwater	79556	+12102462001			0.63	
+461e5684740f	Avir at Snyder	senior	retirement home	32.70404	-100.89630	210 37th St	Snyder	79549	+13255739377	http://avirhg.com/	Senior Living Properties	0.98	
+289ef3ebd340	Avir at Sweetwater	senior	retirement home	32.47921	-100.39058	1600 Josephine St	Sweetwater	79556	+13252366653	http://avirhg.com/	Senior Living Properties	0.97	
+6415eb39df57	Eagle Lake Nursing And Rehab	senior	retirement home	32.39131	-100.85673	535 Austin St	Colorado City	79512	+19792342924			0.59	
+76fa462b0f0c	Good Life Senior Living	senior	retirement home	32.68617	-100.91991	1904 Martha Ann Blvd	Snyder	79549	+13254360228	http://www.goodlifeseniorliving.com		0.92	
+ac52a603f3d4	Homeplace Manor Healthcare Center	senior	retirement home	32.87881	-100.13214	425 SW Ave F	Hamlin	79520	+13255763643	https://geminihc.com/	Senior Living Properties	0.92	
+5ed6d95c4f97	Hoyt Court	senior	retirement home	32.48812	-100.39061	1700 Hoyt St	Sweetwater	79556	+13252406464	https://cimaseniorliving.com/hoyt-court/		0.99	
+cdd22259e308	Living Resources	senior	retirement home	32.46531	-100.40652	301 W Ave D	Sweetwater	79556	+13252352568	http://hillresource.com		0.92	
+ab253446ab53	Mitchell County Nursing and Rehabiliation Center	senior	retirement home	32.40607	-100.86428	1941 Chestnut St	Colorado City	79512	+13257285247			0.97	
+53fb70218db1	Nolan Nursing & Rehab	senior	assisted living facility	32.46241	-100.38538	705 NE Georgia Ave	Sweetwater	79556	+13252355417	http://www.daybreakventure.com/nolan-nursing-and-rehabilitation-lp-home.aspx		0.77	
+4d2e5ce48720	Sterling Hills Rehabilitation and Healthcare Center	senior	retirement home	32.46220	-100.38506	705 NE Georgia Ave	Sweetwater	79556	+13252355417	http://www.daybreakventure.com/nolan-nursing-and-rehabilitation-lp-home.aspx		0.87	
+e523d881056d	Sterling Hills Rehabilitation and Healthcare Center	senior	retirement home	32.44772	-100.40820	705 SW Georgia Ave	Sweetwater	79556	+13252355417	https://www.nexion-health.com/sterlinghills/		0.97	
+d1c15cd68e99	Sweetwater Healthcare Center	senior	retirement home	32.47920	-100.39062	1600 Josephine St	Sweetwater	79556	+13252366653			0.92	

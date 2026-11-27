@@ -9,11 +9,13 @@
  *   address has none of them (the ZIP-area match came from the same customer record, so it is a fair completion).
  * - "Clean list": the clean customer list's ship-to address for the account.
  * - "Invoice bill-to": the bill-to address saved on the account's approved invoices.
+ * - "Web listing": the business listing under the account's name (Web Check, account-web.ts), when it is at our pin
+ *   with another street address, or somewhere else nearby.
  * Suggestions equal to the current address (ignoring case, spacing, punctuation and common abbreviations) are dropped,
  * and so are repeats; the first source to offer an address keeps it.
  */
 
-export type AddressSource = "Geocoder match" | "Completed from ZIP area" | "Clean list" | "Invoice bill-to";
+export type AddressSource = "Geocoder match" | "Completed from ZIP area" | "Clean list" | "Invoice bill-to" | "Web listing";
 
 export type AddressSuggestion = { address: string; source: AddressSource };
 
@@ -26,6 +28,8 @@ export type SuggestionInput = {
   cleanList?: readonly (string | null | undefined)[];
   /** Bill-to addresses on the account's invoices, newest first. */
   invoices?: readonly (string | null | undefined)[];
+  /** The web listing's address (Web Check), when it differs from ours. */
+  web?: string | null;
 };
 
 /** At most this many suggestions per account. */
@@ -235,7 +239,14 @@ export function buildSuggestions(input: SuggestionInput): AddressSuggestion[] {
   }
   for (const a of input.cleanList ?? []) if (a) offer(a, "Clean list");
   for (const a of input.invoices ?? []) if (a) offer(a, "Invoice bill-to");
-  return out.slice(0, MAX_SUGGESTIONS);
+  // Last, and kept even past the cap: the Web Check tab offers it on its own.
+  const list = out.slice(0, MAX_SUGGESTIONS);
+  if (input.web) {
+    const a = tidyAddress(input.web);
+    const key = normalizeAddress(a);
+    if (key && !seen.has(key)) list.push({ address: a, source: "Web listing" });
+  }
+  return list;
 }
 
 /** Search box text → up to six words for a LIKE search. */
