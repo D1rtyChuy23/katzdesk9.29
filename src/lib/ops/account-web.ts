@@ -11,6 +11,8 @@
  * - elsewhere: listed under our name away from our pin: at our own address farther off (the pin is off), or somewhere else within
  *              reach (10 miles of a street pin, 25 of a ZIP-area one), when it is the only open listing under our name
  *              within 25 miles and carries no chain brand: it may have moved, or our pin may be wrong.
+ * - maybe:     no listing under our name, but one at our pin whose name starts the same and shares another word
+ *              ("Elio's Pizzeria & Bar" and "Elio's Osteria e Pizzeria"): shown for a person to judge, never offered.
  * - none:      no listing under our name around. Not proof of anything: the listings cover the Prospects types
  *              (restaurants, cafés, hotels, offices...) in Texas only, and not every business is in them.
  * - nopin:     the account has no map pin, so there is nowhere to look (the Address Report's Open list is for those).
@@ -21,7 +23,7 @@ import { milesBetween, type LatLng } from "./geo.ts";
 import { placeAddress, type Place } from "./places.ts";
 import { normalizeAddress, tidyAddress } from "./address-report.ts";
 
-export type WebStatus = "same" | "different" | "closed" | "elsewhere" | "none" | "nopin";
+export type WebStatus = "same" | "different" | "closed" | "elsewhere" | "maybe" | "none" | "nopin";
 
 export type WebCheck = {
   status: WebStatus;
@@ -53,6 +55,7 @@ export const WEB_STATUS_LABEL: Record<WebStatus, string> = {
   different: "Listed at another address",
   closed: "Listed as permanently closed",
   elsewhere: "Listed somewhere else",
+  maybe: "Possible match",
   none: "No listing found",
   nopin: "No map pin",
 };
@@ -145,7 +148,11 @@ const ORDINAL: Record<string, string> = { first: "1st", second: "2nd", third: "3
  * 5015 Westheimer Rd").
  */
 export function streetKey(address: string | null | undefined): string | null {
-  const words = normalizeAddress(String(address ?? "").split(",")[0]).split(" ").filter(Boolean);
+  // "FM2673" and "IH10": a route and its number run together are two words.
+  const words = normalizeAddress(String(address ?? "").split(",")[0])
+    .split(" ")
+    .filter(Boolean)
+    .flatMap((w) => w.match(/^(fm|cr|sh|us|ih|hwy)(\d+)$/)?.slice(1) ?? [w]);
   const num = words[0]?.match(/^(\d+)[a-z]?$/)?.[1];
   if (!num) return null;
   let i = 1;
@@ -189,6 +196,22 @@ export function sameStreetAddress(a: string | null | undefined, b: string | null
   return x === y && (!za || !zb || za === zb);
 }
 
+/**
+ * A listing that may be ours though its name differs: the same first distinguishing word, and every word of the
+ * shorter name in the longer one ("Elio's Pizzeria" in "Elio's Osteria e Pizzeria"; "Hampton Inn Port Lavaca" in
+ * "Hampton Inn & Suites by Hilton Port Lavaca"). A one-word name needs five letters. "Port Lavaca Dodge" is not
+ * "Port Lavaca Ford"; "Texas Roadhouse" is not "Texas Children's Hospital".
+ */
+export function possibleMatch(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
+  const ours = businessWords(baseName(accountName));
+  const theirs = businessWords(baseName(listingName));
+  if (!ours.length || !theirs.length || ours[0] !== theirs[0] || ours[0]!.length < 4) return false;
+  const [short, long] = ours.length <= theirs.length ? [ours, theirs] : [theirs, ours];
+  if (short.length === 1 && short[0]!.length < 5) return false;
+  const words = new Set(long);
+  return short.every((w) => words.has(w));
+}
+
 export type WebAccount = { name: string; lat: number | null; lng: number | null; address: string | null; approx?: boolean };
 
 type Named = { p: Place; miles: number; street: boolean | null };
@@ -229,6 +252,18 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
   if (!chain && openAround.length > 0) return found("elsewhere", openAround[0]!);
   const closedHere = here.find((x) => x.p.closed) ?? named.find((x) => x.p.closed && x.street === true);
   if (closedHere) return found("closed", closedHere);
+  // Nothing under our name: a listing at our street pin whose name is close, for a person to judge. Never offered.
+  if (!account.approx) {
+    const maybe = candidates
+      .filter((p) => !sameBusiness(p.name, account.name) && possibleMatch(p.name, account.name))
+      .map((p) => ({ p, miles: milesBetween(pin, p) }))
+      .filter((x) => x.miles <= HERE_MILES)
+      .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || a.miles - b.miles)[0];
+    if (maybe) {
+      const street = account.address && maybe.p.street ? sameStreetAddress(maybe.p.street, account.address, maybe.p.zip, null) : null;
+      return { status: "maybe", place: maybe.p, miles: Math.round(maybe.miles * 100) / 100, listedAddress: null, sameAddress: street };
+    }
+  }
   return none("none");
 }
 
@@ -260,7 +295,7 @@ export type WebCheckRow = {
 };
 
 /** The Web Check list's order: what needs a look first. */
-export const WEB_STATUS_ORDER: readonly WebStatus[] = ["closed", "different", "elsewhere", "none", "nopin", "same"];
+export const WEB_STATUS_ORDER: readonly WebStatus[] = ["closed", "different", "elsewhere", "maybe", "none", "nopin", "same"];
 
 /** "Listed as permanently closed" → one line for the card, with the listing's details. */
 /** How far the listing's point is from ours, for a listing at our address: "under 50 ft", "300 ft", "0.4 mi". */
@@ -273,7 +308,7 @@ function pinGap(miles: number): string {
 export function pinDistance(c: Pick<WebCheck, "status" | "miles">): string | null {
   if (c.miles == null) return null;
   if (c.status === "elsewhere") return `${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin`;
-  if (c.status === "same") return `${pinGap(c.miles)} from our pin`;
+  if (c.status === "same" || c.status === "maybe") return `${pinGap(c.miles)} from our pin`;
   return null;
 }
 
@@ -283,6 +318,11 @@ export function webCheckLine(c: WebCheck): string {
   const where = placeAddress(c.place);
   const gap = pinDistance(c);
   const far = gap ? ` (${gap})` : "";
-  const pinOff = c.status === "elsewhere" && c.sameAddress ? ". Same address as ours: the map pin looks off" : "";
+  const pinOff =
+    c.status === "elsewhere" && c.sameAddress
+      ? ". Same address as ours: the map pin looks off"
+      : c.status === "maybe"
+        ? ". The name differs from ours: check it is the same business"
+        : "";
   return `${label}${where ? `: ${where}` : ""}${far}${pinOff}`;
 }

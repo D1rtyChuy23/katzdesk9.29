@@ -4,7 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { isWalkIn } from "@/lib/ops/customer-key";
 import { placeTile, placeTilePassing } from "@/lib/ops/market-api";
-import { ELSEWHERE_MILES, indexByWord, lookupWord, sameBusiness, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { ELSEWHERE_MILES, indexByWord, lookupWord, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { placeTileKey, PLACES_SOURCE, type Place } from "@/lib/ops/places";
 import { milesBetween } from "@/lib/ops/geo";
 
@@ -52,7 +52,8 @@ export async function webChecksFor(
   const byWord = accounts.length > 1 ? indexByWord(places) : null;
   return accounts.map((a) => {
     const word = lookupWord(a.name);
-    const pool = !word ? [] : byWord ? (byWord.get(word) ?? []) : places.filter((p) => sameBusiness(p.name, a.name));
+    // The listings sharing the name's first word: webCheck sorts out ours, namesakes and possible matches.
+    const pool = !word ? [] : byWord ? (byWord.get(word) ?? []) : places.filter((p) => lookupWord(p.name) === word);
     const near = a.lat == null || a.lng == null ? [] : pool.filter((p) => milesBetween({ lat: a.lat!, lng: a.lng! }, p) <= ELSEWHERE_MILES);
     return { id: a.id, name: a.name, address: a.address, approx: a.approx, check: webCheck(a, near) };
   });
@@ -109,7 +110,7 @@ export async function listWebChecksFor(sql: Sql, tile?: (key: string) => Promise
   const key = fingerprint(accounts);
   if (!tile && lastReport?.key === key) return lastReport.report;
   const rows = await webChecksFor(accounts, tile ?? placeTilePassing);
-  const counts: Record<WebStatus, number> = { same: 0, different: 0, closed: 0, elsewhere: 0, none: 0, nopin: 0 };
+  const counts: Record<WebStatus, number> = { same: 0, different: 0, closed: 0, elsewhere: 0, maybe: 0, none: 0, nopin: 0 };
   for (const r of rows) counts[r.check.status] += 1;
   const report: WebCheckReport = { rows, counts, source: PLACES_SOURCE, canEdit: false };
   if (!tile) lastReport = { key, report };
