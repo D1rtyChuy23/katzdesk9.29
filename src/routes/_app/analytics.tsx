@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { downloadAnalytics, getAnalytics } from "@/lib/ops/analytics-api";
 import { downloadPartsProfit, getPartsProfit } from "@/lib/ops/parts-profit-api";
 import { downloadProfitReport, getCostVisibility, getProfitReport } from "@/lib/ops/profit-report-api";
-import { HISTORY_SECTION_TITLE, jobTypeLabel, type GroupTotals, type HistorySection, type HistoryTotals } from "@/lib/ops/profit-report";
+import { CUSTOMER_GROUPINGS, HISTORY_SECTION_TITLE, jobTypeLabel, type CustomerGrouping, type GroupTotals, type HistorySection, type HistoryTotals } from "@/lib/ops/profit-report";
 import { ANALYTICS_LABEL, ANALYTICS_TYPES, NO_REP, type AnalyticsFilters, type AnalyticsRow, type AnalyticsType, type ExportFormat } from "@/lib/ops/analytics";
 import { addDays, todayChicago } from "@/lib/ops/clock";
 import { formatRep } from "@/lib/ops/rep-match";
@@ -484,8 +484,9 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
   const [range, setRange] = useState<RangeId>("year");
   const [dates, setDates] = useState(() => rangeDates("year", today));
   const [shown, setShown] = useState(PAGE);
+  const [grouping, setGrouping] = useCustomerGrouping();
   const filters = { from: dates.from || null, to: dates.to || null };
-  useEffect(() => setShown(PAGE), [dates.from, dates.to]);
+  useEffect(() => setShown(PAGE), [dates.from, dates.to, grouping]);
   const view = useQuery({ queryKey: ["profit-report", filters], queryFn: () => getProfitReport({ data: filters }), placeholderData: keepPreviousData });
   const file = useMutation({
     mutationFn: (format: ExportFormat) => downloadProfitReport({ data: { filters, format } }),
@@ -498,7 +499,7 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
   const building = (format: ExportFormat) => file.isPending && file.variables === format;
   const d = view.data;
   const t = d?.totals;
-  const customers = d?.byCustomer ?? [];
+  const customers = (grouping === "account" ? d?.byAccount : d?.byCustomer) ?? [];
   return (
     <div data-testid="profit-report">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -564,25 +565,93 @@ function ProfitView({ switcher }: { switcher: ReactNode }) {
       ) : null}
 
       <div className={view.isPlaceholderData ? "opacity-60 transition-opacity" : "transition-opacity"} aria-busy={view.isPlaceholderData}>
-      <ProfitTable title="By Job Type" rows={(d?.byType ?? []).map((g) => ({ ...g, label: jobTypeLabel(g.key) }))} loading={view.isLoading} empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."} testId="profit-by-type" />
+      <ProfitTable title="By Job Type" first="Job Type" rows={(d?.byType ?? []).map((g) => ({ ...g, label: jobTypeLabel(g.key) }))} loading={view.isLoading} empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."} testId="profit-by-type" />
       <ProfitTable
         title="By Customer"
+        first={groupingOf(grouping).first}
+        actions={<GroupingSwitch value={grouping} onChange={setGrouping} testId="profit-customer-grouping" />}
         rows={customers.slice(0, shown).map((g) => ({ ...g, label: g.label || "(no customer)" }))}
         loading={view.isLoading}
         empty={notLoadedText(view, "profit") ?? "Nothing billed in this range."}
         testId="profit-by-customer"
         more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
       />
-      {d ? <HistoryProfit history={d.history} /> : null}
+      {d ? <HistoryProfit history={d.history} grouping={grouping} onGrouping={setGrouping} /> : null}
       </div>
     </div>
   );
 }
 
+const GROUPING_KEY = "katz-profit-customers";
+
+const groupingOf = (id: CustomerGrouping) => CUSTOMER_GROUPINGS.find((g) => g.id === id) ?? CUSTOMER_GROUPINGS[0];
+
+/**
+ * How the Profit report's customer tables group (Chuy, 11/26: "Allow both reports"): by account (each listed account on
+ * one row under its name now), or by the name billed under, as before. Remembered per viewer; by account at first.
+ */
+function useCustomerGrouping(): [CustomerGrouping, (v: CustomerGrouping) => void] {
+  const [grouping, setGrouping] = useState<CustomerGrouping>("account");
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(GROUPING_KEY);
+      if (CUSTOMER_GROUPINGS.some((g) => g.id === saved)) setGrouping(saved as CustomerGrouping);
+    } catch {
+      /* private mode */
+    }
+  }, []);
+  const choose = (v: CustomerGrouping) => {
+    setGrouping(v);
+    try {
+      window.localStorage.setItem(GROUPING_KEY, v);
+    } catch {
+      /* private mode */
+    }
+  };
+  return [grouping, choose];
+}
+
+const GROUPING_CHIPS: Record<CustomerGrouping, { label: string; hint: string }> = {
+  account: { label: "By account", hint: "Each account on one row, under its name now" },
+  name: { label: "By name billed", hint: "Each name as it was billed" },
+};
+
+function GroupingSwitch({ value, onChange, testId }: { value: CustomerGrouping; onChange: (v: CustomerGrouping) => void; testId: string }) {
+  return (
+    <div className="flex shrink-0 gap-1.5" role="group" aria-label="Group customers" data-testid={testId}>
+      {CUSTOMER_GROUPINGS.map((g) => (
+        <FilterChip
+          key={g.id}
+          selected={value === g.id}
+          onClick={() => onChange(g.id)}
+          title={GROUPING_CHIPS[g.id].hint}
+          className="h-7 px-2.5 text-xs pointer-coarse:h-9"
+          data-testid={`${testId}-${g.id}`}
+        >
+          {GROUPING_CHIPS[g.id].label}
+        </FilterChip>
+      ))}
+    </div>
+  );
+}
+
+/** A report table's header row: its title, and any controls beside it. */
+function TableHead({ title, actions, as: Tag }: { title: string; actions?: ReactNode; as: "h2" | "h3" }) {
+  const text = "text-xs font-medium tracking-wide text-muted-foreground uppercase";
+  if (!actions) return <Tag className={`border-b border-border px-4 py-2.5 ${text}`}>{title}</Tag>;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-1.5">
+      <Tag className={text}>{title}</Tag>
+      {actions}
+    </div>
+  );
+}
+
 /** QuickBooks history (Jesus, 11/24): its own section, never added into the tables or totals above. */
-function HistoryProfit({ history }: { history: HistorySection }) {
+function HistoryProfit({ history, grouping, onGrouping }: { history: HistorySection; grouping: CustomerGrouping; onGrouping: (v: CustomerGrouping) => void }) {
   const [shown, setShown] = useState(PAGE);
-  const customers = history.byCustomer;
+  useEffect(() => setShown(PAGE), [grouping]);
+  const customers = grouping === "account" ? history.byAccount : history.byCustomer;
   return (
     <section className="mt-8" data-testid="profit-history">
       <h2 className="font-display text-xl font-medium tracking-tight">{HISTORY_SECTION_TITLE}</h2>
@@ -592,7 +661,8 @@ function HistoryProfit({ history }: { history: HistorySection }) {
       <HistoryTable title="By Year" first="Year" rows={history.byYear} total={history.totals} testId="profit-history-by-year" />
       <HistoryTable
         title="By Customer"
-        first="Customer"
+        first={groupingOf(grouping).first}
+        actions={<GroupingSwitch value={grouping} onChange={onGrouping} testId="profit-history-grouping" />}
         rows={customers.slice(0, shown)}
         testId="profit-history-by-customer"
         more={customers.length > shown ? { shown, total: customers.length, onMore: () => setShown((n) => n + PAGE) } : null}
@@ -604,6 +674,7 @@ function HistoryProfit({ history }: { history: HistorySection }) {
 function HistoryTable({
   title,
   first,
+  actions,
   rows,
   total = null,
   testId,
@@ -611,6 +682,7 @@ function HistoryTable({
 }: {
   title: string;
   first: string;
+  actions?: ReactNode;
   rows: (HistoryTotals & { key: string; label: string })[];
   total?: HistoryTotals | null;
   testId: string;
@@ -631,7 +703,7 @@ function HistoryTable({
   );
   return (
     <section className="mt-4 overflow-hidden rounded-xl border border-border bg-card" data-testid={testId}>
-      <h3 className="border-b border-border px-4 py-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h3>
+      <TableHead title={title} actions={actions} as="h3" />
       {rows.length ? (
         <div className="overflow-x-auto">
           <table className={`w-full text-sm sm:min-w-[56rem] ${CARD_TABLE}`}>
@@ -673,6 +745,8 @@ function HistoryTable({
 
 function ProfitTable({
   title,
+  first,
+  actions,
   rows,
   loading,
   empty,
@@ -680,6 +754,9 @@ function ProfitTable({
   more = null,
 }: {
   title: string;
+  /** The first column's heading. */
+  first: string;
+  actions?: ReactNode;
   rows: (GroupTotals & { key: string; label: string })[];
   loading: boolean;
   empty: string;
@@ -688,7 +765,7 @@ function ProfitTable({
 }) {
   return (
     <section className="mt-4 overflow-hidden rounded-xl border border-border bg-card" data-testid={testId}>
-      <h2 className="border-b border-border px-4 py-2.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">{title}</h2>
+      <TableHead title={title} actions={actions} as="h2" />
       {loading ? (
         <Skeleton className="h-40 w-full" />
       ) : rows.length ? (
@@ -696,7 +773,7 @@ function ProfitTable({
           <table className={`w-full text-sm sm:min-w-[52rem] ${CARD_TABLE}`}>
             <thead className={`text-left text-xs tracking-wide text-muted-foreground uppercase ${CARD_HEAD}`}>
               <tr className="border-b border-border">
-                <th className="px-4 py-2.5 font-medium">{title === "By Job Type" ? "Job Type" : "Customer"}</th>
+                <th className="px-4 py-2.5 font-medium">{first}</th>
                 <th className="px-2 py-2.5 text-right font-medium">Bills</th>
                 <th className="px-2 py-2.5 text-right font-medium">Sell</th>
                 <th className="px-2 py-2.5 text-right font-medium">Discount</th>
