@@ -845,6 +845,7 @@ export function CustomerMap({
               <>
                 <span className="text-xs font-medium" data-testid="map-prospect-count">
                   {plural(prospectsInView.length, "prospect")} on screen
+                  {placesQ.truncated ? <span className="font-normal text-muted-foreground"> (the most likely; zoom in for all)</span> : null}
                   {!layers.hideCustomers && placesInView.length > prospectsInView.length ? (
                     <span className="font-normal text-muted-foreground"> · {plural(placesInView.length - prospectsInView.length, "current account")} in gray</span>
                   ) : null}
