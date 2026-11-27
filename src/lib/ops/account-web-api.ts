@@ -4,7 +4,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { isWalkIn } from "@/lib/ops/customer-key";
 import { placeTile, placeTilePassing } from "@/lib/ops/market-api";
-import { ELSEWHERE_MILES, indexByWord, lookupWord, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { ELSEWHERE_MILES, indexByWord, lookupWord, offeredAddress, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { placeTileKey, PLACES_SOURCE, type Place } from "@/lib/ops/places";
 import { milesBetween } from "@/lib/ops/geo";
 
@@ -140,6 +140,6 @@ export const getAccountWebCheck = createServerFn({ method: "GET" })
 /** Kept for the Address Report's Approve: the address a web listing offers for this account, if any. */
 export async function webListingAddress(sql: Sql, accountId: number, tile?: (key: string) => Promise<Place[]>): Promise<string | null> {
   const c = await webCheckForAccount(sql, accountId, tile);
-  return c && (c.status === "different" || c.status === "elsewhere") && c.sameAddress === false ? c.listedAddress : null;
+  return c ? offeredAddress(c) : null;
 }
 
