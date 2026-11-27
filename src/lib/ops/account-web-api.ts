@@ -26,10 +26,15 @@ const num = (v: unknown) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** The 1° squares within ELSEWHERE_MILES of a point: at most four (25 miles is about 0.37° north–south, 0.43° east–west in Texas). */
-function squaresAround(lat: number, lng: number): string[] {
+/**
+ * The 1° squares within ELSEWHERE_MILES of a point: at most four. A degree north–south is 69 miles; east–west it shrinks
+ * with the latitude (25 miles is 0.40° at Brownsville, 0.47° at the top of the Panhandle).
+ */
+export function squaresAround(lat: number, lng: number): string[] {
+  const dy = ELSEWHERE_MILES / 68.7 + 0.005;
+  const dx = ELSEWHERE_MILES / (69.17 * Math.cos((Math.min(Math.abs(lat) + dy, 80) * Math.PI) / 180)) + 0.005;
   const out = new Set<string>();
-  for (const dy of [-0.37, 0.37]) for (const dx of [-0.43, 0.43]) out.add(placeTileKey(lat + dy, lng + dx));
+  for (const y of [-dy, dy]) for (const x of [-dx, dx]) out.add(placeTileKey(lat + y, lng + x));
   return [...out];
 }
 
@@ -85,12 +90,18 @@ export type WebCheckReport = {
 let lastReport: { key: string; report: WebCheckReport } | null = null;
 
 function fingerprint(accounts: readonly { id: number; name: string; address: string | null; lat: number | null; lng: number | null; approx: boolean }[]): string {
+  // Two independent 32-bit hashes (FNV-1a and a multiply-rotate one): a collision would need both to agree.
   let h = 0x811c9dc5;
+  let g = 0x9e3779b9;
   for (const a of accounts) {
     const s = `${a.id}|${a.name}|${a.address ?? ""}|${a.lat ?? ""}|${a.lng ?? ""}|${a.approx ? 1 : 0}\n`;
-    for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+    for (let i = 0; i < s.length; i++) {
+      const c = s.charCodeAt(i);
+      h = Math.imul(h ^ c, 0x01000193);
+      g = Math.imul((g << 5) | (g >>> 27), 0x85ebca6b) ^ c;
+    }
   }
-  return `${accounts.length}:${(h >>> 0).toString(36)}`;
+  return `${accounts.length}:${(h >>> 0).toString(36)}:${(g >>> 0).toString(36)}`;
 }
 
 export async function listWebChecksFor(sql: Sql, tile?: (key: string) => Promise<Place[]>): Promise<WebCheckReport> {

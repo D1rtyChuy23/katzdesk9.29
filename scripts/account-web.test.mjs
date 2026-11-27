@@ -53,13 +53,16 @@ test("closed at our pin; moved; a chain; nothing; no pin", () => {
 
 test("addresses, the card line and the lookup word", () => {
   assert.equal(web.listedAddress({ street: "502 Texas Ave", city: "Houston", zip: "77002" }), "502 Texas Ave, Houston, TX 77002");
-  assert.equal(web.listedAddress({ street: "502 Texas Ave", city: null, zip: null }), "502 Texas Ave, TX");
+  assert.equal(web.listedAddress({ street: "502 Texas Ave", city: null, zip: null }), null, "no city or ZIP: not offered");
+  assert.equal(web.listedAddress({ street: "1432 W 13TH ST", city: "HOUSTON", zip: "77008" }), "1432 W 13th St, Houston, TX 77008");
+  assert.equal(web.listedAddress({ street: "1432 W 13th St, Houston, TX 77008-6511, United States", city: "Houston", zip: "77008" }), null, "a street that already holds the city");
+  assert.equal(web.listedAddress({ street: "1705 Calle San Javier", city: "San Juan", zip: "00926" }), null, "not a Texas ZIP");
   assert.equal(web.listedAddress({ street: null, city: "Houston", zip: "77002" }), null);
   const p = place("p", "Gone Grill", 29.74, -95.4, { street: "9 B St" });
   assert.equal(web.webCheckLine({ status: "elsewhere", place: p, miles: 2.76, listedAddress: null }), "Listed somewhere else: 9 B St, Houston 77002 (2.8 mi from our pin)");
   assert.equal(web.webCheckLine({ status: "none", place: null, miles: null, listedAddress: null }), "No listing found");
   assert.equal(web.lookupWord("Black Rock - Pearland"), "black");
-  assert.equal(web.lookupWord("The Coffee House"), "the", "generic-only names fall back to all their words");
+  assert.equal(web.lookupWord("The Coffee House"), null, "a name of kind words only says nothing about which business: never looked up");
 });
 
 test("the Address Report offers a web listing's address, after the others and never twice", () => {
@@ -123,7 +126,7 @@ test("away from our pin, a listing whose name adds words is another business", (
 });
 
 test("listed elsewhere at our own address: the pin is off, and no address is offered", () => {
-  const h = place("h1", "Hugo's", 29.743, -95.3997, { street: "1600 Westheimer Rd" });
+  const h = place("h1", "Hugo's", 29.743, -95.3997, { street: "1600 Westheimer Rd", zip: "77006" });
   const c = web.webCheck(acct("Hugo's", 29.77, -95.39, "1600 Westheimer Road, Houston, TX 77006"), [h]);
   assert.deepEqual([c.status, c.sameAddress], ["elsewhere", true]);
   assert.match(web.webCheckLine(c), /map pin looks off/);
@@ -177,4 +180,74 @@ test("a listed address is offered in the form the Address Report approves (tidie
   const parsed = places.parsePlaceTile(places.PLACE_TILE_COLUMNS.slice(0, 13).join("\t") + "\n" + row13);
   assert.equal(parsed.length, 1);
   assert.equal(parsed[0].closed, false);
+});
+
+test("second review: different kinds, one-letter words, chains, our own address first, ZIPs, approve wording", () => {
+  const same = (a, b) => web.sameBusiness(a, b);
+  // Kind words must agree, and one-letter words count.
+  for (const [a, b] of [
+    ["Edinburg Inn And Suites", "Edinburg H-E-B"],
+    ["University Inn", "Texas A&M University - Brayton Fire Training Field"],
+    ["Texas de Brazil", "Cafe Brazil"],
+    ["Garden Inn", "The Coffee Garden"],
+    ["Brownsville Coffee Shop", "Texas Inn Brownsville Hotel"],
+    ["Social Cafe", "Social House"],
+    ["J O Motors Llc", "C & D Motors"],
+    ["G & T Auto Sales", "A&B Auto Sales"],
+    ["M & P Motors", "C & D Motors"],
+  ])
+    assert.equal(same(a, b), false, `${a} / ${b}`);
+  assert.equal(same("Katz Coffee", "Katz Coffee - Heights"), true, "one short word with the same kind");
+  assert.equal(same("Bean There Cafe", "Bean There Coffee Co."), true, "a café is a coffee shop");
+  // A chain: two other stores within 25 miles plus a third, or any store carrying a brand.
+  const pin = acct("Domino's", 29.7, -95.4, "943 N Expressway");
+  const branded = place("d1", "Domino's", 29.73, -95.4, { brand: "Domino's Pizza", street: "3355 Boca Chica Blvd" });
+  assert.equal(web.webCheck(pin, [branded]).status, "none", "a brand");
+  const stores = [0.03, 0.2, 0.3].map((d, i) => place(`m${i}`, "Marigold Grill", 29.7 + d, -95.4, { street: `${i + 10} B St` }));
+  assert.equal(web.webCheck(acct("Marigold Grill", 29.7, -95.4, "1 A St"), stores).status, "none", "three stores, two of them past the street pin's reach");
+  // Our own address 0.3 miles off beats another store a block away.
+  const near = place("n", "Starbucks", 29.701, -95.4, { street: "822 Town And Country Blvd", zip: "77024" });
+  const ours = place("o", "Starbucks", 29.7045, -95.4, { street: "12850 Memorial Dr", zip: "77024" });
+  const c = web.webCheck(acct("Starbucks", 29.7, -95.4, "12850 Memorial Dr, Houston, TX 77024"), [near, ours]);
+  assert.deepEqual([c.status, c.place.id, c.sameAddress], ["elsewhere", "o", true]);
+  // The same street in another ZIP is another address.
+  assert.equal(web.sameStreetAddress("100 N Main St, Conroe, TX 77301", "100 Main St, Willis, TX 77378"), false);
+  assert.equal(web.sameStreetAddress("100 N Main St, Conroe, TX 77301", "100 Main Street"), true, "one side without a ZIP");
+});
+
+test("streets: lettered and numbered streets, routes", () => {
+  const k = web.streetKey;
+  assert.notEqual(k("1901 Avenue Q"), k("1901 Avenue K"));
+  assert.notEqual(k("1 A St"), k("1 B St"));
+  assert.equal(k("1 A St"), "1 a");
+  assert.equal(k("502-A Texas Ave"), k("502 Texas Ave"), "a unit letter is still not the street");
+  assert.equal(k("100 State St"), "100 state");
+  assert.equal(k("1200 TX-6"), k("1200 SH 6"));
+  assert.equal(k("1200 State Highway 6"), k("1200 SH 6"));
+  assert.equal(k("100 5th St"), k("100 Fifth St"));
+  assert.equal(k("8 1/2 Main St"), "8 main");
+  assert.notEqual(k("100 N Loop 1604 W"), k("100 Loop 410"));
+});
+
+test("approve takes the web listing's wording when another source offers the same address", () => {
+  const webA = web.listedAddress({ street: "502 Texas Ave", city: "Houston", zip: "77002" });
+  const s = buildSuggestions({ address: "410 Main St, Houston, TX 77002", geocodeAddress: null, invoices: ["502 TEXAS AVE, HOUSTON, TX 77002"], web: webA });
+  assert.equal(s.length, 1);
+  assert.notEqual(s[0].address, webA, "the invoice's wording is what the Address Report offers");
+});
+
+test("the squares read cover 25 miles at every Texas latitude", async () => {
+  const { squaresAround } = await import("../src/lib/ops/account-web-api.ts");
+  const { milesBetween } = await import("../src/lib/ops/geo.ts");
+  for (let lat = 25.8; lat <= 36.6; lat += 0.2)
+    for (const lng of [-106.4, -101.569, -100.01, -97.99, -94.1]) {
+      const keys = new Set(squaresAround(lat, lng));
+      // Points 25 miles away in eight directions all fall in a square that is read.
+      for (let a = 0; a < 360; a += 45) {
+        const r = (a * Math.PI) / 180;
+        const p = { lat: lat + (24.9 / 69) * Math.cos(r), lng: lng + (24.9 / (69.17 * Math.cos((lat * Math.PI) / 180))) * Math.sin(r) };
+        assert.ok(milesBetween({ lat, lng }, p) <= 25.2);
+        assert.ok(keys.has(places.placeTileKey(p.lat, p.lng)), `${lat},${lng} → ${p.lat},${p.lng}`);
+      }
+    }
 });
