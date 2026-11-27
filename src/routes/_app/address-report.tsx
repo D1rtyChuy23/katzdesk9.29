@@ -95,6 +95,8 @@ function Page() {
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["web-check"] });
+      void qc.invalidateQueries({ queryKey: ["account-web"] });
     },
     onError: (e) => {
       toast.error(errorText(e, "Could not save the address"));

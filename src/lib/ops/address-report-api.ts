@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { webListingAddress } from "@/lib/ops/account-web-api";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
@@ -335,7 +336,6 @@ export const approveAddressSuggestion = createServerFn({ method: "POST" })
     if (shown(cur.address) === data.newAddress) return { status: "already", account: summary(data.newAddress) };
     if ((shown(cur.address) ?? "") !== (shown(data.expectedAddress) ?? "")) throw changedError(cur.name);
     const src = (await loadSources(sql, [cur.id])).get(cur.id);
-    const { webListingAddress } = await import("@/lib/ops/account-web-api");
     const web = await webListingAddress(sql, cur.id);
     const offered = buildSuggestions({ address: cur.address, geocodeAddress: cur.geocode_address, cleanList: src?.cleanList, invoices: src?.invoices, web });
     const pick = offered.find((s) => s.address === data.newAddress);

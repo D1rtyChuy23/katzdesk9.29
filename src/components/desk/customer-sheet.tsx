@@ -157,6 +157,8 @@ export function CustomerHistorySheet({
       void qc.invalidateQueries({ queryKey: ["account-addresses"] });
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
+      void qc.invalidateQueries({ queryKey: ["web-check"] });
+      void qc.invalidateQueries({ queryKey: ["account-web"] });
       if (row.merged || row.id !== customerId) {
         void navigate({ to: "/customers", search: (prev) => ({ ...prev, open: row.id }), replace: true });
       }
@@ -726,7 +728,7 @@ function AccountPinField({ id, pin, canEdit }: { id: number; pin: CustomerHistor
     onSuccess: (r) => {
       toast.success(`Map pin saved: ${pinText(r.latitude, r.longitude)}`);
       setEditing(false);
-      for (const key of [["customer-history"], ["account-geo"], ["account-addresses"], ["customer-address"], ["address-report"]]) {
+      for (const key of [["customer-history"], ["account-geo"], ["account-addresses"], ["customer-address"], ["address-report"], ["web-check"], ["account-web"]]) {
         void qc.invalidateQueries({ queryKey: key });
       }
     },

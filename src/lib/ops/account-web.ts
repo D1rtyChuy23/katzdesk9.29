@@ -16,7 +16,8 @@
  * Pure: safe for node --test and the screens.
  */
 import { milesBetween, type LatLng } from "./geo.ts";
-import { nameTokens, placeAddress, sameName, sameStreet, type Place } from "./places.ts";
+import { nameTokens, placeAddress, type Place } from "./places.ts";
+import { normalizeAddress, tidyAddress } from "./address-report.ts";
 
 export type WebStatus = "same" | "different" | "closed" | "elsewhere" | "none" | "nopin";
 
@@ -37,8 +38,9 @@ export type WebCheck = {
 
 /** Our pin and the listing this close (miles) are the same place: one block, to allow for where each map put it. */
 export const HERE_MILES = 0.15;
-/** How far to look for the same name when it is not at our pin. */
+/** How far to look for the same name when it is not at our pin: a street pin is trusted more than a ZIP-area one. */
 export const ELSEWHERE_MILES = 25;
+export const ELSEWHERE_MILES_STREET_PIN = 10;
 /** More open listings than this under one name around: a chain, so "elsewhere" cannot be told. */
 export const CHAIN_LIMIT = 2;
 
@@ -51,48 +53,114 @@ export const WEB_STATUS_LABEL: Record<WebStatus, string> = {
   nopin: "No map pin",
 };
 
-/** A listing's address the way our accounts write them: "502 Texas Ave, Houston, TX 77002". Null without a street. */
+/**
+ * A listing's address the way our accounts write them, tidied the way the Address Report offers it: "502 Texas Ave,
+ * Houston, TX 77002". Null unless the street starts with a house number: a listing without one is never offered.
+ */
 export function listedAddress(p: Pick<Place, "street" | "city" | "zip">): string | null {
-  if (!p.street) return null;
+  if (!p.street || streetKey(p.street) == null) return null;
   const tail = [p.city, ["TX", p.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
-  return [p.street, tail].filter(Boolean).join(", ");
+  return tidyAddress([p.street, tail].filter(Boolean).join(", "));
 }
 
-export type WebAccount = { name: string; lat: number | null; lng: number | null; address: string | null };
+// ---------------------------------------------------------------------------------------------------------------------
+// Names: strict, because a match can lead an Admin to change an address
+
+/** Words that say nothing about which business it is, on top of the generic ones nameTokens drops ("La", "El", "de"). */
+const FILLER = new Set(["la", "el", "los", "las", "le", "les", "de", "del", "di", "da", "y"]);
+
+/** An account's name without the location we add after " - ", " @ ", " | " or "(": "Black Rock - Pearland" → "Black Rock". */
+export function baseName(name: string | null | undefined): string {
+  return String(name ?? "").split(/\s+[-–—@|]\s+|\s*\(/)[0]!.trim();
+}
+
+/** The words that tell one business from another. */
+export function businessWords(name: string | null | undefined): string[] {
+  const words = nameTokens(name);
+  const kept = words.filter((w) => !FILLER.has(w));
+  return kept.length ? kept : words;
+}
+
+/**
+ * The same business by name: the listing's distinguishing words are ours, in order, after our location suffix and
+ * the generic words are set aside ("Black Rock Coffee Bar" is "Black Rock - Pearland"; "La Bar" is not "La Sicilia
+ * Italian Bakery & Cafe"; "Hugo's Cocina" is not "Hugo's"). One word must be at least five letters to count.
+ */
+export function sameBusiness(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
+  const ours = businessWords(baseName(accountName));
+  const theirs = businessWords(baseName(listingName));
+  if (!ours.length || ours.length !== theirs.length || !ours.every((w, i) => w === theirs[i])) return false;
+  return ours.length >= 2 || ours[0]!.length >= 5;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Streets
+
+const ROUTE: Record<string, string> = { fm: "fm", farm: "fm", interstate: "i", i: "i", ih: "i", hwy: "hwy", sh: "hwy", us: "hwy", state: "hwy", cr: "cr", county: "cr" };
+const DIRECTIONS = new Set(["n", "s", "e", "w", "ne", "nw", "se", "sw"]);
+
+/**
+ * House number and street, for comparing two addresses: "502 Texas Ave" and "502 N Texas Avenue, Houston" are both
+ * "502 texas"; "1234 Farm to Market 1960" and "1234 FM 1960 Rd" are "1234 fm 1960". Null when the address does not
+ * start with a house number ("Southwest Fwy", "One University Way", "The Galleria, 5015 Westheimer Rd").
+ */
+export function streetKey(address: string | null | undefined): string | null {
+  const words = normalizeAddress(String(address ?? "").split(",")[0]).split(" ").filter(Boolean);
+  const num = words[0]?.match(/^(\d+)[a-z]?$/)?.[1];
+  if (!num) return null;
+  let i = 1;
+  // "502-A" and "215-294" (a range) normalize to "502 a" and "215 294": the second part is not the street.
+  if (words[i] && /^(\d+|[a-z])$/.test(words[i]!) && words[i + 1] && !ROUTE[words[i]!]) i++;
+  while (words[i] && DIRECTIONS.has(words[i]!)) i++;
+  const w = words[i];
+  if (!w) return null;
+  const route = ROUTE[w];
+  if (route) {
+    // "farm to market 1960", "state highway 6", "county road 12": the route number is what tells it apart.
+    let j = i + 1;
+    while (words[j] && !/^\d/.test(words[j]!) && j < i + 4) j++;
+    return words[j] ? `${num} ${route} ${words[j]}` : `${num} ${route}`;
+  }
+  return `${num} ${w}`;
+}
+
+/** Whether two addresses are the same street address; null when either has no house number to compare. */
+export function sameStreetAddress(a: string | null | undefined, b: string | null | undefined): boolean | null {
+  const x = streetKey(a);
+  const y = streetKey(b);
+  return x == null || y == null ? null : x === y;
+}
+
+export type WebAccount = { name: string; lat: number | null; lng: number | null; address: string | null; approx?: boolean };
 
 /**
  * The check for one account. `candidates` are the listings around it (any name; the server passes the ones sharing the
- * name's first word, within ELSEWHERE_MILES).
+ * name's first word nearby).
  */
 export function webCheck(account: WebAccount, candidates: readonly Place[]): WebCheck {
   const none = (status: WebStatus): WebCheck => ({ status, place: null, miles: null, listedAddress: null, sameAddress: null });
   if (account.lat == null || account.lng == null) return none("nopin");
   const pin: LatLng = { lat: account.lat, lng: account.lng };
+  const reach = account.approx ? ELSEWHERE_MILES : ELSEWHERE_MILES_STREET_PIN;
   const named = candidates
-    .filter((p) => sameName(p.name, account.name))
-    .map((p) => ({ p, miles: milesBetween(pin, p) }))
-    .filter((x) => x.miles <= ELSEWHERE_MILES)
-    .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || a.miles - b.miles);
-  const found = (status: WebStatus, x: { p: Place; miles: number }): WebCheck => ({
+    .filter((p) => sameBusiness(p.name, account.name))
+    .map((p) => ({ p, miles: milesBetween(pin, p), street: account.address && p.street ? sameStreetAddress(p.street, account.address) : null }))
+    .filter((x) => x.miles <= reach)
+    // Open before closed, then a listing on our street before a nearer one on another, then nearest.
+    .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || Number(b.street === true) - Number(a.street === true) || a.miles - b.miles);
+  const found = (status: WebStatus, x: { p: Place; miles: number; street: boolean | null }): WebCheck => ({
     status,
     place: x.p,
     miles: Math.round(x.miles * 100) / 100,
     listedAddress: listedAddress(x.p),
-    sameAddress: x.p.street && account.address ? sameStreet(x.p.street, account.address) : null,
+    sameAddress: x.street,
   });
   const here = named.filter((x) => x.miles <= HERE_MILES);
   const openHere = here.find((x) => !x.p.closed);
-  if (openHere) {
-    // No street on either side: nothing to compare, so the listing stands as "same".
-    const differs = !!openHere.p.street && !!account.address && !sameStreet(openHere.p.street, account.address);
-    return found(differs ? "different" : "same", openHere);
-  }
-  // Away from our pin the listing's name may not add words to ours: "Black Rock Coffee Bar" is "Black Rock - Pearland"
-  // ("coffee" and "bar" say what it is), but "Hugo's Cocina" is not "Hugo's".
-  const ours = nameTokens(account.name).length;
-  const openAround = named.filter((x) => !x.p.closed && x.miles > HERE_MILES && nameTokens(x.p.name).length <= ours);
-  const distinct = openAround.length > 0 && openAround.length <= CHAIN_LIMIT;
-  if (distinct) return found("elsewhere", openAround[0]!);
+  // Only a clear "another street" is "different"; no house number on either side is no evidence either way.
+  if (openHere) return found(openHere.street === false ? "different" : "same", openHere);
+  const openAround = named.filter((x) => !x.p.closed && x.miles > HERE_MILES);
+  if (openAround.length > 0 && openAround.length <= CHAIN_LIMIT) return found("elsewhere", openAround[0]!);
   const closedHere = here.find((x) => x.p.closed);
   if (closedHere) return found("closed", closedHere);
   return none("none");
@@ -100,7 +168,7 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
 
 /** The word listings are looked up by: a name's first distinguishing word ("black" for "Black Rock - Pearland"). */
 export function lookupWord(name: string | null | undefined): string | null {
-  return nameTokens(name)[0] ?? null;
+  return businessWords(baseName(name))[0] ?? null;
 }
 
 /** Places grouped by their lookup word, for many accounts at once. */

@@ -69,8 +69,10 @@ export function WebCheckView() {
   const paged = useShowMore(rows, `${picked.join(",")}|${needle}`, 50);
   const approve = useMutation({
     mutationFn: (r: WebCheckRow) => approveAddressSuggestion({ data: { accountId: r.id, expectedAddress: r.address, newAddress: r.check.listedAddress! } }),
-    onSuccess: (res) => {
-      toast.success(res.status === "updated" ? `Address saved on “${res.account.name}”. ${NETSUITE_NOTE}` : `“${res.account.name}” already has that address`);
+    onSuccess: (res, r) => {
+      // Listed elsewhere: the address moves, the pin does not (the geocoder places it again, or set it on the account).
+      const pin = r.check.status === "elsewhere" ? " The map pin is not moved: check it on the account." : "";
+      toast.success(res.status === "updated" ? `Address saved on “${res.account.name}”.${pin} ${NETSUITE_NOTE}` : `“${res.account.name}” already has that address`);
       for (const key of [["web-check"], ["account-web"], ["address-report"], ["account-geo"], ["customers"], ["customer-address"], ["account-addresses"], ["customer-history"]]) {
         void qc.invalidateQueries({ queryKey: key });
       }

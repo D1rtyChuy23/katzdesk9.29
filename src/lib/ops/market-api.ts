@@ -81,6 +81,17 @@ export function placeTile(key: string): Promise<Place[]> {
   return p;
 }
 
+/**
+ * One square's places for a one-off pass over many squares (the Web Check report): a square already kept is used, but
+ * one read here is not kept, so the report does not push out the squares people are looking at on the Map.
+ */
+export function placeTilePassing(key: string): Promise<Place[]> {
+  const hit = placeTiles.get(key);
+  if (hit) return hit;
+  const load = placeFileLoaders()[`./places-tiles/${key}.tsv`];
+  return load ? load().then(parsePlaceTile) : Promise.resolve([]);
+}
+
 export type PlacesResult = { places: Place[]; total: number; truncated: boolean; source: string };
 
 /** `tile` reads one square's places (the bundled files by default; tests pass their own). */

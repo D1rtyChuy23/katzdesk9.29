@@ -3,8 +3,8 @@ import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { isWalkIn } from "@/lib/ops/customer-key";
-import { placeTile } from "@/lib/ops/market-api";
-import { ELSEWHERE_MILES, indexByWord, lookupWord, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { placeTile, placeTilePassing } from "@/lib/ops/market-api";
+import { ELSEWHERE_MILES, indexByWord, lookupWord, sameBusiness, webCheck, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { placeTileKey, PLACES_SOURCE, type Place } from "@/lib/ops/places";
 import { milesBetween } from "@/lib/ops/geo";
 
@@ -26,11 +26,11 @@ const num = (v: unknown) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** The 1° squares within reach of a point: its own and the eight around it (25 miles is well under a square). */
+/** The 1° squares within ELSEWHERE_MILES of a point: at most four (25 miles is about 0.37° north–south, 0.43° east–west in Texas). */
 function squaresAround(lat: number, lng: number): string[] {
-  const out: string[] = [];
-  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) out.push(placeTileKey(lat + dy, lng + dx));
-  return out;
+  const out = new Set<string>();
+  for (const dy of [-0.37, 0.37]) for (const dx of [-0.43, 0.43]) out.add(placeTileKey(lat + dy, lng + dx));
+  return [...out];
 }
 
 /** `tile` reads one square's listings (the bundled files by default; tests pass their own). */
@@ -43,13 +43,12 @@ export async function webChecksFor(
   // Read square by square (each is parsed once and cached by the loader), then index all of them by name word.
   const places: Place[] = [];
   for (const k of keys) places.push(...(await tile(k)));
-  const byWord = indexByWord(places);
+  // One account (a card): just look through the listings. Many (the report): index them by name word first.
+  const byWord = accounts.length > 1 ? indexByWord(places) : null;
   return accounts.map((a) => {
     const word = lookupWord(a.name);
-    const near =
-      a.lat == null || a.lng == null || !word
-        ? []
-        : (byWord.get(word) ?? []).filter((p) => milesBetween({ lat: a.lat!, lng: a.lng! }, p) <= ELSEWHERE_MILES);
+    const pool = !word ? [] : byWord ? (byWord.get(word) ?? []) : places.filter((p) => sameBusiness(p.name, a.name));
+    const near = a.lat == null || a.lng == null ? [] : pool.filter((p) => milesBetween({ lat: a.lat!, lng: a.lng! }, p) <= ELSEWHERE_MILES);
     return { id: a.id, name: a.name, address: a.address, approx: a.approx, check: webCheck(a, near) };
   });
 }
@@ -78,11 +77,32 @@ export type WebCheckReport = {
   canEdit: boolean;
 };
 
+/**
+ * The last report, kept per server while every account's name, address and pin are as they were: a second look, or
+ * another person's, costs one small query. (A fingerprint of what the check reads, not updated_at: not every address
+ * or pin change sets it.) The listings themselves only change with a deploy, which starts a fresh server.
+ */
+let lastReport: { key: string; report: WebCheckReport } | null = null;
+
+function fingerprint(accounts: readonly { id: number; name: string; address: string | null; lat: number | null; lng: number | null; approx: boolean }[]): string {
+  let h = 0x811c9dc5;
+  for (const a of accounts) {
+    const s = `${a.id}|${a.name}|${a.address ?? ""}|${a.lat ?? ""}|${a.lng ?? ""}|${a.approx ? 1 : 0}\n`;
+    for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+  }
+  return `${accounts.length}:${(h >>> 0).toString(36)}`;
+}
+
 export async function listWebChecksFor(sql: Sql, tile?: (key: string) => Promise<Place[]>): Promise<WebCheckReport> {
-  const rows = await webChecksFor(await loadAccounts(sql), tile);
+  const accounts = await loadAccounts(sql);
+  const key = fingerprint(accounts);
+  if (!tile && lastReport?.key === key) return lastReport.report;
+  const rows = await webChecksFor(accounts, tile ?? placeTilePassing);
   const counts: Record<WebStatus, number> = { same: 0, different: 0, closed: 0, elsewhere: 0, none: 0, nopin: 0 };
   for (const r of rows) counts[r.check.status] += 1;
-  return { rows, counts, source: PLACES_SOURCE, canEdit: false };
+  const report: WebCheckReport = { rows, counts, source: PLACES_SOURCE, canEdit: false };
+  if (!tile) lastReport = { key, report };
+  return report;
 }
 
 export async function webCheckForAccount(sql: Sql, accountId: number, tile?: (key: string) => Promise<Place[]>): Promise<WebCheck | null> {
