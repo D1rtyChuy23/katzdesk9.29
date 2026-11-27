@@ -12,6 +12,7 @@ import { sameStackCustomer, stackCustomerRefusal, stackRowMatchesSql, stackPmSql
 import { LIVE_INVOICE_SQL } from "@/lib/ops/billing-rules";
 import { listedAccountSql } from "@/lib/ops/bill-account";
 import { readsById } from "@/lib/ops/read-by-id";
+import type { PmDateKind, TicketDateKind } from "@/lib/ops/pm-stack-labels";
 
 /** A PM's or ticket's listed account, as a select column, when PMs reads by id (C6); null otherwise. */
 const accountColumn = (byId: boolean, alias: string) => (byId ? listedAccountSql(`${alias}.customer_id`, `${alias}.customer`) : "null::int");
@@ -153,6 +154,9 @@ export type StackedOn = {
   customer: string;
   customerMatches: boolean;
   status: string;
+  /** YYYY-MM-DD: completed, else scheduled, else received (the list's order), and which it is (11/27). */
+  date?: string | null;
+  dateKind?: TicketDateKind | null;
 };
 
 export type StackedPmRow = {
@@ -161,7 +165,19 @@ export type StackedPmRow = {
   status: string;
   equipment: string | null;
   customerMatches: boolean;
+  /** YYYY-MM-DD: completed, else due (projected), else received (the list's order), and which it is (11/27). */
+  date?: string | null;
+  dateKind?: PmDateKind | null;
 };
+
+/** A ticket's date and which it is, as select columns on `j` (the stack list's sort order). */
+const TICKET_DAY = `to_char(coalesce(j.completed_at, j.scheduled, j.received), 'YYYY-MM-DD') as day,
+       case when j.completed_at is not null then 'completed' when j.scheduled is not null then 'scheduled'
+            when j.received is not null then 'received' end as day_kind`;
+/** A PM's date and which it is, as select columns on `p` (the stack list's sort order). */
+const PM_DAY = `to_char(coalesce(p.completed_at, p.projected, p.received), 'YYYY-MM-DD') as day,
+       case when p.completed_at is not null then 'completed' when p.projected is not null then 'due'
+            when p.received is not null then 'received' end as day_kind`;
 
 async function canStack(sql: Sql, userId: string): Promise<boolean> {
   const r = (await sql.query<{ is_admin: unknown; desk_role: string | null }>(
@@ -211,7 +227,7 @@ export async function listForPm(sql: Pick<Sql, "query">, pmId: number) {
   const stackedOn = pm.stacked_job_id ? await readTicket(sql, Number(pm.stacked_job_id), side, byId) : null;
   const rows = key
     ? await sql.query<TicketRow>(
-        `select j.id, j.kind, j.wo, j.call_id, j.customer, ra.account, j.status
+        `select j.id, j.kind, j.wo, j.call_id, j.customer, ra.account, j.status, ${TICKET_DAY}
            from service_jobs j
           cross join lateral (select ${accountColumn(byId, "j")} as account) ra
           where true ${TICKET_WHERE}
@@ -228,11 +244,21 @@ export async function listForPm(sql: Pick<Sql, "query">, pmId: number) {
   };
 }
 
-type TicketRow = { id: number; kind: string; wo: string | null; call_id: string | null; customer: string | null; account: number | null; status: string };
+type TicketRow = {
+  id: number;
+  kind: string;
+  wo: string | null;
+  call_id: string | null;
+  customer: string | null;
+  account: number | null;
+  status: string;
+  day: string | null;
+  day_kind: TicketDateKind | null;
+};
 
 async function readTicket(sql: Pick<Sql, "query">, jobId: number, pm: StackSide, byId: boolean): Promise<StackedOn | null> {
   const r = (await sql.query<TicketRow>(
-    `select j.id, j.kind, j.wo, j.call_id, j.customer, ${accountColumn(byId, "j")} as account, j.status from service_jobs j where j.id = $1`,
+    `select j.id, j.kind, j.wo, j.call_id, j.customer, ${accountColumn(byId, "j")} as account, j.status, ${TICKET_DAY} from service_jobs j where j.id = $1`,
     [jobId],
   ))[0];
   return r ? toTicket(r, pm, byId) : null;
@@ -247,6 +273,8 @@ function toTicket(r: TicketRow, pm: StackSide, byId: boolean): StackedOn {
     customer: (r.customer ?? "").trim(),
     customerMatches: normalizeCustomerKey(pm.customer) !== "" && sameStackCustomer({ customer: r.customer, account: accountOf(r.account, byId) }, pm),
     status: r.status,
+    date: r.day,
+    dateKind: r.day_kind,
   };
 }
 
@@ -260,12 +288,12 @@ export async function listForJob(sql: Pick<Sql, "query">, jobId: number) {
   const key = normalizeCustomerKey(job?.customer);
   const side: StackSide = { customer: job?.customer ?? null, account: accountOf(job?.account, byId) };
   const stacked = await sql.query<PmRow>(
-    `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.equipment from pm_jobs p where p.stacked_job_id = $1 order by p.id desc limit 10`,
+    `select p.id, p.customer, ${accountColumn(byId, "p")} as account, p.status, p.equipment, ${PM_DAY} from pm_jobs p where p.stacked_job_id = $1 order by p.id desc limit 10`,
     [jobId],
   );
   const candidates = key
     ? await sql.query<PmRow>(
-        `select p.id, p.customer, ra.account, p.status, p.equipment
+        `select p.id, p.customer, ra.account, p.status, p.equipment, ${PM_DAY}
            from pm_jobs p
           cross join lateral (select ${accountColumn(byId, "p")} as account) ra
           where p.stacked_job_id is null
@@ -290,11 +318,13 @@ export async function listForJob(sql: Pick<Sql, "query">, jobId: number) {
     status: r.status,
     equipment: r.equipment,
     customerMatches: key !== "" && sameStackCustomer({ customer: r.customer, account: accountOf(r.account, byId) }, side),
+    date: r.day,
+    dateKind: r.day_kind,
   });
   return { stacked: stacked.map(row), candidates: candidates.map(row) };
 }
 
-type PmRow = { id: number; customer: string | null; account: number | null; status: string; equipment: string | null };
+type PmRow = { id: number; customer: string | null; account: number | null; status: string; equipment: string | null; day: string | null; day_kind: PmDateKind | null };
 
 /**
  * Why a ticket (`side` "ticket") or PM ("pm") on a stack can't move to the customer `next`: stackCustomerRefusal over the

@@ -5,6 +5,7 @@ import { stackPmOnTicket, unstackPm, type StackedPmRow } from "@/lib/ops/pm-stac
 import { OpenLink } from "./open-link";
 import { StatusBadge } from "./flag-badge";
 import { isPmStack, pmStackQuery } from "./pm-stack-shared";
+import { NO_UNBILLED_TICKETS, stackPmText, stackTicketText, ticketNumbers } from "@/lib/ops/pm-stack-labels";
 
 function useStackActions() {
   const qc = useQueryClient();
@@ -39,10 +40,6 @@ function useStackActions() {
   return { stack, unstack };
 }
 
-function ticketLabel(row: { wo: string | null; callId: string | null }): string {
-  return (row.wo ?? "").trim() || (row.callId ?? "").trim();
-}
-
 /** Under the PM badges: stack this PM on a ticket, or show the ticket it is already on. */
 export function PmStackHeader({
   pmId,
@@ -63,7 +60,7 @@ export function PmStackHeader({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
             On ticket #{on.jobId}
-            {ticketLabel(on) ? ` · ${ticketLabel(on)}` : ""}
+            {ticketNumbers(on) ? ` · ${ticketNumbers(on)}` : ""}
           </span>
           <OpenLink entityType={on.kind} id={on.jobId} className="text-xs font-medium text-primary hover:underline">
             <span onClick={onSaveFirst}>Open ticket</span>
@@ -96,14 +93,13 @@ export function PmStackHeader({
                     disabled={stack.isPending}
                     onClick={() => stack.mutate({ pmId, jobId: c.jobId })}
                   >
-                    Ticket #{c.jobId}
-                    {ticketLabel(c) ? ` · ${ticketLabel(c)}` : ""} · {c.status}
+                    {stackTicketText(c)}
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-1 text-xs text-muted-foreground">No open tickets for this customer.</p>
+            <p className="mt-1 text-xs text-muted-foreground">{NO_UNBILLED_TICKETS}</p>
           )}
         </div>
       )}
@@ -172,7 +168,7 @@ export function TicketPmStack({
                     disabled={stack.isPending}
                     onClick={() => stack.mutate({ pmId: p.pmId, jobId })}
                   >
-                    PM #{p.pmId} · {p.customer} · {p.status}
+                    {stackPmText(p)}
                   </button>
                 </li>
               ))}

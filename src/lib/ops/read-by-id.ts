@@ -5,6 +5,7 @@ import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { NAME_LINKS } from "@/lib/ops/link-check";
 import { BILLED_ON_INSTALL } from "@/lib/ops/merged-ticket";
 import { notWalkInSql } from "@/lib/ops/walk-in-account";
+import { openPmSql } from "@/lib/ops/ticket-status";
 
 /**
  * Reading by id (phase C5 of "One Record Per Machine Plan", Chuy approved 11/24). Screens find an account's records by
@@ -156,6 +157,12 @@ export type AccountList = {
   id?: string;
   /** The accounts the screen's name match looks in, as a condition on `dc` (directory_customers), when not every listed one. */
   nameAccounts?: string;
+  /**
+   * The whole set this list is part of (11/27: the open-PM rule), when the count should say what it leaves out: the rows
+   * of `where` on no listed account, and the rows of `all` that `where` leaves out on purpose (`leftOutLabel`).
+   */
+  all?: string;
+  leftOutLabel?: string;
 };
 
 /** A provider link whose provider is still on the network (getCustomerProviders). */
@@ -214,7 +221,21 @@ export type ListDiff = {
   onlyById: number;
   /** Up to 25 accounts that differ, most changed first. */
   samples: ListDiffAccount[];
+  /** With `all` (11/27): rows of the list on no listed account, by name or id. */
+  notOnAccount?: number;
+  /** With `all`: rows of the whole set the list leaves out on purpose, and what they are. */
+  leftOut?: number;
+  leftOutLabel?: string;
 };
+
+/** What a count leaves out, to show beside it ("1 not on an account · 1 Walk-In left out"); "" when nothing. */
+export function listGapText(l: { notOnAccount?: number; leftOut?: number; leftOutLabel?: string }): string {
+  const parts = [
+    l.notOnAccount ? `${l.notOnAccount} not on an account` : "",
+    l.leftOut ? `${l.leftOut} ${l.leftOutLabel ?? "other"} left out` : "",
+  ];
+  return parts.filter(Boolean).join(" · ");
+}
 
 const SAMPLES = 25;
 const num = (v: unknown) => Number(v ?? 0) || 0;
@@ -230,7 +251,7 @@ export async function compareLists(
   const out: ListDiff[] = [];
   for (const l of lists) {
     const base = { key: l.key, label: l.label };
-    const same = JSON.stringify([l.table, l.match, l.where ?? "", l.name ?? "", l.id ?? "", l.nameAccounts ?? ""]);
+    const same = JSON.stringify([l.table, l.match, l.where ?? "", l.name ?? "", l.id ?? "", l.nameAccounts ?? "", l.all ?? "", l.leftOutLabel ?? ""]);
     const earlier = seen.get(same);
     if (earlier) {
       out.push({ ...earlier, ...base });
@@ -276,9 +297,21 @@ export async function compareLists(
         where coalesce(n.dropped, 0) > 0 or coalesce(a.added, 0) > 0
         order by coalesce(n.dropped, 0) + coalesce(a.added, 0) desc, lower(d.name)`,
     );
+    // What the count leaves out, for a list that says (`all`): rows on no listed account, and the set's rows it skips.
+    const gap = l.all
+      ? (
+          await sql.query<{ outside: number; left_out: number }>(
+            `with ${accounts}
+             select (select count(*) from ${l.table} t
+                      where ${where} and not exists (select 1 from d o where o.id = ${tid}) and not exists (select 1 from dn where ${matchN}))::int as outside,
+                    ((select count(*) from ${l.table} t where ${l.all}) - (select count(*) from ${l.table} t where (${l.all}) and (${where})))::int as left_out`,
+          )
+        )[0]
+      : null;
     out.push({
       ...base,
       present: true,
+      ...(gap ? { notOnAccount: num(gap.outside), leftOut: num(gap.left_out), ...(l.leftOutLabel ? { leftOutLabel: l.leftOutLabel } : {}) } : {}),
       byName: num(totals?.by_name),
       byId: num(totals?.by_id),
       accounts: rows.length,
@@ -382,7 +415,9 @@ export const PM_LISTS: AccountList[] = [
     label: "Open PMs (Runbook Readiness)",
     table: "pm_jobs",
     match: "lower",
-    where: `t.status not in ('Completed', 'Cancelled') and t.moved_job_id is null and ${notWalkInSql("t.customer")}`,
+    where: `${openPmSql("t")} and ${notWalkInSql("t.customer")}`,
+    all: openPmSql("t"),
+    leftOutLabel: "Walk-In",
   },
 ];
 
@@ -395,7 +430,7 @@ export const MAP_LISTS: AccountList[] = [
     match: "lower",
     where: "not t.done and t.status not in ('Completed', 'Cancelled', 'Phone Resolved') and t.duplicate_of is null",
   },
-  { key: "openPms", label: "Open PMs", table: "pm_jobs", match: "lower", where: "not t.done and t.status not in ('Completed', 'Cancelled')" },
+  { key: "openPms", label: "Open PMs", table: "pm_jobs", match: "lower", where: openPmSql("t"), all: openPmSql("t") },
   {
     key: "openInstalls",
     label: "Open installs",

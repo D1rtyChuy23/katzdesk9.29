@@ -66,7 +66,8 @@ function Page() {
       {data ? (
         <>
           <p className="mt-4 text-sm text-muted-foreground">
-            {data.pmsChecked} open PM{data.pmsChecked === 1 ? "" : "s"} with a covered machine · {data.summary.units} unit
+            {data.pmsChecked} open PM{data.pmsChecked === 1 ? "" : "s"} with a covered machine
+            {data.walkInLeftOut ? ` (${data.walkInLeftOut} Walk-In left out)` : ""} · {data.summary.units} unit
             {data.summary.units === 1 ? "" : "s"} · <b>{data.summary.ready}</b> fully ready
           </p>
           <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Filter">

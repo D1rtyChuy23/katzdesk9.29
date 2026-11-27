@@ -160,7 +160,8 @@ test("a moved PM can't be edited, and leaves the PM board, search and the accoun
       ["src/lib/ops/billing-report-api.ts", "from pm_jobs where moved_job_id is null"],
       ["src/lib/ops/teams-reports.ts", "and p.moved_job_id is null"],
       ["src/lib/ops/record-billing-api.ts", "and p.moved_job_id is null"],
-      ["src/lib/ops/pm-runbook-readiness-api.ts", "and moved_job_id is null"],
+      // The shared open-PM rule (openPmSql, 11/27) leaves a moved PM out; pm-stack-counts tests the rule itself.
+      ["src/lib/ops/pm-runbook-readiness-api.ts", 'where ${openPmSql("p")}'],
       ["src/lib/ops/wo-search.ts", "where moved_job_id is null and"],
     ]) {
       assert.ok(readFileSync(new URL(`../${file}`, import.meta.url), "utf8").includes(text), file);

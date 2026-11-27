@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getLinkCheck, type NameLinkReport, type NameSample } from "@/lib/ops/link-check";
 import { notLoadedText } from "@/lib/ops/load-problem";
-import { getReadById, setReadById, sweepReadIds, type IdFix, type ListDiff, type ReadByIdArea } from "@/lib/ops/read-by-id";
+import { getReadById, listGapText, setReadById, sweepReadIds, type IdFix, type ListDiff, type ReadByIdArea } from "@/lib/ops/read-by-id";
 
 export const Route = createFileRoute("/_app/link-check")({ component: Page });
 
@@ -446,6 +446,12 @@ function ReadArea({ area, idsLeft, onConfirm }: { area: ReadByIdArea; idsLeft: n
                 <td className="py-1.5 pr-3">
                   {l.label}
                   {!l.present ? <span className="ml-2 text-xs text-muted-foreground">(not on this database)</span> : null}
+                  {/* What the count leaves out (11/27), so counts elsewhere add up: "1 not on an account · 1 Walk-In left out". */}
+                  {l.present && listGapText(l) ? (
+                    <span className="block text-xs text-muted-foreground" data-testid={`read-list-${l.key}-gap`}>
+                      {listGapText(l)}
+                    </span>
+                  ) : null}
                 </td>
                 <td className="py-1.5 pr-3 text-right tabular-nums">{fmt(l.byName)}</td>
                 <td className="py-1.5 pr-3 text-right tabular-nums">{fmt(l.byId)}</td>

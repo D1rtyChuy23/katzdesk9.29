@@ -13,6 +13,7 @@ import {
 import { readsById } from "@/lib/ops/read-by-id";
 import { splitEquipment } from "@/lib/ops/equipment";
 import { notWalkInSql } from "@/lib/ops/walk-in-account";
+import { openPmSql } from "@/lib/ops/ticket-status";
 
 async function ready(): Promise<Sql> {
   const { ensureSeeded } = await import("@/lib/ops/seed.server");
@@ -25,8 +26,10 @@ const matchPiece = matchRunbookPiece;
 export type RunbookReadiness = {
   rows: ReadinessRow[];
   summary: ReturnType<typeof readinessSummary>;
-  /** Open PMs (not Completed or Cancelled) checked. */
+  /** Open PMs (openPmSql) checked: the ones with a machine a runbook covers. */
   pmsChecked: number;
+  /** Open Walk-In PMs, which Readiness leaves out (11/27: said beside the count). */
+  walkInLeftOut: number;
 };
 
 export const getRunbookReadiness = createServerFn({ method: "GET" })
@@ -35,9 +38,11 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
     const sql = await ready();
     // By each PM's account id once PMs reads by id (phase C5, Link Check), as its runbook plans its units.
     const byId = await readsById(sql, "pms");
+    // Open by the one rule every open-PM count uses (openPmSql); Walk-In is left out, and the page says how many.
     const all = await sql.query<{ id: number; customer: string; customer_id: number | null; equipment: string | null; status: string }>(
-      `select id, customer, customer_id, equipment, status from pm_jobs where status not in ('Completed', 'Cancelled') and moved_job_id is null and ${notWalkInSql("customer")} order by id`,
+      `select p.id, p.customer, p.customer_id, p.equipment, p.status from pm_jobs p where ${openPmSql("p")} and ${notWalkInSql("p.customer")} order by p.id`,
     );
+    const walkIn = await sql.query<{ n: number }>(`select count(*)::int as n from pm_jobs p where ${openPmSql("p")} and not (${notWalkInSql("p.customer")})`);
     const pms: ReadinessPm[] = all
       .filter((p) => splitEquipment(p.equipment).some((piece) => matchPiece(piece)))
       .map((p) => ({
@@ -90,5 +95,5 @@ export const getRunbookReadiness = createServerFn({ method: "GET" })
       bag[link.piece_key] = Number(link.account_equipment_id);
     }
     const rows = buildReadiness(pms, mapped, matchPiece, pinsByPm, matchRunbookSerial);
-    return { rows, summary: readinessSummary(rows), pmsChecked: pms.length };
+    return { rows, summary: readinessSummary(rows), pmsChecked: pms.length, walkInLeftOut: Number(walkIn[0]?.n ?? 0) };
   });
