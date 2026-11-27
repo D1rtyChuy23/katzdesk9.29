@@ -10,6 +10,11 @@ cover Texas are downloaded (about 300 MB). Needs Python 3 with pyarrow (pip inst
     python3 scripts/build-places.py --release 2026-11-18.0
     python3 scripts/build-places.py --save tx-raw.parquet  # also keep the downloaded rows
     python3 scripts/build-places.py --from tx-raw.parquet  # rebuild from them without downloading again
+    python3 scripts/build-places.py --if-newer --summary summary.md  # what .github/workflows/refresh-prospects.yml runs
+
+The release the files came from is kept in src/lib/ops/places-tiles/release.txt. --if-newer stops (and changes
+nothing) when that is already the newest release; --summary writes what changed (places added and dropped, by type)
+as Markdown, for the pull request.
 
 Kept: places in Texas (address region US-TX or TX) of the types below, not marked permanently closed, with Overture's
 confidence of at least MIN_CONFIDENCE. Columns (tab separated, header first) match PLACE_TILE_COLUMNS in
@@ -223,8 +228,30 @@ def first(xs):
     return xs[0] if xs else None
 
 
-def write_tiles(table):
-    tiles, kept, why = defaultdict(list), 0, defaultdict(int)
+def read_current():
+    """The places in the files now: id → (type, name, city). Empty when there are none yet."""
+    out = {}
+    if not os.path.isdir(OUT):
+        return out
+    for f in os.listdir(OUT):
+        if not f.endswith(".tsv"):
+            continue
+        with open(os.path.join(OUT, f), encoding="utf-8") as fh:
+            next(fh, None)
+            for line in fh:
+                c = line.rstrip("\n").split("\t")
+                if len(c) >= len(COLUMNS):
+                    out[c[0]] = (c[2], c[1], c[7])
+    return out
+
+
+def write_tiles(table, before=None, min_share=0.0):
+    """
+    Writes the files; returns the places written, id → (type, name, city), what was left out and why, and the ids
+    Overture marks permanently closed. Refuses (writing nothing) when it would keep fewer than `min_share` of `before`:
+    a release still being uploaded, or a broken download, must not shrink the list.
+    """
+    tiles, kept, why, closed_ids = defaultdict(list), 0, defaultdict(int), set()
     seen, same = set(), set()
     # Surest first, so when Overture lists one place twice (same name, street and type) the surer copy is kept.
     for r in sorted(table.to_pylist(), key=lambda r: -(r["conf"] or 0)):
@@ -232,7 +259,9 @@ def write_tiles(table):
         if not cat:
             why["type"] += 1; continue
         if r["status"] == "permanently_closed":
-            why["closed"] += 1; continue
+            why["closed"] += 1
+            closed_ids.add((r["id"] or "").replace("-", "")[:12])
+            continue
         if (r["conf"] or 0) < MIN_CONFIDENCE:
             why["unsure"] += 1; continue
         a = first(r["addresses"] or []) or {}
@@ -267,6 +296,8 @@ def write_tiles(table):
         # The square from the written (rounded) numbers, so a place at 32.999996°N, written 33.00000, files under 33.
         tiles[f"{math.floor(float(row[4]))}_{math.floor(float(row[5]))}"].append(row)
         kept += 1
+    if before and kept < min_share * len(before):
+        sys.exit(f"Refusing: only {kept:,} places, against {len(before):,} now (less than {min_share:.0%}). Overture may still be uploading this release; try again later, or pass --allow-shrink.")
     os.makedirs(OUT, exist_ok=True)
     for f in os.listdir(OUT):
         if f.endswith(".tsv"):
@@ -278,6 +309,55 @@ def write_tiles(table):
             for row in rows:
                 fh.write("\t".join(row) + "\n")
     print(f"{kept} places in {len(tiles)} files; left out: {dict(why)}", file=sys.stderr)
+    return {row[0]: (row[2], row[1], row[7]) for rows in tiles.values() for row in rows}, dict(why), closed_ids
+
+
+LABELS = {
+    "coffee": "Coffee Shops & Cafés", "bakery": "Bakeries & Donuts", "restaurant": "Restaurants", "hotel": "Hotels",
+    "college": "Colleges & Universities", "office": "Corporate Offices", "senior": "Senior Living", "hospital": "Hospitals & Clinics",
+    "cinema": "Movie Theaters", "bar": "Bars", "fastfood": "Fast Food", "grocery": "Grocery Stores", "convenience": "Convenience & Gas",
+    "cardealer": "Car Dealerships",
+}
+
+
+def summary(old_release, release, before, after, why, closed_ids):
+    """Markdown for the pull request: totals by type, and a sample of what came and went."""
+    added = [i for i in after if i not in before]
+    dropped = [i for i in before if i not in after]
+    closed = [i for i in dropped if i in closed_ids]
+    lines = [
+        f"Prospects refreshed from Overture release **{release}** (was {old_release or 'none recorded'}).",
+        "",
+        f"- **{len(after):,}** places now (was {len(before):,}): **{len(added):,} added**, **{len(dropped):,} dropped**"
+        f" ({len(closed):,} of them now marked permanently closed by Overture; the rest left its listings, changed type or fell below the bar).",
+        f"- Left out this time: {', '.join(f'{k} {v:,}' for k, v in sorted(why.items()))}.",
+        "",
+        "| Type | Before | Now | Added | Dropped |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    # A place that stayed but changed type counts as dropped from the old type and added to the new one, so each row
+    # adds up: Before + Added - Dropped = Now.
+    moved = [i for i in after if i in before and after[i][0] != before[i][0]]
+    for cat, label in LABELS.items():
+        b = sum(1 for v in before.values() if v[0] == cat)
+        a = sum(1 for v in after.values() if v[0] == cat)
+        ad = sum(1 for i in added if after[i][0] == cat) + sum(1 for i in moved if after[i][0] == cat)
+        dr = sum(1 for i in dropped if before[i][0] == cat) + sum(1 for i in moved if before[i][0] == cat)
+        lines.append(f"| {label} | {b:,} | {a:,} | {ad:,} | {dr:,} |")
+    if moved:
+        lines.append(f"\n{len(moved):,} places stayed but changed type; the table counts them in both rows.")
+
+    def code(text):
+        # Names come from the data: as code text they cannot mention anyone, link anywhere or format the page.
+        return "`" + re.sub(r"[`\r\n]", "", text or "")[:80] + "`"
+
+    def sample(ids, src, n=15):
+        return [f"  - {code(src[i][1])} ({LABELS.get(src[i][0], src[i][0])}, {code(src[i][2] or 'no city')})" for i in sorted(ids)[:n]]
+    if added:
+        lines += ["", f"Some of the places added ({min(15, len(added))} of {len(added):,}):", *sample(added, after)]
+    if closed:
+        lines += ["", f"Some of the places now closed ({min(15, len(closed))} of {len(closed):,}):", *sample(closed, before)]
+    return "\n".join(lines) + "\n"
 
 
 def main():
@@ -285,16 +365,36 @@ def main():
     ap.add_argument("--release", help="Overture release, e.g. 2026-11-18.0 (default: the newest)")
     ap.add_argument("--from", dest="src", nargs="*", help="parquet files an earlier run wrote with --save, instead of downloading")
     ap.add_argument("--save", help="also write the downloaded rows to this parquet file")
+    ap.add_argument("--if-newer", action="store_true", help="do nothing when the files already come from this release")
+    ap.add_argument("--print-newest", action="store_true", help="print the newest Overture release and stop")
+    ap.add_argument("--allow-shrink", action="store_true", help="write the files even if they would hold under 90%% of the places now")
+    ap.add_argument("--summary", help="write what changed, as Markdown, to this file")
     args = ap.parse_args()
+    if args.print_newest:
+        print(newest_release())
+        return
+    release_file = os.path.join(OUT, "release.txt")
+    old_release = open(release_file).read().strip() if os.path.exists(release_file) else ""
+    release = ""
     if args.src:
         table = pa.concat_tables([pq.read_table(p) for p in args.src], promote_options="default")
     else:
         release = args.release or newest_release()
+        if args.if_newer and release == old_release:
+            print(f"The places already come from Overture release {release}: nothing to do.", file=sys.stderr)
+            return
         print(f"Overture release {release}", file=sys.stderr)
         table = download(release)
         if args.save:
             pq.write_table(table, args.save)
-    write_tiles(table)
+    before = read_current()
+    after, why, closed_ids = write_tiles(table, before, 0.0 if args.allow_shrink else 0.9)
+    if release:
+        with open(release_file, "w") as fh:
+            fh.write(release + "\n")
+    if args.summary:
+        with open(args.summary, "w", encoding="utf-8") as fh:
+            fh.write(summary(old_release, release or "(local files)", before, after, why, closed_ids))
 
 
 if __name__ == "__main__":

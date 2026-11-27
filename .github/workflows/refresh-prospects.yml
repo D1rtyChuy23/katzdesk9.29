@@ -1,0 +1,123 @@
+# Keeps the Map's Prospects current (Chuy, 11/27). Overture publishes a new places release about once a month. Every
+# Thursday this looks for one; when there is a newer one than src/lib/ops/places-tiles/release.txt, it rebuilds the
+# place files with scripts/build-places.py, checks them with the map tests, and opens a pull request that says what
+# changed. Nothing reaches the live site until the pull request is reviewed, merged and published, as usual.
+# It waits while a refresh pull request is open, and does not reopen one that was closed without merging. The build
+# refuses a release that would drop more than 10% of the places (one still being uploaded, say).
+#
+# Needs, once, in the repository's Settings → Actions → General → Workflow permissions: "Read and write permissions"
+# and "Allow GitHub Actions to create and approve pull requests".
+name: Refresh prospects
+
+on:
+  schedule:
+    - cron: "41 15 * * 4" # Thursdays, 15:41 UTC (9:41 or 10:41 in Houston)
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Overture release to build from, e.g. 2026-12-16.0 (blank: the newest)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh-prospects
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the builder's one package
+        run: pip install "pyarrow==26.0.1"
+
+      - name: Decide whether there is anything to do
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE: ${{ inputs.release }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          current="$(cat src/lib/ops/places-tiles/release.txt 2>/dev/null || true)"
+          # One directory listing at Overture: no download yet.
+          release="${RELEASE:-$(python3 scripts/build-places.py --print-newest)}"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          go=true
+          open="$(gh pr list --state open --limit 200 --json headRefName --jq '[.[].headRefName | select(startswith("data/prospects-"))] | join(", ")')"
+          declined="$(gh pr list --state closed --head "data/prospects-$release" --json number --jq 'length')"
+          if [ "$release" = "$current" ] && [ -z "$RELEASE" ]; then
+            echo "Nothing new: the places already come from Overture release $current." >> "$GITHUB_STEP_SUMMARY"; go=false
+          elif [ -n "$open" ]; then
+            # One refresh at a time: merge (or close) the open one first. Its release is older or the same.
+            echo "A refresh pull request is still open ($open): merge or close it first." >> "$GITHUB_STEP_SUMMARY"; go=false
+          elif [ "$declined" != "0" ] && [ "$EVENT" != "workflow_dispatch" ]; then
+            echo "A pull request for $release was closed without merging; not opening it again (run the workflow by hand to force it)." >> "$GITHUB_STEP_SUMMARY"; go=false
+          fi
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild the place files from that release
+        id: build
+        if: steps.plan.outputs.go == 'true'
+        env:
+          RELEASE: ${{ steps.plan.outputs.release }}
+        run: |
+          set -euo pipefail
+          python3 scripts/build-places.py --release "$RELEASE" --summary "$RUNNER_TEMP/summary.md"
+          if [ -z "$(git status --porcelain -- src/lib/ops/places-tiles)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Rebuilt from $RELEASE: no place changed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.build.outputs.changed == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Check the new files with the map tests
+        if: steps.build.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          node --experimental-strip-types --test scripts/map-layers.test.mjs
+
+      - name: Open a pull request
+        if: steps.build.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE: ${{ steps.plan.outputs.release }}
+        run: |
+          set -euo pipefail
+          branch="data/prospects-$RELEASE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add src/lib/ops/places-tiles
+          git commit -q -m "Prospects: Overture release $RELEASE" -m "Rebuilt by the Refresh prospects workflow with scripts/build-places.py."
+          git push --force -u origin "$branch"
+          {
+            echo "From: Refresh prospects (GitHub Actions) — $(date -u +%Y-%m-%d) — for: Chuy"
+            echo
+            cat "$RUNNER_TEMP/summary.md"
+            echo
+            echo "The map tests passed on these files (every row parses, each place in its own square in Texas, Texas ZIPs, types filed right)."
+            echo
+            echo "**Before merging:** Claude reviews it (data only: no code changes). After merging, publish from Grok/Vercel as usual. No migrations."
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base main --head "$branch" --title "Prospects: Overture release $RELEASE" --body-file "$RUNNER_TEMP/body.md"
