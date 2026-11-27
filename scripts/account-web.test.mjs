@@ -205,11 +205,14 @@ test("second review: different kinds, one-letter words, chains, our own address 
   assert.equal(web.webCheck(pin, [branded]).status, "none", "a brand");
   const stores = [0.03, 0.2, 0.3].map((d, i) => place(`m${i}`, "Marigold Grill", 29.7 + d, -95.4, { street: `${i + 10} B St` }));
   assert.equal(web.webCheck(acct("Marigold Grill", 29.7, -95.4, "1 A St"), stores).status, "none", "three stores, two of them past the street pin's reach");
-  // Our own address 0.3 miles off beats another store a block away.
+  // Our own address 0.3 miles off beats another store a block away (and is our site: "same").
   const near = place("n", "Starbucks", 29.701, -95.4, { street: "822 Town And Country Blvd", zip: "77024" });
   const ours = place("o", "Starbucks", 29.7045, -95.4, { street: "12850 Memorial Dr", zip: "77024" });
   const c = web.webCheck(acct("Starbucks", 29.7, -95.4, "12850 Memorial Dr, Houston, TX 77024"), [near, ours]);
-  assert.deepEqual([c.status, c.place.id, c.sameAddress], ["elsewhere", "o", true]);
+  assert.deepEqual([c.status, c.place.id, c.sameAddress], ["same", "o", true]);
+  // Our address a mile off: the pin is off.
+  const mileOff = web.webCheck(acct("Starbucks", 29.7, -95.4, "12850 Memorial Dr, Houston, TX 77024"), [near, { ...ours, lat: 29.715 }]);
+  assert.deepEqual([mileOff.status, mileOff.place.id, mileOff.sameAddress], ["elsewhere", "o", true]);
   // The same street in another ZIP is another address.
   assert.equal(web.sameStreetAddress("100 N Main St, Conroe, TX 77301", "100 Main St, Willis, TX 77378"), false);
   assert.equal(web.sameStreetAddress("100 N Main St, Conroe, TX 77301", "100 Main Street"), true, "one side without a ZIP");
@@ -250,4 +253,23 @@ test("the squares read cover 25 miles at every Texas latitude", async () => {
         assert.ok(keys.has(places.placeTileKey(p.lat, p.lng)), `${lat},${lng} → ${p.lat},${p.lng}`);
       }
     }
+});
+
+test("spot-check 11/27: a listing that carries our location without a dash; a big site at our address", async () => {
+  assert.equal(web.sameBusiness("Tostada Regia Long Point", "Tostada Regia - Long Point"), true);
+  assert.equal(web.sameBusiness("Tostada Regia Long Point", "Tostada Regia - Westheimer"), false, "another branch's location");
+  assert.equal(web.sameBusiness("Tostada Regia Long Point", "Tostada Regia"), false, "a name without a location is not that branch");
+  // Real listings: the Long Point branch at its own spot; the Houstonian 0.2 mi from a geocoded pin at its address.
+  const rows = await webChecksFor(
+    [
+      { id: 1, name: "Tostada Regia - Long Point", address: "10066 Long Point Rd, Houston, TX 77055", lat: 29.79498, lng: -95.54279, approx: false },
+      { id: 2, name: "The Houstonian Hotel, Club, and Spa", address: "111 N Post Oak Ln, Houston, TX 77024", lat: 29.76699, lng: -95.45756, approx: false },
+    ],
+    readTile,
+  );
+  assert.deepEqual([rows[0].check.status, rows[0].check.place?.name], ["same", "Tostada Regia Long Point"]);
+  assert.deepEqual([rows[1].check.status, rows[1].check.sameAddress], ["same", true]);
+  assert.match(web.webCheckLine(rows[1].check), /\((\d+ ft|0\.\d mi) from our pin\)$/);
+  assert.equal(web.webCheckLine({ status: "same", place: rows[1].check.place, miles: 0.02, listedAddress: null, sameAddress: true }).endsWith("(100 ft from our pin)"), true);
+  assert.doesNotMatch(web.webCheckLine(rows[1].check), /pin looks off/);
 });
