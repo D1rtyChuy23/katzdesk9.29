@@ -302,6 +302,7 @@ test("possible match: a listing at our pin with a similar name is shown, never o
   const c = web.webCheck(acct("Elio's Pizzeria & Bar. (Canyon Lake)", 29.848, -98.1786, "1834 FM 2673, Canyon Lake, TX 78133"), [elio]);
   assert.deepEqual([c.status, c.place.id, c.listedAddress, c.sameAddress], ["maybe", "e1", null, true]);
   assert.match(web.webCheckLine(c), /^Possible match: Elio's Osteria e Pizzeria · 1834 FM2673, Canyon Lake 78133 \(\d+ ft from our pin\)\. The name differs from ours/);
+  assert.match(web.webCheckLine(c), /Its street address is ours\.$/);
   // Not at our pin, or a ZIP-area pin: nothing.
   assert.equal(web.webCheck(acct("Elio's Pizzeria & Bar.", 29.86, -98.1786), [elio]).status, "none");
   assert.equal(web.webCheck({ ...acct("Elio's Pizzeria & Bar.", 29.848, -98.1786), approx: true }, [elio]).status, "none");
@@ -314,4 +315,21 @@ test("possible match: a listing at our pin with a similar name is shown, never o
   const many = (await webChecksFor([a, { ...a, id: 10, name: "Zzyzx Made Up Coffee" }], readTile))[0];
   assert.deepEqual([one.check.status, one.check.place?.name], ["maybe", "Elio's Osteria e Pizzeria"]);
   assert.deepEqual([many.check.status, many.check.place?.name], ["maybe", "Elio's Osteria e Pizzeria"]);
+});
+
+test("store numbers: \"Boondocks Cafe #2\" is \"Boondocks Cafe\"", () => {
+  assert.equal(web.sameBusiness("Boondocks Cafe", "Boondocks Cafe #2"), true);
+  assert.equal(web.sameBusiness("Central Market", "Central Market #491"), true);
+  assert.equal(web.sameBusiness("HONEY FARMS #858", "Honey Farms #851"), true, "another store number: a namesake, as for any chain");
+  assert.equal(web.sameBusiness("Starbucks Coffee #1234", "Starbucks Coffee"), true);
+  assert.equal(web.sameBusiness("Houston Fire Station 62", "Fire Station 62"), false, "a plain number is part of the name");
+  // At our pin with another street address: listed at another address, and the listing's address is offered.
+  const b = place("b1", "Boondocks Cafe", 29.7835, -95.5408, { street: "10999 W IH-10", zip: "77043" });
+  const c = web.webCheck(acct("Boondocks Cafe #2", 29.7835, -95.5408, "8200 IH-10 W, Houston, TX 77024"), [b]);
+  assert.deepEqual([c.status, c.sameAddress, c.listedAddress], ["different", false, "10999 W IH-10, Houston, TX 77043"]);
+  // A possible match whose address differs says so.
+  const u2 = place("u2", "Union", 29.7, -95.4, { street: "9 B St", zip: "77002" });
+  const m2 = web.webCheck(acct("Union Coffee House Ministry", 29.7, -95.4, "1 A St, Houston, TX 77002"), [u2]);
+  assert.deepEqual([m2.status, m2.sameAddress], ["maybe", false]);
+  assert.match(web.webCheckLine(m2), /Its street address differs from ours too\.$/);
 });
