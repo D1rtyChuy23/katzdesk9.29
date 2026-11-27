@@ -44,6 +44,7 @@ import { notifyAdminsWarehousePull } from "@/lib/ops/notify";
 import { SITE_PURPOSE, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { HOUSE_STAGING } from "@/lib/ops/unit-place-rules";
 import { sentPo } from "@/lib/ops/ticket-po";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export {
   REBUILD_STATUSES,
@@ -226,10 +227,10 @@ function putBackSql(name: string, m: string, when = "true"): string {
          from ${m} pm
          left join assets ua on ua.id = pm.asset_id
      ), ${name}_at as (
-       select ua.id, ua.site, ua.pallet, ua.level, ua.line_no, o.status, o.sold_to, o.purpose, o.install_id, o.job_id, o.locked_at, o.locked_by
+       select ua.id, ua.site, ua.pallet, ua.level, ua.line_no, o.status, o.sold_to, o.sold_to_id, o.purpose, o.install_id, o.job_id, o.locked_at, o.locked_by
          from ${name}_chk c
          join assets ua on ua.id = c.asset_id
-        cross join lateral jsonb_to_record(c.origin) as o(status text, sold_to text, purpose text, install_id int, job_id int,
+        cross join lateral jsonb_to_record(c.origin) as o(status text, sold_to text, sold_to_id int, purpose text, install_id int, job_id int,
                                                           locked_at timestamptz, locked_by text)
         where c.why = 'ok'
      ), ${name}_line as (
@@ -245,6 +246,8 @@ function putBackSql(name: string, m: string, when = "true"): string {
        update assets a set
               status = case when l.staged then 'deployed' else p.status end,
               sold_to = p.sold_to,
+              -- Back on the account it was sold to (C6): the id the pull kept while it's listed, else the name's.
+              sold_to_id = ${listedAccountSql("p.sold_to_id", "p.sold_to")},
               purpose = case when l.staged then ${STAGING_PURPOSE_SQL} else p.purpose end,
               install_id = p.install_id, job_id = p.job_id, locked_at = p.locked_at, locked_by = p.locked_by,
               site = case when l.staged then ${STAGING_SQL} else a.site end,
@@ -948,7 +951,11 @@ export async function updateRebuildFor(sql: Sql, data: z.infer<typeof patchSchem
 export async function moveHeldUnits(sql: Sql, rebuildId: number, account: string, previous: string): Promise<void> {
   await sql.query(
     `with moved as (
-       update assets a set sold_to = $2, updated_at = now()
+       update assets a
+          set sold_to = $2,
+              -- The rebuild's account goes with its name (C6).
+              sold_to_id = coalesce((select ${listedAccountSql("r.account_id", "r.account")} from rebuilds r where r.id = $1 and r.account = $2), katz_customer_id($2)),
+              updated_at = now()
          from rebuild_machines m
         where m.rebuild_id = $1 and m.asset_id = a.id and ${HOLDS("m", "$3::text")}
           and exists (select 1 from rebuilds r where r.id = $1 and r.account = $2)
@@ -1409,7 +1416,7 @@ export async function pullRebuildMachineFor(sql: Sql, data: z.infer<typeof pullI
        select id, rebuild_id, asset_id, origin, serial, pulled_at, stocked_at from rebuild_machines mm
         where id = $12::int and rebuild_id = $5 and stocked_at is null and not ${HELD_LOCKED("mm")} for update
      ), prior as (
-       select status, sold_to, purpose, install_id, job_id, locked_at, locked_by, $2::text as pulled_to from assets where id = $1
+       select status, sold_to, sold_to_id, purpose, install_id, job_id, locked_at, locked_by, $2::text as pulled_to from assets where id = $1
      ), was as (
        select o.origin from rebuild_machines o join rebuilds r on r.id = o.rebuild_id
         where o.asset_id = $1 and o.id is distinct from $12::int and o.origin is not null
@@ -1419,6 +1426,7 @@ export async function pullRebuildMachineFor(sql: Sql, data: z.infer<typeof pullI
        update assets set
          status = 'assigned',
          sold_to = $2,
+         sold_to_id = coalesce((select ${listedAccountSql("r.account_id", "r.account")} from rebuilds r where r.id = $5 and r.account = $2), katz_customer_id($2)),
          purpose = 'In-house rebuild',
          install_id = case when $10 then install_id else null end,
          job_id = case when $10 then job_id else null end,

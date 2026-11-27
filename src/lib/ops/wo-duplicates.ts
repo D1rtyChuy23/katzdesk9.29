@@ -1,6 +1,16 @@
 import { customersCompatible, isWalkIn, woCanonical, woMatchKey } from "./corrigo";
 import { normalizeCustomerKey } from "./customer-key";
 import { closedBillMergeRefusal, openLinkedRebuildsSql } from "./rebuild-link";
+import { listedAccountSql } from "./bill-account";
+
+/**
+ * The merged ticket's account with its name ($4, one of the two tickets' names), in a statement over g (C6): the
+ * account of the ticket whose name it is, else the account the name finds.
+ */
+const MERGED_ACCOUNT = `coalesce(
+  (select ${listedAccountSql("mk.customer_id", "mk.customer")} from service_jobs mk where mk.id = g.keeper_id and btrim(mk.customer) = btrim($4::text)),
+  (select ${listedAccountSql("mx.customer_id", "mx.customer")} from service_jobs mx where mx.id = g.extra_id and btrim(mx.customer) = btrim($4::text)),
+  katz_customer_id($4::text))`;
 
 type SqlLike = {
   query<T = Record<string, unknown>>(text: string, params?: unknown[]): Promise<T[]>;
@@ -457,7 +467,8 @@ export function mergeTicketsSql(): string {
     update invoices i
        set entity_type = g.keeper_kind,
            entity_id = g.keeper_id,
-           customer = $4
+           customer = $4,
+           customer_id = ${MERGED_ACCOUNT}
       from g
      where i.entity_id = g.extra_id
        and i.entity_type in ('service', 'tlc')
@@ -469,7 +480,7 @@ export function mergeTicketsSql(): string {
     returning i.id
   ), inv_cust as (
     update invoices i
-       set customer = $4, updated_at = now()
+       set customer = $4, customer_id = ${MERGED_ACCOUNT}, updated_at = now()
       from g
      where i.entity_id = g.keeper_id
        and i.entity_type in ('service', 'tlc')
@@ -490,6 +501,7 @@ export function mergeTicketsSql(): string {
   ), job as (
     update service_jobs k
        set customer = $4,
+           customer_id = ${MERGED_ACCOUNT},
            contact = $5,
            phone = $6,
            equipment = $7,

@@ -15,7 +15,7 @@ import { CLOSED_CALL, CLOSED_PM } from "./lookups";
 import { DEFAULT_PM_STYLE } from "./pm-runbook";
 import { loadPmRunbookPlan, pmCompletionRefusal, recordCompletedRunbook, stampMachineParts } from "./pm-runbook-api";
 import { pmNoMachineRefusal } from "./pm-machines";
-import { stackCustomerRefusal } from "./pm-stack";
+import { stackEditRefusal } from "./pm-stack-api";
 import { formatAddress } from "./netsuite-customers";
 import { removeCustomersFor } from "./customer-remove-api";
 import { isClosedCall, isOpenCall, isClosedPm, isOpenPm } from "./ticket-status";
@@ -940,8 +940,7 @@ export async function updateJobFor(sql: any, data: z.infer<typeof jobPatch>, use
 		await assertTakesNewWork(sql, data.customer, "ticket", { moving: true });
 	}
 	if (data.customer !== undefined) {
-		const partners = await sql`select id, customer from pm_jobs where stacked_job_id = ${data.id}`;
-		const refusal = stackCustomerRefusal(cur[0].customer, data.customer, partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })), "ticket");
+		const refusal = await stackEditRefusal(sql, "ticket", data.id, data.customer);
 		if (refusal) throw new Error(refusal);
 	}
 	const next = {
@@ -1075,6 +1074,18 @@ export async function listedAccount(sql: Sql, raw: string): Promise<string> {
 	const row = (await sql.query<{ name: string }>("select name from directory_customers where lower(name) = lower($1) and archived = false order by name_locked desc, id limit 1", [typed]))[0];
 	if (!row) throw new Error(`${typed} isn't on the customer list. Pick the account, or add it on Customers first.`);
 	return row.name;
+}
+
+/**
+ * A PM, install or deal moved to another customer goes on a listed account, spelled as the list has it, as a ticket's
+ * move does (C6, 11/26). A save that sends the name the record already has (an older record under a name no account
+ * has) is left as it is, and so is a blank name, which keeps the record's customer.
+ */
+export async function onListedAccount<T extends { customer?: string | null }>(sql: Sql, data: T, current: string | null | undefined): Promise<T> {
+	if (data.customer == null) return data;
+	if (!data.customer.trim()) return { ...data, customer: undefined };
+	if (data.customer.trim() === String(current ?? "").trim()) return data;
+	return { ...data, customer: await listedAccount(sql, data.customer) };
 }
 
 /**
@@ -1237,16 +1248,11 @@ export async function updatePmFor(sql: any, data: any, userId: string) {
 	// Moved to a service ticket (11/18): the ticket is where its work goes now. Move it back from the ticket first.
 	if (cur[0].moved_job_id) throw new Error("This PM was moved to a service ticket. Open the ticket, or move it back to a PM from there.");
 	if (data.customer !== undefined) assertWalkInMove("pm", cur[0].customer, data.customer);
+	data = await onListedAccount(sql, data, cur[0].customer);
 	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
 		await assertTakesNewWork(sql, data.customer, "pm", { moving: true });
 	if (data.customer !== undefined && cur[0].stacked_job_id) {
-		const partners = await sql`select id, customer from service_jobs where id = ${cur[0].stacked_job_id}`;
-		const refusal = stackCustomerRefusal(
-			cur[0].customer,
-			data.customer,
-			partners.map((p: { id: number; customer: string | null }) => ({ id: Number(p.id), customer: p.customer })),
-			"pm",
-		);
+		const refusal = await stackEditRefusal(sql, "pm", data.id, data.customer);
 		if (refusal) throw new Error(refusal);
 	}
 	const c = cur[0];
@@ -1459,10 +1465,12 @@ export const confirmDealMachines = createServerFn({ method: "POST" }).middleware
 		await assertTakesNewWork(sql, deal.customer, "install");
 		const packed = serializeMachines(incoming);
 		const made = await sql`
-      insert into installs (received, customer, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
+      insert into installs (received, customer, customer_id, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
       values (
         ${today},
         ${deal.customer},
+        -- The deal's account goes with its name (C6): its id when listed, else the account the name finds.
+        coalesce((select own.id from directory_customers own where own.id = ${deal.customer_id ?? null}::int and own.archived = false), katz_customer_id(${deal.customer}::text)),
         ${packed.equipment},
         ${"Not Ready"},
         ${canonicalRepName(String(deal.producer ?? "")) ?? null},
@@ -1502,6 +1510,7 @@ export async function updateDealFor(sql: any, data: any, userId: string) {
 	const cur = await sql`select * from deals where id = ${data.id}`;
 	if (!cur[0]) throw new Error("Deal not found");
 	if (data.customer !== undefined) assertWalkInMove("deal", cur[0].customer, data.customer);
+	data = await onListedAccount(sql, data, cur[0].customer);
 	if (data.customer !== undefined && String(data.customer).trim().toLowerCase() !== String(cur[0].customer ?? "").trim().toLowerCase())
 		await assertTakesNewWork(sql, data.customer, "deal", { moving: true });
 	// The owner may take a confirmed machine off the deal: its tie is released, so the stored row is not put back.
@@ -1734,8 +1743,10 @@ async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: strin
            and machines is not distinct from ${cur.machines ?? null}::text
          for update
       ), ins as (
-        insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
-        select ${today}::date, ${cur.customer}::text, ${packed.equipment ?? cur.equipment ?? null}::text, ${initials}::text, ${cur.terms ?? null}::text,
+        insert into installs (received, customer, customer_id, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
+        select ${today}::date, ${cur.customer}::text,
+               coalesce((select own.id from directory_customers own where own.id = ${cur.customer_id ?? null}::int and own.archived = false), katz_customer_id(${cur.customer}::text)),
+               ${packed.equipment ?? cur.equipment ?? null}::text, ${initials}::text, ${cur.terms ?? null}::text,
                ${dealId}::int, ${packed.machines}::text, ${packed.serial}::text, ${packed.powerVoltage}::text, 'made', now()
           from d
          where not exists (select 1 from installs where deal_id = ${dealId}::int and archived = false)
@@ -1959,6 +1970,7 @@ export async function updateInstallFor(sql: any, data: UpdateInstallInput, conte
 		if (Number(own[0]?.n ?? 0) > 0) throw new Error(`Changing this install's account moves its ${own[0].n} unit${Number(own[0].n) === 1 ? "" : "s"} to the new account. Only an Admin can move units between accounts.`);
 	}
 	if (data.customer !== undefined) data.customer = data.customer.trim() || c.customer;
+	if (data.customer != null) data.customer = (await onListedAccount(sql, { customer: data.customer }, c.customer)).customer;
 	if (data.customer !== undefined && data.customer.toLowerCase() !== String(c.customer ?? "").trim().toLowerCase())
 		await assertTakesNewWork(sql, data.customer, "install", { moving: true });
 	// The WO # field follows Add WO's rule: another open install's WO means merging the installs.
@@ -2626,7 +2638,7 @@ export async function assignAssetToInstallFor(sql: any, data: { assetId: number;
 	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	const inst = (await sql`
-      select id, customer from installs where id = ${data.installId}`)[0];
+      select id, customer, customer_id from installs where id = ${data.installId}`)[0];
 	if (asset.status !== "assigned") await assertUnlocked(sql, asset);
 	if (!inst) throw new Error("Install not found");
 	// Locked: a unit already assigned to an account is an asset at that site until it is returned.
@@ -2652,6 +2664,8 @@ export async function assignAssetToInstallFor(sql: any, data: { assetId: number;
         install_id = ${inst.id},
         job_id = null,
         sold_to = ${inst.customer},
+        -- The install's account goes with its name (C6).
+        sold_to_id = coalesce((select own.id from directory_customers own where own.id = ${inst.customer_id ?? null}::int and own.archived = false), katz_customer_id(${inst.customer}::text)),
         origin_site = ${originSite},
         origin_pallet = ${originPallet},
         origin_level = ${originLevel},

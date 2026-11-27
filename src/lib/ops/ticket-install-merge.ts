@@ -30,6 +30,7 @@ import { chargesMismatch, invoiceFitsTicket, liveInvoiceTotal } from "@/lib/ops/
 import { billedCarryOver, nsInvoicesLabel } from "@/lib/ops/merged-ticket";
 import { closedBillMergeRefusal, openLinkedRebuildsSql } from "@/lib/ops/rebuild-link";
 import { INSTALL_WOS_SQL } from "@/lib/ops/wo-search";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 type Q = Pick<Sql, "query">;
 
@@ -592,7 +593,7 @@ export function mergeTicketIntoInstallSql(): string {
      where j.id = $1::int
        for update
   ), lk_inst as (
-    select i.id, i.customer, i.archived, i.duplicate_of, i.updated_at::text as stamp
+    select i.id, i.customer, i.customer_id, i.archived, i.duplicate_of, i.updated_at::text as stamp
       from installs i
      where i.id = $2::int
        for update
@@ -604,7 +605,9 @@ export function mergeTicketIntoInstallSql(): string {
        for update
   ), g as (
     -- charges: the lines that go on the install's invoice (none for a billed ticket).
-    select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer, j.vendor_po as job_vendor_po,
+    select j.id as job_id, j.kind, j.call_id, j.wo, i.id as install_id, i.customer as install_customer,
+           -- The install's account with its name (C6).
+           ${listedAccountSql("i.customer_id", "i.customer")} as install_account, j.vendor_po as job_vendor_po,
            j.discount_scope as job_scope,
            case when $14::text = '' then (select count(*)::int from ticket_charges c where c.job_id = j.id) else 0 end as charges
       from lk_job j cross join lk_inst i
@@ -645,8 +648,8 @@ export function mergeTicketIntoInstallSql(): string {
     -- The charges go on the install's invoice, waiting for an Admin to approve them; never onto an approved one. The
     -- saved-for-approval stamp moves, so an Invoice window opened before this approves nothing until it reloads.
     -- The ticket's P.O. goes with the charges onto the install itself (inst, below), whose invoice carries it (11/2).
-    insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, discount_scope, total, submitted_by, submitted_at, updated_at)
-    select 'install', g.install_id, g.install_customer, $9::text, $10::numeric, $16::text, $8::numeric, $3::text, now(), now()
+    insert into invoices (entity_type, entity_id, customer, customer_id, discount_kind, discount_value, discount_scope, total, submitted_by, submitted_at, updated_at)
+    select 'install', g.install_id, g.install_customer, g.install_account, $9::text, $10::numeric, $16::text, $8::numeric, $3::text, now(), now()
       from g
      where g.charges > 0
     on conflict (entity_type, entity_id) do update
@@ -702,6 +705,7 @@ export function mergeTicketIntoInstallSql(): string {
            job_id = null,
            purpose = case a.purpose when 'Service' then 'Install' when 'Customer-owned / service loaner' then 'Customer-owned / loaner' else a.purpose end,
            sold_to = case when a.status = 'assigned' then ok.install_customer else a.sold_to end,
+           sold_to_id = case when a.status = 'assigned' then ok.install_account else a.sold_to_id end,
            updated_at = now()
       from ok
      where a.job_id = ok.job_id

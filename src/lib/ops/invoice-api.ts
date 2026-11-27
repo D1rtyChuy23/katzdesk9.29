@@ -25,6 +25,7 @@ import { accountRepFor, loadAccountMarks } from "@/lib/ops/reps";
 import { canonicalRepName } from "@/lib/ops/rep-match";
 import { pinQuality } from "@/lib/ops/account-pin";
 import { ACCOUNT_ID_MAX, ofAccount, readsById } from "@/lib/ops/read-by-id";
+import { invoiceAccountSql } from "@/lib/ops/bill-account";
 import {
   SERVICE_DEPT_KEYS,
   invoicePowers,
@@ -624,15 +625,18 @@ export function approvePmInvoiceSql(): string {
      inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope, customer_id
        )
        -- The P.O. it is approved with (11/2): the one the window changed ($18), else the PM's own.
        select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
               case when $18::boolean then $17::text else (select p.po from pm_jobs p where p.id = $2::int) end,
-              coalesce($19::text, 'all')
+              coalesce($19::text, 'all'),
+              -- The PM's account with its name (C6).
+              ${invoiceAccountSql("$1::text", "$2::int", "$3::text")}
          from open_pm
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
          approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
@@ -683,7 +687,7 @@ export function approveRecordInvoiceSql(): string {
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope
+         bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po, discount_scope, customer_id
        )
        -- The P.O. it is approved with (11/2): the one the window changed ($19), else the record's own.
        select $1, $2::int, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now(),
@@ -693,13 +697,16 @@ export function approveRecordInvoiceSql(): string {
                   when 'rebuild' then (select r.po from rebuilds r where r.id = $2::int)
                   when 'deal' then (select d.po from deals d where d.id = $2::int)
                 end) end,
-              coalesce($21::text, 'all')
+              coalesce($21::text, 'all'),
+              -- The record's account with its name (C6).
+              ${invoiceAccountSql("$1::text", "$2::int", "$3::text")}
         where ($1::text <> 'install' or exists (select 1 from rec))
           and ($1::text <> 'rebuild' or exists (select 1 from rb))
           -- A window that opened an invoice writes nothing once it is gone from the record (it went to the install kept).
           and ($12::text is null or exists (select 1 from invoices x where x.entity_type = $1 and x.entity_id = $2::int))
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, approved_by = excluded.approved_by,
          approved_at = now(), updated_at = now(), po = excluded.po, discount_scope = excluded.discount_scope
@@ -751,13 +758,14 @@ export function saveForApprovalSql(): string {
      ), inv as (
        insert into invoices (
          entity_type, entity_id, customer, discount_kind, discount_value,
-         bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at, discount_scope
+         bill_name, bill_account, bill_address, bill_rep, total, submitted_by, submitted_at, updated_at, discount_scope, customer_id
        )
        -- Parts at their prices, no discount: the Whole bill, and its lines unticked (11/7).
-       select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now(), 'all'
+       select 'rebuild', r.id, $2, $3, $4, $5, $6, $7, $8, $9, $10, now(), now(), 'all', ${invoiceAccountSql("'rebuild'", "r.id", "$2::text")}
          from rb r
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address,
          bill_rep = excluded.bill_rep, total = excluded.total, submitted_by = excluded.submitted_by,
          submitted_at = now(), updated_at = now(), discount_scope = 'all'
@@ -888,10 +896,11 @@ export async function approveInvoiceFor(sql: Sql, data: z.output<typeof approveI
   } else if (usesTicketCharges(ref.type)) {
     // A ticket keeps its lines and discount on the ticket, so they are never stored twice.
     await sql.query(
-      `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at)
-       values ($1, $2, $3, null, null, $4, $5, $6, $7, $8, $9, now(), now())
+      `insert into invoices (entity_type, entity_id, customer, discount_kind, discount_value, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, customer_id)
+       values ($1, $2, $3, null, null, $4, $5, $6, $7, $8, $9, now(), now(), ${invoiceAccountSql("$1::text", "$2::int", "$3::text")})
        on conflict (entity_type, entity_id) do update set
-         customer = excluded.customer, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
+         customer = excluded.customer,
+         customer_id = case when excluded.customer is not distinct from invoices.customer then coalesce(excluded.customer_id, invoices.customer_id) else excluded.customer_id end, discount_kind = excluded.discount_kind, discount_value = excluded.discount_value,
          bill_name = excluded.bill_name, bill_account = excluded.bill_account, bill_address = excluded.bill_address, bill_rep = excluded.bill_rep,
          total = excluded.total, approved_by = excluded.approved_by, approved_at = now(), updated_at = now()`,
       [ref.type, data.id, ref.customer || null, ...billing],

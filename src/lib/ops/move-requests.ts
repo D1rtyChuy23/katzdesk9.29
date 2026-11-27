@@ -9,6 +9,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { checked } from "@/lib/ops/checked-input";
 import { actorName } from "@/lib/ops/unit-history";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export const MOVE_ADMIN_ONLY = "Only an Admin can confirm or decline a move.";
 
@@ -33,8 +34,13 @@ export async function askMove(
 ): Promise<void> {
   const to = (await sql.query<{ customer: string }>("select customer from installs where id = $1", [ask.installId]))[0]?.customer ?? "";
   await sql.query(
-    `insert into equipment_move_requests (unit_id, from_customer, to_customer, to_install_id, serial, machine_index, asked_by)
-     select $1, $2, $3, $4, $5, $6, $7
+    // Each side keeps its account with its name (C6): the unit's, and the install's.
+    `insert into equipment_move_requests (unit_id, from_customer, from_customer_id, to_customer, to_customer_id, to_install_id, serial, machine_index, asked_by)
+     select $1, $2,
+            coalesce((select ${listedAccountSql("a.customer_id", "a.customer")} from account_equipment a where a.id = $1 and btrim(a.customer) = btrim($2::text)), katz_customer_id($2::text)),
+            $3,
+            coalesce((select ${listedAccountSql("i.customer_id", "i.customer")} from installs i where i.id = $4 and btrim(i.customer) = btrim($3::text)), katz_customer_id($3::text)),
+            $4, $5, $6, $7
       where not exists (select 1 from equipment_move_requests where unit_id = $1 and to_install_id = $4 and decided_at is null)`,
     [ask.unitId, ask.fromCustomer, to, ask.installId, ask.serial, ask.machineIndex, await actorName(sql, userId)],
   );

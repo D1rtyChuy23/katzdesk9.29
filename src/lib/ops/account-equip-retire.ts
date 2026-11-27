@@ -8,6 +8,7 @@
  */
 import type { Sql } from "@/lib/db";
 import { ofAccount, readsById, type ReadArea } from "@/lib/ops/read-by-id";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export type RetiredUnit = {
   id: number;
@@ -46,9 +47,10 @@ const LINK_KEYS = ["inspection_units", "inspection_items", "inspection_photos", 
  */
 export function retireUnitSql(): string {
   return `insert into account_equipment_retired
-            (unit_id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
+            (unit_id, customer, customer_id, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
              machine_id, unit, links, retired_by, retired_name)
-          select a.id, a.customer, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.install_date, a.electrical, a.ownership, a.part_number, a.condition,
+          -- The copy keeps the unit's account with its name (C6).
+          select a.id, a.customer, ${listedAccountSql("a.customer_id", "a.customer")}, a.catalog_model, a.equipment_name, a.serial, a.serial_key, a.install_date, a.electrical, a.ownership, a.part_number, a.condition,
                  a.machine_id,
                  to_jsonb(a),
                  jsonb_build_object(
@@ -146,15 +148,16 @@ export async function listRetiredUnits(sql: Sql, customer: string, customerId: n
 
 /**
  * Put a retired machine back, as one statement: the unit under its own id, then the inspection and PM links whose
- * install or PM still exists, and the PM parts lines logged for it, then the retired row is dropped. $1 the retired row, $2 the account's name now.
+ * install or PM still exists, and the PM parts lines logged for it, then the retired row is dropped. $1 the retired row, $2 the account's name now,
+ * $3 its id.
  */
 export function restoreUnitSql(): string {
   return `with r as (select * from account_equipment_retired where id = $1),
           unit as (
             insert into account_equipment
-                   (id, customer, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
+                   (id, customer, customer_id, catalog_model, equipment_name, serial, serial_key, install_date, electrical, ownership, part_number, condition,
                     machine_id, created_by_install, created_at, updated_at)
-            select r.unit_id, $2, r.catalog_model, r.equipment_name, r.serial, r.serial_key, r.install_date, r.electrical, r.ownership, r.part_number, r.condition,
+            select r.unit_id, $2, $3::int, r.catalog_model, r.equipment_name, r.serial, r.serial_key, r.install_date, r.electrical, r.ownership, r.part_number, r.condition,
                    -- The same machine it was (M1): kept on the retired row, or in its copy of the unit.
                    coalesce(r.machine_id, nullif(r.unit->>'machine_id', '')::int),
                    (select i.id from installs i where i.id = (r.unit->>'created_by_install')::int),
@@ -220,21 +223,27 @@ export function restoreUnitSql(): string {
  */
 export async function restoreRetiredUnit(sql: Sql, retiredId: number): Promise<{ id: number }> {
   const r = (
-    await sql.query<{ unit_id: number; customer: string; serial: string | null; serial_key: string | null }>(
-      "select unit_id, customer, serial, serial_key from account_equipment_retired where id = $1",
+    await sql.query<{ unit_id: number; customer: string; customer_id: number | null; serial: string | null; serial_key: string | null }>(
+      "select unit_id, customer, customer_id, serial, serial_key from account_equipment_retired where id = $1",
       [retiredId],
     )
   )[0];
   if (!r) throw new Error("That machine isn't on the retired list.");
+  // Back on the account its id names while that's listed (C6), else the one its name finds in any capitals, as before.
   const account = (
-    await sql.query<{ name: string }>("select name from directory_customers where archived = false and lower(name) = lower($1) order by name_locked desc, id limit 1", [r.customer])
+    await sql.query<{ id: number; name: string }>(
+      `select d.id, d.name from directory_customers d
+        where d.archived = false and (d.id = $2::int or lower(d.name) = lower($1))
+        order by (d.id = $2::int) desc nulls last, d.name_locked desc, d.id limit 1`,
+      [r.customer, r.customer_id ?? null],
+    )
   )[0];
   if (!account) throw new Error(`${r.customer} is no longer on the customer list.`);
   if (r.serial_key) {
     const on = (await sql.query<{ customer: string }>("select customer from account_equipment where serial_key = $1 and id <> $2 order by id limit 1", [r.serial_key, r.unit_id]))[0];
     if (on) throw new Error(`SN ${r.serial ?? r.serial_key} is on ${on.customer} now. Remove it there first, or leave this one retired.`);
   }
-  const rows = await sql.query<{ id: number }>(restoreUnitSql(), [retiredId, account.name]);
+  const rows = await sql.query<{ id: number }>(restoreUnitSql(), [retiredId, account.name, Number(account.id)]);
   if (!rows[0]) throw new Error("That machine is already on the account.");
   return { id: Number(rows[0].id) };
 }

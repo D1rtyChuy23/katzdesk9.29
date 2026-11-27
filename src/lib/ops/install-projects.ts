@@ -15,6 +15,7 @@ import { catalogNames, syncInstallUnits } from "@/lib/ops/inspection-api";
 import { loadInstallWos } from "@/lib/ops/install-work-orders";
 import { installMachines, serializeMachines, type MachineSpec } from "@/lib/ops/machines";
 import { closedBillMergeRefusal, openLinkedRebuildsSql, removeLinkedInstallRefusal } from "@/lib/ops/rebuild-link";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 async function actorName(sql: Sql, userId: string): Promise<string> {
   return (await sql.query<{ username: string | null }>("select username from desk_accounts where user_id = $1", [userId]))[0]?.username || "Teammate";
@@ -90,7 +91,12 @@ export type UnitsMoved = { moved: string[]; stayed: string[] };
 export async function moveInstallUnits(sql: Sql, installId: number, from: string, to: string): Promise<UnitsMoved> {
   if (!to.trim() || from.trim().toLowerCase() === to.trim().toLowerCase()) return { moved: [], stayed: [] };
   const moved = await sql.query<{ equipment_name: string | null; catalog_model: string | null; serial: string | null }>(
-    `update account_equipment a set customer = $3, updated_at = now()
+    // The units take the install's account with its name (C6): the install's id when it's saved under that name and
+    // listed, else the account the name finds.
+    `update account_equipment a
+        set customer = $3,
+            customer_id = coalesce((select ${listedAccountSql("i.customer_id", "i.customer")} from installs i where i.id = $1 and btrim(i.customer) = btrim($3)), katz_customer_id($3)),
+            updated_at = now()
       where a.created_by_install = $1 and lower(a.customer) = lower($2) and a.locked_at is null
         and not exists (select 1 from install_inspection_units u where u.equipment_id = a.id and u.install_id <> $1)
       returning a.equipment_name, a.catalog_model, a.serial`,
@@ -258,6 +264,12 @@ async function strandedRebuildsRefusal(sql: Sql, keepId: number, dropId: number)
 }
 
 /** The unique key on invoices refused the move: the keeper's invoice was saved while the merge ran. */
+/**
+ * The kept install's account, for the drop's units and invoice that take its spelling ($15) in a merge (C6): its id
+ * when it's saved under that name and listed, else the account the name finds.
+ */
+const KEEPER_ACCOUNT = `coalesce((select ${listedAccountSql("k.customer_id", "k.customer")} from installs k where k.id = g.keep_id and btrim(k.customer) = btrim($15)), katz_customer_id($15))`;
+
 const invoiceKeyClash = (e: unknown): boolean => /invoices_entity_key/.test(e instanceof Error ? e.message : String(e));
 
 /**
@@ -542,6 +554,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
      ), acct as (
        update account_equipment a
           set customer = case when a.id = any($14::int[]) then $15 else a.customer end,
+              customer_id = case when a.id = any($14::int[]) then ${KEEPER_ACCOUNT} else a.customer_id end,
               created_by_install = case when a.created_by_install = g.drop_id and a.locked_at is null then g.keep_id else a.created_by_install end,
               updated_at = now()
          from g where a.id = any($13::int[])
@@ -556,7 +569,7 @@ export async function mergeInstallsFor(sql: Sql, userId: string, data: z.infer<t
        -- Its invoice (lines, discount and approval as they are) on the keeper's spelling of the account, so it is
        -- billed from the install kept and listed on its Invoices tab. When the keeper has an invoice, the drop's has no
        -- lines (the guard above) and stays on the drop.
-       update invoices v set entity_id = g.keep_id, customer = $15, updated_at = now()
+       update invoices v set entity_id = g.keep_id, customer = $15, customer_id = ${KEEPER_ACCOUNT}, updated_at = now()
          from g
         where v.entity_type = 'install' and v.entity_id = g.drop_id
           and not exists (select 1 from invoices k where k.entity_type = 'install' and k.entity_id = g.keep_id)
