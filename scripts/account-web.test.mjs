@@ -230,6 +230,8 @@ test("streets: lettered and numbered streets, routes", () => {
   assert.equal(k("100 5th St"), k("100 Fifth St"));
   assert.equal(k("8 1/2 Main St"), "8 main");
   assert.notEqual(k("100 N Loop 1604 W"), k("100 Loop 410"));
+  assert.equal(k("1834 FM2673"), k("1834 FM 2673"));
+  assert.equal(k("1300 IH10 W"), k("1300 Interstate 10"));
 });
 
 test("approve takes the web listing's wording when another source offers the same address", () => {
@@ -280,4 +282,36 @@ test("report rows and cards say the same distance from our pin", () => {
   assert.equal(web.pinDistance({ status: "elsewhere", miles: 2.76 }), "2.8 mi from our pin");
   assert.equal(web.pinDistance({ status: "different", miles: 0.05 }), null);
   assert.equal(web.pinDistance({ status: "none", miles: null }), null);
+});
+
+test("possible match: a listing at our pin with a similar name is shown, never offered", async () => {
+  const may = web.possibleMatch;
+  assert.equal(may("Elio's Osteria e Pizzeria", "Elio's Pizzeria & Bar. (Canyon Lake)"), true, "same first word and \"pizzeria\"");
+  assert.equal(may("Niko Niko's Express", "Niko Niko's - Montrose"), true);
+  assert.equal(may("Starbucks Reserve", "Starbucks"), true, "one-word name");
+  assert.equal(may("Texas Roadhouse", "Texas Children's Hospital"), false, "only the first word in common");
+  assert.equal(may("Black Bear Diner", "Black Rock - Pearland"), false);
+  assert.equal(may("Ole Mole", "Ole Cafe"), false, "a first word under four letters");
+  assert.equal(may("Houston Fire Station 62", "HFD Fire Station 062"), false, "another first word");
+  assert.equal(may("Port Lavaca Ford", "Port Lavaca Dodge Chrysler Jeep Ram"), false, "a place name in common is not enough");
+  assert.equal(may("West Houston Subaru", "West Houston Volkswagen"), false);
+  assert.equal(may("Hampton Inn & Suites by Hilton Port Lavaca", "Hampton Inn & Suites Port Lavaca"), true);
+  assert.equal(may("El Todo", "Todo Supermarket"), false, "a one-word name under five letters");
+  // At our street pin: "maybe", with the listing's details and no address to offer.
+  const elio = place("e1", "Elio's Osteria e Pizzeria", 29.84768, -98.17855, { street: "1834 FM2673", city: "Canyon Lake", zip: "78133" });
+  const c = web.webCheck(acct("Elio's Pizzeria & Bar. (Canyon Lake)", 29.848, -98.1786, "1834 FM 2673, Canyon Lake, TX 78133"), [elio]);
+  assert.deepEqual([c.status, c.place.id, c.listedAddress, c.sameAddress], ["maybe", "e1", null, true]);
+  assert.match(web.webCheckLine(c), /^Possible match: Elio's Osteria e Pizzeria · 1834 FM2673, Canyon Lake 78133 \(\d+ ft from our pin\)\. The name differs from ours/);
+  // Not at our pin, or a ZIP-area pin: nothing.
+  assert.equal(web.webCheck(acct("Elio's Pizzeria & Bar.", 29.86, -98.1786), [elio]).status, "none");
+  assert.equal(web.webCheck({ ...acct("Elio's Pizzeria & Bar.", 29.848, -98.1786), approx: true }, [elio]).status, "none");
+  // A listing under our name still wins over a possible one.
+  const ours = place("o1", "Elio's Pizzeria", 29.848, -98.1786);
+  assert.deepEqual(web.webCheck(acct("Elio's Pizzeria & Bar.", 29.848, -98.1786), [elio, ours]).place.id, "o1");
+  // Real listings, one account at a time and many: the same answer.
+  const a = { id: 9, name: "Elio's Pizzeria & Bar. (Canyon Lake)", address: "1834 FM 2673, Canyon Lake, TX 78133", lat: 29.8478, lng: -98.1787, approx: false };
+  const [one] = await webChecksFor([a], readTile);
+  const many = (await webChecksFor([a, { ...a, id: 10, name: "Zzyzx Made Up Coffee" }], readTile))[0];
+  assert.deepEqual([one.check.status, one.check.place?.name], ["maybe", "Elio's Osteria e Pizzeria"]);
+  assert.deepEqual([many.check.status, many.check.place?.name], ["maybe", "Elio's Osteria e Pizzeria"]);
 });

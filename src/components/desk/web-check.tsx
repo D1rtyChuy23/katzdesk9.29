@@ -21,6 +21,7 @@ const TONE: Record<WebStatus, "danger" | "warn" | "outline" | "success"> = {
   closed: "danger",
   different: "warn",
   elsewhere: "warn",
+  maybe: "outline",
   none: "outline",
   nopin: "outline",
   same: "success",
@@ -143,7 +144,8 @@ export function WebCheckView() {
       </ListToolbar>
       <p className="mt-2 max-w-3xl text-xs text-muted-foreground">
         Each account against the business listings under its name: at its map pin, or within 25 miles. &ldquo;No listing found&rdquo; is not proof
-        of anything: the listings cover restaurants, cafés, hotels, offices and the other Prospects types, in Texas only. {NETSUITE_NOTE}
+        of anything: the listings cover restaurants, cafés, hotels, offices and the other Prospects types, in Texas only. A &ldquo;Possible
+        match&rdquo; is a listing at the pin with a similar name: shown for you to judge, never offered as an address. {NETSUITE_NOTE}
       </p>
       {!canEdit ? <p className="mt-1 text-xs text-muted-foreground">Only an Admin can approve an address.</p> : null}
       <ul className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="web-check-rows">
@@ -189,7 +191,7 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
           <dd className="break-words">{r.address ?? <span className="text-warning">No address</span>}</dd>
           {p ? (
             <>
-              <dt className="text-muted-foreground">Listing</dt>
+              <dt className="text-muted-foreground">{c.status === "maybe" ? "Possible match" : "Listing"}</dt>
               <dd className="break-words" data-testid="web-check-listing">
                 <span className="font-medium">{p.name}</span>
                 {placeAddress(p) ? ` · ${placeAddress(p)}` : ""}
@@ -200,6 +202,11 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
           ) : null}
         </dl>
         {p ? <ListingLinks place={p} className="mt-1" /> : null}
+        {c.status === "maybe" ? (
+          <p className="mt-1 text-xs text-muted-foreground" data-testid="web-check-maybe">
+            No listing under our name. This one at our pin has a similar name: check it is the same business before using its details.
+          </p>
+        ) : null}
         {pinOff ? (
           <p className="mt-1 text-xs text-warning" data-testid="web-check-pin-off">
             Same address as ours, so the address is right and the map pin looks off. Fix the pin on the account (Account Details → Map Pin).
