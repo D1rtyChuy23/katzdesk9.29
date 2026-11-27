@@ -164,7 +164,8 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
   const fromHere = useFromHere("/customers");
   const c = r.check;
   const p = c.place;
-  const canApprove = canEdit && !!c.listedAddress && (c.status === "different" || c.status === "elsewhere");
+  const canApprove = canEdit && !!c.listedAddress && c.sameAddress === false && (c.status === "different" || c.status === "elsewhere");
+  const pinOff = c.status === "elsewhere" && c.sameAddress === true;
   return (
     <li className="grid gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start md:px-4" data-testid="web-check-row" data-status={c.status}>
       <div className="min-w-0">
@@ -197,6 +198,11 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
           ) : null}
         </dl>
         {p ? <ListingLinks place={p} className="mt-1" /> : null}
+        {pinOff ? (
+          <p className="mt-1 text-xs text-warning" data-testid="web-check-pin-off">
+            Same address as ours, so the address is right and the map pin looks off. Fix the pin on the account (Account Details → Map Pin).
+          </p>
+        ) : null}
       </div>
       {canApprove ? (
         <div className="flex flex-col items-start gap-1 sm:items-end">

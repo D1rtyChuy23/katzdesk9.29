@@ -108,6 +108,6 @@ export const getAccountWebCheck = createServerFn({ method: "GET" })
 /** Kept for the Address Report's Approve: the address a web listing offers for this account, if any. */
 export async function webListingAddress(sql: Sql, accountId: number, tile?: (key: string) => Promise<Place[]>): Promise<string | null> {
   const c = await webCheckForAccount(sql, accountId, tile);
-  return c && (c.status === "different" || c.status === "elsewhere") ? c.listedAddress : null;
+  return c && (c.status === "different" || c.status === "elsewhere") && c.sameAddress === false ? c.listedAddress : null;
 }
 

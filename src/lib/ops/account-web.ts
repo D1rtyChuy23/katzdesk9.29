@@ -28,6 +28,11 @@ export type WebCheck = {
   miles: number | null;
   /** The listing's address in our format ("502 Texas Ave, Houston, TX 77002"), when it has a street. */
   listedAddress: string | null;
+  /**
+   * Whether the listing's street address is ours (house number and street); null when either side has none. Listed
+   * elsewhere at our own address means the address is right and the map pin is off.
+   */
+  sameAddress: boolean | null;
 };
 
 /** Our pin and the listing this close (miles) are the same place: one block, to allow for where each map put it. */
@@ -60,7 +65,7 @@ export type WebAccount = { name: string; lat: number | null; lng: number | null;
  * name's first word, within ELSEWHERE_MILES).
  */
 export function webCheck(account: WebAccount, candidates: readonly Place[]): WebCheck {
-  const none = (status: WebStatus): WebCheck => ({ status, place: null, miles: null, listedAddress: null });
+  const none = (status: WebStatus): WebCheck => ({ status, place: null, miles: null, listedAddress: null, sameAddress: null });
   if (account.lat == null || account.lng == null) return none("nopin");
   const pin: LatLng = { lat: account.lat, lng: account.lng };
   const named = candidates
@@ -73,6 +78,7 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
     place: x.p,
     miles: Math.round(x.miles * 100) / 100,
     listedAddress: listedAddress(x.p),
+    sameAddress: x.p.street && account.address ? sameStreet(x.p.street, account.address) : null,
   });
   const here = named.filter((x) => x.miles <= HERE_MILES);
   const openHere = here.find((x) => !x.p.closed);
@@ -128,5 +134,6 @@ export function webCheckLine(c: WebCheck): string {
   if (!c.place) return label;
   const where = placeAddress(c.place);
   const far = c.status === "elsewhere" && c.miles != null ? ` (${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin)` : "";
-  return `${label}${where ? `: ${where}` : ""}${far}`;
+  const pinOff = c.status === "elsewhere" && c.sameAddress ? ". Same address as ours: the map pin looks off" : "";
+  return `${label}${where ? `: ${where}` : ""}${far}${pinOff}`;
 }

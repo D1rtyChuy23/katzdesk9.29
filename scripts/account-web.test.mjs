@@ -114,3 +114,12 @@ test("away from our pin, a listing whose name adds words is another business", (
   const br = place("b1", "Black Rock Coffee Bar", 29.6, -95.28);
   assert.equal(web.webCheck(acct("Black Rock - Pearland", 29.56, -95.28), [br]).status, "elsewhere", "our name adds the place; theirs only what it is");
 });
+
+test("listed elsewhere at our own address: the pin is off, and no address is offered", () => {
+  const h = place("h1", "Hugo's", 29.743, -95.3997, { street: "1600 Westheimer Rd" });
+  const c = web.webCheck(acct("Hugo's", 29.77, -95.39, "1600 Westheimer Road, Houston, TX 77006"), [h]);
+  assert.deepEqual([c.status, c.sameAddress], ["elsewhere", true]);
+  assert.match(web.webCheckLine(c), /map pin looks off/);
+  const d = web.webCheck(acct("Hugo's", 29.77, -95.39, "900 Other St"), [h]);
+  assert.deepEqual([d.status, d.sameAddress], ["elsewhere", false]);
+});
