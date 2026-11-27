@@ -2,6 +2,8 @@
 # Thursday this looks for one; when there is a newer one than src/lib/ops/places-tiles/release.txt, it rebuilds the
 # place files with scripts/build-places.py, checks them with the map tests, and opens a pull request that says what
 # changed. Nothing reaches the live site until the pull request is reviewed, merged and published, as usual.
+# It waits while a refresh pull request is open, and does not reopen one that was closed without merging. The build
+# refuses a release that would drop more than 10% of the places (one still being uploaded, say).
 #
 # Needs, once, in the repository's Settings → Actions → General → Workflow permissions: "Read and write permissions"
 # and "Allow GitHub Actions to create and approve pull requests".
@@ -41,22 +43,42 @@ jobs:
       - name: Install the builder's one package
         run: pip install "pyarrow==26.0.1"
 
-      - name: Rebuild the place files from the newest Overture release
-        id: build
+      - name: Decide whether there is anything to do
+        id: plan
         env:
+          GH_TOKEN: ${{ github.token }}
           RELEASE: ${{ inputs.release }}
+          EVENT: ${{ github.event_name }}
         run: |
-          before="$(cat src/lib/ops/places-tiles/release.txt 2>/dev/null || true)"
-          if [ -n "$RELEASE" ]; then
-            python3 scripts/build-places.py --release "$RELEASE" --summary "$RUNNER_TEMP/summary.md"
-          else
-            python3 scripts/build-places.py --if-newer --summary "$RUNNER_TEMP/summary.md"
+          set -euo pipefail
+          current="$(cat src/lib/ops/places-tiles/release.txt 2>/dev/null || true)"
+          # One directory listing at Overture: no download yet.
+          release="${RELEASE:-$(python3 scripts/build-places.py --print-newest)}"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          go=true
+          open="$(gh pr list --state open --limit 200 --json headRefName --jq '[.[].headRefName | select(startswith("data/prospects-"))] | join(", ")')"
+          declined="$(gh pr list --state closed --head "data/prospects-$release" --json number --jq 'length')"
+          if [ "$release" = "$current" ] && [ -z "$RELEASE" ]; then
+            echo "Nothing new: the places already come from Overture release $current." >> "$GITHUB_STEP_SUMMARY"; go=false
+          elif [ -n "$open" ]; then
+            # One refresh at a time: merge (or close) the open one first. Its release is older or the same.
+            echo "A refresh pull request is still open ($open): merge or close it first." >> "$GITHUB_STEP_SUMMARY"; go=false
+          elif [ "$declined" != "0" ] && [ "$EVENT" != "workflow_dispatch" ]; then
+            echo "A pull request for $release was closed without merging; not opening it again (run the workflow by hand to force it)." >> "$GITHUB_STEP_SUMMARY"; go=false
           fi
-          after="$(cat src/lib/ops/places-tiles/release.txt 2>/dev/null || true)"
-          echo "release=$after" >> "$GITHUB_OUTPUT"
-          if [ "$before" = "$after" ] && git diff --quiet -- src/lib/ops/places-tiles; then
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+
+      - name: Rebuild the place files from that release
+        id: build
+        if: steps.plan.outputs.go == 'true'
+        env:
+          RELEASE: ${{ steps.plan.outputs.release }}
+        run: |
+          set -euo pipefail
+          python3 scripts/build-places.py --release "$RELEASE" --summary "$RUNNER_TEMP/summary.md"
+          if [ -z "$(git status --porcelain -- src/lib/ops/places-tiles)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Nothing new: the places already come from Overture release $after." >> "$GITHUB_STEP_SUMMARY"
+            echo "Rebuilt from $RELEASE: no place changed." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
@@ -71,6 +93,7 @@ jobs:
       - name: Check the new files with the map tests
         if: steps.build.outputs.changed == 'true'
         run: |
+          set -euo pipefail
           npm ci --no-audit --no-fund
           node --experimental-strip-types --test scripts/map-layers.test.mjs
 
@@ -78,13 +101,10 @@ jobs:
         if: steps.build.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE: ${{ steps.build.outputs.release }}
+          RELEASE: ${{ steps.plan.outputs.release }}
         run: |
+          set -euo pipefail
           branch="data/prospects-$RELEASE"
-          if gh pr list --head "$branch" --state open --json number --jq 'length' | grep -qv '^0$'; then
-            echo "A pull request for $RELEASE is already open." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
