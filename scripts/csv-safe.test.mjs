@@ -6,7 +6,7 @@ import { test } from "node:test";
 await register("./node-resolve-hook.mjs", import.meta.url);
 process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 
-const { spreadsheetText, safeCsvCell } = await import("../src/lib/ops/csv-safe.ts");
+const { spreadsheetText, safeCsvCell, unSpreadsheetText } = await import("../src/lib/ops/csv-safe.ts");
 
 test("text a spreadsheet would run as a formula gets an apostrophe; numbers and plain text do not", () => {
   for (const bad of ["=1+1", "+1 713 555 0101", "@SUM(A1)", "-2+HYPERLINK(\"http://x\")", "-A1", "-$12.00", "\t=1+1", "\r=1+1", "-1e3"]) {
@@ -83,4 +83,11 @@ test("the parts bin template reads back what it wrote", async () => {
     const unquoted = cell.startsWith('"') ? cell.slice(1, -1).replace(/""/g, '"') : cell;
     assert.equal(cleanBinValue(unquoted), v, `${v} → ${cell}`);
   }
+});
+
+test("reading back: only the guard's apostrophe comes off; one that is part of the value stays", () => {
+  for (const v of ["-AB12", "=X1", "+5 KIT", "@HOME", "-12", "AB12"]) assert.equal(unSpreadsheetText(spreadsheetText(v)), v, v);
+  assert.equal(unSpreadsheetText("'Neil's Cafe"), "'Neil's Cafe");
+  assert.equal(unSpreadsheetText("O'Neil"), "O'Neil");
+  assert.equal(unSpreadsheetText("''-x"), "''-x", "only one apostrophe, and only before = + - @");
 });
