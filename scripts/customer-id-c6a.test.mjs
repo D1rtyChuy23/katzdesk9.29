@@ -273,3 +273,10 @@ test("an update copy that moves a record to another account takes that account's
   const moved = (await run("select customer, customer_id from account_equipment where id = $1", [unit]))[0];
   assert.deepEqual([moved.customer, moved.customer_id], ["ZZ Beta Kitchen", beta]);
 });
+
+test("Link Check's PMs card says the PM stack reads by id with it", async () => {
+  const { READ_AREAS } = await import("../src/lib/ops/read-by-id.ts");
+  const pms = READ_AREAS.find((a) => a.area === "pms").covers;
+  assert.match(pms, /the PM stack: the tickets a PM can stack on, the PMs a ticket can take, and their save checks/);
+  assert.doesNotMatch(pms, /still matches by name/);
+});

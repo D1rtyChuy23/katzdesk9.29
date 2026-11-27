@@ -9,6 +9,7 @@ import { cityFromAddress, isPoint, type PinQuality } from "@/lib/ops/geo";
 import { MANUAL_PIN_MATCH, pinQuality } from "@/lib/ops/account-pin";
 import { isWalkIn } from "@/lib/ops/customer-key";
 import { perAccountJoin, readsById } from "@/lib/ops/read-by-id";
+import { openPmSql } from "@/lib/ops/ticket-status";
 
 async function ready() {
   const { ensureSeeded } = await import("./seed.server");
@@ -140,7 +141,7 @@ export function accountGeoSql(byId: boolean): string {
          ${join(
            "pm_jobs",
            "pm",
-           "not t.done and t.status not in ('Completed', 'Cancelled') and coalesce(t.customer, '') <> ''",
+           `${openPmSql("t")} and coalesce(t.customer, '') <> ''`,
            `count(*)::int as open_pms,
             count(*) filter (where t.projected < $1::date)::int as pms_past_due,
             count(*) filter (where t.projected >= $1::date and t.projected <= $1::date + $2::int)::int as pms_due_soon,
