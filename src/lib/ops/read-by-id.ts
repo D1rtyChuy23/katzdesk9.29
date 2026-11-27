@@ -42,7 +42,7 @@ export const READ_AREAS: { area: ReadArea; label: string; covers: string }[] = [
     area: "pms",
     label: "PMs",
     covers:
-      "The PM window's runbook: the PM account's units it plans and bills, and the account's earlier PMs it takes intervals from (by the PM's id); Runbook Readiness; and the PMs a unit's model change re-pins. The PM stack still matches by name (it moves with its save check, in C6).",
+      "The PM window's runbook: the PM account's units it plans and bills, and the account's earlier PMs it takes intervals from (by the PM's id); Runbook Readiness; the PMs a unit's model change re-pins; and the PM stack: the tickets a PM can stack on, the PMs a ticket can take, and their save checks (C6).",
   },
   {
     area: "map",
