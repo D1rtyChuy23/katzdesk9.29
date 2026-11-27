@@ -107,7 +107,8 @@ test("a Warehouse request is approved only onto a name that is still an account"
   } finally {
     await pg.close();
   }
-  assert.match(src("src/lib/ops/stock-actions.ts"), /const customer = await accountForApproval\(sql, action\.customer\);\n\s+await finalizeAssign\(sql, row, customer,/);
+  // C6: the request's account id goes with its name, read first.
+  assert.match(src("src/lib/ops/stock-actions.ts"), /const customer = await accountForApproval\(sql, action\.customer, action\.customer_id \?\? null\);\n\s+await finalizeAssign\(sql, row, customer,/);
 });
 
 test("ticket numbers count as numbers, so a month goes past 999", async () => {
