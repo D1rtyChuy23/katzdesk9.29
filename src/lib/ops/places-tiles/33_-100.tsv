@@ -76,6 +76,7 @@ d0063cc006f7	Cristina's Taqueria & More	fastfood		33.18518	-99.89558	408 Sunny A
 0bf1c63ea8a4	Overflow Outpost	fastfood		33.18234	-99.17721	308 N Minter Ave	Throckmorton	76483	+19405781695			0.97
 5b611e7b9b4b	Sonic Drive In	fastfood		33.59626	-99.26098	901 North Main Street	Seymour	76380	+19408882039	https://locations.sonicdrivein.com/tx/seymour/901-north-main-street.html	Sonic Drive-In	0.99
 4c510be8f66f	Sonic Drive-In	fastfood		33.17023	-99.73319	1402 N Ave E	Haskell	79521	+19403550020	https://locations.sonicdrivein.com/tx/haskell/1402-n.-e-avenue.html	Sonic Drive-In	0.96
+00712c64cdcc	Subway	fastfood	sandwich shop	33.16100	-99.73334	400 N Avenue E	Haskell	79521	+19408645396	https://www.subway.com		0.92
 c5b200246a8f	Brookshire's Food & Pharmacy	grocery		33.16974	-99.72867	5 N 14th St	Haskell	79521	+19408643127	https://www.brookshires.com		0.92
 bd7963cfc2de	Haskell #722	grocery		33.16989	-99.72787	5 N 14th St	Haskell	79521			Spring Market	0.80
 98ac3c55334f	Knox Inn	grocery		33.41491	-99.81953	402 S Central Ave	Knox City	79529				0.98
@@ -96,17 +97,13 @@ a5d94465b1fe	AmeriStay Inn & Suites	hotel		33.15789	-99.72955	108 N 1st St	Haske
 91fc5aea24b2	City Motel	hotel	motel	33.41821	-99.80688	1100 E Main St	Knox City	79529	+19406583541	http://www.christysmotel.com		0.99
 031b248314c7	Corley Manor Guest House	hotel		33.41621	-99.81416	500 SE 3rd St	Knox City	79529	+19406574406	http://www.corleymanor.com		0.94
 b2df1cd39537	Corner Inn	hotel		33.45385	-99.61551	851 E G St	Munday	76371	+19404225542			0.83
-72731dffe5cc	haskell inn	hotel	motel	33.16485	-99.73210	115 S Avenue E	Haskell	79521	+19408642251	http://haskellinn.com		0.77
 82c58cfeccac	Haskell Inn	hotel	motel	33.15574	-99.73365	115 S Avenue E	Haskell	79521	+19408642251	http://haskellinn.com/		0.99
 cd3516a606ac	HH Creek Inn	hotel	motel	33.58448	-99.26064	400 S Main St	Seymour	76380	+19404482001	http://hhcreekinn.com/		1.00
 104caecb275e	La Siesta Motel	hotel	motel	33.59458	-99.27225	904 W California St	Seymour	76380	+19408893171	http://la-siesta-motel-tx-2.hub.biz/		0.95
-bfc57d28697b	LoneStar Lodging & RV Park	hotel	lodge	33.15014	-99.73528	701 S Ave F	Haskell	79521	+19408634527	http://www.lonestarhaskell.com/		0.92
 442eb2112f96	Moonshine Gate	hotel		33.74300	-99.15495	596 Moonshine Gate Rd	Seymour	76380	+19403572346			0.79
-cfd48b794f5f	Pecan Springs Lodge	hotel	lodge	33.15815	-99.74426	1302 N 1st St	Haskell	79521	+19403864113	http://www.pecanspringslodge.com/		0.95
 6daa226cdf73	Pony Creek Gate	hotel		33.70793	-99.25301	191 Pony Creek Rd	Seymour	76380	+19403572456			0.76
 1fc5d66a625c	Rooster's Roost & Chick Inn	hotel		33.58983	-99.26657	211 N Donald St	Seymour	76380	+19404482001			0.98
 c6c003a8b4bd	Sagamar Inn	hotel	motel	33.59849	-99.26074	1101 N Main St	Seymour	76380	+19408885507	http://www.sagamarinncleburne.com		0.99
-5f0aba5a5a58	The Loft In Seymour TX	hotel	lodge	33.59743	-99.27674	907 N Grossman St	Seymour	76380	+19406368651	http://www.theloftinseymour.com/		0.92
 027ec491dd04	The Woodson Inn	hotel		33.08596	-99.17942	121 US-183	Woodson	76491	+19403456599			0.91
 c428eee1c25e	Yellow Rose Lodge LLC	hotel	motel	33.17849	-99.18008	207 W Chestnut St	Throckmorton	76483	+14699955003	http://yellowroselodge.com/		0.92
 5492494b0f53	Hunt Oil Co	office	energy company	33.41787	-99.80466	1301 E Main St	Knox City	79529	+19406583567	http://huntoil.com		0.92
@@ -145,7 +142,6 @@ c447839e43b3	Rodriguez Inn	restaurant	mexican restaurant	33.15766	-99.72717	105 
 efc0566a7f3e	Simple Simon's Pizza	restaurant	pizza restaurant	33.58476	-99.25986	200 E Ingram St	Seymour	76380	+19408896236	http://www.simplesimonspizza.com/		0.94
 89539b1a35c2	Smokey Bros	restaurant	barbecue restaurant	33.59458	-99.26915		Seymour	76380	+19408882767	http://www.smokeybros.com		0.77
 440fb2db8383	Stanfield's World Famous Big Honker Lodge	restaurant	barbecue restaurant	33.41610	-99.81371		Knox City			www.stanfieldhunting.com		0.97
-00712c64cdcc	Subway	restaurant	sandwich shop	33.16100	-99.73334	400 N Avenue E	Haskell	79521	+19408645396	https://www.subway.com		0.92
 f09037d9a84f	Sweet T Pizza	restaurant	pizza restaurant	33.98451	-99.72525	109 N Main St	Crowell	79227	+19406841357	http://www.sweettpizza.com/		0.94
 97c53dbe4d5e	Tex Mex Cafe	restaurant	texmex restaurant	33.17636	-99.89188	704 13th St	Rule	79547	+19409966111	https://tex-mex-cafe.hub.biz/		0.98
 f7e56241aeb6	The Burrito Shop	restaurant	mexican restaurant	33.45079	-99.62322	321 N Birch Ave	Munday	76371	+19404225678	http://www.burritoshops.com		0.92

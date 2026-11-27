@@ -62,15 +62,22 @@ function placeFileLoaders(): Record<string, () => Promise<string>> {
   return placeFiles;
 }
 const placeTiles = new Map<string, Promise<Place[]>>();
+/** Squares kept parsed per server, the most recently used: about the busiest metro areas, a few dozen MB. */
+const PLACE_TILES_KEPT = 16;
 
-/** One square's places, read once per server; a square with no file (outside Texas, or no places) is empty. */
+/** One square's places, read once and kept while it is in use; a square with no file (outside Texas) is empty. */
 function placeTile(key: string): Promise<Place[]> {
   const hit = placeTiles.get(key);
-  if (hit) return hit;
+  if (hit) {
+    placeTiles.delete(key);
+    placeTiles.set(key, hit);
+    return hit;
+  }
   const load = placeFileLoaders()[`./places-tiles/${key}.tsv`];
   const p = load ? load().then(parsePlaceTile) : Promise.resolve([]);
   p.catch(() => placeTiles.delete(key));
   placeTiles.set(key, p);
+  while (placeTiles.size > PLACE_TILES_KEPT) placeTiles.delete(placeTiles.keys().next().value!);
   return p;
 }
 
@@ -80,7 +87,7 @@ export type PlacesResult = { places: Place[]; total: number; truncated: boolean;
 export async function listPlacesFor(
   sql: Sql,
   userId: string,
-  input: { south: number; west: number; north: number; east: number; categories: readonly string[]; limit?: number },
+  input: { south: number; west: number; north: number; east: number; categories: readonly string[]; limit?: number; q?: string },
   tile: (key: string) => Promise<Place[]> = placeTile,
 ): Promise<PlacesResult> {
   if (!(await canUseMarketLayers(sql, userId))) throw new Error(MARKET_REFUSAL);
@@ -88,10 +95,11 @@ export async function listPlacesFor(
   if (!b) throw new Error("That part of the map could not be read.");
   const categories = input.categories.filter(isPlaceCategory) as PlaceCategory[];
   if (!categories.length) return { places: [], total: 0, truncated: false, source: PLACES_SOURCE };
-  const all = (await Promise.all(placeTilesFor(b).map(tile))).flat();
+  const { keys, capped } = placeTilesFor(b);
+  const all = (await Promise.all(keys.map(tile))).flat();
   const limit = Math.max(1, Math.min(PLACES_LIMIT, Math.floor(input.limit ?? PLACES_LIMIT)));
-  const { places, total } = placesIn(all, b, categories, limit);
-  return { places, total, truncated: total > places.length, source: PLACES_SOURCE };
+  const { places, total } = placesIn(all, b, categories, limit, input.q ?? "");
+  return { places, total, truncated: capped || total > places.length, source: PLACES_SOURCE };
 }
 
 const placesInput = z.object({
@@ -101,6 +109,7 @@ const placesInput = z.object({
   east: z.number(),
   categories: z.array(z.string().max(20)).max(20),
   limit: z.number().int().min(1).max(PLACES_LIMIT).optional(),
+  q: z.string().max(100).optional(),
 });
 
 /** Prospect places of the picked types in the box on screen, the surest first (Admin and Sales). */

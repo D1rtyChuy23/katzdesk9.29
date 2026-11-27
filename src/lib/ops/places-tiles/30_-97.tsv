@@ -113,13 +113,11 @@ e3f6ae49134b	Bar Z Ranch	bar		30.49718	-96.72392	1652 Davidson Branch Rd	Caldwel
 459645f4eefc	Bcs Axe House	bar	sports bar	30.63867	-96.34706	3601 S Texas Ave	Bryan	77802	+19793247001	bcsaxehouse.com		0.92
 644f0d95e7ac	Bernie's Bar And Grill	bar	cocktail bar	30.17734	-96.91667	2110 E Hempstead St	Giddings	78942	+19795424866			0.96
 0c88ed6e5ebd	Big Easy Saloon - Giddings	bar	sports bar	30.18268	-96.93797	154 W Austin St	Giddings	78942	+19792128800	https://www.bigeasysaloongtx.com/		0.96
-45ccaa0e5807	Bitburger USA	bar	brewery	30.58568	-96.28522	3304 Longmire Dr	College Station	77845		http://www.belukus.net/		0.62
 c1fa505c3be4	Bitburger USA	bar	brewery	30.58624	-96.28967	3304 Longmire Dr	College Station	77845		http://www.belukus.net/		0.62
 5130fc6b9121	Blackwater Draw Brewing Company	bar	brewery	30.67951	-96.37242	701 N Main St	Bryan	77803	+19797046191	http://www.blackwaterbrew.com		0.99
 7615759700d7	Boon & Company	bar	cocktail bar	30.06469	-96.69710	206 S Washington St	Round Top	78954	+19792493676	http://boonandcompany.com/		0.92
 b65876931d74	Braggs Blues Club	bar		30.09699	-96.06868	Ole 290	Hempstead	77445		http://www.yellowpages.com/hempstead-tx/night-clubs		0.93
 ce32ac9ea656	Brazos Valley Brewing Company	bar	brewery	30.16431	-96.40583	206 S Jackson St	Brenham	77833	+19793535361	http://www.brazosvalleybeer.com		0.99
-d2e268d961d1	Brazos Valley Brewing Company	bar	brewery	30.16458	-96.39859	206 S Jackson St	Brenham	77833	+19793535361	http://www.brazosvalleybrewery.com		0.77
 95d30b03577c	Brown Water Cigar Bar	bar	cocktail bar	30.16658	-96.39909	200 W Alamo St	Brenham	77833	+19795519019	http://www.brownwatercigar.com/		0.92
 9363f67d975e	Bubba's 33	bar	sports bar	30.63432	-96.30387	1403 Earl Rudder Fwy S	College Station	77845	+19798100070	https://togo.bubbas33.com/location/bubbas-33-college-station/detail/action/start-order	Bubba's 33	0.99
 af344dd8b14d	Buffalo Wild Wings	bar	sports bar	30.63586	-96.32452	903 University Dr E	College Station	77840	+19796918453	https://www.buffalowildwings.com/locations/us/tx/college-station/903-university-drive/sports-bar-1296?utm_source=fb&utm_medium=yext	Buffalo Wild Wings	0.98
@@ -155,7 +153,6 @@ ff603a4408a2	Ellis Motel	bar	dive bar	30.06504	-96.69389	185 Henkel Cir	Round To
 dac48dc7770f	En Gedi Vineyards and Winery	bar	winery	30.97857	-96.67419	604 Main St	Calvert	77837	+12542659669	http://engedivineyardoftexas.com/		0.95
 3a20c6e1202f	Eskimo Hut Frozen Daiquiris and Margaritas To-Go	bar	drive thru bar	30.62289	-96.31197	919 Harvey Rd	College Station	77840	+19797036815	http://www.eskimohut.com/		0.92
 73aa456447a4	Farm Fusion Reels	bar		30.04829	-96.32823	811 S Loop 497	Bellville	77418	+19798652404	https://www.thekenneystoretx.com/		0.99
-c1ca933095aa	Farm Fusion Reels	bar		30.04832	-96.32803	811 S Loop 497	Bellville	77418	+19798652404	https://www.thekenneystoretx.com/		0.99
 33fa2e93d7f6	Fat Burger Grill	bar		30.57942	-96.31977	11907 FM 2154 Rd	College Station	77845	+19796935577	http://www.fatburgergrill.com/		0.87
 573c7f5024ee	Fort Half Moon	bar		30.33907	-96.59538	5354-, 5360 Co Rd 416	Somerville	77879	+19795961234	http://www.budasworld.com/		0.92
 aa5243d53436	Four Downs Sports Bar	bar	sports bar	30.63317	-96.32748	700 University Dr E #101	College Station	77840	+19797045049	http://www.Fourdownsbcs.com/		1.00
@@ -301,7 +298,6 @@ ab4edd1ab129	Caldwell Country Chevrolet	cardealer	used auto dealer	30.53097	-96.
 b7bd60b30918	Cameron Autoplex	cardealer		30.84675	-96.95965	2102 Thornton St	Cameron	76520	+12546974903	http://www.cameroncountrycdjr.com/		1.00
 63c3d33fbba1	Car Sales	cardealer		30.70016	-96.35607	3738 E State Highway 21	Bryan	77808	+19796575551			0.57
 8b99a2de1cd5	Carla Lewis	cardealer		30.84543	-96.55798	4556 S State Highway 6	Hearne	77859	+19795743692	http://AllenSamuelsHearne.com/		0.88
-92d3fbaea054	CarMax	cardealer		30.56103	-96.27084	1320 Pavilion Ave	Bryan-College Station	77845		https://www.carmax.com/stores/6177	CarMax	0.80
 c019e6cbef93	CarMax	cardealer	used auto dealer	30.59835	-96.28788	1320 Pavilion Ave	College Station	77845	+19795997444	https://www.carmax.com/stores/6177		0.99
 431668f3b872	Castleberry Services	cardealer		30.59836	-96.30491	2151 Harvey Mitchell Pkwy S Ste 315	College Station	77840	+19797038715			0.55
 7d93398dbd6c	Central Texas Select Autos	cardealer		30.66076	-96.37149	1201 S Texas Ave	Bryan	77803	+19794859600	http://centraltexasselectautos.com/		0.92
@@ -312,9 +308,7 @@ a0474fcab762	Chappell Hill Auction	cardealer		30.13234	-96.26328	7393 Chadwick H
 523a25582a81	College Station Ford	cardealer		30.63496	-96.30468	1351 S Earl Rudder Fwy	College Station	77845	+19797790664	https://www.collegestationford.com/	Ford Motor Company	0.97
 b7bf4f52ef40	College Station Nissan	cardealer		30.63920	-96.30683	1001 Earl Rudder Fwy	College Station	77845	+19369399023	http://www.collegestationnissan.com/	Nissan	0.97
 2d35d6944fec	Columbus Harris, Brazos Valley Imports	cardealer		30.66348	-96.32533	3100 Briarcrest Dr	Bryan	77802	+19726554905	http://www.brazosvalleyimports.com/		0.56
-0b75ecdf3a32	Country Auto Sales	cardealer	used auto dealer	30.13078	-96.13981	54366 Highway 290	Hempstead	77445	+19794153988	http://countryautosalestx.com/		0.92
 50975987ee0f	Country Auto Sales	cardealer	used auto dealer	30.12609	-96.12042	54366 Highway 290	Hempstead	77445	+19794153988	http://www.countryautosalestx.com		0.95
-8707fe71b914	CSMB, LLC	cardealer		30.59258	-96.28817	3413 State Highway 6 South	College Station			http://www.mbcollegestation.com/	Mercedes-Benz Vans	0.80
 2603d4cdeed1	Deeworksall LLC	cardealer		30.17928	-96.40023	1306 N Park St	Brenham	77833	+17138745810			0.92
 1ed6ed0b77ea	Douglass Volkswagen	cardealer		30.66380	-96.32523	3100 Briarcrest Dr Ste 5	Bryan	77802	+19797742601	https://www.douglassvolkswagen.com		0.99
 9ecbbe8a690c	EAG Chevrolet GMC Navasota	cardealer		30.39582	-96.07294	1614 E Washington Ave	Navasota	77868	+19368257551	http://www.eagchevroletgmcnavasota.com/	Chevrolet	0.92
@@ -354,7 +348,6 @@ e61ee43102b7	LaRoche Chevrolet Buick GMC	cardealer		30.14504	-96.40176	900 US 29
 6cf339c43d2f	Leonard Motors	cardealer		30.65739	-96.37032	1207 S Coulter Dr	Bryan	77803	+19797043068	http://www.leonardmotorsbcs.com		0.75
 201aab4219ec	Lithia Chrysler Dodge Jeep Ram FIAT	cardealer		30.65371	-96.32182	301 N Earl Rudder Fwy	Bryan	77802	+19792135361	https://www.bryanchryslerdodgejeep.com/		0.97
 9c9339a59f46	Lonestar Truck Group Bryan	cardealer		30.74683	-96.45403	7575 N State Highway 6	Bryan	77807	+19797783640	http://www.tntxtruck.com/	Lonestar Truck Group	0.95
-577f21c4c109	Madison Leasure	cardealer		30.84543	-96.55798	4556 S State Highway 6	Hearne	77859	+19792799292	http://AllenSamuelshearne.com/		0.82
 b816e5626b3e	Madison Leasure	cardealer		30.84574	-96.55817	4556 S State Highway 6	Hearne	77859	+19792799292	http://AllenSamuelshearne.com/		0.83
 92887a182eaf	Mark Trosclair	cardealer		30.61955	-96.29688	2450 S Earl Rudder Fwy	College Station	77840	+14097703076	http://allenhonda.com/		0.62
 045268dd3ec5	Martinez Auto Sales	cardealer		30.68407	-96.36977	1212 N Texas Ave	Bryan	77803	+19797781188	http://martinezautos.com		0.97
@@ -521,7 +514,6 @@ d28de80e51db	The Garden Spot Cafe	coffee		30.54001	-96.69936	110 Eloise St	Caldw
 4be7829b4f0d	The Village Cafe	coffee		30.67411	-96.37448	210 W 26th St	Bryan	77803	+19797038514			0.93
 0f1dd37bff4d	The Wild Grain Cafe	coffee		30.63984	-96.34882	3409 S Texas Ave	Bryan	77802	+19727623927	https://www.wildgraincafe.com/		0.97
 3ef91218552e	Tim Hortons	coffee		30.60730	-96.30923	3706 S Texas Ave	Bryan	77802			Tim Hortons	0.80
-6f8fe4a3bbb0	Tim Hortons	coffee		30.63749	-96.34701	3706 S Texas Ave	Bryan	77802	+19794507434	http://facebook.com/timhortonsbcs	Tim Hortons Cafe and Bake Shop	0.61
 45313e701286	Toasted Daybreak Cafe	coffee		30.64705	-96.33447	4012 Stillmeadow Dr	Bryan	77802	+19798100570			0.99
 9b43e5770b75	University	coffee		30.62952	-96.33263	300 University Dr.	College Station	77840		https://locations.dutchbros.com/dutch-bros-coffee-tx/college-station/300-university-dr.	Dutch Bros. Coffee	0.89
 84c12f63ace5	Villa Maria	coffee		30.63006	-96.38168	1642 W Villa Maria Rd	Bryan	77807		https://locations.dutchbros.com/dutch-bros-coffee-tx/bryan/1642-w-villa-maria-rd	Dutch Bros. Coffee	0.80
@@ -544,7 +536,6 @@ a9a3df5460fe	Animal Industries Building - ANIN	college		30.61725	-96.33724	423 T
 de8e8f7a3110	Baylor University At Independence,TX	college		30.31871	-96.35419		Brenham			www.baylor.edu/independence		0.71
 a4b4c5bd8d0c	Blinn Agricultural Sciences	college		30.15967	-96.40673	902 College Ave	Brenham	77833	+19798304653	https://www.blinn.edu/agricultural-sciences/index.html		0.62
 2469cba176b6	Blinn College	college		30.61284	-96.31461		College Station			http://www.blinn.edu/		0.97
-674adba1a932	Blinn College	college		30.61592	-96.30901		College Station			http://www.blinn.edu/		0.74
 7ef5698390b9	Blinn College	college		30.15866	-96.39253	1301 S Market St	Brenham	77833	+19792776533	http://southwestpartnersrealty.blogspot.com/2013/09/early-texas-female-education-at-baylor.html		0.95
 9e991b125076	Blinn College	college		30.64699	-96.36015	301 Post Office St	Bryan	77801	+19792097283	https://www.blinn.edu		0.97
 efb00b8048a5	Blinn College	college		30.66317	-96.35139	2423 Blinn Blvd	Bryan	77802	+19798304800	http://www.blinn.edu/twe/legal/index.html		1.00
@@ -629,7 +620,6 @@ f5cb640b681a	School of Veterinary Medicine & Biomedical Sciences	college		30.612
 45f3e2b670f0	Shenandoah, College Station, Texas	college		30.56205	-96.27753		College Station					0.68
 1c432a860b7c	South Hampton, College Station, Texas	college		30.54029	-96.24128		College Station					0.58
 b581856027c7	Southland, College Station, Texas	college		30.59390	-96.33066		College Station					0.56
-6f648a6a9dc9	STS Texas	college		30.69477	-96.29086	7320 Steep Hollow Rd	Bryan	77808				0.92
 ff2456fc7478	STS Texas	college		30.69426	-96.28984	7320 Steep Hollow Rd	Bryan	77808		http://shepherds.edu/texas		0.92
 c341928c0701	Student Computing Center	college		30.61600	-96.33805	400 Spence St	College Station	77843	+19798458306	http://tamu.edu		0.99
 2192cfb1b039	TAMHSC College Of Medicine	college		30.59865	-96.39428	8447 John Sharp Pkwy	Bryan	77807	+19794360200	http://medicine.tamhsc.edu/		0.99
@@ -666,12 +656,10 @@ c470c5157cee	Texas A&M Student Life	college		30.61393	-96.34147	471 Houston St	C
 68c87ac5437b	Texas A&M Technology Services	college		30.59956	-96.34541	1004 George Bush Dr W	College Station	77845	+19798458300	http://it.tamu.edu/		0.57
 1b17e2d84712	Texas A&M TEEX	college		30.63668	-96.53932		Caldwell					0.55
 666754a1a988	Texas A&M Turbomachinery Laboratory	college		30.59056	-96.35562	1485 George Bush Dr W	College Station	77843	+19798457417			0.92
-575bbf863758	Texas A&M University	college		30.61626	-96.29649		College Station		+19798453211	http://www.tamu.edu/		0.79
 8d0156a59df6	Texas A&M University	college		30.61869	-96.33646	400 Bizzell St	College Station	77840	+19798453211	https://www.tamu.edu/		0.99
 c4aca575437e	Texas A&M University	college		30.55710	-96.25673		College Station			http://www.tamu.edu/		0.97
 239f0c44a6b2	Texas A&M University - Brayton Fire Training Field	college		30.64454	-96.31920		College Station			https://teex.org/Pages/fire-and-emergency-services.aspx		0.74
 26fc8e3b9832	Texas A&M University - College Station	college		30.60939	-96.33514		College Station					0.97
-068883a2b3fb	Texas A&M University - Department of Nutrition	college		30.60809	-96.34954	498 Olsen Blvd	College Station	77845	+19793217060	http://nutrition.tamu.edu/		0.68
 976975386e88	Texas A&M University - Department of Nutrition	college		30.57068	-96.32349	498 Olsen Blvd	College Station	77845	+19793217060	http://nutrition.tamu.edu/		0.69
 cec85e653b41	Texas A&M University College of Architecture	college		30.61877	-96.33744	789 Ross St	College Station	77843	+19798451144	http://arch.tamu.edu/		0.99
 af260c417335	Texas A&M University Construction Science Department	college		30.62101	-96.34614	575 Ross St	College Station	77840	+19798451017	http://arch.tamu.edu/cosc		0.67
@@ -690,7 +678,6 @@ af2a492fbbef	The Texas A&M University System Office of Technology Commercializat
 5d95235a483c	Theatre Arts at Blinn College (Brenham)	college		30.16051	-96.40968	600 Blinn Blvd	Brenham	77833	+19798304269	http://www.blinn.edu/theatre/		0.92
 a7ed6a44e202	University Center Garage (UCG)	college		30.61198	-96.33916	Texas A&M University	College Station	77843	+19798627275	http://tamu.edu		0.77
 46ddfeac8ae1	University Health Services	college		30.61566	-96.34293	A.P. Beutel Health Center, 311 Houston St Bldg. 520	College Station	77843	+19794584584	https://uhs.tamu.edu/		0.99
-798c4d5739da	Wellborn, College Station, Texas	college		30.52525	-96.27271		College Station					0.92
 d2e60a2735b9	Wellborn, College Station, Texas	college		30.53449	-96.30155		College Station					0.97
 4f9f9cd28ac2	Wm Michael Barnes '64 Department of Industrial and Systems Engineering	college		30.62293	-96.33940	Emerging Technologies Building, 3131 TAMU, 101 Bizzell Street	College Station	77843	+19798455531	http://engineering.tamu.edu/industrial		0.92
 c66cd16a52fa	105 Grocery & Deli	convenience		30.32283	-96.18459	17255 TX-105	Washington	77880	+19368782273	https://105-grocery-deli.hub.biz		0.99
@@ -710,7 +697,6 @@ a5b77ad38052	4G Country Store	convenience		30.14958	-96.69135	204 Thigpen St	Car
 462b173863a8	7-Eleven	convenience		30.66550	-96.32651	600 N Earl Rudder Freeway	Bryan	77802	+19797764100	https://www.7-eleven.com/locations/tx/bryan/600-n-earl-rudder-freeway-40931	7-Eleven	0.99
 49f7698d5be7	7-Eleven	convenience		30.67834	-96.33524	2105 Williams Way	Bryan	77808	+19793178846	https://www.7-eleven.com/locations/tx/bryan/2105-e-william-joel-pkwy-41656	7-Eleven	0.92
 5757c94360b7	7-Eleven	convenience		30.55227	-96.26492	1780 Greens Prairie Road	College Station	77845	+19796906268	https://www.7-eleven.com/		0.96
-687853452c68	7-Eleven	convenience		30.17886	-96.38509	1703 Highway 105	Brenham	77833	+18002550711	https://www.7-eleven.com		0.77
 7392c734ca5c	7-Eleven	convenience		30.37664	-96.06789	10240 State Highway 6 Feeder At 1399 Spur 515	Navasota	77868	+18002550711	https://www.7-eleven.com/locations/tx/navasota/10240-state-highway-6-feeder-at-1399-spur-515-40936		0.85
 774af433885f	7-Eleven	convenience		30.67140	-96.33965	2105 E WILLIAM JOEL PKWY	Bryan	77802	+19793178846	https://www.7-eleven.com/locations/tx/bryan/2105-e-william-joel-pkwy-41656		0.77
 7b37a0df831b	7-Eleven	convenience		30.69696	-96.35747	3401 Highway 21 E	Bryan	77808	+19797782432	https://www.7-eleven.com/locations/tx/bryan/3401-highway-21-e-36567	7-Eleven	0.93
@@ -739,7 +725,6 @@ d466d88e1557	Aggies Food Mart	convenience		30.61739	-96.34687	301 Boyett St	Coll
 c2c7ce10b974	Amigos Food Mart	convenience		30.66327	-96.37469	1138 Finfeather Rd	Bryan	77803	+19797794444	http://amigos-food-mart.poi.place		0.95
 0f8388c70582	Annie's Country Store	convenience		30.39769	-96.07054	8755 N Hwy 6 Loop	Navasota	77868	+19368258171	https://www.navasotatx.gov/business-directory/annies-country-store		0.92
 6b7866a71259	ATM (Tootsie's Buy-N-Bye)	convenience		30.15042	-96.38890	2111 S Market St	Brenham	77833	+19798301494	https://tootsies-buy-n-bye-tx-2.hub.biz		0.95
-595b5ebe8d24	Aurora	convenience		30.66817	-96.40579		Bryan					0.67
 76b7a272e4f1	Aurora	convenience		30.66817	-96.40579		Bryan		+19797046020	http://aurorastoretx.com/		1.00
 2c695c83cea6	Aurora Store	convenience		30.65732	-96.34863	2305 E Villa Maria Rd	Bryan	77802	+19797046020	http://aurorastoretx.com/		0.99
 25c714d3e401	Aurora Store 103 (Gibbons Creek Store)	convenience		30.60286	-96.11655	5015 SH 30 a	Anderson	77830	+19368732477			0.97
@@ -851,7 +836,6 @@ f3e8b022ee3d	Conoco	convenience		30.53817	-96.69997	455 TX-36 N	Caldwell	77836	+
 e13bdf54901a	Convenient Food Mart	convenience		30.64468	-96.38845	902 N Harvey Mitchell Pkwy	Bryan	77803	+19797753011	https://www.convenientfoodmarts.com		0.90
 5e63b09dca9e	Cooks Point Store & Cafe	convenience		30.59654	-96.60903	7025 State Highway 21 E	Caldwell	77836	+19792728126	http://exxonmobil.com		0.95
 3491e3e7882d	Corner Store	convenience		30.58557	-96.28376	2160 Rock Prairie Rd	College Station	77845	+19796907848	http://cornerstore.com/StoreHome/1906?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.92
-4e44f6324787	Corner Store	convenience		30.13581	-96.25758	8901 Highway 290 E	Chappell Hill	77426	+19792517584	https://www.circlek.com/store-locator/us/chappell-hill/8901-us-highway-290-e/2741496		0.77
 5540d60aeea2	Corner Store	convenience		30.17825	-96.38425	1708 Hwy 105 East	Brenham	77833	+19798300478	http://circlek.com		0.77
 5de5cb1b475f	Corner Store	convenience		30.67263	-96.33971	901 N Earl Rudder Fwy	Bryan	77802	+19797764011	https://www.circlek.com/store-locator/us/bryan/901-n-earl-rudder-fwy/2740540		0.99
 710c6407fb6b	Corner Store	convenience		30.09741	-96.07816	946 Austin St	Hempstead	77445	+19798266046			0.92
@@ -955,7 +939,6 @@ e04ce8ca45da	Lazy D Feed & Foodmart	convenience		30.60207	-96.11092	5264 Highway
 b51fe151cd9d	Lost Creek Travel Plaza - Hearne Texas	convenience		30.87039	-96.58714	1656 S Market St	Hearne	77859	+19795003552	http://Www.lostcreekstore.com/		0.62
 c3477b5f7fca	Love's Travel Stop	convenience		30.89537	-96.60271	1423 N Market St	Hearne	77859	+19792799700	https://www.loves.com/	Love's Travel Stops & Country Stores	0.98
 0900a2fc8d00	Love's Truck Stop Hearne Tx	convenience		30.90693	-96.61054	1423 N Market St	Hearne	77859	+19792799700	http://www.loves.com/	Love	0.97
-719edf6d5561	Love's Truck Stop Hearne Tx	convenience		30.88266	-96.59644	1423 N Market St	Hearne	77859	+19792799700	http://www.loves.com/	Love	0.97
 0364d0a51eee	Lucky Food Mart	convenience		30.87241	-96.59798	807 W Brown St	Hearne	77859	+19792793151	https://lucky-food-mart-tx.hub.biz		0.92
 cffe680ebb59	Lucky Mart Convenience Store	convenience		30.71737	-96.38590	3329 Woodville Rd	Bryan	77803	+19797782321			0.95
 854557ce0f5a	Ludy's Country Store	convenience		30.28419	-96.57095	10088 Longpoint Rd	Burton	77835	+19792890350	http://www.rudysbbq.com		0.77
@@ -1150,7 +1133,6 @@ ddbb63d6a131	Town & Country Food Mart	convenience		30.68696	-96.37048	1401 N Tex
 7b9a8e3bdc3f	USA Food Mart	convenience		30.65772	-96.99697	513 E Cameron Ave	Rockdale	76567	+15124462123	https://usa-foodmart.hub.biz/		0.92
 00df0d71b482	Valero	convenience		30.67647	-96.36951	401 N Texas Ave	Bryan	77803	+18328720789	https://locations.valero.com/en-us/LocationDetails/Index/401-NORTH-TEXAS-AVENUE/0000025917	Valero Energy	0.92
 1a761c8c348e	Valero	convenience		30.62462	-96.33050	901 Texas Ave S	College Station	77840		https://www.valero.com		0.65
-1e85c412b2e0	Valero	convenience		30.61937	-96.31467	603 HARVEY RD	College Station	77840	+19796930769	http://www.valero.com	Valero Energy	0.92
 425e1a0963b5	Valero	convenience		30.15224	-96.39225	1900 S Market St	Brenham	77833	+18303791736	https://locations.valero.com/en-us/LocationDetails/Index/1900-S-MARKET-ST/0000010280	Valero	0.92
 44d435ea1ca0	Valero	convenience		30.58539	-96.28333	2160 Rock Prairie Rd	College Station	77845	+19796907848	http://www.valero.com	Valero Energy	0.92
 5f8720ed1831	Valero	convenience		30.89367	-96.60104	1255 N Market St	Hearne	77859	+12103452000	https://www.valero.com		0.65
@@ -1183,6 +1165,7 @@ f7fb279310ee	Antojitos Rosita	fastfood		30.84921	-96.98750	1109 W Batte St	Camer
 0c3f6c1fc082	BAD CHX - College Station, TX	fastfood		30.61815	-96.34794	303 Boyett St	College Station	77840	+19794468133	https://www.badchx.com/		0.92
 6d922c0d5d1c	Bryan High Silver Cafeteria	fastfood		30.65517	-96.33471	3450 Campus Dr	Bryan	77802	+19792092400	http://bryanhs.bryanisd.org/		0.99
 0a36a69fce08	Burger King	fastfood		30.39638	-96.07395	1605 E Washington Ave	Navasota	77868	+19368252911	https://burgerking.com/store-locator/store/27521	Burger King	0.94
+10e49387bfec	Burger King	fastfood	burger restaurant	30.65807	-96.34835	2401 E 29th St	Bryan	77802	+19797760246	https://burgerking.com/store-locator/store/15997	Burger King	0.99
 3d1f00f301c1	Burger King	fastfood		30.18156	-96.93367	476 E Austin St	Giddings	78942	+19795423059	https://burgerking.com/store-locator/store/19335	Burger King	0.99
 4f5e6b027b8c	Burger King	fastfood		30.17664	-96.40072	1101 N Park St	Brenham	77833	+19793535538	https://burgerking.com/store-locator/store/23371	Burger King	0.96
 6104870620e8	Burger King	fastfood		30.13954	-96.39519	2749 Highway 36 S	Brenham	77833		http://www.bk.com		0.77
@@ -1205,6 +1188,9 @@ f929fc395a07	Chick-fil-A	fastfood		30.65970	-96.33102	2210 Briarcrest Dr	Bryan	7
 3a8fa567fc95	Chicken Express	fastfood		30.64042	-96.31261	710 Earl Rudder Fwy	College Station	77840	+19798467781	http://chickene.com/	Chicken Express	0.99
 80fc7cbac45c	Chicken Express	fastfood		30.67027	-96.37001	401 S Texas Ave	Bryan	77803	+19798235222	http://www.chickene.com/	Chicken Express	0.99
 b432df936418	Chicken Express	fastfood		30.88026	-96.59470	106 W 2nd St	Hearne	77859	+19792793333	http://chickene.com/	Chicken Express	0.96
+b7d3d7720201	Chipotle Mexican Grill	fastfood	mexican restaurant	30.62228	-96.34135	815 University Dr	College Station	77840	+19792602282	https://locations.chipotle.com/tx/college-station/815-university-dr?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
+c52fe9b7d49c	Chipotle Mexican Grill	fastfood	mexican restaurant	30.59060	-96.33046	1437 Wellborn Rd	College Station	77840	+19793075083	https://locations.chipotle.com/tx/college-station/1437-wellborn-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D3753	Chipotle Mexican Grill	0.94
+f637a32fd869	Chipotle Mexican Grill	fastfood	mexican restaurant	30.63927	-96.31744	1505 University Dr E	College Station	77840	+19792604824	https://locations.chipotle.com/tx/college-station/1505-university-dr-e?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	1.00
 33f915e7d310	Church's Chicken	fastfood		30.39625	-96.07211	1720 E Washington Ave	Navasota	77868	+19368253898	https://churchs.com		0.92
 325da061007f	Church's Texas Chicken	fastfood		30.53832	-96.69567	253 Highway 36 N.	Caldwell	77836	+19795671400	https://locations.churchs.com/tx/caldwell/253-highway-36-n.	Church's Chicken	0.96
 6b9d6f7b8bbf	Church's Texas Chicken	fastfood		30.67781	-96.36919	507 N. Texas Avenue	Bryan	77801	+19798225216	https://locations.churchs.com/tx/bryan/507-n.-texas-avenue	Church's Chicken	0.99
@@ -1226,6 +1212,17 @@ ec110c864c1b	Dairy Queen	fastfood		30.65132	-96.33502	3507 E 29th St	Bryan	77802
 f33b335d93a2	Dairy Queen	fastfood		30.85346	-96.97665	202 W 4th St	Cameron	76520	+12546973401	http://www.dairyqueen.com/	Dairy Queen	0.94
 fb8bba2db740	Dairy Queen	fastfood		30.18134	-96.92835	977 E Austin St	Giddings	78942	+19792125005	https://www.dairyqueen.com/en-us/locations/tx/giddings/977-e-austin-st/45250/?y_source=1_MTE1OTQxMjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
 c193e162166c	Daylight Donuts	fastfood		30.62719	-96.30587	1403 Harvey Rd	College Station	77840			Daylight Donuts	0.80
+038a8c96db0b	Domino's	fastfood	pizza restaurant	30.85644	-96.99414	2208 W 4th Ave	Cameron	76520	+12546050999	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.93
+1af46f6fb05d	Domino's	fastfood	pizza restaurant	30.17876	-96.91378	2490 E Austin Ave	Giddings	78942	+19792891991	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+8d5ce16cc779	Domino's	fastfood	pizza restaurant	30.63034	-96.37849	1525 W. Villa Maria Road	Bryan	77807	+19798230010	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+ac5881ddc269	Domino's	fastfood	pizza restaurant	30.39080	-96.09143	415 N Lasalle St	Navasota	77868	+19367275173	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+c067e871a60e	Domino's	fastfood	pizza restaurant	30.62252	-96.30972	900 Harvey Rd	College Station	77840	+19796966066	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+c8faf0d0eea0	Domino's	fastfood	pizza restaurant	30.67159	-96.34039	2211 Wm J Bryan Pkwy	Bryan	77802	+19797745567	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+fd0acbc248c9	Domino's	fastfood	pizza restaurant	30.09687	-96.07664	817 Austin St	Hempstead	77445	+19797108181	http://www.dominos.com/	Domino's Pizza	0.96
+44e84ab6ebd9	Domino's Pizza	fastfood	pizza restaurant	30.56868	-96.32967	1799 Kerr Valley Ln	College Station	77845	+19796935200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+7b535a79bea6	Domino's Pizza	fastfood	pizza restaurant	30.61868	-96.34536	409 A University Dr	College Station	77840	+19798466666	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+b383cc292bda	Domino's Pizza	fastfood	pizza restaurant	30.14057	-96.39792	401 Highway 290 W	Brenham	77833	+19792519063	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
+f38c2d30d54b	Domino's Pizza	fastfood	pizza restaurant	30.56249	-96.26312	4400 Texas 6 Frontage Rd	College Station	77845	+19794311424	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 12062ec8e8d2	DQ Grill & Chill	fastfood		30.87482	-96.59495	408 W Brown St	Hearne	77859		https://www.dairyqueen.com/en-us/locations/tx/hearne/408-w-brown-st/3970	DQ Grill & Chill	0.80
 1f58c3803dd3	DQ Grill & Chill	fastfood		30.85392	-96.97740	202 W 4th St	Cameron	76520		https://www.dairyqueen.com/en-us/locations/tx/cameron/202-w-4th-st/3668	DQ Grill & Chill	0.80
 3eec0dd7fc10	DQ Grill & Chill	fastfood		30.34925	-96.53130	17147 State Highway 36 N	Somerville	77879		https://www.dairyqueen.com/en-us/locations/tx/somerville/17147-state-highway-36-n/4389	DQ Grill & Chill	0.80
@@ -1241,11 +1238,16 @@ ef3af001f3cf	DQ Grill & Chill	fastfood		30.39044	-96.08430	706 E Washington Ave	
 f89ce82ddd86	DQ Grill & Chill	fastfood		30.16687	-96.42915	2254 Hwy 290 W	Brenham	77833		https://www.dairyqueen.com/en-us/locations/tx/brenham/2254-hwy-290-w/42	DQ Grill & Chill	0.80
 cf6769e6d994	Dunkin Donuts	fastfood		30.09690	-96.06901	2000 FM 1488 Rd, Pilot Travel Center	Hempstead	77445		https://www.dunkindonuts.com/locations/us/tx/hempstead/2000-fm-1488-rd/store-358142/	Dunkin'	0.80
 b0aceb59cdb3	Fat Shack	fastfood		30.62169	-96.35332	4309 Wellborn Rd	Bryan	77801	+19797046765	http://Fatshack.com/	Fat Shack	0.99
+275f240d6fe2	Firehouse Subs	fastfood	sandwich shop	30.61717	-96.32067	1507 Texas Avenue South	College Station	77840	+19797035983	http://www.firehousesubs.com/	Firehouse Subs	0.99
 0e457600a377	Five Guys	fastfood		30.62114	-96.34329	711 University Dr E Ste 100	College Station	77840	+19797031530	https://www.fiveguys.com		0.95
 b0fc9e91521f	Five Guys	fastfood		30.63339	-96.32898	711 University Dr E Unit 100 Unit 100	College Station	77840	+19797031530	https://restaurants.fiveguys.com/711-university-drive-e	Five Guys	0.97
+200d091826b4	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	30.55662	-96.26242	913 William D Fitch Pkwy Ste 100	College Station	77845	+19796901187	https://www.freddys.com/location/college-station-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
+356614148111	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	30.67424	-96.33795	930 N Earl Rudder Fwy	Bryan	77808	+19797763549	https://www.freddys.com/location/bryan-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
 509bf8d16053	Golden Chick	fastfood		30.18020	-96.41943	1480 State Hwy 36 N	Brenham	77833	+19728310911	https://locations.goldenchick.com/tx/brenham/1368/		0.99
 a16ddfaca0bc	Golden Chick	fastfood		30.85357	-96.97867	405 W 4th St	Cameron	76520	+12546972000	https://locations.goldenchick.com/tx/cameron/1005/	Golden Chick	0.97
 ca9bcfb3d0dd	Golden Chick	fastfood		30.18210	-96.93194	615 E Austin St	Giddings	78942	+19795420803	https://locations.goldenchick.com/tx/giddings/1055/	Golden Chick	0.98
+e6fbaf975f08	Golden Chick	fastfood		30.88070	-96.58441	811 Brown	Hearne	77859	+19792795652			0.85
+ee204adc24a4	Golden Chick	fastfood	american restaurant	30.53559	-96.69200	201 N. Green St.	Caldwell	77836	+19795679460	http://locations.goldenchick.com/tx/caldwell/1079/		0.77
 6a3b976770c6	Golden Fried Chicken	fastfood		30.53557	-96.69199	198 State Highway 36 S	Caldwell	77836	+19795679460	https://thejonesassembly.com		0.55
 41f985d65d25	Great Wraps	fastfood		30.62148	-96.34280	717 University Dr Ste 171	College Station	77840	+19795059727	http://ajreed2.wix.com/aggiegreatwraps		0.92
 b1a849ee788f	Helados Exprés	fastfood		30.65869	-96.36926	1114 S Coulter Dr	Bryan	77803				0.92
@@ -1254,8 +1256,15 @@ b1a849ee788f	Helados Exprés	fastfood		30.65869	-96.36926	1114 S Coulter Dr	Brya
 5e8db32b45be	Jack in the Box	fastfood		30.14311	-96.39712	400 Highway 290 W	Brenham	77833	+19798362657	https://www.jackinthebox.com		0.96
 7c77304199f3	Jack in the Box	fastfood		30.61693	-96.32160	1504 Texas Ave S	College Station	77840	+19796972099	https://www.jackinthebox.com		0.99
 a4567918bfee	Jack in the Box	fastfood		30.10526	-96.04939	1925 Fm 1488 Rd	Hempstead	77445	+19799210695	https://www.jackinthebox.com		0.99
+b57fbd52ba06	Jack in the Box	fastfood	taco restaurant	30.65096	-96.36159	1504 Texas Ave S Hwy 6	College Station	77840	+19796934310	http://www.jackinthebox.com/locations/683		0.85
 c6372a1765a3	Jack in the Box	fastfood		30.67104	-96.33965	900 N Earl Rudder Fwy	Bryan	77802	+19797318893	https://www.jackinthebox.com		0.99
 d9bc344095ef	Jefferson Eats	fastfood		30.88027	-96.59660	309 W 3rd St	Hearne	77859				0.59
+0cb4c6240458	Jersey Mike's	fastfood	sandwich shop	30.58360	-96.32346	11663 FM 2154 Suite 200	College Station	77845	+19793930012	https://www.jerseymikes.com/15145/college-station-tx	Jersey Mike's Subs	0.99
+7be8ef50e19d	Jersey Mike's	fastfood	sandwich shop	30.66630	-96.32257	3001 Wildflower Drive Unit 711	Bryan	77802	+19794851661	https://www.jerseymikes.com/15198/bryan-tx	Jersey Mike's Subs	1.00
+98e9c25584de	Jersey Mike's	fastfood	sandwich shop	30.58443	-96.28235	4001 State Highway 6 Suite 900	College Station	77845	+19799770779	https://www.jerseymikes.com/15113/college-station-tx	Jersey Mike's Subs	0.96
+59620d2d73b2	Jimmy John's	fastfood	sandwich shop	30.58283	-96.28632	3505 Longmire Dr Ste. D	College Station	77845	+19796962035	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-2041.html	Jimmy John's	0.99
+939b40e44aa4	Jimmy John's	fastfood	sandwich shop	30.61202	-96.31580	2002 Texas Ave S	College Station	77840	+19796936400	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-616.html	Jimmy John's	0.91
+d071c009f0b7	Jimmy John's	fastfood	sandwich shop	30.62856	-96.33328	200 University Dr E	College Station	77840	+19796959200	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-1227.html	Jimmy John's	0.99
 1d4517852859	KFC	fastfood		30.14206	-96.39681	401 Highway 290 W	Brenham	77833	+19798363904	http://www.kfc.com/storelocator/Default.aspx?address=401%20East%20Highway%20290,Brenham,TX		0.92
 4ab76f912a22	KFC	fastfood		30.64043	-96.34920	3321 S Texas Ave	Bryan	77802	+19798463238	https://locations.kfc.com/tx/bryan/3321-texas-avenue	KFC	0.99
 5b629160229b	KFC	fastfood		30.60734	-96.30780	2501 Texas Avenue	College Station	77840	+19796932331	https://locations.kfc.com/tx/college-station/2501-texas-avenue	KFC	0.99
@@ -1264,9 +1273,18 @@ ce4600a86447	Krispy Krunchy Chicken	fastfood		30.71155	-96.37292	3405 Tabor Rd	B
 f8023213ed25	L.A. Chicken Shack	fastfood		30.16913	-96.39048	100 N Chappell Hill St	Brenham	77833	+19794218160	http://lachickenshack.com		0.99
 75d86cb779f0	Layne's Chicken Fingers	fastfood		30.55225	-96.26502	1780 Greens Prairie Rd	College Station	77845	+19797046422	http://www.layneschickenfingers.com	Layne's Chicken Fingers	0.99
 8a77f2a50fda	Layne's Chicken Fingers	fastfood		30.59259	-96.33134	1301 Wellborn Rd	College Station	77840	+19796966933	https://LaynesChickenFingers.short.gy/LaynesWellborn	Layne's Chicken Fingers	0.99
+1c2ca0569dac	Little Caesars Pizza	fastfood	pizza restaurant	30.67168	-96.33549	2290 Boonville Rd SUITE 900	Bryan	77808	+19797767171	https://littlecaesars.com/en-us/store/7874	Little Caesars	0.99
+2e0a00dd70b1	Little Caesars Pizza	fastfood	pizza restaurant	30.66703	-96.32458	3141 Briarcrest Dr Ste 516	Bryan	77802	+19797747974	https://littlecaesarsstore.com		0.55
+439973f6fad0	Little Caesars Pizza	fastfood	pizza restaurant	30.15355	-96.39795	1608 S Day St	Brenham	77833	+19798308181	https://littlecaesars.com/en-us/store/9416	Little Caesars	0.98
+4fa8b4412b0a	Little Caesars Pizza	fastfood	pizza restaurant	30.60789	-96.30800	2501 Texas Ave S Ste 101	College Station	77840	+19796960191	https://littlecaesars.com/en-us/store/2822	Little Caesars	0.95
+76aaed6da5f2	Little Caesars Pizza	fastfood	pizza restaurant	30.64462	-96.35329	803 Dellwood St	Bryan	77802	+19798223000	https://littlecaesars.com/en-us/store/9646	Little Caesars	0.99
+7d885e077813	Little Caesars Pizza	fastfood	pizza restaurant	30.57134	-96.31003	12727 Farm to Market Rd 2154	College Station	77845	+19796935309	https://littlecaesars.com/en-us/store/10316	Little Caesars	1.00
+9a18d7d55296	Little Caesars Pizza	fastfood	pizza restaurant	30.18017	-96.92007	1799 E Austin St	Giddings	78942	+19795420002	https://littlecaesars.com/en-us/store/11418	Little Caesars	0.96
+ac43c85acdae	Long John Silver's	fastfood	seafood restaurant	30.10539	-96.04846	Hempstead, TX 77445	Hempstead	77445	+19798268522	http://www.ljsilvers.com		0.77
 cc80cb2764b7	Long John Silver's	fastfood		30.64084	-96.35068	3224 S Texas Ave	Bryan	77801	+19797793995	https://www.ljsilvers.com/?y_source=1_MTc1NzMxNzYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
 5fbe8d2586ea	Manchu Wok	fastfood		30.63000	-96.30000	1500 Harvey Road College Station, TX 77840					Manchu Wok	0.80
 00d00c87ef8b	McDonald's	fastfood		30.09701	-96.07883	1005 Austin St	Hempstead	77445	+19798268515	https://www.mcdonalds.com/us/en-us/location/tx/hempstead/1005-austin-st/10442.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+1e03d92ca7ff	McDonald's	fastfood	burger restaurant	30.60393	-96.33930	111 George Bush Dr	College Station	77840	+19796933777	https://www.mcdonalds.com/us/en-us/location/tx/college-station/111-george-bush-dr/17309.html?cid=RF:YXT:RoN::Clicks		0.98
 26eaff6ee8cf	McDonald's	fastfood		30.66585	-96.32724	608 N Earl Rudder Parkway	Bryan	77802	+12818422157	https://www.mcdonalds.com/us/en-us/location/tx/bryan/608-n-earl-rudder-parkway/36937.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 2ed7d391c111	McDonald's	fastfood		30.87583	-96.59131	906 S Market	Hearne	77859	+19792796111	https://www.mcdonalds.com/us/en-us/location/tx/hearne/906-s-market/24678.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 2f85f06cb962	McDonald's	fastfood		30.89549	-96.60275	1425 N Market St	Hearne	77859	+19792799877	https://www.mcdonalds.com/us/en-us/location/tx/hearne/1425-n-market-street/34909.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.92
@@ -1288,18 +1306,51 @@ f892396277ad	McDonald's	fastfood		30.69536	-96.36145	2930 E Hwy 21	Bryan	77803	+
 2e0b2cf9d46c	MOD Pizza	fastfood		30.58798	-96.31391	11655 FM 2154	College Station	77840	+19796395540	https://modpizza.com/locations/college-station-south/		0.85
 40ac5691f14f	Noe's Kitchen	fastfood		30.77680	-96.49062	10915 Hwy 6	Bryan	77807	+19797033852	https://www.facebook.com/share/1Cic9sKERk/?mibextid=wwXIfr		0.96
 22fd76e3ea4a	Panda Express	fastfood		30.61176	-96.34094	275 Joe Routt Blvd Ste L319	College Station	77840	+19792687570	https://www.pandaexpress.com/locations/tx/college-station/2108		0.99
+2a0debff4556	Panda Express	fastfood	chinese restaurant	30.64316	-96.35218	725 E Villa Maria Rd	Bryan	77802	+19797790645	http://www.pandaexpress.com/	Panda Express México	0.92
+6519fd3504ef	Panda Express	fastfood	chinese restaurant	30.65895	-96.33173	2206 Briarcrest Dr	Bryan	77802	+19794311666	www.pandaexpress.com		0.92
 70015ac72932	Panda Express	fastfood		30.63406	-96.37917	639 N Harvey Mitchell Pkwy	Bryan	77803	+19797751732	http://www.pandaexpress.com/	Panda Express México	0.98
 c3ba279cad8a	Panda Express	fastfood		30.61810	-96.32335	1400 Texas Ave. South	College Station	77840	+19796963687	http://www.pandaexpress.com/	Panda Express México	0.99
 f33b2182b10b	Panda Express	fastfood		30.62242	-96.33759	300 Polo Rd Ste 129	College Station	77840	+19797738811	https://www.pandaexpress.com/locations/tx/college-station/3320		0.92
 bfa55ca99a49	Papa G's Old Fashioned Burger	fastfood		30.52481	-96.71042	1515 Presidential Corridor W	Caldwell	77836	+19795674700	https://www.linkedin.com/in/papa-s-burgers-5785957b		0.92
+5b81fbfd47a6	Papa John's Pizza	fastfood	pizza restaurant	30.68973	-96.37138	1601 N Texas Ave Ste 120	Bryan	77803	+19797781500	https://www.papajohns.com/		0.98
+91c6d9441831	Papa John's Pizza	fastfood	pizza restaurant	30.61990	-96.34409	601 University Dr	College Station	77840	+19798463600	http://www.papajohns.com		0.92
+2a0337c0a98a	Papa Johns Pizza	fastfood	pizza restaurant	30.63988	-96.31358	1741 University Dr E	College Station	77840	+19798463600	https://locations.papajohns.com/united-states/tx/77840/college-station/1741-university-drive-e?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA1OTI1ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+3d099cd9a81f	Papa Johns Pizza	fastfood	pizza restaurant	30.14333	-96.39419	228 Hwy 290 W	Brenham	77833	+19798367272	https://locations.papajohns.com/united-states/tx/77833/brenham/228-hwy-290-west?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM2NDgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+555d7c1b7ec4	Papa Johns Pizza	fastfood	pizza restaurant	30.58274	-96.28784	1740 Rock Prairie Rd	College Station	77845	+19796800508	https://locations.papajohns.com/united-states/tx/77845/college-station/1740-rock-prairie-road?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA1OTI1ODgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+055b6862950c	Pizza Hut	fastfood	pizza restaurant	30.18343	-96.94221	556 W Austin St	Giddings	78942	+19795423011	http://www.pizzahut.com		0.92
+070c4d35256c	Pizza Hut	fastfood	pizza restaurant	30.15450	-96.39841	1504 S Day St Washington	Brenham	77833	+19793531383	https://locations.pizzahut.com/tx/brenham/1504-s-day-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315687	Pizza Hut	0.97
+11559c373d48	Pizza Hut	fastfood	pizza restaurant	30.09363	-96.06064	637 Hwy 290 Waller	Hempstead	77445	+19798268001	https://locations.pizzahut.com/tx/hempstead/637-hwy-290?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299503	Pizza Hut	0.99
+16784b601329	Pizza Hut	fastfood	pizza restaurant	30.55570	-96.26498	1295 Arrington Rd Brazos	College Station	77845	+19793930538	https://locations.pizzahut.com/tx/college-station/1295-arrington-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315661	Pizza Hut	0.93
+3ca788ecb1cc	Pizza Hut	fastfood		30.58712	-96.28757	3800 Texas-Frontage Ave S	College Station	77845	+19796939393	https://locations.pizzahut.com/tx/college-station/3800-state-hwy-6?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300000	Pizza Hut	0.92
+4dc825d6c6ff	Pizza Hut	fastfood	pizza restaurant	30.87541	-96.59097	1002 S Market St Robertson	Hearne	77859	+19792795386	https://locations.pizzahut.com/tx/hearne/1002-s-market-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291341	Pizza Hut	0.94
+59df0d7ee423	Pizza Hut	fastfood		30.14386	-96.39886	2540 S Day St	Brenham	77833	+19798364261	https://locations.pizzahut.com/tx/brenham/2540-south-day-street	Pizza Hut	0.93
+5c094d9bc3e2	Pizza Hut	fastfood	pizza restaurant	30.85442	-96.98010	600 W 4th St Milam	Cameron	76520	+12546974941	https://locations.pizzahut.com/tx/cameron/600-w-4th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285508	Pizza Hut	0.96
+5d8b7f98fcdf	Pizza Hut	fastfood	pizza restaurant	30.63073	-96.38079	1622 W Villa Maria Rd Brazos	Bryan	77807	+19796962512	https://locations.pizzahut.com/tx/bryan/1622-w-villa-maria-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313888	Pizza Hut	0.99
+79195a74d14c	Pizza Hut	fastfood	pizza restaurant	30.61210	-96.31583	2002 Texas Ave S Brazos	College Station	77840	+19798463355	https://locations.pizzahut.com/tx/college-station/2002-texas-ave-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314381	Pizza Hut	0.94
+8fe01fb38f7e	Pizza Hut	fastfood	pizza restaurant	30.60803	-96.31870	1103 Anderson St	College Station	77840	+19796939393	http://pizzahut.com/		0.77
+a8620818bac0	Pizza Hut	fastfood	pizza restaurant	30.18087	-96.92745	1088 E Austin St	Giddings	78942	+19792125009	https://locations.pizzahut.com/tx/giddings/1088-east-austin-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309242	Pizza Hut	0.95
+c09d590a25e5	Pizza Hut	fastfood	pizza restaurant	30.39714	-96.06966	9305 Hwy 90 South Grimes	Navasota	77868	+19368257273	https://locations.pizzahut.com/tx/navasota/9305-hwy-90-south?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298974	Pizza Hut	0.98
+c5da89fc0b35	Pizza Hut	fastfood	pizza restaurant	30.66637	-96.32288	3001 Wildflower Drive Brazos	Bryan	77802	+19797743222	http://www.pizzahut.com/	Pizza Hut	0.99
+cdf129b7bd4a	Pizza Hut	fastfood	pizza restaurant	30.53714	-96.69210	300 N Green St Burleson	Caldwell	77836	+19795677996	https://locations.pizzahut.com/tx/caldwell/300-n-green-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292655	Pizza Hut	0.97
+e2e5191366da	Pizza Hut	fastfood	pizza restaurant	30.11791	-96.09005	637 Hwy 290	Hempstead	77445		https://locations.pizzahut.com/tx/hempstead/637-hwy-290	Pizza Hut	0.80
+ee44c53e8f47	Pizza Hut	fastfood	pizza restaurant	30.62818	-96.33389	102 University Dr	College Station	77840	+19796962512	http://www.pizzahut.com		0.77
+4492b96d793b	Pizza Hut Express	fastfood	pizza restaurant	30.63548	-96.30257	1401 Earl Rudder Frwy S., Movies 18 Ste 182	College Station	77845		https://locations.pizzahut.com/tx/college-station/1401-earl-rudder-frwy-s		0.97
+7ae9d5cdfb07	Pizza Hut Express	fastfood	pizza restaurant	30.66528	-96.32173	3061 Wildflower Dr	Bryan	77802	+18009488488	https://locations.pizzahut.com/tx/bryan/3061-wildflower-drive	Pizza Hut	0.96
 9cb7ee0fee0e	Pizza Hut Express	fastfood		30.58375	-96.38950	5688 Raymond Stotzer Parkway	College Station	77845		https://locations.pizzahut.com/tx/college-station/5688-raymond-stotzer-parkway	Pizza Hut	0.80
+b41f82d6aa8f	Pizza Ranchini	fastfood	pizza restaurant	30.67200	-96.37775	405 W 28th St #5	Bryan	77803	+19795718580	http://www.pizzahut.com/	Pizza Hut Jamaica	0.92
 faabf13c3e44	Popeyes	fastfood		30.60772	-96.31029	2422 Texas Ave South	College Station	77840	+15125935759	https://www.popeyes.com/store-locator/store/restaurant_240385	Popeyes Louisiana Kitchen	0.97
 0d2f71e9c4a7	Popeyes Louisiana Kitchen	fastfood		30.63155	-96.37809	505 N Harvey Mitchell Pkwy	Bryan	77807	+19797750994	http://www.popeyes.com/	Popeyes Louisiana Kitchen	0.99
 535b11e3419d	Popeyes Louisiana Kitchen	fastfood		30.67156	-96.33601	890 N Earl Rudder Fwy	Bryan	77802	+19797762671	http://www.popeyes.com/	Popeyes Louisiana Kitchen	0.99
 d4a0491cfe9c	Popeyes Louisiana Kitchen	fastfood		30.39676	-96.06995	9319 TX-90	Navasota	77868	+19368255029	https://www.popeyes.com/store-locator/store/restaurant_82968	Popeyes Louisiana Kitchen	1.00
 ec20d7f56622	Popeyes Louisiana Kitchen	fastfood		30.58948	-96.31561	1800 Harvey Mitchell Pkwy S	College Station	77845	+19796964678	http://www.popeyes.com		0.92
+e52ce36f4e6a	Potbelly	fastfood	sandwich shop	30.61872	-96.34530	409B University Dr	College Station	77840	+19792604620	https://www.potbelly.com/locations/texas/college-station	Potbelly Sandwich Shop	0.99
 bcac9ab16a93	Raising Cane's	fastfood		30.65863	-96.33220	2204 Briarcrest Drive	Bryan	77802	+19797314843	https://locations.raisingcanes.com/tx/bryan/2204-briarcrest-drive	Raising Cane's Chicken Fingers	0.99
 ee6f798a0758	Raising Cane's	fastfood		30.62273	-96.32771	1045 Texas Avenue	College Station	77840	+19796962800	https://locations.raisingcanes.com/tx/college-station/1045-texas-avenue	Raising Cane's Chicken Fingers	0.99
+83fafcdf3d25	Raising Cane's Chicken Fingers	fastfood	chicken restaurant	30.62397	-96.30415	1500 Harvey Rd Ste 4034	College Station	77840	+19796967300	http://raisingcanes.com/		0.99
+2c4d6f9dbb84	Schlotzsky's	fastfood	sandwich shop	30.62272	-96.34180	107 College Ave	College Station	77840	+19792602867	www.schlotzskys.com		0.99
+becd9fb2ddc9	Schlotzsky's	fastfood	sandwich shop	30.59844	-96.30233	2210 Harvey Mitchell Pkwy S	College Station	77845	+19796808150	https://locations.schlotzskys.com/tx/college-station/2210-harvey-mitchell-parkway-south?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
+d54e3596b618	Schlotzskys	fastfood	sandwich shop	30.14141	-96.39626	2606 TX-36	Brenham	77833	+19794216340	https://locations.schlotzskys.com/tx/brenham/2606-highway-36-south?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
+6552812f3013	Smashburger	fastfood	burger restaurant	30.61707	-96.34380	233 N Houston St	College Station	77841	+19798476167	https://smashburger.com/locations/us/tx/college-station/233-houston-st/		0.95
 0e9fbb62be93	Sonic Drive In	fastfood		30.57099	-96.30951	12755 Fm 2154	College Station	77845	+19796945336	https://locations.sonicdrivein.com/tx/collegestation/12755-fm-2154.html	Sonic Drive-In	0.98
 0eba0eb7e546	Sonic Drive In	fastfood		30.39747	-96.06918	9249 Highway 90 South	Navasota	77868	+19368252799	https://locations.sonicdrivein.com/tx/navasota/9249-highway-90-south.html	Sonic Drive-In	0.98
 12e4ae9e3a78	Sonic Drive In	fastfood		30.53514	-96.69124	230 Highway 36 South	Caldwell	77836	+19795677911	https://locations.sonicdrivein.com/tx/caldwell/230-highway-36-south.html	Sonic Drive-In	0.98
@@ -1313,10 +1364,38 @@ edb6bcd9e778	Sonic Drive In	fastfood		30.66430	-96.37175	914 South Texas Avenue	
 efed05c6a954	Sonic Drive In	fastfood		30.59798	-96.29843	2900 Texas Avenue South	College Station	77840	+19796930087	https://locations.sonicdrivein.com/tx/collegestation/2900-texas-avenue-south.html	Sonic Drive-In	0.99
 fdd3c74747ec	Sonic Drive In	fastfood		30.61888	-96.31415	512 Harvey Rd	College Station	77840	+19796808051	https://locations.sonicdrivein.com/tx/collegestation/512-harvey-road.html	Sonic Drive-In	0.96
 5327f16b7515	Sonic Drive-In	fastfood		30.35382	-96.53583	16738 State Highway 36 S	Somerville	77879	+19795961100	https://locations.sonicdrivein.com/tx/somerville/16738-state-highway-36-south.html	Sonic Drive-In	0.92
-84b72096f3b8	Sonic Drive-In	fastfood		30.34088	-96.52483	16738 State Highway 36 S	Somerville	77879	+19795961100	https://locations.sonicdrivein.com/tx/somerville/16738-state-highway-36-south.html		0.85
+56fc8455fe57	Sonic Drive-In	fastfood	burger restaurant	30.13149	-96.22154	11215 US Highway 290 E	Manor	78653	+15122781434	https://locations.sonicdrivein.com/tx/manor/11215-us-highway-290-e.html		0.85
 9a882354ace3	Sonic Drive-In	fastfood		30.10736	-96.04613	2045 FM 1488	Hempstead	77445	+19798266336	https://locations.sonicdrivein.com/tx/hempstead/2045-fm-1488.html	Sonic Drive-In	0.99
 ed5e547a0702	Springers Chevron & Cafe Express	fastfood		30.63135	-96.30128	2601 Harvey Rd	College Station	77845	+19796950020	https://www.chevron.com		0.55
+0f7a87aff818	SUBWAY	fastfood	sandwich shop	30.63140	-96.37812	Villa Maria	Bryan	77807		http://subway.com		0.77
+128497fba512	Subway	fastfood	sandwich shop	30.58765	-96.33871	2048 Holleman Dr W	College Station	77840	+19796966045	https://restaurants.subway.com/united-states/tx/college-station/2048-holleman	Subway	0.96
+1eca8410a5eb	Subway	fastfood	sandwich shop	30.10796	-96.04739	2000 FM 1488	Hempstead	77445	+19798266606	https://restaurants.subway.com/united-states/tx/hempstead/2000-fm-1488	Subway	0.99
+24ce010a28f9	Subway	fastfood	sandwich shop	30.63083	-96.38083	1622 W. Villa Maria Suite 150	Bryan	77807	+19797797756	http://subway.com/	Subway	0.97
+2b59b79ada32	Subway	fastfood	sandwich shop	30.59776	-96.30069	1815 Brothers Blvd	College Station	77840	+19796934975	https://restaurants.subway.com/united-states/tx/college-station/1815-brothers-blvd	Subway	0.99
+3386407a0636	SUBWAY	fastfood	sandwich shop	30.59506	-96.30875	2031 Harvey Mitchell Pkwy S	College Station	77840	+19796933933	http://www.subway.com/		0.92
+36c9bd0228fa	Subway	fastfood	sandwich shop	30.17876	-96.38526	1701 State Hwy 105	Brenham	77833	+19792519400	https://restaurants.subway.com/united-states/tx/brenham/1701-state-hwy-105	Subway	0.95
+3a350fad7d76	Subway	fastfood	sandwich shop	30.85314	-96.97581	102 W 4th St	Cameron	76520	+12546974977	https://www.subway.com		0.99
+4237e18e7397	Subway	fastfood	sandwich shop	30.63184	-96.38133	643 N. Harvey Mitchell Pkwy. Suite 150	Bryan	77807	+19798221581	http://www.subway.com/en-us	Subway	0.97
+447a347c69b5	Subway	fastfood	sandwich shop	30.64318	-96.35222	725 E Villa Maria Suite 900	Bryan	77802	+19798237827	http://subway.com/	Subway	0.98
+70cdea1d27e3	Subway	fastfood	sandwich shop	30.67352	-96.33514	2305 Booneville Rd Suite 750	Bryan	77808	+19797311847	https://restaurants.subway.com/united-states/tx/bryan/2305-booneville-rd	Subway	0.98
+777c5253e639	Subway	fastfood	sandwich shop	30.39670	-96.07319	1695 E Washington Ave	Navasota	77868	+19368703367	https://www.subway.com		0.98
+7841c76c2c9d	Subway	fastfood	sandwich shop	30.53848	-96.69589	271 Hwy 36 North	Caldwell	77836	+19795677827	https://restaurants.subway.com/united-states/tx/caldwell/271-hwy-36-north	Subway	0.95
+7f3d42ecd842	Subway	fastfood	sandwich shop	30.88272	-96.59635	100 N Market St	Hearne	77859	+19792800866	https://restaurants.subway.com/united-states/tx/hearne/100-n-market-st	Subway	0.93
+8c1b67296f14	Subway	fastfood	sandwich shop	30.57026	-96.30900	12815 FM 2154 Suite 100	College Station	77845	+19796939173	https://restaurants.subway.com/united-states/tx/college-station/12815-fm-2154	Subway	0.97
+8cdf5cd9ab29	Subway	fastfood	sandwich shop	30.67387	-96.37351	100 N Main Suite 110	Bryan	77803	+19798233147	https://restaurants.subway.com/united-states/tx/bryan/100-n-main	Subway	0.99
+91b6d11c027a	Subway	fastfood	sandwich shop	30.13389	-96.26062	8780 Highway 290 E	Chappell Hill	77426	+19794219225	https://restaurants.subway.com/united-states/tx/chappell-hill/8780-hwy-290-east	Subway	0.95
+928f1848511b	Subway	fastfood	sandwich shop	30.61996	-96.34408	601 University Dr Ste 103	College Station	77840	+19798462165	https://www.subway.com		0.95
+964bbde49977	Subway	fastfood	sandwich shop	30.63974	-96.31232	806 S Earl Rudder Fwy	College Station	77840	+19798467533	https://restaurants.subway.com/united-states/tx/college-station/806-earl-rudder-fwy	Subway	0.99
+9bf79648aaeb	Subway	fastfood	sandwich shop	30.17879	-96.91385	2458 E. Austin Suite 110	Giddings	78942	+19795429601	https://restaurants.subway.com/united-states/tx/giddings/2458-e-austin	Subway	0.95
+9ec58f28eb35	Subway	fastfood	sandwich shop	30.60567	-96.33740	330 George Bush Dr	College Station	77840	+19796930346	https://restaurants.subway.com/united-states/tx/college-station/330-george-bush-dr?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=10897&utm_campaign=evergreen-2020&y_source=1_MTQ5MTEwMTctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+a218bb6c7241	SUBWAY	fastfood	sandwich shop	30.53583	-96.69244	170 State Highway 36 N	Caldwell	77836	+19795673254	http://www.subway.com/		0.77
+a4d62743d556	Subway	fastfood	sandwich shop	30.55827	-96.26080	951 William D Fitch Parkway Suite 801	College Station	77845	+19796904561	https://restaurants.subway.com/united-states/tx/college-station/951-william-d-fitch-parkway	Subway	0.99
 af6d5a77063d	Subway	fastfood		30.65099	-96.33460	3601 E 29th St Ste 4	Bryan	77802	+19798464972	https://restaurants.subway.com/united-states/tx/bryan/3601-e-29th-st	Subway	0.99
+b4128492b733	Subway	fastfood	sandwich shop	30.58264	-96.28828	1722 Rock Prairie Rd	College Station	77845	+19797648602	https://restaurants.subway.com/united-states/tx/college-station/1722-rock-prairie-rd	Subway	0.97
+c4647b134c77	Subway	fastfood	sandwich shop	30.14030	-96.39334	203 US Loop 290 W	Brenham	77833	+19798308722	https://restaurants.subway.com/united-states/tx/brenham/203-us-loop-290-w	Subway	0.95
+cfe6d80d7c1e	Subway	fastfood	sandwich shop	30.60620	-96.31070	2418 Texas Ave S Ste D2	College Station	77840	+19796964418	http://www.Subway.com/	Subway	0.98
+dbc301975092	Subway	fastfood	sandwich shop	30.15203	-96.39135	1905 S Market St	Brenham	77833	+19798308222	https://restaurants.subway.com/united-states/tx/brenham/1905-s-market-st	Subway	0.96
+e3b2fe1a653a	Subway	fastfood	sandwich shop	30.62279	-96.31116	913 Harvey Rd Suite C	College Station	77840	+19797643990	https://restaurants.subway.com/united-states/tx/college-station/913-harvey-rd	Subway	0.99
 0e11c2ea1228	Taco Bell	fastfood		30.39184	-96.06819	9101 State Hwy 6	Navasota	77868		https://locations.tacobell.com/tx/navasota/9101-state-hwy-6.html	Taco Bell	0.98
 281c6f1e9386	Taco Bell	fastfood		30.65215	-96.33535	3501 East 29th Street	Bryan	77802	+19798468071	http://www.tacobell.com/	Taco Bell	0.99
 297f9a11abc6	Taco Bell	fastfood		30.10826	-96.04623	2150 FM 1488	Hempstead	77445	+19796456190	http://www.tacobell.com	Taco Bell	0.99
@@ -1324,21 +1403,34 @@ af6d5a77063d	Subway	fastfood		30.65099	-96.33460	3601 E 29th St Ste 4	Bryan	7780
 3896c341b47e	Taco Bell	fastfood		30.14115	-96.39548	2607 Hwy 36 South	Brenham	77833	+19792779262	http://www.tacobell.com/	Taco Bell	0.98
 3fc8fbbb3fff	Taco Bell	fastfood		30.66382	-96.37181	920 South Texas Ave	Bryan	77803	+19798225007	http://www.tacobell.com/	Taco Bell	0.99
 6102de03b02b	Taco Bell	fastfood		30.62179	-96.34219	731 University Dr	College Station	77840	+19792601720	http://www.tacobell.com/	Taco Bell	0.99
+8a191acff73b	Taco Bell	fastfood	taco restaurant	30.58510	-96.32460	1696 Harvey Mitchell Pkwy S	College Station	77845	+17372899922	https://locations.tacobell.com/tx/college-station/1696-harvey-mitchell-pkwy-s.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042192&utm_content=website&y_source=1_MTA5MzE5MTA3My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.99
 8ecaeaca918b	Taco Bell	fastfood		30.55623	-96.26294	911 William D Fitch Pkwy	College Station	77845	+19796907979	http://www.tacobell.com/	Taco Bell	0.99
 c949beff6d3a	Taco Bell	fastfood		30.53439	-96.69751	200 W State Hwy 21	Caldwell	77836	+19793154640	https://locations.tacobell.com/tx/caldwell/200-w-state-hwy-21.html	Taco Bell	0.98
 d88f3af513c1	Taco Bell	fastfood		30.61693	-96.31610	310 N Harvey Road	College Station	77840	+19796931963	http://www.tacobell.com/	Taco Bell	0.99
+da850054d0e0	Taco Bell	fastfood	taco restaurant	30.69394	-96.36375	2600 E. Sh 21	Bryan	77803	+19369399193	https://locations.tacobell.com/tx/bryan/2600-e--sh-21.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042104&utm_content=website&y_source=1_MTA5MzA4Nzk1My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 e98db7bab292	Taco Bell	fastfood		30.67251	-96.33439	2305 Boonville Road	Bryan	77808	+19797311138	http://www.tacobell.com/	Taco Bell	0.99
+57be01f3d31a	Taco Cabana	fastfood	texmex restaurant	30.66068	-96.32996	2410 Briarcrest Dr	Bryan	77802	+19797760555	https://www.tacocabana.com/	Taco Cabana	0.95
+9072bed2bceb	Taco Cabana	fastfood	taco restaurant	30.62672	-96.33299	701 Texas Ave S	College Station	77840	+19796931904	http://www.tacocabana.com/		0.92
 7d88492c26f1	Taco Casa	fastfood		30.55249	-96.26611	650 William D Fitch Pkwy	College Station	77845	+19797046681	http://tacocasatexas.com		0.67
 f402253ede2d	Taco Casa	fastfood		30.66602	-96.32787	616 N Earl Rudder Fwy	Bryan	77802	+19794852999	http://tacocasatexas.com		0.99
 55eb2fadc7eb	Wendy's	fastfood		30.64137	-96.35144	3216 N Texas Ave	Bryan	77803	+19797750183	http://www.wendys.com		0.77
 5ef727cc7f49	Wendy's	fastfood		30.67148	-96.33964	891 Earl Rudder Freeway	Bryan	77802	+19797766042	https://locations.wendys.com/united-states/tx/bryan/891-earl-rudder-freeway	Wendy's	0.99
+77df9075de5e	Wendy's	fastfood	burger restaurant	30.58740	-96.33882	2050 Holleman Dr W	College Station	77840	+19797642930			0.92
 c5a13f974568	Wendy's	fastfood		30.60883	-96.30689	202 Southwest Pkwy E	College Station	77840	+19799853427	https://locations.wendys.com/united-states/tx/college-station/202-southwest-pkwy-e	Wendy's	0.99
+0803818b2212	Whataburger	fastfood	burger restaurant	30.61858	-96.32204	105 DOMINIK DR	College Station	77840	+19796962337	http://whataburger.com/	Whataburger	0.99
 302e6a999ef3	Whataburger	fastfood		30.53759	-96.69171	306 N Wright St	Caldwell	77836	+19793154282	https://locations.whataburger.com/tx/caldwell/306-n-wright-st.html	Whataburger	0.92
 407b782a4938	Whataburger	fastfood		30.64245	-96.35119	3109 S TEXAS AVE	Bryan	77802	+19798230861	https://locations.whataburger.com/tx/bryan/3109-s-texas-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 5e29fb751e67	Whataburger	fastfood		30.17930	-96.91691	2050 E AUSTIN ST	Giddings	78942	+19795424968	https://locations.whataburger.com/tx/giddings/2050-e-austin-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+7a685280db7b	Whataburger	fastfood	burger restaurant	30.56102	-96.25780	4471 STATE HIGHWAY 6 S	College Station	77845	+19796905753	https://locations.whataburger.com/tx/college-station/4471-state-highway-6-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+ade590ae59b0	Whataburger	fastfood	burger restaurant	30.66496	-96.37169	902 S TEXAS AVE	Bryan	77803	+19798220624	https://locations.whataburger.com/tx/bryan/902-s-texas-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+c340c1b84d86	Whataburger	fastfood	burger restaurant	30.13851	-96.39505	2801 Hwy 36 South	Brenham	77833	+19792771184	https://locations.whataburger.com/tx/brenham/2801-hwy-36-south.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 d0139b9e3747	Whataburger	fastfood		30.58362	-96.28842	1745 ROCK PRAIRIE RD	College Station	77845	+19796951348	https://locations.whataburger.com/tx/college-station/1745-rock-prairie-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+ddafa300601b	Whataburger	fastfood	burger restaurant	30.59044	-96.32964	1451 WELLBORN RD	College Station	77840	+19794363392	https://locations.whataburger.com/tx/college-station/1451-wellborn-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 072f631c238f	Wienerschnitzel	fastfood		30.66927	-96.37049	501 S Texas Ave	Bryan	77803	+19797751984	http://www.wienerschnitzel.com/	Wienerschnitzel	0.98
+0a08862d0e6f	Wingstop	fastfood	chicken restaurant	30.58350	-96.32409	11659 FM 2154, Suite 100	College Station	77845	+19794859942	https://www.wingstop.com/location/wingstop-1717-college-station-tx-77845/menu?y_source=1_NTUyMDc4ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 21916446113f	Wingstop	fastfood		30.14033	-96.39769	2642 Tx-36	Brenham	77833	+19793532112	https://www.wingstop.com/location/wingstop-1524-brenham-tx-77833/menu?y_source=1_NTUyMDcwMDAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
+23c2251ec4cf	Wingstop	fastfood	chicken restaurant	30.63338	-96.32757	700 University Dr E Ste B201	College Station	77840	+19798469464	https://www.wingstop.com/location/wingstop-35-college-station-tx-77840/menu?y_source=1_NTUyMDcyMDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+e86bc3250b06	Wingstop	fastfood	chicken restaurant	30.67399	-96.33540	2305 Boonville Rd, Ste 150	Bryan	77808	+19797769464	https://www.wingstop.com/location/wingstop-1354-bryan-tx-77808/menu?y_source=1_NTUyMDY5NjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 d9e4284a435e	A & D's Country Store	grocery		30.68863	-96.09758	8121 Jubilee Trl	Iola	77861	+19363945133			0.75
 1addb25f8e63	Alameda Meat Market	grocery		30.09689	-96.07681	825 Austin St	Hempstead	77445	+19798269698			0.92
 2482972e85af	Allen Road Country Store	grocery		30.19579	-96.34967	875 Allen Rd	Brenham	77833	+19798364545			0.96
@@ -1407,7 +1499,6 @@ b1d38272015b	Smart & Fit	grocery		30.58312	-96.29058	1605 Rock Prairie Rd	Colleg
 2e0d3b7d239d	Sophia Food Market Inc	grocery		30.85499	-96.97634	607 N Travis Ave	Cameron	76520	+12546976668			0.65
 e3c5744fba13	Sprouts Farmers Market	grocery		30.61355	-96.31640	1913 Texas Avenue South	College Station	77840	+19792002041	https://www.sprouts.com/store/tx/college-station/texas-ave/		0.99
 2abda64003db	Star Haven Farms	grocery		30.74118	-96.03483	17754 County Road 124	Bedias	77831	+19363949072	http://www.texasgrassfed.com		0.77
-37bb1d9f4c09	Supermercado Monterrey	grocery		30.36102	-96.15651	300 E Jefferson Blvd	Dallas	75203	+12149431086			0.85
 57a6d0f431ce	TAMU Rosenthal Meat Science and Technology Center	grocery		30.60957	-96.34816	500 Raymond Stotzer Pkwy	College Station	77845	+19798455651	http://agrilife.org/rosenthal/		0.96
 408bf746672b	Tater's Place Park Rd. 57 Somerville Texas	grocery		30.31107	-96.63662	14040 Park Rd 57	Somerville	77879	+19795354859	http://gmail.com/		0.93
 01ff3fd012a6	Tejas Market Bryan	grocery		30.64829	-96.34797	1101 E Villa Maria Rd	Bryan	77802	+19797045353			0.96
@@ -1440,7 +1531,6 @@ d9812efa798b	Baylor Scott & White Medical Plaza 900 - College Station	hospital		
 b6e9bef5ac67	Baylor Scott & White Medical Plaza 900 Sleep Center - College Station	hospital		30.58338	-96.27892	900 Scott and White Dr, Ste 101	College Station	77845		https://www.bswhealth.com/locations/clinic/medical-plaza-900-sleep-center-college-station		0.80
 d16c91234b2c	Baylor Scott & White Outpatient Surgery Center - College Station	hospital		30.58337	-96.27892	900 Scott and White Dr, Ste 201	College Station	77845				0.80
 7e3cea79da0e	Baylor Scott and White Medical Center College Station Inpatient Medicine	hospital		30.58231	-96.27925	700 Scott & White Dr	College Station	77845	+19792070100	http://www.sw.org/	Baylor Scott & White All Saints Health Foundation	0.97
-a8fdf073f8d1	Birmingham Rd Medical Offices, College Station, Texas	hospital		30.58368	-96.29707		College Station					0.64
 f6f16cbbf7be	Birmingham Rd Medical Offices, College Station, Texas	hospital		30.57902	-96.28922		College Station					0.97
 6e677655c54d	Brazos Valley Dermatology	hospital		30.58275	-96.29160	1602 Rock Prairie Rd	College Station	77845	+19796937444	http://www.brazosvalleydermatology.com		0.92
 6c3022bcc38f	Brazos Valley Foot Care	hospital		30.58072	-96.28658	1721 Birmingham Rd	College Station	77845	+19796945222	http://www.brazosvalleyfootcare.com		0.92
@@ -1459,7 +1549,6 @@ f2f1537c530c	Geode Health - College Station	hospital		30.63260	-96.33125	511 Uni
 6ad5a8c0e240	Grimes Health Resource Center	hospital		30.39258	-96.07768	210 S Judson St	Navasota	77868	+19368704575	http://www.grimeshealthresourcecenter.com/		0.92
 f3d39d8d7de4	Grimes St Joseph Health Center	hospital		30.39259	-96.07766	210 Judson St	Navasota	77868	+19368256585	https://stjoseph.stlukeshealth.org/locations/chi-st-joseph-health-grimes-hospital?utm_source=LocalSearch&utm_medium=Facility&utm_campaign=CHITexas&utm_term=CHIStJosephHealthGrimesHospital	CommonSpirit - Brazos Valley	1.00
 97ef9082c979	Grimes St Joseph Health Center-Er	hospital		30.11694	-96.04908		Navasota		+19368256585	http://www.st-joseph.org		0.56
-a4e986a140a3	Health For All, Inc.	hospital		30.65350	-96.33716	3030 E 29th St	Bryan	77802	+19797744176	http://www.hlth4all.org/		0.86
 c47e18260c11	Health For All, Inc.	hospital		30.65518	-96.34202	3030 E 29th St	Bryan	77802	+19797744176	http://www.hlth4all.org/		0.94
 d474c593d6b7	Little River Healthcare Cameron Hospital	hospital		30.85733	-96.97729	806 N Crockett Ave	Cameron	76520	+12546050025	https://www.lrhealthcare.com		0.55
 f5340326fc66	Occupational Medicine at St. Joseph Health	hospital		30.65411	-96.34897	2010 E Villa Maria Rd	Bryan	77802	+19798217377	https://stjoseph.stlukeshealth.org/locations/occupational-medicine-bryan?utm_source=LocalSearch&utm_medium=Facility&utm_campaign=CHITexas&utm_term=CHIStJosephHealthOccupationalMedicine	St. Joseph Health	0.92
@@ -1482,7 +1571,6 @@ da306fc443d1	Therapy Center at College Station Medical Center	hospital		30.58153
 e5ac164a6cda	Aggieland Boutique Hotel	hotel		30.61612	-96.32174	1508 Texas Ave S	College Station	77840	+19793147663	https://www.ihg.com/voco/hotels/us/en/college-station/cllcs/hoteldetail		0.99
 e8872d3ed077	Aloft	hotel		30.63505	-96.32017	1150 University Drive East	College Station	77840	+19797046400	https://www.marriott.com/en-us/hotels/cllal-aloft-college-station/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Aloft Hotels	1.00
 4f7445645ac6	American Motel	hotel		30.18418	-96.94329	691 W Austin St	Giddings	78942		www.americaninnelmonte.com		0.55
-42e567e28c09	American Taitx Llc	hotel		30.61084	-96.31110	2313 Texas Ave S	College Station	77840				0.95
 b1f49eed471f	Americas Best Value Inn	hotel	motel	30.14969	-96.38605	2217 S Market St	Brenham	77833	+19798361300	https://www.sonesta.com/americas-best-value-inn/tx/brenham/americas-best-value-inn-brenham	Ramada by Wyndham	1.00
 ce0c9503f9bf	Americas Best Value Inn	hotel		30.33871	-96.52392	18018 TX-36	Somerville	77879	+19795963884	https://www.sonesta.com/americas-best-value-inn/tx/somerville/americas-best-value-inn-somerville		0.99
 0f50934e2826	Americas Best Value Inn & Suites College Station	hotel	resort	30.58802	-96.28805	3702 State Highway 6 S	College Station	77845	+19796936810			0.92
@@ -1493,7 +1581,6 @@ ef17c15a772b	Americas Best Value Inn Giddings	hotel	resort	30.18057	-96.92068	16
 5a262a1aef01	Americas Best Value Inn Rockdale	hotel		30.66858	-96.98175	U.S. 77	Rockdale	76567	+15124466163	https://www.redlion.com/americas-best-value-inn/tx/rockdale/americas-best-value-inn-rockdale		0.77
 3af8f181450b	Ameritex Hospitality Lp	hotel		30.64713	-96.30352	3041 Plaza Centre Ct	Bryan	77802		trafficworksinc.com		0.95
 e0d04762ec20	Appelt Hall	hotel		30.61451	-96.33542	660 Mosher Ln	College Station	77843	+18884513896	http://tamu.edu		0.99
-0b7d2b87fac4	Aria Hospitality Llc	hotel		30.69431	-96.36026	1506 Nuches Ln	Bryan	77803				0.95
 84b7852283a3	Artist's Hideaway	hotel		30.04750	-96.32375	488 Kenney Hall Rd	Bellville	77418	+19792030389	http://www.artistshideaway.com		0.92
 7dc00dc8e883	Aston Hall	hotel		30.61458	-96.33605	655 Mosher Ln	College Station	77843	+18884513896	http://tamu.edu/		0.99
 40a591dde76a	Autograph Collection	hotel		30.60129	-96.38234	4100 Lake Atlas Drive	Bryan	77807	+19794214000	https://www.marriott.com/hotels/travel/cllak-the-stella-hotel-autograph-collection/	Autograph Collection	1.00
@@ -1512,13 +1599,11 @@ a17431ac4f2d	Best Western Bryan College Station	hotel		30.62998	-96.33679	4613 S
 212fd931fc3b	Best Western Inn of Brenham	hotel		30.14331	-96.37476	1503 Hwy 290 E	Brenham	77833	+19792517791	https://www.bestwestern.com/en_US/book/hotel-rooms.44446.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44446	Best Western Hotels & Resorts	1.00
 ef39289e0a0c	Best Western Plus College Station Inn & Suites	hotel		30.56417	-96.26669	950 Arrington Rd	College Station	77845	+19797046444	https://www.bestwestern.com/en_US/book/hotel-rooms.44705.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44705	Best Western Hotels & Resorts	1.00
 bb97b9393832	Best Western Premier Bryan College Station	hotel		30.67044	-96.33421	1920 Austins Colony Pkwy	Bryan	77802	+19797315300	https://www.bestwestern.com/en_US/book/hotel-rooms.44623.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44623	Best Western Hotels & Resorts	1.00
-f06a2d154b7d	Best Western Premier Bryan College Station	hotel		30.67044	-96.33421	1920 Austins Colony Pkwy	Bryan	77802	+19797315300	https://www.bestwestern.com/en_US/book/hotel-rooms.44623.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44623	Best Western Hotels & Resorts	1.00
 cc98ced4cc50	Best Western Rockdale Inn	hotel	resort	30.66871	-96.98087	381 N US Highway 77	Rockdale	76567	+15124466163			0.92
 38384db71096	Bird Song Cottage	hotel		30.09587	-96.63256	8960 Winedale Rd	Carmine	77835	+17132016591	http://www.thebirdsongcottage.com		0.90
 f95aa0dd8f4c	Blinn - Melcher Hall	hotel		30.16097	-96.40759	601 Prairie Lea St	Brenham	77833		www.blinn.edu/housing/residence/melcher.htm		0.61
 8ba96d5cddda	Block 12 - Furnished Game Day Units	hotel		30.62445	-96.35250	4110 College Main St	Bryan	77801	+15129626491	http://www.blocktwelve.com		0.77
 9b684bdf5312	Brenham Schoolhouse Hotel	hotel		30.16753	-96.39306	600 E Alamo St	Brenham	77833	+15122012916	http://brenhamschoolhouse.com/		0.92
-041df9824aa9	Brenham Texas	hotel		30.16592	-96.39799	107 W Commerce St	Brenham	77833				0.55
 c0aec98d8c11	Briarfield At Round Top	hotel		30.02200	-96.72422	219 FM-954	Round Top	78954	+19792493973	http://www.briarfieldatroundtop.com		0.92
 d0878306e719	Briarwood Apartments	hotel		30.62656	-96.30772	1201 Harvey Rd	College Station	77840	+19796933014	http://www.bhmanagement.com/		0.98
 622821951e53	Bryan College Station Hideaway	hotel		30.63810	-96.34960	605 Mary Lake Dr	Bryan	77801	+15127990509			0.74
@@ -1526,7 +1611,6 @@ d0878306e719	Briarwood Apartments	hotel		30.62656	-96.30772	1201 Harvey Rd	Colle
 54facd06db42	Budget Host Inn & Suites	hotel	motel	30.84661	-96.95927	102 Lafferty Ave	Cameron	76520	+12546050610	http://www.budgethost.com/	Budget Host St Ignace	0.99
 8c7899972445	Budget Inn Giddings by Mukhi Hotels	hotel	resort	30.18359	-96.94042	399 W Austin St	Giddings	78942	+19795423839	http://www.budgetinnus.com/		0.96
 ae4378994643	Budgetel Inn and Suites	hotel	motel	30.89382	-96.60091	1259 N Market St	Hearne	77859	+19792796200	http://www.budgetelhearne.com		0.99
-1e3fc534979b	Busby Bottom	hotel		30.44078	-96.56429	1898 Walnut Dr	Caldwell	77836	+19794060856			0.65
 ee28f0dbd147	Busby Bottom	hotel		30.44052	-96.56480	1898 Walnut Dr	Caldwell	77836	+19794060856			0.66
 8d4a0d4dd33b	Caldwell Motel	hotel		30.52216	-96.71700	1819 W Highway 21	Caldwell	77836	+19795674000	http://www.caldwellcountrychevrolet.com/?cs:pro=repman&cs:e=		0.92
 9d878d3f7d52	Camber Villas	hotel		30.67030	-96.34750	2888 Nash St	Bryan	77801	+19793140891	https://www.cambervillas.com/		0.98
@@ -1537,7 +1621,6 @@ d3db405baa97	Carmine Railroad Cottage	hotel		30.14992	-96.67893	562 E US Highway
 7d227e133b23	Cathy's Dream Glamping	hotel		30.11851	-96.57974	5601 Wickel Rd	Burton	77835	+12818964816	http://www.DreamGlamping.com/		0.87
 9140a9a34b10	Cavalry Court, Valencia Hotel Collection	hotel		30.62587	-96.34032	200 Century Ct	College Station	77840	+19795003950	https://www.cavalrycourt.com/		1.00
 83cf216acc58	Central Texas Women's Retreat	hotel		30.11373	-96.21077	6650 Trackside Rd	Chappell Hill	77426	+15124962891	http://www.txwomensretreat.com/		0.86
-7ed62d93578f	Chapel Oaks Ranch	hotel		30.03409	-96.70640	1122 Florida Chapel Rd	Round Top	78954				0.73
 75c714871ac1	Charleston Mills Luxury Townhomes Phase 2 - Atticus Drive	hotel		30.57947	-96.32810	4444 Atticus Drive	College Station	77845	+19798100246	https://linkin.bio/charlestonmillstx		0.71
 14d700eed345	Chillax Inn in Burton, Texas	hotel		30.28192	-96.60016		Burton					0.73
 5511b574f7f9	China Inn	hotel		30.09749	-96.07004	240 Austin St	Hempstead	77445		www.chinainnvb.com		0.55
@@ -1565,7 +1648,6 @@ ff5570fa34c3	Davis-Gary Field	hotel		30.61555	-96.34634	1403 University Dr	Colle
 c9ca138ba5ce	Days Inn	hotel		30.60554	-96.30834	2514 Texas Ave S	College Station	77840	+19796966988	https://www.wyndhamhotels.com/days-inn/college-station-texas/days-inn-bryan-college-station/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A02460	Days Inn	0.99
 2e3706fd18e1	Days Inn by Wyndham Bryan	hotel	resort	30.68007	-96.34505	1039 N Earl Rudder Fwy	Bryan	77802	+19797046644	https://www.wyndhamhotels.com/days-inn/bryan-texas/days-inn-bryan/overview?CID=LC:iqv0j1dklijly45:50244&iata=00093796		0.96
 7eccb8ba6f96	Days Inn by Wyndham College Station University Drive	hotel	resort	30.63640	-96.32500	901 University Dr E	College Station	77840	+19792609150	https://www.wyndhamhotels.com/days-inn/college-station-texas/days-inn-college-station-university-drive/overview?CID=LC:iqv0j1dklijly45:50247&iata=00093796		1.00
-ce09bb7d1f3a	Days Inn by Wyndham College Station University Drive	hotel	resort	30.60755	-96.35789	901 University Dr E	College Station	77840	+19792609150	https://www.wyndhamhotels.com/days-inn/college-station-texas/days-inn-college-station-university-drive/overview?CID=LC:acbkp9kkmt716ab:50247&iata=00093796		0.85
 8c52c5bf461f	Days Inn by Wyndham Navasota	hotel	resort	30.39605	-96.06854	8965 Highway 6	Navasota	77868	+19365108292	https://www.wyndhamhotels.com/days-inn/navasota-texas/days-inn-navasota/overview?CID=LC:acbkp9kkmt716ab:58399&iata=00093796		1.00
 b3a58e582129	Days Inn by Wyndham Rockdale Texas	hotel	resort	30.64705	-96.98296	221 N US Highway 77	Rockdale	76567	+15124465800	https://www.wyndhamhotels.com/days-inn/rockdale-texas/days-inn-rockdale-texas/overview?CID=LC:acbkp9kkmt716ab:25673&iata=00093796		0.85
 ad881ae4654d	Days Inn College Station	hotel		30.63623	-96.32531	901 University Dr E	College Station	77840	+19794315654	http://www.daysinn.com		0.97
@@ -1573,10 +1655,8 @@ ad881ae4654d	Days Inn College Station	hotel		30.63623	-96.32531	901 University D
 87fe272d5f47	Drury Inn & Suites	hotel		30.63431	-96.32938	705 University Drive East	College Station	77840		https://www.druryhotels.com/locations/college-station-tx/drury-plaza-hotel-college-station	Drury Inn & Suites	0.80
 ed6aaf8d32ca	Drury Plaza Hotel College Station	hotel		30.63470	-96.32893	705 University Dr E	College Station	77840	+19793218865	https://www.druryhotels.com/locations/college-station-tx/drury-plaza-hotel-college-station	Drury Hotels	0.99
 15b7b43afc1e	Dunn Hall	hotel		30.61539	-96.33673	J. Harold Dunn Hall, 636 Lubbock St	College Station	77840	+18884513896	http://tamu.edu/		0.97
-c3a87f6c2d4d	Eberly Ranch	hotel	lodge	30.05521	-96.20841	8657 N FM 1371	Chappell Hill	77426	+12814667162	http://www.eberlyranch.com/		0.97
 487f401ff352	Econo Lodge	hotel	resort	30.67956	-96.34473	1039 N Earl Rudder Fwy	Bryan	77802	+19797046644	https://www.choicehotels.com/texas/bryan/econo-lodge-hotels/txs99?mc=llbillpx&pmf=local		0.98
 74ab41764a94	El Camino Motel	hotel	motel	30.69076	-96.36897	2102 E State Hwy 21	Bryan	77803	+19797786262	http://el-camino-motel-tx-1.hub.biz		0.99
-7f254cc010e6	Elk Lodge	hotel	lodge	30.63250	-96.35556	304 Mobile Ave	Bryan	77801		http://elks.org/		0.95
 8b275878f133	Embassy Suites by Hilton	hotel		30.62933	-96.33411	201 University Dr E	College Station	77840	+19792606000	https://bit.ly/WriteReview-Tripadvisor	Embassy Suites by Hilton	1.00
 b4eea19cbfa7	Emerald Park Apartments	hotel		30.65325	-96.37113	200 Rebecca St	Bryan	77801	+19798220472	http://www.bryantx.gov		0.59
 601f8daaaa31	EZ Travel Inn	hotel	motel	30.61276	-96.31480	2007 Texas Ave S	College Station	77840	+19796935822	http://www.eztravelinn.com		0.89
@@ -1587,9 +1667,7 @@ d0ff657f6ef3	Farm at Wellville	hotel	resort	30.13233	-96.61052	1905 Century Farm
 2808722ec496	FlopHouze	hotel		30.01691	-96.75275	1132 W FM-1291	Round Top	78954	+19793532627	http://www.flophouze.com/		1.00
 a4085865bff7	Fowler Hall	hotel		30.61480	-96.34525	225 Jones St	College Station	77843	+18884513896			0.99
 9683de31e5c5	Francis Hall	hotel		30.61731	-96.33978	574 Ross St	College Station	77840		http://tamu.edu/		0.94
-fdc30a2ec4d6	Garden Gate Lodge College Station	hotel	lodge	30.54133	-96.31834	13825 S Dowling Rd	College Station	77845	+19796902116	https://evolvevacationrental.com/vacation-rentals/422436#customer-reviews		0.92
 427fed7e8de3	Giddings Executive Inn	hotel	motel	30.17721	-96.90488	3556 E Austin St	Giddings	78942	+19795425791			0.95
-0621f9e5499a	Graham Lodge No. 20	hotel	lodge	30.14538	-96.40231	908 US-290	Brenham	77833	+19792740012			0.87
 ff0e10feee3a	Granbury Marina Hotel Lp	hotel		30.64447	-96.35508	2800 S Texas Ave Ste 401	Bryan	77802				0.95
 9148878dcb50	Haas Hall	hotel		30.61623	-96.34438	212 Houston St	College Station	77843	+18884513896	http://tamu.edu		0.99
 f23404a0a345	HammerMill Industrial Suites	hotel		30.69313	-96.37883	2404 N Texas Ave	Bryan	77803		http://hammermillindustrialsuites.com/		0.57
@@ -1622,43 +1700,30 @@ a3350470d4bc	Hotel McCoy College Station - Art, Libations, Pool Society	hotel		3
 57179b8dc552	Hullabaloo Hall	hotel		30.62858	-96.33338	200 University Dr E	College Station	77840	+19798454768	http://reslife.tamu.edu		0.99
 a2efc627a763	Hyatt House	hotel		30.66426	-96.32391	3062 Wildflower Dr	Bryan	77802	+19797046744	http://Bryancollegestation.house.hyatt.com/	Hyatt House	0.99
 1e5a9413c707	Hyatt Place College Station	hotel		30.63587	-96.32095	1100 University Dr E	College Station	77840	+19798469800	http://collegestation.place.hyatt.com/	Hyatt Place	1.00
-85dc23326100	Independence Trail Ranch	hotel		30.21324	-96.19834		Washington					0.75
-610ad675b7cb	Inn at Indian Creek	hotel	lodge	30.15321	-96.57142	2460 Boehnemann Rd	Burton	77835	+13619355343	http://www.InnAtIndianCreek.com/		0.96
 09d6edb3d0e8	Inn at Quarry Ridge	hotel		30.67416	-96.37439	101 Regent Ave	Bryan	77803	+19798228368	http://innatquarryridge.com		0.80
-8183000b6d18	Inn at Quarry Ridge	hotel		30.67433	-96.37167	101 Regent Ave	Bryan	77803	+19798228368	http://innatquarryridge.com		0.80
 b62eb526513a	Ion College Station	hotel		30.62083	-96.34306	711 University Dr	College Station	77840	+19793792039	https://ion-collegestation.com/		0.99
-b6088c7cd00f	Jordan Creek Lodge and Equestrian Resort at Jordan Creek Ranch	hotel	lodge	30.32942	-96.17370	19300 Washington Cemetery Rd	Washington	77880	+18322807724	http://www.jordancreekranch.com/		0.92
 5fc6f42d8b0c	Keathley Hall	hotel		30.61518	-96.34603	214 University Dr	College Station	77840	+18884513896			0.56
 cf5fd0ac398f	Knights Inn Brenham	hotel		30.14361	-96.38992	201 Hwy 290 E	Brenham	77833	+19798301110	https://www.knightsinn.com/us/tx/brenham/knights-inn-brenham	Knights Inn Port Charlotte FL	0.99
 273842a42dba	Knights Inn College Station	hotel	resort	30.60646	-96.30815	104 Texas Ave S	College Station	77840	+19796916300	https://www.knightsinn.com/us/tx/college-station/knights-inn-college-station?utm_medium=soci&utm_source=bing		0.85
 a260600e80f0	Knights Inn College Station	hotel	motel	30.62974	-96.33811	104 S Texas Ave	College Station	77840	+19796916300	http://knightsinncollegestation.com/	Knights Inn Port Charlotte FL	0.99
 79c239c765c8	Knights Inn Giddings	hotel		30.18369	-96.94009	389 W Austin St	Giddings	78942	+19795423839	https://www.knightsinn.com/Giddings-TX?CID=LC:KG::BING:RIO:National:45963		0.92
 bed9d6b9666a	Kobza Haus	hotel		30.06458	-96.69820	302 S White St	Round Top	78954	+19792501244	https://shor.by/eyzk		0.92
-b56e38357918	Krooked K Beefmasters	hotel		30.33661	-96.18169	20490 Pickens Rd	Washington	77880				0.78
 14a5f8128a05	Krueger Hall	hotel		30.61617	-96.33573	722 Lubbock St	College Station	77843	+18884513896	http://tamu.edu		0.97
 934ea699c954	Kurten Texas Country B&B	hotel		30.77216	-96.26614	6556 S FM-2038	Bryan	77808	+18667452936			0.95
 d979024b02b7	La Quinta Inn & Suites	hotel		30.57931	-96.28405	1838 Graham Rd	College Station	77845	+19792728914	http://www.laquintacollegestationsouth.com/?cid=local_6569	La Quinta by Wyndham	1.00
 e8c6c42da572	La Quinta Inn & Suites College Station North	hotel		30.63746	-96.30614	1195 Earl Rudder Fwy	College Station	77845	+19797045570	https://www.wyndhamhotels.com/laquinta/college-station-texas/la-quinta-inn-and-suites-college-station-north/overview		1.00
 42b7836621de	La Quinta Inn College Station	hotel		30.62765	-96.33308	607 Texas Ave S	College Station	77840				0.76
 f4317ac0dbcc	La Quinta Inns & Suites	hotel		30.13801	-96.39403	2950 Wood Ridge Blvd	Brenham	77833	+19798365551	http://www.lq.com/		0.74
-331373df88e4	Lake Ranch Lodge	hotel	lodge	30.50455	-96.88487	10695 County Road 321	Caldwell	77836	+15125692909			0.90
 10e45e3d61ad	Lakshmi Hospitality Llc	hotel		30.61257	-96.31493	2007 Texas Ave S	College Station	77840		http://www.lakshmihospitalityconcerns.com		0.95
 a938857bf09a	Landry Ranch Vacation Home	hotel		30.95124	-96.52763	3885 Mitch McMillan Rd	Franklin	77856	+19798146589			0.57
 d790bbaaf181	Lechner Hall	hotel		30.61630	-96.34379	232 Houston St	College Station	77840		http://tamu.edu/		0.99
-22bf2d9166ed	Levitt Enterprises Lp	hotel		30.64447	-96.35508	2800 S Texas Ave Ste 401	Bryan	77802				0.95
-513d7d416ddd	Liberty Hotel Management	hotel		30.61614	-96.29659	2500 Earl Rudder Fwy S	College Station	77840				0.65
-f02175e0785b	Lil Country Cottage	hotel		30.02218	-96.29653	636 Piney Creek Rd	Bellville	77418				0.72
 36c3a79ad7e4	Lillian Farms Bed & Breakfast	hotel		30.23547	-96.22848	12570 FM-1155 E	Washington	77880	+19794216332	http://www.lillianfarms.com/		0.99
-3961d59ea6ec	Lillian Farms Bed & Breakfast	hotel		30.23260	-96.22688	12570 FM-1155 E	Washington	77880	+19794216332	http://www.lillianfarms.com/		0.90
 84d9fdf2c62e	Lillian Farms Bed & Breakfast	hotel		30.28588	-96.47303	8904 Mariposa Ln	Brenham	77833	+19794216332			0.86
 e83332e34168	Little Star Ranch - Lake Somerville, Texas	hotel		30.33807	-96.64805	940 Little Cir	Somerville	77879		https://airbnb.com/h/little-star-ranch		0.87
 64cf8a7d20f2	Lucky B Bison Ranch	hotel		30.68376	-96.47125	4604 Britten Rd	Bryan	77807		http://www.luckybbison.com		0.87
 00770c5ee5db	Lulac Oak Hill	hotel		30.60855	-96.31754	1105 Anderson St	College Station	77840	+19796936676	http://www.assetpluscorp.com		0.92
 1ee74b5442c5	Mann Hospitality Llc	hotel		30.53945	-96.69799	405 State Highway 36 N	Caldwell	77836		http://www.mannhospitality.com		0.95
-cadce5050d15	Masonic Lodge	hotel		30.14554	-96.40224	908 US-290 W	Brenham	77833	+19798362801			0.92
 0b78a5b121b0	Microtel Inn and Suites	hotel		30.58804	-96.28914	1820 Ponderosa Dr	College Station	77845	+19792024770	https://www.wyndhamhotels.com/microtel/college-station-texas/microtel-inn-and-suites-by-wyndham-college%20station/overview		1.00
-97634ab14d4d	Milk & Honey Ranch	hotel	lodge	30.09688	-96.55081	8202 Brandt Rd	Burton	77835	+19792216149	https://linktr.ee/milkandhoneyranch		0.99
-71a264e56623	Mill Creek Residence Hall	hotel		30.16260	-96.41317	1192 Old Mill Creek Rd	Brenham	77833	+19798304461			0.95
 ef49c09a30cb	Moses Hall	hotel		30.61551	-96.34585	212 University Dr	College Station	77843	+18884513896	http://tamu.edu		0.99
 491cf4b87363	Mosher Hall	hotel		30.61544	-96.33492	725 Mosher Ln	College Station	77840	+18884513896	http://tamu.edu		0.94
 6f391f8faa32	Motel 6	hotel	motel	30.65555	-96.36574	1601 S Texas Ave	Bryan	77802	+19792504053	https://www.staystudio6.com/en/motels.tx.bryan.5145.html	Motel 6	0.99
@@ -1674,13 +1739,11 @@ b810227f3469	Navasota Inn	hotel	motel	30.38743	-96.07024	9460 N Hwy 6 Loop South
 a5e4142ea459	New Light Equity Holdings Llc	hotel		30.38751	-96.07037	9460 Highway 6 Loop	Navasota	77868				0.95
 7063f48702c8	Noor Platinum Hospitality, Lp	hotel		30.58789	-96.28900	1820 Ponderosa Dr	College Station	77845				0.95
 e5e1626c5e0b	Oak Tree Inn	hotel	motel	30.89141	-96.60120	1051 N Highway 6	Hearne	77859	+19792795599	http://www.oaktreeinn.com		0.77
-51bed60aa17b	Oakbones Round Top	hotel		30.07573	-96.67535	2117 FM1457	Round Top	78954				0.68
 3e7bde23b2eb	Ogc Galleria Hotel Lp	hotel		30.64447	-96.35508	2800 S Texas Ave Ste 400	Bryan	77802				0.95
 dc994f984aa1	Ogc Westchase Hotel, Lp	hotel		30.64447	-96.35508	2800 S Texas Ave Ste 401	Bryan	77802				0.95
 df304e05b314	OYO Hotel Austin Street Giddings	hotel	resort	30.18337	-96.94024	389 W Austin St # 0	Giddings	78942	+19792322078	https://www.oyorooms.com/us/101447/?utm_source=Bing_bp&utm_medium=listing&utm_campaign=US_GDD001&latitude=30.18389&longitude=-96.9402&locale=en		0.92
 f176710ff4b6	P.A. Smith Hotel & Event Center	hotel		30.38726	-96.08949	111 S Railroad St	Navasota	77868	+19362376484	https://www.thesmithnavasota.com/		0.99
 e414f8eb77e5	Palace Inn	hotel		30.14198	-96.39872	555 Highway 290 W	Brenham	77833	+19798364590	https://www.palaceinn.com/hotels/palace-inn-brenham/	Palace Inn Blue US-59 & Harwin	0.88
-7e7825d90bc0	Panther Creek Lodge	hotel	lodge	30.62431	-96.14434		Iola					0.77
 d0d91e4fd953	Paradise Rv Park	hotel		30.50303	-96.47110	10246 Fm 60 E	Snook	77879	+19792723276	http://www.paradiseparktx.com		0.92
 f270239f3683	Park West Life	hotel		30.59718	-96.33932	503 George Bush Dr W	College Station	77840	+19793530042	http://www.parkwestlife.com/		0.95
 b5a8908fc7b0	Pearl's Place	hotel		30.26263	-96.15963	18250 FM 1155 E	Washington	77880	+12814500667			0.59
@@ -1701,7 +1764,6 @@ af59ad803f20	Relax Inn	hotel	motel	30.69919	-96.35661	3604 Highway 21 E	Bryan	77
 c339c03a56f0	Renaissance Park Apartments	hotel		30.59644	-96.32475	603 Southwest Pkwy	College Station	77840	+19796969771	http://www.renparkcollegestation.com/		0.99
 be2fad2ca3fd	Residence Inn	hotel		30.63298	-96.32600	720 University Dr E	College Station	77840	+19792682200	https://www.marriott.com/en-us/hotels/cllri-residence-inn-bryan-college-station/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Residence Inn by Marriott	1.00
 a29f46effbba	River Ridge Townhomes	hotel		30.63732	-96.32317	1000 Spring Loop	College Station	77840	+19796933700	http://www.equitybcs.com/joomla/index.php?option=com_content&view=article&id=265&Itemid=457		0.99
-ff729d8ace75	Rockdale Hospitality Llc	hotel		30.66548	-96.98141	221 N US Highway 77	Rockdale	76567				0.95
 80abf3e19911	Rodeway Inn	hotel	resort	30.62728	-96.33309	607 Texas Ave S	College Station	77840	+19796967777	https://www.choicehotels.com/texas/college-station/rodeway-inn-hotels/txs27?mc=llbillpx&pmf=local		0.99
 df85d5213b97	Rodeway Inn Caldwell	hotel	motel	30.53932	-96.69803	405 TX-36	Caldwell	77836	+19795674661	https://www.choicehotels.com/texas/caldwell/rodeway-inn-hotels/txm26	Choice Hotels	1.00
 47653b46e277	Rooms to Rent	hotel		30.08270	-96.08067	1111 San Antonio St	Hempstead	77445	+19798263122			0.85
@@ -1709,14 +1771,9 @@ cf222b416065	Rose Hill Round Top	hotel		30.06815	-96.70113	304 W Mill St	Round T
 d01d4eb9cd92	Round Top Farms	hotel		30.06385	-96.69723	301 S Washington St	Round Top	78954	+19792493977			0.56
 e9c036543554	Round Top Hotel	hotel		30.07237	-96.69339	705 TX-237	Round Top	78954	+18329782007	http://RoundTopHotel.com/		0.98
 7b9b6c9d5aa4	Rudder Hall	hotel		30.61508	-96.33407	Rudder Residence Hall, 770 Mosher Ln	College Station	77840	+18884513896	http://tamu.edu		0.99
-e8bc762f7d65	Shakti Hospitality Llc	hotel		30.57879	-96.28355	1846 Graham Rd	College Station	77845				0.95
-0a7aa63b2d0d	Shans Motel Lp	hotel		30.67300	-96.37034	104 S Texas Ave	Bryan	77803				0.95
 805dc418141f	Sleep Inn & Suites	hotel		30.57921	-96.28315	1846 Graham Rd	College Station	77845	+19793215150	https://www.choicehotels.com/texas/college-station/sleep-inn-hotels/txg77?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
 d6d4fc80b300	Sleep Inn and Suites	hotel		30.72478	-96.42476	2825 N Earl Rudder Fwy	Bryan	77807	+19793215151	https://www.choicehotels.com/texas/bryan/sleep-inn-hotels/txh45?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 685b7d9e4ef8	Somerville Inn & Suites	hotel	motel	30.33786	-96.52247	18125 TX-36	Somerville	77879	+19795961000			0.92
-74b406904d2b	Sons of Herman Lodge 301 Deanville Texas	hotel	lodge	30.42937	-96.75957	6785 FM-111	Caldwell	77836	+19795354200			0.97
-6c868cfe3b41	Sons Of Hermann Lodge	hotel	lodge	30.67614	-96.38383	1104 W Wm J Bryan Pkwy	Bryan	77803	+19797795440	https://www.hermannsonslife.org		0.97
-f81ecf0d9d71	Sons of Hermann Lodge 6	hotel	lodge	30.16097	-96.39355	304 E Germania St	Brenham	77833	+19798362053	http://www.sonsofherman.com		0.92
 64127ea410b5	Southern Rose Ranch Bed & Breakfast	hotel		30.17563	-96.24902	8580 Dairy Farm Rd	Chappell Hill	77426	+19792514028			0.92
 774e386131e4	Sri Hospitality & Resorts I Lp	hotel		30.14184	-96.40030	2605 Schulte Blvd	Brenham	77833				0.95
 ca9f3886c4db	Stagecoach Inn of Chappell Hill	hotel		30.14336	-96.25725		Chappell Hill	77426	+19798369777	http://www.stagecoachinn.com		0.72
@@ -1737,7 +1794,6 @@ afa9899761e4	SureStay Hotel	hotel		30.66856	-96.98136	381 US-77	Rockdale	76567	+
 6343eddd1dc0	Tara Farms	hotel		30.10335	-96.41783	2191 FM-109	Brenham	77833	+19798367098	https://www.vrbo.com/4566284?dateless=true		0.89
 ef0a513884f0	Texas A & M University System	hotel		30.62573	-96.34091	250 Charles Haltom Ave Apt 6A	College Station	77840	+19798452261	http://www.tamus.edu		0.77
 d39f720306df	Texas A&M Hotel and Conference Center	hotel		30.61069	-96.34323	177 Joe Routt Blvd	College Station	77840	+18886544436	https://www.texasamhotelcc.com/		1.00
-bcb1287a33e4	Texas Ranch Life	hotel	lodge	30.06588	-96.23730	10848 Cactus Ln	Chappell Hill	77426	+19792709188	https://www.texasranchlifechappellhill.com/		0.95
 32b0032e474f	Texas Tin Haus	hotel		30.18237	-96.59481	12400 E Texas St	Burton	77835	+13619467488	http://www.texastinhaus.com/		0.83
 12989264fd2e	texaselopement	hotel		30.11114	-96.58429	5025 Wickel Rd	Burton	77835	+18322643992	http://Thewhitehouseonthehill.com/		0.63
 9fe530afe399	The Barracks Townhomes	hotel		30.57024	-96.32329	514 Deacon Dr W	College Station	77845	+19798100245	https://linkin.bio/thebarrackstownhomes		0.99
@@ -1747,7 +1803,6 @@ b94e3294bd16	The Binder Haus	hotel		30.14368	-96.68221	395 Centennial St	Carmine
 677faf5e30ee	The Commons	hotel		30.61568	-96.33633		College Station	77843		http://tamu.edu		0.97
 3bd3568accf0	The Frenchie Boutique Hotel	hotel		30.06698	-96.69241	311 N Live Oak St	Round Top	78954	+19792089851	https://www.thefrenchieguesthouses.com/		0.99
 f1df989d1d0f	The Garden Gate Studio, College Station	hotel		30.60794	-96.32862	317 Pershing Ave	College Station	77840	+19792203276	https://www.airbnb.com/rooms/22687482		0.71
-32afd5babbe9	The George, Valencia Hotel Collection	hotel		30.62620	-96.33876	180 Century Ct	College Station	77840	+19795006020	https://www.thegeorgetexas.com/		1.00
 f17a4eb051c9	The George, Valencia Hotel Collection	hotel		30.62599	-96.33946	180 Century Ct	College Station	77840	+19795006020	https://bit.ly/4oBQcvB		1.00
 ef174311d980	The George-cavalry Court Hotels	hotel		30.62585	-96.34045	200 Century Ct	College Station	77840		https://www.thegeorgetexas.com		0.95
 8a37207cf7b4	The Heights at College Station	hotel		30.58157	-96.33006	3055 Holleman Dr S	College Station	77845	+19792163369	https://www.theheightscs.com/		0.99
@@ -1767,14 +1822,11 @@ d6c6073d223a	Underwood Hall	hotel		30.61410	-96.33569	644 Mosher Ln	College Stat
 dabf3b8dafbe	University Inn	hotel	resort	30.64734	-96.35919	2300 S Texas Ave	Bryan	77802	+19797037989			0.87
 1325cc6ea446	Utay Hall	hotel		30.61174	-96.33642	766 Military Mall	College Station	77840	+18884513896	http://tamu.edu/		0.99
 20bc41980739	Vanguard Motel	hotel	motel	30.39281	-96.09331	711 N Lasalle St	Navasota	77868	+19368256497	http://www.hotelmotels.info/Texas/Navasota/VanguardMotel		0.99
-c734ab29f555	Varniraj Llc	hotel		30.14559	-96.39693	2350 S Day St	Brenham	77833				0.95
 e6026ae2156a	Varsity Motel	hotel	motel	30.84875	-96.96782	1004 E 1st St	Cameron	76520	+12546976446	http://varsitymotelcameron.com		0.92
 8c0c29af846d	Vineyard Court Designer Suites Hotel	hotel		30.61945	-96.32024	1500 George Bush Dr E #45	College Station	77840	+19796931220	http://www.vineyardcourt.com/		1.00
 7d9b9c0d6b8e	Wakefield Farms - Luxury Vacation Rentals/Bed & Breakfast	hotel		30.17455	-96.28841	601 Pulawski School Ln	Chappell Hill	77426	+19792511459	http://www.wakefieldfarms.com/		0.86
 412dfecf39f5	Walton Hall	hotel		30.61700	-96.34531	166 Houston St	College Station	77840	+18884513896	http://tamu.edu/		0.99
-92e09a70b164	Warren Lodge No 56 af & am	hotel		30.53090	-96.69360	213 W Buck St	Caldwell	77836	+19795674454	http://msana.com		0.67
 234e6d3e4a0f	Warrenton Inn and the W Venue	hotel		30.01692	-96.73227	4339 State Highway 237	Round Top	78954	+12109901111	http://warrentoninn.com/		0.95
-05c6694d04da	Washington lodge #18	hotel	lodge	30.38836	-96.08776	300 E Washington Ave	Navasota	77868				0.81
 64b05854b858	Wells Hall	hotel		30.61496	-96.33495	700 Mosher Ln	College Station	77843	+18884513896	http://tamu.edu		0.92
 fc65b30ee549	Wellspring Retreat Bed & Breakfast	hotel		30.07252	-96.69840	580 N Washington St	Round Top	78954	+18326461898	http://wellspringretreat.net/		0.93
 c8d97e6fe73e	Western Motel	hotel	motel	30.87228	-96.59976	910 W Brown St	Hearne	77859	+19792799206	http://www.thewesternmotel.com	Western Motel-Quitman, MS	0.93
@@ -1842,7 +1894,6 @@ c3220a15b899	Jokers of Aggieland	office	private association	30.60564	-96.30630	2
 8da1112c2fa3	Lange Distributing Company Inc., Ozarka and Pure Life Bottled Water Delivery Service	office	bottled water company	30.71360	-96.35814	1901 Roughneck Drive	Bryan	77808	+19792184728	https://www.langedistributingcompanyinc.com/		0.95
 2998a2b93784	Legacy Properties	office		30.16673	-96.39692	202 E Alamo St	Brenham	77833	+19798365490	http://lcptx.com		0.92
 cd4f7818d5fb	Logan Industries International, Inc.	office	coworking space	30.11069	-96.08380	1000 Blassingame Rd	Hempstead	77445	+17138492979	http://loganindustries.net/		0.95
-0377e90da40f	Lone Star Lodge #85 PHA	office		30.10142	-96.07450	322 7th St	Hempstead	77445		https://sites.google.com/site/lonestarlodge85/home		0.59
 59f67f8685a4	Mafri Industries	office		30.63305	-96.35424	3809 Old College Rd	Bryan	77801	+19797046535			0.92
 e1f04f383350	Matica Biotechnology	office	biotechnology company	30.55567	-96.24988	150 Venture Dr Ste 101	College Station	77845	+19793217500	https://www.maticabio.com		0.75
 2c4017b44d6b	McLane Intelligent Solutions	office	information technology company	30.62952	-96.33492	404 Jane St Ste 100	College Station	77845	+18665514628	https://mclaneintel.com/technical-support/it-support-college-station/		0.92
@@ -1998,7 +2049,6 @@ fd1522693cc4	Bryan Nutricion	restaurant		30.67221	-96.37596	306 W 28th St	Bryan	
 a2f8ffe507b5	Buck's Pizza	restaurant	pizza restaurant	30.65537	-96.33801	3310 E 29th St	Bryan	77802	+19797752825	http://www.buckspizza.com/		0.92
 80e4eb59fa80	Buckin Burger	restaurant	burger restaurant	30.14190	-96.41678	2828 Industrial Blvd	Brenham	77833	+18325601897			0.98
 1a1443f650a4	Bui's Family kitchen	restaurant	sandwich shop	30.66839	-96.98111	200 E US Highway 79	Thorndale	76577	+15129030094			0.64
-10e49387bfec	Burger King	restaurant	burger restaurant	30.65807	-96.34835	2401 E 29th St	Bryan	77802	+19797760246	https://burgerking.com/store-locator/store/15997	Burger King	0.99
 ebc8fb413c85	Burger Mojo	restaurant	burger restaurant	30.62967	-96.33356	209 University Dr E	College Station	77840	+19799776656	http://www.burgermojo.com/		1.00
 ea3bfb7d9706	Burton Seafood and Steakhouse	restaurant	steakhouse	30.18184	-96.59645	12513 W Washington St	Burton	77835	+19792891080	https://burtonseafoodandsteakhouse.toast.site/		0.97
 d0432dc977fb	Burton Short Stop	restaurant		30.18549	-96.59888	12400 FM 390 Rd W	Burton	77835	+19793472371	https://www.burtonshortstop.com		0.96
@@ -2069,9 +2119,6 @@ ca695736a607	China Go Go Llc Dba Joy Luck Chinese And Sushi	restaurant		30.61760
 96e24957edad	China Inn	restaurant	chinese restaurant	30.38902	-96.08891	111 N Lasalle St	Navasota	77868	+19368257678			0.95
 b72eac1af500	China King Buffett	restaurant	buffet restaurant	30.60843	-96.31190	2402 Texas Ave S	College Station	77840	+19796947959	http://www.thechinakingbuffet.com		0.92
 dbea99ccc6da	Chinese Buffet	restaurant	chinese restaurant	30.14074	-96.39788	2658 TX-36	Brenham	77833	+19798308009	http://www.chinabuffetma.com		0.98
-b7d3d7720201	Chipotle Mexican Grill	restaurant	mexican restaurant	30.62228	-96.34135	815 University Dr	College Station	77840	+19792602282	https://locations.chipotle.com/tx/college-station/815-university-dr?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
-c52fe9b7d49c	Chipotle Mexican Grill	restaurant	mexican restaurant	30.59060	-96.33046	1437 Wellborn Rd	College Station	77840	+19793075083	https://locations.chipotle.com/tx/college-station/1437-wellborn-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D3753	Chipotle Mexican Grill	0.94
-f637a32fd869	Chipotle Mexican Grill	restaurant	mexican restaurant	30.63927	-96.31744	1505 University Dr E	College Station	77840	+19792604824	https://locations.chipotle.com/tx/college-station/1505-university-dr-e?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	1.00
 b424d34b0280	Choi's Restaurant	restaurant	korean restaurant	30.62000	-96.32074	311 Dominik Dr	College Station	77840	+19797037911	https://start.cortera.com/company/research/l2j4owj3s/chois-restaurant		0.99
 9d79190b17e1	Christopher's World Grille	restaurant	steakhouse	30.66017	-96.29575	5001 Boonville Rd	Bryan	77802	+19797762181	http://www.christophersworldgrille.com/		0.99
 e065164bffe0	Chubby's Public House	restaurant	burger restaurant	30.63716	-96.34739	3700 S Texas Ave	Bryan	77802				0.99
@@ -2090,7 +2137,6 @@ d2c7db954527	Clean Eatz	restaurant	health food restaurant	30.61442	-96.31901	180
 5d072be43c7f	Clem Mikeska's Bbq	restaurant	barbecue restaurant	30.84751	-96.96809	1005 E 1st St	Cameron	76520	+12544550618	https://clembbq.com		0.96
 63964d58465f	Clementine's Kitchen	restaurant		30.67258	-96.37459	202 S Bryan Ave	Bryan	77803		https://www.clementinesbcs.com		0.95
 43de6af8a172	Cliff Hangers Country Cafe	restaurant		30.20327	-96.05982	29241 Highway 6	Hempstead	77445	+19793994910	https://cliffhangers.cc/		0.92
-9d787248c201	Cliff Hangers Country Cafe	restaurant		30.20747	-96.05393	29241 Highway 6	Hempstead	77445	+19793994910			0.85
 b6e2b53d3cb3	Cochran Grill	restaurant	comfort food restaurant	30.02809	-96.13046	10711 Hwy 159 E	Bellville	77418	+12817287108	https://www.cochrangrill.com/		0.92
 67387ae046c3	Coco Loco	restaurant	mexican restaurant	30.65510	-96.36550	1607 Texas Ave	Bryan	77802	+19797796789	http://aggielandmenus.info		0.96
 fe573e33b52c	Coco Loco	restaurant	mexican restaurant	30.59471	-96.32291	1804 Welsh Ave	College Station	77840	+19796941633	https://coco-loco-no-2.hub.biz/		0.99
@@ -2110,7 +2156,6 @@ cdd608d1dc67	Coronas Mexican Restaurant #2	restaurant	mexican restaurant	30.6757
 7061efc7b163	Cotton Pickin' Kitchen	restaurant	burger restaurant	30.17533	-96.60188	13200 Highway 290 W	Burton	77835	+19792892000			0.94
 e9003b7d19e7	Country Burger	restaurant	burger restaurant	30.38618	-96.69235	7527 Co Rd 132	Caldwell	77836	+19795353700			0.92
 60362e0ba778	Country Sunshine	restaurant		30.06473	-96.69387	197 Henkel Circle	Round Top	78954	+19794464933	https://www.instagram.com/countrysunshine.tx/?hl=en		0.87
-bd21f95c564a	Country Sunshine	restaurant	american restaurant	30.16466	-96.40437	206 S Jackson St	Brenham	77833	+19793373931	http://countrysunshinetx.com/		0.91
 dd4069673ceb	Country Sunshine	restaurant	american restaurant	30.16410	-96.40549	206 S Jackson St	Brenham	77833	+19793373931	http://countrysunshinetx.com/		0.98
 9a394294f11e	Cowgirls Tavern	restaurant	bar and grill restaurant	30.97920	-96.67462	508 Main St	Calvert	77837	+19792135621			0.96
 6682ac5517c2	CowTalk Steakhouse	restaurant	steakhouse	30.40877	-96.05122	7846 TX-90	Navasota	77868	+19368256993	http://cowtalksteakhouse.ambz.com		0.98
@@ -2128,7 +2173,6 @@ c8a98de450e1	Dary Bakery Llc	restaurant		30.63094	-96.38065	1612 W Villa Maria R
 d1e6be2c6ab3	Dave & Buster's College Station	restaurant	american restaurant	30.62618	-96.30386	1502 Harvey Road, Suite 100	College Station	77840		https://www.daveandbusters.com/us/en/about/locations/college-station	Dave & Buster's	0.80
 f786d862042f	Dave's Hot Chicken	restaurant	chicken restaurant	30.61588	-96.32085	1512 Texas Ave S	College Station	77840	+19798108133	https://daveshotchicken.olo.com/menu/college-station/		0.99
 595620a1e325	DBQ Barbecue & Catering	restaurant	barbecue restaurant	30.61708	-96.34837	123 Walton Dr	College Station	77840	+15129256909	http://www.DBQBBQ.com/		0.70
-6c39922d9d87	DBQ Barbecue & Catering	restaurant	barbecue restaurant	30.62421	-96.32913	123 Walton Dr	College Station	77840	+15129256909	http://www.DBQBBQ.com/		0.69
 f3f166ba27a7	De Baca Steakhouse	restaurant	steakhouse	30.56123	-96.26266	4436 Texas 6 Frontage Rd	College Station	77845	+19797031576	https://brazoslife.com/best-of-the-brazos-valley-voting/#/gallery/?group=549893		0.99
 5cf07e6b914d	Del Rancho Pal Rancho. TAQUERIA	restaurant	mexican restaurant	30.59312	-96.29450	1801 Deacon Dr	College Station	77845	+19792202868			0.83
 71a2e179a14c	Dennard Enterprises, Inc.	restaurant		30.65030	-96.26573	10500 Highway 30 Ste 500	College Station	77845	+19797760175			0.95
@@ -2136,7 +2180,6 @@ f3f166ba27a7	De Baca Steakhouse	restaurant	steakhouse	30.56123	-96.26266	4436 Te
 7f5192ad7537	Denny's Restaurant	restaurant		30.62732	-96.33362	607 Texas Ave	College Station	77840	+19797762684	https://www.dennys.com/		0.98
 bece2dab5f7d	Denny's Restaurant	restaurant		30.13807	-96.39485	2951 State Hwy 36 South	Brenham	77833	+19793531734	https://www.dennys.com/		0.99
 e87deec8fb32	Derrick's Golden Spoon	restaurant		30.38435	-96.09500	708 W Virginia St	Navasota	77868	+19364193990			0.88
-4a530f87a7db	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.12344	-96.10970	35515 US-290 BUS	Waller	77484	+19363728029	https://www.dickeys.com/locations/Texas/Waller/waller		0.85
 79a51d55bc7f	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.38486	-96.09336	501 W Washington Ave	Navasota	77868	+19368252261	https://dickeys.com/locations		0.92
 b6ce0c1bb270	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.20511	-96.05766	29442 Hwy 6	Hempstead	77445	+19797106189	https://www.dickeys.com/locations/Texas/Hempstead/hempstead	Dickey's Barbecue Pit National	0.94
 ec8c83b97a47	Dickeys #1947	restaurant	barbecue restaurant	30.19337	-96.06124	Chevron, 29442 Highway 6	Hempstead	77445	+19797106189	http://Dickeys.com/		0.61
@@ -2144,18 +2187,6 @@ ec8c83b97a47	Dickeys #1947	restaurant	barbecue restaurant	30.19337	-96.06124	Che
 1f3d68f09c1e	Dixie Chicken	restaurant	american restaurant	30.61796	-96.34645	307 University Dr	College Station	77840	+19798462322			0.95
 e1a840788f5a	Dixie Chicken	restaurant	chicken restaurant	30.63083	-96.33823	4415 S Texas Ave	Bryan	77802	+19792607344	http://www.dixiechicken.com	Dixie Chicken	0.68
 5505a9c83dcf	Doc Green's Salads & Grill	restaurant		30.61568	-96.31971	1808 Texas Ave S	College Station	77840	+19798223663	http://www.docgreens.com/		0.92
-038a8c96db0b	Domino's	restaurant	pizza restaurant	30.85644	-96.99414	2208 W 4th Ave	Cameron	76520	+12546050999	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.93
-1af46f6fb05d	Domino's	restaurant	pizza restaurant	30.17876	-96.91378	2490 E Austin Ave	Giddings	78942	+19792891991	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-8d5ce16cc779	Domino's	restaurant	pizza restaurant	30.63034	-96.37849	1525 W. Villa Maria Road	Bryan	77807	+19798230010	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-ac5881ddc269	Domino's	restaurant	pizza restaurant	30.39080	-96.09143	415 N Lasalle St	Navasota	77868	+19367275173	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-c067e871a60e	Domino's	restaurant	pizza restaurant	30.62252	-96.30972	900 Harvey Rd	College Station	77840	+19796966066	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-c8faf0d0eea0	Domino's	restaurant	pizza restaurant	30.67159	-96.34039	2211 Wm J Bryan Pkwy	Bryan	77802	+19797745567	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-fd0acbc248c9	Domino's	restaurant	pizza restaurant	30.09687	-96.07664	817 Austin St	Hempstead	77445	+19797108181	http://www.dominos.com/	Domino's Pizza	0.96
-44e84ab6ebd9	Domino's Pizza	restaurant	pizza restaurant	30.56868	-96.32967	1799 Kerr Valley Ln	College Station	77845	+19796935200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
-46ea68f803b4	Domino's Pizza	restaurant	pizza restaurant	30.14148	-96.39687	401 Highway 290 W	Brenham	77833	+19792519063	https://www.dominos.com		0.99
-7b535a79bea6	Domino's Pizza	restaurant	pizza restaurant	30.61868	-96.34536	409 A University Dr	College Station	77840	+19798466666	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-b383cc292bda	Domino's Pizza	restaurant	pizza restaurant	30.14057	-96.39792	401 Highway 290 W	Brenham	77833	+19792519063	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
-f38c2d30d54b	Domino's Pizza	restaurant	pizza restaurant	30.56249	-96.26312	4400 Texas 6 Frontage Rd	College Station	77845	+19794311424	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 c0a32633d975	Don Chente Mexican & Seafood Restaurant	restaurant	mexican restaurant	30.69350	-96.36319	2701 E State Hwy 21	Bryan	77803	+19797041003	https://linktr.ee/donchentegroup		0.92
 97bd73afaa8b	Dos Hermanos Taqueria	restaurant	mexican restaurant	30.61304	-96.31510	2206 Texas Ave S	College Station	77840	+19795715893			0.92
 24ca65169386	Double C Kitchen	restaurant	chinese restaurant	30.88128	-96.59617	202 S Magnolia St	Hearne	77859	+19792792607			0.59
@@ -2174,7 +2205,6 @@ e33e2b485498	Duo Gino & Nate	restaurant	american restaurant	30.08574	-96.69080	1
 99debe475b3a	E11even Bar & Grill	restaurant	bar and grill restaurant	30.62087	-96.35249	4353 Wellborn Rd	Bryan	77801	+19794507627			0.95
 3293747bae1f	Eccell steakhouse	restaurant	steakhouse	30.63518	-96.32295	980 University Dr E Ste 400	College Station	77840	+19792684101	http://www.eccellsteakhouse.com		0.92
 acf86055c5ed	Edge General Store	restaurant		30.89074	-96.29555	7250 Edge Cut Off Rd	Hearne	77859	+19795893539	https://edgegeneralstore.com		0.99
-b136fdaba717	Edge General Store	restaurant	southern american restaurant	30.89026	-96.29492	7250 Edge Cut Off Rd	Hearne	77859	+19795893539	http://edgegeneralstoreinc.com/		0.97
 1720d46f3c3d	El Alamo Cafe	restaurant	mexican restaurant	30.88039	-96.59628	206 W 3rd St	Hearne	77859	+19792799081	https://el-alamo-cafe.hub.biz/		0.97
 ececb80df6f9	El Alamo Mexican Resturant	restaurant	mexican restaurant	30.89798	-96.60279		Hearne					0.57
 5e74d2fa8802	El Centenario Sports Bar	restaurant	mexican restaurant	30.67648	-96.38509	1204 W William Joel Bryan Pkwy Ste 105	Bryan	77803				0.99
@@ -2186,7 +2216,6 @@ e6292246d5b6	El Charro T Mexican Restaurant	restaurant	mexican restaurant	30.168
 41633947f30d	El Mundo Del Taco	restaurant	mexican restaurant	30.68262	-96.38226	710 San Jacinto Ln	Bryan	77803	+19797393001	http://mundodeltaco.com		0.92
 ba0a0f3ae724	El Mundo del Taco	restaurant	mexican restaurant	30.66327	-96.37460	1138 Finfeather Rd	Bryan	77803	+19794126434			0.96
 ab7a55c4a4ed	El Palomo Kitchen	restaurant		30.64826	-96.34781	902 N Harvey Mitchell Pkwy	Bryan	77803	+19794228555			0.86
-d93bde3e92db	El Palomo Kitchen	restaurant		30.64461	-96.38860	902 N Harvey Mitchell Pkwy	Bryan	77803	+19794228555			0.84
 fc440b7a8a57	El Rey Regio Snowcones	restaurant	mexican restaurant	30.09881	-96.07826	646 10th St	Hempstead	77445				0.76
 f02983ff0455	El Sazon Norteno	restaurant	mexican restaurant	30.18415	-96.92938	392 N Orange St	Giddings	78942	+19797162707			0.92
 60b7c5b42a73	El Sol De Mexico	restaurant	mexican restaurant	30.67943	-96.36903	705 N Texas Ave	Bryan	77803	+19798212400	http://elsoldemexico.cc	El Sol de Mexico	0.99
@@ -2194,17 +2223,14 @@ f02983ff0455	El Sazon Norteno	restaurant	mexican restaurant	30.18415	-96.92938	3
 6ff23290682d	Elvira's Cafe	restaurant	diner	30.18889	-96.93573	748 N Main St	Giddings	78942	+19795421111	http://www.elvirasrestaurant.com	Elvira's Tucson - Tequila, Cocina & Vino	0.96
 710f44906c3b	Ely's Tacos	restaurant	mexican restaurant	30.64524	-96.37589	2208 Finfeather Rd	Bryan	77801	+19794227948			0.92
 89d1b5756abb	Erick's Mexican Restaurant	restaurant	mexican restaurant	30.09787	-96.07865	735 10th St	Hempstead	77445	+19798262427	https://ericksmexicanrestaurant.net/		0.96
-c0670abb06f9	Erick's Mexican Restaurant	restaurant	mexican restaurant	30.09759	-96.07867	735 10th St	Hempstead	77445	+19798262427	https://ericksmexicanrestaurant.com		0.95
 5fa023cafbe9	Exotik Eatz	restaurant	soul food	30.68649	-96.37487	1411 San Jacinto Ln	Bryan	77803	+19795749367			0.69
 94db8ae5bc43	Exotik Eatz	restaurant		30.61695	-96.34824	204 1st St	College Station	77840	+19793834114			0.93
 f288dfebfc41	Exotik Eatz	restaurant	cajun and creole restaurant	30.68009	-96.36966	308 E Martin Luther King Jr St	Bryan	77803	+19795749367			0.92
 ecf1bf5fb516	F&f Japanese Grill	restaurant	japanese restaurant	30.61785	-96.32019	1505 Texas Ave S Ste B	College Station	77840	+19797031207	https://www.fnfeat.com		0.92
-047e41501e41	Faby's Taquería	restaurant	mexican restaurant	30.67077	-96.40325	2714 Highway 21 W	Bryan	77803	+19798077627			0.87
 3fdd52ad2e65	Faby's Taquería	restaurant	mexican restaurant	30.67105	-96.40353	2714 Highway 21 W	Bryan	77803	+19798077627			0.87
 a9c493e8ee94	Fajita Express Taqueria	restaurant		30.39698	-96.07015	9323 Highway 90 S	Navasota	77868	+19363062575			0.97
 6fb40556a3f5	Fajita Pete's	restaurant	texmex restaurant	30.62065	-96.34323	711 University Dr	College Station	77840	+19794507753	https://fajitapetes.com/stores/college-station/	Fajita Pete's	0.67
 043d959934e3	Famous Famiglia Pizzeria	restaurant	pizza restaurant	30.61867	-96.34563	104 College Main St	College Station	77840	+19797031690	https://www.doordash.com/store/famous-famiglia-college-station-31471449/71483346/		0.92
-0d80b20c1b19	Fargo's Pit BBQ	restaurant	barbecue restaurant	30.67998	-96.36771	1701 S Texas Ave	Bryan	77802	+19797783662	http://www.fargospitbbq.com		0.77
 1e769442acd8	Fargo's Pit Bbq	restaurant	barbecue restaurant	30.65499	-96.36472	1701 S Texas Ave	Bryan	77802	+19797783662	https://fargospitbbq.com		0.92
 45e47952a617	Fargo's Pitt BBQ	restaurant	barbecue restaurant	30.68465	-96.36993	1220 N Texas Ave	Bryan	77803	+19797783662	http://fargospitbbq.com		0.92
 f857e6213845	Farmers Grill	restaurant	burger restaurant	30.66209	-96.30148	4301 Boonville Rd	Bryan	77802	+19797318904	http://www.farmersgrillbcs.com		0.92
@@ -2213,7 +2239,6 @@ f857e6213845	Farmers Grill	restaurant	burger restaurant	30.66209	-96.30148	4301 
 5445f283bee2	Fazoli's	restaurant	italian restaurant	30.61705	-96.31579	400 Harvey Rd	College Station	77840	+19796945199	https://fazolis.com/stores/tx-college-station-400-harvey-road-77840/?utm_source=yext&utm_medium=local&utm_campaign=website&y_source=1_MzExNzA1OC01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Fazoli's	0.99
 12bae1f57150	Fercho’s Mexican Dining & Cantina	restaurant	mexican restaurant	30.18141	-96.92634	1195 E Austin St	Giddings	78942	+19795423480			0.92
 11ca2eb05d33	Filling Station Diner & Cafe	restaurant		30.38846	-96.08756	310 E Washington Ave	Navasota	77868				0.95
-275f240d6fe2	Firehouse Subs	restaurant	sandwich shop	30.61717	-96.32067	1507 Texas Avenue South	College Station	77840	+19797035983	http://www.firehousesubs.com/	Firehouse Subs	0.99
 4b5e7fe9e8d5	First Class BBQ	restaurant	barbecue restaurant	30.10982	-96.07539	745 US-290 BUS	Hempstead	77445	+19798262271	http://www.firstclassbbq.com/		0.93
 8e98382ee4fa	First Watch	restaurant	breakfast and brunch restaurant	30.63073	-96.33790	4501 S. Texas Ave.	Bryan	77802	+19797046652	https://www.firstwatch.com/locations/college-station/?utm_source=facebook&utm_medium=organic&utm_campaign=fb-listing&utm_content=college-station%2F	First Watch	0.99
 bc43b32cdb16	Fish 'n More	restaurant	seafood restaurant	30.64280	-96.35165	3105 S Texas Ave	Bryan	77802	+19798223663			0.55
@@ -2221,8 +2246,6 @@ bc43b32cdb16	Fish 'n More	restaurant	seafood restaurant	30.64280	-96.35165	3105 
 7f3753ea575a	Fitzwilly's	restaurant	american restaurant	30.61779	-96.34657	303 University Dr	College Station	77840	+19798468806	http://fitzwillysbar.com/index.htm		0.92
 ecacae67db1b	Flaming Bird By H-E-B	restaurant	chicken restaurant	30.69019	-96.37166	1609 North Texas Avenue	Bryan	77803	+12109381644	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.97
 800d3f475dbd	Four Tines Restaurant at the Surrey	restaurant	buffet restaurant	30.53806	-96.69276	403 TX-21	Caldwell	77836	+19795677235	http://www.thesurreyinncaldwell.com		0.92
-200d091826b4	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	30.55662	-96.26242	913 William D Fitch Pkwy Ste 100	College Station	77845	+19796901187	https://www.freddys.com/location/college-station-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
-356614148111	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	30.67424	-96.33795	930 N Earl Rudder Fwy	Bryan	77808	+19797763549	https://www.freddys.com/location/bryan-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
 018b32509b15	Freebirds World Burrito	restaurant	texmex restaurant	30.61819	-96.34594	319 University Dr	College Station	77840	+19798469298	https://locations.freebirds.com/tx/college-station/20601	Freebirds World Burrito	0.99
 1b022708902a	Freebirds World Burrito	restaurant	texmex restaurant	30.58202	-96.28478	3525 D Longmire Dr Ste D	College Station	77845	+19794858829	https://locations.freebirds.com/tx/college-station/20604	Freebirds World Burrito	0.97
 7cc73637ac63	Freebirds World Burrito	restaurant	texmex restaurant	30.61112	-96.31599	2050 Texas Ave S Ste. C	College Station	77840	+19796950151	https://locations.freebirds.com/tx/college-station/20602	Freebirds World Burrito	0.99
@@ -2233,7 +2256,6 @@ e49d36983c74	Frida’s Kitchen + Bar	restaurant	mexican restaurant	30.63759	-96.
 6d93df7b1883	Fruteria Y Refresqueria Arcelia	restaurant	mexican restaurant	30.09994	-96.07814	525 10th St	Hempstead	77445				0.92
 e8545c5e7ad2	Fs College Station Llc	restaurant		30.62180	-96.35362	4309 Wellborn Rd	Bryan	77801				0.95
 87f2dd6295a4	Fuddruckers	restaurant	burger restaurant	30.61738	-96.31706	1704 George Bush Dr E	College Station	77840	+19796967142	http://www.fuddruckers.com/	Fuddruckers	0.92
-bcc1b87be42d	Fuego Latino Gastropub	restaurant	gastropub	30.18326	-96.93777	155 W Austin St	Giddings	78942	+19792129555	http://Www.fuegolatinogastropub.com/		0.99
 47bce7fb85d4	Fuego Tortilla Grill	restaurant	texmex restaurant	30.62788	-96.33356	108 Poplar St	College Station	77840	+19797031804	https://fuegotortillagrill.com/	Fuego Tortilla Grill- Baylor	0.99
 9b1ec5a39007	Funky Junky	restaurant		30.53332	-96.69365	106 N Main St	Caldwell	77836	+19792184458	https://www.funkyjunkytx.com		0.92
 15346c2bfdaf	Fusion Peru	restaurant	peruvian restaurant	30.60731	-96.30667	2501 Texas Ave S	College Station	77840	+19796762603	https://www.fusionperutx.com/		0.96
@@ -2248,9 +2270,6 @@ c9189dd8185a	Galvan Taqueria	restaurant	taco restaurant	30.88263	-96.59566	103 S
 cc6b0a5120ac	Genghis Grill	restaurant	mongolian restaurant	30.63270	-96.32740	700 University Dr E	College Station	77840	+19792606800	https://locations.genghisgrill.com/tx/collegestation/genghis-grill-1032.html		0.97
 578df483d381	Ginnos Italian Restaurant	restaurant	italian restaurant	30.85099	-96.97617	113 N Central Ave	Cameron	76520	+12546976500	http://www.ginosfdl.com		0.97
 26424c8bb2dc	God’s Presence	restaurant	american restaurant	30.88034	-96.59587	302 S Magnolia St	Hearne	77859	+19794928384			0.69
-4e16a504861f	Golden Chick	restaurant	american restaurant	30.87226	-96.59815	811 Brown	Hearne	77859	+19792795652	http://locations.goldenchick.com/tx/hearne/1018/		0.77
-e6fbaf975f08	Golden Chick	restaurant		30.88070	-96.58441	811 Brown	Hearne	77859	+19792795652			0.85
-ee204adc24a4	Golden Chick	restaurant	american restaurant	30.53559	-96.69200	201 N. Green St.	Caldwell	77836	+19795679460	http://locations.goldenchick.com/tx/caldwell/1079/		0.77
 a733df4f0b83	Golden Corral	restaurant	buffet restaurant	30.63299	-96.32838	University Dr East Ste A	College Station	77840	+19798468484	https://www.goldencorral.com/locations/540/golden-corral-university-dr-east-ste-a/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=540	Golden Corral Buffet & Grill	0.99
 a03d38f88d4b	Golden Imperial	restaurant	chinese restaurant	30.14326	-96.39392	222 Hwy 290 W	Brenham	77833	+19798366729	http://goldenimperialtx.com/		0.99
 2b7baa17bffb	Good Country Foods, Inc	restaurant		30.53823	-96.69296	403 E Highway 21	Caldwell	77836				0.95
@@ -2273,7 +2292,6 @@ ec2e5dc03ef4	Halftime At Hwy 21	restaurant	bar and grill restaurant	30.71304	-96
 2524b1ae6bf0	Hangar 54 Pizza	restaurant	pizza restaurant	30.38803	-96.56556	13720 TX-36	Somerville	77863	+19795963600	https://hangar54.pizza/location/slammin-4-lyons-tx/	Hangar 54 Pizza	0.96
 4129f6162a5b	Hangar 54 Pizza	restaurant	pizza restaurant	30.15762	-96.37338	1804 S Blue Bell Rd	Brenham	77833	+19795519004	https://hangar54.pizza/location/brenham-food-stop-3-brenham-tx/		0.96
 4ba41cf69f3b	Hangar 54 Pizza	restaurant	pizza restaurant	30.64660	-96.28467	3500 Harvey Rd	College Station	77845	+19796800400	https://hangar54.pizza/location/copperfield-food-store-llc-buy-buy-college-station-tx/	Hangar 54 Pizza	0.96
-a599ec8cd5cd	Hangar 54 Pizza	restaurant	pizza restaurant	30.59532	-96.29438	3500 Harvey Rd	College Station	77845	+19796800400	https://hangar54.pizza/location/copperfield-food-store-llc-buy-buy-college-station-tx/		0.85
 d339e423afa3	Hangar 54 Pizza	restaurant	pizza restaurant	30.20527	-96.05773	29442 Highway 6	Hempstead	77445	+19797106186	https://hangar54.pizza/location/fuel-maxx-53-hempstead-tx/		0.96
 49032d3466f0	Hartz Chicken Buffet	restaurant	buffet restaurant	30.14039	-96.39630	2610 TX-36 South	Brenham	77833	+19794516317	https://www.hartz-chicken.com	Hartz Chicken Buffet	0.95
 5207d14869d2	He's Cafe	restaurant	asian restaurant	30.09743	-96.07002	240 Austin St	Hempstead	77445	+19799210866	http://www.hescafehempstead.kwickmenu.com/		0.98
@@ -2312,7 +2330,6 @@ febfcf16b9fd	It's Just Wings	restaurant	chicken wings restaurant	30.62201	-96.32
 19b975faf56d	J W's Steakhouse	restaurant	steakhouse	30.14855	-96.68828	122 S Hauptstrasse St	Carmine	78932	+19792784240	http://www.jw-steakhouse.com/		0.92
 7741f111fb4e	J. Cody's Steak and Barbeque	restaurant	barbecue restaurant	30.63342	-96.35372	3610 S College Ave	Bryan	77801	+19798462639	http://www.jcodys.com/		0.99
 7591cdc0f952	Ja'Mahl's Place	restaurant	bar and grill restaurant	30.97349	-96.67500	406 W Garrett St	Calvert	77837	+19799068062			0.85
-b57fbd52ba06	Jack in the Box	restaurant	taco restaurant	30.65096	-96.36159	1504 Texas Ave S Hwy 6	College Station	77840	+19796934310	http://www.jackinthebox.com/locations/683		0.85
 437b66ec4416	JADII SOUL FOOD	restaurant	soul food	30.17560	-96.38951	806 Independence St	Brenham	77833	+19794517825			0.92
 603e28d771f8	Jake's Bar B Que	restaurant	barbecue restaurant	30.35863	-96.82167	1075 Co Rd 425	Dime Box	77853	+19798843009			0.91
 8d2d5502f9eb	Jason's Deli	restaurant	salad bar	30.61176	-96.34126	275 Joe Routt Blvd	College Station	77840	+19797393128	https://www.jasonsdeli.com/restaurants/texas-am-deli		0.92
@@ -2321,13 +2338,7 @@ a275a27837ba	Jason's Deli	restaurant	delicatessen	30.61668	-96.32252	1460 Texas 
 9306aa76c8fd	Jch Cj College Station Llc	restaurant		30.62446	-96.34026	1025 University Dr Ste 107	College Station	77840				0.95
 3c92ee800418	JC’s Delights & Bites	restaurant		30.79859	-96.07427	2094 FM 1696	Iola	77861	+19792558403	http://jcsdelightsandbites.com/		0.69
 bc429032fd2c	Jernetta's Soul Food	restaurant	southern american restaurant	30.18155	-96.40187	1600 N Park	Brenham	77833	+19792771133	http://chinahut.us		0.77
-0cb4c6240458	Jersey Mike's	restaurant	sandwich shop	30.58360	-96.32346	11663 FM 2154 Suite 200	College Station	77845	+19793930012	https://www.jerseymikes.com/15145/college-station-tx	Jersey Mike's Subs	0.99
-7be8ef50e19d	Jersey Mike's	restaurant	sandwich shop	30.66630	-96.32257	3001 Wildflower Drive Unit 711	Bryan	77802	+19794851661	https://www.jerseymikes.com/15198/bryan-tx	Jersey Mike's Subs	1.00
-98e9c25584de	Jersey Mike's	restaurant	sandwich shop	30.58443	-96.28235	4001 State Highway 6 Suite 900	College Station	77845	+19799770779	https://www.jerseymikes.com/15113/college-station-tx	Jersey Mike's Subs	0.96
 a056f7854fb6	Jesse's Taqueria & Bakery	restaurant	mexican restaurant	30.65534	-96.33778	3310A E 29th St	Bryan	77802	+19794859841	http://www.lovejessestacos.com		0.98
-59620d2d73b2	Jimmy John's	restaurant	sandwich shop	30.58283	-96.28632	3505 Longmire Dr Ste. D	College Station	77845	+19796962035	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-2041.html	Jimmy John's	0.99
-939b40e44aa4	Jimmy John's	restaurant	sandwich shop	30.61202	-96.31580	2002 Texas Ave S	College Station	77840	+19796936400	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-616.html	Jimmy John's	0.91
-d071c009f0b7	Jimmy John's	restaurant	sandwich shop	30.62856	-96.33328	200 University Dr E	College Station	77840	+19796959200	https://locations.jimmyjohns.com/tx/collegestation/sandwiches-1227.html	Jimmy John's	0.99
 6658d46e88a9	Jin Shan Inc	restaurant		30.67396	-96.33521	2305 Boonville Rd	Bryan	77808				0.95
 7c13da4789b3	Jin's Asian Cafe	restaurant	asian restaurant	30.62063	-96.34363	110 Nagle St	College Station	77840	+19796918858	http://www.jinscafe.com/		0.92
 d0d96a24227f	JJ African Market & Restaurant	restaurant		30.64705	-96.36084	2405 Cavitt Ave	Bryan	77801	+17132109441	https://jjafricanfoodmarke.wixsite.com/jjafricanfoodmarket		0.84
@@ -2420,13 +2431,6 @@ ecada8b7f61b	Las Fuentes Mexican Restaurant	restaurant	mexican restaurant	30.354
 34871a0fc9a7	Las Palmas Refresqueria	restaurant	texmex restaurant	30.16001	-96.39795	1003 S Austin St	Brenham	77833	+19794218233			0.92
 a81f796567c0	Layne's of College Station	restaurant	chicken restaurant	30.62315	-96.32864	106 Walton Dr	College Station	77840	+19796967633	https://www.layneschickenfingers.com/	Layne's Chicken Fingers	1.00
 528eb60358e2	Lin's Tv & Appliance Llc	restaurant		30.64226	-96.35444	403 E Villa Maria Rd	Bryan	77801	+19798462100	http://www.leetvapp.com		0.75
-1c2ca0569dac	Little Caesars Pizza	restaurant	pizza restaurant	30.67168	-96.33549	2290 Boonville Rd SUITE 900	Bryan	77808	+19797767171	https://littlecaesars.com/en-us/store/7874	Little Caesars	0.99
-2e0a00dd70b1	Little Caesars Pizza	restaurant	pizza restaurant	30.66703	-96.32458	3141 Briarcrest Dr Ste 516	Bryan	77802	+19797747974	https://littlecaesarsstore.com		0.55
-439973f6fad0	Little Caesars Pizza	restaurant	pizza restaurant	30.15355	-96.39795	1608 S Day St	Brenham	77833	+19798308181	https://littlecaesars.com/en-us/store/9416	Little Caesars	0.98
-4fa8b4412b0a	Little Caesars Pizza	restaurant	pizza restaurant	30.60789	-96.30800	2501 Texas Ave S Ste 101	College Station	77840	+19796960191	https://littlecaesars.com/en-us/store/2822	Little Caesars	0.95
-76aaed6da5f2	Little Caesars Pizza	restaurant	pizza restaurant	30.64462	-96.35329	803 Dellwood St	Bryan	77802	+19798223000	https://littlecaesars.com/en-us/store/9646	Little Caesars	0.99
-7d885e077813	Little Caesars Pizza	restaurant	pizza restaurant	30.57134	-96.31003	12727 Farm to Market Rd 2154	College Station	77845	+19796935309	https://littlecaesars.com/en-us/store/10316	Little Caesars	1.00
-9a18d7d55296	Little Caesars Pizza	restaurant	pizza restaurant	30.18017	-96.92007	1799 E Austin St	Giddings	78942	+19795420002	https://littlecaesars.com/en-us/store/11418	Little Caesars	0.96
 c6053f481439	Little's Lunches Llc	restaurant		30.67127	-96.32644	2651 Boonville Rd Ste 125	Bryan	77808		https://littleslunches.com		0.98
 71009fbf0fe1	LJ's BBQ	restaurant	barbecue restaurant	30.16530	-96.41682	1407 W Main St	Brenham	77833	+19794218292	http://www.ljstxbbq.com/		0.97
 f30fc25116ff	Lo Nuestro De Mexico	restaurant	mexican restaurant	30.52533	-96.71091	1512 TX-21	Caldwell	77836	+19795670642	https://lo-nuestro-de-mexico.hub.biz/		0.94
@@ -2434,7 +2438,6 @@ bd41bfe87e0f	Log Cabin Restaurant	restaurant	american restaurant	30.73284	-96.04
 bc210c36ba4a	Logie's	restaurant	bar and grill restaurant	30.61870	-96.34628	201 College Main St	College Station	77840	+19796910190	https://twitter.com/LogiesOnCampus		0.96
 35513195970d	Lone Star Bar-B-Q	restaurant	barbecue restaurant	30.01727	-96.73219	4311 S State Highway 237	Round Top	78954				0.69
 36553166e0b5	Lone Star Southern Grill	restaurant	southern american restaurant	30.16686	-96.42792	2120 US-290	Brenham	77833	+19798367990	http://www.lonestarsoutherngrill.com/		0.99
-ac43c85acdae	Long John Silver's	restaurant	seafood restaurant	30.10539	-96.04846	Hempstead, TX 77445	Hempstead	77445	+19798268522	http://www.ljsilvers.com		0.77
 8a23758bb9c2	Longhorn Tavern Steakhouse	restaurant	steakhouse	30.67530	-96.37164	201 E 24th St	Bryan	77803	+19797783900	http://www.longhorntavernsteakhouse.com/		0.99
 a8761b6f7763	Loretta's	restaurant	southern american restaurant	30.97846	-96.67391		Calvert	77837	+19793642020	http://lorettascafe.com		0.77
 237f9afe4e58	Los Cabos Mexican Grill	restaurant	texmex restaurant	30.39874	-96.07092	8731 N Hwy 6 Loop	Navasota	77868	+19367275123	http://loscabosnavasota.com/		0.96
@@ -2492,11 +2495,8 @@ df5e14dd1e9c	MARY JANE'S KITCHEN	restaurant	italian restaurant	30.38764	-96.0871
 b9785140360c	Matus Bar-b-q	restaurant	barbecue restaurant	30.53085	-96.69453	304 W Buck St	Caldwell	77836	+19795673666	http://www.tmbbq.com/matus-pit-bar-b-q/		0.96
 49ab584017b5	Mauri's Taqueria	restaurant	taco restaurant	30.56942	-96.32471	3201 Holleman Dr S	College Station	77845	+19796769693			0.92
 78bb700087bd	Mayfield DQ	restaurant	burger restaurant	30.85353	-96.97657	202 W 4th St	Cameron	76520	+12546973401		Mayfield DQ	0.97
-8d32f1856081	Mayfield DQ	restaurant	burger restaurant	30.85313	-96.97502	202 W 4th St	Cameron	76520	+12546973401		Mayfield DQ	0.97
 06a1fe156a33	McAlister's Deli	restaurant	delicatessen	30.63546	-96.32227	1006 University Dr. East	College Station	77840	+19798466000	https://locations.mcalistersdeli.com/tx/college-station/1006-university-dr-east?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
-195666efbc18	McAlister's Deli	restaurant	sandwich shop	30.61520	-96.32153	1006 University Dr. East	College Station	77840		https://locations.mcalistersdeli.com/tx/college-station/1006-university-dr-east/catering	McAlister's Deli	0.80
 1ab45ee69442	McAlister's Deli	restaurant	delicatessen	30.58710	-96.28487	3915 Texas 6 Frontage Rd	College Station	77845	+19795354084	https://locations.mcalistersdeli.com/tx/college-station/3915-state-highway-6-south?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.97
-1e03d92ca7ff	McDonald's	restaurant	burger restaurant	30.60393	-96.33930	111 George Bush Dr	College Station	77840	+19796933777	https://www.mcdonalds.com/us/en-us/location/tx/college-station/111-george-bush-dr/17309.html?cid=RF:YXT:RoN::Clicks		0.98
 0a345c878998	Mcginty's Best Thing Smoking Bbq	restaurant	barbecue restaurant	30.37873	-96.08273	1221 S La Salle St	Navasota	77868	+19368707524			0.92
 7d5d818c50e4	Mel's Diner	restaurant	diner	30.18263	-96.93443	379 E Austin St	Giddings	78942	+19795422900	http://www.melsdiners.com		0.75
 bd8a85b026a0	MeLinda’s Taqueria & Catering	restaurant	seafood restaurant	30.71491	-96.36915	2861 FM974	Bryan	77808	+19795745463			0.75
@@ -2558,15 +2558,7 @@ f50ca91fdb7f	Outlaws BBQ	restaurant	barbecue restaurant	30.01657	-96.73390	4418 
 4a9e8707e5f1	Ozona Grill And Bar	restaurant	american restaurant	30.61928	-96.31338	520 Harvey Rd	College Station	77840	+19796944618	https://www.ozonagrill.com		0.96
 ef6c39022510	P.t.h Llc	restaurant		30.58502	-96.32430	11671 Fm 2154 Rd Ste 100	College Station	77845				0.95
 6b7f16074555	Paliacates Coffee & Food	restaurant	mexican restaurant	30.65830	-96.37556	1500 Finfeather Rd	Bryan	77801	+19799335349			0.92
-2a0debff4556	Panda Express	restaurant	chinese restaurant	30.64316	-96.35218	725 E Villa Maria Rd	Bryan	77802	+19797790645	http://www.pandaexpress.com/	Panda Express México	0.92
-6519fd3504ef	Panda Express	restaurant	chinese restaurant	30.65895	-96.33173	2206 Briarcrest Dr	Bryan	77802	+19794311666	www.pandaexpress.com		0.92
 b38429076b31	Pandora's of London	restaurant		30.32195	-96.18684	18455 Wellmann Rd	Washington	77880	+17204929218			0.97
-5b81fbfd47a6	Papa John's Pizza	restaurant	pizza restaurant	30.68973	-96.37138	1601 N Texas Ave Ste 120	Bryan	77803	+19797781500	https://www.papajohns.com/		0.98
-91c6d9441831	Papa John's Pizza	restaurant	pizza restaurant	30.61990	-96.34409	601 University Dr	College Station	77840	+19798463600	http://www.papajohns.com		0.92
-2a0337c0a98a	Papa Johns Pizza	restaurant	pizza restaurant	30.63988	-96.31358	1741 University Dr E	College Station	77840	+19798463600	https://locations.papajohns.com/united-states/tx/77840/college-station/1741-university-drive-e?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA1OTI1ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
-3d099cd9a81f	Papa Johns Pizza	restaurant	pizza restaurant	30.14333	-96.39419	228 Hwy 290 W	Brenham	77833	+19798367272	https://locations.papajohns.com/united-states/tx/77833/brenham/228-hwy-290-west?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM2NDgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
-555d7c1b7ec4	Papa Johns Pizza	restaurant	pizza restaurant	30.58274	-96.28784	1740 Rock Prairie Rd	College Station	77845	+19796800508	https://locations.papajohns.com/united-states/tx/77845/college-station/1740-rock-prairie-road?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA1OTI1ODgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
-ab43a227d184	Papa Johns Pizza	restaurant	pizza restaurant	30.58079	-96.26086	1740 Rock Prairie Rd	College Station	77845	+19796800508	https://www.papajohns.com		0.95
 937b45997fba	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	30.64540	-96.35160	725 E Villa Maria Rd Ste 300	Bryan	77802	+19797752253			0.92
 edf2b40c9eff	Papa Perez Mexican Cuisine	restaurant	mexican restaurant	30.67254	-96.37376	200 S Main St	Bryan	77803	+19797757272	http://www.papaperez.com/		0.99
 2caebaef62cf	Papi's Icehouse	restaurant	bar and grill restaurant	30.30212	-96.50908	12670 L B J Dr	Brenham	77833	+19792894265	https://local.yahoo.com/info-163891420-papi-s-icehouse-brenham		0.92
@@ -2581,29 +2573,9 @@ d940853a9e9a	Pepperoni's Pizza	restaurant	pizza restaurant	30.62970	-96.33220	31
 87ec1708c4fe	Piada Italian Street Food	restaurant	italian restaurant	30.62428	-96.33958	1025 University Dr Ste 109	College Station	77845	+19793077611	https://mypiada.com/menu/collegestation	Piada Italian Street Food	0.99
 56d1ef925593	Pioneer Smokehouse	restaurant	barbecue restaurant	30.16549	-96.39747	309 S Park St	Brenham	77833	+17138768416	http://www.pioneerbrenham.com/		0.98
 dd0b17098c0f	Pita Pit	restaurant	sandwich shop	30.61859	-96.34543	403 University Dr	College Station	77840	+19792605084	http://www.pitapitusa.com/		0.92
-055b6862950c	Pizza Hut	restaurant	pizza restaurant	30.18343	-96.94221	556 W Austin St	Giddings	78942	+19795423011	http://www.pizzahut.com		0.92
-070c4d35256c	Pizza Hut	restaurant	pizza restaurant	30.15450	-96.39841	1504 S Day St Washington	Brenham	77833	+19793531383	https://locations.pizzahut.com/tx/brenham/1504-s-day-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315687	Pizza Hut	0.97
-11559c373d48	Pizza Hut	restaurant	pizza restaurant	30.09363	-96.06064	637 Hwy 290 Waller	Hempstead	77445	+19798268001	https://locations.pizzahut.com/tx/hempstead/637-hwy-290?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299503	Pizza Hut	0.99
-16784b601329	Pizza Hut	restaurant	pizza restaurant	30.55570	-96.26498	1295 Arrington Rd Brazos	College Station	77845	+19793930538	https://locations.pizzahut.com/tx/college-station/1295-arrington-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315661	Pizza Hut	0.93
-3ca788ecb1cc	Pizza Hut	restaurant		30.58712	-96.28757	3800 Texas-Frontage Ave S	College Station	77845	+19796939393	https://locations.pizzahut.com/tx/college-station/3800-state-hwy-6?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300000	Pizza Hut	0.92
-4dc825d6c6ff	Pizza Hut	restaurant	pizza restaurant	30.87541	-96.59097	1002 S Market St Robertson	Hearne	77859	+19792795386	https://locations.pizzahut.com/tx/hearne/1002-s-market-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291341	Pizza Hut	0.94
-59df0d7ee423	Pizza Hut	restaurant		30.14386	-96.39886	2540 S Day St	Brenham	77833	+19798364261	https://locations.pizzahut.com/tx/brenham/2540-south-day-street	Pizza Hut	0.93
-5c094d9bc3e2	Pizza Hut	restaurant	pizza restaurant	30.85442	-96.98010	600 W 4th St Milam	Cameron	76520	+12546974941	https://locations.pizzahut.com/tx/cameron/600-w-4th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285508	Pizza Hut	0.96
-5d8b7f98fcdf	Pizza Hut	restaurant	pizza restaurant	30.63073	-96.38079	1622 W Villa Maria Rd Brazos	Bryan	77807	+19796962512	https://locations.pizzahut.com/tx/bryan/1622-w-villa-maria-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313888	Pizza Hut	0.99
-79195a74d14c	Pizza Hut	restaurant	pizza restaurant	30.61210	-96.31583	2002 Texas Ave S Brazos	College Station	77840	+19798463355	https://locations.pizzahut.com/tx/college-station/2002-texas-ave-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314381	Pizza Hut	0.94
-8fe01fb38f7e	Pizza Hut	restaurant	pizza restaurant	30.60803	-96.31870	1103 Anderson St	College Station	77840	+19796939393	http://pizzahut.com/		0.77
-a8620818bac0	Pizza Hut	restaurant	pizza restaurant	30.18087	-96.92745	1088 E Austin St	Giddings	78942	+19792125009	https://locations.pizzahut.com/tx/giddings/1088-east-austin-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309242	Pizza Hut	0.95
-c09d590a25e5	Pizza Hut	restaurant	pizza restaurant	30.39714	-96.06966	9305 Hwy 90 South Grimes	Navasota	77868	+19368257273	https://locations.pizzahut.com/tx/navasota/9305-hwy-90-south?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298974	Pizza Hut	0.98
-c5da89fc0b35	Pizza Hut	restaurant	pizza restaurant	30.66637	-96.32288	3001 Wildflower Drive Brazos	Bryan	77802	+19797743222	http://www.pizzahut.com/	Pizza Hut	0.99
-cdf129b7bd4a	Pizza Hut	restaurant	pizza restaurant	30.53714	-96.69210	300 N Green St Burleson	Caldwell	77836	+19795677996	https://locations.pizzahut.com/tx/caldwell/300-n-green-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292655	Pizza Hut	0.97
-e2e5191366da	Pizza Hut	restaurant	pizza restaurant	30.11791	-96.09005	637 Hwy 290	Hempstead	77445		https://locations.pizzahut.com/tx/hempstead/637-hwy-290	Pizza Hut	0.80
-ee44c53e8f47	Pizza Hut	restaurant	pizza restaurant	30.62818	-96.33389	102 University Dr	College Station	77840	+19796962512	http://www.pizzahut.com		0.77
-4492b96d793b	Pizza Hut Express	restaurant	pizza restaurant	30.63548	-96.30257	1401 Earl Rudder Frwy S., Movies 18 Ste 182	College Station	77845		https://locations.pizzahut.com/tx/college-station/1401-earl-rudder-frwy-s		0.97
-7ae9d5cdfb07	Pizza Hut Express	restaurant	pizza restaurant	30.66528	-96.32173	3061 Wildflower Dr	Bryan	77802	+18009488488	https://locations.pizzahut.com/tx/bryan/3061-wildflower-drive	Pizza Hut	0.96
 1d8ea78089cf	Pizza Inn	restaurant	pizza restaurant	30.91341	-96.11243	13309 TX-21	North Zulch	77872	+19363992356	https://www.pizzainn.com/locations/north-zulch-tx/	Pizza Inn	0.96
 33b87f17883a	Pizza Inn	restaurant	pizza restaurant	30.56945	-96.32468	3201 Holleman Dr S Ste 100	College Station	77845	+19792180761	https://www.pizzainn.com/locations/college-station-tx		0.92
 e4192ebd747f	Pizza Inn	restaurant	pizza restaurant	30.85272	-96.97721	309 N Travis Ave	Cameron	76520	+12546976405	http://www.pizzainn.com/locations/cameron-tx/		0.92
-b41f82d6aa8f	Pizza Ranchini	restaurant	pizza restaurant	30.67200	-96.37775	405 W 28th St #5	Bryan	77803	+19795718580	http://www.pizzahut.com/	Pizza Hut Jamaica	0.92
 557a9695df81	Pizzaiolo's	restaurant	pizza restaurant	30.14277	-96.40025	675 US-290 W	Brenham	77833	+19792517464	http://pizzaiolospizza.com/	Pizzaiolo's magnolia	0.97
 2ebfc3a1f026	Pluckers Wing Bar	restaurant	chicken wings restaurant	30.63529	-96.32290	990 University Drive East	College Station	77840	+19793809464	https://www.pluckers.com/location/college-station		0.99
 145d4f0d86a4	Poche Seafood College Station	restaurant		30.58171	-96.33073	3004 Holleman Drive South	College Station	77845	+19797034457	https://pochesseafoodshoppeandrestaurant.com/		0.97
@@ -2620,7 +2592,6 @@ b41f82d6aa8f	Pizza Ranchini	restaurant	pizza restaurant	30.67200	-96.37775	405 W
 cfe309c75094	Porters Dining and Bar	restaurant	steakhouse	30.62570	-96.33961	180 Century Square Dr #120	College Station	77840	+19799770700	https://www.eventbrite.com/e/barrell-whiskey-dinner-at-porters-tickets-1591315159479		0.99
 1d4f3d6b55ae	Potato Expressions Llc	restaurant		30.57015	-96.30867	12815 Fm 2154 Rd Ste 172	College Station	77845				0.95
 13c7266a82bd	Potato Shack Plus	restaurant	american restaurant	30.57002	-96.30871	12815 Farm to Market Rd 2154 #172	College Station	77845	+19796957783	http://www.potatoshack.biz/		0.98
-e52ce36f4e6a	Potbelly	restaurant	sandwich shop	30.61872	-96.34530	409B University Dr	College Station	77840	+19792604620	https://www.potbelly.com/locations/texas/college-station	Potbelly Sandwich Shop	0.99
 59657db02836	Prairie Hill Bed and Breakfast	restaurant		30.22801	-96.51527	4356 FM 2679 Rd	Burton	77835	+18154472487	http://www.prairiehillbandb.com/		0.92
 e5108de35df9	Precious Tower Llc	restaurant		30.60600	-96.31082	2418 Texas Ave S Ste E	College Station	77840				0.95
 8f50cb56d998	ProClean Solutions	restaurant		30.71360	-96.38171	3806 Woody Ln	Bryan	77803	+19799007105	http://www.procleansolutionsbcs.com		0.92
@@ -2630,7 +2601,6 @@ ba441eca10e3	Public & Main	restaurant	american restaurant	30.63192	-96.33878	440
 49d52bc42ad9	R Place	restaurant	barbecue restaurant	30.32527	-96.15724	23254 Farm to Market Road 912	Washington	77880	+19368781925			0.95
 a1477e9a38dd	R Taco	restaurant	taco restaurant	30.61997	-96.34409		College Station			https://www.rtacos.com		0.77
 5b51f0540a1d	Raise the Roost	restaurant		30.89730	-96.60262	1637 N Market St	Hearne	77859	+19799061325	https://raisetheroostchicken.com/		1.00
-83fafcdf3d25	Raising Cane's Chicken Fingers	restaurant	chicken restaurant	30.62397	-96.30415	1500 Harvey Rd Ste 4034	College Station	77840	+19796967300	http://raisingcanes.com/		0.99
 251358305930	Rami's Entertainment	restaurant		30.67548	-96.37348	222 N Main St	Bryan	77803				0.95
 3aa904414f60	Rancho De Los Robles	restaurant	mexican restaurant	30.24044	-96.04103	3003 County Road 324	Navasota	77868	+19368256144			0.62
 4ef305c8e5de	Raspas y Mariscos El Solecito	restaurant	mexican restaurant	30.65977	-96.37117	1212 S Texas Ave	Bryan	77803	+19794129215			0.59
@@ -2670,9 +2640,6 @@ a326b303917e	San Luis Potosi	restaurant		30.18440	-96.93723	259 N Main St	Giddin
 f209a5d86608	Satchels	restaurant		30.61801	-96.34817	303 Boyett St	College Station	77840				0.95
 8f8ccffa717f	Sazón y Tradición Taqueria	restaurant	mexican restaurant	30.70931	-96.37505	3239 Wilkes St	Bryan	77803	+19795879574	https://www.facebook.com/share/1CVfYpWQMk/?mibextid=wwXIfr		0.77
 3bdc8b3a25b5	Sbisa Dining Center	restaurant	cafeteria	30.61687	-96.34393	Texas A&M University	College Station	77843	+19798452061	http://tamu.edu		0.95
-2c4d6f9dbb84	Schlotzsky's	restaurant	sandwich shop	30.62272	-96.34180	107 College Ave	College Station	77840	+19792602867	www.schlotzskys.com		0.99
-becd9fb2ddc9	Schlotzsky's	restaurant	sandwich shop	30.59844	-96.30233	2210 Harvey Mitchell Pkwy S	College Station	77845	+19796808150	https://locations.schlotzskys.com/tx/college-station/2210-harvey-mitchell-parkway-south?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
-d54e3596b618	Schlotzskys	restaurant	sandwich shop	30.14141	-96.39626	2606 TX-36	Brenham	77833	+19794216340	https://locations.schlotzskys.com/tx/brenham/2606-highway-36-south?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
 5136f7407cc8	Seafood House	restaurant	seafood restaurant	30.68480	-96.38028	1000 San Jacinto Ln	Bryan	77803	+19798223605			0.55
 fe821a073244	Sealand	restaurant	seafood restaurant	30.08670	-96.08309	1925 13th St	Hempstead	77445	+19799215151	http://Sealandseafoodsteakandpho.com/		0.92
 6f0752d289f5	Sealand Seafood & Steak	restaurant	seafood restaurant	30.14444	-96.36707	2201 Hwy 290 E	Brenham	77833	+19798365600	http://www.sealand-seafood.com/		0.97
@@ -2692,7 +2659,6 @@ fc6a6bb040ce	Shipwreck Grill	restaurant	seafood restaurant	30.64046	-96.35660	20
 35a189ba41b5	Sidetrack'd Icehouse	restaurant	bar and grill restaurant	30.34766	-96.52991	17291 ST. HWY 36 S	Somerville	77879	+19797776078			0.92
 80b6dddc9ef6	Sissy's Saddle Shop Cafe	restaurant	american restaurant	30.85692	-96.91830	2919 County Road 227	Cameron	76520	+12546978500	http://sissyssaddleshopcafe.food93.com		0.77
 c0b960afa9e2	Sloppy Joe's Deli and Catering	restaurant		30.64571	-96.35664	2700 S Texas Ave	Bryan	77802	+19798236428	http://www.sloppyjoes.com		0.92
-6552812f3013	Smashburger	restaurant	burger restaurant	30.61707	-96.34380	233 N Houston St	College Station	77841	+19798476167	https://smashburger.com/locations/us/tx/college-station/233-houston-st/		0.95
 3c38eea85994	Smith Diary Queens, Ltd	restaurant		30.63620	-96.34379	3833 S Texas Ave Ste 276	Bryan	77802	+19798462222			0.95
 5eb123ee4c4f	Smitty K's	restaurant	american restaurant	30.63261	-96.24139	12601 State Highway 30	College Station	77845	+19793832299	http://www.smittyks.com/		0.89
 366dd4109a49	Smitty's Outdoors Llc	restaurant		30.63460	-96.35505	3602 Old College Rd	Bryan	77801				0.95
@@ -2707,7 +2673,6 @@ df02fdaa44f1	So-Fly Hot Chicken	restaurant	chicken restaurant	30.63168	-96.33921
 d49fd34d7834	Sodolaks Beefmasters Restaurant	restaurant	steakhouse	30.69830	-96.35725	3500 Highway 21 E	Bryan	77808	+19797784999	https://www.groupon.com/biz/bryan-tx/sodolaks-beefmasters-restaurant		0.99
 1511c86edfca	Solodak's Steak House	restaurant	steakhouse	30.49497	-96.47469	9687 FM 60 E	Snook	77879				0.77
 94b05db0d180	Somervilles Seafood and Grill	restaurant	seafood restaurant	30.33773	-96.52235	18125 TX-36	Somerville	77879	+19793531012	https://online.skytab.com/930aea1316bdb63a1cc231dea686f13d		0.92
-56fc8455fe57	Sonic Drive-In	restaurant	burger restaurant	30.13149	-96.22154	11215 US Highway 290 E	Manor	78653	+15122781434	https://locations.sonicdrivein.com/tx/manor/11215-us-highway-290-e.html		0.85
 21aefb6acd4f	Soup Man	restaurant	soup restaurant	30.59682	-96.30173	2205 Longmire Dr	College Station	77845	+19797643177	http://www.originalsoupman.com		0.92
 62dba5a9cf93	South Flo Pizza	restaurant	pizza restaurant	30.58291	-96.32150	11655 Wellborn Rd N	College Station	77845	+19796803260	https://www.heb.com/static-page/south-flo-pizza	South Flo Pizza	0.92
 3a289967cd40	South Flo Pizza In H-E-B	restaurant	pizza restaurant	30.58482	-96.32623	11675 FM 2154 Rd	College Station	77845	+19796803260	https://www.heb.com/static-page/south-flo-pizza		0.96
@@ -2719,35 +2684,6 @@ dc097b5d53e9	Square One Bistro	restaurant		30.67475	-96.37401	211 W Wm J Bryan P
 629f6ab81e81	Stella Southern Cafe	restaurant	southern american restaurant	30.57940	-96.28226	4040 Hwy 6 #100	College Station	77845	+19797043207	http://www.stellabcs.com/		0.99
 a6d9827c76f0	Street Side Tacos	restaurant	taco restaurant	30.18388	-96.94164	501 W Austin St	Giddings	78942	+19797168879			0.75
 8447642cb91e	Stuermer Store	restaurant	american restaurant	30.15062	-96.79149	100 US-290	Ledbetter	78946	+19792495642	https://www.trekaroo.com/activities/stuermer-store-ledbetter-texas		0.94
-0f7a87aff818	SUBWAY	restaurant	sandwich shop	30.63140	-96.37812	Villa Maria	Bryan	77807		http://subway.com		0.77
-128497fba512	Subway	restaurant	sandwich shop	30.58765	-96.33871	2048 Holleman Dr W	College Station	77840	+19796966045	https://restaurants.subway.com/united-states/tx/college-station/2048-holleman	Subway	0.96
-1eca8410a5eb	Subway	restaurant	sandwich shop	30.10796	-96.04739	2000 FM 1488	Hempstead	77445	+19798266606	https://restaurants.subway.com/united-states/tx/hempstead/2000-fm-1488	Subway	0.99
-24ce010a28f9	Subway	restaurant	sandwich shop	30.63083	-96.38083	1622 W. Villa Maria Suite 150	Bryan	77807	+19797797756	http://subway.com/	Subway	0.97
-2b59b79ada32	Subway	restaurant	sandwich shop	30.59776	-96.30069	1815 Brothers Blvd	College Station	77840	+19796934975	https://restaurants.subway.com/united-states/tx/college-station/1815-brothers-blvd	Subway	0.99
-3386407a0636	SUBWAY	restaurant	sandwich shop	30.59506	-96.30875	2031 Harvey Mitchell Pkwy S	College Station	77840	+19796933933	http://www.subway.com/		0.92
-36c9bd0228fa	Subway	restaurant	sandwich shop	30.17876	-96.38526	1701 State Hwy 105	Brenham	77833	+19792519400	https://restaurants.subway.com/united-states/tx/brenham/1701-state-hwy-105	Subway	0.95
-3a350fad7d76	Subway	restaurant	sandwich shop	30.85314	-96.97581	102 W 4th St	Cameron	76520	+12546974977	https://www.subway.com		0.99
-4237e18e7397	Subway	restaurant	sandwich shop	30.63184	-96.38133	643 N. Harvey Mitchell Pkwy. Suite 150	Bryan	77807	+19798221581	http://www.subway.com/en-us	Subway	0.97
-447a347c69b5	Subway	restaurant	sandwich shop	30.64318	-96.35222	725 E Villa Maria Suite 900	Bryan	77802	+19798237827	http://subway.com/	Subway	0.98
-70cdea1d27e3	Subway	restaurant	sandwich shop	30.67352	-96.33514	2305 Booneville Rd Suite 750	Bryan	77808	+19797311847	https://restaurants.subway.com/united-states/tx/bryan/2305-booneville-rd	Subway	0.98
-777c5253e639	Subway	restaurant	sandwich shop	30.39670	-96.07319	1695 E Washington Ave	Navasota	77868	+19368703367	https://www.subway.com		0.98
-7841c76c2c9d	Subway	restaurant	sandwich shop	30.53848	-96.69589	271 Hwy 36 North	Caldwell	77836	+19795677827	https://restaurants.subway.com/united-states/tx/caldwell/271-hwy-36-north	Subway	0.95
-7f3d42ecd842	Subway	restaurant	sandwich shop	30.88272	-96.59635	100 N Market St	Hearne	77859	+19792800866	https://restaurants.subway.com/united-states/tx/hearne/100-n-market-st	Subway	0.93
-8c1b67296f14	Subway	restaurant	sandwich shop	30.57026	-96.30900	12815 FM 2154 Suite 100	College Station	77845	+19796939173	https://restaurants.subway.com/united-states/tx/college-station/12815-fm-2154	Subway	0.97
-8cdf5cd9ab29	Subway	restaurant	sandwich shop	30.67387	-96.37351	100 N Main Suite 110	Bryan	77803	+19798233147	https://restaurants.subway.com/united-states/tx/bryan/100-n-main	Subway	0.99
-91b6d11c027a	Subway	restaurant	sandwich shop	30.13389	-96.26062	8780 Highway 290 E	Chappell Hill	77426	+19794219225	https://restaurants.subway.com/united-states/tx/chappell-hill/8780-hwy-290-east	Subway	0.95
-928f1848511b	Subway	restaurant	sandwich shop	30.61996	-96.34408	601 University Dr Ste 103	College Station	77840	+19798462165	https://www.subway.com		0.95
-964bbde49977	Subway	restaurant	sandwich shop	30.63974	-96.31232	806 S Earl Rudder Fwy	College Station	77840	+19798467533	https://restaurants.subway.com/united-states/tx/college-station/806-earl-rudder-fwy	Subway	0.99
-9bf79648aaeb	Subway	restaurant	sandwich shop	30.17879	-96.91385	2458 E. Austin Suite 110	Giddings	78942	+19795429601	https://restaurants.subway.com/united-states/tx/giddings/2458-e-austin	Subway	0.95
-9ec58f28eb35	Subway	restaurant	sandwich shop	30.60567	-96.33740	330 George Bush Dr	College Station	77840	+19796930346	https://restaurants.subway.com/united-states/tx/college-station/330-george-bush-dr?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=10897&utm_campaign=evergreen-2020&y_source=1_MTQ5MTEwMTctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
-a218bb6c7241	SUBWAY	restaurant	sandwich shop	30.53583	-96.69244	170 State Highway 36 N	Caldwell	77836	+19795673254	http://www.subway.com/		0.77
-a4d62743d556	Subway	restaurant	sandwich shop	30.55827	-96.26080	951 William D Fitch Parkway Suite 801	College Station	77845	+19796904561	https://restaurants.subway.com/united-states/tx/college-station/951-william-d-fitch-parkway	Subway	0.99
-b4128492b733	Subway	restaurant	sandwich shop	30.58264	-96.28828	1722 Rock Prairie Rd	College Station	77845	+19797648602	https://restaurants.subway.com/united-states/tx/college-station/1722-rock-prairie-rd	Subway	0.97
-c4647b134c77	Subway	restaurant	sandwich shop	30.14030	-96.39334	203 US Loop 290 W	Brenham	77833	+19798308722	https://restaurants.subway.com/united-states/tx/brenham/203-us-loop-290-w	Subway	0.95
-cfe6d80d7c1e	Subway	restaurant	sandwich shop	30.60620	-96.31070	2418 Texas Ave S Ste D2	College Station	77840	+19796964418	http://www.Subway.com/	Subway	0.98
-dbc301975092	Subway	restaurant	sandwich shop	30.15203	-96.39135	1905 S Market St	Brenham	77833	+19798308222	https://restaurants.subway.com/united-states/tx/brenham/1905-s-market-st	Subway	0.96
-e3b2fe1a653a	Subway	restaurant	sandwich shop	30.62279	-96.31116	913 Harvey Rd Suite C	College Station	77840	+19797643990	https://restaurants.subway.com/united-states/tx/college-station/913-harvey-rd	Subway	0.99
-e626d78cbe61	Subway	restaurant	sandwich shop	30.58079	-96.26086	1722 Rock Prairie Rd	College Station	77845	+19797648602	https://www.subway.com		0.95
 be1fa5b1d698	Sully's Sports Grill & Bar	restaurant	american restaurant	30.62296	-96.32830	1037 Texas Ave S	College Station	77840	+19797034072	http://sullysgrill.com		0.92
 4ff2065e7420	Sushi Masa	restaurant	sushi restaurant	30.63190	-96.33884	4401 S Texas Ave	Bryan	77802	+19793263688	https://sushimasaus.com		0.99
 82d26897936f	Sushi Masa College Station	restaurant	sushi restaurant	30.62048	-96.32530	4401 S Texas Ave	College Station	77840	+19793263688	https://sushimasaus.com/	Sushi Masa Lafayette	1.00
@@ -2759,10 +2695,6 @@ cfb100282cfd	T Jin China Diner	restaurant	chinese restaurant	30.58269	-96.28509	
 1248ee2e1aea	T's Sports Bar & Grill	restaurant	burger restaurant	30.84929	-96.99929	273 FM 845	Cameron	76520	+12546978700	https://smittyks.com		0.85
 ea29ab18a5b9	T. Jin China Diner II	restaurant	chinese restaurant	30.67362	-96.33512	2305 Boonville Rd #650	Bryan	77808	+19797769999	http://www.tjindiner.com		0.94
 de219416ab62	Tabu Tacos & Burgers	restaurant	taco restaurant	30.16688	-96.39819	112 S Park St	Brenham	77833	+19793535738	http://tabu-tacosandburgers.square.site		0.99
-8a191acff73b	Taco Bell	restaurant	taco restaurant	30.58510	-96.32460	1696 Harvey Mitchell Pkwy S	College Station	77845	+17372899922	https://locations.tacobell.com/tx/college-station/1696-harvey-mitchell-pkwy-s.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042192&utm_content=website&y_source=1_MTA5MzE5MTA3My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.99
-da850054d0e0	Taco Bell	restaurant	taco restaurant	30.69394	-96.36375	2600 E. Sh 21	Bryan	77803	+19369399193	https://locations.tacobell.com/tx/bryan/2600-e--sh-21.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042104&utm_content=website&y_source=1_MTA5MzA4Nzk1My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
-57be01f3d31a	Taco Cabana	restaurant	texmex restaurant	30.66068	-96.32996	2410 Briarcrest Dr	Bryan	77802	+19797760555	https://www.tacocabana.com/	Taco Cabana	0.95
-9072bed2bceb	Taco Cabana	restaurant	taco restaurant	30.62672	-96.33299	701 Texas Ave S	College Station	77840	+19796931904	http://www.tacocabana.com/		0.92
 0d3e832cfae5	Taco Crave	restaurant	taco restaurant	30.67598	-96.37331	308 N Main St	Bryan	77803	+19794855460	http://www.tacocrave.net/		0.97
 5118917fb46b	Taco Hut	restaurant	taco restaurant	30.18312	-96.94017	374 W Austin St	Giddings	78942	+15125490728	http://www.tacohuttx.com		0.94
 df1312c57063	Tacobar Mexican Taste + Drinks	restaurant	mexican restaurant	30.62958	-96.33482	404 Jane St #400	College Station	77840	+19797046636	http://www.tacobarbcs.com/		0.99
@@ -2805,7 +2737,6 @@ f34e659362cd	Taqueria Mi Ilusion	restaurant	mexican restaurant	30.65865	-96.3784
 8a436fe560c6	Taqueria Poblana	restaurant	mexican restaurant	30.67054	-96.31872	3200 Boonville Rd	Bryan	77802	+19797765637	http://ordertaqueriapoblana.com		0.96
 ca90b5da3673	Taqueria Potosina	restaurant	mexican restaurant	30.37609	-96.07905		Navasota	77868	+19368258000	https://taqueria-potosina.hub.biz		0.92
 5b100d575621	Taqueria Puro Potosino	restaurant	mexican restaurant	30.71549	-96.38303	4108 Woody Ln	Bryan	77803				0.62
-76f485cc57dd	Taqueria Puro Potosino	restaurant	mexican restaurant	30.71517	-96.38336	4108 Woody Ln	Bryan	77803				0.57
 8144107faa38	Taqueria San Francisco	restaurant	mexican restaurant	30.67855	-96.37363	600 N Bryan Ave	Bryan	77803	+19795718580			0.99
 35502baf7d9b	Taqueria San Luis	restaurant	mexican restaurant	30.68359	-96.37252	1299 N Bryan Ave	Bryan	77803	+19795747103	http://www.taqueriasanluisbryan.com		0.56
 4fff4f5edffe	Taqueria San Luis	restaurant	mexican restaurant	30.67575	-96.38666	1305 W Wm J Bryan Pkwy Ste 300	Bryan	77803	+19795747103	http://www.taqueriasanluisbryan.com		0.92
@@ -2813,7 +2744,6 @@ dc8b850c57ff	Taqueria y restaurant La Perla	restaurant		30.67379	-96.35955	1204 
 43042dab0272	Taquerias Arandas	restaurant	mexican restaurant	30.65237	-96.36337	1816 S Texas Ave	Bryan	77802	+19798225533	http://www.taqueriasarandas.com	Taquería Arandas PN	0.99
 5e23b66dae22	Taz Indian Cuisine	restaurant	indian restaurant	30.60650	-96.31114	2416 Texas Ave S	College Station	77840	+19796966560	https://tazcuisine.com/		1.00
 32f59ceb1b94	Teague's Tavern	restaurant		30.06516	-96.69461	105 N Live Oak St	Round Top	78954	+19792493077			0.75
-b7206dc7b7d4	Tees Soulfood Heaven & More ‼️	restaurant		30.66049	-96.35581	3500 E 29th St	Bryan	77802	+19795873710			0.85
 f19d0c648e46	Tees Soulfood Heaven & More ‼️	restaurant		30.65233	-96.33603	3500 E 29th St	Bryan	77802	+19795873710			0.85
 bb776f43bfdd	Terry Suehs	restaurant		30.54585	-96.68350	1266 State Highway 21 E	Caldwell	77836		https://www.txfb-ins.com		0.95
 0677485d207b	Tex Miller	restaurant	burger restaurant	30.85065	-96.97550	104 N Fannin Ave	Cameron	76520	+12546974302	https://tex-miller.hub.biz		0.97
@@ -2873,7 +2803,6 @@ c811c1694846	The Tabor Store	restaurant	bar and grill restaurant	30.79616	-96.37
 636886d129fc	The Toasted Yolk	restaurant	breakfast and brunch restaurant	30.63351	-96.32776	700 University Dr E Ste B	College Station	77840	+19799774700	https://thetoastedyolk.com/locations/college-station-tx/	Yolk.	0.99
 1628400a1cc5	The Top Shelf Bar &Grill	restaurant	bar and grill restaurant	30.67676	-96.37389	400 N Bryan Ave	Bryan	77803				0.99
 62a803ddddc9	The Villages Of Indian Lake	restaurant	indian restaurant	30.52083	-96.25016	17528 Indian Lakes Dr	College Station	77845	+19796902051	http://villagesofindianlakes.com		0.66
-1b160c3f1189	The Vintage House Restaurant	restaurant	american restaurant	30.70285	-96.32276	4545 Old Reliance Rd	Bryan	77808	+19795997339	http://www.messinahof.com		0.94
 452ba2119b82	The Vintage House Restaurant	restaurant	american restaurant	30.71032	-96.31255	4545 Old Reliance Rd	Bryan	77808	+19795997339	https://www.messinahof.com		0.95
 f27c305a7b36	The Western Steakhouse & Dancehall	restaurant	steakhouse	30.38620	-96.06934	9524 N Hwy 6 Loop South	Navasota	77868	+19368259070	http://Thewesternsteakhouseanddancehall.com/		0.94
 ae6a0bca14e5	The Wild Garlic Pizza Co.	restaurant		30.63990	-96.34872	3409 Texas Ave	Bryan	77802	+19727623927	https://www.wildgraincafe.com/		0.93
@@ -2885,7 +2814,6 @@ e8ba1ea1440c	Toku 12	restaurant	japanese restaurant	30.61832	-96.34570	335 Unive
 fb914f13e0ae	Tommy's Drive-In	restaurant	diner	30.66995	-96.38928	1520 W 28th St	Bryan	77803	+19798237939	http://tommysdrivein.biz		0.98
 a5291cbeb398	Top of the Hill-Greasy Burgers	restaurant	burger restaurant	30.72996	-96.47288	2444 Lakewood Dr	Bryan	77807	+19797786911	https://www.impulsivetravelerguy.com/top-of-the-hill-greasy-burgers-benchley-tx		0.97
 460313b65b96	Torchy's Tacos	restaurant	texmex restaurant	30.62284	-96.32833	1037 Texas Ave S	College Station	77840	+19793296900	https://torchystacos.com/	Torchy's Tacos	0.99
-6d9e4e89c888	Torchy's Tacos	restaurant	taco restaurant	30.61820	-96.32283	1037 Texas Ave S	College Station	77840	+19793296900	https://torchystacos.com/?olonwp=z17TA_tz20aL5UmKf8LjMg		0.98
 907d6f34828c	Tortas Ahogadas	restaurant	mexican restaurant	30.67780	-96.38879	204 San Jacinto Ln	Bryan	77803	+19796392461			0.92
 81b673db6acb	Tortilleria Mi Tierra	restaurant	mexican restaurant	30.54059	-96.69938	525 TX-36	Caldwell	77836	+19795674977	https://www.tortilleriamitierra.com	Tortilleria Mi Tierra Bryan TX	0.92
 b2bef6e40c41	Tortilleria Mi Tierra	restaurant	mexican restaurant	30.67554	-96.37994	710 W William Joel Bryan Pkwy	Bryan	77803	+19794852665	http://www.TortilleriaMiTierra.com/	Tortilleria Mi Tierra Bryan TX	0.94
@@ -2919,16 +2847,10 @@ cc058262e4e8	Wanna Taco	restaurant	taco restaurant	30.61758	-96.31758	1702 Georg
 ac54c9bdb9d7	Wayback Burgers	restaurant	burger restaurant	30.55515	-96.26003	910 William D Fitch Pkwy	College Station	77845	+19797046280	https://waybackburgers.com/		0.92
 99617c0883f3	Welcome Store	restaurant	bar and grill restaurant	30.02869	-96.48782	12528 FM109	Industry	78944		http://Www.welcometexasgeneralstore.com/		0.97
 0e927f77e622	Well Watered Garden Llc	restaurant		30.60614	-96.30657	2551 Texas Ave S Ste D	College Station	77840		https://www.wellwateredgardens.org		0.95
-77df9075de5e	Wendy's	restaurant	burger restaurant	30.58740	-96.33882	2050 Holleman Dr W	College Station	77840	+19797642930			0.92
 7923c6528ce9	Western Club	restaurant		30.38619	-96.06956	9524 Highway 6 Loop S	Navasota	77868	+19368259070	http://www.westernclubbg.com		0.98
 83b1a0dd18cd	Wfk Restaurant Group, Llc	restaurant		30.61595	-96.31971	1727 Texas Ave S	College Station	77840				0.95
 3c6ddfe0006d	What's Tha Deal Barbecue	restaurant	barbecue restaurant	30.68492	-96.36935	1223 N Texas Ave	Bryan	77803	+19792290895	https://whatsthadealbarbecue.com		0.95
 48ec6d42125c	What's Tha Deal Barbecue	restaurant	barbecue restaurant	30.71300	-96.34435	5809 US-190	Bryan	77808	+19792290895	http://whatsthadealbarbecue.com/		1.00
-0803818b2212	Whataburger	restaurant	burger restaurant	30.61858	-96.32204	105 DOMINIK DR	College Station	77840	+19796962337	http://whataburger.com/	Whataburger	0.99
-7a685280db7b	Whataburger	restaurant	burger restaurant	30.56102	-96.25780	4471 STATE HIGHWAY 6 S	College Station	77845	+19796905753	https://locations.whataburger.com/tx/college-station/4471-state-highway-6-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-ade590ae59b0	Whataburger	restaurant	burger restaurant	30.66496	-96.37169	902 S TEXAS AVE	Bryan	77803	+19798220624	https://locations.whataburger.com/tx/bryan/902-s-texas-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-c340c1b84d86	Whataburger	restaurant	burger restaurant	30.13851	-96.39505	2801 Hwy 36 South	Brenham	77833	+19792771184	https://locations.whataburger.com/tx/brenham/2801-hwy-36-south.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-ddafa300601b	Whataburger	restaurant	burger restaurant	30.59044	-96.32964	1451 WELLBORN RD	College Station	77840	+19794363392	https://locations.whataburger.com/tx/college-station/1451-wellborn-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 3a31dd190fee	Wheels Tavern	restaurant	bar and grill restaurant	30.67369	-96.39677	2004 Highway 21 W	Bryan	77803	+19797037647	https://www.wheelstavern.com/		0.99
 bb2d298c5881	Which Wich	restaurant	sandwich shop	30.17895	-96.90703	3023 E Austin St	Giddings	78942	+19795429444	http://locations.whichwich.com/TX/Giddings/Giddings		0.96
 7679e5a35883	Which Wich Superior Sandwiches	restaurant	sandwich shop	30.60992	-96.34902	300 Olsen Blvd	College Station	77843	+19798456115	http://locations.whichwich.com/TX/College-Station/TAMU		0.92
@@ -2944,9 +2866,6 @@ f36b753c7291	Wings and More	restaurant	chicken restaurant	30.69728	-96.35806	340
 90bbb5ee86cf	Wings Locas	restaurant	chicken wings restaurant	30.38824	-96.06962	9416 Highway 6 Loop Ste B	Navasota	77868	+19368252996	http://locaswings.com		0.90
 3a2a8d808246	Wings N More	restaurant	barbecue restaurant	30.59384	-96.29353	3230 Texas Ave S	College Station	77845	+19796948966	https://wingsnmore.com/locations/#txave	Wings 'N More Restaurant & Bar	1.00
 584669c43a39	Wings N Thangs	restaurant	southern american restaurant	30.87938	-96.60474	210 N Alamo St	Hearne	77859	+19793122101			0.94
-0a08862d0e6f	Wingstop	restaurant	chicken restaurant	30.58350	-96.32409	11659 FM 2154, Suite 100	College Station	77845	+19794859942	https://www.wingstop.com/location/wingstop-1717-college-station-tx-77845/menu?y_source=1_NTUyMDc4ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-23c2251ec4cf	Wingstop	restaurant	chicken restaurant	30.63338	-96.32757	700 University Dr E Ste B201	College Station	77840	+19798469464	https://www.wingstop.com/location/wingstop-35-college-station-tx-77840/menu?y_source=1_NTUyMDcyMDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
-e86bc3250b06	Wingstop	restaurant	chicken restaurant	30.67399	-96.33540	2305 Boonville Rd, Ste 150	Bryan	77808	+19797769464	https://www.wingstop.com/location/wingstop-1354-bryan-tx-77808/menu?y_source=1_NTUyMDY5NjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 d7411186a0cd	Winkmitch, Llc Dba Rx Pizza	restaurant		30.67409	-96.37424	200 W 26th St	Bryan	77803				0.95
 c8fecc264b11	Wob College Station	restaurant		30.62738	-96.33582	425 Northpoint Xing	College Station	77840	+19799855927			0.55
 64024152a6de	Wokamole Healthy Cuisine	restaurant	fujian restaurant	30.64648	-96.33213	4001 E 29th St	Bryan	77802	+19798460009	http://www.wokamolefood.com		0.96
@@ -2966,7 +2885,6 @@ d35d90db9342	Zeitman's Grocery Store	restaurant	delicatessen	30.67543	-96.37357	
 1330986d361b	4 Star Living	senior	retirement home	30.35104	-96.93076	1106 Co Rd 446	Lincoln	78948	+19798840300			0.92
 00ba7e61abe1	Accel at College Station	senior	retirement home	30.58475	-96.27436	1500 Medical Avenue	College Station	77845	+19792721000	http://accelcollegestation.com/		0.97
 6367df4055b1	AccentCare Personal Care Services	senior	assisted living facility	30.58311	-96.29080	1605 Rock Prairie Rd Ste 206	College Station	77845	+19798462692	https://pcs.accentcare.com/college-station		0.85
-324b3f296127	Amedisys	senior	retirement home	30.65561	-96.34484	4500 Carter Creek Pkwy	Bryan	77802	+19797747770	https://locations.amedisys.com/tx/bryan/home-health-0720/?utm_source=facebook&utm_medium=organic&utm_campaign=locallisting	Amedisys	0.95
 aaba21b95012	Amedisys	senior	retirement home	30.64444	-96.32819	4500 Carter Creek Pkwy	Bryan	77802	+19797747770	https://locations.amedisys.com/tx/bryan/home-health-0720/?utm_source=facebook&utm_medium=organic&utm_campaign=locallisting	Amedisys	0.95
 eaab39f08d81	Argent Court Assisted Living	senior	retirement home	30.14522	-96.36388	2815 Victory Ln	Brenham	77833	+19798368000	http://www.argentcourt.com/	Argent Court Assisted Living	0.99
 566666603ab6	Assisted Living at St. Joseph Health - Bryan, TX	senior	assisted living facility	30.65924	-96.35097	2345 Manor Dr	Bryan	77802	+19798217304	https://stjoseph.stlukeshealth.org/locations/assisted-living-bryan		0.92
@@ -3013,14 +2931,12 @@ e315bb811233	Navasota Manor Apartments	senior	retirement home	30.38129	-96.08160
 be18c624c785	Navasota Nursing and Rehabilitation	senior	retirement home	30.39498	-96.07722	1405 E Washington Ave	Navasota	77868	+19368256463	http://www.navasotanursing.com/		0.92
 ad31abc81c6b	Nexion Health	senior	retirement home	30.38857	-96.06530	2100 Dove Crossing Lane	Navasota	77868	+19368254043	https://www.nexion-health.com/		0.92
 14fb6d84c6a0	Parc Retirement Community at Traditions	senior	retirement home	30.60083	-96.38831	3095 Club Dr	Bryan	77807	+19792134200	http://parcattraditions.com/		1.00
-0de986a8e76f	Park Place	senior	assisted living facility	30.73922	-96.44653	8733 N State Highway 6	Bryan	77807	+19794315262			0.55
 3a85a916d763	Park Place	senior	assisted living facility	30.74728	-96.45511	8733 N State Highway 6	Bryan	77807	+19797783003			0.85
 6d7f3eac1104	Peach Creek Assisted Living	senior	retirement home	30.53236	-96.20490	1488 Stokes Cir	College Station	77845	+18336874872	https://peachcreekassistedliving.com/		0.99
 d73d631280a4	QCC Senior Living	senior	assisted living facility	30.55470	-96.30569	13778 Alacia Ct	College Station	77845	+19796901319	http://www.qccseniorliving.com		0.92
 3fcc81f8f6d7	Seasons Assisted Living	senior	retirement home	30.39454	-96.08217	1103 Water St	Navasota	77868	+19362743177	http://www.meetseasons.com/	Seasons Assisted Living & Memory Care	0.99
 eb7c505f6a98	Serenity at Briarcrest - 55+ Active Adult Living	senior	retirement home	30.65760	-96.34400	2410 Memorial Dr	Bryan	77802	+19794726910	https://serenityatbriarcrest.com/		0.92
 4e4d80819b44	Sodalis College Station	senior	retirement home	30.64319	-96.29028	3211 Harvey Rd	College Station	77845	+19797045561	https://sodaliscollegestation.com/		0.99
-c26eb96adb3e	Sodalis College Station	senior	assisted living facility	30.63800	-96.29408	3211 Harvey Rd	College Station	77845	+19797045561	https://sodaliscollegestation.com/		0.85
 74a39535fec8	St Joseph Manor	senior	assisted living facility	30.65883	-96.35126	2333 Manor Dr Ofc	Bryan	77802	+19798217330	http://st-joseph.org		0.92
 38e5d4375389	The Crossings on Anointed Care Home	senior	retirement home	30.63496	-96.36370	410 Fairway Dr	Bryan	77801	+19796350677	https://www.anointedcarehome.com/		0.88
 304876148be1	The Huntington at College Station	senior	retirement home	30.57963	-96.27733	800 Durham Loop	College Station	77845	+19795719224	https://www.huntingtonatcs.com/		0.92
@@ -3029,6 +2945,5 @@ c26eb96adb3e	Sodalis College Station	senior	assisted living facility	30.63800	-9
 7757ed56a0a3	Villas of Rock Prairie	senior	retirement home	30.56673	-96.30171	100 Mortier Dr	College Station	77845	+19796938129	http://villasofrockprairie.com		0.99
 9b0c29f908ee	VIVERE Life College Station	senior	retirement home	30.64306	-96.29014	3211 Harvey Rd	College Station	77845	+18444030960	https://sodaliscollegestation.com/		0.97
 2baf3acc7cd0	Waldenbrooke Estates	senior	retirement home	30.65694	-96.34285	2410 Memorial Dr	Bryan	77802	+19797741298	http://www.seniorlifestyle.com		0.98
-6ec40fb85cc1	Waldenbrooke Estates	senior	retirement home	30.65680	-96.34341	2410 Memorial Dr	Bryan	77802	+19797741298	http://www.seniorlifestyle.com		0.93
 7b0d9bace492	Watercrest at Bryan	senior	retirement home	30.65721	-96.29202	3801 E Crest Dr	Bryan	77802	+19793145591	https://watercrestbryan.com/		0.92
 ea45c38e9d2a	Winnie L Nursing Facility	senior	retirement home	30.86916	-96.98165	2104 N Karnes Ave	Cameron	76520	+12546974985	http://winnielnursing.com/		0.92

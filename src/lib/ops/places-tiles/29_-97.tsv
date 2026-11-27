@@ -26,7 +26,6 @@ d49b4a045a89	Newman's Bakery	bakery		29.94885	-96.25307	504 E Main St	Bellville	
 f6dd6dbe6e93	Original Kountry Bakery	bakery		29.68478	-96.90238	110 N Kessler Ave	Schulenburg	78956	+19797434342	http://www.kountrybakery.com		0.97
 120f6de66d58	Rapha	bakery		29.84507	-96.32674	10745 FM949	Cat Spring	78933	+12813004768	http://raphakitchenandco.com/	Rapha	0.97
 7fcd25cab53d	Shipley Do-Nuts	bakery	donut shop	29.70337	-96.54707	1336 Fannin St	Columbus	78934	+19797330267	https://shipleydonuts.com/locations/1336-fannin	Shipley Do-Nuts	0.92
-e5afb7f9b7bd	Shipley Do-Nuts	bakery	donut shop	29.77146	-96.06204	8135 Interstate 10 Frontage Rd	Houston	77024	+13462044606	https://shipleydonuts.com/locations/8135-interstate-10-frontage-rd	Shipley Do-Nuts	0.97
 24a8d51520a6	Snow Flake Donuts	bakery	donut shop	29.44291	-96.94674	112 Fairwinds St	Hallettsville	77964	+13617989018			0.97
 51980535a1c0	Snowflake Donut Shop	bakery	donut shop	29.70113	-96.77613	201 S Eagle St	Weimar	78962	+15014770444			0.96
 79a7b3d79545	Snowflake Donuts	bakery	donut shop	29.63245	-96.06804	6825 Commerce St	Wallis	77485	+19794782361			0.92
@@ -53,7 +52,6 @@ ba132376cf96	Cast Iron Winery	bar	winery	29.76219	-96.26755	1657 Meier Rd S	Seal
 c95b7c070583	Club Shakey's	bar		29.58634	-96.33359		Eagle Lake			http://shakeys.com/		0.97
 632929a8b5de	Creekmore's Sports Bar	bar	sports bar	29.74090	-96.14527	3797 TX-36 S	Sealy	77474	+19798857237			0.96
 cff51446ca39	Cummins Creek Vineyards	bar	winery	29.83389	-96.57938	1022 Aschenbeck Rd	Columbus	78934				0.90
-d1d9a5d37a56	Cummins Creek Vineyards	bar	winery	29.82848	-96.57919	1022 Aschenbeck Rd	Columbus	78934				0.90
 53647da70911	Duke's on Main	bar	whiskey bar	29.95006	-96.25775	3 E Main St	Bellville	77418	+19792705000	https://dukesonmain.com/		0.57
 76f9534ab7a3	Emery's Buffalo Creek	bar	winery	29.90637	-96.22845	10827 TX-36	Bellville	77418	+19562273369	http://www.emerysbuffalocreek.com/		0.92
 a5ca76dc3bed	Ginger’s Sports Bar and Squirell Farm	bar	sports bar	29.13532	-96.34316	1074 Co Rd 304	Louise	77455				0.89
@@ -227,7 +225,6 @@ ccaa283ef982	Texas Bible Institute!	college		29.65458	-96.48251	1423 County Road
 dc91e079fd42	WCJC Dental Hygiene	college		29.32078	-96.07659	911 E Boling Hwy	Wharton	77488	+19795326429	http://www.wcjc.edu/Programs/allied-health/dental-hygiene/		0.59
 774596bcff3c	WCJC TRiO SSS	college		29.32078	-96.07659	911 E Boling Hwy	Wharton	77488	+19795326476	https://www.wcjc.edu/support/trio-student-support-services.aspx		0.79
 1d1dbfc2bf49	WCJC Welding	college		29.32078	-96.07659	911 E Boling Hwy	Wharton	77488	+19795324560	http://www.wcjc.edu/Programs/vocational-science/welding-technology/index.aspx		0.68
-9aa066d0cbeb	WCJC Welding	college		29.32293	-96.08371	911 E Boling Hwy	Wharton	77488	+19795324560	http://www.wcjc.edu/Programs/vocational-science/welding-technology/index.aspx		0.66
 afa07bfa1366	Wharton County Jr College Adult Learning Center	college		29.20064	-96.27536	208 W Church St	El Campo	77437	+19795433949	http://www.wcjc.edu		0.67
 bf7a9f0a02ee	Wharton County Junior College	college		29.32383	-96.08578	911 E Boling Hwy	Wharton	77488	+19795324560	http://www.wcjc.edu/		0.92
 81c3014f71e8	7's Mart	convenience		29.78060	-96.15759	305 Meyer St	Sealy	77474	+19796279128		7-Eleven	0.92
@@ -285,7 +282,6 @@ ac587b6693f9	Circle K	convenience		29.70673	-96.54589	912 Walnut St	Columbus	789
 f5e17a3000e7	Circle K	convenience		29.43627	-96.95194	312 US HWY 77 S	Driscoll	78351	+13613873622	https://www.circlek.com/store-locator/us/driscoll/312-us-hwy-77-s/2740128		0.85
 278df6711196	Citgo	convenience		29.73881	-96.58934	2682 State Hwy 71	Columbus	78934	+19797323484	http://www.citgo.com/	Citgo	0.92
 45de9b98fe68	CITGO	convenience		29.05116	-96.51539	1106 US-59	Ganado	77962	+13617712113	http://www.citgo.com/	Citgo	0.92
-ce72f30b6aee	CITGO	convenience		29.95001	-96.25580		Bellville		+19792705121	http://www.citgo.com/	Citgo	0.92
 f685345c31d4	CITGO	convenience		29.03677	-96.51098		Ganado		+13617712722	http://www.citgo.com/	Citgo	0.92
 34f0dd92cfe0	City Food Mart	convenience		29.63173	-96.06634	6607 Commerce St	Wallis	77485	+19794786241	http://exxonmobil.com		0.98
 5131abd211ed	Columbus Mini Mart	convenience		29.68863	-96.53822	2560 State Hwy 71 Ste A	Columbus	78934	+19795004068	http://churchs.com	MINI	0.85
@@ -300,7 +296,6 @@ a470e58d4690	Conoco	convenience		29.03365	-96.50861	1006 S 3rd St	Ganado	77962	+
 23b11389026f	Cryotech	convenience		29.18647	-96.26835	602 Marion St	El Campo	77437	+17137335776			0.92
 9fa71b74136c	Dru Chem, Inc.	convenience		29.17748	-96.32175	1329 County Road 358	El Campo	77437	+19795436843	http://www.dru-chem.com/		0.92
 927309fa8896	Dulce City	convenience		29.19519	-96.26968	111 W Monseratte St	El Campo	77437	+19795342006			0.92
-2023ae839bc5	El Campo Truck Stop	convenience		29.21881	-96.23286	21411 US-59	El Campo	77437	+19795789611	http://exxonmobil.com/corporate		0.93
 3e1a0bac5fd4	El Campo Truck Stop	convenience		29.22358	-96.22411	21411 US-59	El Campo	77437	+19795789611			0.96
 1350691085ac	Exxon	convenience		29.31058	-96.08932	315 N Alabama Rd	Wharton	77488	+19795328903	http://www.exxonmobilstations.com/16187-svateks-exxon-wharton		0.92
 155112fd0c8a	Exxon	convenience		29.63155	-96.06669	6607 Commerce St	Wallis	77485	+19794786241			0.55
@@ -333,7 +328,6 @@ ab8a67f5e361	Fuel Maxx# 34	convenience		29.91719	-96.02241	10596 FM359	Brookshir
 80b51ee18f72	Grab N Go	convenience		29.44545	-96.93481	1005 E 4th St	Hallettsville	77964	+13617983823	http://grab-n-go-halttsville.edan.io		0.92
 0cf2a7add21e	Hallettsville C-Store	convenience		29.46690	-96.94032	698 US Highway 77 N	Hallettsville	77964		https://locations.valero.com/en-us/LocationDetails/Index/698-US-HIGHWAY-77-N/0000027664	Valero	0.80
 de6b6226650e	Hallettsville One-Stop	convenience		29.40730	-96.85291	US Highway 77 N	Hallettsville	77964	+13617984876	https://hallettsville-one-stop.hub.biz/		0.76
-ecbedcfaf318	Hallettsville One-Stop	convenience		29.47238	-96.79649	US Highway 77 N	Hallettsville	77964	+13617984876	https://hallettsville-one-stop.hub.biz/		0.74
 a04d8fc1ac96	Handy Stop	convenience		29.70286	-96.78407	301 W Main St	Weimar	78962	+19797259029			0.92
 ce6a104ff3aa	Highway 71 Shell	convenience		29.70602	-96.54718	1003 Walnut St	Columbus	78934	+19797325090	https://rmarts.net		0.55
 34ad58ec1087	Hoffer's Drive In Grocery & Washateria	convenience		29.44252	-96.94663	115 Fairwinds St	Hallettsville	77964	+13617985843	http://www.exxonmobilstations.com		0.92
@@ -358,7 +352,6 @@ ac055cb739dd	Leo's Stop-N-Shop	convenience		29.67290	-96.90453	1306 Lyons Ave	Sc
 c276b959fe92	Little B's	convenience		29.76944	-96.15991	622 US-90	Sealy	77474	+19798852151	http://www.exxonmobil.com		0.80
 69a662c169cf	Little Triangle Food Mart	convenience		29.77533	-96.15700	323 North Cir Drive	Sealy	77474	+19798853766			0.92
 57a576136e27	Love's Travel Stop	convenience		29.69045	-96.77700	900 S Eagle St	Weimar	78962	+19797258625	https://www.loves.com/	Love's Travel Stops & Country Stores	0.97
-4ac1533d426b	Love's Travel Stops and Country Stores	convenience		29.39151	-96.07698	350 E Walnut St	East Bernard	77435	+19795321503	https://www.loves.com/locations/617	Love	0.97
 71a7a5f0b2e4	Love's Travel Stops and Country Stores	convenience		29.39195	-96.07708	350 E Walnut St	East Bernard	77435	+19795321503	https://www.loves.com/locations/617	Love	1.00
 b3ee62028b92	Lucky Stop	convenience		29.92974	-96.24860	1720 S Front St	Bellville	77418	+19798652287			0.65
 ce2d09b5de86	M C Food Mart	convenience		29.17908	-96.26031	1721 S Mechanic St	El Campo	77437	+19795789599			0.99
@@ -486,13 +479,16 @@ f3a561b8e9a9	WILDCAT EXPRESS-SEALY	convenience		29.76430	-96.18550	6025 N FM 353
 d076a2b1d916	Your C Store	convenience		29.90963	-96.86948	809 E Travis St	La Grange	78945	+19799685944			0.92
 b2c890f6a32d	YOUR C STORE #2	convenience		29.90619	-96.87594	157 E TRAVIS ST	La Grange	78945		https://www.exxon.com/en/find-station/exxon-lagrange-tx-yourcstore2-200324978	Exxon	0.80
 319c9fab7f0b	Zip In Zip Out, Exxon Truck Stop	convenience		29.17391	-96.27816	1414 Palacios St	El Campo	77437	+19794758057	https://www.exxonmobilfuels.com/en/find-gas-station/200323061		0.92
+05d98b4b858b	Burger King	fastfood	burger restaurant	29.32513	-96.09539	121 W Boling Hwy	Wharton	77488	+19795318399	https://www.bk.com/store-locator/store/restaurant_239547	Burger King	0.98
 1c02fd0098a6	Burger King	fastfood		29.21604	-96.28486	2102 N Mechanic St	El Campo	77437	+19792751330	https://burgerking.com/store-locator/store/28739	Burger King	0.94
 34dc576567dd	Burger King	fastfood		29.04971	-96.50332	802 E York St	Ganado	77962	+13617713504	https://burgerking.com/store-locator/store/26083	Burger King	0.99
-8412229f7163	Burger King	fastfood		29.20985	-96.28015	2102 N Mechanic St	El Campo	77437		https://www.bk.com/store-locator/store/restaurant_239857	Burger King	0.80
+cff40bb849d1	Burger King	fastfood	burger restaurant	29.69337	-96.54059	2214 State Hwy 71	Columbus	78934	+19797322973	https://burgerking.com/store-locator/store/20172	Burger King	0.95
 db8e7fd4abec	Carl's Jr.	fastfood		29.74269	-96.33046	6709 US-90	Sealy	77474	+19797322986	https://locations.carlsjr.com/tx/sealy/6709-us-hwy-90	Carl's Jr.	0.92
 5e543b0b88bd	Chicken Express	fastfood		29.21491	-96.28432	2014 N Mechanic St	El Campo	77437	+19795415390	https://www.chickene.com	Chicken Express	0.96
 b960121f7af8	Chicken Express	fastfood		29.32310	-96.09765	1406 N Richmond Rd	Wharton	77488	+19794882668	http://www.chickene.com/	Chicken Express	0.92
 f39ee1d1d2e4	Chicken Express	fastfood		29.76148	-96.15089	2211 TX-36	Sealy	77474	+19792561438	http://www.chickene.com/	Chicken Express	0.96
+6d79c2247973	Church's Chicken	fastfood	chicken wings restaurant	29.20065	-96.27264	606 N Mechanic St	El Campo	77437	+19795436961			0.92
+e9384753f836	Church's Chicken	fastfood	chicken restaurant	29.69036	-96.77551	901 S Eagle St	Weimar	78962	+19797255013	https://locations.churchs.com/tx/weimar/901-s-eagle-street	Church's Chicken	0.90
 9c7eb8d26b67	Church's Texas Chicken	fastfood		29.33308	-96.09399	2400 N. Richmond Road	Wharton	77488	+19792825176	https://locations.churchs.com/tx/wharton/2400-n.-richmond-road	Church's Chicken	0.96
 fd0da49e650f	Dairy Cone	fastfood		29.70659	-96.54539	836 Walnut St	Columbus	78934	+19797325500	https://www.groupon.com/biz/brenham-tx/dairy-cone		0.93
 0440af94ab1e	Dairy Queen	fastfood		29.52311	-96.06833	706 S Dill St 706 S Dill St	East Bernard	77435	+19793356220	https://www.dairyqueen.com/en-us/locations/tx/east-bernard/706-s-dill-st/14037/?y_source=1_NDc5NDI4MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
@@ -506,6 +502,11 @@ fcd5e153844b	Dairy Queen	fastfood		29.68948	-96.90289	77 N Kessler Ave	Schulenbu
 fddec249e939	Dairy Queen	fastfood		29.69360	-96.77629	715 S Eagle St	Weimar	78962	+19797256617	https://www.dairyqueen.com/en-us/locations/tx/weimar/715-s-eagle/14705/?y_source=1_MjkzMzk0MDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 1de8301d0549	Dairy Queen Store	fastfood		29.05125	-96.51420	1202 US-59	Ganado	77962	+13617713326	https://dqtexas.com/	Dairy Queen	0.98
 f4c4e541bf05	Dairy Queen Store	fastfood		29.32272	-96.09852	1321 N Richmond Rd	Wharton	77488	+19795325180	http://www.dairyqueen.com/	Dairy Queen	0.97
+2d4099979d1a	Domino's	fastfood	pizza restaurant	29.32537	-96.09193	309 E. Boling	Wharton	77488	+19795329600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+53de7d317302	Domino's	fastfood	pizza restaurant	29.19613	-96.26962	117 North Mechanic St	El Campo	77437	+19793206976	https://www.dominos.com/en/?redirect=homepage	Domino's Pizza	0.96
+570b4b1d08a9	Domino's	fastfood	pizza restaurant	29.76043	-96.15024	2329 Hwy 36 South Ste A	Sealy	77474	+19798850100	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test	Domino's Pizza	0.92
+f8e5bee25112	Domino's	fastfood	pizza restaurant	29.69380	-96.54074	2210 Sh 71 South Ste B	Columbus	78934	+13465532363	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
+a276bbfb9a46	Domino's Pizza	fastfood	pizza restaurant	29.90275	-96.90562	2001 State Hwy 71	La Grange	78945	+19792062121	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
 028084ada781	DQ Grill & Chill	fastfood		29.68948	-96.90305	77 N Kessler Ave	Schulenburg	78956		https://www.dairyqueen.com/en-us/locations/tx/schulenburg/77-n-kessler-ave/4362	DQ Grill & Chill	0.80
 0538e2a5e39c	DQ Grill & Chill	fastfood		29.52307	-96.06836	706 S Dill St	East Bernard	77435		https://www.dairyqueen.com/en-us/locations/tx/east-bernard/706-s-dill-st/3810	DQ Grill & Chill	0.80
 16a3bcb4c47a	DQ Grill & Chill	fastfood		29.05128	-96.51425	1202 E Highway 59	Ganado	77962		https://www.dairyqueen.com/en-us/locations/tx/ganado/1202-e-highway-59/3915	DQ Grill & Chill	0.80
@@ -522,10 +523,17 @@ f0b7b0c0c3d5	Hangar 54 Pizza	fastfood		29.66029	-96.10867	10505 Highway 36 S	Wal
 ed39d42a4362	Hartz Chicken Buffet	fastfood		29.76537	-96.15277	1822 Meyer St	Sealy	77474	+19799871175	http://hartz-chicken.com/	Hartz Chicken Buffet	0.95
 eee425cb799a	Hartz Chicken Buffet	fastfood		29.33549	-96.11801	10314 US-59	Wharton	77488	+19792828800		Hartz Chicken Buffet	0.94
 504ce16c2614	Ingredients & Co, LLC	fastfood		29.20115	-96.31079	2607 County Road 360	El Campo	77437	+18327575004			0.92
+374385fb0c17	Jack in the Box	fastfood	taco restaurant	29.69410	-96.54027	2209 Highway 71 S	Columbus	78934	+19797325834	http://www.jackinthebox.com/locations/3945		0.95
+520dfd710a2d	Jack in the Box	fastfood	taco restaurant	29.18556	-96.26115	1721 S Mechanic St	El Campo	77437	+19795788981	http://www.jackinthebox.com/locations/3950		0.85
 88920feb6674	Jack in the Box	fastfood		29.75943	-96.14988	2367 Highway 36 S	Sealy	77474	+19794847994	https://www.jackinthebox.com		0.95
 8068773950d1	Jimmy John's	fastfood		29.71511	-96.48219	4301 U S 90, Exit 699 of I-10W	Columbus	78934	+19797733390	https://locations.jimmyjohns.com/tx/columbus/sandwiches-4650.html		0.96
+4916295972e8	KFC	fastfood	chicken restaurant	29.21484	-96.28454	2014 N Mechanic St	El Campo	77437	+14095439066	http://www.kfc.com/storelocator/Default.aspx?address=2014%20North%20Mechanic,El%20Campo,TX		0.92
+b299f818b160	KFC	fastfood	chicken restaurant	29.32321	-96.09805	1406 N Richmond Rd	Wharton	77488	+19795328866	http://www.kfc.com/storelocator/Default.aspx?address=1406%20North%20Richmond%20Road,Wharton,TX		0.92
 6f9e721e056e	Krispy Krunchy Chicken	fastfood		29.91969	-96.88174	1335 N Jefferson St	La Grange	78945		https://locations.krispykrunchy.com/tx/la-grange/1335-n-jefferson-st	Krispy Krunchy Chicken	0.96
 e205f1053c72	Krispy Krunchy Chicken	fastfood		29.76029	-96.22262	5058 NW I 10 Frontage Rd	Sealy	77474		https://locations.krispykrunchy.com/tx/sealy/5058-nw-i-10-frontage-rd	Krispy Krunchy Chicken	0.96
+ba0b13eace34	Little Caesars Pizza	fastfood	pizza restaurant	29.32333	-96.09774	1422 N Richmond Rd	Wharton	77488	+19795313038	https://littlecaesars.com/en-us/store/10930	Little Caesars	0.95
+bf0b6f77a67f	Little Caesars Pizza	fastfood	pizza restaurant	29.21911	-96.28709	3703 Peters Rd F	El Campo	77437	+19795780786	https://littlecaesars.com/en-us/store/9140	Little Caesars	0.98
+24226a032a0c	McDonald's	fastfood	burger restaurant	29.46266	-96.93995	1628 N Texana St	Hallettsville	77964		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.96
 39ff48530d06	McDonald's	fastfood		29.76656	-96.15323	1724 Meyer St	Sealy	77474	+19798854132	https://www.mcdonalds.com/us/en-us/location/tx/sealy/1724-meyer-st/10949.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 3d9f1d496a9d	McDonald's	fastfood		29.69111	-96.53842	2421 Hwy 71 S	Columbus	78934	+19797328293	https://www.mcdonalds.com/us/en-us/location/tx/columbus/2421-hwy-71-s/7567.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 4f92261f25dc	McDonald's	fastfood		29.20676	-96.27760	1240 N Mechanic	El Campo	77437	+19795437054	https://www.mcdonalds.com/us/en-us/location/tx/el-campo/1240-n-mechanic/8053.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
@@ -536,7 +544,16 @@ ba34fd1e3ec0	McDonald's	fastfood		29.21681	-96.29219	3413 West Loop	El Campo	774
 d89290d56367	McDonald's	fastfood		29.90471	-96.91045	2304 West Travis Street	La Grange	78945	+19799685098	https://www.mcdonalds.com/us/en-us/location/tx/la-grange/2304-west-travis-street/10585.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 db37649b1380	McDonald's	fastfood		29.69617	-96.90329	718 N US Highway 77	Schulenburg	78956	+19797432027	http://www.mcdonalds.com/		0.92
 dbb2fcec2aab	McDonald's	fastfood		29.53060	-96.07047	953 Main St.	E Bernard	77435	+19793354707	http://www.mcdonalds.com		0.77
+00fb5b3e0861	Pizza Hut	fastfood	pizza restaurant	29.95195	-96.26111	380 W Main St	Bellville	77418	+19798659480	https://locations.pizzahut.com/tx/bellville/380-w-main-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307733	Pizza Hut	0.98
+0853c2049c9a	Pizza Hut	fastfood	pizza restaurant	29.21797	-96.28661	2348 N Mechanic St Wharton	El Campo	77437	+19795434242	https://locations.pizzahut.com/tx/el-campo/2348-n-mechanic-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=301406	Pizza Hut	0.98
+19f255190692	Pizza Hut	fastfood	pizza restaurant	29.46428	-96.93969	1632 N Texana St	Hallettsville	77964	+13617985500	https://locations.pizzahut.com/tx/hallettsville/1632-n-texana?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310276	Pizza Hut	0.99
+66beb6ecba13	Pizza Hut	fastfood	pizza restaurant	29.69465	-96.54173	106C Shult Dr	Columbus	78934	+19797338627	https://locations.pizzahut.com/tx/columbus/106c-shult-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307121	Pizza Hut	0.98
+67521e201486	Pizza Hut	fastfood	pizza restaurant	29.90438	-96.90913	2230 Bus. Hwy 71 West Fayette	La Grange	78945	+19799683125	https://locations.pizzahut.com/tx/la-grange/2230-bus-hwy-71-west?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281393	Pizza Hut	1.00
+99c1c50f4909	Pizza Hut	fastfood	pizza restaurant	29.76259	-96.15369	251 Gebhardt Rd Austin	Sealy	77474	+19798857447	https://locations.pizzahut.com/tx/sealy/251-gebhardt-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299690	Pizza Hut	0.98
+b5c0493bd7a0	Pizza Hut	fastfood	pizza restaurant	29.33120	-96.09470	2202 North Richmond Rd Wharton	Wharton	77488	+19795321692	https://locations.pizzahut.com/tx/wharton/2202-north-richmond-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311299	Pizza Hut	0.96
 b03eb6c4abf1	Popeyes	fastfood		29.69378	-96.54064	2210 TX-71	Columbus	78934		https://www.popeyes.com/store-locator/store/restaurant_880078	Popeyes	0.98
+9f31508acb51	Popeyes Louisiana Kitchen	fastfood		29.76491	-96.62335	2210 Tx-71	Columbus	78934	+19794847390	https://www.popeyes.com/store-locator/store/restaurant_880078?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.85
+bbf75c219ae7	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	29.76374	-96.15244	2005 Tx-36	Sealy	77474	+19792310443	https://www.popeyes.com/store-locator/store/restaurant_884990		0.97
 a95bd3684b77	Sheridan Dairy Delite	fastfood		29.49561	-96.67052	1454 Hwy 90 Alt	Sheridan	77475	+19792343977			0.96
 2bef9e651019	Sonic Drive In	fastfood		29.90906	-96.87029	717 E. Travis	La Grange	78945	+19799686421	https://locations.sonicdrivein.com/tx/lagrange/717-e.-travis.html	Sonic Drive-In	0.98
 5ac8600003a7	Sonic Drive In	fastfood		29.20971	-96.28122	1609 N Mechanic	El Campo	77437	+19795439001	https://locations.sonicdrivein.com/tx/elcampo/1408-n.-mechanic.html	Sonic Drive-In	0.94
@@ -545,17 +562,41 @@ a95bd3684b77	Sheridan Dairy Delite	fastfood		29.49561	-96.67052	1454 Hwy 90 Alt	
 a00f0541b32c	Sonic Drive In	fastfood		29.94030	-96.25194	716 Front Street	Bellville	77418	+19798658303	https://locations.sonicdrivein.com/tx/bellville/716-front-street.html	Sonic Drive-In	0.96
 cf0d23e7ae02	Sonic Drive In	fastfood		29.32557	-96.09534	120 W. Boling Highway	Wharton	77488	+19795320097	https://locations.sonicdrivein.com/tx/wharton/120-w.-boling-highway.html	Sonic Drive-In	0.96
 e6285cad8594	Sonic Drive In	fastfood		29.76629	-96.15305	1736 Meyer Street	Sealy	77474	+19798856283	https://locations.sonicdrivein.com/tx/sealy/1736-meyer-street.html	Sonic Drive-In	0.97
+236c2afd1909	Sonic Drive-In	fastfood	burger restaurant	29.46215	-96.93994	1624 N Texana St	Hallettsville	77964	+13617989299	https://locations.sonicdrivein.com/tx/hallettsville/1624-n.-texana-street.html		0.92
+daf000c60639	Sonic Drive-In	fastfood	burger restaurant	29.70868	-96.50224	4301 Us-90	Columbus	78934	+19797733368	https://locations.sonicdrivein.com/tx/columbus/4301-us-90.html		0.85
+195f8e87e456	Subway	fastfood	sandwich shop	29.04967	-96.50339	802 E York St	Ganado	77962	+13617713504	https://www.order.subway.com		0.96
+2bf2871f2bd1	Subway	fastfood	sandwich shop	29.77714	-96.10751	5168 I-10 Frontage Rd	Sealy	77474	+19798852401	http://www.subway.com/en-us	Subway	0.98
+4b730221d729	Subway	fastfood	sandwich shop	29.70810	-96.50459	2006 Alleyton Road South	Columbus	78934	+18326452090	https://restaurants.subway.com/united-states/tx/columbus/2006-alleyton-road-south?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=60335&utm_campaign=evergreen-2020&y_source=1_MTQ4OTc4MDAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+526942f6a7f7	Subway	fastfood	sandwich shop	29.90495	-96.87585	109 S Jefferson St	La Grange	78945	+19799660724	https://www.subway.com		0.99
+6120bc177062	Subway	fastfood	sandwich shop	29.44700	-96.94152	308 N Texana St Ste A	Hallettsville	77964	+13617989961	https://www.subway.com		0.97
+6a5fa4216aca	Subway	fastfood	sandwich shop	29.32870	-96.12451	1255 US-59	Wharton	77488	+19795310005	https://restaurants.subway.com/united-states/tx/wharton/1255-hwy-59-loop	Subway	0.95
+753c47a6d340	Subway	fastfood	sandwich shop	29.70850	-96.50360	2006 Alleyton Rd	Columbus	78934	+18326452090	https://www.subway.com		0.95
+76d601d70f67	Subway	fastfood	sandwich shop	29.75811	-96.15198	310 Overcreek Way	Sealy	77474	+19798856500	https://alibabacharleston.com		0.92
+7797b09d6220	Subway	fastfood	sandwich shop	29.95681	-96.26791	800 W Main St	Bellville	77418	+19798655855	https://restaurants.subway.com/united-states/tx/bellville/800-w-main-st	Subway	0.98
+8e782ed4c2d2	Subway	fastfood	sandwich shop	29.78726	-96.20751	I-10 & Bernado Rd CR169 ,	Sealy	78933			Subway	0.63
+9e40bbd03c18	Subway	fastfood	sandwich shop	29.68878	-96.53834	2560 Highway 71 S. Suite A	Columbus	78934	+19797328666	https://restaurants.subway.com/united-states/tx/columbus/2560-highway-71-s	Subway	0.96
+a1cebeb89c09	Subway	fastfood	sandwich shop	29.76446	-96.18543	6023 FM 3538	Sealy	77474	+19798856277	https://restaurants.subway.com/united-states/tx/sealy/6023-fm-3538	Subway	0.95
+a681b5198717	Subway	fastfood	sandwich shop	29.32612	-96.09752	1705 N Richmond Rd	Wharton	77488	+19792822112	https://www.subway.com		1.00
+bd773086723c	Subway	fastfood	sandwich shop	29.75030	-96.26680	1848 Beckendorff Rd	Sealy	77474	+18154145685	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72417&utm_campaign=evergreen-2020&y_source=1_MTAxMzU2Mjc3OS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+c150cf1a1a7c	Subway	fastfood	sandwich shop	29.76054	-96.15275	2302 Hwy 36 S	Sealy	77474	+19798850077	https://restaurants.subway.com/united-states/tx/sealy/2302-hwy-36-s	Subway	0.99
+d143954d10de	Subway	fastfood	sandwich shop	29.58405	-96.34019	704 S McCarty Ave	Eagle Lake	77434	+19792347000	https://restaurants.subway.com/united-states/tx/eagle-lake/704-s-mccarty-ave	Subway	0.97
+dd7158675030	Subway	fastfood	sandwich shop	29.21640	-96.28890	3413 West Loop	El Campo	77437	+19795788282	http://www.subway.com/	Subway	0.95
+decaf706a68b	Subway	fastfood	sandwich shop	29.69278	-96.77499	1547 I-10	Weimar	78962	+19797256979	http://www.subway.com/en-us	Subway	0.97
+3d892ba38d25	Subway Restaurants	fastfood	sandwich shop	29.69226	-96.90205	14 N Kessler Ave	Schulenburg	78956	+19797434492	https://alibabacharleston.com		0.96
 272ebc9c1a0e	Taco Bell	fastfood		29.70892	-96.50185	Shell Station 4800 Highway 10, West	Alleyton	78935	+19797330896	http://www.tacobell.com/	Taco Bell	0.93
 36d515452f50	Taco Bell	fastfood		29.21030	-96.28146	1611 N Mechanic St	El Campo	77437	+19795342141	http://www.tacobell.com/	Taco Bell	0.96
 5bdba54d6aea	Taco Bell	fastfood		29.69247	-96.90224	22 N Kessler Ave	Schulenburg	78956	+19797432547	http://www.tacobell.com/	Taco Bell	0.94
 72533bfeef0c	Taco Bell	fastfood		29.76114	-96.15237	2200 Hwy 36 S	Sealy	77474	+19792310042	https://locations.tacobell.com/tx/sealy/2200-hwy-36-s.html	Taco Bell	1.00
-b91fd0b3cb35	Taco Bell	fastfood		29.21493	-96.28433	1611 N Mechanic St	El Campo	77437	+19795342141	http://tacobell.com/		0.92
 f4f7864a42df	Taco Bell	fastfood		29.32321	-96.09805	1406 N Richmond Rd	Wharton	77488	+19795328866			0.92
 f58be09246f2	Taco Bell	fastfood		29.90361	-96.90895	2201 West Highway 71	La Grange	78945	+19799683401	http://www.tacobell.com/	Taco Bell	0.99
 3adc9e51cb22	Tha Tower	fastfood		29.30970	-96.09512	513 E Milam St	Wharton	77488	+19799437912	https://www.instagram.com/deonbilliondollar_favor?igsh=ZDdvYThndDhkaXJi		0.71
 d492b728308e	Wendy's	fastfood		29.75109	-96.26661	1848 Beckendorff Rd	Sealy	77474	+18303682414	https://locations.wendys.com/united-states/tx/sealy/1848-beckendorff-rd,-suite-b	Wendy's	0.96
 defa2b72010e	Wendy's	fastfood		29.69026	-96.77692	900 South Eagle Street	Weimar	78962	+19797258640	https://locations.wendys.com/united-states/tx/weimar/900-south-eagle-street	Wendy's	0.93
+57b96b787007	Whataburger	fastfood	burger restaurant	29.46049	-96.94068	1603 North Texana Street	Hallettsville	77964	+13612173069	https://whataburger.com/		0.97
+639c71c82367	Whataburger	fastfood	burger restaurant	29.69433	-96.54091	2204 HIGHWAY 71 S	Columbus	78934	+19797328681	https://locations.whataburger.com/tx/columbus/2204-highway-71-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 639faa47c44f	Whataburger	fastfood		29.69121	-96.90231	40 N KESSLER AVE	Schulenburg	78956	+19797439166	https://locations.whataburger.com/tx/schulenburg/40-n-kessler-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+8689cb4931d1	Whataburger	fastfood	burger restaurant	29.32670	-96.11984	10319 US-59	Wharton	77488	+19795321208	https://locations.whataburger.com/tx/wharton/10319-us-59-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
+9fa4d64b272e	Whataburger	fastfood	burger restaurant	29.91923	-96.85442	1800 Texas 71	La Grange	78945	+19799689868	https://locations.whataburger.com/tx/la-grange/1800-texas-71.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 ae0f714c951e	Whataburger	fastfood		29.76175	-96.15096	2159 HIGHWAY 36 S	Sealy	77474	+19798854101	https://locations.whataburger.com/tx/sealy/2159-highway-36-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 e4db9f02f5fd	Whataburger	fastfood		29.20379	-96.27616	909 N MECHANIC ST	El Campo	77437	+19795431455	https://locations.whataburger.com/tx/el-campo/909-n-mechanic-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 ebc49a5530f4	Arlan's Food Market	grocery		29.68388	-96.90156	236 College St	Schulenburg	78956	+19797433159	https://www.arlansmarket.com		0.96
@@ -604,7 +645,6 @@ f71163753ff3	Potter's Country Store	grocery		29.69222	-96.90207	16 N Kessler Ave
 0575cb5c367b	Snappy's Market	grocery		29.69331	-96.77560	County Rd	Weimar	78962	+19797432333			0.97
 8001f9a180f0	Southern Select Candy Co.	grocery		29.38875	-96.07539	1113 N Fulton St	Wharton	77488	+19795318080	http://www.southernselectnut.com		0.95
 5b0fb1537f5e	Super Market San Miguel	grocery		29.44500	-96.94344	111 N Main St	Hallettsville	77964	+13617331044			0.92
-5996bab44915	WalMart 7036--Sealy,Tx	grocery		29.73470	-96.17822		Sealy			http://www.walmart.com/		0.77
 bec32c468faa	WalMart 7036--Sealy,Tx	grocery		29.73129	-96.17348		Sealy			http://www.walmart.com/		0.79
 083e6f7c0a75	Walmart Grocery Pickup	grocery		29.75781	-96.15260	310 Overcreek Way	Sealy	77474	+19793984027	https://grocery.walmart.com/locations/pickup/Walmart-Sealy-TX-Supercenter-437		0.77
 02a59e216605	Wharton H-E-B	grocery		29.32170	-96.08351	1616 N ALABAMA	Wharton	77488		https://www.heb.com/heb-store/us/tx/wharton/wharton-h-e-b-233	H-E-B	0.80
@@ -632,9 +672,7 @@ dbffeb3ea962	WCJC Emergency Medical Services	hospital		29.32078	-96.07659	911 E 
 77046002c137	Wharton ER	hospital		29.32824	-96.11758		Wharton					0.77
 0283b9c6cd33	Americas Best Value Inn	hotel	motel	29.69473	-96.90383	205 West, 205 Interstate 10 Frontage Rd	Schulenburg	78956	+19797434192	https://www.redlion.com/americas-best-value-inn/tx/schulenburg/americas-best-value-inn-schulenburg		1.00
 8c0b9f7bd9d4	Americas Best Value Inn Columbus	hotel	motel	29.69118	-96.53941	2436 State Hwy 71	Columbus	78934	+19797326293	https://www.redlion.com/americas-best-value-inn/tx/columbus/americas-best-value-inn-columbus-tx		0.96
-c28fc3f8ec3f	Americas Best Value Inn Schulenburg	hotel	resort	29.69554	-96.89738	205 W Ih-10 Frontage Rd	Schulenburg	78956	+19797434192	https://www.sonesta.com/americas-best-value-inn/tx/schulenburg/americas-best-value-inn-schulenburg?utm_medium=soci&utm_source=bing		0.85
 ac857d2f6cb7	Americas Best Value Inn Wharton	hotel		29.33127	-96.11803	9985 US 59 Hwy	Wharton	77488	+19795320301	https://www.redlion.com		0.98
-2d08f426dcd5	Anfield Lodgings Company	hotel		29.69072	-96.53841	2427 Highway 71 S	Columbus	78934				0.95
 19d56f383b9d	Baymont by Wyndham Columbus	hotel		29.69009	-96.53832	2535 Highway 71 S	Columbus	78934	+19797323785	https://www.wyndhamhotels.com/baymont/columbus-texas/baymont-inn-and-suites-columbus/overview		1.00
 0095bd09c48a	Best Western	hotel		29.78839	-96.07372	2027 Meyer Rd	Sealy	77474	+19798853707	http://www.bestwestern.com		0.92
 7dae58ae6bd2	Best Western Executive Inn	hotel	motel	29.43817	-96.95092	207 US-77	Hallettsville	77964	+13617989200	https://www.bestwestern.com/en_US/book/hotel-rooms.44565.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44565	Best Western Hotels & Resorts	1.00
@@ -647,14 +685,12 @@ fa5d4ac0764a	Blossom Cottage	hotel		29.77457	-96.15682	912 Atchison St	Sealy	774
 234dfb789583	Brendan Manor	hotel		29.90722	-96.87412	345 E Travis St	La Grange	78945	+19799682028	http://www.brendanmanor.com/		0.92
 04da83b4bb60	Budget Inn	hotel	motel	29.43997	-96.95023	111 US-77	Hallettsville	77964	+13617983251	http://www.budgetinn.com	Budget Inn	0.97
 1109f4d74ffd	Budget Inn and Suites	hotel		29.04154	-96.51653	203 W York St	Ganado	77962	+13617713600	http://www.budgetinn.com	Budget Inn	0.92
-cd9fb8fd2239	Cardinal Ridge Ranch	hotel	lodge	29.94652	-96.64643	609 Coufal Rd	Fayetteville	78940	+17134168044	http://Www.CardinalRidgeRanch.com/		0.92
 9f02f3c9c4d2	Carter Motel	hotel	motel	29.91324	-96.86262	243 Ellinger Rd	La Grange	78945		https://carters-motel.com		0.94
 1750e771c5b1	Casa de Cantú	hotel		29.02790	-96.50317	1801 S 3rd St	Ganado	77962	+13615798645			0.92
 96de3f93385e	Chaparral Motel	hotel	motel	29.43720	-96.95218	310 US-77 S	Hallettsville	77964	+13617984385	http://www.chaparralmoteltx.com		0.99
 a6a01c911782	Columbus Inn	hotel	motel	29.69349	-96.54137	2208 State Hwy 71	Columbus	78934	+19797325723	http://www.columbusinntexas.us		0.98
 80166dc16cac	Comer Ranch	hotel		29.75488	-96.01972	38925 Sampson Rd	Brookshire	77423	+17133779848	http://comersbrookshireranch.com		0.92
 c69d4d2d6ed0	Comfort Inns Columbus Tx	hotel		29.69016	-96.53805	2535 Highway 71 S	Columbus	78934		https://www.choicehotels.com/texas/columbus/comfort-inn-hotels		0.70
-3d52c0d18453	Conrad Ranch	hotel		29.51997	-96.67891		Sheridan					0.74
 3c08ede86ea9	Cottonwood Inn Motel	hotel	motel	29.90137	-96.89688	1494 W Travis St	La Grange	78945	+19799683175	http://www.lagrangecottonwoodinn.com		0.99
 83e1063fd5ff	Country Paradise Creations	hotel		29.55103	-96.49920	1051 Buffalo Circle Rd	Garwood	77442	+17132949642	http://www.countryparadisecreations.com/		0.97
 8ae3d3f57fe1	Country Place Hotel	hotel		29.90429	-96.67690	201 W Fayette St	Fayetteville	78940		countryplacehotel.com		0.89
@@ -662,12 +698,10 @@ a9d55653c968	Countryside Inn	hotel	motel	29.32449	-96.11437	1808 FM102	Wharton	7
 ad5f6b9d71b0	Crown Inn	hotel	motel	29.32200	-96.09922	1303 N Richmond Rd	Wharton	77488	+19795321481	http://crowninnmotel1.placeweb.site		0.92
 b103de9fcf21	Days Inn	hotel		29.17856	-96.26350	25060 US-59	El Campo	77437	+19795431666	http://www.daysinn.com	Days Inn	0.89
 e00d95d99bb0	Days Inn El Campo, TX	hotel		29.18113	-96.25459	25060 US-59	El Campo	77437	+19795431666	https://www.wyndhamhotels.com/days-inn/el-campo-texas/days-inn-el-campo-tx/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A47016	Days Inn	0.84
-4cd04efd246f	East Bernard Masonic Lodge	hotel	lodge	29.53082	-96.06688	712 Morris St	East Bernard	77435				0.82
 40dc91217a48	Econo Lodge Inn & Suites	hotel	resort	29.76344	-96.15105	2021 Highway 36 S	Sealy	77474	+19798857407	https://www.choicehotels.com/texas/sealy/econo-lodge-hotels/tx718?mc=llbillpx&pmf=local		0.99
 d59c0466988b	Economy Inn	hotel		29.70666	-96.54997	1136 Walnut St	Columbus	78934	+19797322315	economy-inn-fort-wayne.edan.io		0.55
 9374670eef94	El Campo Inn	hotel		29.19772	-96.26228	210 Highlands St	El Campo	77437	+19795431110	http://www.elcampoinn.com		0.64
 aa78298fdf1f	El Cielo Lodge	hotel		29.42998	-96.53018	1363 County Road 165	Garwood	77442	+19795419024			0.80
-5f4aaeae268e	Elks Lodge	hotel	lodge	29.22506	-96.29224	3030 N Mechanic St	El Campo	77437	+19795433701	http://www.elks.org		0.92
 610751678939	Executive Inn & Suites	hotel	motel	29.69714	-96.90350	800 US-77	Schulenburg	78956	+19797434590	http://www.executiveinnschulenburg.com		0.99
 4f65857032ee	Express Inn	hotel	motel	29.32687	-96.12457	2393 FM102	Wharton	77488	+19794889440	http://www.expressinnwharton.us		0.98
 291b8eb98ea4	Falls Resort & Country Club	hotel		29.84654	-96.50124	1750 N Falls Dr	New Ulm	78950	+19799923123	http://www.thefallsresort.com/		0.97
@@ -688,17 +722,14 @@ ca619ffa9e34	Home2 Suites by Hilton El Campo	hotel		29.17887	-96.26300	25268 US 
 3e89a35278f5	Hotel Texas	hotel		29.68005	-96.90585	531 N Main St	Schulenburg	78956		https://www.hoteltexas.net		0.95
 c7ebfa9115ec	Hotel Texas Hallettsville	hotel		29.46355	-96.93963	1632 N Texana St	Hallettsville	77964	+13617985900	http://www.hoteltexas.net/		0.99
 099eb17eb4a1	Jackson Inn	hotel	motel	29.19449	-96.27316	405 W Jackson St	El Campo	77437	+19792578861			0.96
-dea2e3adf975	Jvm Inc	hotel		29.69492	-96.90370	205 W I 10 Frontage Rd	Schulenburg	78956				0.95
 b62c6a4bc2d4	La Grange Executive Inn & Suites	hotel	motel	29.90294	-96.90321	1708 W Hwy 71 Business	La Grange	78945	+19799682600	http://www.lagrangeexecutiveinnsuites.us		1.00
 42ec4327c924	La Quinta Inn & Suites	hotel		29.69064	-96.53838	2427 State Hwy 71	Columbus	78934	+19797330522	http://www.laquintacolumbustx.com/?cid=local_6203	La Quinta by Wyndham	1.00
 1aacb8e92a9d	Lily Ponds Cottage	hotel		29.89644	-96.50459	1842 Track Rd W	New Ulm	78950	+17138586238			0.91
-793b402346d6	Lily Ponds Cottage	hotel		29.90391	-96.50253	1842 Track Rd W	New Ulm	78950	+17138225038	http://www.bluebonnetcabins.com		0.77
 3725abfb21cd	Lonestar Inn	hotel	motel	29.18129	-96.26026	1319 S Mechanic St	El Campo	77437	+19795437833	http://www.lonestarinnelcampotx.com/		0.99
 cecae31c5f72	Marys Nest	hotel		29.70560	-96.54323	1136 Live Oak St	Columbus	78934	+19797321316	http://Www.marysnesttx.com/		0.90
 83b9f4e69074	Moon Palace Jamaica	hotel		29.70440	-96.54659	1233 Fannin St	Columbus	78934	+19797325701	https://jamaica.moonpalace.com/?utm_source=google&utm_medium=organic&utm_campaign=gbp_listing		0.85
 398035ca7a5a	Motel 6	hotel		29.69279	-96.77813	102 Townsend Dr	Weimar	78962	+19797259700	https://verdevalleyinn.com		0.77
 3c3eb050a031	Motel 6 Wharton, TX	hotel		29.33115	-96.11774	9985 US 59 Hwy	Wharton	77488	+19795320301	https://www.motel6.com/en/motels.tx.wharton.8936.html?lid=Local_Milestone_8936&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.92
-966f4d3eedf8	Mso Ranch	hotel		29.19009	-96.35284		Louise					0.97
 ee9cc729ed0f	New French Inn	hotel		29.90478	-96.67379	108 S Church St	Fayetteville	78940	+17136148382	http://newfrenchinn.com/		0.83
 dac6589a7719	Oakridge Motor Inn	hotel		29.69492	-96.90370	205 W I 10 Frontage Rd	Schulenburg	78956	+19797434192			0.55
 277743017355	Palms on the Prairie Ranch	hotel		29.92710	-96.02222	11076 FM 359 Rd	Brookshire	77423				0.97
@@ -706,39 +737,27 @@ dac6589a7719	Oakridge Motor Inn	hotel		29.69492	-96.90370	205 W I 10 Frontage Rd
 2a980d581914	Provident City Hotel	hotel		29.28218	-96.63030	1057 Providence City Hotel Rd	Louise	77455		www.providentcity.org		0.97
 6413bf300506	Reduced 300K Best Houston Ranch Deal Best Ft Bend Ranch for Sale	hotel		29.68107	-96.02695	38400 Buckskin Rd	Wallis	77485	+17135036247	http://youtu.be/S38v_lajaH0		0.85
 89b54b9d9c5e	River Valley Motor Inn	hotel	motel	29.90104	-96.89954	1575 W Travis St	La Grange	78945	+19799688314	http://www.rivervalleyinn.com		0.98
-b3528d75ec93	Rocky Creek Retriever Hunting Club Lodge	hotel	lodge	29.32497	-96.33467	2908 Co Rd 469	El Campo	77437	+13614447732			0.83
 a70d4c38cbe4	Rooms 4 Rent	hotel		29.78453	-96.15771	207 N Meyer St	Sealy	77474	+19796277122	http://Google.com/+Rooms4RentSealy		0.92
-41c206a2a35c	Sach Hospitality Llc	hotel		29.69183	-96.89951	200 Heinrich	Schulenburg	78956				0.95
 77e0ca8dd1ad	Scottish Inn	hotel		29.69280	-96.77798	102 Townsend Ln	Weimar	78962	+19797259700	http://scottishinnweimar.com		0.96
 526fadfd6c63	Scottish Inns & Suites	hotel	resort	29.33093	-96.11778	9985 US 59 Hwy	Wharton	77488	+19795320301	https://www.stayhihotels.com/property/scottish-inns-and-suites-wharton-tx/?utm_source=Bing&utm_medium=Referral&utm_campaign=Places		0.92
-c29aa44e1e36	Sealy Masonic Lodge No 239	hotel		29.77328	-96.16660	1224 Eagle Lake Rd	Sealy	77474	+19798856203	http://msana.com		0.84
-06fe65d36b63	Shiv Bhole Llc	hotel		29.32907	-96.09534	1920 N Richmond Rd	Wharton	77488				0.95
 6c9b97e89486	Shoney's Inn	hotel		29.17844	-96.26360	25060 US 59 Rd	El Campo	77437	+19795431666			0.55
 4d0ae6523697	Splashway Rv Park	hotel		29.49866	-96.67002	5211 Main St	Sheridan	77475		www.splashwaywaterpark.com		0.85
 2fd4fe7ede5a	Sportsman's Motel	hotel	motel	29.58649	-96.33492	203 Boothe Dr	Eagle Lake	77434	+19792345541			0.98
 10450bf35d74	Star Motel	hotel	motel	29.77304	-96.14345	470 US-90	Sealy	77474	+19798857401	https://ranch-motel-tx-5.hub.biz/		0.92
-0741ba0fe809	Stardust Ranch	hotel	lodge	29.94826	-96.67541	2944 Sykora Rd	Fayetteville	78940	+19792087553	http://www.stardustranch.com/		0.86
 aa2e88c94da9	Super 8	hotel	motel	29.76207	-96.15406	267 Gebhardt Rd	Sealy	77474	+19798852121	https://www.wyndhamhotels.com/super-8/sealy-texas/super-8-sealy/overview		0.99
 641aa405ec1f	SureStay	hotel		29.69279	-96.77798	102 Townsend Dr	Weimar	78962	+19797259700	https://www.bestwestern.com/en_US/book/hotel-rooms.54154.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54154	SureStay Hotels	1.00
 50505c51d63f	Surestay By Best Western Weimar	hotel		29.69279	-96.77813	102 Townsend Dr	Weimar	78962	+19797259700	https://www.bestwestern.com		0.97
 6ef41d2c5559	The Cardinal House	hotel		29.97484	-96.76575	928 E TX-237	Fayetteville	78940	+17132946658	https://www.airbnb.com/rooms/5884997?bev_ref=1451320312_Zu24NEmWBczHayrH&user_id=30562884&s=3		0.72
-29bb8fa147c9	The Family Farm	hotel		29.27126	-96.29385	6055 County Road 456	El Campo	77437				0.77
 86a75787c62e	The Guest House at Dry Creek Ranch	hotel		29.91765	-96.46797	4156 Shunka Rd	New Ulm	78950	+17132035061			0.75
 f6605ff05f58	The Oak Motel	hotel	motel	29.90439	-96.87551	227 S Jefferson St	La Grange	78945	+19799683133	http://www.theoakmotel.com/		0.99
-25d4515c5af4	The Sorola Ranch	hotel		29.98326	-96.52834	1525 Marek Rd	New Ulm	78950				0.80
 aecb8b6c642a	Travel Inn and Suites	hotel	motel	29.19197	-96.27709	809 W Jackson St	El Campo	77437	+19795432797	https://travel-inn-suites-tx.hub.biz/		0.92
 82627be0d28c	Travelers Inn & Suites	hotel		29.32454	-96.09797	1527 N Richmond Rd	Wharton	77488	+19795320740	http://www.travelersinnandsuiteswharton.com		0.98
 f3c36d7e1404	Trinity Farm - Fayetteville, TX	hotel		29.87486	-96.67620	1496 Kramr Rd	Fayetteville	78940	+17135697248			0.90
 f0182f68a3c8	Twin Palms Paradise/ Mobley's Backyard Paradise	hotel		29.28500	-96.15989	1450 County Road 467	Wharton	77488	+12818515540			0.92
-569421d4cbb3	Valley Lodge	hotel	lodge	29.69379	-96.00005		Simonton					0.71
-b971ae57a620	Vara Ranch	hotel	lodge	29.58135	-96.61202	2089 Co Rd 106	Columbus	78934	+18555018272	http://www.vararanch.com/		0.99
 c3eb3af8818b	Wakefield Inn	hotel		29.33259	-96.09505	2327 N Richmond Rd	Wharton	77488	+19795322160			0.95
 c0f4b9e9670c	Waterfowl Outfitters Unlimited & Eagle Lake Lodge at Wingswept	hotel		29.56715	-96.33415	1246 Lakeside Dr	Eagle Lake	77434	+18323610868	http://www.WaterfowlOutfittersUnlimited.com/		0.92
 00a4cc39a62b	Wharton Inn	hotel	motel	29.32907	-96.09534	1920 N Richmond Rd	Wharton	77488	+19792822033	https://www.wharton-inn.business.site		0.95
-ac68cc65c33c	Whispering Trees Farm	hotel	lodge	29.94279	-96.16177	7774 Koehn Rd	Bellville	77418	+18323980122	http://staywhisperingtrees.com/		0.83
 a217438511c1	White Lodge Motel	hotel		29.20596	-96.25603	1403 E Jackson St	El Campo	77437	+19795433358	http://www.elcampochamber.com		1.00
-7e9d138dfec1	Wilson Hill	hotel		29.68984	-96.45708		Columbus					0.59
-d66f6924f289	Windy Hills	hotel		29.51980	-96.94351		Hallettsville					0.77
 174c7f52c60c	Austin County Water Supply	office		29.94785	-96.25481	105 S Mathews St	Bellville	77418	+19798653022	http://www.austincounty.com		0.92
 541ed42c4f51	Barco Industries, Llc	office		29.73717	-96.55476	3554 FM 109	Columbus	78934	+19797322086	https://www.barcoind.com		0.96
 d7f39a5e8731	Bucksnag Hunting Club	office	private association	29.44882	-96.39496	507 Arthur St	Garwood	77442	+19793320141	http://www.bucksnag.com/		0.92
@@ -751,13 +770,11 @@ bb6fe378bf30	Fesco	office	energy company	29.20259	-96.26369	310 N Wharton St	El 
 8a01337193e2	Ganado Telephone Co	office	telecommunications company	29.04010	-96.51446	115 W Putnam Ave	Ganado	77962	+13617713331	http://www.ganadotel.com		0.92
 647b8abdf7b8	Gulf Coast Lease Services	office	energy company	29.17173	-96.31143	3588 US-59 BUS	El Campo	77437	+19795431453	https://www.keyenergy.com		0.92
 9114500a4684	Industry Telephone Company	office		29.97203	-96.50342	17105 Fordtran Blvd	Industry	78944	+19793574411	http://www.industrytelco.com		0.77
-eeed9e2697ed	Knights of Columbus Insurance	office		29.90013	-96.87273	739 S Jefferson St	La Grange	78945	+19799689800	http://www.kofc.org		0.92
 d37cc625799e	Mid Coast Propane LLC	office	energy company	29.52813	-96.07050	306 S Dill St	East Bernard	77435	+19795334427	http://www.midcoastpropane.com/		0.92
 eb13621d105d	Nan Ya Plastics Corporation	office	plastics company	29.32517	-96.12044	2081 FM 102 Rd	Wharton	77488	+19795325494	npcusa.com		0.99
 4f6259691f40	New Wave Communications	office	telecommunications company	29.19973	-96.27280	505 N Mechanic St	El Campo	77437	+19795436858	https://www.newwavecom.com/		0.70
 4e13b2eedf7f	Square G Ranch Weimar TX	office	private association	29.61248	-96.70978	1240 County Road 212	Weimar	78962				0.79
 43580cc0e29a	The Ranch TX Club	office	private association	29.59126	-96.39581		Eagle Lake		+19794847264	https://www.theranchtxclub.com/		0.97
-c43fb8937c6f	The Ranch TX Club	office	private association	29.59120	-96.38564		Eagle Lake		+19794847264	https://www.theranchtxclub.com/		0.87
 c6e8e0104f0e	Tops Well Services Llc	office		29.77057	-96.13405	3077 Outlet Center Dr	Sealy	77474	+19796277434	https://www.topswellservices.com/overview		0.65
 001eaf062b11	Transtex Gas Services	office	energy company	29.44898	-96.91398	1442 Hwy 90 Alt E	Hallettsville	77964	+13617989255	http://www.transtexgas.com		0.56
 f718a4820121	Tri-County Petroleum	office	energy company	29.70949	-96.50893	2042 Reese Ln	Columbus	78934	+19797328333	https://tri-county-petroleum-tx.hub.biz		0.92
@@ -777,7 +794,6 @@ ae3bd6ad8c58	Ana's Taqueria	restaurant	taco restaurant	29.30920	-96.09521		Whart
 467560714aa3	Austin's Barbeque & Catering	restaurant	barbecue restaurant	29.58536	-96.33126	515 E Main St	Eagle Lake	77434	+19792345250	http://austinsbbqandcatering.com/		0.93
 e2a9787508b3	Austin's Club	restaurant		29.79691	-96.16061	1614 Highway 36 N	Sealy	77474	+14098857371	http://www.austincountyliving.com		0.92
 d224f1c24c59	Back Porch BBQ & GRILL	restaurant	barbecue restaurant	29.92323	-96.88097	1602 N Jefferson St	La Grange	78945	+19799681580	http://www.thebackporchbbq.com/		0.99
-e3ca80343403	Back Porch Bbq & Grill	restaurant	barbecue restaurant	29.92315	-96.88084	1602 N Jefferson St	La Grange	78945	+19799681580	https://www.thebackporchbbq.com		0.97
 c10eb9e300cc	BBQ To Go	restaurant	barbecue restaurant	29.04286	-96.51470		Ganado	77962	+19796160312			0.92
 8b15622a2bb6	BEERZ BURGERZ	restaurant	burger restaurant	29.99835	-96.89085	115 Post Oak Rd	La Grange	78945	+19792422888			0.92
 9ab54d076a12	Bel Tavolo Pizzeria e Caffè Bar	restaurant	italian restaurant	29.89069	-96.48946	639 Taylor St	New Ulm	78950	+19799923701	http://BelTavolo.com/		0.96
@@ -791,8 +807,6 @@ bf89286015ff	Best Seafood & Steak House	restaurant	seafood restaurant	29.20021	-
 741b5914a8e0	Blake's Kitchen and Kocktail	restaurant	bar and grill restaurant	29.69535	-96.53960	2035 Milam St	Columbus	78934	+19797325757	http://www.blakeskitchenandkocktailz.com/		0.96
 5c63b30395db	Boudin Cafe'	restaurant	cajun and creole restaurant	29.82713	-96.00465	3808 Clemons Switch Rd	Brookshire	77423	+13462697040			0.95
 f8ace5f2d8b2	Buffalo Wild Wings	restaurant	chicken wings restaurant	29.69032	-96.77658	900 S Eagle St.	Weimar	78962			Buffalo Wild Wings	0.92
-05d98b4b858b	Burger King	restaurant	burger restaurant	29.32513	-96.09539	121 W Boling Hwy	Wharton	77488	+19795318399	https://www.bk.com/store-locator/store/restaurant_239547	Burger King	0.98
-cff40bb849d1	Burger King	restaurant	burger restaurant	29.69337	-96.54059	2214 State Hwy 71	Columbus	78934	+19797322973	https://burgerking.com/store-locator/store/20172	Burger King	0.95
 a7860f68f0f2	Cabos San Lucas Mexican Grill	restaurant	mexican restaurant	29.46453	-96.93955	1636 N Texana St	Hallettsville	77964	+13617989227	http://loscaboshallettsville.com/		0.98
 3ddf040ee08a	Camp Shack	restaurant		29.20173	-96.27345		El Campo					0.72
 0c5b0c338954	Cantu's Restaurant & Bar	restaurant	american restaurant	29.69609	-96.54065	2102 Milam St	Columbus	78934	+19797325757	http://www.blakestreettx.com		0.92
@@ -806,8 +820,6 @@ a779f2921dd1	China Buffet	restaurant	chinese restaurant	29.90466	-96.87639	154 S
 cd42fd4e3d90	China Buffet	restaurant	chinese restaurant	29.76973	-96.15421	242 Moody St	Sealy	77474	+19798850999	http://www.chinabuffettx.com		0.94
 7c9ff579c158	Chopan Ranch Restaurant & Ballroom Weekends Reservation	restaurant		29.82789	-96.00472	3808 Clemons Switch Rd	Brookshire	77423	+12818459195	https://chopanranch.com		0.91
 660cc4014079	Christine's Donuts	restaurant	breakfast and brunch restaurant	29.19463	-96.26916	108 W Railroad St	El Campo	77437	+19794758188			0.94
-6d79c2247973	Church's Chicken	restaurant	chicken wings restaurant	29.20065	-96.27264	606 N Mechanic St	El Campo	77437	+19795436961			0.92
-e9384753f836	Church's Chicken	restaurant	chicken restaurant	29.69036	-96.77551	901 S Eagle St	Weimar	78962	+19797255013	https://locations.churchs.com/tx/weimar/901-s-eagle-street	Church's Chicken	0.90
 f566c19ce79d	Cielito Lindo Restaurant II	restaurant	mexican restaurant	29.94917	-96.25381	412 E Main St	Bellville	77418	+19798653239	http://houston.citysearch.com/profile/map/614146100/bellville_tx/cielito_lindo_restaurant_ii.html		0.97
 a3ca62b739b7	City Market	restaurant	barbecue restaurant	29.68482	-96.90293	109 N Kessler Ave	Schulenburg	78956	+19797433440	http://www.citymarketsch.com/	City Market	0.96
 90ee68bf7635	Closed	restaurant	breakfast and brunch restaurant	29.69452	-96.78809	400 Youens Dr	Weimar	78962	+19797258274	https://vannassociates.com/staff		0.55
@@ -819,11 +831,6 @@ ec73298e0eab	Czech-Mex Pantry	restaurant		29.78121	-96.15623		Sealy		+1713240764
 2ec8023c03b6	Denny's Restaurant	restaurant		29.32626	-96.11976	10367 Highway 59	Wharton	77488	+19795323200	https://www.dennys.com/		0.99
 1d54f54b67ab	Diamond K&S	restaurant		29.97191	-96.49856	16693 Fordtran Blvd	Industry	78944	+19793572444	http://DiamondStop.net/		0.96
 c09be9314aa3	Diamond W	restaurant	american restaurant	29.19187	-96.26536	503 S Mechanic St	El Campo	77437	+19795436482			0.96
-2d4099979d1a	Domino's	restaurant	pizza restaurant	29.32537	-96.09193	309 E. Boling	Wharton	77488	+19795329600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-53de7d317302	Domino's	restaurant	pizza restaurant	29.19613	-96.26962	117 North Mechanic St	El Campo	77437	+19793206976	https://www.dominos.com/en/?redirect=homepage	Domino's Pizza	0.96
-570b4b1d08a9	Domino's	restaurant	pizza restaurant	29.76043	-96.15024	2329 Hwy 36 South Ste A	Sealy	77474	+19798850100	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test	Domino's Pizza	0.92
-f8e5bee25112	Domino's	restaurant	pizza restaurant	29.69380	-96.54074	2210 Sh 71 South Ste B	Columbus	78934	+13465532363	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
-a276bbfb9a46	Domino's Pizza	restaurant	pizza restaurant	29.90275	-96.90562	2001 State Hwy 71	La Grange	78945	+19792062121	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
 08a497913802	Dot's Spot Catering	restaurant	burger restaurant	29.97401	-96.49657	1234 main st, Austin , 78944, United States	Industry	78944	+15124663243	http://www.gardenspotcafe.com		0.92
 274cb9426be1	EL BUEN SAZON MEXICAN FOOD	restaurant	mexican restaurant	29.70301	-96.78197	112 W Main St	Weimar	78962	+19794840959			0.99
 9088855b1e69	El Campo Seafood And Grill	restaurant	seafood restaurant	29.19466	-96.26938	110 W Railroad St	El Campo	77437	+19795342091	http://elcamposeafoodandgrill.com/		0.97
@@ -871,7 +878,6 @@ ebabfa9675f1	Hartz Chicken Buffet	restaurant	buffet restaurant	29.69922	-96.5448
 13f4daf93344	Hinze Bar-B-Q	restaurant	barbecue restaurant	29.35393	-96.10829	8229 US 59 Hwy	Wharton	77488	+19795322710	http://hinzesbarbque.com/		0.92
 80da6928fd78	Hinze Llc.hinze's Barbeque & Catering	restaurant		29.78026	-96.15631	327 Fowlkes St	Sealy	77474	+19798854878			0.95
 bc416ca2f686	Hinze's BBQ & Catering	restaurant	barbecue restaurant	29.76289	-96.15159	2101 Highway 36 S	Sealy	77474	+19798857808	http://hinzesbbq.com/		0.97
-bfc941d9c8b8	Hinze's Bbq & Catering	restaurant	barbecue restaurant	29.75104	-96.15579	2101 Highway 36 S	Sealy	77474	+19798857808			0.85
 6dde2728d566	Hinze's Country Kitchen	restaurant	comfort food restaurant	29.30667	-96.08590	1512 Milam St	Wharton	77488	+19795321799	http://hinzes-country-kitchen.edan.io		0.97
 0d4102743d94	Hinzes Bar-B-Que	restaurant	barbecue restaurant	29.32897	-96.09605	1917 N Richmond Rd	Wharton	77488	+19795322710	http://www.hinzesbarbque.com/		0.98
 0175f78f4170	Holman Valley Steakhouse	restaurant	steakhouse	29.79629	-96.79715	10204 FM155	La Grange	78945	+19792634188	http://holmansteakhouse.com/		0.95
@@ -881,8 +887,6 @@ cd67632d464e	Infamous BBQ	restaurant	barbecue restaurant	29.71944	-96.15914	1785
 a07eb3c09367	Instant bourbons restaurant	restaurant		29.83752	-96.70407	274 Raintree Ln	Elgin	78621				0.59
 405f6166f764	Iron Horse Filling Station	restaurant	sandwich shop	29.68209	-96.90387	405 Summit St	Schulenburg	78956	+19797434392			0.92
 b96bb7e6f180	J's Cantina	restaurant		29.19546	-96.26754	114 S Washington St	El Campo	77437		http://thecantina.com/		0.96
-374385fb0c17	Jack in the Box	restaurant	taco restaurant	29.69410	-96.54027	2209 Highway 71 S	Columbus	78934	+19797325834	http://www.jackinthebox.com/locations/3945		0.95
-520dfd710a2d	Jack in the Box	restaurant	taco restaurant	29.18556	-96.26115	1721 S Mechanic St	El Campo	77437	+19795788981	http://www.jackinthebox.com/locations/3950		0.85
 cf1531c26d5e	Jack's Drive In Deli and Catering	restaurant	delicatessen	29.21692	-96.28603	2120 N Mechanic St	El Campo	77437	+19795437181			0.94
 b1b45a020803	Jalapeno's Cuisine	restaurant	mexican restaurant	29.19547	-96.27010	120 W Monseratte St	El Campo	77437	+19795342199	http://www.JalapenosCuisine.com/		0.98
 2a747c2706a0	Jalisco Mexican Restaurant	restaurant	mexican restaurant	29.44446	-96.93717	706 E 4th St	Hallettsville	77964	+13617985999	https://www.jaliscoscafe.com		0.95
@@ -899,8 +903,6 @@ bedec114bf37	JRS Texas Best Smoke House	restaurant	barbecue restaurant	29.19501	
 65a8b803fd97	Juniors Smokehouse	restaurant	barbecue restaurant	29.27024	-96.15080	164 County Road 467	Wharton	77488	+19795310888	https://www.juniorsjerky.com		0.92
 6c362853ecbf	Kari's TEXAN Tamales	restaurant	texmex restaurant	29.42192	-96.97030	1219 FM318	Hallettsville	77964	+13612178718			0.68
 0405115cc7e6	KC's Bar	restaurant	barbecue restaurant	29.01160	-96.49606		Ganado		+13617713338	https://kc-s-tx.hub.biz/		0.93
-4916295972e8	KFC	restaurant	chicken restaurant	29.21484	-96.28454	2014 N Mechanic St	El Campo	77437	+14095439066	http://www.kfc.com/storelocator/Default.aspx?address=2014%20North%20Mechanic,El%20Campo,TX		0.92
-b299f818b160	KFC	restaurant	chicken restaurant	29.32321	-96.09805	1406 N Richmond Rd	Wharton	77488	+19795328866	http://www.kfc.com/storelocator/Default.aspx?address=1406%20North%20Richmond%20Road,Wharton,TX		0.92
 62e805fc00b2	Kolacny's Bar-B-Q House	restaurant	barbecue restaurant	29.43716	-96.94131	100 S Russell St	Hallettsville	77964	+13617984400	https://kolacny-s-bar-b-q-house.hub.biz		0.96
 e8af5eba6998	Korner Kitchen	restaurant		29.49527	-96.67175	5400 Main St	Sheridan	77475	+19792342912	http://www.countrykitchenrestaurants.com		0.94
 8ea3d14b3ca2	Kountry Bakery	restaurant	breakfast and brunch restaurant	29.58394	-96.34068	720 S McCarty Ave	Eagle Lake	77434	+19792342404	http://kountrybakery.com/		0.94
@@ -926,15 +928,12 @@ d1dd97d9febb	Laspalmasmexicangrill	restaurant	texmex restaurant	29.58673	-96.335
 7529fb80def0	Lazy J Bar Vienna	restaurant	barbecue restaurant	29.37845	-96.79269	10186 FM530	Hallettsville	77964	+13617983880			0.95
 05e8e7fc5ee0	Leticia's Mexican Restaurant	restaurant	mexican restaurant	29.70377	-96.78027	107 E Post Office St	Weimar	78962	+19797258602	http://leticiasmexicanrestaurantweimar.tableconstructor.website		0.95
 ae0baf5fb7ee	Lil' Red Barn	restaurant	steakhouse	29.95224	-96.24394	1216 Highway 159 E	Bellville	77418	+19798659000	http://lilredbarnsteakhouse.weebly.com		0.92
-ba0b13eace34	Little Caesars Pizza	restaurant	pizza restaurant	29.32333	-96.09774	1422 N Richmond Rd	Wharton	77488	+19795313038	https://littlecaesars.com/en-us/store/10930	Little Caesars	0.95
-bf0b6f77a67f	Little Caesars Pizza	restaurant	pizza restaurant	29.21911	-96.28709	3703 Peters Rd F	El Campo	77437	+19795780786	https://littlecaesars.com/en-us/store/9140	Little Caesars	0.98
 91005e0a6fe2	Lone Star Cafe	restaurant	bar and grill restaurant	29.30823	-96.34080	9850 State Hwy 71	El Campo	77437	+19795437755			0.98
 c2a0cfdbf9d9	Los Cabos Mexican Grill	restaurant	mexican restaurant	29.76427	-96.18549	6027 FM 3538	Sealy	77474	+15126076232	http://www.loscabossealy.com/		0.97
 d126888b85e0	Los Cabos Mexican Grill	restaurant	mexican restaurant	29.44034	-96.95049	101 US Hwy 77 South	Hallettsville	77964	+13617989227	http://www.loscaboshallettsville.com		0.98
 e5a2d5cab383	Los Cabos Mexican Grill	restaurant	mexican restaurant	29.68982	-96.53774	2543 Highway 71 S	Columbus	78934	+19797329744	http://www.loscabosmexicangrill.net	Los Cabos Mexican Grill	0.98
 5a6b72cc0c5d	Los Charritos Mexican Grill	restaurant	mexican restaurant	29.32150	-96.09783	1302 N Richmond Rd	Wharton	77488	+19794884174	https://drive.google.com/file/d/1urcGJnpP7kQBwLxQ1sBKyKL0B7drerPE/view?usp=drivesdk		0.92
 3f97e9dfe1d2	Los Cucos Mexican Cafe	restaurant	mexican restaurant	29.17897	-96.26250	208 Highway 59 W	El Campo	77437	+19795436123	http://www.loscucos.com		0.77
-40484a5ed947	Los Cucos Mexican Cafe	restaurant	mexican restaurant	29.16863	-96.31361	208 Highway 59 W	El Campo	77437	+19795436123			0.64
 fed96c477e7e	Los Cucos Mexican Cafe	restaurant	mexican restaurant	29.20203	-96.26188	805 E Jackson St	El Campo	77437	+19795780612	http://www.loscucos.com	Los Cucos Mexican Restaurant	0.93
 7fdfbb49add6	Los Cucos Mexican Cafe Vll, Inc	restaurant		29.30937	-96.10292	211 W Elm St	Wharton	77488				0.95
 ac493c5bfa1a	Los Jarritos Mexican Food	restaurant	mexican restaurant	29.69313	-96.77563	801 S Eagle St	Weimar	78962	+19797029199	https://jeila.design/los-corajudos-del-gordo	Los Jarritos Mexican Food Inc.	0.95
@@ -951,7 +950,6 @@ c614ae590caa	Maria's Mexican Cafe	restaurant	mexican restaurant	29.70488	-96.546
 967e1806512e	Marini's Empanada Kitchen	restaurant		29.63053	-96.06352	6423 Commerce St	Wallis	77485	+19793987707	https://marinisempanadakitchen.com		0.92
 c73841957387	Massey’s Texas Made BBQ	restaurant	barbecue restaurant	29.44884	-96.94176	411 N Texana St	Hallettsville	77964	+13612479028	https://www.masseystexasmadebbq.com		0.95
 f2a0817b4445	Mauro’s taqueria	restaurant	taco restaurant	29.94775	-96.25066	731 E Hill St	Bellville	77418	+18326060445			0.60
-24226a032a0c	McDonald's	restaurant	burger restaurant	29.46266	-96.93995	1628 N Texana St	Hallettsville	77964		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.96
 2a7cff686fc1	Mesquite Mexican Grill	restaurant	mexican restaurant	29.78185	-96.15537	217 W Front St	Sealy	77474	+19796277480	https://local.yahoo.com/info-59531802-mesquite-mexican-grill-sealy		0.97
 181c40e6c016	Mexico Lindo	restaurant	mexican restaurant	29.19640	-96.26803	2 N Washington St	El Campo	77437	+19793326677	http://www.mi-mexicolindo.com		0.96
 ace412aadf17	Mexico Lindo	restaurant	mexican restaurant	29.19398	-96.26728	211 S Mechanic St	El Campo	77437	+19795439033	http://www.mi-mexicolindo.com		0.77
@@ -989,15 +987,6 @@ f037637169a3	Pinchers Cajun and Seafood Restaurant	restaurant	seafood restaurant
 56ae50e2a1db	Pitt Viper BBQ	restaurant	barbecue restaurant	29.20867	-96.29447	2411 West Loop	El Campo	77437	+19792534226	http://www.pvbbqandcatering.net/		0.99
 33e9c607904b	Pitt Viper BBQ Rub	restaurant	barbecue restaurant	29.20509	-96.27857	1274 N Mechanic St	El Campo	77437	+19792534226	http://pittviperbbq.com/pitt-viper-bbq-rubs-store		0.92
 66c17c88397b	Pivo's Ice House	restaurant	bar and grill restaurant	29.90076	-96.58208	1564 Farm to Market Rd 1291	Fayetteville	78940	+19795515800	http://www.pivosicehouse.com/		0.96
-00fb5b3e0861	Pizza Hut	restaurant	pizza restaurant	29.95195	-96.26111	380 W Main St	Bellville	77418	+19798659480	https://locations.pizzahut.com/tx/bellville/380-w-main-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307733	Pizza Hut	0.98
-0853c2049c9a	Pizza Hut	restaurant	pizza restaurant	29.21797	-96.28661	2348 N Mechanic St Wharton	El Campo	77437	+19795434242	https://locations.pizzahut.com/tx/el-campo/2348-n-mechanic-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=301406	Pizza Hut	0.98
-19f255190692	Pizza Hut	restaurant	pizza restaurant	29.46428	-96.93969	1632 N Texana St	Hallettsville	77964	+13617985500	https://locations.pizzahut.com/tx/hallettsville/1632-n-texana?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310276	Pizza Hut	0.99
-66beb6ecba13	Pizza Hut	restaurant	pizza restaurant	29.69465	-96.54173	106C Shult Dr	Columbus	78934	+19797338627	https://locations.pizzahut.com/tx/columbus/106c-shult-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307121	Pizza Hut	0.98
-67521e201486	Pizza Hut	restaurant	pizza restaurant	29.90438	-96.90913	2230 Bus. Hwy 71 West Fayette	La Grange	78945	+19799683125	https://locations.pizzahut.com/tx/la-grange/2230-bus-hwy-71-west?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281393	Pizza Hut	1.00
-99c1c50f4909	Pizza Hut	restaurant	pizza restaurant	29.76259	-96.15369	251 Gebhardt Rd Austin	Sealy	77474	+19798857447	https://locations.pizzahut.com/tx/sealy/251-gebhardt-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299690	Pizza Hut	0.98
-b5c0493bd7a0	Pizza Hut	restaurant	pizza restaurant	29.33120	-96.09470	2202 North Richmond Rd Wharton	Wharton	77488	+19795321692	https://locations.pizzahut.com/tx/wharton/2202-north-richmond-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311299	Pizza Hut	0.96
-9f31508acb51	Popeyes Louisiana Kitchen	restaurant		29.76491	-96.62335	2210 Tx-71	Columbus	78934	+19794847390	https://www.popeyes.com/store-locator/store/restaurant_880078?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.85
-bbf75c219ae7	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	29.76374	-96.15244	2005 Tx-36	Sealy	77474	+19792310443	https://www.popeyes.com/store-locator/store/restaurant_884990		0.97
 5292bae35588	Post Oak Bar & Grill	restaurant	bar and grill restaurant	29.87631	-96.85995	1114 FM155	La Grange	78945	+19792474347			0.97
 d0ab4f550e6f	Prasek's Hillje Smokehouse	restaurant		29.15689	-96.33297	29714 US 59 Rd	El Campo	77437	+19795438312	http://www.praseks.com		0.95
 89f0ce00388b	Preferida De Monterrey	restaurant	mexican restaurant	29.18978	-96.26438	708 S Mechanic St	El Campo	77437	+19795415992	http://www.lapreferida.com		0.96
@@ -1029,29 +1018,8 @@ a598967d9708	Simple Simon's Pizza	restaurant	pizza restaurant	29.58804	-96.33339
 b19d0a0f02f7	Simply Divine Event Center	restaurant		29.31168	-96.10239	300 W Milam St	Wharton	77488	+18322795850	http://simplydivinequeen.com/		0.99
 1a6150a587f5	Skull Creek Bbq	restaurant		29.69308	-96.77710	720 S Eagle St	Weimar	78962				0.95
 8405ec0cf9f2	Snack Paradise and More	restaurant		29.76511	-96.62383	2126 TX-71	Columbus	78934	+19795004001	http://snackparadise.net/		0.66
-236c2afd1909	Sonic Drive-In	restaurant	burger restaurant	29.46215	-96.93994	1624 N Texana St	Hallettsville	77964	+13617989299	https://locations.sonicdrivein.com/tx/hallettsville/1624-n.-texana-street.html		0.92
-daf000c60639	Sonic Drive-In	restaurant	burger restaurant	29.70868	-96.50224	4301 Us-90	Columbus	78934	+19797733368	https://locations.sonicdrivein.com/tx/columbus/4301-us-90.html		0.85
 7d545ad8f49c	Sorella's	restaurant	italian restaurant	29.31131	-96.10246	301 W Milam St	Wharton	77488	+19794889030			0.92
 4139f7a7bdd9	Southern Fried Bar and Grill	restaurant	bar and grill restaurant	29.24600	-96.30666	4860 TX-71	El Campo	77437	+19793326888			0.72
-195f8e87e456	Subway	restaurant	sandwich shop	29.04967	-96.50339	802 E York St	Ganado	77962	+13617713504	https://www.order.subway.com		0.96
-2bf2871f2bd1	Subway	restaurant	sandwich shop	29.77714	-96.10751	5168 I-10 Frontage Rd	Sealy	77474	+19798852401	http://www.subway.com/en-us	Subway	0.98
-4b730221d729	Subway	restaurant	sandwich shop	29.70810	-96.50459	2006 Alleyton Road South	Columbus	78934	+18326452090	https://restaurants.subway.com/united-states/tx/columbus/2006-alleyton-road-south?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=60335&utm_campaign=evergreen-2020&y_source=1_MTQ4OTc4MDAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-526942f6a7f7	Subway	restaurant	sandwich shop	29.90495	-96.87585	109 S Jefferson St	La Grange	78945	+19799660724	https://www.subway.com		0.99
-6120bc177062	Subway	restaurant	sandwich shop	29.44700	-96.94152	308 N Texana St Ste A	Hallettsville	77964	+13617989961	https://www.subway.com		0.97
-6a5fa4216aca	Subway	restaurant	sandwich shop	29.32870	-96.12451	1255 US-59	Wharton	77488	+19795310005	https://restaurants.subway.com/united-states/tx/wharton/1255-hwy-59-loop	Subway	0.95
-753c47a6d340	Subway	restaurant	sandwich shop	29.70850	-96.50360	2006 Alleyton Rd	Columbus	78934	+18326452090	https://www.subway.com		0.95
-76d601d70f67	Subway	restaurant	sandwich shop	29.75811	-96.15198	310 Overcreek Way	Sealy	77474	+19798856500	https://alibabacharleston.com		0.92
-7797b09d6220	Subway	restaurant	sandwich shop	29.95681	-96.26791	800 W Main St	Bellville	77418	+19798655855	https://restaurants.subway.com/united-states/tx/bellville/800-w-main-st	Subway	0.98
-8e782ed4c2d2	Subway	restaurant	sandwich shop	29.78726	-96.20751	I-10 & Bernado Rd CR169 ,	Sealy	78933			Subway	0.63
-9e40bbd03c18	Subway	restaurant	sandwich shop	29.68878	-96.53834	2560 Highway 71 S. Suite A	Columbus	78934	+19797328666	https://restaurants.subway.com/united-states/tx/columbus/2560-highway-71-s	Subway	0.96
-a1cebeb89c09	Subway	restaurant	sandwich shop	29.76446	-96.18543	6023 FM 3538	Sealy	77474	+19798856277	https://restaurants.subway.com/united-states/tx/sealy/6023-fm-3538	Subway	0.95
-a681b5198717	Subway	restaurant	sandwich shop	29.32612	-96.09752	1705 N Richmond Rd	Wharton	77488	+19792822112	https://www.subway.com		1.00
-bd773086723c	Subway	restaurant	sandwich shop	29.75030	-96.26680	1848 Beckendorff Rd	Sealy	77474	+18154145685	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72417&utm_campaign=evergreen-2020&y_source=1_MTAxMzU2Mjc3OS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
-c150cf1a1a7c	Subway	restaurant	sandwich shop	29.76054	-96.15275	2302 Hwy 36 S	Sealy	77474	+19798850077	https://restaurants.subway.com/united-states/tx/sealy/2302-hwy-36-s	Subway	0.99
-d143954d10de	Subway	restaurant	sandwich shop	29.58405	-96.34019	704 S McCarty Ave	Eagle Lake	77434	+19792347000	https://restaurants.subway.com/united-states/tx/eagle-lake/704-s-mccarty-ave	Subway	0.97
-dd7158675030	Subway	restaurant	sandwich shop	29.21640	-96.28890	3413 West Loop	El Campo	77437	+19795788282	http://www.subway.com/	Subway	0.95
-decaf706a68b	Subway	restaurant	sandwich shop	29.69278	-96.77499	1547 I-10	Weimar	78962	+19797256979	http://www.subway.com/en-us	Subway	0.97
-3d892ba38d25	Subway Restaurants	restaurant	sandwich shop	29.69226	-96.90205	14 N Kessler Ave	Schulenburg	78956	+19797434492	https://alibabacharleston.com		0.96
 a62bd226bdf0	Sugar Land Food Service, Inc	restaurant		29.32274	-96.09863	1321 N Richmond Rd	Wharton	77488				0.95
 ee36d1f2d821	Suzie Q's Saloon	restaurant	bar and grill restaurant	29.97900	-96.76324	1280 TX-237	Fayetteville	78940	+19795303037			0.92
 38818daf58c8	Taco Tony's	restaurant	mexican restaurant	29.58513	-96.34962	1000 Calhoun Rd	Eagle Lake	77434	+19792343984	http://www.taco-tonys.com/		0.96
@@ -1104,10 +1072,6 @@ e59f75cb62d3	Vicenza’s Italian Restaurant	restaurant	italian restaurant	29.442
 995b90d959cb	Vincek's Smokehouse	restaurant	barbecue restaurant	29.52979	-96.07058	139 S Dill St #7455	East Bernard	77435	+19793357921			0.98
 0927b7efd175	Von Enterprises Llc	restaurant		29.76538	-96.15279	1822 Meyer St	Sealy	77474				0.95
 bad4457c66cd	Watering hole bar and grill	restaurant	bar and grill restaurant	29.48231	-96.02090	2816 FM2919	Beasley	77417				0.96
-57b96b787007	Whataburger	restaurant	burger restaurant	29.46049	-96.94068	1603 North Texana Street	Hallettsville	77964	+13612173069	https://whataburger.com/		0.97
-639c71c82367	Whataburger	restaurant	burger restaurant	29.69433	-96.54091	2204 HIGHWAY 71 S	Columbus	78934	+19797328681	https://locations.whataburger.com/tx/columbus/2204-highway-71-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-8689cb4931d1	Whataburger	restaurant	burger restaurant	29.32670	-96.11984	10319 US-59	Wharton	77488	+19795321208	https://locations.whataburger.com/tx/wharton/10319-us-59-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
-9fa4d64b272e	Whataburger	restaurant	burger restaurant	29.91923	-96.85442	1800 Texas 71	La Grange	78945	+19799689868	https://locations.whataburger.com/tx/la-grange/1800-texas-71.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 9699aa26074c	William Sanchez & Assoc Inc	restaurant		29.69003	-96.53905	2536 Highway 71 S	Columbus	78934				0.95
 f77cdf92d979	Wolf Pack Woodfired Tavern	restaurant	barbecue restaurant	29.78207	-96.15572	211 W Front St	Sealy	77474	+19796279023	https://wolfpackwoodfiredtavern.com/		0.99
 8f97c6945642	Woods BBQ	restaurant	barbecue restaurant	29.78214	-96.64339	1709 Highway 71	Columbus	78934	+19794842628			0.92
@@ -1156,7 +1120,6 @@ d8c4be187a5c	Sodalis Wharton	senior	retirement home	29.30864	-96.08184	1930 Bria
 4125cceef29f	Stevens Nursing and Rehabilitation Center of Hallettsville	senior	retirement home	29.44545	-96.95023	106 Kahn St	Hallettsville	77964	+13617983606	https://wellsentialhealth.org/location/stevens-nursing-rehabilitation-center-of-hallettsville/		0.92
 1ce2a3a35de7	TruCare Living Centers	senior	retirement home	29.69883	-96.55824	1511 Montezuma St	Columbus	78934	+19797330500	http://www.tlc-columbus.com/		0.92
 69103f208c1e	WCJC Associate Degree Nursing	senior	retirement home	29.32078	-96.07659	911 E Boling Hwy	Wharton	77488	+19795326391	https://wcjc.edu/pdfs/vocational-programs/ADNursing/ADN-Program-Application.pdf		0.81
-dfcfec900b02	WCJC Associate Degree Nursing	senior	retirement home	29.32249	-96.08358	911 E Boling Hwy	Wharton	77488	+19795326391	https://wcjc.edu/pdfs/vocational-programs/ADNursing/ADN-Program-Application.pdf		0.79
 f2df6e4e09b5	Wharton Manor Nursing & Convalescent Center	senior	retirement home	29.31393	-96.09693	418 N Rusk St	Wharton	77488	+19795325021			0.94
 01a6daf4954e	Wharton Nursing and Rehabilitation Center	senior	retirement home	29.31862	-96.08381	1220 Sunny Ln	Wharton	77488	+19795325020	https://wellsentialhealth.org/location/wharton-nursing-rehabilitation-center/		0.92
 35252eac09f9	Williamsburg House Inc	senior	retirement home	29.37965	-96.96164	4656 US Hwy 77S	Hallettsville	77964	+13617982345	http://www.williamsburghousefurnishings.com		0.91

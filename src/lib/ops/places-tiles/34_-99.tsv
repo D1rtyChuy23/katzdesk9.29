@@ -6,7 +6,6 @@ id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 48116c228ac8	Burk Small Engine	cardealer		34.08428	-98.56055	615 S Oklahoma Cutoff	Burkburnett	76354	+19407306957			0.92
 3a825987bbb6	Greater Texas Ford Dealers	cardealer		34.07976	-98.55965	912 Sheppard Rd	Burkburnett	76354	+18337181626		Greater Texas Ford Dealers	0.82
 6f615e5fb704	Lipscomb Chevrolet in Burkburnett	cardealer		34.08056	-98.55950	905 Sheppard Rd	Burkburnett	76354	+19405804239	https://www.lipscombchevrolet.com/	Chevrolet	0.96
-92a3352d45a2	Pruitt Ford	cardealer		34.08002	-98.55968	912 Sheppard Rd	Burkburnett	76354	+19405695226	https://www.pruitt-ford.com/	Ford Motor Company	0.97
 a4eea1977697	Pruitt Ford	cardealer		34.07990	-98.55962	912 Sheppard Rd	Burkburnett	76354	+19405695226	https://www.pruitt-ford.com/	Ford Motor Company	1.00
 d224ad1b7e46	Grand Theatre	cinema		34.03063	-98.91888	114 N Waggoner St	Electra	76360		https://electragrandtheatre.com		0.97
 d844f963bcd2	7-Eleven	convenience		34.07901	-98.55842	918 Sheppard Rd	Burkburnett	76354	+19405694022	http://www.7-eleven.com/	7-Eleven	0.73
@@ -35,8 +34,14 @@ ba09d4f1ec17	Valero	convenience		34.07943	-98.58220	914 W Kramer Rd	Burkburnett	
 95addeba502b	Braum's Ice Cream and Dairy Store	fastfood		34.07798	-98.55829	1004 S Red River Expy	Burkburnett	76354	+19405690941	https://www.braums.com/store/1004-s-red-river-expy-burkburnett-tx/	Braums	0.98
 c023db53ef9e	Chicken Express	fastfood		34.07753	-98.55839	1006 S Red River Expy	Burkburnett	76354	+19405692054	https://chickene.com/	Chicken Express	0.97
 d84267323534	Chicken Express	fastfood		34.08182	-98.58540	1005 Taylor Ln	Burkburnett	76354	+19405692054			0.59
+817b76583e78	Domino's	fastfood	pizza restaurant	34.09142	-98.56902	300 S Avenue D	Burkburnett	76354	+19405691000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+fc095d33e9a4	Jimmy John's	fastfood	sandwich shop	34.09121	-98.55849	204 S Red River Expy	Burkburnett	76354		https://locations.jimmyjohns.com/tx/burkburnett/sandwiches-4712.html	Jimmy John's	0.80
 b0ae79ad67df	McDonald's	fastfood		34.08228	-98.56150	819 Sheppard Dr	Burkburnett	76354	+19405690106	https://www.mcdonalds.com/us/en-us/location/tx/burkburnett/819-sheppard-dr/12628.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
+7da3584a7349	Pizza Hut	fastfood	pizza restaurant	34.07990	-98.57882	900 Kramer Rd Wichita	Burkburnett	76354	+19405693315	https://locations.pizzahut.com/tx/burkburnett/900-kramer-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284700	Pizza Hut	0.99
 f7ca19955ec1	Sonic Drive In	fastfood		34.09130	-98.56981	205 S. Avenue D	Burkburnett	76354	+19405690453	https://locations.sonicdrivein.com/tx/burkburnett/205-s.-avenue-d.html	Sonic Drive-In	0.99
+40eadb956266	Sonic Drive-In	fastfood	burger restaurant	34.04355	-98.91711	1298 N Bailey St	Electra	76360	+19404952299	https://locations.sonicdrivein.com/tx/electra/1298-n.-bailey.html		0.97
+68bd12325dd3	Subway	fastfood	sandwich shop	34.09060	-98.55926	208 South Red River Exp Suite B	Burkburnett	76354	+19405695252	https://restaurants.subway.com/united-states/tx/burkburnett/208-south-red-river-exp	Subway	0.97
+11530cbd2d38	Taco Bell	fastfood	taco restaurant	34.07691	-98.55833	1100 S Red River Expy	Burkburnett	76354	+19402155762	http://www.tacobell.com		0.92
 a16d7ee498d1	Taco Bell	fastfood		34.07688	-98.55820	1100 S. Red River Expressway	Burkburnett	76354	+19402155762	https://locations.tacobell.com/tx/burkburnett/1100-s--red-river-expressway.html	Taco Bell	0.96
 b97d65eb16f4	Whataburger	fastfood		34.08082	-98.55836	920 S RED RIVER EXPY	Burkburnett	76354	+19405691419	https://locations.whataburger.com/tx/burkburnett/920-s-red-river-expy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 f7d93a224c79	Electra Food Market	grocery		34.03219	-98.92469		Electra	76360	+19404952228	http://www.frontstreetmarket.net		0.77
@@ -44,7 +49,6 @@ f0a4546c50c8	Shameless Snacks	grocery		34.09024	-98.57044	311 S Avenue D	Burkbur
 d3adf4ab9ff8	SS Exotic and Phone Shop Burkburnett TX	grocery		34.09069	-98.55962	208 S Red River Expy	Burkburnett	76354				0.89
 b839f1627f15	United Supermarkets	grocery		34.09018	-98.57078	311 S Ave D	Burkburnett	76354	+19405692541	https://local.unitedsupermarkets.com/tx/burkburnett/311-s-ave-d.html	United Supermarkets	0.92
 f355874b4c98	Electra Memorial Hospital	hospital		34.01797	-98.92479	1207 S Bailey Street	Electra	76360	+19404953981	http://www.electrahospital.com	Electra Hospital	0.98
-8b1630e9c603	Burkburnett Masonic Lodge	hotel	lodge	34.08759	-98.57616	119 W Williams Dr	Burkburnett	76354	+19403090159	http://masonic.wf.net/bbt1027.htm		0.92
 a8dd38a4c91d	Electra Inn	hotel	motel	34.04062	-98.90331	802 Hwy 287 Access Rd	Electra	76360	+19404954331	www.booking.com/hotel/gr/electra-stavros.html		0.92
 e9e936524c32	The Ranchhouse Motel	hotel	motel	34.08109	-98.56007	707 S Oklahoma Cut Off	Burkburnett	76354	+19405695031	http://www.ranchhousemotel.com		0.75
 160bdfc47e9b	Twilite Motel	hotel	motel	34.07585	-98.55367	1028 Sheppard Rd	Burkburnett	76354	+19405691601	http://www.twilitemotel.com		0.92
@@ -54,18 +58,12 @@ b77d9b48dbcb	Byers Cafe	restaurant	american restaurant	34.06735	-98.19108	419 Ma
 8a7aad0427a9	Carlitos Mexican Restaurant	restaurant	texmex restaurant	34.08551	-98.56645	625 Sheppard Rd #2765	Burkburnett	76354	+19405694373	http://carlitostx.com/	Carlitos Burk	0.96
 91ac20e68378	Carlitos Mexican Restaurant	restaurant	mexican restaurant	34.02701	-98.92477	600 S Bailey St	Electra	76360	+19404953891	http://carlitostx.com/	Carlitos Burk	0.96
 214bc792ab47	Circle H Bar-B-Que	restaurant	barbecue restaurant	34.09039	-98.56099		Burkburnett	76354	+19405690914	http://circlehbarbque.dinehere.us		0.77
-817b76583e78	Domino's	restaurant	pizza restaurant	34.09142	-98.56902	300 S Avenue D	Burkburnett	76354	+19405691000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 7714945333e4	FANCY FRANKS ON FRONT AVE	restaurant		34.03108	-98.92266	419 W Front Ave	Electra	76360	+19404952056	https://www.fancyfranksfrontave.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
 6841d9f1d008	Genova's Italian Restaurant and Pizza	restaurant	italian restaurant	34.08868	-98.56902	414 S Ave D	Burkburnett	76354	+19404340030	http://genovaitalianrestaurantmenu.com/		0.94
-fc095d33e9a4	Jimmy John's	restaurant	sandwich shop	34.09121	-98.55849	204 S Red River Expy	Burkburnett	76354		https://locations.jimmyjohns.com/tx/burkburnett/sandwiches-4712.html	Jimmy John's	0.80
 a5795b9ae36d	La Familia Mexican Restaurant	restaurant	mexican restaurant	34.09040	-98.56078	301 S Berry St	Burkburnett	76354	+19405699373	https://la-familia-mexican-restaurant-tx-4.hub.biz		0.94
 4c05d4df54d7	Lite Pan	restaurant	chinese restaurant	34.08097	-98.56092	826 Sheppard Rd	Burkburnett	76354	+19405690603	https://lite-pan.hub.biz/		0.95
-7da3584a7349	Pizza Hut	restaurant	pizza restaurant	34.07990	-98.57882	900 Kramer Rd Wichita	Burkburnett	76354	+19405693315	https://locations.pizzahut.com/tx/burkburnett/900-kramer-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284700	Pizza Hut	0.99
 8778786ad25e	Pump City Diner	restaurant	diner	34.03057	-98.91988	209 E Cleveland Ave	Electra	76360	+19404952812	https://site-osv31hfms.godaddysites.com/		0.96
 a4f2afcf1b8a	Red River Ranch Chuck Wagon	restaurant	american restaurant	34.07117	-98.14094	3930 Benvanue Rd	Byers	76357	+15804713775	http://kentrollins.com		0.92
-40eadb956266	Sonic Drive-In	restaurant	burger restaurant	34.04355	-98.91711	1298 N Bailey St	Electra	76360	+19404952299	https://locations.sonicdrivein.com/tx/electra/1298-n.-bailey.html		0.97
-68bd12325dd3	Subway	restaurant	sandwich shop	34.09060	-98.55926	208 South Red River Exp Suite B	Burkburnett	76354	+19405695252	https://restaurants.subway.com/united-states/tx/burkburnett/208-south-red-river-exp	Subway	0.97
-11530cbd2d38	Taco Bell	restaurant	taco restaurant	34.07691	-98.55833	1100 S Red River Expy	Burkburnett	76354	+19402155762	http://www.tacobell.com		0.92
 9d68488a35d1	The Feed Lot Restaurant	restaurant	comfort food restaurant	34.08136	-98.55875	914 S Red River Expy	Burkburnett	76354	+19405699999	http://www.feedlotburk.com/		1.00
 4b5b07c02b60	The Whistle Stop-Historic Valentine Diner Electra, Texas	restaurant		34.02721	-98.91358	515 E Front Ave	Electra	76360				0.84
 b8c7af3a4fdb	Wholly Frijoles	restaurant	breakfast and brunch restaurant	34.01359	-98.23206	108 W Benton St	Petrolia	76377	+19407826223			0.94

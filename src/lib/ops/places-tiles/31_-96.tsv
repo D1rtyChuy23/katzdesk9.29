@@ -47,7 +47,6 @@ b0e1e034c74a	Friday Night Lights Rusk Tx.	bar		31.79464	-95.14923	193 S Henderso
 277c1478f2d2	Half Blind	bar		31.96328	-95.27351	107 E Commerce St	Jacksonville	75766	+14303524772	https://www.opentable.com/r/half-blind-bar-reservations-jacksonville?restref=1501477&lang=en-US&ot_source=Restaurant+website		0.98
 8f58f441974a	Herbie's juice bar	bar		31.73449	-95.67207	99 Chestnut Dr	Palestine	75803	+17138765798			0.91
 1bf3a6fa796d	Joe's Sports Bar and Grill	bar	sports bar	31.79460	-95.14929	193 S Henderson St	Rusk	75785	+19037212913			0.92
-1ad5bf5e0750	Maydelle Country Wines	bar	winery	31.81028	-95.26567	175 County Road 2108	Rusk	75785	+19037953915	http://www.maydellewines.com/		0.92
 f6488ef5eb61	Maydelle Country Wines	bar	winery	31.79702	-95.26080	175 County Road 2108	Rusk	75785	+19037953915	https://maydellewines.com		0.95
 aef1ff3f60e9	Meadowbrook Country Club	bar		31.79557	-95.62989	2130 Country Club Rd	Palestine	75803	+19037295954	http://www.meadowbrookclub.com		0.92
 04ed02ef14de	Pecan Street Brewing	bar		31.32555	-95.46147	106 Pecan Dr	Crockett	75835	+18308682500	https://www.pecanstreetbrewing.com		0.66
@@ -68,7 +67,6 @@ a5307c08a9fc	All Star Autoplex	cardealer		31.77597	-95.61848	1216 E Palestine Av
 1f156ac1af70	Apache Auto Sales	cardealer	used auto dealer	31.96472	-95.26814	522 E Rusk St	Jacksonville	75766	+19035868739	http://www.apacheautosales.com/		0.92
 4f0128761b25	Bill McRae Ford	cardealer	used auto dealer	31.96595	-95.24819	1511 E Rusk St	Jacksonville	75766	+19035862241	https://www.billmcraefordjacksonville.com/		0.99
 2a4b80816a8b	Blessed K & O Motors	cardealer		31.75474	-95.64786	1610 W Palestine Ave	Palestine	75801	+19037296489	http://blessedko.com/		0.92
-8b3b61ec8206	Champion Chrysler Dodge and Jeep	cardealer		31.79377	-95.61758	2321 N State Highway 155	Palestine	75803	+19037233031	http://www.championchryslerdodgejeep.com/	Chrysler	0.71
 d6f44515c3d3	Champion Chrysler Dodge and Jeep	cardealer		31.78715	-95.62097	2321 N State Highway 155	Palestine	75803	+19037233031	http://www.championchryslerdodgejeep.com/	Chrysler	1.00
 127a620d9088	Cutshaw Chevrolet	cardealer		31.47950	-95.46812	10116 US-287	Grapeland	75844	+19367554520	http://www.cutshawchevrolet.com/	Chevrolet	0.92
 de6829cfcb45	East Texas Auto & Financing	cardealer	used auto dealer	31.79936	-95.14499	335 Dickinson Dr	Rusk	75785	+19036832886	http://www.easttxauto.com/		0.99
@@ -148,7 +146,6 @@ c13b2a51ac96	Anderson College Center	college		31.79589	-95.67640	2970 N State Hi
 255331e660af	BMA Seminary	college		31.96730	-95.27278	1530 E Pine St	Jacksonville	75766	+19035862501	https://bmats.edu/		0.96
 d6e27772cf21	Institute For Regional Forecasting	college		31.31177	-95.46456	204 Mcelhinney Hall	Houston	77204	+17137433869	https://uh.edu		0.65
 0e38e8003266	Jacksonville College	college		31.96583	-95.28124	105 B J Albritton Dr	Jacksonville	75766	+19035862518	http://www.jacksonvillecollege.edu/		0.97
-d7fdf9cb4a9a	The Honors College	college		31.73668	-95.64957	212 M.D. Anderson Library	Houston	77204	+17137439010	http://thehonorscollege.com		0.65
 42122f23aa1d	Trinity Valley Community College	college		31.73358	-95.60944	2100 TX-256-LOOP	Palestine	75801	+19037290256	http://www.tvcc.edu		0.97
 aae51fbe4dc1	Trinity Valley Community College Palestine	college		31.79549	-95.67625	2970 N State Highway 19	Palestine	75803	+19037236743	https://www.tvcc.edu		0.55
 a79ca113dc76	University Of Texas-Tyler	college		31.77023	-95.65836	1820 W Spring St	Palestine	75803	+19037272300	http://www.uttyler.edu/palestine		0.92
@@ -195,7 +192,6 @@ af79861f2e80	Crockett E-Z Stop	convenience		31.31595	-95.46626	501 W Goliad Ave	
 0271cd04aa0b	Crockett Exxon Service Station	convenience		31.30753	-95.45863	801 S 4th St	Crockett	75835	+19365452235	https://www.exxonmobil.com		0.55
 c6ae3c44e466	Crockett Food Mart	convenience		31.32773	-95.45975	808 N 4th St	Crockett	75835	+19365469497			0.97
 a2f093ef1d54	Crockett Truck Stop	convenience		31.30740	-95.43800	1409 E Loop 304	Crockett	75835		https://locations.valero.com/en-us/LocationDetails/Index/1409-E-LOOP-304/0000024985	Valero	0.80
-c0e7dc2fe80d	CrossRoads County Store	convenience		31.69314	-95.96265	1280 US Highway 84	Oakwood	75855	+19033895569			0.64
 d6239f3f04c9	CrossRoads County Store	convenience		31.66017	-95.90563	1280 US Highway 84	Oakwood	75855	+19033895569			0.64
 a092c093760e	Denny Oil Co-running Rudys	convenience		31.80101	-95.14771	130 S Dickinson Dr	Rusk	75785	+19036838210	https://crenco.com		0.55
 1103d67058a8	DK Gas Station	convenience		31.73569	-95.60664	2110 Crockett Road	Palestine	75801	+19037290455	https://dkfuel.com/stations/dk-gas-station-0980-2110-crockett-road-palestine-tx-75801/		0.95
@@ -250,7 +246,6 @@ b6e0165e937f	Kim's #46	convenience		31.78730	-95.12950	1580 S DICKINSON	Rusk	757
 ef6f10c1b52b	KIM'S #7	convenience		31.73685	-95.60818	2050 CROCKETT ROAD	Palestine	75801		https://www.exxon.com/en/find-station/mobil-palestine-tx-kims7-200325642	Mobil	0.95
 950c8329b959	KIM'S #8	convenience		31.75752	-95.60606	1000 S. LOOP 256	Palestine	75801		https://www.exxon.com/en/find-station/exxon-palestine-tx-kims8-200325648	Exxon	0.80
 2288d21c7706	Kim's Convenience Stores	convenience		31.73870	-95.61233	1929 Crockett Rd #5905	Palestine	75801	+19032210537	http://www.kimscstores.com		0.92
-3fccb2f90ea6	Kim's Convenience Stores	convenience		31.78299	-95.65971	1000 S TX-256-LOOP	Palestine	75801	+19037295167	http://www.kimscstores.com/	Kim's Convenience Store	0.92
 545843a6efdf	Kim's Convenience Stores	convenience		31.77731	-95.61843	1219 E Palestine Ave	Palestine	75801	+19037294005	http://kimscstores.com	Kim's Convenience Store	0.92
 5adbdfaa9189	Kim's Convenience Stores	convenience		31.73686	-95.60821	2050 Crockett Rd	Palestine	75801	+19037293770	http://exxonmobil.com/corporate		0.92
 d0f804f5a7e8	Kim's Convenience Stores	convenience		31.75745	-95.60603	1000 S TX-256-LOOP	Palestine	75801	+19037295167	http://www.kimscstores.com/	Kim's Convenience Store	0.98
@@ -262,7 +257,6 @@ a857d92680b8	Lakeside Food Mart	convenience		31.39219	-95.13927	18485 State High
 7da5e85e4dca	Leona Country Store	convenience		31.14890	-95.98563	1167 FM 977 W	Leona	75850	+19033442045	http://exxonmobilstations.com		0.77
 f89fd69eb744	Lucky Star Drive In Grocery	convenience		31.76942	-95.63997	704 W Palestine Ave	Palestine	75801	+19037233507			0.92
 5b4b64435b0e	Maxs Gas Station	convenience		31.96675	-95.24623	1613 E Rusk St	Jacksonville	75766	+19035864140			0.81
-7b9e3fd3dfe6	Maxs Gas Station	convenience		31.96739	-95.24509	1613 E Rusk St	Jacksonville	75766	+19035864140			0.79
 f9b781b838d2	Maxs Gas Station	convenience		31.96477	-95.26653	613 E Rusk St	Jacksonville	75766	+19033938843			0.75
 877247b003d8	Midtown Feed & Beer Barn	convenience		31.02500	-95.75126	12078 E TX-21	Midway	75852	+19363488696			0.94
 fda9637670f2	MIDWAY #20	convenience		31.58650	-95.84602	506 BROAD ST	Oakwood	75855		https://www.exxon.com/en/find-station/exxon-oakwood-tx-midway20-200328211	Exxon	0.80
@@ -309,7 +303,6 @@ a9a5b7972edf	Skeeter's	convenience		31.80565	-95.15186	467 N Dickinson Dr	Rusk	7
 f231ea34fbdf	Spitfire Grill And Grocery	convenience		31.18362	-95.23625	11332 US-287	Groveton	75856	+19366382027	http://exxonmobil.com		0.99
 9f566c428468	Spitfire Grill, Grocery & Liqour	convenience		31.21028	-95.28506	11332 US Highway 287	Pennington	75856	+19366382027			0.87
 bbac7c06699b	Stop N Shop	convenience		31.65071	-95.07301	105 N Marcus St	Alto	75925	+19368582790	http://shell.com		0.77
-1397d827fc2d	Stripes	convenience		31.81342	-95.16129	1203 N Dickinson Dr	Rusk	75785	+19036838210	https://www.7-eleven.com/	Stripes	0.69
 85a117b15c91	Stripes	convenience		31.80097	-95.14766	1203 N Dickinson Dr	Rusk	75785	+19036838210	https://www.7-eleven.com/		0.97
 dae198d00dc0	Sunoco	convenience		31.96697	-95.27619	329 North Bolton Street	Jacksonville	75766	+19035867422	https://www.sunoco.com/		1.00
 2031a9730efc	Texaco	convenience		31.96249	-95.22457	1002 EAST LOOP 456	Jacksonville	75766		https://www.texaco.com/en_us/home/find-a-station.html?/station/1002-EAST-LOOP-456-JACKSONVILLE-TX-75766-9165-id308227	Texaco	0.95
@@ -347,13 +340,14 @@ eafe28f30548	Arby's	fastfood		31.09302	-95.96367	23456 Old San Antonio Rd	Norman
 f21aa24c35f1	Bucees	fastfood		31.00494	-95.91612		Madisonville			https://buc-ees.com/index.php		0.70
 68d97ccd0019	Burger King	fastfood		31.96398	-95.26855	505 East Rusk	Jacksonville	75766	+19035410510	https://burgerking.com/store-locator/store/25290	Burger King	0.96
 84cd40667dfd	Burger King	fastfood		31.94886	-95.26115	1608 S Jackson St	Jacksonville	75766	+19035861811	http://www.bk.com		0.92
+aedff2c253e5	Burger King	fastfood	burger restaurant	31.32770	-95.44016	940 E Loop 304	Crockett	75835	+19362436309	https://burgerking.com/store-locator/store/26908	Burger King	0.96
 db0ca1a9022b	Burger King	fastfood		31.73330	-95.62526	2901 TX-256 Loop	Palestine	75801	+19037291019	https://locations.bk.com/tx/palestine/2901-s--loop-256.html	Burger King	0.97
 b809ac13da8d	Checkers	fastfood		31.25821	-95.99020	950 W. St. Mary's St. Centerville, TX	Centerville	75833	+19035361170	https://checkersandrallys.com/location/-29066934?y_source=1_MTYyMDA1NDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Checkers and Rally's	0.92
 bef66c79660f	Chick-fil-A	fastfood		31.73575	-95.60823	1940 S Loop 256	Palestine	75801	+19039227168	https://www.chick-fil-a.com/locations/tx/palestine-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.94
 de0d66cb80ac	Chick-fil-A	fastfood		31.96151	-95.26897	502 S Jackson St	Jacksonville	75766	+19035410330	http://www.chick-fil-a.com/	Chick-fil-A	0.93
-f05b44289338	Chick-fil-A	fastfood		31.73726	-95.63100	1940 S Loop 256	Palestine	75801		https://www.chick-fil-a.com/locations/tx/palestine-tx	Chick-fil-A	0.80
 676b6da2871e	Chicken Express	fastfood		31.73474	-95.60609	2117 Crockett Rd	Palestine	75801	+19037230339	http://www.chickenexpress.us/	Chicken Express	0.99
 96a434dfb6b8	Chicken Express	fastfood		31.94669	-95.26012	1651 S Jackson St	Jacksonville	75766	+19035862100	http://www.chickenexpress.us/	Chicken Express	0.97
+a2e6aa6b6ead	Church's Chicken	fastfood	chicken restaurant	31.80232	-95.14852	1106 Dickinson Road	Rusk	75785	+19036834515	http://www.churchs.com		0.77
 b2e33099a981	Church's Chicken	fastfood		31.77038	-95.63801	419 W. Palestine Avenue	Palestine	75801	+19037291888	https://locations.churchs.com/tx/palestine/419-w.-palestine-avenue	Church's Chicken	0.99
 ea3fd4e29ce0	Come Eat	fastfood		31.95384	-95.26564	1112 S Jackson St	Jacksonville	75766	+19032844715			0.94
 5f9e637e8370	Dairy Queen	fastfood		31.80267	-95.14883	Dairy Queen Store 175 N Dickinson Dr	Rusk	75785	+19036835252	https://dqtexas.com/?y_source=1_MjkzMzkxMzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.58
@@ -362,39 +356,65 @@ af7007c7bc52	Dairy Queen	fastfood		31.30874	-95.45787	800 S Fourth St	Crockett	7
 d70fd0037768	Dairy Queen	fastfood		31.73541	-95.61020	2101 S Loop 256 2101 S Loop 256	Palestine	75801	+19037292014	https://www.dairyqueen.com/en-us/locations/tx/palestine/2101-s-loop-256/12715/?y_source=1_MjkzMzkxODgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 f47fdaff90f0	Dairy Queen	fastfood		31.95044	-95.26305	1501 S Jackson St 1501 S Jackson St	Jacksonville	75766	+19035863633	http://www.dairyqueen.com/us-en/Locator/Detail/4074	Dairy Queen	0.97
 76a52fc11360	Deck n Dine LLC	fastfood		31.58298	-95.85158	137 Post St	Oakwood	75855	+19035452486			0.96
+29429a5a2166	Domino's	fastfood	pizza restaurant	31.73928	-95.61191	1926 Crockett Road	Palestine	75801	+19037232200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+645d7dbce026	Domino's	fastfood	pizza restaurant	31.95421	-95.26565	1029 South Jackson Street	Jacksonville	75766	+19033396606	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+c2df90ad04a4	Domino's	fastfood	pizza restaurant	31.73418	-95.67141	3913 W Oak Street	Palestine	75801	+19032218420	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+8910ca05aecf	Domino's Pizza	fastfood	pizza restaurant	31.32613	-95.43876	1002 E Loop 304	Crockett	75835	+19366240111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
 442789e95e0c	DQ Grill & Chill	fastfood		31.30875	-95.45771	800 S 4th St	Crockett	75835		https://www.dairyqueen.com/en-us/locations/tx/crockett/800-s-4th-st/3729	DQ Grill & Chill	0.80
 8c2ceb0a2b32	DQ Grill & Chill	fastfood		31.25787	-95.99105	1120 St Mary	Centerville	75833		https://www.dairyqueen.com/en-us/locations/tx/centerville/1120-st-mary/3681	DQ Grill & Chill	0.80
 99f737755519	DQ Grill & Chill	fastfood		31.73542	-95.61014	2101 S Loop 256	Palestine	75801		https://www.dairyqueen.com/en-us/locations/tx/palestine/2101-s-loop-256/2494	DQ Grill & Chill	0.80
 cc23bd4997ad	DQ Grill & Chill	fastfood		31.95050	-95.26306	1501 S Jackson St	Jacksonville	75766		https://www.dairyqueen.com/en-us/locations/tx/jacksonville/1501-s-jackson-st/4074	DQ Grill & Chill	0.80
 ec3201b497b1	DQ Grill & Chill	fastfood		31.96457	-95.26667	607 E Rusk St	Jacksonville	75766		https://www.dairyqueen.com/en-us/locations/tx/jacksonville/607-e-rusk-st/4075	DQ Grill & Chill	0.80
 940cdb05775e	Jack in the Box	fastfood		31.74590	-95.65422	2207 W Oak St	Palestine	75801	+19037236233	https://www.jackinthebox.com		0.97
+d50b8b6c837a	Jack in the Box	fastfood	taco restaurant	31.25813	-95.98566	1129 W Saint Marys St	Centerville	75833	+19035361022	http://www.jackinthebox.com/locations/TX/Centerville/75833/3764?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80c62		0.85
+ebe9c2f76f1d	Jack in the Box	fastfood	taco restaurant	31.25843	-95.99122	1129 E St Marys	Centerville	75833	+19035361022	http://www.jackinthebox.com/locations/3764		0.97
+fd025652ebb3	Jersey Mike's	fastfood	sandwich shop	31.95194	-95.26355	1314-C South Jackson Street	Jacksonville	75766	+19033391271	https://www.jerseymikes.com/15119/jacksonville-tx	Jersey Mike's Subs	0.94
 8c4d87626526	KFC	fastfood		31.32817	-95.43974	900 E Loop 304, Power Pumper	Crockett	75835	+19365447363	http://www.kfc.com/storelocator/Default.aspx?address=900%20E%20Loop%20304,Crockett,TX		0.97
 b8b70580777e	KFC	fastfood		31.96177	-95.27012	411 S. Jackson	Jacksonville	75766	+19035861341	https://locations.kfc.com/tx/jacksonville/411-s-jackson	KFC	0.99
+f63714f92ce0	Kfc	fastfood	chicken restaurant	31.75278	-95.64948	1711 W Palestine Ave	Palestine	75801	+19037235515	https://www.kfc.com		0.92
 92205fcd33f8	Krispy Krunchy Chicken	fastfood		31.50732	-95.47480	1110 US-287	Grapeland	75844		https://locations.krispykrunchy.com/tx/grapeland/1110-us-287	Krispy Krunchy Chicken	0.80
 9259ac838c98	Krispy Krunchy Chicken	fastfood		31.49176	-95.47864		Grapeland	75844	+19366872920	https://locations.krispykrunchy.com/tx/crockett/1500-east-loop-304	Krispy Krunchy Chicken	0.94
 c32d067bde1f	Krispy Krunchy Chicken	fastfood		31.69283	-95.72823	5138 N Us Hwy 79	Palestine	75801		https://locations.krispykrunchy.com/tx/palestine/5138-n-us-hwy-79	Krispy Krunchy Chicken	0.88
 e2592fe1747e	Krispy Krunchy Chicken	fastfood		31.79632	-95.16926	1204 W 6th St # 1	Rusk	75785	+19036833437	https://locations.krispykrunchy.com/tx/rusk/1204-w-6th-street		0.92
+30dc0beb864c	Little Caesars Pizza	fastfood	pizza restaurant	31.95422	-95.26718	1009 S Jackson St Ste 109	Jacksonville	75766	+19032846195	https://littlecaesars.com/en-us/store/10619	Little Caesars	0.97
+7c445a3a4487	Little Caesars Pizza	fastfood	pizza restaurant	31.73517	-95.61322	419 Old Elkhart Rd	Palestine	75801	+19037232620	https://littlecaesars.com/en-us/store/9650	Little Caesars	0.97
 6a89cbd8fe50	McDonald's	fastfood		31.96256	-95.26947	402 S Jackson St	Jacksonville	75766	+19035869520	https://www.mcdonalds.com/us/en-us/location/tx/jacksonville/402-s-jackson-st/8040.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 966df718f1df	McDonald's	fastfood		31.73374	-95.61095	2120 S Loop 256	Palestine	75801	+19037295000	https://www.mcdonalds.com/us/en-us/location/tx/palestine/2120-s-loop-256/7237.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 ab74cd3b83cb	McDonald's	fastfood		31.32335	-95.43687	1115 Loop 304	Crockett	75835	+19365448008	https://www.mcdonalds.com/us/en-us/location/tx/crockett/1115-loop-304/12011.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
+ad45fbfdbfce	McDonald's	fastfood	burger restaurant	31.73608	-95.61610	2223 S Loop 256	Palestine	75801	+19037298977	https://www.mcdonalds.com/us/en-us/location/tx/palestine/2223-s-loop-256/14602.html?cid=RF:YXT:RoN::Clicks		0.92
 afbd9724b134	McDonald's	fastfood		31.80671	-95.15179	516 Dickinson Dr	Rusk	75785	+19036835680	https://www.mcdonalds.com/us/en-us/location/tx/rusk/516-s-dickenson-dr/35276.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 4019e95f0084	Panda Express	fastfood		31.73369	-95.61575	2230 S Loop 256	Palestine	75801	+12546510809	http://www.pandaexpress.com/	Panda Express México	0.99
 b7b9533de5d9	Panda Express	fastfood		31.95843	-95.26828	701 S Jackson St	Jacksonville	75766	+19035410338	http://www.pandaexpress.com/	Panda Express México	0.95
+714ec3310eef	Pizza Hut	fastfood	pizza restaurant	31.80277	-95.15026	1208 N Main St	Rusk	75785	+19036836121	https://locations.pizzahut.com/tx/rusk/1208-n-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291102	Pizza Hut	0.98
+8a011733ec8b	Pizza Hut	fastfood	pizza restaurant	31.94879	-95.26124	1608 S Jackson St	Jacksonville	75766	+19035866531	https://locations.pizzahut.com/tx/jacksonville/1608-s-jackson-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=301470	Pizza Hut	0.99
+8f04cf5f1255	Pizza Hut	fastfood	pizza restaurant	31.73723	-95.63718	3400 Loop 256 Anderson	Palestine	75801	+19037235109	https://locations.pizzahut.com/tx/palestine/3400-loop-256?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304518	Pizza Hut	0.99
+a8a2ed33e4af	Pizza Hut	fastfood	pizza restaurant	31.77096	-95.62916	402 E Palestine Ave	Palestine	75801	+19037235109	http://www.pizzahut.com		0.98
+f1ecb922d87b	Pizza Hut	fastfood	pizza restaurant	31.31923	-95.43514	1231 E Loop 304 Houston	Crockett	75835	+19365443054	https://locations.pizzahut.com/tx/crockett/1231-e-loop-304?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312061	Pizza Hut	0.96
 1fc27f432147	Rancho Grande Palestine Tx	fastfood		31.73777	-95.60935	2036 Crockett Rd	Palestine	75801	+19037272008	https://rancho-grande-tx-14.hub.biz		0.92
-75b221fe7316	Slayers Burger	fastfood		31.76145	-95.63165	https://maps.apple.com/?address=Tulkarm&auid=18328126991067375792&ll=32.317475,35.031253&lsp=7618&q=Mein%20Standort&t=m	Palestine		+970595792500			0.61
+7c12480ca1ea	Schlotzsky's	fastfood	sandwich shop	31.94633	-95.25944	1664 S Jackson St	Jacksonville	75766	+19033393090	https://locations.schlotzskys.com/tx/jacksonville/1664-jackson-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
 0049a67fd73a	Sonic Drive In	fastfood		31.31919	-95.43709	1200 East Loop 304	Crockett	75835	+19362436229	https://locations.sonicdrivein.com/tx/crockett/1200-east-loop-304.html	Sonic Drive-In	0.98
 41aa52b73bc7	Sonic Drive In	fastfood		31.95377	-95.26568	1105 S. Jackson Street	Jacksonville	75766	+19035863131	https://locations.sonicdrivein.com/tx/jacksonville/1105-s.-jackson-street.html	Sonic Drive-In	0.98
 95204586f156	Sonic Drive In	fastfood		31.77053	-95.63502	220 W. Palestine Avenue	Palestine	75801	+19037298290	https://locations.sonicdrivein.com/tx/palestine/220-w.-palestine-avenue.html	Sonic Drive-In	0.98
 e002ffe8e24c	Sonic Drive In	fastfood		31.73345	-95.62201	2727 S Loop 256	Palestine	75801	+19037319172	https://locations.sonicdrivein.com/tx/palestine/2727-s-loop-256.html	Sonic Drive-In	0.97
 ec08d07e9700	Sonic Drive In	fastfood		31.80544	-95.15170	435 N. Dickinson Drive	Rusk	75785	+19036836363	https://locations.sonicdrivein.com/tx/rusk/435-n.-dickinson-drive.html	Sonic Drive-In	0.98
+167053280080	Subway	fastfood	sandwich shop	31.25838	-95.98512	921 W St Marys St	Centerville	75833	+19035362388	http://www.subway.com	Subway	0.96
+a85cca8f120a	Subway	fastfood	sandwich shop	31.50470	-95.47630	900 US Hwy. 287	Grapeland	75844			Subway	0.96
+bfb01cad96ca	Subway	fastfood	sandwich shop	31.80027	-95.14561	267 N Dickinson Dr	Rusk	75785	+19036832526	https://www.subway.com		0.98
+dda448e0e301	Subway	fastfood	sandwich shop	31.95344	-95.26524	1127 S Jackson St	Jacksonville	75766	+19035866337	https://www.subway.com		0.98
+e614b8476931	Subway	fastfood	sandwich shop	31.31909	-95.43580	1241 TX-304 Loop	Crockett	75835	+19365442723	https://www.subway.com/en-us/	Subway	0.99
+e8d338806a99	Subway	fastfood	sandwich shop	31.73868	-95.60956	2006 Crockett Rd Ste A	Palestine	75801	+19037292062	http://subway.com/	Subway	0.98
+e8e1eb425a09	Subway	fastfood	sandwich shop	31.74268	-95.65808	2607 W Oak St	Palestine	75801	+19037291266	https://www.subway.com		0.97
+2ffedfeaf682	Subway Restaurants	fastfood	sandwich shop	31.73421	-95.61510	2213 S Loop 256 Ste 102	Palestine	75801	+19037319106	https://alibabacharleston.com		0.55
 271ec1a99ad6	Taco Bell	fastfood		31.80243	-95.14846	1207 N Dickinson Dr.	Rusk	75785	+19036836472	http://www.tacobell.com/	Taco Bell	0.96
 900823941180	Taco Bell	fastfood		31.73590	-95.60686	2104 Crockett	Palestine	75801	+19037298034	http://www.tacobell.com/	Taco Bell	0.99
 c98befd3360b	Taco Bell	fastfood		31.96348	-95.26995	302 S Jackson Street	Jacksonville	75766	+19035866090	http://www.tacobell.com/	Taco Bell	0.96
 fdb4855692f3	Taco Bell	fastfood		31.32773	-95.43987	940 E Loop 304	Crockett	75835	+19365458589	http://www.tacobell.com/	Taco Bell	1.00
+f0e02acc6fdb	Wendy's	fastfood	burger restaurant	31.73468	-95.61575	2215 S Loop 256	Palestine	75801	+19037296973			0.92
 2e39ec6af5fc	Whataburger	fastfood		31.31515	-95.43552	1281 E Loop 304	Crockett	75835	+19365460240	https://locations.whataburger.com/tx/crockett/1281-e-loop-304.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 e6e22a1ce2e3	Whataburger	fastfood		31.73754	-95.60761	1717 South Loop 256	Palestine	75801	+19037295737	http://whataburger.com/	Whataburger	0.99
 e93ea9c571e7	Whataburger	fastfood		31.80096	-95.14764	1203 N Dickinson Dr	Rusk	75785	+19036838040	https://locations.whataburger.com/tx/rusk/1203-n-dickinson-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 eeb2b48d1648	Whataburger	fastfood		31.95916	-95.26877	627 S. Jackson St.	Jacksonville	75766	+19035867211	https://locations.whataburger.com/tx/jacksonville/627-s-jackson-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+14c79b063408	Wingstop	fastfood	chicken restaurant	31.95021	-95.26216	1502 S Jackson St	Jacksonville	75766	+19032846224	https://www.wingstop.com/location/wingstop-811-jacksonville-tx-75766/menu?y_source=1_NTUyMDY3OTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 5bc7fb540a5f	Wingstop	fastfood		31.73882	-95.60703	1625-A S. Loop 256	Palestine	75801	+19037319464	https://www.wingstop.com/location/wingstop-1073-palestine-tx-75801/menu?y_source=1_NTUyMDY4NTAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
 7d688e881b57	African Caribbean Middle East Food Store	grocery		31.73914	-95.61588	213 Old Elkhart Rd	Palestine	75801	+14693633981			0.92
 c3616d5d3922	B&B Food	grocery	international grocery store	31.65376	-95.07304	272 Marcus St	Alto	75925	+19368585900	https://www.brookshirebrothers.com/weekly-ad?store=7		0.85
@@ -459,7 +479,6 @@ e65dc4fab59d	1904 Kolstad Inn	hotel		31.76770	-95.62988	303 Kolstad St	Palestine
 c9d4aefa6f20	Aadarsh Hospitality Llc	hotel		31.94661	-95.26025	1659 S Jackson St	Jacksonville	75766		lizmazurphotography.com		0.95
 07eb15a0d5b8	Best Western Jacksonville Inn	hotel		31.94588	-95.25982	1659 S Jackson St	Jacksonville	75766	+19035860007	https://www.bestwestern.com/en_US/book/hotel-rooms.44568.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44568	Best Western Hotels & Resorts	0.99
 7d5ab483a1de	Best Western Palestine Inn	hotel		31.75468	-95.64931	1601 W Palestine Ave	Palestine	75801	+19037234655	https://www.bestwestern.com/en_US/book/hotel-rooms.44296.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44296	Best Western Hotels & Resorts	0.99
-f4baaa4b37dc	Boar Creek Ranch	hotel	lodge	31.88562	-95.96604	2730 Private Rd 8608	Tennessee Colony	75861	+19407651972	http://www.boarcreek.com/		0.89
 aa7047dd1104	Budget Inn By OYO Palestine TX Hwy 79	hotel		31.77940	-95.61308	1520 E Palestine Ave	Palestine	75801	+12124059232	https://www.oyorooms.com/us/242013/	OYO USA	1.00
 cb568746c2d5	Comfort Suites	hotel		31.73497	-95.63568	301 Willow Creek Pkwy	Palestine	75801	+19037230284	https://www.choicehotels.com/texas/palestine/comfort-suites-hotels/txb78?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 0036914cfb7d	Comfort Suites Palestine	hotel		31.73484	-95.63700	301 Willow Creek Parkway	Palestine	75801		https://www.choicehotels.com/texas/palestine/rodeway-inn-hotels	Comfort Suites	0.80
@@ -471,30 +490,23 @@ b738553de39f	Eas-Lee RANCH	hotel		31.27015	-95.53274	4273 State Highway 21 W	Cro
 6ed8f59e83da	Econo Lodge Palestine	hotel		31.77120	-95.63120	205 E Palestine Ave	Palestine	75801	+19037291660	https://www.choicehotels.com/texas/palestine/econo-lodge-hotels/txi81		0.92
 ab7dbf5cff52	Economy Inn Motel	hotel	motel	31.32371	-95.45777	614 N 4th St	Crockett	75835	+19365447891	http://www.economyinn.us/	Economy Inn	0.94
 3caccd43edba	Embers Motor Inn	hotel		31.30945	-95.43717	1401 E Loop 304	Crockett	75835	+19365445681	https://www.embersinntexas.com/en-us		0.96
-bb9f223f2092	Euclid Masonic Lodge #45	hotel	lodge	31.80291	-95.15036	1206 N Main St	Rusk	75785	+19036834556			0.97
-f7333d16b3a7	Euclid Masonic Lodge #45	hotel	lodge	31.80124	-95.15038	1206 N Main St	Rusk	75785	+19036834556			0.89
 a60c32ec2590	Executive Inn	hotel		31.94246	-95.25491	1848 S Jackson St	Jacksonville	75766	+19035898500			0.92
 d6591ba2c7d8	Executive inn	hotel	motel	31.79421	-95.13534	1007 N Dickinson Dr	Rusk	75785	+19036832326	http://executive-inn-rusk.keeq.io		0.94
 fe85500b4684	Express Inn and Suites	hotel	motel	31.77466	-95.62001	1100 E Palestine Ave	Palestine	75801	+19037293151	http://www.expresspalestine.com/		1.00
 c15ee8d20e5c	Felchak River Ranch	hotel		31.14406	-95.75894	8573 Private Road 1235	Centerville	75833	+17135914994			0.83
 f94da7149f1e	Hampton Inn & Suites Palestine	hotel		31.73258	-95.61919	2700 South Loop 256	Palestine	75801	903-723-0016	https://www.hilton.com/en/hotels/psntxhx-hampton-suites-palestine/	Hampton by Hilton	1.00
-5944d99e0556	Harrison Hills	hotel		31.65177	-95.08907		Alto					0.56
 91cc882007e4	Holiday Inn Express	hotel		31.30271	-95.44122	1511 E Loop 304	Crockett	75835	+19365444488	http://www.hiexpress.com/	Holiday Inn Express	0.98
 ff0fb3445e5b	Holiday Inn Express & Suites Jacksonville	hotel		31.93985	-95.25278	1923 S Jackson St	Jacksonville	75766	+19035898900	https://www.ihg.com/holidayinnexpress/hotels/us/en/jacksonville/jkves/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-JKVES	Holiday Inn Express	1.00
 ca0612c7847e	Holiday Inn Express Palestine	hotel		31.77445	-95.62128	1030 E Palestine Ave	Palestine	75801	+19037234884	https://www.ihg.com/holidayinnexpress/hotels/us/en/palestine/psntx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-PSNTX	Holiday Inn Express	1.00
 f1eaf3350e0e	Home Place Inn	hotel	motel	31.96418	-95.25479	1407 E Rusk St	Jacksonville	75766	+19035869841	http://www.magnusonhotels.com/home-place-inn-suites-jacksonville/	Ramada by Wyndham	0.97
 d9c328bb495d	Hotel Ritual and Wellness Center	hotel		31.96038	-95.26545	540 El Paso St	Jacksonville	75766	+19038106695	http://www.ritualonmain.com		0.98
-891d7ecae0c8	Hs Ghuman Llc	hotel		31.75463	-95.64897	1601 W Palestine Ave	Palestine	75801				0.95
 d338667064f9	Inn at BK Ranch	hotel		31.99689	-95.77682	520 CR-488	Montalba	75853	+19033382004	http://www.innatbkranch.com		0.85
-e8b84ab049d0	Jacksonville Masonic Lodge Number 108 AF and AM	hotel	lodge	31.96212	-95.27196	318 1/2 S Main St	Jacksonville	75766		http://Jacksonville108.com/		0.92
 f405c0c89360	La Quinta Inn & Suites by Wyndham Jacksonville TX	hotel		31.94209	-95.25397	1902 S Jackson St	Jacksonville	75766	+19032842492	http://www.laquintajacksonville.com/?cid=local_6318	La Quinta by Wyndham	0.99
 2286a0c5446c	La Quinta Inn & Suites Jacksonville	hotel	resort	31.94832	-95.26094	1902 S Jackson St	Jacksonville	75766	+19035866504	http://www.laquintajacksonville.com/?cid=local_6318		0.85
 b539cafd30ad	La Quinta Inn & Suites Palestine	hotel		31.73399	-95.62937	3000 TX-256 Loop	Palestine	75801	+19037231387	http://www.laquintapalestine.com/?cid=local_6101	La Quinta by Wyndham	1.00
 ce0254328130	Lakeview Methodist Conference Center	hotel		31.65436	-95.68668	400 Private Road 6036	Palestine	75801	+19035382712	http://www.lakeviewmcc.org		0.99
 56e8683c89ea	Laxmi Lodging Inc	hotel		31.76526	-95.62968	210 E Lacy St	Palestine	75801	+12144786642			0.65
 1f6d01f952e3	Let's Go Cricket Co.	hotel		31.30340	-95.48880	680 TX-21 W	Crockett	75835	+19365461973			0.69
-22bb92619985	Local Hospitality Llc	hotel		31.77467	-95.62006	1100 E Palestine Ave	Palestine	75801				0.95
-72af933fac30	Lothrop Lodge No 21	hotel	lodge	31.30240	-95.44331	1520 E Loop 304	Crockett	75835	+19365441497			0.59
 0bb4ef56779b	Motel 6	hotel	motel	31.77637	-95.62006	1101 E Palestine Ave	Palestine	75801	+19032053989	http://www.motel6.com/	Motel 6	0.99
 2d7e7acbcac6	Nikkikumar Inc	hotel	motel	31.77978	-95.61303	1520 E Palestine Ave	Palestine	75801	+19037295137			0.92
 08b99db56df9	Om Sai Nath Hospitality Llc	hotel		31.80770	-95.15202	590 N Dickinson Dr	Rusk	75785				0.95
@@ -502,16 +514,12 @@ f374aa2bfdab	Pal-tex Motel	hotel	motel	31.77967	-95.61319	1520 E Palestine Ave	P
 b82a1c7498aa	Palestine Tx	hotel		31.74551	-95.65466		Palestine			http://www.cityofpalestinetx.com/	Palestine Police Department	0.97
 121e7a97a8de	Premier Inn Palestine	hotel	resort	31.74432	-95.65539	2300 W Oak St	Palestine	75801	+19037319495	http://www.premierinnpalestinetx.com/		0.98
 e92134ffbea1	Prince Hall Manor	hotel		31.30697	-95.46487	1100 Martin Luther King Jr Blvd	Crockett	75835	+19365443064	www.rentalhousingdeals.com/TX/CROCKETT/PRINCE-HALL-MANOR-APARTMENTS		0.96
-a39d8367e79a	Rock Water Ranch	hotel	lodge	31.81688	-95.17876	1256 FM 2972	Rusk	75785	+19032796073	http://www.rockwaterhunts.com/		0.97
 4eb92c2594f1	Rock'N D Ranch	hotel		31.17520	-95.58414	1620 County Road 3430	Lovelady	75851				0.67
 a1d9b7df2157	Rodeway Inn	hotel	resort	31.77371	-95.62394	805 E Palestine Ave	Palestine	75801	+19037296049	https://www.choicehotels.com/texas/palestine/rodeway-inn-hotels/txq16?mc=llbillpx&pmf=local		0.99
-eabd39f8171c	Stoneranch	hotel	lodge	31.42512	-95.56909	730 Pine Island Cv	Grapeland	75844		http://www.stoneranchtx.com/		0.97
 d6357a770928	Super 8 by Wyndham Palestine	hotel		31.74508	-95.65483	2300 W Oak St	Palestine	75801	+19034804900	https://www.wyndhamhotels.com/super-8/palestine-texas/super-8-palestine/overview?CID=LC:SE::BING:RIO:National:06887&iata=00065402		0.99
 8711c056bbeb	Super 8 by Wyndham Palestine TX	hotel	resort	31.77099	-95.63202	205 E Palestine Ave	Palestine	75801	+19037291660	https://www.wyndhamhotels.com/super-8/niagara-falls-ontario/super-8-niagara-falls-on/overview		1.00
 ca561c09ede7	Texann Motel	hotel	motel	31.77401	-95.62380	805 E Palestine Ave	Palestine	75801	+19037296049			0.92
-860b445eb9ad	The BigWoods on the Trinity	hotel	lodge	31.87105	-95.95445	14809 FM321	Tennessee Colony	75861	+19033911112	http://www.bigwoods.net/		1.00
 5fb588e53f1d	The Reserve at Montalba	hotel		31.85017	-95.75350	1 Lakeside Dr	Montalba	75853	+12142633870	https://www.reserveatmontalba.com/		0.92
-8a34b798432e	Thomas Rusk Hotel	hotel		31.79609	-95.15009		Rusk	75785				0.76
 53d126cbf8a6	Town & Country Motel	hotel		31.77135	-95.63111	205 E Palestine Ave	Palestine	75801	+19037291660	http://towncountrymotel.placeweb.site		0.92
 57a5291ec1c5	Trade Wind Motel	hotel	motel	31.96102	-95.26891	520 S Jackson St	Jacksonville	75766	+19035862574	https://trade-winds-motel-tx-1.hub.biz/		0.97
 9a259ec7f1cb	Truckerz Inn	hotel	motel	31.94261	-95.25485	1848 S Jackson St	Jacksonville	75766	+19035898500			0.92
@@ -528,11 +536,7 @@ c9f7a9a22056	Cardinal Health	office	pharmaceutical company	31.94473	-95.26821	20
 d03321091b04	Greenpath Polymers	office	plastics company	31.99633	-95.27765	1498 N Bolton St	Jacksonville	75766	+19724378300	http://www.greenpathrecovery.com/		0.85
 32fbc17e6d58	Kim's Convenience Stores - Corporate Office	office		31.76197	-95.62989	100 Avenue A St	Palestine	75801	+19037238585	https://www.kimscstores.com		0.92
 4b3564a3aedc	Lady Trinity	office	information technology company	31.40117	-95.59049	363 Pine St	Crockett	75835	+19365006626			0.60
-34463177595a	Magnolia Boat Ramp	office	ferry boat company	31.66332	-95.75272	9421 hwy 294 w	Palestine					0.67
-e600238bcbae	Magnolia Boat Ramp	office	ferry boat company	31.66059	-95.74037	9421 W TX-294	Palestine	75801				0.68
-6145e1ea06de	Mountain Pure Water	office	bottled water company	31.72774	-95.63276	777 Willow Creek Pkwy	Palestine	75801	+19037231362	https://mountainpurebeverage.com		0.90
 9da972ae7807	Mountain Pure Water	office	bottled water company	31.72820	-95.63314	777 Willow Creek Pkwy	Palestine	75801	+19037231362	https://mountainpurebeverage.com		0.91
-8e356af65388	Nalcom Wireless Communications	office	telecommunications company	31.73071	-95.62345	2200 S Royall St	Palestine	75801	+19037296300	http://www.nalcomwireless.com/		0.92
 b8a366c5873f	Northwestern Mutual	office		31.76138	-95.62621	123 N Church St	Palestine	75801	+19037298419	https://www.northwesternmutual.com/financial-professional-locator?address=123%20N%20Church%20St,75801&distance=1&cmpid=LL-Lo3-Search		0.92
 14d175a37ca2	Onshore Outsourcing Crockett Delivery Center	office	information technology company	31.29735	-95.46107	1505 S Fourth St #100	Crockett	75835	+16603954242	https://www.onshoreoutsourcing.com/	Onshore Outsourcing	0.92
 da7945209d0e	Pcdworks	office		31.97057	-95.61282	410 Private Road 8315	Palestine	75803	+19035492056	pcdworks.com		0.65
@@ -571,7 +575,6 @@ a0c28e765a08	Betty Boop's Sandwich & Soup	restaurant	sandwich shop	31.31780	-95.
 c2cc758f1bb0	Bradford Cafe	restaurant	american restaurant	31.98776	-95.76774	17589 TX-19	Montalba	75853	+19035493030	https://order.yourmenu.com/bradfordcafe		0.71
 a6cdb31f843e	Broken Yolk Cafe - McKinney	restaurant	breakfast and brunch restaurant	31.24201	-95.02179	6651 Alma Rd Suite 250	Mckinney	75070	+19723328188	https://www.thebrokenyolkcafe.com/location/mckinney/	Broken Yolk Cafe - McKinney	0.94
 08764fd5d8e5	Bud's Snowball	restaurant		31.83400	-95.84962	7789 W FM-321	Tennessee Colony	75861	+19039480946	http://Budsssnowball.com/		0.84
-aedff2c253e5	Burger King	restaurant	burger restaurant	31.32770	-95.44016	940 E Loop 304	Crockett	75835	+19362436309	https://burgerking.com/store-locator/store/26908	Burger King	0.96
 bd9fb3d41f79	Catfish King	restaurant	seafood restaurant	31.96500	-95.25282	1417 E Rusk St	Jacksonville	75766	+19035866550			0.96
 5e7011268ecf	Cattleman's Country Cafe	restaurant	comfort food restaurant	31.30753	-95.49287	893 TX-7 West	Crockett	75835	+19365467477			0.92
 212b916e9d98	Chili's Grill & Bar	restaurant		31.73414	-95.61240	2210 S. Loop 256	Palestine	75801	+19037291122	https://www.chilis.com/		0.93
@@ -580,7 +583,6 @@ bc06ab050178	China Buffett	restaurant	chinese restaurant	31.95774	-95.26823	707 
 aa177f3bb3f7	Christi’s Kitchen	restaurant		31.63874	-95.57847	312 N US Highway 287	Elkhart	75839	+19033738159			0.91
 eb0eb0ad9898	Chuck Wagon Grill & Buffet	restaurant	american restaurant	31.51821	-95.47932	12946 US-287	Grapeland	75844	+19366875170			0.92
 0c48d48d3d90	Chuck's Fried Chicken	restaurant	chicken restaurant	31.30331	-95.46001	1021 S Fourth St	Crockett	75835	+19362436944			0.92
-a2e6aa6b6ead	Church's Chicken	restaurant	chicken restaurant	31.80232	-95.14852	1106 Dickinson Road	Rusk	75785	+19036834515	http://www.churchs.com		0.77
 695ca7293bd3	City Street Cafe	restaurant	comfort food restaurant	31.48732	-95.47522	325 S Market St	Grapeland	75844	+19366874409	http://www.coralgablesplumbing.com		0.96
 9ede41d79a68	Colter's Country Restaurant	restaurant		31.32949	-95.46688	Corner of Stokes and Patterson	Crockett	75835				0.72
 d0e2c5ac4d18	Commerce Street Drafthouse	restaurant	gastropub	31.96437	-95.27076	401 E Commerce St	Jacksonville	75766	+19035412141	http://www.commercestdrafthouse.com/		0.99
@@ -598,7 +600,6 @@ f96031bb15d9	Crockett Steak and Seafood	restaurant	steakhouse	31.32307	-95.43645
 e7375cb27476	Daily Fresh Donuts & Pizza	restaurant	pizza restaurant	31.98239	-95.09470	21355 E US Highway 79	New Summerfield	75766	+19037262030			0.56
 0f5be920a973	DatGum BBQ & More	restaurant		31.30503	-95.46424	1023 S 1st St	Crockett	75835	+19362223579			0.93
 26ad5b8733fd	Davy Crockett Grill	restaurant	bar and grill restaurant	31.31579	-95.43695	1260 E Loop 304	Crockett	75835	+19362436005	https://orders.cake.net/11337100		0.98
-9e904e7851d4	Deli'cioso	restaurant	mexican restaurant	31.30274	-95.49020	764 State Highway 19 S	Crockett	75835				0.89
 dddac9808903	Deli'cioso	restaurant	mexican restaurant	31.28563	-95.46611	764 State Highway 19 S	Crockett	75835				0.89
 80526ab1b079	Denby's Restaurant and Bar	restaurant	steakhouse	31.76308	-95.63261	201 W Crawford St	Palestine	75801	+19037230783			0.92
 26a6f5ae38ee	Denny's	restaurant	breakfast and brunch restaurant	31.94742	-95.26046	1702 S Jackson St	Jacksonville	75766	+19032846296	http://locations.dennys.com/TX/JACKSONVILLE/248872/		0.97
@@ -607,10 +608,6 @@ c246626e2532	Denny’s Diner	restaurant		31.98882	-95.27355	1702 N Jackson St	Ja
 4c3907594e12	Doc's BBQ	restaurant	barbecue restaurant	31.31536	-95.43553	1277 E Loop 304	Crockett	75835	+19365467743	http://www.docssmokedmeats.com/	Doc's BBQ & Smoked Meats	0.94
 59d91b9c56d3	Dogwood Diner	restaurant		31.73533	-95.60917	2000 S Loop 256	Palestine	75801	+19037233240			0.55
 e47ae7feb56a	Dogwood Diner	restaurant	american restaurant	31.77096	-95.62916	412 E Palestine Ave	Palestine	75801	+19037233240	http://dogwooddiner.com		0.92
-29429a5a2166	Domino's	restaurant	pizza restaurant	31.73928	-95.61191	1926 Crockett Road	Palestine	75801	+19037232200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-645d7dbce026	Domino's	restaurant	pizza restaurant	31.95421	-95.26565	1029 South Jackson Street	Jacksonville	75766	+19033396606	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-c2df90ad04a4	Domino's	restaurant	pizza restaurant	31.73418	-95.67141	3913 W Oak Street	Palestine	75801	+19032218420	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-8910ca05aecf	Domino's Pizza	restaurant	pizza restaurant	31.32613	-95.43876	1002 E Loop 304	Crockett	75835	+19366240111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
 5157dc69441a	Don Mario's Mexican Cuisine	restaurant	mexican restaurant	31.77647	-95.61958	1103 E Palestine Ave	Palestine	75801	+19037295054	http://donmariosmexicanrestaurant.placeweb.site		0.89
 dd7c2c00e238	Don Wicho's	restaurant	mexican restaurant	31.75690	-95.60494	1330 E US Highway 84	Palestine	75801	+19037314606	http://donwichos.com		0.92
 b6edbf7c9f0d	Durans Italian Restaurant Centerville	restaurant	pizza restaurant	31.25618	-95.98461	311 S Old Bryan Rd	Centerville	75833	+19035361054	https://online.aptito.one/#/restaurant/96f25b37-cc4c-40a5-b2b6-625630a6713c/		0.89
@@ -622,7 +619,6 @@ a4f3d78f84d5	El Toro Mexican Restaurant	restaurant	texmex restaurant	31.73535	-9
 3f15bd164326	Eliz Taqueria	restaurant	taco restaurant	31.30236	-95.45967	1028 S Fourth St	Crockett	75835	+19365460281			0.96
 821487881483	Firehouse Pizza of Lovelady	restaurant	pizza restaurant	31.12894	-95.44562	310 Commerce St	Lovelady	75851	+19366367700	http://www.firehousepizza911.com		0.92
 b995af9255c1	Flamingo's Mexican Restaurant	restaurant	mexican restaurant	31.64993	-95.07253	144 S Marcus St	Alto	75925	+19368772405			0.92
-02b6de3727d5	Flips Drive In	restaurant		31.49341	-95.47968	213 Roys Aly	Grapeland	75844	+19367073312			0.63
 bf5cb587ffc5	Flips Drive In	restaurant		31.48903	-95.47637	213 Roys Aly	Grapeland	75844	+19367073312			0.64
 8fa6f21522b2	Fonda Mexican Restaurant	restaurant	mexican restaurant	31.25791	-95.97851	111 E St Marys St	Centerville	75833	+19035367734	http://www.mexicanrestaurantfinder.com/		0.96
 e65107f84ff6	Food and Table	restaurant		31.96327	-95.27350	107 E Commerce St	Jacksonville	75766	+19033391247	https://foodandtabletx.com/		0.99
@@ -651,18 +647,14 @@ df8925cda1c0	Irene's Cocina	restaurant	mexican restaurant	31.87613	-95.73286		Mo
 8e9f957db3a4	Island Delight	restaurant		31.32564	-95.43604	1035 Loop 304	Crockett	75835	+19367145760			0.78
 706bc74dbe60	It's Just Wings	restaurant	chicken wings restaurant	31.95212	-95.26440	1225 S. Jackson Street	Jacksonville	75766	+14697221828	https://itsjustwings.com/		1.00
 cbc2fdb19644	It's Just Wings	restaurant	chicken wings restaurant	31.73414	-95.61240	2210 S. Loop 256	Palestine	75801	+14696103563	https://itsjustwings.com/		0.92
-d50b8b6c837a	Jack in the Box	restaurant	taco restaurant	31.25813	-95.98566	1129 W Saint Marys St	Centerville	75833	+19035361022	http://www.jackinthebox.com/locations/TX/Centerville/75833/3764?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80c62		0.85
-ebe9c2f76f1d	Jack in the Box	restaurant	taco restaurant	31.25843	-95.99122	1129 E St Marys	Centerville	75833	+19035361022	http://www.jackinthebox.com/locations/3764		0.97
 1d47ad0219a4	Jam Hospitality Llc	restaurant		31.76285	-95.63437	400 N Queen St Ste 108	Palestine	75801				0.95
 0f6880601af5	Jenny's Restaurant	restaurant		31.64809	-95.07118	305 S Marcus St	Alto	75925	+19368582272			0.94
-fd025652ebb3	Jersey Mike's	restaurant	sandwich shop	31.95194	-95.26355	1314-C South Jackson Street	Jacksonville	75766	+19033391271	https://www.jerseymikes.com/15119/jacksonville-tx	Jersey Mike's Subs	0.94
 aaafe02109c0	Joe's Italian Restaurant & Pizza	restaurant	italian restaurant	31.31749	-95.45663	509 E Goliad Ave	Crockett	75835	+19363238414			0.72
 9d6b6568677c	Jucys Hamburgers	restaurant	taco restaurant	31.74154	-95.65779	2702 W Oak St	Palestine	75801	+19037270455	https://jucyshamburgers.com/		0.96
 c67f515b5f5e	Jw's Barbecue	restaurant	barbecue restaurant	31.96574	-95.25971	1015 E Rusk St	Jacksonville	75766		http://jwsbbq.com		0.92
 a13af5aabd5d	K T Seafood Grill	restaurant	seafood restaurant	31.80162	-95.14709	145 Dickinson Dr	Rusk	75785	+19036835721			0.98
 0e86dad3589a	Katon's Kitchen	restaurant	barbecue restaurant	31.79464	-95.14923	193 S Henderson St	Rusk	75785	+19038059535			0.78
 5fd4d3f1b060	Keepin It Real Grill	restaurant	burger restaurant	31.48887	-95.47646	311 S Market St	Grapeland	75844	+19037421206			0.78
-f63714f92ce0	Kfc	restaurant	chicken restaurant	31.75278	-95.64948	1711 W Palestine Ave	Palestine	75801	+19037235515	https://www.kfc.com		0.92
 b5e4e202f079	Kinfolks Country Cookin	restaurant	american restaurant	31.89396	-95.14504	141 E 1st Ave	Gallatin	75764	+19036833211			0.88
 a17f966ff2b1	King Buffet	restaurant	buffet restaurant	31.73244	-95.62437	2800 TX-256 Loop	Palestine	75801	+19037237700	http://www.kingbuffetrenton.com		0.97
 784bf9252101	Krispy Krunchy Chicken	restaurant	chicken restaurant	31.30570	-95.44094	1500 East Loop 304	Crockett	75835	+19365443748	https://locations.krispykrunchy.com/tx/crockett/1500-east-loop-304		0.96
@@ -689,9 +681,6 @@ c367e1847d30	Legends Old Time Burger Cafe	restaurant	burger restaurant	31.94771	
 780bb06edfa2	Leona General Store	restaurant	steakhouse	31.15518	-95.96915	136 Leona Blvd N	Leona	75850	+19033442202	http://leonageneral.com/		0.97
 c5a6c4d2e376	Lindo Guanajuato Tex-Mex	restaurant	texmex restaurant	31.33142	-95.44356	700E E Loop 304	Crockett	75835	+19365450077			0.97
 e2f05d115d64	Lindsey’s Lazy “L” BBQ	restaurant	barbecue restaurant	31.62121	-95.05138	12157 US-69	Alto	75925	+19368584468	http://foodeist.com/place/lindsey-s-lazy-l-bar-b-q		0.94
-30dc0beb864c	Little Caesars Pizza	restaurant	pizza restaurant	31.95422	-95.26718	1009 S Jackson St Ste 109	Jacksonville	75766	+19032846195	https://littlecaesars.com/en-us/store/10619	Little Caesars	0.97
-7c445a3a4487	Little Caesars Pizza	restaurant	pizza restaurant	31.73517	-95.61322	419 Old Elkhart Rd	Palestine	75801	+19037232620	https://littlecaesars.com/en-us/store/9650	Little Caesars	0.97
-972a216a5415	Little Caesars Pizza	restaurant	pizza restaurant	31.73636	-95.61438	419 Old Elkhart Rd	Palestine	75801	+19037232620	https://littlecaesars.com/en-us/store/9650	Little Caesars	0.97
 b4ab141624b4	Little Mexico	restaurant	mexican restaurant	31.74747	-95.65303	2025 W Oak St	Palestine	75801	+19037233143	https://littlemexicopalestine.com/		0.94
 afc2070483ac	LIVE It Up - Nutrition & Energy	restaurant	health food restaurant	31.73882	-95.61094	2034 Crockett Rd	Palestine	75801	+19034478666	http://ArmstrongFitness.goherbalife.com/		0.92
 56c00903a274	Lonchería Rangel	restaurant	mexican restaurant	31.77040	-95.63599	310 W Palestine Ave	Palestine	75801	+19037270786			0.96
@@ -705,7 +694,6 @@ f54f6c139b8a	Los Ranchos Mexican Restaurant	restaurant	mexican restaurant	31.318
 f6795af2e56a	Mario's Mexican Grill	restaurant	mexican restaurant	31.75210	-95.64958	1717 W Palestine Ave	Palestine	75803	+19037290309	https://www.chamberofcommerce.com/.../6121403-taqueria-mexicano-grill		0.97
 7d513b7e9add	Market Street Deli & Chicken	restaurant	chicken wings restaurant	31.49196	-95.47874	102 N Market St	Grapeland	75844	+19366872920			0.55
 e14e349b4b9d	Mazzio's Italian Eatery	restaurant	italian restaurant	31.73574	-95.60975	1929 S Loop 256	Palestine	75801	+19037231400	http://www.mazzios.com/		1.00
-ad45fbfdbfce	McDonald's	restaurant	burger restaurant	31.73608	-95.61610	2223 S Loop 256	Palestine	75801	+19037298977	https://www.mcdonalds.com/us/en-us/location/tx/palestine/2223-s-loop-256/14602.html?cid=RF:YXT:RoN::Clicks		0.92
 a543f7cba2ec	Milano's Pizza	restaurant	pizza restaurant	31.79987	-95.15028	1002 N Main St	Rusk	75785	+19036836001	http://www.milanoaustin.com		0.92
 d61b3e729fa7	Mimsy's Craft Barbecue & Steakhouse	restaurant	barbecue restaurant	31.29795	-95.45027	1979 S 5th St	Crockett	75835	+19365447000	http://www.mimsyscraftbbq.com		0.98
 eaec7ff3b35f	Miss Mollie's Diner	restaurant	diner	31.65020	-95.07374	201 San Antonio Rd	Alto	75925	+19368581001			0.96
@@ -723,11 +711,6 @@ c6e576d05f84	Papa Murphy's	restaurant	pizza restaurant	31.73687	-95.61005	2037 C
 2ce9aadb2903	Piccadilly Cafeteria	restaurant	barbecue restaurant	31.69820	-95.73389	14863 FM 645	Palestine	75803	+19035380139	http://www.piccadilly.com		0.77
 ac5e86e1e6a3	Pint and Barrel Drafthouse	restaurant	gastropub	31.76378	-95.62940	302 E Crawford St	Palestine	75801	+19037272711	http://www.pintandbarrel.com/		0.98
 e4d16c2327a3	Pita Hut	restaurant	mediterranean restaurant	31.73934	-95.60674	1625 TX-256 Loop F	Palestine	75801	+19037290140	http://www.pitahutpalestinetx.com/		0.97
-714ec3310eef	Pizza Hut	restaurant	pizza restaurant	31.80277	-95.15026	1208 N Main St	Rusk	75785	+19036836121	https://locations.pizzahut.com/tx/rusk/1208-n-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291102	Pizza Hut	0.98
-8a011733ec8b	Pizza Hut	restaurant	pizza restaurant	31.94879	-95.26124	1608 S Jackson St	Jacksonville	75766	+19035866531	https://locations.pizzahut.com/tx/jacksonville/1608-s-jackson-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=301470	Pizza Hut	0.99
-8f04cf5f1255	Pizza Hut	restaurant	pizza restaurant	31.73723	-95.63718	3400 Loop 256 Anderson	Palestine	75801	+19037235109	https://locations.pizzahut.com/tx/palestine/3400-loop-256?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304518	Pizza Hut	0.99
-a8a2ed33e4af	Pizza Hut	restaurant	pizza restaurant	31.77096	-95.62916	402 E Palestine Ave	Palestine	75801	+19037235109	http://www.pizzahut.com		0.98
-f1ecb922d87b	Pizza Hut	restaurant	pizza restaurant	31.31923	-95.43514	1231 E Loop 304 Houston	Crockett	75835	+19365443054	https://locations.pizzahut.com/tx/crockett/1231-e-loop-304?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312061	Pizza Hut	0.96
 8780c118a9f6	Pizza Inn	restaurant	pizza restaurant	31.58624	-95.84573	506 Broad St	Oakwood	75855	+19035451954	https://www.pizzainn.com/locations/oakwood-tx/		0.93
 2be57bc84002	Pizza Pro	restaurant	american restaurant	31.12901	-95.44553	Hwy 19 E Commerce St	Lovelady	75851	+19366367700	https://www.pizzapro.com		0.77
 94af7c28d840	Pizza Pro	restaurant	pizza restaurant	31.65063	-95.07207	105 Marcus St	Alto	75925	+19368584101	http://www.pizzapro.com/		0.92
@@ -756,8 +739,6 @@ d2a499b9a232	Roberts Cajun Kitchen	restaurant	cajun and creole restaurant	31.798
 029ee279faed	Ryan's	restaurant	american restaurant	31.73244	-95.62466	2800 Rte 256 Loop	Palestine	75801	+19037295732	http://www.ryans.com		0.77
 0800cae81e85	Sadler's Kitchen	restaurant	comfort food restaurant	31.96318	-95.27522	101 S Bonner St	Jacksonville	75766	+19033395350	https://www.sadlerskitchen.com/		0.92
 0b89ce5306f3	Salsa Picante	restaurant	mexican restaurant	31.97172	-95.27514	564 N Main St	Jacksonville	75766	+19035861616			0.96
-036ac216aefa	Schlotzsky's	restaurant	sandwich shop	31.94641	-95.25932			75766		https://locations.schlotzskys.com/tx/jacksonville/1664-jackson-street	Schlotzsky's	0.94
-7c12480ca1ea	Schlotzsky's	restaurant	sandwich shop	31.94633	-95.25944	1664 S Jackson St	Jacksonville	75766	+19033393090	https://locations.schlotzskys.com/tx/jacksonville/1664-jackson-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
 2a40bd3d6d98	Shabbos	restaurant		31.96698	-95.27625	329 N Bolton St	Jacksonville	75766	+19033936074			0.95
 c7fd0c3ceb8d	Shep's Bar-B-Q & Catering	restaurant	barbecue restaurant	31.77538	-95.62098	1013 E Palestine Ave	Palestine	75801	+19037294206	http://www.cityseekr.com/palestine/restaurants/poi-shep-s-bar-b-q-946280.html		0.92
 1796d97777e7	Shorty's Shortz	restaurant	barbecue restaurant	31.79577	-95.14966		Rusk					0.71
@@ -774,15 +755,6 @@ c093025e6cad	Soul Bar-b-que & Soul Food	restaurant	soul food	31.97033	-95.23141	
 64e27c05f8f9	Southern Multifoods	restaurant		31.96492	-95.27468	101 E Cherokee St	Jacksonville	75766	+19035861524	https://www.smi-tex.com		0.96
 485998c8074e	Stamps Restaurant & Bar	restaurant		31.96376	-95.27033	402 E Rusk St	Jacksonville	75766	+19035860005	http://www.landmarktexas.com		0.92
 b88ae65ed6f8	Stockpot Of Palestine, Inc	restaurant	soup restaurant	31.76283	-95.62908	410 Avenue A St	Palestine	75801	+19037232891			0.92
-167053280080	Subway	restaurant	sandwich shop	31.25838	-95.98512	921 W St Marys St	Centerville	75833	+19035362388	http://www.subway.com	Subway	0.96
-a85cca8f120a	Subway	restaurant	sandwich shop	31.50470	-95.47630	900 US Hwy. 287	Grapeland	75844			Subway	0.96
-b907f0d02174	Subway	restaurant	sandwich shop	31.80370	-95.14964	267 N Dickinson Dr	Rusk	75785	+19036832526	https://www.subway.com/en-us/	Subway	0.92
-bfb01cad96ca	Subway	restaurant	sandwich shop	31.80027	-95.14561	267 N Dickinson Dr	Rusk	75785	+19036832526	https://www.subway.com		0.98
-dda448e0e301	Subway	restaurant	sandwich shop	31.95344	-95.26524	1127 S Jackson St	Jacksonville	75766	+19035866337	https://www.subway.com		0.98
-e614b8476931	Subway	restaurant	sandwich shop	31.31909	-95.43580	1241 TX-304 Loop	Crockett	75835	+19365442723	https://www.subway.com/en-us/	Subway	0.99
-e8d338806a99	Subway	restaurant	sandwich shop	31.73868	-95.60956	2006 Crockett Rd Ste A	Palestine	75801	+19037292062	http://subway.com/	Subway	0.98
-e8e1eb425a09	Subway	restaurant	sandwich shop	31.74268	-95.65808	2607 W Oak St	Palestine	75801	+19037291266	https://www.subway.com		0.97
-2ffedfeaf682	Subway Restaurants	restaurant	sandwich shop	31.73421	-95.61510	2213 S Loop 256 Ste 102	Palestine	75801	+19037319106	https://alibabacharleston.com		0.55
 a4dd9b62e783	Switch Brick-Oven Pizza	restaurant	pizza restaurant	31.73638	-95.62442	1615 S Royall St	Palestine	75801	+19037297700	http://www.switchbrickovenpizza.com/		0.97
 3ff426bd4e74	Sylvia Mae's Soul Food	restaurant		31.97166	-95.27509	564 N Main St	Jacksonville	75766	+19036583122	http://www.sylviamaessoulfood.com		0.92
 5c0b2b54942b	Taco Casa	restaurant	taco restaurant	31.74145	-95.65781	2702 W Oak St	Palestine	75801	+19037295575	http://www.tacocasa.com		0.92
@@ -816,7 +788,6 @@ e17bf3381276	The Burger Den	restaurant		31.74321	-95.65591	2350 West Oak St. #10
 fd307ce141d0	The Patio Seafood	restaurant	seafood restaurant	31.96769	-95.27318	311 N Jackson St	Jacksonville	75766	+19033396193	http://www.thepatiojacksonville.com		0.96
 d8c61a5c28dc	The Ranch Groveton TX	restaurant		31.05395	-95.12328	515 E 1st St	Groveton	75845	+17138999526			0.64
 bd9cbbfef43e	The Station: A Gathering Place & Food Truck Corner	restaurant		31.50576	-95.47496	914 US Highway 287 N	Grapeland	75844	+19035134938	http://TJHassell.com/		0.97
-bdd54f2643dc	The Station: A Gathering Place & Food Truck Corner	restaurant		31.50037	-95.47462	914 US Highway 287 N	Grapeland	75844	+19035134938	http://TJHassell.com/		0.89
 b1ce3333be88	The Steel Magnolia Boutique and Soapery	restaurant	breakfast and brunch restaurant	31.79587	-95.14966	121 S Henderson St	Rusk	75785	+16822299703			0.57
 2b7450ab4f4d	Tienda La Juanita 2	restaurant	mexican restaurant	31.96758	-95.27454	330 N Bolton St	Jacksonville	75766	+19035867532	http://www.yelp.com/biz/tienda-la-juanita-jacksonville-2		0.96
 a1279ef1e24f	Tienda La Juanita Taqueria	restaurant	mexican restaurant	31.98186	-95.09381	21446 E US Highway 79	Jacksonville	75766	+19037262220			1.00
@@ -827,9 +798,7 @@ cd2aa3372b55	TX Burger Crockett	restaurant	burger restaurant	31.32093	-95.43729	
 7c966d812ba2	TX Burger Jacksonville	restaurant	burger restaurant	31.96452	-95.26664	607 E Rusk St	Jacksonville	75766	+19032845223		TX Burger	0.72
 c9dabf7204f3	Vantro	restaurant	italian restaurant	31.78243	-95.62023		Palestine					0.57
 da7960c84258	Vincent Seafood	restaurant	seafood restaurant	31.96924	-95.27351	503 N Jackson St	Jacksonville	75766	+19035868359	https://www.groupon.com/biz/jacksonville-tx/vincents-seafood		0.94
-f0e02acc6fdb	Wendy's	restaurant	burger restaurant	31.73468	-95.61575	2215 S Loop 256	Palestine	75801	+19037296973			0.92
 de4161cf6000	Wildwood Grill	restaurant	american restaurant	31.39486	-95.47618	3939 US-287 N	Latexo	75849	+19365440553	http://www.facebook.com/wildwoodgrillandtavern		0.96
-14c79b063408	Wingstop	restaurant	chicken restaurant	31.95021	-95.26216	1502 S Jackson St	Jacksonville	75766	+19032846224	https://www.wingstop.com/location/wingstop-811-jacksonville-tx-75766/menu?y_source=1_NTUyMDY3OTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 6c8796c026f7	Woody's Smokehouse	restaurant	barbecue restaurant	31.25861	-95.98583	947 W St Marys St	Centerville	75833	+19035369663	https://woodys-smokehouse.com/		0.98
 b1c15c73bda0	Woodys Smokehouse	restaurant	barbecue restaurant	31.25836	-95.99060	1021 W St Marys St	Centerville	75833	+19035362434	http://www.woodys-smokehouse.com		0.98
 61555bc701ea	Yamato Hibachi & Sushi	restaurant	sushi restaurant	31.94384	-95.25731	1800 S Jackson St	Jacksonville	75766	+19032846820	http://www.yamatohibachisushitx.com		0.94

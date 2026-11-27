@@ -7,7 +7,6 @@ cae9f94bcf83	Centennial Bar & Lounge	bar		30.88623	-102.87950	123 N Main St	Fort
 ec363a667de8	Lulu’s Stixx	bar		30.89664	-102.90147	1216 US Hwy 285	Fort Stockton	79735	+14322446966			0.92
 1fef2376cf83	Mesa Vineyards	bar	winery	30.87548	-102.46128	5640 I-10	Fort Stockton	79735	+14323952417	http://www.valverdewinery.com		0.95
 3796d4b4d5a6	Roadside Drive Inn	bar		30.86153	-102.86125	HWY 285 S and Gonzales Loop	Fort Stockton	79735	+14323360251			0.86
-d9da08285e85	Roadside Drive Inn	bar		30.87805	-102.86825	HWY 285 S and Gonzales Loop	Fort Stockton	79735	+14323360251			0.85
 b68309bcbf8e	Susie's Roadside Drive Inn Ft Stockton Tx	bar	pub	30.89407	-102.88834	910 W Dickinson Blvd	Fort Stockton	79735	+14326313490			0.87
 29f3df90145c	The Grey Mule Saloon	bar	wine bar	30.88354	-102.87902	101 E Callaghan St	Fort Stockton	79735	+14323369463	http://www.thegreymule.net/		0.94
 d36249acb6fa	Aaron Salgado	cardealer		30.89470	-102.90321	2110 W Dickinson Blvd	Fort Stockton	79735	+14323606770	http://amistadmotors.net/		0.82
@@ -68,11 +67,18 @@ cdd4322b75ec	Valero	convenience		30.89860	-102.89693	1607 W Dickinson Blvd	Fort 
 ab7cfb73cc67	Bush's Chicken	fastfood		30.89417	-102.89622	1700 W Dickinson Blvd	Fort Stockton	79735	+14323368709	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.95
 e82f1b665622	Carl's Jr.	fastfood		30.89349	-102.85235	2723 E US Hwy 290	Fort Stockton	79735	+14323363650	https://locations.carlsjr.com/tx/ft-stockton/2723-e-us-hwy-290	Carl's Jr.	0.99
 02e61b648c71	Dairy Queen	fastfood		30.89430	-102.88275	408 W Dickinson Blvd 408 W Dickinson Blvd	Fort Stockton	79735	+14323365660	https://www.dairyqueen.com/en-us/locations/tx/fort-stockton/408-w-dickinson-blvd/14084/?y_source=1_MjkzMzkzMzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+f88c323e69e9	Domino's Pizza	fastfood	pizza restaurant	30.89489	-102.90930	1003 N Sycamore St	Fort Stockton	79735	+14323369999	http://dominos.com/	Domino's Pizza	0.92
 c7c426a63484	DQ Grill & Chill	fastfood		30.89424	-102.88291	408 W Dickinson Blvd	Fort Stockton	79735		https://www.dairyqueen.com/en-us/locations/tx/fort-stockton/408-w-dickinson-blvd/3857	DQ Grill & Chill	0.80
 1fd1d90b5cc1	KFC	fastfood		30.89764	-102.90331	1304 N. U.S. Highway 285	Fort Stockton	79735	+14322990634	https://locations.kfc.com/tx/fort-stockton/1304-n-us-highway-285	KFC	0.98
+09662ec12090	Little Caesars Pizza	fastfood	pizza restaurant	30.89375	-102.88326	407 W Dickinson Blvd	Fort Stockton	79735	+14323366000	https://littlecaesars.com/en-us/store/10905	Little Caesars	0.98
 cd4e6bd3f6c8	McDonald's	fastfood		30.89916	-102.90563	1500 N Us Hwy 285	Fort Stockton	79735	+14323369705	https://www.mcdonalds.com/us/en-us/location/tx/fort-stockton/1500-n-us-hwy-285/7259.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+d7a40b1576fb	Pizza Hut	fastfood	pizza restaurant	30.89376	-102.88881	911 W Dickinson Blvd	Fort Stockton	79735	+14323365264	https://locations.pizzahut.com/tx/fort-stockton/911-w-dickinson-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297639	Pizza Hut	0.99
 0a08be0c3a02	Sonic Drive In	fastfood		30.89354	-102.89689	1701 W. Dickinson	Fort Stockton	79735	+14323365632	https://locations.sonicdrivein.com/tx/fortstockton/1701-w.-dickinson.html	Sonic Drive-In	0.98
+41d990792696	Subway	fastfood	sandwich shop	30.90576	-102.88519	N Front St & I-10	Fort Stockton	79735	+14323363429	http://www.subway.com/en-us	Subway	0.96
+d2db30c00e8a	Subway	fastfood	sandwich shop	30.89375	-102.90144	2005 W Dickinson Blvd	Fort Stockton	79735	+14323368722	https://restaurants.subway.com/united-states/tx/fort-stockton/2005-w-dickinson	Subway	0.98
 23f8dc09c130	Sunbelt Burrito Joint	fastfood		30.90647	-102.89061	I-10 W	Fort Stockton	79735	+4322318190			0.94
+5a2a0d788981	Taco Bell	fastfood	taco restaurant	30.91066	-102.92350	1304 U.S. Highway 5, Unit B	Fort Stockton	79735	+14323600525	https://locations.tacobell.com/tx/fort-stockton/1304-u-s--highway-5.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042287&utm_content=website&y_source=1_NjE0NjU2Mi00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
+86ef8f2faf24	Taco Bell	fastfood	taco restaurant	30.89747	-102.90343	1304 N US Highway 285	Fort Stockton	79735	+14323604001			0.95
 fc31502581c7	First Christian Church (disciples Of Christ)	grocery		30.88421	-102.89494	200 S Rio St	Fort Stockton	79735	+14323362394	https://fccfs.org		0.92
 de8fcaa64a83	Lowe's Market	grocery		30.89441	-102.89297	1300 W Dickinson Blvd	Fort Stockton	79735	+14323363341	http://www.lowesmarket.com/	Lowe's Market	0.99
 47696521db63	Pecos County Memorial Hospital	hospital		30.90559	-102.88052	387 Interstate 10 W	Fort Stockton	79735	+14323362004	http://www.pcmhfs.com/		0.97
@@ -103,8 +109,6 @@ e7789907a249	La Quinta Inn by Wyndham Fort Stockton	hotel	resort	30.89855	-102.9
 2f14cd8efdb1	Outback Oasis Motel	hotel	motel	30.14429	-102.40520	800 W Us Highway 90	Marathon	79848	+14323452850	http://outbackoasismotel.com		0.87
 a519aa17784e	Pvc Investments, Llc	hotel		30.89698	-102.90434	1305 N US Highway 285	Fort Stockton	79735				0.95
 752a76cec8ee	Quality Inn Fort Stockton	hotel		30.89809	-102.90388	1308 N Highway 285	Fort Stockton	79735	+14323365955			0.99
-0f75dbf3c47f	Santhikunj Enterprises Llc	hotel		30.89366	-102.87116	801 E Dickinson Blvd	Fort Stockton	79735				0.95
-2adc2b062238	Sav Hospitality Llc	hotel		30.89820	-102.90369	1308 N US Highway 285	Fort Stockton	79735				0.95
 93f34f7ccd32	Sleep Inn and Suites	hotel		30.89411	-102.91936		Fort Stockton		+14322139313	https://www.choicehotels.com/texas/fort-stockton/sleep-inn-hotels/txa89?pmf=yext&mc=llyxyxpx	Choice Hotels	0.98
 e54d7e54e1e0	Spark by Hilton Fort Stockton	hotel		30.89400	-102.91901	3401 W. Dickinson Blvd	Fort Stockton	79735	432-336-8338	https://www.hilton.com/en/hotels/fstdbpe-spark-fort-stockton/	Spark by Hilton	1.00
 761b76fe9894	Super 8	hotel	motel	30.89526	-102.91538	3200 W Dickinson Blvd	Fort Stockton	79735	+14323368531	https://www.wyndhamhotels.com/super-8/ft-stockton-texas/super-8-ft-stockton/overview		1.00
@@ -124,7 +128,6 @@ a05dc9b36265	Burrito Express	restaurant	mexican restaurant	30.90198	-102.87868	1
 2535f5566169	Chihuahuas Mexican Restaurant	restaurant		30.90910	-102.88435	2977 N State Highway 18	Fort Stockton	79735	+18065189464			0.75
 76f2e960a53b	Chila's	restaurant	texmex restaurant	30.89049	-102.87255	634 N Alamo St	Fort Stockton	79735	+14323605009			0.92
 cb45ba62022a	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.89363	-102.88345	409 W Dickinson Blvd	Fort Stockton	79735	+14322992224	https://www.dickeys.com/locations/Texas/Fort-Stockton/dickeys-fort-stockton	Dickey's Barbecue Pit National	0.99
-f88c323e69e9	Domino's Pizza	restaurant	pizza restaurant	30.89489	-102.90930	1003 N Sycamore St	Fort Stockton	79735	+14323369999	http://dominos.com/	Domino's Pizza	0.92
 40a5045e71f9	Dragon Buffet	restaurant	chinese restaurant	30.89403	-102.91463	3105 W Dickinson Blvd	Fort Stockton	79735	+14323368886	http://dragonbuffetdecatur.com		0.95
 feb0e535bb73	Ft Stockton	restaurant	mexican restaurant	30.89416	-102.87715	1000 E Railroad Ave	Fort Stockton	79735	+14323362264			0.55
 7f9431fbf0e6	Howard's Drive In	restaurant	burger restaurant	30.89440	-102.90913	2700 W Dickinson Blvd	Fort Stockton	79735	+14323368887	https://www.ruralfork.com/tag/howards-drive-in		0.97
@@ -138,19 +141,13 @@ c9c6511b8197	La Posada	restaurant	mexican restaurant	30.88534	-102.87985	105 W 1
 4dd57fd039ce	La Rosita Cafe	restaurant	mexican restaurant	30.89206	-102.87563	800 N Williams St	Fort Stockton	79735	+14323360099	http://larositacafefortstockton.gastrobars.com		0.94
 4cc358c45fd1	Laredo Taco Company	restaurant		30.14414	-102.40624	803 W Oak Street	Sanderson	79848	+14695252899	https://www.laredotacocompany.com/		0.92
 aef31ab0a737	Laredo Taco Company	restaurant		30.90217	-102.91255	1723 N US Highway 285	Fort Stockton	79735	+14323368861	https://www.laredotacocompany.com/		0.96
-09662ec12090	Little Caesars Pizza	restaurant	pizza restaurant	30.89375	-102.88326	407 W Dickinson Blvd	Fort Stockton	79735	+14323366000	https://littlecaesars.com/en-us/store/10905	Little Caesars	0.98
 08240eccb87a	Mariscos Sinaloa	restaurant	seafood restaurant	30.89905	-102.88483	1501 N Front St	Fort Stockton	79735	+14322997000			0.66
 0352abb09d48	Mi Casita	restaurant	mexican restaurant	30.89319	-102.87551	405 E Dickinson Blvd	Fort Stockton	79735	+14323365368			0.95
 2692147da00a	Mingo's Burritos	restaurant	mexican restaurant	30.89320	-102.87781	201 E Dickinson Blvd	Fort Stockton	79735	+14323368080			0.99
 c37e48a2a4e4	Pepito's Cafe	restaurant	texmex restaurant	30.89413	-102.90107	2014 W Dickinson Blvd	Fort Stockton	79735	+14323362882	https://pepitoscafe0807.s4shops.com/		0.99
-d7a40b1576fb	Pizza Hut	restaurant	pizza restaurant	30.89376	-102.88881	911 W Dickinson Blvd	Fort Stockton	79735	+14323365264	https://locations.pizzahut.com/tx/fort-stockton/911-w-dickinson-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297639	Pizza Hut	0.99
 17b2806bf7aa	Pizza Pro	restaurant	pizza restaurant	30.89371	-102.89125	1201 W Dickinson Blvd	Fort Stockton	79735	+14323365400	https://www.pizzapro.com		0.92
 aa9e12171fea	Steak House Restaurant	restaurant	steakhouse	30.89406	-102.89028	1100 W Dickinson Blvd	Fort Stockton	79735	+14323365909	http://steakhouserestaurant.food73.com		0.96
-41d990792696	Subway	restaurant	sandwich shop	30.90576	-102.88519	N Front St & I-10	Fort Stockton	79735	+14323363429	http://www.subway.com/en-us	Subway	0.96
-d2db30c00e8a	Subway	restaurant	sandwich shop	30.89375	-102.90144	2005 W Dickinson Blvd	Fort Stockton	79735	+14323368722	https://restaurants.subway.com/united-states/tx/fort-stockton/2005-w-dickinson	Subway	0.98
 94ba4405e61e	Sunbelt Burrito Joint	restaurant	mexican restaurant	30.90709	-102.89765	I-10 W	Fort Stockton	79735	+4322318190			0.88
-5a2a0d788981	Taco Bell	restaurant	taco restaurant	30.91066	-102.92350	1304 U.S. Highway 5, Unit B	Fort Stockton	79735	+14323600525	https://locations.tacobell.com/tx/fort-stockton/1304-u-s--highway-5.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=042287&utm_content=website&y_source=1_NjE0NjU2Mi00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
-86ef8f2faf24	Taco Bell	restaurant	taco restaurant	30.89747	-102.90343	1304 N US Highway 285	Fort Stockton	79735	+14323604001			0.95
 4ee1bc478b58	Tacos OJ	restaurant	mexican restaurant	30.89718	-102.87936	1303 N Main St	Fort Stockton	79735	+14323363066	http://tacosoj.food61.com		0.98
 7a11019fc5c5	Taqueria Guadalajara	restaurant	texmex restaurant	30.90275	-102.87746	200 E 19th St	Fort Stockton	79735	+14323366600			0.98
 13c97d5d1f7d	The Ranch House	restaurant	comfort food restaurant	30.14182	-102.40054	309 W Oak St	Sanderson	79848	+14323452600			0.96

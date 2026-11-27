@@ -4,10 +4,11 @@ import { Download, ExternalLink, Globe, Mountain, Navigation, Phone, RotateCcw, 
 import { getMyAccess } from "@/lib/ops/access";
 import { isDeskAdmin } from "@/lib/ops/admin-role";
 import { listPlaces, listZipStats } from "@/lib/ops/market-api";
-import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, zipRequest, ZIP_MIN_ZOOM, ZIP_SOURCE, type ZipStat } from "@/lib/ops/market-map";
+import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, zipRequest, ZIP_MIN_ZOOM, ZIP_SOURCE, type Bounds, type ZipStat } from "@/lib/ops/market-map";
 import {
   DEFAULT_PLACE_CATEGORIES,
   isPlaceCategory,
+  containsBounds,
   formatPhone,
   nearestAccount,
   nearestRep,
@@ -307,11 +308,15 @@ export type PlacesStatus = "off" | "zoom" | "loading" | "error" | "ready";
 /** The old in-browser copy of OpenStreetMap answers (11/26), which could hold empty answers from a busy server. */
 const OLD_PLACE_CACHE_KEY = "katz-desk-places-v1";
 
+/** On a phone, fewer places: each is a few SVG nodes, and a small screen cannot show 3,000 anyway. */
+const PHONE_PLACES_LIMIT = 1500;
+
 /**
- * Prospect places of the picked types on screen (and a little around it), from our server. Each box is asked for once
- * and kept for the visit; a pan inside it needs nothing new.
+ * Prospect places of the picked types on screen (and a little around it) matching the search, from our server. A
+ * complete answer is reused while its box still covers the screen, so a pan inside it asks for nothing new; while a new
+ * answer is on its way the last one stays up ("updating"), and only a first load reads as loading.
  */
-export function usePlaces(view: MapBounds | null, on: boolean, categories: readonly PlaceCategory[]) {
+export function usePlaces(view: MapBounds | null, on: boolean, categories: readonly PlaceCategory[], search: string) {
   useEffect(() => {
     try {
       window.localStorage.removeItem(OLD_PLACE_CACHE_KEY);
@@ -319,22 +324,40 @@ export function usePlaces(view: MapBounds | null, on: boolean, categories: reado
       /* storage blocked: nothing to clear */
     }
   }, []);
+  const [phone, setPhone] = useState(false);
+  useEffect(() => setPhone(!!window.matchMedia?.("(max-width: 639px)").matches), []);
+  const limit = phone ? PHONE_PLACES_LIMIT : PLACES_LIMIT;
+  const cats = [...categories].sort().join(",");
+  const needle = search.trim().toLowerCase();
+  const want = `${cats}|${needle}|${limit}`;
   const zoomedIn = !!view && view.zoom >= PLACES_MIN_ZOOM - 0.01;
-  const box = view && on && zoomedIn && categories.length ? padBounds(view, 0.25, view.zoom < 12 ? 0.1 : 0.02) : null;
-  const cats = [...categories].sort();
+  /** The last complete answer's box and what it was for. */
+  const [last, setLast] = useState<{ box: Bounds; want: string } | null>(null);
+  let box: Bounds | null = null;
+  if (view && on && zoomedIn && categories.length) {
+    box = last && last.want === want && containsBounds(last.box, view) ? last.box : padBounds(view, 0.25, view.zoom < 12 ? 0.1 : 0.02);
+  }
   const q = useQuery({
-    queryKey: ["places", box?.south, box?.west, box?.north, box?.east, cats.join(",")],
-    queryFn: () => listPlaces({ data: { ...box!, categories: cats } }),
+    queryKey: ["places", box?.south, box?.west, box?.north, box?.east, want],
+    queryFn: () => listPlaces({ data: { ...box!, categories: cats ? cats.split(",") : [], limit, ...(needle ? { q: needle } : {}) } }),
     enabled: !!box,
     staleTime: 60 * 60_000,
     placeholderData: keepPreviousData,
     retry: 1,
   });
-  const status: PlacesStatus = !on || !view || !categories.length ? "off" : !zoomedIn ? "zoom" : q.isError ? "error" : q.isPending || (q.isFetching && q.isPlaceholderData) ? "loading" : "ready";
+  const answered = !!q.data && !q.isPlaceholderData && !!box;
+  const complete = answered && !q.data!.truncated;
+  useEffect(() => {
+    // Remember a complete answer for reuse; a cut-off one is not reused (zooming in asks again, for all of them).
+    if (complete && box && (!last || last.box !== box || last.want !== want)) setLast({ box, want });
+    if (answered && !complete && last && last.want === want && last.box === box) setLast(null);
+  }, [complete, answered, box, want, last]);
+  const status: PlacesStatus = !on || !view || !categories.length ? "off" : !zoomedIn ? "zoom" : q.isError && !q.data ? "error" : !q.data ? "loading" : "ready";
   return {
-    places: (status === "off" || status === "zoom" ? null : q.data?.places) ?? NO_PLACES,
+    places: (status === "ready" ? q.data?.places : null) ?? NO_PLACES,
     total: q.data?.total ?? 0,
     truncated: status === "ready" && !!q.data?.truncated,
+    updating: status === "ready" && (q.isFetching || q.isPlaceholderData),
     status,
     error: q.error instanceof Error ? q.error.message : null,
     retry: () => void q.refetch(),
@@ -363,6 +386,7 @@ export function placePins(places: readonly Place[], matched: ReadonlyMap<string,
 export function PlacesNote({
   status,
   truncated,
+  updating,
   total,
   error,
   onRetry,
@@ -370,6 +394,7 @@ export function PlacesNote({
 }: {
   status: PlacesStatus;
   truncated: boolean;
+  updating: boolean;
   total: number;
   error: string | null;
   onRetry: () => void;
@@ -382,9 +407,11 @@ export function PlacesNote({
         ? "Loading prospects…"
         : status === "error"
           ? (error ?? "Prospects could not load.")
-          : truncated
-            ? `Showing the ${PLACES_LIMIT.toLocaleString("en-US")} most likely of ${total.toLocaleString("en-US")} places here. Zoom in for all of them.`
-            : null;
+          : updating
+            ? "Updating prospects…"
+            : truncated
+              ? `Showing the most likely of ${total.toLocaleString("en-US")} places here. Zoom in for all of them.`
+              : null;
   if (!text) return null;
   return (
     <div

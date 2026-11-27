@@ -172,10 +172,8 @@ f4aef45e83af	Kroozin Market FM 347	convenience		29.94162	-93.94270		Port Arthur	
 dffca5de0c4e	LANDMARK MOBIL	convenience		29.94556	-93.97472	3600 JIMMY JOHNSON BLVD	Port Arthur	77642		https://www.exxon.com/en/find-station/mobil-portarthur-tx-landmarkmobil-200331219	Mobil	0.80
 5114e40f07ca	M & M Grocery	convenience		29.89065	-93.91749	2849 Procter St	Port Arthur	77640	+14099852277	http://www.exxonmobilstations.com/		0.97
 05927e80ea1e	M & M Superette	convenience		29.90661	-93.93906	2800 Memorial Blvd	Port Arthur	77640	+14099835222	http://mmsuperette.placeweb.site		0.96
-b795c6912e5f	Marine Fueling	convenience		29.96808	-93.86047	9000 Old Ferry Rd	Port Arthur	77642	+14099628424	http://www.marinefuelingservice.com		0.93
 c953d9ca0f3e	Marine Fueling	convenience		29.96827	-93.86642	9000 Old Ferry Rd	Port Arthur	77642	+14099628424	http://www.marinefuelingservice.com		0.94
 37b8d377b107	Mes Port Arthur	convenience		29.83032	-93.96484	2420 Dowling Rd	Port Arthur	77640				0.70
-8d0f90a4d66a	Mes Port Arthur	convenience		29.83374	-93.96361	2420 Dowling Rd	Port Arthur	77640				0.70
 ec367fdcc248	Mid County Express	convenience		29.97538	-93.98848	104 S Twin City Hwy	Nederland	77627	+14093449189			0.92
 0ceb3cd25700	Mobil	convenience		29.90759	-93.92072	3649 Gulfway Dr	Port Arthur	77642	+14095480204	https://www.exxon.com/en/find-station/mobil-portarthur-tx-exxpressmart25-200329707?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
 13d673b922d3	Mobil	convenience		29.98256	-93.96674	1309 Magnolia Ave	Port Neches	77651	+14097226202	https://www.exxon.com/en/find-station/200312748	Exxon & Mobil Stations	0.99
@@ -235,18 +233,25 @@ cadb7fa10a27	Valero Port Arthur Refinery	convenience		29.89045	-93.93703	1801 Gu
 f671c808c59d	Arby's	fastfood		29.93437	-93.93277	4900 Tx-73	Port Arthur	77642	+14092934499	https://locations.arbys.com/tx/portarthur/4900-tx-73.html		0.95
 4c50750db09f	Burger King	fastfood		29.92920	-93.92475	3301 Twin City Hwy	Port Arthur	77642	+14099631009	https://burgerking.com/store-locator/store/5094	Burger King	0.99
 83465efcb11c	Checkers	fastfood		29.97523	-93.98904	1132 Nederland Avenue	Nederland	77627			Checkers	0.92
+4071e77cc16a	Chick-fil-A	fastfood	american restaurant	29.85105	-93.97713	Midcounty 8701Memorialblvd Portarthur Tx	Port Arthur	77640	+14097224536	http://www.chick-fil-a.com		0.77
 4e7bae8b894e	Chick-fil-A	fastfood		29.93643	-93.93031	5100 W Parkway St	Groves	77619	+14099625634	https://www.chick-fil-a.com/locations/tx/groves-tx	Chick-fil-A	0.99
 e45e921098f9	Chick-fil-A	fastfood		29.94570	-93.99541	8701 Memorial Blvd	Port Arthur	77640	+14097224536	https://www.chick-fil-a.com/locations/tx/mid-county?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
+15bf0e3fc315	Chicken Express	fastfood	chicken restaurant	29.97384	-93.96857	2615 Nall St	Port Neches	77651	+14097216767			0.93
+44c8be6bdbab	Chipotle Mexican Grill	fastfood	mexican restaurant	29.94445	-93.99511	2780 FM 365 D D	Port Arthur	77640	+14097229489	https://locations.chipotle.com/tx/port-arthur/2780-highway-365?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2630	Chipotle Mexican Grill	0.99
 6c3f33404658	Church's Texas Chicken	fastfood		29.91968	-93.91113	1849 Jefferson Drive	Port Arthur	77642	+14092934759	https://locations.churchs.com/tx/port-arthur/1849-jefferson-drive	Church's Chicken	0.96
 6b13abcc56e3	Dairy Queen	fastfood		29.97336	-93.99158	123 N 14th St 123 N 14th St	Nederland	77627	+14097273178	https://www.dairyqueen.com/en-us/locations/tx/nederland/123-n-14th-st/14442/?y_source=1_MjkzMzg5NDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 6b43e322ab1e	Dairy Queen	fastfood		29.91491	-93.94801	3010 39th St 3010 39th St	Port Arthur	77642	+14099833256	https://www.dairyqueen.com/en-us/locations/tx/port-arthur/3010-39th-st/14497/?y_source=1_MjkzMzkxMzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 6b93fe11f79a	Dairy Queen	fastfood		29.94732	-93.91782	6250 39th St 6250 39th St	Groves	77619	+14099620229	https://www.dairyqueen.com/en-us/locations/tx/groves/6250-39th-st/14183/?y_source=1_MjkzMzkzOTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
 ec25b396693f	Dairy Queen	fastfood		29.97949	-93.96049	854 Magnolia Ave 854 Magnolia Ave	Port Neches	77651	+14097271628	https://www.dairyqueen.com/en-us/locations/tx/port-neches/854-magnolia-ave/14506/?y_source=1_MjkzMzkzMzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	1.00
+598dbfcb64d3	Domino's	fastfood	pizza restaurant	29.90284	-93.93538	2401 Memorial Blvd	Port Arthur	77640	+14099837771	https://www.dominos.com/en	Domino's Pizza	0.99
+6d803d30fcf4	Domino's	fastfood	pizza restaurant	29.97289	-93.99113	1404 Nederland Ave	Nederland	77627	+14097277799	http://pizza.dominos.com/texas/nederland/77627/1404-nederland-ave/	Domino's Pizza	0.99
+82fc66834170	Domino's	fastfood	pizza restaurant	29.94574	-93.92139	4101 Main Ave	Groves	77619	+14099620505	https://www.dominos.com/en/?redirect=homepage&utm_campaign=Branded+Plus&utm_source=Bing&utm_medium=p_search&utm_term=dominos+pizza&device=c&matchtype=bb&	Domino's Pizza	0.98
 d2b74805b7e4	DQ Grill & Chill	fastfood		29.97331	-93.99167	123 N 14th St	Nederland	77627		https://www.dairyqueen.com/en-us/locations/tx/nederland/123-n-14th-st/4214	DQ Grill & Chill	0.80
 d4ea110762de	DQ Grill & Chill	fastfood		29.91482	-93.94784	3010 39th St	Port Arthur	77642		https://www.dairyqueen.com/en-us/locations/tx/port-arthur/3010-39th-st/4269	DQ Grill & Chill	0.80
 de30fae0a788	DQ Grill & Chill	fastfood		29.97952	-93.96059	854 Magnolia Ave	Port Neches	77651		https://www.dairyqueen.com/en-us/locations/tx/port-neches/854-magnolia-ave/4278	DQ Grill & Chill	0.80
 ec90c88a4b7f	DQ Grill & Chill	fastfood		29.94726	-93.91769	6250 39th St	Groves	77619		https://www.dairyqueen.com/en-us/locations/tx/groves/6250-39th-st/3956	DQ Grill & Chill	0.80
 c8c32cd3e207	Dunkin Donuts	fastfood		29.93649	-93.94115	4999 N Twin City Hwy, WM449	Port Arthur	77642		https://www.dunkindonuts.com/locations/us/tx/port-arthur/4999-n-twin-city-hwy/store-366922/	Dunkin'	0.80
+5b44dbcaad47	Firehouse Subs Port Arthur	fastfood	sandwich shop	29.94439	-93.99491	2780 Highway 365	Port Arthur	77640	+14097298500	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1151	Firehouse Subs	0.99
 fcf805057bb0	Golden Chick	fastfood		29.95155	-93.98818	3380 FM 365	Port Arthur	77642	+14092375230	https://locations.goldenchick.com/tx/port-arthur/1425/	Golden Chick	1.00
 05bcfae8b5ec	Great American Cookies	fastfood		29.95204	-93.98392	8591 9th Avenue	Port Arthur	77642		https://ordernew.greatamericancookies.com/gac/8591-9th-avenue-port-arthur-tx-77642	Great American Cookies	0.80
 ccd985bce06b	Great American Cookies	fastfood		29.87963	-93.97765	3100 Hwy 365, Space B8, Slot 6	Port Arthur	77640		https://ordernew.greatamericancookies.com/gac/3100-hwy-365-space-b8-slot-6-port-arthur-tx-77640	Great American Cookies	0.80
@@ -254,31 +259,50 @@ d68cd8ef8ee3	GW Gyro & Wings	fastfood		29.98171	-93.99731	1113 N Twin City Hwy	N
 d4aed1e49ede	J&J Wings & Seafood	fastfood		29.93511	-93.93412	4849 Highway 73	Port Arthur	77642	+14099625707	https://qrco.de/bc2fW7		0.99
 66e59be0f59c	Jack In The Box	fastfood		29.96163	-93.97886	4640 Highway 365	Port Arthur	77642	+14097241644	https://www.jackinthebox.com		0.96
 a929278de602	Jack in the Box	fastfood		29.94628	-93.99384	2840 Highway 365	Port Arthur	77640	+14097223022	https://www.jackinthebox.com		0.99
+caf56f2e5063	Jack in the Box	fastfood	taco restaurant	29.97628	-93.95649	706 Magnolia Ave	Port Neches	77651	+14097272887	http://www.jackinthebox.com/locations/3965		0.92
 f65fae3875b9	Jack in the Box	fastfood		29.93399	-93.93068	4001 Twin City Hwy	Port Arthur	77642	+14092201651	https://www.jackinthebox.com		0.99
 108d0bd764e6	KFC	fastfood		29.95395	-93.98599	3650 Highway 365	Port Arthur	77642	+14097291680	https://locations.kfc.com/tx/port-arthur/3650-highway-365	KFC	0.99
 af4a52704064	Krispy Krunchy Chicken	fastfood		29.94768	-93.97958	8149 9th Ave	Port Arthur	77642	+14097274275	https://www.krispykrunchy.com		0.92
 fc9258867bcf	Kwik Hot Chicken	fastfood		29.93883	-93.93742	4850 Twin City Hwy	Groves	77619	+18326775309	http://Kickhc.com/		0.69
 841c3e8041c9	La Salsitas Express	fastfood		29.97512	-93.98817	110 S Twin City Hwy	Nederland	77627		https://lasalsitasexpresstx.com		0.95
+9f3e7d92e70f	Little Caesars	fastfood	pizza restaurant	29.97632	-93.98749	1029 Nederland Ave	Nederland	77627	+14097241900	https://littlecaesars.com/en-us/store/7404	Little Caesars	0.99
+0469675c551a	Little Caesars Pizza	fastfood	pizza restaurant	29.92410	-93.91720	2517 Jefferson Dr	Port Arthur	77642	+14099631911	https://littlecaesars.com/en-us/store/4723	Little Caesars	0.99
 8cfc166fba1b	McDonald's	fastfood		29.94208	-93.99001	8435 Memorial Blvd	Port Arthur	77642	+14097223396	https://www.mcdonalds.com/us/en-us/location/tx/port-arthur/8435-memorial-blvd/27776.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 b9fe0251b3b5	McDonald's	fastfood		29.93713	-93.93443	4500 Twin City Highway	Groves	77619	+14099632244	https://www.mcdonalds.com/us/en-us/location/tx/groves/4500-twin-city-highway/7286.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+ff46c81c2e3b	Panda Express	fastfood	chinese restaurant	29.94843	-93.99131	3080 Hwy 365	Port Arthur	77642	+14097229793	http://www.pandaexpress.com/	Panda Express México	0.99
+f1a6da7e8550	Papa Johns	fastfood	pizza restaurant	29.95217	-93.98905	3004 Highway 365	Nederland	77627	+14097292929	https://locations.papajohns.com/united-states/tx/77627/nederland/3004-highway-365?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE2NTAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+00deef8df71c	Pizza Hut	fastfood	pizza restaurant	29.96297	-93.97697	4700 Hwy. 365 Jefferson	Port Arthur	77642	+14097274343	https://locations.pizzahut.com/tx/port-arthur/4700-hwy-365?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310523	Pizza Hut	0.99
+3ff1b43d8439	Pizza Hut	fastfood	pizza restaurant	29.94763	-93.98946	3100 Highway 365 Jefferson	Port Arthur	77642	+14097274343	https://locations.pizzahut.com/tx/port-arthur/3100-highway-365	Pizza Hut	0.92
+d17b29757618	Pizza Hut	fastfood	pizza restaurant	29.90483	-93.93820	2800 26th St. Jefferson	Port Arthur	77640	+14099825133	https://locations.pizzahut.com/tx/port-arthur/2800-26th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309963	Pizza Hut	0.99
 8353c6d0144b	Pizza Hut Express	fastfood		29.94147	-93.94225	5325 Twin City Highway	Port Arthur	77642		https://locations.pizzahut.com/tx/port-arthur/5325-twin-city-highway	Pizza Hut	0.80
 d131b9e4ec4d	Pollo's El Campeaon	fastfood		29.90669	-93.92107	3610 Gulfway Dr	Port Arthur	77642	+14093002773			0.67
 a84425753ed6	Popeyes	fastfood		29.91337	-93.91565	4049 Gulfway Dr	Port Arthur	77642	+19362743087	https://www.popeyes.com/store-locator/store/restaurant_81842	Popeyes Louisiana Kitchen	0.92
 9d37b4eedc4d	Popeyes Louisiana Kitchen	fastfood		29.96095	-93.98082	1804 FM 365	Nederland	77627	+19362749014	https://www.popeyes.com/store-locator/store/restaurant_82140	Popeyes Louisiana Kitchen	1.00
+a95515f38444	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	29.93973	-93.93832	4850 Twin City Hwy	Groves	77619	+19362740412	https://www.popeyes.com/store-locator/store/restaurant_84284?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.99
 522d4bee7d1a	Qdoba	fastfood		29.94415	-93.99007	8450 Memorial Drive	Port Arthur	77640		https://locations.qdoba.com/us/tx/port-arthur/8450-memorial-drive	Qdoba	0.89
-f6154fc798cc	Qdoba	fastfood		29.87963	-93.97765	8450 Memorial Drive	Port Arthur	77640		https://locations.qdoba.com/us/tx/port-arthur/8450-memorial-drive/catering	Qdoba	0.80
 86dbc44f1f85	Raising Cane's	fastfood		29.94931	-93.99178	3324 Hwy 365	Nederland	77627	+14097242226	https://locations.raisingcanes.com/tx/nederland/3324-hwy-365	Raising Cane's Chicken Fingers	0.99
+f1f225f1d971	Schlotzsky's	fastfood	sandwich shop	29.94602	-93.99594	8745 Memorial Blvd Ste 100	Port Arthur	77640	+14097219997	https://www.schlotzskys.com/texas/port-arthur/2387		0.92
 ec58c0d8e96d	Sip N Sip	fastfood		29.94269	-93.94253	5360 N Twin City Hwy	Port Arthur	77619				0.91
 09ab14b5d685	Sonic Drive In	fastfood		29.93626	-93.93480	4525 Twin City Highway	Port Arthur	77642	+14099621501	https://locations.sonicdrivein.com/tx/portarthur/4525-twin-city-highway.html	Sonic Drive-In	0.99
 472d6b4a6d2d	Sonic Drive In	fastfood		29.97763	-93.95837	772 Magnolia	Port Neches	77651	+14097277011	https://locations.sonicdrivein.com/tx/portneches/772-magnolia.html	Sonic Drive-In	0.98
 723b8dde7197	Sonic Drive In	fastfood		29.96712	-93.99610	2205 Nederland Ave	Nederland	77627	+14097277007	https://locations.sonicdrivein.com/tx/nederland/2205-nederland-ave.html	Sonic Drive-In	0.99
+8d305a517c50	Sonic Drive-In	fastfood	burger restaurant	29.90564	-93.93732	2648 Memorial Blvd	Port Arthur	77640	+14099837222	https://locations.sonicdrivein.com/tx/portarthur/2648-memorial-drive.html		0.96
 ab7195414540	Sonic Drive-In	fastfood		29.94122	-93.99792	2290 Highway 365	Port Arthur	77640	+14098006585	https://locations.sonicdrivein.com/tx/portarthur/2290-highway-365.html	Sonic Drive-In	1.00
+0211da6942f4	Subway	fastfood	sandwich shop	29.95653	-93.89909	7201 32nd Street	Groves	77619	+14092934345	https://restaurants.subway.com/united-states/tx/groves/7201-32nd-street	Subway	0.96
+04b46173c34b	Subway	fastfood	sandwich shop	29.96988	-93.99358	1807 Nederland Ave	Nederland	77627	+14093565897	https://restaurants.subway.com/united-states/tx/nederland/1807-nederland-ave	Subway	0.99
+18c3959eb18c	Subway	fastfood	sandwich shop	29.93873	-93.93932	5019 N Twin City Hwy	Port Arthur	77642	+14093565035	https://www.subway.com		0.95
+19bbe4b12671	Subway	fastfood	sandwich shop	29.90472	-93.93828	2800 26th Street Sute 200	Port Arthur	77640	+14095484744	https://restaurants.subway.com/united-states/tx/port-arthur/2800-26th-street	Subway	0.95
+473b021768f8	Subway	fastfood	sandwich shop	29.90972	-93.92232	1918 9th Ave	Port Arthur	77642	+14099826496	https://restaurants.subway.com/united-states/tx/port-arthur/1918-9th-ave	Subway	0.92
+87235f7a2818	Subway	fastfood	sandwich shop	29.94339	-93.99180	8565 Memorial Boulevard Suite # 200	Port Arthur	77640	+14097290247	https://restaurants.subway.com/united-states/tx/port-arthur/8565-memorial-boulevard	Subway	0.99
+f4a8772005b2	Subway	fastfood	sandwich shop	29.97923	-93.96382	2222 Nall St	Port Neches	77651	+14093565329	https://restaurants.subway.com/united-states/tx/port-neches/2222-nall-st	Subway	0.98
 52cd7b8d0bf0	Taco Bell	fastfood		29.95382	-93.98756	2816 FM-365	Nederland	77627	+14097247290	http://www.tacobell.com/	Taco Bell	0.99
 a7b2278f1f3c	Taco Bell	fastfood		29.93783	-93.93556	4630 Twin City Hwy	Groves	77619	+14099625669	http://www.tacobell.com/	Taco Bell	0.99
 01d2619d022d	Tacos Oreo	fastfood		29.92435	-93.94340	4248 9th Ave	Port Arthur	77642	+14095487294			0.88
 5b3ba879ed25	Wendy's	fastfood		29.93759	-93.93524	4600 Twin City Highway	Groves	77619	+14092340215	https://locations.wendys.com/united-states/tx/groves/4600-twin-city-highway	Wendy's	0.97
 bff20351ccbc	Wendy's	fastfood		29.95265	-93.98860	2912 Peek Rd	Nederland	77627	+14092712333	https://locations.wendys.com/united-states/tx/nederland/2912-peek-rd	Wendy's	0.99
 393cd2191a2a	Whataburger	fastfood		29.93885	-93.93717	4800 Twin City Hwy	Groves	77619	+14099632623	https://locations.whataburger.com/tx/groves/4800-twin-city-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+b12b226245c9	Wingstop	fastfood	chicken restaurant	29.94254	-93.99049	8445 Memorial Blvd Ste 400	Port Arthur	77640	+14098534256	https://www.wingstop.com/location/wingstop-614-port-arthur-tx-77640/menu?y_source=1_NTUyMDY3NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+d08ba5c61b5c	Wingstop	fastfood	american restaurant	29.95297	-93.98692	3620 Highway 365 Ste 100	Port Arthur	77642	+14097271600	http://www.wingstop.com		0.92
 37d972305655	A lo cubano market & food truck	grocery		29.90990	-93.91817	3880 Gulfway Dr	Port Arthur	77642	+14093004003			0.97
 478625a9a50a	Asia Meat Grocery	grocery		29.90187	-93.91179	738 9th Ave	Port Arthur	77642	+14099822352			0.99
 372b4ef7f6ab	Avilez Grupo Inc	grocery		29.91593	-93.91214	4500 Gulfway Dr	Port Arthur	77642				0.95
@@ -356,19 +380,15 @@ b1dc1981175c	quality inn suites	hotel		29.93716	-93.97977	7440 Memorial Blvd	Por
 d4707cb17944	Relax Inn	hotel	motel	29.90601	-93.93998	2811 Memorial Blvd	Port Arthur	77640	+14099859316	http://www.hifranchise.com		0.92
 ed3b37644bb4	Residence Inn by Marriott Port Arthur	hotel		29.93591	-93.98334	2740 Jimmy Johnson Blvd	Port Arthur	77640	+14092934021	https://www.marriott.com/en-us/hotels/bptrb-residence-inn-port-arthur/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Residence Inn by Marriott	0.97
 8f30a33a9a38	Rodeway Inn & Suites	hotel		29.92618	-93.94398	3838 Highway 73	Port Arthur	77642	+14099837255	https://www.choicehotels.com/texas/port-arthur/rodeway-inn-hotels/txl69?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-e836bebe8b75	Sabine Lake Lodge	hotel	lodge	29.76674	-93.90744	3890 Martin Luther King Jr Dr	Port Arthur	77640	+14096734487	https://sabinelakelodge.org/		0.92
 a3df2ac699a1	Sabine Pass Motel	hotel	motel	29.73006	-93.89571	5623 Greenwich St	Sabine Pass	77655	+14092135020	https://www.hotels.com/de1420195/hotels-sabine-pass-texas		0.92
 48de68942e11	Seagull Motel	hotel	motel	29.94197	-93.89031	6828 Gulfway Dr	Port Arthur	77642	+14099624437	http://www.abvi.com		0.99
-ae110d2b0e6d	Sonal Hotels Llc	hotel		29.93453	-93.97645	6900 Memorial Blvd	Port Arthur	77642				0.95
 6129740ff281	Southwinds Inn	hotel		29.93709	-93.93201	5101 E Parkway St	Groves	77619	+14099623000	https://verdevalleyinn.com		0.92
 c9c6ce3bfb50	stayAPT Suites Port Arthur	hotel	resort	29.93648	-93.98660	7800 Medical Center Blvd	Port Arthur	77640	+14092071004	https://www.stayapt.com/hotels/stayapt-suites-port-arthur/		1.00
-1fe02d17f7fd	Staybridge Suites Port Arthur by IHG	hotel		29.93781	-93.99194	8580 Medical Center Blvd	Port Arthur	77640			Staybridge Suites	0.74
 94870af773cb	Staybridge Suites Port Arthur by IHG	hotel		29.94088	-93.99599	8580 Medical Center Blvd	Port Arthur	77640	+14092909000		Staybridge Suites	0.91
 122ca3bcef97	Studio 6 Port Arthur, TX - SE	hotel		29.93884	-93.98003	3000 Jimmy Johnson Blvd	Port Arthur	77642	+14092022317	https://www.staystudio6.com/en/motels.tx.port-arthur.5001.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305	Studio 6	0.99
 8d4b26b9e8de	Suburban Studios Port Arthur	hotel	resort	29.93437	-93.97638	6900 Memorial Blvd	Port Arthur	77642	+14097229120	https://www.choicehotels.com/texas/port-arthur/suburban-hotels/txe73?mc=llbillpx&pmf=local		0.97
 8992a7422f33	Super 8 Motel	hotel		29.93642	-93.93305	5001 E Parkway St	Groves	77619	+14099622200	http://www.super8.com/	Super 8 by Wyndham	0.93
 6d870a4bb1d4	Super 8 Port Arthur Nederland Area	hotel		29.94003	-93.98439	7700 Memorial Blvd	Port Arthur	77642	+14095279923	https://super-8-port-arthur-nederland-area.hub.biz/		1.00
-5aad7dfa00e9	SureStay by Best Western Groves	hotel		29.93641	-93.93294	5001 E Parkway St	Groves	77619	+14099622200	https://www.bestwestern.com/en_US/book/hotel-rooms.54215.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54215	SureStay Hotels	0.98
 63a859fe8549	SureStay by Best Western Groves	hotel		29.93611	-93.93256	5001 E Parkway St	Groves	77619	+14099622200			0.99
 bca0bbc9c96d	TownePlace Suites	hotel		29.93822	-93.98688	2700 Port Plaza Drive	Port Arthur	77642	+14097222700	https://www.marriott.com/en-us/hotels/bptts-towneplace-suites-beaumont-port-arthur/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	TownePlace Suites by Marriott	1.00
 496e47de2494	Towneplace Suites Beaumont Port Arthur	hotel		29.93830	-93.98709	2700 Port Plaza Dr	Port Arthur	77640		https://towneplace-suites-beaumont-port-arthur.booked.net		1.00
@@ -407,12 +427,8 @@ c9d01a7e5b8c	Carmela's Mexican Restaurant	restaurant	mexican restaurant	29.94431
 7b667a6ba7d1	Casa Ole	restaurant	texmex restaurant	29.94885	-93.98899	3100 Highway 365	Port Arthur	77642	+14097275377	http://casaole.com/	Casa Olé	0.99
 0f263969e020	Chaba Thai Bistro	restaurant	thai restaurant	29.97593	-93.98648	1027 Nederland Ave	Nederland	77627	+14098531991			0.95
 172f3b538309	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	29.93928	-93.98615	8005 Memorial Blvd	Port Arthur	77640	+14097295800	https://www.cheddars.com/locations/tx/port-arthur/port-arthur/2109?cmpid=br%3Acsk_ag%3Aie_ch%3Asoc_ca%3ACSKFB_sn%3Afacebook_gt%3Aport-arthur-tx-2109_pl%3Alocurl_rd%3A1088	Cheddar's Scratch Kitchen	0.99
-4071e77cc16a	Chick-fil-A	restaurant	american restaurant	29.85105	-93.97713	Midcounty 8701Memorialblvd Portarthur Tx	Port Arthur	77640	+14097224536	http://www.chick-fil-a.com		0.77
-15bf0e3fc315	Chicken Express	restaurant	chicken restaurant	29.97384	-93.96857	2615 Nall St	Port Neches	77651	+14097216767			0.93
 fae69ae397a6	Chili's Grill & Bar	restaurant		29.94437	-93.99362	8665 Memorial Blvd	Port Arthur	77640	+14097273675	https://www.chilis.com		0.92
-3f2cf5a0480a	China Express Food To Go (New China)	restaurant	chinese restaurant	29.90506	-93.93668	2600 Memorial Blvd	Port Arthur	77642	+14099824937	http://www.chinaexpresstysons.com/		0.71
 737cc0396bb5	China Express Food To Go (New China)	restaurant	chinese restaurant	29.90507	-93.93668	2600 Memorial Blvd	Port Arthur	77642	+14099824937	http://restaurants.portarthur.ypeek.com		0.92
-44c8be6bdbab	Chipotle Mexican Grill	restaurant	mexican restaurant	29.94445	-93.99511	2780 FM 365 D D	Port Arthur	77640	+14097229489	https://locations.chipotle.com/tx/port-arthur/2780-highway-365?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2630	Chipotle Mexican Grill	0.99
 e4a5d84cb865	Cicis Pizza	restaurant	pizza restaurant	29.94812	-93.98950	3100 Highway 365	Port Arthur	77640	+14096662952	https://www.cicis.com		1.00
 61581ad7720a	Classic BBQ Company	restaurant	barbecue restaurant	29.99127	-93.95895	1107 Port Neches Ave	Port Neches	77651	+14099986758			0.75
 229a78dcab16	Colichia's Italian Village	restaurant	italian restaurant	29.94143	-93.92412	5601 E Parkway St	Groves	77619	+14099627711	http://www.colichias.com/contact-colichias-groves-tx.html		0.94
@@ -424,9 +440,6 @@ e4a5d84cb865	Cicis Pizza	restaurant	pizza restaurant	29.94812	-93.98950	3100 Hig
 5b06ceb35b4e	Delicias Yolis	restaurant	delicatessen	29.92180	-93.93569		Port Arthur		+14097185916			0.70
 2ff26d649f8b	Dickey's Barbecue Pit	restaurant	barbecue restaurant	29.94708	-93.99398	1629 S Hwy 69	Nederland	77627	+14098531726	https://www.dickeys.com/locations/texas/nederland/nederland	Dickey's Barbecue Pit National	0.97
 d4a013e0288a	DIVA National Area Headquarters	restaurant		29.97696	-93.97371		Port Neches			www.divaarea.com/index.html		0.71
-598dbfcb64d3	Domino's	restaurant	pizza restaurant	29.90284	-93.93538	2401 Memorial Blvd	Port Arthur	77640	+14099837771	https://www.dominos.com/en	Domino's Pizza	0.99
-6d803d30fcf4	Domino's	restaurant	pizza restaurant	29.97289	-93.99113	1404 Nederland Ave	Nederland	77627	+14097277799	http://pizza.dominos.com/texas/nederland/77627/1404-nederland-ave/	Domino's Pizza	0.99
-82fc66834170	Domino's	restaurant	pizza restaurant	29.94574	-93.92139	4101 Main Ave	Groves	77619	+14099620505	https://www.dominos.com/en/?redirect=homepage&utm_campaign=Branded+Plus&utm_source=Bing&utm_medium=p_search&utm_term=dominos+pizza&device=c&matchtype=bb&	Domino's Pizza	0.98
 cd5da8a8d7a1	Dylan's	restaurant	bar and grill restaurant	29.95267	-93.98454	8601 9th Ave	Port Arthur	77642	+14097221600	http://Dylansbackyard.com/		0.99
 9a817250cc47	Dyrla Restaurant	restaurant	mexican restaurant	29.89845	-93.92863	1629 Woodworth Blvd	Port Arthur	77640	+14092171101			0.99
 6c58fbdb5e99	Dyrla Taqueria	restaurant	taco restaurant	29.95910	-93.96739	7901 Twin City Hwy	Port Arthur	77642	+14093325258			0.92
@@ -440,7 +453,6 @@ a94a3a2a2c93	El Viejo Tony	restaurant		29.95526	-93.98567	4300 FM-365, Nederland
 8bbdc069063e	Famous Buffet	restaurant	buffet restaurant	29.94108	-93.93862	5080 Twin City Hwy	Groves	77619	+14099621888	https://famousbuffettx.com		0.95
 cc8fe224287d	Far East	restaurant	vietnamese restaurant	29.92443	-93.91751	2523 Jefferson Dr	Port Arthur	77642	+14099628000	http://fareast88.com		0.65
 db73c61142a8	Fast Freddy's Barbeque	restaurant	barbecue restaurant	29.95831	-93.89886	3380 Pure Atlantic Rd	Groves	77619	+14095480313			0.96
-5b44dbcaad47	Firehouse Subs Port Arthur	restaurant	sandwich shop	29.94439	-93.99491	2780 Highway 365	Port Arthur	77640	+14097298500	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1151	Firehouse Subs	0.99
 2ac9523b33f5	For the Love of Foods	restaurant	health food restaurant	29.96494	-93.99805	2505 Nederland Ave	Nederland	77627	+14097223663			0.95
 e932a5e5eb4a	Gather: Paleo Café & Market	restaurant		29.98521	-93.97039	1811 Magnolia Ave	Port Neches	77651	+14095279696			0.63
 e8647f6a061d	Grand Buffet	restaurant	buffet restaurant	29.95786	-93.98386	2250 FM 365	Nederland	77627	+14097226668	http://www.ranchograndebarandgrill.com/		0.99
@@ -457,14 +469,12 @@ d1f082dd3c79	Hartz Chicken Buffet	restaurant	buffet restaurant	29.95852	-93.9668
 37e7f3414369	Hey Grill Hey	restaurant	health food restaurant	29.95828	-93.99261	920 S 27th St	Nederland	77627	+14096568976			0.92
 d8a4afb90829	Hung's Seafood Market	restaurant	seafood restaurant	29.88324	-93.93362	830 Gilham Cir	Port Arthur	77640	+14099857904	https://hung-s-seafood-market.hub.biz/		0.96
 92664829cbaa	IHOP	restaurant	breakfast and brunch restaurant	29.94476	-93.99380	8685 Memorial Blvd	Port Arthur	77640	+14097216310	http://www.ihop.com/	IHOP	0.99
-d74be81de6d8	IHOP	restaurant		29.92164	-93.94370		Port Arthur			http://www.ihop.com/		0.71
 2e027bf8d8bd	Isela's Kitchen	restaurant		29.93862	-93.89350	6610 Gulfway Dr	Port Arthur	77642	+14695630819			0.64
 81d9b287999c	J & J Wings & Seafood	restaurant		29.92573	-93.93350	4849 Hwy	Port Arthur	77642	+14099625707	http://www.whitepages.com/business/j-j-wings-seafood-port-arthur-tx		0.77
 c5163055e975	J & Z Sabor Latino	restaurant	dominican restaurant	29.92127	-93.90847	5100 Gulfway Dr	Port Arthur	77642	+14093004242			0.99
 dffb09373383	J and J's Chinese Food	restaurant	chinese restaurant	29.88607	-93.93427	1600 Bluebonnet Ave	Port Arthur	77640	+14099858880			0.77
 9a5735f7b808	J&J Wings and Seafood	restaurant	chinese restaurant	29.88604	-93.93433	1600 Bluebonnet Ave	Port Arthur	77640	+14099858880	http://www.portarthurrestaurant.com/		1.00
 8f785b231343	J.r. Smith Ventures, Inc	restaurant		29.94309	-93.97099	7217 9th Ave	Port Arthur	77642				0.95
-caf56f2e5063	Jack in the Box	restaurant	taco restaurant	29.97628	-93.95649	706 Magnolia Ave	Port Neches	77651	+14097272887	http://www.jackinthebox.com/locations/3965		0.92
 4c2731dc7a3e	Jason's Deli	restaurant	delicatessen	29.94983	-93.98997	3260 FM 365	Port Arthur	77642	+14097276420	https://www.jasonsdeli.com/	Jason's Deli	0.97
 e393415097aa	Jason's Deli Port Arthur, TX: Central Mall	restaurant	sandwich shop	29.97438	-93.99241	3260 HIGHWAY 365	Port Arthur	77627			Jason's Deli	0.80
 8cae378f4fa1	Jaws Bar-B-Que	restaurant	barbecue restaurant	29.88103	-93.93037	1448 Rev Dr Ransom Howard St	Port Arthur	77640	+14099856601	http://jaws-bar-b-que.edan.io		0.96
@@ -497,8 +507,6 @@ b97a245a6840	Laredo Taco Company	restaurant		29.94554	-93.97472	3600 Jimmy Johns
 c233a67eadad	Larry & Rita's Mexican Cajun Bar & Grill	restaurant	mexican restaurant	29.95969	-93.90157	3701 Pure Atlantic Rd	Groves	77619	+14099623381	https://larryandritas.net		0.96
 ff8a521f8b08	Las Rosa's Mexican Restaurant	restaurant	texmex restaurant	29.98082	-93.96468	1021 Magnolia Ave	Port Neches	77651	+14098531154	https://start.cortera.com/.../l7n2pyp3q/las-rosas-mexican-restaurant		0.95
 09f493f44197	Lily John Seafood	restaurant	seafood restaurant	29.94594	-93.97590	7765 9th Ave	Port Arthur	77642	+14097221710	http://lily-john-seafood.poi.place		0.99
-9f3e7d92e70f	Little Caesars	restaurant	pizza restaurant	29.97632	-93.98749	1029 Nederland Ave	Nederland	77627	+14097241900	https://littlecaesars.com/en-us/store/7404	Little Caesars	0.99
-0469675c551a	Little Caesars Pizza	restaurant	pizza restaurant	29.92410	-93.91720	2517 Jefferson Dr	Port Arthur	77642	+14099631911	https://littlecaesars.com/en-us/store/4723	Little Caesars	0.99
 7bb20fe3e7c1	Los Bandidos	restaurant	texmex restaurant	29.97458	-93.99269	1344 Boston Ave	Nederland	77627	+14093637122			0.86
 58b3b1a1b515	Los Compadres Pupuseria	restaurant	salvadoran restaurant	29.91071	-93.93092	3433 25th St	Port Arthur	77642	+14099849898	https://www.chamberofcommerce.com/.../24033185-los-compadres-pupuseria		0.96
 5c94e7629906	Luby's	restaurant	comfort food restaurant	29.94618	-93.99264	8680 Memorial Blvd.	Port Arthur	77642	+14097240043	https://www.lubys.com/port-arthur-memorial-blvd		0.77
@@ -518,20 +526,14 @@ dadc51be82e6	Novrozsky's Hamburgers	restaurant	burger restaurant	29.95211	-93.98
 bbd485025b63	olive garden Beaumont, Tx	restaurant	italian restaurant	29.94220	-93.98981		Port Arthur			http://www.olivegarden.com/	Olive Garden Italian Food Restaurant	0.75
 3baa3fc40c7e	P & J Seafood	restaurant	seafood restaurant	29.95742	-93.89845	3301 Pure Atlantic Rd	Groves	77619	+14099625096	http://pjseafood.com/		1.00
 836ba44ca721	P.A. wings & seafood	restaurant	seafood restaurant	29.89324	-93.93285	2200 Bluebonnet Ave	Port Arthur	77640	+14096004622			0.92
-ff46c81c2e3b	Panda Express	restaurant	chinese restaurant	29.94843	-93.99131	3080 Hwy 365	Port Arthur	77642	+14097229793	http://www.pandaexpress.com/	Panda Express México	0.99
-f1a6da7e8550	Papa Johns	restaurant	pizza restaurant	29.95217	-93.98905	3004 Highway 365	Nederland	77627	+14097292929	https://locations.papajohns.com/united-states/tx/77627/nederland/3004-highway-365?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE2NTAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
 bc1014885600	Pedro's Tacos & Tequila Bar Port Arthur	restaurant	mexican restaurant	29.94424	-93.99007	8550 Memorial Blvd	Port Arthur	77642	+14092375206	http://pedrostacostequilabar.com		0.95
 0d3aa318b689	Pho Neches	restaurant	vietnamese restaurant	29.97752	-93.96567	2370 Nall St	Port Neches	77651	+14093444054	http://pho-neches.edan.io		0.92
 6854d69c2c53	Pho Tau Bay	restaurant	vietnamese restaurant	29.92533	-93.90592	5300 Gulfway Dr	Port Arthur	77642	+14092937777			0.93
 6f8aebbf5a81	Pit Side BBQ	restaurant		29.94147	-93.91532	3501 Main Ave	Groves	77619	+14094335039	http://Www.instagram.com/pitsidebbq		0.96
 84ef4e0954a1	Pizza Artista	restaurant	pizza restaurant	29.94436	-93.91860	3814 Main Ave Unit A	Groves	77619	+14092175600	https://pizzaartista.com		0.95
-00deef8df71c	Pizza Hut	restaurant	pizza restaurant	29.96297	-93.97697	4700 Hwy. 365 Jefferson	Port Arthur	77642	+14097274343	https://locations.pizzahut.com/tx/port-arthur/4700-hwy-365?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310523	Pizza Hut	0.99
-3ff1b43d8439	Pizza Hut	restaurant	pizza restaurant	29.94763	-93.98946	3100 Highway 365 Jefferson	Port Arthur	77642	+14097274343	https://locations.pizzahut.com/tx/port-arthur/3100-highway-365	Pizza Hut	0.92
-d17b29757618	Pizza Hut	restaurant	pizza restaurant	29.90483	-93.93820	2800 26th St. Jefferson	Port Arthur	77640	+14099825133	https://locations.pizzahut.com/tx/port-arthur/2800-26th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309963	Pizza Hut	0.99
 84285972c7f8	Pizza Inn	restaurant	buffet restaurant	29.98338	-93.96811	1501 Magnolia Ave	Port Neches	77651	+14097224600	https://www.pizzainn.com/locations/port-neches-tx/	Pizza Inn	0.97
 29b65179bd0b	Pizza Pro	restaurant	pizza restaurant	29.96983	-93.97001	2825 Nall St	Port Neches	77651	+14097221285			0.92
 96dc852f04c7	Pleasure Island Seafood House	restaurant	seafood restaurant	29.76338	-93.90501	3931 Martin Luther King Jr Dr	Port Arthur	77640	+14099834334	http://eaglepestandchemical.com		0.92
-a95515f38444	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	29.93973	-93.93832	4850 Twin City Hwy	Groves	77619	+19362740412	https://www.popeyes.com/store-locator/store/restaurant_84284?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.99
 7b3c8bfd9347	POPS BOIL N GEAUX	restaurant		29.94457	-93.91817	3814 Main Ave	Groves	77619	+14095480335			0.92
 36faf25e8ea1	Pour Neches	restaurant	american restaurant	29.99773	-93.95454	820 Lee Ave	Port Neches	77651	+14092375284	http://pourneches.com/		0.99
 73fc228e8acf	Rancho Grande Bar and Grill	restaurant	texmex restaurant	29.93997	-93.98383	7670 Memorial Blvd	Port Arthur	77642	+14097299105	http://www.ranchograndebarandgrill.com	Rancho Grande Bar and Grill, Port Arthur Tx.	0.96
@@ -551,22 +553,13 @@ d6021a2ab271	Sam's China Inn	restaurant	chinese restaurant	29.93951	-93.93787	48
 866c7c519c07	Sam's Seafood Southern Eatery	restaurant	seafood restaurant	29.90287	-93.93546	2401 Memorial Blvd, Ste 200	Port Arthur	77640	+14099996206	http://samssoutherneatery.com/		0.94
 f02ce9ab9361	Sazón Dulce Authentic Puerto Rican Cuisine	restaurant	puerto rican restaurant	29.96964	-93.97007	2825 Nall St Suite 19B	Port Neches	77651	+14098531177	https://order.toasttab.com/online/sazondulce		0.92
 dd4972710644	Sazón Jalisco Taqueria	restaurant	mexican restaurant	29.92204	-93.94090	3937 9th Ave	Port Arthur	77642	+14092974601	https://taqueriaestilojalisco.godaddysites.com/		0.92
-f1f225f1d971	Schlotzsky's	restaurant	sandwich shop	29.94602	-93.99594	8745 Memorial Blvd Ste 100	Port Arthur	77640	+14097219997	https://www.schlotzskys.com/texas/port-arthur/2387		0.92
 3e257ab92dc5	Sea Ranch Cafe	restaurant	seafood restaurant	29.98230	-93.96650	1305 Magnolia Ave	Port Neches	77651	+14097226057	http://www.searanchcafe.com/		0.98
 5a82ed42f7f7	Seaside Seafood	restaurant	seafood restaurant	29.94965	-93.97213	4041 Jimmy Johnson Blvd	Port Arthur	77642	+14095198098	https://zmenu.com/seaside-seafood-port-arthur-online-menu/		0.99
 51f08d9ab8be	Shop Lincoln Ave • Groves Texas Business District	restaurant		29.94840	-93.92178	4321 Lincoln Ave	Groves	77619				0.92
 a756cbe341c7	Silvia's Tacos	restaurant	taco restaurant	29.95186	-93.90353	3303 Taft Ave	Groves	77619	+14092170048	http://silvias-tacos.edan.io		0.97
 00898e0492c8	Sneaky Pete's Under The Patio	restaurant	american restaurant	29.96101	-93.90281	3900 Pure Atlantic Rd	Groves	77619	+14099631241	http://www.sneakypetesonline.com		0.94
-8d305a517c50	Sonic Drive-In	restaurant	burger restaurant	29.90564	-93.93732	2648 Memorial Blvd	Port Arthur	77640	+14099837222	https://locations.sonicdrivein.com/tx/portarthur/2648-memorial-drive.html		0.96
 645cb56e6967	Southern Kitchen	restaurant		29.90574	-93.93930	2749 Memorial Blvd	Port Arthur	77640	+14099832115	https://southernkitchenca.com		0.55
 d9306b6e1165	Station 6 Pa.f.s. Llc	restaurant		29.94437	-93.99497	2780 Highway 365 Ste A	Port Arthur	77640				0.95
-0211da6942f4	Subway	restaurant	sandwich shop	29.95653	-93.89909	7201 32nd Street	Groves	77619	+14092934345	https://restaurants.subway.com/united-states/tx/groves/7201-32nd-street	Subway	0.96
-04b46173c34b	Subway	restaurant	sandwich shop	29.96988	-93.99358	1807 Nederland Ave	Nederland	77627	+14093565897	https://restaurants.subway.com/united-states/tx/nederland/1807-nederland-ave	Subway	0.99
-18c3959eb18c	Subway	restaurant	sandwich shop	29.93873	-93.93932	5019 N Twin City Hwy	Port Arthur	77642	+14093565035	https://www.subway.com		0.95
-19bbe4b12671	Subway	restaurant	sandwich shop	29.90472	-93.93828	2800 26th Street Sute 200	Port Arthur	77640	+14095484744	https://restaurants.subway.com/united-states/tx/port-arthur/2800-26th-street	Subway	0.95
-473b021768f8	Subway	restaurant	sandwich shop	29.90972	-93.92232	1918 9th Ave	Port Arthur	77642	+14099826496	https://restaurants.subway.com/united-states/tx/port-arthur/1918-9th-ave	Subway	0.92
-87235f7a2818	Subway	restaurant	sandwich shop	29.94339	-93.99180	8565 Memorial Boulevard Suite # 200	Port Arthur	77640	+14097290247	https://restaurants.subway.com/united-states/tx/port-arthur/8565-memorial-boulevard	Subway	0.99
-f4a8772005b2	Subway	restaurant	sandwich shop	29.97923	-93.96382	2222 Nall St	Port Neches	77651	+14093565329	https://restaurants.subway.com/united-states/tx/port-neches/2222-nall-st	Subway	0.98
 f495153b34af	Sun Wok Chinese Cafe	restaurant	chinese restaurant	29.97097	-93.99287	1624 Nederland Ave	Nederland	77627	+14097290577	http://events.kfdm.com		0.96
 77ab0e6f1b18	Tabu Bar and Grill	restaurant	bar and grill restaurant	29.94165	-93.97736	3350 Jimmy Johnson Blvd	Port Arthur	77642	+14093444014			0.94
 af6f27af3ff2	Taco Rey Mexican Restaurant	restaurant	texmex restaurant	29.97240	-93.99118	1505 Nederland Ave	Nederland	77627	+14097215100	http://tacoreytexas.com/		0.97
@@ -613,8 +606,6 @@ ea0426686057	Waffle House	restaurant	diner	29.93579	-93.93438	4505 Twin City Hwy
 a0a8eea398c6	Wheel House Restaurant Port Neches	restaurant	american restaurant	29.99763	-93.95298		Port Neches					0.97
 e3353f759d64	Wing Boss	restaurant	chicken wings restaurant	29.94711	-93.99399	1629 S Highway 69	Nederland	77627	+14098531726	https://www.wingboss.com/locations/texas/nederland/boost-nederland-wing-boss?utm_source=Bing&utm_campaign=Bing&utm_medium=organic&utm_content=button-website		0.97
 01aaef7bce54	Wings To Go	restaurant	chicken wings restaurant	29.95854	-93.96681	7849 N Twin City Hwy	Port Arthur	77642	+14098981600	http://www.wingstogo.com/		0.98
-b12b226245c9	Wingstop	restaurant	chicken restaurant	29.94254	-93.99049	8445 Memorial Blvd Ste 400	Port Arthur	77640	+14098534256	https://www.wingstop.com/location/wingstop-614-port-arthur-tx-77640/menu?y_source=1_NTUyMDY3NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-d08ba5c61b5c	Wingstop	restaurant	american restaurant	29.95297	-93.98692	3620 Highway 365 Ste 100	Port Arthur	77642	+14097271600	http://www.wingstop.com		0.92
 180429832c48	Wok D'Lite	restaurant	chinese restaurant	29.98165	-93.96560	1201 Magnolia Ave	Port Neches	77651	+14097229868	http://www.woodlandridgeretreat.com		0.99
 7cfb1b4e3176	Yuka Sushi	restaurant		29.94618	-93.99269	8680 Memorial Blvd	Port Arthur	77642	+14092375073	https://sushiyuka.com/		0.99
 ae7159addac8	Advocates House	senior	retirement home	29.98813	-93.97941	2625 Magnolia Ave	Port Neches	77651	+17136099908	https://advocatesfortheindependent.com/services/advocates-house/		0.92

@@ -42,7 +42,7 @@ export const PLACE_CATEGORIES: readonly CategoryDef[] = [
   { id: "college", label: "Colleges & Universities", color: "#7e22ce", initially: true },
   { id: "office", label: "Corporate Offices", color: "#0369a1", initially: false },
   { id: "senior", label: "Senior Living", color: "#4d7c0f", initially: false },
-  { id: "hospital", label: "Hospitals", color: "#0f766e", initially: false },
+  { id: "hospital", label: "Hospitals & Clinics", color: "#0f766e", initially: false },
   { id: "cinema", label: "Movie Theaters", color: "#a16207", initially: false },
   { id: "bar", label: "Bars", color: "#9d174d", initially: false },
   { id: "fastfood", label: "Fast Food", color: "#b45309", initially: false },
@@ -91,16 +91,19 @@ export function placeTileKey(lat: number, lng: number): string {
   return `${Math.floor(lat)}_${Math.floor(lng)}`;
 }
 
-/** Every square a box touches (at most `max`, so a zoomed-out box cannot ask for hundreds). */
-export function placeTilesFor(b: Bounds, max = 30): string[] {
-  const out: string[] = [];
+/** Squares one answer reads at most: a big screen at the widest Prospects zoom touches about 40. */
+export const PLACE_TILES_MAX = 60;
+
+/** Every square a box touches, and whether there were more than `max` (the rest are left out). */
+export function placeTilesFor(b: Bounds, max = PLACE_TILES_MAX): { keys: string[]; capped: boolean } {
+  const keys: string[] = [];
   for (let la = Math.floor(b.south); la <= Math.floor(b.north); la++) {
     for (let ln = Math.floor(b.west); ln <= Math.floor(b.east); ln++) {
-      out.push(`${la}_${ln}`);
-      if (out.length >= max) return out;
+      if (keys.length >= max) return { keys, capped: true };
+      keys.push(`${la}_${ln}`);
     }
   }
-  return out;
+  return { keys, capped: false };
 }
 
 export const PLACE_TILE_COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence"] as const;
@@ -140,13 +143,34 @@ export function parsePlaceTile(text: string): Place[] {
   return out;
 }
 
-/** The places of these types in the box, the surest first, at most `limit`; and how many there were in all. */
-export function placesIn(all: readonly Place[], b: Bounds, categories: readonly PlaceCategory[], limit = PLACES_LIMIT): { places: Place[]; total: number } {
+/** Whether a place matches what was typed in the search box: its name, brand, kind or street, any case. */
+export function placeFitsSearch(p: Place, q: string): boolean {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return true;
+  return [p.name, p.brand, p.kind, p.street].some((v) => !!v && v.toLowerCase().includes(needle));
+}
+
+/**
+ * The places of these types in the box (matching the search, if any), the surest first, at most `limit`; and how many
+ * there were in all. Many places share a confidence, so ties go by id, which is random: a cut-off list is a fair
+ * spread of the map, not the A's and B's.
+ */
+export function placesIn(
+  all: readonly Place[],
+  b: Bounds,
+  categories: readonly PlaceCategory[],
+  limit = PLACES_LIMIT,
+  q = "",
+): { places: Place[]; total: number } {
   const wanted = new Set(categories);
-  const hits = all.filter((p) => wanted.has(p.category) && p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east);
-  hits.sort((a, c) => c.confidence - a.confidence || a.name.localeCompare(c.name) || a.id.localeCompare(c.id));
+  const hits = all.filter((p) => wanted.has(p.category) && p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east && placeFitsSearch(p, q));
+  hits.sort((a, c) => c.confidence - a.confidence || (a.id < c.id ? -1 : a.id > c.id ? 1 : 0));
   return { places: hits.slice(0, Math.max(0, limit)), total: hits.length };
 }
+
+/** Whether box `outer` holds all of box `inner`. */
+export const containsBounds = (outer: Bounds, inner: Bounds) =>
+  inner.south >= outer.south && inner.north <= outer.north && inner.west >= outer.west && inner.east <= outer.east;
 
 /** "502 Texas Avenue, Houston 77002", or null. */
 export function placeAddress(p: Pick<Place, "street" | "city" | "zip">): string | null {

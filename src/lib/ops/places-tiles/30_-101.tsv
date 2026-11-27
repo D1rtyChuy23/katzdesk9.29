@@ -38,7 +38,10 @@ eb521bb2f7a2	Sunoco	convenience		30.57792	-100.64920	503 US-277	Sonora	76950	+13
 2b22c7426753	Town & Country Food	convenience		30.56664	-100.64422	1001 S Crockett Ave	Sonora	76950	+13253872864	http://www.tcfs.com		0.92
 b07c59633985	Dairy Queen	fastfood		30.57604	-100.65146	134 US-277 N	Sonora	76950	+13253872118	https://www.dairyqueen.com/en-us/locations/tx/sonora/134-hwy-277-n/14618/?y_source=1_MjkzMzkwNzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 8d7743fc4dcb	DQ Grill & Chill	fastfood		30.57613	-100.65155	134 Hwy 277 N	Sonora	76950		https://www.dairyqueen.com/en-us/locations/tx/sonora/134-hwy-277-n/4390	DQ Grill & Chill	0.80
+000826ee1ad0	Pizza Hut	fastfood	pizza restaurant	30.57746	-100.64977	401 US Hwy 277 N. Sutton	Sonora	76950	+13253873540	https://locations.pizzahut.com/tx/sonora/401-us-hwy-277-n?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289903	Pizza Hut	0.98
 13c4acf74f18	Sonic Drive In	fastfood		30.57564	-100.65122	131 Highway 277 N.	Sonora	76950	+13253875292	https://locations.sonicdrivein.com/tx/sonora/131-highway-277-n..html	Sonic Drive-In	0.97
+079be785fcf8	Subway	fastfood	sandwich shop	30.57059	-100.58550	3880 Loop 467	Sonora	76950	+13253872768	https://restaurants.subway.com/united-states/tx/sonora/3880-loop-467	Subway	0.93
+614d3e66c66c	Subway	fastfood	sandwich shop	30.56662	-100.64407	610 S Crockett Ave	Sonora	76950	+13253876181	https://restaurants.subway.com/united-states/tx/sonora/610-crockett-se	Subway	0.99
 343aacc389f3	Lowe's Market	grocery		30.56711	-100.64450	600 S Crockett Ave	Sonora	76950	+13253873438	https://www.lowesmarket.com/	Lowe's Market	0.96
 cae5b365bf18	Lowe's Market	grocery		30.01543	-100.20514	102 TX-55 P.O. Box 254	Rocksprings	78880	+18306832178	https://lowesmarket.com/	Lowe's Market	0.92
 e52218f82aaa	Sonora Super S	grocery		30.56719	-100.64440	600 S Crockett Ave	Sonora	76950	+13253873438			0.71
@@ -48,16 +51,13 @@ a31d971c0c65	Town & Country Food Store	grocery		30.57553	-100.65292	1105 N Crock
 7550ca83d282	Sutton County Hospital District	hospital		30.56335	-100.63470	308 Hudspeth St	Sonora	76950	+13253872521	http://www.sonora-hospital.org/		0.92
 995b695568d5	Wellness Center	hospital		30.56339	-100.63444	308 Hudspeth St	Sonora	76950	+13253872521	http://sonora-hospital.org		0.88
 ac0e8cd2e2b5	Comfort Inn	hotel		30.57808	-100.65040	311 Highway 277 N	Sonora	76950	+13253875800	https://www.choicehotels.com/texas/sonora/quality-inn-hotels/tx831?mc=llyxyxpx		0.77
-24c54379d6d1	Days Inn Sonora Devils River	hotel		30.58005	-100.64856	1312 N Service Rd	Sonora	76950	+18003291073	https://www.wyndhamhotels.com		0.55
 372aea9cc2b4	Days Inn Sonora Devils River	hotel		30.56684	-100.64344	1312 N Service Rd	Sonora	76950	+13253873516	https://www.wyndhamhotels.com/days-inn/sonora-texas/days-inn-sonora-devils-river/overview?CID=LC:DI::BING:RIO:National:07733&iata=00065402		0.85
 9353e4d9ab81	Econo Lodge	hotel	resort	30.57978	-100.64848	1312 N Service Rd, Building A	Sonora	76950	+13255300007	https://www.choicehotels.com/texas/sonora/econo-lodge-hotels/txn88?mc=llbillpx&pmf=local		0.98
 f49bb33aeadc	Economy Inn	hotel		30.57481	-100.65223	1009 N Crockett Ave	Sonora	76950	+13253872551	economy-inn-fort-wayne.edan.io		0.90
 90259e96345c	Historic Rocksprings Hotel	hotel		30.01675	-100.20861	200 W Austin St	Rocksprings	78880	+18306834212	http://www.historicrockspringshotel.com		0.92
 f6b8cf6477fc	Holiday Host Motel and RV Park	hotel	motel	30.56124	-100.63912	127 TX-467 Loop	Sonora	76950	+13253872531	https://holiday-host-motel-sonora.booked.net		0.98
 06b347390e72	JL Bar Ranch & Resort	hotel	resort	30.56337	-100.45213	3500 Private Road 2254	Sonora	76950	+18554143337	https://jlbar.com		0.77
-c39c6ed2b33e	LeGrand Headwaters Ranch (North Headquarters)	hotel	lodge	30.72172	-100.36926	9501 Ranch to Market Rd 2596	Eldorado	76936	+13256518841	http://www.legrandheadwatersranch.com/		0.95
 5c89dacfc86d	Mesa Motel	hotel	motel	30.01558	-100.20712		Rocksprings	78880	+18306833241			0.92
-c9ece232f781	Mitchell Lodge	hotel	lodge	30.01563	-100.20978	201 S Well St	Rocksprings	78880	+18306832184	http://mitchelllodge.placeweb.site		0.96
 c432a07163e1	Motel 6 Sonora, Tx	hotel	motel	30.58005	-100.64856	1312 N Service Rd	Sonora	76950	+13253873516	https://www.motel6.com		0.98
 18d1fe9cbbf2	Quality Inn	hotel	resort	30.57784	-100.65042	311 Highway 277 N	Sonora	76950	+13255305883	https://www.choicehotels.com/texas/sonora/quality-inn-hotels/tx831?mc=llbillpx&pmf=local		1.00
 a48ac9baac4c	Shaws Motel	hotel	motel	30.86047	-100.60109	13 S Divide St	Eldorado	76936	+13258532866	https://shaws-motel-tx.hub.biz		0.92
@@ -66,7 +66,6 @@ cf0807b1a60a	Sorrell's Inn	hotel	motel	30.01552	-100.20594	205 E Main St	Rockspr
 2379e7c787f7	Super 8	hotel	motel	30.57578	-100.65313	1009 N Crockett Ave	Sonora	76950	+13253872551	https://www.wyndhamhotels.com/super-8/sonora-texas/super-8-sonora/overview		0.98
 37e5f4246181	Sutton County Hospitality Llc	hotel		30.57481	-100.65223	1009 N Crockett Ave	Sonora	76950				0.95
 849e1626cfe0	The Pineview Inn	hotel	motel	30.01553	-100.20605	205 E Main St	Rocksprings	78880	+18303087780	https://www.hotels.cloudbeds.com		0.75
-7855362f6785	X Bar Ranch Nature Retreat	hotel	lodge	30.73610	-100.82445	8115 Farm To Market 2129	Eldorado	76936	+13258532688	https://www.facebook.com/share/17LmQwCoq2/?mibextid=wwXIfr		0.99
 93e4176694a6	Zola's Motel	hotel		30.57650	-100.65277	1108 N Crockett Ave	Sonora	76950	+13253873000			0.92
 bbc65a5b016c	Grady Douglass Custom Leather	office	bags luggage company	30.01442	-100.20559		Rocksprings	78880	+18303772631	http://www.gradydouglass.com/		0.92
 36e8b7fa07e6	Halliburton	office	energy company	30.58065	-100.65052	1522 N Service Rd	Sonora	76950	+13253875881	http://www.halliburton.com		0.92
@@ -95,12 +94,9 @@ c5afb5272464	Laredo Taco Company	restaurant		30.57481	-100.65200	805 N Crockett 
 6d595f072a88	Mercantile On Main	restaurant		30.57150	-100.64484	232 E Main St	Sonora	76950	+13253873753	http://mercantileonmain.com/		0.92
 577859b63124	Miss Buffy's Fried Chicken	restaurant	chicken restaurant	30.01556	-100.20900	215 W Main St	Rocksprings	78880	+18302347197			0.99
 91c8529700e2	Pit Stop BBQ	restaurant	barbecue restaurant	30.57472	-100.65115	802 N Crockett Ave	Sonora	76950	+13253872626			0.98
-000826ee1ad0	Pizza Hut	restaurant	pizza restaurant	30.57746	-100.64977	401 US Hwy 277 N. Sutton	Sonora	76950	+13253873540	https://locations.pizzahut.com/tx/sonora/401-us-hwy-277-n?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289903	Pizza Hut	0.98
 5727b7cd6f01	Pizza Pro	restaurant	pizza restaurant	30.86332	-100.59798	303 N Divide St	Eldorado	76936	+13258352504			0.98
 11801b0ff6f6	Rock Ridge RoadHouse	restaurant	american restaurant	30.01555	-100.20813	103 W Main St	Rocksprings	78880	+18306833308			0.67
 5dacca5e2416	Sonia's Taco's	restaurant	mexican restaurant	30.01587	-100.20512	304 E Main St	Rocksprings	78880	+18308340037			0.97
-079be785fcf8	Subway	restaurant	sandwich shop	30.57059	-100.58550	3880 Loop 467	Sonora	76950	+13253872768	https://restaurants.subway.com/united-states/tx/sonora/3880-loop-467	Subway	0.93
-614d3e66c66c	Subway	restaurant	sandwich shop	30.56662	-100.64407	610 S Crockett Ave	Sonora	76950	+13253876181	https://restaurants.subway.com/united-states/tx/sonora/610-crockett-se	Subway	0.99
 7bd8515db4ae	Sutton County Steak House	restaurant	steakhouse	30.58005	-100.64856	1312 N Service Rd	Sonora	76950	+13253873833	https://sutton-county-steak-house-inc.square.site		0.91
 40b92f3fbec7	Taco Grill	restaurant	mexican restaurant	30.57648	-100.64972	232 US-277	Sonora	76950	+13253879127	https://www.restaurant.com/taco-grill-sonora-reviews-pid=185771		0.95
 ef5890489b1e	The Cabin takeout & catering	restaurant		30.86348	-100.59283	808 East St	Eldorado	76936	+13258128757			0.96

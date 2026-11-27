@@ -27,6 +27,7 @@ e4b5172646e1	Sam's Truck Stop	convenience		31.03496	-104.85649		Van Horn	79855	+
 a8345a76a0d3	Valero	convenience		31.03628	-104.83109	500 E Van Horn St.	Van Horn	79855	+14322831447	http://www.valero.com	Valero Energy	0.92
 85b6e562b1e5	Xpress Fuel Travel Center	convenience		31.03908	-104.81546	900 Frontage Rd	Van Horn	79855	+19153358044	https://locations.pilotflyingj.com/us/tx/van-horn/900-frontage-rd	Pilot Flying J	0.97
 862e399bfd13	McDonald's	fastfood		31.03474	-104.85555	1809 Frontage Rd	Van Horn	79855	+14322832692	https://www.mcdonalds.com/us/en-us/location/tx/van-horn/1809-se-frontage-rd/11696.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+75724c136be3	Pizza Hut	fastfood	pizza restaurant	31.03811	-104.85497	1808 W Broadway	Van Horn	79855	+14322832860	https://www.pizzahut.com/	Pizza Hut	0.57
 f43f01e281d3	Subway	fastfood		31.04000	-104.81911	810 E. Broadway	Van Horn	79855	+14322832881	https://restaurants.subway.com/united-states/tx/van-horn/810-e-broadway	Subway	0.97
 0068ab4a978b	Wendy's	fastfood		31.03612	-104.83014	501 Van Horn Drive	Van Horn	79855	+14322838070	https://locations.wendys.com/united-states/tx/van-horn/501-van-horn-drive	Wendy's	0.99
 2580b30945c5	Pueblo Market	grocery		31.03728	-104.85432	1807 W Broadway St	Van Horn	79855	+14322832125	http://www.pueblomarkets.com		0.92
@@ -60,9 +61,7 @@ b5a45f08580a	Chelas Mexican Restaurant	restaurant	mexican restaurant	31.03551	-1
 8a23cff45279	Gilbert's Restaurant	restaurant	mexican restaurant	31.04034	-104.82725	313 E Broadway	Van Horn	79855	+14322849153			0.98
 f6c51c4ea1ab	Gopher Hole Bar	restaurant	american restaurant	31.03963	-104.83080	100 E Broadway St	Van Horn	79855	+14322831347	http://www.hotelelcapitan.net/		0.91
 a9d0543ae044	Mom's Kitchen	restaurant	texmex restaurant	31.04217	-104.83109	201 La Caverna St	Van Horn	79855	+14322832134			0.98
-75724c136be3	Pizza Hut	restaurant	pizza restaurant	31.03811	-104.85497	1808 W Broadway	Van Horn	79855	+14322832860	https://www.pizzahut.com/	Pizza Hut	0.57
 383e30ca13f2	Plateau Truck Stop and Restaurant	restaurant		31.06311	-104.50186		Van Horn					0.73
 a7abd97c8799	RJ's Bar and Grill	restaurant	american restaurant	31.03811	-104.85497	1808 W Broadway	Van Horn	79855	+14322830062			0.76
-656ec8d8ba51	SUBWAY	restaurant	sandwich shop	31.05823	-104.54977		Van Horn			http://subway.com		0.77
 45360a7aa14e	Uncles Cafe	restaurant		31.03777	-104.83143	400 Van Horn Dr	Van Horn	79855	+14322830069			0.92
 da9a4b4c7e9a	Van Horn Cattle Company	restaurant	steakhouse	31.03761	-104.85119	1703 W Broadway St	Van Horn	79855	+14322831163	https://www.vanhorncattlecompany.com/#!		0.97

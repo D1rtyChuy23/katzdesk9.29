@@ -83,7 +83,6 @@ b1f63a435028	Conoco	convenience		35.90470	-100.39005	959 S 2nd St	Canadian	79014
 d2707197339f	Crossroads	convenience		35.22918	-100.24899	1416 N Main St	Shamrock	79079	+18062565156	http://hjgarrison.com/	Crossroads TG	0.99
 7aa69a3f40db	CVS Pharmacy	convenience		35.54820	-100.97121	1300 N Hobart St	Pampa	79065	+18066652705	http://locations.cvsrx.com/tx/pampa/-pampa-tx-3431.html		1.00
 113459ef0bb6	Edwards Chevron Service Station	convenience		35.22274	-100.11697	15810 W Business 40	Shamrock	79079	+18062562411	https://www.chevron.com		0.55
-f9b701328ceb	Food Mart	convenience		35.94234	-100.37057		Canadian					0.72
 1a5ecf15248c	Fronk Oil	convenience		35.91019	-100.39030	718 S 2nd St	Canadian	79014	+18063235103			0.92
 556876c10947	Frontier Fuel Co	convenience		35.53078	-100.96101	501 W Brown St	Pampa	79065	+18066651617	https://www.frontierfuel.com		0.65
 fd451d40dfff	Garrison Food Mart	convenience		35.23222	-100.24959	1627 N Main St	Shamrock	79079	+18062561881	http://www.chevron.com/	Garrison Food Mart Shamrock Texas	0.92
@@ -120,12 +119,20 @@ b8f620aacc7e	Valero	convenience		35.54932	-100.97157	1342 N Hobart St	Pampa	7906
 f164e0d7dd18	Valero	convenience		35.22245	-100.24963	811 N Main St	Shamrock	79079	+12103452000	https://www.valero.com		0.65
 4c401e65890c	Braum's Ice Cream & Dairy Store	fastfood		35.54216	-100.97222	901 N Hobart St	Pampa	79065	+18066658930	https://www.braums.com/store/901-n-hobart-st-pampa-tx/	Braums	0.98
 6e12c0d6f1b4	Chicken Express	fastfood		35.56067	-100.97146	2201 Perryton Pkwy	Pampa	79065	+18066692442	http://www.chickenexpress.us/	Chicken Express	0.97
+2fd6ec87fc10	Domino's	fastfood	pizza restaurant	35.55303	-100.97228	1541 N Hobart	Pampa	79065	+18066658080	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 97d96fb753eb	KFC	fastfood		35.56090	-100.97244	2201 N Hobart St	Pampa	79065	+18066652766	https://locations.kfc.com/tx/pampa/2201-n-hobart-street	KFC	0.98
+f5eefeecfc76	Little Caesars	fastfood	pizza restaurant	35.56539	-100.96841	2505 Perryton Pkwy	Pampa	79065	+18066881088	https://littlecaesars.com/en-us/store/11095	Little Caesars	0.97
+9d23f2721063	Long John Silver's	fastfood	american restaurant	35.54375	-100.97163	1050 N Hobart St	Pampa	79065	+18066652201	http://www.ljsilvers.com/		0.92
 315e2b42ed29	Marys Burritos.	fastfood		35.53328	-100.96664	601 W Foster Ave	Pampa	79065	+18066624353	http://marys-burritos.poi.place		0.94
 5fc456cf6f54	McDonald's	fastfood		35.22871	-100.24938	1235 N Main	Shamrock	79079	+18062562567	https://www.mcdonalds.com/us/en-us/location/tx/shamrock/1235-n-main/16882.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 869e2aba8f45	McDonald's	fastfood		35.54519	-100.97244	1201 N Hobart	Pampa	79065	+18066655891	https://www.mcdonalds.com/us/en-us/location/tx/pampa/1201-n-hobart/13611.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 8909ab553832	Pak-A-Burger	fastfood		35.55381	-100.97163	1608 N Hobart St	Pampa	79065	+18066692865	https://pakasak.net		0.92
+0f3d98e407f1	Pizza Hut	fastfood	pizza restaurant	35.55165	-100.97301	1500 N Banks St Gray	Pampa	79065	+18066650887	https://locations.pizzahut.com/tx/pampa/1500-n-banks-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284600	Pizza Hut	0.98
+2e7aab5bdcfa	Pizza Hut	fastfood	pizza restaurant	35.91316	-100.38731	322 S 2nd St Hemphill	Canadian	79014	+18063235122	https://locations.pizzahut.com/tx/canadian/322-s-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291986	Pizza Hut	0.98
 66ed3c4a356c	Sonic Drive In	fastfood		35.54986	-100.97118	1404 N. Hobart	Pampa	79065	+18066693171	https://locations.sonicdrivein.com/tx/pampa/1404-n.-hobart.html	Sonic Drive-In	0.94
+6c0f6098954d	Subway	fastfood	sandwich shop	35.22994	-100.24948	1249 N Main St	Shamrock	79079	+18062562059	https://restaurants.subway.com/united-states/tx/shamrock/1249-n-main-street	Subway	0.98
+7b6fb2dff4fa	SUBWAY	fastfood	sandwich shop	35.57006	-100.96989	in Walmart	Pampa	79065	+18066693939	http://subway.com		0.77
+c88e35329135	Subway	fastfood	sandwich shop	35.56017	-100.97237	2141 N Hobart St	Pampa	79065	+18066697702	https://www.subway.com		0.98
 405fa556c4e1	Taco Bell	fastfood		35.23211	-100.24957	1629 N Main St	Shamrock	79079	+18062565078	http://www.tacobell.com/	Taco Bell	0.97
 ec1a35ccba51	Taco Bell	fastfood		35.54269	-100.97175	1002 N Hobart St	Pampa	79065	+18066650601	http://www.tacobell.com/	Taco Bell	0.98
 3ed38a2ecb52	Wendy's	fastfood		35.54535	-100.97247	1205 N Hobart St	Pampa	79065	+18064191601	https://locations.wendys.com/united-states/tx/pampa/1205-n-hobart-st	Wendy's	0.94
@@ -145,7 +152,6 @@ c5d15668bf26	Parkview Hospital	hospital		35.43934	-100.27026	901 Sweetwater St	W
 f506941b0d6c	Shamrock General Hospital	hospital		35.19910	-100.24814	1000 S Main St	Shamrock	79079	+18062562114	https://shamrockhospital.com/		1.00
 7551555ddda9	Alanreed Travel Center	hotel	motel	35.21438	-100.73980	13100 Interstate 40	Mclean	79057	+18067792202	http://www.alanreedtx.com		0.92
 8dbc8cdb9db7	AmericInn Pampa Event Center	hotel		35.54359	-100.97298	1101 N Hobart St	Pampa	79065	+18066654404	http://www.americinn.com/hotels/TX/Pampa?chebs=ai_directory_listings		0.92
-34a07d4e1f2a	Arrington Ranch & Lodge	hotel	lodge	35.71582	-100.45226	9765 Co Rd 5	Canadian	79014	+18773256924	http://www.arringtonranch.com/		0.71
 74d9b975c72a	Athena Hospitality Lp	hotel		35.91280	-100.38670	303 S 2nd St	Canadian	79014		https://www.athenahospitalitygroup.com		0.95
 41dd1abf7c42	Baymont by Wyndham Wheeler	hotel		35.43143	-100.27253	1414 S Alan L Bean Blvd	Wheeler	79096	+18065890460	https://www.wyndhamhotels.com/baymont/wheeler-texas/baymont-inn-and-suites-wheeler/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A19977	Baymont by Wyndham	1.00
 12972d5517b2	Best Western Northgate Inn	hotel		35.57013	-100.96579	2831 Perryton Pkwy	Pampa	79065	+18066650926	https://www.bestwestern.com/en_US/book/hotel-rooms.44309.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44309	Best Western Hotels & Resorts	1.00
@@ -153,7 +159,6 @@ c90467b250c6	Best Western Oasis Inn	hotel		35.91280	-100.38674	303 S 2nd St	Cana
 d2b51407beb2	Best Western Plus Shamrock Inn & Suites	hotel		35.23238	-100.24834	1802 N Main St	Shamrock	79079	+18062561001	https://www.bestwestern.com/en_US/book/hotel-rooms.44518.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44518	Best Western Hotels & Resorts	0.99
 632396640b55	Black Gold Motel	hotel	motel	35.53299	-100.94501	12029 E Frederic Ave	Pampa	79065	+18066655723	http://www.blackgoldtx.com		0.96
 37d6a5ad3918	Blarney Inn	hotel	motel	35.22636	-100.24493	402 E 12th St	Shamrock	79079	+18062562101	http://www.budgethost.com		0.99
-1bb059f01a12	Cabin at Indian Creek	hotel		35.89363	-100.81780	2200 FM-283	Miami	79059	+18066695307			0.76
 fda0c8a086dd	Cabin at Indian Creek	hotel		35.89327	-100.81765	2200 FM-283	Miami	79059	+18066695307			0.77
 ed273a962ff3	Cactus Inn	hotel	motel	35.23379	-100.60757	101 Pine St	Mclean	79057	+18067792346	https://hotels.cloudbeds.com/reservation/9JfAmQ#checkin=2025-05-30&checkout=2025-05-31		1.00
 70da34541c75	Canadian Courts Motel	hotel	motel	35.91625	-100.38394	220 S 2nd St	Canadian	79014	+18063238058	http://www.canadiancourts.com		0.99
@@ -166,9 +171,7 @@ f1c53676be3a	Econo Lodge	hotel	motel	35.91597	-100.38414	220 N 2nd St	Canadian	7
 3ac7c3021e14	El Capri Motel	hotel	motel	35.53384	-100.95590	321 E Brown St	Pampa	79065	+18066658497	https://el-capri-motel.hub.biz/		0.95
 eada43513ba2	FairBridge Inn & Suites Canadian	hotel		35.90250	-100.39035	200 E Cedar St	Canadian	79014	+18063236111	http://www.fairBridgeinnsuitescanadian.com/		0.98
 99884eb2ade7	Hadaway Haven Bed and Breakfast	hotel		35.91474	-100.38042	419 E Elsie Ave	Canadian	79014	+18062550007			0.86
-4d28476a2bf1	Hampton Inn Pampa	hotel		35.57013	-100.96417	2820 Perryton Pkwy	Pampa	79065	+18066691555	https://www.hilton.com		0.95
 fd31f3c33027	Hampton Inn Pampa	hotel		35.56994	-100.96385	2820 Perryton Pkwy	Pampa	79065	+18066691555	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
-84276331cb6e	Harikrishna Llc	hotel		35.54363	-100.97297	1101 N Hobart St	Pampa	79065				0.95
 cea84af1a12f	Holiday Inn Express & Suites	hotel		35.57446	-100.96246	3119 Perryton Pkwy	Pampa	79065	+18066659500	https://www.ihg.com/holidayinnexpress/hotels/us/en/pampa/ppatx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-PPATX	Holiday Inn Express	1.00
 57fd0ec0748b	Holiday Inn Express and Suites	hotel		35.22773	-100.24844	101 E 13th St	Shamrock	79079	+18062565022	https://www.ihg.com/holidayinnexpress/hotels/us/en/shamrock/smrtx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SMRTX	Holiday Inn Express	1.00
 47868f675ba5	HomeTowne Studios Shamrock	hotel	motel	35.22534	-100.23884	1006 E 12th St, Building B	Shamrock	79079		https://www.redroof.com/extendedstay/hometownestudios/property/tx/shamrock/hts1591	HomeTowne Studios	0.80
@@ -187,7 +190,6 @@ ec1e0a31d5fb	Protea Hospitality, Llc	hotel		35.57450	-100.96246	3119 Perryton Pk
 6fcff2947528	Route 66 Inn	hotel	resort	35.22646	-100.24055	800 E 12th St	Shamrock	79079	+18062563225	https://route66innshamrocktx.com/		0.98
 90e52a87aaae	Shamrock Country Inn	hotel	motel	35.22680	-100.24190	711 E 12th St	Shamrock	79079	+18062563257	http://www.shamrockcountryinn.com		0.99
 f976fb6f748b	Sleep Inn and Suites	hotel		35.22989	-100.24747	111 E 15th St	Shamrock	79079	+18062564780	http://www.sleepinn.com/	Choice Hotels	1.00
-cb83839f6c97	Sportsman's Club & Outpost	hotel	lodge	35.51198	-100.95361	1435 S Barnes St	Pampa	79065	+19405859032			0.92
 92db42edba9f	Texan Motel	hotel	motel	35.22634	-100.25423	412 W 12th St	Shamrock	79079	+18062563569			0.92
 5e18d652ee12	The Inn of Pampa	hotel	motel	35.53378	-100.94279	12037 E Frederic Ave	Pampa	79065	+18064378981			0.92
 e53f30007de8	The Irish Inn Boutique Hotel	hotel		35.23260	-100.24522	301 I-40	Shamrock	79079	+18062142290	http://irishstay.com/		1.00
@@ -215,7 +217,6 @@ e729a32b5009	Big Verns Steakhouse	restaurant	steakhouse	35.22596	-100.24769	200 
 f50c7f7ce928	Burrito Hut	restaurant	mexican restaurant	35.22359	-100.24902	910 N Main St	Shamrock	79079	+18062562400	http://www.burgerking.com		0.96
 6d7946076a0f	Caminos de Guanajuato Mexican Restaurant	restaurant		35.53247	-100.95869	421 S Cuyler St	Pampa	79065	+18064191228			0.63
 06bfe0b01b63	Canadian Restaurant	restaurant	comfort food restaurant	35.91710	-100.38206	402 N 2nd St	Canadian	79014	+18063239176	https://www.restaurantscanada.org/		0.93
-39a9887ae4dc	Canadian Restaurant	restaurant	canadian restaurant	35.91271	-100.38758	402 N 2nd St	Canadian	79014	+18063239176			0.85
 4f893504fdf7	Cat's Paw	restaurant	american restaurant	35.90921	-100.38352	411 S 6th St	Canadian	79014	+18063238616			0.92
 3e96d9213e8b	China Dragon	restaurant	pan asian restaurant	35.54822	-100.97226	1307 N Hobart St	Pampa	79065	+18066658286	https://www.chinadragonpampatx.com/zysp28ba/restaurant/order-online		0.94
 a2901419fc7c	China King	restaurant	chinese restaurant	35.53718	-100.97166	518 N Hobart St	Pampa	79065	+18066693565	http://www.newchinasuperbuffetpampa.com		0.92
@@ -225,7 +226,6 @@ bb27f6bdf1a1	Chubby's Burrito Co	restaurant	mexican restaurant	35.54889	-100.971
 086f4235a0d9	Cookya Inc	restaurant		35.91489	-100.38530	122 Main St	Canadian	79014		cookya.com		0.95
 939970324958	Cookya Inc	restaurant		35.91339	-100.38608	217 S 2nd St	Canadian	79014		cookya.com		0.95
 f3b8f53ac7ca	Cyd's Cafe	restaurant		35.53719	-100.97162	518 N Hobart St	Pampa	79065	+18066601606			0.60
-2fd6ec87fc10	Domino's	restaurant	pizza restaurant	35.55303	-100.97228	1541 N Hobart	Pampa	79065	+18066658080	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 9d594fd42d26	EL ASADOR DE TITO	restaurant	mexican restaurant	35.52694	-100.96892	725 W Brown St	Pampa	79065	+18064193100			0.96
 626f289332cd	El Ranchito	restaurant	mexican restaurant	35.53336	-100.98917	11809 Highway 152	Pampa	79065	+18066652625	http://www.elranchito-dallas.com		0.92
 9fdec91b6b0f	El Rincón Mexicano	restaurant	mexican restaurant	35.55563	-100.97235	1807 N Hobart St	Pampa	79065	+18068980185			0.92
@@ -245,7 +245,6 @@ c4513edaba2c	Hamburger Station	restaurant	burger restaurant	35.52200	-100.98618	
 e5c131ccb027	Hoagie's Deli	restaurant	delicatessen	35.54673	-100.97375	1201 N Hobart St	Pampa	79065	+18066650292	http://www.hoagiesdeli.com		0.97
 907324f311d0	Hunt Brothers Pizza	restaurant	pizza restaurant	35.53962	-100.96208	400 N Ballard St	Pampa	79065	+18064193080	https://www.huntbrotherspizza.com/location-details/108289/		0.93
 7cd730231e97	Indian Mound Ranch	restaurant	indian restaurant	35.68795	-100.18399	9577 County Road 20	Briscoe	79011	+18063752263			0.59
-be2af5c23636	Indian Mound Ranch	restaurant	indian restaurant	35.69205	-100.18352	9577 County Road 20	Briscoe	79011	+18063752263			0.59
 9bc66b7c59d9	Irish blessings gifts /Tower Plaza Pizzeria	restaurant		35.21498	-100.24935	115 S Main St	Shamrock	79079	+18062562323			0.95
 0fb4fb70489c	Jay's Drive Inn	restaurant	burger restaurant	35.53335	-100.97281	924 Alcock St	Pampa	79065	+18066692722	http://jaysdriveinnpampa.com/		0.98
 ac84ff567fc0	Jumping Leprechauns	restaurant	texmex restaurant	35.21601	-100.24928	213 N Main St	Shamrock	79079	+18062162176			0.92
@@ -257,9 +256,7 @@ c0b5766e6c65	Kozy Korner Restaurant	restaurant		35.53263	-100.96864	712 W Foster
 18ed966ac217	La Herradura	restaurant	mexican restaurant	35.53312	-100.95134	732 E Frederic Ave	Pampa	79065	+18066650538			0.92
 2419a3181aac	La Herradura	restaurant	texmex restaurant	35.53326	-100.94516	1100 E Frederic Ave	Pampa	79065	+18066650538	https://la-herradura-tx-1.hub.biz		0.92
 60888765d3e8	Lampliter Restaurant	restaurant	chinese restaurant	35.53291	-100.95934	403 S Cuyler St	Pampa	79065	+18066519129	https://www.lamplitertexas.com/#		0.94
-f5eefeecfc76	Little Caesars	restaurant	pizza restaurant	35.56539	-100.96841	2505 Perryton Pkwy	Pampa	79065	+18066881088	https://littlecaesars.com/en-us/store/11095	Little Caesars	0.97
 4fc00c7ef610	Lolly's	restaurant	delicatessen	35.23179	-100.59977	110 N Main St	Mclean	79057	+18064867577	http://thewildflowermarket.com		0.64
-9d23f2721063	Long John Silver's	restaurant	american restaurant	35.54375	-100.97163	1050 N Hobart St	Pampa	79065	+18066652201	http://www.ljsilvers.com/		0.92
 8c728a0228e1	Main Street Meat Market and Deli	restaurant	delicatessen	35.21497	-100.24950	115 N Main St	Shamrock	79079	+18062161686			0.92
 ff878061cb37	Maxey's Steakhouse	restaurant	steakhouse	35.42720	-100.27168	7789 US-83	Wheeler	79096	+18068263441	http://maxeyssteakhouse.com/		0.92
 84f3c8bfd0b0	Mel's Diner of Wheeler Texas	restaurant	american restaurant	35.44429	-100.26473	704 E Oklahoma Ave	Wheeler	79096	+18068263756			0.97
@@ -267,8 +264,6 @@ ff878061cb37	Maxey's Steakhouse	restaurant	steakhouse	35.42720	-100.27168	7789 U
 a84c3d7e3d4c	New China Super Buffet	restaurant		35.53714	-100.97161	518 N Hobart St	Pampa	79065	+18066693565	http://www.newchinasuperbuffetpampa.com		0.92
 d1007486ecd3	North 40 Settlers	restaurant	comfort food restaurant	35.56662	-100.96907	2545 Perryton Pkwy	Pampa	79065	+18066696237	https://www.instagram.com/north40settlers?igsh=Nmp2Mmk1MjFzYzhz&utm_source=ig_contact_invite		0.95
 54d5c3d52f92	Osaki Steak House	restaurant	japanese restaurant	35.56714	-100.96867	2545 Perryton Pkwy #25	Pampa	79065	+18066691828	https://www.osakisteaksushi.com/	Osaki Steak & Sushi House Pampa TX	0.92
-0f3d98e407f1	Pizza Hut	restaurant	pizza restaurant	35.55165	-100.97301	1500 N Banks St Gray	Pampa	79065	+18066650887	https://locations.pizzahut.com/tx/pampa/1500-n-banks-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284600	Pizza Hut	0.98
-2e7aab5bdcfa	Pizza Hut	restaurant	pizza restaurant	35.91316	-100.38731	322 S 2nd St Hemphill	Canadian	79014	+18063235122	https://locations.pizzahut.com/tx/canadian/322-s-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291986	Pizza Hut	0.98
 19fc618932b1	Plaza Restaurant	restaurant	texmex restaurant	35.54611	-100.97336	1201 N Hobart St	Pampa	79065	+18066880031	https://www.theplazarestaurant.com/	The Plaza Restaurant & Bar - Lubbock, Texas	0.92
 5237ff22b9fb	Railhead Bar & Grill	restaurant		35.91629	-100.38400	220 N 2nd St	Canadian	79014	+18063239435			0.65
 66caf2448a03	RARAS & RARAS Texas Mobile Food	restaurant	texmex restaurant	35.22367	-100.24929	911 N Main St	Shamrock	79079				0.88
@@ -280,9 +275,6 @@ adbdb9ee13a7	Shane-shell Limited Partnership	restaurant		35.54627	-100.97467	120
 1f5685db4195	Simply Bare	restaurant	health food restaurant	35.56124	-100.97146	2131 Perryton Pkwy	Pampa	79065	+18064862504			0.75
 66114cfa5fca	Smokin Joe's Burger Shack, Llc	restaurant		35.56693	-100.96893	2545 Perryton Pkwy	Pampa	79065		https://www.smokinjoesburgers.com		0.95
 346d34b4777e	Sotos Family Restaurant | Mexican • American	restaurant	theme restaurant	35.44442	-100.26385	708 E Oklahoma Ave	Wheeler	79096	+18068263129			0.94
-6c0f6098954d	Subway	restaurant	sandwich shop	35.22994	-100.24948	1249 N Main St	Shamrock	79079	+18062562059	https://restaurants.subway.com/united-states/tx/shamrock/1249-n-main-street	Subway	0.98
-7b6fb2dff4fa	SUBWAY	restaurant	sandwich shop	35.57006	-100.96989	in Walmart	Pampa	79065	+18066693939	http://subway.com		0.77
-c88e35329135	Subway	restaurant	sandwich shop	35.56017	-100.97237	2141 N Hobart St	Pampa	79065	+18066697702	https://www.subway.com		0.98
 ac86120d7cb1	Sunset Diner	restaurant	diner	35.44547	-100.27145	205 E Oklahoma Ave	Wheeler	79096	+18068261234			0.92
 bdbc16c60b15	Texas Rose Steakhouse	restaurant	steakhouse	35.57005	-100.96532	2841 Perryton Pkwy	Pampa	79065	+18066691009	http://Texasrosesteakhouse.com/	Texas Rose Steakhouse Amarillo	0.98
 3d13539d3474	The Back Forty Howardwick Texas	restaurant		35.03267	-100.90968	221 Rick Husband Blvd	Howardwick	79226	+18062237463			0.93

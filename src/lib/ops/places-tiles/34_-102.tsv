@@ -130,7 +130,6 @@ efb6c4e76ae1	Love's Travel Stop	convenience		34.53600	-101.77279	2851 W TX-86	Tu
 f24e45f952ee	Murphy USA	convenience		34.19475	-101.75089	4001 W 15th	Plainview	79072	+18062230986	http://www.murphyusa.com/		0.92
 3167e363add6	Pak-A-Sak	convenience		34.97940	-101.91017	2800 4th Ave	Canyon	79015	+18066559811	https://pakasak.net	PAK A SAK	0.92
 51a7408dd95e	Pak-A-Sak	convenience		34.97948	-101.93360	1100 4th Ave	Canyon	79015	+18066557559	https://pakasak.net/		0.99
-017e2ddaaec7	Phillips 66	convenience		34.20156	-101.70730	2403 N Columbia St	Plainview	79072	+18062931482	https://www.phillips66gas.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
 69274fc1f5d2	Phillips 66	convenience		34.97969	-101.93353	1100 TX-217	Canyon	79015	+18066557559	https://www.phillips66gas.com/		0.92
 9d7e635443c4	Phillips 66	convenience		34.54346	-101.77625	525 N Highway 87	Tulia	79088	+18069952724	https://www.phillips66gas.com/		0.92
 a2dc682bd1d6	Phillips 66	convenience		34.20568	-101.70900	2403 N Columbia St	Plainview	79072	+18062931482	https://www.phillips66gas.com/	Phillips 66 Gas	0.92
@@ -169,8 +168,12 @@ efde2cf604f4	Chick-fil-A	fastfood		34.98252	-101.91658	Jbk Student Ctr	Canyon	79
 1d23ebcdc5a9	Chicken Express	fastfood		34.98381	-101.92016	2106 N 2nd Ave	Canyon	79015	+18066558800	http://chickene.com/	Chicken Express	0.97
 3d3e0850f049	Chicken Express	fastfood		34.18913	-101.75079	909 N Interstate 27	Plainview	79072	+18062910260	http://www.chickenexpress.us/	Chicken Express	0.99
 729ae2dc1ede	Dairy Queen	fastfood		34.18400	-101.71832	1307 W 5th St 1307 W 5th St	Plainview	79072	+18062910068	https://www.dairyqueen.com/en-us/locations/tx/plainview/1307-w-5th-st/41072/?y_source=1_MjkzMzkwNjQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+cf82966bcc76	Domino's	fastfood	pizza restaurant	34.98520	-101.91998	301 N 23rd St	Canyon	79015	+18066556600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
+6255612d6573	Domino's Pizza	fastfood	pizza restaurant	34.18439	-101.72890	2110 W 5th St	Plainview	79072	+18062919999	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
 852800447eee	DQ Grill & Chill	fastfood		34.18386	-101.71828	1307 W 5th St	Plainview	79072		https://www.dairyqueen.com/en-us/locations/tx/plainview/1307-w-5th-st/8762	DQ Grill & Chill	0.80
 520fb8325c5b	KFC	fastfood		34.18428	-101.72593	1900 W Fifth St	Plainview	79072	+18064290331	https://locations.kfc.com/tx/plainview/1900-w-fifth-st	KFC	0.98
+3bd7ada87857	Little Caesars	fastfood	pizza restaurant	34.98024	-101.91953	306 23rd St	Canyon	79015	+18065107231	https://littlecaesars.com/en-us/store/12431	Little Caesars	0.96
+cac46ec44845	Little Caesars Pizza	fastfood	pizza restaurant	34.18383	-101.72340	1707 W 5th St	Plainview	79072	+18062134685	https://littlecaesars.com/en-us/store/10488	Little Caesars	0.96
 22653900be08	Long John Silver's	fastfood		34.18473	-101.74075	3101 Olton Road	Plainview	79072		https://www.ljsilvers.com/locations/tx/plainview/3101-olton-road/	Long John Silver's	0.98
 83c7edd9db64	McDonald's	fastfood		34.18887	-101.75079	815 N I 27	Plainview	79072	+18062937430	https://www.mcdonalds.com/us/en-us/location/tx/plainview/815-n-i-27/6355.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 da81a4e561dc	McDonald's	fastfood		34.52722	-101.79279	2851 Tx-86	Tulia	79088		https://www.mcdonalds.com/us/en-us/location/41233.html	McDonald's	0.90
@@ -178,18 +181,33 @@ ee40e5b20376	McDonald's	fastfood		34.19613	-101.75319	1501 N I-27 (Walmart)	Plai
 ff2fc5ca73c8	McDonald's	fastfood		34.98174	-101.91978	200 23rd St	Canyon	79015	+18066559502	https://www.mcdonalds.com/us/en-us/location/tx/canyon/200-23rd-st/2532.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 4db8e2bf1b8f	Mi Sol Mexicano	fastfood		34.06832	-101.84477	1008 Main St	Hale Center	79041	+18064299400			0.92
 1b6f4707bec0	Mias Italian	fastfood		34.19055	-101.75253	1001 N Interstate 27	Plainview	79072			Mia's Italian Kitchen Orlando	0.76
+c9c4e09e9bbf	Papa Johns Pizza	fastfood	pizza restaurant	34.18767	-101.74876	3612 OLTON RD	Plainview	79072	+18066004272	https://locations.papajohns.com/united-states/tx/79072/plainview/3612-olton-rd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2ODUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+1e3c54de4c46	Pizza Hut	fastfood	pizza restaurant	34.19171	-101.74940	1108 N. Interstate Hwy. 27 Hale	Plainview	79072	+18062935334	https://locations.pizzahut.com/tx/plainview/1108-n-interstate-hwy-27?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305344	Pizza Hut	0.99
+475d920cdaa2	Pizza Hut	fastfood	pizza restaurant	34.98229	-101.92013	110 23rd St Randall	Canyon	79015	+18066557125	http://pizzahut.com/	Pizza Hut	0.98
+6a1bdb59b1a3	Pizza Hut	fastfood	pizza restaurant	34.53572	-101.77415	811 SW 2nd St Swisher	Tulia	79088	+18069954010	https://locations.pizzahut.com/tx/tulia/811-sw-2nd-st	Pizza Hut	0.98
+5a83756cf90d	Schlotzsky's	fastfood	sandwich shop	34.97445	-101.91869	901 23rd St	Canyon	79015	+18066552867	https://locations.schlotzskys.com/tx/canyon/901-s-23rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98
 17e72441baaf	Sonic Drive In	fastfood		34.53577	-101.77599	915 SW 2nd Street	Tulia	79088	+18069958887	https://locations.sonicdrivein.com/tx/tulia/915-sw-2nd-street.html	Sonic Drive-In	0.97
 47588babf6f2	Sonic Drive In	fastfood		34.18851	-101.75174	4004 Olton Road	Plainview	79072	+18062934848	https://locations.sonicdrivein.com/tx/plainview/4004-olton-road.html	Sonic Drive-In	0.95
 ee6ccd86d117	Sonic Drive In	fastfood		34.97293	-101.91905	1007 23Rd Street	Canyon	79015	+18066553661	https://locations.sonicdrivein.com/tx/canyon/1007-23rd-street.html	Sonic Drive-In	0.98
+de7bdcd87736	Sonic Drive-In	fastfood	burger restaurant	34.18422	-101.70866	501 W 5th St	Plainview	79072	+18062933199	https://locations.sonicdrivein.com/tx/plainview/501-w-fifth-street.html		0.98
+116686626e0e	Subway	fastfood	sandwich shop	34.96579	-101.91585	1701 N 23rd St	Canyon	79015	+18066556555	https://www.subway.com		0.95
+81b72d93d190	Subway	fastfood	sandwich shop	34.52866	-101.79718	700 S. I-27	Tulia	79088	+18069952620	https://restaurants.subway.com/united-states/tx/tulia/700-s-i-27?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=15256&utm_campaign=evergreen-2020&y_source=1_MTQ5MTY4NzYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
+df5d46a91220	Subway	fastfood	sandwich shop	34.98379	-101.91972	105 N 23rd St	Canyon	79015	+18066551193	https://www.subway.com		0.92
+e067867f3acb	Subway	fastfood	sandwich shop	34.99793	-101.92187	1701 North 23rd Street	Canyon	79015	+18066556555	https://restaurants.subway.com/united-states/tx/canyon/1701-north-23rd-street	Subway	0.98
+e24cf7054b63	Subway	fastfood	sandwich shop	34.19272	-101.75113	1001 Interstate Hwy Suite 840	Plainview	79072	+18062930652	https://restaurants.subway.com/united-states/tx/plainview/1001-interstate-hwy	Subway	0.96
 7a5c4fe59ce1	Summer Salt Steakhouse	fastfood		34.16888	-101.69731	3651 Timber Oak Drive	Plainview	79072				0.62
 3c94ff29291a	Taco Bell	fastfood		34.97693	-101.91888	611 23rd St	Canyon	79015	+18066557167	http://www.tacobell.com/	Taco Bell	1.00
 8ed11c9515fd	Taco Bell	fastfood		34.18952	-101.75095	911 N I-27	Plainview	79072	+18062966228	http://www.tacobell.com/	Taco Bell	0.98
 c9e9a39774aa	Tenderfix By Noah Schnapp	fastfood		34.18658	-101.75096	701 N Interstate 27	Plainview	79072	+18884135074	https://www.tenderfix.com		0.55
 5e9a0014f7eb	Wendy's	fastfood		34.19528	-101.75085	1509 N I27	Plainview	79072	+18064294033	https://www.wendys.com		0.92
 7011cdff4aa8	Wendy's	fastfood		34.97904	-101.91899	407 23rd St.	Canyon	79015	+18066557782	https://locations.wendys.com/united-states/tx/canyon/407-23rd-st	Wendy's	0.98
+311c3f9eee7d	Whataburger	fastfood	burger restaurant	34.98265	-101.91988	100 N 23rd Street	Canyon	79015	+18064760014	https://locations.whataburger.com/tx/canyon/100-n-23rd-street.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.99
+58605f37a305	Whataburger	fastfood	burger restaurant	34.18733	-101.74768	3606 Olton Road	Plainview	79072	+18064290008			0.92
+8cc527b88824	Wingstop	fastfood	chicken wings restaurant	34.97854	-101.91910	501 23rd St, Unit 6	Canyon	79015	+18065571060	https://www.wingstop.com/location/wingstop-2457-canyon-tx-79015/menu?y_source=1_MTA1NjY5NTkzMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.99
+bbaf80f35869	Wingstop	fastfood	chicken wings restaurant	34.18571	-101.74620	3435 Olton Rd	Plainview	79072	+18064291780	https://www.wingstop.com/location/wingstop-3181-plainview-tx-79072/menu?y_source=1_MjAyMDY5MjYxMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.98
+ccabff42dd45	Đồ Gia Dụng Hay	fastfood		34.18427	-101.70869	501 W 5th St	Plainview	79072		https://locations.sonicdrivein.com/tx/plainview/501-w-fifth-street.html	Sonic Drive-In	0.93
 6f032bfea067	Amigos	grocery		34.20554	-101.70879	2403 Columbia St	Plainview	79072	+18062932700	https://local.amigosunited.com/tx/plainview/2403-n-columbia-ave.html	Amigos	0.96
 76d54a24e2c9	Garrison Food Mart , Plainview Texas	grocery		34.18501	-101.73341	2510 W 5th St	Plainview	79072		http://Www.hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.96
-c60826bc742d	Garrison Food Mart , Plainview Texas	grocery		34.18483	-101.73351	2510 W 5th St	Plainview	79072		http://Www.hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.96
 5f2a887a47cc	Grocery Services North	grocery		34.18682	-101.74468	3400 Olton Rd	Plainview	79072	+18064297009		Grocery Services North - WIC Accepted Here	0.92
 e32d46a00592	Krazy Little Snacks	grocery		34.53584	-101.76336	120 SE 2nd St	Tulia	79088	+18065171624			0.67
 035f622595ac	La Super Economica	grocery		34.18361	-101.72025	1411 W 5th St	Plainview	79072	+18062930300	http://www.lasupermeatmarket.com	La Super Economica Meat Market	0.96
@@ -201,21 +219,16 @@ c7600cf15935	Merrell Food	grocery		34.36599	-101.05643	135 Main St	Quitaque	7925
 0691f0fe16e9	United Supermarkets	grocery		34.98448	-101.92092	201 N 23 Rd Street	Canyon	79015	+18066552300	https://local.unitedsupermarkets.com/tx/canyon/201-n-23rd-st.html	United Supermarkets	0.97
 b9442436d6d6	United Supermarkets	grocery		34.18544	-101.74668	3501 Olton Rd	Plainview	79072	+18062934402	https://local.unitedsupermarkets.com/tx/plainview/3501-olton-rd.html	United Supermarkets	0.92
 f20b1e1abe9a	United Supermarkets	grocery		34.20560	-101.70872	2403 Columbia St	Plainview	79072	+18062931482	http://www.unitedsupermarkets.com/	United Supermarkets	0.92
-0668a20c5bfd	Walmart Distribution Center	grocery		34.20994	-101.72763	3101 Quincy St	Plainview	79072	+18062939601	http://www.walmart.com/		0.94
 a0886625c1e4	Walmart Distribution Center	grocery		34.20981	-101.72896	3101 Quincy St	Plainview	79072	+18062939601	http://www.walmart.com/		0.98
 d23db5c152e6	Bsa Ems Services Station 1	hospital		34.98481	-101.95286	615 W U.S. 60	Canyon	79015	+18066557726		BSA Health System	0.66
 843d68d608de	Family Medical Care	hospital		34.19313	-101.74910	1208 N Interstate 27	Plainview	79072	+18062962444			0.99
 86e5205e2312	Mangold Memorial Hospital Home Health Care	hospital		34.12683	-101.44129	104 N Main St	Lockney	79241	+18066522895	http://www.mangoldmemorial.org/		0.56
-8cd4540202a2	Plainview Emergency Medicine Associates Pa	hospital		34.20667	-101.73251	2601 Dimmitt Rd	Plainview	79072	+18062964282	http://covmedgroup.org/		0.66
 5dec1e2e0e57	Regents Health Network	hospital		34.20712	-101.73309	2601 Dimmitt Rd	Plainview	79072	+18062932270	http://rhn.md/plainview-medical		0.84
 2f778fe18051	Swisher Memorial Hospital	hospital		34.53592	-101.75578	539 Southeast 2 Nd	Tulia	79088	+18069953581	https://www.swisherhospital.com/		0.97
 556c3365bfee	Best Western Palo Duro Canyon Inn & Suites	hotel		34.98028	-101.90997	2801 4th Ave	Canyon	79015	+18066551818	https://www.bestwestern.com/en_US/book/hotel-rooms.44572.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44572	Best Western Hotels & Resorts	1.00
 7d2fc0a4dbcf	Budget Inn Motel	hotel	motel	34.18362	-101.72733	2001 W 5th St	Plainview	79072	+18062932578	http://budgetinnplainview.com/		0.95
 092372341adb	Buffalo Inn	hotel	motel	34.98059	-101.91967	300 23rd St	Canyon	79015	+18066552124	http://www.buffaloinncanyontx.com		0.99
-c5fe7ec76e35	Canyon City Lodge	hotel	lodge	34.97483	-101.93544	909 9th Ave	Canyon	79015	+18066553001	http://www.canyoncitylodge730.com/		0.92
-b4d6b74f2d79	Canyon Hospitality Llc	hotel		34.98055	-101.91974	300 23rd St	Canyon	79015				0.95
 6f8877d197bf	Comfort Suites	hotel		34.18486	-101.74879	3615 Grandview Drive, 500 I-27	Plainview	79072	+18066005188	https://www.choicehotels.com/texas/plainview/comfort-suites-hotels/tx596?pmf=yext&mc=llyxyxpx	Choice Hotels	0.92
-4ee0fcee46c5	Conner Hall	hotel		34.98467	-101.91490	2317 Russell Long Blvd	Canyon	79015				0.92
 74d0756b7b02	Cousins Hall	hotel		34.98124	-101.91404	200-298 26th St	Canyon	79016		http://www.wtamu.edu/student-life/cousins-hall.aspx		0.92
 10a6ffbd6e9d	Days Inn by Wyndham Plainview	hotel	resort	34.18756	-101.74735	3600 Olton Rd	Plainview	79072	+18062212748	https://www.wyndhamhotels.com/days-inn/plainview-texas/days-inn-plainview/overview?CID=LC:DI::BING:RIO:National:02093&iata=00093796		0.80
 41db4cbfddf7	Executive Inn	hotel	motel	34.52761	-101.79700	1591 I-27	Tulia	79088	+18069953248			0.97
@@ -233,7 +246,6 @@ b835d704c23b	Lasso Motel	hotel	motel	34.53658	-101.77623	125 US-87	Tulia	79088	+
 ed2a64caf58c	Prairie Blossom and Cactus Blossom Guesthouses	hotel		34.96987	-101.83936	301 W Nance Rd	Canyon	79015	+18064769381			0.92
 32c92f49e1c9	Quality Inn	hotel		34.18555	-101.74919	600 N Interstate 27	Plainview	79072	+18064291020	https://www.choicehotels.com/texas/plainview/quality-inn-hotels/txh05?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 af52af24c4dc	Reddy Hotel	hotel		34.21149	-101.73811	3001 Dimmitt	Plainview	79072	+18062888888	http://www.reddyhotels.com/		0.99
-98a758999d54	Redi Marketing Inc	hotel		34.19279	-101.75433	4213 W 13th St	Plainview	79072				0.95
 a5f6fe470fe2	Sands Motel	hotel	motel	34.18472	-101.70937	600 W 5th St	Plainview	79072	+18062965832	http://sandsmotel.com	Sands Motel	0.67
 59c802347ef7	SkyHouse at Doves Rest Cabins	hotel		34.96848	-101.70495	11200 Indian Camp Trl	Canyon	79015	+19728803600	https://www.dovesrestcabins.com/our-cabins/el-coronado		0.94
 11f8711ae15c	Starlight Motel	hotel	motel	34.18430	-101.71053	701 W 5th St	Plainview	79072	+18062962703	http://www.starlightmotel.com	Starlight Motel and Luxury Suites	0.99
@@ -246,7 +258,6 @@ e532103c1d81	Tule Creek Apts	hotel		34.52811	-101.76293	711 S Austin Ave	Tulia	7
 a6dc5432593c	Core Powered Nutrition	office	energy company	34.18687	-101.70209	120 E 7th St	Plainview	79072	+18066856411	http://dinafalcon.herbalife.com/en-us/u		0.67
 78870884122a	Martin Resources	office	energy company	34.22142	-101.75702	1920 TX-194	Plainview	79072	+18062932501	http://www.themartincompanies.com		0.92
 fd6b76046d68	Suddenlink Communications	office	telecommunications company	34.97094	-101.91943	1205 23rd St Ste 1	Canyon	79015	+18063584801	http://www.suddenlink.com/		0.92
-9b6b791667d5	Valero	office	energy company	34.20503	-101.72913		Plainview	79072	+12103452000	http://WWW.VALERO.COM/DEFAULT.ASPX	Valero	0.92
 9a7aab9f7a0d	Watermill Express	office	bottled water company	34.97696	-101.92028	2111 7th Ave	Canyon	79015	+18066553273	http://www.watermillexpress.com	Watermill Express	0.92
 720d6c29cdf6	White Energy Plainview	office	industrial company	34.17899	-101.62661	2698 US-70 #70	Plainview	79072	+18062968000	https://www.white-energy.com		0.77
 28a1dad32875	806 Pizza House	restaurant	pizza restaurant	34.19201	-101.75182	1140 Kermit Dr	Plainview	79072	+18064290049	https://ser.vi/806pizzahouse/seat/pickup?sa=1917&source=social&campaign=facebook		0.96
@@ -269,15 +280,12 @@ a17907efdcea	Carlito's Mexican Restaurant	restaurant	mexican restaurant	34.18737
 92bc4a82b599	Chinese/Asian food Plainview	restaurant	chinese restaurant	34.18592	-101.74471	3401 Olton Rd	Plainview	79072				0.76
 040ef15c9196	Cinnabon at Schlotzsky's	restaurant	sandwich shop	34.97444	-101.91939	901 23rd St	Canyon	79015	+18066552867	https://www.cinnabon.com/		0.98
 be3607476323	Cotton Patch Cafe	restaurant	southern american restaurant	34.18652	-101.74371	3314 Olton Rd #16	Plainview	79072	+18062935522	https://cottonpatch.com/locations/tx/plainview/3314-olton-rd-16	Cotton Patch Cafe	0.96
-cf82966bcc76	Domino's	restaurant	pizza restaurant	34.98520	-101.91998	301 N 23rd St	Canyon	79015	+18066556600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
-6255612d6573	Domino's Pizza	restaurant	pizza restaurant	34.18439	-101.72890	2110 W 5th St	Plainview	79072	+18062919999	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
 0ca9589329e8	Donut World Llc	restaurant		34.18443	-101.72515	1806 W 5th St	Plainview	79072				0.95
 40ad12f20fdd	Duckits Unlimited Inc	restaurant		34.96579	-101.91585	1701 N 23rd St	Canyon	79015				0.95
 514becb681e0	El Burrito	restaurant	mexican restaurant	34.53614	-101.76015	402 SE 2nd St	Tulia	79088	+18069954124	https://el-burrito-tx.hub.biz		0.92
 e94f02a46dff	El Camino Dining Room	restaurant	texmex restaurant	34.53492	-101.77608	225 US-87	Tulia	79088	+18069954083	http://www.elcaminosd.com		0.98
 4300d23aa100	EL COMAL TORTILLERIA .	restaurant	mexican restaurant	34.20544	-101.71597	1006 W 24th St	Plainview	79072	+18062931585	https://el-comal-tortilleria.hub.biz/		0.99
 80672e5b773f	El Girasol	restaurant	mexican restaurant	34.20483	-101.71021	603 W 24th St	Plainview	79072	+18064295113			0.92
-0986ee3efdd9	El Mercadito Street Tacos	restaurant	mexican restaurant	34.20491	-101.71758	1201 W 24th St	Plainview	79072	+18064298029	http://elmercaditotogo.com/		0.87
 e64af98966bc	El Mercadito Street Tacos	restaurant	taco restaurant	34.20491	-101.71758	1201 W 24th St	Plainview	79072	+18064298029	http://elmercaditotogo.com/		0.93
 d142a9a2a648	El Taco Café	restaurant		34.05811	-101.84523	202 S Main St	Hale Center	79041	+18067294612			0.87
 c3bf716645d8	El Taco Taco	restaurant	mexican restaurant	34.19100	-101.70687	1000 Columbia St	Plainview	79072	+18062965533	https://www.zmenu.com/el-taco-taco-plainview-online-menu		0.96
@@ -307,14 +315,11 @@ a050ad7f5e44	La Bella Pizza Canyon	restaurant	pizza restaurant	34.97628	-101.919
 a9b98fac12b0	Laredo Taco Company	restaurant		34.18460	-101.73615	2715 Olton Road	Plainview	79072	+18062910010	https://www.laredotacocompany.com/		0.92
 4783b63c7951	Leal's Mexican Restaurant	restaurant	texmex restaurant	34.18523	-101.74497	3311 Olton Rd	Plainview	79072	+18062935355	http://eatatleals.com/		0.93
 3461675255af	Little Beverage Company	restaurant	breakfast and brunch restaurant	34.06669	-101.84566	901 Main St	Hale Center	79041	+18067292152			0.92
-3bd7ada87857	Little Caesars	restaurant	pizza restaurant	34.98024	-101.91953	306 23rd St	Canyon	79015	+18065107231	https://littlecaesars.com/en-us/store/12431	Little Caesars	0.96
-cac46ec44845	Little Caesars Pizza	restaurant	pizza restaurant	34.18383	-101.72340	1707 W 5th St	Plainview	79072	+18062134685	https://littlecaesars.com/en-us/store/10488	Little Caesars	0.96
 5d17cd2d0af6	Longhorn Cafe	restaurant	texmex restaurant	34.12098	-101.44594	411 S W 4th St	Lockney	79241				0.92
 a4ce63950524	Main Street Pizza	restaurant	pizza restaurant	34.12263	-101.44189	w 79241, 193 W Bryant St	Lockney	79241	+18066522201	http://www.yellowpages.com/lockney-tx/main-street-pizza		0.91
 67fe562e7470	Malt Shop	restaurant	american restaurant	34.47441	-101.30281	500 Lone Star St	Silverton	79257	+18068232214	http://malt-shop-silverton.keeq.io		0.92
 85dea1f7f626	Map Food Group Llc	restaurant		34.98010	-101.91992	2201 4th Ave	Canyon	79015				0.95
 9db7fce255a0	Mi Mexico Restaurant	restaurant	mexican restaurant	34.18459	-101.71434	1000 W 5th St	Plainview	79072	+18062910677	http://www.mimexicobuffalogrove.com		0.97
-412f018ab853	Mia's Pizzeria & Restaurant	restaurant	pizza restaurant	34.19096	-101.70705	1001 I-27	Plainview	79072	+18062965757	https://miaspizzeriarestaurant.com/		0.96
 4ea9d9bf25e6	Mia's Pizzeria & Restaurant	restaurant	pizza restaurant	34.19120	-101.75342	1001 I-27	Plainview	79072	+18062965757	https://www.miaspizzeriarestaurant.com/		1.00
 c45629bf1372	Mickey's Place	restaurant	italian restaurant	34.97869	-101.92818	1512 5th Ave	Canyon	79015	+18064527320	https://www.exploretock.com/mickeys-place		0.99
 0311257832db	Mitch's Texas Style BBQ	restaurant	barbecue restaurant	34.18864	-101.74870	808 Interstate 27 Service Rd	Plainview	79072	+18064297453	https://mitchstxbbq.com	Mitch's TX BBQ	0.96
@@ -326,11 +331,7 @@ a608b4bce0c8	My Diner	restaurant		34.18482	-101.70875	506 W 5th St	Plainview	790
 f067d81d80f4	Old Maroon Saloon	restaurant	bar and grill restaurant	34.11722	-101.44754	615 US-70	Lockney	79241	+18066991090			0.92
 ece48336f574	Old Mexico Restaurant	restaurant	mexican restaurant	34.18383	-101.72769	2003 W 5th St	Plainview	79072	+18062932868	https://www.chamberofcommerce.com/.../7534797-old-mexico-restaurant		0.97
 4d2189fcdc8e	Owl City Pizza and Burgers	restaurant	pizza restaurant	34.06403	-101.84480	691 Main St	Hale Center	79041		http://www.owlcitymusic.com/home		0.59
-c9c4e09e9bbf	Papa Johns Pizza	restaurant	pizza restaurant	34.18767	-101.74876	3612 OLTON RD	Plainview	79072	+18066004272	https://locations.papajohns.com/united-states/tx/79072/plainview/3612-olton-rd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2ODUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
 c03313582187	Pepito's Mexican Restaurante	restaurant	texmex restaurant	34.97909	-101.91964	408 23rd St	Canyon	79015	+18066554736	https://pepitoscanyon.com		0.99
-1e3c54de4c46	Pizza Hut	restaurant	pizza restaurant	34.19171	-101.74940	1108 N. Interstate Hwy. 27 Hale	Plainview	79072	+18062935334	https://locations.pizzahut.com/tx/plainview/1108-n-interstate-hwy-27?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305344	Pizza Hut	0.99
-475d920cdaa2	Pizza Hut	restaurant	pizza restaurant	34.98229	-101.92013	110 23rd St Randall	Canyon	79015	+18066557125	http://pizzahut.com/	Pizza Hut	0.98
-6a1bdb59b1a3	Pizza Hut	restaurant	pizza restaurant	34.53572	-101.77415	811 SW 2nd St Swisher	Tulia	79088	+18069954010	https://locations.pizzahut.com/tx/tulia/811-sw-2nd-st	Pizza Hut	0.98
 4d3a53d67996	Pondaseta Pizza Company	restaurant	pizza restaurant	34.98232	-101.93550	1001 2nd Ave	Canyon	79015	+18066565100	http://www.pondaseta.com/		0.99
 24636bd183fb	Pony Express Burritos	restaurant	mexican restaurant	34.97947	-101.90977	2808 4th Ave	Canyon	79015	+18065574166	https://pony-express-burritos.hub.biz/		0.99
 3a70bdeec6f8	Prissy’s Barbecue	restaurant		34.53517	-101.77537	2509 E Amarillo Blvd	Tulia	79107	+18068771457	http://Prissysbarbecue.com/		0.92
@@ -343,15 +344,8 @@ e4b1aba16ece	Robinson's BBQ	restaurant	barbecue restaurant	34.98350	-101.91964	1
 4eda9137b646	Roma Italian Restaurant	restaurant		34.53750	-101.76696	222 W Broadway Ave	Tulia	79088	+18069950011			0.92
 246c55426542	Sad Monkey Mercantile	restaurant		34.98419	-101.72604	9800 TX-217	Canyon	79015	+18064524712	https://tpwd.texas.gov/state-parks/palo-duro-canyon/park_events		0.95
 f61c84c768fd	Sayakomarn's Restaurant	restaurant	thai restaurant	34.97898	-101.92746	421 16th St	Canyon	79015	+18066552698	http://www.sayakomarns.com/		0.96
-5a83756cf90d	Schlotzsky's	restaurant	sandwich shop	34.97445	-101.91869	901 23rd St	Canyon	79015	+18066552867	https://locations.schlotzskys.com/tx/canyon/901-s-23rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98
 ebf4b30015a1	Silvertons Steakhouse	restaurant	steakhouse	34.47447	-101.30560		Silverton		+18068232063			0.85
 b265d77525aa	Something Different	restaurant	thai restaurant	34.18369	-101.72870	2103 W 5th St	Plainview	79072	+18067291428			0.55
-de7bdcd87736	Sonic Drive-In	restaurant	burger restaurant	34.18422	-101.70866	501 W 5th St	Plainview	79072	+18062933199	https://locations.sonicdrivein.com/tx/plainview/501-w-fifth-street.html		0.98
-116686626e0e	Subway	restaurant	sandwich shop	34.96579	-101.91585	1701 N 23rd St	Canyon	79015	+18066556555	https://www.subway.com		0.95
-81b72d93d190	Subway	restaurant	sandwich shop	34.52866	-101.79718	700 S. I-27	Tulia	79088	+18069952620	https://restaurants.subway.com/united-states/tx/tulia/700-s-i-27?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=15256&utm_campaign=evergreen-2020&y_source=1_MTQ5MTY4NzYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
-df5d46a91220	Subway	restaurant	sandwich shop	34.98379	-101.91972	105 N 23rd St	Canyon	79015	+18066551193	https://www.subway.com		0.92
-e067867f3acb	Subway	restaurant	sandwich shop	34.99793	-101.92187	1701 North 23rd Street	Canyon	79015	+18066556555	https://restaurants.subway.com/united-states/tx/canyon/1701-north-23rd-street	Subway	0.98
-e24cf7054b63	Subway	restaurant	sandwich shop	34.19272	-101.75113	1001 Interstate Hwy Suite 840	Plainview	79072	+18062930652	https://restaurants.subway.com/united-states/tx/plainview/1001-interstate-hwy	Subway	0.96
 879a29ecb198	Table on 10th	restaurant		34.18994	-101.74139	3019 W 10th	Plainview	79072	+18067870356	https://app.squareup.com/appointments/book/classes/ywe1wq5nsmlwky/L8B2VZF2PVP8V/classes		0.96
 b5f74585b742	Taco Pronto, Inc	restaurant		34.18448	-101.72023	1412 W 5th St	Plainview	79072		https://www.tacopronto.com		0.95
 4c5949c9eccd	Taco Villa	restaurant	texmex restaurant	34.98326	-101.91998	101 N 23rd St	Canyon	79015	+18065574218	https://tacovilla.net/	Taco Villa Fanatics	0.98
@@ -370,12 +364,7 @@ d51ec7d1eb7a	The Snoball Stop	restaurant		34.97535	-101.91972	810 23rd St	Canyon
 ea302761e20c	WeekEnds BBQ and Catering	restaurant	barbecue restaurant	34.18443	-101.73021	2206 W 5th St	Plainview	79072	+18062921423	http://weekendsbbq.com/		0.92
 364b656d9ccc	Weekends Takeout Bbq & Catering, Llc	restaurant		34.18997	-101.75510	1007 Mesa Dr	Plainview	79072		https://weekendsbbq.com		0.95
 54b8d6e3a1ed	West Texas Chow Wagon	restaurant		34.47278	-101.30994	1003 Commerce St	Silverton	79257	+18064634671			0.57
-311c3f9eee7d	Whataburger	restaurant	burger restaurant	34.98265	-101.91988	100 N 23rd Street	Canyon	79015	+18064760014	https://locations.whataburger.com/tx/canyon/100-n-23rd-street.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.99
-58605f37a305	Whataburger	restaurant	burger restaurant	34.18733	-101.74768	3606 Olton Road	Plainview	79072	+18064290008			0.92
 95f9e1ed2651	Which Wich Superior Sandwiches	restaurant	sandwich shop	34.98154	-101.91579	2501 4th Ave	Canyon	79016	+18066512975	https://www.whichwich.com		0.96
-8cc527b88824	Wingstop	restaurant	chicken wings restaurant	34.97854	-101.91910	501 23rd St, Unit 6	Canyon	79015	+18065571060	https://www.wingstop.com/location/wingstop-2457-canyon-tx-79015/menu?y_source=1_MTA1NjY5NTkzMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.99
-bbaf80f35869	Wingstop	restaurant	chicken wings restaurant	34.18571	-101.74620	3435 Olton Rd	Plainview	79072	+18064291780	https://www.wingstop.com/location/wingstop-3181-plainview-tx-79072/menu?y_source=1_MjAyMDY5MjYxMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.98
-ccabff42dd45	Đồ Gia Dụng Hay	restaurant		34.18427	-101.70869	501 W 5th St	Plainview	79072		https://locations.sonicdrivein.com/tx/plainview/501-w-fifth-street.html	Sonic Drive-In	0.93
 ce4e9934b1e2	Avir at Plainview	senior	retirement home	34.19389	-101.75523	1301 Mesa Dr	Plainview	79072	+18062934855	http://avirhg.com/	Avir at Bowie	0.99
 14cfa8760f43	BeeHive Homes of Plainview	senior	retirement home	34.19419	-101.75344	1435 Lometa Dr	Plainview	79072	+18064525883	https://beehivehomes.com/locations/plainview/	Beehive Homes of Page- Elk Road	0.92
 fd5ff5f803d7	Conner Court	senior	retirement home	34.98845	-101.92285	2 Cottonwood Ln	Canyon	79015	+18062165035	https://cimaseniorliving.com/conner-court/		0.97

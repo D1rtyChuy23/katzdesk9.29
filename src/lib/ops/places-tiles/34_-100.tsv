@@ -68,17 +68,22 @@ feb46febd23c	Taylor Petroleum	convenience		34.29071	-99.74947	701 W 11th St	Quan
 80c1931a6216	Vernon Hopin East Wilbarger	convenience		34.15262	-99.28028	1405 Wilbarger St	Vernon	76384	+19404735023			0.96
 114891aee88a	Yesway	convenience		34.28999	-99.74126	101 E 11th St	Quanah	79252	+19406632063	https://yesway.com/		0.92
 11c84dbceb3b	Yesway	convenience		34.15287	-99.31016	4016 Wilbarger St	Vernon	76384	+19405531663	https://www.yesway.com		0.95
-46e653dace49	Yesway	convenience		34.14992	-99.32681	4016 Wilbarger St	Vernon	76384			Yesway	0.80
-e0780ae19647	Yesway	convenience		34.15267	-99.31046	4016 Wilbarger St	Vernon	76384	+19405531663	https://yesway.com/	Yesway	0.92
 66636d50f7df	Braum's Ice Cream & Dairy Store	fastfood		34.16133	-99.31556	4220 College Dr	Vernon	76384	+19405529849	https://www.braums.com/store/4220-college-drive-vernon-tx/	Braums	1.00
 e4b6f327bb6e	Chicken Shack Restaurant	fastfood		34.15226	-99.30821	3901 Wilbarger St	Vernon	76384	+19405526464	http://www.chickenshack.com	Chicken Shack - Acadian Thrwy	0.98
 76a0f6526989	Dairy Queen	fastfood		34.25616	-99.51266	14251 US Highway 287 S	Chillicothe	79225	+19408525541	https://www.dairyqueen.com/en-us/locations/tx/chillicothe/14251-hwy-287-e/13912/?y_source=1_MjkzMzkwOTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 03922574f898	DQ Grill & Chill	fastfood		34.25621	-99.51265	14251 Hwy 287 E	Chillicothe	79225		https://www.dairyqueen.com/en-us/locations/tx/chillicothe/14251-hwy-287-e/3685	DQ Grill & Chill	0.80
+38c8a98701b8	KFC	fastfood	chicken restaurant	34.16121	-99.31263	4110 Hillcrest Plz	Vernon	76384	+19405522221	http://www.kfc.com/storelocator/Default.aspx?address=4110%20Hillcrest%20Plaza,Vernon,TX		0.92
 29f01493032a	L&S Blasian Soul	fastfood		34.14833	-99.30577	2204 14th St	Vernon	76384	+19404737221			0.59
+82758a18ccef	Little Caesars Pizza	fastfood	pizza restaurant	34.15953	-99.31297	909 Hillcrest Dr	Vernon	76384	+19404735040	https://littlecaesars.com/en-us/store/11483	Little Caesars	0.96
 ff8c8346bec2	McDonald's	fastfood		34.16163	-99.31376	801 Hillcrest Dr	Vernon	76384	+19405531881	https://www.mcdonalds.com/us/en-us/location/tx/vernon/hillcrest-dr-hwy-70/7547.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+01e0d91cd6ae	Pizza Hut	fastfood	pizza restaurant	34.15283	-99.28976	2230 Wilbarger St	Vernon	76384	+19405531806	https://locations.pizzahut.com/tx/vernon/2230-wilbarger-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290192	Pizza Hut	0.98
 5c87465ad205	Popeyes	fastfood		34.15968	-99.02966	2817 South US 287	Vernon	76384		https://www.popeyes.com/store-locator/store/restaurant_888113	Popeyes	0.80
 bb08dc247cbb	Sonic Drive In	fastfood		34.29202	-99.75552	1201 West 11Th Street	Quanah	79252	+19406632241	https://locations.sonicdrivein.com/tx/quanah/1201-west-11th-street.html	Sonic Drive-In	0.98
 c6cb49034f07	Sonic Drive In	fastfood		34.15263	-99.30966	4004 Wilbarger	Vernon	76384	+19405534733	https://locations.sonicdrivein.com/tx/vernon/4004-wilbarger.html	Sonic Drive-In	1.00
+13d89206e86e	Subway	fastfood	sandwich shop	34.07150	-99.00975	19765 US Hwy 287	Harrold	76364	+19408862661	https://restaurants.subway.com/united-states/tx/harrold/19765-us-hwy-287?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=52581&utm_campaign=evergreen-2020&y_source=1_MTQ5MDAwNzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
+7243dd834de1	Subway	fastfood	sandwich shop	34.16092	-99.31342	4123 Hillcrest Plaza	Vernon	76384	+19405522227	http://www.subway.com/en-us	Subway	0.97
+bb7c146dfaf0	SUBWAY	fastfood	sandwich shop	34.07159	-99.00470	in 7 Eleven	Harrold	76364		http://subway.com		0.77
+d8eae4f7b72b	Subway	fastfood	sandwich shop	34.29208	-99.75772	1415 W. 11th Street Hwy 287	Quanah	79252	+19406632567	https://restaurants.subway.com/united-states/tx/quanah/1415-w-11th-street	Subway	0.96
 6c0893bd0631	Taco Bell	fastfood		34.16172	-99.31327	4112 Hillcrest Plaza	Vernon	76384	+19405531987	http://www.tacobell.com/	Taco Bell	1.00
 fbd1dc7d02ab	Taco Casa	fastfood		34.16151	-99.31474	4200 College Dr	Vernon	76384	+19405533144	https://tacocasatexas.com/location/21-vernon/	Taco Casa	0.97
 108281667ee3	Asian Market	grocery		34.15270	-99.29891	3106 Wilbarger St	Vernon	76384	+18069224603			0.92
@@ -106,7 +111,6 @@ f69b2119ec1e	La Fonda Motel	hotel	motel	34.15305	-99.27588	1004 Wilbarger St	Ver
 bd105890f0af	Rogers Lodging, Inc	hotel		34.16036	-99.31140	4131 Western Trl	Vernon	76384				0.95
 871bc41c7fab	Rogers Lodging, Inc.	hotel		34.15373	-99.28571	1900 Pease St	Vernon	76384	+19405522328			0.95
 20e500930f7a	Super 8 by Wyndham Vernon	hotel	resort	34.15931	-99.28538	1829 US Highway 287 W	Vernon	76384	+19402270089			0.92
-c74d372dcda2	Super 8 by Wyndham Vernon	hotel	resort	34.15252	-99.28533	1829 US Highway 287 W	Vernon	76384	+19402270089	https://www.wyndhamhotels.com/super-8/vernon-texas/super-8-vernon/overview?CID=LC:7xnkh22o63wf5qj:08092		0.85
 f588cfbf7643	SureStay Plus	hotel		34.29282	-99.75407	1100 W 11th St	Quanah	79252	+19406635407	https://www.bestwestern.com/en_US/book/hotel-rooms.54062.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54062	SureStay Hotels	0.99
 5f8537785cc4	Santa Rosa Telephone Coop	office		34.14820	-99.22992	7110 US Highway 287 E	Vernon	76384	+19408862217	http://www.srcaccess.net		0.92
 8f381086ed25	Texas Oncology-Vernon	office	pharmaceutical company	34.15225	-99.31104	4103 Wilbarger St	Vernon	76384	+19406918271	https://www.texasoncology.com/cancer-centers/vernon/texas-oncology-vernon		0.92
@@ -115,7 +119,6 @@ ab48cf46280d	Arquitos Mexican Grill	restaurant	mexican restaurant	34.15051	-99.3
 84865f8ba3fe	Bara's Fine Mexican Food	restaurant	mexican restaurant	34.15754	-99.27090	529 US Highway 287 E	Vernon	76384	+19405533100			0.92
 28fda4e957cb	Benito's Italian Cafe & Pizzeria Ll	restaurant		34.16069	-99.31419	4201 College Dr Ste A	Vernon	76384		https://www.benitositaliancafepizzeria.com		0.61
 bb5399d37a8d	Bevo's Drive In	restaurant	burger restaurant	34.15252	-99.30929	4000 Wilbarger St	Vernon	76384	+19405522570			0.94
-022ba42ec3a9	BluTaco	restaurant	taco restaurant	34.31266	-99.78697	703 W 11th St	Quanah	79252	+19406634018	https://theblutaco.com/locations/garrison-food-mart-quanah-quanah-tx/		0.85
 db1c45cf721a	BluTaco	restaurant	mexican restaurant	34.29073	-99.74963	703 W 11th St	Quanah	79252	+19406634018	https://theblutaco.com/locations/garrison-food-mart-quanah-quanah-tx/	BluTaco	0.94
 f2a8184bd366	Brown Cow Family Restaurant	restaurant	texmex restaurant	34.15999	-99.30096	3205 US-287	Vernon	76384	+19405533322	http://browncowfamilyrestaurant.placeweb.site		0.98
 848f3e9e4308	Chester's Chicken	restaurant	chicken restaurant	34.29266	-99.75773	1415 W 11th St	Quanah	79252	+19406632567	https://www.chesterschicken.com/		0.92
@@ -124,18 +127,14 @@ f2a8184bd366	Brown Cow Family Restaurant	restaurant	texmex restaurant	34.15999	-
 21c8f069bef3	Doan's Crossing	restaurant		34.15201	-99.31109	4110 Wilbarger St	Vernon	76384	+19405522904			0.58
 a384f725ef6d	Dutch's Restaurant	restaurant	diner	34.29232	-99.75906	1501 W 11th St	Quanah	79252	+19406632435	http://www.freewebs.com/briscoesfamilyrestaurant		0.92
 96e8b498de5b	El Coco Loco	restaurant	mexican restaurant	34.15905	-99.28261	1601 US Highway 287 E	Vernon	76384	+19404735150			0.92
-b5a11facd82c	El Taco Michoacano	restaurant	mexican restaurant	34.29399	-99.75983	1309 W 5th St	Quanah	79252	+19406745168			0.67
 bccb15caaa44	El Taco Michoacano	restaurant	mexican restaurant	34.29838	-99.75519	1309 W 5th St	Quanah	79252	+19406745168			0.68
 12afc34c1d45	Fred's Corner Grille	restaurant	burger restaurant	34.14732	-99.28419	2327 Main St	Vernon	76384	+19405522402			0.95
 5acb60ddaac8	Godfather's Pizza Express	restaurant	pizza restaurant	34.29204	-99.75793	1415 W 11th St	Quanah	79252	+19406632582	https://www.godfathers.com/	Godfathers Pizza	0.95
 a76b10a27d18	GOOD TIMES BAR & GRILL	restaurant	bar and grill restaurant	34.29128	-99.74869	700 W 11th St	Quanah	79252	+19403563010			0.67
 254dc2190c59	Hcc Restaurant	restaurant	burger restaurant	34.16440	-99.32072	4400 Country Club Rd	Vernon	76384	+19405525406	https://hillcrestvernon.com		0.55
 293e4dc1f4d7	Huddle House	restaurant	breakfast and brunch restaurant	34.16182	-99.29855	2824 US Highway 287 W	Vernon	76384	+19405522514	https://huddlehouse.com/locations/tx/vernon/2824-us-highway-287-w		0.96
-38c8a98701b8	KFC	restaurant	chicken restaurant	34.16121	-99.31263	4110 Hillcrest Plz	Vernon	76384	+19405522221	http://www.kfc.com/storelocator/Default.aspx?address=4110%20Hillcrest%20Plaza,Vernon,TX		0.92
 511252950809	Krispy Krunchy Chicken	restaurant	chicken restaurant	34.29242	-99.75511	1200 W 11th St	Quanah	79252	+19406637303	https://www.krispykrunchy.com/		0.94
 feab7fcee739	Ladot Restaurant, Inc	restaurant		34.29175	-99.75516	1201 W 11th St	Quanah	79252				0.95
-82758a18ccef	Little Caesars Pizza	restaurant	pizza restaurant	34.15953	-99.31297	909 Hillcrest Dr	Vernon	76384	+19404735040	https://littlecaesars.com/en-us/store/11483	Little Caesars	0.96
-307d698a4600	Loves Texas Style BBQ & Steakhouse	restaurant	barbecue restaurant	34.24677	-99.51167	14211 Us-287	Chillicothe	79225	+19408525400	http://lovestexasstylebbqandsteakhouse.com/		0.85
 bca679bc9fd7	Loves Texas Style BBQ & Steakhouse	restaurant	barbecue restaurant	34.25625	-99.51324	14211 US-287	Chillicothe	79225	+19408525400	http://www.lovesbbq.net/		0.92
 bba27bb7ec64	Lupes II In Vernon	restaurant	texmex restaurant	34.15759	-99.27087	529 US-287	Vernon	76384	+19405522622	http://www.lupesmexicanrestaurant.com		0.96
 62022131b42b	Medicine Mound Depot Restaurant	restaurant	american restaurant	34.29305	-99.75910	1802 W 11th St	Quanah	79252	+19406635619			0.93
@@ -143,7 +142,6 @@ bba27bb7ec64	Lupes II In Vernon	restaurant	texmex restaurant	34.15759	-99.27087	
 b6ba48bc2e72	Mr Jims Pizza	restaurant	pizza restaurant	34.14393	-99.29678	3005 Gordon St	Vernon	76384	+19405529012	http://www.mrjims.com		0.92
 3e0066b39a9c	MrJims.Pizza	restaurant	pizza restaurant	34.15254	-99.30894	3926 Wilbarger St	Vernon	76384	+19405520095	https://mrjims.pizza/064.cfm	Mr. Jim's Pizza	0.97
 a28e8f603388	Old Bank Saloon	restaurant	bar and grill restaurant	34.29859	-99.73924	201 S Main St	Quanah	79252	+19406634100	http://old-bank-saloon.poi.place		0.98
-01e0d91cd6ae	Pizza Hut	restaurant	pizza restaurant	34.15283	-99.28976	2230 Wilbarger St	Vernon	76384	+19405531806	https://locations.pizzahut.com/tx/vernon/2230-wilbarger-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290192	Pizza Hut	0.98
 a0a6f1a0ca13	RAY'S Fish & Wing Bar	restaurant	seafood restaurant	34.16145	-99.30082	3108 US Highway 287 W	Vernon	76384	+19405529464	http://www.kalsportsbar.ca/menu		0.92
 6413579cc023	Red House Restaurant	restaurant		34.14712	-99.22411	Hwy 287 E	Vernon	76384	+19404142640			0.78
 c0a907067957	Red House Restaurant	restaurant		34.13944	-99.19320	9108 US Highway 287 E	Vernon	76384	+19404142640			0.93
@@ -151,10 +149,6 @@ af17b1f40c24	SCOOTS SMASHED BURGERS	restaurant	burger restaurant	34.29119	-99.75
 ed9fc1dfdca7	Simone's Place	restaurant	american restaurant	34.29103	-99.75010	801 W 11th St	Quanah	79252	+19404731835			0.92
 67dbfd59188d	Skilled Care And Rehab, Inc	restaurant		34.15681	-99.31503	4301 Hospital Dr	Vernon	76384				0.95
 a303f05bf8f5	Smitty's BBQ	restaurant	barbecue restaurant	34.15282	-99.30264	3428 Wilbarger St	Vernon	76384	+19403571228			0.92
-13d89206e86e	Subway	restaurant	sandwich shop	34.07150	-99.00975	19765 US Hwy 287	Harrold	76364	+19408862661	https://restaurants.subway.com/united-states/tx/harrold/19765-us-hwy-287?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=52581&utm_campaign=evergreen-2020&y_source=1_MTQ5MDAwNzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
-7243dd834de1	Subway	restaurant	sandwich shop	34.16092	-99.31342	4123 Hillcrest Plaza	Vernon	76384	+19405522227	http://www.subway.com/en-us	Subway	0.97
-bb7c146dfaf0	SUBWAY	restaurant	sandwich shop	34.07159	-99.00470	in 7 Eleven	Harrold	76364		http://subway.com		0.77
-d8eae4f7b72b	Subway	restaurant	sandwich shop	34.29208	-99.75772	1415 W. 11th Street Hwy 287	Quanah	79252	+19406632567	https://restaurants.subway.com/united-states/tx/quanah/1415-w-11th-street	Subway	0.96
 5f5e835aac4f	Taqueria Jalisco	restaurant	mexican restaurant	34.15235	-99.30394	3511 Wilbarger St	Vernon	76384	+19405525825	http://taqueria-jalisco.com		0.95
 b53830a1155b	Thai Cuisine	restaurant	thai restaurant	34.14920	-99.28450	2128 Main St	Vernon	76384	+18064456795	http://www.thaicuisine.com		0.96
 92f99376019f	The Old Train Station Depot	restaurant		34.28561	-99.72224	1802 US-287	Quanah	79252	+19403335556			0.92

@@ -2,7 +2,6 @@ id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 82658ff249b7	1889 Cake and Coffee Bar	bakery		33.86126	-98.53414	2510 Mallard Dr	Wichita Falls	76308	+19402576531	https://www.1889wf.com/		0.99
 aa1481e7adc1	Atlanta Bread Co	bakery		33.87012	-98.52952	2801 Midwestern Pkwy	Wichita Falls	76308	+19406899098	http://atlantabread.com/		0.92
 dd9e39ba794a	Bake Shop	bakery		33.95283	-98.67227	402 W Park Ave	Iowa Park	76367	+19405924950	http://www.muddysbakeshop.com		0.98
-909d643816f6	Cake Turners	bakery		33.22646	-98.16258	741 N Main St	Lumberton	77657	+14092274818	http://www.caketurners.com		0.65
 754494d4061c	Chillin Out	bakery		33.09535	-98.58980	1100 Packing House Rd	Graham	76450	+19405211315	http://www.justchillingraham.com		0.92
 c788459f0a69	Cinnabon	bakery		33.79958	-98.19411	237 Frontage Rd	Henrietta	76365	+12145172000	https://locations.cinnabon.com/tx/henrietta/237-frontage-road?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.94
 8cf8ed988cf2	Circle M Bakery	bakery		33.92908	-98.52438	2716 Old Iowa Park Rd	Wichita Falls	76306	+19407678355			0.98
@@ -82,7 +81,6 @@ bf957137e620	Velvet Rodeo Saloon	bar	dive bar	33.92026	-98.49951	320 N Scott Ave
 10310e1973cf	Vudu Lounge	bar		33.92164	-98.49978	411 N Scott Ave	Wichita Falls	76306				0.92
 f5a55664e3b1	Water Hole	bar		33.92652	-98.50904	1415 Old Iowa Park Rd B	Wichita Falls	76306	+19403220387	http://www.water-hole.com/		0.96
 1d2c51f5d1ec	Webber’s Place	bar		33.20766	-98.56284	1626 Turtle Hole Rd	Graham	76450				0.72
-91b39e331fba	Webber’s Place	bar		33.21034	-98.55454	1626 Turtle Hole Rd	Graham	76450				0.72
 76371c3b5eaa	Whiskey River Saloon	bar		33.92826	-98.50828	1103 Sheppard Access Rd	Wichita Falls	76306	+19407816005	http://www.whiskeyrivertexas.com		0.62
 508024a33225	Whiskeyta Club	bar	whiskey bar	33.87789	-98.53764	3709 Gregory St	Wichita Falls	76308	+19406919759	http://whiskeytaclubwf.com		0.99
 e28297f60fac	Wichita Falls Brewing Company	bar	brewery	33.91354	-98.49136	701 Indiana Ave	Wichita Falls	76301	+19402644677	http://wichitafallsbrewing.com/		0.99
@@ -186,7 +184,6 @@ ad0bf772f1ee	Willis Motors	cardealer	used auto dealer	33.88206	-98.49244	3101 Ol
 570981f300d7	Cinemark Movie Theatre	cinema		33.86393	-98.49266		Wichita Falls			http://cinemark.com/	Cinemark	0.71
 9b1016983e33	Cinemark Wichita Falls 14	cinema		33.88424	-98.52467	2915 Glenwood Ave	Wichita Falls	76308	+19407169933	https://www.cinemark.com/theatres/tx-wichita-falls/cinemark-14-wichita-falls?utm_medium=organic&utm_source=fb&utm_campaign=local_listing_theater&utm_content=fb_listing&y_source=1_MTc0OTI4ODYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Cinemark	0.99
 219f2d92b751	Graham Drive In	cinema		33.11022	-98.56760	1519 4th St	Graham	76450	+19405498478	https://www.grahamdriveintheatre.com/		0.99
-cefbf322d254	Graham Drive In	cinema		33.10875	-98.56730	1519 4th St	Graham	76450	+19405498478	https://www.grahamdriveintheatre.com/		0.96
 5394172d6c6f	Graham Drive-In	cinema		33.10706	-98.58952	1519 4th St	Graham	76450	+19405498478	http://www.grahamdrivein.com		0.77
 180febc9ecc3	National Theatre	cinema		33.10611	-98.59148	522 Oak St	Graham	76450	+19405492077	http://www.nationaltheatreofgraham.com		0.95
 873240f698d0	Sheppard Theater	cinema		33.97698	-98.50793	808 Avenue G bldg 840	Wichita Falls	76311	+19408550824			0.61
@@ -246,14 +243,12 @@ ed02eb47705f	Fain Fine Arts	college		33.87352	-98.52295	3410 Taft Blvd	Wichita F
 d3c151c65cd7	McCoy College of Science, Mathematics & Engineering	college		33.87642	-98.52229	Engineering Laboratories, Louis J Rodriguez Dr	Wichita Falls	76308	+19403974253	https://msutexas.edu/academics/scienceandmath/		0.99
 dffd97d032a5	Midwestern State University	college		33.87477	-98.52126	3410 Taft Blvd	Wichita Falls	76308	+19403974000	http://www.msutexas.edu/		0.91
 841168415d21	MSU Texas Computer Science	college		33.87680	-98.51955	3410 Taft Blvd	Wichita Falls	76308	+19403974702	http://cs.msutexas.edu/		0.67
-eeccb454423c	MSU Texas Radiology Club	college		33.87625	-98.51976	3410 Taft Blvd	Wichita Falls	76308	+18665754305	http://www.msutexas.edu/academics/hs2/radsci/index.php		0.78
 fe2e3017e9d9	MSU Texas Radiology Club	college		33.87768	-98.52242	3410 Taft Blvd	Wichita Falls	76308	+18665754305	http://www.msutexas.edu/academics/hs2/radsci/index.php		0.78
 ba64d2c20123	MSU West College of Education	college		33.87680	-98.51955	3410 Taft Blvd	Wichita Falls	76308	+19403974313	https://msutexas.edu/academics/education/index.php		0.95
 4af9f7970914	MSUTexas Lifelong Learning Center	college		33.86893	-98.52485	2 Eureka Cir	Wichita Falls	76308	+19403974814	http://msutexas.edu/lifelong-learning-center		0.92
 e1b3579a8140	North Central Texas College	college		33.09758	-98.58819	928 Cherry St	Graham	76450	+19405210720	https://www.nctc.edu/campuses/graham.html		0.97
 8911010fd869	Prothro-Yeager College of Humanities & Social Sciences	college		33.87691	-98.51856	3410 Taft Blvd	Wichita Falls	76308	+19403974030	https://msutexas.edu/academics/libarts/		0.99
 72743073a1b9	Robert D. & Carol Gunn College of Health Sciences & Human Services	college		33.87691	-98.51856	3410 Taft Blvd	Wichita Falls	76308	+19403974597	https://msutexas.edu/academics/hs2/		0.78
-53e86d988b68	The Wichitan	college		33.87739	-98.51857	3410 Taft Blvd	Wichita Falls	76308	+19403974704	https://linktr.ee/thewichitan?utm_source=linktree_profile_share&ltsid=fd10d45e-4661-4ecb-8275-859b910a1e51		0.60
 ad3dab4a12b7	The Wichitan	college		33.87319	-98.52237	3410 Taft Blvd	Wichita Falls	76308	+19403974704	https://linktr.ee/thewichitan?utm_source=linktree_profile_share&ltsid=fd10d45e-4661-4ecb-8275-859b910a1e51		0.61
 934b65640805	Vernon College	college		33.88425	-98.43826	2813 Central Fwy E	Wichita Falls	76302	+19407663369	http://www.vernoncollege.edu/police-academy	Vernon College	0.98
 e3597125d53a	Vernon College	college		33.86723	-98.52740	4105 Maplewood Ave A	Wichita Falls	76308	+19406968752	http://www.vernoncollege.edu/	Vernon College	0.99
@@ -475,6 +470,7 @@ d4e83c365eeb	Zoom Zoom #3	convenience		33.89956	-98.46547	1301 E Scott Ave	Wichi
 862800dc504c	Arby's	fastfood		33.85969	-98.53589	4601 Kemp Blvd	Wichita Falls	76308	+19406963100	https://locations.arbys.com/tx/wichitafalls/4601-kemp-blvd..html		0.99
 9ea12065da9a	Braum's Ice Cream & Dairy Store	fastfood		33.85781	-98.56433	4711 Southwest Pkwy	Wichita Falls	76310	+19406914251	https://www.braums.com/store/4711-southwest-parkway-wichita-falls-tx/	Braums	0.97
 124ce3c2e76b	Burger Barn	fastfood		33.37114	-98.76897	1128 W Main St	Olney	76374	+19405643322			0.55
+04e306b7b391	Burger King	fastfood	burger restaurant	33.90152	-98.49607	1307 Holliday St	Wichita Falls	76301	+19407611153	https://burgerking.com/store-locator/store/8922	Burger King	0.99
 1b04c1546463	Carl's Jr.	fastfood		33.94517	-98.53234	2053 Loop 11	Wichita Falls	76306	+19408551771	https://locations.carlsjr.com/tx/wichita-falls/2053-loop-11	Carl's Jr.	0.99
 e0a38fee8ffe	Carl's Jr.	fastfood		33.90213	-98.49513	1304 Broad St	Wichita Falls	76301	+19403227790	https://locations.carlsjr.com/tx/wichita-falls/1304-broad-st	Carl's Jr.	0.98
 202046376d14	Chick-fil-A	fastfood		33.85764	-98.54832	4101 Southwest Pkwy	Wichita Falls	76308	+19406898000	https://www.chick-fil-a.com/locations/tx/southwest-pkwy-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
@@ -485,6 +481,9 @@ e3c10cdee811	Chicken Box	fastfood		33.90352	-98.50801	901 Denver St	Wichita Fall
 3cc8b2f13dab	Chicken Express	fastfood		33.08516	-98.58444	1901 TX-16	Graham	76450	+19405492200	http://www.chickenexpress.us/	Chicken Express	0.96
 d3b9450a8c29	Chicken Express	fastfood		33.85650	-98.52074	5001 Taft Blvd	Wichita Falls	76308	+19406965001	http://www.chickenexpress.us		0.99
 d7fbe2a9cac4	Chicken Express	fastfood		33.96454	-98.67345	1410 N Pacific Ave	Iowa Park	76367	+19402138000	https://www.chickene.com	Chicken Express	0.92
+f4dfa1343f70	Chicken Express	fastfood	chicken restaurant	33.88721	-98.52728	2511 Kemp Blvd	Wichita Falls	76309	+19402342500	http://chickene.com		0.99
+7be92c54abed	Chipotle Mexican Grill	fastfood	mexican restaurant	33.87089	-98.53410	3910 Wayne Ave	Wichita Falls	76308	+19406921922	https://locations.chipotle.com/tx/wichita-falls/3910-wayne-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2378	Chipotle Mexican Grill	0.99
+216b644fb594	Church's Chicken	fastfood	chicken restaurant	33.96027	-98.51428	3704 Sheppard Access Rd	Wichita Falls	76306	+19408558171	https://locations.churchs.com/tx/wichita-falls/3704-sheppard-road	Church's Chicken	0.90
 f6c257789b4c	Cinnabon	fastfood		33.87270	-98.53518	3916 Kemp Boulevard	Wichita Falls	76308		https://locations.cinnabon.com/tx/wichita-falls/3916-kemp-boulevard	Cinnabon	0.99
 3c9cda486e95	Dairy King	fastfood		33.09879	-98.59006	910 Elm St	Graham	76450	+19405493718	http://www.edairyking.com		0.96
 0491024c4a98	Dairy Queen	fastfood		33.37183	-98.77555	1419 W Main St 1419 W Main St	Olney	76374	+19405642821	https://www.dairyqueen.com/en-us/locations/tx/olney/1419-w-main-st/14455/?y_source=1_MjkzMzkwOTAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
@@ -494,6 +493,10 @@ f6c257789b4c	Cinnabon	fastfood		33.87270	-98.53518	3916 Kemp Boulevard	Wichita F
 609840e78b23	Dairy Queen	fastfood		33.11456	-98.55714	1840 Hwy 380 Bypass	Graham	76450	+19405492500	https://www.dairyqueen.com/en-us/locations/tx/graham/1310-380-byp/14169/?y_source=1_MjkzMzkwMjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
 ab5889010d5a	Dairy Queen	fastfood		33.22606	-98.16157	Hwy 114 W Hwy 114 W	Jacksboro	76458	+19405675362	https://www.dairyqueen.com/en-us/locations/tx/jacksboro/hwy-114-w/14300/?y_source=1_MjkzMzkyOTctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 e9e253d712a7	Dairy Queen	fastfood		33.09243	-98.58919	1310 TX-16	Graham	76450	+19405494977	https://www.dairyqueen.com/en-us/locations/tx/graham/1310-hwy-16-s/14170/?y_source=1_MjkzMzg4NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
+225168f47d56	Domino's	fastfood	pizza restaurant	33.89072	-98.52746	2214 Kemp Blvd	Wichita Falls	76309	+19404325640	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+a6ff470d6d1d	Domino's	fastfood	pizza restaurant	33.09428	-98.58929	1219 Highway 16 South	Graham	76450	+19405499994	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+be32152cd2ed	Domino's	fastfood	pizza restaurant	33.86120	-98.53258	4518 Maplewood	Wichita Falls	76308	+19406915818	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+de3d07065817	Domino's	fastfood	pizza restaurant	33.96506	-98.51424	Safb 4114 Burkbernett Rd	Wichita Falls	76306	+19408558110	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 51ca8d3ae40a	DQ Grill & Chill	fastfood		33.37177	-98.77558	1419 W Main St	Olney	76374		https://www.dairyqueen.com/en-us/locations/tx/olney/1419-w-main-st/4227	DQ Grill & Chill	0.80
 5a96e00d91de	DQ Grill & Chill	fastfood		33.22602	-98.16163	Hwy 114 W	Jacksboro	76458		https://www.dairyqueen.com/en-us/locations/tx/jacksboro/hwy-114-w/4073	DQ Grill & Chill	0.80
 5d9f4270a700	DQ Grill & Chill	fastfood		33.81525	-98.18537	927 E Omega St	Henrietta	76365		https://www.dairyqueen.com/en-us/locations/tx/henrietta/927-e-omega-st/3975	DQ Grill & Chill	0.80
@@ -503,16 +506,28 @@ de79ef96f8c2	DQ Grill & Chill	fastfood		33.58251	-98.62811	934 S Center St	Arche
 e97286e4df1c	DQ Grill & Chill	fastfood		33.81468	-98.69842	Hwy 82 & 277 W	Holliday	76366		https://www.dairyqueen.com/en-us/locations/tx/holliday/hwy-82-277-w/3983	DQ Grill & Chill	0.80
 f61b8849f77b	DQ Grill & Chill	fastfood		33.88087	-98.52937	3112 Kemp Blvd	Wichita Falls	76308		https://www.dairyqueen.com/en-us/locations/tx/wichita-falls/3112-kemp-blvd/11781	DQ Grill & Chill	0.80
 c7dbcd11b1e4	Express Grill	fastfood		33.89956	-98.46538	1301 E Scott Ave	Wichita Falls	76301	+19405004913			0.90
+2383cd6eb39c	Firehouse Subs	fastfood	sandwich shop	33.87484	-98.53889	3201 Lawrence Rd	Wichita Falls	76308	+19406968775	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1479	Firehouse Subs	0.96
+b22e5f9d5279	Firehouse Subs	fastfood	sandwich shop	33.87484	-98.53889	3201 Lawrence Road Suite 536	Wichita Falls	76308	+19406968775	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1479	Firehouse Subs	0.96
+548aa10b638e	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	33.87175	-98.54507	4002 Call Field Rd	Wichita Falls	76308	+19402474117	https://www.freddys.com/location/wichita-falls-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
+0336bd007108	Golden Chick	fastfood		33.95180	-98.67201	414 W Highway ST	Iowa Park	76367	+19405921155			0.92
 12bb4a45a032	Golden Chick	fastfood		33.95263	-98.52769	2906 Central E Fwy	Wichita Falls	76306	+19402285037	https://locations.goldenchick.com/tx/wichita-falls/1301/	Golden Chick	0.99
 1b3a6ee7aa72	Golden Chick	fastfood		33.90937	-98.51762	2409 5th St	Wichita Falls	76301	+19402285615	https://locations.goldenchick.com/tx/wichita-falls/1050/	Golden Chick	0.98
 280e57b2e0a0	Golden Chick	fastfood		33.08880	-98.58691	1504 Highway 16 S	Graham	76450	+19405492662	http://locations.goldenchick.com/tx/graham/1017/		0.96
 41a710382e5a	Golden Chick	fastfood		33.87489	-98.49455	3900 Old Jacksboro Hwy	Wichita Falls	76302	+19402285280	https://locations.goldenchick.com/tx/wichita-falls/1049/	Golden Chick	0.96
-cef63781cce7	Golden Chick	fastfood		33.99274	-98.54504	2906 Central E. Freeway	Wichita Falls	75050	+19402285366	http://locations.goldenchick.com/tx/wichita-falls/1301/		0.85
 d9f07954fa9d	Golden Chick	fastfood		33.95242	-98.52706	2906 Central E. Freeway	Wichita Falls	76306	+19402285366	https://locations.goldenchick.com/tx/wichita-falls/1301/		0.97
+eb22f7d7b144	Golden Chick	fastfood	american restaurant	33.37051	-98.76035	601 W Main St	Olney	76374	+19405645731	http://goldenchick.com		0.92
+ebff4fca9ad9	Golden Chick	fastfood	chicken restaurant	33.85802	-98.52884	USPS, 4001 Southwest Pkwy	Wichita Falls	76308	+19406912884	http://locations.goldenchick.com/tx/wichita-falls/1048/	Golden Chick	0.96
+f9625cb7525f	Golden Chick	fastfood	chicken restaurant	33.10783	-98.56949	1445 4th St	Graham	76450	+19405498650	http://goldenchick.com/		0.92
 0c098743691e	Jack in the Box	fastfood		33.87779	-98.53944	3125 Lawrence Rd	Wichita Falls	76308	+19406899100	https://www.jackinthebox.com		0.96
 c36d9d0c0267	Jack in the Box	fastfood		33.95035	-98.52640	2610 Central Freeway	Wichita Falls	76306	+19408510667	https://www.jackinthebox.com		0.99
+c744c1ae711c	Jersey Mike's	fastfood	sandwich shop	33.87082	-98.54068	3801 Call Field Rd	Wichita Falls	76308	+19406968072	https://www.jerseymikes.com/15032/wichita-falls-tx	Jersey Mike's Subs	0.99
+fec90d821fdb	Jimmy John's	fastfood	sandwich shop	33.87120	-98.53468	3210 Midwestern Pkwy Ste. 300	Wichita Falls	76308	+19406920024	https://locations.jimmyjohns.com/tx/wichitafalls/sandwiches-1907.html	Jimmy John's	0.97
+2dcf8c327ea5	KFC	fastfood	chicken restaurant	33.08947	-98.58752	1504 State Highway 16 S	Graham	76450	+19405490757	http://www.kfc.com		0.92
 3f264bdce6ad	KFC	fastfood		33.85015	-98.49969	1600 Archer City Hwy	Wichita Falls	76302	+19407169855	http://www.kfc.com/storelocator/Default.aspx?address=1600%20Archer%20City%20Highway,Wichita%20Falls,TX		0.92
 99028c6bfadb	KFC	fastfood		33.95206	-98.52734	2810 Central Freeway	Wichita Falls	76306	+19408510900	https://locations.kfc.com/tx/wichita-falls/2810-central-freeway	KFC	0.99
+a2ce54d0424e	Little Caesars Pizza	fastfood	pizza restaurant	33.87669	-98.49514	1501 Midwestern Pkwy	Wichita Falls	76302	+19402445555	https://littlecaesars.com/en-us/store/10185	Little Caesars	0.98
+bd2a1e63c95b	Little Caesars Pizza	fastfood	pizza restaurant	33.85858	-98.56085	4520 Southwest Pkwy	Wichita Falls	76308	+19406922233	https://littlecaesars.com/en-us/store/7385	Little Caesars	0.99
+c1738984b553	Little Caesars Pizza	fastfood	pizza restaurant	33.90868	-98.53079	3145 5th St SUITE B	Wichita Falls	76301	+19407661122	https://littlecaesars.com/en-us/store/2067	Little Caesars	1.00
 3f16e47cf379	Long John Silver's	fastfood		33.86253	-98.53551	4413 Kemp Blvd	Wichita Falls	76308	+19406911761	https://www.ljsilvers.com/?y_source=1_MTc1NzMzMzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
 8754a5f2df2f	Long John Silver's	fastfood		33.93647	-98.51956	2000 Maurine St	Wichita Falls	76306	+19407676256	http://www.ljsilvers.com/	Long John Silver's	0.92
 9e3447b45cc6	MAURY Taqueria	fastfood		33.10836	-98.58924	335 Elm St	Graham	76450	+19405212859			0.99
@@ -523,8 +538,22 @@ c36d9d0c0267	Jack in the Box	fastfood		33.95035	-98.52640	2610 Central Freeway	W
 7b492db3b333	McDonald's	fastfood		33.85741	-98.54766	4035 Southwest Pky	Wichita Falls	76308	+19406918866	https://www.mcdonalds.com/us/en-us/location/tx/wichita-falls/4035-southwest-pky/12629.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 a1747b460548	McDonald's	fastfood		33.08802	-98.58601	1701 Hwy 16 S	Graham	76450	+19405495117	https://www.mcdonalds.com/us/en-us/location/tx/graham/1701-hwy-16-s/11595.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 bbe628ee8cba	McDonald's	fastfood		33.96515	-98.67162	401 Southwest Access Road	Iowa Park	76367	+19405925555	https://www.mcdonalds.com/us/en-us/location/tx/iowa-park/401-southwest-access-road/33213.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+f82cf5eedee9	McDonald's	fastfood	burger restaurant	33.87664	-98.54169	3130 Lawrence Rd	Wichita Falls	76308	+19406918833	https://www.mcdonalds.com/us/en-us/location/tx/wichita-falls/3130-lawrence-rd/29680.html?cid=RF:YXT:RoN::Clicks		0.92
 dde67c20e18d	Meltons Roadside	fastfood		33.90266	-98.48461	200 E Scott Ave	Wichita Falls	76301	+19406312900	https://meltonsroadside.com/		0.86
+8a78c8cba7fa	Panda Express	fastfood	chinese restaurant	33.87479	-98.54024	3164 Lawrence Rd	Wichita Falls	76308	+19406968728	http://www.pandaexpress.com/		0.97
+c6a783366c82	Papa John's Pizza	fastfood	pizza restaurant	33.97250	-98.50603	803 1/2 Broad St	Wichita Falls	76301	+19407230000	http://www.papajohns.com		0.77
+6fd77ed3c0c3	Papa Johns Pizza	fastfood	pizza restaurant	33.96013	-98.51321	3705B Sheppard Access Rd	Wichita Falls	76306	+19407230000	https://locations.papajohns.com/united-states/tx/76306/wichita-falls/3705-b-sheppard-access-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
+d0c5965c89f5	Papa Johns Pizza	fastfood	pizza restaurant	33.88379	-98.52891	2922 Kemp Blvd	Wichita Falls	76308	+19407661300	https://locations.papajohns.com/united-states/tx/76308/wichita-falls/2922-kemp-blvd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NzYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	1.00
+0fe9647307ce	Pizza Hut	fastfood	pizza restaurant	33.87019	-98.49395	4201 Jacksboro Hwy Wichita	Wichita Falls	76302	+19407612222	https://locations.pizzahut.com/tx/wichita-falls/4201-jacksboro-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285928	Pizza Hut	0.96
+34c3dc0ee816	Pizza Hut	fastfood	pizza restaurant	33.09490	-98.58923	1113 State Highway 16 S	Graham	76450	+19405495401	http://pizzahut.com/		0.92
+774ecb4c6e38	Pizza Hut	fastfood	pizza restaurant	33.96250	-98.51381	4000 Sheppard Access Rd Wichita	Wichita Falls	76306	+19408516552	https://locations.pizzahut.com/tx/sheppard-afb/main-exchange?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310775	Pizza Hut	0.99
+7e00f2784b97	Pizza Hut	fastfood	pizza restaurant	33.08560	-98.58459	1805 State Hwy. 16 South	Graham	76450	+19405495401	https://locations.pizzahut.com/tx/graham/1805-state-hwy-16-south?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305595	Pizza Hut	0.98
+a6cff5a48cb9	Pizza Hut	fastfood	pizza restaurant	33.90941	-98.51833	2501 5th St Wichita	Wichita Falls	76301	+19403225757	https://locations.pizzahut.com/tx/wichita-falls/2501-5th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299206	Pizza Hut	0.98
+c13377254db4	Pizza Hut	fastfood	pizza restaurant	33.86463	-98.53520	4311 Kemp Blvd Wichita	Wichita Falls	76308	+19406920731	https://locations.pizzahut.com/tx/wichita-falls/4311-kemp-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284522	Pizza Hut	1.00
+ed502b164a46	Pizza Hut	fastfood	pizza restaurant	33.95266	-98.67288	412 W Park Ave	Iowa Park	76367	+19405922772	https://locations.pizzahut.com/tx/iowa-park/412-w-park?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286791	Pizza Hut	0.95
 da76700a4b03	Popeyes	fastfood		33.85771	-98.55762	4449 Southwest Pkwy	Wichita Falls	76308	+19406969956	https://www.popeyes.com/store-locator/store/restaurant_83906	Popeyes Louisiana Kitchen	0.99
+6c42e1c84bfc	Popeyes Louisiana Kitchen	fastfood	american restaurant	33.90187	-98.49677	1308 Holliday St	Wichita Falls	76301	+19407230484	http://www.popeyes.com		0.92
+dee93010a401	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	33.86837	-98.53699	4449 Southwest Pkwy	Wichita Falls	76308		https://popeyes.com		0.77
 f54ab94f3948	Popeyes Louisiana Kitchen	fastfood		33.97592	-98.50716	715 Avenue H	Wichita Falls	76311	+19408555451	https://www.popeyes.com/store-locator/store/restaurant_83857	Popeyes Louisiana Kitchen	0.94
 ca868c9bf048	Raising Cane's	fastfood		33.88000	-98.54074	3701 Kell Blvd.	Wichita Falls	76308	+19406920388	https://locations.raisingcanes.com/tx/wichita-falls/3701-kell-blvd.	Raising Cane's Chicken Fingers	0.99
 c5545083d193	Schlotzsky's	fastfood		33.87240	-98.53610	3916 Kemp	Wichita Falls	76308	+19406914415	https://locations.schlotzskys.com/tx/wichita-falls/3916-kemp?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner		0.98
@@ -540,7 +569,28 @@ ac1057bde599	Simple Simon's Pizza	fastfood		33.85704	-98.55143	4131 SW Parkway, 
 98cbd797a3bc	Sonic Drive In	fastfood		33.88713	-98.46792	2407 Old Windthorst Road	Wichita Falls	76301	+19407616145	https://locations.sonicdrivein.com/tx/wichitafalls/2407-old-windthorst-road.html	Sonic Drive-In	1.00
 cd8ece092020	Sonic Drive In	fastfood		33.88041	-98.52930	3200 Kemp Blvd.	Wichita Falls	76308	+19406924919	https://locations.sonicdrivein.com/tx/wichitafalls/3200-kemp-blvd..html	Sonic Drive-In	0.99
 f169ffebd71a	Sonic Drive In	fastfood		33.85775	-98.56512	4801 S.W. Parkway	Wichita Falls	76310	+19406928288	https://locations.sonicdrivein.com/tx/wichitafalls/4801-s.w.-parkway.html	Sonic Drive-In	0.96
+bca4276e8446	Sonic Drive-In	fastfood	burger restaurant	33.90410	-98.51321	2112 9th St	Wichita Falls	76301	+19407675628	https://locations.sonicdrivein.com/tx/wichitafalls/2112-w.-ninth.html		0.92
+be99c7687cb3	Sonic Drive-In	fastfood	burger restaurant	33.88709	-98.46812	2407 Old Windthorst Rd	Wichita Falls	76301	+19407616145	https://locations.sonicdrivein.com/tx/wichitafalls/2407-old-windthorst-road.html		0.99
+c4df61301512	Sonic Drive-In	fastfood	burger restaurant	33.09466	-98.58961	1217 Highway 16 S	Graham	76450	+19405494000	https://locations.sonicdrivein.com/tx/graham/1217-highway-16-south.html		0.98
+f36e1cfb9471	Sonic Drive-In	fastfood	burger restaurant	33.81474	-98.19198	402 E Omega St	Henrietta	76365	+19405385545	https://locations.sonicdrivein.com/tx/henrietta/402-e.-omega.html		0.96
+09948d7f149c	Subway	fastfood	sandwich shop	33.95278	-98.52845	2314 Airport Dr # A	Wichita Falls	76306	+19408519782	https://www.subway.com		0.99
+0b0da73fa533	Subway	fastfood	sandwich shop	33.87675	-98.49509	1501 Midwestern Parkway Suite 106	Wichita Falls	76302	+19407661782	https://restaurants.subway.com/united-states/tx/wichita-falls/1501-midwestern-parkway	Subway	0.95
+1c7155ffc400	Subway	fastfood	sandwich shop	33.85776	-98.52120	4730 Taft Blvd.	Wichita Falls	76308	+19406877827	https://restaurants.subway.com/united-states/tx/wichita-falls/4730-taft-blvd	Subway	0.99
 2fb05ce1deea	Subway	fastfood		33.95060	-98.52916	2700 Central Freeway	Wichita Falls	76306	+19408553399	https://restaurants.subway.com/united-states/tx/wichita-falls/2700-central-freeway?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=37903&utm_campaign=evergreen-2020&y_source=1_MTQ4OTUyNzgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
+342762dbf859	Subway	fastfood	sandwich shop	33.37052	-98.75992	509 W Main St	Olney	76374	+19405644100	https://restaurants.subway.com/united-states/tx/olney/509-w-main	Subway	0.96
+60428026df75	Subway	fastfood	sandwich shop	33.87708	-98.56042	3701 Fairway Blvd Ste 104	Wichita Falls	76309	+19406878235	https://restaurants.subway.com/united-states/tx/wichita-falls/3701-fairway-blvd	Subway	0.99
+6d5a14dd0f65	Subway	fastfood	sandwich shop	33.90264	-98.49799	1200 Holliday St	Wichita Falls	76301	+19403222782	http://www.subway.com/en-us	Subway	0.96
+81928ad52c46	Subway	fastfood	sandwich shop	33.22795	-98.16635	112 Chisholm Trail	Jacksboro	76458	+19405675229	https://restaurants.subway.com/united-states/tx/jacksboro/112-chisholm-trail	Subway	0.96
+835c5738205d	Subway	fastfood	sandwich shop	33.96085	-98.51332	3711 Sheppard Access Rd	Wichita Falls	76306	+19408551782	https://restaurants.subway.com/united-states/tx/wichita-falls/3711-sheppard-access-rd	Subway	0.95
+a2f152e47252	Subway	fastfood	sandwich shop	33.88668	-98.46870	1124 Central Freeway E	Wichita Falls	76301	+19407666098	https://restaurants.subway.com/united-states/tx/wichita-falls/1124-central-freeway-e	Subway	0.95
+ac4309fe6ada	Subway	fastfood	sandwich shop	33.11345	-98.58923	175 Elm St.	Graham	76450	+19405494649	https://restaurants.subway.com/united-states/tx/graham/175-elm-st	Subway	0.98
+b89af0441e23	Subway	fastfood	sandwich shop	33.85098	-98.50114	5131 Greenbriar Rd	Wichita Falls	76302	+19407619865	https://www.subway.com		0.95
+ba2acb350d0f	Subway	fastfood	sandwich shop	33.85726	-98.56369	4701 Southwest Pkwy Ste 14	Wichita Falls	76310	+19406912782	https://www.subway.com		0.92
+c01e88ffc8b5	Subway	fastfood	sandwich shop	33.96339	-98.69025	1409 W Highway St	Iowa Park	76367	+19405922782	https://www.subway.com		1.00
+d1159499de01	Subway	fastfood	sandwich shop	33.96493	-98.67273	1501 N Pacific Ave	Iowa Park	76367	+19405922782	https://alibabacharleston.com		0.97
+d16b23aa71af	SUBWAY	fastfood	sandwich shop	33.99856	-98.50665	Frente a la 105	Sps	76311	+19402346444	http://subway.com		0.77
+f71f70715666	Subway	fastfood	sandwich shop	33.87962	-98.52949	3208 Kemp Blvd	Wichita Falls	76308	+19406927827	https://www.subway.com		1.00
+fdd55b57a18d	Subway	fastfood	sandwich shop	33.81449	-98.19138	415 E Omega St	Henrietta	76365	+19405385009	https://restaurants.subway.com/united-states/tx/henrietta/415-omega-st	Subway	0.98
 32888ed2d80c	Taco Bell	fastfood		33.96494	-98.67157	301 Southwest Access Roa	Iowa Park	76367	+19402131574	https://locations.tacobell.com/tx/iowa-park/301-southwest-access-roa.html	Taco Bell	0.95
 47d948f4001c	Taco Bell	fastfood		33.85366	-98.49976	1415 Southwest Parkway	Wichita Falls	76302	+19402855512	http://www.tacobell.com/	Taco Bell	0.98
 96686318d804	Taco Bell	fastfood		33.88728	-98.52821	2512 Kemp Blvd	Wichita Falls	76309	+16822580683	http://www.tacobell.com/	Taco Bell	0.99
@@ -557,8 +607,9 @@ d44fd1fb11e6	Wendy's	fastfood		33.87502	-98.53072	3601 Kemp Blvd.	Wichita Falls	
 43409e15a5ee	Whataburger	fastfood		33.85748	-98.53477	2725 SOUTHWEST PKWY	Wichita Falls	76308	+19406920015	https://locations.whataburger.com/tx/wichita-falls/2725-southwest-pkwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 4d8821a766cf	Whataburger	fastfood		33.87743	-98.54806	3404 MCNIEL AVE	Wichita Falls	76308	+19406962201	https://locations.whataburger.com/tx/wichita-falls/3404-mcniel-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 753033aa7c20	Whataburger	fastfood		33.09320	-98.58944	1228 STATE HIGHWAY 16 S	Graham	76450	+19405493420	https://locations.whataburger.com/tx/graham/1228-state-highway-16-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
+f598db209e5b	Whataburger	fastfood	burger restaurant	33.93419	-98.51828	1040 CENTRAL FWY	Wichita Falls	76306	+19407231019	https://locations.whataburger.com/tx/wichita-falls/1040-central-fwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+cdbb01d1feac	Wingstop	fastfood	chicken restaurant	33.88384	-98.52885	2918 Kemp Blvd	Wichita Falls	76308	+19403229464	https://order.wingstop.com/menu/wingstop-123-wichita-falls-tx-76308	Wingstop	1.00
 e53395e119c1	4K Premium Beef	grocery		33.10435	-98.58499	702 East St	Graham	76450	+19404562868			0.59
-08755718e943	ALDI	grocery		33.88181	-98.52852					https://www.aldi.us		0.77
 e18c2fb8df85	Diamond Food Markets	grocery		33.81600	-98.17496	1290 US Highway 82	Henrietta	76365	+19405386991	https://www.diamondfood.com		0.55
 938529522428	Diamond Supermarket	grocery		33.21748	-98.15633	201 S East St	Jacksboro	76458	+19405672212			0.55
 8ba6bc4fe55d	Fresh Choice Shop	grocery	organic grocery store	33.86633	-98.53462	956 Boggess Street	Wichita Falls	76308				0.58
@@ -578,7 +629,6 @@ f59dcc2c8c7a	Market Street	grocery		33.85730	-98.54659	4025 Southwest Pkwy	Wichi
 502d9b97e8d4	Senator Craig Estes	grocery		33.86633	-98.53462	4245 Kemp Blvd	Wichita Falls	76308				0.95
 5fcdf8d53a28	Shepherd Air Force Base In Wichita Falls Texas	grocery		33.98200	-98.51601		Wichita Falls					0.74
 8afda7d39e2b	Sheppard Commissary	grocery		33.96705	-98.50948	130 Community Center Dr	Wichita Falls	76311	+19402857001	http://www.commissaries.com		0.99
-2d3d67d61778	Stewart's Food Store	grocery		33.13670	-98.59637	1204 W Main St	Olney	76374	+19405642722	http://stewartsolney.com		0.77
 9ba8a6b9f7a6	Stewart's Food Store	grocery		33.37158	-98.76974	1204 W Main St	Olney	76374	+19405642722	http://stewartsolney.com/		0.96
 a97b0491db67	Texoma Messianic Synagogue	grocery		33.88412	-98.52931	2910 Kemp Blvd Ste 209	Wichita Falls	76308		texomamessianicsynagogue.org		0.95
 a4e721638104	United Express	grocery		33.86639	-98.49464	4500 Old Jacksboro Hwy	Wichita Falls	76302	+19407615837	https://www.unitedsupermarkets.com/rs/storelocator	United Express	1.00
@@ -631,7 +681,6 @@ f8830eb40df5	Wichita Falls Infectious Disease Clinic	hospital		33.89774	-98.5035
 5ad32f05d26b	Ambe Hotels W Falls Llc	hotel		33.86271	-98.53312	2511 Montgomery East Pl	Wichita Falls	76308				0.95
 75d369a97499	American Inn	hotel		33.08847	-98.58733	1516 State Highway 16 S	Graham	76450	+19405499900			0.55
 3a772072c538	Baymont by Wyndham Wichita Falls	hotel		33.87659	-98.55823	4510 Kell W Blvd	Wichita Falls	76309	+19402472820	https://www.wyndhamhotels.com/baymont/wichita-falls-texas/baymont-inn-suites-wichita-falls/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A18114	Baymont by Wyndham	1.00
-cb72387495bf	Bed, Barn, and Beyond	hotel		33.08088	-98.53956	1472 Finis Rd	Graham	76450	+12563104723			0.78
 d86ef992c259	Bed, Barn, and Beyond	hotel		33.08539	-98.53851	1472 Finis Rd	Graham	76450	+12563104723			0.80
 d8d05506bdfb	Best Western Henrietta Inn & Suites	hotel		33.79460	-98.18549	816 US-287	Henrietta	76365	+19405386969	https://www.bestwestern.com/en_US/book/hotel-rooms.44592.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44592	Best Western Hotels & Resorts	1.00
 5cfe3bf3648e	Best Western North Side Inn	hotel		33.93343	-98.51912	1307 Kenley Ave	Wichita Falls	76306	+19403228880	https://www.bestwestern.com/en_US/book/hotel-rooms.44793.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44793	Best Western Hotels & Resorts	1.00
@@ -639,10 +688,7 @@ cdb0eebb992e	Best Western Plus Graham Inn	hotel		33.08706	-98.58517	1707 TX-16	G
 b0d3062efd79	Best Western Plus University Inn & Suites	hotel		33.85930	-98.53211	4540 Maplewood Ave	Wichita Falls	76308	+19406872025	https://www.bestwestern.com/en_US/book/hotel-rooms.44657.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44657	Best Western Hotels & Resorts	1.00
 5d3426e83860	Best Western Wichita Falls Inn	hotel		33.93336	-98.51807	1032 Central Fwy	Wichita Falls	76306	+19407666881	https://www.lacasadelzorro.com		0.55
 8cbc543496d8	Bolin Hall	hotel		33.87376	-98.51951		Wichita Falls		+19403974253	http://www.mwsu.edu		0.82
-6b8fc176b7d8	Bucks & Ducks Hunting Lodge	hotel	lodge	33.69371	-98.01913	3896 FM 1288	Bellevue	76228	+19032715524	http://www.kentoutdoors.com		0.92
-ec729c1fd840	Bullwinkle Blvd	hotel		33.12957	-98.64622		Graham					0.72
 8ad88279ce81	Butterfield Motel	hotel	motel	33.22513	-98.15900	626 N Main St	Jacksboro	76458	+19405675567	https://butterfield-depot-motel.hub.biz		0.83
-3adf8c7e491a	Castlerock Hospitality	hotel		33.93722	-98.51511	1740 Maurine St	Wichita Falls	76306				0.95
 cbc82ce972ac	Catalina Motel	hotel	motel	33.89978	-98.46915	1108 E Scott Ave	Wichita Falls	76301	+19407671411	http://chamberofcommerce.com		0.99
 4fc85502d7f1	Circle Inn	hotel	motel	33.90747	-98.53153	3153 5th St	Wichita Falls	76301	+19407235515	http://circleinn4.placeweb.site		0.99
 c46a3aedb3c7	Comfort Inn Wichita Falls Near University	hotel		33.86230	-98.53463	4414 Westgate St	Wichita Falls	76308	+19406911066	http://www.choicehotels.com/txi47	Choice Hotels	0.99
@@ -652,28 +698,23 @@ c9663791f05c	Cp Hotel Group Llc	hotel		33.90088	-98.49503	1401 Holliday St Ste 4
 efe2b9ab4dad	Days Inn	hotel		33.92982	-98.51672	1015 Wolcott Ln	Wichita Falls	76306	+19407613400	http://www.daysinn.com	Days Inn	1.00
 400445579e4e	Days Inn & Suites by Wyndham Wichita Falls	hotel		33.87675	-98.55776	4500 Kell Blvd	Wichita Falls	76309	+19406914200	https://www.wyndhamhotels.com/days-inn/wichita-falls-texas/days-inn-and-suites-wichita-falls/overview?CID=LC:DI::BING:RIO:National:15565&iata=00093796		0.92
 1d4cbfb16242	Days Inn by Wyndham Wichita Falls	hotel		33.93656	-98.51689	1812 Maurine St	Wichita Falls	76306	+19406870060	https://www.wyndhamhotels.com/days-inn/wichita-falls-texas/days-inn-wichita-falls/overview?CID=LC:acbkp9kkmt716ab:58691&iata=00093796		1.00
-9f267626eac1	Decker Farms	hotel		33.82756	-98.59686	1954 Decker Rd	Wichita Falls	76310	+19403227800	http://www.deckerfarmsliving.com/		0.83
 d71419056049	Decker Farms	hotel		33.82647	-98.59586	1954 Decker Rd	Wichita Falls	76310	+19403227800	http://www.deckerfarmsliving.com/		0.97
 34ac10465254	Delta Hotels by Marriott Wichita Falls Convention Center	hotel		33.91385	-98.49788	306 Travis St	Wichita Falls	76301	+19402477279	https://www.marriott.com/en-us/hotels/spsde-delta-hotels-wichita-falls-convention-center/overview/	Delta Hotels	0.99
 df71e0b07473	Delux Inn	hotel	motel	33.90282	-98.49630	1212 Broad St	Wichita Falls	76301	+19407238008			0.99
 db31e6dc9048	Eagle Inn	hotel	motel	33.92864	-98.51933	2602 Old Iowa Park Rd	Wichita Falls	76306	+19403224567	https://www.theeagleinn.com/mobile.htm		0.92
 64441b6c2bd5	Econo Lodge Wichita Falls Downtown	hotel	resort	33.91064	-98.50378	1700 5th St	Wichita Falls	76301	+19406920329	https://www.choicehotels.com/texas/wichita-falls/econo-lodge-hotels/tx270?mc=llbillpx&pmf=local		0.99
-0acc588ae159	Elks Lodge 1105	hotel	lodge	33.89621	-98.54849	4205 Seymour Hwy	Wichita Falls	76309	+19406914820	http://www.elks.org		0.99
 515c9bef055f	Executive Inn	hotel		33.08452	-98.58366	1919 State Highway 16 S	Graham	76450	+19405498320	http://www.executiveinntx.com		0.84
 9055e33fff92	Executive Inn & Suites	hotel	motel	33.93673	-98.51577	1750 Maurine St	Wichita Falls	76306	+19403222477	http://executiveinnwf.com/		1.00
 a4e1c44b8fc2	Fairfield by Marriott Inn & Suites Wichita Falls Northwest	hotel		33.93100	-98.51687	1020 Central E Fwy	Wichita Falls	76306	+19402287505	https://www.marriott.com/en-us/hotels/wctnw-fairfield-inn-and-suites-wichita-falls-northwest/overview/	Fairfield by Marriott	1.00
 83d382fb8199	Fairfield Inn Wichita Falls	hotel		33.86237	-98.53468	4414 Westgate St	Wichita Falls	76308	+19406911066	http://www.marriott.com/hotels/travel/wctfi-fairfield-inn-wichita-falls/		0.85
-5efe705d7b9e	Faith Masonic Lodge No. 1158	hotel	lodge	33.87657	-98.52937	3503 Kemp Blvd	Wichita Falls	76308	+19406920142	https://faithlodge.org/		0.99
 38d980a90f65	Freedom Estates	hotel		33.97875	-98.51997	102 Falcon Blvd	Wichita Falls	76311	+19405004075	www.sheppardafbhomes.com		0.92
 0407148ae815	Gateway Inn	hotel	motel	33.08939	-98.58681	1401 TX-16	Graham	76450	+19405490222	http://www.gatewayinngraham.com		0.98
-c3557a2bdedc	Graham Hospitality Llc	hotel		33.08697	-98.58503	1707 State Highway 16 S	Graham	76450				0.95
 41a7906db159	Graham Hotel, Llc	hotel		33.11796	-98.56316	1581 380 Byp	Graham	76450				0.95
 ee2a984df173	Hair After, Inc	hotel		33.10748	-98.57062	1425 4th St	Graham	76450				0.95
 74711c38ab3e	Hampton Inn by Hilton Wichita Falls North	hotel		33.94877	-98.52878	2432 Sierra Drive	Wichita Falls	76306	940-2803020	https://www.hilton.com/en/hotels/spsfnhx-hampton-wichita-falls-north/	Hampton by Hilton	0.99
 cd0795f361b0	Hampton Inn Wichita Falls Sikes Senter Mall	hotel		33.86693	-98.53452	4217 Kemp Blvd	Wichita Falls	76308	+19406921999	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-wichita-falls-sikes-senter-mall-SPSSSHX/index.html	Hampton by Hilton	1.00
 aecc4f277c65	Hampton Inn Wichita Falls-sikes Senter Mall	hotel		33.86683	-98.53475	4217 Kemp Blvd	Wichita Falls	76308	+19406921999	https://www.hilton.com		0.95
 fe653271db27	Hawthorn Suites	hotel		33.86032	-98.53339	1917 Elmwood North Ave	Wichita Falls	76308	+19406927900	http://www.hawthorn.com/Hawthorn/control/Booking/property_info?propertyId=30847&brandInfo=BH&cid=ROMLBCHW		0.92
-48ef0579d346	Henrietta Hospitality Inc	hotel		33.79436	-98.18556	816 US Highway 287 S	Henrietta	76365				0.95
 0093be05fc2c	Himmel's Country Cottage	hotel		33.57779	-98.44093	10143 State Highway 25 E	Windthorst	76389		http://www.himmelscountrycottage.com/		0.58
 8ca36ca8fd2a	Holiday Inn Express & Suites	hotel		33.87331	-98.57421	5300 Kell E Blvd	Wichita Falls	76310	+19406928300	http://www.hiexpress.com/	Holiday Inn Express	0.97
 f0d17b2054ee	Holiday Inn Express & Suites Graham	hotel		33.11808	-98.56319	1581 Hwy 380 Bypass	Graham	76450	+19405219188	https://www.ihg.com/holidayinnexpress/hotels/us/en/graham/rhptx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-RHPTX	Holiday Inn Express	1.00
@@ -686,7 +727,6 @@ eccc04b06553	Hotel Cristina Suites, C.A.	hotel		33.87652	-98.52902	3503 Kemp Blv
 218bcaa610e8	Innin Fund 2 Llc	hotel		33.93423	-98.51907	1317 Kenley Ave	Wichita Falls	76306				0.95
 03cff60bc1fd	Jacksboro Inn	hotel	motel	33.20033	-98.14967	944 S Main St	Jacksboro	76458	+19405673751			0.95
 f56083bad2f9	Jellystone Park Wichita Falls	hotel		33.87499	-98.41068	14145 US Highway 287 N	Wichita Falls	76310	+19407676700	https://wichitafallsjellystonepark.com/		0.97
-91583275e177	Key West Lodge 257 F & A M Pha	hotel		33.91351	-98.47569	803 Harding St	Wichita Falls	76301	+19407237910	http://www.upspring.com/key-west-lodge-257-f-and-a-m-pha-wichita-falls-tx...		0.67
 8203cb1bdd46	Killingsworth Hall	hotel		33.87494	-98.52237		Wichita Falls		+19403974217			0.89
 7caacf7705e8	Knights Inn Graham	hotel		33.08830	-98.58722		Graham		+19405499900	http://www.wyndhamhotelgroup.com/		0.77
 f3a3ac348090	Knights Inn Jacksboro	hotel		33.20349	-98.15248	824 S Main St	Jacksboro	76458	+19405675507	https://www.wyndhamhotels.com/knights-inn/jacksboro-texas/knights-inn-jacksboro/overview?CID=LC:KG::BING:RIO:National:37290		0.92
@@ -708,52 +748,39 @@ c258729c1a00	Oak Ranch Resort	hotel	resort	33.04486	-98.75645	303 Young Ln	Graha
 88eac01cf0d5	OYO Hotel Jacksboro TX - Fort Richardson	hotel		33.20374	-98.15221	824 S Main St	Jacksboro	76458	+18012049994	https://www.oyorooms.com/us/97608	OYO Rooms	1.00
 7c126c983d75	OYO Hotel Wichita Falls Downtown	hotel	motel	33.90549	-98.50292	1601 8th St	Wichita Falls	76301	+19403265079	https://www.oyorooms.com/us/54055?utm_source=FB_locations&utm_medium=listing&utm_campaign=US_WFS001	OYO Rooms	1.00
 abc5278853e5	OYO Townhouse Wichita Falls West	hotel		33.87664	-98.55769	4500 Kell W Blvd	Wichita Falls	76309	+16282630414	https://www.oyorooms.com/h/83244	OYO Rooms	0.92
-30db892010c1	Park Place Inn	hotel		33.95222	-98.66827	108 W Cash St	Iowa Park	76367				0.57
-81ec8d4f9ed0	Pasqual Restaurant	hotel		33.88749	-98.51144	2601 Harrison St	Wichita Falls	76308				0.92
 988118b29a6f	Pipeliner Inn	hotel		33.37023	-98.75774	401 W Main St	Olney	76374	+19405645695	https://the-pipeliner-inn.business.site		0.55
 095a616a29ad	Quality Inn and Suites Wichita Falls I-44	hotel		33.93684	-98.51531	1740 Maurine St	Wichita Falls	76306	+19402472799	https://www.choicehotels.com/texas/wichita-falls/quality-inn-hotels/tx803?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 e96944abecc0	Ramada Limited Wichita Falls	hotel		33.94569	-98.53451	3209 Northwest Fwy	Wichita Falls	76306	+19408550085	http://www.ramada.com/	Ramada by Wyndham	0.92
-7076f00a3aa8	Rathgeber Hospitality House	hotel	lodge	33.90109	-98.50053	1615 12th St	Wichita Falls	76301	+19407642400	http://rathgeberhospitalityhouse.org/		0.92
 cf4ae9ba32ab	Red Roof Inn Wichita Falls	hotel	resort	33.93362	-98.51765	1032 Central Fwy	Wichita Falls	76306	+19407666881	http://www.redroof.com/property/tx/wichita-falls/RRI742		0.95
 0998e166bd84	Regency Inn & Suites	hotel		33.90532	-98.50295	1601 8th St	Wichita Falls	76301	+19403221182	http://www.budgethost.com		0.67
 d8807fad464d	Residence Inn	hotel		33.87749	-98.54980	4233 Kell E Boulevard	Wichita Falls	76308	+19406910009	https://www.marriott.com/en-us/hotels/spsri-residence-inn-wichita-falls/overview/	Residence Inn by Marriott	0.99
-77da8ac013c5	RHL Ranch	hotel	lodge	33.05476	-98.29654	3901 Barton Chapel Rd	Jacksboro	76458	+18178221328			0.92
 94da2561b6e4	River Walk Suites	hotel	motel	33.90958	-98.53003	3136 Seymour Hwy	Wichita Falls	76301	+19407810335	http://riverwalksuites.net		0.99
 19d0fdca4a85	Rodeway Inn	hotel	resort	33.20358	-98.15233	824 S Main St	Jacksboro	76458	+19405671200	https://www.choicehotels.com/texas/jacksboro/rodeway-inn-hotels/txs28?mc=llbillpx&pmf=local		0.97
 c8b42307f050	Rodeway Inn	hotel	resort	33.94572	-98.53439	3209 NW Fwy, Unit 287	Wichita Falls	76305	+19408550085	https://www.choicehotels.com/texas/wichita-falls/rodeway-inn-hotels/txp42		0.85
 e4e6f90519d1	Royal Inn	hotel	motel	33.90952	-98.52791	3102 5th St	Wichita Falls	76301	+19407231186	http://www.www.royalinnmotel.com		0.92
 8af9db576f70	Scotland Park Motel & Apartments	hotel	motel	33.91582	-98.50728	99 Central E Fwy	Wichita Falls	76306	+19403225441			0.99
 6696b6d0dbde	Sheppard Inn	hotel		33.97038	-98.50303	400 J Ave	Sheppard Afb	76311	+19406764538	https://af.dodlodging.net/propertys/Sheppard-AFB		0.95
-18b62ade1bd3	Siya Hospitality Llc	hotel		33.87691	-98.55820	4510 Kell Blvd	Wichita Falls	76309				0.95
 0f5be1b9b679	Spark by Hilton Wichita Falls	hotel		33.87700	-98.58801	4500 Kell West Blvd	Wichita Falls	76309	940-691-4200	https://www.hilton.com/en/hotels/spsflpe-spark-wichita-falls/	Spark by Hilton	0.95
 de2913793ad5	Spark by Hilton Wichita Falls	hotel		33.87672	-98.55782	4500 Kell W Blvd	Wichita Falls	76309	+19406914200	https://www.hilton.com/en/hotels/spsflpe-spark-wichita-falls/?SEO_id=YEXTN-AMER-PE-SPSFLPE	Spark By Hilton	1.00
 288b776b035b	Staybridge Suites Wichita Falls by IHG	hotel		33.85995	-98.53376	1917 Elmwood Ave N	Wichita Falls	76308	+19402285741	https://www.ihg.com/staybridge/hotels/us/en/wichita-falls/spsen/hoteldetail?cm_mmc=FacebookMaps-_-SB-_-US-_-SPSEN	Staybridge Suites	0.99
 01fb3fcda465	Sunwatcher Apartments	hotel		33.87465	-98.52385	3704 Louis J Rodriguez Dr	Wichita Falls	76308	+19403974217	http://housing.mwsu.edu/sunwatcher.asp		0.99
 d68044161cfa	Super 8 by Wyndham Wichita Falls	hotel	resort	33.94613	-98.53420	3209 Northwest Fwy	Wichita Falls	76306	+19402280090	https://www.wyndhamhotels.com/super-8/wichita-falls-texas/super-8-wichita-falls/overview?CID=LC:7xnkh22o63wf5qj:07626&iata=00093796		1.00
 f628d4593a07	Super 8 by Wyndham Wichita Falls	hotel	resort	33.93327	-98.51850	1307 Kenley Ave	Wichita Falls	76306	+19402472004	https://www.wyndhamhotels.com/super-8/wichita-falls-texas/super-8-wichita-falls/overview		0.92
-f79f222e8000	The Elk Ranch	hotel	lodge	33.23001	-98.33028	11110 Burwick Rd	Jacksboro	76458	+19403912979			0.97
 ab2a7afdf374	the hotel at wichita falls	hotel		33.91427	-98.50881	100 Central Fwy	Wichita Falls	76306	+19407616000	http://hotelatwichitafalls.com		0.92
 afde2581cb1d	The Inn at Revel Manor	hotel		33.10451	-98.58817	700 Cherry St	Graham	76450	+19405492294	http://www.revelmanor.com		0.92
-0f35d51c9c5f	The Lodge At Muddy Water	hotel	lodge	33.78048	-98.15279	2715 US-287	Henrietta	76365	+19407813129			0.97
 a8a47ab4fab8	The Pipeliner Inn	hotel	motel	33.37088	-98.74965	401 E Main St	Olney	76374	+19405645695	https://the-pipeliner-inn.business.site		0.94
 1cf884edc1e0	The Spur Hotel	hotel		33.59598	-98.62543	110 N Center	Archer City	76351	+19405742501	http://www.thespurhotel.com		0.99
 c63c782c3db7	Tiger Den	hotel		33.21806	-98.17023	753 W Belknap St	Jacksboro	76458		https://www.tigerdentx.com		0.95
 6e8a368fff8d	Travelodge Wichita Falls	hotel		33.92978	-98.51665	1015 Wolcott Ln	Wichita Falls	76306	+19407613400	https://www.wyndhamhotels.com/travelodge		0.92
-67199a4f05cb	Vani Inc	hotel		33.94622	-98.53462	3209 Northwest Fwy	Wichita Falls	76306				0.95
-cf9556ae8f9d	Vbd Hospitality Llc	hotel		33.85929	-98.53183	4540 Maplewood Ave	Wichita Falls	76308				0.95
 6c47567974aa	Wayfarer hotel	hotel	motel	33.88757	-98.47937	600 Central E Fwy	Wichita Falls	76301	+19407613900	https://www.wayfarersb.com		0.99
 1d54e6aa9cd0	Wellington On The Lake Apartments	hotel		33.87384	-98.57698	3919 Barnett Rd	Wichita Falls	76310	+19406962300	http://wfapartments.com/		0.96
-67596abc4431	Wf Hotel Llc	hotel		33.86230	-98.53457	4414 Westgate St	Wichita Falls	76308				0.95
-f678a405445d	Wichita Falls Masonic Lodge No. 635	hotel	lodge	33.88264	-98.57825	3388 Barnett Rd	Wichita Falls	76310	+19406926981	http://masonic.wf.net/wf635.htm		0.93
 85cfcb237aac	Wichita Falls Travel Center	hotel		33.91601	-98.49590	306 Scott Ave	Wichita Falls	76301	+19407617925	wichitafalls.org/directory/wichita-falls-travel-center		0.98
 7a7e9510bb76	Wichita Star Management Inc	hotel		33.86073	-98.53352	1917 Elmwood North Ave # H	Wichita Falls	76308				0.95
-6e3c9c1a9f45	Worth Hotels Llc	hotel		33.90088	-98.49503	1401 Holliday St Ste 426	Wichita Falls	76301				0.95
 8b1844a98fd6	Wyndham Hotel	hotel		33.87666	-98.55776	4500 Kell Blvd	Wichita Falls	76309		http://www.wyndhamhotelgroup.com		0.72
 2662fefd4898	Alpha Social Card Club	office	private association	33.90406	-98.48530	105 E Scott Ave	Wichita Falls	76301	+19402475353			0.92
 e6ae49405d10	American Insurance Agency Inc	office		33.89650	-98.52400	1712 Kemp Blvd	Wichita Falls	76309	+19403223122	http://www.anamericaninsurancedfw.com		0.92
 75db129bcfd4	Apex Geoscience	office		33.85988	-98.58839	6232 Southwest Pkwy	Wichita Falls	76310	+19406923446	http://www.apexgeo.com		0.92
 c2905cc67fc3	ArrowMP	office	industrial company	33.97612	-98.53625	5000 Central Fwy	Wichita Falls	76306	+19407615050	Arrowmp.com		0.95
-26b373dfbb08	AT&T Wireless Call Center	office	telecommunications company	33.87897	-98.55289	4300 Kell Blvd	Wichita Falls	76309	+19406919100	www.att.com/wireless		0.92
 fa44b44403fc	Burk Royalty Co Ltd	office	energy company	33.86631	-98.53442	4245 Kemp Blvd	Wichita Falls	76308	+19403978600	http://burkroyalty.com/		0.92
 39f14f90792b	Cobalt Ridge	office	information technology company	33.81359	-98.69411	200 S Main St	Holliday	76366	+19404630040	http://cobaltnow.com/		0.92
 b3fbd5a6df17	Comcell Community	office	telecommunications company	33.57752	-98.43993	10184 State Hwy 25	Windthorst	76389	+19404236201	http://www.comcell.net/		0.57
@@ -811,7 +838,6 @@ a9eff113b2f0	Brickhouse Pizza Pasta and Taproom	restaurant	pizza restaurant	33.1
 603a308eec50	Bricktown Tap House & Kitchen	restaurant	gastropub	33.86976	-98.53489	3111 Midwestern Pkwy	Wichita Falls	76308	+19402287501	https://bricktownbrewery.com/location/wichita-falls/	Bricktown Brewery Fort Smith	0.99
 23a350cadb5f	Buffalo Wild Wings Grill & Bar	restaurant	chicken restaurant	33.86950	-98.53201		Wichita Falls		+19406969464	https://www.buffalowildwings.com/en/locations/detail/3243/?utm_source=extendednetwork&utm_medium=organic&utm_campaign=yext	Buffalo Wild Wings - Skokie, IL	0.86
 c2cb77420d6d	Bull Malarkey's	restaurant	american restaurant	33.81606	-98.19650	109 N Main St	Henrietta	76365	+19405380400	http://bullmalarkeys.com/		0.97
-04e306b7b391	Burger King	restaurant	burger restaurant	33.90152	-98.49607	1307 Holliday St	Wichita Falls	76301	+19407611153	https://burgerking.com/store-locator/store/8922	Burger King	0.99
 1cc65ad646e2	Burgers & Billiards	restaurant	burger restaurant	33.09352	-98.59003	1222 State Highway 16 S	Graham	76450	+19405210113	http://galvestontotalfitness.com		0.96
 a8da8644a932	Burrito Bowl	restaurant		33.87474	-98.52111	3410 Taft Blvd	Wichita Falls	76308	+19403974203			0.79
 f4aa3e844386	Burrito Shop	restaurant	mexican restaurant	33.90999	-98.49286	907 9th St #3403	Wichita Falls	76301	+19407664086	http://www.burritoshops.com		1.00
@@ -826,14 +852,11 @@ c9423147ce6f	Chartwells Midwestern State University	restaurant	sandwich shop	33.
 f5dc0f741a89	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	33.87883	-98.55154	4240 Kell Blvd	Wichita Falls	76309	+19406929292	https://www.cheddars.com/locations/tx/wichita-falls/wichita-falls/2024?cmpid=br%3Acsk_ag%3Aie_ch%3Asoc_ca%3ACSKFB_sn%3Afacebook_gt%3Awichita-falls-tx-2024_pl%3Alocurl_rd%3A1019	Cheddar's Scratch Kitchen	0.96
 424beff18f2e	Chicago Pizza Kitchen Of Wichita Falls Llc	restaurant		33.85764	-98.56070	4523 Southwest Pkwy	Wichita Falls	76308				0.95
 8afa9dd9ad2d	Chicka D's	restaurant		33.87249	-98.56012	3921 Fairway Blvd	Wichita Falls	76310	+18303854562	http://www.chickadscoffee.com		0.95
-f4dfa1343f70	Chicken Express	restaurant	chicken restaurant	33.88721	-98.52728	2511 Kemp Blvd	Wichita Falls	76309	+19402342500	http://chickene.com		0.99
 61ee76b30251	Chief’s Barricks	restaurant	bar and grill restaurant	33.81745	-98.18250	1216 E Wichita St	Henrietta	76365				0.82
 f7b4829330c5	Chili's Grill & Bar	restaurant		33.87147	-98.53777	3710 Call Field Rd.	Wichita Falls	76308	+19406924995	https://www.chilis.com/		0.99
 f13e25450b26	China Garden	restaurant	chinese restaurant	33.21805	-98.16755	551 W Belknap St	Jacksboro	76458	+19405672263	https://china-garden-tx-22.hub.biz/		0.99
 3dc6088b704f	China Star	restaurant	chinese restaurant	33.93216	-98.51736		Wichita Falls	76306	+19407678000	http://www.chinastarfood.com		0.77
 2dcf90c3c695	Chinese Gourmet	restaurant	chinese restaurant	33.86900	-98.53455	3111 Midwestern Pkwy, Wichita Falls, TX 76308	Wichita Falls	76308	+19406919966	http://www.chinese-gourmet-express.com/frontend/default.asp		0.92
-7be92c54abed	Chipotle Mexican Grill	restaurant	mexican restaurant	33.87089	-98.53410	3910 Wayne Ave	Wichita Falls	76308	+19406921922	https://locations.chipotle.com/tx/wichita-falls/3910-wayne-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2378	Chipotle Mexican Grill	0.99
-216b644fb594	Church's Chicken	restaurant	chicken restaurant	33.96027	-98.51428	3704 Sheppard Access Rd	Wichita Falls	76306	+19408558171	https://locations.churchs.com/tx/wichita-falls/3704-sheppard-road	Church's Chicken	0.90
 5a3282d3ba36	Cicis Pizza	restaurant	pizza restaurant	33.85824	-98.53301	2710 Southwest Pkwy	Wichita Falls	76308	+19406916060	https://www.cicis.com		0.96
 ddefd90b4519	Circle K Drive In, Llc	restaurant		33.37098	-98.76590	1010 W Main St	Olney	76374				0.92
 109cadf2f16b	Claytons Enterprises Llc	restaurant		33.11483	-98.55843	1820 380 Byp	Graham	76450				0.92
@@ -853,10 +876,6 @@ dc07677a53a2	Degree Celsius	restaurant		33.91258	-98.49053	710 8th St	Wichita Fa
 89763bdb8126	Denny's Restaurant	restaurant		33.93661	-98.51991	1206 Central Frwy N	Wichita Falls	76306	+19407235651	https://www.dennys.com/		0.99
 f0400e9e8e2e	Dickey's Barbecue Pit	restaurant	barbecue restaurant	33.87283	-98.53941	3911 Lawrence Rd #600	Wichita Falls	76308	+19402855177	https://www.dickeys.com/locations/Texas/Wichita-Falls/wichita-falls	Dickey's Barbecue Pit National	0.98
 03730a11111c	Dinner Bell Cafe	restaurant	american restaurant	33.10728	-98.57030	1429 4th St	Graham	76450	+19405491898	http://www.dinnerbellcafe.com/		0.97
-225168f47d56	Domino's	restaurant	pizza restaurant	33.89072	-98.52746	2214 Kemp Blvd	Wichita Falls	76309	+19404325640	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-a6ff470d6d1d	Domino's	restaurant	pizza restaurant	33.09428	-98.58929	1219 Highway 16 South	Graham	76450	+19405499994	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-be32152cd2ed	Domino's	restaurant	pizza restaurant	33.86120	-98.53258	4518 Maplewood	Wichita Falls	76308	+19406915818	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-de3d07065817	Domino's	restaurant	pizza restaurant	33.96506	-98.51424	Safb 4114 Burkbernett Rd	Wichita Falls	76306	+19408558110	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 5bb60e8af431	Don Jose Mexican Restaurant	restaurant	mexican restaurant	33.90248	-98.52010	2601 10th St	Wichita Falls	76309	+19403229167	http://donjose1.com/		0.99
 f2eed027cedc	Doorway To Gourmet	restaurant	delicatessen	33.95209	-98.66833	109 W Park Ave	Iowa Park	76367	+19405923354			0.95
 75ab88f9ce0d	Dos Chiles	restaurant	mexican restaurant	33.08086	-98.58322	2208 State Highway 16 S	Graham	76450	+19405493663	http://www.doschiles.com/#!grahammenu/c1800		0.77
@@ -888,25 +907,17 @@ bca3fbea8257	El Tapatío	restaurant	mexican restaurant	33.85765	-98.52173	2210 S
 3c1a0de59453	Fazmoz Caribbean Cuisine	restaurant	caribbean restaurant	33.86852	-98.52770	2611 Plaza Pkwy Suite 305	Wichita Falls	76308	+19405004899			0.97
 46e3a40e1912	Fiesta Mariachi	restaurant	mexican restaurant	33.86132	-98.53413	2510 Mallard Dr	Wichita Falls	76308	+19403869551	https://www.fiestamariachitx.com/		0.92
 5a314b8d85eb	Firefly Bar & Grill	restaurant	bar and grill restaurant	33.85740	-98.54048	2927 Southwest Pkwy	Wichita Falls	76308	+19402803473	http://www.fireflywf.com/		0.99
-2383cd6eb39c	Firehouse Subs	restaurant	sandwich shop	33.87484	-98.53889	3201 Lawrence Rd	Wichita Falls	76308	+19406968775	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1479	Firehouse Subs	0.96
-b22e5f9d5279	Firehouse Subs	restaurant	sandwich shop	33.87484	-98.53889	3201 Lawrence Road Suite 536	Wichita Falls	76308	+19406968775	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1479	Firehouse Subs	0.96
 e7b12243778e	Firo Fire Kissed Pizza	restaurant	pizza restaurant	33.87375	-98.53783	3410 Maplewood Ave	Wichita Falls	76308	+19402343476	https://firopizza.com/	Firo Fire Kissed Pizza	0.92
 155f7f4349f7	Five Guys	restaurant	burger restaurant	33.87072	-98.53351	3110 Midwestern Pkwy	Wichita Falls	76308	+19402645489	http://www.fiveguys.com/	Five Guys	0.78
 db40aadc0bd0	Five Twenty Six Pizza Studio	restaurant	pizza restaurant	33.10662	-98.59148	526 Oak St	Graham	76450	+19405496606	https://tastingsgrahamtx.com		0.99
 479511e88cc7	Fox Hill Restaurant & Gardens	restaurant	american restaurant	33.90724	-98.52023	800 Kemp Blvd	Wichita Falls	76301	+19404325541	http://www.foxhilltx.com/		0.99
 8e210f391929	Francheska's desing	restaurant		33.37081	-98.75513	122 W Main St	Olney	76374	+18175645652			0.98
-548aa10b638e	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	33.87175	-98.54507	4002 Call Field Rd	Wichita Falls	76308	+19402474117	https://www.freddys.com/location/wichita-falls-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
 70d92a500127	Fully Loaded Potato Kitchen	restaurant		33.91259	-98.49053	801 Indiana Ave	Wichita Falls	76301	+19402323153			0.94
 796821018abf	Fun Noodle Bar	restaurant	ramen restaurant	33.87278	-98.53466	3916 Kemp Blvd Ste N	Wichita Falls	76308	+19405004883	https://www.funnoodlebarwichitafalls.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.99
 25e9aa98fab2	Ganache To-go	restaurant	delicatessen	33.91294	-98.48988	800 Ohio Ave	Wichita Falls	76301	+19407663000	https://www.ganachetogo.com		0.92
 24393921130e	Gidgets Sandwich Shack	restaurant	sandwich shop	33.91415	-98.49027	701 Ohio Ave	Wichita Falls	76309	+19407660112	https://roadtrippers.com/.../food-drink/gidgets-sandwich-shack		0.95
 afe37bb65db8	Go Loco Street Tacos and Burritos	restaurant	mexican restaurant	33.88655	-98.46671	1208 Central E Fwy	Wichita Falls	76301	+19402642000	http://www.goloco.com/	Go Loco Street Tacos & Burritos - Wichita Falls	0.97
 2d4ee13d5516	Godfather's Pizza Express	restaurant	pizza restaurant	33.88680	-98.46877	1124 Central E Fwy E	Wichita Falls	76301	+19407617546	https://www.godfathers.com/	Godfathers Pizza	0.96
-0336bd007108	Golden Chick	restaurant		33.95180	-98.67201	414 W Highway ST	Iowa Park	76367	+19405921155			0.92
-454ef6805b1e	Golden Chick	restaurant	chicken restaurant	33.85750	-98.53410	USPS, 4001 Southwest Pkwy	Wichita Falls	76308	+19406912884	http://locations.goldenchick.com/tx/wichita-falls/1048/	Golden Chick	0.90
-eb22f7d7b144	Golden Chick	restaurant	american restaurant	33.37051	-98.76035	601 W Main St	Olney	76374	+19405645731	http://goldenchick.com		0.92
-ebff4fca9ad9	Golden Chick	restaurant	chicken restaurant	33.85802	-98.52884	USPS, 4001 Southwest Pkwy	Wichita Falls	76308	+19406912884	http://locations.goldenchick.com/tx/wichita-falls/1048/	Golden Chick	0.96
-f9625cb7525f	Golden Chick	restaurant	chicken restaurant	33.10783	-98.56949	1445 4th St	Graham	76450	+19405498650	http://goldenchick.com/		0.92
 18f1c2fd4aa2	Golden China	restaurant	chinese restaurant	33.09594	-98.58891	1104 Cypress St	Graham	76450	+19405496001	http://goldenchina.us		0.95
 2523995ae1e9	Golden Corral Buffet and Grill	restaurant	buffet restaurant	33.87302	-98.53343	3812 Kemp Blvd	Wichita Falls	76308	+12078747483	https://www.goldencorral.com/		0.92
 0b6a150255b6	Grand Buffet Seafood & Sushi	restaurant	buffet restaurant	33.86278	-98.53528	4407 Kemp Blvd	Wichita Falls	76308	+19406962899	http://www.grandbuffettexas.com/		0.99
@@ -930,7 +941,6 @@ fa10c4b20987	Hungry Joe's	restaurant	pizza restaurant	33.87720	-98.56011	3701 Fa
 782c5da2ffc8	Hwy 114 Diner Llc	restaurant		33.37105	-98.76625	1012 W Main St	Olney	76374				0.95
 4d626cf1a3e7	Hwy Cafe	restaurant	breakfast and brunch restaurant	33.88511	-98.48954	2808 Old Jacksboro Hwy	Wichita Falls	76302	+19407666386	https://www.hwycafewf.com/		0.95
 0588a2180e2c	IHOP	restaurant	breakfast and brunch restaurant	33.85752	-98.54674	4025 Southwest Pkwy	Wichita Falls	76308	+19406915555	https://restaurants.ihop.com/en-us/tx/wichitafalls/breakfast-4025-southwest-pkwy-1494	IHOP	0.99
-0e9acd5e1a67	IHOP	restaurant		33.90536	-98.49799	1004 Broad St	Wichita Falls	76301		https://restaurants.ihop.com/tx/wichitafalls/breakfast-1004-broad-st-1406	IHOP	0.97
 81bcf249effc	IHOP	restaurant	breakfast and brunch restaurant	33.90536	-98.49795	1004 Broad St	Wichita Falls	76301	+19403224555	http://www.ihop.com/	IHOP	0.98
 b9f1a82c4667	International Cuisine	restaurant		33.96382	-98.51456	1607 Pearlie Dr	Wichita Falls	76306	+19402492030			0.58
 dac69a7585e0	Iowa Park Hwy Grill	restaurant	diner	33.95022	-98.66176	510 E Hwy St	Iowa Park	76367	+19405920020			0.99
@@ -944,9 +954,7 @@ d6e84791c4e6	Jcd Group Wf Llc	restaurant		33.87924	-98.55016	4214 Kell Blvd Ste 
 b2f1ee0ee83c	Jefe's Mexican Restaurant	restaurant	mexican restaurant	33.85769	-98.56036	4519 Southwest Pkwy	Wichita Falls	76308	+19406969500	http://www.jefesmexicanrestaurant.com		0.98
 29974d31c545	Jefes	restaurant		33.85769	-98.56044	4519 Southwest Pkwy	Wichita Falls	76308	+19406969500	http://www.wichitafallsfoodie.com/2011/02/jefes-bar-grill.html		0.99
 9578eb169922	Jefes Henrietta	restaurant	mexican restaurant	33.81659	-98.19551	102 W Ikard St	Henrietta	76365	+19402152040	http://jefesrestaurants.com/		0.99
-c744c1ae711c	Jersey Mike's	restaurant	sandwich shop	33.87082	-98.54068	3801 Call Field Rd	Wichita Falls	76308	+19406968072	https://www.jerseymikes.com/15032/wichita-falls-tx	Jersey Mike's Subs	0.99
 273a949cfea1	Jessie's Burritos	restaurant	mexican restaurant	33.98354	-98.52462	2119 Missile Rd	Wichita Falls	76306	+19405008183			0.92
-fec90d821fdb	Jimmy John's	restaurant	sandwich shop	33.87120	-98.53468	3210 Midwestern Pkwy Ste. 300	Wichita Falls	76308	+19406920024	https://locations.jimmyjohns.com/tx/wichitafalls/sandwiches-1907.html	Jimmy John's	0.97
 2c94fe8f89d7	Jimmy's Egg	restaurant	breakfast and brunch restaurant	33.86995	-98.52943	2801 Midwestern Pkwy #300	Wichita Falls	76308	+19402855370	https://jimmysegg.com/locations/wichita-falls-tx/	Jimmy's Egg	0.99
 d5c3386d95ed	Joey's	restaurant	mexican restaurant	33.90450	-98.53250	528 Beverly Dr	Wichita Falls	76301	+19403225701	https://joeys0314.s4shops.com/		0.92
 8dabbf543abd	Johnny Carino's	restaurant	pizza restaurant	33.87798	-98.55413	4330 Kell Blvd	Wichita Falls	76309	+19406918900	https://www.carinos.com/wichita-falls-tx/location/detail		0.97
@@ -957,7 +965,6 @@ fad1ae95ea22	Jordan Craft BBQ	restaurant		33.86294	-98.62347	7503 Seymour Hwy, W
 b03e513c1640	Karat Bar And Bistro	restaurant		33.91294	-98.48988	800 Ohio Ave	Wichita Falls	76301	+19407200175	https://karatbarandbistro.com		0.95
 e32bdbb7fb20	Ken's Pizza Parlor	restaurant	pizza restaurant	33.95713	-98.68115	902 W Hwy St	Iowa Park	76367	+19405929999	http://kenspizza.online/		0.94
 782f27bcf11f	Kenna's Roadhouse	restaurant	american restaurant	33.45268	-98.93584	423 TX-114	Megargel	76370	+19405701160			0.92
-2dcf8c327ea5	KFC	restaurant	chicken restaurant	33.08947	-98.58752	1504 State Highway 16 S	Graham	76450	+19405490757	http://www.kfc.com		0.92
 d223240ba466	KN Restaurant	restaurant	american restaurant	33.09570	-98.58876	1108 Cypress St	Graham	76450	+19405492247	http://www.knrestaurants.com		0.77
 2ba8d80f3183	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.16141	-98.38537	106 E Dempsey St	Bryson	76427	+19403922461	https://locations.krispykrunchy.com/tx/bryson/106-e-dempsey		0.96
 a31c452fd450	Kung Fu Kitchen | Chinese	restaurant	chinese restaurant	33.86931	-98.53618	4020 Kemp Blvd	Wichita Falls	76308	+19406929360			1.00
@@ -965,13 +972,9 @@ a31c452fd450	Kung Fu Kitchen | Chinese	restaurant	chinese restaurant	33.86931	-9
 4b5c243b7b80	La Grand Cantina Wichita Falls	restaurant	mexican restaurant	33.98380	-98.53600	2526 Missile Rd	Wichita Falls	76306	+19402285041	https://www.lagrandcantina.com/		0.99
 88c8eb586b87	La Perla Tapatia	restaurant	mexican restaurant	33.86053	-98.53136	4525 Maplewood Ave	Wichita Falls	76308	+19402285646			0.99
 089b9b2f2261	La Real Michoacana	restaurant	mexican restaurant	33.90808	-98.53032	3139 5th St	Wichita Falls	76301	+12144027256	http://www.lamichoacanameatmarket.com		0.92
-2370bb6a2838	La Roma Pizza and Subs	restaurant	pizza restaurant	33.13267	-98.43772	6173 W Adams Ave	Temple	76502	+12547739999	http://laromapizzaandsubs.com		0.77
 e8d390535bf0	La Sultana	restaurant	mexican restaurant	33.10679	-98.58044	1016 4th St	Graham	76450	+19407459533			0.92
 3914b8edee32	Lala's Cocina	restaurant	mexican restaurant	33.88168	-98.52910	3102 Kemp Blvd	Wichita Falls	76308	+19403869977			0.99
 363cfbf7f934	Laredo Taco Company	restaurant		33.87271	-98.57736	5376 Kell West Blvd	Wichita Falls	76310	+19406920491	https://www.laredotacocompany.com/		1.00
-a2ce54d0424e	Little Caesars Pizza	restaurant	pizza restaurant	33.87669	-98.49514	1501 Midwestern Pkwy	Wichita Falls	76302	+19402445555	https://littlecaesars.com/en-us/store/10185	Little Caesars	0.98
-bd2a1e63c95b	Little Caesars Pizza	restaurant	pizza restaurant	33.85858	-98.56085	4520 Southwest Pkwy	Wichita Falls	76308	+19406922233	https://littlecaesars.com/en-us/store/7385	Little Caesars	0.99
-c1738984b553	Little Caesars Pizza	restaurant	pizza restaurant	33.90868	-98.53079	3145 5th St SUITE B	Wichita Falls	76301	+19407661122	https://littlecaesars.com/en-us/store/2067	Little Caesars	1.00
 f25e549115e9	Los Abuelos Mexican Restaurante	restaurant	mexican restaurant	33.95108	-98.51725	3004 TX-325 Spur	Wichita Falls	76306	+19409016613			0.99
 a68bce56f10c	Los Cuates Properties	restaurant	mexican restaurant	33.90467	-98.49633	1105 Broad St	Wichita Falls	76301	+16825217984			0.83
 32c791061ec5	Luby's Cafeteria	restaurant	cafeteria	33.90344	-98.50640	1801 9th St	Wichita Falls	76301	+19407236022	http://www.lubyswf.com		0.92
@@ -985,7 +988,6 @@ cd8b43b00f86	Mario's Pizza By The Slice	restaurant	pizza restaurant	33.95964	-98
 b8112948e2b3	McAlister's Deli	restaurant	delicatessen	33.87188	-98.54018	3900 Call Field Rd.	Wichita Falls	76308	+19406890800	https://locations.mcalistersdeli.com/tx/wichita-falls/3900-call-field-rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 bbe17dd90ad7	McBride's Steakhouse	restaurant	steakhouse	33.85928	-98.53064	4537 Maplewood Ave	Wichita Falls	76308	+19406960250	https://www.mcbridessteakhouse.com/		0.99
 863bc3aa8c65	McBrides Land & Cattle Co	restaurant	steakhouse	33.91494	-98.49393	501 Scott Ave	Wichita Falls	76301	+19403222516	http://mcbrideslandandcattletx.com		0.99
-f82cf5eedee9	McDonald's	restaurant	burger restaurant	33.87664	-98.54169	3130 Lawrence Rd	Wichita Falls	76308	+19406918833	https://www.mcdonalds.com/us/en-us/location/tx/wichita-falls/3130-lawrence-rd/29680.html?cid=RF:YXT:RoN::Clicks		0.92
 22a9c7ad9142	Mckinney BBQ	restaurant	barbecue restaurant	33.94919	-98.53202	4322 Burkburnett Rd	Wichita Falls	76306	+19403869033	http://mckinneybbq.com		0.77
 7f07dc294af8	Mi Familia Mexican Restaurant	restaurant	mexican restaurant	33.08474	-98.58416	1917 TX-16	Graham	76450	+19405210553	http://www.gomifamilia.com		0.95
 784a42dfe923	Mia's Italian Bistro	restaurant	italian restaurant	33.90594	-98.53175	507 Beverly Dr	Wichita Falls	76309	+19403221010	http://ordermiasitalianbistro.com/		0.96
@@ -1007,11 +1009,7 @@ f73bc191966c	Oodles Deli	restaurant	delicatessen	33.59215	-98.62684	315 S Center
 fef75f3ef0ce	Opa's Schnitzel Haus	restaurant	german restaurant	33.86908	-98.52811	2611 Plaza Pkwy	Wichita Falls	76308	+19406130611	http://www.opaschnitzelhaus.com		0.92
 0ce5285ed9a9	Oxford Street Restaurant	restaurant		33.86861	-98.52802	2611 Plaza Pkwy Ste 101	Wichita Falls	76308				0.95
 9e79706bac6c	Painted Ice Llc	restaurant		33.95183	-98.67146	322 W Highway St	Iowa Park	76367	+19402248627			0.75
-8a78c8cba7fa	Panda Express	restaurant	chinese restaurant	33.87479	-98.54024	3164 Lawrence Rd	Wichita Falls	76308	+19406968728	http://www.pandaexpress.com/		0.97
 c2993c05800d	Papa Ed’s Pizza	restaurant	pizza restaurant	33.37115	-98.76907	1130 W Main St	Olney	76374	+19405642494			0.73
-c6a783366c82	Papa John's Pizza	restaurant	pizza restaurant	33.97250	-98.50603	803 1/2 Broad St	Wichita Falls	76301	+19407230000	http://www.papajohns.com		0.77
-6fd77ed3c0c3	Papa Johns Pizza	restaurant	pizza restaurant	33.96013	-98.51321	3705B Sheppard Access Rd	Wichita Falls	76306	+19407230000	https://locations.papajohns.com/united-states/tx/76306/wichita-falls/3705-b-sheppard-access-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
-d0c5965c89f5	Papa Johns Pizza	restaurant	pizza restaurant	33.88379	-98.52891	2922 Kemp Blvd	Wichita Falls	76308	+19407661300	https://locations.papajohns.com/united-states/tx/76308/wichita-falls/2922-kemp-blvd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NzYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	1.00
 b845ea4a6fc8	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	33.87716	-98.56091	3701 Fairway Blvd Ste 124	Wichita Falls	76310	+19407677272			0.92
 200b1df07bb7	Paradise Steakhouse, Racetrack & RV Park	restaurant	steakhouse	33.00597	-98.63988	522 Racetrack Rd	Graham	76450	+19404417275	http://www.myparadisepark.com/		0.92
 4cac2b506bf8	Pat's Drive Inn	restaurant	diner	33.91564	-98.49525	400 Scott Ave	Wichita Falls	76301	+19403223531			0.99
@@ -1022,21 +1020,10 @@ b845ea4a6fc8	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	33.87
 564459f523b0	Pioneer of Texas	restaurant	comfort food restaurant	33.85853	-98.53065	4545 Maplewood Ave	Wichita Falls	76308	+19406922170	https://www.www.pioneeroftexasrestaurant.com/		0.98
 6b664cec3a56	Pioneer of Texas	restaurant	american restaurant	33.85757	-98.56000	4517 Southwest Pkwy Rear	Wichita Falls	76308	+19406911798	http://pioneer.com		0.97
 699b301521b5	Pioneer Supper Club	restaurant	southern american restaurant	33.92783	-98.50965	1100 Sheppard Access Rd	Wichita Falls	76306	+19408674663			0.87
-0fe9647307ce	Pizza Hut	restaurant	pizza restaurant	33.87019	-98.49395	4201 Jacksboro Hwy Wichita	Wichita Falls	76302	+19407612222	https://locations.pizzahut.com/tx/wichita-falls/4201-jacksboro-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285928	Pizza Hut	0.96
-34c3dc0ee816	Pizza Hut	restaurant	pizza restaurant	33.09490	-98.58923	1113 State Highway 16 S	Graham	76450	+19405495401	http://pizzahut.com/		0.92
-774ecb4c6e38	Pizza Hut	restaurant	pizza restaurant	33.96250	-98.51381	4000 Sheppard Access Rd Wichita	Wichita Falls	76306	+19408516552	https://locations.pizzahut.com/tx/sheppard-afb/main-exchange?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310775	Pizza Hut	0.99
-7e00f2784b97	Pizza Hut	restaurant	pizza restaurant	33.08560	-98.58459	1805 State Hwy. 16 South	Graham	76450	+19405495401	https://locations.pizzahut.com/tx/graham/1805-state-hwy-16-south?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305595	Pizza Hut	0.98
-a6cff5a48cb9	Pizza Hut	restaurant	pizza restaurant	33.90941	-98.51833	2501 5th St Wichita	Wichita Falls	76301	+19403225757	https://locations.pizzahut.com/tx/wichita-falls/2501-5th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299206	Pizza Hut	0.98
-c13377254db4	Pizza Hut	restaurant	pizza restaurant	33.86463	-98.53520	4311 Kemp Blvd Wichita	Wichita Falls	76308	+19406920731	https://locations.pizzahut.com/tx/wichita-falls/4311-kemp-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284522	Pizza Hut	1.00
-ed502b164a46	Pizza Hut	restaurant	pizza restaurant	33.95266	-98.67288	412 W Park Ave	Iowa Park	76367	+19405922772	https://locations.pizzahut.com/tx/iowa-park/412-w-park?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286791	Pizza Hut	0.95
 85bf465beb58	Pizza Pro	restaurant	pizza restaurant	33.37099	-98.76707	1106 W Main St	Olney	76374	+19405645225			0.55
 ec1cf7e3430d	Pizza Pro	restaurant	pizza restaurant	33.10710	-98.56937	1442 4th St	Graham	76450	+19405491502	http://pizzapro.com		0.92
 479141f4ea6a	Polar Station	restaurant		33.86517	-98.62370	7504 Seymour Hwy	Wichita Falls	76310	+19402352058			0.77
-6c42e1c84bfc	Popeyes Louisiana Kitchen	restaurant	american restaurant	33.90187	-98.49677	1308 Holliday St	Wichita Falls	76301	+19407230484	http://www.popeyes.com		0.92
-dee93010a401	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	33.86837	-98.53699	4449 Southwest Pkwy	Wichita Falls	76308		https://popeyes.com		0.77
 e74d4f25d9ef	Possum Hollow Camp	restaurant	american restaurant	33.07201	-98.58392	4801 Possum Hollow Lane	Graham		+19405491873	http://www.possumhollowcamp.net/		0.94
-46cfe2b0c7a7	Possum Hollow Restaurant-Lodge	restaurant		33.10712	-98.58933	577 HC 74	Graham	76450	+19405491873	http://www.possumhollowcamp.com		0.77
-4e0e43f71f5f	Possum Hollow Restaurant-Lodge	restaurant	american restaurant	33.11236	-98.57318	577 HC 74	Graham	76450	+19405491873	http://www.possumhollowcamp.com		0.91
 f0de83968258	Possum Hollow Restaurant-Lodge	restaurant	american restaurant	33.08774	-98.59389	577 HC 74	Graham	76450	+19405491873	http://www.possumhollowcamp.com		0.91
 590740b6d1fb	Potter's Pizza	restaurant	buffet restaurant	33.09501	-98.58931	1113 TX-16	Graham	76450	+19405219847	http://www.potterspizza.com/	Potter's Pizza	0.96
 647c0bbecb21	Prespa's Italian Restaurant	restaurant	pizza restaurant	33.22256	-98.15849	420 N Main St	Jacksboro	76458	+19405677165	https://www.orderprespasitalianrestaurant.com/?utm_source=organic_bing&utm_medium=bing_pw		0.92
@@ -1079,10 +1066,6 @@ b4b8489fe537	Simple Simon's Pizza	restaurant	pizza restaurant	33.81487	-98.18407
 add9c8b27de4	Smokin Joe's Bbq	restaurant	barbecue restaurant	33.90057	-98.54297	3701 Seymour Hwy Ste 100	Wichita Falls	76309	+19405004034	http://www.smokinjoesbarbq.com		0.75
 a33f9f393dc8	Snookies Craft Kitchen	restaurant	burger restaurant	33.66097	-98.47050	12309 US-281	Scotland	76379	+19405413663	http://www.snookieskitchen.com/		0.97
 89d0437f52e6	SNOWFOX Sushi	restaurant	sushi restaurant	33.88153	-98.53516	3015 Wenonah Avenue	Wichita Falls	76309	+19402280362	https://www.snowfox.com/		0.95
-bca4276e8446	Sonic Drive-In	restaurant	burger restaurant	33.90410	-98.51321	2112 9th St	Wichita Falls	76301	+19407675628	https://locations.sonicdrivein.com/tx/wichitafalls/2112-w.-ninth.html		0.92
-be99c7687cb3	Sonic Drive-In	restaurant	burger restaurant	33.88709	-98.46812	2407 Old Windthorst Rd	Wichita Falls	76301	+19407616145	https://locations.sonicdrivein.com/tx/wichitafalls/2407-old-windthorst-road.html		0.99
-c4df61301512	Sonic Drive-In	restaurant	burger restaurant	33.09466	-98.58961	1217 Highway 16 S	Graham	76450	+19405494000	https://locations.sonicdrivein.com/tx/graham/1217-highway-16-south.html		0.98
-f36e1cfb9471	Sonic Drive-In	restaurant	burger restaurant	33.81474	-98.19198	402 E Omega St	Henrietta	76365	+19405385545	https://locations.sonicdrivein.com/tx/henrietta/402-e.-omega.html		0.96
 9f1c49e05566	Sooner Pies Llc	restaurant		33.98222	-98.53660	5401 Central Fwy	Wichita Falls	76306				0.95
 0aed7545d816	Soup Man	restaurant	soup restaurant	33.85894	-98.53452	2720 Southwest Pkwy	Wichita Falls	76308	+19406910420	http://www.originalsoupman.com		0.92
 028d027cdd02	Steak 'n Shake	restaurant	burger restaurant	33.80007	-98.19624	101 U S Highway 287	Henrietta	76365	+18777856745			0.96
@@ -1090,23 +1073,6 @@ f36e1cfb9471	Sonic Drive-In	restaurant	burger restaurant	33.81474	-98.19198	402 
 07ae4584ebfd	Stone Oven Gourmet Pizza & Eatery	restaurant	pizza restaurant	33.87092	-98.53151	3002 Midwestern Pkwy	Wichita Falls	76308	+19406927768	http://www.stoneovenpizza.com		0.77
 dbcdec35a3d7	Stone Oven Gourmet Pizza & Eatery	restaurant	pizza restaurant	33.86793	-98.52737	2617 Plaza Pkwy	Wichita Falls	76308	+19406927768	http://www.stoneovenpizza.com/		0.95
 11340dbdbc6b	Stone Oven Pizza	restaurant	pizza restaurant	33.91269	-98.49345	810 7th St	Wichita Falls	76301	+19405004020	http://www.stoneovenpizza.com/		0.99
-09948d7f149c	Subway	restaurant	sandwich shop	33.95278	-98.52845	2314 Airport Dr # A	Wichita Falls	76306	+19408519782	https://www.subway.com		0.99
-0b0da73fa533	Subway	restaurant	sandwich shop	33.87675	-98.49509	1501 Midwestern Parkway Suite 106	Wichita Falls	76302	+19407661782	https://restaurants.subway.com/united-states/tx/wichita-falls/1501-midwestern-parkway	Subway	0.95
-1c7155ffc400	Subway	restaurant	sandwich shop	33.85776	-98.52120	4730 Taft Blvd.	Wichita Falls	76308	+19406877827	https://restaurants.subway.com/united-states/tx/wichita-falls/4730-taft-blvd	Subway	0.99
-342762dbf859	Subway	restaurant	sandwich shop	33.37052	-98.75992	509 W Main St	Olney	76374	+19405644100	https://restaurants.subway.com/united-states/tx/olney/509-w-main	Subway	0.96
-60428026df75	Subway	restaurant	sandwich shop	33.87708	-98.56042	3701 Fairway Blvd Ste 104	Wichita Falls	76309	+19406878235	https://restaurants.subway.com/united-states/tx/wichita-falls/3701-fairway-blvd	Subway	0.99
-6d5a14dd0f65	Subway	restaurant	sandwich shop	33.90264	-98.49799	1200 Holliday St	Wichita Falls	76301	+19403222782	http://www.subway.com/en-us	Subway	0.96
-81928ad52c46	Subway	restaurant	sandwich shop	33.22795	-98.16635	112 Chisholm Trail	Jacksboro	76458	+19405675229	https://restaurants.subway.com/united-states/tx/jacksboro/112-chisholm-trail	Subway	0.96
-835c5738205d	Subway	restaurant	sandwich shop	33.96085	-98.51332	3711 Sheppard Access Rd	Wichita Falls	76306	+19408551782	https://restaurants.subway.com/united-states/tx/wichita-falls/3711-sheppard-access-rd	Subway	0.95
-a2f152e47252	Subway	restaurant	sandwich shop	33.88668	-98.46870	1124 Central Freeway E	Wichita Falls	76301	+19407666098	https://restaurants.subway.com/united-states/tx/wichita-falls/1124-central-freeway-e	Subway	0.95
-ac4309fe6ada	Subway	restaurant	sandwich shop	33.11345	-98.58923	175 Elm St.	Graham	76450	+19405494649	https://restaurants.subway.com/united-states/tx/graham/175-elm-st	Subway	0.98
-b89af0441e23	Subway	restaurant	sandwich shop	33.85098	-98.50114	5131 Greenbriar Rd	Wichita Falls	76302	+19407619865	https://www.subway.com		0.95
-ba2acb350d0f	Subway	restaurant	sandwich shop	33.85726	-98.56369	4701 Southwest Pkwy Ste 14	Wichita Falls	76310	+19406912782	https://www.subway.com		0.92
-c01e88ffc8b5	Subway	restaurant	sandwich shop	33.96339	-98.69025	1409 W Highway St	Iowa Park	76367	+19405922782	https://www.subway.com		1.00
-d1159499de01	Subway	restaurant	sandwich shop	33.96493	-98.67273	1501 N Pacific Ave	Iowa Park	76367	+19405922782	https://alibabacharleston.com		0.97
-d16b23aa71af	SUBWAY	restaurant	sandwich shop	33.99856	-98.50665	Frente a la 105	Sps	76311	+19402346444	http://subway.com		0.77
-f71f70715666	Subway	restaurant	sandwich shop	33.87962	-98.52949	3208 Kemp Blvd	Wichita Falls	76308	+19406927827	https://www.subway.com		1.00
-fdd55b57a18d	Subway	restaurant	sandwich shop	33.81449	-98.19138	415 E Omega St	Henrietta	76365	+19405385009	https://restaurants.subway.com/united-states/tx/henrietta/415-omega-st	Subway	0.98
 19efd2c4875e	Suga B’s	restaurant	comfort food restaurant	33.96453	-98.49187	Wichita Falls Regional Airport, 4000 Armstrong Dr	Wichita Falls	76305	+19407825022			0.92
 f3ed68551a38	Sunrise and Shine Omelette Grill	restaurant	breakfast and brunch restaurant	33.87481	-98.49409	3901 Old Jacksboro Hwy	Wichita Falls	76302	+19407632669	http://sunriseseniorliving.com	Sunrise Senior Living	0.93
 f92c652bbd24	T & M Thomas Inc	restaurant		33.09108	-98.58835	1322 State Highway 16 S	Graham	76450				0.95
@@ -1164,12 +1130,10 @@ b0afcf6b4fdc	Vcvt Enterprises, Inc	restaurant		33.86933	-98.53657	4020 Kemp Blvd
 4f66bad0bbde	Walk In Tacos	restaurant	taco restaurant	33.87151	-98.60525	6642 Kell W Blvd	Wichita Falls	76310	+19402470012			0.92
 cc3f14ee437d	Wangs and Thangs	restaurant	barbecue restaurant	33.90709	-98.46778	1400 Martin Luther King Jr Blvd	Wichita Falls	76301	+19405004420			0.97
 4c82ee341516	Wellborn 2R Steakhouse	restaurant	steakhouse	33.91412	-98.49856	306 Travis St #98.498406	Wichita Falls	76301	+19402472085	https://www.wellborn2rsteakhouse.com/		0.99
-f598db209e5b	Whataburger	restaurant	burger restaurant	33.93419	-98.51828	1040 CENTRAL FWY	Wichita Falls	76306	+19407231019	https://locations.whataburger.com/tx/wichita-falls/1040-central-fwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 75eee60f2996	Which Wich	restaurant	sandwich shop	33.87501	-98.53180	3606 Grant St Ste e	Wichita Falls	76308	+19402133824	https://whichwich.com/	Which Wich	0.95
 2b2e73d2fb75	Wild Horse Bar and Grill	restaurant		33.95089	-98.52680	2710 Central Fwy	Wichita Falls	76306				0.63
 84ee81906f0e	Willie's Place	restaurant	barbecue restaurant	33.90266	-98.53046	3135 10th St	Wichita Falls	76309	+19406872271			0.98
 940627dc3819	Wing Zone	restaurant	chicken restaurant	33.96631	-98.50678	740 H Ave	Sheppard Afb	76311	+19402022654	https://www.wingzone.com/sheppard-afb/	Wing Zone	0.92
-cdbb01d1feac	Wingstop	restaurant	chicken restaurant	33.88384	-98.52885	2918 Kemp Blvd	Wichita Falls	76308	+19403229464	https://order.wingstop.com/menu/wingstop-123-wichita-falls-tx-76308	Wingstop	1.00
 6117c08864aa	Wuichita Falls	restaurant	buffet restaurant	33.80070	-98.19609		Henrietta					0.97
 85fd1f4a2678	Zeke's BBQ	restaurant	barbecue restaurant	33.57265	-98.43867	19000 US-281	Windthorst	76389	+19404236888	http://zekesbbqshop.com/		0.94
 7b39bb6b1d8e	ZENSHI Handcrafted Sushi	restaurant	sushi restaurant	33.87656	-98.55903	4590 Kell W Blvd	Wichita Falls	76309	+19406911471	https://www.zenshisushi.com/	Zenshi Sushi	0.92
@@ -1203,7 +1167,6 @@ ccebb376ec59	Morgan Day Care Center	senior	retirement home	33.36550	-98.75276	51
 321d8f7ed30c	Parkstone Senior Village	senior	retirement home	33.84228	-98.49992	1727 W Rathgeber Rd	Wichita Falls	76310	+19407664600			0.99
 d1ea9c772348	Presbyterian Manor	senior	retirement home	33.86045	-98.51915	4600 Taft Blvd	Wichita Falls	76308	+19406911710	http://www.presmanor.org/		0.99
 2235fac62c35	Promise Skilled Nursing Facility of Wichita Falls	senior	assisted living facility	33.90268	-98.49937	1101 Grace St	Wichita Falls	76301	+19403223393	http://www.promisesnf-wichitafalls.com		0.92
-59eeae508f04	Rolling Meadows	senior	assisted living facility	33.89627	-98.53979	3006 McNiel Ave	Wichita Falls	76309	+19406917511	http://www.rmeadows.com/		0.85
 b9065397d7df	Rolling Meadows	senior	retirement home	33.88046	-98.55103	3006 McNiel Ave	Wichita Falls	76309	+19406917511	http://www.rmeadows.com/		0.97
 11a8efa6e2e3	Royal Estates of Wichita Falls	senior	retirement home	33.88097	-98.54486	3908 Kell Blvd	Wichita Falls	76309	+19404003233	https://12oaks.net/senior-living-communities/royal-estates-of-wichita-falls/		0.99
 9c5e3c6d34b5	Senior Care Health & Rehabilitation	senior	retirement home	33.87761	-98.48312	910 Midwestern Pkwy	Wichita Falls	76302	+19407675500	http://www.seniorcarewf.com/		0.99

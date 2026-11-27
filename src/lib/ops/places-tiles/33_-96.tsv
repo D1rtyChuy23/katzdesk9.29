@@ -37,7 +37,6 @@ afd99aeb3ddc	Lucky Donuts	bakery	donut shop	33.14070	-95.60066	408 Church St	Sul
 b1cde1bbb3ac	Sweetie's Donut Shop	bakery	donut shop	33.24705	-95.90800	1903 Live Oak St	Commerce	75428	+19038866111	https://www.bizapedia.com/tx/sweeties-donut-shop-inc.html		0.95
 0aeae3ad71d9	The Cake Lady Bakery Cafe	bakery		33.18877	-95.21987	209 E Main St	Mt Vernon	75457	+19729488636	http://thecakeladytx.com/		0.98
 c860e1c74309	The Tiny Bakery at the Tiny House	bakery		33.45558	-95.75018	3110 FM-1533	Ben Franklin	75415				0.61
-f938d6800f77	The Tiny Bakery at the Tiny House	bakery		33.45942	-95.75047	3110 FM-1533	Ben Franklin	75415				0.57
 b4592691d385	Wildflour Bakery	bakery		33.66146	-95.54915	707 Lamar Ave	Paris	75460	+19036693544	http://wildflourbakeryparistx.com/		0.93
 35a2892ec820	11th Frame Bar	bar		33.68354	-95.55563	2331 N Main St	Paris	75460	+19037847425			0.85
 1c981f5a2cfe	A Bar 7 Quarter Horses	bar		33.54806	-95.25279	1174 Farm Road 411	Detroit	75436	+19032494898			0.64
@@ -172,7 +171,6 @@ b5f0c35be46b	Cowhill Express Coffee Co.	coffee		33.25067	-95.89988	1212 Main St	
 135a74e186dc	Deep Routes Coffee	coffee		33.11867	-95.59701	1217 S Broadway St	Sulphur Springs	75482	+19035584302	http://www.deeproutescoffee.com/		0.98
 ab397aa42afc	Deep Routes Coffee	coffee		33.11525	-95.59161	215 Shannon Rd E	Sulphur Springs	75482	+19035584302	http://www.deeproutescoffee.com/		0.92
 2c6db8dc7093	Downtown.coffee	coffee		33.66145	-95.55493	111 Lamar Ave	Paris	75460	+19033292392	http://www.Downtown.coffee/		0.92
-f52f8626c317	Downtown.coffee	coffee		33.65542	-95.55590	111 Lamar Ave	Paris	75460	+19033292392	http://www.Downtown.coffee/		0.84
 71950ce7e6f2	Dunkin'	coffee		33.67283	-95.51979	3070 NE Loop 286 Paris Tx Travel Center	Paris	75460	+19037065187	https://locations.dunkindonuts.com/en/tx/paris/3070-ne-loop-286/356740?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=356740&y_source=1_MTIxMTQwMzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dunkin'	0.99
 7c378a3c4910	Dutch Bros Coffee	coffee		33.11562	-95.59492	140 Shannon Rd E	Sulphur Springs	75482	+18778992767	https://www.dutchbros.com/locations/tx/sulphur-springs/140-e-shannon-rd?y_source=1_MTAyNDEzNjUzNi01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Dutch Bros Coffee	0.96
 d6d3413e07df	Hole in the Wall Catering Company	coffee		33.66288	-95.55862		Paris		+19032724517	http://www.holeinthewallptx.com/		0.97
@@ -221,7 +219,6 @@ c17cce642756	CSO East Texas A&M University	college		33.24135	-95.90359	1508 Coop
 774a01bedd99	Department of History	college		33.24344	-95.90604	Ferguson Social Sciences, 1702 Education Dr	Commerce	75428	+19038865226			0.63
 13b51381f41d	Department of Physics and Astronomy	college		33.24187	-95.90950	2201 W Neal St	Commerce	75428	+19038865488	http://www.etamu.edu/physics		0.92
 b8d28ce77ad9	East Texas A&M Memorial Stadium	college		33.24606	-95.91074	North Hunt Water Supply, 201 King Plz	Commerce	75428	+19038865558	http://www.lionathletics.com/		0.91
-2bc685a08f7f	East Texas A&M University	college		33.24309	-95.90851	2008 University Dr	Commerce	75428	+18888682682	https://www.etamu.edu/		0.96
 ff62f4a0c1ba	East Texas A&M University	college		33.24553	-95.91119	2008 University Dr	Commerce	75428	+18888682682	https://www.etamu.edu/		0.98
 6e4c53db0a43	East Texas A&M University - Equine Center	college		33.18695	-95.93028	3112 State Highway 24	Campbell	75422	+19038865901	http://www.tamuc.edu/equine		0.94
 d110ee6a32fd	East Texas A&M University Nursing	college		33.24059	-95.90853		Commerce		+19038865315	http://www.ETAMU.edu/nursing		0.78
@@ -261,7 +258,6 @@ e5d216901a72	Blossom Food Mart	convenience		33.66096	-95.37968	510 E Front St	Bl
 a573786d305c	Blossom Kwik Mart	convenience		33.66051	-95.39948	1235 W Front St	Blossom	75416	+19039827111			0.97
 c1bbda1e407b	Blossom Mart	convenience		33.66068	-95.39841	1210 W Front St	Blossom	75416	+19039825224	https://www.blossommartfoodandfuel.com/		0.98
 90eb4a2f0a60	Brookshire's Fuel Center	convenience		33.18298	-95.23360	306 TX-37	Mt Vernon	75457	+19035374471	https://www.brookshires.com/fuel	Brookshire's	1.00
-e810f454267e	Buffalo Stop	convenience		33.00089	-95.94196	605 US Highway 69 S	Lone Oak	75453	+19036620000	http://www.subway.com/		0.95
 919f511d052a	Burn Money 5	convenience		33.66109	-95.57604	1838 Bonham St	Paris	75460				0.82
 e96ee86e764c	Byte Federal Bitcoin ATM (J M Grocery Sunoco)	convenience		33.66076	-95.57560	1805 Bonham St	Paris	75460	+17866862983	https://www.bytefederal.com/bitcoin-atm-near-me/texas/paris/2529?y_source=1_MTAyNTA4NjM3Ni00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 c65ef61bc293	Byte Federal Bitcoin ATM (Quick Track 21)	convenience		33.67690	-95.55578	1604 N Main St	Paris	75460	+17866862983	http://www.bytefederal.com/		0.92
@@ -301,7 +297,6 @@ c3a53ae2a9a2	DK Gas Station	convenience		33.61812	-95.05147	1105 Texas 37	Clarks
 c7ce151d724f	E-Z Mart	convenience		33.64963	-95.51913	3085 Clarksville St	Paris	75460	+19037845295	http://www.e-zmart.com		0.99
 e07eac043b32	E-Z Mart	convenience		33.13491	-95.61060	732 Main St	Sulphur Springs	75482	+19038852507	http://www.e-zmart.com		0.93
 e3637b944955	E-Z Mart	convenience		33.14188	-95.56413	1505 Shannon Rd E	Sulphur Springs	75482	+18444001035	https://location.westernunion.com/us/tx/sulphur-springs/fd3b3f5c5a2bc70c97b527f5dd182383		0.98
-f47a9b77f32f	E-z Mart	convenience		33.14220	-95.56450	1505 Shannon Rd E	Sulphur Springs	75482	+19034380306	https://www.gpminvestments.com		0.65
 73e4c825c92c	E-Z TRACK	convenience		33.24582	-95.90254	1700 MONROE ST.	Commerce	75428		https://www.exxon.com/en/find-station/exxon-commerce-tx-eztrack-200330772	Exxon	0.80
 92f7c0096d47	Easy Mart	convenience		33.37344	-95.68024	950 E Dallas Ave	Cooper	75432	+19033952422		Easy Mart	0.92
 0a87724d0002	Exxon	convenience		33.12558	-95.61304	597 S League St	Sulphur Springs	75482	+19038859374	https://www.exxon.com/en/find-station/exxon-sulphursprings-tx-joebobs2-200313167?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
@@ -333,7 +328,6 @@ f5b72796ccca	Exxon	convenience		33.15636	-95.59825	1302 Church St	Sulphur Spring
 163dc0e7ceaa	Exxon Mobil	convenience		33.68822	-95.55369	2610 N Main St	Paris	75460	+19037859592	http://www.exxonmobilstations.com/15184-food-fast-100-paris		0.92
 ccfa495142f2	Exxon On The Loop	convenience		33.66030	-95.60065	3905 Bonham St	Paris	75460	+19037858978	http://www.exxon.com/		0.91
 b85fbb1af729	Family Mart	convenience		33.13306	-95.63033	1601 Main St	Sulphur Springs	75482	+19038854930	http://www.family.co.jp		0.92
-cd467a31a85d	Family Mart	convenience		33.13280	-95.63026	1601 Main St	Sulphur Springs	75482	+19038854930	http://www.family.co.jp		0.87
 7560c15abf5e	Flying L Fastmart	convenience		33.24674	-95.91247	1611 State Highway 50 Ste A	Commerce	75428	+19038868091	http://phillips66.com		0.77
 f18344170461	Git-n-Go	convenience		33.66100	-95.27300	595 W GARNER ST	Detroit	75436		https://locations.valero.com/en-us/LocationDetails/Index/595-W-GARNER-ST/0000010938	Valero	0.92
 338f6c4efb95	Hagansport General Store	convenience		33.34046	-95.25443	295 FM-71	Talco	75487	+19036320956			0.75
@@ -360,7 +354,6 @@ f28a4a262074	LAKE VIEW GROCERY	convenience		33.37777	-95.70139	40 HIGHWAY 24	Coo
 fd57ace26888	Lake View Grocery & Deli	convenience		33.37776	-95.70151	40 TX-24	Cooper	75432	+19033952596	http://www.exxonmobil.com/		0.97
 5f3885fdfd57	Lavishpearl	convenience		33.30930	-95.09087	12400 N US Highway 271	Mt Pleasant	75455	+18449143499		Lavishpearl	0.59
 9bf3e83f909a	Love's Travel Stop	convenience	truck gas station	33.11729	-95.63627	1201 S Hillcrest Dr	Sulphur Springs	75482	+19034381801	https://www.loves.com/locations/738?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=738		0.99
-58f3e20f703d	Love's Travel Stops and Country Stores	convenience		33.16410	-95.21859	215 I-30 W	Mt Vernon	75457	+19035377696	https://www.loves.com/locations/279	Love	0.99
 63e8f2ab2e92	Love's Travel Stops and Country Stores	convenience		33.69554	-95.55544	3215 N Main St	Paris	75460	+19037371950	https://www.loves.com/locations/678	Love	0.99
 8b22f2a39d4d	Love's Travel Stops and Country Stores	convenience		33.16404	-95.21838	215 I-30 W	Mt Vernon	75457	+19035377696	https://www.loves.com/locations/279	Love	1.00
 b980d5205f0c	Loves Paris Tx 5678	convenience		33.69554	-95.55544	3215 N Main St	Paris	75460				0.92
@@ -398,7 +391,6 @@ f65fb7738f30	Paris Travel Center	convenience		33.67284	-95.51972	3070 NE Loop 28
 b662ac30c8c8	Petro Max Express	convenience		33.18894	-95.22358	302 Main St	Mt Vernon	75457	+19032706302			0.92
 92cd0a7127af	Phillips 66	convenience		33.67901	-95.52574	1825 Fm-195	Paris	75462	+19037857946	https://www.phillips66gas.com/		1.00
 ebae198fde34	Phillips 66	convenience		33.59613	-95.91098	1636 FM 100	Honey Grove	75446	+19033783191	https://www.phillips66gas.com/	Phillips 66 Gas	0.92
-9234875f86c4	Phillips 66 Gas	convenience		33.43045	-95.96011	905 FM-2990	Ladonia	75449	+19033677602	https://www.phillips66gas.com/	Phillips 66 Gas	0.69
 eb3cc9b37da0	Phillips 66 Gas	convenience		33.43219	-95.96056	905 FM-2990	Ladonia	75449	+19033677602	https://www.phillips66gas.com/	Phillips 66 Gas	0.76
 8aea54b8d70c	Pilot Travel Center	convenience		33.11650	-95.63428	1200 Hillcrest Dr S	Sulphur Springs	75482	+19038850020	https://locations.pilotflyingj.com/us/tx/sulphur-springs/1200-hillcrest-dr-s	Pilot Flying J	0.97
 1aa2c20c16e1	Pilot Truck Stop Sulfur Springs Tx	convenience		33.11665	-95.63413	1200 Hillcrest Dr	Sulphur Springs	75482		http://www.pilotflyingj.com/view-location?id=157		0.93
@@ -420,10 +412,7 @@ ac2c0ae9e60a	Qwik Cheque	convenience		33.58293	-95.91328	407 W Main St	Honey Gro
 b977c8c717ee	Scotties Grocery	convenience		33.68366	-95.58656	2735 FM79	Paris	75460	+19037851242	http://www.alonbrands.com		1.00
 b5f67a91d2ce	Sessums' Service Station	convenience		33.66116	-95.38522	118 Front St	Blossom	75416	+19039825553			0.92
 531711f6e441	Shamrock	convenience		33.66039	-95.40009	1235 W Front St	Blossom	75416	+19039826400	https://my-store-c87639.creator-spring.com/listing/new-boredapeyachtclub		0.55
-ce0aa6be3a68	Shamrock	convenience		33.12398	-95.63258		Sulphur Springs	75482				0.92
 02d976fe4dd5	Shell	convenience		33.63228	-95.55864	2735 South Church Street	Paris	75460	+19036693013	https://find.shell.com/us/fuel/12766687-2735-s-church-st/en_US		0.92
-0be2d754ba14	Shell	convenience		33.32344	-95.91126	1611 State Highway 50	Commerce	75428	+19038868091	https://www.shell.com		0.75
-1e48b3bfabac	Shell	convenience		33.67476	-95.52183	3005 Nw Loop 286	Paris	75460	+19037392309	http://www.shell.us/	Shell	0.92
 345565eb63fc	Shell	convenience		33.66157	-95.50285	1201 W North St	Paris	75462	+12603491581	https://find.shell.com/us/fuel/10084443-4120-lamar-ave	Shell	0.92
 3eaa3c2b3027	Shell	convenience		33.16143	-95.21660	300 Inerstate 30 E	Mt Vernon	75457	+19035379201	https://find.shell.com/us/fuel/12605855-300-interstate-30-e/en_US		1.00
 41a762e536ce	Shell	convenience		33.11542	-95.59692	1321 S Broadway St	Sulphur Springs	75482	+19039195080	https://find.shell.com/us/fuel/10012830-1321-s-broadway-st		0.92
@@ -484,12 +473,16 @@ f28afe2251c0	Valero	convenience		33.65840	-95.54174	1380 E CLARKSVILLE STREET	Pa
 e00034448516	Arby's	fastfood		33.11660	-95.63435	1200 South Hillcrest Dr	Sulphur Springs	75482	+19038854050	https://locations.arbys.com/tx/sulphursprings/1200-south-hillcrest-dr.html	Arby's	0.99
 b749b0d058d3	Braum's Ice Cream & Dairy Store	fastfood		33.66576	-95.51006	3561 NE Loop 286	Paris	75460	+19037840214	https://www.braums.com/store/3561-ne-loop-286-paris-tx/	Braums	1.00
 ed48332eb6af	Braum's Ice Cream and Dairy Store	fastfood		33.11452	-95.59302	1331 Mockingbird Ln	Sulphur Springs	75482	+19038851020	https://www.braums.com/store/1331-mockingbird-lane-sulphur-springs-tx/		0.99
+35f534bc48e0	Burger King	fastfood	burger restaurant	33.11589	-95.59163	209 Shannon Rd E	Sulphur Springs	75482	+19038852314	https://burgerking.com/store-locator/store/4067	Burger King	0.98
+3e69f17aaa5e	Burger King	fastfood	burger restaurant	33.24656	-95.91169	1613 State Highway 50	Commerce	75428	+19032463265	https://burgerking.com/store-locator/store/restaurant_87935		0.92
+563a6365e8b8	Burger King	fastfood	burger restaurant	33.66078	-95.51039	3590 Lamar Ave	Paris	75460	+19037843383	https://www.bk.com/store-locator/store/restaurant_1270	Burger King	0.99
 01a19d711812	Carl's Jr.	fastfood		33.11716	-95.63645	1201 S Hillcrest	Sulphur Springs	75482	+19034381803	https://locations.carlsjr.com/tx/sulphur-springs/1201-s-hillcrest	Carl's Jr.	0.95
 35f80e03b99a	Chester's Chicken	fastfood		33.16404	-95.21829	215 East I-30, N. Service Road Exit 147	Mt Vernon	75457	+19035377696	http://www.chestersinternational.com		0.96
 0163e56368c0	Chick-fil-A	fastfood		33.24167	-95.90831	2200 W Neal St	Commerce	75428	+19034684890	https://www.chick-fil-a.com/locations/tx/texas-a-m-commerce?utm_source=yext&utm_medium=link	Chick-fil-A	0.94
 053ad0cc9820	Chick-fil-A	fastfood		33.11566	-95.59528	130 Shannon Rd E	Sulphur Springs	75482	+19034381354	https://www.chick-fil-a.com/locations/tx/sulphur-springs-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.94
 5abb954b4129	Chick-fil-A	fastfood		33.66043	-95.51286	3420 Lamar Ave	Paris	75460	+19032243834	https://www.chick-fil-a.com/locations/tx/paris-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 69979caf4540	Chicken Express	fastfood		33.24804	-95.91042	1590 TX-24	Commerce	75428	+19038862222	https://chickene.com/	Chicken Express	0.96
+7524b511f490	Chicken Express	fastfood	chicken restaurant	33.11657	-95.59508	910 Gilmer St	Sulphur Springs	75482	+19038853677	http://www.chickene.com		0.77
 794f501a8d0e	Chicken Express	fastfood		33.12123	-95.59554	1125 Mockingbird Ln	Sulphur Springs	75482	+19038853677	https://www.chickene.com	Chicken Express	0.98
 e55bf61b58ed	Chicken Express	fastfood		33.66145	-95.50655	3820 Lamar Ave	Paris	75462	+19037840303	http://www.chickene.com	Chicken Express	0.98
 1184d720bce4	Dairy Queen	fastfood		33.61018	-95.05486	704 W Main St 704 W Main St	Clarksville	75426	+19034273611	https://www.dairyqueen.com/en-us/locations/tx/clarksville/704-w-main-st/13915/?y_source=1_MjkzMzk0MDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
@@ -501,6 +494,9 @@ a6d6e29a6ac3	Dairy Queen	fastfood		33.11231	-95.59698	1419 S Broadway St 1419 S 
 cc3a0be8cee5	Dairy Queen	fastfood		33.16047	-95.23640	I-30 At Hwy 37	Mt Vernon	75457	+19035882295	https://www.dqtexas.com/?y_source=1_MjkzMzg4ODUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 d79449c1a277	Dairy Queen	fastfood		33.66138	-95.52928	2505 E Lamar Ave 2505 E Lamar Ave	Paris	75460	+19037853402	http://www.dqtexas.com/	Dairy Queen	0.99
 edb39a5a6fb0	Dairy Queen	fastfood		33.67378	-95.51869	3195 Ne Loop 286 3195 Ne Loop 286	Paris	75462	+19037065177	https://www.dairyqueen.com/en-us/locations/tx/paris/3195-ne-loop-286/44625/?y_source=1_MjkzMzg4OTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
+14b05a83e326	Domino's	fastfood	pizza restaurant	33.24773	-95.91221	2220 Live Oak	Commerce	75428	+19038862116	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+1702398b5a73	Domino's	fastfood	pizza restaurant	33.66109	-95.53738	1828 Lamar Ave	Paris	75460	+19037855511	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+f72cf9a107da	Domino's	fastfood	pizza restaurant	33.11417	-95.59624	1328 S Broadway	Sulphur Springs	75482	+19038851530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 078f5e087607	DQ Grill & Chill	fastfood		33.61013	-95.05486	704 W Main St	Clarksville	75426		https://www.dairyqueen.com/en-us/locations/tx/clarksville/704-w-main-st/3688	DQ Grill & Chill	0.80
 196c3925965d	DQ Grill & Chill	fastfood		33.16061	-95.23637	I-30 At Hwy 37	Mount Vernon	75457		https://www.dairyqueen.com/en-us/locations/tx/mount-vernon/i-30-at-hwy-37/4207	DQ Grill & Chill	0.80
 1aa5dce14015	DQ Grill & Chill	fastfood		33.13565	-95.60950	705 Main St	Sulphur Springs	75482		https://www.dairyqueen.com/en-us/locations/tx/sulphur-springs/705-main-st/4405	DQ Grill & Chill	0.80
@@ -514,18 +510,30 @@ b8a3b0e5fd8d	DQ Grill & Chill	fastfood		33.37609	-95.70136	2151 Fm 64 West	Coope
 94b85c58fcec	Golden Chick	fastfood		33.16126	-95.23217	405 W I-30	Mt. Vernon	76123	+14302224345	http://locations.goldenchick.com/tx/mt.-vernon/1403/		0.97
 e4317cc7c640	Grandy's	fastfood		33.11570	-95.59404	117 Shannon Rd E	Sulphur Springs	75482	+19038858889	http://www.grandys.com/		0.92
 4e64e17c7dc0	Jack in the Box	fastfood		33.67433	-95.52309	3110 NE Loop 286	Paris	75460	+19037845119	https://www.jackinthebox.com		1.00
-6191690fee6a	Jack In The Box	fastfood		33.67267	-95.51893	3110 NE Loop 286	Paris	75460	+19037845119	https://locations.jackinthebox.com/us/tx/paris/3110-ne-loop-286?utm_source=Facebook&utm_medium=local&utm_campaign=facebook-local	Jack in the Box	0.96
 a79e3194ad7f	Jack in the Box	fastfood		33.11572	-95.59668	110 Shannon Rd W	Sulphur Springs	75482	+19034388069	https://www.jackinthebox.com		1.00
+c5ac54c7f31b	Jimmy John's	fastfood	sandwich shop	33.24216	-95.91086	2300 Morris Drive	Commerce	75428	+19034683212	https://locations.jimmyjohns.com/tx/commerce/sandwiches-4401.html	Jimmy John's	0.96
+311a701a7105	Kfc	fastfood	chicken restaurant	33.12634	-95.59808	900 Gilmer St	Sulphur Springs	75482	+19034380997	https://www.kfc.com		0.92
 b0cc2d779c56	KFC	fastfood		33.64909	-95.51867	3110 Clarksville St	Paris	75460	+19037848593	http://www.kfc.com/storelocator/Default.aspx?address=3110%20Clarksville%20Street,Paris,TX		0.92
+d1545eac9a55	Little Caesars	fastfood	pizza restaurant	33.66087	-95.53495	2010 Lamar Ave.	Paris	75460	+19037378422	https://littlecaesars.com/en-us/store/8338	Little Caesars	0.98
+55c8e57656f7	Little Caesars Pizza	fastfood	pizza restaurant	33.13077	-95.60070	610 Gilmer St Ste 2	Sulphur Springs	75482	+19034390415	https://littlecaesars.com/en-us/store/8416	Little Caesars	0.96
 b965ab815e33	Long John Silver's	fastfood		33.11403	-95.59624	1338 S Broadway St	Sulphur Springs	75482	+19034396067	https://www.ljsilvers.com/?utm_source=listings&utm_medium=yext&utm_campaign=yext2023&utm_id=yext2023&y_source=1_MTc1NzMyNzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.75
 38c98c651a3c	McDonald's	fastfood		33.11546	-95.59334	121 E Shannon Rd	Sulphur Springs	75482	+19038851336	https://www.mcdonalds.com/us/en-us/location/tx/sulphur-springs/121-e-shannon-rd/6509.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 9b7edbb5e0a5	McDonald's	fastfood		33.66225	-95.50629	3825 Lamar Avenue	Paris	75462	+19037829991	https://www.mcdonalds.com/us/en-us/location/tx/paris/3825-lamar-avenue/24119.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 cb1fee55055d	McDonald's	fastfood		33.24760	-95.91039	2102 Live Oak Street	Commerce	75428	+19032463064	https://www.mcdonalds.com/us/en-us/location/tx/commerce/2102-live-oak-street/10645.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 ed7ed8f1f796	McDonald's	fastfood		33.15965	-95.23548	906 Hwy 37	Mt Vernon	75457	+19035883200	https://www.mcdonalds.com/us/en-us/location/tx/mount-vernon/906-hwy-37/30764.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
 50dfdb35dd14	Panda Express	fastfood		33.66029	-95.50877	5280 S. E. Loop 286	Paris	75460	+19037392322	http://www.pandaexpress.com/	Panda Express México	0.97
-c551cc8ab481	Pizza Takeout & Delivery	fastfood		33.66136	-95.52668					https://locations.papamurphys.com/tx/paris/2705-lamar-avenue	Papa Murphy's	0.80
+a670369427fa	Panda Express	fastfood	chinese restaurant	33.11581	-95.59457	150 Shannon Rd E	Sulphur Springs	75482	+19034393293	http://www.pandaexpress.com/		0.97
+c7cb950fc180	Panda Express	fastfood	chinese restaurant	33.24991	-95.89987	1207 Alamo St	Commerce	75428	+19038864008			0.95
+aaea860d3b27	Papa Johns Pizza	fastfood	pizza restaurant	33.11466	-95.59614	1324 S BROADWAY ST	Sulphur Springs	75482	+19036890012	https://locations.papajohns.com/united-states/tx/75482/sulphur-springs/1324-s-broadway-st?utm_source=bing-maps&utm_medium=organic&y_source=1_MTA4MzczMDA5My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.98
+aefdd43108bc	Papa Johns Pizza	fastfood	pizza restaurant	33.66135	-95.51344	3375 Lamar Ave	Paris	75460	+19037065023	https://locations.papajohns.com/united-states/tx/75460/paris/3375-lamar-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTA3MjYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+0414e5ccf065	Pizza Hut	fastfood	pizza restaurant	33.24740	-95.90838	1920 Live Oak St Hunt	Commerce	75428	+19038869600	https://locations.pizzahut.com/tx/commerce/1920-live-oak-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299550	Pizza Hut	0.98
+3b2e46dd5c16	Pizza Hut	fastfood	pizza restaurant	33.12034	-95.59501	1135 Mockingbird Ln	Sulphur Springs	75482	+19034380520	https://locations.pizzahut.com/tx/sulphur-springs/1135-mockingbird?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282672	Pizza Hut	0.97
+5335fe37b571	Pizza Hut	fastfood	pizza restaurant	33.66515	-95.51017	3565 NE Loop 286 Ste 100	Paris	75460	+19037845051	https://locations.pizzahut.com/tx/paris/3565-ne-loop-286?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309511	Pizza Hut	0.99
+73591a4fe981	Pizza Hut	fastfood	pizza restaurant	33.61145	-95.08039	2000 W Main St	Clarksville	75426	+19034272215	http://www.pizzahut.com/locations/texas/clarksville/007199		0.77
 b96b32da28b0	Popeyes	fastfood		33.68516	-95.55494	2455 N Main St	Paris	75460	+19037850739	https://www.popeyes.com/store-locator/store/restaurant_84122	Popeyes Louisiana Kitchen	0.99
 dc7fedccdbcf	Popeyes	fastfood		33.11547	-95.59231	201 Shannon Road East	Sulphur Springs	75482		https://www.popeyes.com/store-locator/store/restaurant_879106	Popeyes	0.98
+3e338ee6e710	Schlotzsky's	fastfood	sandwich shop	33.65975	-95.51010	3598 Lamar Ave	Paris	75460	+19039054916	www.schlotzskys.com		0.96
+addf09c98741	Schlotzsky's	fastfood	sandwich shop	33.12293	-95.59662	1050 Gilmer St	Sulphur Springs	75482	+19039195060	https://locations.schlotzskys.com/tx/sulphur-springs/1050-gilmer-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.92
 29b36247f6bf	Simple Simon's Pizza	fastfood		33.66087	-95.39852	1210 W Front St, Blossom, TX 75416					Simple Simon's Pizza	0.80
 ae935096d78d	Sona Taqueria	fastfood		33.11979	-95.63731	1600 W Shannon Rd	Sulphur Springs	75482	+19035581854	https://www.sonagtacos.com		0.94
 10925932cb84	Sonic	fastfood		33.67688	-95.55630	1603 N Main St	Paris	75460	+19037378525	http://www.sonicdrivein.com/		0.92
@@ -537,6 +545,13 @@ ae935096d78d	Sona Taqueria	fastfood		33.11979	-95.63731	1600 W Shannon Rd	Sulphu
 939c74551a7c	Sonic Drive In	fastfood		33.66133	-95.53010	2425 Lamar Avenue	Paris	75460	+19037853618	https://locations.sonicdrivein.com/tx/paris/2425-lamar-avenue.html	Sonic Drive-In	0.98
 de27d836190a	Sonic Drive In	fastfood		33.11122	-95.59636	1516 South Broadway	Sulphur Springs	75482	+12149718953	https://locations.sonicdrivein.com/tx/sulphursprings/1516-south-broadway.html	Sonic Drive-In	0.97
 ec77d5526eba	Sonic Drive In	fastfood		33.16315	-95.23380	512 I-30 West	Mt Vernon	75457	+19035374596	https://locations.sonicdrivein.com/tx/mountvernon/512-i-30-west.html	Sonic Drive-In	0.94
+0c507317358f	Subway	fastfood	sandwich shop	33.24759	-95.90997	2012 Liveoak St	Commerce	75428	+19038867827	https://restaurants.subway.com/united-states/tx/commerce/2012-liveoak-st	Subway	0.97
+618faf926deb	Subway	fastfood	sandwich shop	33.66122	-95.59821	3720 Bonham Street	Paris	75462	+19037398200	https://restaurants.subway.com/united-states/tx/paris/3720-bonham-street?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50994&utm_campaign=evergreen-2020&y_source=1_MTQ5MDg3NjUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		1.00
+6532468f7c42	Subway	fastfood	sandwich shop	33.66430	-95.50613	3855 Lamar Ave	Paris	75462	+19037399200	http://www.subway.com/en-us	Subway	0.98
+7bd935e49530	Subway	fastfood	sandwich shop	33.11729	-95.59473	151 E. Industrial Suite A	Sulphur Springs	75482	+19038857990	https://restaurants.subway.com/united-states/tx/sulphur-springs/151-e-industrial	Subway	0.99
+9ae764e0b176	Subway	fastfood	sandwich shop	33.16401	-95.21790	215 E. I-30 N. Service Rd.	Mt Vernon	75457	+19035377696	http://www.subway.com/en-us	Subway	0.98
+da4c46382479	Subway	fastfood	sandwich shop	33.68903	-95.55369	2650 North Main St	Paris	75460	+19037399990	https://restaurants.subway.com/united-states/tx/paris/2650-north-main-st	Subway	0.97
+f56abadb337b	Subway	fastfood	sandwich shop	33.10611	-95.59567	1750 S Broadway St	Sulphur Springs	75482	+19038853054	https://restaurants.subway.com/united-states/tx/sulphur-springs/1750-s-broadway	Subway	0.98
 12d36b0c4908	Taco Bell	fastfood		33.66154	-95.50422	3922 Lamar Ave.	Paris	75462	+19037857731	http://www.tacobell.com/	Taco Bell	0.99
 24388c548db6	Taco Bell	fastfood		33.24713	-95.91294	2203 Live Oak Street	Commerce	75428	+19038860743	http://www.tacobell.com/	Taco Bell	0.98
 89abb1ca3322	Taco Bell	fastfood		33.11398	-95.59626	1338 S. Broadway	Sulphur Springs	75482	+19034396067	http://www.tacobell.com/	Taco Bell	0.98
@@ -546,14 +561,13 @@ ee0ba6c7284b	Wendy's	fastfood		33.11728	-95.59547	131 E. Industrial Drive	Sulphu
 b088cf906856	Whataburger	fastfood		33.23579	-95.91319	2675 Hwy 24	Commerce	75428	+14303030244	https://locations.whataburger.com/tx/commerce/2675-hwy-24.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 c6742c536b58	Whataburger	fastfood		33.11565	-95.59413	117 Shannon Road	Sulphur Springs	75482	+19034391035	https://locations.whataburger.com/tx/sulphur-springs/117-shannon-road.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.95
 e0f6fd5ea053	Whataburger	fastfood		33.68547	-95.55417	2470 N MAIN ST	Paris	75460	+19037850808	https://locations.whataburger.com/tx/paris/2470-n-main-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+81dc768d117b	Wingstop	fastfood	chicken restaurant	33.10958	-95.59637	1602 S Broadway St Ste B	Sulphur Springs	75482	+19033358431	https://www.wingstop.com/location/wingstop-1763-sulphur-springs-tx-75482/menu?y_source=1_NTUyMDcxNjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
 aefc85fe79c6	Wingstop	fastfood		33.66218	-95.50391	3915 Lamar Ave #330	Paris	75462	+19037844700	https://www.wingstop.com/location/wingstop-704-paris-tx-75462/menu?y_source=1_NTUyMDc0MjAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-1f065f46c842	Aldi	grocery		33.66086	-95.51158	3518 Lamar Ave Ste 310 Suite 310	Paris	75460	+18559552534	https://www.aldi.us/store/aldi/pages/locator/l/tx/paris/3510-lamar-ave-ste-310/l819	ALDI	0.96
 2d839a63f63e	Aldi	grocery		33.65922	-95.51138	3518 Lamar Ave Ste 310 Suite 310	Paris	75460	+18559552534	https://stores.aldi.us/tx/paris/3510-lamar-ave?utm_source=fb&utm_medium=local&utm_campaign=brand&utm_content=storepage_webclick	ALDI	1.00
 17694f6f3329	Blossom Superette	grocery		33.66135	-95.38289	110 N Walnut St	Blossom	75416	+19039825444	https://www.superette.co.nz/bomber-cherry-blossom.html		0.92
 0b3d9ba3da14	Brookshire's	grocery		33.15038	-95.23780	306 TX-37 S	Mt Vernon	75457	+19035374471	https://www.brookshires.com/store-information/Mount_Vernon/58	Brookshire's	0.99
 377d72474152	Brookshire's	grocery		33.66040	-95.54620	925 Clarksville St	Paris	75460	+19037852740	https://www.brookshires.com/store-information/Paris/14	Brookshire's	1.00
 3f0118eb309e	Brookshire's	grocery		33.23650	-95.90431	1603 Culver St	Commerce	75428	+19038863252	https://www.brookshires.com/store-information/Commerce/52	Brookshire's	1.00
-5dea364174f2	Brookshire's	grocery		33.12741	-95.60027	809 Gilmer St	Sulphur Springs	75482	+19038854921			0.97
 ee30b151e9fe	Brookshire's	grocery		33.12741	-95.60030	809 Gilmer St	Sulphur Springs	75482	+19038854921	https://www.brookshires.com/store-information/Sulphur_Springs/13	Brookshire's	1.00
 43d048a05a71	Budding Botanicals	grocery	organic grocery store	33.13143	-95.60173	525 Gilmer St	Sulphur Springs	75482	+17603598386	https://www.buddingbotanicalsca.com/contact		0.92
 33c3d84134be	CEFCO Travel Center	grocery		33.63013	-95.56123	2900 South Church St.	Paris	75460	+19037829589	https://www.cefcostores.com		0.77
@@ -600,7 +614,6 @@ f8e49c50903e	Hopkins County Memorial Hospital	hospital		33.15769	-95.60004	115 A
 421404a612c7	Hopkins County Wound Care	hospital		33.15739	-95.60066	115 Airport Rd	Sulphur Springs	75482	+19034384448	http://www.hcmh.com/woundcareservices.php		0.73
 0f7fcca358de	Hunt Regional Community Hospital	hospital		33.23045	-95.89594	2900 Sterling Hart Dr	Commerce	75428	+19038863161	http://huntregional.org		0.55
 6ac767e28139	Hunt Regional Urgent Care	hospital		33.24760	-95.90517	1704 Live Oak St.	Commerce	75428	+19038861055	https://urgentcare.huntregional.org/location/hunt-regional-urgent-care-commerce/		0.85
-1b2b8ff8b4a0	Jordan Health Services	hospital		33.17846	-95.23415	412 Texas Highway 37 S	Mt Vernon	75457	+18006650639	http://www.jhsi.com/		0.88
 8b895e6d1a13	Jordan Health Services	hospital		33.14991	-95.23892	412 Texas Highway 37 S	Mt Vernon	75457	+18006650639	http://www.jhsi.com/		0.90
 fd0c88c7b0fe	Paragon Pain & Rehabilitation	hospital		33.66403	-95.52600	305 N Collegiate Dr	Paris	75460	+19722033600	http://www.paragon-ppr.com		0.61
 26af9a7dda3d	Paragon Post Acute	hospital		33.68976	-95.55003		Paris		+19729937498	https://www.paragon-pac.com/		0.80
@@ -615,7 +628,6 @@ a707c3dbd0fa	American Inn	hotel	motel	33.16344	-95.21480	415 Interstate 30 Servi
 ce4f17c597cc	American Inn & Suites	hotel	motel	33.68751	-95.55521	2501 N Main St	Paris	75460	+19037859700	http://www.americaninnofparis.com/		0.97
 2213087a792e	Americas Best Value Inn	hotel	motel	33.66394	-95.50951	3755 NE Loop 286	Paris	75460	+19037855566	http://www.americasbestvalueinn.com/		0.99
 b01b8e988e20	Best Western Trail Dust Inn & Suites	hotel		33.14211	-95.56323	1521 Shannon Rd E	Sulphur Springs	75482	+19038857515	https://www.bestwestern.com/en_US/book/hotel-rooms.44286.html?iata=00171890&ssob=BLBWI0003G		0.77
-a4fb96203de4	Bethel Masonic lodge #134	hotel	lodge	33.42609	-95.94634		Ladonia					0.72
 5c46141c3238	Big Al's Barefoot Bay	hotel		33.05088	-95.02332	5244 FM-1520	Pittsburg	75686	+19038563643	https://bigalsbarefootbay.com/		0.99
 589152b6cec1	Clarion Pointe Sulphur Springs	hotel		33.11828	-95.58936	411 Industrial Dr E	Sulphur Springs	75482	+19038856851	https://www.choicehotels.com/texas/sulphur-springs/clarion-hotels/txj62?pmf=yext&mc=llyxyxpx	Clarion Hotel	1.00
 f3c10847a0b6	Comfort Inn & Suites Paris	hotel		33.67508	-95.52051	3035 NE Loop 286	Paris	75460	+19037850089	https://www.choicehotels.com/texas/paris/comfort-inn-hotels/txc53?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
@@ -631,19 +643,15 @@ a19c11b865bc	Days Inn & Suites by Wyndham Sulphur Springs	hotel	resort	33.14444	
 ef9c46255135	Econo Lodge Sulphur Springs I-30	hotel	resort	33.14173	-95.56890	1495A Industrial Dr E	Sulphur Springs	75482	+19038850562	https://www.choicehotels.com/texas/sulphur-springs/econo-lodge-hotels/txa10		0.95
 71b27a623955	Fairfield	hotel		33.69320	-95.55546	3005 N Main Street	Paris	75460	+14303223670		Fairfield by Marriott	1.00
 4ddb32a91e26	Ferrari Inn	hotel	motel	33.14357	-95.56809	1495 Industrial Dr E	Sulphur Springs	75482	+19038856900	http://theferrariinn.com/hotel		0.92
-0959173519b5	Gibraltar Hotel	hotel		33.65892	-95.55604	265 S Main St	Paris	75460				0.99
 99214f6056a9	H3P Ranch	hotel		33.43908	-95.72837	Co Rd 3225	Cooper	75432	+19034562649	http://www.bucksandbirds.com/		0.77
 c71c3d7fe91c	Hampton Inn by Hilton	hotel		33.68856	-95.55277	2650 N Main St	Paris	75460	+19037848165	http://www.hamptoninn1.hilton.com		0.92
 6f4b1b7049ff	Hampton Inn Paris	hotel		33.66558	-95.50902	3563 NE Loop 286	Paris	75460	+19037846536	http://hamptoninn.hilton.com/	Hampton by Hilton	1.00
 317ca1b959aa	Hampton Inn Sulphur Springs	hotel		33.11948	-95.59473	1202 Mockingbird Ln	Sulphur Springs	75482	+19034394646	https://www.hilton.com/en/hotels/slrtxhx-hampton-sulphur-springs/	Hampton by Hilton	1.00
-99c86a774888	Henry Creek	hotel		33.21461	-95.61089		Sulphur Springs					0.70
-e9359ebb1613	Hic Hospitality Inc	hotel		33.11838	-95.58942	411 Industrial Dr E	Sulphur Springs	75482				0.95
 2d891a63c89a	Holiday Inn Express & Suites Paris	hotel		33.67535	-95.52348	3025 N. E. Loop 286	Paris	75460		https://www.ihg.com/holidayinnexpress/hotels/us/en/paris/prscs/hoteldetail	Holiday Inn Express	0.99
 a3b2739f9486	Holiday Inn Express & Suites Sulphur Springs by IHG	hotel		33.14484	-95.56358	1521 Industrial Dr E	Sulphur Springs	75482	+19034380918	https://www.ihg.com/holidayinnexpress/hotels/us/en/sulphur-springs/slrss/hoteldetail?cm_mmc=YextLocal-_-EX-_-US-_-SLRSS	Holiday Inn Express	0.99
 1f49623c8dcc	Holiday Inn Sulphur Springs	hotel		33.14264	-95.56861	1495 Industrial Dr E	Sulphur Springs	75482				0.95
 d48d62bf3f3b	Home2 Suites by Hilton Paris	hotel		33.67500	-95.51901	3143 NE Loop 286	Paris	75460	430-900-1337	https://www.hilton.com/en/hotels/txkpaht-home2-suites-paris/	Home2 Suites by Hilton	0.99
 30ec3d8db831	Hotel Azul and Suites	hotel	resort	33.23734	-95.91023	2207 Culver St	Commerce	75428	+19038864777			0.85
-3d4a4c95d793	Hunter's Creek Ranch	hotel	lodge	33.25293	-95.19900	4644 County Rd NE 2100	Mt Vernon	75457	+19033058460	http://www.hunterscreekranchtx.com/		0.92
 5a936dffe2b0	Kings Inn Paris TX	hotel	motel	33.66159	-95.53623	1907 Lamar Ave	Paris	75460	+19037398499	http://www.kingsinnparistx.com/		0.89
 81540c29735c	La Quinta Inn & Suites	hotel		33.67339	-95.51801	3205 NE Loop 286	Paris	75460	+19037839600	http://www.laquintaparis.com/?cid=local_6111	La Quinta by Wyndham	1.00
 4fa35b68ae83	La Quinta Inn & Suites by Wyndham Mt. Pleasant	hotel		33.17212	-95.00288	1620 Rotan Rd	Mt Pleasant	75455	+19032047325	http://www.laquintamtpleasant.com/?cid=local_6319	La Quinta by Wyndham	1.00
@@ -657,16 +665,10 @@ c8a1cee7fa4d	Magnuson Hotel Commerce	hotel		33.23663	-95.91443	2207 Culver St	Co
 6cb384be05ab	Motel 6	hotel	motel	33.14518	-95.56296	1529 Industrial Dr E	Sulphur Springs	75482	+19038852105	http://www.motel6.com/	Motel 6	0.99
 972ed709a2c4	Motel 6	hotel	motel	33.66526	-95.51224	425 35th St NE	Paris	75460	+19032053982	http://www.motel6.com/	Motel 6	0.99
 026f63dd61fc	Mt. Vernon Hospitality Inc	hotel		33.16127	-95.23113	401 Interstate 30 W	Mount Vernon	75457				0.95
-5ae6dd02b190	Paradise Plains	hotel	lodge	33.48204	-95.58750	10855 TX-24	Paris	75462	+12142139949	http://www.paradiseplains.com/		0.92
-b248818f6883	Paris Elks Lodge 2433	hotel	lodge	33.68148	-95.50977	2110 36th St NE	Paris	75462	+19037845662	http://texaselks.org/		0.84
 3521412a4e81	Paris Extended Stay Suites	hotel	motel	33.66093	-95.54020	1518 Lamar Ave	Paris	75460	+19037848851	http://www.parisextendedstay.com		0.98
 6ebf5cd75028	Paris Inn & Suites	hotel	motel	33.67500	-95.51979	3075 NE Loop 286	Paris	75460	+19037065303	https://www.parisinnandsuitesparistexas.com/		1.00
-72a7ae687457	Paris Masonic Lodge #27	hotel	lodge	33.62671	-95.56274	3150 Church St	Paris	75462	+19037847214	http://www.grandlodgeoftexas.org		0.97
 95837e9f97bf	Paris Wise House	hotel		33.65464	-95.56071	418 W Washington St	Paris	75460	+12145383305	http://www.pariswisehouse.com		0.92
-dd65148cda56	Pavillion Apartment	hotel		33.66087	-95.53364	2160 Lamar Ave	Paris	75460				0.95
 66e08e1a9ae5	Pine Meadows Apartments	hotel		33.12871	-95.61079	539 Moore St S	Sulphur Springs	75482	+14055460678			0.75
-5bf324f41205	Pride Rock Residence Hall	hotel		33.23777	-95.91151	2513 W Halls	Commerce	75428	+19034684078			0.99
-ad46188f07a7	Pure Hope Inn	hotel	lodge	33.29831	-95.23109	450 Co Rd NW 1051	Talco	75487	+19036321122	http://www.purehoperanch.com/		0.97
 9d4d196a4902	Quality Inn and Suites	hotel		33.14331	-95.56776	1495 Industrial Dr E	Sulphur Springs	75482	+19032439003	https://www.choicehotels.com/texas/sulphur-springs/quality-inn-hotels/txn46?mc=llgoxxpx	Choice Hotels	1.00
 e5641e02944f	Quality Inn Mt. Pleasant	hotel		33.16772	-95.00088	2515 W Ferguson Rd	Mt Pleasant	75455	+19037044960	http://www.qualityinn.com	Choice Hotels	1.00
 0fb0b09bb710	Quality Inn Paris	hotel		33.66810	-95.51112	3505 NE Loop 286	Paris	75460	+14309004096	https://www.choicehotels.com/texas/paris/quality-inn-hotels/tx416	Choice Hotels	0.99
@@ -677,8 +679,6 @@ e5641e02944f	Quality Inn Mt. Pleasant	hotel		33.16772	-95.00088	2515 W Ferguson 
 f4a376c5efbc	Residence Inn by Marriott	hotel		33.70541	-95.62715	35 Farm Road 2820	Sumner	75486	+13037407177	http://marriott.com		0.92
 bc590e7661fa	Retreat at Lake Cypress Springs	hotel		33.05301	-95.17001	US-175 Frontage Rd #3007	Scroggins	75480	+19032858661	https://www.lakecypressretreat.com/		0.92
 efa3f632b26a	River B Ranch	hotel		33.20173	-95.88838	2267 FM-3218	Campbell	75422	+19034503162			0.58
-4bc1ed34dc5a	Royal Inn	hotel		33.12628	-95.60664		Sulphur Springs					0.64
-e43d9980707b	Royal Inn	hotel		33.11758	-95.59709		Sulphur Springs					0.91
 600718712d15	Selah Inn at the Ranch	hotel		33.29812	-95.23134	450 County Road NW 1051	Talco	75487	+19036321122	http://www.selahranch.com		0.96
 fa261ac277df	Super 8	hotel	motel	33.16080	-95.23158	401 I-30 Exit 146	Mt Vernon	75457	+19035882882	https://www.wyndhamhotels.com/super-8/mount-vernon-texas/super-8-mount-vernon/overview		0.99
 f3a6fc0650e4	Super 8 by Wyndham Mount Vernon	hotel	resort	33.18872	-95.22134	401 W Inerstate 30 Exit 146	Mt. Vernon	75457	+19035882882	https://www.wyndhamhotels.com/super-8/mount-vernon-texas/super-8-mount-vernon/overview?CID=LC:7xnkh22o63wf5qj:08509		0.85
@@ -688,7 +688,6 @@ c8cc6c3f6b04	The lucky Lure	hotel		33.01332	-95.07640	1608 FM-21	Pittsburg	75686
 8b980243df93	TownePlace Suites by Marriott Paris	hotel		33.69326	-95.55553	3005 N Main St	Paris	75460	+14303223660		TownePlace Suites by Marriott	0.98
 0b0d9d431411	University Inn	hotel		33.22402	-95.91264	3000 State Highway 50	Commerce	75428	+19038863165			0.61
 7a90b8a1573f	White Rose Ranch of Texas	hotel		33.60585	-95.78211	985 County Road 25780	Petty	75470	+14698550256	https://www.whiteroseranch.com/		0.97
-069935de24be	Whitley Residence Hall	hotel		33.23699	-95.91017	2001 Culver St	Commerce	75428	+19038865790			0.99
 96a30c41f0e1	Ziggy's Point	hotel		33.80415	-95.63426	370 County Rd 34721	Paris	75460	+19034010862			0.57
 1a8f4eb63325	A&J Propane	office	energy company	33.69963	-95.55461	4095 N Main St	Paris	75460	+19037846602	https://ajpropane.com/		0.59
 0be4a415194d	Adult Probation	office		33.66018	-95.60587	4355 Bonham St	Paris	75460	+19037372435	http://www.co.lamar.tx.us/default.aspx?Lamar_County/AdultProbation=		0.77
@@ -708,7 +707,6 @@ fd91fd80dcd5	Northeast Texas Data	office	information technology company	33.13034
 93bd3670d42f	Northwestern Mutual	office		33.14145	-95.60049	430 Church St	Sulphur Spgs	75482	+19034394829	https://www.northwesternmutual.com/financial-professional-locator?address=200%20Church%20St%20Ste%20B,75482&distance=1&cmpid=LL-Lo3-Search		0.88
 8f284ac4cb1c	Optimum	office	telecommunications company	33.66080	-95.53654	25 19th St SE	Paris	75460	+18669503278	https://www.optimum.com/stores/tx/paris/25-19th-st-se.html	Optimum	0.99
 104267a4c62c	P & DW Siding	office		33.71534	-95.83064	1536 Farm Road 2352	Sumner	75486	+19032275581	http://www.danddwsiding.com		0.92
-abfc614e4d1c	Paris Elks Lodge 2433	office	private association	33.68148	-95.50977	2110 36th St NE	Paris	75462	+19037845662	http://texaselks.org/		0.99
 5aa60962a685	Paris Energy Center	office	energy company	33.69706	-95.55752	301 Lake Crook Rd	Paris	75460	+19037852992	http://directenergy.com		0.90
 0f3a43f0b8e9	Signature Solar	office	energy company	33.12004	-95.58943	421 Industrial Dr E Ste 201	Sulphur Springs	75482	+19034412090			0.97
 c002e0a775b3	SmartTech Home Solutions	office	telecommunications company	33.11869	-95.59645	1217 S Broadway St Ste A1	Sulphur Springs	75482	+19034394892	http://smarttechhomesolutions.com/		0.92
@@ -751,9 +749,6 @@ e73810f5f0b6	Broadway Buffet	restaurant	buffet restaurant	33.12085	-95.59752	114
 0b22fbac6bf1	Buffalo Wild Wings	restaurant	chicken wings restaurant	33.69558	-95.55541	3215 N Main Street	Paris	75460			Buffalo Wild Wings	0.89
 cf8a96f888e2	Buffalo Wild Wings	restaurant	chicken wings restaurant	33.23680	-95.91148	2714 State Highway 24	Commerce	75428			Buffalo Wild Wings	0.96
 99084f8cdf9f	bull home style barbeque	restaurant	barbecue restaurant	33.25732	-95.89430	709 Bishop St	Commerce	75428	+19723746440			0.59
-35f534bc48e0	Burger King	restaurant	burger restaurant	33.11589	-95.59163	209 Shannon Rd E	Sulphur Springs	75482	+19038852314	https://burgerking.com/store-locator/store/4067	Burger King	0.98
-3e69f17aaa5e	Burger King	restaurant	burger restaurant	33.24656	-95.91169	1613 State Highway 50	Commerce	75428	+19032463265	https://burgerking.com/store-locator/store/restaurant_87935		0.92
-563a6365e8b8	Burger King	restaurant	burger restaurant	33.66078	-95.51039	3590 Lamar Ave	Paris	75460	+19037843383	https://www.bk.com/store-locator/store/restaurant_1270	Burger King	0.99
 8923b0e114ff	BURGERLAND	restaurant	burger restaurant	33.67293	-95.55618	1301 N Main St	Paris	75460	+19037399443	http://burgerlandparis.com/		0.99
 640bc46609d7	Burgers & Fries	restaurant	burger restaurant	33.13706	-95.59776	208 B, 208 College St	Sulphur Springs	75482	+19038859496			0.96
 f9bc624f9a42	Burks Hacienda	restaurant		33.59214	-95.53493	1784 County Road 12500	Paris	75462				0.88
@@ -773,7 +768,6 @@ e5e0c3ca33d9	Casey's	restaurant	pizza restaurant	33.68826	-95.55371	2510 North M
 ff8d247551b0	Charles Restaurant	restaurant		33.69140	-95.55363	2880 N Main St	Paris	75460				0.95
 2eb6129e4d53	CHEN'S KITCHEN	restaurant	chinese restaurant	33.11554	-95.60401	472 Shannon Rd W	Sulphur Springs	75482	+19033358195	http://www.chenskitchentx.com/		0.92
 22202d579e58	Chester's Chicken	restaurant	chicken restaurant	33.00064	-95.94111	508 Hwy 69	Lone Oak	75453	+19036629500	https://www.chesterschicken.com/		0.96
-7524b511f490	Chicken Express	restaurant	chicken restaurant	33.11657	-95.59508	910 Gilmer St	Sulphur Springs	75482	+19038853677	http://www.chickene.com		0.77
 af18f2eb4d32	Chilango's Mexican Kitchen	restaurant	mexican restaurant	33.68391	-95.55515	2335 N Main St	Paris	75462	+14303225174	http://Www.chilangoskitchen.com/		0.63
 37a4ef24ca8c	Chilango's Mexican Restaurant	restaurant	mexican restaurant	33.61124	-95.07092	2000 W Main St	Clarksville	75426	+19034270089	https://chilangosmexicanrestaurant.com		0.99
 d64167d7734f	Chili's Grill & Bar	restaurant		33.68510	-95.54481	1105 NE Loop 286	Paris	75460	+19037839977	https://www.chilis.com/		0.99
@@ -806,11 +800,7 @@ e90f6b1c216e	Denman Bar & Grill	restaurant	bar and grill restaurant	33.60023	-95
 c46e6c660e3f	Dickey's Barbecue Pit	restaurant	barbecue restaurant	33.24906	-95.91199	2202 Live Oak St	Commerce	75428	+19038868808	https://dickeys.com/locations		0.92
 bfb201489d55	Dip Net	restaurant	barbecue restaurant	33.06451	-95.59975	4858 Texas Highway 154 S	Sulphur Springs	75482	+19034381547	http://www.bing.com/search?sc=8-7&qs=AS&q=dip%20net%20sulphur%20springs%20tx&sk=AS3&form=QBLH&pq=dip%20net&sp=4		0.92
 8b3c5504fbb6	DoDay's BBQ	restaurant		33.66122	-95.52605	Lamar Avenue & Collegiate Drive	Paris	75460	+19032720287			0.96
-90ac60b2ec73	DoDay's BBQ	restaurant		33.67897	-95.55508	Lamar Avenue & Collegiate Drive	Paris	75460	+19032720287			0.95
 70ab7869a769	Doma Korean Grill & Burgers	restaurant	korean restaurant	33.12974	-95.63055	200 S Hillcrest Dr	Sulphur Springs	75482	+19034400865	http://Jenskitchen.us/		0.99
-14b05a83e326	Domino's	restaurant	pizza restaurant	33.24773	-95.91221	2220 Live Oak	Commerce	75428	+19038862116	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-1702398b5a73	Domino's	restaurant	pizza restaurant	33.66109	-95.53738	1828 Lamar Ave	Paris	75460	+19037855511	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-f72cf9a107da	Domino's	restaurant	pizza restaurant	33.11417	-95.59624	1328 S Broadway	Sulphur Springs	75482	+19038851530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 e620d1a1906c	Don Lalo's Mexican Restaurant	restaurant	texmex restaurant	33.12586	-95.59793	912 Gilmer St	Sulphur Springs	75482	+19035581859	www.superpages.com/bp/sulphur-springs-tx/don-lalos-mexican-restaur...		0.96
 43b60989bba0	Dos Laredos	restaurant	texmex restaurant	33.25003	-95.90070	1229 Washington St	Commerce	75428	+19038861234	http://doslaredos.net/		0.95
 ed3733aee85c	Dos Marias	restaurant	mexican restaurant	33.66394	-95.53600	303 20th St NE	Paris	75460	+19037374557	https://www.mapquest.com/us/texas/business-paris/dos-marias-369308458		0.98
@@ -860,11 +850,9 @@ a3585da15837	Huddle House	restaurant	breakfast and brunch restaurant	33.16035	-9
 cea3d2236339	Italian Bistro	restaurant	italian restaurant	33.61113	-95.05070	106 Walnut St	Clarksville	75426	+19034275997	http://italianbistro.com		0.96
 376307685e29	Jaxx Burgers	restaurant	burger restaurant	33.66054	-95.55598	10 Clarksville St	Paris	75460	+19037392955	http://jaxxburger.com/		0.97
 a24553c281b9	Jaxx Burgers	restaurant	burger restaurant	33.65070	-95.55647	1264 S Main St	Paris	75460	+19037392955			0.57
-c5ac54c7f31b	Jimmy John's	restaurant	sandwich shop	33.24216	-95.91086	2300 Morris Drive	Commerce	75428	+19034683212	https://locations.jimmyjohns.com/tx/commerce/sandwiches-4401.html	Jimmy John's	0.96
 edc5172a8266	Juan Pablos	restaurant	texmex restaurant	33.11818	-95.59362	1216 Mockingbird Ln	Sulphur Springs	75482	+19038850066	http://www.dshs.state.tx.us		0.98
 eb53e07ec882	Kaizen Japanese Cuisine - Hibachi & Sushi	restaurant	japanese restaurant	33.66148	-95.53593	1995 Lamar Ave	Paris	75460	+19036693000			0.96
 5637e1bf833e	KenSal's CuckooNest Asian Fusion Restaurant	restaurant	asian restaurant	33.18904	-95.22057	106 N. Houston	Mount Vernon	75457	+19032702512	http://www.kensalsasianfusion.com		0.77
-311a701a7105	Kfc	restaurant	chicken restaurant	33.12634	-95.59808	900 Gilmer St	Sulphur Springs	75482	+19034380997	https://www.kfc.com		0.92
 6cadd1d8a992	Kountry Kitchen	restaurant	diner	33.66111	-95.38488	110 W Front St	Blossom	75416	+19039826712			0.95
 1301446e3628	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.66104	-95.56284	663 Bonham Street	Paris	75460	+19037846000	https://locations.krispykrunchy.com/tx/paris/663-bonham-street		0.96
 16cb6153348a	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.65816	-95.54163	1380 Clarksville Street	Paris	75460	+19037840296	https://locations.krispykrunchy.com/tx/paris/1380-clarksville-street		0.96
@@ -880,8 +868,6 @@ f91963af9fef	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.66054	-95.3
 400594fbaa9c	Lance's Sunriser	restaurant	diner	33.69130	-95.55376	2880 N Main St	Paris	75460	+19037859149			0.92
 08280ff7b364	LaPana Asian Cuisine	restaurant	asian restaurant	33.37473	-95.68852	21 N Side Square	Cooper	75432	+19033003006	http://lapanaasiancuisine.com/		0.95
 f7b1669fdf39	Lily Queen Chinese Restaurant	restaurant	chinese restaurant	33.66160	-95.53655	1905 Lamar Ave	Paris	75460	+19037850383	http://lilyqueenchineserestaurant.business.site		0.95
-d1545eac9a55	Little Caesars	restaurant	pizza restaurant	33.66087	-95.53495	2010 Lamar Ave.	Paris	75460	+19037378422	https://littlecaesars.com/en-us/store/8338	Little Caesars	0.98
-55c8e57656f7	Little Caesars Pizza	restaurant	pizza restaurant	33.13077	-95.60070	610 Gilmer St Ste 2	Sulphur Springs	75482	+19034390415	https://littlecaesars.com/en-us/store/8416	Little Caesars	0.96
 a60369e72a51	Lone Star Eatery Grill & Bar	restaurant	bar and grill restaurant	33.23639	-95.91322	2203 Culver St	Commerce	75428	+19038862121	http://www.eatlonestar.com/		0.93
 b3b5114d3756	Longhorn Barbque	restaurant	barbecue restaurant	33.67514	-95.57741	1411 19th St NW	Paris	75460	+19037392625	http://diningoption.com/LonghornBarbque		0.92
 b99e6aa14c70	Los Amigos Mexican Food	restaurant	taco restaurant	33.24756	-95.90838	1940 Live Oak St	Commerce	75428	+19032463478	http://losamigosmobileautoglass.com		0.92
@@ -892,8 +878,6 @@ e90b702ffd09	Los Mochis Restaurant	restaurant	texmex restaurant	33.13776	-95.601
 01397c2bf68f	Los Rodriguez Restaurant	restaurant	mexican restaurant	33.83607	-95.51550	10115 US-271	Powderly	75473	+19037323874			0.95
 bd23cc1fba7c	Luby's Cafeteria	restaurant	american restaurant	33.66512	-95.51000	3565 NE Loop 286	Paris	75460	+19037847790	http://www.lubys.com		0.92
 058c9eba05d6	Luigi's Italian Cafe	restaurant	italian restaurant	33.24637	-95.91225	1615 State Hwy 50	Commerce	75428	+19038862000	http://www.luigisitaliancafe.com/	Luigi's Italian Cafe	0.99
-76ed8a78d3dc	Luigi's Italian Cafe	restaurant	italian restaurant	33.25277	-95.88581	1615 State Highway 50	Commerce	75428	+19038862000	http://luigisitaliancafe.com/	Luigi's Italian Cafe	0.65
-987bce7b225d	Luigi's Italian Cafe	restaurant	italian restaurant	33.28878	-95.85301	1615 State Hwy 50	Commerce	75428	+19038862000	http://luigisitaliancafe.com/	Luigi's Italian Cafe	0.65
 fcbb1c7e555e	Luigi's Italian Cafe	restaurant	italian restaurant	33.32344	-95.91126	1615 State Highway 50	Commerce	75428	+19038862000	http://www.luigisitaliancafe.com		0.95
 8fd6b687385c	Lulu's Burgers	restaurant	burger restaurant	33.23600	-95.89444	803 Culver St	Commerce	75428	+19038863888	http://www.lulusburgers.com/		0.98
 b618c617d5f5	Luna Azul	restaurant	mexican restaurant	33.67682	-95.55599	1603 N Main St	Paris	75460	+19036098006			0.96
@@ -916,11 +900,7 @@ c188f449a153	Oasis of Pittsburg	restaurant		33.06132	-95.10760	2550 FM 21	Pittsb
 56ad3be9de23	Omega's Biscuits and Eggs	restaurant	comfort food restaurant	33.22392	-95.91290	3000 TX-24	Commerce	75428	+19032463002			0.99
 04f262288c49	Omega’s Biscuits N' Eggs	restaurant	american restaurant	33.24511	-95.90260	1814 Monroe St	Commerce	75428	+19032463002			0.94
 2b56abdaeee9	Pacífic station seafood	restaurant	mexican restaurant	33.13466	-95.60439	211 Magnolia St	Sulphur Springs	75482	+19034382337			0.92
-a670369427fa	Panda Express	restaurant	chinese restaurant	33.11581	-95.59457	150 Shannon Rd E	Sulphur Springs	75482	+19034393293	http://www.pandaexpress.com/		0.97
-c7cb950fc180	Panda Express	restaurant	chinese restaurant	33.24991	-95.89987	1207 Alamo St	Commerce	75428	+19038864008			0.95
 13630c46582c	Panizza	restaurant	pizza restaurant	33.65897	-95.55698	265 1st St SW	Paris	75460	+19038836022			0.92
-aaea860d3b27	Papa Johns Pizza	restaurant	pizza restaurant	33.11466	-95.59614	1324 S BROADWAY ST	Sulphur Springs	75482	+19036890012	https://locations.papajohns.com/united-states/tx/75482/sulphur-springs/1324-s-broadway-st?utm_source=bing-maps&utm_medium=organic&y_source=1_MTA4MzczMDA5My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.98
-aefdd43108bc	Papa Johns Pizza	restaurant	pizza restaurant	33.66135	-95.51344	3375 Lamar Ave	Paris	75460	+19037065023	https://locations.papajohns.com/united-states/tx/75460/paris/3375-lamar-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTA3MjYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
 741736898a3f	Papa Murphy's	restaurant	pizza restaurant	33.66129	-95.52674	2705 Lamar Avenue	Paris	75460	+19037850036	http://www.papamurphys.com/	Papa Murphy's - Jefferson City	0.94
 99120735297d	Papi’s Street Tacos	restaurant	mexican restaurant	33.61266	-95.03902	1309 E Main St	Clarksville	75426	+19036893225			0.86
 fb7c68c7118a	Paris House	restaurant	asian restaurant	33.66116	-95.55612	7 E Plaza	Paris	75460	+19036693649	https://maps.google.com/?cid=2317981468844159082		0.99
@@ -935,10 +915,6 @@ a28b53ebc598	Pig and Whistle Cafe	restaurant	comfort food restaurant	33.42630	-9
 159f437f41bc	Pioneer Cafe	restaurant	comfort food restaurant	33.13956	-95.59512	325 Jefferson St E	Sulphur Springs	75482	+19038857773	https://www.facebook.com/profile.php?id=100063877757870&mibextid=LQQJ4d		0.97
 e5b812628357	Pioneer Cafe	restaurant		33.13768	-95.60329	307 Main St	Sulphur Springs	75482				0.92
 f5ad4975dd74	Pit Happens BBQ	restaurant	barbecue restaurant	33.66580	-95.50819	3740 Pine Mill Rd	Paris	75462	+19035175822	http://diningoption.com/PitHappensBBQ		0.92
-0414e5ccf065	Pizza Hut	restaurant	pizza restaurant	33.24740	-95.90838	1920 Live Oak St Hunt	Commerce	75428	+19038869600	https://locations.pizzahut.com/tx/commerce/1920-live-oak-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299550	Pizza Hut	0.98
-3b2e46dd5c16	Pizza Hut	restaurant	pizza restaurant	33.12034	-95.59501	1135 Mockingbird Ln	Sulphur Springs	75482	+19034380520	https://locations.pizzahut.com/tx/sulphur-springs/1135-mockingbird?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282672	Pizza Hut	0.97
-5335fe37b571	Pizza Hut	restaurant	pizza restaurant	33.66515	-95.51017	3565 NE Loop 286 Ste 100	Paris	75460	+19037845051	https://locations.pizzahut.com/tx/paris/3565-ne-loop-286?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309511	Pizza Hut	0.99
-73591a4fe981	Pizza Hut	restaurant	pizza restaurant	33.61145	-95.08039	2000 W Main St	Clarksville	75426	+19034272215	http://www.pizzahut.com/locations/texas/clarksville/007199		0.77
 42422ea853b8	Pizza Inn	restaurant	buffet restaurant	33.11494	-95.59230	Tarboro Shopping Centre, 1320 Mockingbird Ln	Sulphur Springs	75482	+19038851549	https://www.pizzainn.com/locations/sulphur-springs-tx/	Pizza Inn	1.00
 b2cd7c6a5e53	Plain and Fancy Sandwich Shoppe	restaurant	sandwich shop	33.13769	-95.60111	120 Main St	Sulphur Springs	75482	+19038859225	http://www.plainandfancyshoppe.com/		0.96
 9d13341fa8fd	Pop's Fish and Shrimp	restaurant	seafood restaurant	33.22345	-95.91238	3000 State Highway 50	Commerce	75428	+19032463044			0.77
@@ -954,8 +930,6 @@ dcb0461a9396	Rooster's Country Cooking	restaurant	diner	33.66355	-95.46378	6545 
 328e01c3f9e5	salsas y mas	restaurant	mexican restaurant	33.14055	-95.59617	105 Weaver Dr	Sulphur Springs	75482	+14303469434	https://order.online/business/salsas-y-mas-13020910		0.97
 44c63475eab2	San Remo Italian Restaurant	restaurant	italian restaurant	33.13824	-95.60263	226 Connally St	Sulphur Springs	75482	+19035581200	https://sanremoitalian.com		0.92
 8ab0dd34b637	Sandwich Etc.	restaurant	sandwich shop	33.66028	-95.52129	3060 Lamar Ave	Paris	75460	+19037841626	https://sandwichetcptx.com/		0.96
-3e338ee6e710	Schlotzsky's	restaurant	sandwich shop	33.65975	-95.51010	3598 Lamar Ave	Paris	75460	+19039054916	www.schlotzskys.com		0.96
-addf09c98741	Schlotzsky's	restaurant	sandwich shop	33.12293	-95.59662	1050 Gilmer St	Sulphur Springs	75482	+19039195060	https://locations.schlotzskys.com/tx/sulphur-springs/1050-gilmer-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.92
 f5f9b3ecbcd0	Scholl Bros BBQ	restaurant	barbecue restaurant	33.66119	-95.54000	1528 Lamar Ave	Paris	75460	+19037398080	https://schollbrosbbq.com		1.00
 3261d132e2ea	Senior Submarine & Gyros	restaurant	sandwich shop	33.66102	-95.54242	1250 Lamar Ave	Paris	75460	+19034015233			0.92
 27555979e75a	Sharon's BBQ	restaurant	barbecue restaurant	33.15420	-95.59914	1310 Church St	Sulphur Springs	75482	+19032430596	http://Sharonsbbq.com/		0.96
@@ -967,7 +941,6 @@ d7d2e7144c11	Simple Simon's Pizza	restaurant	pizza restaurant	33.58303	-95.91325
 8f54ad7e098d	Sirloin Stockade - Paris	restaurant	american restaurant	33.66768	-95.51089	3525 NE Loop 286	Paris	75460	+19037850319	https://order.online/store/sirloin-stockade-paris-952378/?hideModal=true&pickup=true		0.96
 046d05fd1eda	Sister Tacos	restaurant	mexican restaurant	33.37361	-95.69064	301 W Dallas Ave	Cooper	75432	+14303224417	https://www.sistertacostx.com		0.97
 9fd85be5a077	Slaughter's BBQ	restaurant	barbecue restaurant	33.13644	-95.60451	107 Magnolia St	Sulphur Springs	75482	+19035581298	https://slaughtersbbq.myshopify.com/		0.97
-4633a1f9233d	Smoke Eaters BBQ & Catering	restaurant	barbecue restaurant	33.06426	-95.59751	4881 Texas Highway 154 S	Sulphur Springs	75482	+19032437518			0.66
 e658add4fcdb	Smoke Eaters BBQ & Catering	restaurant	barbecue restaurant	33.06474	-95.59854	4881 Texas Highway 154 S	Sulphur Springs	75482	+19032437518			0.73
 65eb4f3bd21a	Smokin Good Eats	restaurant	barbecue restaurant	33.66563	-95.55654	455 N Main St.	Paris	75460	+19035173673			0.92
 8ffe07fa1c04	Sno Palace	restaurant		33.05645	-95.47112	2104 E Main St	Como	75431				0.85
@@ -977,13 +950,6 @@ a453e41760b7	Soulmans	restaurant	barbecue restaurant	33.11912	-95.59657	1201 S B
 82d06312db49	Stacey's Fish Fry	restaurant	seafood restaurant	33.02430	-95.80283	7565 Farm Road 275 S	Cumby	75433	+19034593300	http://www.staceysfishfry.com		0.95
 3c48571a6dd2	Star Bar Ranch Bar B Que and Catering	restaurant		33.61105	-95.06944	1905 W Main St	Clarksville	75426	+12146844372			0.58
 c1b3e97c302a	Steve-O's Pizza and Pub	restaurant	pizza restaurant	33.18928	-95.22073	114 Houston St	Mt Vernon	75457	+19032702515	https://thespotpizzapub.com/		0.97
-0c507317358f	Subway	restaurant	sandwich shop	33.24759	-95.90997	2012 Liveoak St	Commerce	75428	+19038867827	https://restaurants.subway.com/united-states/tx/commerce/2012-liveoak-st	Subway	0.97
-618faf926deb	Subway	restaurant	sandwich shop	33.66122	-95.59821	3720 Bonham Street	Paris	75462	+19037398200	https://restaurants.subway.com/united-states/tx/paris/3720-bonham-street?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50994&utm_campaign=evergreen-2020&y_source=1_MTQ5MDg3NjUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		1.00
-6532468f7c42	Subway	restaurant	sandwich shop	33.66430	-95.50613	3855 Lamar Ave	Paris	75462	+19037399200	http://www.subway.com/en-us	Subway	0.98
-7bd935e49530	Subway	restaurant	sandwich shop	33.11729	-95.59473	151 E. Industrial Suite A	Sulphur Springs	75482	+19038857990	https://restaurants.subway.com/united-states/tx/sulphur-springs/151-e-industrial	Subway	0.99
-9ae764e0b176	Subway	restaurant	sandwich shop	33.16401	-95.21790	215 E. I-30 N. Service Rd.	Mt Vernon	75457	+19035377696	http://www.subway.com/en-us	Subway	0.98
-da4c46382479	Subway	restaurant	sandwich shop	33.68903	-95.55369	2650 North Main St	Paris	75460	+19037399990	https://restaurants.subway.com/united-states/tx/paris/2650-north-main-st	Subway	0.97
-f56abadb337b	Subway	restaurant	sandwich shop	33.10611	-95.59567	1750 S Broadway St	Sulphur Springs	75482	+19038853054	https://restaurants.subway.com/united-states/tx/sulphur-springs/1750-s-broadway	Subway	0.98
 1b63c9915731	Supper's Ready	restaurant		33.37387	-95.68738	151 E Dallas Ave	Cooper	75432		http://suppersreadytx.weebly.com		0.92
 a17b10c52db7	Sushi Guy	restaurant	sushi restaurant	33.13778	-95.60195	209 Main St	Sulphur Springs	75482	+18885001337	https://sushiguyco.com		0.92
 9977a099f5ce	Sweet Home Texas Eatery	restaurant	american restaurant	33.19089	-95.22043	100 Houston St N	Mt Vernon	75457	+19032702134			0.95
@@ -1037,8 +1003,6 @@ e529ff3b626b	Torres Mochas	restaurant	mexican restaurant	33.66139	-95.53584	1955
 dcc8437e3356	TTaMolly's of Paris	restaurant	texmex restaurant	33.67575	-95.52530	2835 NE Loop 286	Paris	75460	+19037844706	http://www.tamollys.com/		0.99
 2967c69a1166	Two Senontas Office	restaurant	mexican restaurant	33.17125	-95.00156	2001 W Ferguson Rd Ste 1020	Mount Pleasant	75455	+19035722247	http://www.twosenoritasrestaurant.com		0.77
 c0c83ae463ea	Two Senoritas	restaurant	mexican restaurant	33.17126	-95.00156	2601 W Ferguson Rd	Mt Pleasant	75455	+19035725057	http://www.twosenoritastx.com/		0.97
-4ee3b2d85004	Vaughan's Catfish On The Lake	restaurant	seafood restaurant	33.04423	-95.10639	741 County Road 2920	Pittsburg	75686	+19035723474			0.85
-53912a31e951	Vaughan's Catfish On The Lake	restaurant	seafood restaurant	33.05621	-95.11386	741 County Road 2920	Pittsburg	75686	+19035723474			0.92
 780d8bd2320f	Vaughan's Catfish On the Lake	restaurant	seafood restaurant	33.05202	-95.11526	741 County Road 2920	Pittsburg	75686	+19035723474	https://vaughanscatfishonthelaketx.com/		0.96
 e22c485bb9bd	Villa Del Mar	restaurant		33.11760	-95.59077	326 Industrial Dr E	Sulphur Springs	75482	+19035581301			0.97
 832624bf609f	Walton’s Family Restaurant	restaurant	american restaurant	33.25046	-95.89888	1113 Main St	Commerce	75428	+19038866080	https://www.doordash.com/store/mckay's-country-kitchen-commerce-31193767/44404957		0.98
@@ -1048,10 +1012,8 @@ c3952011a4dd	White Oak Buffet	restaurant	buffet restaurant	33.17945	-95.49400	23
 782b79ab7f39	White Oak City Limits	restaurant	southern american restaurant	33.13772	-95.60332	307 Main St	Sulphur Springs	75482	+19035581034	https://order.toasttab.com/online/white-oak-city-limits-307-main-st/item-fried-okra_b702b0df-a1b8-42c2-96ef-b890bf63a8b4		0.92
 f70ed38af7e2	Windom Feed Sack	restaurant	buffet restaurant	33.56461	-95.99818	414 Main	Windom	75492	+19036233013	http://windomfeedsack.com/		0.96
 59e4a03ee98e	Winfield Cafe	restaurant		33.16214	-95.11140	105 E 7	Winfield	75493	+19035242600	http://www.hanatravelplaza.com		0.96
-81dc768d117b	Wingstop	restaurant	chicken restaurant	33.10958	-95.59637	1602 S Broadway St Ste B	Sulphur Springs	75482	+19033358431	https://www.wingstop.com/location/wingstop-1763-sulphur-springs-tx-75482/menu?y_source=1_NTUyMDcxNjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
 70d1b4f23c43	Yugo Fusion Sushi	restaurant	sushi restaurant	33.66220	-95.55863		Paris		+19035172692			0.57
 d127616c3327	Yummies & Cravings Fish Fry	restaurant	seafood restaurant	33.23653	-95.89135	704 Culver St	Commerce	75428	+19036694748			0.98
-a66057729d52	AccentCare Personal Care Services	senior	assisted living facility	33.67648	-95.52790	2600 Lamar Ave Ste A	Paris	75460	+19037830489	https://pcs.accentcare.com/paris		0.85
 f8bcea98e8a6	AccentCare Personal Care Services	senior	assisted living facility	33.66108	-95.52808	2600 Lamar Ave Ste A	Paris	75460	+19037830489	https://pcs.accentcare.com/paris		0.92
 4bb1d714d074	Atlanta Nursing Homes Inc	senior	assisted living facility	33.18957	-95.22209	110 Dallas St W	Mt Vernon	75457	+19035374116			0.65
 e572021337ca	Avir at Clarksville	senior	retirement home	33.60301	-95.04482	300 E Baker St	Clarksville	75426	+19034272236	http://www.ahstexas.com/clarksville	Avir at Bowie	0.98
@@ -1072,7 +1034,6 @@ bc50c7d45b57	Eiffel Healthcare	senior	assisted living facility	33.65663	-95.5491
 063b8e439f64	ETAMU Residential Living & Learning	senior	retirement home	33.24500	-95.90000		Commerce		+19038865797	https://www.etamu.edu/residential-living-learning/		0.62
 3d67309d673a	Golden Acres Retirement Community	senior	retirement home	33.64761	-95.51224	3414 Clarksville St	Paris	75460	+19037392739	http://gaseed.com		0.92
 b809baee684a	Golden Villa Nursing Home	senior	retirement home	33.17831	-95.23354	412 S State Highway 37	Mt Vernon	75457	+19035374116			0.58
-24bc6847a2d8	Honey Grove Nursing Center	senior	retirement home	33.58465	-95.89680	1303 E Main St	Honey Grove	75446	+19033782293	https://www.honeygrovenursing.com/		0.92
 cea2618595f5	Hopkins Court	senior	retirement home	33.12508	-95.61445	890 Camp St	Sulphur Springs	75482	+19034594192	https://cimaseniorliving.com/hopkins-court/		0.97
 dd67f175b099	Hopkins Place	senior	assisted living facility	33.12468	-95.61447	890 Camp St	Sulphur Springs	75482	+19033072027	http://www.enlivant.com/communities/texas/hopkins-place-sulphur-springs		0.92
 95981fa54016	Legend Healthcare and Rehabilitation	senior	retirement home	33.65661	-95.54909	520 8th St SE	Paris	75460	+19037379820	https://legendhealthcareparis.com/		1.00

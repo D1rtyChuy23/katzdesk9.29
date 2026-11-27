@@ -43,7 +43,6 @@ c28044973084	Panaderia y tortilleria diariamente	bakery		31.79295	-94.17091	812 
 4e8c3222af1f	Real Time Breads	bakery		31.33800	-94.72850	115 E Shepherd Ave	Lufkin	75901	+19368995634			0.98
 6e515be13a60	Sam's Club Bakery	bakery		31.30149	-94.73166	407 N Brentwood Dr	Lufkin	75904	+19366391709	https://www.samsclub.com/club/6202	Sam's Club	0.97
 1f908385631d	Shipley Do-Nuts	bakery	donut shop	31.62970	-94.65257	2829 North St	Nacogdoches	75965	+19362053045	http://shipleydonuts.com/locations/fc6170		0.95
-756e1668a36d	Shipley Do-Nuts	bakery	donut shop	31.61530	-94.63983	2829 North St	Nacogdoches	75965	+19362053045	https://shipleydonuts.com/locations/fc6170		0.85
 d7b91278caa3	Shipley Do-Nuts	bakery	donut shop	31.32999	-94.72247	502 E Denman Ave	Lufkin	75901	+19366327484	https://shipleydonuts.com		0.77
 a5b0740f7050	Shipley Donuts	bakery	donut shop	31.33068	-94.72253	609 S Timberland Dr	Lufkin	75901	+19362382602	http://shipleydonuts.com/	Shipley Do-Nuts	0.95
 9c50a41a8f8c	The Donut Express	bakery	donut shop	31.60087	-94.62010	624 NE Stallings Dr	Nacogdoches	75961	+19367159088	http://the-donut-express.lany.io		0.96
@@ -83,7 +82,6 @@ abb29d55ba46	Sages Vintage	bar	winery	31.72676	-94.63383	1404 FM2864	Nacogdoches
 c7d5ebaffe5e	South First Bar & Grill	bar		31.33842	-94.72929	118 S 1st St	Lufkin	75901	+19362849464			0.99
 9be5114fe677	Sports Shack Bar and Grill	bar	sports bar	31.64756	-94.65540	4601 North St	Nacogdoches	75965	+19362054282	http://diningoption.com/SportsShackBarandGrill		1.00
 6d2ade4d3112	Steel Horse Saloon	bar		31.25501	-94.94239	18567 TX-94	Apple Springs	75926	+19368312332			0.96
-36aa9a82a7d8	Texas Wild Child's Icehouse	bar		31.21860	-94.99187	22711 TX HWY 94 WEST	Apple Springs	22711	+19364040422			0.97
 f4801c159e62	Texas Wild Child's Icehouse	bar		31.16311	-94.98869	94 Best Rd	Apple Springs	75926	+19364040422			0.70
 a2f29202ea81	The Foxxhole House	bar	sports bar	31.90846	-94.39734	912 N 2nd St	Timpson	75975	+19362542800	http://thefoxxholehouse.net/		0.96
 1211e702aea0	The Rusty Spur Winery & Bistro	bar	winery	31.60420	-94.65238	405 E Hospital St	Nacogdoches	75961	+19363053068	https://www.therustyspurwinery.com		0.92
@@ -127,7 +125,6 @@ c7b64941ef1c	Honda	cardealer		31.32353	-94.69311	1701 S Medford Dr	Lufkin	75901	
 b1980b1de530	Hyundai	cardealer		31.31610	-94.70598	3101 S. Medford Drive	Lufkin	75901	+19366301200	https://www.hyundaioflufkin.com/	Hyundai	0.97
 37673db2b2fe	J & D Auto Sales	cardealer		31.35555	-94.74942	2200 N Raguet St	Lufkin	75904	+19366395208	http://www.drautosalesaz.com		0.55
 3849f5500c0b	J & H Auto Sales	cardealer	used auto dealer	31.33180	-94.72462	401 E Denman Ave	Lufkin	75901	+19366328608	car-lote.ueniweb.com		0.75
-b04d1723b679	J C Auto Sales	cardealer		31.55864	-94.66888	182 31st St	Nacogdoches	75964	+19367150077			0.60
 ba803fead005	J C Auto Sales	cardealer		31.55829	-94.66987	182 31st St	Nacogdoches	75964	+19367150077			0.62
 83f6358ffe44	Jacob Auto Sales	cardealer		31.49361	-94.71574	7784 S US Highway 59	Nacogdoches	75964	+19367158607	http://jacobautosales.com		0.99
 8023d8dd9fa0	Jc Truck & Auto Center LLC	cardealer		31.62182	-94.68447	2101 NW Stallings Dr St	Nacogdoches	75964	+19362590546	http://www.jctrucknautocenter.com/		0.92
@@ -157,7 +154,6 @@ a7cd54a697d7	Pmc Auto Group	cardealer		31.34754	-94.72063	905 N Timberland Dr # 
 bba9b104d55b	Raceway Motors	cardealer	used auto dealer	31.31723	-94.72757	1623 S 1st St	Lufkin	75901	+19366395511	http://www.racewaymotors.net/		0.99
 e73aac07ef90	Randall Performance Automotive	cardealer		31.60934	-94.67731	1917 Douglass Rd	Nacogdoches	75964	+19362500282			0.92
 98db34666c75	Randy Davis -TCCB	cardealer		31.31590	-94.70596	3101 S Medford Dr	Lufkin	75901	+19366301200	http://www.hyundaioflufkin.com/		0.92
-fab04a78ea3a	Randy Davis -TCCB	cardealer		31.31636	-94.70590	3101 S Medford Dr	Lufkin	75901	+19366301200	http://www.hyundaioflufkin.com/		0.90
 a79d908490e7	Ray Jones Chevrolet	cardealer		31.81411	-94.19721	1727 Tenaha St	Center	75935	+18774538689	http://www.rayjoneschevy.com/	Chevrolet	0.92
 e7df4a1048dd	Ray Neil's Auto Sales, Inc	cardealer	used auto dealer	31.52209	-94.12655	695 S El Camino Xing	San Augustine	75972	+19362752592			0.95
 d88e0cd82d4b	Raymond Buick GMC	cardealer		31.79278	-94.18168	301 San Augustine St	Center	75935	+19365985654	http://www.driveraymond.com/	GMC	1.00
@@ -187,11 +183,9 @@ e0a85c9f20b0	West Flips Whips	cardealer		31.79266	-94.18153	301 San Augustine St
 b46ffca566da	World Class Autos	cardealer		31.57520	-94.65785	1216 SE Stallings Dr	Nacogdoches	75964	+19365696467	https://www.worldclassautomotiveoperations.com		0.55
 c9ead045ff0c	Wright Chrysler Dodge Jeep Ram	cardealer		31.81611	-94.19724	1858 Tenaha St	Center	75935	+19365988433	http://www.wrightchryslerdodgejeep.com	Chrysler	0.97
 c287fe5adf4f	Yates Auto Sales & Consulting	cardealer	used auto dealer	31.60662	-94.64238	635 N University Dr	Nacogdoches	75961				0.82
-19e7db315e91	Your Home Town Car Guy Abel At Southern CDJR	cardealer		31.31600	-94.70350	2711 S Medford Dr	Lufkin	75901	+19366357919	https://www.southernchryslerdodgejeep.net/		0.86
 a8fb99cacbda	Your Home Town Car Guy Abel At Southern CDJR	cardealer		31.31623	-94.70345	2711 S Medford Dr	Lufkin	75901	+19366357919	https://www.southernchryslerdodgejeep.net/		0.87
 644cc6488c3c	Amc Classic Nacogdoches 6	cinema		31.63928	-94.65491	3801 North St	Nacogdoches	75965	+19365602963	https://www.amctheatres.com		0.95
 5a382be91e36	AMC Lufkin 9	cinema		31.31287	-94.72486	4600 S. Medford Lufkin Mall	Lufkin	75901	+19366373714	https://www.amctheatres.com/	AMC Theatres	1.00
-a889d682ff5a	Carmike Cinema 12	cinema		31.31282	-94.71815		Lufkin			https://www.carmike.com/tx/mall-9-lufkin-tx		0.71
 cc49d4a0bb1c	Carmike Cinema 12	cinema		31.31323	-94.72446		Lufkin			https://www.carmike.com/tx/mall-9-lufkin-tx		0.75
 5b87f40d06d8	Carmike Cinemas	cinema		31.63890	-94.65506	3800 North St	Nacogdoches	75965	+19365602962			0.92
 385c61fd4e7e	Carmike Cinemas Lufkin Mall	cinema		31.31359	-94.72428	4600 S Medford Dr	Lufkin	75901	+19366373714	www.Carmike.com		0.66
@@ -235,7 +229,6 @@ c880a98c52a4	HTeaO	coffee		31.32247	-94.72816	1410 S. First St.	Lufkin	75901		ht
 1f40e0b47015	Java Jacks Coffee House	coffee		31.61331	-94.65279	1122 North St	Nacogdoches	75961	+19365603975	http://ungenius.com/	Java Jack's Coffee House	0.98
 eaf512e490ab	Java Jacks Coffee House	coffee		31.32055	-94.75506	1102 S John Redditt Dr	Lufkin	75904	+19366342922		Java Jack's Coffee House	0.99
 7b59073ca672	Kay’s Coffeehouse & Cafe	coffee		31.19244	-94.77827	291 Lumberjack Dr	Diboll	75941	+19368290004			0.76
-ba7629cf055c	King's Soul Food Cafe	coffee		31.67059	-94.36479	13337 TX-7	Center	75935	+19362802256			0.94
 ed3cbd76d64f	King's Soul Food Cafe	coffee		31.64435	-94.40782	13337 TX-7	Center	75935	+19362802256			0.94
 1f40d0f00f14	La Biblioteca Coffee	coffee		31.60365	-94.65157	138 N Mound St	Nacogdoches	75961	+19362440578			0.92
 ec1259d1e226	MJ’s Coffee	coffee		31.18540	-94.78143	200 N Temple Dr	Diboll	75941	+19365858800	http://www.mjscafe.org/		1.00
@@ -262,7 +255,6 @@ be85ea02ad12	The Thirsty Heifer	coffee		31.79336	-94.18965	411 Hurst St	Center	7
 0373d038f325	Thumpers Christian Books And Gifts	coffee		31.64701	-94.65540	4515 North St	Nacogdoches	75965	+19367207007			0.55
 e397eaff0fa5	Total Energy Nutrition	coffee		31.58447	-94.66888	2400 South St	Nacogdoches	75964	+19366152934			0.92
 74d6d41eaabb	Travelin' Tom's Coffee of Lufkin/Nacogdoches	coffee		31.22230	-94.97732	15283 N State Highway 94	Apple Springs	75926	+19362190693	https://travelintomscoffee.com/local-site/travelin-toms-coffee-of-lufkin-nacogdoches/?utm_source=fb&utm_medium=organic&utm_campaign=listing	Travelin' Tom's Coffee	0.57
-49ea036b5f76	Twigs & Twine Tea Room and Gifts	coffee	tea room	31.02198	-94.82366	101 Sandra Ln	Corrigan	75939	+19363980125			0.88
 4c91ec37da8e	Twigs & Twine Tea Room and Gifts	coffee	tea room	31.00046	-94.82633	101 Sandra Ln	Corrigan	75939	+19363980125			0.89
 8d8232ab03a2	University Coffee	coffee		31.62699	-94.65259	2611 North St	Nacogdoches	75965	+19363055014	http://www.universitycoffee.org/		0.92
 ac1875db7c1f	What The Fork Cafe	coffee		31.82244	-94.91933	15745 State Highway 204	Reklaw	75788	+19363264344			0.97
@@ -278,7 +270,6 @@ e11b76489fc5	Lucky's	college		31.32877	-94.78152	3385 Ted Trout Dr	Hudson	75904	
 7d40ace6e068	Panola College	college		31.80344	-94.20200	678 Rough Rider Dr	Center	75935	+19036932000	http://www.panola.edu/	Panola College	0.92
 4934ca4ccda3	Panola College - Shelby College Center	college		31.77224	-94.17110	3600 TX-500 Loop	Center	75935	+19365989543	https://panola-college-learning-center.hub.biz	Panola College	0.99
 97332318f692	Rusk Building	college		31.62115	-94.64914	2008 Alumni Dr	Nacogdoches	75965	+19364682504	www.sfasu.edu		0.99
-3e4eec41c118	School of Social Work, Stephen F. Austin State University	college		31.61928	-94.64706	Stephen F Austin State University, 1936 North St	Nacogdoches	75965	+19364685105	http://www2.sfasu.edu/aas/socwk/		0.75
 b423e9893e8c	School of Social Work, Stephen F. Austin State University	college		31.60363	-94.65559	Stephen F Austin State University, 1936 North St	Nacogdoches	75965	+19364685105	http://www2.sfasu.edu/aas/socwk/		0.76
 0e684faed8a5	SFA Agriculture Department	college		31.62074	-94.64427	1924 Wilson Dr	Nacogdoches	75961				0.89
 c6cf3d6baf3f	SFA Alumni Association	college		31.62131	-94.64978	300 Vista Dr	Nacogdoches	75961	+19364683407	https://www.jackshq.com/		0.92
@@ -288,7 +279,6 @@ d646fd0feee0	SFA College of Health Professions Advising Center	college		31.62314
 46de0a7def02	SFA Horticulture	college		31.62069	-94.64404	1924 Wilson Dr	Nacogdoches	75961		http://www.horticultureisawesome.com/		0.68
 393ec7f670b4	SFA Intramural Fields	college		31.61762	-94.64456	1817 Wilson Dr	Nacogdoches	75961	+19364683507	http://www.sfasu.edu/campusrec/147.asp		0.92
 8755c5ea32ef	SFA Office of Student Engagement	college		31.62082	-94.64986	222 Vista Dr	Nacogdoches	75961	+19364683703	https://linktr.ee/jacksgetinvolved		0.68
-d5da9d76e68a	SFA Office of Student Engagement	college		31.62059	-94.65002	222 Vista Dr	Nacogdoches	75961	+19364683703	https://linktr.ee/jacksgetinvolved		0.65
 b2e5ddf26ac8	SFA Poultry Science	college		31.62059	-94.64429	1972 Wilson Drive, Nacogdoches , 75961, United States	Nacogdoches	79561	+19364683301	http://ag.sfasu.edu		0.77
 cf62bb257b2c	SFA School of Human Sciences	college		31.61735	-94.64752	615 Home Economics Dr	Nacogdoches	75961	+19364684502	http://www.sfasu.edu/hms		0.96
 de5618095be2	SFA School of Nursing	college		31.65781	-94.65948	5707 North St	Nacogdoches	75965	+19364687700	http://www.nursing.sfasu.edu/nursing		0.92
@@ -397,7 +387,6 @@ ca7e9e311c4c	Cushing Food Mart	convenience		31.81756	-94.83459	230 Cypress Ave	C
 b7ecf76921ad	Diamond Shamrock	convenience		31.58365	-94.60520	5000 E Main St	Nacogdoches	75961	+19364621990			0.74
 9fbd696ae2b8	Donut Plus	convenience		31.64699	-94.65445	4512 North University Dr.	Nacogdoches	75965	+19365642916	http://exxonmobil.com		0.77
 3ff9d1e433f9	E-Z Mart	convenience		31.81537	-94.19736	1822 Tenaha St	Center	75935	+18444001035	http://e-zmart.com		0.92
-b00fc4ee93b5	E-z Mart	convenience		31.81527	-94.19672	1822 Tenaha St	Center	75935	+19365986305	https://www.gpminvestments.com		0.65
 de7c65121767	Etoile Country Store	convenience		31.37488	-94.43147	2448 TX-103	Etoile	75944	+19368542320			0.92
 859fc1b499f1	EVRRIZE FUEL – VAL BRD TX	convenience		31.57260	-94.67361	3505 South Street	Nacogdoches	75964		https://locations.valero.com/en-us/LocationDetails/Index/3505-SOUTH-STREET/0000027889	Valero	0.80
 07ff82036c35	Exxon	convenience		31.34000	-94.73495	612 W Frank Ave	Lufkin	75904		https://www.exxon.com/en/find-station/exxon-lufkin-tx-midway30-200328140?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
@@ -467,7 +456,6 @@ e06bd65864a5	MIDWAY #30	convenience		31.34001	-94.73496	612 W FRANK AVE	Lufkin	7
 749b4e01b8bf	Morgan Oil Company	convenience		31.60516	-94.65862	428 W Main St	Nacogdoches	75961	+19365601333			0.65
 3cc755d331af	Murphy Express	convenience		31.64604	-94.65397	4422 North St	Nacogdoches	75965	+19365597834	http://www.murphyusa.com/		1.00
 c3af2114fc1d	Murphy Express	convenience		31.33451	-94.71987	204 S Timberland Dr	Lufkin	75901			Murphy Express	0.80
-226eee958c30	Murphy USA	convenience		31.29955	-94.72910	2500-B Daniel McCall Dr	Lufkin	75904			Murphy USA	0.80
 7e698c8d8547	Murphy USA	convenience		31.80036	-94.19314	250 Rough Rider Dr	Center	75935	+19365982818	http://www.murphyusa.com	Murphy USA	0.92
 aa2ddadcbff3	Murphy USA	convenience		31.29776	-94.72797	2500-B Daniel McCall Dr	Lufkin	75904	+19366399419	http://www.murphyusa.com/	Murphy USA	1.00
 ab634d4bdf52	Murphy USA	convenience		31.33448	-94.71996	204 S Timberland Dr	Lufkin	75901	+19362201174	http://www.murphyusa.com/		0.92
@@ -497,7 +485,6 @@ c4d7292d8871	QUICK STOP TRAVEL CENTER	convenience		31.90590	-94.39900	674 N 1ST 
 c9da4e19d559	QUICK TIME	convenience		31.53200	-94.12621	1007 W Highway 21	San Augustine	75972		https://locations.valero.com/en-us/LocationDetails/Index/1007-W-HIGHWAY-21/0000013935	Valero	0.80
 d740a0df5f0b	Rayburn Superette	convenience		31.02986	-94.17309	13013 TX-63 W	Jasper	75951	+14093845958	http://www.visitlakesamrayburn.com		0.92
 d02a3fdaa239	Roady's	convenience		31.94609	-94.23933	498 N George Bowers Dr	Tenaha	75974	+19362484008	http://www.exxonstations.com/home.asp?stationsap=00605		0.92
-d98d5a033afa	Roady's	convenience		31.21822	-94.77433		Diboll	75941	+19368299324			0.92
 2a125b5f0bc7	Roquemore Oil & Gas Leases	convenience		31.32472	-94.75487	901 S John Redditt Dr	Lufkin	75904	+19366376916			0.92
 569e2bc97901	Rosevine Country Store	convenience		31.40653	-94.05226	8205 State Highway 103 E	Bronson	75930	+19362016325			0.94
 1ddf6d2a6eca	Rudy's	convenience		31.91744	-94.68057	Mount Enterprise	Mt Enterprise	75681	+19038224036			0.68
@@ -521,7 +508,6 @@ e7cddeda252e	Shell	convenience		31.81532	-94.19743	1822 Tenaha St	Center	75935	+
 d62a8368bd71	Stripes	convenience		31.91745	-94.68080	104 S Railroad Ave	Mt Enterprise	75681	+19038224036	https://stripesstores.com/		0.99
 1990f7bc907c	Sunoco	convenience		31.56286	-94.67980	4712 South St	Nacogdoches	75964	+19365641626	https://www.sunoco.com/locations/store/4712-south-st-nacogdoches-tx-0714528700		0.97
 6682d026486f	Sunoco	convenience		31.44883	-94.86305	10951 US 69	Pollok	75969		https://www.sunoco.com/locations/store/10951-us-69-pollok-tx-8003046601	Sunoco	0.80
-adde6b063f9c	Sunoco	convenience		31.56289	-94.67999	4712 South St	Nacogdoches	75964	+19365641626	https://www.sunoco.com		0.94
 b84bf1a8dbb1	Sunoco	convenience		31.33420	-94.71902	203 South Timberland Drive	Lufkin	75901	+14092009102	https://www.sunoco.com/locations/store/203-s-timberland-dr-lufkin-tx-0044439801		1.00
 e1c7a65b8de7	Sunshine #2 Texaco	convenience		31.53110	-94.11591		San Augustine		+19362755455			0.60
 37e78359bf2b	Sunshine Jocstop	convenience		31.54515	-94.12772	103 US Highway 96 N	San Augustine	75972	+19362751997	http://www.exxonmobilstations.com/14643-sun-shine-san-augustine-san-augustine		0.88
@@ -568,7 +554,9 @@ d6db78e6c17e	Arby's - CLOSED	fastfood		31.57334	-94.67447	3512 A South Street	Na
 16c5ead27dd8	Batch Breads and Bar	fastfood		31.41235	-94.71118	157 Mulberry Street	Lufkin	75901				0.64
 93efa6354d57	Bernhards indian grill	fastfood		31.30564	-94.77301	827 Mulberry Street	Lufkin	75901		https://bernhardsindiaangrill.tumblr.com/		0.89
 f3f065d1f398	Bigs 3817	fastfood		31.35605	-94.68330	3122 E Atkinson Dr	Lufkin	75901				0.63
+2037e2c562da	Burger King	fastfood	burger restaurant	31.33370	-94.71958	209 S. Timberland Drive	Lufkin	75901	+19366343035	https://burgerking.com/store-locator/store/2151	Burger King	0.97
 2de763ea1422	Burger King	fastfood		31.57042	-94.67491	3819 South Street	Nacogdoches	75964	+19365643730	https://burgerking.com/store-locator/store/16906	Burger King	0.98
+71e5164c36a4	Burger King	fastfood	burger restaurant	31.29627	-94.72893	2402 S First St	Lufkin	75901	+19366329718	https://burgerking.com/store-locator/store/15787	Burger King	0.98
 d82ec22db4e9	Burger King	fastfood		31.63055	-94.65294	2921 North St	Nacogdoches	75965	+19365601012	https://burgerking.com/store-locator/store/2110	Burger King	0.98
 9a2c837e398e	Cafe Krossover	fastfood		31.90504	-94.39706	140 Park Plz	Timpson	75975	+19362549888			0.71
 93674cf9390a	CASA OLE	fastfood		31.30982	-94.72560	2015 S 1st St	Lufkin	75901	+19366322653			0.99
@@ -580,19 +568,24 @@ a8410863b7eb	Charleys Cheesesteaks	fastfood		31.00377	-94.82597	619 N Home St	Co
 5eee55b87a62	Chick-fil-A	fastfood		31.31031	-94.72436	4605 S Medford Dr	Lufkin	75901	+19366342237	https://www.chick-fil-a.com/locations/tx/south-loop-crossing?utm_source=yext&utm_medium=link	Chick-fil-A	0.98
 8e3b3d0a4764	Chick-fil-A	fastfood		31.62078	-94.65000	Vista Dr Rm 109	Nacogdoches	75962	+19364685208	http://www.chick-fil-a.com/stephenfaustin		0.98
 f6116c55cd77	Chick-fil-A	fastfood		31.64653	-94.65574	4501 North St	Nacogdoches	75965	+19364628681	http://www.chick-fil-a.com/nac	Chick-fil-A	1.00
+3656c36f0cde	Chicken Express	fastfood	chicken restaurant	31.57515	-94.65996	1102 SE Stallings Dr	Nacogdoches	75964	+19364621442	http://chickene.com/		0.92
 6af3ae2cccd5	Chicken Express	fastfood		31.61715	-94.63908	1614 N University Dr	Nacogdoches	75961	+19365590077	http://www.chickenexpress.us/	Chicken Express	0.99
 9f24c4924ec8	Chicken Express	fastfood		31.79985	-94.18471	323 Tenaha St	Center	75935	+19365989100	https://www.chickene.com	Chicken Express	0.92
 a5b34f63090c	Chicken Express	fastfood		31.31406	-94.71445	3711 S Medford Dr	Lufkin	75901	+19366370070	http://www.chickenexpress.us		0.99
+b2cea56f861b	Chipotle Mexican Grill	fastfood	mexican restaurant	31.62315	-94.65253	2111 North St	Nacogdoches	75965	+19365595393	https://locations.chipotle.com/tx/nacogdoches/2111-north-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	1.00
 ea91ccc8d6d2	Chipotle Mexican Grill	fastfood		31.31147	-94.72143	1813 Tulane Dr	Lufkin	75901	+19366391000	https://www.chipotle.com/		0.92
 771939f7ebda	Church's Texas Chicken	fastfood		31.18649	-94.78138	208 N. Temple Drive	Diboll	75941	+19368294464	https://locations.churchs.com/tx/diboll/208-n.-temple-drive	Church's Chicken	0.96
 aa475a591b48	Church's Texas Chicken	fastfood		31.33578	-94.71774	101 S. Timberland Drive	Lufkin	75901	+19366327097	https://locations.churchs.com/tx/lufkin/101-s.-timberland-drive	Church's Chicken	0.99
 1bf7de552b60	Dairy Queen	fastfood		31.33459	-94.76121	301 N John Redditt Dr 301 N John Redditt Dr	Lufkin	75904	+19366399635	http://www.dairyqueen.com/	Dairy Queen	0.92
 d5cabb445e42	Dairy Queen	fastfood		31.80095	-94.18536	401 Tenaha St 401 Tenaha St	Center	75935	+19365985207	https://www.dairyqueen.com/en-us/locations/tx/center/401-tenaha-st/13907/?y_source=1_MjkzMzkzMTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 621c4d416f8d	Damita Jo's	fastfood		31.61687	-94.65388	1513 North St	Nacogdoches	75965	+19365000114			0.96
+67dca2fab1bb	Domino's	fastfood	pizza restaurant	31.62506	-94.65250	2403 North St.	Nacogdoches	75961	+19365692121	https://pizza.dominos.com/texas/nacogdoches/75965/2403-north-st/	Domino's Pizza	0.98
+cc62569bd177	Domino's	fastfood	pizza restaurant	31.31983	-94.72755	1521 S First Street	Lufkin	75901	+19366345600	http://dominos.com/	Domino's Pizza	0.98
 d81435a0139a	DQ Grill & Chill	fastfood		31.80098	-94.18528	401 Tenaha St	Center	75935		https://www.dairyqueen.com/en-us/locations/tx/center/401-tenaha-st/3680	DQ Grill & Chill	0.80
 69dec916b483	El Taco Riendo	fastfood		31.72678	-94.67816	163 CR-816	Nacogdoches	75964	+19366154311			0.86
 a543f5d26fcf	FireEngine.Pizza	fastfood		31.18088	-94.48244	18400 FM-1818	Huntington	75949	+18326434739	http://www.fireengine.pizza/		0.67
-e7eb366678dd	FireEngine.Pizza	fastfood		31.18088	-94.48245	18400 FM-1818	Huntington	75949	+18326434739	http://www.fireengine.pizza/		0.67
+eb694bcd9441	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	31.63885	-94.65324	3720 North St	Nacogdoches	75965	+19362253203	https://www.freddys.com/location/nacogdoches?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
+fd79bbf7625c	Freddy's Frozen Custard & Steakburgers	fastfood	american restaurant	31.31261	-94.71835	4103 S Medford Dr	Lufkin	75901	+19362253203	https://www.freddys.com/location/lufkin?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 f5ab8d783c2d	Golden Chick	fastfood		31.48932	-94.94096	3113 N E 2nd St.	Mineral Wells	78664	+19403252974	http://locations.goldenchick.com/tx/mineral-wells/1031/		0.85
 e4224aa87084	Great American Cookies	fastfood		31.31064	-94.72179	1817 Tulane Drive	Lufkin	75901		https://ordernew.greatamericancookies.com/gac/1817-tulane-drive-lufkin-tx-75901	Great American Cookies	0.80
 19a5f762c2e2	Jack in the Box	fastfood		31.18853	-94.78099	400 N Temple Dr	Diboll	75941	+19368293344	https://www.jackinthebox.com		0.95
@@ -604,21 +597,41 @@ e6f48ddaa338	Jimmy John's	fastfood		31.62226	-94.65291	2023 North St	Nacogdoches
 cfb9148b2550	KFC	fastfood		31.81119	-94.19431	1502 Tenaha	Center	75935	+19365983909	https://locations.kfc.com/tx/center/1502-tenaha	KFC	1.00
 3d38992d91a9	Krispy Krunchy Chicken	fastfood		31.57256	-94.67358	3505 South St	Nacogdoches	75964	+19365599551	https://locations.krispykrunchy.com/tx/nacogdoches/3505-south-st	Krispy Krunchy Chicken	0.79
 a79b0e74e10d	Krispy Krunchy Chicken	fastfood		31.27506	-94.57262	461 South U.S. 69	Huntington	75949		https://locations.krispykrunchy.com/tx/huntington/461-south-u.s.-69	Krispy Krunchy Chicken	0.80
+43072501bbf6	Little Caesars Pizza	fastfood	pizza restaurant	31.33686	-94.72008	107 N Chestnut St	Lufkin	75901	+19366396677	https://littlecaesars.com/en-us/store/10283	Little Caesars	0.99
+511309761658	Little Caesars Pizza	fastfood	pizza restaurant	31.29847	-94.72948	103 N Brentwood Dr	Lufkin	75901	+19366320660	https://littlecaesars.com/en-us/store/12488	Little Caesars	0.96
+92a463d82da0	Little Caesars Pizza	fastfood	pizza restaurant	31.80513	-94.19105	854 Hurst St	Center	75935	+19364275170	https://littlecaesars.com/en-us/store/11426	Little Caesars	1.00
+952d3c86dc4c	Little Caesars Pizza	fastfood	pizza restaurant	31.61629	-94.65234	1500 North St	Nacogdoches	75965	+19365645339	https://littlecaesars.com/en-us/store/7656	Little Caesars	0.99
+d25150bfbb19	Little Caesars Pizza	fastfood	pizza restaurant	31.32124	-94.75520	1034 S John Redditt Dr	Lufkin	75904	+19366396655	https://littlecaesars.com/en-us/store/3523	Little Caesars	0.99
 0944b9d3a39a	Los Jarritos	fastfood		31.81717	-94.19878	181 US Highway 96 N	Center	75935	+19364272244			0.81
 05ffaa7939cd	Lot 402, Llc	fastfood		31.31839	-94.69756	2001 E Denman Ave	Lufkin	75901	+14027509995			0.76
 fd51bd08a85c	Mark Henry's	fastfood		31.52769	-94.09832	1010 TX-21	San Augustine	75972	+19362751105			0.89
 1ff0f9b6cf9c	McDonald's	fastfood		31.28852	-94.72931	3301 S 1st St	Lufkin	75901	+19366393633	https://www.mcdonalds.com/us/en-us/location/tx/lufkin/3301-s-1st-st/7962.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 20f1026195d7	McDonald's	fastfood		31.33163	-94.75958	110 South John Redditt Drive	Lufkin	75904	+19366327502	https://www.mcdonalds.com/us/en-us/location/tx/lufkin/110-south-john-redditt-drive/36593.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 5cb603913378	McDonald's	fastfood		31.61829	-94.65307	1717 North St	Nacogdoches	75961	+19365690792	https://www.mcdonalds.com/us/en-us/location/tx/nacogdoches/1717-north-st/4681.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+6cc24c2da84c	McDonald's	fastfood	burger restaurant	31.53447	-94.12656	209 North El Camino Crossing	San Augustine	75972	+19362880813	https://www.mcdonalds.com/us/en-us/location/tx/san-augustine/209-north-el-camino-crossing/36840.html?cid=RF:YXT:RoN::Clicks		0.97
 a7d7dbca174f	McDonald's	fastfood		31.80243	-94.19175	812 Hurst Street	Center	75935	+19365910400	https://www.mcdonalds.com/us/en-us/location/tx/center/812-hurst-street/31394.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 bf5346c8bcd0	McDonald's	fastfood		31.32519	-94.72679	1118 S Timberland Dr	Lufkin	75901	+19366347800	https://www.mcdonalds.com/us/en-us/location/tx/lufkin/1118-s-timberland-dr/3611.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+c85cd15c51d0	McDonald's	fastfood	burger restaurant	31.64958	-94.65279	4801 North St	Nacogdoches	75961	+19365699889	https://www.mcdonalds.com/us/en-us/location/tx/nacogdoches/4801-north-st/14773.html?cid=RF:YXT:RoN::Clicks		0.92
 c923a4b9ccba	McDonald's	fastfood		31.63272	-94.63972	3120 University Dr	Nacogdoches	75961	+19365602641	https://www.mcdonalds.com/us/en-us/location/tx/nacogdoches/3120-university-dr/18082.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+e5ea0f55aa7e	McDonald's	fastfood	burger restaurant	31.30027	-94.73106	2500 Daniel McCall Dr	Lufkin	75904	+19366348488	https://www.mcdonalds.com/us/en-us/location/tx/lufkin/2500-daniel-mccall-dr/30571.html?cid=RF:YXT:RoN::Clicks		0.92
 999b478c1d5a	Newk's Nacogdoch	fastfood		31.69586	-94.67377	114 N Village Ln	Nacogdoches	75964				0.82
+2bfe73cf9afd	Panda Express	fastfood	chinese restaurant	31.61722	-94.65251	1602 North Street	Nacogdoches	75965	+19364628808	http://www.pandaexpress.com/		0.96
+44fdd7fe392b	Panda Express	fastfood	chinese restaurant	31.30211	-94.72779	2134 S 1st St	Lufkin	75904	+19366326991	http://www.pandaexpress.com/		0.98
 8c6569b9dbc6	Panda Express	fastfood		31.35591	-94.71958	2134 N 1st St	Lufkin	75904	+19366326991	https://www.pandaexpress.com/locations/tx/lufkin/2292		0.85
+45a063567086	Panda Express Chinese Restaurant	fastfood	chinese restaurant	31.62483	-94.64797		Nacogdoches			http://www.pandaexpress.com/	Panda Express México	0.72
+10de243edfdb	Papa Johns	fastfood	pizza restaurant	31.32505	-94.72737	1205 S 1 St St	Lufkin	75901	+19366346611	https://locations.papajohns.com/united-states/tx/75901/lufkin/1205-s-1st-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+a2d25c0135c8	Papa Johns Pizza	fastfood	pizza restaurant	31.62761	-94.65205	2702 North St	Nacogdoches	75965	+19365597272	https://locations.papajohns.com/united-states/tx/75965/nacogdoches/2702-north-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1MzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+48f9d1fb6247	Pizza Hut	fastfood	pizza restaurant	31.62759	-94.65277	2619 North St	Nacogdoches	75965	+19365697257			0.90
+6d206da47bea	Pizza Hut	fastfood	pizza restaurant	31.31024	-94.72256	4505 S. Medford Drive. Angelina	Lufkin	75901	+19366393939	https://locations.pizzahut.com/tx/lufkin/4505-s-medford-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304231	Pizza Hut	0.99
+9003b3e5339b	Pizza Hut	fastfood	pizza restaurant	31.18500	-94.78169	190 N Temple Dr Angelina	Diboll	75941	+19368299705	https://locations.pizzahut.com/tx/diboll/190-n-temple-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313998	Pizza Hut	0.96
+b21398f29c7c	Pizza Hut	fastfood	pizza restaurant	31.80822	-94.19263	1007 Hurst St Shelby	Center	75935	+19365986303	https://locations.pizzahut.com/tx/center/1007-hurst-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289990	Pizza Hut	0.98
+bf4093339a5b	Pizza Hut	fastfood	pizza restaurant	31.63201	-94.63957	3102 N University Dr Nacogdoches	Nacogdoches	75965	+19365699999	https://locations.pizzahut.com/tx/nacogdoches/3102-n-university-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289048	Pizza Hut	0.98
+c334b28fb82d	Pizza Hut	fastfood	pizza restaurant	31.59061	-94.66582	1632 South St Nacogdoches	Nacogdoches	75964	+19365645400	https://locations.pizzahut.com/tx/nacogdoches/1632-south-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312075	Pizza Hut	0.99
 135ebae16435	Popeyes	fastfood		31.32606	-94.72580	1106 S Timberland Drive	Lufkin	75901	+19366322761	https://locations.popeyes.com/tx/lufkin/1106-s-timberland-drive?utm_source=yext&utm_medium=local_listings_pack&utm_campaign=yext_localsearch&utm_id=yext_localsearch	Popeyes Louisiana Kitchen	0.99
 f3389d1f2bd0	Popeyes	fastfood		31.61657	-94.63985	1519 N University Dr	Nacogdoches	75961	+19365600590	https://www.popeyes.com/store-locator/store/restaurant_82141	Popeyes Louisiana Kitchen	0.99
 ad135d54b8b4	Raising Cane's	fastfood		31.30096	-94.72788	2200 S 1st St	Lufkin	75901	+19366325963	https://locations.raisingcanes.com/tx/lufkin/2200-s-1st-st	Raising Cane's Chicken Fingers	0.96
 aef8cf4288ff	Raising Cane's	fastfood		31.62026	-94.65297	1831 North St	Nacogdoches	75964	+19365691700	https://locations.raisingcanes.com/tx/nacogdoches/1831-north-st	Raising Cane's Chicken Fingers	0.95
+751b5f9f519e	Schlotzsky's	fastfood	sandwich shop	31.31070	-94.72382	4601 S Medford Dr	Lufkin	75901	+19366394900	https://locations.schlotzskys.com/tx/lufkin/4601-south-medford?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
 78a920836510	Schlotzsky's	fastfood		31.62691	-94.65197	2608 North Street	Nacogdoches	75965	+19365642867	https://locations.schlotzskys.com/tx/nacogdoches/2608-north-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner		0.98
 320923a7744e	Sonic Drive In	fastfood		31.27945	-94.58070	407 Highway 69 North	Huntington	75949	+19368762850	https://locations.sonicdrivein.com/tx/huntington/407-highway-69-north.html	Sonic Drive-In	0.97
 34813ae1ae77	Sonic Drive In	fastfood		31.80688	-94.18873	715 Tenaha Street	Center	75935	+19365989110	https://locations.sonicdrivein.com/tx/center/715-tenaha-street.html	Sonic Drive-In	0.98
@@ -627,27 +640,49 @@ a64b58b56f46	Sonic Drive In	fastfood		31.63021	-94.65292	2903 North Street	Nacog
 b6c08fefa8f0	Sonic Drive In	fastfood		31.31489	-94.72755	1805 S First	Lufkin	75901	+19366326006	https://locations.sonicdrivein.com/tx/lufkin/1805-s-first.html	Sonic Drive-In	0.97
 ed913f54f812	Sonic Drive In	fastfood		31.34087	-94.71833	417 N. Timberland Drive	Lufkin	75901	+19366345003	https://locations.sonicdrivein.com/tx/lufkin/417-n.-timberland-drive.html	Sonic Drive-In	0.99
 4b0aa94c18a3	Sonic Drive-In	fastfood		31.57369	-94.67326	3419 South St	Nacogdoches	75964	+19365699639	https://locations.sonicdrivein.com/tx/nacogdoches/3419-south-street.html	Sonic Drive-In	0.92
+5e8bc3084b06	Sonic Drive-In	fastfood	burger restaurant	31.27495	-94.57327	407 Highway 69 N	Huntington	75949	+19368762850	https://locations.sonicdrivein.com/tx/huntington/407-highway-69-north.html		0.85
 889ecefebe36	Sonic Drive-In	fastfood		31.33287	-94.75678	1901 W Frank Ave	Lufkin	75904	+19366349200	https://locations.sonicdrivein.com/tx/lufkin/1901-w.-frank-street.html	Sonic Drive-In	0.99
+15d6904ab4f1	Subway	fastfood	sandwich shop	31.57409	-94.67328	3415 South St	Nacogdoches	75964	+19365642992	https://restaurants.subway.com/united-states/tx/nacogdoches/3415-south-st	Subway	0.95
+199aa2255a4f	Subway	fastfood	sandwich shop	31.70024	-94.67589	9855 US Highway 259	Nacogdoches	75965	+19364621146	https://restaurants.subway.com/united-states/tx/nacogdoches/9855-us-hwy-259	Subway	0.98
 414582e51019	Subway	fastfood		31.22337	-94.96849	15972 Highway 94 W	Apple Springs	75926	+19368313877	https://restaurants.subway.com/united-states/tx/apple-springs/15972-hwy-94-w?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=22956&utm_campaign=evergreen-2020&y_source=1_MTQ5ODQwMTAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+498d46b73801	Subway	fastfood	sandwich shop	31.62840	-94.65285	2721 North St	Nacogdoches	75965	+19365598910	https://www.subway.com		0.98
+63f616b62be2	Subway	fastfood	sandwich shop	31.90444	-94.40215	484 North 1st Street	Timpson	75975	+19362543300	http://www.subway.com/en-us	Subway	0.96
+7104080267a0	Subway	fastfood	sandwich shop	31.33375	-94.75232	1607 W Frank Ave. Suite 101	Lufkin	75904	+19366394111	https://restaurants.subway.com/united-states/tx/lufkin/1607-w-frank-ave	Subway	0.95
+7a28bfda7e6c	Subway	fastfood	sandwich shop	31.53485	-94.12541	210 US-96	San Augustine	75972	+19362885077	http://www.subway.com/	Subway	0.93
+8687303e611c	Subway	fastfood	sandwich shop	31.61093	-94.64082	933 N University Dr	Nacogdoches	75961	+19365602998	https://restaurants.subway.com/united-states/tx/nacogdoches/933-n-university	Subway	0.98
+8e790558b05c	Subway	fastfood	sandwich shop	31.96987	-94.01890	12722 US Hwy 84 East	Joaquin	75954	+19362694104	https://restaurants.subway.com/united-states/tx/joaquin/12722-us-hwy-84-east	Subway	0.98
+b6b03a08b5d2	Subway	fastfood	sandwich shop	31.28797	-94.72907	105 Champions Dr	Lufkin	75901	+19366342746	https://restaurants.subway.com/united-states/tx/lufkin/105-champion-dr	Subway	0.95
+b9fb668055eb	Subway	fastfood	sandwich shop	31.32250	-94.82123	5572 Ted Trout Drive	Lufkin	75904	+19368752163	https://restaurants.subway.com/united-states/tx/lufkin/5572-ted-trout-drive?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=49291&utm_campaign=evergreen-2020&y_source=1_MTQ5MTU4NDItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+cddb9241daad	Subway	fastfood	sandwich shop	31.32499	-94.72686	1122 S Timberland Dr	Lufkin	75901	+19366392111	https://www.subway.com		0.95
+d3fad497531c	Subway	fastfood	sandwich shop	31.80182	-94.19388	810 Hurst St	Center	75935	+19365985686	https://restaurants.subway.com/united-states/tx/center/810-hurst-st	Subway	0.97
+d9e22a640162	Subway	fastfood	sandwich shop	31.32850	-94.68977	1003 S Medford Dr	Lufkin	75901	+19366374928	https://www.subway.com		0.98
 fc7c95beae57	Subway	fastfood		31.42114	-94.80605	6925 US Highway 69 N	Pollok	75969	+19368534500	https://restaurants.subway.com/united-states/tx/pollok/6925-us-highway-69-n?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=13763&utm_campaign=evergreen-2020&y_source=1_MTQ5MDEyODMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98
 0a7facc7d9fc	Taco Bell	fastfood		31.33223	-94.76351	2405 W Frank Ave	Lufkin	75904		https://locations.tacobell.com/tx/lufkin/2405-w-frank-ave.html	Taco Bell	0.80
 108bac8877f5	Taco Bell	fastfood		31.32616	-94.72571	1102 S Timberland	Lufkin	75901	+19366373745	https://locations.tacobell.com/tx/lufkin/1102-s-timberland.html	Taco Bell	0.99
 1ac55680fcc8	Taco Bell	fastfood		31.57116	-94.67480	3805 South Street	Nacogdoches	75964	+19365643535	http://www.tacobell.com/	Taco Bell	0.95
 1f0f01890baf	Taco Bell	fastfood		31.61711	-94.65314	1605 North St.	Nacogdoches	75965	+19365602758	http://www.tacobell.com/	Taco Bell	0.99
 27e9caf71e24	Taco Bell	fastfood		31.29880	-94.72858	2214 South First	Lufkin	75904	+19366320035	http://www.tacobell.com/	Taco Bell	0.99
+e256c671b941	Taco Bell	fastfood	taco restaurant	31.33320	-94.72043	216 S Timberland Dr	Lufkin	75901	+19366373745			0.92
 ee6116346d3b	Taco Bell	fastfood		31.81121	-94.19436	1315 Tenaha St.	Center	75935	+19365983909	https://locations.tacobell.com/tx/center/1315-tenaha-st-.html	Taco Bell	0.94
 f597359194c4	Tacos Don Julio	fastfood		31.59343	-94.66435	1403 South St	Nacogdoches	75964	+19363055102			0.82
 e86752781753	The Kitchen	fastfood		31.59175	-94.64518	1303 Martin Luther King Jr Blvd	Nacogdoches	75961	+12122555793	http://www.thekitchen.org/		0.92
 330341857a92	Ultimate shaking crab	fastfood		31.07893	-94.00998	371 Fidler Drive	Brookeland	75931		https://ultimateshakingcrab.blogspot.com/		0.58
 4c05705f4d33	Wendy's	fastfood		31.29933	-94.72852	2212 S First St	Lufkin	75901	+19366344334	https://locations.wendys.com/united-states/tx/lufkin/2212-s-first-st	Wendy's	0.99
 40cd376ecd86	Whataburger	fastfood		31.91772	-94.68044	104 S Railroad Avenue	Mt Enterprise	75681	+19032630359	https://locations.whataburger.com/tx/mt-enterprise/104-s-railroad-avenue.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.95
+4c81048caff9	Whataburger	fastfood	burger restaurant	31.33240	-94.76005	102 S John Redditt Dr	Lufkin	75904	+19366320022	https://locations.whataburger.com/tx/lufkin/102-s-john-redditt-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 57b70e7111b6	Whataburger	fastfood		31.70366	-94.67762	10173 US Hwy 259	Nacogdoches	75964	+19365854065	https://locations.whataburger.com/tx/nacogdoches/10173-us-hwy-259.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 613fc535de4a	Whataburger	fastfood		31.90569	-94.39883	694 N. First St.	Timpson	75975	+19366574233	https://locations.whataburger.com/tx/timpson/694-n-first-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 6b2876433a65	Whataburger	fastfood		31.62730	-94.65263	2617 North Street	Nacogdoches	75965	+19365644988	http://whataburger.com/	Whataburger	0.99
+767f06d1e60b	Whataburger	fastfood	burger restaurant	31.29827	-94.73008	103 N Brentwood Dr	Lufkin	75904	+19366320005	https://locations.whataburger.com/tx/lufkin/103-n-brentwood-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 8a1677d05488	Whataburger	fastfood		31.34158	-94.71859	421 N. Timberland Dr.	Lufkin	75901	+19366322216	https://locations.whataburger.com/tx/lufkin/421-n-timberland-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+989fc5c17a5a	Whataburger	fastfood	burger restaurant	31.53463	-94.12657	209 S. El Camino Crossing	San Augustine	75972	+19366792001	https://locations.whataburger.com/tx/san-augustine/209-s-el-camino-crossing.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.83
 c19824131871	Whataburger	fastfood		31.62724	-94.65274	2617 North St	Nacogdoches	75965	+19365644988	https://www.whataburger.com		1.00
+c9582e02f604	Whataburger	fastfood	burger restaurant	31.96931	-94.02061	12768 Hwy 84 East	Joaquin	75954	+19032630044	https://locations.whataburger.com/tx/joaquin/12768-hwy-84-east.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
 f2e1c084292e	Whataburger	fastfood		31.80554	-94.19102	864 Hurst St	Center	75935	+19365909898	https://locations.whataburger.com/tx/center/864-hurst-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+ed1c3ace91b1	Whataburger Restaurants	fastfood	american restaurant	31.35916	-94.76019	212 Loop Ln	Lufkin	75904	+19366324827	http://www.whataburger.com		0.92
 af327944fe65	Wienerschnitzel	fastfood		31.29792	-94.72932	101 N Brentwood Dr	Lufkin	75904	+19368997234	https://www.wienerschnitzel.com/location/brentwood-dr-whitehouse-dr-in-lufkin-tx/	Wienerschnitzel	0.95
+127fa707be85	Wingstop	fastfood	chicken restaurant	31.65069	-94.65646	4909 North St Ste 206	Nacogdoches	75965	+19365527867	https://www.wingstop.com/location/wingstop-362-nacogdoches-tx-75965/menu?y_source=1_NTUyMDY3MjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
+86c9a16b0cb9	Wingstop	fastfood	chicken restaurant	31.31029	-94.72311	4505 S Medford Dr	Lufkin	75901	+19366399464	https://www.wingstop.com/location/wingstop-201-lufkin-tx-75901/menu?y_source=1_NTUyMDc0MDMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 19e299845187	204 Butcher Block	grocery		31.81660	-94.83512	283 Cypress Ave	Cushing	75760	+19363269248			0.92
 b3eed12ca42d	2Hoog - Jojo's Meat on a Stick	grocery		31.64673	-94.65424	4506 North St	Nacogdoches	75965	+19365537117			0.70
 8b6bd4023446	59 Food Mart	grocery		31.82634	-94.49000	313 N US Highway 59	Garrison	75946	+19363472714	http://exxonmobil.com		0.92
@@ -655,7 +690,6 @@ fc76417c82df	ALDI	grocery		31.65142	-94.65737	4919 North St, Suite 101	Nacogdoch
 72b4c80397ff	Appleby Market	grocery		31.72205	-94.61710	14084 N US Highway 59	Nacogdoches	75965	+19364621960			0.88
 92f33d0af9b5	B&B Food	grocery		31.90794	-94.39761	839 North First St	Timpson	75975	+19362542731	https://brookshirebrothers.com/weekly-ad?store=4		0.77
 2e269f19ad22	B&B Food Express	grocery	international grocery store	31.30223	-94.27253	809 State Highway 147	Broaddus	75929	+19368721012	https://www.brookshirebrothers.com/store-location/store-78		0.92
-45c1212215ca	B&B Food Express	grocery	international grocery store	31.30642	-94.26953	809 State Highway 147	Broaddus	75929	+19368721012	https://www.brookshirebrothers.com/store-location/store-78		0.85
 161415d69ea0	Brookshire Brothers	grocery		31.33411	-94.71701	301 S Chestnut St	Lufkin	75901	+19366377086	https://www.brookshirebrothers.com/store-location/store-1	Brookshire Brothers	0.99
 1bba886ab7b0	Brookshire Brothers	grocery		31.33230	-94.75461	1807 W Frank Ave Frnt	Lufkin	75904	+19366393128	https://www.brookshirebrothers.com/store-location/store-25	Brookshire Brothers	1.00
 3c80698d2fb1	Brookshire Brothers	grocery	international grocery store	31.28268	-94.58760	885 S US-69	Huntington	75949	+19368765154	https://www.brookshirebrothers.com/store-location/store-52		0.85
@@ -667,7 +701,6 @@ fc76417c82df	ALDI	grocery		31.65142	-94.65737	4919 North St, Suite 101	Nacogdoch
 9f592ae89e09	Brookshire Brothers	grocery		31.61613	-94.63845	1420 N University Dr	Nacogdoches	75961	+19365691716	https://www.brookshirebrothers.com/store-location/store-42	Brookshire Brothers	0.99
 cb6e4aeadd39	Brookshire Brothers	grocery		31.96758	-94.02780	113 Haslam Sawmill Rd	Joaquin	75954	+19362693189	https://www.brookshirebrothers.com/store-location/store-57	Brookshire Brothers	1.00
 d0c0c70896ca	Brookshire Brothers	grocery		31.59548	-94.66377	1216 South St	Nacogdoches	75961	+19365641275	https://www.brookshirebrothers.com/store-location/store-2	Brookshire Brothers	1.00
-ff6dd618180c	Brookshire Brothers	grocery	international grocery store	31.96982	-94.02029	113 Haslam Sawmill Rd	Joaquin	75954	+19362693189	https://www.brookshirebrothers.com/weekly-ad?store=57		0.97
 4f238cd6c46b	Brookshire Brothers Express	grocery	international grocery store	31.15839	-94.42504	198 E Main St	Zavalla	75980	+19368972174	https://www.brookshirebrothers.com/store-location/store-81		0.97
 6f7087cb4ed9	Brookshire Brothers Express	grocery	international grocery store	31.30732	-94.72700	2106 S First St	Lufkin	75901	+19362551026	https://www.brookshirebrothers.com/store-location/store-118		0.85
 c2712c3bd9de	Brookshire Brothers Express	grocery		31.32276	-94.81868	5750 Ted Trout Dr	Lufkin	75904	+19368755444	https://www.brookshirebrothers.com		1.00
@@ -716,44 +749,35 @@ c9a0cd9a5cfb	Worsham Grocery, Deli and Lone Star Feeds	grocery		31.96649	-94.055
 919676963e2c	Cardiac Rehabilitation Center	hospital		31.33057	-94.75212	310 Gaslight Blvd	Lufkin	75904	+19366348840			0.92
 45d60c29fa46	El Camino Real Internal Medicine Clinic	hospital		31.53112	-94.10236	600 E Hospital St	San Augustine	75972	+19362755287	https://www.stlukeshealth.org		0.92
 d3f034fa4a14	Hope Community Medicine	hospital		31.52950	-94.10969		San Augustine		+19362754420	http://www.hcmtx.org/		0.76
-a716d7e2e21b	Interventional Pain Management PA	hospital		31.63382	-94.63945	3312 N University Dr	Nacogdoches	75965	+19365602222	http://www.txpaindoctor.com		0.74
 27e625769aaa	Lufkin Adult Medicine Clinic	hospital		31.33539	-94.73866	202 S Bynum St	Lufkin	75904	+19366329277			0.94
 ae4c4b65cf23	Lufkin Urgent Care Center	hospital		31.32587	-94.75327	710 Gaslight Blvd	Lufkin	75904	+19366324042	https://www.urgentcarelocations.com/tx/lufkin		0.62
 124eb71ecb73	MedPost Urgent Care	hospital		31.61431	-94.65316	1305 North St	Nacogdoches	75961	+19365595322	https://medpost.com/urgent-care-clinics/nacogdoches-tx		0.77
 bef1e714bcaf	Memorial Medical Center	hospital		31.33658	-94.74191	1201 W Frank Ave	Lufkin	75904	+19366397161			0.55
 ac72dcf6dfbd	Mt Enterprise Community Health Clinic	hospital		31.91805	-94.68192	106 W Rusk St	Mt Enterprise	75681	+19038223076	http://www.tachc.org/center/mt-enterprise-community-health-clinic		0.67
-516e560efade	Nac. Medical Center Hospital	hospital		31.62038	-94.65388		Nacogdoches					0.72
 d77a946952b5	Nac. Medical Center Hospital	hospital		31.62977	-94.63535		Nacogdoches					0.72
 d34a44eb391e	Nacogdoches Heart Clinic	hospital		31.61479	-94.64954	1303 N Mound St	Nacogdoches	75961	+19365601844	http://www.nacogdochesheartclinic.com		0.95
 300acf89f866	Nacogdoches Memorial Hospital	hospital		31.61278	-94.64902	1204 Mound St	Nacogdoches	75961	+19365644611	http://www.nacmem.org/	Memorial Hermann	0.97
 9f399f0d40b0	Oceans Behavioral Hospital Of Lufkin Llc	hospital		31.30694	-94.74574	302 Gobblers Knob Rd	Lufkin	75904	+19366322276	https://oceanshealthcare.com/location/oceans-behavioral-hospital-lufkin/	Oceans Healthcare	0.92
 13347b63a15d	PAM Health Specialty Hospital of Lufkin	hospital		31.33632	-94.74213	1201 W Frank Ave	Lufkin	75904	+19368997350	http://postacutemedical.com/facilities/find-facility/specialty-hospitals/PAM-Specialty-Hospital-Lufkin		0.92
-39660a30d008	PAM Health Specialty Hospital of Lufkin	hospital		31.34000	-94.74001	1201 W Frank Ave	Lufkin	75904	+19368997350	http://postacutemedical.com/facilities/find-facility/specialty-hospitals/PAM-Specialty-Hospital-Lufkin		0.85
 50b9ba8d744d	Physical Medicine - Baylor St. Luke's Medical Group - Lufkin, TX	hospital		31.33683	-94.74118	1105 W Frank Ave Ste 260	Lufkin	75904	+19366316792	https://locations.stlukeshealth.org/location/physical-medicine-baylor-st-lukes-medical-group-lufkin-tx		0.92
 71225cc94af6	Pineywoods Hospital	hospital		31.33712	-94.74117	1201 W Frank Ave	Lufkin	75904	+19366397944	http://www.hospiceinthepines.org/		0.77
-5913112699ba	Pratibha Deshpande, MD	hospital		31.33878	-94.73802	818 W Frank Ave	Lufkin	75904	+19366995040	https://chistlukeshealth.org/physician/Pratibha-Deshpande-14148		0.92
 dfbfbc4c2e8c	RCG-Center Dialysis	hospital		31.81164	-94.16434	457 State Highway 7 E	Center	75935	+19365987351			0.62
 fcc0ed19a403	Shelby Regional Medical Center	hospital		31.79604	-94.18920	602 Hurst St # 5	Center	75935	+19365982781			0.65
 1654efc717b5	SNG Lufkin Dialysis Center	hospital		31.33597	-94.74759	1520 W Frank Ave	Lufkin	75904	+19362383583	http://sngdialysis.com		0.77
 4f5851c3d231	St. Luke's Health - Memorial Hospital - San Augustine, TX	hospital		31.60374	-94.65103	511 E Hospital St	San Augustine	75972	+19362753446	https://www.stlukeshealth.org/locations/memorial-san-augustine-hospital		0.92
 4573024f8c13	The Burke Center Mental Health Emergency Center	hospital		31.33910	-94.74969	103 Mayo Pl	Lufkin	75904		http://www.burke-center.org/pdfs/directory.pdf		0.86
-118cde441986	147 Lakehouse Lodge	hotel	lodge	31.18393	-94.36474	3787 TX-147	Zavalla	75980		http://airbnb.com/h/147lakehouselodge		0.92
 8104d2a782a2	59 Texas Inn	hotel	motel	31.39045	-94.71581	4350 US-59	Lufkin	75901	+19366391255	http://59texasinn.placeweb.site		0.92
 087827620762	American Motel	hotel		31.39014	-94.71518	4350 US-59 N	Lufkin	75901	+19366391255	http://www.americinn.com/		0.82
 6d02f12a4b4a	Americas Best Value Inn Center	hotel		31.80940	-94.19228	1005 Hurst St	Center	75935	+19365983384	https://www.redlion.com		1.00
 45b952ab9aee	Americas Best Value Inn Nacogdoches	hotel		31.66836	-94.66177	6906 North St	Nacogdoches	75965	+19365644899	https://www.redlion.com		0.87
-fe228fc8d7df	Angelina Hospitality Ltd	hotel		31.27886	-94.73636	4402 S 1st St	Lufkin	75901				0.95
-11981c8d74bf	Arriola Cooke Cemetery	hotel		31.56391	-94.71291	Hwy. 7 And County Rd. 715	Nacogdoches					0.76
 f44ea214abbc	Austin Arms Apartments	hotel		31.60480	-94.66558	1013 Douglass Rd	Nacogdoches	75964	+19365602420			0.75
 dda8c15c5162	Baba's Associates Llc	hotel		31.80751	-94.19286	907 Hurst St	Center	75935				0.95
-6dd8a99e1777	Best Western Inn Of Nacogdoches	hotel		31.57382	-94.67454	3428 South St	Nacogdoches	75964	+19365604900	https://www.bestwestern.com		0.97
 8b7353ebf3c7	Best Western Inn Of Nacogdoches	hotel	motel	31.57401	-94.67458	3428 South St	Nacogdoches	75964	+19365604900	https://www.bestwestern.com/en_US/book/hotel-rooms.44403.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44403	Best Western Hotels & Resorts	1.00
 c10744482fc0	Best Western Northpark Inn	hotel		31.65331	-94.68154	4809 NW Stallings Dr	Nacogdoches	75964	+19365601906	http://www.bwnacogdoches.com/		0.97
 c4652f874cfd	Best Western Plus Classic Inn & Suites	hotel		31.81091	-94.19518	210 Moffitt Dr	Center	75935	+19365910002	https://www.bestwestern.com/en_US/book/hotel-rooms.44671.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44671	Best Western Hotels & Resorts	1.00
 0b6b458e34d0	Best Western Plus Crown Colony Inn & Suites	hotel		31.28872	-94.72836	3211 S First St	Lufkin	75901	+19366343481	https://www.bestwestern.com/en_US/book/hotel-rooms.44552.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44552	Best Western Hotels & Resorts	1.00
 53fa08b74c0a	Budget Inn	hotel		31.51411	-94.12747	116 S US Highway 96	San Augustine	75972	+18777478713	http://www.budgetinnsa.com/		0.71
 ffc40fe22b9f	Budget inn by Oyo San Augustine	hotel		31.53227	-94.12613	US-96, San Augustine, TX	San Augustine, Tx			https://www.oyorooms.com/us/249769/	OYO	0.92
-b27b135a5877	Bugscuffle Inn and RV Park	hotel	lodge	31.88324	-94.90038	13579 US-84	Cushing	75760	+19032537740	https://bugscuffleinnandrvpark.com/		0.92
 1665d666f233	C&s Hospitality Inc	hotel		31.28815	-94.72872	3211 S 1st St	Lufkin	75901		cshospitalitygroup.com		0.95
 f50097bc404b	Camp Huawni	hotel		31.84623	-94.30450	954 County Road 4235	Timpson	75975	+19362543223	http://www.camphuawni.com/		0.92
 f87cf84f9c18	Claridge Apartments	hotel		31.63505	-94.65396	3409 North St	Nacogdoches	75965	+19365645621	http://www.deicommunities.com		0.62
@@ -764,18 +788,15 @@ a7257873308a	Country Inn Motel	hotel	motel	31.31205	-94.26453	129 County Road 35
 22d6f300b06e	Courtyard By Marriott	hotel		31.30330	-94.72878	2130 South 1st Street	Lufkin	75901	+19366320777	https://www.marriott.com/en-us/hotels/lfkcy-courtyard-lufkin/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Courtyard by Marriott	0.99
 ad6078e7423f	Cpt, Tx	hotel		31.71280	-94.50620	447 CR-275	Nacogdoches	75961				0.71
 00b8303e16cf	Crown Colony Villas	hotel		31.27471	-94.72025	900 Crown Colony Dr	Lufkin	75901	+19366378888	http://crown-colony.com/villas/		0.93
-a1edb27fb72a	Cushing Masonic Lodge No 911	hotel		31.81391	-94.84121	713 7th St	Cushing	75760	+19363264423			0.74
 26d1d5c4e5ae	Days Inn Nacogdoches SFA University Downtown	hotel	motel	31.62802	-94.65215	2724 North St	Nacogdoches	75965	+19367150005	https://www.wyndhamhotels.com/days-inn/nacogdoches-texas/days-inn-nacogdoches-sfa-university-downtown/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A12624	Days Inn	1.00
 2c5ff2fa1363	Deer Cross Apartments	hotel		31.33710	-94.72990	300 S 1st St	Lufkin	75901	+19366392599	http://www.deercross411.com		0.64
 db9f90c65ed6	Diboll Inn & Suites	hotel	motel	31.19587	-94.77888	910 N Temple Dr	Diboll	75941	+19368292055	http://www.dibollinn.com		0.98
 b09cf24dcca4	Eastwood Terrace Apartments	hotel		31.58178	-94.62972	3001 Ej Campbell St	Nacogdoches	75961	+19365698533	https://www.summitortonhill.com/contact_us		0.94
-c0827da74e96	Et Hotels Llc	hotel		31.57306	-94.67256	3429 South St	Nacogdoches	75964				0.95
 0f65c1ba0be0	Executive Inn & Suites	hotel	motel	31.30865	-94.72552	103 Harmony Hill Dr	Lufkin	75901	+19366326605	http://www.traveltex.com		0.99
 7c82300f239a	Executive Inn and Suites	hotel		31.96889	-94.02505	12449 US-84	Joaquin	75954	+19362699100	http://www.executiveinnjoaquin.com		1.00
 61957b4031d5	Expo Inn of Lufkin	hotel		31.36721	-94.70206	4200 N Medford Dr	Lufkin	75901	+19366327300			0.69
 00ee5e2769eb	Fairfield by Marriott Inn & Suites Lufkin	hotel		31.27880	-94.73580	4402 S. 1ST ST	Lufkin	75901		https://www.marriott.com/GGGLF	Fairfield Inn	0.80
 98c16162b695	Fishermans Delight	hotel	motel	31.21103	-94.25911	477 County Rd 4730	Broaddus	75929	+19362013304			0.97
-7302092744e7	Garrison Lodge #670	hotel	lodge	31.82572	-94.49154	231 N Avenue B	Garrison	75946				0.79
 876bd2f8f613	Griffith Hall	hotel		31.61841	-94.65182	118 Griffith Blvd	Nacogdoches	75965	+19364684909	http://www.sfasu.edu/reslife/166.asp		0.97
 0154d9124016	Hall 14	hotel		31.62263	-94.64962	Wisely Hall, E College St	Nacogdoches	75965	+19364684609	http://www.sfasu.edu/reslife/157.asp		0.75
 25e5bbfdf943	Hall 14	hotel		31.62251	-94.64615	514 E College St	Nacogdoches	75965	+19364684609			0.99
@@ -789,43 +810,31 @@ cf20e4340a78	Hari Om Hospitality Llc	hotel		31.57564	-94.67224	3215 South St	Nac
 8460fd8a53ad	Holiday Inn Express & Suites Lufkin South By Ihg	hotel		31.32728	-94.72739	4404 S 1st St	Lufkin	75901	+19366993000	https://www.ihg.com		0.95
 15bff4cf71f4	Holiday Inn Express & Suites Nacogdoches Southwest	hotel		31.57607	-94.67115	3211 South Street	Nacogdoches	75964		https://www.ihg.com/holidayinnexpress/hotels/us/en/nacogdoches/ochnt/hoteldetail	Holiday Inn Express	0.80
 136e660cc09a	Home2 Suites by Hilton Lufkin	hotel		31.31400	-94.71401	3701 S Medford Drive	Lufkin	75901	1-9362846632	https://www.hilton.com/en/hotels/lfkrcht-home2-suites-lufkin/	Home2 Suites by Hilton	0.97
-bcc725a11741	Homer Masonic Lodge #254	hotel	lodge	31.27838	-94.57814	254 N US Highway 69	Huntington	75949				0.82
 ed1059be4d10	Hotel Angelina (Flats)	hotel	motel	31.33779	-94.72977	101 W Shepherd Ave	Lufkin	75904	+19366342040	http://hotelangelina.com/		0.96
 21f52d1a11fb	Hudson Green	hotel		31.31878	-94.77830	840 Mount Carmel Rd	Lufkin	75904	+19362383825	https://hudson-green-ltd.hub.biz/		0.90
 2e8007b740ba	Hudson Manor	hotel		31.31865	-94.77943	4280 Old Union Rd	Lufkin	75904	+19362383840			0.92
 913fdbaba025	Hwy 59 South	hotel		31.39361	-94.71667		Lufkin			https://www.trulia.com/property/3237620317--Hwy-59-S-Lufkin-TX		0.74
 42254aaf3dcc	Hyatt Regency Lost Pines Resort And Spa	hotel		31.33054	-94.70770	1202 Kingwood Dr.	Lufkin	77339	+12813584663			0.68
 a3f59726710c	Idlewood	hotel		31.38101	-94.76490		Lufkin					0.73
-a9f64088d829	Idlewood	hotel		31.38541	-94.76959		Lufkin					0.71
 3bdac9f3824f	Kalli Hotels, Inc	hotel		31.36840	-94.71328	2409 N Timberland Dr	Lufkin	75901		https://www.kalihoteles.com		0.95
 52b63a8c0697	Kerr Hall	hotel		31.61847	-94.65087	218 Griffith Blvd	Nacogdoches	75965	+19364685301	http://www.sfasu.edu/reslife/167.asp		0.99
 2a42671a0032	La Quinta Inn	hotel		31.30514	-94.72570	2119 S First St	Lufkin	75901	+19366343351	http://www.laquintalufkin.com/?cid=local_581	La Quinta by Wyndham	1.00
 1380b0c7c067	Lake Country Inn	hotel	motel	31.78948	-94.18326	701 San Augustine St	Center	75935	+19365982431			0.92
 b07dda7c0698	Lakeview RV and Motel	hotel	motel	31.20327	-94.33791	5896 TX-147	Zavalla	75980	+19368972102	http://www.visitsamrayburn.com/lakeview-motel-and-rv-park-zavalla/		0.93
 7a7adb147b57	Legends at Nacogdoches	hotel		31.61547	-94.65330	1411 North St	Nacogdoches	75961	+19362866769	https://youtu.be/Jjqt3bizNQw?feature=shared		0.99
-1c78da6fd5bb	Lewis Motel	hotel	motel	31.35590	-94.73132	907 Kurth Dr	Lufkin	75904				0.92
-35ed8cb495ed	Lufkin Hospitality Ltd	hotel		31.27825	-94.73569	4400 S 1st St	Lufkin	75901				0.95
 654f6809801f	Lufkin Inn	hotel	motel	31.33932	-94.71714	308 N Timberland Dr	Lufkin	75901	+19366346626	http://staylufkininn.com/		0.99
-6537e731bd26	Lufkin Lodge No 669 AF & AM	hotel	lodge	31.33780	-94.76119	508 N John Redditt Dr	Lufkin	75904	+19366763242	http://www.lodgeapt.com		0.92
 23bb955abaa3	Lufkin Tx.	hotel		31.35169	-94.70625		Lufkin					0.97
 c30741f14e7a	Lumberjack Landing	hotel		31.62151	-94.64602	508 E College St	Nacogdoches	75965	+19364685404	www.sfasu.edu		0.95
 69c1e9aa1292	Lumberjack Lodge	hotel		31.62242	-94.64668	424 E College St	Nacogdoches	75965	+19364682400	http://www.sfasu.edu/housing		0.97
 4dba9f402dbf	Lumberjack Village	hotel		31.61690	-94.64968	1600 Clark Blvd	Nacogdoches	75965	+19364684300	http://www.sfasu.edu/reslife/169.asp		0.99
 cb0784f1f607	Luxury Inn and Suites and RV Park	hotel	motel	31.66866	-94.66167	6906 North St	Nacogdoches	75965	+19365644899			0.99
 d19b22d5acf6	MainStay Suites Lufkin	hotel	service apartment	31.36849	-94.71311	2409 N Timberland Dr Building A	Lufkin	75904	+19364659744	https://www.choicehotels.com/texas/lufkin/mainstay-hotels/txg18?pmf=yext&mc=llyxyxpx	Choice Hotels	0.92
-66fe3e60850b	Matchco Llc	hotel		31.79712	-94.18294	110 S Church St	Center	75935				0.95
-894498020f9a	Milam Lodge	hotel	lodge	31.60416	-94.65405	129 N Fredonia St	Nacogdoches	75961	+19365644816	http://www.milamlodge2.com/Homepage.htm		0.97
 cd9a3ede4ba4	Motel 6	hotel	motel	31.32628	-94.72735	1110 S Timberland Dr	Lufkin	75901	+19362338648	http://www.motel6.com/	Motel 6	0.99
 eea3634ccd4e	Motel 6 + Studio 6 of Nacogdoches. TX	hotel		31.57465	-94.67403	3400 South St	Nacogdoches	75964	+19363054148	https://www.studio6.com/en/home/motels.tx.nacogdoches.3725.html?utm_source=google&utm_medium=organic&utm_campaign=gbp_listing		1.00
 7b5a2a8c8851	Motel 6 Nacogdoches	hotel	motel	31.57547	-94.67184	3215 South St	Nacogdoches	75964	+19365605453	https://www.motel6.com/en/motels.tx.nacogdoches.8711.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305		0.77
 c393a03a88bf	Motel 6 Nacogdoches- Tx	hotel	resort	31.65297	-94.68149	4809 NW Stallings Dr	Nacogdoches	75964	+19365601906			1.00
-1c14fa65adc7	Naci Hospitality Llc	hotel		31.80495	-94.19303	141 Express Blvd	Center	75935				0.95
-bcd6df900fc9	Nacogdoches Convalescent Ctr	hotel		31.63450	-94.65427	3305 North St	Nacogdoches	75965				0.95
-bef509a08d97	Nacogdoches Shrine Club	hotel	lodge	31.61033	-94.68805	280 County Road 701	Nacogdoches	75964	+19365532124	https://www.shrinersinternational.org/en		0.92
 e0b64b73bb72	Old Place Cabins	hotel		31.78822	-94.60650	898 County Road 1361	Garrison	75946	+19365546814			0.96
-11ca9fb63964	Paradise Lake Resort	hotel	resort	31.56345	-94.67467	100 Paradise Dr	Nacogdoches	75964				0.76
 7180060deb01	Petty's Motor Hotel	hotel	motel	31.34987	-94.72025	1112 N Timberland Dr	Lufkin	75901	+19366345571	http://lonelypictures.blogspot.com		0.99
-4ae950273551	Pineview Hospitality Ltd	hotel		31.32728	-94.72739	4404 S 1st St	Lufkin	75901				0.95
 231643ab86b3	Procella Cemetery	hotel		31.47329	-94.72770	Hwy 59 Between Nacogdoches & Lufkin, Tx	Nacogdoches			http://www.rootsweb.ancestry.com/~txnacogd/cemeteries/procella_cem.htm		0.84
 e3ef58692f7a	Pruitt Park Town Homes	hotel		31.60907	-94.63590	1732 Martinsville St	Nacogdoches	75961	+19365604343			0.92
 3cd4a728840d	Quality Inn & Suites Lufkin	hotel		31.27860	-94.73507	4306 S. 1st Street	Lufkin	75901		https://www.choicehotels.com/texas/lufkin/sleep-inn-hotels	Quality Inn	0.80
@@ -838,43 +847,31 @@ f955eeea706a	Sam Rayburn Marina Resort	hotel		31.07146	-94.04986	4404 Sam Raybur
 63d3dda45349	Shelby Energy Lodge	hotel		31.79438	-94.17821	365 Shelbyville St	Center	75935	+19365983400	http://www.shelbyenergylodge.com/		0.94
 0c6f26de30e7	Sleep Inn	hotel		31.36847	-94.71317	2409 N Timberland Dr Building B	Lufkin	75904	+19362992145	http://lufkinhotel.com/	Choice Hotels	1.00
 45977fbd04f1	Sleep Inn and Suites	hotel		31.80781	-94.19416	181 Civic Center Dr	Center	75935	+19362800410	https://www.choicehotels.com/texas/center/sleep-inn-hotels/txf13?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-e5a8b113f1f0	Smit Inc	hotel		31.32632	-94.72717	1110 S Timberland Dr	Lufkin	75901				0.95
 619a41451863	Spark by Hilton Nacogdoches	hotel		31.56980	-94.67507	3909 South St	Nacogdoches	75964	+19365602888	https://www.hilton.com/en/hotels/ochncpe-spark-nacogdoches/?SEO_id=YEXTN-AMER-PE-OCHNCPE	Spark By Hilton	1.00
-f9cdff14e524	Spark by Hilton Nacogdoches	hotel		31.57000	-94.67500	3909 South St	Nacogdoches	75964	936-560-2888	https://www.hilton.com/en/hotels/ochncpe-spark-nacogdoches/	Spark by Hilton	1.00
 bed5248d4c77	Stay and Play Lake Sam Rayburn	hotel		31.06175	-94.04330	3835 Sam Rayburn Pkwy	Brookeland	75931	+14092025007	http://stayandplayvacationrentals.com/		0.60
 805c715bda6b	Steen Hall	hotel		31.62332	-94.64529	609 E College St	Nacogdoches	75965	+19364685201	https://www.emporis.com/buildings/179402		0.99
 95b4b924edc6	Studio 6	hotel	motel	31.57475	-94.67404	3400 South Street	Nacogdoches Tx			https://www.motel6.com/property/motel-nacogdoches-tx-texas-us-293263/	Studio 6	1.00
 ecb8b9b83552	Summer Creek Hospitality Inc	hotel		31.80491	-94.19393	143 Express Blvd	Center	75935				0.95
 b81c0a277dea	Summit Hill Extended Stay Cottages & Suites	hotel		31.56381	-94.62444	249 Dutton Ln	Nacogdoches	75961	+19365544245	http://staysummithill.webs.com		0.92
 6cf38d0d827a	Sun-N-Pines Motel	hotel		31.33431	-94.72012	208 S Timberland Dr	Lufkin	75901	+19366346676	http://sun-n-pines.com		0.92
-0d168d1f8879	Sunset Avenue	hotel		31.60013	-94.66438		Nacogdoches					0.61
 32822f9dcfd1	Super 8	hotel		31.80765	-94.19249	907 Hurst St	Center	75935	+19366574795	https://www.wyndhamhotels.com/super-8		0.97
 1444ec68900e	Super 8 by Wyndham Nacogdoches	hotel	resort	31.57037	-94.67536	3909 South St	Nacogdoches	75964	+19365602888	https://www.wyndhamhotels.com/super-8/nacogdoches-texas/super-8-nacogdoches/overview?CID=LC:7xnkh22o63wf5qj:21663		0.98
 abf60ba53202	Tall Timbers Retreat	hotel		31.58079	-94.64304	7245 Rayburn Road	Nacogdoches	75961	+12149230111	http://Talltimbersretreatandlodge.com/		0.81
-2bbad73e9466	Tarvers Mental Institution	hotel		31.33310	-94.60403	304 Oliver Rd	Lufkin	75901				0.79
-79962cc1b429	Tejas Lakeside Lodge Inc	hotel	lodge	31.07137	-94.03576	Parkside Loop	Brookeland	75931	+14096989400			0.60
 b563cd4ab2d2	Tenaha Housing Authority	hotel		31.94347	-94.24125	239 Church St	Tenaha	75974	+19362484424			0.80
 c190e55ef450	Texas Inn and Suites	hotel		31.29812	-94.72881	2216 S First St	Lufkin	75901	+19366328885	http://www.texasinnandsuites.com		0.99
 142916121a77	The Boulware Ranch	hotel		31.15458	-94.39619	199 W C Wade Rd	Zavalla	75980	+19367071271	http://www.diamondbquarterhorses.net/		0.74
 4b39a8c49266	The Estate House Bed & Breakfast	hotel		31.56618	-94.54249	507 FM-226	Nacogdoches	75961	+19365590150			0.93
 f85f688aa820	The Fredonia Hotel and Convention Center	hotel		31.60444	-94.65335	200 N Fredonia St	Nacogdoches	75961	+19365641234	http://www.thefredonia.com		1.00
-43c156a4eff4	The Last Resort	hotel	lodge	31.12268	-94.08308	22440 FM705	Broaddus	75929	+12814756385	http://thelastresortrayburn.com		0.95
 c43fc6ee12ee	The Lone Star Farm - aka 23rd Pharm	hotel		31.56662	-94.24644	488 County Road 206	San Augustine	75972	+17136282804			0.60
 0a36ebf5db38	The Overlook at Nacogdoches	hotel		31.61561	-94.63684	1602 Cardinal St	Nacogdoches	75961	+19367159670	http://theoverlooknac.com/		0.99
-20be71721300	Tiger Creek Lodge	hotel	lodge	31.11065	-94.01326	195 Wild Cherry Ln	Brookeland	75931	+14096988824			0.92
-acb589b49218	Timpson Masonic Lodge #437	hotel	lodge	31.90393	-94.39943	582 Washington St	Timpson	75975		http://Grandlodgeoftexas.org/		0.66
 12de43db4c3a	Victorian Inn and Suites	hotel	motel	31.63740	-94.65322	3612 North St	Nacogdoches	75965	+19365606038	http://www.victorianinnsuites.com/		0.99
 bdfdbdc4f5e4	Wisely Hall	hotel		31.62274	-94.64961	221 Aikman Dr	Nacogdoches	75965	+19364682600			0.99
 6e5d0cda0d0d	Woodland Hills Apartments	hotel		31.31956	-94.70213	1806 E Denman Ave	Lufkin	75901	+19366323899	http://elvapartments.com/contact-us		0.76
 b8813818a03e	Wylie Hotel	hotel		31.82350	-94.49046	116 D Ave	Garrison	75946	+19363472185			0.83
 466c4ce91db7	Xecutive Inn and Suites	hotel		31.80876	-94.19259	1005 Hurst St	Center	75935	+19365983384	https://xecutiveinnandsuites.com/		0.98
-f52d169f9815	Allcom Wireless Lufkin, TX	office	telecommunications company	31.30223	-94.72863	500 N Brentwood Dr	Lufkin	75904	+19366396090	https://www.att.com/stores/texas/lufkin/33543?source=E-g2s10000000000X&wtExtndSource=stores		0.97
-0f0527143451	Allcom Wireless Nacogdoches	office	telecommunications company	31.63517	-94.65272	3402 North St	Nacogdoches	75965	+19365692700	https://www.att.com/stores/texas/nacogdoches/33553?source=E-g2s10000000000X&wtExtndSource=stores		0.95
 11636ca23317	Amerigy Energy	office	energy company	31.32096	-94.71270	1511 S Chestnut St	Lufkin	75901	+18776318875	https://www.amerigyenergy.com		0.92
 5790437ab85b	Angelina Medical Research	office	biotechnology company	31.33216	-94.75016	121 Gaslight Medical Parkway #102	Lufkin	75904	+19366340180			0.90
 2802f217167c	Apollos Development	office	information technology company	31.60586	-94.64346	1001 Park St	Nacogdoches	75961	+19365597797	https://apollos-dev.com/		0.92
-3c9a4040b35c	Ard Hill North	office	private association	31.97831	-94.35686	1555 County Road 125	Gary	75643				0.87
-fc075daaf2f3	Boost Mobile and R & T Latino	office	telecommunications company	31.59162	-94.66548	1608 South St	Nacogdoches	75964	+19366329788			0.90
 a64a1b4e5a52	Borgfeld & White Pc	office		31.31702	-94.75294	1402 Turtle Creek Dr	Lufkin	75904	+19366395053			0.65
 66d105a7df73	Cmc Industries North America Corp.	office		31.34928	-94.76435	1610 N John Redditt Dr	Lufkin	75904	+17062555084	http://www.cmcindustries.com		0.75
 e78ad2989d6a	Consolidated communications	office	telecommunications company	31.34140	-94.72800		Lufkin	75901	+19366341011	http://www.consolidated.com	Consolidated	0.92
@@ -945,12 +942,9 @@ d38e6c9e2b4e	Brisket House	restaurant		31.20374	-94.77718	1225 N Temple Dr	Dibol
 c9d8446f3ce9	Broken Arrow Pizza Co.	restaurant	pizza restaurant	31.96677	-94.05524	107 Steve Hughes Dr	Joaquin	75954	+13184710604	http://www.brokenarrowpizza.com/		0.92
 4fc748a23a01	Brothers BBQ	restaurant	barbecue restaurant	31.57238	-94.67493	3714 South St	Nacogdoches	75964	+19365696020	http://www.brothers-bbq.com		0.92
 1d3598921020	Bubba T's	restaurant	bar and grill restaurant	31.33210	-94.77129	2702 Ted Trout Dr	Hudson	75904	+19368753639			0.99
-2037e2c562da	Burger King	restaurant	burger restaurant	31.33370	-94.71958	209 S. Timberland Drive	Lufkin	75901	+19366343035	https://burgerking.com/store-locator/store/2151	Burger King	0.97
-71e5164c36a4	Burger King	restaurant	burger restaurant	31.29627	-94.72893	2402 S First St	Lufkin	75901	+19366329718	https://burgerking.com/store-locator/store/15787	Burger King	0.98
 7ac9d8b80edc	Butcher Boys	restaurant	barbecue restaurant	31.60867	-94.65450	603 North St	Nacogdoches	75961	+19365601137	http://www.butcherboysnac.com/		0.99
 c912f38220ec	C C's Smokehouse Restaurant	restaurant	barbecue restaurant	31.65251	-94.68128	2709 Westward Dr	Nacogdoches	75964	+19364628880	http://Www.ccsmokehouse.com/		0.97
 c3b789417485	Cafe Del Rio	restaurant	texmex restaurant	31.31933	-94.69846	2301 S Medford Dr	Lufkin	75901	+19366394471	https://cafedelrio.net/	Cafe Rio Mexican Grill	0.97
-c4c48ec0b834	Cafe Del Rio	restaurant	texmex restaurant	31.31965	-94.69843	2301 S Medford Dr	Lufkin	75901	+19366394471	www.cafedelrio.net	Cafe Rio Mexican Grill	0.96
 cdc47855caf2	Cajun Corner	restaurant	cajun and creole restaurant	31.82306	-94.20037	508 US Highway 96 N	Center	75935	+19365987100			0.96
 cd7912c00727	Captain Crab	restaurant	seafood restaurant	31.33031	-94.72474	734 S Timberland Dr	Lufkin	75901	+19366328718	https://www.captaincrabtx.com/		1.00
 ed845a2fcadd	Casa Morales	restaurant	mexican restaurant	31.32839	-94.72786	1001 S First St	Lufkin	75901	+19366346811	http://www.casamorales1.com/		0.92
@@ -970,20 +964,16 @@ fe7259371ed5	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	31.313
 9aac2d2d40ec	Chef's Cuisine	restaurant	halal restaurant	31.33854	-94.72736	208 E Lufkin Ave	Lufkin	75901	+19366302283			0.92
 e24f3a606042	Chen's	restaurant	chinese restaurant	31.33307	-94.72090	302 S Timberland Dr	Lufkin	75901	+19366321635	http://www.chenslufkin.com		0.97
 ad943c0e333a	Chester's Chicken	restaurant	chicken restaurant	31.75820	-94.07854	5270 SH-87	Shelbyville	75973	+19365986221	https://www.chesterschicken.com/		0.96
-3656c36f0cde	Chicken Express	restaurant	chicken restaurant	31.57515	-94.65996	1102 SE Stallings Dr	Nacogdoches	75964	+19364621442	http://chickene.com/		0.92
 ba2be790a53e	Chili's Grill & Bar	restaurant		31.62110	-94.65302	1911 North St	Nacogdoches	75965	+19365595775	https://www.chilis.com/		0.94
 c51eefcdd305	Chili's Grill & Bar	restaurant		31.31243	-94.71907	4115 S. Medford Dr.	Lufkin	75901	+19366336800	https://www.chilis.com/		0.97
 7055763792eb	China Buffet	restaurant	chinese restaurant	31.34063	-94.71806	409 N Timberland Dr	Lufkin	75901	+19366371866	http://chinabuffet.net/		0.92
 b72c14a7af99	China Hibachi Buffet	restaurant	buffet restaurant	31.33023	-94.72465	736 S Timberland Dr	Lufkin	75901	+19366348868	https://www.groupon.com/biz/lufkin-tx/china-hibachi		0.99
 4470c698c48e	China Max	restaurant	chinese restaurant	31.31279	-94.72497	4600 S Medford Dr	Lufkin	75901	+19366991116	http://higmgt.com/mwm-china-max.html		0.94
-b2cea56f861b	Chipotle Mexican Grill	restaurant	mexican restaurant	31.62315	-94.65253	2111 North St	Nacogdoches	75965	+19365595393	https://locations.chipotle.com/tx/nacogdoches/2111-north-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	1.00
 245ce8b66d28	Cicis Pizza	restaurant	pizza restaurant	31.31061	-94.72890	3053 S John Redditt Dr	Lufkin	75904	+19366342424	https://www.cicis.com		0.99
-933b0af99c35	Cicis Pizza	restaurant	pizza restaurant	31.30723	-94.73196	3053 S John Redditt Dr	Lufkin	75904	+19366342424			0.85
 fdf5606bbfe7	Cicis Pizza	restaurant	pizza restaurant	31.63937	-94.65554	3801 North St	Nacogdoches	75965	+19363053337	https://www.cicis.com		0.99
 fb5014fb4079	Clawdaddy's	restaurant	seafood restaurant	31.59928	-94.62042	3322 Center Rd	Nacogdoches	75961	+19362054111	http://Clawdaddysnac.com/		0.99
 b6e637453f8f	Clear Springs Restaurant	restaurant	american restaurant	31.60608	-94.65897	211 Old Tyler Rd	Nacogdoches	75961	+19365690489	http://clearspringsrestaurant.com/	Clear Springs New Braunfels	0.99
 acd66a726658	Coop's Burger's and Mo	restaurant		31.64783	-94.65507	4601 North St	Nacogdoches	75965	+18322086367	https://www.coopsburgersnmo.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
-b0ad6033ea2c	Cooper’s Crawfish	restaurant	seafood restaurant	31.85968	-94.43124	2130 FM-2667	Timpson	75975	+19366154299			0.94
 edcc5e9b76a9	Cooper’s Crawfish	restaurant	seafood restaurant	31.82829	-94.48724	2130 FM-2667	Timpson	75975	+19366154299			0.95
 d94b82033ac1	Corn Dog 7	restaurant	hot dog restaurant	31.31282	-94.72478	Lufkin Mall	Lufkin	75901	+19366394144	http://www.lufkinmall.com/store/corn-dog-7/2137053609/2138880533		0.77
 2c62604300b3	Cotton Patch Cafe	restaurant	southern american restaurant	31.63243	-94.65291	3117 North St	Nacogdoches	75961	+19365696926	https://cottonpatch.com/locations/tx/nacogdoches/3117-north-st	Cotton Patch Cafe	0.99
@@ -992,7 +982,6 @@ d94b82033ac1	Corn Dog 7	restaurant	hot dog restaurant	31.31282	-94.72478	Lufkin 
 e17962cf6f9b	Cowboy Jack's Llc	restaurant		31.60340	-94.65493	203 E Main St	Nacogdoches	75961				0.95
 8210d2c2b49e	Cracker Barrel	restaurant	southern american restaurant	31.29720	-94.72903	US 59 & Whitehouse Dr, Exit 391 2302 S. First St.	Lufkin	75904	+19366995020	https://www.crackerbarrel.com/Locations/States/tx/lufkin/622/	Cracker Barrel Old Country Store	0.99
 5086dc05afee	Cracker Barrel Old Country Store	restaurant	breakfast and brunch restaurant	31.29584	-94.71919	Us 59 & Whitehouse Dr, Exit 391	Lufkin	75904	+19366995020	https://www.crackerbarrel.com/Locations/States/tx/lufkin/622/		0.85
-bf6b87a81115	Cracker Barrel Old Country Store	restaurant	breakfast and brunch restaurant	31.31267	-94.72070	Us 59 & Whitehouse Dr, Exit 391	Lufkin	75904	+19366995020	https://www.crackerbarrel.com/Locations/States/tx/lufkin/622/		0.85
 6c901bfb512b	Crawdaddy's Boil-N-Go	restaurant	cajun and creole restaurant	31.32646	-94.71577	1202 S Chestnut St	Lufkin	75901	+19363663648	https://www.whodoyou.com/biz/652308/boil-n-go-lufkin-tx		0.92
 b056734624a0	Crawdaddy's Boil-n-Go	restaurant	seafood restaurant	31.61710	-94.68335	1304 NW Stallings Dr	Nacogdoches	75964	+19364040662	https://crawdaddies-boil-go.hub.biz/		0.67
 7a9cfc757fef	Crawdaddy's Boil-N-Go Diboll	restaurant	seafood restaurant	31.18712	-94.78361	N Hendrick Ave	Diboll	75941	+19363666105			0.92
@@ -1006,8 +995,6 @@ d0146f02bcbb	Delia's grill and steak house	restaurant	barbecue restaurant	31.627
 2185e44def55	Denny's Restaurant	restaurant		31.65168	-94.67917	2615 N. Stallings Dr.	Nacogdoches	75964	+19363716267	https://www.dennys.com/		0.99
 55b9d67339fe	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.57266	-94.67358	3505 South St	Nacogdoches	75964	+19363054410	https://www.dickeys.com/locations/Texas/Nacogdoches/nacogdoches	Dickey's Barbecue Pit National	1.00
 e13b635f030b	Dixon Furniture	restaurant		31.18665	-94.78345	300 N Hines St	Diboll	75941				0.95
-67dca2fab1bb	Domino's	restaurant	pizza restaurant	31.62506	-94.65250	2403 North St.	Nacogdoches	75961	+19365692121	https://pizza.dominos.com/texas/nacogdoches/75965/2403-north-st/	Domino's Pizza	0.98
-cc62569bd177	Domino's	restaurant	pizza restaurant	31.31983	-94.72755	1521 S First Street	Lufkin	75901	+19366345600	http://dominos.com/	Domino's Pizza	0.98
 4b60f3f8f13d	Double J Bar B Que	restaurant	barbecue restaurant	31.76820	-94.08801	4280 TX-87	Center	75935	+19365909337	https://double-j-bar-b-que.hub.biz		0.92
 0525b12cc99f	Durango's Canyon - the Crater	restaurant		31.99928	-94.73206	1039 FM 1798 W	Mount Enterprise, Tx, Us	75681	+19038982772	http://www.durangoscanyon.com		0.77
 070e8eedac78	Early Birds	restaurant		31.30796	-94.26856	300 State Highway 147	Broaddus	75929	+19367076125	http://www.earlybirdseatery.com/		0.58
@@ -1032,8 +1019,6 @@ d64298c0b063	Family Traditions	restaurant	comfort food restaurant	31.79339	-94.1
 75576ac9094c	Fish Tales Nacogdoches	restaurant	seafood restaurant	31.57338	-94.67455	3512 South St	Nacogdoches	75964	+19363053082	https://fishtalescentral.square.site/		0.71
 90314b7f03fe	Five Guys	restaurant	burger restaurant	31.31036	-94.72296	4505 S Medford Dr #301	Lufkin	75901	+19366320043	http://order.fiveguys.com/		0.92
 fb6916c8df9a	Flashback Cafe	restaurant		31.62395	-94.65186	109 Wettermark St	Nacogdoches	75965	+19364629550	https://www.flashbackcafe.com		0.99
-eb694bcd9441	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	31.63885	-94.65324	3720 North St	Nacogdoches	75965	+19362253203	https://www.freddys.com/location/nacogdoches?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
-fd79bbf7625c	Freddy's Frozen Custard & Steakburgers	restaurant	american restaurant	31.31261	-94.71835	4103 S Medford Dr	Lufkin	75901	+19362253203	https://www.freddys.com/location/lufkin?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 316052f0d200	Free Cookies Smokehouse & More	restaurant	barbecue restaurant	31.91997	-94.68224	205 N Railroad Ave	Mt Enterprise	75681	+19038223753	https://order.toasttab.com/online/free-cookies-smokehouse-205-n-railroad-ave		0.92
 75fd247f2416	French & Hightower Restaurant Group	restaurant		31.31249	-94.72482	4001 S Medford Dr Ste 300	Lufkin	75901				0.95
 d33d362f9f9c	Frogs	restaurant	american restaurant	31.61659	-94.65398	1507 North St	Nacogdoches	75965	+19365689999	http://www.frogsnac.com		0.93
@@ -1100,15 +1085,9 @@ b8a567ff92b0	La Unica Tortilleria	restaurant	mexican restaurant	31.35229	-94.744
 3c58adb8bc85	Lia's Kitchen	restaurant	asian fusion restaurant	31.33839	-94.72750	208 E Lufkin Ave	Lufkin	75901	+19366342778	https://liaskitchenlufkin.com		1.00
 a5113ff599f4	Lindo Mexico Taqueria	restaurant	mexican restaurant	31.33244	-94.72076	305 S Timberland Dr	Lufkin	75901	+19366328955	http://www.lindomexicorestaurant.com/		0.96
 3a75a89bda8c	Lionheart Krav Maga & Fitness	restaurant		31.32260	-94.75567	922 S John Redditt Dr	Lufkin	75904	+19364659601	http://www.lionheartlufkin.com		0.92
-43072501bbf6	Little Caesars Pizza	restaurant	pizza restaurant	31.33686	-94.72008	107 N Chestnut St	Lufkin	75901	+19366396677	https://littlecaesars.com/en-us/store/10283	Little Caesars	0.99
-511309761658	Little Caesars Pizza	restaurant	pizza restaurant	31.29847	-94.72948	103 N Brentwood Dr	Lufkin	75901	+19366320660	https://littlecaesars.com/en-us/store/12488	Little Caesars	0.96
-92a463d82da0	Little Caesars Pizza	restaurant	pizza restaurant	31.80513	-94.19105	854 Hurst St	Center	75935	+19364275170	https://littlecaesars.com/en-us/store/11426	Little Caesars	1.00
-952d3c86dc4c	Little Caesars Pizza	restaurant	pizza restaurant	31.61629	-94.65234	1500 North St	Nacogdoches	75965	+19365645339	https://littlecaesars.com/en-us/store/7656	Little Caesars	0.99
-d25150bfbb19	Little Caesars Pizza	restaurant	pizza restaurant	31.32124	-94.75520	1034 S John Redditt Dr	Lufkin	75904	+19366396655	https://littlecaesars.com/en-us/store/3523	Little Caesars	0.99
 02559c632602	Lobster BBQ house	restaurant	barbecue restaurant	31.44846	-94.87030	4431 Maple Court	Pollok	75969				0.63
 b9880b8f96e3	Lone Star Charlie's Family Restaurant	restaurant	diner	31.31763	-94.69919	1910 E Denman Ave	Lufkin	75901	+19366328881	http://lonestarcharlieslufkin.com/		0.99
 d18334a524c6	LoneStar Crawfish Company	restaurant	cajun and creole restaurant	31.84761	-94.13008	3634 TX-7	Center	75935	+19363329640			0.81
-344b771e2fe1	Long John Silver's	restaurant	seafood restaurant	31.61644	-94.65318		Nacogdoches	75965	+19365691486	http://www.ljsilvers.com		0.77
 9b30432ae6d4	Los 3 Potros	restaurant	mexican restaurant	31.58534	-94.66791	2214 South St	Nacogdoches	75964	+19363713787	http://bit.ly/losTresPotros.		0.92
 6e36651ed784	Los Jarritos Mexican restaurant	restaurant	mexican restaurant	31.28197	-94.57466	N Main St	Huntington	75949	+19364224546	http://los-jarritos-mexican-huntington.poi.place		0.94
 9745aaf3d8cd	Los Jarritos Mexican Restaurant	restaurant	mexican restaurant	31.00916	-94.82465	810 N Home St	Corrigan	75939	+19364175060	http://www.losjarritosmexicanfood.com	Los Jarritos Mexican Food Inc.	0.96
@@ -1126,12 +1105,7 @@ eefcc003a503	Martinez Billar Cocina Martinez	restaurant	mexican restaurant	31.79
 f238e19b424a	Martinsville Kitchen	restaurant	american restaurant	31.64310	-94.40876	13337 E State Highway 7	Nacogdoches	75961	+19367150722	www.tripadvisor.com		0.92
 571d55194ae6	Maymay's	restaurant	burger restaurant	31.91776	-94.68198	103 W Rusk St	Mt Enterprise	75681	+19038223344	http://MayMays.com/		0.92
 27ee6f41a341	McAlister's Deli	restaurant	delicatessen	31.62176	-94.65266	2015 North St	Nacogdoches	75965	+19366220115	https://locations.mcalistersdeli.com/tx/nacogdoches/2015-north-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	1.00
-5c77dea24ec5	McAlister's Deli	restaurant	salad bar	31.30693	-94.72621	2136 S 1st St	Lufkin	75901	+14092191600	https://www.mcalistersdeli.com/locations/tx/lufkin/deli-101034		0.85
 9419fa364459	McAlister's Deli	restaurant	delicatessen	31.30242	-94.72774	2136 S 1st St	Lufkin	75901	+14092191600	https://locations.mcalistersdeli.com/tx/lufkin/2136-s-1st-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.96
-a61bc8414903	McAlister's Deli	restaurant	sandwich shop	31.61216	-94.64833	2015 North St	Nacogdoches	75965	+19366220115	https://locations.mcalistersdeli.com/tx/nacogdoches/2015-north-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.96
-6cc24c2da84c	McDonald's	restaurant	burger restaurant	31.53447	-94.12656	209 North El Camino Crossing	San Augustine	75972	+19362880813	https://www.mcdonalds.com/us/en-us/location/tx/san-augustine/209-north-el-camino-crossing/36840.html?cid=RF:YXT:RoN::Clicks		0.97
-c85cd15c51d0	McDonald's	restaurant	burger restaurant	31.64958	-94.65279	4801 North St	Nacogdoches	75961	+19365699889	https://www.mcdonalds.com/us/en-us/location/tx/nacogdoches/4801-north-st/14773.html?cid=RF:YXT:RoN::Clicks		0.92
-e5ea0f55aa7e	McDonald's	restaurant	burger restaurant	31.30027	-94.73106	2500 Daniel McCall Dr	Lufkin	75904	+19366348488	https://www.mcdonalds.com/us/en-us/location/tx/lufkin/2500-daniel-mccall-dr/30571.html?cid=RF:YXT:RoN::Clicks		0.92
 f419d5d3a0a3	Mexican Food	restaurant	mexican restaurant	31.73854	-94.67618	12552 US-259	Nacogdoches	75965				0.92
 2e95c752fed1	Mexico Express	restaurant	mexican restaurant	31.33415	-94.75158	1603 W Frank Ave	Lufkin	75904	+19366373200	https://zmenu.com/mexico-express-lufkin-online-menu		0.95
 1a1a0365f239	Mi Casita	restaurant	mexican restaurant	31.79665	-94.18259	133 Tenaha St	Center	75935	+19365918399	http://www.mi-casita.net	Mi Casita Restaurant	0.92
@@ -1140,7 +1114,6 @@ f419d5d3a0a3	Mexican Food	restaurant	mexican restaurant	31.73854	-94.67618	12552
 027815bfa3c7	Mike's Barbeque House	restaurant	barbecue restaurant	31.59097	-94.66557	1622 South St	Nacogdoches	75964	+19365601676	http://www.mikesbarbequehouse.net/		0.96
 e382159638b9	Moe's Southwest Grill	restaurant	mexican restaurant	31.31762	-94.69886	1920 E Denman Ave.	Lufkin	75901	+18776637411	https://locations.moes.com/tx/lufkin/1920-e-denman-ave?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Moe's Southwest Grill	0.97
 3bb04c8e1657	Mom's Diner	restaurant	diner	31.34051	-94.73315	420 W Frank Ave	Lufkin	75904	+19366376510			0.97
-75c13d18e152	Mom's Diner	restaurant	diner	31.33887	-94.73874	420 W Frank Ave	Lufkin	75904	+19366376410	http://www.dshs.state.tx.us		0.77
 69a72d5896fc	Morning Glory Natural Foods	restaurant		31.33310	-94.75513	1867 W Frank Ave	Lufkin	75904	+19366377481	http://www.morninggloryhealth.com/		0.92
 be22ee3dbbf3	Morton's Now & Then	restaurant	american restaurant	31.37324	-94.46812	165 State Highway 103	Etoile	75944	+19368542037	http://mortons.com		0.77
 0a4ac7bbf296	Mr Gatti's Pizza	restaurant	pizza restaurant	31.29934	-94.73141	2500 Daniel McCall Drive	Lufkin	75904	+19364659960	https://order.mrgattispizza.com/menu/mr-gattis-pizza-lufkin/?y_source=1_MTA4MjQ4NDcyNi00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
@@ -1170,11 +1143,6 @@ daa193d8e64a	Ostioneria Mi Tierra	restaurant	mexican restaurant	31.35236	-94.720
 83a792a50d53	Outback Steakhouse	restaurant	steakhouse	31.30026	-94.72801	2206 S 1st St	Lufkin	75901	+19366344616	https://locations.outback.com/texas/lufkin/2206-south-first-street?utm_source=gmb&utm_medium=local_search&utm_campaign=website_cta&y_source=1_MTU1MDIxMjYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Outback Steakhouse	0.96
 14408cde416b	pablo's BBQ	restaurant	barbecue restaurant	31.38608	-94.77441	3900 US Highway 69 N	Lufkin	75904	+19366396050	https://lordmap.top/pablo-s-bbq		0.96
 c812a2b47547	Panda Cafe	restaurant	chinese restaurant	31.61416	-94.65252	1224 North St	Nacogdoches	75961	+19365680880			0.96
-2bfe73cf9afd	Panda Express	restaurant	chinese restaurant	31.61722	-94.65251	1602 North Street	Nacogdoches	75965	+19364628808	http://www.pandaexpress.com/		0.96
-44fdd7fe392b	Panda Express	restaurant	chinese restaurant	31.30211	-94.72779	2134 S 1st St	Lufkin	75904	+19366326991	http://www.pandaexpress.com/		0.98
-45a063567086	Panda Express Chinese Restaurant	restaurant	chinese restaurant	31.62483	-94.64797		Nacogdoches			http://www.pandaexpress.com/	Panda Express México	0.72
-10de243edfdb	Papa Johns	restaurant	pizza restaurant	31.32505	-94.72737	1205 S 1 St St	Lufkin	75901	+19366346611	https://locations.papajohns.com/united-states/tx/75901/lufkin/1205-s-1st-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1NDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
-a2d25c0135c8	Papa Johns Pizza	restaurant	pizza restaurant	31.62761	-94.65205	2702 North St	Nacogdoches	75965	+19365597272	https://locations.papajohns.com/united-states/tx/75965/nacogdoches/2702-north-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTM1MzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
 ba6311daff32	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	31.65079	-94.65725	4909 N St., Ste 207	Nacogdoches	75965	+19365527900			0.85
 c9ff5b8efdb9	Papa's Pit & More	restaurant	barbecue restaurant	31.28091	-94.57542	501 N Main St	Huntington	75949	+19364223686			0.93
 a013ba91fbff	Papi's Restaurant & Cantina	restaurant	texmex restaurant	31.60205	-94.65278	422 E Main St	Nacogdoches	75961	+19363053714			0.99
@@ -1185,13 +1153,6 @@ ce5e00351ba0	Pelican Pointe	restaurant	cajun and creole restaurant	31.34553	-94.
 92772e5cfd1d	Pemberley's At The Jones House	restaurant		31.60388	-94.65301	141 N Church St	Nacogdoches	75961	+19365591487			0.94
 ba200f9d266f	Pineywoods Seafood	restaurant	seafood restaurant	31.80876	-94.19217	1003 Hurst St	Center	75935	+19365986661			0.92
 e88580bfdb63	PitMaster East Texas Hickory Smoked BBQ	restaurant	barbecue restaurant	31.91834	-94.68183	100 W Rusk St	Mt Enterprise	75681	+19729622608			0.65
-48f9d1fb6247	Pizza Hut	restaurant	pizza restaurant	31.62759	-94.65277	2619 North St	Nacogdoches	75965	+19365697257			0.90
-6d206da47bea	Pizza Hut	restaurant	pizza restaurant	31.31024	-94.72256	4505 S. Medford Drive. Angelina	Lufkin	75901	+19366393939	https://locations.pizzahut.com/tx/lufkin/4505-s-medford-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304231	Pizza Hut	0.99
-9003b3e5339b	Pizza Hut	restaurant	pizza restaurant	31.18500	-94.78169	190 N Temple Dr Angelina	Diboll	75941	+19368299705	https://locations.pizzahut.com/tx/diboll/190-n-temple-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313998	Pizza Hut	0.96
-b21398f29c7c	Pizza Hut	restaurant	pizza restaurant	31.80822	-94.19263	1007 Hurst St Shelby	Center	75935	+19365986303	https://locations.pizzahut.com/tx/center/1007-hurst-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289990	Pizza Hut	0.98
-bf4093339a5b	Pizza Hut	restaurant	pizza restaurant	31.63201	-94.63957	3102 N University Dr Nacogdoches	Nacogdoches	75965	+19365699999	https://locations.pizzahut.com/tx/nacogdoches/3102-n-university-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289048	Pizza Hut	0.98
-c334b28fb82d	Pizza Hut	restaurant	pizza restaurant	31.59061	-94.66582	1632 South St Nacogdoches	Nacogdoches	75964	+19365645400	https://locations.pizzahut.com/tx/nacogdoches/1632-south-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312075	Pizza Hut	0.99
-9e9dfd356680	Pizza Panther	restaurant	pizza restaurant	31.79644	-94.14718	Shop#28, Stadium Center	Center	39350	+923344766600			0.87
 2c529774776e	Pizza Pro	restaurant	pizza restaurant	31.66916	-94.88085	15276 W State Highway 21	Douglass	75943	+19365602294	https://www.pizzapro.com		0.92
 57d922d07293	Pizza Pro	restaurant	pizza restaurant	31.70023	-94.67616	9855 US Highway 259	Nacogdoches	75965	+19365527255	https://www.pizzapro.com		0.92
 9c8398d0aaa6	Pizza Pro	restaurant	pizza restaurant	31.90549	-94.39497	422 Austin St	Timpson	75975	+19362549995	http://www.pizzapro.com		0.77
@@ -1219,7 +1180,6 @@ c381bd417ae2	Royal Buffet	restaurant	buffet restaurant	31.80738	-94.19229	902 Hu
 d11709ab6b4c	Salma's Pizza and Indian Restaurant	restaurant	indian restaurant	31.64988	-94.65279	4810 North St	Nacogdoches	75965	+19363053795	https://www.toasttab.com/salmas-pizza-indian-restaurant-4810-north-street		1.00
 20a43e506d85	Sam's Southern Eatery	restaurant	southern american restaurant	31.61399	-94.65250	1220 North St	Nacogdoches	75961	+19362053113	http://www.SamsNacogdoches.com/		0.94
 26b5f474ab2c	Sams Southern eatery	restaurant	southern american restaurant	31.33364	-94.72048	214 S Timberland Dr	Lufkin	75901	+19368995066			0.89
-751b5f9f519e	Schlotzsky's	restaurant	sandwich shop	31.31070	-94.72382	4601 S Medford Dr	Lufkin	75901	+19366394900	https://locations.schlotzskys.com/tx/lufkin/4601-south-medford?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
 89e12b959c51	Seafood Xpress	restaurant	seafood restaurant	31.18987	-94.78096	Lot 500 N Temple Dr	Diboll	75941	+13186021531			0.92
 cc8a83a2933b	Shiggity Shack	restaurant	american restaurant	31.64805	-94.65631	4601 North St	Nacogdoches	75965	+19365606678			0.87
 170b98e70caa	Simple Simon's Pizza	restaurant	pizza restaurant	31.27491	-94.57281	461 S US Highway 69	Huntington	75949	+19368764452	https://www.simplesimonspizza.com		0.92
@@ -1232,26 +1192,11 @@ b35a02761968	Simple Simon's Pizza	restaurant	pizza restaurant	31.27799	-94.57719
 e1e98deb2a23	SNOWFOX Sushi	restaurant	sushi restaurant	31.61381	-94.65408	1215 North Street	Nacogdoches	75961		https://www.snowfox.com/		0.92
 53c81ff8361f	Sofy's Tacos & Donuts	restaurant	mexican restaurant	31.33839	-94.73374	102 N Raguet St	Lufkin	75904	+19366321911			0.92
 5d6a92fdc9b6	Sombreros Coastal Tex-Mex and Cantina	restaurant	texmex restaurant	31.63054	-94.65237	3000 North St	Nacogdoches	75965	+19365692800	http://www.lacarretatx.com		0.99
-5e8bc3084b06	Sonic Drive-In	restaurant	burger restaurant	31.27495	-94.57327	407 Highway 69 N	Huntington	75949	+19368762850	https://locations.sonicdrivein.com/tx/huntington/407-highway-69-north.html		0.85
 2746a33751ad	Spanky’s Cafe	restaurant	comfort food restaurant	31.82444	-94.49097	123 N US Highway 59	Garrison	75946	+19363473627			0.92
 47e067128a39	Special burger world	restaurant	burger restaurant	31.35497	-94.71309	1199 Maberry St	Lufkin	75901		https://specialburgerworld.blogspot.com/		0.62
 41e8edecd498	Spuddies Baked Potato	restaurant	barbecue restaurant	31.65251	-94.65653	5105 North St	Nacogdoches	75965	+19362053020	https://youtu.be/8KFBtfs2xXc		0.92
 4d980f6a248a	Stringer's Lufkin Bar B Q	restaurant	barbecue restaurant	31.33463	-94.71827	203 S Chestnut St	Lufkin	75901	+19366344744	https://www.lufkinbbq.com/		0.98
 480478bd7fde	Stump Restaurant & Club	restaurant	american restaurant	31.06132	-94.04333	3819 Sam Rayburn Pkwy	Brookeland	75931	+14096989495	http://www.thestumprestaurant.com/		1.00
-15d6904ab4f1	Subway	restaurant	sandwich shop	31.57409	-94.67328	3415 South St	Nacogdoches	75964	+19365642992	https://restaurants.subway.com/united-states/tx/nacogdoches/3415-south-st	Subway	0.95
-199aa2255a4f	Subway	restaurant	sandwich shop	31.70024	-94.67589	9855 US Highway 259	Nacogdoches	75965	+19364621146	https://restaurants.subway.com/united-states/tx/nacogdoches/9855-us-hwy-259	Subway	0.98
-42cfcb831f9f	Subway	restaurant	sandwich shop	31.62841	-94.65266	2721 North St	Nacogdoches	75965	+19365598910	http://www.subway.com/en-us	Subway	0.97
-498d46b73801	Subway	restaurant	sandwich shop	31.62840	-94.65285	2721 North St	Nacogdoches	75965	+19365598910	https://www.subway.com		0.98
-63f616b62be2	Subway	restaurant	sandwich shop	31.90444	-94.40215	484 North 1st Street	Timpson	75975	+19362543300	http://www.subway.com/en-us	Subway	0.96
-7104080267a0	Subway	restaurant	sandwich shop	31.33375	-94.75232	1607 W Frank Ave. Suite 101	Lufkin	75904	+19366394111	https://restaurants.subway.com/united-states/tx/lufkin/1607-w-frank-ave	Subway	0.95
-7a28bfda7e6c	Subway	restaurant	sandwich shop	31.53485	-94.12541	210 US-96	San Augustine	75972	+19362885077	http://www.subway.com/	Subway	0.93
-8687303e611c	Subway	restaurant	sandwich shop	31.61093	-94.64082	933 N University Dr	Nacogdoches	75961	+19365602998	https://restaurants.subway.com/united-states/tx/nacogdoches/933-n-university	Subway	0.98
-8e790558b05c	Subway	restaurant	sandwich shop	31.96987	-94.01890	12722 US Hwy 84 East	Joaquin	75954	+19362694104	https://restaurants.subway.com/united-states/tx/joaquin/12722-us-hwy-84-east	Subway	0.98
-b6b03a08b5d2	Subway	restaurant	sandwich shop	31.28797	-94.72907	105 Champions Dr	Lufkin	75901	+19366342746	https://restaurants.subway.com/united-states/tx/lufkin/105-champion-dr	Subway	0.95
-b9fb668055eb	Subway	restaurant	sandwich shop	31.32250	-94.82123	5572 Ted Trout Drive	Lufkin	75904	+19368752163	https://restaurants.subway.com/united-states/tx/lufkin/5572-ted-trout-drive?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=49291&utm_campaign=evergreen-2020&y_source=1_MTQ5MTU4NDItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
-cddb9241daad	Subway	restaurant	sandwich shop	31.32499	-94.72686	1122 S Timberland Dr	Lufkin	75901	+19366392111	https://www.subway.com		0.95
-d3fad497531c	Subway	restaurant	sandwich shop	31.80182	-94.19388	810 Hurst St	Center	75935	+19365985686	https://restaurants.subway.com/united-states/tx/center/810-hurst-st	Subway	0.97
-d9e22a640162	Subway	restaurant	sandwich shop	31.32850	-94.68977	1003 S Medford Dr	Lufkin	75901	+19366374928	https://www.subway.com		0.98
 63be2a7f29d3	Sue's Country Store & Smokehouse	restaurant		31.33031	-94.38966	13093 TX-7	Nacogdoches	75961	+19368542123			0.64
 d4a78653f5a4	Sujey's New American Table	restaurant	american restaurant	31.53064	-94.10946	129 E Columbia St	San Augustine	75972	+19362014013			0.96
 d77df368cd45	Super Yummy at Nacogdoches	restaurant	asian restaurant	31.64765	-94.65459	4604 North St #110	Nacogdoches	75965	+19365595020	http://superyummystirfry.com/	Super Yummy at Nacogdoches	1.00
@@ -1259,7 +1204,6 @@ d77df368cd45	Super Yummy at Nacogdoches	restaurant	asian restaurant	31.64765	-94
 442b1d4d577d	T and G Burger	restaurant	burger restaurant	31.32907	-94.73977	811 Pershing Ave	Lufkin	75904	+19366321333	http://www.tgwu.org.uk		0.92
 b858e49411aa	T Sandwiches	restaurant	vietnamese restaurant	31.61307	-94.63720	1122 N University Dr	Nacogdoches	75961		http://www.cityseekr.com/nacogdoches/restaurants/poi-t-sandwiches-945734.html		0.97
 8a64aff92f37	T/R's Steaks & More	restaurant	steakhouse	31.80693	-94.19138	892 Hurst St	Center	75935	+19365984115	http://trssteaksandmore.com/		0.97
-e256c671b941	Taco Bell	restaurant	taco restaurant	31.33320	-94.72043	216 S Timberland Dr	Lufkin	75901	+19366373745			0.92
 2f39364936c9	Taco Bueno	restaurant	texmex restaurant	31.62001	-94.65301	1821 North St	Nacogdoches	75965	+19365691073	https://locations.tacobueno.com/nacogdoches/1821-north-st	Taco Bueno	1.00
 73605869e503	Taco Casa	restaurant	texmex restaurant	31.61403	-94.63944	1133 N University Dr	Nacogdoches	75961	+19363055353	http://tacocasatexas.com/	Taco Casa	0.96
 d7152dbe8944	Taco Casa	restaurant	texmex restaurant	31.32014	-94.72740	1517 S First St	Lufkin	75901	+19366341800	https://tacocasatexas.com/location/36-lufkin/	Taco Casa	0.98
@@ -1326,11 +1270,6 @@ e4a6ba3d70d9	Viet Fusion Eats & Drink	restaurant	vietnamese restaurant	31.31653	
 287e81424f78	Wade's Barbecue	restaurant	barbecue restaurant	31.31981	-94.71243	1513 S Chestnut St	Lufkin	75904	+19366352876			0.92
 3d015b487468	Watts n Watts BBQ	restaurant	barbecue restaurant	31.54626	-94.12770	200 US Highway 96 N	San Augustine	75972	+19362883013			0.97
 f37753e1a9ff	Wendi's	restaurant	burger restaurant	31.37298	-94.96033	22395 HW 94 N	Apple Springs	75926	+19368317001	https://www.facebook.com/wendis94?mibextid=LQQJ4d		0.97
-4c81048caff9	Whataburger	restaurant	burger restaurant	31.33240	-94.76005	102 S John Redditt Dr	Lufkin	75904	+19366320022	https://locations.whataburger.com/tx/lufkin/102-s-john-redditt-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-767f06d1e60b	Whataburger	restaurant	burger restaurant	31.29827	-94.73008	103 N Brentwood Dr	Lufkin	75904	+19366320005	https://locations.whataburger.com/tx/lufkin/103-n-brentwood-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-989fc5c17a5a	Whataburger	restaurant	burger restaurant	31.53463	-94.12657	209 S. El Camino Crossing	San Augustine	75972	+19366792001	https://locations.whataburger.com/tx/san-augustine/209-s-el-camino-crossing.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.83
-c9582e02f604	Whataburger	restaurant	burger restaurant	31.96931	-94.02061	12768 Hwy 84 East	Joaquin	75954	+19032630044	https://locations.whataburger.com/tx/joaquin/12768-hwy-84-east.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
-ed1c3ace91b1	Whataburger Restaurants	restaurant	american restaurant	31.35916	-94.76019	212 Loop Ln	Lufkin	75904	+19366324827	http://www.whataburger.com		0.92
 82bc6cba329e	Which Wich	restaurant		31.60337	-94.65497	Aramark Higher Education SFA Station 222 Vista Drive 304 Suite 1	Nacogdoches	75962	+19364688416	http://locations.whichwich.com/TX/Nacogdoches/SFASU		0.77
 19113b1a3361	Whispering Pines RV Park - Mt Enterprise TX	restaurant	american restaurant	31.99359	-94.71360	13099 US-259	Mt Enterprise	75681	+19034666937	https://whisperingpinesrvpark.com/		0.89
 4b134e869b28	Whistle Stop Restaurant	restaurant	comfort food restaurant	31.94430	-94.24460	172 Wall St	Tenaha	75974	+19362484344			0.92
@@ -1339,8 +1278,6 @@ d0838c1e215f	Willie G's BBQ And Fis	restaurant	barbecue restaurant	31.34549	-94.
 a96a41ddfb4a	Willie P's Bbq And Fish - Soul Food	restaurant	barbecue restaurant	31.34190	-94.71952	503 Locke St	Lufkin	75901	+19368997310	http://www.williepssoulfood.com		0.75
 7144895e0fd3	Willie P's BBQ and Fish - Soul Food LLC	restaurant	barbecue restaurant	31.31245	-94.72460	821 N Raguet St	Lufkin	75904	+19368997310	http://willieps.com		0.95
 aee4b54fbbfd	Wing Boss	restaurant	chicken wings restaurant	31.61027	-94.70706	3505 South St	Nacogdoches	75964	+19365595461	https://nacogdoches.wingbosstogo.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.85
-127fa707be85	Wingstop	restaurant	chicken restaurant	31.65069	-94.65646	4909 North St Ste 206	Nacogdoches	75965	+19365527867	https://www.wingstop.com/location/wingstop-362-nacogdoches-tx-75965/menu?y_source=1_NTUyMDY3MjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
-86c9a16b0cb9	Wingstop	restaurant	chicken restaurant	31.31029	-94.72311	4505 S Medford Dr	Lufkin	75901	+19366399464	https://www.wingstop.com/location/wingstop-201-lufkin-tx-75901/menu?y_source=1_NTUyMDc0MDMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 e14f2d244566	Y&C Noodle Bar	restaurant		31.30110	-94.70799	3406 S Chestnut St	Lufkin	75901	+19366763547			0.59
 614f46da8171	Yardbirds Bbq	restaurant	barbecue restaurant	31.81787	-94.19896	1991 Tenaha St	Center	75935	+19364275007			0.75
 ec8a5ea0c010	Zippy's Pizza, Wings & Things	restaurant	pizza restaurant	31.53126	-94.12556	107B N US Highway 96 # B	San Augustine	75972	+19362752600	http://www.zippyspizzatogo.com		0.77

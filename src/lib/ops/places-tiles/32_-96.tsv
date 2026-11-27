@@ -109,7 +109,6 @@ ab417342832a	Sola Bread Co	bakery		32.32947	-95.32894	2453 Earl Campbell Pkwy	Ty
 40c15a9ebfa8	Star Donuts	bakery	donut shop	32.33163	-95.30087	1611 S Broadway Ave	Tyler	75701	+19035922092	https://star-donuts-tx-8.hub.biz		0.96
 a63da1280e14	Star Donuts & Crossiants	bakery	donut shop	32.31581	-95.27665	1940 Troup Hwy	Tyler	75701	+19035950006	https://star-donuts-crossiants.hub.biz		0.97
 d393b4e5c651	Stella Mae's	bakery		32.93056	-95.87149	97 S 1st St	Point	75472	+14093773085			0.92
-59465b66e828	Sugarbakers of Mineola	bakery		32.66438	-95.49531	119 W Broad St	Mineola	75773	+19039918911			0.70
 d234781d1ca3	Sugarbakers of Mineola	bakery		32.66356	-95.48982	119 W Broad St	Mineola	75773	+19039918911			0.92
 c0c6d2e7cd26	Sunrise Donuts	bakery	donut shop	32.23804	-95.34619	16637 Old Jacksonville Hwy A	Tyler	75703	+19036306488			0.94
 ca8fba2c5c04	Sunrise Donuts	bakery	donut shop	32.28025	-95.74035	6421B State Highway 31 E	Murchison	75778	+19035049869			0.92
@@ -187,7 +186,6 @@ ee1fc6c6f8c1	Plaza De Toros El Relicario La Reyna Del Jaripeo	bar		32.44392	-95.
 03ad4512162a	Republic Icehouse	bar	sports bar	32.31168	-95.25151	3807 University Blvd	Tyler	75701	+19035045860	http://republicicehouse.com/		0.99
 62f6a28d0e55	RNA Tavern	bar	cocktail bar	32.66330	-95.48951	108 S Johnson St	Mineola	75773	+19033762120	http://www.rnatavern.com		0.93
 2eaef3b27dd1	Roast Social Kitchen	bar	cocktail bar	32.33185	-95.28768	1125 East 5th Street	Tyler	75701	+19032020295	http://www.roastsocialkitchen.com/		0.97
-672a3773cdef	Rod’s Country Kitchen & Bbq	bar		32.21888	-95.25211	17927 George Taylor Rd	Whitehouse	75791	+19032459987			0.76
 a9379f58aadd	Rod’s Country Kitchen & Bbq	bar		32.21857	-95.25108	17927 George Taylor Rd	Whitehouse	75791	+19032459987			0.76
 456314332c26	Rose City Draft House	bar	beer bar	32.29050	-95.30447	5393 S Broadway Ave	Tyler	75703	+19035612739	http://www.rosecitydrinks.dreamhosters.com		0.99
 536b168f07e7	Rumors Salon	bar		32.87474	-95.76503	126 Planters St	Emory	75440	+19034747566	https://rumoros-salon.hub.biz/		0.63
@@ -208,14 +206,12 @@ b8a04527850c	The Brass Star Club	bar		32.38086	-95.33032	2616 W NW Loop 323	Tyle
 c4149ef51209	The Finish Line	bar		32.50846	-95.64465	3064 I-20 Frontage Rd	Van	75790	+19039631037			0.92
 0de654d72ecf	The Garage Bar	bar		32.35101	-95.29654	418 E Erwin St	Tyler	75702	+19036177713	https://www.thegaragebartyler.com		0.95
 5e959ad92bbb	The Griff's Sports PLACE	bar		32.33420	-95.29991	Rt.01 Box 14104	Tyler					0.75
-f2262f187f62	The Griff's Sports PLACE	bar		32.30112	-95.23797	Rt.01 Box 14104	Tyler					0.74
 58daad18e0b6	The Hill-Rhonesboro	bar		32.75890	-95.14677	280 Private Road 3051	Winnsboro	75494	+19038413683			0.69
 59f46110c525	The IronHorse Bar - Cigars and Spirits at the Beckham	bar		32.66270	-95.48898	115E Commerce St	Mineola	75773	+19036386182	https://www.mineolabeckhamhotel.com/		0.96
 7a51297658d8	The Jungle Lounge	bar		32.33627	-95.37647	12594 State Highway 31 W	Tyler	75709				0.99
 6ef7f4a22d5e	The Parking Lot Sports Bar	bar		32.30972	-95.36656	12041 Spur 364	Tyler	75709	+19035972000			0.90
 a8ed40c8bf84	The Red Bull Saloon	bar		32.29231	-95.68201	10503 State Highway 31 E	Murchison	75778	+19034693226	http://theredbullsaloon.webs.com		0.81
 41f4b5f9f99c	The Tatershed at Pine Mills, TX. USA	bar		32.71336	-95.30656	3036 County Road 3880	Mineola	75773				0.76
-f26d32a3ba26	The Tatershed at Pine Mills, TX. USA	bar		32.71341	-95.30624	3036 County Road 3880	Mineola	75773				0.73
 64d506a460cb	The Tattler	bar		32.79593	-95.45153	103 N Main St	Quitman	75783	+19037602739	http://www.thetattler.net/		0.85
 c249ee75fccd	Tilting Vines Winery	bar	winery	32.15759	-95.18170	County Road 2178	Troup	75789	+14127731511	https://tiltingvines.com/		0.61
 7d8d14b2297d	True Vine Brewing Company	bar	brewery	32.34872	-95.31629	219 S Englewood Ave	Tyler	75702	+19036000124	http://truevinebrewing.com		0.92
@@ -240,7 +236,6 @@ dd96e75540ee	XL'N Pool Hall & Club	bar	pub	32.33198	-95.27454	2109 E 5th St	Tyle
 3a83687edc86	AJ Auto Sales	cardealer	used auto dealer	32.23801	-95.00304	24086 FM 838	Overton	75684	+19038592933	http://www.ajautosales.com/		0.89
 70b4bbb85f53	All In Auto	cardealer		32.78827	-95.45374	615 S Main St	Quitman	75783	+19039529774			0.92
 3a6af5d0fb38	All Star Auto Group	cardealer		32.58135	-95.86492		Canton		+19037292171	https://www.ridewithallstar.com/		0.77
-d67be4cdb07b	All Star Auto Group	cardealer		32.55215	-95.92252		Canton		+19037292171	https://www.ridewithallstar.com/		0.74
 38d14e2f6761	America's Car-Mart	cardealer		32.35474	-95.34378	128 NNW LOOP 323	Tyler	75702		https://www.car-mart.com/locations/054/tyler-texas/	America's Car-Mart	0.80
 cfeffb067fc8	American Auto Credit	cardealer	used auto dealer	32.21797	-95.82211	1824 State Highway 31 E	Athens	75751	+19036754227	http://www.amautocredit.com/		0.92
 7dbe6928885e	Aransas Auto Sales LLC	cardealer		32.58351	-95.11123	201 W Broadway HWY 80	Big Sandy	75755	+19036360403	https://aransasautosales.com/		0.92
@@ -576,7 +571,6 @@ bd95c3bda141	Starbucks Coffee Company	coffee		32.29674	-95.30059	4790 South Broa
 94f356ed4999	Taylor's Cafe 7402 Timber Circle	coffee		32.39280	-95.25446		Tyler					0.75
 bf90d576b1ea	The Caboose Coffee and Breakfast Stop	coffee		32.92596	-95.39788	3055 FM 515	Winnsboro	75494	+19033352499			0.83
 61965a688aae	The Cafe at The Lake Fork Inn	coffee		32.87336	-95.54426	3875 W State Highway 154	Yantis	75497	+19034744264			0.95
-e847e3415680	The Cafe at The Lake Fork Inn	coffee		32.89331	-95.55240	3875 W State Highway 154	Yantis	75497	+19034744264			0.95
 fa0eb2443ad4	The Celtic Table Cafe and Store	coffee		32.95790	-95.28978	217 Market St	Winnsboro	75494	+14693187980			0.60
 9128eb7e1360	The Coco Bean	coffee		32.26802	-95.34308	7272 Crosswater Ave	Tyler	75703	+19036304626	https://www.thecocobean.co/		0.99
 f7ba889eecec	The Coffee Bean & Tea Leaf	coffee		32.29935	-95.30223	4601 S Broadway Ave	Tyler	75703	+19035817470	http://www.coffeebeanery.com		0.92
@@ -601,7 +595,6 @@ b4e2ea464a9d	Yantis Cafe	coffee		32.92926	-95.57451	108 S Main St	Yantis	75497	+
 98e325c09e48	YWAM Substation	coffee		32.51124	-95.51144	20131 FM Rd 16	Lindale	75771	+19035095588	http://www.ywamtyler.org/		0.98
 21869978e626	Anderson County Special Edu	college		32.05040	-95.51199	401 W Main St	Frankston	75763	+19038763685	http://www.acsec.net		0.77
 380bbcb14823	Biotechnology Graduate Program (UTHSCT)	college		32.42558	-95.21336	11937 US-271	Tyler	75708	+19038777593	http://www.uthct.edu/biotech		0.78
-f6dcf2d7b592	Biotechnology Graduate Program (UTHSCT)	college		32.42551	-95.21256	11937 US-271	Tyler	75708	+19038777593	http://www.uthct.edu/biotech		0.78
 1f492bce12ee	City University	college		32.35224	-95.30651	212 N Border Ave	Tyler	75702				0.92
 a78e44cb0480	Department of Art and Art History, University of Texas at Tyler	college		32.31553	-95.25772	University of Texas at Tyler, 3900 University Blvd	Tyler	75701	+19035667000	http://www.uttyler.edu/art		0.76
 f64a5e7b6418	Department of Electrical Engineering - UT Tyler	college		32.31545	-95.25091	3900 University Blvd	Tyler	75799	+19035667417	https://www.uttyler.edu/ee/		0.59
@@ -655,7 +648,6 @@ b6fbbb3a3662	4 Way Country Store	convenience		32.89850	-95.88329	2450 FM-47	Poin
 665ec46b2d0a	7-Eleven	convenience		32.30244	-95.29994	4300 S Broadway Ave	Tyler	75703	+19033438738	https://www.7-eleven.com/		1.00
 67574e2fbc33	7-Eleven	convenience		32.22108	-95.50895	2110 Fm 315 S	Chandler	75758	+19038496687	https://www.7-eleven.com/locations/tx/chandler/2110-fm-315-s-39540		0.85
 7ffa266e8c08	7-Eleven	convenience		32.36934	-95.34250	3400 Van Highway	Tyler	75702	+18002550711	https://www.7-eleven.com/locations/tx/tyler/loop-323-&-van-hwy-41849		0.97
-8a59415aa683	7-Eleven	convenience		32.13395	-95.29488	655 S DOCTOR M ROPER PKWY	Bullard	75757	+18002550711	https://www.7-eleven.com/locations/tx/bullard/655-s-doctor-m-roper-pkwy-42161	7-Eleven	0.98
 a6cb30612f4e	7-Eleven	convenience		32.34695	-95.26809	403 S Southeast Loop 323	Tyler	75702	+19032831477	https://www.7-eleven.com/locations/tx/tyler/403-s-se-loop-323-38952		0.97
 affba9c88109	7-Eleven	convenience		32.57947	-95.85526	17200 Tx-19	Canton	75103	+18002550711	https://www.7-eleven.com/		1.00
 b77941f76c3f	7-Eleven	convenience		32.51301	-95.41009	303 S Main St	Lindale	75771	+19033552852	https://www.7-eleven.com/locations/tx/lindale/303-s-main-st-39670		0.85
@@ -670,7 +662,6 @@ f03086abe664	7-Eleven	convenience		32.33397	-95.29132	1315 S Beckham Ave	Tyler	7
 fcc09fbb256a	7-Eleven	convenience		32.35628	-95.35696	11421 Highway 64 W	Tyler	75704	+19035935149	https://www.7-eleven.com/locations/tx/tyler/11421-hwy-64-w-39675		0.93
 6a94d2d8c462	7-ELEVEN 38953	convenience		32.30240	-95.30000	4300 S BROADWAY AVE	Tyler	75703		https://locations.valero.com/en-us/LocationDetails/Index/4300-S-BROADWAY-AVE/0000029039	Valero	0.80
 7a0d542ff75d	76	convenience		32.79514	-95.45380	302 W Bermuda St	Quitman	75783	+19037638219	https://www.76.com/		0.92
-8649f1cdd56d	76	convenience		32.79761	-95.44946	302 W Bermuda St	Quitman	75783	+19037638219	http://www.76.com		0.75
 e8acda8a1bac	76	convenience		32.46890	-95.36538	12108 I 20 W	Tyler	75706	+19038826666	https://www.76.com/		0.92
 fe733ba701a5	A & S ARMADILLO #6	convenience		32.95819	-95.29393	400 W BROADWAY	Winnsboro	75494		https://www.exxon.com/en/find-station/exxon-winnsboro-tx-asarmadillo6-200315349	Exxon	0.80
 d11586e177ab	A and S Armadillo	convenience		32.95815	-95.29404	400 W Broadway St	Winnsboro	75494	+19033425626	http://exxonmobil.com		0.92
@@ -686,13 +677,11 @@ b46612c04072	ALON	convenience		32.28547	-95.71453	8500 State Highway 31 E	Murchi
 2a9b7fba583b	BEST MART	convenience		32.87550	-95.76820	316 W LENNON DRIVE	Emory	75440		https://locations.valero.com/en-us/LocationDetails/Index/316-W-LENNON-DRIVE/0000001257	Valero	0.80
 ae00f4604d31	Big Dog Convenience Store	convenience		32.34364	-95.30840	712 W Houston St	Tyler	75702	+19036176710			0.92
 ca197156d056	Bob's Town & Country	convenience		32.54010	-95.87505	1520 S Buffalo St	Canton	75103	+19035670943			0.92
-958eb89a3550	Brookshire's	convenience		32.31626	-95.45197	703 Hwy 31 E	Chandler	75758	+19038493663	https://www.brookshires.com/store-information/Chandler/84		0.85
 a719652870a6	Brookshire's	convenience		32.87033	-95.76165	959 E Lennon Dr	Emory	75440	+19034734519	https://www.brookshires.com/		0.97
 de1a3b91ebf2	Brookshire's	convenience		32.31030	-95.47152	703 Hwy 31 E	Chandler	75758	+19038493663	https://www.brookshires.com/store-information/Chandler/84		0.99
 43eb23b7f3b7	Brookshire's Fuel Center	convenience		32.12882	-95.30585	213 US Highway 69 N	Bullard	75757	+19038949384	https://www.brookshires.com/fuel	Brookshire's	0.79
 d3ae180d5cec	Brookshire's Fuel Center	convenience		32.58847	-95.20412	1477 N Beaulah St	Hawkins	75765	+19037695959	https://www.brookshires.com/fuel		0.85
 f91821736756	Buffalo Stop	convenience		32.99082	-95.93529	605 US Highway 69 S	Lone Oak	75453	+19036620000	http://www.subway.com/		1.00
-11363cc4303b	Bunny's	convenience		32.57750	-95.85571	17169 Interstate 20	Canton	75103				0.76
 ebfb79afe803	Bunny's	convenience		32.57752	-95.85575	17169 Interstate 20	Canton	75103				0.78
 0ea442955706	Bunny's 14	convenience		32.39021	-95.28628	638 E Northeast Loop 323	Tyler	75706	+19035266786	http://bunnys14.com/		0.98
 c19bfe549653	Bunny's Gas Station	convenience		32.23605	-95.34872		Tyler					0.61
@@ -858,7 +847,6 @@ b1e0770249a8	Express 64	convenience		32.35810	-95.36366	11876 State Hwy 64	Tyler
 a2186131de6f	Exxon	convenience		32.23741	-95.34673	16669 Fm 2493	Tyler	75703	+19035345486	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
 a89ac84c5d5e	Exxon	convenience		32.69381	-95.87617	714 E Pine St	Edgewood	75117	+19038967000	http://www.exxon.com		0.92
 ac4a1f057cd7	Exxon	convenience		32.31307	-95.31578	1321 Lake Placid Rd	Tyler	75701	+19035939894	https://www.exxon.com/en/find-station/exxon-tyler-tx-cornermarket-200310987?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
-acde4a5f9bcb	Exxon	convenience		32.48830	-95.16796	303 Main St	Winona	75792	+19038770472	http://www.exxon.com		0.92
 aeec7a7250c0	Exxon	convenience		32.28040	-95.31616	1001 W Grande Blvd	Tyler	75703	+19032382830	https://www.exxon.com/en/find-station/exxon-tyler-tx-7eleven41850-200324132?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
 b5e95049c6e4	Exxon	convenience		32.50476	-95.64274	133 Fm 314	Van	75790		https://www.exxon.com/en/find-station/exxon-van-tx-gatewayofvan-200329178?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
 ba0b22c381fb	Exxon	convenience		32.79580	-95.44946	308 E Goode St	Quitman	75783	+19037634492	https://www.exxon.com/en/find-station/exxon-quitman-tx-quicktrack106-200320263?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
@@ -949,7 +937,6 @@ f049623eae80	Kwicker's Food Mart	convenience		32.38105	-95.33234	2715 W NW Loop 
 ec4336714e00	Kwickers Food Mart #3	convenience		32.30930	-95.27860	1810 E SOUTHEAST LOOP 323	Tyler	75701		https://locations.valero.com/en-us/LocationDetails/Index/1810-E-SOUTHEAST-LOOP-323/0000027244	Valero	0.80
 650a188ffae0	KWIK STOP #2	convenience		32.05928	-95.50309	704 STATE HWY 155	Frankston	75763		https://www.exxon.com/en/find-station/exxon-frankston-tx-kwikstop2-200315297	Exxon	0.80
 f77481f15857	Kwik-Stop	convenience		32.05944	-95.50301	704 State Hwy 155	Frankston	75763	+19038764215	http://www.exxonmobil.com/corporate		0.92
-8dafaf3b064f	Kyle's Kwik Stop	convenience		32.57944	-95.85516	17200 State Highway 19	Canton	75103	+19035676750			0.77
 cf07e78ac8a0	Kyle's Kwik Stop	convenience		32.53693	-95.86254	17200 State Highway 19	Canton	75103	+19035676750	http://exxonmobil.com		0.95
 d881d9e04a4c	Kyles Kwik Stop 2	convenience		32.39524	-95.26952	6288 US Highway 271	Tyler	75708	+19035260150			0.90
 8ebd97a2ee8a	Lake Athens Marina	convenience		32.21572	-95.76853	5401 Fm 2495	Athens	75752	+19036758686			0.97
@@ -1045,7 +1032,6 @@ b9180763ee1f	Scott's Grocery	convenience		32.60458	-95.92738	30707 State Hwy 64	
 2b36b1a4f178	Scotties-whitehouse	convenience		32.23151	-95.22788	415 State Highway 110 N	Whitehouse	75791				0.55
 fbec39a735c6	Scotts Crossing General Store	convenience		32.28490	-95.71444	8500 State Hwy 31 E	Murchison	75778	+19034693122	http://ScottsCrossingGeneralStore.weebly.com/		0.92
 717f86fa643e	Shamrock	convenience		32.32324	-95.26624	2431 S Southeast Loop 323	Tyler	75701				0.59
-783fabfbad3d	Shamrock	convenience		32.31250	-95.26891	2431 S Southeast Loop 323	Tyler	75701				0.56
 166be4030e06	Shell	convenience		32.58350	-95.12209	707 W Broadway St	Big Sandy	75755	+19036365600	https://find.shell.com/us/fuel/12564594-707-w-broadway-st	Shell	0.92
 1baa4ed3bf57	Shell	convenience		32.35179	-95.26729	124 S Southeast Loop 323	Tyler	75702	+19035954305	https://find.shell.com/us/fuel/10084466-124-s-southeast-loop-323	Shell	0.92
 1c6cef1b1217	Shell	convenience		32.20506	-95.86990	116 Us Highway 175 W	Athens	75751	+19036752075	https://find.shell.com/us/fuel/10004369-116-us-highway-175-w	Shell	0.92
@@ -1176,7 +1162,6 @@ cc7d346eaeb8	TX17	convenience		32.23917	-95.22908	802 SH-110 N	Whitehouse	75791	
 12602a7bfce3	Valero	convenience		32.38132	-95.33235	2715 N Northwest Loop 323	Tyler	75702	+19035952751	http://www.valero.com	Valero Energy	0.92
 17eabd836629	Valero	convenience		32.67400	-95.70272	534 E Garland St	Grand Saline	75140	+19039625626	http://www.valero.com	Valero Energy	0.92
 1b7ed2e7d7c2	Valero	convenience		32.57735	-95.85553	17169 INTERSTATE 20	Canton	75103	+903567345	https://locations.valero.com/en-us/LocationDetails/Index/17169-INTERSTATE-20/0000027218	Valero	0.92
-25d8ba778c72	Valero	convenience		32.20400	-95.84285		Athens	75751	+12103452000	http://www.valero.com	Valero Energy	0.92
 2d336c84fe22	Valero	convenience		32.39016	-95.29164	407 E NE LOOP 323	Tyler	75706	+19035920653	http://www.valero.com	Valero Energy	0.92
 34e338be6af4	Valero	convenience		32.33461	-95.30106	4300 S Broadway Ave	Tyler	75703	+12103452000	https://www.valero.com		0.65
 3d1e890f8885	Valero	convenience		32.29493	-95.27827	5006 PALUXY DR	Tyler	75703	+19037148787	https://locations.valero.com/en-us/LocationDetails/Index/5006-PALUXY-DR/0000001952	Valero Energy	0.99
@@ -1196,9 +1181,7 @@ baef619bc5dd	Valero	convenience		32.55652	-95.86074	170 N Trade Days Blvd	Canton
 bfb9f9d7f0c0	Valero	convenience		32.65579	-95.49062	1000 S Pacific St	Mineola	75773	+12103452000	https://www.valero.com		0.65
 ce5a1309baf1	Valero	convenience		32.20950	-95.83035	1396 E Tyler St	Athens	75751	+14695172000	http://www.valero.com	Valero Energy	0.92
 d3672d05031f	Valero	convenience		32.31015	-95.46858	820 State Highway 31 E	Chandler	75758	+19038496132	http://www.valero.com	Valero Energy	0.70
-f618bf9c0bec	Valero	convenience		32.34708	-95.26785		Tyler	75702	+12103452000	http://www.valero.com	Valero Energy	1.00
 f7c505398552	Valero	convenience		32.27885	-95.30592	6500 S Broadway Ave	Tyler	75703	+12103452000	http://www.valero.com	Valero Energy	0.92
-f9547c49665b	Valero	convenience		32.05134	-95.50208		Frankston	75763	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/410-PINE-ST/0000002539	Valero Energy	0.95
 be4a9fed7eab	Valero Gas Station	convenience		32.19625	-95.85498	600 S Prairieville St.	Athens	75751	+19036774777	http://www.valero.com		0.77
 eb0c2d3a2d6b	Walis Grocery and Deli	convenience		32.37010	-95.30325	302 W Martin Luther King Jr Blvd	Tyler	75702	+19035265314	https://locations.valero.com/en-us/LocationDetails/Index/302-W-MLK-BLVD/0000012409		0.99
 7336a9c646e9	Walmart Fuel & Convenience	convenience		32.34578	-95.26462	450 S Southeast Loop 323	Tyler	75702	+19034056391	https://www.walmart.com		0.99
@@ -1213,19 +1196,26 @@ ce385cbfab3c	Alex Elotes Athens TX	fastfood		32.20649	-95.85602	300 N Pinkerton 
 ac30cba7a1ff	Alma Mexicana	fastfood		32.38999	-95.27911	1437 Poplar Rd	Tyler	75708		http://www.mexicansoulfood903.com/		0.65
 1414449fbe8e	Arby's	fastfood		32.30690	-95.30024	4006 S Broadway	Tyler	75701	+19035341735	https://locations.arbys.com/tx/tyler/4006-south-broadway.html		0.98
 51458ced6ef4	Arby's	fastfood		32.50882	-95.64479	1188 S Oak St	Van	75790	+19039631122	https://www.arbys.com/locations/us/tx/van/1188-s--oak-street/store-8493/	Arby's	0.97
-dcecf98244e2	Auntie Anne's	fastfood		32.30644	-95.47941	100 Main St.	Chandler	75758		https://locations.auntieannes.com/tx/chandler/100-main-st	Auntie Anne's	0.80
 d5e06b819df1	Beef Jerky Outlet	fastfood		32.25194	-95.30590	8942-8946 S Broadway Ave	Tyler	75703	+19035618822	https://beefjerkyoutlet.com		0.95
 f9743cb0f5f2	Benson's Eats & Treats	fastfood		32.19961	-95.85341	319 S Palestine St	Athens	75751	+19036751414	https://www.groupon.com/biz/athens-tx/bensons-eats-and-treats		0.99
 6c85391b8eaf	Bounree Na	fastfood		32.52460	-95.63744	110 W Main St	Van	75790	+19035042515			0.58
 240123d74081	Braum's	fastfood		32.28510	-95.32984	5858 Old Jacksonville Highway	Tyler	75703		https://www.braums.com/store/5858-old-jacksonville-highway-tyler-tx/	Braum's	0.80
 579b1ddae0af	Braum's Ice Cream & Dairy Store	fastfood		32.20552	-95.84542	712 E Tyler St	Athens	75751	+14302725153	https://www.braums.com/store/712-e-tyler-st-athens-tx/	Braums	0.96
 96c3de49ab47	Braum's Ice Cream and Dairy Store	fastfood		32.27182	-95.30760	7101 S Broadway Ave	Tyler	75703	+19035343973	http://www.braums.com/	Braums	1.00
+0d0445b5102c	Burger King	fastfood	burger restaurant	32.54257	-95.87467	575 E State Highway 243	Canton	75103	+19032876271	https://burgerking.com/store-locator/store/restaurant_239893		0.94
+0f5d8edcf04f	Burger King	fastfood	burger restaurant	32.34307	-95.34039	530 S SW Loop 323	Tyler	75702	+19035954687	https://burgerking.com/store-locator/store/4280	Burger King	0.97
 589d62fa5022	Burger King	fastfood		32.23125	-95.22710	406 Highway 110 North	Whitehouse	75791	+19038398667	https://locations.bk.com/tx/whitehouse/406-highway-110-north.html		0.77
+670350c9e72e	Burger King	fastfood	burger restaurant	32.30600	-95.33467	2801 W SW Loop 323	Tyler	75701	+19032669233	https://burgerking.com/store-locator/store/17173	Burger King	0.99
 714a14aee83c	Burger King	fastfood		32.30528	-95.30132	4113 S Broadway Ave	Tyler	75701	+19035617151	https://burgerking.com/store-locator/store/1677	Burger King	0.96
+762e148bd1b6	Burger King	fastfood	burger restaurant	32.47073	-95.38800	3404 S Main St	Lindale	75771	+19035664900	https://burgerking.com/store-locator/store/4279	Burger King	0.99
+7b1f75a1fa57	Burger King	fastfood	burger restaurant	32.26797	-95.30799	7445 S Broadway Ave	Tyler	75703	+19032669282	https://burgerking.com/store-locator/store/17323	Burger King	0.96
 d65b72d2ac03	Burger King	fastfood		32.54504	-95.85584	575 TX-243	Canton	75103	+19032876271	https://burgerking.com/store-locator/store/28793	Burger King	0.92
+d8b71a1a291a	Burger King	fastfood	burger restaurant	32.33187	-95.26555	1602 S SE Loop 323	Tyler	75701	+19035661176	https://burgerking.com/store-locator/store/3265	Burger King	0.99
+fa44158e6c38	Burger King	fastfood	burger restaurant	32.20523	-95.83833	1004 E Tyler St	Athens	75751	+19036753572	https://burgerking.com/store-locator/store/25385	Burger King	0.95
 f0fcba194b4a	Bush's Chicken	fastfood		32.30937	-95.47383	605 State Highway 31 W	Chandler	75758	+19038493341	http://www.bushschicken.com		0.77
 67ae3b926d02	Bush's Chicken!	fastfood		32.51089	-95.64352	1100 S Oak St	Van	75790	+19039631115	http://www.bushschicken.com		0.92
 af23b48a0e27	Carl's Jr.	fastfood		32.50841	-95.64270	1221 S Oak St	Van	75790	+19039633306	https://locations.carlsjr.com/tx/van/1221-s-oak	Carl's Jr.	0.98
+f7904fc39e02	Carl’s Jr.	fastfood	burger restaurant	32.43947	-95.13487	16242 US HWY 271, Suite Ste 300	Tyler	75708	+19038773756	https://locations.carlsjr.com/tx/tyler/16242-us-hwy-271		0.98
 6bfd67767652	Charleys Cheesesteaks	fastfood		32.54309	-95.75567	9800 I-20	Canton	75103	+19038292150	https://order.charleys.com/menu/canton-travel-center/	Charleys Cheesesteaks	0.93
 32ac0326d6e4	Chester Chucjen	fastfood		32.50896	-95.64345	1188 S Oak St	Van	75790	+19039631122	http://chestersinternational.com		0.96
 1cfe189b78f1	Chick-fil-A	fastfood		32.28466	-95.30512	5943 S Broadway Ave	Tyler	75703	+19035344692	http://www.chick-fil-a.com/	Chick-fil-A	0.98
@@ -1236,12 +1226,15 @@ bfff12ee3c80	Chick-fil-A	fastfood		32.32816	-95.34194	1873 South SW Loop 323	Tyl
 d114a3a629d5	Chick-fil-A	fastfood		32.33472	-95.28600	1250 Magnolia Dr New Student Resident Life Center	Tyler	75701	+19035335460	https://www.chick-fil-a.com/locations/tx/tyler-junior-college?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 daa0f2b3d583	Chick-fil-A	fastfood		32.30807	-95.27184	3830 Troup Hwy	Tyler	75703	+19035612324	https://www.chick-fil-a.com/locations/tx/highlands-village-shopping-center?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 53111485c785	Chicken Express	fastfood		32.57956	-95.85425	2356 N Trade Days Blvd	Canton	75103	+19032875030	https://chickene.com/	Chicken Express	0.97
+aa4a92555fae	Chicken Express	fastfood	chicken restaurant	32.23125	-95.22700	406 State Highway 110 N	Whitehouse	75791	+19032026064	hanzonation.com		0.90
 c16feffe6824	Chicken Express	fastfood		32.48709	-95.39750	2204 S Main St	Lindale	75771	+19038821515	https://chickene.com/	Chicken Express	0.97
 c68d4e12d9f1	Chicken Express	fastfood		32.20944	-95.82972	1303 Flat Creek Rd	Athens	75751	+19036753336	https://chickene.com/	Chicken Express	0.98
 c7e0df553499	Chicken Express	fastfood		32.33547	-95.33972	1270 S SW Loop 323	Tyler	75701	+19035330005	http://www.chickenexpress.us/	Chicken Express	0.99
 f028d6490205	Chicken Express	fastfood		32.27927	-95.33517	6363 Old Jacksonville Hwy	Tyler	75703	+19035611003	http://www.chickenexpress.us/	Chicken Express	0.99
 c3577a08a3ae	China Express	fastfood		32.67308	-95.70993	123 N Main St	Grand Saline	75140	+19039134505			0.66
+2958bc41167e	Chipotle Mexican Grill	fastfood	mexican restaurant	32.25116	-95.30776	8916 S Broadway Ave	Tyler	75703	+14302885466	https://locations.chipotle.com/tx/tyler/8916-s-broadway-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4330	Chipotle Mexican Grill	0.99
 aae0d8334ad9	Chipotle Mexican Grill	fastfood		32.33255	-95.34123	1555 S SW Loop 323	Tyler	75709		https://locations.chipotle.com/tx/tyler/1555-s-sw-loop-323	Chipotle	0.89
+b2844226796c	Chipotle Mexican Grill	fastfood	mexican restaurant	32.29723	-95.30183	4751 S Broadway Ave	Tyler	75703	+19035346266	http://www.chipotle.com	Chipotle Mexican Grill	0.99
 b98344f34424	Church's Chicken	fastfood		32.30337	-95.30222	105 N. N.W. Loop 323	Tyler	75701		https://locations.churchs.com/tx/tyler/105-n.-n.w.-loop-323	Church's Chicken	0.92
 5cfdd578bb1d	Church's Texas Chicken	fastfood		32.34381	-95.29369	535 S Beckham Ave	Tyler	75702	+19035971942		Church's Chicken	0.89
 7e7342834b56	Church's Texas Chicken	fastfood		32.58208	-95.87418	13951 South FM 859	Canton	75103	+19032519378	https://locations.churchs.com/tx/canton/13951-south-fm-859	Church's Chicken	0.97
@@ -1269,16 +1262,26 @@ b8b696f52e88	Dairy Queen	fastfood		32.23203	-95.22767	419 St Hwy 110n 419 St Hwy
 b982bceb013e	Dairy Queen	fastfood		32.87603	-95.77026	Hwy 69 Hwy 69	Emory	75440	+19034732236	https://www.dairyqueen.com/en-us/locations/tx/emory/hwy-69/14067/?y_source=1_MjkzMzkyOTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 cc5f985dc433	Dairy Queen	fastfood		32.50671	-95.63984	2789 Interstate 20 W	Van	75790	+19039638621	https://dqtyler.com/location/dq-van/?y_source=1_MjkzMzg5MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
 cd1e62864bf9	Dairy Queen	fastfood		32.34641	-95.26633	416 S SE Loop 323	Tyler	75702	+19036306448	https://dqtyler.com/location/dq-east-loop/?y_source=1_MjkzMzkzNTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
-df1c22cf5e98	Dairy Queen	fastfood		32.95051	-95.29322	700 S Main St 700 S Main St	Winnsboro	75494	+19033426969	https://www.dairyqueen.com/en-us/locations/tx/winnsboro/700-s-main-st/14733/?y_source=1_MjkzMzg4ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 e1b109f340f4	Dairy Queen	fastfood		32.23494	-95.40626	16941 Hwy 155 S	Noonday	75762	+19037102782	https://dqtyler.com/location/dq-noonday/?y_source=1_MjkzMzkxMzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 f60d80dd56b3	Dairy Queen	fastfood		32.33209	-95.26736	2611 E 5th St 2611 E 5th St	Tyler	75701	+19035938247	https://dqtyler.com/location/dq-5th-street/?y_source=1_MjkzMzkyMjctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+0a5b3649e364	Dairy Queen Corporation	fastfood		32.26680	-95.30656	106 E Heritage Dr	Tyler	75703	+19035614018	http://www.dqtyler.com/		0.96
 a0348df4d580	Dairy Queen in chandler	fastfood		32.32326	-95.46739	4510 S Broadway Ave	Tyler	75758		http://www.dairyqueen.com/	Dairy Queen	0.71
+0f62608e0389	Domino's	fastfood	pizza restaurant	32.66258	-95.48698	302 E Broad St	Mineola	75773	+19036382100	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+2842fede60e8	Domino's	fastfood	pizza restaurant	32.29077	-95.30451	5371 South Broadway	Tyler	75703	+19035978000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+371fea832e2c	Domino's	fastfood	pizza restaurant	32.35984	-95.30795	701 W. Gentry Parkway	Tyler	75703	+19035924432	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+48f8b5a7e1b5	Domino's	fastfood	pizza restaurant	32.57394	-95.85632	1963 North Trade Days Blvd	Canton	75103	+19035673030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+5b6c65e61663	Domino's	fastfood	pizza restaurant	32.33142	-95.28989	1694 S Beckham	Tyler	75701	+19035921530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+8608f95dab7f	Domino's	fastfood	pizza restaurant	32.22683	-95.22550	404 State Hwy North	Whitehouse	75791	+19038711215	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+ad17e8a8e6ab	Domino's	fastfood	pizza restaurant	32.29391	-95.26098	5111 Troup Hwy	Tyler	75707	+19039393131	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+f7d693d06304	Domino's	fastfood	pizza restaurant	32.23709	-95.34638	16669 D Fm 2493	Tyler	75703	+19039390705	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+2e38cf620ae0	Domino's Pizza	fastfood	pizza restaurant	32.30861	-95.47423	522 TX-31	Chandler	75758	+19035154088	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
+3478ef76e5f5	Domino's Pizza	fastfood	pizza restaurant	32.20432	-95.83401	210 Crestway St	Athens	75751	+19036703160	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+fe89253c73a2	Domino's Pizza	fastfood	pizza restaurant	32.47857	-95.39368	2807 S Main St Ste 100 ste 100	Lindale	75771	+19038819300	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
 02efd4bd0c47	DQ Grill & Chill	fastfood		32.30868	-95.27831	1809 E SE Loop 323	Tyler	75703		https://www.dairyqueen.com/en-us/locations/tx/tyler/1809-e-se-loop-323/4441	DQ Grill & Chill	0.80
 0f204c0bc598	DQ Grill & Chill	fastfood		32.31736	-95.20837	12050 Hwy 64 E	Tyler	75707		https://www.dairyqueen.com/en-us/locations/tx/tyler/12050-hwy-64-e/11092	DQ Grill & Chill	0.80
 1347f5902d07	DQ Grill & Chill	fastfood		32.34728	-95.26704	416 S Southeast Loop 323	Tyler	75702		https://www.dairyqueen.com/en-us/locations/tx/tyler/416-s-southeast-loop-323/14409	DQ Grill & Chill	0.80
 176e24166408	DQ Grill & Chill	fastfood		32.51300	-95.40883	310 S Main St	Lindale	75771		https://www.dairyqueen.com/en-us/locations/tx/lindale/310-s-main-st/4125	DQ Grill & Chill	0.80
 1f36b313d571	DQ Grill & Chill	fastfood		32.78802	-95.45469	700 S Main St	Quitman	75783		https://www.dairyqueen.com/en-us/locations/tx/quitman/700-s-main-st/4287	DQ Grill & Chill	0.80
-213febc3d86f	DQ Grill & Chill	fastfood		32.95058	-95.29327	700 S Main St	Winnsboro	75494		https://www.dairyqueen.com/en-us/locations/tx/winnsboro/700-s-main-st/4505	DQ Grill & Chill	0.80
 4cbc264b985e	DQ Grill & Chill	fastfood		32.42392	-95.20736	11972 Hwy 271	Tyler	75708		https://www.dairyqueen.com/en-us/locations/tx/tyler/11972-hwy-271/12435	DQ Grill & Chill	0.80
 51a18cb6e1ea	DQ Grill & Chill	fastfood		32.05179	-95.50337	Hwy 175 S	Frankston	75763		https://www.dairyqueen.com/en-us/locations/tx/frankston/hwy-175-s/3901	DQ Grill & Chill	0.80
 5638f1e3c227	DQ Grill & Chill	fastfood		32.57778	-95.85637	17249 I-20	Canton	75103		https://www.dairyqueen.com/en-us/locations/tx/canton/17249-i-20/3670	DQ Grill & Chill	0.80
@@ -1295,26 +1298,52 @@ f158cbef4652	DQ Grill & Chill	fastfood		32.23499	-95.40631	16941 State Highway 1
 f9303569e0b3	DQ Grill & Chill	fastfood		32.32126	-95.44088	16210 State Highway 31w	Tyler	75709		https://www.dairyqueen.com/en-us/locations/tx/tyler/16210-state-highway-31w/4438	DQ Grill & Chill	0.80
 8d253480a4a3	DQ Tyler	fastfood		32.25332	-95.30757	8850 S Broadway Ave	Tyler	75703	+19036306465	http://www.dqtyler.com/		0.96
 d3d3fc04bab5	Dunkin Donuts	fastfood		32.34577	-95.26539	450 S SOUTHEAST LOOP 323, WM6467	Tyler	75702		https://www.dunkindonuts.com/locations/us/tx/tyler/450-s-southeast-loop-323/store-366969/	Dunkin'	0.80
+53a722424985	Firehouse Subs	fastfood	sandwich shop	32.31348	-95.27460	3304 Troup Highway	Tyler	75701	+19037877472	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=927	Firehouse Subs	0.99
+984c36a08d38	Firehouse Subs	fastfood	sandwich shop	32.20531	-95.83711	1010 E Tyler St Suite E	Athens	75751	+19039044205	https://www.firehousesubs.com/	Firehouse Subs	0.99
 460f83598d06	Freddy's Frozen Custard & Steakburgers	fastfood		32.32793	-95.34017	3743 Earl Campbell Pkwy	Tyler	75701	+13167197800	https://www.freddys.com/location/tyler-earl-campbell-tx	Freddy's Frozen Custard & Steakburgers	0.97
+4c159c867318	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	32.26511	-95.30811	7707 S Broadway Ave	Tyler	75703	+19036305480	https://www.freddys.com		1.00
 98270b118532	Freddy's Frozen Custard & Steakburgers	fastfood		32.20955	-95.82906	1305 Flat Creek Rd	Athens	75751	+14699371004	https://www.freddys.com/		0.92
 0bbaabec7e8c	Golden Chick	fastfood		32.87528	-95.76960	401 W Lennon Dr	Emory	75440	+19034730000	https://locations.goldenchick.com/tx/emory/1349/	Golden Chick	0.92
 48e6515c5ab1	Golden Chick	fastfood		32.30360	-95.30325	205 W SW Loop 323	Tyler	75701	+19037478155	https://locations.goldenchick.com/tx/tyler/1379/	Golden Chick	0.98
+74f13d50b733	Golden Chick	fastfood	american restaurant	32.66497	-95.49667	638 W. Broad St.	Mineola	75773	+19035690404	http://locations.goldenchick.com/tx/mineola/1168/		0.94
 818803c084bc	Golden Chick	fastfood		32.68842	-95.48576	230 NW Loop 564	Mineola	75773	+19035690404	https://locations.goldenchick.com/tx/mineola/1168/	Golden Chick	1.00
 9e6ee5b19e16	Golden Chick	fastfood		32.67368	-95.48420	1110 N Pacific St	Mineola	75773	+19035690404	http://www.goldenchick.com		0.92
 d6662e1cfe32	Great American Cookies	fastfood		32.29590	-95.30244	4915 South Broadway	Tyler	75703		https://ordernew.greatamericancookies.com/gac/4915-south-broadway-tyler-tx-75703	Great American Cookies	0.80
 4b5444fa8d56	Hot Dog Hero	fastfood		32.14461	-95.31474	475 E Main St	Bullard	75757	+19035748576	http://thehotdoghero.com/		0.91
+1ae64e50ba11	Jack in the Box	fastfood	taco restaurant	32.35474	-95.34274	121 N Northwest Loop 323	Tyler	75702	+19035967739	http://www.jackinthebox.com/locations/3805		0.96
 6871a6d3f6e3	Jack in the Box	fastfood		32.33092	-95.30080	1703 S Broadway Ave	Tyler	75701	+19035928841	https://www.jackinthebox.com		1.00
+7064f12b6c6d	Jersey Mike's	fastfood	sandwich shop	32.33143	-95.28984	1690 South Beckham Ave	Tyler	75701	+19037473437	https://www.jerseymikes.com/15025/tyler-tx	Jersey Mike's Subs	0.98
+aac19e1a4937	Jersey Mike's Subs	fastfood	sandwich shop	32.29705	-95.29915	Macy's Plaza, 4754 S Broadway Ave	Tyler	75703	+19035614955	https://www.jerseymikes.com/15004/tyler-tx	Jersey Mike's Subs	0.99
+82b62648d17a	Jimmy John's	fastfood	sandwich shop	32.29156	-95.30315	5303 S Broadway Ave	Tyler	75703	+19036301651	https://locations.jimmyjohns.com/tx/tyler/sandwiches-4535.html	Jimmy John's	0.99
+d8a5742b5370	Jimmy John's	fastfood	sandwich shop	32.31638	-95.27866	1847 Troup Hwy Ste 100	Tyler	75701	+19036176878	https://www.jimmyjohns.com		0.92
 65cbd8a07a84	Julio's Market Chicken and Fish	fastfood		32.20605	-95.84269	803 E Tyler St	Athens	75751	+19036771601			0.98
 40e92902c2b6	Kevin and Jeaneane Lilly's McDonald's	fastfood		32.20613	-95.83860	1001 E Tyler St	Athens	75751	+19036774806	http://www.lillymcd.com/		0.89
+238b65e213aa	KFC	fastfood	chicken restaurant	32.20444	-95.86654	612 W Corsicana St	Athens	75751	+19036751900	http://www.kfc.com/storelocator/Default.aspx?address=612%20W.%20Corsicana,Athens,TX		0.92
 6a89e7ef8d66	KFC	fastfood		32.36676	-95.32560	2215 W Gentry Pkwy	Tyler	75702	+19035926184	http://www.kfc.com/storelocator/Default.aspx?address=2215%20W.%20Gentry,Tyler,TX		0.92
+6a9024651eb8	Kfc	fastfood	chicken restaurant	32.34578	-95.26462	450 S Southeast Loop 323	Tyler	75702	+19037811824	https://www.kfc.com		0.92
 95ac5759471d	KFC	fastfood		32.27435	-95.30748	6901 South Broadway	Tyler	75703	+19035347024	https://locations.kfc.com/tx/tyler/6901-south-broadway	KFC	0.99
 9c841cf22452	KFC	fastfood		32.31052	-95.27318	3630 Troup Highway	Tyler	75703	+19035340133	https://locations.kfc.com/tx/tyler/3630-troup-highway	KFC	0.98
 9d4cfcee7d0f	KFC	fastfood		32.20605	-95.84283	801 E. Tyler St	Athens	75751	+19039040237	https://locations.kfc.com/tx/athens/801-e-tyler-st	KFC	0.99
+d32c7c6d5e03	KFC	fastfood	chicken restaurant	32.57388	-95.85574	1963 N Trade Days Blvd	Canton	75103	+19035675417	http://www.kfc.com/storelocator/Default.aspx?address=1963%20N%20Trade%20Days%20Blvd,Canton,TX		0.92
+e32f1ced8135	KFC	fastfood	chicken restaurant	32.47258	-95.38934	3222 South Main Street, Suite B	Lindale	75771	+19038819601	https://locations.kfc.com/tx/lindale/3222-south-main-street		0.97
 4226696c78c0	Krispy Krunchy Chicken	fastfood		32.89701	-95.55967	4634 W SH 154	Yantis	75497		https://locations.krispykrunchy.com/tx/yantis/4634-w-sh-154	Krispy Krunchy Chicken	0.80
 74e0c1a75394	Krispy Krunchy Chicken	fastfood		32.17389	-95.42696	17125 FM 344	Flint	75762		https://locations.krispykrunchy.com/tx/flint/17125-fm-344	Krispy Krunchy Chicken	0.96
 dbb35d0cc637	Krispy Krunchy Chicken	fastfood		32.90770	-95.96023	482 Highway 276	Point	75472		https://locations.krispykrunchy.com/tx/point/482-highway-276	Krispy Krunchy Chicken	0.96
 e01e78842d33	Krispy Krunchy Chicken	fastfood		32.79587	-95.45708	515 W Bermuda St	Quitman	75783		https://locations.krispykrunchy.com/tx/quitman/515-w-bermuda-st	Krispy Krunchy Chicken	0.80
 1647d156ccf1	La Cocina De Silvia De La cruz	fastfood		32.38239	-95.31440	34th ST	Tyler	75702	+19035907681			0.97
+b69fcaea035e	Little Caesars	fastfood	pizza restaurant	32.51242	-95.40888	318 S Main St	Lindale	75771	+19038815421	https://littlecaesars.com/en-us/store/12341	Little Caesars	0.99
+d645408eb01f	Little Caesars	fastfood	pizza restaurant	32.20581	-95.84772	607 East Tyler Street	Athens	75751	+19036752335	https://littlecaesars.com/en-us/store/10301	Little Caesars	0.98
+15a86ba70963	Little Caesars Pizza	fastfood	pizza restaurant	32.27071	-95.34175	2251 Three Lakes Pkwy Ste 101	Tyler	75703	+19039393900	https://littlecaesars.com/en-us/store/11182	Little Caesars	0.97
+18987c843ebf	Little Caesars Pizza	fastfood	pizza restaurant	32.34517	-95.33999	510 S SW Loop 323 Ste 310	Tyler	75702	+19035927373	https://littlecaesars.com/en-us/store/8161	Little Caesars	0.97
+2ef0aa832022	Little Caesars Pizza	fastfood	pizza restaurant	32.79631	-95.45724	515 West Bermuda Street	Quitman	75783	+19037602500	https://littlecaesars.com/en-us/store/20539		0.95
+736d90d3de92	Little Caesars Pizza	fastfood	pizza restaurant	32.34715	-95.29583	512 E Front St	Tyler	75702	+19035936000	https://littlecaesars.com/en-us/store/11386	Little Caesars	0.96
+78fd64e5a57d	Little Caesars Pizza	fastfood	pizza restaurant	32.54449	-95.85933	351 East State Highway 243	Canton	75103	+19035024933	https://littlecaesars.com/en-us/store/21026		0.92
+8f2bd53539ed	Little Caesars Pizza	fastfood	pizza restaurant	32.36506	-95.32260	1919 W Gentry Pkwy	Tyler	75702	+19032669466	https://littlecaesars.com/en-us/store/12436	Little Caesars	0.96
+93aa6255df78	Little Caesars Pizza	fastfood	pizza restaurant	32.32262	-95.43886	16158 Highway 31 W	Tyler	75709	+19035937860	https://www.littlecaesars.com		0.99
+9c4c56f97b06	Little Caesars Pizza	fastfood	pizza restaurant	32.24654	-95.23358	1200 TX-110	Whitehouse	75791	+19038719826	https://littlecaesars.com/en-us/store/10627	Little Caesars	0.96
+fea93d6eecff	Little Caesars Pizza	fastfood	pizza restaurant	32.31751	-95.28050	1741 Troup Hwy	Tyler	75701	+19035927744	https://littlecaesars.com/en-us/store/3806	Little Caesars	1.00
+0d2c9dbd3159	Long John Silver's	fastfood	seafood restaurant	32.20488	-95.86961	116 US Highway 175 W	Athens	75751	+19036750025	https://www.ljsilvers.com		0.92
+1655f618d2f1	Long John Silver's	fastfood	seafood restaurant	32.30357	-95.30326	205 W Southwest Loop 323	Tyler	75701	+19035615726	locations.ljsilvers.com		0.92
 74eb38ea402d	Long John Silver's	fastfood		32.26831	-95.30782	7425 S Broadway Ave	Tyler	75703	+19039391873	https://locations.ljsilvers.com/tx/tyler/7425-s.-broadway	Long John Silver's	0.92
 bd68c7adaf08	Long John Silver's	fastfood		32.54317	-95.75576	9800 I-20	Canton	75103	+19038292150	https://www.ljsilvers.com/?y_source=1_MTc1NzMyODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.94
 6bf47b4e5363	Major League Snowballs	fastfood		32.10709	-95.40952	2241 FM-346	Bullard	75757	+19037425766			0.73
@@ -1322,7 +1351,6 @@ bd68c7adaf08	Long John Silver's	fastfood		32.54317	-95.75576	9800 I-20	Canton	75
 23d394ca395c	McDonald's	fastfood		32.57628	-95.85467	2254 Trade Days Blvd	Canton	75103	+19035675517	https://www.mcdonalds.com/us/en-us/location/tx/canton/2254-trade-days-blvd/13638.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
 2678900152fd	McDonald's	fastfood		32.30675	-95.48934	710 State Hwy 31 E	Chandler	75758	+19035152100	https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.93
 354aff74ff49	McDonald's	fastfood		32.67506	-95.48453	1202 N Pacific	Mineola	75773	+19035693252	https://www.mcdonalds.com/us/en-us/location/tx/mineola/1202-n-pacific/11434.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
-415182d340d1	McDonald's	fastfood		32.30962	-95.47076	710 State Hwy 31 E	Chandler	75758	+19035152100	https://www.mcdonalds.com/?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.92
 46a010971db9	McDonald's	fastfood		32.94827	-95.28974	314 E Coke Road	Winnsboro	75494	+19033423165	https://www.mcdonalds.com/us/en-us/location/tx/winnsboro/314-e-coke-road/35694.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 524e94c49d77	McDonald's	fastfood		32.51028	-95.64364	1070 S Oak St	Van	75790		https://www.mcdonalds.com/us/en-us/location/39743.html	McDonald's	0.80
 58a5bb1bf888	McDonald's	fastfood		32.46974	-95.38894	3511 S Main St	Lindale	75771	+19038825821	https://www.mcdonalds.com/us/en-us/location/tx/lindale/3511-south-main-street/6704.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
@@ -1336,13 +1364,31 @@ d22d0112d3c6	McDonald's	fastfood		32.37536	-95.33163	3109 W Gentry Place	Tyler	7
 e4fc4f0c8d3c	McDonald's	fastfood		32.33441	-95.29039	1300 S Beckham Ave	Tyler	75701	+19035937987	https://www.mcdonalds.com/us/en-us/location/tx/tyler/1300-s-beckham-ave/1301.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 e81b5a262e6c	McDonald's	fastfood		32.35143	-95.34577	3820 HWY 64 WEST (Walmart #1022)	Tyler	75702	+19035970091	https://www.mcdonalds.com/us/en-us/location/tx/tyler/3820-hwy-64-west/30146.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	1.00
 ebc8ef11fabc	McDonald's	fastfood		32.30642	-95.30018	4014 S Broadway	Tyler	75701	+19035349769	https://www.mcdonalds.com/us/en-us/location/tx/tyler/4014-s-broadway/3239.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+f233544f3d5c	McDonald's	fastfood	burger restaurant	32.14907	-95.31280	407 Almarion St	Bullard	75757		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 f609bd0e5bb7	McDonald's	fastfood		32.45089	-95.28357	12881 Fm 14	Tyler	75706	+19035265168	https://www.mcdonalds.com/us/en-us/location/tx/tyler/12881-fm-14/33272.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	1.00
-4def3fb02458	Panda Express	fastfood		32.46366	-95.38465	8404 Military Dr	Tyler	75706	+14699988698	https://www.pandaexpress.com/locations/tx/tyler/3430		0.85
+5676f7283b19	Panda Express	fastfood	chinese restaurant	32.46757	-95.38488	8404 Military Dr	Tyler	75706	+14699988698	www.pandaexpress.com		0.97
 7936d7c7c2f3	Panda Express	fastfood		32.30729	-95.27131	3904 Troup Hwy	Tyler	75703	+19035618718	http://www.pandaexpress.com/		0.99
 8a1969cc9df9	Panda Express	fastfood		32.57950	-95.85561	17210 I-20 Frontage Rd	Canton	75103	+19033863768	http://www.pandaexpress.com/	Panda Express México	0.94
+dff6db60a73b	Panda Express	fastfood	chinese restaurant	32.27397	-95.30624	6910 S Broadway Ave.	Tyler	75703	+19039390071	http://www.pandaexpress.com/	Panda Express México	0.99
+f00d6061c7a3	Panda Express	fastfood	chinese restaurant	32.20511	-95.83772	1006 E Tyler St	Athens	75751	+19728429661	www.pandaexpress.com		0.94
+fc61a32a5416	Papa John's Pizza	fastfood	pizza restaurant	32.27556	-95.30741	6751 S Broadway Ave	Tyler	75703	+19035090990	https://www.papajohns.com/		0.94
+6351db67e13f	Papa Johns	fastfood	pizza restaurant	32.27654	-95.30870	6751 S Broadway Avenue	Tyler	75703	+19035090990	https://locations.papajohns.com/united-states/tx/75703/tyler/6751-s-broadway-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
+f119447a03ee	Papa Johns	fastfood	pizza restaurant	32.34211	-95.29300	631 S Beckham Ave	Tyler	75701	+19035967272	https://locations.papajohns.com/united-states/tx/75701/tyler/631-s-beckham-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
 46e3e5c89968	Perkins Ponderosa	fastfood		32.26616	-95.63503	13162 Jordan Acres Rd	Brownsboro	75756				0.73
+0c44cd89ddf8	Pizza Hut	fastfood	pizza restaurant	32.67557	-95.48584	1211 N Johnson St	Mineola	75773	+19035695437	https://locations.pizzahut.com/tx/mineola/1211-n-johnson?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289941	Pizza Hut	0.98
+1ed7c16b9851	Pizza Hut	fastfood	pizza restaurant	32.87384	-95.76582	122 S. Texas St. Rains	Emory	75440	+19034735550	https://locations.pizzahut.com/tx/emory/122-s-texas-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=308126	Pizza Hut	0.99
+3819a6affc9a	Pizza Hut	fastfood	pizza restaurant	32.35490	-95.34678	3871 State Highway 64 Smith	Tyler	75704	+19037078205	https://locations.pizzahut.com/tx/tyler/3871-state-highway-64?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315987	Pizza Hut	0.96
+3cec64659cf9	Pizza Hut	fastfood	pizza restaurant	32.47292	-95.38886	3222 S. Main Street Smith	Lindale	75771	+19038818691	https://locations.pizzahut.com/tx/lindale/3222-s-main-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305004	Pizza Hut	0.92
+47418f288747	Pizza Hut	fastfood	pizza restaurant	32.54334	-95.86259	1260 S Trade Days Blvd	Canton	75103	+19035671700	https://locations.pizzahut.com/tx/canton/1260-s-trades-day-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286689	Pizza Hut	0.96
+6785874bc53d	Pizza Hut	fastfood	pizza restaurant	32.21077	-95.83057	1409 E Tyler St	Athens	75751	+19036756060	https://locations.pizzahut.com/tx/athens/1409-e-tyler-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309175	Pizza Hut	0.99
+77b4679c7ff0	Pizza Hut	fastfood	pizza restaurant	32.30779	-95.47867	206 Hwy 31 Henderson	Chandler	75758	+19035154280	https://locations.pizzahut.com/tx/chandler/206-hwy-31	Pizza Hut	0.98
+7ea882c3ac58	Pizza Hut	fastfood	pizza restaurant	32.26078	-95.30807	7925 S. Broadway Smith	Tyler	75703	+19035616141	https://locations.pizzahut.com/tx/tyler/7925-s-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310641	Pizza Hut	0.92
+bde42c1768b1	Pizza Hut	fastfood	pizza restaurant	32.31172	-95.25068	3905 University Blvd Smith	Tyler	75701	+14302470099	https://locations.pizzahut.com/tx/tyler/3905-university-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315603	Pizza Hut	0.96
+d1d9598ca6b0	Pizza Hut	fastfood	pizza restaurant	32.32935	-95.30086	1817 South Broadway Smith	Tyler	75701	+19035979797	https://locations.pizzahut.com/tx/tyler/1817-south-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295628	Pizza Hut	0.98
+ecaac59b683d	Pizza Hut	fastfood	pizza restaurant	32.23366	-95.22860	601 Hwy. 110 North Smith	Whitehouse	75791	+19038398741	https://locations.pizzahut.com/tx/whitehouse/601-hwy-110-north?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305525	Pizza Hut	0.98
+81a88da065bc	Pizza Hut Express	fastfood	pizza restaurant	32.33336	-95.26501	2734 E 5th St, Brookshires #28	Tyler	75701		https://locations.pizzahut.com/tx/tyler/2734-e-5th-st		0.96
+d2261284c629	Pizza Hut Express	fastfood	pizza restaurant	32.30606	-95.27076	3828 Troup Hwy, Brookshires #605 S1f	Tyler	75707		https://locations.pizzahut.com/tx/tyler/3828-troup-hwy		0.96
 d9b4afa82e34	Pizza Hut Express	fastfood		32.29378	-95.30299	100 Rice Road	Tyler	75703		https://locations.pizzahut.com/tx/tyler/100-rice-road	Pizza Hut	0.80
-e2e00d5e4be0	Pizza Takeout & Delivery	fastfood		32.27466	-95.30612					https://locations.papamurphys.com/tx/tyler/6878-south-broadway-avenue	Papa Murphy's	0.80
 7e2e0bdf6ddd	Popeyes	fastfood		32.34935	-95.34274	3820 W Elm St	Tyler	75702	+19037473833	https://www.popeyes.com/store-locator/store/restaurant_84466	Popeyes Louisiana Kitchen	0.99
 aff1738f68b6	Popeyes	fastfood		32.33268	-95.27251	2316 E 5th St	Tyler	75701	+19035259523	https://www.popeyes.com/store-locator/store/restaurant_84917	Popeyes Louisiana Kitchen	1.00
 cd38570c4aea	Popeyes Louisiana Kitchen	fastfood		32.21008	-95.82974	1398 E Tyler St	Athens	75751	+19038044220	https://www.popeyes.com/store-locator/store/restaurant_89332	Popeyes Louisiana Kitchen	0.98
@@ -1350,6 +1396,12 @@ cd38570c4aea	Popeyes Louisiana Kitchen	fastfood		32.21008	-95.82974	1398 E Tyler
 445e9f2400c0	Raising Cane's	fastfood		32.34534	-95.26809	513 South Southeast Loop 323	Tyler	75702	+19032523327	https://locations.raisingcanes.com/tx/tyler/513-south-southeast-loop-323	Raising Cane's Chicken Fingers	0.99
 755aa96a421e	Raising Cane's	fastfood		32.30469	-95.30009	4186 S Broadway Ave	Tyler	75701	+19035813924	https://locations.raisingcanes.com/tx/tyler/4186-s.-broadway-ave.	Raising Cane's Chicken Fingers	0.99
 44fe09e8bd4e	Roy's Tacos	fastfood		32.20393	-95.86952	801 W Corsicana St	Athens	75751	+19032882187			0.95
+38cccf07e197	Schlotzsky's	fastfood	sandwich shop	32.30347	-95.30936	720 W Southwest Loop 323	Tyler	75701	+19035810801	http://www.schlotzskys.com/tyler/1200/home		0.98
+88183554d0c9	Schlotzsky's	fastfood	sandwich shop	32.20230	-95.85333	215 S Palestine St	Athens	75751	+19036770202	https://locations.schlotzskys.com/tx/athens/215-s-palestine?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
+d038c204e6ed	Schlotzsky's	fastfood	sandwich shop	32.57808	-95.85683	17279 Interstate 20 Service Road	Canton	75103	+19035675000	https://www.schlotzskys.com/texas/canton/100858	Schlotzsky's	0.97
+f2f8cc08e542	Schlotzsky's	fastfood	sandwich shop	32.32676	-95.26646	2105 S SE Loop 323	Tyler	75701	+19035967040	https://locations.schlotzskys.com/tx/tyler/2105-south-south-east-loop-323?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.94
+fa429e41ec3d	Schlotzsky's	fastfood	sandwich shop	32.47881	-95.39377	2805 S Main St Suite 275	Lindale	75771	+19038825689	https://www.schlotzskys.com/	Schlotzsky's	0.94
+153b273515a1	Schlotzskys	fastfood	sandwich shop	32.34166	-95.29289	709 S Beckham Ave Ste B	Tyler	75701	+19035928390	https://locations.schlotzskys.com/tx/tyler/709-south-beckham?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98
 90c1f5eef37d	Smoothie King	fastfood		32.33161	-95.34168	1575 South SW Loop 323, Unit 100	Tyler	75701		https://locations.smoothieking.com/ll/us/tx/tyler/157-s-sw-loop-323-ste-100/	Smoothie King	0.89
 02e0f5f4aa2b	Sonic Drive In	fastfood		32.28220	-95.33152	5980 Old Jacksonville Highway	Tyler	75703	+19039392672	https://locations.sonicdrivein.com/tx/tyler/5980-old-jacksonville-highway.html	Sonic Drive-In	0.99
 13dbd65de187	Sonic Drive In	fastfood		32.66403	-95.49197	311 W. Broad Street	Mineola	75773	+19035695506	https://locations.sonicdrivein.com/tx/mineola/311-w.-broad-street.html	Sonic Drive-In	0.97
@@ -1372,25 +1424,65 @@ e33f1c73ba1e	Sonic Drive In	fastfood		32.35430	-95.34395	102 N. Northwest Loop 3
 efe5cb855ee8	Sonic Drive In	fastfood		32.18919	-95.43532	20095 Highway 155 South	Flint	75762	+19038252759	https://locations.sonicdrivein.com/tx/flint/20095-highway-155-south.html	Sonic Drive-In	0.99
 f92b9e18fde2	Sonic Drive In	fastfood		32.28826	-95.30399	5611 S. Broadway	Tyler	75703	+19035814200	https://locations.sonicdrivein.com/tx/tyler/5611-s.-broadway.html	Sonic Drive-In	0.99
 039f41535803	Sonic Drive-In	fastfood		32.14724	-95.13889	1807 W Duval St	Troup	75789	+19038423304	https://locations.sonicdrivein.com/tx/troup/1807-west-duval.html	Sonic Drive-In	0.98
+338e21113c36	Sonic Drive-In	fastfood	burger restaurant	32.21117	-95.82877	1402 E Tyler St	Athens	75751	+19036758987	https://locations.sonicdrivein.com/tx/athens/1402-east-tyler.html		0.98
 5adc14536f5d	Sonic Drive-In	fastfood		32.54387	-95.86440	177 West State Highway 243	Canton	75103	+19035674747	https://locations.sonicdrivein.com/tx/canton/177-west-state-highway-243.html	Sonic Drive-In	0.96
 63af73ebcf36	Sonic Drive-In	fastfood		32.51114	-95.64273	989 S Oak St	Van	75790	+19039634336	https://locations.sonicdrivein.com/tx/van/989-south-oak-street.html	Sonic Drive-In	0.97
 82f1904b6bfa	Sonic Drive-In	fastfood		32.21175	-95.87551	6096 U S Highway 175 W	Athens	75751		https://locations.sonicdrivein.com/tx/athens/6096-u.s.-highway-175-west.html		0.85
+c9666a67e686	Sonic Drive-In	fastfood	burger restaurant	32.44071	-95.13687	16243 Highway 271	Tyler	75708	+19038774266	https://locations.sonicdrivein.com/tx/tyler/16243-highway-271.html		0.97
+da57b6b9cf5d	Sonic Drive-In	fastfood	burger restaurant	32.54304	-95.86285	1270 S Trade Days Blvd	Canton	75103	+19035674747	https://locations.sonicdrivein.com/tx/canton/1270-s-trade-days-blvd.html		0.99
+dc4397974c1f	Sonic Drive-In	fastfood	burger restaurant	32.36852	-95.32835	2501 GENTRY Park	Tyler	75702	+19035936892	https://locations.sonicdrivein.com/tx/tyler/2501-gentry-park.html		0.96
 76b51e5be541	Southern Classic Chicken	fastfood		32.34587	-95.31544	411 S Glenwood Blvd	Tyler	75702	+19035969015	http://www.southernclassicchicken.com	Southern Classic Chicken	0.99
 04ff459534b8	Subway	fastfood		32.52604	-95.64265	FM 314	Van	75790	+19039637280	https://restaurants.subway.com/united-states/tx/van/1031-s-oak-st		0.77
+09afc6cd1afd	Subway	fastfood	sandwich shop	32.34264	-95.29309	613 S Beckham Ave	Tyler	75701	+19035922300	https://restaurants.subway.com/united-states/tx/tyler/613-s-beckham-ave	Subway	0.99
+0d3a1382b9f2	Subway	fastfood	sandwich shop	32.36671	-95.32649	2230 W Gentry Pkwy	Tyler	75702	+19035930344	https://restaurants.subway.com/united-states/tx/tyler/2230-w-gentry-pkwy?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.98
+13fa1d3b7c1f	Subway	fastfood	sandwich shop	32.58406	-95.12230	708 W Broadway St	Big Sandy	75755	+19036364323	https://restaurants.subway.com/united-states/tx/big-sandy/708-w-broadway	Subway	0.98
+171e365b9be8	Subway	fastfood	sandwich shop	32.95835	-95.29452	404 W Broadway St	Winnsboro	75494	+19033423556	https://restaurants.subway.com/united-states/tx/winnsboro/404-w-broadway	Subway	0.98
+1cf5357fc515	Subway	fastfood	sandwich shop	32.47417	-95.38830	105 Centennial Blvd	Lindale	75771	+19038818826	https://restaurants.subway.com/united-states/tx/lindale/105-centennial-blvd	Subway	0.95
 1ea6490fb87b	Subway	fastfood		32.33850	-95.29195	1000 S Beckham Ave	Tyler	75701	+19037875937	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73928&utm_campaign=evergreen-2020&y_source=1_MjAxMTk4MzM2OS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
+230cd16257db	Subway	fastfood	sandwich shop	32.79560	-95.43582	914B E Goode St	Quitman	75783	+19037630898	https://restaurants.subway.com/united-states/tx/quitman/914b-e-goode-st	Subway	0.95
 2b497b92af66	Subway	fastfood		32.47136	-95.38828	13354 County Road, Suite 472	Lindale	75771	+19038820231	https://restaurants.subway.com/united-states/tx/lindale/13354-county-road?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=15729&utm_campaign=evergreen-2020&y_source=1_MTQ5MDAwMDgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+2c18702a9b68	SUBWAY	fastfood	sandwich shop	32.30256	-95.60924	Kidd Jones	Brownsboro	75756	+19038522252	http://subway.com		0.77
+38783f6b2166	Subway	fastfood	sandwich shop	32.35870	-95.37750	12675 Hwy 64W	Tyler	75704			Subway	0.96
+389efc849ce0	Subway	fastfood	sandwich shop	32.20055	-95.85390	306 S Palestine	Athens	75751	+19036751103	https://restaurants.subway.com/united-states/tx/athens/306-s-palestine	Subway	0.92
+499e159a9022	Subway	fastfood	sandwich shop	32.31810	-95.20980	11980 TX-64 E	Tyler	75707	+19035666703	https://restaurants.subway.com/united-states/tx/tyler/11980-hwy-64-e	Subway	0.99
+4a7b7a457f36	Subway	fastfood	sandwich shop	32.45135	-95.28298	12810 FM 14	Tyler	75706	+19032047236	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72539&utm_campaign=evergreen-2020&y_source=1_MTAxNzI0NDE5Ny00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+4c6580ca7541	Subway	fastfood	sandwich shop	32.47151	-95.45028	14098 FM 849	Lindale	75771	+19038827827	https://restaurants.subway.com/united-states/tx/lindale/14098-fm-849	Subway	0.96
+52ba6a1808ab	Subway	fastfood	sandwich shop	32.30988	-95.27576	2021 E SE Loop 323	Tyler	75701	+19035099800	http://www.subway.com/en-us	Subway	0.95
+5555ced4fc48	Subway	fastfood	sandwich shop	32.30556	-95.33359	2701 W Southwest Loop 323	Tyler	75701	+19035614700	https://www.subway.com		0.95
+57bf46b79b36	SUBWAY	fastfood	sandwich shop	32.35061	-95.30154	118 W Erwin St	Tyler	75702	+19035045402	http://subway.com		0.92
 5aeeb8dd1731	Subway	fastfood		32.99069	-95.93541	605 US Hwy 69 S	Lone Oak	75453	+19036620000	https://restaurants.subway.com/united-states/tx/lone-oak/605-us-hwy-69-s?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=26067&utm_campaign=evergreen-2020&y_source=1_MTQ5MTExODQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+64ca12b01ecf	Subway	fastfood	sandwich shop	32.21035	-95.83295	1405 E Tyler St	Athens	75751	+19036770341	https://www.subway.com		0.98
+66dd39aa2950	Subway	fastfood	sandwich shop	32.27530	-95.31011	6801 S Broadway	Tyler	75703	+19039390790	https://restaurants.subway.com/united-states/tx/tyler/6801-s-broadway?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.99
+6b03eab195e4	Subway	fastfood	sandwich shop	32.50999	-95.64287	1031 S. Oak St. (FM 314)	Van	75790	+19039637280	http://www.subway.com/en-us	Subway	0.93
+6de97fa77962	Subway	fastfood	sandwich shop	32.54536	-95.86208	310 E Hwy 243	Canton	75103	+19035675554	https://restaurants.subway.com/united-states/tx/canton/310-e-hwy-243	Subway	0.94
 6e6b6ee82187	Subway	fastfood		32.58209	-95.87418	13951 FM 859	Canton	75103	+19032519378	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73727&utm_campaign=evergreen-2020&y_source=1_MjAwNTY3NTgyMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+720572907f42	Subway	fastfood	sandwich shop	32.29797	-95.26006	5050 Troup Hwy	Tyler	75707	+19035616005	https://restaurants.subway.com/united-states/tx/tyler/5050-troup-hwy	Subway	0.99
 78a0f39de8db	Subway	fastfood		32.34849	-95.34232	400 SWS Loop 323	Tyler	75702	+19035954580	https://restaurants.subway.com/united-states/tx/tyler/400-sws-loop-323	Subway	0.95
+7a9b9b67cd0c	Subway	fastfood	sandwich shop	32.44317	-95.06201	12577 C R 3101	Winona	75792	+19036184002	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71231&utm_campaign=evergreen-2020&y_source=1_MzA3MjIyMjktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+81feb82b6878	Subway	fastfood	sandwich shop	32.31599	-95.25250	3900 University Blvd	Tyler	75799	+19035667074	https://www.subway.com		0.96
+82b6b257e383	Subway	fastfood	sandwich shop	32.32875	-95.26644	1949 SSE Loop 323	Tyler	75701	+19035956262	http://www.Subway.com/	Subway	0.99
 82dfd60f3f02	Subway	fastfood		32.57476	-95.85588	2001 N. Trade Days Blvd.	Canton	75103	+19035672220	https://restaurants.subway.com/united-states/tx/canton/2001-n-trade-days-blvd	Subway	0.97
 8d9ced1f9101	Subway	fastfood		32.65424	-95.22514	5201 S FM 14	Hawkins	75765	+19037699399	https://restaurants.subway.com/united-states/tx/hawkins/5201-s-fm-14	Subway	0.97
+913d9c1e9ac4	Subway	fastfood	sandwich shop	32.67644	-95.48428	1226 N Pacific St	Mineola	75773	+19035690116	http://www.subway.com/	Subway	0.97
+998d17bee96b	Subway	fastfood	sandwich shop	32.23497	-95.22889	601 Highway 110 N	Whitehouse	75791	+19038397657	https://restaurants.subway.com/united-states/tx/whitehouse/601-highway-110-n	Subway	0.99
+9b47d33ee810	Subway	fastfood	sandwich shop	32.86670	-95.75506	886 E Lennon Dr Ste 100	Emory	75440	+19034733999	https://restaurants.subway.com/united-states/tx/emory/886-e-lennon-dr	Subway	0.98
+bcfdd3bb16ae	Subway	fastfood	sandwich shop	32.89590	-95.55891	4568 W State Highway 154	Yantis	75497			Subway	0.95
+bfb719038d9c	Subway	fastfood	sandwich shop	32.43952	-95.13470	16242 Hwy 271	Tyler	75708	+19038773580	https://restaurants.subway.com/united-states/tx/tyler/16242-hwy-271?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=66296&utm_campaign=evergreen-2020&y_source=1_MTQ5MDU3MTEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+cc38332a8296	Subway	fastfood	sandwich shop	32.06283	-95.50208	960 N Frankston Hwy	Frankston	75763	+19038765605	https://restaurants.subway.com/united-states/tx/frankston/960-n-frankston-hwy	Subway	0.95
+cf788d10f7c1	Subway	fastfood	sandwich shop	32.25400	-95.33801	1951 Blue Mountain	Tyler	75703			Subway	0.96
+e56a4e846b0a	Subway	fastfood	sandwich shop	32.14507	-95.31543	151 Hwy 69 N. Ste 1300	Bullard	75757	+19038949930	http://www.subway.com/en-us	Subway	0.98
+ec0b6c11c349	Subway	fastfood	sandwich shop	32.19021	-95.43456	20031 Highway 155 South Suite 110	Flint	75762	+19037877504	https://restaurants.subway.com/united-states/tx/flint/20031-highway-155-south	Subway	1.00
+f5716235e835	Subway	fastfood	sandwich shop	32.32790	-95.30045	101 E. Eighth Street	Tyler	75701	+19036176968	https://restaurants.subway.com/united-states/tx/tyler/101-e-eighth-street	Subway	0.97
+f9e177d7f3fd	Subway	fastfood	sandwich shop	32.28064	-95.33300	2350 W Grande Blvd	Tyler	75703	+19035342929	https://restaurants.subway.com/united-states/tx/tyler/2350-w-grande-blvd	Subway	0.95
 4186e50e4af3	Subway Restaurants	fastfood		32.33604	-95.28412	1401 E Lake St	Tyler	75701		https://alibabacharleston.com		0.92
+ab8e5cc77e9e	Subway Restaurants	fastfood	sandwich shop	32.23705	-95.34638	16669 FM 2493	Tyler	75703	+19035349904	https://alibabacharleston.com		0.97
 14dcee9ffa21	Taco Bell	fastfood		32.26830	-95.30779	7425 S. Broadway	Tyler	75703	+19039391873	http://www.tacobell.com/	Taco Bell	0.99
 4cab82a58859	Taco Bell	fastfood		32.57428	-95.85620	1999 North Trades Day Blvd.	Canton	75103	+19035672676	http://www.tacobell.com/	Taco Bell	0.99
 67567be11aab	Taco Bell	fastfood		32.19046	-95.43388	19901 State Highway 155 S	Flint	75762	+19038251946	https://locations.tacobell.com/tx/flint/19901-highway-155.html	Taco Bell	0.98
 6c3a05b788ca	Taco Bell	fastfood		32.34490	-95.34118	500 S Southwest Loop 323	Tyler	75701	+19035979244	http://www.tacobell.com/	Taco Bell	0.99
 6d12d8a5732e	Taco Bell	fastfood		32.87207	-95.76472	218 E Lennon Dr	Emory	75440	+19034739500	https://locations.tacobell.com/tx/emory/218-e-lennon-dr.html	Taco Bell	0.94
 73c9919a5652	Taco Bell	fastfood		32.33279	-95.26328	2760 E 5Th St.	Tyler	75701	+19035926391	http://www.tacobell.com/	Taco Bell	0.99
+7b668dbbaa14	Taco Bell	fastfood	taco restaurant	32.23843	-95.22868	720 Highway 110 N.	Whitehouse	75791	+19032020680	https://locations.tacobell.com/tx/whitehouse/720-highway-110-n-.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=040537&utm_content=website&y_source=1_MTA3MzcxMjIxMy00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 886f6ac8494a	Taco Bell	fastfood		32.30743	-95.27223	3825 Troup Highway	Tyler	75703	+19035811436	http://www.tacobell.com/	Taco Bell	0.99
 8eebbee15f73	Taco Bell	fastfood		32.28271	-95.33151	5978 Old Jacksonville Hwy	Tyler	75703	+19039390938	http://www.tacobell.com/	Taco Bell	0.99
 94bc0e43a7f5	Taco Bell	fastfood		32.68874	-95.48360	125 N E Loop 564	Mineola	75773	+19035696729	http://www.tacobell.com/	Taco Bell	0.98
@@ -1415,19 +1507,31 @@ f67568c977d7	Wendy's	fastfood		32.34683	-95.30506	427 W Front St	Tyler	75702	+19
 1c5804f40e5d	Whataburger	fastfood		32.46762	-95.38786	13341 I-20	Tyler	75706	+14302351201	https://locations.whataburger.com/tx/tyler/13341-i-20-w.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 1ed9652d4d0e	Whataburger	fastfood		32.24304	-95.23222	1051 HWY 110 N	Whitehouse	75791	+19032025085	https://locations.whataburger.com/tx/whitehouse/1051-hwy-110-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.93
 203bf0391c12	Whataburger	fastfood		32.29634	-95.26329	5003 Troup Hwy	Tyler	75707	+19032669168	https://locations.whataburger.com/tx/tyler/5003-troup-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
+285ce1ff3b87	Whataburger	fastfood	burger restaurant	32.25203	-95.30785	8910 South Broadway Avenue	Tyler	75703	+19032669373	https://whataburger.com/		0.97
 32e11683a939	Whataburger	fastfood		32.21187	-95.82967	1417 E Tyler St	Athens	75751	+19036773838	https://locations.whataburger.com/tx/athens/1417-e-tyler-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
 5322b3eb2fbd	Whataburger	fastfood		32.30328	-95.30286	137 W SW Loop 323	Tyler	75701	+19035617334	https://locations.whataburger.com/tx/tyler/137-w-sw-loop-323.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
 54357784ee17	Whataburger	fastfood		32.30135	-95.33962	12405 Texas 155	Tyler	75703	+19035340625	https://locations.whataburger.com/tx/tyler/12405-texas-155.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 5462bf23ceb7	Whataburger	fastfood		32.32980	-95.29095	1739 South Beckham	Tyler	75701	+19035938081	http://whataburger.com/	Whataburger	0.99
+5eb2bebfa8ac	Whataburger	fastfood	burger restaurant	32.18618	-95.43737	20277 State Highway 155 S	Flint	75762	+19039787002			0.99
+63ef64a7bb1e	Whataburger	fastfood	burger restaurant	32.27482	-95.30733	6849 South Broadway	Tyler	75703	+19039399961	http://whataburger.com/	Whataburger	0.96
 65c77dbd946f	Whataburger	fastfood		32.36699	-95.32561	2215 W Gentry Pkwy	Tyler	75702	+19036305778	https://locations.whataburger.com/tx/tyler/2215-w-gentry-pkwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 69302b823757	Whataburger	fastfood		32.12832	-95.30446	651 S Dr M Roper Pkwy	Bullard	75757	+19039542900	https://locations.whataburger.com/tx/bullard/651-s-dr-m-roper-pkwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 6cbf41b2ba83	Whataburger	fastfood		32.51248	-95.40978	311 South Main Street	Lindale	75771	+19038815120	https://locations.whataburger.com/tx/lindale/311-south-main-street.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 722a46e59893	Whataburger	fastfood		32.34749	-95.34290	345 S SW Loop 323	Tyler	75702	+19035330693	http://whataburger.com/	Whataburger	0.96
+73e363735504	Whataburger	fastfood	burger restaurant	32.86576	-95.75109	1021 E Lennon Dr suit 100	Emory	75440	+19033081129	https://locations.whataburger.com/tx/emory/1021-e-lennon-dr-suit-100.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+96009ec4135b	Whataburger	fastfood	burger restaurant	32.33071	-95.26639	1717 Loop 323	Tyler	75701	+19035952221	https://locations.whataburger.com/tx/tyler/1717-loop-323.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+a5d68d69e4a8	Whataburger	fastfood	burger restaurant	32.39512	-95.26926	6288 US-271	Tyler	75708	+19035260490	https://locations.whataburger.com/tx/tyler/6288-north-us-hwy-271.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 c218811db62a	Whataburger	fastfood		32.30748	-95.48058	103 Hwy 31 West	Chandler	75758	+19038493021	https://locations.whataburger.com/tx/chandler/103-hwy-31-west.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 c2fcc899200b	Whataburger	fastfood		32.23602	-95.34916	16772 FM 2493	Tyler	75703	+19036304150	https://locations.whataburger.com/tx/tyler/16772-fm-2493.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 cfd0f1c07fd2	Whataburger	fastfood		32.29630	-95.30141	4825 S Broadway	Tyler	75703	+19032669402	https://locations.whataburger.com/tx/tyler/4825-south-broadway.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages		0.99
+d5067993c888	Whataburger	fastfood		32.36518	-95.32237	1919 W Gentry Pkwy	Tyler	75702	+19035927354	https://www.whataburger.com		0.75
+dc78850e4374	Whataburger	fastfood	burger restaurant	32.28403	-95.33096	5916 Old Jacksonville Highway	Tyler	75703	+19036306394	https://locations.whataburger.com/tx/tyler/5916-old-jacksonville-highway.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 5923469f4511	Williams Fried Chicken	fastfood		32.35933	-95.31255	1102 W Gentry Pkwy	Tyler	75702	+19035338583	http://williamsfriedchicken.com	Williams Chicken	0.92
-19491c440fea	Wingstop	fastfood		32.26735	-95.30637	7496 S Broadway Ave	Tyler	75703		https://www.wingstop.com/location/wingstop-558-tyler-tx-75703/menu	Wingstop	0.97
+411b68328604	Wingstop	fastfood	chicken restaurant	32.26740	-95.30669	7496 S Broadway Ave	Tyler	75703	+19035342999	https://www.wingstop.com/location/wingstop-558-tyler-tx-75703/menu?y_source=1_NTUyMDY2NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
+8ec49131c893	Wingstop	fastfood	chicken restaurant	32.31096	-95.27797	1918 E Southeast Loop 323	Tyler	75701	+19035269464	https://www.wingstop.com/location/wingstop-33-tyler-tx-75701/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.99
+b76e27e5626d	Wingstop	fastfood	chicken restaurant	32.20835	-95.83296	1395 E Tyler Street	Athens	75751	+19036754261	https://www.wingstop.com/location/wingstop-1801-athens-tx-75751/menu?y_source=1_NTUyMDc5MjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
+bc20c4f441f0	Wingstop	fastfood	chicken restaurant	32.48106	-95.39498	2553 S Main St Bldg D	Lindale	75771	+19038825200	https://www.wingstop.com/location/wingstop-861-lindale-tx-75771/menu?y_source=1_NTUyMDc3MzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
+d0f5d83a64ea	Wingstop	fastfood	chicken restaurant	32.34864	-95.34241	400 S Southwest Loop 323 Ste 100	Tyler	75702	+19035319464	https://www.wingstop.com/location/wingstop-374-tyler-tx-75702/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.99
 8b754e5ea40e	Athens #11	grocery		32.20585	-95.84184	807 E Tyler St	Athens	75751			Brookshire's	0.80
 98c47e3bdeba	Ballow's Famous Texas Chili	grocery		32.20718	-95.85165	311 N Underwood St	Athens	75751	+19036757148	https://ballowschili.com		0.96
 7d637dff9ccd	Beef Jerky Experience	grocery		32.25195	-95.30619	8942 S Broadway Ave Ste 132	Tyler	75703	+19035618822	https://www.beefjerkyx.com		0.92
@@ -1555,9 +1659,7 @@ b4327959249f	Athens Women's Health Center	hospital		32.26198	-95.83184	8286 CR-3
 151196d2235e	Baptist Student Center	hospital		32.19709	-95.85527	110 Lakeside Dr	Athens	75751	+19036755353	http://www.baptiststudentcenter.org		0.56
 f9ed2b13955e	Baylor Scott & White Cardiac Surgery - Tyler	hospital		32.33373	-95.29161	1321 S Beckham Ave	Tyler	75701		https://www.bswhealth.com/locations/clinical-group/cardiac-surgery		0.80
 4b569db9c675	Baylor Scott and White Texas Spine and Joint Hospital Urgent Care	hospital		32.25994	-95.30800	8101 S Broadway Ave	Tyler	75703	+19039390920	http://tsjh.org/urgent-care-clinic?y_source=1_MTQ2NjI4ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Baylor Scott & White Health	0.99
-0ee9425ac7df	Bradford James White, FNP-C	hospital		32.58807	-95.87414	18780 Interstate 20	Canton	75103	+19035674841	https://www.christushealth.org/trinity/clinic/find-a-doctor/bradford-white		0.92
 fe0b09af0ca7	Cardiac Cath Lab	hospital		32.32382	-95.26674	2401 S SE Loop 323	Tyler	75701	+19035955762			0.80
-0899d3cf7f43	Cardiovascular Associate of East Texas-Athens PA	hospital		32.17204	-95.84540	1505 S Palestine St	Athens	75751	+19036756800			0.79
 838a484168e4	Christus Health	hospital		32.23482	-95.22892	601 State Highway 110 N	Whitehouse	75791	+19038394536	http://www.christushealth.org/	CHRISTUS Children's	0.56
 e56a0952e34b	CHRISTUS Louis and Peaches Owen Heart Hospital	hospital		32.34228	-95.28945	703 S Fleishel Ave	Tyler	75701	+19036063000	https://tmfhc.org/maps-and-locations/locations-profile/?id=4&page=1&pageSize=10&searchId=edc9f072-1f4d-e611-b37f-2c768a4e1b84&sort=11		0.97
 dc825624fb63	CHRISTUS Mother Frances Hospital - Tyler	hospital		32.34306	-95.29079	800 East Dawson Street	Tyler	75701	+19035938441	https://www.christushealth.org/locations/tyler-hospital		1.00
@@ -1610,13 +1712,11 @@ a82fe30fb019	Trinity Clinic	hospital		32.79484	-95.44640	502 E Goode St	Quitman	
 a93625d60bfc	Trinity Clinic	hospital		32.65379	-95.22436	5321 S FM 14	Hawkins	75765	+19037692990	https://www.christushealth.org/locations/trinity-clinic-holly-lake		0.95
 c5290afce657	Trinity Clinic	hospital		32.86896	-95.75872	650 E Lennon Dr	Emory	75440	+19034737234	https://www.christushealth.org/locations/trinity-clinic-emory		0.99
 e1e90faa1cd9	Trinity Clinic	hospital		32.28993	-95.30267	5414 S Broadway Ave	Tyler	75703	+19035315300			0.97
-ff6ad114f532	Trinity Clinic	hospital		32.17425	-95.84461	1505 S Palestine St	Athens	75751	+19036751725	https://www.christushealth.org/locations/trinity-clinic-athens		0.99
 a980538c201b	Trinity Clinic Arthritis and Rheumatology	hospital		32.32406	-95.28594	1327 Troup Hwy	Tyler	75701	+19036068764	https://www.christushealth.org/trinity/services-treatments/arthritis-rheumatology		0.88
 36843645b45f	Trinity Clinic Medical Specialties	hospital		32.34116	-95.30267	305 W Rusk St	Tyler	75701	+19035953942	https://www.christushealth.org/trinity/clinic/locations-directions/rusk-street?y_source=1_MTE3ODEzMDYtNDQwLWxvY2F0aW9uLndlYnNpdGU=		0.61
 588d9a7a00a5	Trinity Mother Frances Hospital And Clinics	hospital		32.37916	-95.30311	2990 N Broadway Ave	Tyler	75702	+19035931892	http://www.tmfhs.org/tfcc		0.97
 e1ee939b8ca5	Trinity Mother Frances Hospital And Clinics	hospital		32.34410	-95.29330	536 S Beckham Ave	Tyler	75702	+19035315000	www.tmfhs.org		0.55
 22018f1f98f9	Trinity Mother Frances-Admin	hospital		32.30297	-95.26115	4542 Old Troup Hwy	Tyler	75707	+19035315000			0.56
-3d7dc8a8e096	Trinity Vascular Institute	hospital		32.34280	-95.28922	619 S Fleishel Ave	Tyler	75701	+19035251400			0.85
 f5b5d653419a	Trinity Vascular Institute	hospital		32.34285	-95.28929	619 S Fleishel Ave	Tyler	75701	+19035251400			0.97
 5f3cee8a9ade	Tyler Urgent Care	hospital		32.29688	-95.32510	1809 Capital Dr	Tyler	75701	+19035094499	http://www.tylerurgentcare.com		0.69
 f8dc0e2fc21e	Tyler VA Primary Care Clinic	hospital		32.26230	-95.30681	7916 S Broadway Ave	Tyler	75703	+18553756930			0.97
@@ -1630,7 +1730,6 @@ d5349a887cda	UT Health East Texas Physicians clinc	hospital		32.68017	-95.72176	
 708127b0b117	UT Health East Texas Physicians- ENT (Athens)	hospital		32.17244	-95.84463	1701 S Palestine St.	Athens	75751	+19036763316	https://uthealtheasttexas.com/find-a-provider/location/entity23910/		0.85
 2eae0115e91f	UT Health East Texas Specialty Hospital	hospital		32.33834	-95.29069	1000 S Beckham Ave	Tyler	75701	+19035963600	https://uthealtheasttexas.com/locations/ut-health-east-texas-specialty-hospital		0.77
 bb29baf75b1b	UT Health East Texas- Orthopedic & Sports Medicine Institute (Quitman)	hospital		32.79581	-95.44283	709 E Goode St uite 300	Quitman	75783	+19037636090	https://uthealtheasttexas.com/find-a-provider/location/entity8210/		0.85
-6a43bd598fff	UT Health North Campus Tyler	hospital		32.38615	-95.27599	11937 US Highway 271	Tyler	75708	+19038777000	https://uthealthnorth.com/		0.85
 b5459cd6e9ac	UT Health North Campus Tyler	hospital		32.42489	-95.21298	11937 US Highway 271	Tyler	75708	+19038777000	https://uthealthnorth.com/		0.99
 07971ba59f1e	UT Hospital	hospital		32.42611	-95.21252		Tyler		+19038774673	https://www.uthealth.org/patient-care/university-hospital		0.79
 9d6007da74ad	UT Quitman	hospital		32.79712	-95.44275	177 N Winnsboro St	Quitman	75783	+19037636300	https://ardenthealth.com/		0.97
@@ -1643,12 +1742,9 @@ eee69480a28e	12 Oaks Hotel	hotel	motel	32.37861	-95.33652	3100 W NW Loop 323	Tyl
 6da3973d8d2d	Americas Best Value Inn Tyler Lindale	hotel	resort	32.46777	-95.39015	13429 Interstate 20	Lindale	75706	+19038826145	https://www.redlion.com/americas-best-value-inn/tx/tyler/americas-best-value-inn-tyler-lindale		0.85
 2a048d59aaa6	Americas Best Value Inn Tyler Winona	hotel		32.44773	-95.18945	12732 Texas 155	Tyler	75708	+19038779227	https://www.redlion.com/americas-best-value-inn/tx/tyler/americas-best-value-inn-tyler-winona		0.92
 4fb527f14216	Armadillo Hotel	hotel		32.55669	-95.85168	542 E Dallas St	Canton	75103	+12144009412	http://www.cantonarmadillo.com		0.92
-2d43aff21980	Athens Lodge	hotel	lodge	32.17590	-95.86751	1301 W Cayuga Dr	Athens	75751	+19036753741			0.92
-c5688d4a397e	Athens Masonic Lodge	hotel	lodge	32.19639	-95.82715	2030 E Corsicana St	Athens	75751	+19036752504			0.92
 88f35886d6a7	Athens Townhomes	hotel		32.20800	-95.83824	215 Wood St	Athens	75751	+19036752828	http://www.myathenstownhomes.com/		0.99
 b47af5aff1e5	Axton's Bass City	hotel	resort	32.89114	-95.66663	2959 FM2946	Emory	75440	+19034737224	https://axtonsbasscity.com/index.html		0.98
 f33752da7836	Baymont by Wyndham Tyler	hotel	resort	32.30745	-95.33569	3913 Frankston Hwy	Tyler	75701	+19039390100	https://www.wyndhamhotels.com/baymont/tyler-texas/baymont-inn-and-suites-tyler/overview?CID=LC:cfixxwa8fefdt79:19253&iata=00093796		1.00
-3bf8d7ff8a77	Beach Club Resort	hotel		32.22894	-95.45397		Flint					0.78
 5598c1325b9e	Beckham Hotel	hotel		32.66258	-95.48891	115 E Commerce St	Mineola	75773	+19036386182	https://direct-book.com/properties/thebeckhamhoteldirect		0.98
 c842a02e2c21	Bent Tree Motel	hotel	motel	32.87644	-95.77094	381 W Lennon Dr	Emory	75440	+19034730061	http://www.benttreemotel.com		0.96
 93032a877d55	Best Western Canton Inn	hotel		32.57668	-95.85551	2251 N Trade Days Blvd	Canton	75103	+19035676591	https://www.bestwestern.com		1.00
@@ -1661,29 +1757,21 @@ cb2cea47646c	Best Western Plus Royal Mountain Inn & Suites	hotel		32.21768	-95.8
 7b0072ffc491	Best Western Plus Southpark Inn & Suites	hotel		32.28917	-95.30458	120 W Rieck Rd	Tyler	75703	+19035348800	https://www.bestwestern.com/en_US/book/hotel-rooms.44461.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44461	Best Western Hotels & Resorts	1.00
 8e445605ccd7	Best Western Plus Wills Point	hotel		32.70040	-95.97215	3135 Goodnight Blvd	Wills Point	75169	+19038737500	https://www.bestwestern.com		0.92
 fbee30b8c232	Bluebonnet Inn Inc	hotel	motel	32.58821	-95.20682	119 Rock St	Hawkins	75765	+19037692171	http://bluebonnetinninc.placeweb.site		0.60
-981fe943ca48	Broken Stone Ranch	hotel	lodge	32.67348	-95.62627	1910 E US-80	Grand Saline	75140	+12142324488	http://brokenstoneranch.com/		0.92
 129f620f5d12	Brooks House Suites	hotel		32.66346	-95.48422	202 Graham St	Mineola	75773	+19033727616	https://www.airbnb.com/rooms/5007099		0.94
 a1b58d467e49	Budget Inn - Athens	hotel	motel	32.20756	-95.87395	305 US-175 BUS	Athens	75751	+19036755194	http://www.budgetinn.com	Budget Inn	0.92
 64d3bad1eed4	Budget Inn of Mineola	hotel	motel	32.65825	-95.46752	1213 US-80	Mineola	75773	+19035692661	http://www.budgetinn.com	Budget Inn	0.95
-69210d028b39	Buffalo Girls Hotel	hotel		32.55495	-95.85406	542 E Dallas St	Canton	75103	+19033850385	http://www.buffalogirlshotel.com/		0.92
 91215ee72f2e	Buffalo Girls Hotel	hotel		32.55629	-95.86324	542 E Dallas St	Canton	75103	+19033850385	http://www.buffalogirlshotel.com/		0.93
 9b0683282b10	Bullard Creek Ranch	hotel		32.13807	-95.33539		Bullard			www.zillow.com/bullard-tx/bullard-creek-ranch-_att		0.71
-b89653b516c2	Buncum Hill	hotel		32.17608	-95.19502		Troup					0.76
 9407dbc53a1d	Burnin' Stump Lodge	hotel	motel	32.88022	-95.64594	9530 FM 515	Alba	75410	+19034745864	http://www.burninstump.com/		0.92
 e22e3709a1e5	Camp Three Points	hotel		32.61314	-95.68173	4564 State Highway 110	Grand Saline	75140	+19032169340	http://campthreepoints.com/		0.90
 c6d887bcfb4e	Candlewood Suites Tyler By Ihg	hotel		32.28848	-95.29941	315 E Rieck Rd	Tyler	75703	+19035094131	https://www.ihg.com		0.99
 5d95709ecde5	Canton Motel	hotel	motel	32.54340	-95.87117	451 W TX-243	Canton	75103	+19035676011			0.99
 208f3a2c6e00	Canton Square Bed & Breakfast	hotel		32.55623	-95.86383	133 S Buffalo St	Canton	75103	+19035671680	https://www.cantonsquarebnb.com		0.55
 e79b5e36c112	Carousel Boutique	hotel		32.66358	-95.48996	121 W Broad St	Mineola	75773	+19035692015			0.55
-e08847c6fc02	Castillian Lodge	hotel	lodge	32.56484	-95.87632	1284 W Dallas St	Canton	75103		http://grandlodgeoftexas.org/		0.92
-a7a596cd68d4	Cedar Cove Ranch	hotel	lodge	32.35031	-95.90598	14283 Co Rd 3905	Eustace	75124	+19032876336	https://www.cedarcoveranch.com/		0.98
-3c64ab2ac999	Chamness Lodge	hotel	lodge	32.24942	-95.35188	Water's Edge Way	Tyler	75703				0.83
-8b6852aecec3	Chandler Masonic Lodge #993	hotel	lodge	32.31517	-95.47996	724 Broad St	Chandler	75758	+19036817443	https://whatsapp.com/channel/0029VbCSs2V3LdQaDODnLD2q		0.90
 e099161c60c8	Clear Lakes Inn	hotel	motel	32.77588	-95.45763	1097 TX-37	Quitman	75783	+19037635451			0.93
 06aa66993ea9	Comfort Inn & Suites Tyler North	hotel		32.37976	-95.33141	3247 W Gentry Pkwy	Tyler	75702		https://www.choicehotels.com/texas/lindale/comfort-suites-hotels	Comfort Inn	0.99
 c7608edf3577	Comfort Suites Lindale	hotel		32.47407	-95.39367	200 Centennial Blvd	Lindale	75771	+14303105691	https://www.choicehotels.com/texas/lindale/comfort-suites-hotels/txa48?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 b382159fc86c	Comfort Suites Tyler South	hotel		32.28877	-95.30013	303 E Rieck Rd	Tyler	75703	+19035306105	https://www.choicehotels.com/texas/tyler/comfort-suites-hotels/tx767?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-c2ee756f4189	Coon Holler Lodge	hotel	lodge	32.11856	-95.81247	9501 CR-4613	Athens	75752	+19036751975			0.97
 b61532e10c6a	Country Getaway CR 1185	hotel		32.34801	-95.41943	5353 CR-1185	Tyler	75704	+19035935108			0.85
 63ce139b9131	Country Inn & Suites By Carlson Tyler South, TX	hotel		32.27681	-95.30469	6702 S Broadway Ave	Tyler	75703	+19035610863	https://www.countryinns.com/tyler-hotel-tx-75703/txtysou		0.99
 d872d494cf71	Country Inn & Suites by Radisson, Tyler University Area	hotel		32.31237	-95.26971	2421 E SE Loop 323	Tyler	75701		https://www.choicehotels.com/texas/lindale/comfort-suites-hotels	Country	0.98
@@ -1695,31 +1783,22 @@ fdf3b317adf6	Courtyard by Marriott Tyler	hotel	resort	32.26821	-95.30634	7424 So
 3003f4c154a3	Days Inn by Wyndham Canton	hotel	resort	32.58353	-95.86819	17299 S I-20	Canton	75103	+19035676588	https://www.wyndhamhotels.com/days-inn/canton-texas/days-inn-canton-tx/overview?CID=LC:DI::BING:RIO:National:05846&iata=00093796		0.97
 ece6d3024f55	Days Inn Canton	hotel	motel	32.57817	-95.85739	17299 I-20	Canton	75103	+19035676588	https://www.wyndhamhotels.com/days-inn/canton-texas/days-inn-canton/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A05846	Days Inn	0.92
 830f08c2b80d	Days Inn Lindale	hotel		32.47066	-95.38683	13307 County Road 472	Lindale	75771	+18003291073	https://www.wyndhamhotels.com		0.55
-cccf9b55832b	Dixie Masonic Lodge #272	hotel	lodge	32.14493	-95.11951	106 N Virginia St	Troup	75789	+19035692608	https://grandlodgeoftexas.org/		0.98
 647434098e91	Diya Hotels, Llc	hotel		32.31302	-95.27634	3303 Troup Hwy	Tyler	75701				0.95
-c13573c91787	DJ's Big Bass Oasis	hotel	lodge	32.89138	-95.59963	268 Co Rd 1919	Yantis	75497	+12103814197			0.92
 3f659931d8aa	Dove Tree Apartments	hotel		32.29006	-95.32333	1600 Rice Rd	Tyler	75703	+19035810082	http://www.dovetreetyler.com/		0.82
 d8e156812023	East Texas Wedding at Trinity Pines Vacation Homes	hotel		32.36779	-95.59525	9480 FM 279	Edom	75756	+12144788999	http://www.trinitypinesedom.com/weddings		0.92
-d68e0b5e11b4	Empty Nest Inn	hotel		32.17673	-95.50914	20759 Meadowbrook Dr	Chandler	75758				0.77
 3036ef307041	Executive Inn & Suites	hotel	motel	32.34608	-95.34077	3701 Chandler Hwy	Tyler	75702	+19035045848	http://executiveinntyler.com/		1.00
 287603d62542	Fairfield	hotel		32.50833	-95.64467	3064 Interstate 20	Van	75790	+19039631037	https://fairfield.marriott.com/	Fairfield by Marriott	0.99
 a14254e2ed85	Fairfield	hotel		32.30394	-95.32578	1945 W Southwest Loop 323	Tyler	75701	+19035612535	https://www.marriott.com/en-us/hotels/tyrfi-fairfield-inn-and-suites-tyler/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	0.99
 7b285488cfad	Fairfield by Marriott Inn & Suites Tyler South	hotel		32.26719	-95.30949	309 W Heritage Dr	Tyler	75703	+19035613300	https://www.marriott.com/en-us/hotels/tyrso-fairfield-inn-and-suites-tyler-south/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
-de3edc4422b7	Fleurdelis Hospitality Inc	hotel		32.27921	-95.29271	915 E Grande Blvd	Tyler	75703				0.95
-0ead892ba7c6	Flora Lodge #119	hotel		32.80983	-95.43491	915 N Winnsboro St	Quitman	75783	+19037635716	https://floralodge119.org/		0.98
 5fae04c5b5f3	Focus Pointe Base Camp	hotel		32.73626	-95.60817		Alba		+19037653616	http://glowingheart.org/pacesetters		0.63
 0c9d617bdfe8	Garner Hotel Tyler Southwest	hotel		32.30745	-95.33590	3913 Frankston Highway	Tyler	75701		https://www.ihg.com/garner-hotels/hotels/us/en/tyler/tyrfh/hoteldetail	Garner Hotels	0.86
 148baf49dc18	Getaway Piney Woods	hotel		32.11455	-95.61656	9595 CR-4357	Larue	75770	+16179140021	https://getaway.house		0.97
-1e27b61b9c39	Gn Hospitality Inc	hotel		32.31371	-95.27358	3310 Troup Hwy	Tyler	75701				0.95
-845c34208f65	Golden Homestead	hotel	lodge	32.72958	-95.56252	FM779	Alba	75410				0.78
 25e193935b46	Grecian Hotels Llc	hotel		32.20749	-95.83406	1119 E Tyler St	Athens	75751		https://www.grecianhotels.com		0.95
 3fa92ff712d0	Greyhound Inn	hotel		32.35298	-95.30260	311 N Bois D'Arc Ave	Tyler	75702	+19034763911	https://www.tiktok.com/@greyhoundinntylertx		0.99
-1acfd066dd45	GTG Resorts	hotel	lodge	32.44019	-95.86638	393 Vz County Rd 2323	Canton	75103	+14697660946	http://www.GTGResorts.com/		0.64
 83e09d87334f	Hampton Inn	hotel		32.31531	-95.27605	3130 Troup Hwy	Tyler	75701	+19035967752	https://www.hilton.com		0.55
 32dd64632bb3	Hampton Inn & Suites - Tyler/South	hotel		32.37729	-95.33154	8962 S Broadway Ave	Tyler	75703	+19036307272	https://www.hilton.com/en/hotels/tyrtshx-hampton-suites-tyler-south/		0.77
 60e3b5d2db86	Hampton Inn & Suites Tyler South	hotel		32.24809	-95.30352	8962 S Broadway Ave	Tyler	75703	+19036307272	http://www.tylersouthsuites.hamptoninn.com/	Hampton by Hilton	1.00
 862ca61e1e80	Hampton Inn Lindale/Tyler	hotel		32.46975	-95.39030	3505 S Main St	Lindale	75771	+19038821002	https://www.hilton.com/en/hotels/tyrldhx-hampton-lindale-tyler/	Hampton by Hilton	0.99
-e67c7f435a9e	Hidden Lakes Hunting Resort	hotel	lodge	32.91020	-95.59623	1609 Co Rd 1912	Yantis	75497	+19033837100	http://www.hiddenlakeshr.com/		0.93
 5029b1fa52dc	Hilton Garden Inn Tyler	hotel		32.28074	-95.30372	220 E Grande Blvd	Tyler	75703	+19035091166	https://www.hilton.com/en/hotels/tyrtygi-hilton-garden-inn-tyler/	Hilton Garden Inn	1.00
 ad4003c1dcc8	Holiday Inn Club Vacations Villages Resort	hotel	resort	32.21438	-95.45538	18270 Singing Wood Ln	Flint	75762	+19035611153	http://www.holidayinn.com/	Holiday Inn	1.00
 ce7b622d6e06	Holiday Inn Club Vacations Villages Resort Lake Palestine	hotel		32.21656	-95.45264	18270 Singing Wood Lane	Flint	75762		https://www.ihg.com/holidayinnclubvacations/hotels/us/en/flint/tyrcv/hoteldetail	Holiday Inn Club Vacations	0.80
@@ -1728,33 +1807,25 @@ ce7b622d6e06	Holiday Inn Club Vacations Villages Resort Lake Palestine	hotel		32
 642a3711de8d	Holiday Inn Express & Suites Tyler South - University Area by IHG	hotel		32.31121	-95.27071	2315 E SE Loop 323	Tyler	75701	+19035798266	https://www.ihg.com/holidayinnexpress/hotels/us/en/tyler/tyrxp/hoteldetail?cm_mmc=YextLocal-_-EX-_-US-_-TYRXP	Holiday Inn Express	0.60
 c7230281140c	Holiday Inn Express & Suites Tyler South By Ihg	hotel		32.31190	-95.26939	2421 E Southeast Loop 323	Tyler	75701	+19035660600	https://www.ihg.com		0.99
 c933c5d49c9e	Holiday Inn Tyler - Conference Center	hotel		32.28746	-95.30505	5701 S Broadway Ave	Tyler	75703	+19035615800	https://www.ihg.com/holidayinn/hotels/us/en/tyler/tyrsb/hoteldetail?cm_mmc=GoogleMaps-_-HI-_-US-_-TYRSB	Holiday Inn	1.00
-161991193ac1	Holiday Pines, Mineola, Texas	hotel		32.60853	-95.53690		Mineola					0.66
-300ef45f6d2a	Holiday Pines, Mineola, Texas	hotel		32.60972	-95.53935		Mineola					0.65
 30a659885250	Holiday Pines, Mineola, Texas	hotel		32.60551	-95.54272		Mineola					0.66
 681302c3f019	Holiday Villages Of Fork Club House	hotel		32.84391	-95.50446	310 Concho	Quitman	75783	+19038787052			0.55
-970e13a00764	Holley Hills Ranch	hotel		32.05689	-95.75526		Athens					0.72
 b02470d52034	Holly Lake Ranch - resort	hotel		32.71342	-95.19698		Hawkins			www.silverleafresorts.com/resorts/holly-lake-ranch		0.72
 dcb98281128b	Holly Lake Ranch Resorts	hotel		32.71035	-95.19125	210 Golf Dr	Hawkins	75765	+19037692138	www.hollylakeresort.com		0.95
 bbf7304ede7c	Home2 Suites by Hilton Tyler	hotel		32.30100	-95.29401	621 E SE Loop 323	Tyler	75701	903-630-6725	https://www.hilton.com/en/hotels/tyrosht-home2-suites-tyler/	Home2 Suites by Hilton	0.99
 f980a729701d	Homewood Suites by Hilton Tyler	hotel		32.31469	-95.27378	3104 Golden Rd	Tyler	75701	+19035937880	https://homewoodsuites3.hilton.com/	Homewood Suites by Hilton	1.00
-f4ab443bc1c4	Hook Line and Sinker Lodge	hotel	lodge	32.84383	-95.52345	2855 TX-154	Quitman	75783	+18172333293	http://www.hooklineandsinkerlf.com/		0.92
 a7b2c47cb57d	Hospitality House	hotel	service apartment	32.34389	-95.28957	528 S Saunders Ave	Tyler	75702	+19035927813	http://www.hospitalityhousetylertx.com/		0.99
 681bd90ddb95	Hotel Casino & Resort Rivera	hotel		32.29356	-95.29055	5113 New Copeland Rd	Tyler	75703	+19035093454	http://www.riveracasinoresort.com/		0.88
 e35b265964c3	Hotel Medium Valencia	hotel		32.35954	-95.29385	906 N Beckham Ave	Tyler	75702	+19035938331	https://www.mediumhoteles.com/hotel-medium-valencia/		0.71
 9ae526dc5341	Howard Johnson Enterprises	hotel		32.28042	-95.29610	717 Hampton Hill Dr	Tyler	75703	+19035617791	http://www.howardjohnson.com		0.77
 53b7b3ae7cf1	Jad Hotel Group Corporation	hotel		32.86517	-95.75220	1026 E Lennon Dr	Emory	75440				0.95
-aca6909740ae	Jai Ganesh Inc	hotel		32.46741	-95.38993	13429 Interstate 20 W	Tyler	75706				0.95
-d4420ef299be	Kaleidoscope Ranch	hotel	lodge	32.69490	-95.11701	1936 Silver Maple Rd	Big Sandy	75755	+19033472747	http://kaleidoscoperanch.com/		0.92
 245e0ed57350	Kangaroo Cabins Tyler, Texas	hotel		32.33164	-95.38858	West Lakeshore Drive	Tyler	75709	+19037147940	http://airbnb.com/h/kangaroocabins-loft		0.70
 7c15e19993d9	Kashe Hospitality, Llc	hotel		32.38073	-95.33008	2616 W Northwest Loop 323	Tyler	75702				0.95
 ed2414c7d056	Knights Inn Tyler	hotel		32.38103	-95.32859	2600 W Northwest Loop 323	Tyler	75702	+18884240138	https://www.kingsinnmichigancity.com		0.98
-fc2136d66dc5	Knox Lodge on Lake Fork	hotel	lodge	32.88153	-95.64574		Alba					0.87
 2a9311bdd995	La Quinta Inn and Suites	hotel		32.27714	-95.30472	6702 S Broadway Ave	Tyler	75703	+19032661941	http://www.lq.com/en/findandbook/hotel-details.tyler-south.html?cid=local_6975	La Quinta by Wyndham	1.00
 c09e8772b3a5	La Quinta Inn and Suites by Wyndham Lindale	hotel		32.47431	-95.39498	204 W Centennial Blvd	Lindale	75771	+19038553416	http://www.laquintalindale.com/?cid=local_6079	La Quinta by Wyndham	1.00
 18cc77e9a2ba	La Quinta Inn and Suites by Wyndham Tyler University Area	hotel		32.32183	-95.26507	2552 S SE Loop 323	Tyler	75701	+19034819880	http://www.laquintatyleruniversityarea.com/?cid=local_6499	La Quinta by Wyndham	1.00
 e2bbb0f6e123	La Quinta Inn Tyler	hotel		32.30433	-95.32054	1601 W SW Loop 323	Tyler	75701	+19035612223	http://www.laquintatyler.com/?cid=local_457	La Quinta by Wyndham	1.00
 4ac8d7ccf1b0	Lake Fork Fisherman's Cove LLC	hotel	motel	32.83805	-95.63194	2712 FM 17	Alba	75410	+19034747479	http://www.gofishfork.com/		0.92
-0a8ae2c6786c	Lake Fork Lodge	hotel	lodge	32.88094	-95.63903	9360 W FM 515	Alba	75410	+19034737236	https://lakeforklodge.com/?y_source=1_MTI4NDMxMzYtNDQwLWxvY2F0aW9uLndlYnNpdGU=		0.98
 417a6546519f	Lake Fork Resort	hotel	motel	32.87526	-95.63314	5004 N FM 17	Alba	75410	+19037652987	http://lakeforkresort.com/		0.96
 7ea51d524fe5	Lake Fork Vacation Rentals	hotel		32.88532	-95.60062	266 County Road 1973	Yantis	75497	+12144070203	http://www.LakeForkVacationRentals.com/		0.78
 12e73432763f	Lake O' The Woods	hotel	resort	32.16358	-95.46802	17446 Pintail Dr	Flint	75762	+19038257755	http://www.lakeothewoods.com		0.92
@@ -1762,8 +1833,6 @@ e2bbb0f6e123	La Quinta Inn Tyler	hotel		32.30433	-95.32054	1601 W SW Loop 323	Ty
 203635e850f1	Lake Tyler Petroleum Club	hotel		32.29845	-95.31480	4710 Kinsey Dr # 200	Tyler	75703		laketylerpetroleumclub.com		0.95
 0a5bcd82671b	Lakeland Lodge	hotel		32.66244	-95.48347	533 E Broad St	Mineola	75773	+19035695445	https://www.lakeland-lodges.com		0.92
 fd13d0cd8450	Lakeside Getaway	hotel	motel	32.15440	-95.44988	16698 CR-1170	Flint	75762	+19038253295	http://www.lakesidegetaway.com/		0.91
-b1ba4f7f9bdc	Lakeview Lodge On Lake Fork	hotel	lodge	32.89110	-95.66373	2980 FM2946	Emory	75440	+19034735110	http://www.bwlakeviewlodge.com		0.92
-e8b589fcf8ac	Lindale Masonic Lodge #848 AF & AM	hotel	lodge	32.52185	-95.41250	200 Margaret St	Lindale	75771	+19038826041	http://www.lindalelodge848.org/		0.86
 8126f2d9a055	Lof2 Tyler Golden Trs, Llc	hotel		32.31472	-95.27363	3104 Golden Rd	Tyler	75701				0.95
 6b6b2ae560d0	Lof2 Tyler Grande Trs, Llc	hotel		32.28062	-95.30385	220 E Grande Blvd	Tyler	75703				0.95
 b12ecf8ec073	Lone Star Inn	hotel	motel	32.37913	-95.33231	3236 W Gentry Pkwy	Tyler	75702	+19035330804	https://lone-star-inn-tx-9.hub.biz		0.99
@@ -1773,10 +1842,7 @@ b5abe72573e1	Magnuson Grand Hotel and Conference Center	hotel		32.31357	-95.2737
 70f8c455fd2d	Maloufs Trophy Whitetails	hotel		32.76694	-95.93240	5721 FM 1395	Wills Point	75169	+19035600066	http://www.malouftrophywhitetails.com		0.77
 6c1d1ec2a63e	Mammaw's Little White Farmhouse	hotel		32.51619	-95.38404	13198 fm rd 16w	Lindale	75771	+19037809249			0.57
 803d5b92c4b1	Marriott Inn	hotel		32.31306	-95.27680	3303 Troup Hwy	Tyler	75701	+19035955188	http://residenceinn.marriott.com/		0.73
-53582d830229	Mars Hill Lodge #1440	hotel		32.88937	-95.78674	1579 W US Highway 69	Emory	75440				0.93
-c74f841f7006	Masonic Family Lodge	hotel		32.36129	-95.31084	912 W Queen St	Tyler	75702	+19035045351	http://msana.com		0.75
 a85747d66c5c	Mill Creek Ranch Resort	hotel		32.57122	-95.85159	1880 N Trade Days Blvd	Canton	75103	+18779273439	https://millcreekranchresort.com/		0.99
-d1485b5c7dd5	Mill Creek Ranch Resort	hotel	resort	32.57341	-95.85574	1880 N Trade Days Blvd	Canton	75103	+18779273439	https://millcreekranchresort.com/		0.94
 1a19b84f45f8	Motel 6	hotel	motel	32.47094	-95.38651	13307 County Rd 472	Lindale	75771	+19032053978	http://www.motel6.com/	Motel 6	1.00
 2e89768079de	Motel 6	hotel		32.37926	-95.33253	3236 W Gentry Pkwy	Tyler	75702	+19035956691	https://verdevalleyinn.com		0.87
 f5052bd3d8f9	Motel 6	hotel	motel	32.58006	-95.85500	3001 N Trade Days Blvd	Canton	75103	+19032053980	http://www.motel6.com/	Motel 6	1.00
@@ -1786,7 +1852,6 @@ fe6031ec42c9	Motel 6 Lindale, TX	hotel	resort	32.47050	-95.39691	13307 County Ro
 e3b2e84d31d7	Oak Ridge Restaurant	hotel	motel	32.84580	-95.52526	2949 W State Highway 154	Quitman	75783	+19038782529	https://www.oakridgemarina.com/restaurant.htm		0.98
 a2a0cb9dbf03	Oaks Apartments	hotel		32.34414	-95.28655	1208 E Houston St	Tyler	75702	+19035974291	http://www.bhmanagement.com		0.60
 db34d87f2679	Old Texas Bunkhouse	hotel	hostel	32.69977	-95.96860	3402 Goodnight Blvd	Wills Point	75169	+18333862442	http://oldtexasbunkhouse.com		0.75
-ba26006cf2fd	Open Water Lodge and Cabins	hotel	lodge	32.83295	-95.98021	400 VZ County Road 3727	Wills Point	75169	+19034413937	http://Www.openwaterlodge.com/		0.92
 5069913e27cc	Ornelas Hall	hotel		32.31427	-95.25112	3900 University Blvd	Tyler	75799		http://www.uttyler.edu/housing/ornelashall/index.php		0.94
 e12cab5ad723	Ornelas Hall	hotel		32.33568	-95.27892	1202 S Blackwell Ave	Tyler	75701	+19035656400	http://www.uttyler.edu/housing/orneleashall		0.99
 e017bb4950d3	Otr4u	hotel	resort	32.75254	-95.91454	3086 FM 1395	Wills Point	75169	+19038735553	http://www.otr4u.com		0.92
@@ -1812,20 +1877,14 @@ c971d57accc0	Relax inn	hotel		32.36945	-95.28898	1812 E Gentry Pkwy	Tyler	75702	
 7cde91728dc7	REST INN	hotel	motel	32.37727	-95.33157	3209 W Gentry Pkwy	Tyler	75702	+19035930103	http://MYRESTINN.COM/		0.99
 9f1599ead5a2	Rodeway Inn Mineola	hotel		32.66260	-95.48320	533 E Broad St	Mineola	75773	+19039200020		Choice Hotels	0.98
 2212a3652ac6	Rose City Inn and Suites	hotel	motel	32.38163	-95.33094	2631 WNW, TX-323 Loop	Tyler	75702	+19035263700	http://rosecityinn.com/		0.99
-fedb0d22cfee	Rose City Motel	hotel		32.35271	-95.34312	3712 W Erwin St	Tyler	75702				0.95
 b38959219346	Royal Inn and Suites	hotel	motel	32.38198	-95.33070	2645 W NW Loop 323	Tyler	75702	+19035954514	https://motel-royal-inn-suites-tyler.vivehotels.com/en		0.99
 d3b8930da436	Salt City Inn	hotel	motel	32.67468	-95.70580	401 E Garland St	Grand Saline	75140	+19039624228	https://salt-city-inn.hub.biz		0.92
 49575725e26a	Sanchez Circle 7 Ranch	hotel		32.45768	-95.98112		Canton					0.72
-4afe94c3d4fb	Sand Springs Guest House	hotel	lodge	32.40780	-95.77824	498 Co Rd 4302	Ben Wheeler	75754		http://www.sandspringsguesthouse.com/		0.92
 f25046f90f35	Secluded Lodge	hotel		32.89325	-95.51495	6201 FM 515	Yantis	75497	+19408671006	http://www.secludedlodge.com		0.77
-bca71250b3e9	Serenity Hill Inn & Retreat	hotel	lodge	32.65969	-95.84123	8800 TX-19	Edgewood	75117	+19032247111			0.92
-80bdf7c67e11	Shanti Llc	hotel		32.35004	-95.32091	1800 W Erwin St	Tyler	75702				0.95
 67d10a3dbed3	Sherwood Forest Apartments	hotel		32.30444	-95.27632	4123 Southpark Dr	Tyler	75703	+19035613039	https://www.theevergreens.net		0.56
-9a8da01e5ffd	Shiloh Masonic Lodge	hotel	lodge	32.99654	-95.94017	105 Katy St	Lone Oak	75453				0.92
 87c5608f68c7	Shorty's Resort & Marina	hotel		32.84045	-95.63313	2825 N FM 17	Alba	75410	+19729512640	http://www.shortysresort.com		0.77
 f0e373b7b4ce	Silverleaf Resorts	hotel		32.21455	-95.45525	18270 Singing Wood Ln	Flint	75762	+19039393317			0.97
 af2374994750	Silverleaf Resorts Holly Lake Texas	hotel		32.71268	-95.21072		Hawkins					0.76
-e82f6c586df9	Sledge Hall	hotel		32.33516	-95.28561	1201 S Baxter Ave	Tyler	75701				0.60
 126d45ef120b	Sleep Inn and Suites Tyler South	hotel		32.28746	-95.30019	5555 S Donnybrook Ave	Tyler	75703	+14302872785	https://www.choicehotels.com/texas/tyler/sleep-inn-hotels/txc04?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 8fe3f1f6d979	Sportsman's Lodge at Lake Fork	hotel		32.87512	-95.67120	4449 FM 515	Emory	75440	+19034733333			0.99
 f106d68377fb	SpringHill Suites by Marriott Lindale	hotel	resort	32.51969	-95.41049	505 N Main St	Lindale	75771	+14302352800	http://www.marriott.com/hotels/travel/tyrsl-springhill-suites-lindale/?scid=f2ae0541-1279-4f24-b197-a979c79310b0		0.99
@@ -1834,7 +1893,6 @@ f106d68377fb	SpringHill Suites by Marriott Lindale	hotel	resort	32.51969	-95.410
 40adcc22da8e	Stratford Inn Tyler	hotel	motel	32.38147	-95.32923	2600 W NW Loop 323	Tyler	75702	+19035972756	https://stratfordinntyler.com/		0.99
 6e56784bd7b8	Studio 6	hotel		32.31302	-95.27634	3303 Troup Hwy	Tyler	75701	+19035955188	s6.xyz		0.92
 fa6d7db6a8eb	Studio 6	hotel		32.38088	-95.33315	2739 W NW Loop 323	Tyler	75702	+19032053983	https://www.studio6.com/en/home/motels.tx.tyler.5152.html		0.99
-df6f4784b637	Sugoi Lakes Lodge & Resort	hotel	lodge	32.71219	-95.47092	705 County Road 2460	Mineola	75773	+19035201515	http://Sugoilakesresort.com/		0.92
 bb8bf0b52a6b	Super 8	hotel	motel	32.20611	-95.87209	205 US Hwy 175 W	Athens	75751	+19036757511	https://www.wyndhamhotels.com/super-8/athens-texas/super-8-athens-tx/overview		0.99
 fffa777d516f	Super 8	hotel	motel	32.38102	-95.33012	2616 N NW Loop 323	Tyler	75702	+19038274009	https://www.wyndhamhotels.com/super-8/tyler-texas/super-8-tyler-tx/overview		0.99
 c251a3e3903f	Super 8 by Wyndham	hotel		32.35844	-95.34368	556 N Northwest Loop 323	Tyler	75702	+19038274009	http://www.wyndhamhotelgroup.com/		0.97
@@ -1849,10 +1907,8 @@ bf00d61a1fe6	The Lucky Lodge	hotel		32.43001	-95.93085	790 VZ County Road 2313	C
 329e21ebf396	The Midtown Apartment	hotel	service apartment	32.34714	-95.28712	1126 E Front St	Tyler	75702	+19037306710	http://www.TheMidtownTyler.com/		0.92
 a38d7af29448	The Prickly Pear Bed and Breakfast	hotel		32.43182	-95.66329	11558 State Highway 64	Ben Wheeler	75754	+19038527327	http://www.pricklypearbenwheeler.com		0.92
 e851c6222c96	The Ranch on Rhones Quarter	hotel		32.27208	-95.25787	14245 Rhones Quarter Rd	Whitehouse	75791	+19035615089	http://www.ranchrq.com/		0.74
-6505026e015f	The Retreat at the End of the Road LLC	hotel	lodge	32.21497	-95.93123	9100 Co Rd 2800	Athens	75751	+19038049202	https://calendar.google.com/calendar/embed?src=godsgiftretreat%40gmail.com&ctz=America%2FChicago		1.00
 3878aa79a002	The Stretford at the Cascades	hotel		32.31637	-95.34756	2801 Wexford Dr	Tyler	75709	+19035954448	http://www.thestretford.com/		0.92
 1866e24b5a67	The Thomas Hotel	hotel		32.35064	-95.30024	109 E Erwin St	Tyler	75702	+19034268958	http://www.thethomastyler.com/		0.99
-94d223900b23	The Troyer Inn	hotel		32.74893	-95.60984		Alba					0.75
 2fcee0bc457b	The Villages Resort By Silverleaf	hotel	resort	32.21447	-95.45595	18270 Singing Wood Ln	Flint	75762	+19035611153	http://www.holidayinn.com		0.92
 afca68a36ed9	The Villages Resort On Lake Palestine	hotel		32.21743	-95.46828		Flint			http://www.silverleafresorts.com/resorts/the-villages		0.73
 24dfaf831eb0	Tiny Bluebird Cottage	hotel		32.71847	-95.97194	250 Lakeview Dr	Wills Point	75169	+19035020375	http://www.tinybluebird.com/		0.92
@@ -1880,11 +1936,9 @@ c2081fc31cd2	Wesley House	hotel		32.33644	-95.28435	1400 E Lake St	Tyler	75701	+
 fdf58aee9aea	Westward Ho Motor Lodge	hotel		32.67490	-95.70578	401 E Garland St	Grand Saline	75140	+19039624228	http://tinka.net		0.57
 fd7993dd0e16	Windsock Inn	hotel		32.47383	-95.90822	4206 FM 1651	Canton	75103	+19038480618	http://www.windsockinn.net		0.92
 b307336c2021	WoodSpring Suites Tyler Rose Garden	hotel		32.31157	-95.33988	3210 S SW Loop 323	Tyler	75701	+19035613232	https://www.woodspring.com/extended-stay-hotels/locations/texas/tyler/woodspring-suites-tyler	WoodSpring Suites	0.99
-a2fe89f17c51	Yale Street Cabana	hotel		32.26498	-95.30470	8321 Yale Dr	Tyler					0.71
 319027f4e44a	A. C. Grace Company	office	pharmaceutical company	32.58233	-95.10730	111 E Gilmer St	Big Sandy	75755	+19036364368	http://www.acgrace.com/		0.92
 ec913d0e547e	All Advanced Media Communications	office	telecommunications company	32.06129	-95.50261	808 State Highway 155	Frankston	75763	+19038760207	https://www.alladvancedmediacommunications.com/		0.92
 be0569f5d59c	Alliant Insurance Services, Inc.	office		32.26559	-95.33971	2311 Dueling Oaks Dr Ste 30	Tyler	75703	+19036307234	https://alliant.com/		0.92
-dafc967f36f1	Arp Club Lake	office	private association	32.25861	-95.14613	14966 County Road 288	Tyler	75707		arpclublake.com		0.92
 feefcb182b41	Arp Club Lake	office	private association	32.24897	-95.14793	14966 County Road 288	Tyler	75707		arpclublake.com		0.95
 cf49c8926e90	Athens Fish and Game Club	office	private association	32.23386	-95.78037	6372 Athens Fish & Game	Athens	75752	+19036756049	http://www.athensfishandgame.org		0.92
 e1c41223e6f8	Azalea Surgical Products, Inc.	office		32.29937	-95.33517	10220 Robinson Dr	Tyler	75703	+19037522600	https://www.azasurg.com		0.75
@@ -1947,7 +2001,6 @@ c2cc5c6b122b	Northwestern Mutual	office		32.29931	-95.30006	100 Independence Pl 
 31800fe01c37	Peoples Communication	office	telecommunications company	32.79594	-95.45282	102 N Stephens St	Quitman	75783	+19037632214	http://www.peoplescom.net		0.92
 62b30bd1df99	Petro-land Group, Inc.	office		32.31121	-95.26707	3400 G E Dr	Tyler	75701	+19035954293	https://www.petroland.com		0.92
 78ee04959bbc	Project Control	office		32.31462	-95.27545	3200 Troup Hwy Ste 140	Tyler	75701		https://www.projectcontrol.com		0.65
-7a47c855f068	Promise Hill	office		32.35809	-95.49281	15669 FM 279	Chandler	75758				0.76
 036c97d4ffbe	Prosperity Computer Solutions	office	information technology company	32.65839	-95.08907	605 Private Road 3001	Big Sandy	75755	+19036363000	http://www.prosperityerp.com		0.92
 74cab9d63bf7	QeH2	office	information technology company	32.30491	-95.30372	3930 Old Bullard Rd Ste a	Tyler	75701	+18442507084	https://www.qeh2.com/		0.92
 c6998ee516c7	Quad Axis	office	information technology company	32.26641	-95.34699	7517 Cross Rd	Tyler	75703	+19036347823	http://www.quadaxisllc.com		0.77
@@ -1963,7 +2016,6 @@ a9453d63b850	Seismic Energy Products Lp	office	plastics company	32.21130	-95.811
 bcb53179b386	Suddenlink Communications	office	telecommunications company	32.66430	-95.49233	403 W Broad St	Mineola	75773	+18888225151	http://www.suddenlink.com/		0.92
 bd6d33ad5a85	Suddenlink Communications	office	telecommunications company	32.32940	-95.34000	1820 S Southwest Loop 323	Tyler	75701	+18776125036	http://www.suddenlink.com		0.96
 d7ab6bb915ff	Suddenlink Communications	office	telecommunications company	32.29685	-95.30122	4949 S Broadway Ave	Tyler	75703	+18888225151	http://www.suddenlink.com/		0.85
-477636607774	Tees Aquatic Complex	office	private association	32.25830	-95.11877	15174 Ridge Rd	Arp	75750				0.85
 1b006d8eb9f7	Texas Energy Alliance	office	energy company	32.32105	-95.30137	2627 S Broadway Ave Suite 8343	Tyler	75711	+19032900403	http://www.texasenergyalliance.org/		0.92
 d10a779d413a	Texas Oncology-Canton	office	pharmaceutical company	32.58806	-95.87423	18780 I-20	Canton	75103	+19035799800	https://www.texasoncology.com/cancer-centers/canton/canton/medical-oncology		0.92
 675142530c10	Texas Oncology-Tyler	office	pharmaceutical company	32.34412	-95.29046	501 Saunders Ave	Tyler	75702	+19035799800	https://www.texasoncology.com/cancer-centers/tyler/tyler		0.99
@@ -2019,7 +2071,6 @@ df062d08e162	Archangels Infinity Lavender Ranch	restaurant		32.97428	-95.29730	2
 c02037b95bd0	Aspen Creek Grill	restaurant	steakhouse	32.30421	-95.32366	1725 W SW Loop 323	Tyler	75701	+19036308370	https://www.aspencreekgrill.com/	Aspen Creek Grill - Noblesville, Indiana	0.99
 b4d4a95cc3a5	Athena Greek & American Family Restaurant	restaurant	greek restaurant	32.30404	-95.32001	1593 W Southwest Loop 323	Tyler	75701	+19035618065	https://athenagreekrestaurant.com		0.95
 15cd8f460991	Athens Boathouse Bar and Grill	restaurant	bar and grill restaurant	32.21603	-95.76884	5401 Marina Dr	Athens	75752	+19036752628	http://Athensboathouse.com/		0.98
-1f09b5190b45	Athens Flea Market	restaurant	delicatessen	32.20049	-95.88078	1513 W Corsicana St	Athens	75751	+19723221999			0.89
 52dd2bb919e4	Athens Flea Market	restaurant	delicatessen	32.19975	-95.88335	1513 W Corsicana St	Athens	75751	+19723221999			0.89
 b60cafa6bd73	Athens Ken's Pizza	restaurant	pizza restaurant	32.19755	-95.85336	505 S Palestine St	Athens	75751	+19036758507			0.98
 467834885c76	Athens Soup Kitchen	restaurant	soup restaurant	32.20792	-95.85522	421 N Prairieville St	Athens	75751				0.79
@@ -2070,13 +2121,6 @@ d7ab98739524	Bruno's | Pizza & Pasta	restaurant	pizza restaurant	32.25067	-95.34
 16bffcabc344	Bulldog Pizza Edgewood	restaurant	pizza restaurant	32.69836	-95.88575	111 NE Front St	Edgewood	75117	+14302885607	http://Www.BulldogPizzaEdgewoodTX.Com/		0.92
 2e42357bb750	Burger Barn	restaurant	burger restaurant	32.11898	-95.90426	14860 FM 59	Athens	75751	+19036759220			0.96
 b6caea0100a8	Burger Barn	restaurant	burger restaurant	32.04230	-95.96651	14860 FM-59	Athens	75751	+19036759220	http://theburgerbarn.net		0.92
-0d0445b5102c	Burger King	restaurant	burger restaurant	32.54257	-95.87467	575 E State Highway 243	Canton	75103	+19032876271	https://burgerking.com/store-locator/store/restaurant_239893		0.94
-0f5d8edcf04f	Burger King	restaurant	burger restaurant	32.34307	-95.34039	530 S SW Loop 323	Tyler	75702	+19035954687	https://burgerking.com/store-locator/store/4280	Burger King	0.97
-670350c9e72e	Burger King	restaurant	burger restaurant	32.30600	-95.33467	2801 W SW Loop 323	Tyler	75701	+19032669233	https://burgerking.com/store-locator/store/17173	Burger King	0.99
-762e148bd1b6	Burger King	restaurant	burger restaurant	32.47073	-95.38800	3404 S Main St	Lindale	75771	+19035664900	https://burgerking.com/store-locator/store/4279	Burger King	0.99
-7b1f75a1fa57	Burger King	restaurant	burger restaurant	32.26797	-95.30799	7445 S Broadway Ave	Tyler	75703	+19032669282	https://burgerking.com/store-locator/store/17323	Burger King	0.96
-d8b71a1a291a	Burger King	restaurant	burger restaurant	32.33187	-95.26555	1602 S SE Loop 323	Tyler	75701	+19035661176	https://burgerking.com/store-locator/store/3265	Burger King	0.99
-fa44158e6c38	Burger King	restaurant	burger restaurant	32.20523	-95.83833	1004 E Tyler St	Athens	75751	+19036753572	https://burgerking.com/store-locator/store/25385	Burger King	0.95
 4632c48a7309	Burger Warehouse	restaurant	burger restaurant	32.31637	-95.27937	1839 Troup Hwy	Tyler	75701	+19728631798			0.98
 899d3bd89a57	Burgers Fries And Pies	restaurant	burger restaurant	32.87500	-95.63274	5004 N FM 17	Alba	75410	+19036033512	https://www.lakeforkresort.com		0.55
 f43362ac3f69	Burgins BBQ	restaurant	barbecue restaurant	32.87465	-95.67016	4500 FM 515	Emory	75440	+19032434591	http://burginsbbqandcatering.com		0.77
@@ -2089,12 +2133,10 @@ e718afba8d2b	C Rojos Taqueria	restaurant	taco restaurant	32.27126	-95.30772	7205
 7812464ed821	Cantina Laredo Tyler	restaurant	mexican restaurant	32.26551	-95.34180	7428 Old Jacksonville Highway Ste 10	Tyler	75703	+19036305423	https://www.cantinalaredotyler.com/		0.93
 4e736cf809c0	Canton Taco Shack	restaurant	mexican restaurant	32.56220	-95.85995		Canton					0.65
 ef335aa47cf1	Caribbean Kitchen	restaurant	dominican restaurant	32.33186	-95.28768	1125 E 5th St	Tyler	75701	+19036303960	https://www.caribbeankitchentx.com		0.96
-f7904fc39e02	Carl’s Jr.	restaurant	burger restaurant	32.43947	-95.13487	16242 US HWY 271, Suite Ste 300	Tyler	75708	+19038773756	https://locations.carlsjr.com/tx/tyler/16242-us-hwy-271		0.98
 83ea22d9f4f2	Casa Ole	restaurant	texmex restaurant	32.30959	-95.27392	3701 Troup Hwy	Tyler	75703	+19035092800	http://www.casaole.com		0.92
 d691da238ee5	Casey's	restaurant	pizza restaurant	32.38903	-95.28519	677 E Northeast Loop 323	Tyler	75708	+14302554104	https://www.caseys.com		1.00
 d14828fc2310	Catalina's	restaurant	mexican restaurant	32.35672	-95.31049	622 N Palace Ave	Tyler	75702	+19033302981	http://www.tylermexicanrestaurant.com		0.96
 31d9827ffd70	Catalina's Authentic Mexican Cuisine & Tacos	restaurant		32.34276	-95.31006	622 S Palace Ave	Tyler	75701	+19033302981			0.95
-5be240773878	Catalina's Authentic Mexican Cuisine & Tacos	restaurant		32.34299	-95.31007	622 S Palace Ave	Tyler	75701	+19033302981			0.95
 5c76d38497e2	Catch Me If You Can Restaurant	restaurant	cajun and creole restaurant	32.20599	-95.42307	18950 Hwy 155 S	Flint	75762	+19039782033	https://www.doordash.com/store/26185317?utm_source=mx_share		0.99
 524a5737b173	Catfish King	restaurant	seafood restaurant	32.33522	-95.29098	1216 S Beckham Ave	Tyler	75701	+19035928865	http://www.davidbeards.com	David Beard's Catfish King	1.00
 acc76d31d82a	Catfish Palace	restaurant	seafood restaurant	32.20549	-95.87070	200 US-175 BUS	Athens	75751	+19036758580	http://www.athenstx.org/places-to-eat/catfish-palace		0.99
@@ -2108,30 +2150,24 @@ ad004287d450	Chayitos Taqueria	restaurant	mexican restaurant	32.92863	-95.86788	
 4ebbf85e9710	Chelita’s Tacos	restaurant	mexican restaurant	32.23190	-95.04980	509 E Longview St	Arp	75750	+19037302505	https://www.chelitastacos.com/		0.92
 0404cbfa1260	Chely’s Cafe	restaurant	texmex restaurant	32.21368	-95.85529	801 N Prairieville St	Athens	75751	+19039044317			0.97
 df041a56e7bd	Chen's Buffet	restaurant	buffet restaurant	32.54606	-95.85941	400 TX-243	Canton	75103	+19035676888	http://www.chensbuffettx.com/		0.99
-9c3bd2a163dd	Cherry Point Public House	restaurant		32.93083	-95.87052	E Street & 2nd Avenue	Point	28533	+12524665555	https://cherrypoint.usmc-mccs.org/dining-entertainment/entertainment-events/event-planning/event-centers/public-house		0.93
 1e5f3caef5d5	Chester's Chicken	restaurant	chicken restaurant	32.14405	-95.12379	302 W Duval	Troup	75789	+19038423156	https://www.chesterschicken.com/		0.96
 49b49382a41e	Chester's Chicken	restaurant		32.53488	-95.27090	18562 Fm 14	Lindale	75771	+19038582225	https://www.chesterschicken.com/		0.96
 8b95120efd84	Chester's Chicken	restaurant	chicken restaurant	32.29225	-95.13929	16117 State Hwy 64	Tyler	75707	+19035665000	https://www.chesterschicken.com/		0.96
 86e8e47a2dbb	Chiangmai Thai Kitchen	restaurant	thai restaurant	32.24930	-95.30640	8934 S Broadway Ave #480	Tyler	75703	+19035348424	http://www.chiangmaithaikitchenonline.com/	Chiangmai Thai Kitchen-Longview	1.00
 f265058cf398	Chiangmai Thai Sushi	restaurant	thai restaurant	32.29255	-95.30428	5201 S Broadway Ave	Tyler	75703	+19037478171	http://www.chiangmaithaikitchenonline.com		0.96
 62d14fe5fb90	Chicken & Burgers	restaurant		32.28579	-95.35928	22005 Hwy 155s	Tyler	75798				0.55
-aa4a92555fae	Chicken Express	restaurant	chicken restaurant	32.23125	-95.22700	406 State Highway 110 N	Whitehouse	75791	+19032026064	hanzonation.com		0.90
 51a197f84dc2	Chicken Salad Chick	restaurant	salad bar	32.29768	-95.29951	4710 S Broadway Ave	Tyler	75703	+19037473016	https://chickensaladchick.com/tyler-tx	Chicken Salad Chick	0.99
-25968fcfbedf	Chili's Grill & Bar	restaurant	texmex restaurant	32.28173	-95.30596	6201 S Broadway Ave	Tyler	75703	+19035817813	https://www.chilis.com/locations	Chili's Grill & Bar	0.97
 4c390b795227	Chili's Grill & Bar	restaurant		32.28354	-95.30584	6201 S Broadway Ave	Tyler	75703	+14305628735	https://www.chilis.com/		1.00
 8abcfb8077ae	Chili's Grill & Bar	restaurant		32.47480	-95.39040	3210 S Main St	Lindale	75771	+19038823227	https://www.chilis.com/		0.99
 a441368692c3	Chili's Grill & Bar	restaurant		32.20564	-95.84123	900 E Tyler St	Athens	75751	+19036483154	https://www.chilis.com/		0.95
 e5a52ddad08b	China Chef	restaurant	chinese restaurant	32.30879	-95.47324	636 State Hwy 31 W	Chandler	75758	+19038492308	https://www.groupon.com/biz/tyler-tx/china-chef		0.92
 3df0e92b6568	China King	restaurant	chinese restaurant	32.30036	-95.29914	4542 S Broadway Ave	Tyler	75703	+19035349888	http://eatchinaking.com/locations/	China King Buffet	0.99
 635a090374dd	China Star Tyler	restaurant	chinese restaurant	32.34485	-95.34064	510 S Southwest Loop 323	Tyler	75702	+19035969999	http://www.chinastarexpress.com		0.99
-2958bc41167e	Chipotle Mexican Grill	restaurant	mexican restaurant	32.25116	-95.30776	8916 S Broadway Ave	Tyler	75703	+14302885466	https://locations.chipotle.com/tx/tyler/8916-s-broadway-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4330	Chipotle Mexican Grill	0.99
-b2844226796c	Chipotle Mexican Grill	restaurant	mexican restaurant	32.29723	-95.30183	4751 S Broadway Ave	Tyler	75703	+19035346266	http://www.chipotle.com	Chipotle Mexican Grill	0.99
 63b2b6f7de95	Choice BBQ	restaurant	barbecue restaurant	32.65612	-95.43163	3196 FM 1801	Mineola	75773	+12146647078			0.78
 95a42f73bcbe	Chop Chop	restaurant	american restaurant	32.60872	-95.20535	233 FM-1795	Hawkins	75765	+17327797425	http://www.chopchopmag.org/		0.84
 24e30a641573	Chuy's	restaurant	texmex restaurant	32.28534	-95.30541	5935 S Broadway Ave	Tyler	75703	+19035092489	https://www.chuys.com/locations/tx/tyler/tyler-tx/6025	Chuy's	0.99
 9a7df9b73206	CiCi's Pizza	restaurant	pizza restaurant	32.66433	-95.49328	502 W Broad St	Mineola	75773	+19035691700	http://www.cicispizza.com/		0.92
 905af6e3c9d2	Cicis Pizza	restaurant	pizza restaurant	32.31192	-95.27583	1938 E. Southeast Loop 323	Tyler	75701	+19035339494	https://www.cicis.com		0.97
-d534bcc4ed2c	Cicis Pizza	restaurant	pizza restaurant	32.37188	-95.34308	211 N Northwest Loop 323	Tyler	75702	+19035269494	https://www.cicis.com		0.55
 eb5a878e583f	Cicis Pizza	restaurant	pizza restaurant	32.35548	-95.34275	211 N Northwest Loop 323	Tyler	75702	+19035269494	https://www.cicis.com		0.99
 3931c70594b0	Cinco De Mayo	restaurant	mexican restaurant	32.20412	-95.85793	309 W Corsicana St	Athens	75751	+14302721802			0.92
 86b92515eb5c	Cinco De Mayo	restaurant	mexican restaurant	32.48089	-95.39427	2610 S Main St	Lindale	75771	+19038818600	http://cincodemayomexicanrestaurant.com/menu		0.98
@@ -2169,7 +2205,6 @@ fc174957e8a5	D'Angelo's Pizzeria	restaurant	pizza restaurant	32.30273	-95.61885	
 3c67f6a96824	D.Ray’s BBQ-Ribs & Chicken Wings	restaurant		32.93080	-95.57411	100 E Oak St	Yantis	75497	+19034740598	https://linktr.ee/DRays_BBQ_Chicken		0.66
 aa37ad62e29e	Daiquiris To Go Tyler	restaurant	bar and grill restaurant	32.30398	-95.30993	713 W SW Loop 323	Tyler	75701	+19036303866			0.99
 f27265389d7e	Dairy Palace	restaurant	diner	32.57637	-95.85584	2301 N Trade Days Blvd	Canton	75103	+19035676551	https://dairypalace.com/		0.99
-0a5b3649e364	Dairy Queen Corporation	restaurant		32.26680	-95.30656	106 E Heritage Dr	Tyler	75703	+19035614018	http://www.dqtyler.com/		0.96
 2d21221b184f	Dakota's Steak & Chop House	restaurant	steakhouse	32.29049	-95.30437	5397 S Broadway Ave	Tyler	75703	+18667274808			0.70
 2d486f1c00aa	Dakotas Steaks - Seafood - Chops	restaurant	steakhouse	32.29721	-95.30520	4803 Old Bullard Rd	Tyler	75703	+19035816700	http://www.dakotasintyler.com/		0.99
 f4763ee236e9	Dakotas Steaks - Seafood - Chops	restaurant	seafood restaurant	32.29125	-95.30283	4803 Old Bullard Rd Ste 1	Tyler	75703	+19035816700	http://dakotasintyler.com/		0.85
@@ -2192,17 +2227,6 @@ c13c5ec59fe0	Dickey's Barbecue Pit	restaurant	barbecue restaurant	32.56197	-95.8
 b299eaeaa608	Dizzy Daq’s & Cajun Bowls	restaurant		32.66404	-95.48990	118 W Broad St	Mineola	75773		https://www.dizzydaqs.com		0.99
 e131a4e5a9de	DK - Sbarro 5522	restaurant	pizza restaurant	32.45140	-95.28252	12810 FM 14	Tyler	75706	+19032047236	https://sbarro.com/locations/tx/tyler/sbarro-dk-express-tyler/?utm_source=facebook&utm_medium=local&utm_campaign=fb	Sbarro	0.97
 c7f4291b4da7	Doc's Pizza	restaurant	pizza restaurant	32.50954	-95.40896	607 S Main St	Lindale	75771	+19038826181	http://www.docspizzalindale.com		0.98
-0f62608e0389	Domino's	restaurant	pizza restaurant	32.66258	-95.48698	302 E Broad St	Mineola	75773	+19036382100	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
-2842fede60e8	Domino's	restaurant	pizza restaurant	32.29077	-95.30451	5371 South Broadway	Tyler	75703	+19035978000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-371fea832e2c	Domino's	restaurant	pizza restaurant	32.35984	-95.30795	701 W. Gentry Parkway	Tyler	75703	+19035924432	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-48f8b5a7e1b5	Domino's	restaurant	pizza restaurant	32.57394	-95.85632	1963 North Trade Days Blvd	Canton	75103	+19035673030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
-5b6c65e61663	Domino's	restaurant	pizza restaurant	32.33142	-95.28989	1694 S Beckham	Tyler	75701	+19035921530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-8608f95dab7f	Domino's	restaurant	pizza restaurant	32.22683	-95.22550	404 State Hwy North	Whitehouse	75791	+19038711215	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-ad17e8a8e6ab	Domino's	restaurant	pizza restaurant	32.29391	-95.26098	5111 Troup Hwy	Tyler	75707	+19039393131	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-f7d693d06304	Domino's	restaurant	pizza restaurant	32.23709	-95.34638	16669 D Fm 2493	Tyler	75703	+19039390705	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-2e38cf620ae0	Domino's Pizza	restaurant	pizza restaurant	32.30861	-95.47423	522 TX-31	Chandler	75758	+19035154088	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
-3478ef76e5f5	Domino's Pizza	restaurant	pizza restaurant	32.20432	-95.83401	210 Crestway St	Athens	75751	+19036703160	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-fe89253c73a2	Domino's Pizza	restaurant	pizza restaurant	32.47857	-95.39368	2807 S Main St Ste 100 ste 100	Lindale	75771	+19038819300	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
 890be2f2d6e2	Don Benito’s Mexican Cafe	restaurant	texmex restaurant	32.30943	-95.27386	3701 Troup Hwy	Tyler	75703	+19035092800	http://donbenitosmexicancafe.com		0.99
 7b07f8543148	Don Juan Mexican Restaurant	restaurant	mexican restaurant	32.35091	-95.28506	1313 E Erwin St	Tyler	75702	+19035262999	https://www.donjuantyler.com		0.98
 d8b018d15f8d	Don Juan On The Square	restaurant	mexican restaurant	32.35067	-95.29993	113 E Erwin St	Tyler	75702	+19035260702	http://www.donjuantyler.com/		0.99
@@ -2252,20 +2276,15 @@ c0c6f29de30e	Fat Kid Flats	restaurant		32.71990	-95.86440	753 County Road 3617	E
 b64a180a4d21	FD's Grillhouse	restaurant	steakhouse	32.24938	-95.30664	8934 S Broadway Ave #494	Tyler	75703	+19036307683	https://fds903.com/		0.99
 f87065f42792	Fine Eatz	restaurant		32.15344	-95.54544	6804 FM 315 S	Larue	75770	+19032195586			0.74
 aadd27f9601d	Fire Fish - Sushi Bar & Asian Bistro	restaurant	sushi restaurant	32.30876	-95.27383	3709 Troup Hwy #700	Tyler	75703	+19037875043	http://firefishtx.com/		0.86
-1ce7ac1c0b71	Firehouse Subs	restaurant		32.30491	-95.28049	4347-1 University Blvd.	Jacksonville Beach	32216	+19047311888	http://www.firehousesubs.com		0.77
-53a722424985	Firehouse Subs	restaurant	sandwich shop	32.31348	-95.27460	3304 Troup Highway	Tyler	75701	+19037877472	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=927	Firehouse Subs	0.99
-984c36a08d38	Firehouse Subs	restaurant	sandwich shop	32.20531	-95.83711	1010 E Tyler St Suite E	Athens	75751	+19039044205	https://www.firehousesubs.com/	Firehouse Subs	0.99
 cf4c98fa53c0	First Watch	restaurant	breakfast and brunch restaurant	32.32726	-95.30006	150 E 9th St	Tyler	75701	+19035923447	https://www.firstwatch.com/locations/tyler/?utm_source=facebook&utm_medium=organic&utm_campaign=fb-listing&utm_content=tyler%2F	First Watch	0.99
 eecaa4119c29	Fish City Grill	restaurant	seafood restaurant	32.29770	-95.29925	7428 Old Jacksonville Hwy #20	Tyler	75703	+19032669218	http://www.fishcitygrill.com		0.77
 36ae51396a45	Five Guys	restaurant	burger restaurant	32.30184	-95.29983	4510 S Broadway Ave	Tyler	75703	+19035812903	http://order.fiveguys.com/		0.92
 6da7fdec694e	Flamingo Hawaiian Barbecue & Coffee	restaurant	barbecue restaurant	32.20463	-95.86790	700 W Corsicana St	Athens	75751	+19032862800	http://www.flamingoathens.com/		0.75
 b209e5896301	Flat Creek Smokehaus	restaurant		32.21814	-95.76946	5401 Marina Dr	Athens	75752	+18174542438			0.73
-f40ee53b2498	Flat Creek Smokehaus	restaurant		32.21591	-95.76913	5401 Marina Dr	Athens	75752	+18174542438			0.71
 0f2efd8e8e34	Flavors Daiquiri Cafe	restaurant		32.31046	-95.29986	3502 S Broadway Ave # 404	Tyler	75701	+19039445600	http://flavorsdaiquiricafe.com		0.75
 d06fcf371ef3	Food Barn Winnsboro	restaurant		32.94863	-95.28823	Trinity Mission Health & Rehab, 502 E Coke Rd	Winnsboro	75494	+19038502427			0.67
 38db59611dd4	Fore Seasons Restaurant	restaurant		32.71238	-95.18837	210 Golf Dr	Hawkins	75765	+19037694325	http://www.hollylakeranch.com/restaurant.html		0.65
 21a5c2c0f0e6	Freddie Mae's	restaurant	barbecue restaurant	32.37037	-95.30458	403 W Martin Luther King Jr Blvd	Tyler	75702	+19036308680	http://freddiemaestyler.com		0.77
-4c159c867318	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	32.26511	-95.30811	7707 S Broadway Ave	Tyler	75703	+19036305480	https://www.freddys.com		1.00
 c34264b79801	Freebirds World Burrito	restaurant	texmex restaurant	32.29298	-95.30273	5105 S Broadway Ave	Tyler	75703	+19039390996	https://locations.freebirds.com/tx/tyler/20735	Freebirds World Burrito	0.96
 73f37552fb90	Funny Frogs	restaurant		32.87160	-95.76292	390 E Lennon Dr	Emory	75440	+19034731146			0.95
 862c9df4221c	Fuzion Eleven	restaurant	asian restaurant	32.29070	-95.30405	5377 S Broadway Ave	Tyler	75703	+19035260655	http://www.elevenfuzion.com		0.92
@@ -2279,7 +2298,6 @@ c736cdbe4c28	Gateway Bar and Grill	restaurant	bar and grill restaurant	32.88153	
 8501e3b374bf	Godfather's Pizza Express	restaurant	pizza restaurant	32.44383	-95.06121	12577 County Road 3101	Winona	75792	+19036184000	https://godfathers.com/		0.97
 d0b4b6ba063a	GoFish Lures & Cafe	restaurant	diner	32.86998	-95.54106	3736 TX-154	Yantis	75497	+19033833287	http://GoFishLures.com/		0.97
 cca045cbdcf1	GoFish Modern Japanese Kitchen	restaurant	sushi restaurant	32.30318	-95.30234	127 W SW Loop 323	Tyler	75701	+19037478266	http://Gofishmodernjapanesekitchen.com/		0.99
-74f13d50b733	Golden Chick	restaurant	american restaurant	32.66497	-95.49667	638 W. Broad St.	Mineola	75773	+19035690404	http://locations.goldenchick.com/tx/mineola/1168/		0.94
 e9e79232f587	Golden China Buffet	restaurant	chinese restaurant	32.22889	-95.22707	203 TX-110 #4	Whitehouse	75791	+19038712400	http://www.goldenchinabuffet.com/	Golden China Buffet	0.99
 35990aa80679	Golden Chopstix Express	restaurant	chinese restaurant	32.20404	-95.84528	716 E Corsicana St	Athens	75751		http://www.athenstx.org/places-to-eat/golden-chopstix-express		0.92
 dffbb0b92f90	Golden Corral	restaurant	buffet restaurant	32.28733	-95.30334	5602 S Broadway Ave	Tyler	75703	+19035618997	https://www.goldencorral.com/locations/2681/golden-corral-broadway/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=2681	Golden Corral Buffet & Grill	0.99
@@ -2291,7 +2309,6 @@ d79c6a6e85c9	Grandy's	restaurant	american restaurant	32.33481	-95.29076	1226 S B
 c52aeb7dd863	Grub House	restaurant	burger restaurant	32.28948	-95.13472	16408 State Highway 64 E	Tyler	75707	+19032669644	http://grubhousetyler.com		0.92
 a14ec72ef1be	Grumpy's Grub & Pork Rinds	restaurant	american restaurant	32.56689	-95.87225	Festivals all around East Texas	Canton	75103				0.61
 5b2e6e859283	Guerito Taqueria	restaurant	mexican restaurant	32.35910	-95.31312	1118 W Gentry Pkwy	Tyler	75702	+12147231136			0.92
-65debc3c10eb	Gus'	restaurant	texmex restaurant	32.21129	-95.34755	16700 FM 2493	Flint	75762	+19035343947	http://www.gusmexicanrestaurant.com/		0.65
 ad15d68ee563	Gus'	restaurant	texmex restaurant	32.23637	-95.34904	16700 FM 2493	Flint	75762	+19035343947	http://www.gusmexicanrestaurant.com/		0.68
 ae88a304dc67	Hacienda Renteria Mexican Cosina	restaurant	texmex restaurant	32.33838	-95.26071	3014 Spur 124	Tyler	75707	+19033124077	http://mextizostyler.com		0.62
 59fe6565c0c2	Hamburguesas y tacos de trompo estilo Monterrey	restaurant	burger restaurant	32.35334	-95.29443	323 N Beckham Ave	Tyler	75702	+19417046242			0.84
@@ -2328,7 +2345,6 @@ e3b225397c19	INKA's Tyler	restaurant	peruvian restaurant	32.35095	-95.28199	1523
 d77b87c4adaa	It's Just Wings	restaurant	chicken wings restaurant	32.28367	-95.30584	6201 S Broadway Ave	Tyler	75703	+14305628913	https://itsjustwings.com/		0.92
 5a1e590a1437	Italian Garden	restaurant	italian restaurant	32.48042	-95.39610	2701 S Main St	Lindale	75771	+19038810102	http://italiangardenlindale.com/		0.99
 9aee7181243f	J A J Management Inc	restaurant		32.23497	-95.34940	16884 FM 2493	Tyler	75703				0.95
-1ae64e50ba11	Jack in the Box	restaurant	taco restaurant	32.35474	-95.34274	121 N Northwest Loop 323	Tyler	75702	+19035967739	http://www.jackinthebox.com/locations/3805		0.96
 1e3188aa93cd	Jakes BBQ	restaurant	barbecue restaurant	32.35838	-95.36467	11968 TX-64	Tyler	75704	+19035937377			0.92
 ca7ba8cd1281	Jalapeno Tree	restaurant	mexican restaurant	32.55816	-95.80367	17270 I-20 Frontage Rd	Canton	75103	+19035677799	http://www.jalapenotree.com		0.77
 a144d6a55170	Jamie's Restaurant	restaurant	american restaurant	32.86679	-95.62528	271 Co Rd 1558	Alba	75410	+19037652087	http://google.com/		0.97
@@ -2336,11 +2352,7 @@ a144d6a55170	Jamie's Restaurant	restaurant	american restaurant	32.86679	-95.6252
 2d9fd0c3eeab	Jason's Deli	restaurant	delicatessen	32.29579	-95.30229	4913 S Broadway Ave	Tyler	75703	+19035615380	https://www.jasonsdeli.com/	Jason's Deli	0.99
 3145f96132ea	Javi's	restaurant	mexican restaurant	32.26785	-95.34058	7212 Old Jacksonville Hwy	Tyler	75703	+19035045075	https://javis903.com/		0.99
 cb26245a361a	Jerry's Pizza	restaurant	pizza restaurant	32.57582	-95.85481	2250 N Trade Days Blvd	Canton	75103	+19035674821	https://www.eatjerryspizza.com/		0.93
-7064f12b6c6d	Jersey Mike's	restaurant	sandwich shop	32.33143	-95.28984	1690 South Beckham Ave	Tyler	75701	+19037473437	https://www.jerseymikes.com/15025/tyler-tx	Jersey Mike's Subs	0.98
-aac19e1a4937	Jersey Mike's Subs	restaurant	sandwich shop	32.29705	-95.29915	Macy's Plaza, 4754 S Broadway Ave	Tyler	75703	+19035614955	https://www.jerseymikes.com/15004/tyler-tx	Jersey Mike's Subs	0.99
 fde192285065	Jhonny’s Lake House	restaurant	mexican restaurant	32.84854	-95.63008	3362 FM 17	Alba	75410	+19037659170	https://jhonnyslakehouse.com		0.92
-82b62648d17a	Jimmy John's	restaurant	sandwich shop	32.29156	-95.30315	5303 S Broadway Ave	Tyler	75703	+19036301651	https://locations.jimmyjohns.com/tx/tyler/sandwiches-4535.html	Jimmy John's	0.99
-d8a5742b5370	Jimmy John's	restaurant	sandwich shop	32.31638	-95.27866	1847 Troup Hwy Ste 100	Tyler	75701	+19036176878	https://www.jimmyjohns.com		0.92
 b3677841cb91	Jimmy's Egg	restaurant	breakfast and brunch restaurant	32.28381	-95.30419	6004 S Broadway Ave #100	Tyler	75703	+19036304013	https://jimmysegg.com/locations/tyler-tx/	Jimmy's Egg	0.99
 daafa651b6dc	Joamia's Kitchen	restaurant	japanese restaurant	32.34122	-95.28836	1500 W SW Loop #323	Tyler	75701	+19034770260			0.64
 d70bd592ab98	Joey's Tacos	restaurant	taco restaurant	32.34942	-95.30606	514 W Elm St	Tyler	75702	+19039203356			0.97
@@ -2371,10 +2383,6 @@ e969c856ab19	Katie's OLD Fashion BBQs	restaurant	barbecue restaurant	32.20267	-9
 20eab0cfabfb	Kens Pizza	restaurant		32.19762	-95.85335	505 S Palestine St	Athens	75751		https://kenspizza.online		0.97
 87551aed76f3	Kens Pizza	restaurant	pizza restaurant	32.30098	-95.29903	4526 S Broadway Ave	Tyler	75703	+19035615920	https://kenspizza.online		0.99
 f2a8302b1366	Kens Tyler 602	restaurant		32.30176	-95.30010	4504 S Broadway Ave	Tyler	75703				0.68
-238b65e213aa	KFC	restaurant	chicken restaurant	32.20444	-95.86654	612 W Corsicana St	Athens	75751	+19036751900	http://www.kfc.com/storelocator/Default.aspx?address=612%20W.%20Corsicana,Athens,TX		0.92
-6a9024651eb8	Kfc	restaurant	chicken restaurant	32.34578	-95.26462	450 S Southeast Loop 323	Tyler	75702	+19037811824	https://www.kfc.com		0.92
-d32c7c6d5e03	KFC	restaurant	chicken restaurant	32.57388	-95.85574	1963 N Trade Days Blvd	Canton	75103	+19035675417	http://www.kfc.com/storelocator/Default.aspx?address=1963%20N%20Trade%20Days%20Blvd,Canton,TX		0.92
-e32f1ced8135	KFC	restaurant	chicken restaurant	32.47258	-95.38934	3222 South Main Street, Suite B	Lindale	75771	+19038819601	https://locations.kfc.com/tx/lindale/3222-south-main-street		0.97
 45db24b210e0	Kidd Street Grill	restaurant	bar and grill restaurant	32.30031	-95.28195	4610 Kidd Dr	Tyler	75703				0.81
 4958de4b8c30	Kiepersol Enterprises	restaurant		32.24091	-95.32103	3933 FM 344 E	Tyler	75703	+19038949330	http://www.kiepersol.com		0.77
 d3b3841b9296	King Tortas #2	restaurant		32.37103	-95.28773	2021 E Gentry Pkwy	Tyler	75702	+19036307157			0.92
@@ -2416,7 +2424,6 @@ a61dbd00b2e8	La Waffalata	restaurant	burger restaurant	32.66331	-95.48858	124 E 
 9263543cc4ca	Lake Fork Fish House	restaurant	seafood restaurant	32.87939	-95.63944	5375 FM 17	Alba	75410	+19039533474			0.96
 8b7689e42ae2	Lake Fork Roadhouse at Lake Fork Resort	restaurant	american restaurant	32.87531	-95.63297	5004 N FM 17	Alba	75410	+19037652400			0.64
 80b730e93886	Lalos Mexican Grill & Cantina	restaurant	mexican restaurant	32.29384	-95.30476	5106 Old Bullard Rd	Tyler	75703	+19036302153			0.87
-99b5520f0833	Laredo Taco Company	restaurant	mexican restaurant	32.33461	-95.30106	4300 S Broadway Ave	Tyler	75703	+19033438738	https://www.laredotacocompany.com		0.95
 bb061968701d	Laredo Taco Company	restaurant	mexican restaurant	32.30244	-95.29994	4300 S Broadway Ave	Tyler	75703	+19033438738	https://www.laredotacocompany.com/		0.97
 dd18c62accaa	Laredo Taco Company	restaurant		32.28057	-95.31613	1001 W Grande Blvd	Tyler	75703	+19037527173	https://www.laredotacocompany.com/		0.92
 034dd6847358	Las Mejores Gorditas	restaurant	mexican restaurant	32.35088	-95.29600	500 E Erwin St	Tyler	75702	+19036303077			0.99
@@ -2435,17 +2442,6 @@ d3545af974b7	Liang's Chinese Restaurant	restaurant	chinese restaurant	32.26646	-
 981ac7ee837f	Lindo Mexico Restaurant	restaurant	mexican restaurant	32.37405	-95.28649	2410 E Gentry Pkwy	Tyler	75708	+19035265464	http://www.lindomexicorestaurant.com		0.92
 de305a0c28e4	Linh Nguyen Llc	restaurant		32.25195	-95.30619	8942 S Broadway Ave Ste 108	Tyler	75703				0.95
 fc03f0324719	Lip Smacker's Country Kitchen	restaurant	burger restaurant	32.86558	-95.53840	3589 W State Highway 154	Yantis	75497	+19033835008	http://www.lipsmackerscountrykitchen.com		0.92
-b69fcaea035e	Little Caesars	restaurant	pizza restaurant	32.51242	-95.40888	318 S Main St	Lindale	75771	+19038815421	https://littlecaesars.com/en-us/store/12341	Little Caesars	0.99
-d645408eb01f	Little Caesars	restaurant	pizza restaurant	32.20581	-95.84772	607 East Tyler Street	Athens	75751	+19036752335	https://littlecaesars.com/en-us/store/10301	Little Caesars	0.98
-15a86ba70963	Little Caesars Pizza	restaurant	pizza restaurant	32.27071	-95.34175	2251 Three Lakes Pkwy Ste 101	Tyler	75703	+19039393900	https://littlecaesars.com/en-us/store/11182	Little Caesars	0.97
-18987c843ebf	Little Caesars Pizza	restaurant	pizza restaurant	32.34517	-95.33999	510 S SW Loop 323 Ste 310	Tyler	75702	+19035927373	https://littlecaesars.com/en-us/store/8161	Little Caesars	0.97
-2ef0aa832022	Little Caesars Pizza	restaurant	pizza restaurant	32.79631	-95.45724	515 West Bermuda Street	Quitman	75783	+19037602500	https://littlecaesars.com/en-us/store/20539		0.95
-736d90d3de92	Little Caesars Pizza	restaurant	pizza restaurant	32.34715	-95.29583	512 E Front St	Tyler	75702	+19035936000	https://littlecaesars.com/en-us/store/11386	Little Caesars	0.96
-78fd64e5a57d	Little Caesars Pizza	restaurant	pizza restaurant	32.54449	-95.85933	351 East State Highway 243	Canton	75103	+19035024933	https://littlecaesars.com/en-us/store/21026		0.92
-8f2bd53539ed	Little Caesars Pizza	restaurant	pizza restaurant	32.36506	-95.32260	1919 W Gentry Pkwy	Tyler	75702	+19032669466	https://littlecaesars.com/en-us/store/12436	Little Caesars	0.96
-93aa6255df78	Little Caesars Pizza	restaurant	pizza restaurant	32.32262	-95.43886	16158 Highway 31 W	Tyler	75709	+19035937860	https://www.littlecaesars.com		0.99
-9c4c56f97b06	Little Caesars Pizza	restaurant	pizza restaurant	32.24654	-95.23358	1200 TX-110	Whitehouse	75791	+19038719826	https://littlecaesars.com/en-us/store/10627	Little Caesars	0.96
-fea93d6eecff	Little Caesars Pizza	restaurant	pizza restaurant	32.31751	-95.28050	1741 Troup Hwy	Tyler	75701	+19035927744	https://littlecaesars.com/en-us/store/3806	Little Caesars	1.00
 6a497a613c28	Little Italy	restaurant	italian restaurant	32.31200	-95.30050	3320 S Broadway Ave	Tyler	75701	+19035951184	http://littleitalyrestaurant1.placeweb.site/		0.98
 35146668b069	Little Jewel	restaurant		32.57630	-95.85593	2301 N Trade Days Blvd	Canton	75103	+19035674875	http://littleethans.com		0.92
 1ee75cbbd14f	Local Bbq	restaurant	barbecue restaurant	32.28627	-95.30692	5875 Old Bullard Rd Ste 500	Tyler	75703		https://localbbqtyler.com		0.95
@@ -2455,8 +2451,6 @@ fea93d6eecff	Little Caesars Pizza	restaurant	pizza restaurant	32.31751	-95.28050
 2b7dad0fed42	Loggins Restaurant	restaurant	comfort food restaurant	32.34930	-95.31888	137 S Glenwood Blvd	Tyler	75702	+19035955022	http://logginsrestaurant.com/		0.98
 5b8389ffa082	Lola's Handcrafted Kitchen	restaurant	sandwich shop	32.29067	-95.30447	5377 S Broadway Ave	Tyler	75703	+19036305652	https://www.eatlolas.com/?utm_source=facebook&utm_medium=website_link		0.98
 d7a957fb4c72	Lola's Handcrafted Sandwiches	restaurant	sandwich shop	32.23681	-95.34862	16700 FM-2493	Tyler	75703	+19037072432	http://www.lolastyler.com		0.86
-0d2c9dbd3159	Long John Silver's	restaurant	seafood restaurant	32.20488	-95.86961	116 US Highway 175 W	Athens	75751	+19036750025	https://www.ljsilvers.com		0.92
-1655f618d2f1	Long John Silver's	restaurant	seafood restaurant	32.30357	-95.30326	205 W Southwest Loop 323	Tyler	75701	+19035615726	locations.ljsilvers.com		0.92
 7b449da28fea	Longhorn Smokehouse	restaurant	barbecue restaurant	32.49575	-95.17865		Winona		+19036364208			0.75
 08d3d0be6d83	LongHorn Steakhouse	restaurant	steakhouse	32.29847	-95.30151	4705 S Broadway Ave	Tyler	75703	+19035343649	https://www.longhornsteakhouse.com/locations/tx/tyler/tyler-broadway-square-mall/5615?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Atyler-tx-5615_pl%3Alocurl_rd%3A1531	LongHorn Steakhouse	0.99
 5861d7ad8b2d	Los Antojitos By Maria Tyler Tx	restaurant	mexican restaurant	32.31060	-95.29991	3502 S Broadway Ave	Tyler	75701	+19036301308			0.89
@@ -2502,7 +2496,6 @@ c816844a40e4	Mazzio's Pizza	restaurant	pizza restaurant	32.27800	-95.30711	6525 
 48ff9891b720	McAlister's Deli	restaurant	salad bar	32.20535	-95.83408	220 Crestway Dr Ste 116	Athens	75751	+19036770170	https://www.mcalistersdeli.com/locations/tx/athens/deli-1115		0.97
 5e9162444c5f	McAlister's Deli	restaurant	delicatessen	32.30194	-95.30484	4325 Old Bullard Road	Tyler	75701	+19039393300	https://locations.mcalistersdeli.com/tx/tyler/4325-old-bullard-road?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 6c6141d2dd05	McAlister's Deli	restaurant	delicatessen	32.28460	-95.33027	5868 Old Jacksonville Highway Suite 700	Tyler	75703	+19032530840	https://locations.mcalistersdeli.com/tx/tyler/5868-old-jacksonville-highway?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.97
-f233544f3d5c	McDonald's	restaurant	burger restaurant	32.14907	-95.31280	407 Almarion St	Bullard	75757		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 cb212bd77aa6	Meltdown	restaurant		32.79554	-95.45528	415 W Bermuda St	Quitman	75783	+19037635194			0.60
 97bf111c1115	Mercado's	restaurant	texmex restaurant	32.30317	-95.32935	2214 W SW Loop 323	Tyler	75701	+19035341754	https://mercadoscafe.com/		0.99
 fecc17600456	Mercado's	restaurant		32.32512	-95.34111	2214 S Southwest Loop 323	Tyler	75701	+19035341754	http://www.posados.com		0.81
@@ -2527,7 +2520,6 @@ d2880bb183a2	milanos pizza quitman	restaurant	pizza restaurant	32.78846	-95.4533
 a7770f16a078	Ming's Cafe	restaurant	chinese restaurant	32.28708	-95.30441	5707 S Broadway Ave	Tyler	75703	+19039390133	http://www.mingscafe.bzfs.com/		0.99
 038c8b72d9c9	Miss Houston's	restaurant	hot dog restaurant	32.29247	-95.35708	11474 County Rd 1113	Tyler	75709	+13462706935	http://misshoustons.com/		0.98
 1176a8b32777	Miss. Connie's Cajun Café on the Boardwalk	restaurant	cajun and creole restaurant	32.55596	-95.85803	542 E Dallas St	Canton	75103	+13376583702			0.90
-d7bde0594a50	Miss. Connie's Cajun Café on the Boardwalk	restaurant	cajun and creole restaurant	32.55517	-95.85361	542 E Dallas St	Canton	75103	+13376583702			0.86
 1c5fd9ce2993	Moes Pizza	restaurant	pizza restaurant	32.70536	-95.20684	2129 FM2869	Hawkins	75765	+19037693333	http://orderonline.granburyrs.com/slice/index.html?accountId=188b7b35-c3be-4644-b278-4b9e685bfa18		0.94
 e669a549a827	Molinas Mexican Restaurant	restaurant	mexican restaurant	32.67492	-95.71201	310 W Garland St	Grand Saline	75140	+19039623949	https://order.spoton.com/so-moody-mikes-5305/lexington-ky/6114043f24b4c406936b1d5e		1.00
 648b0cfecba6	Moma T's BBQ	restaurant	barbecue restaurant	32.55588	-95.85423	542 E Dallas St	Canton	75103	+19033910581	http://momatbbq.com/		0.99
@@ -2578,14 +2570,7 @@ ba2a7a7b6fcd	P & A Buffet	restaurant	mexican restaurant	32.67321	-95.70992	123 N
 ed3d2a151ce0	Palace Seafood	restaurant	seafood restaurant	32.35798	-95.30996	721 N Palace Ave	Tyler	75702	+19035927270	https://www.palaceseafooddimsum.com		0.92
 6966b3970162	Palio's Pizza Cafe	restaurant	pizza restaurant	32.27701	-95.31070	6611 S Broadway Ave Ste 100	Tyler	75703	+19035343600	http://www.paliostyler.com		0.92
 f92fdfd2f118	Panda Buffet	restaurant		32.66199	-95.48412	506 E Broad St	Mineola	75773	+19035693959	https://www.pandabuffetmineolatx.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
-5676f7283b19	Panda Express	restaurant	chinese restaurant	32.46757	-95.38488	8404 Military Dr	Tyler	75706	+14699988698	www.pandaexpress.com		0.97
-81ae928bf7e5	Panda Express	restaurant	asian fusion restaurant	32.20431	-95.85551	1006 E Tyler St	Athens	75751	+19728429661	https://www.pandaexpress.com/locations/tx/athens/3230		0.85
-dff6db60a73b	Panda Express	restaurant	chinese restaurant	32.27397	-95.30624	6910 S Broadway Ave.	Tyler	75703	+19039390071	http://www.pandaexpress.com/	Panda Express México	0.99
-f00d6061c7a3	Panda Express	restaurant	chinese restaurant	32.20511	-95.83772	1006 E Tyler St	Athens	75751	+19728429661	www.pandaexpress.com		0.94
 9680122c0b3a	Panini S Cafe	restaurant		32.29292	-95.30409	5201 S Broadway Ave Ste 162	Tyler	75703				0.95
-fc61a32a5416	Papa John's Pizza	restaurant	pizza restaurant	32.27556	-95.30741	6751 S Broadway Ave	Tyler	75703	+19035090990	https://www.papajohns.com/		0.94
-6351db67e13f	Papa Johns	restaurant	pizza restaurant	32.27654	-95.30870	6751 S Broadway Avenue	Tyler	75703	+19035090990	https://locations.papajohns.com/united-states/tx/75703/tyler/6751-s-broadway-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
-f119447a03ee	Papa Johns	restaurant	pizza restaurant	32.34211	-95.29300	631 S Beckham Ave	Tyler	75701	+19035967272	https://locations.papajohns.com/united-states/tx/75701/tyler/631-s-beckham-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
 bad8df77ce54	Papa Murphy's	restaurant	pizza restaurant	32.27467	-95.30621	6878 South Broadway Avenue	Tyler	75703	+19039392828	https://locations.papamurphys.com/tx/tyler/6878-south-broadway-avenue	Papa Murphy's - Jefferson City	0.94
 5d507faef3ba	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	32.31620	-95.27741	1847 Troup Hwy Ste A	Tyler	75701	+19035923100			0.92
 0bd1390c69c9	Papa T's BBQ	restaurant	barbecue restaurant	32.79190	-95.63396	151 E Quitman St	Alba	75410	+19037659016	https://bishopboost.my.canva.site/papatsbbq		0.92
@@ -2618,19 +2603,6 @@ ef267b27b873	Pink Bel Air Company	restaurant		32.28627	-95.30692	5875 Old Bullar
 e96d13962f08	Pit Stop Pizza	restaurant	pizza restaurant	32.12610	-95.30469	51635 U.S. Hwy 69 S	Bullard	75757	+19038948112	http://www.pit-stop-pizza.com/		0.98
 80509a0d24a1	Pitt Grill	restaurant		32.20447	-95.86350	520 W Corsicana St	Athens	75751	+19036779100			0.92
 57eea2b4407e	Pizza Alley	restaurant	pizza restaurant	32.79275	-95.45031	405 S Hart St	Quitman	75783	+19037635471	https://www.goshenlanes.com		0.55
-0c44cd89ddf8	Pizza Hut	restaurant	pizza restaurant	32.67557	-95.48584	1211 N Johnson St	Mineola	75773	+19035695437	https://locations.pizzahut.com/tx/mineola/1211-n-johnson?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289941	Pizza Hut	0.98
-1ed7c16b9851	Pizza Hut	restaurant	pizza restaurant	32.87384	-95.76582	122 S. Texas St. Rains	Emory	75440	+19034735550	https://locations.pizzahut.com/tx/emory/122-s-texas-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=308126	Pizza Hut	0.99
-3819a6affc9a	Pizza Hut	restaurant	pizza restaurant	32.35490	-95.34678	3871 State Highway 64 Smith	Tyler	75704	+19037078205	https://locations.pizzahut.com/tx/tyler/3871-state-highway-64?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315987	Pizza Hut	0.96
-3cec64659cf9	Pizza Hut	restaurant	pizza restaurant	32.47292	-95.38886	3222 S. Main Street Smith	Lindale	75771	+19038818691	https://locations.pizzahut.com/tx/lindale/3222-s-main-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305004	Pizza Hut	0.92
-47418f288747	Pizza Hut	restaurant	pizza restaurant	32.54334	-95.86259	1260 S Trade Days Blvd	Canton	75103	+19035671700	https://locations.pizzahut.com/tx/canton/1260-s-trades-day-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286689	Pizza Hut	0.96
-6785874bc53d	Pizza Hut	restaurant	pizza restaurant	32.21077	-95.83057	1409 E Tyler St	Athens	75751	+19036756060	https://locations.pizzahut.com/tx/athens/1409-e-tyler-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309175	Pizza Hut	0.99
-77b4679c7ff0	Pizza Hut	restaurant	pizza restaurant	32.30779	-95.47867	206 Hwy 31 Henderson	Chandler	75758	+19035154280	https://locations.pizzahut.com/tx/chandler/206-hwy-31	Pizza Hut	0.98
-7ea882c3ac58	Pizza Hut	restaurant	pizza restaurant	32.26078	-95.30807	7925 S. Broadway Smith	Tyler	75703	+19035616141	https://locations.pizzahut.com/tx/tyler/7925-s-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310641	Pizza Hut	0.92
-bde42c1768b1	Pizza Hut	restaurant	pizza restaurant	32.31172	-95.25068	3905 University Blvd Smith	Tyler	75701	+14302470099	https://locations.pizzahut.com/tx/tyler/3905-university-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315603	Pizza Hut	0.96
-d1d9598ca6b0	Pizza Hut	restaurant	pizza restaurant	32.32935	-95.30086	1817 South Broadway Smith	Tyler	75701	+19035979797	https://locations.pizzahut.com/tx/tyler/1817-south-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295628	Pizza Hut	0.98
-ecaac59b683d	Pizza Hut	restaurant	pizza restaurant	32.23366	-95.22860	601 Hwy. 110 North Smith	Whitehouse	75791	+19038398741	https://locations.pizzahut.com/tx/whitehouse/601-hwy-110-north?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305525	Pizza Hut	0.98
-81a88da065bc	Pizza Hut Express	restaurant	pizza restaurant	32.33336	-95.26501	2734 E 5th St, Brookshires #28	Tyler	75701		https://locations.pizzahut.com/tx/tyler/2734-e-5th-st		0.96
-d2261284c629	Pizza Hut Express	restaurant	pizza restaurant	32.30606	-95.27076	3828 Troup Hwy, Brookshires #605 S1f	Tyler	75707		https://locations.pizzahut.com/tx/tyler/3828-troup-hwy		0.96
 996e370a6143	Pizza Inn	restaurant	buffet restaurant	32.96256	-95.29869	624 W Broadway St	Winnsboro	75494	+19033429192	https://www.pizzainn.com/locations/winnsboro-tx/	Pizza Inn	0.97
 af5d96e18b4a	Pizza Inn	restaurant	pizza restaurant	32.55667	-95.86074	170 N Trade Days Blvd	Canton	75103	+19035677711	http://www.pizzainn.com/locations/canton-tx/		0.92
 30acb4670f74	Pizza Man	restaurant	pizza restaurant	32.23016	-95.50866	1473 FM 315 S	Chandler	75758	+19038494062	http://www.pizzamanpizza.net		0.92
@@ -2718,12 +2690,6 @@ fca775319576	Salt Licker's	restaurant	seafood restaurant	32.67412	-95.70973	229 
 efa0b658f83f	Sam's Southern Eatery	restaurant	seafood restaurant	32.31234	-95.27157	2324 E Southeast Loop 323	Tyler	75701	+19039447936	http://www.samssoutherneatery.com		0.92
 aec861a16e08	San Luis Mexican Cafe	restaurant	mexican restaurant	32.20656	-95.85610	300 N Pinkerton St	Athens	75751	+19036773800	http://chowhound.com		0.87
 5700d5299f51	Sandwich Depot	restaurant		32.14419	-95.12145	116 W Duval St	Troup	75789				0.59
-38cccf07e197	Schlotzsky's	restaurant	sandwich shop	32.30347	-95.30936	720 W Southwest Loop 323	Tyler	75701	+19035810801	http://www.schlotzskys.com/tyler/1200/home		0.98
-88183554d0c9	Schlotzsky's	restaurant	sandwich shop	32.20230	-95.85333	215 S Palestine St	Athens	75751	+19036770202	https://locations.schlotzskys.com/tx/athens/215-s-palestine?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
-d038c204e6ed	Schlotzsky's	restaurant	sandwich shop	32.57808	-95.85683	17279 Interstate 20 Service Road	Canton	75103	+19035675000	https://www.schlotzskys.com/texas/canton/100858	Schlotzsky's	0.97
-f2f8cc08e542	Schlotzsky's	restaurant	sandwich shop	32.32676	-95.26646	2105 S SE Loop 323	Tyler	75701	+19035967040	https://locations.schlotzskys.com/tx/tyler/2105-south-south-east-loop-323?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.94
-fa429e41ec3d	Schlotzsky's	restaurant	sandwich shop	32.47881	-95.39377	2805 S Main St Suite 275	Lindale	75771	+19038825689	https://www.schlotzskys.com/	Schlotzsky's	0.94
-153b273515a1	Schlotzskys	restaurant	sandwich shop	32.34166	-95.29289	709 S Beckham Ave Ste B	Tyler	75701	+19035928390	https://locations.schlotzskys.com/tx/tyler/709-south-beckham?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.98
 e895866b14ca	Scorpion Restaurant Group Llc	restaurant		32.28738	-95.33035	2467 Crow Rd Ste 400	Tyler	75703				0.95
 0e1299c96e8d	Sdi Of Mineola, Tx, Llc	restaurant		32.66397	-95.49197	311 W Broad St	Mineola	75773				0.95
 2debcf69ec3e	Seafood & Grill San Miguel	restaurant	seafood restaurant	32.33998	-95.26387	2862 Spur 124	Tyler	75707	+19039925644			0.57
@@ -2751,10 +2717,6 @@ c4c93ba89ff6	Smoke Monkey East Texas	restaurant	barbecue restaurant	32.19416	-95
 3f9479b8c7aa	Smoky B Barbecue	restaurant	barbecue restaurant	32.18764	-95.85298	606 E Maryland Dr	Athens	75751		http://www.thetexanathens.com/shows		0.80
 39bf4dacf576	Snowcone Shop of Van	restaurant		32.52333	-95.63783	222 S Maple St	Van	75790				0.64
 3fd679209585	Soccer Tacos	restaurant	mexican restaurant	32.45621	-95.28494	13156 County Rd 3140	Tyler	75706	+19039448881	http://soccertacosmendozascuisine.toast.site/		0.96
-338e21113c36	Sonic Drive-In	restaurant	burger restaurant	32.21117	-95.82877	1402 E Tyler St	Athens	75751	+19036758987	https://locations.sonicdrivein.com/tx/athens/1402-east-tyler.html		0.98
-c9666a67e686	Sonic Drive-In	restaurant	burger restaurant	32.44071	-95.13687	16243 Highway 271	Tyler	75708	+19038774266	https://locations.sonicdrivein.com/tx/tyler/16243-highway-271.html		0.97
-da57b6b9cf5d	Sonic Drive-In	restaurant	burger restaurant	32.54304	-95.86285	1270 S Trade Days Blvd	Canton	75103	+19035674747	https://locations.sonicdrivein.com/tx/canton/1270-s-trade-days-blvd.html		0.99
-dc4397974c1f	Sonic Drive-In	restaurant	burger restaurant	32.36852	-95.32835	2501 GENTRY Park	Tyler	75702	+19035936892	https://locations.sonicdrivein.com/tx/tyler/2501-gentry-park.html		0.96
 7a609f5c47ac	Soulmans Bar-B-Que	restaurant	barbecue restaurant	32.50775	-95.64169	2904 Interstate 20 W	Van	75790	+19039637777	http://www.soulmans.com/	Soulman's Bar-B-Que	0.92
 85d4e4816ae6	Souper Sandwich	restaurant	sandwich shop	32.55692	-95.85584	542 E Highway 64	Canton	75103	+19035672600			0.92
 468d5adc3281	South Tyler Speakeasy	restaurant	bar and grill restaurant	32.23485	-95.34938	16884 Old Jacksonville Hwy	Tyler	75703	+19035341884	http://www.southtylerspeakeasy.com		0.99
@@ -2770,42 +2732,6 @@ dff7d092beec	Steak 'n Shake	restaurant	american restaurant	32.31280	-95.24762	39
 ca37784a23ff	Stefanos Greek Kouzina	restaurant	greek restaurant	32.87379	-95.76443		Emory					0.75
 d6cc3c173a5c	Stoney's Dinner Bell	restaurant	diner	32.52455	-95.63914	208 W Main St	Van	75790	+19039638961	http://dinnerbell.com		0.92
 e357177a6307	Street Taco Shack	restaurant	taco restaurant	32.57260	-95.85539	1860 N Trade Days Blvd	Canton	75103	+19032875029	https://www.streettacoshack.com/	Taco Shack	0.94
-09afc6cd1afd	Subway	restaurant	sandwich shop	32.34264	-95.29309	613 S Beckham Ave	Tyler	75701	+19035922300	https://restaurants.subway.com/united-states/tx/tyler/613-s-beckham-ave	Subway	0.99
-0d3a1382b9f2	Subway	restaurant	sandwich shop	32.36671	-95.32649	2230 W Gentry Pkwy	Tyler	75702	+19035930344	https://restaurants.subway.com/united-states/tx/tyler/2230-w-gentry-pkwy?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.98
-13fa1d3b7c1f	Subway	restaurant	sandwich shop	32.58406	-95.12230	708 W Broadway St	Big Sandy	75755	+19036364323	https://restaurants.subway.com/united-states/tx/big-sandy/708-w-broadway	Subway	0.98
-171e365b9be8	Subway	restaurant	sandwich shop	32.95835	-95.29452	404 W Broadway St	Winnsboro	75494	+19033423556	https://restaurants.subway.com/united-states/tx/winnsboro/404-w-broadway	Subway	0.98
-1cf5357fc515	Subway	restaurant	sandwich shop	32.47417	-95.38830	105 Centennial Blvd	Lindale	75771	+19038818826	https://restaurants.subway.com/united-states/tx/lindale/105-centennial-blvd	Subway	0.95
-228d09330660	Subway	restaurant	sandwich shop	32.89584	-95.55932	4568 W State Highway 154	Yantis	75497	+19033832670	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=67636&utm_campaign=evergreen-2020&y_source=1_MTc4MTg2OTctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.94
-230cd16257db	Subway	restaurant	sandwich shop	32.79560	-95.43582	914B E Goode St	Quitman	75783	+19037630898	https://restaurants.subway.com/united-states/tx/quitman/914b-e-goode-st	Subway	0.95
-2c18702a9b68	SUBWAY	restaurant	sandwich shop	32.30256	-95.60924	Kidd Jones	Brownsboro	75756	+19038522252	http://subway.com		0.77
-38783f6b2166	Subway	restaurant	sandwich shop	32.35870	-95.37750	12675 Hwy 64W	Tyler	75704			Subway	0.96
-389efc849ce0	Subway	restaurant	sandwich shop	32.20055	-95.85390	306 S Palestine	Athens	75751	+19036751103	https://restaurants.subway.com/united-states/tx/athens/306-s-palestine	Subway	0.92
-499e159a9022	Subway	restaurant	sandwich shop	32.31810	-95.20980	11980 TX-64 E	Tyler	75707	+19035666703	https://restaurants.subway.com/united-states/tx/tyler/11980-hwy-64-e	Subway	0.99
-4a7b7a457f36	Subway	restaurant	sandwich shop	32.45135	-95.28298	12810 FM 14	Tyler	75706	+19032047236	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72539&utm_campaign=evergreen-2020&y_source=1_MTAxNzI0NDE5Ny00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
-4c6580ca7541	Subway	restaurant	sandwich shop	32.47151	-95.45028	14098 FM 849	Lindale	75771	+19038827827	https://restaurants.subway.com/united-states/tx/lindale/14098-fm-849	Subway	0.96
-52ba6a1808ab	Subway	restaurant	sandwich shop	32.30988	-95.27576	2021 E SE Loop 323	Tyler	75701	+19035099800	http://www.subway.com/en-us	Subway	0.95
-5555ced4fc48	Subway	restaurant	sandwich shop	32.30556	-95.33359	2701 W Southwest Loop 323	Tyler	75701	+19035614700	https://www.subway.com		0.95
-57bf46b79b36	SUBWAY	restaurant	sandwich shop	32.35061	-95.30154	118 W Erwin St	Tyler	75702	+19035045402	http://subway.com		0.92
-64ca12b01ecf	Subway	restaurant	sandwich shop	32.21035	-95.83295	1405 E Tyler St	Athens	75751	+19036770341	https://www.subway.com		0.98
-66dd39aa2950	Subway	restaurant	sandwich shop	32.27530	-95.31011	6801 S Broadway	Tyler	75703	+19039390790	https://restaurants.subway.com/united-states/tx/tyler/6801-s-broadway?cid=0:im:0:subway-com:dsp:nat-us-v1&segment_code=0	Subway	0.99
-6b03eab195e4	Subway	restaurant	sandwich shop	32.50999	-95.64287	1031 S. Oak St. (FM 314)	Van	75790	+19039637280	http://www.subway.com/en-us	Subway	0.93
-6de97fa77962	Subway	restaurant	sandwich shop	32.54536	-95.86208	310 E Hwy 243	Canton	75103	+19035675554	https://restaurants.subway.com/united-states/tx/canton/310-e-hwy-243	Subway	0.94
-720572907f42	Subway	restaurant	sandwich shop	32.29797	-95.26006	5050 Troup Hwy	Tyler	75707	+19035616005	https://restaurants.subway.com/united-states/tx/tyler/5050-troup-hwy	Subway	0.99
-7a9b9b67cd0c	Subway	restaurant	sandwich shop	32.44317	-95.06201	12577 C R 3101	Winona	75792	+19036184002	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71231&utm_campaign=evergreen-2020&y_source=1_MzA3MjIyMjktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
-81feb82b6878	Subway	restaurant	sandwich shop	32.31599	-95.25250	3900 University Blvd	Tyler	75799	+19035667074	https://www.subway.com		0.96
-82b6b257e383	Subway	restaurant	sandwich shop	32.32875	-95.26644	1949 SSE Loop 323	Tyler	75701	+19035956262	http://www.Subway.com/	Subway	0.99
-913d9c1e9ac4	Subway	restaurant	sandwich shop	32.67644	-95.48428	1226 N Pacific St	Mineola	75773	+19035690116	http://www.subway.com/	Subway	0.97
-998d17bee96b	Subway	restaurant	sandwich shop	32.23497	-95.22889	601 Highway 110 N	Whitehouse	75791	+19038397657	https://restaurants.subway.com/united-states/tx/whitehouse/601-highway-110-n	Subway	0.99
-9b47d33ee810	Subway	restaurant	sandwich shop	32.86670	-95.75506	886 E Lennon Dr Ste 100	Emory	75440	+19034733999	https://restaurants.subway.com/united-states/tx/emory/886-e-lennon-dr	Subway	0.98
-bcfdd3bb16ae	Subway	restaurant	sandwich shop	32.89590	-95.55891	4568 W State Highway 154	Yantis	75497			Subway	0.95
-bfb719038d9c	Subway	restaurant	sandwich shop	32.43952	-95.13470	16242 Hwy 271	Tyler	75708	+19038773580	https://restaurants.subway.com/united-states/tx/tyler/16242-hwy-271?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=66296&utm_campaign=evergreen-2020&y_source=1_MTQ5MDU3MTEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
-cc38332a8296	Subway	restaurant	sandwich shop	32.06283	-95.50208	960 N Frankston Hwy	Frankston	75763	+19038765605	https://restaurants.subway.com/united-states/tx/frankston/960-n-frankston-hwy	Subway	0.95
-cf788d10f7c1	Subway	restaurant	sandwich shop	32.25400	-95.33801	1951 Blue Mountain	Tyler	75703			Subway	0.96
-e56a4e846b0a	Subway	restaurant	sandwich shop	32.14507	-95.31543	151 Hwy 69 N. Ste 1300	Bullard	75757	+19038949930	http://www.subway.com/en-us	Subway	0.98
-ec0b6c11c349	Subway	restaurant	sandwich shop	32.19021	-95.43456	20031 Highway 155 South Suite 110	Flint	75762	+19037877504	https://restaurants.subway.com/united-states/tx/flint/20031-highway-155-south	Subway	1.00
-f5716235e835	Subway	restaurant	sandwich shop	32.32790	-95.30045	101 E. Eighth Street	Tyler	75701	+19036176968	https://restaurants.subway.com/united-states/tx/tyler/101-e-eighth-street	Subway	0.97
-f9e177d7f3fd	Subway	restaurant	sandwich shop	32.28064	-95.33300	2350 W Grande Blvd	Tyler	75703	+19035342929	https://restaurants.subway.com/united-states/tx/tyler/2350-w-grande-blvd	Subway	0.95
-ab8e5cc77e9e	Subway Restaurants	restaurant	sandwich shop	32.23705	-95.34638	16669 FM 2493	Tyler	75703	+19035349904	https://alibabacharleston.com		0.97
 7d8977c4f77a	Sum 2 Eat - Soul Food Resturant	restaurant	soul food	32.35067	-95.32135	1815 W Erwin St	Tyler	75702	+19037478225	https://m.facebook.com/Sum2EatTylerTx		0.95
 da60fb5e904b	Summerfields at Holiday Inn	restaurant	american restaurant	32.28725	-95.30520	5701 S Broadway Ave	Tyler	75703	+19035615800	http://www.hitylertx.com/tyler-tx-hotel-dining.php		0.92
 c0f832989b78	Super Suppers	restaurant	american restaurant	32.23841	-95.34612	16623 Old Jacksonville Hwy	Tyler	75703	+19035340015	http://www.supersuppers.com		0.92
@@ -2814,7 +2740,6 @@ f225cc22807c	Sushi Guy	restaurant	sushi restaurant	32.31751	-95.25595	3979 Unive
 14a8c1308f9d	Sweet Sue's	restaurant	diner	32.31008	-95.33941		Tyler	75701	+19035815464	http://www.sweetsues.net		0.92
 f0eb41aac55c	Synergy Zone Management Group, Llc	restaurant		32.30607	-95.33461	2801 W Southwest Loop 323	Tyler	75701				0.95
 c6c3492467e0	T & D'S	restaurant		32.27913	-95.74902	6551 State Highway 31 E	Murchison	75778	+19034694040			0.85
-7b668dbbaa14	Taco Bell	restaurant	taco restaurant	32.23843	-95.22868	720 Highway 110 N.	Whitehouse	75791	+19032020680	https://locations.tacobell.com/tx/whitehouse/720-highway-110-n-.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=040537&utm_content=website&y_source=1_MTA3MzcxMjIxMy00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 1a4b9cf3d096	Taco Bueno	restaurant	texmex restaurant	32.29625	-95.30532	4907 Old Bullard Rd	Tyler	75703	+19036176102	https://locations.tacobueno.com/tyler/4907-old-bullard-rd	Taco Bueno	0.96
 7f132a07d64a	Taco Bueno	restaurant	texmex restaurant	32.33377	-95.26681	1305 S Southeast Loop 323	Tyler	75701	+19035264679	https://locations.tacobueno.com/tyler/1305-s-southeast-loop-323	Taco Bueno	0.98
 8ec6702be9ea	Taco Dive	restaurant	taco restaurant	32.95731	-95.28989	111 E Broadway St	Winnsboro	75494	+19033471098	http://facebook.com/TacoDiveWinnsboro		0.95
@@ -2902,7 +2827,6 @@ d19a4c7913b4	The King Tortas	restaurant	mexican restaurant	32.35322	-95.29415	31
 89ee94f9d3db	The Lake Grill	restaurant	bar and grill restaurant	32.12336	-95.48833	8900 Ruby Ln	Frankston	75763	+19038762253			0.96
 f268afb0e57c	The Lakeside Grill	restaurant	bar and grill restaurant	32.21396	-95.18104	18183 Concession Rd	Whitehouse	75791	+19033609437	http://laketylermarinaresort.net/		0.99
 f0c02651fd9f	The Landing’s Seafood	restaurant	seafood restaurant	32.00037	-95.27562	3018 N Jackson St	Jacksonville	75766	+19035862313			0.99
-e1b86e702f47	The Last Stand Canton	restaurant		32.55105	-95.85590	542 E Dallas St	Canton	75103	+14695003479	https://thelaststandcanton.com/contact-us		0.78
 ef46ba7f253e	The Last Stand Canton	restaurant		32.55600	-95.85802	542 E Dallas St	Canton	75103	+14695003479	https://thelaststandcanton.com/contact-us		0.78
 76565769d92f	The Meltdown	restaurant		32.37948	-95.33220	3244 Gentry Pkwy	Tyler	75702	+19035319995	https://themeltdown.com/		1.00
 7d47d85cea55	The Mighty Crab	restaurant	seafood restaurant	32.30426	-95.32629	2001 W SW Loop 323	Tyler	75701	+19035348888	https://www.themightycrabtyler.com/	The Mighty Crab	0.99
@@ -2958,16 +2882,7 @@ bb3ebad2edfe	Villaggio del Vino	restaurant	italian restaurant	32.29723	-95.30486
 fd8d6eb10085	Wade's Place	restaurant	seafood restaurant	32.30646	-95.47941	104 E Main St	Chandler	75758	+19038492729	http://www.wadesplacechandler.com		0.99
 5ba1884cefd7	Wasabi Sushi Bar & Asian Bistro	restaurant	sushi restaurant	32.28667	-95.29999	5617 Donnybrook Ave	Tyler	75703	+19039390211	http://www.wasabityler.com		0.99
 0f2a4c0ceaeb	Web Mason Inc	restaurant		32.28911	-95.25509	5615 Troup Hwy	Tyler	75707				0.95
-31678d55d169	Wendy's	restaurant	burger restaurant	32.52387	-95.64293	133 Fm 314 Ste 100	Van	75790	+19039632010	https://locations.wendys.com/united-states/tx/van/133-fm-314-ste-100		0.85
 5b94579a54aa	What About Kabob & His Gyros	restaurant	doner kebab restaurant	32.25986	-95.30716	7924 S Broadway Ave	Tyler	75703	+19032133787	http://www.whataboutkabob.weebly.com		0.92
-285ce1ff3b87	Whataburger	restaurant	burger restaurant	32.25203	-95.30785	8910 South Broadway Avenue	Tyler	75703	+19032669373	https://whataburger.com/		0.97
-5eb2bebfa8ac	Whataburger	restaurant	burger restaurant	32.18618	-95.43737	20277 State Highway 155 S	Flint	75762	+19039787002			0.99
-63ef64a7bb1e	Whataburger	restaurant	burger restaurant	32.27482	-95.30733	6849 South Broadway	Tyler	75703	+19039399961	http://whataburger.com/	Whataburger	0.96
-73e363735504	Whataburger	restaurant	burger restaurant	32.86576	-95.75109	1021 E Lennon Dr suit 100	Emory	75440	+19033081129	https://locations.whataburger.com/tx/emory/1021-e-lennon-dr-suit-100.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-96009ec4135b	Whataburger	restaurant	burger restaurant	32.33071	-95.26639	1717 Loop 323	Tyler	75701	+19035952221	https://locations.whataburger.com/tx/tyler/1717-loop-323.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-a5d68d69e4a8	Whataburger	restaurant	burger restaurant	32.39512	-95.26926	6288 US-271	Tyler	75708	+19035260490	https://locations.whataburger.com/tx/tyler/6288-north-us-hwy-271.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
-d5067993c888	Whataburger	restaurant		32.36518	-95.32237	1919 W Gentry Pkwy	Tyler	75702	+19035927354	https://www.whataburger.com		0.75
-dc78850e4374	Whataburger	restaurant	burger restaurant	32.28403	-95.33096	5916 Old Jacksonville Highway	Tyler	75703	+19036306394	https://locations.whataburger.com/tx/tyler/5916-old-jacksonville-highway.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 7d3c69703efa	Whatsub Bahn Mi	restaurant	vietnamese restaurant	32.25985	-95.30720	7924 S Broadway Ave	Tyler	75703	+19036306476	https://whatsubbanhmi.business.site		0.92
 737271a62950	Which Wich East Texas	restaurant	sandwich shop	32.28389	-95.33125	5868 Old Jacksonville Hwy	Tyler	75703	+19035045737	https://order.whichwich.com/menu/which-wich-grande-commons?_ga=2.222943070.477737136.1707925732-322846029.1707925732		0.92
 c089ccba9141	Which Wich Superior Sandwiches	restaurant	sandwich shop	32.24969	-95.30779	8982 S Broadway Ave Ste 112	Tyler	75703	+19036309424	http://order.whichwich.com		0.75
@@ -2976,11 +2891,6 @@ c089ccba9141	Which Wich Superior Sandwiches	restaurant	sandwich shop	32.24969	-9
 826bcbcc7416	Wing Dingers	restaurant	american restaurant	32.51921	-95.40913	75 Miranda Lambert Way Ste 8	Lindale	75771	+19035604281	https://www.thecannerylindale.com/properties/wing-dingers		0.92
 f4370fe3cf8d	Wingdingers	restaurant	chicken wings restaurant	32.79609	-95.45152	107 N Main St SL 173	Quitman	75783	+19037634200	http://www.wingdingerstexas.com		0.77
 ec10be6d3e85	Wings of Tyler	restaurant	chicken restaurant	32.35047	-95.30056	101 E Erwin St	Tyler	75702	+19032587274			0.93
-411b68328604	Wingstop	restaurant	chicken restaurant	32.26740	-95.30669	7496 S Broadway Ave	Tyler	75703	+19035342999	https://www.wingstop.com/location/wingstop-558-tyler-tx-75703/menu?y_source=1_NTUyMDY2NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
-8ec49131c893	Wingstop	restaurant	chicken restaurant	32.31096	-95.27797	1918 E Southeast Loop 323	Tyler	75701	+19035269464	https://www.wingstop.com/location/wingstop-33-tyler-tx-75701/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.99
-b76e27e5626d	Wingstop	restaurant	chicken restaurant	32.20835	-95.83296	1395 E Tyler Street	Athens	75751	+19036754261	https://www.wingstop.com/location/wingstop-1801-athens-tx-75751/menu?y_source=1_NTUyMDc5MjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-bc20c4f441f0	Wingstop	restaurant	chicken restaurant	32.48106	-95.39498	2553 S Main St Bldg D	Lindale	75771	+19038825200	https://www.wingstop.com/location/wingstop-861-lindale-tx-75771/menu?y_source=1_NTUyMDc3MzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-d0f5d83a64ea	Wingstop	restaurant	chicken restaurant	32.34864	-95.34241	400 S Southwest Loop 323 Ste 100	Tyler	75702	+19035319464	https://www.wingstop.com/location/wingstop-374-tyler-tx-75702/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.99
 b921c5a41893	winnsboro bakery & cafe	restaurant	american restaurant	32.95764	-95.28997	Main Street	Winnsboro	75494	+19033426119	http://www.winnsboro.com		0.77
 f07890c60677	Wixo Llc Dba Master Logistics	restaurant		32.19762	-95.85335	505 S Palestine St	Athens	75751				0.95
 16d2844189e0	Wok Box	restaurant	asian restaurant	32.31045	-95.29994	3502 S. Broadway Ave.	Tyler	75701	+19039447878	http://wokbox.us		0.77
@@ -3029,7 +2939,6 @@ a3ac63df1e9d	Colonial Lindale Nursing and Rehabilitation	senior	retirement home	
 018c22358a37	Colonial Tyler Care Center	senior	retirement home	32.33809	-95.28500	930 S Baxter Ave	Tyler	75701	+19035972068	http://www.colonialtylercarecenter.com		0.95
 88b2c2ff6e27	Country Manor, Lindale, Texas	senior	retirement home	32.49236	-95.43098		Lindale					0.97
 86de14f64a2c	Country Place Senior Living	senior	retirement home	32.53500	-95.86263	1835 S Trade Days Blvd	Canton	75103	+19035672313	http://www.countryplaceseniorliving.net/contact	Country Place Senior Living of Greenville, Alabama	1.00
-8839ef264829	Country Place Senior Living	senior	assisted living facility	32.57418	-95.85572	1835 S Trade Days Blvd	Canton	75103	+19035672313	http://www.countryplaceseniorliving.net/canton-mulberry-residence		0.85
 5d0c4debe660	Country Place Senior Living of Athens	senior	retirement home	32.20737	-95.83757	209 Wood St	Athens	75751	+19036756500	http://www.countryplaceseniorliving.net/	Country Place Senior Living of Greenville, Alabama	0.92
 8cbbbc18726c	Country Trails Care Center	senior	assisted living facility	32.69054	-95.71314	1638 Vz County Road 1803	Grand Saline	75140	+19039627595	https://www.countrytrailscarecenter.com		0.92
 9bfa225caca8	Countryside Senior Living of Athens	senior	retirement home	32.18644	-95.85945	213 W Cayuga Dr	Athens	75751	+19036771272	http://www.countrysidetx.com/	Countryside Senior Living of Lufkin	1.00
@@ -3093,7 +3002,6 @@ e08b3b92d287	The Hamptons of Tyler Senior Living	senior	retirement home	32.30014
 937bbc5f37bf	TJC Nursing	senior	retirement home	32.33275	-95.28822	1200 E 5th St	Tyler	75701	+19035102869	http://www.tjc.edu/nursing		0.92
 2d7ca339267c	Trinity Rehabilitation Center	senior	retirement home	32.31518	-95.27791	3131 Troup Hwy	Tyler	75701	+19035359148			0.97
 c2f35adb7671	UT Tyler School of Nursing	senior	retirement home	32.31545	-95.25091	3900 University Blvd	Tyler	75799	+19035667320	http://www.uttyler.edu/nursing		0.97
-c92b63f75989	UT Tyler School of Nursing	senior	retirement home	32.31270	-95.25066	3900 University Blvd	Tyler	75799	+19035667320	http://www.uttyler.edu/nursing		0.97
 60650aa9592f	Van Healthcare	senior	retirement home	32.52319	-95.64254	169 S Oak St	Van	75790	+19039638641	http://www.vanhealthcare.com/		0.92
 ca3973d131ff	Villa Of Tyler	senior	assisted living facility	32.36865	-95.34123	3323 Garden Valley Rd	Tyler	75702	+19035928852	villaoftyler.com		0.55
 e0e004bef775	Waterton Healthcare and Rehabilitation	senior	retirement home	32.29411	-95.26504	2875 Shiloh Rd	Tyler	75703	+19035611300	https://watertonhealthcare.com/contact/		0.99

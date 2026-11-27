@@ -122,7 +122,6 @@ caf548be37fc	Carlos Garcia Motors	cardealer	used auto dealer	28.42321	-97.75892	
 7d221c85e850	D&B Auto Sales	cardealer	used auto dealer	28.82784	-97.86114	431 N Sunset Strip St	Kenedy	78119	+12107184080	https://www.dbautomotivesales.com		0.92
 098bb91cdd2d	Derral Russell's Car Co.	cardealer		28.39665	-97.74598	609 S Washington St	Beeville	78102	+13613589208			0.55
 38ab0c8f7fba	Ford Motor Company	cardealer		28.79601	-97.85106	1601 Escondido St	Kenedy	78119	+18303960030	https://www.ford.com/	Ford Motor Company	0.90
-abd41eb717c1	Ford Motor Company	cardealer		28.79614	-97.84967	1601 Escondido St	Kenedy	78119	+18303960030	https://www.ford.com/	Ford Motor Company	0.85
 b2a4e4d1b635	K.O. Auto Sales	cardealer		28.82766	-97.00785	3602 N Main St	Victoria	77901	+13612180538			0.76
 311ec01422ac	Lean On Me Crossroads	cardealer		28.83802	-97.00083	4702 N Navarro St	Victoria	77904	+13615728425	https://www.crossroadstoday.com/lean-on-me-form/#//		0.67
 2744cdd83ea8	LT Motors	cardealer		28.06206	-97.04140	3205 TX-35 Business	Fulton	78358	+13614501750			0.92
@@ -195,7 +194,6 @@ d515242ee3ea	Uncommon Market	coffee		28.40021	-97.75110	300 W Bowie St	Beeville	
 b78eb3e754ca	Victoria Coffee Roasters	coffee		28.79574	-97.00285	501 E Juan Linn St	Victoria	77901	+13615793050	http://www.victoriacoffees.com/		0.92
 c994e9e4b3be	Weesatche Hall And Cafe	coffee		28.85094	-97.44608	140 East FM884	Weesatche	77993	+13615643360	https://weesatche-hall-cafe.hub.biz/		0.96
 077de46e84ba	Bee County College	college		28.43585	-97.75735	3870 Charco Rd	Beeville	78102				0.92
-5dcefcce48fd	Coastal Bend College	college		28.44327	-97.75641	3800 Charco Rd	Beeville	78102	+13613582838	https://coastalbend.edu		0.95
 c5304e78e5ad	Coastal Bend College	college		28.39825	-97.75730	900 W Corpus Christi St	Beeville	78102	+13613626095			0.92
 e647dfade546	Coastal Bend College	college		28.43470	-97.75768	3800 Charco Rd	Beeville	78102	+13613582838	http://www.coastalbend.edu/	Coastal Bend College	1.00
 7d1894dd7f1e	Garza East Unit	college		28.38098	-97.66268	4304 Highway 202	Beeville	78102	+13613589880	https://www.texastribune.org/.../data/texas-prisons/units/garza-east		0.92
@@ -215,7 +213,6 @@ e42d84ceba1c	5 POINTS STOP	convenience		28.80507	-97.00735	607 N MOODY ST	Victor
 9eb61461de5a	7-Eleven	convenience		28.06102	-97.04171	3105 Highway 35 N	Rockport	78382	+13617905778	http://www.7-eleven.com/	7-Eleven	0.91
 a89d9180606e	7-Eleven	convenience		28.03659	-97.50883	204 E Sinton St	Sinton	78387	+13613643915	https://www.7-eleven.com/locations/tx/sinton/204-e-sinton-st-21286	7-Eleven	1.00
 bfe6ac6a98f8	7-Eleven	convenience		28.13921	-97.00623	5870 Hwy 35 N	Rockport	78382	+13612305505	https://www.7-eleven.com/		1.00
-ce11ef21d92b	7-Eleven	convenience		28.88348	-97.71237	102 E Main St	Runge	78151	+18302397440	https://www.7-eleven.com/locations/tx/runge/102-e-main-st-40803	7-Eleven	1.00
 d437e6b757a7	7-Eleven	convenience		28.41530	-97.75487	1510 N. St. Mary'S St	Beeville	78102	+13613586430	https://www.7-eleven.com/locations/tx/beeville/1510-n-st-marys-40804	7-Eleven	0.99
 daa9f4f3caf4	7-Eleven	convenience		28.03654	-97.48877	12475 Highway 188	Sinton	78387	+13614243833	https://www.7-eleven.com/locations/tx/sinton/12475-hwy-188-42242		0.85
 e340550511cb	7-Eleven	convenience		28.30635	-97.27474	108 North Alamo Street	Refugio	78377	+13615262251	https://www.7-eleven.com/locations/tx/refugio/108-north-alamo-street-40810	7-Eleven	1.00
@@ -261,7 +258,6 @@ ad1236854308	Circle K	convenience		28.87914	-97.90965	719 Clavert	Karnes City	78
 af944102412e	Circle K	convenience		28.11238	-97.81964	10537 N Hwy 359	Mathis	78368	+13615479216	https://www.circlek.com/		0.97
 afb48c2382bb	Circle K	convenience		28.01200	-97.06339	1328 Hwy 35 S	Rockport	78382	+13617299803	https://www.circlek.com/		0.92
 b39d53c215d1	Circle K	convenience		28.88413	-97.89349	719 E Calvert Ave	Karnes City	78118	+18307803406	https://www.circlek.com/		1.00
-c41ab055fd7b	Circle K	convenience		28.42338	-97.75755	2501 N ST MARYS ST	Beeville	78102	+13613583321	https://www.circlek.com/store-locator/US/beeville/2501-n-st-marys-st/2740429	Circle K	1.00
 cdaa86aa9677	Circle K	convenience		28.81324	-97.85861	101 S Sunset Strip Dr	Kenedy	78119	+18305830571	https://www.circlek.com/store-locator/us/kenedy/101-south-sunset-strip/2704059	Circle K	0.92
 e4d4aa55b923	Circle K	convenience		28.03198	-97.04611	911 Hwy 35 N	Rockport	78382	+13617296741	https://www.circlek.com/		0.99
 f9d3b5840eae	Circle K	convenience		28.42347	-97.75747	2501 N St Marys St	Beeville	78102	+13613583321	https://www.circlek.com/		1.00
@@ -376,7 +372,6 @@ e84efbd873e6	Speedy Stop	convenience		28.02371	-97.06000	601 South Bronte Street
 423309dc5b5e	Stripes	convenience		28.79082	-97.02075	1704 SW Moody St	Victoria	77901	+13615783181	https://stripesstores.com/		1.00
 57ed32a54e54	Stripes	convenience		28.05739	-97.04084	2902 Highway 35 North	Rockport	78382	+13617908814	https://stripesstores.com/		1.00
 6afa2f5f161c	Stripes	convenience		28.30621	-97.27444	108 North Alamo Street	Refugio	78377	+13615262251	https://stripesstores.com/		1.00
-78db285284b1	Stripes	convenience		28.04579	-97.07386	3306 Highway 35 Byp	Rockport	78382	+13617295200	http://www.stripesstores.com/	Stripes	0.71
 a3b453733038	Stripes	convenience		28.02047	-97.05332	902 E Market St	Rockport	78382	+13617295228	http://www.stripesstores.com/	Stripes	0.56
 bad162b53927	Stripes	convenience		28.30791	-97.27418	218 N. ALAMO	Refugio	78377	+13615262182	http://www.stripesstores.com		0.77
 bf694c062780	Stripes	convenience		28.85842	-97.02593	10408 Zac Lentz Pkwy	Victoria	77904	+13615729844	https://www.7-eleven.com/	Stripes	1.00
@@ -420,7 +415,6 @@ a3b7b995a5c5	TX0336	convenience		28.81479	-97.85825	102 N SUNSET STRIP STREET	Ke
 94475d4529f5	Valero	convenience		28.03685	-97.51353	320 W SINTON ST	Sinton	78387	+13613643801	https://locations.valero.com/en-us/LocationDetails/Index/320-W-SINTON-ST/0000020424	Valero	1.00
 a67f7b7b33d1	Valero	convenience		28.81648	-97.84813	322 S 2ND ST	Kenedy	78119	+18305833397	http://www.valero.com	Valero Energy	0.92
 b7c62fa95fba	Valero	convenience		28.42350	-97.75744	2501 N ST MARY'S ST	Beeville	78102	+13613583321	https://locations.valero.com/en-us/LocationDetails/Index/2501-N-ST-MARYS-ST/0000020429	Valero	0.97
-be28352c6a1b	Valero	convenience		28.40348	-97.74226		Beeville	78102	+13613580317	https://locations.valero.com/en-us/LocationDetails/Index/600-E-HOUSTON-ST/0000007396	Valero Energy	0.92
 c63b8c915306	Valero	convenience		28.02209	-97.06020	601 Highway 35 S	Rockport	78382	+12103452000	https://www.valero.com		0.65
 b35ab880b20b	VALERO 2740431	convenience		28.01200	-97.06340	1328 HWY 35 S	Rockport	78382		https://locations.valero.com/en-us/LocationDetails/Index/1328-HWY-35-S/0000020431	Valero	0.80
 d26918747bfa	VALERO 2741499	convenience		28.03010	-97.08300	1802 W MARKET ST	Rockport	78382		https://locations.valero.com/en-us/LocationDetails/Index/1802-W-MARKET-ST/0000021499	Valero	0.95
@@ -429,11 +423,15 @@ bbe76429f573	Valero Energy	convenience		28.30626	-97.27465	105 N Alamo St	Refugi
 2c779bf98899	Xpress Mart	convenience		28.10810	-97.83534	9825 FM-3377	Mathis	78368	+13616784518	https://xpress-mart-tx-2.hub.biz/		0.98
 2bd33661297a	Arby's	fastfood		28.81969	-97.00094	2601 N Navarro St	Victoria	77901	+13615752729	https://locations.arbys.com/us/tx/victoria/2601-north-navarro-street.html		0.92
 22b84320244c	Burger King	fastfood		28.82981	-97.00163	3801 N Navarro St	Victoria	77901	+13615755800	http://www.burgerking.com/		0.92
+27c9fb89b3b0	Burger King	fastfood	burger restaurant	28.81161	-97.85748	123 S Sunset Strip Street	Kenedy	78119	+18305838117	https://burgerking.com/store-locator/store/27440	Burger King	0.95
+bbcbb839420f	Burger King	fastfood	burger restaurant	28.31627	-97.27288	719 Victoria Hwy	Refugio	78377	+13615261339	https://www.bk.com/store-locator/store/restaurant_9100	Burger King	0.96
+f068464825ee	Burger King	fastfood	burger restaurant	28.42138	-97.75630	2300 N Saint Marys Street	Beeville	78102	+13615424035	https://burgerking.com/store-locator/store/25617	Burger King	0.96
 750cb1d862a5	Champs Chicken	fastfood		28.25366	-97.68600	104 S 8th St	Skidmore	78389	+12813182558	https://champschicken.com/locations/speedy-express-51-skidmore-tx/	Champs Chicken	0.96
 a768b8b82a6a	Champs Chicken	fastfood		28.92240	-97.09947	13515 US Highway 87 N	Victoria	77904	+13615764460	https://champschicken.com/locations/cimarron-crossing-victoria-tx.html	Champs Chicken	0.94
 22ed885351c0	Cheryls by Bay	fastfood		28.02712	-97.08794	318 Griffith Dr	Rockport	78382	+13617909626	http://www.cherylsbythebay.com		0.77
 7a6b48cae5c7	Chester's Chicken	fastfood		28.01162	-97.53281	13886 FM1945	Sinton	78387	+13613649215	https://www.chesterschicken.com/		0.96
 8fe49793202d	Chick-fil-A	fastfood		28.80183	-97.01083	7800 Hallettsville Highway #155	Victoria	77901		https://www.chick-fil-a.com/locations/tx/victoria-mall	Chick-fil-A	0.80
+2e50e2365be3	Church's Chicken	fastfood	chicken restaurant	28.66789	-97.38900	321 E Pearl St	Goliad	77963	+13616453309	http://www.churchs.com		0.92
 213fec7ad4aa	Church's Texas Chicken	fastfood		28.08821	-97.82050	904 E. San Patricio Avenue	Mathis	78368	+13615477338	https://locations.churchs.com/tx/mathis/904-e.-san-patricio-avenue	Church's Chicken	0.93
 2f66cdc50afd	Church's Texas Chicken	fastfood		28.81627	-97.85822	110 N. Sunset Strip Street	Kenedy	78119	+18305839030	https://locations.churchs.com/tx/kenedy/110-n.-sunset-strip-street	Church's Chicken	0.98
 4b9f90eadb3f	Church's Texas Chicken	fastfood		28.40665	-97.75219	611 N.E. Washington Street	Beeville	78102	+13613589256	https://locations.churchs.com/tx/beeville/611-n.e.-washington-street	Church's Chicken	0.96
@@ -452,6 +450,11 @@ bab1de2f8cad	Cinnabon	fastfood		28.83728	-97.00221	4601 North Navarro Street	Vic
 b80c2041f4bf	Dairy Queen	fastfood		28.80172	-97.00860	207 N Moody St 207 N Moody St	Victoria	77901	+13615782996	https://www.dairyqueen.com/en-us/locations/tx/victoria/207-n-moody-st/14679/?y_source=1_MjkzMzkxODYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
 db7d0ef4d38b	Dairy Queen	fastfood		28.66803	-97.39045	243 E Pearl St 243 E Pearl St	Goliad	77963	+13617224021	https://www.dairyqueen.com/en-us/locations/tx/goliad/243-e-pearl-st/14165/?y_source=1_MjkzMzkxMDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 dcddd9c4f119	Dairy Queen	fastfood		28.61771	-97.80299	Hwy 181 Hwy 181	Pettus	78146	+13613752571	https://www.dairyqueen.com/en-us/locations/tx/pettus/hwy-181/14485/?y_source=1_MjkzMzg4NjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+76e425f260cf	Domino's	fastfood	pizza restaurant	28.04370	-97.04293	1927 Hwy 35 N	Rockport	78382	+13617294700	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+829760cd38c1	Domino's	fastfood	pizza restaurant	28.41866	-97.75715	1903 N St. Mary's	Beeville	78102	+13613586871	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+8975ad054c81	Domino's	fastfood	pizza restaurant	28.03657	-97.51626	523 W Sinton St	Sinton	78387	+13615876400	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
+80c3d43660c9	Domino's Pizza	fastfood	pizza restaurant	28.83493	-97.86678	119 Business Park Dr	Kenedy	78119	+18305830599	https://www.dominos.com/en/?redirect=homepage&utm_source=locallistings&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
+e2463e82a967	Domino's Pizza	fastfood	pizza restaurant	28.40541	-97.75098	414 N Washington St	Beeville	78102	+13613586871	https://www.dominos.com		0.55
 04a0c0bf90d8	DQ Grill & Chill	fastfood		28.25577	-97.68572	218 N 8th St	Skidmore	78389		https://www.dairyqueen.com/en-us/locations/tx/skidmore/218-n-8th-st/4523	DQ Grill & Chill	0.80
 1c88b07ca3bb	DQ Grill & Chill	fastfood		28.80175	-97.00862	207 N Moody St	Victoria	77901		https://www.dairyqueen.com/en-us/locations/tx/victoria/207-n-moody-st/4451	DQ Grill & Chill	0.80
 2899550e9f90	DQ Grill & Chill	fastfood		28.24393	-97.32829	2nd St & Hwy 77	Woodsboro	78393		https://www.dairyqueen.com/en-us/locations/tx/woodsboro/2nd-st-hwy-77/4508	DQ Grill & Chill	0.80
@@ -467,13 +470,15 @@ efbf07003b1a	DQ Grill & Chill	fastfood		28.41631	-97.75504	1610 N St Marys St	Be
 f0cc99d87945	DQ Grill & Chill	fastfood		28.97960	-97.51023	510 W Main St	Yorktown	78164		https://www.dairyqueen.com/en-us/locations/tx/yorktown/510-w-main-st/4513	DQ Grill & Chill	0.80
 912bf3585a42	Dunkin Donuts	fastfood		28.04806	-97.04526	2401 Highway 35 North Bypass, WM Store # 440	Rockport	78382		https://www.dunkindonuts.com/locations/us/tx/rockport/2401-highway-35-north-bypass/store-366593/	Dunkin'	0.84
 359af81d7147	Golden Chick	fastfood		28.42278	-97.75722	2305 N Saint Marys Street	Beeville	78102	+13613435181	https://locations.goldenchick.com/tx/beeville/1001/	Golden Chick	0.94
-6689dfa5d982	Golden Chick	fastfood		28.03623	-97.04315	1215 TX-35 BUS	Rockport	78382	+13614501088	http://locations.goldenchick.com/tx/rockport/1320	Golden Chick	0.97
 992f8ed61e8b	Golden Chick	fastfood		28.30836	-97.27434	300 N Alamo St	Refugio	78377	+13615267084	https://locations.goldenchick.com/tx/refugio/1057/	Golden Chick	0.92
+a40bf2ce123a	Golden Chick	fastfood	chicken restaurant	28.06150	-97.04659	1215 TX-35	Rockport	78382	+13614501088	https://locations.goldenchick.com/tx/rockport/1320/	Golden Chick	0.91
 f984cd1fce65	Golden Chick	fastfood		28.03425	-97.08070	1215 TX-35 Bus	Rockport	78382	+13614501088	https://locations.goldenchick.com/tx/rockport/1320/		0.97
 eca93e957bcf	Good-N-Crisp Chicken	fastfood		28.03685	-97.50414	601 E Sinton St	Sinton	78387	+13613643002	http://www.goodncrispchickencorpuschristi.com		0.98
 314b516c54fd	Jalsco Taqeria	fastfood		28.81091	-97.85723	127 S Sunset Strip Dr	Kenedy	78119		www.superpages.com/bp/kenedy-tx/taqueria-jalisco-L2215359808.htm		0.95
+23e4cb507fc3	KFC	fastfood	chicken restaurant	28.04042	-97.04252	1601 Highway 35 N	Rockport	78382	+13617299464	http://www.kfc.com/storelocator/Default.aspx?address=1601%20Highway%2035%20N,Rockport,TX		0.92
 3823ea709af3	KFC	fastfood		28.40166	-97.74624	200 E. Houston Street	Beeville	78102	+13613587222	https://locations.kfc.com/tx/beeville/200-e-houston-street	KFC	0.96
-c85557538674	KFC	fastfood		28.03229	-97.08198	1601 Highway 35 N	Rockport	78382		https://locations.kfc.com/tx/rockport/1601-highway-35-n	KFC	0.80
+0d1af68d9919	Little Caesars Pizza	fastfood	pizza restaurant	28.42245	-97.75515	420 E F-M 351 #421	Beeville	78102	+13613589555	https://littlecaesars.com/en-us/store/9245	Little Caesars	0.98
+a66980daf7d6	Little Caesars Pizza	fastfood	pizza restaurant	28.04732	-97.04300	2321 Highway 35	Rockport	78382	+13617294400	http://www.littlecaesars.com		0.98
 7db8a78b0e55	Long John Silver's	fastfood		28.82216	-97.00026	2904 N Navarro St	Victoria	77901	+13612374982	https://www.ljsilvers.com/?y_source=1_MTc1NzI3NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
 bbeca52ce48d	May Ranch	fastfood		28.39242	-97.86660	2513 Gill Ranch Rd	Beeville	78102	+13613589977	http://www.may-ranch.com		0.92
 2de799db9958	McDonald's	fastfood		28.81482	-97.85902	109 N Sunset Strip	Kenedy	78119	+18305833700	https://www.mcdonalds.com/us/en-us/location/tx/kenedy/109-n-sunset-strip/37172.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.93
@@ -485,7 +490,17 @@ b42f2b58f126	McDonald's	fastfood		28.01167	-97.53291	13888 FM1945	Sinton	78387	+
 b577b7fcf76b	McDonald's	fastfood		28.82396	-97.00020	3112 N Navarro Rd	Victoria	77901	+13615754342	https://www.mcdonalds.com/us/en-us/location/tx/victoria/3112-n-navarro-rd/2359.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 ec8b745feaed	McDonald's	fastfood		28.31086	-97.27451	427 N Alamo St	Refugio	78377	+13615269175	https://www.mcdonalds.com/us/en-us/location/tx/refugio/427-n-alamo-st/22899.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 df23f2afa2e3	Moo Moo	fastfood		28.79435	-97.01181	709 S Moody St	Victoria	77901	+13615753752	https://local.yahoo.com/info-19210319-moomoo-victoria		0.98
+cb84a62796e1	Papa Johns Pizza	fastfood	pizza restaurant	28.82350	-97.00006	3112 N Navarro St	Victoria	77901	+13615757272	https://locations.papajohns.com/united-states/tx/77901/victoria/3112-n-navarro-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE1MjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
+08f2485a8dae	Pizza Hut	fastfood	pizza restaurant	28.42267	-97.75671	2400 N. St Marys St. Bee	Beeville	78102	+13613582970	https://locations.pizzahut.com/tx/beeville/2400-n-st-marys-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310808	Pizza Hut	0.96
+32297334f035	Pizza Hut	fastfood	pizza restaurant	28.10785	-97.82225	517 N. Old Hwy 9 San Patricio	Mathis	78368	+13615479127	https://locations.pizzahut.com/tx/mathis/517-n-old-hwy-9?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283807	Pizza Hut	0.98
+4e3092687d96	Pizza Hut	fastfood	pizza restaurant	28.31530	-97.27222	720 Victoria Hwy Refugio	Refugio	78377	+13615268103	https://locations.pizzahut.com/tx/refugio/720-victoria-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311367	Pizza Hut	0.96
+6177925064be	Pizza Hut	fastfood	pizza restaurant	28.03683	-97.51234	210 W. Sinton San Patricio	Sinton	78387	+13613644796	https://locations.pizzahut.com/tx/sinton/210-w-sinton?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289353	Pizza Hut	0.98
+7c7e6ba8dc81	Pizza Hut	fastfood	pizza restaurant	28.41063	-97.75468	1103 N Washington St	Beeville	78102	+13613582970			0.92
+861526e03cc0	Pizza Hut	fastfood	pizza restaurant	28.81608	-97.85826	106 N. Sunset Strip Karnes	Kenedy	78119	+18305839864	https://locations.pizzahut.com/tx/kenedy/106-n-sunset-strip?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283479	Pizza Hut	0.98
+b2b4ee2ea4a6	Pizza Hut	fastfood	pizza restaurant	28.82676	-97.00044	3404 N Navarro St	Victoria	77901	+13615753731	https://locations.pizzahut.com/tx/victoria/3404-n-navarro?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289306	Pizza Hut	0.99
+fc2678587fd8	Pizza Hut	fastfood	pizza restaurant	28.05487	-97.04200	2711 Hwy 35 N	Rockport	78382	+13617297270	https://locations.pizzahut.com/tx/rockport/2711-n-hwy-35?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299541	Pizza Hut	0.99
 7f0ebdef9dc4	Popeyes	fastfood		28.05521	-97.04197	2751 Highway 35 N	Rockport	78382	+13617294107	https://www.popeyes.com/store-locator/store/restaurant_83434	Popeyes Louisiana Kitchen	0.98
+f3b3860ad790	Schlotzsky's	fastfood	sandwich shop	28.83732	-97.00220	4601 N Navarro St	Victoria	77904	+13615763201	https://locations.schlotzskys.com/tx/victoria/4601-north-navarro?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
 348730d022e3	Sonic Drive In	fastfood		28.08908	-97.82243	728 E. San Patricio Avenue	Mathis	78368	+13615477937	https://locations.sonicdrivein.com/tx/mathis/728-e.-san-patricio-avenue.html	Sonic Drive-In	1.00
 7eaa2ec82db2	Sonic Drive In	fastfood		28.82277	-97.00021	3004 N. Navarro	Victoria	77901	+13615751081	https://locations.sonicdrivein.com/tx/victoria/3004-n.-navarro.html	Sonic Drive-In	0.99
 8229b658a991	Sonic Drive In	fastfood		28.41951	-97.75579	2000 North St. Marys	Beeville	78102	+13613587925	https://locations.sonicdrivein.com/tx/beeville/2000-north-st.-marys.html	Sonic Drive-In	0.98
@@ -493,6 +508,22 @@ df23f2afa2e3	Moo Moo	fastfood		28.79435	-97.01181	709 S Moody St	Victoria	77901	
 bcf74868de2a	Sonic Drive In	fastfood		28.03545	-97.04337	1203 Highway 35 North	Rockport	78382	+13617298550	https://locations.sonicdrivein.com/tx/rockport/1203-highway-35-north.html	Sonic Drive-In	0.97
 363c3fc8f662	Sonic Drive-In	fastfood		28.04346	-97.04204	1910 Highway 35 N	Rockport	78382	+13617299511	http://www.sonicdrivein.com/		0.92
 7afa5e0d8f61	Sonic Drive-In	fastfood		28.38560	-97.73962	2000 St. Marys	Beeville	78102	+13613587925	https://locations.sonicdrivein.com/tx/beeville/2000-st.-marys.html		0.85
+e0a7bdadae7e	Sonic Drive-In	fastfood	burger restaurant	28.88478	-97.89320	213 Highway 123	Karnes City	78118	+18302548089	https://locations.sonicdrivein.com/tx/karnescity/213-highway-123.html		0.85
+053800fce18e	Subway	fastfood	sandwich shop	28.05649	-97.04198	2861 Highway 35N Suite 3	Rockport	78382	+13617291910	https://restaurants.subway.com/united-states/tx/rockport/2861-highway-35n	Subway	0.99
+27574d044e8b	Subway	fastfood	sandwich shop	28.66890	-97.38824	420 E Pearl	Goliad	77963	+13616453709	https://restaurants.subway.com/united-states/tx/goliad/420-e-pearl?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=36049&utm_campaign=evergreen-2020&y_source=1_MTQ5MTAyNTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98
+5e408389d522	Subway	fastfood	sandwich shop	28.83404	-97.86700	131 Business Park Drive Suite 100	Kenedy	78119	+18302554463	https://restaurants.subway.com/united-states/tx/kenedy/131-business-park-drive	Subway	0.95
+8041382534b3	Subway	fastfood	sandwich shop	28.81504	-97.85767	102 N Sunset Strip St	Kenedy	78119	+18305830173	https://www.subway.com		0.98
+835f7e7d01fa	Subway	fastfood	sandwich shop	28.42262	-97.75296	502 E FM 351	Beeville	78102	+13613629000	https://restaurants.subway.com/united-states/tx/beeville/502-e-fm-351?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=62297&utm_campaign=evergreen-2020&y_source=1_MTQ5MTU2MzQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+9820085e5597	Subway	fastfood	sandwich shop	28.03649	-97.51122	115 W Sinton St	Sinton	78387	+13613643900	https://restaurants.subway.com/united-states/tx/sinton/115-w-sinton	Subway	0.93
+be802bd1a61b	Subway	fastfood	sandwich shop	28.83034	-97.00155	3805 N Navarro St Ste A	Victoria	77901	+13615765714	https://restaurants.subway.com/united-states/tx/victoria/3805-n-navarro-st	Subway	0.98
+bfcdfc2eb195	Subway	fastfood	sandwich shop	28.41658	-97.75531	1700 N St Marys St	Beeville	78102	+13613586000	https://restaurants.subway.com/united-states/tx/beeville/1700-n-st-marys	Subway	0.98
+cd815e4df93f	Subway	fastfood	sandwich shop	28.40415	-97.74078	710 E Houston St	Beeville	78102	+13613586200	https://restaurants.subway.com/united-states/tx/beeville/710-e-houston	Subway	0.98
+cd970aa5dc8c	Subway	fastfood	sandwich shop	28.11138	-97.81876	10536 TX-359 Ih 37	Mathis	78368	+13615476678	https://restaurants.subway.com/united-states/tx/mathis/10536-hwy-359/ih-37	Subway	0.98
+d5e7f1b746f8	Subway	fastfood	sandwich shop	28.98170	-97.49820	324 E Main St	Yorktown	78164	+13615649138	https://restaurants.subway.com/united-states/tx/yorktown/324-e-main	Subway	0.95
+ea2fd48fdc27	Subway	fastfood	sandwich shop	28.08652	-97.82317	10536 N Highway 359 # Ih # 37	Mathis	78368	+13615476678	http://subway.com		0.77
+fafd00880a65	Subway	fastfood	sandwich shop	28.30810	-97.27502	217 N Alamo St # 77	Refugio	78377	+13615269137	https://www.subway.com		0.99
+ff38fc7fe49b	Subway	fastfood	sandwich shop	28.02705	-97.07755	1405 W. Market St.	Rockport	78382	+13617291003	https://restaurants.subway.com/united-states/tx/rockport/1405-w-market-st	Subway	0.95
+0996821a56a7	Subway -Beeville Walmart	fastfood		28.42209	-97.75341	502 E FM-351	Beeville	78102	+3613629000			0.70
 6f934a0e9247	Sugar Shack	fastfood		28.40756	-97.76283	1001 W Fannin St	Beeville	78102	+13613623480			0.96
 2e432f9bc4c7	Taco Bell	fastfood		28.04045	-97.04287	1601 Highway 35 N	Rockport	78382	+13617299464	http://www.tacobell.com/	Taco Bell	0.99
 374e20d37062	Taco Bell	fastfood		28.82444	-97.85932	340 N Sunset Strip St	Kenedy	78119	+18305830606	http://www.tacobell.com/	Taco Bell	0.96
@@ -504,6 +535,7 @@ ea3f0c2ef2ab	Vans Mathis Texas	fastfood		28.09648	-97.82045	411 E Magnolia St	Ma
 484a4ab3d698	Whataburger	fastfood		28.03464	-97.51701	220 S SAN PATRICIO ST	Sinton	78387	+13613642463	https://locations.whataburger.com/tx/sinton/220-s-san-patricio-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 4bc2f4dd7f6e	Whataburger	fastfood		28.66837	-97.38916	348 E PEARL ST	Goliad	77963	+13616458800	https://locations.whataburger.com/tx/goliad/348-e-pearl-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 651b2d42effa	Whataburger	fastfood		28.41725	-97.75549	1710 N SAINT MARYS ST	Beeville	78102	+13613588454	https://locations.whataburger.com/tx/beeville/1710-n-saint-marys-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+9b50cc00b2c7	Whataburger	fastfood	burger restaurant	28.31372	-97.27381	605 N ALAMO ST	Refugio	78377	+13615264625	https://locations.whataburger.com/tx/refugio/605-n-alamo-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 c8e613236b9b	Whataburger	fastfood		28.83462	-97.00131	4302 N NAVARRO ST	Victoria	77901	+13615789011	http://whataburger.com/	Whataburger	0.99
 f6e7ec968a50	Whataburger	fastfood		28.04279	-97.04282	1805 HIGHWAY 35 N	Rockport	78382	+13617293022	https://locations.whataburger.com/tx/rockport/1805-highway-35-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 ac7c4c3d435b	Beeville H-E-B	grocery		28.40025	-97.74609	100 EAST HOUSTON ST.	Beeville	78102		https://www.heb.com/heb-store/us/tx/beeville/beeville-h-e-b-412	H-E-B	0.98
@@ -555,12 +587,10 @@ fe48ab39c6ad	Warm Springs Specialty Hospital	hospital		28.85498	-97.02197	102 Me
 ca9816873d00	Allegro House	hotel		28.04195	-97.02979	29 Mazatlan Dr	Rockport	78382	+13617292088	http://keyallegrohomeowners.org/		0.56
 32554bc60841	Americas Best Value Inn	hotel	motel	28.02849	-97.52996	8108 US-77	Sinton	78387	+13613642882	https://www.redlion.com/americas-best-value-inn/tx/sinton/americas-best-value-inn-sinton		1.00
 f5ea770a0a25	Americas Best Value Inn	hotel	motel	28.31903	-97.26919	920 Victoria Rd	Refugio	78377	+13615265351	https://www.sonesta.com/americas-best-value-inn/tx/refugio/americas-best-value-inn-refugio		0.97
-388bbcbad7e4	Americas Best Value Inn Beeville	hotel		28.40095	-97.74974	400 US-181 Bypass	Beeville	78102		https://www.sonesta.com/americas-best-value-inn/tx/beeville/americas-best-value-inn-beeville	Americas Best Value Inn	0.80
 e64d2729e7ec	Americas Best Value Inn Beeville	hotel		28.40558	-97.72750	400 US-181 Bypass	Beeville	78102		https://www.sonesta.com/americas-best-value-inn/tx/beeville/americas-best-value-inn-beeville	Americas Best Value Inn	0.95
 da1c33d77945	Americas Best Value Inn Rockport Fulton	hotel		28.03112	-97.04643	901 Highway 35 N	Rockport	78382	+13617270283	https://www.redlion.com/americas-best-value-inn/tx/rockport/americas-best-value-inn-rockport-fulton		0.92
 7e9e829d2b2f	Antlers Inn	hotel	motel	28.66783	-97.40350	1013 W Pearl St	Goliad	77963	+13616458215	https://www.antlersinngoliadtx.com/		0.98
 18352147c7f0	Aransas Ranch Rv Park	hotel		28.00197	-97.08710	1420 W 12th St	Rockport	78382	+13613860111	rockportranch.com		0.95
-466fdce80d2f	Atri Hospitality Llc	hotel		28.66879	-97.38345	754 E Pearl St	Goliad	77963				0.95
 a43a82d8fc51	Balboa Courts Motel	hotel		28.00969	-97.05844	1408 S Church St	Rockport	78382	+13617292517			0.55
 94db46c5764d	Bay of Aransas Garden Apartments	hotel		28.01940	-97.06145	811 Highway 35 S	Rockport	78382	+13617293271			0.81
 59ffa012ad2d	Bay View Inn	hotel	motel	28.01937	-97.05148	1105 E Market St	Rockport	78382	+13617292028			0.97
@@ -569,7 +599,6 @@ a43a82d8fc51	Balboa Courts Motel	hotel		28.00969	-97.05844	1408 S Church St	Rock
 221885543b35	Bayview RV Resort	hotel	resort	28.10513	-97.02981	5451 Highway 35 N	Rockport	78382	+13612884723			0.85
 a99e7444f5f5	Beeville Studio 6	hotel		28.41375	-97.72359	2180 Highway 59 E	Beeville	78102	+13615424020	https://www.staystudio6.com/en/motels.tx.beeville.5113.html		0.99
 6fa0a6008d11	Belmont Inn & Suites	hotel		28.41389	-97.72362	2180 Highway 59 E	Beeville	78102	+13615424020			0.92
-40f87d364a9e	Benjamin's Pier - Rockport Condo	hotel		28.01412	-97.05367	1021 Water St	Rockport	78382	+15127731249	http://www.lagunareef.com/		0.91
 7df982aedc8c	Benjamin's Pier - Rockport Condo	hotel		28.01370	-97.05426	1021 Water St	Rockport	78382	+15127731249	http://www.lagunareef.com/		0.92
 1406fc5c7763	Best Lil' Harbor House in Texas	hotel		28.06273	-97.03767	402 Cactus St	Fulton	78358	+12102015656	https://www.instagram.com/bestlilharborhousetx/		0.78
 1eab97d24f7c	Best Western Plus Goliad Inn & Suites	hotel		28.66879	-97.38339	754 E Pearl St	Goliad	77963	+13616453100	https://www.bestwestern.com/en_US/book/hotel-rooms.44673.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44673	Best Western Hotels & Resorts	1.00
@@ -578,7 +607,6 @@ a99e7444f5f5	Beeville Studio 6	hotel		28.41375	-97.72359	2180 Highway 59 E	Beevi
 abc935adb0f0	Best Western Refugio Inn	hotel		28.32022	-97.26901	1007 VICTORIA RD	Refugio	78377	+13615264600	https://www.bestwestern.com/en_US/book/hotel-rooms.44598.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44598	Best Western Hotels & Resorts	0.99
 c3604b6a3275	Best Western Texan Inn	hotel		28.41174	-97.72625	2001 Highway 59 E	Beeville	78102	+13613589999	http://www.bestwestern.com		0.92
 f609379c60b7	Blue Wave Inn	hotel		28.02833	-97.04916	1212 E Laurel St	Rockport	78382	+13617296379	http://bluewaveinn.com		0.92
-75284a9d5d03	BQ5 Ranch & Nature Retreat	hotel	lodge	28.61361	-97.66572	8212 FM-883	Berclair	78107	+3615420348	http://www.barnhartranchretreat.com/		0.95
 04caf94371b8	Bratton Isle Copano Bay	hotel		28.08157	-97.07793		Rockport					0.77
 492165d2ef9f	Bravado Bayside Bungalows- Rockport Waterfront Vacation Rentals	hotel		28.04101	-97.04215	1602 Highway 35 N	Rockport	78382	+13617293474			0.57
 a264bb4733e4	Budget Inn	hotel	motel	28.81038	-97.85792	204 S Sunset Strip St	Kenedy	78119	+18305833451	http://www.budgetinn.com	Budget Inn	0.98
@@ -591,7 +619,6 @@ c2f67a56e050	Comfort Inn & Suites	hotel	resort	28.42916	-97.74140	2201 NW Fronta
 9405a391a5d2	Crazy Horse Resort	hotel	resort	28.07350	-97.04026	919 N Fulton Beach Rd # 206	Rockport	78382	+13612204214			0.92
 b04579acfa27	Days Inn	hotel	motel	28.82912	-97.86276	453 N Sunset Strip St	Kenedy	78119	+18305725576	https://www.wyndhamhotels.com/days-inn/kenedy-texas/days-inn-kenedy-karnes-city/overview	Days Inn	0.95
 c95c6fae94b8	Days Inn	hotel	motel	28.03127	-97.04656	901 Hwy 35 N	Rockport	78382	+13614500463	https://www.wyndhamhotels.com/days-inn/rockport-texas/days-inn-rockport-texas/overview	Days Inn	0.99
-166109a9b2f1	Dos Acres	hotel		28.38021	-97.70898	2556 Old St Marys Rd	Beeville	78102				0.97
 c867af5e94e8	Eagle's Den Suites Kenedy	hotel		28.83811	-97.87086	4312 US-181	Kenedy	78119	+18302997127	http://eaglesdensuites.com		1.00
 09b60c66231c	Eagle's Den Suites Kenedy a Travelodge by Wyndham	hotel	resort	28.84483	-97.87410	4312 S Highway 181	Kenedy	78119	+18302997127	https://www.wyndhamhotels.com/travelodge?CID=LC:g22xy9tahqskhx3:57982&iata=00093796		0.85
 589b0a135d1c	Econo Lodge By The Bay	hotel		28.07069	-97.04088	3902 N. Highway 35	Fulton	78358	+13617298351	https://www.choicehotels.com/texas/fulton/econo-lodge-hotels/txf76?mc=llyxyxpx		0.77
@@ -600,42 +627,28 @@ f2d88f8fd5be	Econo Lodge Inn & Suites Fulton Rockport	hotel		28.07061	-97.04101	
 6d8a6d7c9985	Economy Inn	hotel	motel	28.03517	-97.50957	202 S Vineyard Ave	Sinton	78387	+13613643456	http://www.economyinnflorence.com	Economy Inn	0.92
 f14f4145c370	El Camino Motel	hotel	motel	28.41438	-97.75536	1500 N Washington St	Beeville	78102	+13613582141	https://www.eventseeker.com/venue/428652-el-camino-motel-beeville		0.95
 44d6fccc9153	El Shaddai Ranch	hotel		28.94124	-97.44824	3004 FM 884	Yorktown	78164	+13615649488	http://www.elshaddai-ranch.com		0.90
-892e96f0c022	Energy Lodge Kenedy	hotel	lodge	28.83694	-97.87017	4392 US-181	Kenedy	78119	+15124098069	http://energylodge.com/kenedy.cfm	Choice Hotels	0.92
-af35aafc1f00	Evergreen Cemetery	hotel		28.27428	-97.69402		Skidmore					0.73
 9e5d3498ec53	Executive Inn	hotel	motel	28.80600	-97.00218	204 E Rio Grande St	Victoria	77901	+13615758244	http://www.executiveinnnashville.com		0.99
 ff03446184d1	Executive Inn	hotel	motel	28.41595	-97.75585	1601 N Saint Marys Street	Beeville	78102	+13613584100	https://www.executiveinnsuitesbeevilletx.com/		0.84
 ec2601e9b327	Executive Inn and Suites	hotel	motel	28.66761	-97.38887	124 S Jefferson St	Goliad	77963	+13616453251			0.99
 b0a83cb25697	Fairfield	hotel		28.05808	-97.04092	2950 Hwy 35 North Business	Rockport	78382	+13617279007	https://www.marriott.com/en-us/hotels/crprp-fairfield-inn-and-suites-rockport/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 84b614fc1a39	Five O Five Lodging Facility	hotel		28.81750	-97.85261	505 W Main St	Kenedy	78119	+18305839404	http://www.505lodging.com		0.82
 5082e1d67293	Forrest Place Suites	hotel	service apartment	28.80295	-97.00319	201 E Stayton Ave	Victoria	77901	+13615784260	http://www.forrestplace.com/		0.92
-24c1655a62d7	Gehna Hotels Llc	hotel		28.86213	-97.00341	8107 NE Zac Lentz Pkwy	Victoria	77904				0.95
-87341151f6a6	Goliad Hotels Llc	hotel		28.66760	-97.38905	124 S Jefferson St	Goliad	77963				0.95
-687bd3910b5f	Goliad Masonic Lodge No. 94	hotel	lodge	28.66699	-97.39302	113 W Franklin St	Goliad	77963		http://www.goliadfreemasonry.com/		0.92
 0ba15d3b2db8	Hampton by Hilton	hotel		28.84122	-97.87113	4091 S Highway 181	Kenedy	78119	+18305839277	https://www.hilton.com/en/hotels/satkehx-hampton-kenedy/		1.00
 3ef56084edb7	Hampton by Hilton	hotel		28.40574	-97.73486	301 S Hall St	Beeville	78102	+13613622100	https://www.hilton.com/en/hotels/nirbvhx-hampton-beeville/		0.77
 51ec087f221c	Hampton Inn & Suites Rockport-Fulton	hotel		28.06787	-97.04190	3677 Highway 35 North	Rockport	78382	361-727-2228	https://www.hilton.com/en/hotels/rpttxhx-hampton-suites-rockport-fulton/	Hampton by Hilton	1.00
 7c0606ed30b9	Hampton Inn Beeville	hotel		28.40575	-97.73470	301 S Hall St	Beeville	78102	+13613622100	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-beeville-NIRBVHX/index.html	Hampton by Hilton	1.00
 36c03453c03b	Hampton Inn Kenedy	hotel		28.84128	-97.87105	4091 US-181	Kenedy	78119	+18305839277	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
 6cc7dd6de132	Harbour Inn	hotel	motel	28.02502	-97.05059	209 N Austin St	Rockport	78382	+13614500107	http://www.rockportharbourinn.com		0.99
-4ba2e668fcfe	Haun Ranch	hotel	lodge	28.88483	-97.31974	1139 Bud Haun Rd	Meyersville	77974	+13615507925	https://haunranch.com/		0.92
-76a60fb40fd5	HEB Live Oak Point Lodge	hotel	lodge	28.10770	-97.02826	5602 TX-35	Rockport	78382	+13617297108	https://h-e-b-live-oak-point-lodge.hub.biz/		0.92
-4418adb5f2c2	Hemlata Hospitality Lp	hotel		28.83578	-97.86361	304 Business Park Blvd	Kenedy	78119				0.95
-65baec60e429	Herman Sons Lodge	hotel	lodge	28.88438	-97.90016	120 S Market St	Karnes City	78118	+18305836969			0.92
-fd101d51cffc	Hickok Ranch	hotel	lodge	28.81630	-97.92073	1470 Private Road 6245	Karnes City	78118	+18306230446	http://www.hickokranch.com/		0.94
 2e5132f3d16d	Holiday Inn Express & Suites Rockport - Bay View	hotel		28.03201	-97.04656	925 Lady Claire St	Rockport	78382	+13617294444	https://www.ihg.com/holidayinnexpress/hotels/us/en/rockport/rkpcs/hoteldetail?cm_mmc=GoogleMaps-_-EX-_-US-_-RKPCS	Holiday Inn Express	1.00
 6603bb56ada4	Holiday Inn Express and Suites Beeville	hotel		28.41293	-97.72485	2199 US-59	Beeville	78102	+13613587300	https://www.ihg.com/holidayinnexpress/hotels/us/en/beeville/nirex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-NIREX	Holiday Inn Express	0.99
 079541232195	Holiday Inn Express Kenedy	hotel		28.83841	-97.87124	4268 US-181	Kenedy	78119	+18305833000	https://www.ihg.com/holidayinnexpress/hotels/us/en/kenedy/satkn/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SATKN	Holiday Inn Express	1.00
 e57e726f915b	Honor Hospitality, Llc	hotel		28.83301	-97.86684	501 N Sunset Strip St	Kenedy	78119				0.95
 59817e5bc6d5	Hunt's Castle Waterfront Resort	hotel	resort	28.01727	-97.05264	725 S Water St	Rockport	78382	+13617292273	http://www.huntscastle.com/		0.99
 3ebe786e5d8b	Instalodge Hotel and Suites	hotel		28.85905	-97.88831	2467 US-181	Karnes City	78118	+18307803070	http://www.instalodge.com/		0.99
-1296673c75bd	Janki Enterprises Inc	hotel		28.31891	-97.26891	920 Victoria Rd	Refugio	78377				0.95
 19e294bf5f36	Karnes City Cottages	hotel		28.88298	-97.89227	838 E Calvert Ave	Karnes City	78118	+15123802502	https://www.thecottagesofkarnescity.com		0.95
 8f2dad09f085	Karnes City Inn	hotel		28.88246	-97.89280	210 S State Highway 123	Karnes City	78118	+18302999575	https://karnescityinn.weebly.com		0.95
-42493addd63e	Karnes City Lodge	hotel	lodge	28.88350	-97.90856	309 US-181	Karnes City	78118	+18307803244	http://www.karnescitylodge.com/	OYO USA	0.97
 aedc6c2c774f	Karnes County Auditor’s Office	hotel		28.88466	-97.89979	200 E Calvert Ave	Karnes City	78118	+18307802721	https://www.co.karnes.tx.us		0.65
-6ec4aaac041c	Karnes County Lodge	hotel	lodge	28.95140	-97.82370	167 County Road 300	Karnes City	78118	+18302037787	http://www.pmcoilfieldservices.com		0.95
 d8b8407def69	Karnes County Sheriff's Office	hotel		28.88201	-97.89719	500 E Wall St	Karnes City	78118	+18307803931	https://www.co.karnes.tx.us		0.92
-dbc6e218cdc4	Kavu Tv	hotel		28.83071	-97.00079	3808 N Navarro St	Victoria	77901				0.95
 3525769d4483	KENEDY COUNTRY INN	hotel		28.80687	-97.85753	320 S Sunset Strip St	Kenedy	78119	+18305839009	http://www.kenedycountryinn.com		0.95
 1cf11afc0e4c	Kenedy Suites	hotel	resort	28.82523	-97.86175	206 Freeny Dr	Kenedy	78119	+15127922393	http://www.kenedysuites.com/		0.92
 c4f6b9e8c6cf	Kj Texas Properties, Llc	hotel		28.83856	-97.87093	4268 S Highway 181	Kenedy	78119				0.95
@@ -646,21 +659,16 @@ d23c221223fa	La Quinta Inn & Suites by Wyndham Rockport - Fulton	hotel		28.05797
 e56d0849ed3d	La Quinta Inn and Suites by Wyndham Beeville	hotel		28.41180	-97.72459	2062 US-59 N	Beeville	78102	+13613622222	http://www.laquintabeeville.com/?cid=local_6622	La Quinta by Wyndham	1.00
 e9d1b85ea982	Lainie's Dockside Paradise, LLC	hotel		28.10207	-97.02607	2292 N Fulton Beach Rd	Rockport	78382	+19183977686			0.92
 dbf83c0e91b8	Lakeside Inn & Suites	hotel	motel	28.10663	-97.82018	1500 TX-359	Mathis	78368	+13615473003	http://www.lakesideinnmathis.com		0.95
-4ed3e8a99090	Langford Chevrolet	hotel		28.30894	-97.27395	308 N Alamo St	Refugio	78377				0.95
 8205e6aaa6f8	LaSalle Rockport	hotel		28.06181	-97.05537	1724 FM 3036	Rockport	78382	+18323779090			0.87
-a286c62f2ca7	Lazy Lodge	hotel		28.02848	-97.08372	206 Lazy Rd	Rockport	78382	+17135167877	https://www.vrbo.com/2136732?unitId=2701268		0.83
 c8f47f992924	Lazy Lodge	hotel		28.02798	-97.08369	206 Lazy Rd	Rockport	78382	+17135167877	https://www.vrbo.com/2136732?unitId=2701268		0.84
 65485d3f63fc	Lil Grande Ranch	hotel		28.87523	-97.80087	Cr326	Kenedy	78119	+18302991722			0.97
 113d930b3eb7	Linden Hill Motel	hotel	motel	28.77508	-97.06002	4725 SW Moody St	Victoria	77905	+13615782557	https://linden-hill-motel.hub.biz		0.92
 7218f2a923ad	Live Oak Lodging, Llc	hotel		28.05938	-97.03404	200 S Fulton Beach Rd	Rockport	78382		liveoakmeetings.com		0.95
-bde11e007ab3	Lonesome Bull Ranch	hotel	lodge	28.03157	-97.90099	101 Lard Creek Road	Sandia	78322	+13619200881	http://www.lonesomebullranch.com/		0.66
 4015882cfacc	Luxury Inn & RV Park	hotel	motel	28.80877	-97.85771	210 S Sunset Strip St	Kenedy	78119	+18305833426	http://luxuryinnhotel.com/	Luxury Inn Norwalk California Hotel	0.98
 d85329ebccdf	Magic Sun Tan Motel	hotel	motel	28.04513	-97.03515	1805 Broadway St	Rockport	78382	+13617292179	http://www.magicsuntanmotel.com/		0.93
 972976820a6c	Manaki Management, Llc	hotel		28.06091	-97.04358	1006 FM 3036	Rockport	78382				0.95
-bea993f9fdaf	Mcconnell State Prison	hotel		28.37320	-97.71986		Beeville					0.97
 7a660d8ee920	Metro White Settlement Partners, Llc	hotel		28.41288	-97.72505	2199 Highway 59 E	Beeville	78102				0.95
 dfd9e3549543	Microtel Inn and Suites by Wyndham Kenedy	hotel		28.82306	-97.86009	333 N Sunset Strip St	Kenedy	78119	+18302997122	https://www.wyndhamhotels.com/microtel/kenedy-texas/microtel-inn-and-suites-by-wyndham-kenedy/overview		1.00
-f321ef26740b	Momentum Hospitality Inc	hotel		28.05804	-97.04125	2950 Highway 35 N	Rockport	78382				0.95
 5539835cd6cc	Motel 6	hotel		28.40117	-97.72531	400 US-181 S	Beeville	78102	+13613584000	https://www.motel6.com/en/motels.tx.beeville.4296.html	Motel 6 Morehead	0.62
 744e7b24da06	Motel 6	hotel		28.39220	-97.76889		Beeville	78102	+13615424020	http://www.motel6.com		0.77
 e0449ad0aab5	Motel 6	hotel	motel	28.03030	-97.53008	8154 US-77	Sinton	78387	+13612005936	http://www.motel6.com/	Motel 6	0.99
@@ -670,13 +678,11 @@ d633bb76882c	Motel Miya	hotel	motel	28.01656	-97.05626	907 S Church St	Rockport	
 a51e4284cde8	Mustang	hotel		28.82749	-97.00223	309 E Crestwood Dr	Victoria	77901	+13615757433	http://mustangbedandbreakfast.com		0.57
 657dd614f563	New Lax Investments Llc	hotel		28.87076	-97.89272	1025 S State Highway 123	Karnes City	78118				0.95
 7c9cd2458303	Oak Bay Club	hotel		28.05183	-97.05296	210 Oak Bay Dr	Rockport	78382	+13617279040			0.71
-b0f7fc4b99e9	Oak Creek Ranch	hotel		28.35061	-97.81137		Beeville					0.75
 e0580b960f31	OneLodge Camp by Cotton Logistics	hotel		28.89470	-97.91840	836 U S 181	Karnes City	78118	+18774272947	https://www.cottonlogistics.com/solutions/onelodge/karnes-city/		0.85
 02d704191ab7	OYO Hotel	hotel		28.81950	-97.84624	18 W Main St	Kenedy	78119	+18442665696	https://www.oyorooms.com/us/108317/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_KNY001	OYO USA	0.70
 3d846708414c	OYO Hotel	hotel		28.40448	-97.74967	369 N Saint Marys St	Beeville	78102	+18442665696	https://www.oyorooms.com/us/109000/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_BVL001	OYO USA	0.99
 58672fe2f05c	OYO Hotel Beeville	hotel		28.43411	-97.76035	3609 N Saint Marys Street	Beeville	78102	+13613435057	https://www.oyorooms.com/us/109000/	OYO Rooms	0.97
 03fd5885f745	OYO Hotel Rockport Bay View	hotel	motel	28.03509	-97.04340	1155 Hwy 35 N	Rockport	78382	+15592067127	https://oyorooms.com/us/109125/	OYO Rooms	0.99
-edca45ffa1b5	Pease Pod	hotel		28.12869	-97.89818	135 Lagarto Ferry Rd	Mathis	78413				0.70
 245b143ce95a	Pelican Bay Resort	hotel	resort	28.07787	-97.03841	4206 TX-35 N	Rockport	78382	+13617297177	http://www.pelicanbayresort.com/		0.99
 7c18e78dc797	Pelican Reef Motel & Suites	hotel		28.01968	-97.05260	1011 E Market St	Rockport	78382	+13617293838	http://www.pelicanreefmotel.com		0.91
 27a4bc9adbaa	Pier Pressure	hotel		28.07840	-97.09570	94 Copano Ridge Rd	Rockport	78382	+13617277368	http://www.vrbo.com/488965		0.77
@@ -684,17 +690,12 @@ edca45ffa1b5	Pease Pod	hotel		28.12869	-97.89818	135 Lagarto Ferry Rd	Mathis	784
 41fd25278962	Quality Inn & Suites Kenedy	hotel		28.82573	-97.86023	415 N Sunset Strip St	Kenedy	78119	+18302997207	https://www.choicehotels.com/texas/kenedy/quality-inn-hotels/txg94?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 414a2df436df	Quarters at Presidio la Bahia	hotel		28.64786	-97.38295		Goliad		+15123898900	http://www.presidiolabahia.org/		0.85
 e25ee21d41fa	Raisin L Ranch	hotel		28.73797	-97.15305	1043 Kobitz Rd	Victoria	77905	+13615765995			0.92
-5f553d0e32c6	Rancho Tiki	hotel		28.11038	-97.04630		Rockport					0.97
-45efac73de4f	Redfish Lodge On Copano Bay	hotel	lodge	28.06405	-97.11034	842 Rattlesnake Point Rd	Rockport	78382	+13615570047	http://www.redfishlodge.com/		0.98
 1c2a954f780d	Redfish Resort	hotel		28.07710	-97.09585	110 Donna Ln	Rockport	78382	+13614638814			0.81
 9442c1f64b6c	Reel ‘em Inn Rockport	hotel	motel	28.00664	-97.05726	1603 S Water St	Rockport	78382	+13615585200	https://www.reeleminnrockport.com/		0.99
 a4899c01c894	Relax Inn	hotel	motel	28.31791	-97.27156	807 Victoria Hwy	Refugio	78377	+13615265331	http://www.relaxinnkuttawa.com	Relax Inn & Suites of Kuttawa	0.96
-46e83fb2914f	Rimaan Properties Inc	hotel		28.81447	-97.85708	809 W Main St	Kenedy	78119				0.95
-6f12105cbb84	Rj Hospitality Llc	hotel		28.03151	-97.04681	901 Highway 35 N	Rockport	78382				0.95
 bb5eb05780c6	Rod & Reel Motel	hotel	motel	28.01927	-97.05142	1105 E Market St	Rockport	78382	+13617292028	http://www.pelicanreefmotel.com		0.92
 caaa7b74aa94	Rodeway Inn	hotel		28.40642	-97.72836	400 S U.S. Hwy 181 Bypass	Beeville	78102	+13613584000	https://www.choicehotels.com/texas/beeville/rodeway-inn-hotels/tx991?mc=llbillpx&pmf=local		0.97
 ef5cd1071f2f	Sea View Motel	hotel		28.03502	-97.04380	1155 Highway 35 N	Rockport	78382	+13617299112	http://www.rockportseaview.com		0.97
-2ea8b152856a	Shady Oaks Sub Division	hotel		28.72282	-97.14240		Victoria		+13615761781	https://shady-oaks-sub-division-tx.hub.biz/		0.85
 70c3c1029523	Shady Oaks Sub Division	hotel		28.71807	-97.14540		Victoria		+13615761781	https://shady-oaks-sub-division-tx.hub.biz/		0.89
 70409b5cd18d	Shivam Reef Motel	hotel	motel	28.01957	-97.05247	1011 E Market St	Rockport	78382	+13613860059			0.92
 fb64ed3b9c13	Shon Properties	hotel	motel	28.07161	-97.04275	51 Sandra Dr	Fulton	78358	+15126590910	http://www.shonproperties.com/		0.92
@@ -714,21 +715,14 @@ cb6622143ee7	Super 8	hotel	motel	28.88254	-97.89268	210 TX-123	Karnes City	78118
 149744359062	Super 8 Karnes City	hotel	resort	28.88497	-97.90085	210 S Sh # 123	Karnes City	78118	+18307802140	http://www.super8.com/hotels/texas/karnes-city/super-8-karnes-city/hotel-overview		0.85
 c2dd63a901ab	SureStay Plus Hotel by Best Western Beeville	hotel	resort	28.41137	-97.72604	2001 Highway 59e	Beeville	78102	+13615424751			0.98
 89fb4a68ac00	Texan Inn By OYO Beeville US-181	hotel		28.41173	-97.72615	US- Highway 59, Beeville	Beeville			https://www.oyorooms.com/gb/298180/	OYO	0.80
-f640cecd7c36	Texas Lodge Kenedy	hotel	lodge	28.81964	-97.84649	108 TX-72	Kenedy	78119	+18305830019	http://www.priceline.com/r/?product=hotel&theme=property&propertyID=17478303&refid=PLGOOGLEHPARM&refclickid=HOTELFPT		1.00
 e1869160b8b8	The cabins at Double J	hotel		28.42327	-97.76917	2609 Orange Ln	Beeville	78102	+3612074506	https://www.airbnb.com/rooms/30322944?s=51		0.75
 927ab5159ec0	The Inn At Fulton Harbor	hotel		28.06377	-97.03510	215 N Fulton Beach Rd	Fulton	78358	+13617905888	http://www.innatfultonharbor.com/		0.99
 127ca0ba5039	The Inn at Silver Oaks	hotel		28.43793	-97.76273	4225 N St Marys St	Beeville	78102	+13612542883	http://www.airbnb.com/		0.76
 7b23f7c67892	The Kingdom of David	hotel		28.04053	-97.49889	1006 E Lewis St	Sinton	78387	+13618675309	https://uk.linkedin.com/in/david-sinton-83834412		0.97
-c1fa01eea8ac	The Lake Lodge	hotel	lodge	28.12473	-97.89523	127 Harbor Cir	Mathis	78368		http://WWW.LAKECCLODGE.COM		0.74
 e777dd8ac364	The Lighthouse Inn	hotel		28.05960	-97.03394	200 S Fulton Beach Rd	Rockport	78382	+13617908439	http://www.lighthousetexas.com/		1.00
-7bf3793e2dc3	The Lodge at Kenedy	hotel	resort	28.81226	-97.86036	301 W State Highway 72	Kenedy	78119	+18305830406	http://www.thelodgeatkenedy.com/		0.97
 7fcd0d8a22b7	The Sandy Pelican Cottage in Rockport	hotel		28.10652	-97.02946	5481 Ih 35 N	Rockport	78382	+12108950274	https://airbnb.com/h/thetexanpelican		0.93
-6611b9478fc6	Turkey Creek Ranch	hotel		28.76955	-97.21770	530 Fannin Rd	Victoria	77905				0.72
-f62fa92c1750	Victoria Sunrise Ltd	hotel		28.86424	-97.00332	8106 NE Zac Lentz Pkwy	Victoria	77904				0.95
 3d2a2f3857ae	Village Inn Motel Rockport near Aransas Bay	hotel	motel	28.02772	-97.05073	503 N Austin St	Rockport	78382	+13617296370	http://villageinnmotel.com/		0.96
-174e38791299	Yorktown Hermann Sons Lodge	hotel	lodge	28.98264	-97.50511	225 N Eckhardt St	Yorktown	78164	+13615643255			0.60
 d4b67b1ce4d3	Yorktown Inn and Suites	hotel	motel	28.97989	-97.51776	949 W Main St	Yorktown	78164	+13615642700	http://www.yorktowninnandsuites.com		1.00
-69c8d7426ae2	Yorktown Lodging Llc	hotel		28.97927	-97.52264	1241 State Highway 72 W	Yorktown	78164				0.95
 36ce2d1e543d	Yorktown Motel	hotel	motel	28.97975	-97.51426	801 W Main St	Yorktown	78164	+13615642271	http://www.yorktowninnandsuites.com		0.92
 a2648f9b0cb0	AAA Butane Gas Company - Yorktown, TX.	office	energy company	28.98976	-97.49020	33 FM-237	Yorktown	78164	+18885642441	http://www.aaabutane.com/		0.67
 664d7b45ea26	Anita Diebel Art	office		28.02429	-97.05074	111 N Austin St	Rockport	78382	+13614501728			0.97
@@ -747,7 +741,6 @@ a233b58547fe	Diamond Fiberglas Fabricators	office	plastics company	28.77202	-97.
 62f01fd842c7	Drillwell Energy Services	office	energy company	28.87203	-97.83521		Kenedy	78119	+17138249436	http://drillenergy.com		0.75
 1a5a0bf725a5	FLH Hull Harbor Paplote texas	office	private association	28.20293	-97.57860		Sinton					0.72
 006c561ed877	Flying Horse Ranch Llc	office		28.91439	-97.92846	884 Private Road 6232	Karnes City	78118	+18305835477			0.65
-a8a6995c3852	Goco Wireless	office	telecommunications company	28.68043	-97.38800	1113 N US Highway 183	Goliad	77963	+13616453799	http://gocowireless.net/		0.85
 08765038a50b	Key Allegro Yacht Club	office	private association	28.04976	-97.03061	1796 Bay Shore Dr	Rockport	78382	+13617294114	https://www.yachtclubatkeyallegro.com/		0.99
 d12f7ab44715	Key energy services	office		28.72478	-97.04037	4007 US Highway 77 S	Victoria	77905	+13615789975	http://www.keyenergy.com		0.92
 6dbd6f577c46	Pico Propane and Fuels	office	energy company	28.80700	-97.85606	323 S Sunset Strip St	Kenedy	78119	+18305832421	https://www.picopropane.com/?utm_source=gmb&utm_medium=organic&utm_campaign=uberall	Pico Propane and Fuels	0.99
@@ -805,9 +798,6 @@ cd35d5a0b364	Blue Quail Deli	restaurant	delicatessen	28.66653	-97.39278	224 S Co
 c399ac18d763	Broadway Bar	restaurant	bar and grill restaurant	28.92190	-97.61077	208 Broadway	Nordheim	78141	+13619387438	https://broadway-bar-tx.hub.biz		0.96
 41ae7f49a6e9	Bubble Chicken	restaurant	chicken restaurant	28.02586	-97.05771	206 Highway 35 S	Rockport	78382	+13616887080			0.80
 57f4cf580914	Burger Depot	restaurant	burger restaurant	28.40355	-97.74299	515 E Houston St	Beeville	78102	+13613622400	http://www.carlosgarciaburgerdepot.com		0.92
-27c9fb89b3b0	Burger King	restaurant	burger restaurant	28.81161	-97.85748	123 S Sunset Strip Street	Kenedy	78119	+18305838117	https://burgerking.com/store-locator/store/27440	Burger King	0.95
-bbcbb839420f	Burger King	restaurant	burger restaurant	28.31627	-97.27288	719 Victoria Hwy	Refugio	78377	+13615261339	https://www.bk.com/store-locator/store/restaurant_9100	Burger King	0.96
-f068464825ee	Burger King	restaurant	burger restaurant	28.42138	-97.75630	2300 N Saint Marys Street	Beeville	78102	+13615424035	https://burgerking.com/store-locator/store/25617	Burger King	0.96
 7212e72f88d8	Burger Nation	restaurant	burger restaurant	28.82369	-97.00002	3112 N Navarro St Ste A	Victoria	77901	+13618948974	https://burger-nation.com		0.92
 4d9059926fdc	Bush's Chicken	restaurant	chicken restaurant	28.83419	-97.00181	4209 N Navarro St	Victoria	77901	+13617035294	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.99
 feefe3e2497c	Butter Churn Restaurant	restaurant	buffet restaurant	28.03646	-97.51218	207 W Sinton St	Sinton	78387	+13613645900	http://www.butterchurnrestaurant.com		0.96
@@ -827,7 +817,6 @@ d0fb899ccab3	Chester's Chicken	restaurant	chicken restaurant	28.11131	-97.81882	
 28416786ba3f	Chili's Grill & Bar	restaurant		28.84121	-97.00055	5004 N. Navarro	Victoria	77904	+13615764700	https://www.chilis.com/		0.99
 c30965236216	China A Super Buffet	restaurant	buffet restaurant	28.05618	-97.04148	2822 Highway 35 N	Rockport	78382	+13617298881	https://www.chinaasuperbuffet.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.96
 8074cbd4d45b	China Express	restaurant	chinese restaurant	28.10698	-97.82090	1500 TX-359	Mathis	78368	+13615472174	http://chinaexpressmathis.kwickmenu.com		0.94
-2e50e2365be3	Church's Chicken	restaurant	chicken restaurant	28.66789	-97.38900	321 E Pearl St	Goliad	77963	+13616453309	http://www.churchs.com		0.92
 43129676d582	Coastal Breeze Shaved ICE	restaurant	american restaurant	28.02977	-97.04089	Rockport Beach, 210 Seabreeze Dr	Rockport	78382	+13617796239			0.73
 b358a8940d0f	Copano's	restaurant	american restaurant	28.02318	-97.05130	1008 E North St	Rockport	78382	+13614500116	http://www.copanosrockport.com/		0.99
 cd1af825f5e5	Country Express	restaurant	american restaurant	28.76454	-97.07909	6064 SW Moody St	Victoria	77905	+13615733278	https://country-express.hub.biz/		0.96
@@ -836,11 +825,6 @@ a2f7bd72bb41	Crazy Chicken Lady's	restaurant	chicken restaurant	28.79037	-97.223
 2c116da7e300	Deborah's Kitchen Table	restaurant	american restaurant	28.66618	-97.39272	244 S Commercial	Goliad	77963	+13616459164			0.92
 f8bf87ce1e5c	Dirty's Place	restaurant	bar and grill restaurant	28.24241	-97.32621	301 Holmes St	Woodsboro	78393	+13616469315			0.96
 e92c632565ca	Dockside Boiling Pot	restaurant	seafood restaurant	28.84429	-97.00140	5209 N Navarro St	Victoria	77904	+13618947838	http://Toasttab.com/docksideboilingpot		0.96
-76e425f260cf	Domino's	restaurant	pizza restaurant	28.04370	-97.04293	1927 Hwy 35 N	Rockport	78382	+13617294700	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-829760cd38c1	Domino's	restaurant	pizza restaurant	28.41866	-97.75715	1903 N St. Mary's	Beeville	78102	+13613586871	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-8975ad054c81	Domino's	restaurant	pizza restaurant	28.03657	-97.51626	523 W Sinton St	Sinton	78387	+13615876400	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
-80c3d43660c9	Domino's Pizza	restaurant	pizza restaurant	28.83493	-97.86678	119 Business Park Dr	Kenedy	78119	+18305830599	https://www.dominos.com/en/?redirect=homepage&utm_source=locallistings&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
-e2463e82a967	Domino's Pizza	restaurant	pizza restaurant	28.40541	-97.75098	414 N Washington St	Beeville	78102	+13613586871	https://www.dominos.com		0.55
 f000ad274a76	Dot’s and Mel's Place	restaurant	soul food	28.39252	-97.75612	600 S Minnesota St	Beeville	78102	+16018427432			0.92
 836aab6d0da6	DQ®	restaurant		28.51938	-97.04401	TX-239	Refugio	77990	+13612863307	http://www.dairyqueen.com/		0.65
 d6c0034342b8	Dragon Palace Chinese Restaurant	restaurant	chinese restaurant	28.84573	-97.00117	5223 N Navarro St	Victoria	77904	+13615731342	http://www.dragonpalacevictoriatx.com/		0.94
@@ -857,7 +841,6 @@ fdba6d391535	Estrada's Mexican Steak House	restaurant	delicatessen	28.01402	-97.
 45ae7e52899c	Fabulous Dinners To Go	restaurant		28.83408	-97.00102	4208 N Navarro St	Victoria	77901	+13616484346	https://fabulousdinnerstogo.com		0.96
 f435a93f5e4a	Family Table Restaurant	restaurant	soul food	28.79170	-97.01521	1102 SW Moody St	Victoria	77901	+13615803602		Family Table Restaurant	0.96
 4d759f9627b1	Fely's Lumpia House	restaurant	filipino restaurant	28.33066	-97.75965	3845 FM888	Beeville	78102	+13613629524			0.97
-51a1a8630c66	Firehouse Subs	restaurant		28.81614	-97.00016	2310 Highway 77 Ste. 170	Lynn Haven	32444	+18502713330	http://www.firehousesubs.com		0.77
 43ecfb4ef703	Flores Restaurant	restaurant	mexican restaurant	28.03188	-97.50852	517 Avenue B	Sinton	78387	+13613642107	https://flores-grocery.hub.biz/		0.94
 eb8184a444f9	Flowers Shrimp Market	restaurant	seafood restaurant	28.01372	-97.05744	1119 S Church St	Rockport	78382	+13617905751	http://www.mayflower.com/moving		0.96
 8e7611e64d7d	Fossati's Delicatessen	restaurant	delicatessen	28.79724	-97.00676	302 S Main St	Victoria	77901	+13615763354	http://www.FossatisDelicatessen.com/		0.93
@@ -865,7 +848,6 @@ eb8184a444f9	Flowers Shrimp Market	restaurant	seafood restaurant	28.01372	-97.05
 095bb377754f	Fried Chicken	restaurant		28.79434	-97.01184		Victoria	77901	+13615736111			0.76
 2bc9def57899	GiGi's Pizzeria	restaurant	pizza restaurant	28.09398	-97.82783	103 E San Patricio Ave	Mathis	78368	+13612556092			1.00
 7e9a7a9a9bfb	Glorias Restaurant	restaurant	mexican restaurant	28.82877	-97.86113	436 N Sunset Strip St	Kenedy	78119	+18305839157			0.96
-a40bf2ce123a	Golden Chick	restaurant	chicken restaurant	28.06150	-97.04659	1215 TX-35	Rockport	78382	+13614501088	https://locations.goldenchick.com/tx/rockport/1320/	Golden Chick	0.91
 721b5aa026d8	Golden Corral	restaurant	buffet restaurant	28.84185	-97.00011	5102 N Navarro St	Victoria	77904	+13615788176	https://www.goldencorral.com/locations/981/golden-corral-n-navarro-street/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=981	Golden Corral Buffet & Grill	0.99
 7546d216f25f	Gonzalez Cafe	restaurant	mexican restaurant	28.79152	-97.01482	1103 SW Moody St	Victoria	77901	+13615755355	http://dineoption.com/GonzalezCafe		0.96
 3668c767c671	Good N Crisp	restaurant	southern american restaurant	28.09127	-97.82381	523 E San Patricio Ave	Mathis	78368	+13615476979	http://goodncrispchicken4.placeweb.site		0.92
@@ -894,7 +876,6 @@ a9714f74ca64	Joe's Pizza and Pasta	restaurant	italian restaurant	28.83504	-97.00
 41a1be9ff971	JZ Smokehouse BBQ	restaurant	barbecue restaurant	28.88420	-97.71320	207 Helena St	Runge	78151	+18302995500			0.92
 2d6e31120c5a	Karnes Mercantile	restaurant	delicatessen	28.88471	-97.90078	110 E Calvert	Karnes City	78118	+18307802762	https://www.mechanicadvisor.com/tx/karnes-city/karnes-mercantile		0.92
 9792ba4bd247	KB's BBQ	restaurant	barbecue restaurant	28.90564	-97.08080	134 Villafranca Rd	Victoria	77904	+13616498049	https://kbsbbqtexas.com		0.98
-23e4cb507fc3	KFC	restaurant	chicken restaurant	28.04042	-97.04252	1601 Highway 35 N	Rockport	78382	+13617299464	http://www.kfc.com/storelocator/Default.aspx?address=1601%20Highway%2035%20N,Rockport,TX		0.92
 73a3d13ad07c	Kim Son Chinese Restaurant	restaurant	chinese restaurant	28.03647	-97.51115	113 W Sinton St	Sinton	78387	+13613642000	http://www.txkimson.com		0.96
 c3c53abcd18a	Kino’s BBQ & Catering	restaurant	barbecue restaurant	28.39198	-97.74324	1205 N Washington St	Beeville	78102	+13613433291			0.99
 aa179cd44ecf	Krispy Krunchy Chicken	restaurant	chicken restaurant	28.02964	-97.53059	8140 Highway 77	Sinton	78387	+13615873038			0.92
@@ -919,12 +900,9 @@ b679696bb658	Laredo Taco Company	restaurant		28.03710	-97.48457	12475 Hwy 188	Si
 c726b17e68be	Laredo Taco Company	restaurant		28.42970	-97.74216	1620 Fm 351 East	Beeville	78102	+13613545459	https://www.laredotacocompany.com/		0.95
 ffd36fb091df	Laredo Taco Company	restaurant		28.88348	-97.71237	102 E Main St	Runge	78151	+18302397440	https://www.laredotacocompany.com/		0.92
 f95f000c051d	Las Hermanas Restaurant	restaurant		28.09162	-97.82085	331 N State Highway 359	Mathis	78368	+13615479407			0.57
-3d80c7e691e1	Las Palmas Mexican Bar & Grill	restaurant	mexican restaurant	28.84953	-97.01844	6007 N Main St	Victoria	77904	+13615731717	http://laspalmasmexbarandgrill.com/		0.97
 f69324b7431f	Las Palmas Mexican Bar & Grill	restaurant	texmex restaurant	28.84953	-97.01844	6007 N Main St	Victoria	77904	+13615731717	http://laspalmasmexbarandgrill.com/		0.98
 d58c0bcc108e	Latitude 28'02' Restaurant & Art Gallery	restaurant	seafood restaurant	28.02388	-97.05051	105 N Austin St	Rockport	78382	+13617279009	http://www.latituderockport.com/		0.99
 9116b7eadcfa	LaVaca BBQ - Victoria	restaurant	barbecue restaurant	28.81328	-97.00024	2001 N Navarro St	Victoria	77901	+13612124860	https://www.lavacabbq.com/		0.92
-0d1af68d9919	Little Caesars Pizza	restaurant	pizza restaurant	28.42245	-97.75515	420 E F-M 351 #421	Beeville	78102	+13613589555	https://littlecaesars.com/en-us/store/9245	Little Caesars	0.98
-a66980daf7d6	Little Caesars Pizza	restaurant	pizza restaurant	28.04732	-97.04300	2321 Highway 35	Rockport	78382	+13617294400	http://www.littlecaesars.com		0.98
 b8b0b585f7e8	Los Comales	restaurant	texmex restaurant	28.02362	-97.05995	431 TX-35 BUS	Rockport	78382	+13617293952	http://www.yellowpages.com/rockport-tx/agave-room		0.99
 19498e0a874e	Lucita's Mexican Restaurant	restaurant	mexican restaurant	28.81891	-97.84805	112 S 1st St	Kenedy	78119	+18305839455	http://www.lucitas-mexican-restaurant.hub.biz/		0.96
 745db1a23277	M & M Pinto Beans	restaurant	texmex restaurant	28.80576	-97.00236	202 E Rio Grande St	Victoria	77901	+13615760112	http://mandmpintobeanvictoria2.gastro-america.com		1.00
@@ -960,7 +938,6 @@ a03ede3b1cb1	Orbit’s Cajun Soul	restaurant	seafood restaurant	28.71739	-97.179
 6a02b391a7b6	Original Vallarta	restaurant	mexican restaurant	28.00501	-97.06654	1908 Highway 35 S	Rockport	78382	+13617908881	http://rockportvallarta.260mb.net/index.php		0.92
 fe9c24a53e70	Our Family Kitchen	restaurant	diner	28.02464	-97.05820	324 TX-35 BUS	Rockport	78382	+13617271111	http://www.ourfamilykitchentogo.com/		0.96
 e6d231a55c04	Panjo's Pizza & Pasta	restaurant	pizza restaurant	28.05539	-97.04060	2744 Highway 35 N	Rockport	78382	+13617291411	http://panjospizza.com		0.96
-cb84a62796e1	Papa Johns Pizza	restaurant	pizza restaurant	28.82350	-97.00006	3112 N Navarro St	Victoria	77901	+13615757272	https://locations.papajohns.com/united-states/tx/77901/victoria/3112-n-navarro-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE1MjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
 7856c88380b0	Partner's Bbq	restaurant	barbecue restaurant	28.81139	-97.85809	120 S Sunset Strip St	Kenedy	78119	+18305839113	https://partners-bbq-tx.hub.biz/		0.92
 bb51f252dbaa	Partners BBQ	restaurant	barbecue restaurant	28.88318	-97.89297	204 TX-123	Karnes City	78118	+18307805121	https://www.chamberofcommerce.com/karnes-city-tx/24798758-partners-bbq		0.95
 e020f206ae12	Pd Industries Llc	restaurant		28.84324	-97.87251	130 Boardwalk	Kenedy	78119				0.95
@@ -969,14 +946,6 @@ d138287808b1	Pfeifer Bar-b-que Llc	restaurant	barbecue restaurant	28.92127	-97.6
 b67bba61f591	Pier 77 of Fulton	restaurant	seafood restaurant	28.06333	-97.04176	3307 TX-35	Rockport	78382	+13614500132			0.92
 9830ec5dbb83	PIK-NIK Deli + Wine Bar	restaurant	delicatessen	28.02059	-97.05236	1005 St Marys St	Rockport	78382	+13614508600	https://maps.apple.com/place?address=1005+E+St+Marys+St%2C+Rockport%2C+TX++78382%2C+United+States&coordinate=28.020578%2C-97.052359&name=Pik-Nik&place-id=IA407681E7AC629D2&map=explore		0.96
 aeca66cb4f85	Pinto Bean	restaurant	texmex restaurant	28.83298	-97.00959	4103 N Main St	Victoria	77901	+13615747813	http://www.pintobeantexmex.com		0.97
-08f2485a8dae	Pizza Hut	restaurant	pizza restaurant	28.42267	-97.75671	2400 N. St Marys St. Bee	Beeville	78102	+13613582970	https://locations.pizzahut.com/tx/beeville/2400-n-st-marys-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310808	Pizza Hut	0.96
-32297334f035	Pizza Hut	restaurant	pizza restaurant	28.10785	-97.82225	517 N. Old Hwy 9 San Patricio	Mathis	78368	+13615479127	https://locations.pizzahut.com/tx/mathis/517-n-old-hwy-9?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283807	Pizza Hut	0.98
-4e3092687d96	Pizza Hut	restaurant	pizza restaurant	28.31530	-97.27222	720 Victoria Hwy Refugio	Refugio	78377	+13615268103	https://locations.pizzahut.com/tx/refugio/720-victoria-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311367	Pizza Hut	0.96
-6177925064be	Pizza Hut	restaurant	pizza restaurant	28.03683	-97.51234	210 W. Sinton San Patricio	Sinton	78387	+13613644796	https://locations.pizzahut.com/tx/sinton/210-w-sinton?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289353	Pizza Hut	0.98
-7c7e6ba8dc81	Pizza Hut	restaurant	pizza restaurant	28.41063	-97.75468	1103 N Washington St	Beeville	78102	+13613582970			0.92
-861526e03cc0	Pizza Hut	restaurant	pizza restaurant	28.81608	-97.85826	106 N. Sunset Strip Karnes	Kenedy	78119	+18305839864	https://locations.pizzahut.com/tx/kenedy/106-n-sunset-strip?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283479	Pizza Hut	0.98
-b2b4ee2ea4a6	Pizza Hut	restaurant	pizza restaurant	28.82676	-97.00044	3404 N Navarro St	Victoria	77901	+13615753731	https://locations.pizzahut.com/tx/victoria/3404-n-navarro?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289306	Pizza Hut	0.99
-fc2678587fd8	Pizza Hut	restaurant	pizza restaurant	28.05487	-97.04200	2711 Hwy 35 N	Rockport	78382	+13617297270	https://locations.pizzahut.com/tx/rockport/2711-n-hwy-35?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299541	Pizza Hut	0.99
 25e8849fec29	Pizza Pro	restaurant	pizza restaurant	28.23932	-97.32912	106 Wood Ave	Woodsboro	78393	+13615434123	http://www.pizzapro.com		0.92
 330434eacf48	Pizzarriffic	restaurant	pizza restaurant	28.40813	-97.75264	714 N Washington St	Beeville	78102	+13613585347	http://pizzadirectory.us		0.96
 375dd844f3f4	Polak's Sausage Farm Restaurant	restaurant	barbecue restaurant	28.85410	-97.88414	2835 US-181	Karnes City	78118	+18305832113	http://www.polaksausagefarm.com		0.93
@@ -1007,14 +976,12 @@ fcf987c6d267	Samiches Diner	restaurant	diner	28.04798	-97.94531	1986 FM-534	Sand
 9f48b373f406	Sammy's Burgers & Brew	restaurant	burger restaurant	28.41412	-97.72566	2144 Ellis Rd	Beeville	78102	+13613581067			0.95
 980d1d0099bb	Sandollar Pavillion	restaurant		28.07288	-97.03594	910 N Fulton Beach Rd	Rockport	78382	+13617298611	http://www.sandollar-resort.com		0.92
 c2fe71ee60da	Santiagos Restaurant	restaurant		28.09452	-97.82716	118 N South St	Mathis	78368		http://ordersantiagosrestaurant.com		0.95
-f3b3860ad790	Schlotzsky's	restaurant	sandwich shop	28.83732	-97.00220	4601 N Navarro St	Victoria	77904	+13615763201	https://locations.schlotzskys.com/tx/victoria/4601-north-navarro?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
 d1aa8f617bf1	Seaux Cajun	restaurant	cajun and creole restaurant	28.79918	-97.00087	207 N Navarro St	Victoria	77901	+13614337780	http://seauxcajun.net/		0.70
 c34a80a2e94b	Shelleys	restaurant	seafood restaurant	28.02274	-97.06248	303 W Market St	Rockport	78382	+13614500108			0.92
 db08d9f56c85	Shrimp Shack Cafe	restaurant	american restaurant	28.02803	-97.07734	1406 W Market St	Rockport	78382	+13612302651	http://www.theshrimpshackcafe.blogspot.com		0.92
 4b532fb56d7b	Sinton Pollo Hut	restaurant	chicken restaurant	28.03652	-97.50536	502 E Sinton St	Sinton	78387	+13616664230			0.92
 5bff3253ff85	Smolik's BBQ	restaurant	barbecue restaurant	28.09154	-97.82431	501 E San Patricio Ave	Mathis	78368	+13615475494	http://www.smolikssmokehouse.com		0.92
 786065e1db91	Smolik's Smokehouse	restaurant	barbecue restaurant	28.11196	-97.82006	10541 N Highway 359	Mathis	78368	+13615473700	https://www.smolikssmokehouse.com/		0.98
-e0a7bdadae7e	Sonic Drive-In	restaurant	burger restaurant	28.88478	-97.89320	213 Highway 123	Karnes City	78118	+18302548089	https://locations.sonicdrivein.com/tx/karnescity/213-highway-123.html		0.85
 aca78da8ed08	Soul Food Sold	restaurant	soul food	28.88422	-97.89925	112 S Browne St	Karnes City	78118	+18303704700			0.92
 bbab0fd36d50	Southern Select Crawfish	restaurant	seafood restaurant	28.88052	-97.06127	435 Leeper Ln	Victoria	77904	+13616498822	http://southernselectcrawfish.com/		0.92
 60bb01982d57	Spice Magic	restaurant	indian restaurant	28.06124	-97.04091	3114 Hwy 35 N	Fulton	78382	+13468195741	http://www.SpiceMagic/		0.99
@@ -1022,21 +989,6 @@ bbab0fd36d50	Southern Select Crawfish	restaurant	seafood restaurant	28.88052	-97
 caacce47ac0a	SR Boil House	restaurant	seafood restaurant	28.02048	-97.05185	501 S Austin St	Rockport	78382	+13614505050	http://www.srboilhouse.com		0.92
 b11d41f88b25	Stevie Lew's BBQ Kitchen	restaurant	barbecue restaurant	28.10321	-97.03010	5340 TX-35	Rockport	78382	+13617270002	http://www.stevielewsbbq.com/		0.98
 46de2c0a472b	Stone Creek	restaurant		28.43970	-97.76080	4402 N. Saint Mary's St.	Beeville	78102	+13613545189	http://www.stonecreekbeeville.com		0.77
-053800fce18e	Subway	restaurant	sandwich shop	28.05649	-97.04198	2861 Highway 35N Suite 3	Rockport	78382	+13617291910	https://restaurants.subway.com/united-states/tx/rockport/2861-highway-35n	Subway	0.99
-27574d044e8b	Subway	restaurant	sandwich shop	28.66890	-97.38824	420 E Pearl	Goliad	77963	+13616453709	https://restaurants.subway.com/united-states/tx/goliad/420-e-pearl?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=36049&utm_campaign=evergreen-2020&y_source=1_MTQ5MTAyNTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98
-5e408389d522	Subway	restaurant	sandwich shop	28.83404	-97.86700	131 Business Park Drive Suite 100	Kenedy	78119	+18302554463	https://restaurants.subway.com/united-states/tx/kenedy/131-business-park-drive	Subway	0.95
-8041382534b3	Subway	restaurant	sandwich shop	28.81504	-97.85767	102 N Sunset Strip St	Kenedy	78119	+18305830173	https://www.subway.com		0.98
-835f7e7d01fa	Subway	restaurant	sandwich shop	28.42262	-97.75296	502 E FM 351	Beeville	78102	+13613629000	https://restaurants.subway.com/united-states/tx/beeville/502-e-fm-351?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=62297&utm_campaign=evergreen-2020&y_source=1_MTQ5MTU2MzQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-9820085e5597	Subway	restaurant	sandwich shop	28.03649	-97.51122	115 W Sinton St	Sinton	78387	+13613643900	https://restaurants.subway.com/united-states/tx/sinton/115-w-sinton	Subway	0.93
-be802bd1a61b	Subway	restaurant	sandwich shop	28.83034	-97.00155	3805 N Navarro St Ste A	Victoria	77901	+13615765714	https://restaurants.subway.com/united-states/tx/victoria/3805-n-navarro-st	Subway	0.98
-bfcdfc2eb195	Subway	restaurant	sandwich shop	28.41658	-97.75531	1700 N St Marys St	Beeville	78102	+13613586000	https://restaurants.subway.com/united-states/tx/beeville/1700-n-st-marys	Subway	0.98
-cd815e4df93f	Subway	restaurant	sandwich shop	28.40415	-97.74078	710 E Houston St	Beeville	78102	+13613586200	https://restaurants.subway.com/united-states/tx/beeville/710-e-houston	Subway	0.98
-cd970aa5dc8c	Subway	restaurant	sandwich shop	28.11138	-97.81876	10536 TX-359 Ih 37	Mathis	78368	+13615476678	https://restaurants.subway.com/united-states/tx/mathis/10536-hwy-359/ih-37	Subway	0.98
-d5e7f1b746f8	Subway	restaurant	sandwich shop	28.98170	-97.49820	324 E Main St	Yorktown	78164	+13615649138	https://restaurants.subway.com/united-states/tx/yorktown/324-e-main	Subway	0.95
-ea2fd48fdc27	Subway	restaurant	sandwich shop	28.08652	-97.82317	10536 N Highway 359 # Ih # 37	Mathis	78368	+13615476678	http://subway.com		0.77
-fafd00880a65	Subway	restaurant	sandwich shop	28.30810	-97.27502	217 N Alamo St # 77	Refugio	78377	+13615269137	https://www.subway.com		0.99
-ff38fc7fe49b	Subway	restaurant	sandwich shop	28.02705	-97.07755	1405 W. Market St.	Rockport	78382	+13617291003	https://restaurants.subway.com/united-states/tx/rockport/1405-w-market-st	Subway	0.95
-0996821a56a7	Subway -Beeville Walmart	restaurant		28.42209	-97.75341	502 E FM-351	Beeville	78102	+3613629000			0.70
 7223efcca6c1	Sulla Costa	restaurant	italian restaurant	28.06552	-97.04161	3501 Hwy 35 N	Fulton	78358	+13617291422	http://www.sullacosta.com		0.77
 0a2911ac6ad3	Sushi Luck	restaurant	sushi restaurant	28.06013	-97.03514	112 Palmetto Ave	Rockport	78382	+13617291960	http://www.sushiluck.com		0.92
 97fe8ace92bf	Swinney Switch Cafe	restaurant	diner	28.24464	-97.92078	926 FM-3024	Mathis	78368	+13615472749	http://www.swinneyswitchcafe.com/		0.85
@@ -1051,7 +1003,6 @@ b0bf527fbdb4	Taqueria Los Potros de Jalisco	restaurant	mexican restaurant	28.810
 1e34078997d8	Taqueria Puerto Vallarta	restaurant	mexican restaurant	28.05869	-97.04089	3002 Business Hwy 35 N	Rockport	78382	+13617907221	http://rockportvallarta.260mb.net/index.php		0.96
 69494d58ee27	Taqueria Puerto Vallarta	restaurant	mexican restaurant	28.42072	-97.75688	2017 N St Marys St, Beeville, TX 78102	Beeville	78102	+13613589255	http://www.puertovallartausa.com		0.77
 32a405a1d248	Taqueria Vallarta	restaurant	mexican restaurant	28.80917	-97.85706	215 S Sunset Strip St	Kenedy	78119	+18305832600			0.95
-9cddf881a1c9	Taqueria Vallarta	restaurant	mexican restaurant	28.81378	-97.85766	215 S Sunset Strip St	Kenedy	78119	+18305832600			0.95
 eb5e546459a0	Taqueria Vallarta	restaurant	mexican restaurant	28.10515	-97.82076	318 TX-359	Mathis	78368	+13615478041			0.97
 ae77679236a3	Taqueria Vallarta 6	restaurant	texmex restaurant	28.38897	-97.73885	1611 S Washington St	Beeville	78102	+13613584231	http://www.taqueriavallartabeeville.com		0.98
 7a2cc73acbc8	Taqueria Vallarta Karne City	restaurant	texmex restaurant	28.88577	-97.89291	202 TX-123	Karnes City	78118	+18307802465	http://taqueriavallartarestaurant.com		0.94
@@ -1092,7 +1043,6 @@ fb42ef85724d	Tutti Frutti's	restaurant		28.24036	-97.32874	111 Wood Ave	Woodsbor
 7251481153c1	Van's Burgers & Soda Bar	restaurant	burger restaurant	28.09652	-97.82047	411 E Magnolia St	Mathis	78368	+13615478012	https://www.vansburgers.com		0.98
 d6c7f1b4b45e	Ventura's Tamales	restaurant	texmex restaurant	28.83197	-97.00159	3907 N Navarro St	Victoria	77901	+13615785161	http://www.venturastamales.com/		0.99
 9031e2bcc6db	VeraCruz Restaurant	restaurant	mexican restaurant	28.82316	-97.00025	3110 N Navarro St	Victoria	77901	+13615766015	https://local.yahoo.com/info-19219513-veracruz-restaurant-victoria		0.96
-9b50cc00b2c7	Whataburger	restaurant	burger restaurant	28.31372	-97.27381	605 N ALAMO ST	Refugio	78377	+13615264625	https://locations.whataburger.com/tx/refugio/605-n-alamo-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 5797e344fe60	Wild Foods	restaurant	american restaurant	28.79916	-97.00079	207 N Navarro St	Victoria	77901	+13617035205	http://wildfoods.business.site		0.92
 9679240218e7	Yarbaritas Sip and Swing	restaurant	american restaurant	28.03768	-97.04111	1329 Broadway St	Rockport	78382	+13614508077	http://yarbaritas.com/		0.98
 71312b441397	Yum Buffet	restaurant	buffet restaurant	28.82909	-97.00275	3611 N Navarro St	Victoria	77901	+13615758881	http://www.chinabsuperbuffet.com/		1.00

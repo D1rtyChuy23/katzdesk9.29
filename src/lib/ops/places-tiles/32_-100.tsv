@@ -34,7 +34,6 @@ ef104e7bb169	Jack N Jill Donut Shop	bakery	donut shop	32.38605	-99.76621	5233 Bu
 cfd0f584601b	Kyda Cakes	bakery		32.51618	-99.79720	992 FM-2404	Abilene	79601	+13256656914			0.97
 660c127cb71a	La Tejanita Bakery & Burritos	bakery		32.41309	-99.49904	219 S Access Rd	Clyde	79510	+13258931444			0.68
 ed274562422f	Life Of Pie Abilene	bakery		32.39531	-99.76627	3386 Rebecca Ln	Abilene	79606	+13252328042	http://lifeofpieabilene.com		0.97
-17af46b730d2	McKay's Bakery	bakery		32.45123	-99.73429	266 Cypress St	Abilene	79601	+13256729737	http://mckaysbakery.com/		0.98
 ee8848df3866	Mckay's Bakery	bakery		32.45127	-99.73448	266 Cypress St	Abilene	79601	+13256729737	https://mckaysbakery.com		0.99
 f1a3ed53dc6b	Milk & Honey Bakery	bakery		32.47502	-99.71797	480 E Ambler Ave	Abilene	79601	+13255132683	http://www.milkandhoneybvb.com		0.97
 ca43b4935d4b	Moli McKay's	bakery		32.44405	-99.75339	2534 S 7th St	Abilene	79605	+13256729737	http://molimckays.com/		0.98
@@ -124,7 +123,6 @@ e004b08bf709	Abilene Elite Auto	cardealer		32.42888	-99.78548	1399 s Danville dr
 e8cded2ae4f4	All Star Honda Abilene	cardealer		32.42894	-99.78555	1399 S Danville Dr suite #100	Abilene	79605	+13257933028	http://www.allstarhonda.net/	Honda	0.97
 2a6cef0d97e6	Approved Autoplex	cardealer		32.44854	-99.73708	1243 S 1st St	Abilene	79602	+13258645962	http://Approvedautoplex.com/		0.79
 d6230f954ece	Arrow Ford	cardealer		32.45062	-99.77665	4001 S 1st St	Abilene	79605	+13256929500	https://www.arrowford.net/	Ford Motor Company	0.97
-ddd323e5058f	Arrow Ford	cardealer		32.44852	-99.77989	4001 S 1st St	Abilene	79605	+13256929500	https://www.arrowford.net		0.95
 2b42114c17a6	Arrow Loan Arranger	cardealer		32.45108	-99.77406	3951 S 1st St	Abilene	79605	+13256739500	http://WWW.YourLoanArranger.com/		0.99
 b0b5b830b271	Arrow Mitsubishi	cardealer		32.45095	-99.77558	3995 S 1st St	Abilene	79605	+13256925303	https://www.arrowford.net	Mitsubishi Motors	0.97
 9cf90fe49b06	Arrow Point Auto Mall	cardealer	used auto dealer	32.40495	-99.76170	4101 S Danville Dr	Abilene	79605	+13256727290	http://arrowpointauto.com/		0.92
@@ -186,7 +184,6 @@ bdec9498d2bc	LeJuan At Blake Fulenwider	cardealer	used auto dealer	32.41283	-99.
 cd2240489d51	Lithia Toyota Of Abilene	cardealer		32.40816	-99.78168	4449 Southwest Dr	Abilene	79606	+13252035459	http://www.toyotaabilene.com		1.00
 18df9ac53c64	LNC Auto Sales LLC	cardealer	used auto dealer	32.45053	-99.74447	1842 N 1st St	Abilene	79603	+15126530636			0.92
 a817fee2651c	M&m Auto Sales	cardealer		32.45403	-99.76788	598 Westwood Dr	Abilene	79603	+13257019517	http://olymmauto.com		0.55
-42d134bb700c	Mason Anders at Arrow Ford	cardealer		32.45208	-99.77158	4001 S 1st St	Abilene	79605	+13253700270	http://mercedesofabilene.com/		0.57
 997937f3c827	Mason Anders at Arrow Ford	cardealer		32.45087	-99.77666	4001 S 1st St	Abilene	79605	+13253700270	http://mercedesofabilene.com/		0.57
 6ac8ecee38d0	McGavock Nissan of Abilene	cardealer		32.40814	-99.77042	3550 S Clack St	Abilene	79605	+13256952970	http://www.mcgavocknissanabilene.com		0.92
 b0ecc32aa7ab	Mcgavock Nissian	cardealer		32.45105	-99.77408	3951 S 1st St	Abilene	79605	+13256952970	https://www.abilenenissan.com		0.55
@@ -201,7 +198,6 @@ ee2675ebfd0e	Oily Turtle Sales	cardealer		32.73007	-99.29089	233 Hill St	Albany	
 5788d717d473	Private Motorsports	cardealer		32.46252	-99.75770	1125 N Mockingbird Ln	Abilene	79603	+13252607665			0.92
 74e4f6e3c5f1	Radical Rides	cardealer	used auto dealer	32.46066	-99.72585	1042 N Treadaway Blvd	Abilene	79601	+13258294840	http://www.radicalridestx.com/		0.92
 05bf7eb7037b	Richard Roberts Motors Llc	cardealer		32.45387	-99.78776	134 N Clack St	Abilene	79603	+13257258154			0.75
-5ea8349ba219	SAG Texas	cardealer		32.43152	-99.78796	1424 S. Clack Street	Abilene				Mercedes-Benz	0.80
 2a32e0601a61	Second Chance Motors	cardealer		32.44010	-99.78754	898 S Clack St	Abilene	79605	+13256772894	http://www.frontiermotorcompany.com		0.92
 7d674f597c30	Star Dodge Chrysler Jeep Ram Service	cardealer		32.45130	-99.78860	5101 S 1st St	Abilene	79605	+13252716905	https://www.stardodge.net		0.97
 e50df6949c02	Star Hyundai	cardealer		32.43303	-99.78775	1380 S Clack St	Abilene	79605	+13256916800	http://hyundaiofabilene.com/	Hyundai	0.97
@@ -226,7 +222,6 @@ d4b2cdf662ae	Abilene Premiere Lux Cine 10	cinema		32.40033	-99.76304	4310 Buffal
 700683888608	Amc	cinema		32.40958	-99.77432	3234 S Clack St	Abilene	79606		https://www.annegregorybrides.com		0.55
 3b8affccdfa9	Century Theatre	cinema		32.40557	-99.77006	3818 John Knox Dr	Abilene	79606	+13257939292	https://www.cinemark.com/west-texas/century-12-abilene		0.77
 8b907fe5a309	Cinemark Abilene and XD	cinema		32.48694	-99.71184	672 E Overland Trail	Abilene	79601	+13256700097	https://www.cinemark.com/west-texas/cinemark-abilene-and-xd	Cinemark	0.99
-f4e3c6746f94	Cinemark Abilene and XD	cinema		32.49101	-99.72633	672 E Overland Trail	Abilene	79601		https://www.cinemark.com/theatres/tx-abilene/cinemark-abilene-and-xd	Cinemark	0.80
 11737d166966	Cinemark Century Abilene 12	cinema		32.40544	-99.76849	3818 John Knox Dr	Abilene	79606	+13257939292	https://www.cinemark.com		0.99
 d2b2a4dc002f	Grand Theatre	cinema		32.94403	-99.80217	118 E Hamilton St	Stamford	79553	+13252386470	https://grandtheatrestamford.com/		0.92
 8ba275416bb1	Paramount Theatre	cinema		32.45205	-99.73422	352 Cypress St	Abilene	79601	+13256769620	http://www.paramountabilene.com/		0.99
@@ -239,7 +234,6 @@ a4f3d2d8066c	Archway Cafe	coffee		32.47242	-99.73376	1253 N 21st St	Abilene	7960
 879388e90a94	Big Country Coffee	coffee		32.38843	-99.76422	5001 Buffalo Gap Rd	Abilene	79606	+13252328521	https://www.bigcountrycoffee.com		0.96
 a9242b3393b4	Big Country Coffee	coffee		32.43996	-99.72868	802 S Treadaway Blvd	Abilene	79602	+13252328589	https://www.bigcountrycoffee.com		0.92
 6986cd5d83d2	Caitie Pies	coffee		32.45123	-99.73850	244 Pine St	Abilene	79601	+13259998677	https://www.caitiepies.com/		0.85
-1daba3093bbd	Castle Verona	coffee	tea room	32.46159	-99.70036	Verona	Abilene	79602				0.87
 431766f4cc29	Castle Verona	coffee	tea room	32.43708	-99.73618	Verona	Abilene	79602				0.88
 56e5ded7681e	Cedar Street Coffee and Venue	coffee		32.45120	-99.73570	218 Cedar St	Abilene	79601	+13253357805			0.71
 0d9b5832c38c	Chestnut Bistro	coffee		32.44430	-99.73467	500 Chestnut St	Abilene	79602	+13253522762	http://www.ChestnutBistro.com/		0.92
@@ -300,7 +294,6 @@ a7c2b41d0f8d	Abilene Christian University	college		32.47002	-99.70776	1600 Campu
 ca921d8499d7	Abilene Christian University	college		32.45284	-99.73310	400 Pine St	Abilene	79601	+13256726172	https://acu.edu		0.55
 bfb551b22794	Abilene Christian University Admissions	college		32.47054	-99.70591	1925 Campus Ct	Abilene	79601	+18004606228	https://acu.edu/admissions-aid/undergraduate		0.92
 315c00bd32d2	ACU College of Education and Human Services	college		32.46650	-99.70893	1600 Campus Ct	Abilene	79601	+13256252700	https://www.acu.edu/on-campus/undergraduate/college-of-education-and-human-services.html		0.87
-d527a27b5e1e	ACU College of Education and Human Services	college		32.46897	-99.70857	1600 Campus Ct	Abilene	79601	+13256252700	https://www.acu.edu/on-campus/undergraduate/college-of-education-and-human-services.html		0.87
 b584f7fd3e0c	ACU Department of Marriage and Family Therapy	college		32.46907	-99.70710	Onstead-Packer Bible Building ACU Box 29444	Abilene	79699	+13256743724	https://acu.edu/academics/graduate/master-of-marriage-and-family-therapy/about-mmft/		0.66
 4705c44fb4aa	ACU Grad School	college		32.46897	-99.70857	1600 Campus Ct	Abilene	79601	+13256746911	http://www.acu.edu/grad		0.87
 7a09a431fd55	ACU Sports	college		32.44901	-99.74103	Abilene Christian University	Abilene	79699		https://tickets.acusports.com/section/rally-cats-experience-b1su		0.97
@@ -371,7 +364,6 @@ ed41b28a4526	Allsup's Convenience Store	convenience		32.61206	-99.81426	510 E Ac
 f774707003e8	Allsup's Convenience Store	convenience		32.46201	-99.77921	4409 N 10th St	Abilene	79603	+13256723578	http://www.allsups.com/		0.97
 fc33f521c62d	Allsup's Convenience Store	convenience		32.32152	-99.75032	965 US-83 #84	Abilene	79602	+13256918952	https://www.allsups.com/	Allsup’s	1.00
 8089dc23fb34	Allsups Convenience Store 349	convenience		32.42784	-99.78458	4809 S 14th St	Abilene	79605	+13256911252			0.90
-5f63b6320b97	Allsup’s	convenience		32.46822	-99.98516	9232 I-20 W	Merkel	79536	+13259285584	https://www.allsups.com/	Allsup’s	0.99
 ebb982e1c4e6	Allsup’s	convenience		32.46781	-99.98416	9232 I-20 W	Merkel	79536	+13259285584	https://www.allsups.com/	Allsup’s	1.00
 2acb2d805198	Alon	convenience		32.47448	-99.75488	2702 Ambler Ave	Abilene	79603	+19156779356	http://myalon.com/		0.92
 3b50ae1c273d	ALON	convenience		32.43166	-99.72894	1458 S Treadaway Blvd	Abilene	79602	+13256734269	https://alonfuel.com/stations/alon-gas-station-3112-1458-s-treadaway-blvd-abilene-tx-79602/		0.97
@@ -553,7 +545,6 @@ ea197fe75784	Phillips 66	convenience		32.45110	-99.76995	3809 S 1st St	Abilene	7
 8be7b2ea491e	Phillips 66 Gas	convenience		32.61235	-99.81413	510 E Ave	Hawley	79525	+13256772775	https://www.phillips66gas.com/	Phillips 66 Gas	0.74
 98d193536a9d	Pilot Flying	convenience		32.46114	-99.87238	101 Scott St	Tye	79563	+13256919974	http://pilotflyingj.com/view-location?id=0738		0.71
 14742cf53af9	Prairie Star Inc	convenience		32.72948	-99.29089	225 Hill St	Albany	76430	+13257629095	https://www.prairiestar.com		0.92
-157c348ac3bc	QuikTrip	convenience		32.50345	-99.76329	3217 Old Anson Rd	Abilene	79603	+13252716736	https://locations.quiktrip.com/tx/abilene/3217-old-anson-rd?utm_source=extnet&utm_medium=yext&y_source=1_MjQzMzM5MzMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.85
 1a9dac14163c	QuikTrip	convenience		32.48939	-99.74690	3217 Old Anson Rd	Abilene	79603	+13252716736	https://locations.quiktrip.com/tx/abilene/3217-old-anson-rd?utm_source=fb&utm_medium=yext&y_source=1_MjQzMzM5MzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	QuikTrip	0.99
 7111e07fed26	Red Barn	convenience		32.37235	-99.19803	106 Travis E	Cisco	76437	+13256623944	http://redbarn5.placeweb.site		0.77
 8f56736e9935	Rifa Hop In	convenience		32.42582	-99.78718	5002 S 14th St	Abilene	79605	+13256952257			0.92
@@ -587,7 +578,6 @@ a6aa68abf20c	Sunoco Gas Station	convenience		32.40092	-99.75555	2717 Industrial 
 896f6ea67606	Texaco	convenience		32.41439	-99.50771	921 S Access Rd W	Clyde	79510	+13258935000	http://www.texaco.com/	Texaco	0.92
 a1b921254a3d	Texaco	convenience		32.39496	-99.76463	3290 REBECCA LN	Abilene	79606		https://www.texaco.com/en_us/home/find-a-station.html?/station/3290-REBECCA-LN-ABILENE-TX-79606-id377968	Texaco	0.99
 c0f923bafed7	Texaco	convenience		32.72993	-99.29247	100 HILL ST	Albany	76430		https://www.texaco.com/en_us/home/find-a-station.html?/station/100-HILL-ST-ALBANY-TX-76430-0000-id390593	Texaco	0.80
-c48ad70f18db	Texaco	convenience		32.43262	-99.76543		Abilene		+13256950196	http://www.texaco.com		0.56
 d4344d3005f2	TEXAS EXPRESS 1	convenience		32.45216	-99.76898	3809 S 1ST ST	Abilene	79605			Phillips 66	0.80
 d1647d4fd13e	TEXAS EXPRESS 2	convenience		32.43237	-99.74844	1398 SAYLES BLVD	Abilene	79605			Phillips 66	0.80
 0d00ac7b4e41	The Tobacconist & Vape Parlor	convenience		32.45690	-99.74073	715 Grape St	Abilene	79601	+3257041273			0.63
@@ -627,16 +617,22 @@ a583416e1616	BluTaco Cross Plains TX	fastfood		32.12166	-99.16530	109 SE 5th St	
 3935bc2a9028	Braum's	fastfood		32.47475	-99.73757	1600 Ambler Ave.	Abilene	79601		https://www.braums.com/store/store-318-1600-ambler-ave-abilene-tx-79601/	Braum's	0.80
 20898fdcfd38	Burger King	fastfood		32.41739	-99.52702	8075 S Access Rd	Clyde	79510	+13258934760	https://burgerking.com/store-locator/store/29099	Burger King	0.93
 63ab0f75d674	Burger King	fastfood		32.40678	-99.76828	3650 S Clack St	Abilene	79606	+13252326011	https://burgerking.com/store-locator/store/7402	Burger King	0.97
+72f68c0eac86	Burger King	fastfood	burger restaurant	32.45192	-99.77084	3901 N 1st St	Abilene	79603	+13256700668	https://burgerking.com/store-locator/store/1728	Burger King	0.99
+a6f3ad13f335	Burger King	fastfood		32.42651	-99.83621	201 Avenue B Bldg 7322	Abilene	79607	+12813613655	https://burgerking.com/store-locator/store/restaurant_74992		1.00
+bcda53df1f0d	Burger King	fastfood		32.37267	-99.74301	1633 Antilley Rd	Abilene	79606	+13256958590	https://burgerking.com/store-locator/store/restaurant_74992		0.92
 e9caf659db22	Champs Chicken	fastfood		32.24763	-99.75839	3049 US-83	Tuscola	79562	+13255723111	https://champschicken.com/locations/bowies-tuscola-llc-tuscola-tx/	Champs Chicken	0.66
 f1c7ccc0c89e	Chester's Chicken	fastfood		32.40316	-99.38440	1333 US-283	Baird	79504	+13258540099	http://chestersinternational.com	Chester's Chicken	0.96
 3a59422d41a1	Chick-fil-A	fastfood		32.41243	-99.77579	3130 S Clack St	Abilene	79606	+13256910414	http://www.chick-fil-a.com/abilene		0.85
 5b0fd2dcb58b	Chick-fil-A	fastfood		32.48017	-99.69553	1750 State Highway 351	Abilene	79601	+13257768168	https://www.indeed.com/viewjob?jk=5a7d677f2014cfed&from=shareddesktop_copy	Chick-fil-A	0.99
 9fa00f67f873	Chick-fil-A	fastfood		32.47190	-99.73254	1900 Pine St	Abilene	79601	+13256703099	https://www.chick-fil-a.com/locations/tx/hendrick-medical-center?utm_source=yext&utm_medium=link	Chick-fil-A	0.92
 b0ca201e74ab	Chick-fil-A	fastfood		32.40891	-99.78072	4355 Southwest Dr	Abilene	79606	+13256910414	https://www.chick-fil-a.com/locations/tx/relo-abilene?utm_source=yext&utm_medium=link		0.96
+b70ae6204e6d	Chick-fil-a	fastfood	chicken restaurant	32.40046	-99.76163	4310 Buffalo Gap Rd Ste 1442	Abilene	79606	+13256952946	https://www.chick-fil-a.com/locations/il/south-loop-il		0.92
 b8c686bfe961	Chick-fil-A	fastfood		32.46912	-99.70860	216B McGlothlin Campus Ctr	Abilene	79699	+13256742520	https://www.chick-fil-a.com/locations/tx/abilene-christian-university?utm_source=yext&utm_medium=link	Chick-fil-A	1.00
 2d094b7a8b3e	Chicken Express	fastfood		32.40506	-99.76562	3374 Turner Plz	Abilene	79606	+13256983333	https://chickene.com/	Chicken Express	0.99
 4b38ddc92d90	Chicken Express	fastfood		32.41132	-99.49050	619 S Access Rd	Clyde	79510	+13258939132	https://chickene.com/	Chicken Express	0.95
 e29b9f1a742b	Chicken Express	fastfood		32.46013	-99.70487	1034 E N 10th St	Abilene	79601	+13256755701	https://chickene.com/	Chicken Express	0.98
+17783b83098b	Chipotle Mexican Grill	fastfood	mexican restaurant	32.47837	-99.69907	1631 TX-351	Abilene	79601	+13259999831	https://locations.chipotle.com/tx/abilene/1631-hwy-351?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4730	Chipotle Mexican Grill	0.96
+1c5961e78915	Chipotle Mexican Grill	fastfood	mexican restaurant	32.40530	-99.76550	3800 S Clack St	Abilene	79606	+13256906463	https://locations.chipotle.com/tx/abilene/3800-s-clack-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2929	Chipotle Mexican Grill	0.99
 02183fe45813	Church's Texas Chicken	fastfood		32.46457	-99.74004	1309 Grape Street	Abilene	79601	+13256724672	https://locations.churchs.com/tx/abilene/1309-grape-street	Church's Chicken	0.96
 405e44ee515b	Church's Texas Chicken	fastfood		32.45262	-99.77144	4026 N. 1st Street	Abilene	79603	+13256731741	https://locations.churchs.com/tx/abilene/4026-n.-1st-street	Church's Chicken	0.98
 4bab82acf8ad	Cinnabon	fastfood		32.46058	-99.70650	1018 N. Judge Ely Blvd.	Abilene	79601		https://locations.cinnabon.com/tx/abilene/1018-n-judge-ely-blvd	Cinnabon	0.89
@@ -648,6 +644,10 @@ e29b9f1a742b	Chicken Express	fastfood		32.46013	-99.70487	1034 E N 10th St	Abile
 8ccd9d4a8ef6	Dairy Queen	fastfood		32.40286	-99.38593	I 20 EX	Baird	79504	+13258541363	http://www.Deeqs.com/	Dairy Queen	0.94
 fc6f285e2b2d	Dairy Queen	fastfood		32.12170	-99.16521	Hwys 36 & 279 Hwys 36 & 279	Cross Plains	76443	+12547257605	http://www.dairyqueen.com/	Dairy Queen	0.98
 c454f411abba	Denny's	fastfood		32.47749	-99.69872	120 E Interstate 20	Abilene	79601	+13256777448	http://www.dennys.com		0.77
+52a8bf8aa48e	Domino's	fastfood	pizza restaurant	32.37775	-99.74420	33 Windmill Circle	Abilene	79606	+13256983030	http://www.DOMINOS.com/	Domino's Pizza	0.96
+829cfbfc1253	Domino's	fastfood	pizza restaurant	32.45950	-99.70453	1125 E North 10th St	Abilene	79601	+13256773030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+c1fe8c55a629	Domino's	fastfood	pizza restaurant	32.46028	-99.75815	934 North Mockingbird Lane	Abilene	79603	+13256731333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+f550a20a8976	Domino's	fastfood	pizza restaurant	32.42580	-99.78661	5001 US-277	Abilene	79605	+13256953030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
 e6a45670ea22	Don Luis Express	fastfood		32.45017	-99.70546	273 N Judge Ely Blvd	Abilene	79601	+13257044255	http://www.chinaexpresstysons.com		0.92
 1dd1911d6f9b	DQ Grill & Chill	fastfood		32.46049	-99.75822	942 N Mockingbird Ln	Abilene	79603		https://www.dairyqueen.com/en-us/locations/tx/abilene/942-n-mockingbird-ln/3558	DQ Grill & Chill	0.80
 5c1c8df34d8f	DQ Grill & Chill	fastfood		32.42473	-99.78837	5110 Hwy 277 S	Abilene	79605		https://www.dairyqueen.com/en-us/locations/tx/abilene/5110-hwy-277-s/3563	DQ Grill & Chill	0.80
@@ -656,12 +656,21 @@ c8a1874d1122	DQ Grill & Chill	fastfood		32.12175	-99.16520	Hwys 36 & 279	Cross P
 e57a76ef13b6	DQ Grill & Chill	fastfood		32.40280	-99.38596	I-20, Ex 307	Baird	79504		https://www.dairyqueen.com/en-us/locations/tx/baird/i-20-ex-307/3610	DQ Grill & Chill	0.80
 f19dca2d9fae	DQ Grill & Chill	fastfood		32.47842	-99.69845	1626 State Highway 351	Abilene	79601		https://www.dairyqueen.com/en-us/locations/tx/abilene/1626-state-highway-351/220	DQ Grill & Chill	0.80
 73f6d2127304	Dyess AFB Food Court	fastfood		32.42316	-99.83618		Abilene					0.74
+3ffe976cbcc0	Firehouse Subs	fastfood	sandwich shop	32.47840	-99.69458	2608 Enterprise Drive	Abilene	79601		https://www.firehousesubs.com/store-locator/store/65cb571e-4331-4efd-b371-d0ba27f3db3c	Firehouse Subs	0.80
+ecc73e786114	Firehouse Subs	fastfood	sandwich shop	32.40456	-99.76632	3858 Ridgemont Dr.	Abilene	79606	+13256955700	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=890	Firehouse Subs	0.98
 33b876182853	Five Guys	fastfood		32.36500	-99.74332	6950 South Clack Street	Abilene	79606		https://restaurants.fiveguys.com/6950-south-clack-street	Five Guys	0.80
 3bd7413a0872	Golden Chick	fastfood		32.47972	-99.69482	1989 State Highway 351	Abilene	79601	+13256762442			0.64
 70ad9cc8df6d	Golden Chick	fastfood		32.38470	-99.76734	5317 Buffalo Gap Rd	Abilene	79606	+13252326800	http://www.goldenchick.com/	Golden Chick	0.97
 ba027dc5732b	Golden Chick	fastfood		32.45215	-99.76962	3809 N 1st St	Abilene	79603	+13256724110	https://locations.goldenchick.com/tx/abilene/1061/	Golden Chick	0.99
+5857f6b59d46	Jersey Mike's Subs	fastfood	sandwich shop	32.40804	-99.77030	3562 S Clack St	Abilene	79606	+13252441833	https://www.jerseymikes.com/15279/abilene-tx	Jersey Mike's Subs	0.97
+9b57c8c9f999	Jimmy John's	fastfood	sandwich shop	32.41040	-99.77701	4213 Southwest Dr	Abilene	79606	+13257939900	https://locations.jimmyjohns.com/tx/abilene/sandwiches-1668.html	Jimmy John's	0.98
 830296b4c296	KFC	fastfood		32.46300	-99.70568	1301 North Judge Ely Blvd	Abilene	79601	+13256768280	https://locations.kfc.com/tx/abilene/1301-north-judge-ely-blvd	KFC	0.99
 8aca675fcd68	KFC	fastfood		32.45131	-99.78049	4335 S 1st Street	Abilene	79605	+13257348492	https://locations.kfc.com/tx/abilene/4335-s-1st-street	KFC	0.99
+365e0321bb56	Little Caesars Pizza	fastfood	pizza restaurant	32.42924	-99.78255	4653 S 14th St	Abilene	79605	+13256923212	https://littlecaesars.com/en-us/store/7518	Little Caesars	0.97
+4a08c35e1304	Little Caesars Pizza	fastfood	pizza restaurant	32.41740	-99.52699	8075 South Access Road	Clyde	79510	+13258934760	https://littlecaesars.com/en-us/store/20291		0.96
+88274d93a0e1	Little Caesars Pizza	fastfood	pizza restaurant	32.46207	-99.70547	1121 N Judge Ely Blvd	Abilene	79601	+13252327894	https://littlecaesars.com/en-us/store/11487	Little Caesars	0.96
+af2d1111d85c	Little Caesars Pizza	fastfood	pizza restaurant	32.40359	-99.75806	4102 Buffalo Gap Rd	Abilene	79605	+13254375419	https://littlecaesars.com/en-us/store/8760	Little Caesars	0.96
+e7b35d31adc8	Little Caesars Pizza	fastfood	pizza restaurant	32.46319	-99.75816	1200 N Mockingbird Ln	Abilene	79603	+13256728389	https://littlecaesars.com/en-us/store/7356	Little Caesars	0.97
 60fb3a81a731	Long John Silver's	fastfood		32.61218	-99.81413	510 Avenue E	Hawley	79525	+19155373551	http://www.ljsilvers.com		0.92
 db9cfad9b9de	Long John Silver's	fastfood		32.45338	-99.76707	301 Westwood Dr	Abilene	79603	+13256777092	https://www.ljsilvers.com/?y_source=1_MTc1NzMxNzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
 b24ae4ab8cf0	M & M’s Shaved Ice	fastfood		32.38602	-99.76611	5233 Buffalo Gap Rd	Abilene	79606				0.95
@@ -671,9 +680,23 @@ b24ae4ab8cf0	M & M’s Shaved Ice	fastfood		32.38602	-99.76611	5233 Buffalo Gap 
 9aaceaf3f1eb	McDonald's	fastfood		32.37400	-99.77480	6130 Buffalo Gap Rd	Abilene	79606		https://www.mcdonalds.com/us/en-us/location/44532.html	McDonald's	0.80
 a0cf94486828	McDonald's	fastfood		32.46246	-99.70554	1201 N Judge Ely	Abilene	79601	+13256721271	https://www.mcdonalds.com/us/en-us/location/tx/abilene/1201-n-judge-ely/10684.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 a360cc589ced	McDonald's	fastfood		32.41266	-99.48935	1700 N Access Road	Clyde	79510	+13258931492	https://www.mcdonalds.com/us/en-us/location/tx/clyde/1700-n-access-road/34945.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
+1bd0a9d672d0	Panda Express	fastfood	chinese restaurant	32.47919	-99.69511	1749 Hwy 351	Abilene	79601	+13256727416	http://www.pandaexpress.com/	Panda Express México	0.99
+35b0332d5f67	Papa Johns Pizza	fastfood	pizza restaurant	32.37197	-99.77622	6382 Buffalo Gap Rd Ste D	Abilene	79606	+13252744519	https://locations.papajohns.com/united-states/tx/79606/abilene/6382-buffalo-gap-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_NjEzMTI2OTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.95
+91922cfa99cc	Papa Johns Pizza	fastfood	pizza restaurant	32.45255	-99.77007	3900 N 1st St	Abilene	79603	+13256773434	https://locations.papajohns.com/united-states/tx/79603/abilene/3900-n-1st-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE0MTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+0d0696bc8bb8	Pizza Hut	fastfood	pizza restaurant	32.40088	-99.75951	4303 S Clack St	Abilene	79606	+13256953770	https://locations.pizzahut.com/tx/abilene/4303-s-clack-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283968	Pizza Hut	0.92
+1d247246f61b	Pizza Hut	fastfood	pizza restaurant	32.94387	-99.80199	126 E. Hamilton St Jones	Stamford	79553	+13257732707	https://locations.pizzahut.com/tx/stamford/126-e-hamilton-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=317140	Pizza Hut	0.97
+226b15e312e8	Pizza Hut	fastfood	pizza restaurant	32.37368	-99.74648	24 Hospital Dr Taylor	Abilene	79606	+13256953770	https://locations.pizzahut.com/tx/abilene/24-hospital-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314606	Pizza Hut	0.93
+4e0db2573a66	Pizza Hut	fastfood	pizza restaurant	32.95284	-99.80270	702 N Swenson St	Stamford	79553	+13257732707	https://locations.pizzahut.com/tx/stamford/702-n-swenson?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282353	Pizza Hut	0.92
+a4b6664865c7	Pizza Hut	fastfood	pizza restaurant	32.47479	-99.71567	550 E Ambler Ave Taylor	Abilene	79601	+13256761892	https://locations.pizzahut.com/tx/abilene/550-e-ambler-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=280412	Pizza Hut	0.96
+a537dd338ba4	Pizza Hut	fastfood	pizza restaurant	32.43232	-99.75578	2750 S 14th St Taylor	Abilene	79605	+13256929328	https://locations.pizzahut.com/tx/abilene/2750-s-14th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284652	Pizza Hut	0.96
+3bbc213ba556	Pizza Hut Express	fastfood	pizza restaurant	32.48698	-99.71186	672 E. Overland Trail, Cinemark Abilene #1146	Abilene	79601		https://locations.pizzahut.com/tx/abilene/672-e-overland-trail?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314431		0.97
+9b8ca5db7344	Pizza Hut Express	fastfood	pizza restaurant	32.46904	-99.70846	216 B McGlothlin Campus Center	Abilene	79699	+13256742107			0.85
 09ded8f0ef4d	Popeyes	fastfood		32.39695	-99.76456	4425 Ridgemont Dr	Abilene	79606	+13257958999	https://www.popeyes.com/store-locator/store/restaurant_82890	Popeyes Louisiana Kitchen	0.99
+bf710cb0fd0b	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	32.47428	-99.72959	841 Ambler Ave	Abilene	79601	+13256770062	https://www.popeyes.com/store-locator/store/restaurant_83054?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.92
 be3b5dbf4355	Raising Cane's	fastfood		32.41121	-99.77412	3218 South Clack Street	Abilene	79606	+13256918855	https://locations.raisingcanes.com/tx/abilene/3218-south-clack-street	Raising Cane's Chicken Fingers	0.99
 fa502eac9d1a	Raising Cane's	fastfood		32.47748	-99.69833	1602 E Overland Trail	Abilene	79601	+13256709941	https://locations.raisingcanes.com/tx/abilene/1602-e-overland-trail	Raising Cane's Chicken Fingers	0.99
+09880b9f32f3	Schlotzsky's	fastfood	sandwich shop	32.46062	-99.70653	1018 N Judge Ely Blvd	Abilene	79601	+13256729500	www.schlotzskys.com		0.97
+607f4c56b8da	Schlotzsky's	fastfood	sandwich shop	32.43111	-99.78210	4518 S 14th St Ste 1350	Abilene	79605	+13256952021	www.schlotzskys.com		1.00
 15abdd32dae1	Sonic Drive In	fastfood		32.42011	-99.74857	2402 Sayles Boulevard	Abilene	79605	+13256929075	https://locations.sonicdrivein.com/tx/abilene/2402-sayles-boulevard.html	Sonic Drive-In	0.98
 1783be878a92	Sonic Drive In	fastfood		32.44992	-99.70640	202 N Judge Ely Blvd	Abilene	79601	+13256733663	https://locations.sonicdrivein.com/tx/abilene/202-n.-judge-ely-boulevard.html	Sonic Drive-In	1.00
 4a5b77f2ba5c	Sonic Drive In	fastfood		32.44992	-99.70640	202 N. Judge Ely Boulevard	Abilene	79601	+13256733663	https://locations.sonicdrivein.com/tx/abilene/202-n.-judge-ely-boulevard.html	Sonic Drive-In	0.98
@@ -683,8 +706,29 @@ fa502eac9d1a	Raising Cane's	fastfood		32.47748	-99.69833	1602 E Overland Trail	A
 a1b99f3375f4	Sonic Drive In	fastfood		32.40523	-99.76466	3856 S. Clack Street	Abilene	79606	+13256921014	https://locations.sonicdrivein.com/tx/abilene/3856-s.-clack-street.html	Sonic Drive-In	0.99
 f648f28c0007	Sonic Drive In	fastfood		32.95217	-99.80277	616 N. Swenson	Stamford	79553	+13257732362	https://locations.sonicdrivein.com/tx/stamford/616-n.-swenson.html	Sonic Drive-In	0.97
 fb428d02cf58	Sonic Drive In	fastfood		32.41306	-99.49223	1506 N Access Road	Clyde	79510	+13258931659	https://locations.sonicdrivein.com/tx/clyde/1506-n-access-road.html	Sonic Drive-In	0.97
+48cf70bce779	Sonic Drive-In	fastfood	burger restaurant	32.41054	-99.48142	1506 N Access Rd	Clyde	79510	+13258931659	https://locations.sonicdrivein.com/tx/clyde/1506-n-access-road.html		0.85
+03020104851d	Subway	fastfood	sandwich shop	32.12215	-99.16593	416 S Main St	Cross Plains	76443	+12547256827	https://restaurants.subway.com/united-states/tx/cross-plains/416-s-main-st	Subway	0.97
+091a976656f3	Subway	fastfood	sandwich shop	32.46208	-99.70560	1117 N Judge Ely Blvd	Abilene	79601	+13256767827	https://www.subway.com		0.98
+170fe53131c2	Subway	fastfood	sandwich shop	32.41106	-99.48808	805 S Access Rd	Clyde	79510	+13258931663	https://www.subway.com		0.95
+29279d272462	Subway	fastfood	sandwich shop	32.40338	-99.38471	1333 US Highway 283 N	Baird	79504	+13258540099	http://www.subway.com/en-us	Subway	0.95
+2c1b883cf507	Subway	fastfood	sandwich shop	32.21598	-99.79581	216 County Rd 160	Tuscola	79562	+13255547008	https://restaurants.subway.com/united-states/tx/tuscola/216-county-rd-160?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=69951&utm_campaign=evergreen-2020&y_source=1_MTUxMDk0ODEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		1.00
+305404ca7751	Subway	fastfood	sandwich shop	32.46286	-99.75748	1149 N Mockingbird	Abilene	79603	+13256756272	https://restaurants.subway.com/united-states/tx/abilene/1149-n-mockingbird?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=7685&utm_campaign=evergreen-2020&y_source=1_MTQ5MTI4NjAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+32b1562f8a0d	Subway	fastfood	sandwich shop	32.43234	-99.75629	2810 S.14th St.	Abilene	79605	+13256919179	https://restaurants.subway.com/united-states/tx/abilene/2810-s14th-st	Subway	0.95
+5f8972f3af6c	Subway	fastfood	sandwich shop	32.41113	-99.48812	805 South Access Road	Clyde	79510	+13258931663	https://restaurants.subway.com/united-states/tx/clyde/805-south-access-road	Subway	0.96
+67e1504bcf30	Subway	fastfood	sandwich shop	32.41101	-99.77625	4157 Southwest Dr	Abilene	79606	+13257939888	https://restaurants.subway.com/united-states/tx/abilene/4157-southwest-dr	Subway	0.95
+747844e80c59	Subway	fastfood	sandwich shop	32.61058	-99.81944	501 E Frontage Road	Hawley	79525	+13255373552	https://restaurants.subway.com/united-states/tx/hawley/501-e-frontage-road		0.77
+893bbac77200	Subway	fastfood	sandwich shop	32.45284	-99.73310	400 Pine St	Abilene	79601	+13256727723	https://www.subway.com		0.92
+8b43853e64f0	Subway	fastfood	sandwich shop	32.46680	-99.73155	1542 Pine St	Abilene	79601	+13256700337	https://restaurants.subway.com/united-states/tx/abilene/1542-pine-st	Subway	0.99
+93b149fe392d	Subway	fastfood	sandwich shop	32.45207	-99.77161	4001 N 1st St	Abilene	79603	+13256723070	https://restaurants.subway.com/united-states/tx/abilene/4001-n-1st-st	Subway	0.94
+95be1ed600e2	Subway	fastfood	sandwich shop	32.75122	-99.89668	1701 Commercial Ave	Anson	79501	+13258232782	https://restaurants.subway.com/united-states/tx/anson/1701-commercial-ave	Subway	0.98
+b0e0b335ac7a	Subway	fastfood	sandwich shop	32.40099	-99.71712	4102 Loop 322	Abilene	79606	+13256905952	https://restaurants.subway.com/united-states/tx/abilene/4102-loop-322	Subway	0.94
+b339210d0632	Subway	fastfood	sandwich shop	32.37251	-99.74649	1901 Antilley Rd	Abilene	79606	+13256906624	https://restaurants.subway.com/united-states/tx/abilene/1901-antilley-rd	Subway	0.98
 b97d3638e2d4	Subway	fastfood		32.96094	-99.80271	1412 N Swenson Rd	Stamford	79553	+13257732262	https://restaurants.subway.com/united-states/tx/stamford/1412-n-swenson-rd	Subway	0.96
 bd8d27aace25	Subway	fastfood		32.42297	-99.83611	260 Commissary Road, Bldg. 7339	Dyess Afb	79607	+13256928996	https://restaurants.subway.com/united-states/tx/dyess-afb/260-commissary-road?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=59778&utm_campaign=evergreen-2020&y_source=1_MTQ5MTMzNDUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.85
+c17d3ecba730	Subway	fastfood	sandwich shop	32.44947	-99.74689	2001 South 1st	Abilene	79602	+13256762002	https://restaurants.subway.com/united-states/tx/abilene/2001-south-1st	Subway	0.95
+e743d9eaa2e6	Subway	fastfood	sandwich shop	32.39609	-99.76257	4498 Buffalo Gap Rd	Abilene	79606	+13256980668	https://restaurants.subway.com/united-states/tx/abilene/4498-buffalo-gap-rd	Subway	0.94
+ef6f9c6a3a1c	Subway	fastfood	sandwich shop	32.48032	-99.69851	1650 State Hwy 351	Abilene	79601	+13256758818	http://www.subway.com/en-us	Subway	0.97
+f257bfd4f105	Subway	fastfood	sandwich shop	32.43662	-99.72847	1109b S Treadaway Blvd Ste B	Abilene	79602	+13254374882	https://alibabacharleston.com		0.92
 3f778572f843	Taco Bell	fastfood		32.45132	-99.78104	4341 South 1st Street	Abilene	79605	+13256952355	http://www.tacobell.com/	Taco Bell	0.99
 4fe6c1925206	Taco Bell	fastfood		32.40294	-99.75861	4165 S Danville Dr	Abilene	79605	+13256954900	http://www.tacobell.com/	Taco Bell	0.99
 6812434cff3a	Taco Bell	fastfood		32.47487	-99.73077	2201 Pine Street	Abilene	79601	+13256739621	http://www.tacobell.com/	Taco Bell	0.99
@@ -694,8 +738,11 @@ ba9038e71907	Taco Bueno	fastfood		32.45787	-99.70554	825 N Judge Ely Blvd	Abilen
 65818ab03472	The Toasted Traveler	fastfood		32.60830	-99.48703	Ever-Changing	Abilene	79602	+13258297072	http://thetoastedtraveler.com/		0.57
 17cec67155be	Wendy's	fastfood		32.40924	-99.78088	4374 Southwest Dr	Abilene	79606	+13256922315	https://locations.wendys.com/united-states/tx/abilene/4374-southwest-dr	Wendy's	0.99
 4d29678418e1	Whataburger	fastfood		32.41317	-99.77366	3141 S DANVILLE DR	Abilene	79605	+13256911695	https://locations.whataburger.com/tx/abilene/3141-s-danville-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+96b41d2d507e	Whataburger	fastfood	burger restaurant	32.44802	-99.70830	893 US HIGHWAY 80 E	Abilene	79601	+13256760836	https://locations.whataburger.com/tx/abilene/893-us-highway-80-e.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+cbd27778f130	Whataburger	fastfood	burger restaurant	32.47660	-99.69747	1625 TX Hwy 351	Abilene	79601	+13254801409	https://whataburger.com/menu?unitNum=1403		0.98
 e2c7ce282a3e	Whataburger	fastfood		32.41317	-99.49066	1614 N ACCESS RD	Clyde	79510	+13258933535	https://locations.whataburger.com/tx/clyde/1614-n-access-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 f2ebc282a372	Whataburger	fastfood		32.45139	-99.77868	4241 S 1ST ST	Abilene	79605	+13256956336	http://whataburger.com/	Whataburger	0.99
+8a8d8f47bbaa	Wingstop	fastfood	chicken restaurant	32.47875	-99.69466	1813 State Highway 351	Abilene	79601	+13257045234	https://www.wingstop.com/location/wingstop-1151-abilene-tx-79601/menu?y_source=1_NTUyMDc4OTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
 ec3b5ff1e264	Wingstop	fastfood		32.40349	-99.75900	4102 Buffalo Gap Rd Ste C	Abilene	79605	+13256929464	https://www.wingstop.com/location/wingstop-84-abilene-tx-79605/menu?y_source=1_NTUyMDY1NTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
 3ab44a689e9d	Abilene Fairgrounds	grocery		32.43185	-99.69527	1700 Texas 36, Abilene , 79602, United States	Abilene	79602	+13256774376	http://www.taylorcountyexpocenter.com		0.77
 cf1a274bfcc6	Abilene H-E-B	grocery		32.43348	-99.75935	1345 BARROW	Abilene	79605		https://www.heb.com/heb-store/us/tx/abilene/abilene-h-e-b-70	H-E-B	0.80
@@ -766,11 +813,8 @@ c64b14a2778c	1204 Hotel Operating Llc	hotel		32.39898	-99.76522	4250 Ridgemont D
 25b78a5856ac	36 West Motel	hotel		32.12125	-99.16998	501 SW 5th St	Cross Plains	76443	+12547254550	https://36-west-motel.stayin.us		0.88
 2c1a4dedda01	A.B. Barret Hall	hotel		32.46937	-99.71185	1818 Campus Ct	Abilene	79601	+13256746119	http://www.acu.edu/legacy/campusoffices/residencelife/sophomore-halls/barret.html		0.72
 f89611ad3deb	Abilene Hotel Partners Llc	hotel		32.39624	-99.76424	4449 Ridgemont Dr	Abilene	79606		indfumc.org		0.95
-74a03d4476db	Abilene Investments Llc	hotel		32.47656	-99.69965	1525 E Stamford St	Abilene	79601				0.95
 87952ca6048a	Abilene North Apartments	hotel		32.47709	-99.76534	2411 N Willis St	Abilene	79603	+13256729851	https://www.abilenenorthapartments.com		0.92
-37b2a73959c6	Abilene Palace Llc	hotel		32.47627	-99.69506	1802 E Overland Trl	Abilene	79601				0.95
 7f69f01f2d56	Air Force Inn, Dyess Air Force Base, Abilene, Texas	hotel		32.42729	-99.84245		Abilene			http://www.dodlodging.net/		0.97
-fa822cc957e1	Air Force Inn, Dyess Air Force Base, Abilene, Texas	hotel		32.42190	-99.83254		Abilene			http://www.dodlodging.net/		0.71
 c33bfd0e3bed	Alamo Motel	hotel	motel	32.45040	-99.75968	2957 S 1st St	Abilene	79605	+13254373499	http://alamomotel.hotelgalaxyintl.com		0.99
 1772654e79ea	Albany Inn & RV Campground	hotel	motel	32.73017	-99.28825	424 US-180	Albany	76430	+13257622224	http://www.albanyinntexas.com		0.98
 cf53ab887683	American Star Inn	hotel		32.48970	-99.73895	1633 W Stamford St	Abilene	79601	+13256735424			0.85
@@ -782,7 +826,6 @@ c8028500e7df	Anderson Hall	hotel		32.47550	-99.73586	2200 Hickory St	Abilene	796
 ccbf191575a5	Anson Inn By OYO	hotel	motel	32.75220	-99.89701	1532 Commercial Ave	Anson	79501	+13258234117	https://www.oyorooms.com/us/225395	OYO Rooms	0.98
 aed0f7265fd6	Antilley Inn	hotel	motel	32.36979	-99.74341	6550 US-83	Abilene	79602	+13256953330	http://www.antilleyinn.com		0.99
 1def4580b1b5	Baymont by Wyndham Abilene	hotel		32.49130	-99.72259	3501 W Lake Rd	Abilene	79601	+13256761676	https://www.wyndhamhotels.com/baymont/abilene-texas/baymont-abilene/overview		0.99
-e61318299842	Bb Hotels Inc	hotel		32.47552	-99.69485	1902 E Overland Trl	Abilene	79601				0.95
 f0b5226a4660	Bent Tree Apartments	hotel		32.41904	-99.75688	2800 S 25th St	Abilene	79605	+13256923409	http://www.weidner.com/abilene/bent-tree-apartments/		0.99
 6002f3c853e0	Best Budget Inn	hotel	motel	32.45063	-99.76202	3153 S 1st St	Abilene	79605	+13256734251	http://budgetinn.com		0.99
 6aafda3d40a0	Best Western Abilene Inn & Suites	hotel		32.49154	-99.72459	350 W Overland Trl	Abilene	79601	+13256725501	https://www.bestwestern.com		0.95
@@ -793,12 +836,10 @@ c3b8b09e3202	Bharat Prakashan Global Llc	hotel		32.39752	-99.75087	4397 Sayles B
 41ff7c2ba200	Buck Canyon Ranch	hotel		32.67447	-99.01399	5392 County Road 296	Breckenridge	76424	+13348035319	http://www.buckcanyonranch.com/		0.98
 40e0c01a686e	Candlewood Suites Abilene By Ihg	hotel		32.41293	-99.77902	3050 Catclaw Dr	Abilene	79606	+13254374741	https://www.ihg.com		1.00
 c0665a8b7d78	Century Lodge	hotel	motel	32.45047	-99.76796	3509 S 1st St	Abilene	79605	+13256778557	https://www.centurylodge.com		0.99
-b29e986b39ce	Christi Co Inc	hotel		32.43565	-99.70484	1150 Estates Dr	Abilene	79602				0.95
 bfb3b58a8898	Civic Plaza Hotel	hotel		32.45416	-99.73238	505 Pine St	Abilene	79601	+13256760222	civicplazahotel.com		0.55
 d37fb5a37128	Comfort Inn & Suites Regional Medical Center	hotel		32.37173	-99.74567	6350 Directors Pkwy	Abilene	79606	+13252328801	https://www.choicehotels.com/texas/abilene/comfort-inn-hotels/txb57?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 3aab70988836	Comfort Inn Abilene	hotel		32.44779	-99.69630	1758 E Interstate 20	Abilene	79601	+13256760203	http://www.comfortinn.com		0.77
 3b810ec1c8d4	Comfort Suites	hotel		32.41157	-99.77213	3225 S Danville Dr	Abilene	79605	+13254808409	https://www.choicehotels.com/texas/abilene/comfort-suites-hotels/txb13?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-e5d8ce06f829	Comfort Suites	hotel	motel	32.41264	-99.77325	3225 S Danville Dr	Abilene	79605	+13257958500	https://www.choicehotels.com/comfort-suites		0.77
 86bff0178559	Comfort Suites University	hotel		32.47557	-99.69488	1902 E Overland Trail	Abilene	79601	+13254808486	https://www.choicehotels.com/texas/abilene/comfort-suites-hotels/tx951?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 6da1c1a7e5ff	Country Hearth Inn & Suites Abilene	hotel	resort	32.40915	-99.77254	3450 S Clack St	Abilene	79606	+13256957700			0.97
 86372ba6eb94	Courtyard By Marriott	hotel		32.47404	-99.68818	2141 Scottish Road	Abilene	79601	+13256730400	https://www.marriott.com/en-us/hotels/abine-courtyard-abilene-northeast/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Courtyard by Marriott	1.00
@@ -808,17 +849,14 @@ d532a78bbd0c	Courtyard By Marriott	hotel		32.39846	-99.76548	4350 Ridgemont Driv
 d6add1f49d90	Days Inn by Wyndham Abilene	hotel	resort	32.40377	-99.76610	3950 Ridgemont Dr	Abilene	79606	+13254807124	https://www.wyndhamhotels.com/days-inn/abilene-texas/days-inn-abilene-tx/overview?CID=LC:DI::BING:RIO:National:50320&iata=00093796		0.99
 98b88390f835	Deluxe Inn	hotel	motel	32.96255	-99.80386	1701 N Swenson St	Stamford	79553	+13257732751	http://stamforddeluxeinn.com/		0.99
 e7b90383fc33	DoubleTree by Hilton Abilene Downtown Convention Center	hotel		32.45428	-99.73435	500 Cypress St	Abilene	79601	+13259991878	http://doubletree3.hilton.com/	DoubleTree by Hilton	1.00
-e9c485d7d987	Eastern Star Temple	hotel	lodge	32.41758	-99.76349	3173 S 27th St	Abilene	79605	+13256925977			0.92
 d81914fe8213	Econo Lodge Inn and Suites	hotel	motel	32.44905	-99.70937	840 E Hwy 80	Abilene	79601	+13256778100	https://www.choicehotels.com/texas/abilene/econo-lodge-hotels/txk73?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
 19dfc7f236b7	Edwards Hall	hotel		32.47072	-99.71111	1995 Campus Ct	Abilene	79699	+13256746300	http://www.acu.edu/campusoffices/residencelife/Sophomore_Halls/Edwards.html		0.99
-923ea70b1e4e	Enzor Travel	hotel		32.41154	-99.77640	4150 Southwest Dr	Abilene	79606				0.95
 d4da17704368	Executive Inn	hotel		32.47652	-99.69678	1650 E Overland Trail	Abilene	79601	+13256772200	http://executiveinnabilene.com/CONTACT		0.99
 8b0bf8eba3fa	Fairfield by Marriott Inn & Suites Abilene	hotel		32.40425	-99.76468	3902 Turner Plaza Dr	Abilene	79606	+13256952448	https://www.marriott.com/en-us/hotels/abifi-fairfield-inn-and-suites-abilene/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 e3ef55f815b4	Franklin Rv Center	hotel		32.41026	-99.48499	1021 S Access Rd	Clyde	79510		https://www.bigcountryrv.com		0.98
 03f5d15c4973	Frontier Inn	hotel		32.48914	-99.73241	3210 Pine St	Abilene	79601	+13256778211	http://www.frontierinnabilene.com/		0.99
 b02d85c10f6c	Hampton Inn Abilene	hotel		32.40402	-99.76522	3917 Ridgemont Dr	Abilene	79606	+13256950044	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-abilene-ABITXHX/index.html	Hampton by Hilton	1.00
 73199765f7e9	Hampton Inn and Suites Abilene I-20	hotel		32.49259	-99.72354	3526 W Lake Rd	Abilene	79601	+13256734400	https://www.hilton.com/en/hotels/abihshx-hampton-suites-abilene-i-20/	Hampton by Hilton	1.00
-6f2e72c65a38	Hendrick League House	hotel	lodge	32.47095	-99.73524	1910 Hickory St	Abilene	79601	+13256704430	https://www.hendrickhealth.org/patients-visitors/league-house		0.92
 4b3cda95d57f	Hereford Motel	hotel		32.75945	-99.11086	557 US-180	Albany	76430	+13257620335	http://www.herefordmotel.com/		0.60
 fc508d84491c	Hereford Motel	hotel	motel	32.71825	-99.29853	557 WEST US-180	Albany	76430	+13257620335	https://hereford-motel-tx-2.hub.biz/		0.92
 d050a50e9734	Hilton Garden Inn Abilene	hotel		32.39620	-99.76409	4449 Ridgemont Dr	Abilene	79606	+13256906432	http://hiltongardeninn3.hilton.com/en/hotels/texas/hilton-garden-inn-abilene-ABIABGI/event/index.html	Hilton Garden Inn	1.00
@@ -830,7 +868,6 @@ c9aa8a0bbf91	Home2 Suites by Hilton Abilene Southwest	hotel		32.40400	-99.77100	
 6f12156f88c1	Honeybee Bed and Breakfast Stamford, Texas	hotel		32.94157	-99.78754	808 E Wells St	Stamford	79553	+13253701023			0.81
 8d77f84b70f4	Hood Ranch	hotel		32.50149	-99.71191	4073 Caldwell Rd	Abilene	79601		http://www.3dhood.com/		0.79
 f727b3470728	Hotel 34Fifty	hotel		32.40943	-99.77216	3450 S Clack St	Abilene	79606	+13256957700	https://34fifty.com/		0.66
-b9e4398fcfe2	Jalsaa Hospitality	hotel		32.47675	-99.69639	1702 E Overland Trl	Abilene	79601				0.95
 6d82de537858	La Quinta Inn & Suites	hotel		32.41335	-99.77854	3018 Catclaw Dr	Abilene	79606	+13252384185	http://www.laquintaabilenemall.com/?cid=local_6177	La Quinta by Wyndham	1.00
 76604b124f0d	La Quinta Inn Abilene	hotel	resort	32.49174	-99.72250	3501 W Lake Rd	Abilene	79601	+13256761676	http://www.laquintaabilene.com/?cid=local_544		0.99
 e0902fab623f	Lazy Cactus Bed & Breakfast	hotel		32.44645	-99.76708	400 Riverside Blvd	Abilene	79605	+13256727131	http://www.lazycactusbb.com/		0.92
@@ -838,15 +875,12 @@ e0902fab623f	Lazy Cactus Bed & Breakfast	hotel		32.44645	-99.76708	400 Riverside
 99b6516d4741	Morning Star Inn	hotel	motel	32.75136	-99.90254		Anson		+13258232255			0.98
 46084a24dbc7	Motel 6	hotel	motel	32.47635	-99.69653	1702 E Overland Trail	Abilene	79601	+13252165986	http://www.motel6.com/	Motel 6	0.99
 7db2d385e681	Motel 6	hotel	motel	32.47747	-99.78459	4951 W Stamford St	Abilene	79603	+13253061316	http://www.motel6.com/	Motel 6	1.00
-e7a69027e43e	Nelson Hall	hotel		32.46651	-99.70875	860 E North 16th St	Abilene	79601				0.99
 372e9c32b5fb	Omj Hospitality, Inc	hotel		32.48985	-99.73795	1633 W Stamford St	Abilene	79601				0.95
-90c26fe0f86f	Omsairm Hospitality Inc	hotel		32.48985	-99.73795	1633 W Stamford St	Abilene	79601				0.95
 ec2f5eb9b269	Osprey Avionics	hotel		32.43080	-99.76626	3301 S 14th St Ste 16	Abilene	79605	+13252671212	http://www.ospreyavionics.com		0.92
 c8b9e1dbf5f6	OYO Hotel Breckenridge TX Hubbard Creek Lake	hotel	motel	32.76848	-99.01980	6924 US-180	Breckenridge	76424	+13182394656	https://www.oyorooms.com/us/76395/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_DLS015	OYO Rooms	0.92
 1dcb38c2c1c0	P3 Hospitality Lp	hotel		32.41293	-99.77902	3050 Catclaw Dr	Abilene	79606	+13254376082			0.65
 e1f6f3dd12d7	Phil’s Bunkhouse Llc	hotel		32.12179	-99.16612	116 SW 5th St	Cross Plains	76443	+18179133531	https://www.philsbunkhouse.com		0.99
 57c9299b119c	Ponca Motel	hotel	motel	32.45045	-99.76129	3101 S 1st St	Abilene	79605	+13256709717	https://ponca-motel.hub.biz/		0.99
-5020926899f0	Quail Ridge Ranch LLC	hotel	lodge	32.75550	-99.89630	HWY 180	Anson	79501		http://www.quailridgehunts.com/		0.86
 2c7545e372d3	Quality Inn Abilene	hotel		32.47578	-99.69579	1758 E Overland Trl	Abilene	79601	+13254808490	https://www.choicehotels.com/texas/abilene/quality-inn-hotels/tx346?mc=llyxyxpx	Choice Hotels	1.00
 0f6df4f69744	Quality Suites Abilene Mall Area	hotel		32.41282	-99.77316	3165 S. Danville Dr.	Abilene	79605		https://www.choicehotels.com/texas/abilene/comfort-suites-hotels	Quality Inn	0.98
 9dcebe2cd046	Reddy INN & Suites	hotel		32.71580	-99.30092	724 US Highway 283 S	Albany	76430	+13257623939	http://www.reddyinn.com/		0.92
@@ -870,7 +904,6 @@ ec05635e9fba	The Wes Ben Ranch	hotel		32.07561	-99.96220	1250 County Road 314	Wi
 fdd329b697e0	Value Place	hotel		32.39954	-99.75337	4266 Oil Belt Ln	Abilene	79605	+13252328710	https://www.choicehotels.com		0.55
 b99b4328bc36	Western Motel	hotel	motel	32.45055	-99.76295	3201 S 1st St	Abilene	79605	+13256727858	http://www.thewesternmotel.com	Western Motel-Quitman, MS	0.96
 a0e088d46e94	Whispering Oaks	hotel		32.45524	-99.77982	309 N Jefferson Dr	Abilene	79603	+13256900123			0.92
-1896cbdd7ccc	Whitten Inn	hotel		32.44936	-99.70947	840 US Highway 80 E	Abilene	79601				0.79
 e8d09004892f	Wingate by Wyndham Abilene	hotel		32.41378	-99.77852	3010 Catclaw Drive S Clack St	Abilene	79606	+13256906400	https://www.wyndhamhotels.com/wingate/abilene-texas/wingate-by-wyndham-abilene/overview?CID=LC:WG::BING:RIO:National:30540&iata=00065402		0.99
 24bd6187f417	WoodSpring Suites Abilene	hotel		32.39932	-99.75351	4266 Oil Belt Ln	Abilene	79605	+13252328710	https://www.woodspring.com/extended-stay-hotels/locations/texas/abilene/woodspring-suites-abilene	WoodSpring Suites	0.99
 5cd1815628ed	Abilene Country Club - North	office	private association	32.40371	-99.73887	4039 S Treadaway Blvd	Abilene	79602	+13256922583	http://www.abilenecountryclub.com/	Abilene Country Club	0.95
@@ -941,10 +974,8 @@ fc32cf39e8a8	Armando's Mexican Food	restaurant		32.45001	-99.75336	2549 S 1st St
 71ff0f125387	Bar-B-Que Barn	restaurant	barbecue restaurant	32.27500	-99.82819	602 Houston St	Buffalo Gap	79508	+13255723552	http://barbecuefoodbuffalogap.com		0.92
 f5bbb5b587ec	Beehive Restaurant	restaurant	steakhouse	32.45359	-99.73534	442 Cedar St	Abilene	79601	+13256750600	http://beehivesaloon.com/		0.99
 747f4ba755e7	Belle's Chicken Dinner House	restaurant	comfort food restaurant	32.47506	-99.77653	2002 N, Clack St	Abilene	79603	+13256777100	http://www.belleschicken.com/		0.99
-21a3df9dc5d1	Betty Rose's Little Brisket	restaurant	barbecue restaurant	32.39254	-99.77735	3934 Catclaw Dr	Abilene	79606	+13256988000	http://www.bettyroses.com/		0.77
 50b4e120cde7	Betty Rose's Little Brisket	restaurant	barbecue restaurant	32.39477	-99.76651	3934 Catclaw Dr	Abilene	79606	+13256988000			0.99
 5a54f13840f3	Betty Rose's Little Brisket	restaurant	barbecue restaurant	32.47968	-99.69031	2588 E Lake Rd	Abilene	79601	+13256723500	bettyroses.com		0.98
-d8b9f2a0c8d6	Betty Rose's Little Brisket	restaurant	barbecue restaurant	32.40366	-99.77486	3934 Catclaw Dr	Abilene	79606	+13256988000	http://www.bettyroses.com/		0.97
 7c613fc803ec	Big Country Burgers And More	restaurant	mexican restaurant	32.75137	-99.89727		Anson					0.97
 ceba8b041abd	Big Country Truckstop	restaurant	american restaurant	32.46793	-99.98414	9232 Interstate 20	Merkel	79536	+13259284437	http://conocophillips.com		0.77
 dbc804948df8	Big Mama's Commercial Kitchen	restaurant	burger restaurant	32.42378	-99.80629	6117 Texas Ave	Abilene	79605	+13257571332	http://www.25bigmamas.com/		0.92
@@ -962,9 +993,6 @@ c5cef191dc72	Bubba's Smokehouse BBQ	restaurant	barbecue restaurant	32.12157	-99.
 3f8816f97cab	Buffalo Wild Wings	restaurant	american restaurant	32.44793	-99.73235	153 Oak St	Abilene	79602	+14238773338	https://www.buffalowildwings.com/	Buffalo Wild Wings	0.69
 d53f53f896cd	Buffet Asia	restaurant	buffet restaurant	32.40385	-99.76727	3366 John Knox Dr	Abilene	79606	+13256988888	http://www.buffetkingabilene.com		0.97
 5b353144d91b	buffet king	restaurant	chinese restaurant	32.40388	-99.76727	3366 John Knox Dr	Abilene	79606	+13256988888	http://www.buffetkingabilene.com		0.98
-72f68c0eac86	Burger King	restaurant	burger restaurant	32.45192	-99.77084	3901 N 1st St	Abilene	79603	+13256700668	https://burgerking.com/store-locator/store/1728	Burger King	0.99
-a6f3ad13f335	Burger King	restaurant		32.42651	-99.83621	201 Avenue B Bldg 7322	Abilene	79607	+12813613655	https://burgerking.com/store-locator/store/restaurant_74992		1.00
-bcda53df1f0d	Burger King	restaurant		32.37267	-99.74301	1633 Antilley Rd	Abilene	79606	+13256958590	https://burgerking.com/store-locator/store/restaurant_74992		0.92
 81d11bc4463c	Burritos San Lorenzo	restaurant	mexican restaurant	32.45004	-99.70554	273 N Judge Ely Blvd	Abilene	79601	+13257041553			0.99
 7715dc29df1e	Bush's Chicken - Abilene	restaurant	chicken restaurant	32.45094	-99.77869	125 S Pioneer Dr	Abilene	79605	+13252328510	http://bushschicken.com/	Bush's Chicken - Laredo	0.59
 7503bdc26460	Buttermans Grill	restaurant	american restaurant	32.41029	-99.56151	1060 FM 603	Clyde	79510	+14696847448	http://local.aarp.org/local-services/buttermans-grill-1060-farm...clyde.html		0.95
@@ -980,7 +1008,6 @@ d2c265eed521	Charley's Grilled Subs	restaurant	american restaurant	32.43245	-99.
 ad0783f9a2f8	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	32.40904	-99.77127	3502 S Clack St	Abilene	79606	+13257937106	https://www.cheddars.com/locations/tx/abilene/abilene/2191?cmpid=br%3Acsk_ag%3Aie_ch%3Asoc_ca%3ACSKFB_sn%3Afacebook_gt%3Aabilene-tx-2191_pl%3Alocurl_rd%3A1161	Cheddar's Scratch Kitchen	0.99
 cc6416f57a75	Chelsea's Burgers N' Brew	restaurant	burger restaurant	32.43163	-99.76066	3121 S 14th St	Abilene	79605	+13257044285	http://www.chelseasburgersnbrew.com/		0.99
 e5ebda497125	Chester's Chicken	restaurant	chicken restaurant	32.41714	-99.38627	1333 US Highway 283 N	Baird	79504	+13258540099	https://www.chesterschicken.com		0.92
-b70ae6204e6d	Chick-fil-a	restaurant	chicken restaurant	32.40046	-99.76163	4310 Buffalo Gap Rd Ste 1442	Abilene	79606	+13256952946	https://www.chick-fil-a.com/locations/il/south-loop-il		0.92
 10b5a1c4c0f4	Chili's Grill & Bar	restaurant		32.47950	-99.69652	1702 Highway 351	Abilene	79601	+13256721424	https://www.chilis.com/		0.99
 461f5b3afc34	Chili's Grill & Bar	restaurant		32.40140	-99.75961	4302 S. Clack	Abilene	79606	+13256981660	https://www.chilis.com/		0.99
 a6707e617d36	Chimmy's Donuts & Kolaches	restaurant		32.21187	-99.79787	802 Garza Ave	Tuscola	79562	+13256601014	https://chimmydonuts.com		0.97
@@ -988,8 +1015,6 @@ b3ce3d33ba19	China Garden Restaurant	restaurant	chinese restaurant	32.32305	-99.
 02ed44e60dc1	China King	restaurant	chinese restaurant	32.42971	-99.78259	4621 S 14th St	Abilene	79605	+13256956888	http://www.chinaking.org		0.92
 bd6e7ca0f730	China Star	restaurant	chinese restaurant	32.45087	-99.76873	3601 S 1st St	Abilene	79605	+13256772000	http://www.chinastarabilene.com		0.97
 b3ec711b2e40	China Wok	restaurant	chinese restaurant	32.94404	-99.80202	124 E Hamilton St	Stamford	79553	+13257733388	http://chinawok.us	China Wok El Salvador	0.96
-17783b83098b	Chipotle Mexican Grill	restaurant	mexican restaurant	32.47837	-99.69907	1631 TX-351	Abilene	79601	+13259999831	https://locations.chipotle.com/tx/abilene/1631-hwy-351?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4730	Chipotle Mexican Grill	0.96
-1c5961e78915	Chipotle Mexican Grill	restaurant	mexican restaurant	32.40530	-99.76550	3800 S Clack St	Abilene	79606	+13256906463	https://locations.chipotle.com/tx/abilene/3800-s-clack-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2929	Chipotle Mexican Grill	0.99
 ef413854b75b	Chuy's	restaurant	texmex restaurant	32.40364	-99.76274	4104 S Clack St	Abilene	79606	+13252371113	https://www.chuys.com/locations/tx/abilene/abilene-tx/6109?cmpid=br%3Achy_ag%3Aie_ch%3Asoc_ca%3ACHYFB_sn%3Afacebook_gt%3Aabilene-tx-6109_pl%3Alocurl_rd%3A1110	Chuy's	0.96
 490c08aa2689	Chuy's Bar N Grill	restaurant	bar and grill restaurant	32.40583	-99.76278	3201 Curry Ln	Abilene	79605				0.75
 a2f56264fcb4	Cicis Pizza	restaurant	pizza restaurant	32.40469	-99.76537	3366 Turner Plaza	Abilene	79606	+13256921660	https://www.cicis.com		0.99
@@ -1020,10 +1045,6 @@ cae7fd600eb4	Deutschlander Freshwater Catfish Co.	restaurant	seafood restaurant	
 616e338f73c8	Dixie Dog	restaurant	hot dog restaurant	32.94802	-99.80289	306 N Swenson St	Stamford	79553	+13257735717	http://holleys-dixie-dog.edan.io		0.92
 5452983166f0	Dixie Pig	restaurant	diner	32.43179	-99.73833	1401 Butternut St	Abilene	79602	+13256733292	http://dixiepig.com		0.98
 baf3fc2998b7	Doc's Bar and Grill	restaurant	bar and grill restaurant	32.33228	-99.70634	2042 FM1750	Abilene	79602	+13256920403	http://docsabilene.com/		1.00
-52a8bf8aa48e	Domino's	restaurant	pizza restaurant	32.37775	-99.74420	33 Windmill Circle	Abilene	79606	+13256983030	http://www.DOMINOS.com/	Domino's Pizza	0.96
-829cfbfc1253	Domino's	restaurant	pizza restaurant	32.45950	-99.70453	1125 E North 10th St	Abilene	79601	+13256773030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-c1fe8c55a629	Domino's	restaurant	pizza restaurant	32.46028	-99.75815	934 North Mockingbird Lane	Abilene	79603	+13256731333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-f550a20a8976	Domino's	restaurant	pizza restaurant	32.42580	-99.78661	5001 US-277	Abilene	79605	+13256953030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
 8e731b0afc40	Don Luis Burger & Wings	restaurant	cuban restaurant	32.39517	-99.40379	841 W 4th St	Baird	79504	+13257941658	https://donluistx.com/		0.92
 8cdbebe9a839	Don Luis Cafe	restaurant	cuban restaurant	32.45191	-99.76256	3370 N 1st St	Abilene	79605	+13252684198			0.68
 bbd0217eaf2d	Don Luis Cafe	restaurant	mexican restaurant	32.45023	-99.75671	2801 S 1st St	Abilene	79605	+13252684198	https://www.donluistx.com		0.71
@@ -1043,8 +1064,6 @@ f5869231f73d	EN FU Express	restaurant	chinese restaurant	32.40145	-99.76225	4310
 6262d025ec65	Fazoli's	restaurant	italian restaurant	32.40541	-99.76293	4066 S Danville Dr	Abilene	79605	+13256923804	https://fazolis.com/stores/tx-abilene-4066-s-danville-street-79605/?utm_source=yext&utm_medium=local&utm_campaign=website&y_source=1_MzExNzA2MS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Fazoli's	0.99
 a8be43186f95	Fehr Foods	restaurant		32.45423	-99.79164	5425 N 1st St	Abilene	79603	+13256915425	http://fehrfoods.com/		0.92
 92d364718d85	Firehouse Bar & Grill	restaurant	american restaurant	32.42335	-99.73901	2074 Butternut St	Abilene	79602	+13252684399	http://www.firehousesaloon.com/		0.81
-3ffe976cbcc0	Firehouse Subs	restaurant	sandwich shop	32.47840	-99.69458	2608 Enterprise Drive	Abilene	79601		https://www.firehousesubs.com/store-locator/store/65cb571e-4331-4efd-b371-d0ba27f3db3c	Firehouse Subs	0.80
-ecc73e786114	Firehouse Subs	restaurant	sandwich shop	32.40456	-99.76632	3858 Ridgemont Dr.	Abilene	79606	+13256955700	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=890	Firehouse Subs	0.98
 a04e8ec8bc8f	Flipping Egg	restaurant	breakfast and brunch restaurant	32.36752	-99.71336	229 Harrisburg Rd	Abilene	79602	+13256682994			0.97
 1d0a9db953ec	FLY by Sodexo at Dyess AFB	restaurant		32.42664	-99.84137	490 Avenue B	Abilene	79607	+18303707034	https://usafdining-dyess.sodexomyway.com/		0.92
 df5c0b14e849	FOODEx	restaurant	sandwich shop	32.44640	-99.74551		Abilene		+13254551524	http://www.foodexabilene.com/		0.75
@@ -1104,9 +1123,7 @@ a3257ad38fc4	Jazzie Wings N More	restaurant	chicken wings restaurant	32.43666	-9
 b04a26a4721a	JC'S Bayou Barbeque	restaurant	barbecue restaurant	32.04264	-99.46809	164 Lakeview Dr	Coleman	76834				0.63
 9ac57f987310	Jean's Feed Barn	restaurant	comfort food restaurant	32.12144	-99.16892	349 TX-36 W	Cross Plains	76443	+12547256881	http://jeans-feedbarn.keeq.io		0.98
 a9f46648ef8a	Jerry's Subs and Pizza	restaurant	pizza restaurant	32.46606	-99.73112	1465 Pine St	Abilene	79601	+13256738333	http://www.jerrysusa.com		0.92
-5857f6b59d46	Jersey Mike's Subs	restaurant	sandwich shop	32.40804	-99.77030	3562 S Clack St	Abilene	79606	+13252441833	https://www.jerseymikes.com/15279/abilene-tx	Jersey Mike's Subs	0.97
 0416bbdb3326	Jiffy Lunch & Pizza	restaurant	pizza restaurant	32.61386	-99.81774	765 3rd St	Hawley	79525	+13257217163			0.92
-9b57c8c9f999	Jimmy John's	restaurant	sandwich shop	32.41040	-99.77701	4213 Southwest Dr	Abilene	79606	+13257939900	https://locations.jimmyjohns.com/tx/abilene/sandwiches-1668.html	Jimmy John's	0.98
 c3c24443fe38	Jody's Family Restaurant	restaurant	southern american restaurant	32.12839	-99.16525		Cross Plains					0.89
 32a8ae4db848	Joe Allen's Pit BBQ	restaurant	barbecue restaurant	32.43660	-99.72662	301 S 11th St	Abilene	79602	+13256729948	http://www.joeallens.com/		0.99
 c918a4fefb8a	Joe's Pasta and Pizza	restaurant	italian restaurant	32.43673	-99.72886	1102 S Treadaway Blvd	Abilene	79602	+13256739956	http://Joespizzaabilene.com/		0.97
@@ -1137,12 +1154,6 @@ f1265324ba97	Larry's Better Burger Drive-In	restaurant	burger restaurant	32.4625
 fb173f827c1f	Las 3 Marias' fresh fruit cups	restaurant		32.46740	-99.75651	1501 Fannin St	Abilene	79603	+13254554584	http://www.marias-fruits.simplesite.com		0.92
 0c91be7b34bd	Legacy Ttc 4l Llc	restaurant		32.45366	-99.76724	401 Westwood Dr	Abilene	79603				0.95
 d7b4ed644b37	Letty's restaurant in Stamford texas	restaurant	mexican restaurant	32.95454	-99.80323	811 N Swenson St	Stamford	79553	+13257738040			0.97
-2fedd2130417	Little Caesars Pizza	restaurant	pizza restaurant	32.46347	-99.75829	1200 N Mockingbird Ln	Abilene	79603	+13256728389	https://littlecaesars.com/en-us/store/7356	Little Caesars	0.92
-365e0321bb56	Little Caesars Pizza	restaurant	pizza restaurant	32.42924	-99.78255	4653 S 14th St	Abilene	79605	+13256923212	https://littlecaesars.com/en-us/store/7518	Little Caesars	0.97
-4a08c35e1304	Little Caesars Pizza	restaurant	pizza restaurant	32.41740	-99.52699	8075 South Access Road	Clyde	79510	+13258934760	https://littlecaesars.com/en-us/store/20291		0.96
-88274d93a0e1	Little Caesars Pizza	restaurant	pizza restaurant	32.46207	-99.70547	1121 N Judge Ely Blvd	Abilene	79601	+13252327894	https://littlecaesars.com/en-us/store/11487	Little Caesars	0.96
-af2d1111d85c	Little Caesars Pizza	restaurant	pizza restaurant	32.40359	-99.75806	4102 Buffalo Gap Rd	Abilene	79605	+13254375419	https://littlecaesars.com/en-us/store/8760	Little Caesars	0.96
-e7b35d31adc8	Little Caesars Pizza	restaurant	pizza restaurant	32.46319	-99.75816	1200 N Mockingbird Ln	Abilene	79603	+13256728389	https://littlecaesars.com/en-us/store/7356	Little Caesars	0.97
 dd2cd822428d	Little Italy Pizza & Pasta #2	restaurant		32.42312	-99.83469	260 Commissary Rd	Dyess Afb	79607	+13254002482	https://www.littleitalyexpress.com/		0.92
 ae029847fd34	Little Italy Pizza and Pasta	restaurant	italian restaurant	32.47480	-99.72717	620 Ambler Ave	Abilene	79601	+13256727715	http://WWW.LITTLEITALYEXPRESS.COM/		0.97
 14f6878a46e2	Little ninja	restaurant	sushi restaurant	32.40355	-99.75827	4102 Buffalo Gap Rd # n	Abilene	79605	+13256950113	http://www.littleninja888.com/		0.99
@@ -1188,9 +1199,6 @@ f39e6ff764b1	Onic Brands LLC	restaurant		32.37365	-99.76779	60 Pebble Beach	Abil
 67391f5e3c3e	Oscar's Mexican Restaurant	restaurant	mexican restaurant	32.47788	-99.69637	1665 TX-351	Abilene	79601	+13256750140	https://oscarsmexicanrestauranttx.com/		0.95
 c4670c50be5b	Oscar's Mexican Restaurant	restaurant	mexican restaurant	32.75174	-99.89950	1302 17th St	Anson	79501	+13258235044			0.92
 94b2bd78c094	Outback Steakhouse	restaurant	steakhouse	32.40086	-99.76500	4142 Ridgemont Dr	Abilene	79606	+13256927177	https://locations.outback.com/texas/abilene/4142-ridgemont-drive?utm_source=gmb&utm_medium=local_search&utm_campaign=website_cta&y_source=1_MTU1MDIzNzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Outback Steakhouse	0.99
-1bd0a9d672d0	Panda Express	restaurant	chinese restaurant	32.47919	-99.69511	1749 Hwy 351	Abilene	79601	+13256727416	http://www.pandaexpress.com/	Panda Express México	0.99
-35b0332d5f67	Papa Johns Pizza	restaurant	pizza restaurant	32.37197	-99.77622	6382 Buffalo Gap Rd Ste D	Abilene	79606	+13252744519	https://locations.papajohns.com/united-states/tx/79606/abilene/6382-buffalo-gap-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_NjEzMTI2OTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.95
-91922cfa99cc	Papa Johns Pizza	restaurant	pizza restaurant	32.45255	-99.77007	3900 N 1st St	Abilene	79603	+13256773434	https://locations.papajohns.com/united-states/tx/79603/abilene/3900-n-1st-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE0MTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
 725e2746f3b2	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	32.43129	-99.75909	1441 Barrow St	Abilene	79605	+13256957272	https://order.papamurphys.com/menu/papa-murphys-barrow-street		0.95
 dfac39927a73	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	32.45981	-99.70332	1152 EN 10th St	Abilene	79601	+13256777272	https://order.papamurphys.com/menu/papa-murphys-e-n-10th-st		0.92
 7e4d73e3d355	Pardon My Cheesesteak	restaurant	sandwich shop	32.40610	-99.76620	3750 S Clack St	Abilene	79606	+18884440934			0.92
@@ -1203,14 +1211,6 @@ dfac39927a73	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	32.45
 c24fb2a0eab4	Piquin Mexican Restaurant	restaurant	mexican restaurant	32.42610	-99.83608	201 Ave B	Abilene	79607	+13252328256			0.98
 736ba5b17e6e	Pizza by Design	restaurant	pizza restaurant	32.40787	-99.77379	3753 Catclaw Dr	Abilene	79606	+13257044275	http://www.pizzabydesign.net/		0.99
 4b32c7adb978	Pizza Haus	restaurant	pizza restaurant	32.40659	-99.49570	212 N 1st St	Clyde	79510	+13258934141			0.96
-0d0696bc8bb8	Pizza Hut	restaurant	pizza restaurant	32.40088	-99.75951	4303 S Clack St	Abilene	79606	+13256953770	https://locations.pizzahut.com/tx/abilene/4303-s-clack-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283968	Pizza Hut	0.92
-1d247246f61b	Pizza Hut	restaurant	pizza restaurant	32.94387	-99.80199	126 E. Hamilton St Jones	Stamford	79553	+13257732707	https://locations.pizzahut.com/tx/stamford/126-e-hamilton-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=317140	Pizza Hut	0.97
-226b15e312e8	Pizza Hut	restaurant	pizza restaurant	32.37368	-99.74648	24 Hospital Dr Taylor	Abilene	79606	+13256953770	https://locations.pizzahut.com/tx/abilene/24-hospital-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314606	Pizza Hut	0.93
-4e0db2573a66	Pizza Hut	restaurant	pizza restaurant	32.95284	-99.80270	702 N Swenson St	Stamford	79553	+13257732707	https://locations.pizzahut.com/tx/stamford/702-n-swenson?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282353	Pizza Hut	0.92
-a4b6664865c7	Pizza Hut	restaurant	pizza restaurant	32.47479	-99.71567	550 E Ambler Ave Taylor	Abilene	79601	+13256761892	https://locations.pizzahut.com/tx/abilene/550-e-ambler-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=280412	Pizza Hut	0.96
-a537dd338ba4	Pizza Hut	restaurant	pizza restaurant	32.43232	-99.75578	2750 S 14th St Taylor	Abilene	79605	+13256929328	https://locations.pizzahut.com/tx/abilene/2750-s-14th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284652	Pizza Hut	0.96
-3bbc213ba556	Pizza Hut Express	restaurant	pizza restaurant	32.48698	-99.71186	672 E. Overland Trail, Cinemark Abilene #1146	Abilene	79601		https://locations.pizzahut.com/tx/abilene/672-e-overland-trail?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314431		0.97
-9b8ca5db7344	Pizza Hut Express	restaurant	pizza restaurant	32.46904	-99.70846	216 B McGlothlin Campus Center	Abilene	79699	+13256742107			0.85
 4b64689ad42f	Pizza Inn	restaurant	pizza restaurant	32.40186	-99.76467	4138 Ridgemont Dr	Abilene	79606	+13256955656	http://pizzainn.com/		0.92
 d81c9b386868	Pizza Mark	restaurant	pizza restaurant	32.54619	-99.16561	330 Fisher St	Moran	76464	+13259453663	https://pizza-mark.hub.biz		0.96
 1a026968d004	Pizza Pro	restaurant	pizza restaurant	32.32879	-99.69683	1726 FM 1750	Abilene	79602	+19156682226			0.92
@@ -1218,7 +1218,6 @@ d81c9b386868	Pizza Mark	restaurant	pizza restaurant	32.54619	-99.16561	330 Fishe
 5986d95674aa	Pizza Pro	restaurant	pizza restaurant	32.76138	-99.89636	631 Commercial Ave	Anson	79501	+13258233999	http://www.pizzapro.com		0.92
 6040a77597fa	Pizza Pro	restaurant	pizza restaurant	32.38774	-99.76615	5194 Buffalo Gap Rd	Abilene	79606	+13256926550			0.55
 74a7813b0206	Pizza Pro	restaurant	pizza restaurant	32.75129	-99.90320	1631 17th St	Anson	79501	+13258232444	http://www.pizzapro.com/		0.92
-bf710cb0fd0b	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	32.47428	-99.72959	841 Ambler Ave	Abilene	79601	+13256770062	https://www.popeyes.com/store-locator/store/restaurant_83054?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.92
 c9fe3f638445	Potosi Country Store & Grill	restaurant	burger restaurant	32.32877	-99.70467	1920 FM-1750	Abilene	79602	+13255296664	https://potosi-country-store-grill.hub.biz/		0.86
 3bd3088632c6	Potter's Pizza	restaurant	buffet restaurant	32.40572	-99.75684	3802 Buffalo Gap Rd	Abilene	79605	+13257045474	http://www.potterspizza.com/	Potter's Pizza	0.99
 6b6379e23d9f	Pourhouse	restaurant	bar and grill restaurant	32.51085	-99.88728	476 Mulberry Rd	Merkel	79536				0.99
@@ -1236,8 +1235,6 @@ a66ba49a1bd5	Rick and Carolyn's Burgers and Fries	restaurant	burger restaurant	3
 abbcbc3c8929	Rosa's Cafe	restaurant	mexican restaurant	32.41111	-99.77757	3333 Catclaw Dr	Abilene	79606	+13256926569	https://www.rosascafe.com/	Rosa's Cafe	0.99
 b1cdf1f23a94	Rosa's Cafe	restaurant	texmex restaurant	32.46108	-99.70670	1026 N Judge Ely Blvd	Abilene	79601	+13256756520	https://www.rosascafe.com/	Rosa's Cafe	0.99
 3579b465f07b	Sam's Southern Eatery	restaurant	american restaurant	32.45186	-99.76683	3509 N 1st St	Abilene	79603	+13256709422	http://www.samssoutherneatery.com		0.92
-09880b9f32f3	Schlotzsky's	restaurant	sandwich shop	32.46062	-99.70653	1018 N Judge Ely Blvd	Abilene	79601	+13256729500	www.schlotzskys.com		0.97
-607f4c56b8da	Schlotzsky's	restaurant	sandwich shop	32.43111	-99.78210	4518 S 14th St Ste 1350	Abilene	79605	+13256952021	www.schlotzskys.com		1.00
 74ab8ee12626	Sdi 4424 Of Clyde, Tx, L.l.c	restaurant		32.41314	-99.49214	1506 N Access Rd	Clyde	79510				0.95
 9e4eaae8ccf9	Sdi Anson Jones County, Llc	restaurant		32.75087	-99.89648	1715 Commercial Ave	Anson	79501				0.95
 def39248d1a3	Seafood Tavern	restaurant	seafood restaurant	32.42655	-99.78764	1882 S Clack St	Abilene	79605	+13256951770	http://www.abileneseafoodtavern.com		0.92
@@ -1251,7 +1248,6 @@ cf1d3a081b66	Sisters sandwich shoppe	restaurant	sandwich shop	32.12218	-99.16424
 c37777219249	Skeet's Texas Grill #2	restaurant	comfort food restaurant	32.41628	-99.74857	2134 East South 27th	Abilene	79605	+13257044273	http://www.skeetstxgrill.com		0.77
 af0b675962f0	Smashin' Grill	restaurant	burger restaurant	32.48045	-99.69065	2642 E Lake Rd	Abilene	79601	+13254373006	https://www.smashingrill.com		0.92
 8093b308b3cd	Smokehouse Abilene	restaurant	barbecue restaurant	32.45436	-99.73418	500 Cypress St	Abilene	79601	+13259997848	https://www.opentable.com/r/smokehouse-abilene		0.99
-48cf70bce779	Sonic Drive-In	restaurant	burger restaurant	32.41054	-99.48142	1506 N Access Rd	Clyde	79510	+13258931659	https://locations.sonicdrivein.com/tx/clyde/1506-n-access-road.html		0.85
 5236a0ca7d51	SoulFood Shack Grab & Go	restaurant	soul food	32.44352	-99.77168	4021 S 7th St	Abilene	79605	+13252675243			0.92
 0f21bfd0e2ae	Soup Man	restaurant	soup restaurant	32.39682	-99.76345	4450 Buffalo Gap Rd	Abilene	79606	+13256955300	http://www.originalsoupman.com		0.92
 53cfe8efb572	Spanky P's Tavern	restaurant	bar and grill restaurant	32.44382	-99.75223	2442 S 7th St	Abilene	79605	+13257041026	http://www.spankysbarabilene.com		0.99
@@ -1263,26 +1259,6 @@ cad503abb9e0	Square's Gourmet Meat	restaurant	barbecue restaurant	32.45306	-99.7
 231506321e8a	Stillwater Barbeque	restaurant	barbecue restaurant	32.43199	-99.76593	3365 S 14th St	Abilene	79605	+13255185071	https://stillwaterbarbeque.com		0.92
 dc703c176aca	Stonewalls Pizza Wings & Things	restaurant	pizza restaurant	32.45023	-99.75671	2801 S 1st St	Abilene	79605	+13257880008	https://stonewallspizza.org		0.92
 eda73725a33f	Strong Arm Bar And Grill	restaurant	bar and grill restaurant	32.46586	-99.73235	1433 Cypress St	Abilene	79601				0.95
-03020104851d	Subway	restaurant	sandwich shop	32.12215	-99.16593	416 S Main St	Cross Plains	76443	+12547256827	https://restaurants.subway.com/united-states/tx/cross-plains/416-s-main-st	Subway	0.97
-091a976656f3	Subway	restaurant	sandwich shop	32.46208	-99.70560	1117 N Judge Ely Blvd	Abilene	79601	+13256767827	https://www.subway.com		0.98
-170fe53131c2	Subway	restaurant	sandwich shop	32.41106	-99.48808	805 S Access Rd	Clyde	79510	+13258931663	https://www.subway.com		0.95
-29279d272462	Subway	restaurant	sandwich shop	32.40338	-99.38471	1333 US Highway 283 N	Baird	79504	+13258540099	http://www.subway.com/en-us	Subway	0.95
-2c1b883cf507	Subway	restaurant	sandwich shop	32.21598	-99.79581	216 County Rd 160	Tuscola	79562	+13255547008	https://restaurants.subway.com/united-states/tx/tuscola/216-county-rd-160?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=69951&utm_campaign=evergreen-2020&y_source=1_MTUxMDk0ODEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		1.00
-305404ca7751	Subway	restaurant	sandwich shop	32.46286	-99.75748	1149 N Mockingbird	Abilene	79603	+13256756272	https://restaurants.subway.com/united-states/tx/abilene/1149-n-mockingbird?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=7685&utm_campaign=evergreen-2020&y_source=1_MTQ5MTI4NjAtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
-32b1562f8a0d	Subway	restaurant	sandwich shop	32.43234	-99.75629	2810 S.14th St.	Abilene	79605	+13256919179	https://restaurants.subway.com/united-states/tx/abilene/2810-s14th-st	Subway	0.95
-5f8972f3af6c	Subway	restaurant	sandwich shop	32.41113	-99.48812	805 South Access Road	Clyde	79510	+13258931663	https://restaurants.subway.com/united-states/tx/clyde/805-south-access-road	Subway	0.96
-67e1504bcf30	Subway	restaurant	sandwich shop	32.41101	-99.77625	4157 Southwest Dr	Abilene	79606	+13257939888	https://restaurants.subway.com/united-states/tx/abilene/4157-southwest-dr	Subway	0.95
-747844e80c59	Subway	restaurant	sandwich shop	32.61058	-99.81944	501 E Frontage Road	Hawley	79525	+13255373552	https://restaurants.subway.com/united-states/tx/hawley/501-e-frontage-road		0.77
-893bbac77200	Subway	restaurant	sandwich shop	32.45284	-99.73310	400 Pine St	Abilene	79601	+13256727723	https://www.subway.com		0.92
-8b43853e64f0	Subway	restaurant	sandwich shop	32.46680	-99.73155	1542 Pine St	Abilene	79601	+13256700337	https://restaurants.subway.com/united-states/tx/abilene/1542-pine-st	Subway	0.99
-93b149fe392d	Subway	restaurant	sandwich shop	32.45207	-99.77161	4001 N 1st St	Abilene	79603	+13256723070	https://restaurants.subway.com/united-states/tx/abilene/4001-n-1st-st	Subway	0.94
-95be1ed600e2	Subway	restaurant	sandwich shop	32.75122	-99.89668	1701 Commercial Ave	Anson	79501	+13258232782	https://restaurants.subway.com/united-states/tx/anson/1701-commercial-ave	Subway	0.98
-b0e0b335ac7a	Subway	restaurant	sandwich shop	32.40099	-99.71712	4102 Loop 322	Abilene	79606	+13256905952	https://restaurants.subway.com/united-states/tx/abilene/4102-loop-322	Subway	0.94
-b339210d0632	Subway	restaurant	sandwich shop	32.37251	-99.74649	1901 Antilley Rd	Abilene	79606	+13256906624	https://restaurants.subway.com/united-states/tx/abilene/1901-antilley-rd	Subway	0.98
-c17d3ecba730	Subway	restaurant	sandwich shop	32.44947	-99.74689	2001 South 1st	Abilene	79602	+13256762002	https://restaurants.subway.com/united-states/tx/abilene/2001-south-1st	Subway	0.95
-e743d9eaa2e6	Subway	restaurant	sandwich shop	32.39609	-99.76257	4498 Buffalo Gap Rd	Abilene	79606	+13256980668	https://restaurants.subway.com/united-states/tx/abilene/4498-buffalo-gap-rd	Subway	0.94
-ef6f9c6a3a1c	Subway	restaurant	sandwich shop	32.48032	-99.69851	1650 State Hwy 351	Abilene	79601	+13256758818	http://www.subway.com/en-us	Subway	0.97
-f257bfd4f105	Subway	restaurant	sandwich shop	32.43662	-99.72847	1109b S Treadaway Blvd Ste B	Abilene	79602	+13254374882	https://alibabacharleston.com		0.92
 27d27967f036	Sunrise	restaurant	chinese restaurant	32.45010	-99.75573	2701 S 1st St	Abilene	79605	+13254377771	http://sunrisechinesefood.com/		0.96
 c60b01c76b2f	Szechuan Chinese Restaurant	restaurant	chinese restaurant	32.45049	-99.76691	3425 S 1st St	Abilene	79605	+13256739100	https://www.szechuanabilene.com/		0.97
 fd4edee9d5af	Ta Molly's Mexican Resturant	restaurant	mexican restaurant	32.39762	-99.76480	4400 Ridgemont Dr	Abilene	79606	+13256982000			0.92
@@ -1294,7 +1270,6 @@ c9e29db0c113	Taco Bueno	restaurant	texmex restaurant	32.45245	-99.76875	3650 N 1
 8fca9e64f99f	Tacos el Jalisco	restaurant	mexican restaurant	32.47469	-99.75586	2802 Ambler Ave	Abilene	79601	+13252687703			0.99
 415348cdec5f	Tacos El Patron	restaurant	taco restaurant	32.45721	-99.70555	815n N Judge Ely Blvd	Abilene	79601	+13256654028			0.74
 624b4ec61eb4	Tacos El Tapatio	restaurant	mexican restaurant	32.41952	-99.75986	2550 Barrow St	Abilene	79605	+13254289208			0.97
-32b47b5388aa	Tacos Los 3 Potrillos	restaurant	mexican restaurant	32.44601	-99.75341	2441 S 1st St	Abilene	79605	+13253382202	https://threebestrated.com/food-trucks-in-abilene-tx		0.93
 90f201bd00e1	Tacos Los 3 Potrillos	restaurant	mexican restaurant	32.44974	-99.75187	2441 S 1st St	Abilene	79605	+13253382202	https://threebestrated.com/food-trucks-in-abilene-tx		0.93
 b696f48148cb	Tamolly's Of Abilene	restaurant	mexican restaurant	32.39762	-99.76480	4400 Ridgemont Dr # 2716	Abilene	79606	+13256982000	https://tamollys.com		0.75
 91ec8fb17ca0	Taqueria Nuestro Mexico	restaurant	mexican restaurant	32.45288	-99.77397	4116 N 1st St	Abilene	79603	+13256722144			0.99
@@ -1335,12 +1310,9 @@ fc1269eb0e0d	Vagabond Pizza	restaurant	pizza restaurant	32.45068	-99.73367	1056 
 ffa5780e083b	Village Market Dining Hall	restaurant		32.43029	-99.75037	1400 Sayles Blvd	Abilene	79605	+13257934811			0.56
 e1f176512eb0	Vintage Vanilla	restaurant	diner	32.72439	-99.29752	104 S Main St	Albany	76430	+13257623030	https://vintage-vanilla.hub.biz		0.96
 ead7e9fdbe71	West Texas Restaurant & Refrigeration Company	restaurant		32.45137	-99.79684	149 Ruidosa Ave	Abilene	79605	+13256906112			0.92
-96b41d2d507e	Whataburger	restaurant	burger restaurant	32.44802	-99.70830	893 US HIGHWAY 80 E	Abilene	79601	+13256760836	https://locations.whataburger.com/tx/abilene/893-us-highway-80-e.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-cbd27778f130	Whataburger	restaurant	burger restaurant	32.47660	-99.69747	1625 TX Hwy 351	Abilene	79601	+13254801409	https://whataburger.com/menu?unitNum=1403		0.98
 4129651dc0cc	Wienerschnitzel	restaurant	hot dog restaurant	32.43201	-99.75787	2997 S 14th St	Abilene	79605	+13252326766	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
 db03ef38e537	WillieD's Soul Food Kitchen	restaurant		32.45564	-99.76457	3508 N 6th St	Abilene	79603	+13255149401			0.71
 3b2220e047a8	Winchester Pub and Grill	restaurant	bar and grill restaurant	32.39531	-99.76543	3362 Rebecca Ln	Abilene	79606	+13257043360			0.96
-8a8d8f47bbaa	Wingstop	restaurant	chicken restaurant	32.47875	-99.69466	1813 State Highway 351	Abilene	79601	+13257045234	https://www.wingstop.com/location/wingstop-1151-abilene-tx-79601/menu?y_source=1_NTUyMDc4OTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
 15b4752e9f83	ZENSHI Handcrafted Sushi	restaurant	sushi restaurant	32.39684	-99.76351	4450 Buffalo Gap Rd	Abilene	79606	+13256955300	https://www.zenshisushi.com/	Zenshi Sushi	0.92
 79af7cdaec6e	ZENSHI Handcrafted Sushi	restaurant	sushi restaurant	32.43084	-99.76466	3301 S 14th St	Abilene	79605	+13256989391	https://www.zenshisushi.com/	Zenshi Sushi	0.92
 31aff0efeb4a	Abilene Senior Village	senior	retirement home	32.38271	-99.74754	2225 Covenant Dr	Abilene	79606	+13252327552	http://www.hamiltonpropertiescorporation.com/locations/abilene_senior_village		0.92

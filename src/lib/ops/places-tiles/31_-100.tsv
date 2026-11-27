@@ -24,7 +24,6 @@ ba12bab2d9a0	V bar M	bar		31.17502	-99.38766	303 County Road 166	Brady	76825	+13
 d803f5af0a09	Watson Vineyard And Brewery	bar	winery	31.82947	-99.42339	210 S Commercial Ave	Coleman	76834	+13252419955	http://www.watsonvineyard.com		0.97
 fe17c068b97d	Bahlman Charles Chevrolet	cardealer		31.95049	-99.96851	7540 State Highway 153	Winters	79567	+13257544551	http://www.chevrolet.com/		0.83
 47ae1606d72e	Barrios Trucks & Auto Sales	cardealer		31.80194	-99.39147	10238 US-283	Coleman	76834	+3256367268	http://www.barriostrucks-collision.com/		0.89
-cad53ff83339	Barrios Trucks & Auto Sales	cardealer		31.86687	-99.42533	10238 US-283	Coleman	76834	+3256367268	http://www.barriostrucks-collision.com/		0.85
 268962626e2c	Betts Powersports LLC	cardealer		31.12350	-99.33637	104 W 13th St	Brady	76825	+13254562270			0.92
 bf6423b027fb	Bledsoe Ford	cardealer		31.85337	-99.42567	2200 N Neches St	Coleman	76834	+13256254101	https://www.bledsoeford.com/	Ford Motor Company	0.92
 d7a36c0736ad	Bledsoe Ford	cardealer		31.85678	-99.41908	2200 N Neches	Coleman	76834		https://www.bledsoeford.com	Ford	0.80
@@ -36,7 +35,6 @@ d50c807392ca	Destination Ford	cardealer		31.13415	-99.33530	110 S Bridge St	Brad
 91db792ed34e	Dirt Road Auto	cardealer	used auto dealer	31.16238	-99.57411	1513 County Rd 132	Melvin	76858	+13252408989			0.92
 cf14691c393b	Ford Ranch	cardealer		31.19521	-99.57962	1493 Private Road 520	Melvin	76858	+13252864572	http://www.fordranchhunting.net		0.62
 ec9eaff9149e	Giles Trade Lot	cardealer	used auto dealer	31.71952	-99.05471	3151 US-84	Brownwood	76801	+13256432297	http://www.gilestradelot.com/		0.92
-183a8d177007	Hasan Mackdenver	cardealer		31.38160	-99.38725	8306 Parkway Drive, Lone Tree, Colorado 80124	Lone Tree	80124	+13039967362	https://www.hasanmackdenver.com		0.77
 a05bf772508a	Lubke's Cars & Trucks	cardealer		31.11761	-99.33568	2110 S Bridge St	Brady	76825	+13255972116	http://www.lubkes.com		0.77
 d65bb514180a	REGENCY CHEVROLET GMC	cardealer		31.11222	-99.33502	2110 S BRIDGE ST	Brady	76825			Chevrolet	0.80
 6f7b7a21c3d7	RT Truck Sales	cardealer		31.84332	-99.42328	1307 US-84	Coleman	76834	+13256251239	http://www.rttrucksales.com/		0.92
@@ -123,7 +121,6 @@ cf8f6c8eed16	HOP IN 430461	convenience		31.82687	-99.42116	214 E WALNUT ST	Colem
 1c2f174d82d2	Pic n pac	convenience		31.73513	-99.95114	1101 Hutchings Ave	Ballinger	76821	+13253653682	http://www.picnpac.com		0.63
 d7bb33680cd7	Santa Anna Short Stop	convenience		31.74230	-99.33151	1303 Wallis Avenue	Santa Anna	76878		https://locations.valero.com/en-us/LocationDetails/Index/1303-WALLIS-AVENUE/0000028829	Valero	0.80
 4ca4f6902c8b	Shell	convenience		31.21664	-99.84550	202 E Broadway St	Eden	76837	+13258698210	https://find.shell.com/us/fuel/10003119-202-e-broadway-st		0.85
-642810a2c4aa	Shell	convenience		31.95492	-99.91610	400 S Main St	Winters	79567	+13257545214	http://www.shell.us/ontheroad	Shell	0.64
 7766be300773	Shell	convenience		31.10678	-99.33297	2342 S Bridge St	Brady	76825	+13255972772	https://find.shell.com/us/fuel/10003746-2342-s-bridge-st/en_US	Shell	0.92
 7bc590bc2b36	Shell	convenience		31.95389	-99.96246	400 S Main St	Winters	79567	+13257545214	http://www.shell.us/ontheroad	Shell	0.83
 d8356dbe40a3	Shell	convenience		31.13508	-99.33972	600 W Commerce St	Brady	76825	+13255979022	http://www.shell.us/	Shell	0.92
@@ -151,11 +148,13 @@ fc2cce35ed79	Tres Amigos	convenience		31.74033	-99.94402	417 Hutchings Ave	Balli
 a84772b35614	Yesway	convenience		31.95413	-99.96254	400 S Main St	Winters	79567	+13257545682	https://yesway.com/	Yesway	0.92
 aa5b74366bc1	Yesway	convenience		31.82692	-99.42138	214 East Walnut Street	Coleman	76834	+13256254582	https://yesway.com/		0.92
 5116b0d230a5	Beyond The City Limits, Llc	fastfood		31.71656	-99.12404	807 E Hall St	Bangs	76823	+17374209886			0.75
+877b33089d34	Burger King	fastfood		31.11543	-99.33533	2007 S Bridge St	Brady	76825	+13255970291	https://burgerking.com/store-locator/store/restaurant_74992		0.92
 d5c853d5f665	Burrito Express	fastfood		31.12070	-99.33532	101 E 15th St	Brady	76825	+13255974676	http://www.burritoexpressinc.com		0.92
 40a3ea093254	Chicken Express	fastfood		31.10991	-99.33459	2206 S Bridge St	Brady	76825	+13255971056	https://www.chickene.com	Chicken Express	0.96
 9c6c27e94571	Dairy Queen	fastfood		31.21658	-99.84602	402 W Broadway St 402 W Broadway St	Eden	76837	+13258695619	https://www.dairyqueen.com/en-us/locations/tx/eden/402-w-broadway-st/13439/?y_source=1_MjkzMzkxNzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
 a72864a1ff60	Dairy Queen	fastfood		31.74266	-99.33266	1402 Wallis Ave	Santa Anna	76878	+13253483123	https://www.dairyqueen.com/en-us/locations/tx/santa-anna/1402-wallis-ave/14588/?y_source=1_MjkzMzg5NzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 baf1c3f24eaf	Dairy Queen	fastfood		31.12506	-99.33569	1300 S Bridge St 1300 S Bridge St	Brady	76825	+13255972955	https://www.dairyqueen.com/en-us/locations/tx/brady/1300-s-bridge-st/13872/?y_source=1_MjkzMzkwNTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+b6688ba68565	Domino's	fastfood	pizza restaurant	31.10886	-99.33251	2209 South Bridge Street #400	Brady	76825	+13255971613	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 818758ef64f4	DQ Grill & Chill	fastfood		31.21670	-99.84600	402 W Broadway St	Eden	76837		https://www.dairyqueen.com/en-us/locations/tx/eden/402-w-broadway-st/3215	DQ Grill & Chill	0.80
 aea6bdc8033e	DQ Grill & Chill	fastfood		31.12513	-99.33578	1300 S Bridge St	Brady	76825		https://www.dairyqueen.com/en-us/locations/tx/brady/1300-s-bridge-st/3645	DQ Grill & Chill	0.80
 e1b0984b7553	DQ Grill & Chill	fastfood		31.74272	-99.33264	1402 Wallis Ave	Santa Anna	76878		https://www.dairyqueen.com/en-us/locations/tx/santa-anna/1402-wallis-ave/4360	DQ Grill & Chill	0.80
@@ -164,10 +163,15 @@ e1b0984b7553	DQ Grill & Chill	fastfood		31.74272	-99.33264	1402 Wallis Ave	Santa
 c4aa6dc86f24	Golden Chick	fastfood		31.72707	-99.95802	1901 Hutchings Ave	Ballinger	76821	+13253652646	https://locations.goldenchick.com/tx/ballinger/1257/	Golden Chick	0.95
 025ec8ef0bb3	Krispy Krunchy Chicken	fastfood		31.55871	-99.92141	22693 US HWY 83 N	Paint Rock	76866		https://locations.krispykrunchy.com/tx/paint-rock/22693-us-hwy-83-n	Krispy Krunchy Chicken	0.96
 50387c1599a9	McDonald's	fastfood		31.11273	-99.33589	2106 S Bridge	Brady	76825	+13255977211	http://www.mcdonalds.com/	McDonald's	0.99
+1b77510971e5	Pizza Hut	fastfood	pizza restaurant	31.12542	-99.33560	1208 S Bridge St	Brady	76825	+13255970772	http://pizzahut.com/	Pizza Hut	0.93
+2f520ecb7421	Pizza Hut	fastfood	pizza restaurant	31.84518	-99.42731	1601 N Neches St	Coleman	76834	+13256252179	https://locations.pizzahut.com/tx/coleman/1601-n-neches?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281616	Pizza Hut	0.97
 cf713266d6c7	Shelly Ray’s SnowCones	fastfood		31.15032	-99.33435	1638 N Bridge St	Brady	76825	+13252201582			0.71
 445429810846	Sonic Drive In	fastfood		31.12453	-99.33530	1311 S. Bridge Street	Brady	76825	+13255971722	https://locations.sonicdrivein.com/tx/brady/1311-s.-bridge-street.html	Sonic Drive-In	0.98
 84b1d036041e	Sonic Drive In	fastfood		31.72141	-99.96166	2003 Hutchinson Avenue	Ballinger	76821	+13253652225	https://locations.sonicdrivein.com/tx/ballinger/2003-hutchinson-avenue.html	Sonic Drive-In	0.98
 4fe28366e405	Sonic Drive-In	fastfood		31.81170	-99.42348	2300 S Commercial Ave	Coleman	76834	+13256251013	https://locations.sonicdrivein.com/tx/coleman/2300-commercial-avenue.html	Sonic Drive-In	0.94
+052dd12e777b	Subway	fastfood	sandwich shop	31.82688	-99.42263	501 S Commercial Ave	Coleman	76834	+13256252564	https://www.subway.com		0.97
+b1410c7549db	Subway	fastfood	sandwich shop	31.72762	-99.95709	1801 Hutchings Ave	Ballinger	76821	+13253652876	https://restaurants.subway.com/united-states/tx/ballinger/1801-hutchings-rd	Subway	0.96
+e19dff81d0e7	Subway	fastfood	sandwich shop	31.11396	-99.33529	2023 S Bridge St Spc 2	Brady	76825	+13255978055	https://restaurants.subway.com/united-states/tx/brady/2023-s-bridge?y_source=1_MTQ4OTQ3NzktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D	Subway	0.96
 61ab8b35ab22	TJ's Shaved Ice	fastfood		31.72906	-99.95712	1702 Hutchings Ave	Ballinger	76821				0.98
 22794fbaae4a	Ballinger #738	grocery		31.73969	-99.94650	610 Hutchings Ave	Ballinger	76821			Spring Market	0.80
 312e13fcc64a	Bangs Thrift Mart	grocery		31.71462	-99.13279	108 S 1st St	Bangs	76823	+13257526113	http://www.BangsThriftMart.com/		0.92
@@ -199,7 +203,6 @@ bb106b15cd78	BRB Ranch	hotel		31.49056	-99.73729	17761 FM-2134	Millersview	76862
 5f65569f868e	Budget Host-stonewall Inn	hotel		31.74087	-99.94854	201 N Broadway St	Ballinger	76821	+13253653524			0.98
 e4169f350021	Budget Inn	hotel	motel	31.85623	-99.42625	2802 US-84	Coleman	76834	+13256254194	http://www.budgetinn.com	Budget Inn	0.95
 acc7a8c1545e	Carnes Camp	hotel		31.80734	-99.06799	191 Starr Ln	Brownwood	76801	+13257211230			0.92
-3bfa7ed99379	Centennial Lodge	hotel	lodge	31.79853	-99.54421	2970 FM 503	Talpa	76882	+13252140964	http://www.centenniallodge.com/		0.95
 fe9ba60f1fbf	Clifton Corner	hotel		31.75115	-99.96378		Ballinger		+13253653252			0.71
 536b6785d165	Cobblestone Inn & Suites	hotel		31.95026	-99.96243	800 S Main St	Winters	79567	+13257540944	https://staycobblestone.com/tx/winters		0.99
 443e190500a4	Coleman Inn	hotel	resort	31.81924	-99.42521	1401 U S 84	Coleman	76834	+13256254176	http://www.colemaninntx.com/		0.85
@@ -210,32 +213,21 @@ f882ee9a1cd6	Coleman Inn	hotel	motel	31.84401	-99.42532	1401 US-84	Coleman	76834
 7d025629d115	Harbord Kourt Motel	hotel	motel	31.80746	-99.42333	2710 S Commercial Ave	Coleman	76834	+13252591948	http://www.theharbordkourt.com/		0.99
 153d95042a00	Holiday Inn Express & Suites Brady	hotel		31.10782	-99.33367	2320 S Bridge St	Brady	76825	+13255971800	https://www.ihg.com/holidayinnexpress/hotels/us/en/brady/bbdtx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-BBDTX	Holiday Inn Express	1.00
 285a4d1bd296	Luxury Inn	hotel	motel	31.72714	-99.00036	1008 W Commerce St	Brownwood	76801	+13256411818	http://luxuryinnhotel.com	Luxury Inn Norwalk California Hotel	0.92
-a236c47b7794	M BAR H Lodge & R.V. Park LLC	hotel	lodge	31.74241	-99.34454	4329 US Highway 67	Santa Anna	76878	+13252001803	http://www.mbarh.com/		0.99
-8b78d74c49d6	Millers Sportsman Lodge	hotel		31.51722	-99.63605	2923 FM-1929	Voss	76888				0.87
 b88e9d2b9b82	Nsks Llc	hotel		31.11441	-99.33514	2023 S Bridge St	Brady	76825	+13255972185			0.65
 89fd486adf95	Quail Ridge Cottages - Lake Brownwood, Texas	hotel		31.82171	-99.07714	5500 Lariat Ln	Brownwood	76801	+13257846509	https://www.sites.google.com/site/quailridgecottages		0.70
-035457626e2e	Rancho Loma	hotel	lodge	31.80087	-99.54176	2969 Co Rd 422	Talpa	76882	+13256364556	http://www.rancholoma.com/		0.92
 b8fff84ebdd7	Red Rock Ranch	hotel		31.34953	-99.41184	949 FM 2635	Lohn	76852	+13254567813			0.97
-666e82273e4a	Rocky Ridge Ranch & Lodge	hotel	lodge	31.38576	-99.88155	53 FM 765 W	Paint Rock	76866	+3257169048			0.94
 74e0bb5d4bf6	S & K Hostility Llc	hotel		31.84399	-99.42532	1401 Highway 84 Byp	Coleman	76834				0.95
-10b76bb7874f	Santa Anna Sunset Lodge	hotel	lodge	31.69877	-99.23756	323 Co Rd 202	Bangs	76823	+13258006888			0.92
 8e9372297f0b	Slumber Inn	hotel	motel	31.21551	-99.86088	1075 US-87	Eden	76837	+13258695560	https://www.slumberinnedentx.com/		0.92
-23c4a724705b	Sportsman Lodge/Kennedy Rec area	hotel	lodge	31.51736	-99.63625	2923 FM-1929	Voss	76888	+13253574996			0.88
 ecb9e1261656	Sunset Inn	hotel	motel	31.11237	-99.33606	2108 S Bridge St	Brady	76825	+13255970789	http://www.daysinn.com		0.96
 88455d10520f	Texas Ranger Motel and RV Park	hotel	motel	31.74254	-99.30746	401 US-67	Santa Anna	76878	+13253483150	http://texasrangermotel.com/		0.95
-c5e13f02271d	The Feed Lot Guesthouse	hotel	lodge	31.82684	-99.43106	504 5th Ave	Coleman	76834	+14152252182			0.92
 de4cc55865a5	The Haunted Olde Park Hotel	hotel		31.73930	-99.94501	107 S 6th St	Ballinger	76821	+13257578467	http://www.theghostgeeks.com/		0.97
 5cd9ee5a7633	The Hotel On Main	hotel		31.73738	-99.94830	801 Hutchings Ave	Ballinger	76821		http://www.thehotelonmain.com/		0.75
-c12e5264514b	The Lodge at Rock House Ridge	hotel	lodge	31.85912	-99.38129	420 County Road 155	Coleman	76834	+12549772434	http://www.rhrlodge.com/		0.98
-27abc09dcbe0	The Lodge at Santa Anna	hotel	lodge	31.73117	-99.31566	302 Fannin St	Santa Anna	76878	+18287881153	http://lodgesantaanna.com		0.92
 ec33a991d1a8	Winters Inn	hotel		31.95170	-99.96256	608 S Main St	Winters	79567	+13257544558	http://abysinn.com		0.92
-00767c6caf1d	WW RedTop Lodge	hotel	lodge	31.69231	-99.33885		Santa Anna	76878				0.95
 4d5f6e4d3538	Coleman County Telephone Cooperative	office	telecommunications company	31.73913	-99.32362	206 2nd St	Santa Anna	76878	+13253483124	http://www.cctelco.org/network-status		0.96
 0eaffff3f3eb	D L Construction	office		31.75011	-99.95235	205 Sargent Ave	Ballinger	76821	+13252614014	http://dlconstructiontx.com		0.92
 0ad87a04d9b3	Fast Youtube to WAV Converter	office	information technology company	31.27649	-99.35372	4106 Monroe Street	Amarillo	79110	+17134415392	https://en.ytbto.com		0.77
 a5bc7980ca0d	Longspar Ranch	office		31.79227	-99.09332	6012 Highway 279	Brownwood	76801	+14322316522			0.91
 d52564f54dc4	New Braunfels Remote	office		31.96851	-99.90181	550 Landa St, New Braunfels, TX 78130, United States	New Braunfels	78130	+18302214000	https://www.newbraunfels.gov		0.77
-4f0d3b9f8ae7	Perry Bunkport	office	private association	31.82195	-99.03858		Lake Brownwood					0.71
 3232a5f03c3f	PF&E Oil	office	energy company	31.68515	-99.00105	3805 Highway 377 S	Brownwood	76801	+13256461584	http://www.pfeoilco.com/		0.92
 ec76ddc48e17	Polar Station (Water and Ice Refill Station)	office	bottled water company	31.81246	-99.42279	103 Santa Anna Ave	Coleman	76834	+12542308346			0.92
 5262d49bccb2	Acapulco	restaurant	mexican restaurant	31.74032	-99.94672	607 Railroad Ave	Ballinger	76821	+13253653213	http://www.acapulcorestaurants.com		0.93
@@ -250,7 +242,6 @@ ff23c9f4c731	BK BBQ and catering	restaurant	barbecue restaurant	31.74656	-99.964
 fb9a2c1e1df5	Black Cur	restaurant	steakhouse	31.82758	-99.42329	414 S Commercial Ave	Coleman	76834	+13256251870	http://blackcursteak.com/		0.98
 f6e05cd44395	Boondocks	restaurant	seafood restaurant	31.11342	-99.33507	2027 S Bridge St	Brady	76825	+13255979009	https://indulgery.com/b/boondocks-brady		0.98
 4e1e8b9c33b9	Brady's Restaurant	restaurant	american restaurant	31.13128	-99.33466	503 S Bridge St	Brady	76825	+13255979990	https://www.beefobradys.com/burgers.aspx		0.92
-877b33089d34	Burger King	restaurant		31.11543	-99.33533	2007 S Bridge St	Brady	76825	+13255970291	https://burgerking.com/store-locator/store/restaurant_74992		0.92
 bf0e32349163	Casa Cabana Restaurant	restaurant	mexican restaurant	31.97168	-99.96230	1032 N Main St	Winters	79567	+13257545796	https://roadtrippers.com		0.98
 1125b356eaaf	Casa Jalisco	restaurant	mexican restaurant	31.71778	-99.12289	900 E Hall St	Bangs	76823	+13259984111	http://www.CasaJaliscoMexicanGrill.com/	Casa Jalisco Victoria Texas	0.92
 a9dd78958f45	Casa Mezcal Mexican Restaurant	restaurant	mexican restaurant	31.11264	-99.33441	2035 S Bridge St	Brady	76825	+13252402005	https://casamezcaltx.com/		0.80
@@ -265,7 +256,6 @@ f7091050657f	Chubby’s Diner	restaurant		31.12067	-99.33521	101 E 15th St	Brady
 1b95ba438acc	Coleman Video	restaurant		31.83029	-99.42328	116 S Commercial Ave	Coleman	76834				0.95
 d0c9757b7040	Cowan Rancho Grande	restaurant	mexican restaurant	31.42985	-99.04740		Brady					0.71
 b5566c10f522	Dillon's Smokehouse Bar & Grill Lake Ivie, Texas	restaurant		31.52769	-99.76021	20030 Lake Country Rd	Paint Rock	76866		http://www.dillonssmokehouse.com/		0.91
-b6688ba68565	Domino's	restaurant	pizza restaurant	31.10886	-99.33251	2209 South Bridge Street #400	Brady	76825	+13255971613	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 756aa85dee78	Dot's Diner	restaurant	american restaurant	31.96751	-99.96247	920 N Main St	Winters	79567	+13257544331	http://dotsdiner.com		0.92
 bb01ff9adba5	Double T Box Ranch	restaurant	burger restaurant	31.83493	-99.89820	1599 FM-2647	Ballinger	76821	+14322884129			0.84
 96063c4b7ce0	Down Home Country Cookin	restaurant		31.11157	-99.33424	2105 S Bridge St	Brady	76825	+13255971300	http://downhomecountrystore.com/		0.77
@@ -313,8 +303,6 @@ f300108564b5	New China Buffet	restaurant	buffet restaurant	31.11262	-99.33438	20
 751148a3b2fe	Ortiz's Burrito Joint	restaurant	mexican restaurant	31.97006	-99.96309	1015 N Main St	Winters	79567	+13256690855	http://www.westonsjewelry.com		0.92
 6ca3887110f0	Piggy T's BBQ	restaurant	barbecue restaurant	31.16856	-99.32607	3117 N Bridge St	Brady	76825	+13252400982			0.75
 c868fcf8cfe9	Piggy T's BBQ	restaurant	barbecue restaurant	31.13062	-99.33525	9th and bridge st	Brady	76825	+13252400982			0.75
-1b77510971e5	Pizza Hut	restaurant	pizza restaurant	31.12542	-99.33560	1208 S Bridge St	Brady	76825	+13255970772	http://pizzahut.com/	Pizza Hut	0.93
-2f520ecb7421	Pizza Hut	restaurant	pizza restaurant	31.84518	-99.42731	1601 N Neches St	Coleman	76834	+13256252179	https://locations.pizzahut.com/tx/coleman/1601-n-neches?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281616	Pizza Hut	0.97
 30f6d25040ed	Pizza Pro	restaurant	pizza restaurant	31.71464	-99.13285	108 N 1st St	Bangs	76823	+13257526113	https://www.pizzapro.com		0.96
 f547ce7df486	Pompa's Kitchen	restaurant	texmex restaurant	31.72832	-99.95721	1709 Hutchings Ave	Ballinger	76821	+13259390658			0.92
 5cc9b85cd5fb	Rancho Centro Llc	restaurant		31.82772	-99.42337	410 S Commercial Ave	Coleman	76834				0.95
@@ -330,9 +318,6 @@ fd4be9e3cdad	Rockin' J Smokehouse	restaurant	barbecue restaurant	31.11439	-99.33
 87763cf5bbb1	Somewhere Texas	restaurant	american restaurant	31.74219	-99.32476	801 Wallis Ave	Santa Anna	76878	+13253483151	http://www.somewheretexas.com/		0.92
 af0971d0724d	Speedy's FAST Burritos	restaurant		31.12195	-99.33518	1503 S Bridge St	Brady	76825	+13253651635			0.90
 8a7051efe36b	Sprinkles Bakery	restaurant		31.11202	-99.33426	2101 S Bridge St	Brady	76825	+18882202210	http://www.sprinkles.com		0.92
-052dd12e777b	Subway	restaurant	sandwich shop	31.82688	-99.42263	501 S Commercial Ave	Coleman	76834	+13256252564	https://www.subway.com		0.97
-b1410c7549db	Subway	restaurant	sandwich shop	31.72762	-99.95709	1801 Hutchings Ave	Ballinger	76821	+13253652876	https://restaurants.subway.com/united-states/tx/ballinger/1801-hutchings-rd	Subway	0.96
-e19dff81d0e7	Subway	restaurant	sandwich shop	31.11396	-99.33529	2023 S Bridge St Spc 2	Brady	76825	+13255978055	https://restaurants.subway.com/united-states/tx/brady/2023-s-bridge?y_source=1_MTQ4OTQ3NzktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D	Subway	0.96
 21bac9cbc33a	Super S Foods Chicken Express	restaurant		31.13518	-99.33275	301 E Commerce St	Brady	76825	+13255973798	http://www.supersfoods.com		0.92
 c9850c224c23	T&S Tacos & Sweets	restaurant	taco restaurant	31.73861	-99.33064	305 S 8th St	Santa Anna	76878	+15127693591			0.92
 dcf018f14623	TexMex	restaurant	texmex restaurant	31.13195	-99.33315	403 S Elm St	Brady	76825	+13255975050	http://www.texmexrestaurant.com		0.95

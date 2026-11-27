@@ -54,14 +54,24 @@ dd3d9690bde4	ZAPATA PUMP N SHOP	convenience		26.88068	-99.25749	1823 HIGHWAY 83	
 1d8a31fdedb9	Burger King	fastfood		26.40175	-99.00632	390 E Grant St	Roma	78584	+19568495806	https://burgerking.com/store-locator/store/12501	Burger King	0.98
 882f2c7fd8ca	Burger King	fastfood		26.90241	-99.26706	702 & 706 N US Highway 83	Zapata	78076		https://www.bk.com/store-locator/store/restaurant_887141	Burger King	0.80
 750e35d55a90	Church's Texas Chicken	fastfood		26.89583	-99.26438	101 Highway 83	Zapata	78076	+19567656859	https://locations.churchs.com/tx/zapata/101-highway-83	Church's Chicken	0.96
+f111af9d9870	Church's Texas Chicken	fastfood	chicken restaurant	26.40342	-99.01517	207 Grant Street	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street		0.96
+dd222576b5cb	Church’s Texas Chicken	fastfood	chicken restaurant	26.40243	-99.00800	207 E Grant St	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street	Church's Chicken	1.00
 95ab7cea3761	Dairy Queen	fastfood		26.89607	-99.26450	103 US-83	Zapata	78076	+19567655591	https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/14742/?y_source=1_MjkzMzg4ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 bfe9f9a4dba1	Dairy Queen	fastfood		26.41173	-99.01979	1403 N Grant St 1403 N Grant St	Roma	78584	+19568491921	https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/14533/?y_source=1_MjkzMzg5NzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+bad27e56e13d	Domino's Pizza	fastfood	pizza restaurant	26.40207	-99.01308	1004 E Grant St	Roma	78584	+19567652018	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
 792e28a7f613	DQ Grill & Chill	fastfood		26.41172	-99.01983	1403 N Grant St	Roma	78584		https://www.dairyqueen.com/en-us/locations/tx/roma/1403-n-grant-st/4305	DQ Grill & Chill	0.80
 d74c15cb400d	DQ Grill & Chill	fastfood		26.89612	-99.26437	Hwy 83 N	Zapata	78076		https://www.dairyqueen.com/en-us/locations/tx/zapata/hwy-83-n/4514	DQ Grill & Chill	0.80
+b61d9caf858c	Jack in the Box	fastfood	taco restaurant	26.40327	-99.01445	201 E Grant St	Roma	78584	+19568471905	http://www.jackinthebox.com/locations/3932		0.95
+b5ab4cf64f11	Little Caesars Pizza	fastfood	pizza restaurant	26.91194	-99.27605	1803 US-83	Zapata	78076	+19567503379	https://littlecaesars.com/en-us/store/11233	Little Caesars	0.98
 4c512d263ba4	McDonald's	fastfood		26.40227	-99.01129	104 E Grant Street	Roma	78584	+19568491045	https://www.mcdonalds.com/us/en-us/location/tx/roma/104-e-grant-street/31585.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 a2488c9bd1ff	McDonald's	fastfood		26.89416	-99.26367	116 South Us Hwy 83	Zapata	78076	+19567656700	https://www.mcdonalds.com/us/en-us/location/tx/zapata/116-south-us-hwy-83/18776.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 bc15361945f2	MG's Restaurant	fastfood		26.89951	-99.26267	301 Glenn St	Zapata	78076	+19567503004			0.97
 4cb756ced70d	MidKnight Snack	fastfood		26.89949	-99.26633	410 Jackson St	Zapata	78076				0.59
+51a3781ee7ce	Pizza Hut	fastfood	pizza restaurant	26.89770	-99.26479	209 N St #83	Zapata	78076	+19567654882	https://locations.pizzahut.com/tx/zapata/209-n-hwy-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299108	Pizza Hut	0.98
+6e2cbcaacaac	Pizza Hut	fastfood	pizza restaurant	26.40267	-99.00838	229 East Grant Street Starr	Roma	78584	+19568494475	https://locations.pizzahut.com/tx/roma/229-east-grant-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281306	Pizza Hut	0.99
+42a86c638beb	Subway	fastfood	sandwich shop	26.41293	-99.02082	1505 N Grant St Ste 5	Roma	78584	+19568499087	https://restaurants.subway.com/united-states/tx/roma/1505-n-grant-st	Subway	0.98
+a8e68110b2f6	Subway	fastfood	sandwich shop	26.90021	-99.26526	408 US Hwy 83 Suite A	Zapata	78076	+19567653265	https://restaurants.subway.com/united-states/tx/zapata/408-us-hwy-83	Subway	0.97
+9302382892f7	Subway Roma Tx	fastfood	sandwich shop	26.40470	-99.01560		Roma			http://www.subway.com/	Subway	0.70
 ea9bb0ae84f6	The Sweet Spot Snacks	fastfood		26.91706	-99.27709	2205 Glenn St	Zapata	78076				0.91
 c51f449afbf7	Whataburger	fastfood		26.40242	-99.00643	505 US-83	Roma	78584	+19568494895	https://locations.whataburger.com/tx/roma/505-us-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 e02111538273	Xtreme Hotdogs	fastfood		26.91894	-99.26151	702 Mier Ave	Zapata	78076	+19567540071			0.98
@@ -75,21 +85,14 @@ ee9600dac099	Riverview Family Center	grocery		26.89413	-99.26245	117 S US Highwa
 ee074deccd08	Saenz Mini Mart	grocery		26.41227	-99.01974	1408 E Grant St	Roma	78584	+19568491055	http://saenzminimart.com		0.77
 5130e55d1bfd	Super S Foods	grocery		26.90412	-99.26939	909 N US Highway 83	Zapata	78076	+19567654861	http://www.lowesmarket.com/?wpmm_location=lowes-155-zapata-tx		0.72
 a93ace269112	The Snack Shop	grocery		26.91364	-99.27109	1702 17th Ave	Zapata	78076	+19567559512			0.94
-ad6742aa27bc	Mary Plattner NP	hospital		26.90640	-99.27139	1201 US-83	Zapata	78076	+19567655847			0.79
 d2ed7dbdcc03	Star County Roma Family Health Clinic	hospital		26.44098	-99.02708	1861 N Highway 83	Roma	78584	+19568490674	http://starrcountyhospital.com		0.70
 dd1911cf3628	Zapata Gateway Clinic	hospital		26.90161	-99.26902	210 Rathmell St	Zapata	78076		http://www.gatewaychc.com/		0.95
-f607ac361d09	Ashmay Hospitality Llc	hotel		26.87906	-99.25751	1896 S US Highway 83	Zapata	78076				0.95
 2f1f6ce63588	Beacon Lodge	hotel		26.86875	-99.29342	313 Lakeshore St	Zapata	78076	+19567654616	https://www.beaconlodge.com		0.92
-5a5d465ddcd9	Casa Del Rio	hotel	lodge	26.40538	-99.01884	77 Convent Ave	Roma	78584	+19563531720			0.81
-5e81cb070d19	City Of Zapata	hotel		26.91426	-99.27718		Zapata			https://county-of-zapata-tx-26.hub.biz/		0.74
 71b79b84d429	City Of Zapata	hotel		26.89644	-99.26389		Zapata			https://county-of-zapata-tx-26.hub.biz/		0.75
 96e30429c020	Executive Inn Zapata	hotel		26.89156	-99.26167	143 S US Highway 83	Zapata	78076	+19567656982	www.falconexecutiveinn.com		0.98
-7fbb46bef87d	Falcon Dam	hotel		26.56054	-99.14285	FM-2098-SPUR	Falcon Village	78584				0.55
 97a0cb4871df	Falcon Heights Motel and RV Park	hotel	motel	26.56307	-99.12402	616 FM2098	Falcon Heights	78545	+19568485229	https://falconheightsmotel.com		0.94
 a027bf392eb3	Four Seasons Mobile Home & Rv Resort	hotel		26.87372	-99.29312	126 Sunshine Ln	Zapata	78076	+19567654241	http://www.fourseasonsrvpark.com		0.82
-07afaf784401	Holiday Inn Express & Suites Zapata	hotel		26.81239	-99.15193	167 S US Highway 83	Zapata	78076	+19567651333	https://www.ihg.com		0.55
 e001e8b1a7c5	Holiday Inn Express & Suites Zapata	hotel		26.88904	-99.26050	167 S US Highway 83	Zapata	78076	+19567651333	https://www.ihg.com/holidayinnexpress/hotels/us/en/zapata/zptex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ZPTEX	Holiday Inn Express	0.99
-f0e1b908433f	Holiday Inn Express & Suites Zapata	hotel	resort	26.89669	-99.26384	167 S US Highway 83	Zapata	78076	+19567651333	https://www.ihg.com/holidayinnexpress/hotels/us/en/zapata/zptex/hoteldetail?cm_mmc=BingMaps-_-EX-_-US-_-ZPTEX		0.97
 4295b9e65bbf	Hotel Zapata	hotel		26.87906	-99.25751	1896 S US Highway 83	Zapata	78076	+19567658403		SureStay Hotels	0.78
 5a30d2ca8463	Lakefront Lodge	hotel	motel	26.88085	-99.27066	493 Oak St	Zapata	78076	+19567654346	http://texaslakefrontlodge.com/index.html		0.96
 30d9364b4fba	Oso Blanco Motel	hotel		26.90594	-99.26994	1102 US-83	Zapata	78076	+19567654339			0.91
@@ -103,9 +106,6 @@ bdade36e58f2	Antojitos Snacks	restaurant	mexican restaurant	26.92137	-99.25092	1
 bf74095eab3d	Arcoiris	restaurant		26.40236	-99.00686	351 E Grant St	Roma	78584	+19568446472	https://www.redfin.com/TX/Roma/LOS-SAENZ-78584/home/68115887		0.92
 194c370ec07d	Augie's Taqueria	restaurant	mexican restaurant	26.91203	-99.26399	98 W 13th Ave	Zapata	78076	+19567656006	http://www.augiestaqueria.com/		0.92
 be811f08a943	China Buffet	restaurant	chinese restaurant	26.91250	-99.27497	1802 N US Highway 83	Zapata	78076	+19567656006	http://www.chinabuffet.net/		0.92
-f111af9d9870	Church's Texas Chicken	restaurant	chicken restaurant	26.40342	-99.01517	207 Grant Street	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street		0.96
-dd222576b5cb	Church’s Texas Chicken	restaurant	chicken restaurant	26.40243	-99.00800	207 E Grant St	Roma	78584	+19568492022	https://locations.churchs.com/tx/roma/207-grant-street	Church's Chicken	1.00
-bad27e56e13d	Domino's Pizza	restaurant	pizza restaurant	26.40207	-99.01308	1004 E Grant St	Roma	78584	+19567652018	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
 3735fcb495a5	Dulcería Mexicana y snak	restaurant	mexican restaurant	26.44214	-99.02622	1875 N Highway 83	Roma	78584	+19568479702			0.68
 d03cb18bcd02	El Mexicano Restaurant	restaurant	mexican restaurant	26.41458	-99.02122	Highway 83	Roma	78584	+19568494275	http://www.rosamexicano.com		0.77
 6141ac4928b9	El Paraiso Restaurant	restaurant	mexican restaurant	26.91307	-99.27684	1905 US-83	Zapata	78076	+19567653558	http://erslojistik.com		0.95
@@ -118,12 +118,10 @@ b4caaa6a131e	El Taco Rico Restaurant	restaurant		26.40181	-99.00286	601 E Grant 
 0256e29c191d	Genesis taqueria	restaurant	mexican restaurant	26.91860	-99.27576	2213 Elm St	Zapata	78076	+19567402632			0.93
 a2431139dc4e	Hawk's Landing Restaurant	restaurant	comfort food restaurant	26.91422	-99.27677	2002 US-83	Zapata	78076	+19567503009			0.97
 02aee85a04ea	Holiday Restaurant	restaurant	comfort food restaurant	26.90068	-99.26608	506 US-83	Zapata	78076	+19567654521	http://holiday-restaurant-zapatatx.com/		0.94
-b61d9caf858c	Jack in the Box	restaurant	taco restaurant	26.40327	-99.01445	201 E Grant St	Roma	78584	+19568471905	http://www.jackinthebox.com/locations/3932		0.95
 d59afd9101cf	Johnny's BBQ	restaurant	barbecue restaurant	26.91423	-99.27682	2002 N US Highway 83	Zapata	78076	+19567503579	http://www.tonyromas.com		0.92
 afdf6509a0a2	Koko Bongo #2	restaurant		26.41089	-99.01907	1208 N Grant St	Roma	78584				0.96
 c32d68fa3c24	Kyomu Sushi Llc	restaurant		26.91845	-99.25547	1101 TX-16	Zapata	78076	+19566450308			0.92
 335833738b3d	Laredo Taco Company	restaurant		26.89676	-99.26348	102 U.S. 83, Zapata, TX 78043, United States	Zapata	78076	+19567655536	https://www.laredotacocompany.com/		0.95
-b5ab4cf64f11	Little Caesars Pizza	restaurant	pizza restaurant	26.91194	-99.27605	1803 US-83	Zapata	78076	+19567503379	https://littlecaesars.com/en-us/store/11233	Little Caesars	0.98
 c1ed7dd4fa53	Loncheria Los Quates	restaurant	mexican restaurant	26.41038	-99.01688	206E La Fragua Ave	Roma	78584	+19568491520			0.92
 2495d3808e35	Los Lazos Ranch	restaurant	mexican restaurant	26.73162	-99.11127	4359 US-83	Zapata	78076	+19568485332	http://www.buzzfile.com/business/Los-Lazos-Ranch-956-848-5332		0.80
 730a414e1fc4	Mariscos El Jarocho	restaurant	mexican restaurant	26.91758	-99.28006	1910 US-83	Zapata	78076	+19567503195			0.92
@@ -131,8 +129,6 @@ c1ed7dd4fa53	Loncheria Los Quates	restaurant	mexican restaurant	26.41038	-99.016
 6cba2b5c850e	Mi Ranchito	restaurant	mexican restaurant	26.91453	-99.27642	2001-2099 E Hidalgo Blvd	Zapata	78076	+19567658480	http://www.local.com/business/details/zapata-tx/mi-tierra-restaurant-98138933		0.92
 ab29ab56b546	Mr John's Taco	restaurant	mexican restaurant	26.91482	-99.26958	1702 Carla St	Zapata	78076	+19567659232	https://m.facebook.com/MrJohnsTaco	Taco John's	0.95
 31afb04f93b7	Patno's Patio	restaurant	bar and grill restaurant	26.86922	-99.29403	Beacon Lodge Cir	Zapata	78076		https://beaconlodgerv.com/bourbon-street-bar		0.92
-51a3781ee7ce	Pizza Hut	restaurant	pizza restaurant	26.89770	-99.26479	209 N St #83	Zapata	78076	+19567654882	https://locations.pizzahut.com/tx/zapata/209-n-hwy-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299108	Pizza Hut	0.98
-6e2cbcaacaac	Pizza Hut	restaurant	pizza restaurant	26.40267	-99.00838	229 East Grant Street Starr	Roma	78584	+19568494475	https://locations.pizzahut.com/tx/roma/229-east-grant-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281306	Pizza Hut	0.99
 6e174af49ad9	Porcion 72 Vintage Tea Room	restaurant	breakfast and brunch restaurant	26.40576	-99.01899	208 Convent Ave	Roma	78584	+19562565485			0.97
 25d2a1261f5d	PURE Fresh Eatery	restaurant	health food restaurant	26.89729	-99.26414	202 US-83	Zapata	78076	+19562659565			0.96
 ff088c9f11f8	PURE Fresh Eatery	restaurant		26.90508	-99.27020	1007 N US Highway 83 Ste 3	Zapata	78076	+19562659565	https://cyrusramsey.com/places/pure-fresh-eatery		0.77
@@ -144,9 +140,6 @@ ba15245ade0d	Robert's Fish N Tackle & Restaurant	restaurant	seafood restaurant	2
 b75e24a7bb83	Sashimi Sushi and Grill	restaurant	sushi restaurant	26.90804	-99.27248	1209 Glenn St	Zapata	78076	+19567503224			0.74
 ba0c898bf04e	Shorty's	restaurant	barbecue restaurant	26.91707	-99.27896	2302 Iturbide St	Zapata	78076	+19567654633	http://www.shortysnyc.com		0.92
 52c83c872481	Sissi's Smiles & Styles	restaurant		26.89989	-99.26543	408 US-83	Zapata	78076	+19562655306			0.92
-42a86c638beb	Subway	restaurant	sandwich shop	26.41293	-99.02082	1505 N Grant St Ste 5	Roma	78584	+19568499087	https://restaurants.subway.com/united-states/tx/roma/1505-n-grant-st	Subway	0.98
-a8e68110b2f6	Subway	restaurant	sandwich shop	26.90021	-99.26526	408 US Hwy 83 Suite A	Zapata	78076	+19567653265	https://restaurants.subway.com/united-states/tx/zapata/408-us-hwy-83	Subway	0.97
-9302382892f7	Subway Roma Tx	restaurant	sandwich shop	26.40470	-99.01560		Roma			http://www.subway.com/	Subway	0.70
 defedd9fbcb1	Tacos Alex	restaurant	mexican restaurant	26.62233	-99.09105	5168 W Highway 83	Roma	78584	+19562089984	https://qrco.de/beuKag		0.89
 f8a5edb20c4b	Tacos Alex	restaurant		26.40135	-99.00243	688 E Grant St	Roma	78584	+19562089984			0.81
 68b0d25f3bb5	Tacos El Tejano	restaurant	mexican restaurant	26.90316	-99.26723	710 US-83	Zapata	78076	+19567653362	https://start.cortera.com/company/research/l6r6mun0r/tacos-el-tejano		0.92

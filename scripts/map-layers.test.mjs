@@ -216,12 +216,22 @@ test("a place file: header, one place per line; a row with no name, an unknown t
 test("squares and boxes: the files a box needs, and the places in it, surest first, capped", () => {
   assert.equal(places.placeTileKey(29.76, -95.37), "29_-96");
   assert.equal(places.placeTileKey(30, -95), "30_-95");
-  assert.deepEqual(places.placeTilesFor({ south: 29.5, west: -95.5, north: 30.2, east: -94.8 }), ["29_-96", "29_-95", "30_-96", "30_-95"]);
-  assert.equal(places.placeTilesFor({ south: 25, west: -107, north: 37, east: -93 }).length, 30, "a whole-state box is capped");
+  assert.deepEqual(places.placeTilesFor({ south: 29.5, west: -95.5, north: 30.2, east: -94.8 }), { keys: ["29_-96", "29_-95", "30_-96", "30_-95"], capped: false });
+  const state = places.placeTilesFor({ south: 25, west: -107, north: 37, east: -93 });
+  assert.deepEqual([state.keys.length, state.capped], [places.PLACE_TILES_MAX, true], "a whole-state box is capped, and says so");
   const mk = (id, category, lat, confidence) => ({ id, name: id, category, kind: null, lat, lng: -95.4, street: null, city: null, zip: null, phone: null, website: null, brand: null, confidence });
   const all = [mk("a", "coffee", 29.7, 0.6), mk("b", "coffee", 29.71, 0.99), mk("c", "hotel", 29.72, 0.9), mk("d", "coffee", 31, 0.99)];
   const r = places.placesIn(all, { south: 29.6, west: -95.5, north: 29.8, east: -95.3 }, ["coffee"], 1);
   assert.deepEqual([r.places.map((p) => p.id), r.total], [["b"], 2], "the surest coffee shop in the box; the hotel and the far one left out");
+  // Fable review 11/27: ties go by the (random) id, not the name, so a cut-off list is not just the A's.
+  const tied = [mk("f3", "coffee", 29.7, 0.9), { ...mk("0a", "coffee", 29.7, 0.9), name: "Zed" }, { ...mk("9c", "coffee", 29.7, 0.9), name: "Aardvark" }];
+  assert.deepEqual(places.placesIn(tied, { south: 29, west: -96, north: 30, east: -95 }, ["coffee"]).places.map((p) => p.id), ["0a", "9c", "f3"]);
+  // Search: name, brand, kind or street, any case.
+  const shop = { ...mk("s1", "coffee", 29.7, 0.9), name: "Joe's", brand: "Starbucks", kind: "coffee roastery", street: "12141 Richmond Ave" };
+  for (const q of ["joe", "STARBUCKS", "roastery", "richmond", ""]) assert.ok(places.placeFitsSearch(shop, q), q);
+  assert.equal(places.placeFitsSearch(shop, "hilton"), false);
+  assert.ok(places.containsBounds({ south: 29, west: -96, north: 30, east: -95 }, { south: 29.2, west: -95.8, north: 29.9, east: -95.1 }));
+  assert.equal(places.containsBounds({ south: 29, west: -96, north: 30, east: -95 }, { south: 29.2, west: -95.8, north: 30.1, east: -95.1 }), false);
 });
 
 test("the bundled files: every row parses, ids are unique, every place sits in its own square in Texas, every type has places", () => {
@@ -251,13 +261,27 @@ test("the bundled files: every row parses, ids are unique, every place sits in i
   for (const c of places.PLACE_CATEGORIES) assert.ok((byType.get(c.id) ?? 0) > 100, `${c.label}: ${byType.get(c.id) ?? 0}`);
 });
 
+test("the bundled files: big chains are Fast Food, lodge halls are not hotels, doctors are not hospitals, ZIPs are Texas ones", () => {
+  const bad = [];
+  for (const f of tileFiles) {
+    for (const p of places.parsePlaceTile(readFileSync(new URL(f, TILE_DIR), "utf8"))) {
+      if (p.category === "restaurant" && /^(subway|mcdonald|burger king|whataburger|taco bell|chick-fil-a)\b/i.test(p.name)) bad.push(`chain as restaurant: ${p.name}`);
+      if (p.category === "hotel" && /\b(masonic|elks lodge|a\.?f\.? ?& ?a\.?m)\b/i.test(p.name)) bad.push(`lodge hall as hotel: ${p.name}`);
+      if (p.category === "hospital" && /,\s*(md|do|np)\.?$/i.test(p.name)) bad.push(`doctor as hospital: ${p.name}`);
+      if (p.zip && !/^(7[5-9]|885|733)/.test(p.zip)) bad.push(`ZIP ${p.zip}: ${p.name}`);
+    }
+  }
+  assert.deepEqual(bad.slice(0, 10), []);
+});
+
 test("prospects come from our server, for Admin and Sales only, and downtown Houston has coffee shops and hotels", async () => {
   const pg = new PGlite();
   const MIGRATIONS = new URL("../migrations/", import.meta.url);
   for (const name of readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
   await pg.query(
     `insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values
-      ('u-owner', 'chuy', true, true, null), ('u-sales', 'sam', true, false, 'sales'), ('u-tech', 'tom', true, false, 'service')`,
+      ('u-owner', 'chuy', true, true, null), ('u-sales', 'sam', true, false, 'sales'), ('u-tech', 'tom', true, false, 'service'),
+      ('u-wh', 'wes', true, false, 'warehouse'), ('u-wait', 'wren', false, false, 'sales')`,
   );
   const sql = Object.assign(async () => [], { query: async (text, params) => (await pg.query(text, params)).rows });
   const downtown = { south: 29.745, west: -95.38, north: 29.77, east: -95.355 };
@@ -269,6 +293,9 @@ test("prospects come from our server, for Admin and Sales only, and downtown Hou
   assert.deepEqual([capped.places.length, capped.truncated], [50, true]);
   assert.ok(capped.total > 1000);
   assert.deepEqual((await listPlacesFor(sql, "u-sales", { ...downtown, categories: ["not-a-type"] }, readTile)).places, []);
-  await assert.rejects(listPlacesFor(sql, "u-tech", { ...downtown, categories: ["coffee"] }, readTile), new RegExp(MARKET_REFUSAL));
+  for (const who of ["u-tech", "u-wh", "u-wait", "u-nobody"]) await assert.rejects(listPlacesFor(sql, who, { ...downtown, categories: ["coffee"] }, readTile), new RegExp(MARKET_REFUSAL), who);
+  // The search is applied before the cap: every Starbucks in the area, not just the ones among the first 50.
+  const sb = await listPlacesFor(sql, "u-sales", { south: 29.5, west: -95.8, north: 30.1, east: -95.0, categories: ["coffee"], limit: 50, q: "starbucks" }, readTile);
+  assert.ok(sb.places.length > 30 && sb.places.every((p) => places.placeFitsSearch(p, "starbucks")), `${sb.places.length} Starbucks`);
   await assert.rejects(listPlacesFor(sql, "u-sales", { south: 31, west: -95, north: 30, east: -94, categories: ["coffee"] }, readTile), /could not be read/);
 });

@@ -1,7 +1,6 @@
 id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 f8107f4325eb	A sweetie cupcake	bakery	cupcake shop	27.57608	-99.48216	112 Lagos Ave	Laredo	78045	+19566453385			0.92
 25fad0a115fd	Auntie Anne's	bakery		27.55227	-99.50061	5300 San Dario Ave	Laredo	78041	+19567245886	http://auntieannes.com/	Auntie Anne's	0.96
-90ae8020b903	Auntie Anne's	bakery		27.55128	-99.50124	5300 San Dario Ave	Laredo	78041	+19567245886	https://www.auntieannes.com/tx/laredo/178-1	Auntie Anne's	0.96
 b9d27b069c4f	Auntie Anne's	bakery		27.50166	-99.51162	1600 Water Street	Laredo	78040	+19563912109	https://locations.auntieannes.com/tx/laredo/1600-water-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Auntie Anne's	0.97
 e41fa6f96ad6	Auntie Anne's Laredo	bakery		27.61465	-99.52169	13602 Mines Rd	Laredo	78045	+19566021083		Auntie Anne's	0.74
 6d9401c4f918	Beatriz Cakes	bakery		27.54678	-99.49370	302 Hillside Rd #5	Laredo	78041	+19567912651	https://beatriz-cakes.hub.biz/		0.96
@@ -78,7 +77,6 @@ f8778941a24c	Brs Forwarding Inc.	bar	winery	27.65095	-99.55593	18730 Metropolita
 ba7e18e07b1c	Classic Tavern	bar		27.56666	-99.49837	120 W Village Blvd Ste 103	Laredo	78041	+19566060721	https://thrillcall.com/venue/Classic-Tavern-Laredo-TX		0.95
 09deba12adf3	Cloud9	bar	pub	27.58601	-99.49100	401 Shiloh Dr	Laredo	78045	+19567408181			0.57
 44da722020fa	CLUB LOBOS	bar		27.50375	-99.50626	4210 S Zapata Hwy	Laredo	78046	+19562205359			0.97
-55f163deb5f0	CLUB LOBOS	bar		27.45555	-99.47882	4210 S Zapata Hwy	Laredo	78046	+19562205359			0.92
 f87a706ea73c	Cosmos	bar		27.56756	-99.49877	201 W Del Mar Blvd	Laredo	78041	+19567273393			0.85
 1ddc4ad9caf7	Cowboy Lounge	bar		27.42995	-99.47339	St Isaac Loop	Laredo	78046		https://indulgery.com/b/2-cafe-grill-laredo/reviews		0.90
 32ae1740b10c	Cowboys Night Club	bar		27.56668	-99.49899	201 W Del Mar Blvd	Laredo	78041	+19562682489	http://www.laredoheat.com/?p=2410		0.87
@@ -108,7 +106,6 @@ ddee9d012b43	Inguz Group	bar	winery	27.61261	-99.50568	11906 Conley Rd	Laredo	78
 7353c27a81ac	La Cancha	bar		27.56322	-99.45614		Laredo					0.71
 751df987d9c1	La Mina Restaurant Bar	bar	dive bar	27.50230	-99.50768	202 Convent Ave	Laredo	78040	+19565685938	https://goo.gl/maps/Sn6s1KiNSZupsBvY6		0.99
 3a7271192280	La Pinguina Loca Snack Bar	bar	pub	27.48390	-99.47237	1502 S Zapata Hwy	Laredo	78046	+19569993059			0.96
-e3943c258b54	La Pinguina Loca Snack Bar	bar	pub	27.48397	-99.47225	1502 S Zapata Hwy	Laredo	78046	+19569993059			0.96
 e73f8f85df12	Laredo Brewing Company	bar	brewery	27.58480	-99.44544	3910 E Del Mar Blvd Ste 201	Laredo	78041	+19564625801	http://www.laredobrewing.com		0.99
 e84da6c3bf0d	Las Palmas Food Trucks & Park	bar	sports bar	27.45555	-99.47884	4210 S Zapata Hwy	Laredo	78046	+19564707858			0.95
 2257e18949dd	Leo's Ram Club	bar		27.54800	-99.49397	5326 Alabama Ave	Laredo	78041	+19562696786			0.97
@@ -150,7 +147,6 @@ f8469615cb4c	Tilted Kilt Pub and Eatery Laredo, Texas	bar	sports bar	27.56196	-9
 dcbfe7bd84d4	Vaqueras Club	bar		27.50340	-99.50935	1319 Iturbide St	Laredo	78040				0.65
 23c5ea87b2c4	Vibe Laredo	bar		27.55981	-99.44929	6408 Crescent Loop	Laredo	78041	+19564143979	http://www.vibe.com/		0.94
 811d4227f188	Vineyards	bar	winery	27.60865	-99.46697	10706 International Blvd	Laredo	78045	+19567171563	https://www.localwineevents.com		0.99
-5727b8255942	WAX THAT. The Brow Bar	bar		27.60046	-99.48045	9652 McPherson Rd	Laredo	78045	+19569908023	http://Www.WAXTHAT.TheBrowBar.com/		0.78
 d09b25c36381	WAX THAT. The Brow Bar	bar		27.59649	-99.48135	9652 McPherson Rd	Laredo	78045	+19569908023	http://Www.WAXTHAT.TheBrowBar.com/		0.80
 c6081eb366c5	Whiskey River	bar		27.56340	-99.45565	2322 Jacaman Rd	Laredo	78041				0.88
 da07c7278f88	Whiskey River Country Bar	bar		27.55985	-99.44943	6408 Crescent Loop	Laredo	78041	+19569421407			0.99
@@ -216,7 +212,6 @@ ed28c2fa0e4d	Emanuel Motor Co	cardealer		27.51696	-99.51006	1919 Santa Maria Ave
 645d970489f3	Estrada AUTOS	cardealer		27.50727	-99.49780	120 Houston St	Laredo	78040	+19562422533			0.63
 1ef040627f1d	Exotics Cars & Trucks Auto Sales	cardealer		27.56723	-99.50403	7200 Santa Maria Ave	Laredo	78041	+19567172006			0.70
 ab06129ab671	Fairly Used Cars For Sale	cardealer		27.56162	-99.44756	2420 Jacaman Rd	Laredo	78041	+14244348709			0.56
-4212e33f5b20	Ford México	cardealer		27.45811	-99.49216	Blvd. Luis Donaldo Colosio Murrieta Km 0+365 Esq. Col. Fracc. Vista Hermosa.	Laredo	88274	+528677113700	http://www.fordlaredomotors.mx/	Ford México	0.68
 f620dcec8467	Freddy's Quality Motors LLC	cardealer		27.48526	-99.38007	7156 State Highway 359	Laredo	78043	+19564411594			0.98
 c1db21c65648	Frema Motor Group	cardealer		27.50373	-99.46928	2619 Market St	Laredo	78043	+19566021199			0.92
 62daad5da6b3	G & T Auto Sales	cardealer		27.53392	-99.50218	3803 San Dario Ave	Laredo	78041	+19567912190			0.92
@@ -273,7 +268,6 @@ c8e6f93f0121	Queen Auto Sales	cardealer		27.49806	-99.46876	203 S Zapata Hwy	Lar
 8494291bc860	Ramos Auto Pro	cardealer		27.49104	-99.47118	711 S Zapata Hwy	Laredo	78043	+19562695580			0.55
 023461d3aa8c	Ramos Auto Sales	cardealer		27.53093	-99.48872	720 E Saunders St	Laredo	78041	+19567269068	http://ramosautosales.org	Ramos Auto Sales	0.92
 7fbead81b865	Ranger Motors Laredo	cardealer		27.51922	-99.50243	3720 E Saunders St	Laredo	78041	+19567269090	https://rangermotors.com/		0.99
-fb41475c022f	Ranger Motors Laredo	cardealer		27.53022	-99.45796	3720 E Saunders St	Laredo	78041	+19567269090	https://rangermotors.com/		0.92
 ab4f4923892b	Raza Motors	cardealer		27.53393	-99.50231	3803 San Dario Ave	Laredo	78041	+19567016387			0.99
 88072dd0e45a	Recio Auto Sales	cardealer		27.50669	-99.48489	1118 Guadalupe St	Laredo	78040	+19567242112			0.92
 d84327637a37	Recio Auto Sales	cardealer		27.49656	-99.46973	102 N Zapata Hwy	Laredo	78043	+19567289860	http://www.recioautosales.net/		0.99
@@ -323,9 +317,7 @@ f5f9121b5c2f	Toro Automotive	cardealer		27.50624	-99.48650	1001 Guadalupe St	Lar
 73e89cbf3718	Zapata Auto Sales	cardealer		27.47624	-99.47424	2315 S Zapata Hwy	Laredo	78046	+19567128603			0.55
 bf3cba5de5ca	Zino Auto Sales	cardealer		27.49595	-99.46997		Laredo		+19562317182			0.92
 a1283a160e82	Alamo Drafthouse Cinema Laredo	cinema		27.61384	-99.47107	11210 EastPoint Dr	Laredo	78045	+19562426440	http://www.drafthouse.com/	Alamo Drafthouse Cinema	0.99
-32323fee94fc	Cine Mark Mall Del Norte	cinema		27.52243	-99.48179		Laredo		+19567250132	https://www.cinemark.com/theatre-385		0.78
 957cb9570a4d	Cine Mark Mall Del Norte	cinema		27.51655	-99.48199		Laredo		+19567250132	https://www.cinemark.com/theatre-385		0.97
-13d6741438ab	Cinemark Mall Del Norte	cinema		27.55050	-99.50299	5300 San Dario Ave Ste 2206	Laredo	78041	+19567250132	https://www.cinemark.com		0.98
 77781e6ae661	Cinemark Mall Del Norte	cinema		27.55337	-99.49966	5300 San Dario Ave Ste 2206	Laredo	78041	+19567250132	https://www.cinemark.com/theatres/tx-laredo/cinemark-mall-del-norte?utm_medium=organic&utm_source=fb&utm_campaign=local_listing_theater&utm_content=fb_listing&y_source=1_MTc0OTMyMDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Cinemark	0.98
 aeb3f0cd066f	Hollywood Theaters	cinema		27.56128	-99.45293	2401 Jacaman Rd	Laredo	78041	+19567243456	https://www.gohollywood.com		0.55
 13a2df0e08c1	Kabby's Movie Theatre	cinema		27.58777	-99.51553		Laredo					0.70
@@ -391,7 +383,6 @@ ea936c375481	Wellness Coffee	coffee		27.54402	-99.50091	608 W Calton Rd	Laredo	7
 5b476435542b	CKMI University	college		27.50867	-99.48619	1002 Corpus Christi St	Laredo	78040	+19563078108	http://www.ckmiuniversityseminariodecapellania.org/		0.88
 f71e2f5bae98	Convocation Building	college		27.57122	-99.43420	Kinesiology - Convocation Building	Laredo	78041				0.65
 2ff9484c8e9f	Julieta & Frank Staggs Academy of International & STEM Studies	college		27.57297	-99.43382	5201 University Blvd	Laredo	78041	+19563262860	http://www.tamiu.edu/coas/theacademy/		0.90
-febfd95593fd	Julieta & Frank Staggs Academy of International & STEM Studies	college		27.57044	-99.43436	5201 University Blvd	Laredo	78041	+19563262860	http://www.tamiu.edu/coas/theacademy/		0.90
 e95e91cb23e6	Kazen Student Center	college		27.50582	-99.52000	Laredo College, West End Washington St	Laredo	78040		http://www.laredo.edu		0.86
 a24a5b198356	Laredo Beauty College	college		27.52380	-99.48080	3020 N Meadow Ave	Laredo	78040	+19567232059	http://www.laredobeautycollege.net		0.99
 dc9042067af9	Laredo College	college		27.50748	-99.52040	West End Washington St	Laredo	78040	+19567220521	http://www.laredo.edu/		0.97
@@ -421,7 +412,6 @@ f600f1508ee7	University Village/ Residential Learning Community	college		27.5723
 47ea73bc1ef4	7-Eleven	convenience		27.52741	-99.46848	3410 N Arkansas Ave	Laredo	78043	+19567236107	https://www.7-eleven.com/locations/tx/laredo/3410-arkansas-40903	7-Eleven	0.99
 48afd04912a3	7-Eleven	convenience		27.51779	-99.47993	2401 N Meadow Avenue	Laredo	78040	+19567244657	https://www.7-eleven.com/locations/tx/laredo/2401-meadow-avenue-40904	7-Eleven	1.00
 510f26f99d69	7-Eleven	convenience		27.49955	-99.44839	218 Bob Bullock Loop	Laredo	78045	+12404599593	https://www.7-eleven.com/locations/tx/laredo/218-bob-bullock-loop-42126		0.85
-56be3b03e328	7-Eleven	convenience		27.56003	-99.46854	2519 Jacaman Rd	Laredo	78041	+18002550711	http://www.7-eleven.com		0.77
 64a2891d7935	7-Eleven	convenience		27.60539	-99.51754	11801 Mines Rd	Laredo	78045	+19567287837	http://www.7-eleven.com/	7-Eleven	0.96
 6dcd697cba6e	7-Eleven	convenience		27.58599	-99.51073	9304 Mines Rd	Laredo	78045	+19567172922	https://www.7-eleven.com/locations/tx/laredo/9304-mines-rd-40920	7-Eleven	0.99
 75d14f6e075b	7-Eleven	convenience		27.50638	-99.48951	701 Guadalupe Street	Laredo	78040	+19567274719	https://www.7-eleven.com/locations/tx/laredo/701-guadalupe-street-40900	7-Eleven	0.99
@@ -500,14 +490,12 @@ b6813d41c0ec	Conoco	convenience		27.50853	-99.49046	602 Corpus Christi St	Laredo
 b61064d4aad9	Corner Store	convenience		27.50567	-99.48010	1601 Chihuahua St	Laredo	78043	+19567261027			0.92
 c75074b111fd	Diamond Shamrock of GasFusion Inc.	convenience		27.50615	-99.50500	901 Matamoros St	Laredo	78040	+12692717050			0.92
 c80646b93ce4	Dollar Tree	convenience		27.43250	-99.46615	5702 Cielito Lindo Blvd	Laredo	78046	+19564620772			0.92
-d609afa24fb7	Dollar Tree	convenience		27.54941	-99.45243	5702 Bob Bullock Loop	Laredo	78041	+13156555506	https://www.dollartree.com/locations/ny/cazenovia/7372/	Dollar Finds	0.73
 e4cb81ca4dd4	Dollar Tree	convenience		27.54539	-99.45000	5702 Bob Bullock Loop	Laredo	78041	+13156555506	https://www.dollartree.com/locations/ny/cazenovia/7372/	Dollar Deal Reviews	0.76
 0dc54a1de458	Exxon	convenience		27.36357	-99.46072	900 Espejo Molina Rd	Rio Bravo	78046	+19567287225	https://www.exxonmobilfuels.com/en/find-gas-station/200316281		0.92
 2078878ff06f	Exxon	convenience		27.53004	-99.46828	2719 E Saunders St	Laredo	78041	+19567247293	https://www.exxonmobilfuels.com/en/find-gas-station/200316257		0.92
 22543f688073	Exxon	convenience		27.57389	-99.47252	7615 Mcpherson Rd	Laredo	78041	+19567287495	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
 23d57df15c86	Exxon	convenience		27.59191	-99.47860	9101 McPherson Rd	Laredo	78045	+19567123793	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
 58ec635ebc63	Exxon	convenience		27.56657	-99.50232	7045 W Del Mar Blvd	Laredo	78041	+19567122000	https://www.exxon.com/en	Exxon & Mobil Stations	0.99
-9d1886bffe35	Exxon	convenience		27.47458	-99.47489		Laredo	78043	+19567231485	http://www.exxon.com/		0.92
 d8e022b1efee	Exxon	convenience		27.53079	-99.50388	801 Lafayette St	Laredo	78041	+19567289997	https://www.exxon.com/en	Exxon & Mobil Stations	0.92
 f7364630fc2e	Exxon	convenience		27.60518	-99.51732	11801 Mines Rd	Laredo	78045	+18887392730	http://www.exxon.com		1.00
 face074da93d	Exxon	convenience		27.58629	-99.44084	9811 Bob Bullock Loop	Laredo	78045	+19567533715	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
@@ -533,7 +521,6 @@ fbb23458b104	Lyon Drive-Thru	convenience		27.52244	-99.49081	520 E Lyon St	Lared
 fa80a0a2cfb4	Macias Drive Inn	convenience		27.48432	-99.46296	3214 Santa Barbara St	Laredo	78043	+19567243253	https://macias-drive-inn.hub.biz		0.92
 45c9a3d7a6eb	MARISOL'S CONVENIENCE	convenience		27.50540	-99.50231	619 FARRAGUT ST	Laredo	78040		https://locations.valero.com/en-us/LocationDetails/Index/619-FARRAGUT-ST/0000004639	Valero	0.80
 5598c1d86bf3	Mobil	convenience		27.62227	-99.50523	8852 Killam Industrial Blvd	Laredo	78045	+19567178552	http://www.exxonmobilstations.com/1845797-timewise-63-laredo		0.86
-de1adb8197fc	Mobil	convenience		27.61250	-99.52262	8852 Killam Industrial Blvd	Laredo	78045	+19567178552	http://www.exxonmobilstations.com/1845797-timewise-63-laredo		0.68
 b7f0afca1355	Murphy Express	convenience		27.61065	-99.46662	10714 International Blvd.	Laredo	78045			Murphy Express	0.80
 313b055a2b32	Murphy USA	convenience		27.51728	-99.44994	2318 Bob Bullock Lp	Laredo	78043	+19567912889	http://www.murphyusa.com/	Murphy USA	0.99
 8beeb41894f7	Murphy USA	convenience		27.61072	-99.46663	10714 International Blvd	Laredo	78045	+19567291718	http://www.murphyusa.com	Murphy USA	0.92
@@ -541,7 +528,6 @@ b7f0afca1355	Murphy Express	convenience		27.61065	-99.46662	10714 International 
 be1afbc8bd6e	Murphy USA	convenience		27.45210	-99.47670	4419 S Zapata Hwy	Laredo	78046	+19567536595	http://www.murphyusa.com	Murphy USA	0.99
 a0ef5aeea2a7	MyPop Gourmet Popcorn	convenience		27.52909	-99.45380	4202 E Saunders St	Laredo	78041	+19567178800	http://www.mypop.us/		0.84
 c2a5b9205087	Oxxo	convenience		27.50552	-99.50825	1219 Farragut St	Laredo	78040	+19565688575	https://www.oxxo.com		0.99
-024b0f116704	Pepe'S Exxon	convenience		27.04465	-99.43757		San Ygnacio					0.92
 f0e9f369fa13	Pepe'S Exxon	convenience		27.02096	-99.40563		San Ygnacio					0.98
 9d385af0fc92	Pilot Travel Center	convenience		27.68421	-99.46133	1101 Uniroyal Dr	Laredo	78045	+19567175006	https://locations.pilotflyingj.com/us/tx/laredo/1101-uniroyal-dr	Pilot Flying J	0.97
 eaf318aaeb07	Pronto's Superette	convenience		27.51606	-99.48151	2202 N Seymour Ave	Laredo	78040	+19567273231			0.96
@@ -665,7 +651,6 @@ e9fe435dbc39	Timewise	convenience		27.61273	-99.52278	8852 KILLAM INDUSTRIAL BLV
 1085e42560cf	Valero	convenience		27.45247	-99.45879	3302 Pita Mangana Rd	Laredo	78046	+12103452000	https://www.valero.com		0.65
 152f11cca21c	Valero	convenience		27.57435	-99.47369	1200 E Del Mar Blvd	Laredo	78041	+19567226138	https://www.valero.com		0.65
 17fbbeb82298	Valero	convenience		27.60324	-99.47707	2441 SAN ISIDRO	Laredo	78045	+19565230048	https://locations.valero.com/en-us/LocationDetails/Index/2441-SAN-ISIDRO/0000007611	Valero	0.92
-1f2f9cfc3fab	Valero	convenience		27.58599	-99.51049		Laredo	78045	+19567172922	https://locations.valero.com/en-us/LocationDetails/Index/9304-FM-1472/0000007579	Valero	0.99
 2df429c810ed	Valero	convenience		27.50149	-99.46940	602 N ZAPATA HWY	Laredo	78043	+19567268543	https://locations.valero.com/en-us/LocationDetails/Index/602-N-ZAPATA-HWY/0000007559	Valero Energy	0.92
 3a86b9c94bd7	Valero	convenience		27.50632	-99.48952	701 Guadalupe St	Laredo	78040	+12103452000	https://www.valero.com		0.92
 47a997816081	Valero	convenience		27.52899	-99.44423	5002 E Saunders St	Laredo	78041	+19567178539	http://www.valero.com	Valero Energy	0.92
@@ -693,63 +678,95 @@ a2633637b4b3	Valero Energy	convenience		27.55855	-99.44706	2519 Jacaman Rd	Lared
 c7f8e92f651b	Valero Energy	convenience		27.50904	-99.50439	1101 San Bernardo Ave	Laredo	78040	+19567224769	https://locations.valero.com/en-us/LocationDetails/Index/1101-SAN-BERNARDO-AVE/0000007558	Valero	0.92
 a55479c62af7	Yumm	convenience		27.57447	-99.47382	1200 E Del Mar Blvd	Laredo	78041	+19567538858			0.92
 d66b083a37b2	Yumm	convenience		27.53005	-99.46828	2719 E Saunders St	Laredo	78041	+19567247293	http://www.speedystop.com		0.92
-04a52ec91b87	Zapata Pump & Shop	convenience		27.48033	-99.47327	4506 State Highway 359	Laredo	78043	+19567656343			0.58
 295b2e966ac3	Zapata Pump & Shop	convenience		27.49698	-99.44754	4506 State Highway 359	Laredo	78043	+19567656343			0.61
 8371d04802ae	Anahi's Snack	fastfood		27.33529	-99.49990	541 Rosales	Laredo	78046	+19564897798			0.97
 a41bc1543a87	Arby's	fastfood		27.57319	-99.47453	1201 E Del Mar Blvd	Laredo	78045	+19567533512	https://locations.arbys.com/us/tx/laredo/1201-e--del-mar-blvd-.html		0.92
 b250e63834e9	Arby's	fastfood		27.61381	-99.46423	2606 Bob Bullock Loop	Laredo	78045	+19566250422	http://arbys.com/	Arby's	1.00
+1524e35ce3dc	Burger King	fastfood		27.55050	-99.50299	5300 San Dario Ave Ste 167	Laredo	78041	+19566020204	https://burgerking.com/store-locator/store/restaurant_74992		0.92
+17918dcaf377	Burger King	fastfood	burger restaurant	27.53044	-99.50384	801 Lafayette St	Laredo	78041	+19565167453	https://burgerking.com/store-locator/store/11338	Burger King	0.96
+4a0ead00eea9	Burger King	fastfood	burger restaurant	27.59879	-99.45550	1920 Shiloh Dr	Laredo	78045	+19564625092	https://burgerking.com/store-locator/store/26665	Burger King	0.98
+4a6bc80c0591	Burger King	fastfood	burger restaurant	27.53089	-99.48219	1402 E Saunders St	Laredo	78041	+19565167284	https://burgerking.com/store-locator/store/3983	Burger King	0.99
 4cba72d27310	Burger King	fastfood		27.50617	-99.48158	1419 Guadalupe	Laredo	78040	+19565167489	https://burgerking.com/store-locator/store/12275	Burger King	0.99
+6fe03005fb5c	Burger King	fastfood	burger restaurant	27.57232	-99.47220	7515 McPherson Rd	Laredo	78041	+19565682217	https://burgerking.com/store-locator/store/11414	Burger King	0.99
 777a41280604	Burger King	fastfood		27.58993	-99.51225	9810 Mines Rd	Laredo	78045	+19565167840	https://burgerking.com/store-locator/store/8319	Burger King	0.99
 9a778ab179a4	Burger King	fastfood		27.45361	-99.47683	4407 US-83	Laredo	78046	+19564625667	https://burgerking.com/store-locator/store/15756	Burger King	0.99
 abd201bc7372	Burger King	fastfood		27.54244	-99.50385	4601 San Bernardo Ave	Laredo	78041	+19566020219	https://burgerking.com/store-locator/store/5019	Burger King	0.99
+dd1142219bd5	Burger King	fastfood	burger restaurant	27.50552	-99.50884	1301 Farragut St	Laredo	78040	+19565167369	https://burgerking.com/store-locator/store/14016	Burger King	0.98
 e40e5e298198	Burger King	fastfood		27.68730	-99.46358	1010 Beltway Pkwy	Laredo	78045	+19567242106	https://burgerking.com/store-locator/store/15578	Burger King	0.98
 05d6d7b7beaa	Bush's Chicken	fastfood		27.61401	-99.46667	10802 International Blvd	Laredo	78045	+19567910045	http://bushschicken.com/	Bush's Chicken - Laredo	0.95
+4fb93ee67baa	Carl's Jr.	fastfood	burger restaurant	27.60593	-99.47601	10519 McPherson Rd	Laredo	78045	+19567258491	https://www.carlsjr.com/	Carl's Jr.	0.98
+d3c21f2c56e4	Carl's Jr.	fastfood	burger restaurant	27.61348	-99.52350	13602 Mines Rd	Laredo	78045	+19566021084	https://locations.carlsjr.com/tx/laredo/13602-fm-1472	Carl's Jr.	0.99
 a673bbd75ae7	Charleys Cheesesteaks	fastfood		27.95323	-99.37927	23813 I-35	Encinal	78019	+12108243892	https://order.charleys.com/menu/fuel-america-tc-2/	Charleys Cheesesteaks	0.96
 314799524503	Chick-fil-A	fastfood		27.57343	-99.43614	5201 University Blvd St	Laredo	78041		https://www.chick-fil-a.com/locations/tx/texas-a-m-international-university?utm_source=yext&utm_medium=link		0.95
 46725b29fdbe	Chick-fil-A	fastfood		27.54664	-99.50241	5000 San Dario Ave	Laredo	78041	+19567291190	https://www.chick-fil-a.com/locations/tx/laredo?utm_source=yext&utm_medium=link	Chick-fil-A	0.93
 70ee83cdf907	Chick-fil-A	fastfood		27.51593	-99.44958	1916 Bob Bullock Loop	Laredo	78043	+19567298846	http://www.chick-fil-a.com/	Chick-fil-A	0.99
+82aa0f287c63	Chick-Fil-A	fastfood	american restaurant	27.60797	-99.50394	Northlaredo 2460Monarchdr Laredo Tx	Laredo	78045	+19567640451	http://www.chick-fil-a.com		0.77
 889be5162306	Chick-fil-A	fastfood		27.54411	-99.48335	5118 Mcpherson Rd	Laredo	78041	+19567291190	http://www.chick-fil-a.com/laredo		0.92
 c6e42179b15a	Chick-fil-A	fastfood		27.61055	-99.47166	2460 Monarch Dr	Laredo	78045	+19567640451	https://www.chick-fil-a.com/locations/tx/north-laredo?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 c9279d630866	Chick-fil-A	fastfood		27.55177	-99.50043	5300 San Dario Ave	Laredo	78041	+19567222328	https://www.chick-fil-a.com/locations/tx/mall-del-norte?utm_source=yext&utm_medium=link	Chick-fil-A	0.98
 2989813c2a69	Chicken Grill House	fastfood		27.43564	-99.46404	493 Adamsville Road	Laredo	78040				0.60
 9121d898bd97	Chipotle Mexican Grill	fastfood		27.61508	-99.46588	10819 International Blvd	Laredo	78045	+19565528742	https://locations.chipotle.com/tx/laredo/10819-international-blvd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D5722	Chipotle Mexican Grill	0.96
+ebbc040608da	Chipotle Mexican Grill	fastfood	mexican restaurant	27.57332	-99.47386	1211 E Del Mar Blvd Suite #1	Laredo	78041	+19567234905	https://locations.chipotle.com/tx/laredo/1211-del-mar-blvd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2728	Chipotle Mexican Grill	0.99
 1348d33d3a66	Church's Chicken	fastfood		27.56274	-99.47311	6701 McPherson Rd	Laredo	78041	+19567123342	https://locations.churchs.com/tx/laredo/6701-mcpherson-road	Church's Chicken	0.99
+6f0a49998f37	Church's Chicken	fastfood	chicken wings restaurant	27.51583	-99.49477	2201 Sanders Ave	Laredo	78040	+19567262656	https://churchs.com		0.55
+1b3b3cd84142	Church's Texas Chicken	fastfood	chicken restaurant	27.59116	-99.51276	611 Rancho Viejo Dr	Laredo	78045	+19567271495	https://churchs.com		0.69
 1b57f09ec8e8	Church's Texas Chicken	fastfood		27.50672	-99.47913	1702 Guadalupe Street	Laredo	78040	+19567226131	https://locations.churchs.com/tx/laredo/1702-guadalupe-street	Church's Chicken	0.99
 2d0d6269d4a6	Church's Texas Chicken	fastfood		27.53072	-99.50471	3420 San Bernardo Avenue	Laredo	78040	+19567222802	https://locations.churchs.com/tx/laredo/3420-san-bernardo-avenue	Church's Chicken	0.98
+83d277da23ed	Church's Texas Chicken	fastfood	chicken restaurant	27.60291	-99.47733	10219 McPherson Rd	Laredo	78045	+19567916358	https://churchs.com		0.92
 97c0c55f5947	Church's Texas Chicken	fastfood		27.46410	-99.47669	3615 Highway 83	Laredo	78046	+19567233456	https://locations.churchs.com/tx/laredo/3615-highway-83	Church's Chicken	0.98
+9997b805062c	Church's Texas Chicken	fastfood	chicken restaurant	27.53030	-99.47392	2201 E. Saunders Street	Laredo	78040	+19567262656	https://locations.churchs.com/tx/laredo/2201-e.-saunders-street		0.99
 aaf1e58ddc06	Church's Texas Chicken	fastfood		27.51859	-99.44907	2333 Bob Bullock Loop	Laredo	78043	+19567917824	https://locations.churchs.com/tx/laredo/2333-bob-bullock-loop	Church's Chicken	0.98
 e4d664e2834e	Church's Texas Chicken	fastfood		27.50222	-99.50680	1108 Zaragoza Street	Laredo	78040	+19565230199	https://locations.churchs.com/tx/laredo/1108-zaragoza-street	Church's Chicken	0.99
 095302d08e88	Cosina Suarez	fastfood		27.48027	-99.47289	1901 S Zapata Hwy	Laredo	78046	+19562907501			0.70
 07756e549215	Dairy Queen	fastfood		27.53794	-99.50416	4205 San Bernardo Ave	Laredo	78041	+19567243355	https://www.dairyqueen.com/en-us/locations/tx/laredo/4205-san-bernardo-ave/14344/?y_source=1_MjkzMzkxOTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 5b4a3a816b51	Dairy Queen	fastfood		27.50641	-99.47920	1701 Guadalupe St 1701 Guadalupe St	Laredo	78043	+19567232601	https://www.dairyqueen.com/en-us/locations/tx/laredo/1701-guadalupe-st/14343/?y_source=1_MjkzMzkwMDgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+4c641ed24dd7	Domino's	fastfood	pizza restaurant	27.59113	-99.47900	611 Shiloh	Laredo	78045	+19567263333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+633e03d2c897	Domino's	fastfood	pizza restaurant	27.49294	-99.45406	3919 Jaime Zapata Memorial Hwy Ste 1	Laredo	78043	+19567960021	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+7156bbc56d72	Domino's	fastfood	pizza restaurant	27.54443	-99.48323	5220 Mc Pherson Rd	Laredo	78041	+19567261974	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+85147d31ee98	Domino's	fastfood	pizza restaurant	27.47187	-99.47591	1920 Thurman St	Laredo	78046	+19567222221	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+72861b01969a	Domino's Pizza	fastfood	pizza restaurant	27.53851	-99.50399	4301 San Bernardo Ave	Laredo	78041	+19566352025	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+9e2ae9e8ca0f	Domino's Pizza	fastfood	pizza restaurant	27.61078	-99.52190	12602 Mines Rd	Laredo	78045	+19569482672	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
 454809709a08	DQ Grill & Chill	fastfood		27.53790	-99.50404	4205 San Bernardo Ave	Laredo	78041		https://www.dairyqueen.com/en-us/locations/tx/laredo/4205-san-bernardo-ave/4117	DQ Grill & Chill	0.80
 a205cb37f7df	DQ Grill & Chill	fastfood		27.50636	-99.47916	1701 Guadalupe St	Laredo	78043		https://www.dairyqueen.com/en-us/locations/tx/laredo/1701-guadalupe-st/4116	DQ Grill & Chill	0.80
 13f864485f9c	Dunkin Donuts	fastfood		27.61255	-99.45920	207 Sabal Loop, Address to change	Laredo	78045		https://www.dunkindonuts.com/locations/us/tx/laredo/207-sabal-loop/store-366812/	Dunkin'	0.80
 966b23221d94	El Laguito Snacks	fastfood		27.36652	-99.47385	1224 Paseo de Danubio Rd	Rio Bravo	78046	+19569559284			0.93
 db862d48e844	El Primo Snack's	fastfood		27.50581	-99.48060	1104 N Meadow Ave	Laredo	78040				0.94
 1df5d079196b	El Rico Taco by Dany Salazar	fastfood		27.53167	-99.50218	3519 San Dario Ave	Laredo	78041	+19564800926			0.91
-1dc747fab9b0	Food City Laredo	fastfood		27.55306	-99.49874	Mall Del Norte	Laredo	78041	+19563192492			0.63
+46aa095ac36b	Firehouse Subs	fastfood	sandwich shop	27.51958	-99.44855	2402 Bob Bullock Loop Unit 5	Laredo	78043	+19565683296	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1658	Firehouse Subs	0.98
+4c8cf76bef4c	Firehouse Subs	fastfood	sandwich shop	27.60721	-99.47493	2438 Monarch Dr	Laredo	78045	+19567533404	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1165	Firehouse Subs	0.99
 7c597fc61221	Food City Laredo	fastfood		27.55095	-99.50233	Mall Del Norte	Laredo	78041	+19563192492			0.71
+5e19134b2c20	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	27.61378	-99.46465	2604 Bob Bullock Lp	Laredo	78045	+19566255661	https://www.freddys.com/location/laredo?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 e18ef9d05d26	Fuddruckers	fastfood		27.50261	-99.50740	I-35-Br	Laredo	78040		http://www.fuddruckers.com/		0.97
 2d8f40e0aefc	Great American Cookies	fastfood		27.50178	-99.50994	1600 Water Street	Laredo	78040		https://ordernew.greatamericancookies.com/gac/1600-water-street-laredo-tx-78040	Great American Cookies	0.80
 b64da99612b0	Great American Cookies	fastfood		27.55182	-99.50122	Mall Del Norte - 5300 San Dario Ste #166	Laredo	78041		https://ordernew.greatamericancookies.com/gac/mall-del-norte-5300-san-dario-ste-166-laredo-tx-78041	Great American Cookies	0.92
 be82eb1861b1	Great American Cookies	fastfood		27.56201	-99.45448	2329 Jacaman Rd	Laredo	78041		https://ordernew.greatamericancookies.com/gac/2329-jacaman-rd-laredo-tx-78041	Great American Cookies	0.80
 fc42fa90cfbf	Great American Cookies	fastfood		27.57493	-99.47014	1605 E. Del Mar Blvd. Suite 101	Laredo	78041		https://ordernew.greatamericancookies.com/gac/1605-e-del-mar-blvd-suite-101-laredo-tx-78041	Great American Cookies	0.80
-7393d7fe9fec	Habaneros Tacos & Wings	fastfood		27.54957	-99.50137	5300 San Dario Ave	Laredo	78041	+19565167272			0.88
 c13f7f4cade7	Habaneros Tacos & Wings	fastfood		27.55321	-99.50084	5300 San Dario Ave	Laredo	78041	+19565167272			0.89
 450ef620d9fb	Hungry Howie's	fastfood		27.57677	-99.46523	2019 E Del Mar Blvd	Laredo	78041		https://hungryhowies.com/location/hungry-howie-s-pizza-01506-24606642	Hungry Howie's	0.80
 5dbb9968e3d1	Iglu	fastfood		27.50986	-99.46828	2719 Mier St	Laredo	78043	+19567229410			0.77
 790be6ddc531	Jack in the Box	fastfood		27.60599	-99.47600	10519 Mcpherson Rd	Laredo	78045	+18326046515	https://www.jackinthebox.com		0.99
 88d77b6dac9f	Jack in the Box	fastfood		27.45135	-99.47756	4502 S Zapata Hwy	Laredo	78046	+19562675048	https://www.jackinthebox.com		0.99
 9cea2cbd0808	Jack in the Box	fastfood		27.56709	-99.50246	7101 San Dario Ave	Laredo	78045	+13612253006	https://www.jackinthebox.com		0.99
+bb8c1b208c1f	Jack in the Box	fastfood	taco restaurant	27.54148	-99.48345	5106 Mcpherson Ave	Laredo	78041	+19567171881	http://www.jackinthebox.com/locations/TX/Laredo/78041/3662?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80c1f		0.97
 fb438b24734c	Jack in the Box	fastfood		27.58340	-99.50883	8919 Mines Rd	Laredo	78045	+13612836017	https://www.jackinthebox.com		0.97
+aabf19d3c6a6	Jersey Mike's	fastfood	sandwich shop	27.60957	-99.47408	2019 NE Bob Bullock Loop Suite C-350	Laredo	78045	+19565974515	https://www.jerseymikes.com/15259/laredo-tx	Jersey Mike's Subs	0.99
+6609ab7bf2b9	Jimmy John's	fastfood	sandwich shop	27.57527	-99.47128	1408 E Del Mar Blvd Suite 4C	Laredo	78041	+19565680300	https://locations.jimmyjohns.com/tx/laredo/sandwiches-3849.html	Jimmy John's	0.96
 a22083549d80	Kentucky Fried Chicken	fastfood		27.50905	-99.51347	1802 Washington St	Laredo	78040	+19567227011	http://www.kfc.com/		0.57
 ccfc88d06cb1	KFC	fastfood		27.47367	-99.47643	2602 S. Zapata Hwy	Laredo	78046	+19567951851	https://locations.kfc.com/tx/laredo/2602-s-zapata-hwy	KFC	0.99
 d57fa38ce4cb	KFC	fastfood		27.50633	-99.47242	2319 Guadalupe	Laredo	78043	+19567230711	https://locations.kfc.com/tx/laredo/2319-guadalupe	KFC	0.99
 ddfb47225ad5	KFC	fastfood		27.57299	-99.47206	7605 McPherson Drive	Laredo	78041	+19567122339	https://locations.kfc.com/tx/laredo/7605-mcpherson-drive	KFC	0.96
+df4e7ae7a5e4	KFC	fastfood	chicken restaurant	27.50906	-99.50411	802 Washington St	Laredo	78040	+19567227011	http://www.kfc.com		0.92
+fb7ca41ceada	KFC	fastfood	chicken restaurant	27.56714	-99.48389	7605 Mcpherson Dr	Laredo	78041	+19567122339	http://www.kfc.com/storelocator/Default.aspx?address=7605%20McPherson%20Drive,Laredo,TX		0.85
 887908e3be12	La Paletera	fastfood		27.47699	-99.47575	2314 S Zapata Hwy	Laredo	78046	+19567272878	http://www.lapaletera.com		0.77
 d5e793fd97ca	La Tradicional Nieves De Garrafa	fastfood		27.58615	-99.49088	401 Shiloh Dr Ste 9	Laredo	78045	+19562352364			0.95
 f9b4dfc20fcf	La Tremenda restaurant y snack	fastfood		27.52016	-99.46822	2620 N Arkansas Ave	Laredo	78043	+19567231155			0.66
+c2a816ebce6e	Little Caesars	fastfood	pizza restaurant	27.54070	-99.48492	1001 E Calton Rd	Laredo	78041	+19567128223	https://littlecaesars.com/en-us/store/10717	Little Caesars	0.99
+0d5b41b84d8e	Little Caesars Pizza	fastfood	pizza restaurant	27.50645	-99.48106	1503 Guadalupe St	Laredo	78040	+19567129997	https://littlecaesars.com/en-us/store/7482	Little Caesars	0.99
+0f09bfc71db6	Little Caesars Pizza	fastfood	pizza restaurant	27.58720	-99.51127	9502 Mines Rd	Laredo	78045	+19566020473	https://littlecaesars.com/en-us/store/12440	Little Caesars	0.99
+5f4239ecc0a9	Little Caesars Pizza	fastfood	pizza restaurant	27.46232	-99.47797	3706 S Zapata Hwy	Laredo	78046	+19567913900	https://littlecaesars.com/en-us/store/9342	Little Caesars	0.99
+83cd434bb7dc	Little Caesars Pizza	fastfood	pizza restaurant	27.51795	-99.44916	2420 Bob Bullock Loop	Laredo	78043	+19567291424	https://littlecaesars.com/en-us/store/11023	Little Caesars	0.97
+da70147756f3	Little Caesars Pizza	fastfood	pizza restaurant	27.60719	-99.47484	2438 Monarch Dr Ste A-175	Laredo	78045	+19567237724	http://www.littlecaesars.com/	Little Caesars	0.99
+e4bf1868e7e8	Little Caesars Pizza	fastfood	pizza restaurant	27.51795	-99.51038	2020 Santa Maria Ave	Laredo	78040	+19567228662	http://www.littlecaesars.com/	Little Caesars	0.99
 310fac7ed9ca	Long John Silver's	fastfood		27.54978	-99.50293	5300 San Dario Ave	Laredo	78041	+19567242184	http://www.ljsilvers.com/	Long John Silver's	0.92
 938c28e2d0d3	Macdonals Laredo Txs Zapata	fastfood		27.50934	-99.50382		Laredo					0.74
 1995a0b3c053	Macias Drive-Thru	fastfood		27.48427	-99.46224	3301 Santa Barbara St	Laredo	78046	+19567171614	http://www.superpages.com/bp/laredo-tx/macias-drive-thru-L2050738331.htm		0.95
@@ -775,7 +792,24 @@ fe191a3ac356	McDonald's	fastfood		27.46478	-99.46096	3320 Lomas Del Sur Boulevar
 b2da257e924e	MDN foodcourt	fastfood		27.55187	-99.50065		Laredo			www.malldelnorte.com		0.82
 fcf55cf5ab78	Orlando's Snack	fastfood		27.59540	-99.51427	11100 FM-1472	Laredo	78045	+19564410115			0.93
 38d1b108c029	Orlandos Snack	fastfood		27.48829	-99.47750	1802 Barrios St	Laredo	78043	+19566020320			0.64
+4208147fe817	Panda Express	fastfood	chinese restaurant	27.51784	-99.44908	2324 Bob Bullock Loop	Laredo	78043	+19567969112	http://www.pandaexpress.com/	Panda Express México	0.97
+5520a57ba245	Panda Express	fastfood	chinese restaurant	27.61220	-99.46463	2603 North East Bob Bullock Loop Suite #100 Suite #100	Laredo	78045	+19567220061	http://www.pandaexpress.com/	Panda Express México	0.97
 f37b6e53d7dc	Papa John's	fastfood		27.61377	-99.46417	2606 NE BOB BULLOCK LOOP 20	Laredo	78045		https://locations.papajohns.com/united-states/tx/78045/laredo/2606-ne-bob-bullock-loop-20	Papa John's	0.94
+32b588cf1cc2	Papa John's Pizza	fastfood	pizza restaurant	27.54434	-99.50428	4803 San Bernardo Ave	Laredo	78041	+19567237272	http://www.papajohns.com/		0.92
+5bab1dbb8b92	Papa John's Pizza	fastfood	pizza restaurant	27.58740	-99.47735	1212 International Blvd Ste 4	Laredo	78045	+19567123335	https://www.papajohns.com/		0.92
+5fa74d89a60a	Papa Johns Pizza	fastfood	pizza restaurant	27.45251	-99.47781	4410 ZAPATA Highway	Laredo	78046	+19569372990	https://locations.papajohns.com/united-states/tx/78046/laredo/4410-zapata-highway?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2NzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+a8febb03aa99	Papa Johns Pizza	fastfood	pizza restaurant	27.61377	-99.46417	2606 NE BOB BULLOCK LOOP 20, Suite 102	Laredo	78045	+19564622270	https://locations.papajohns.com/united-states/tx/78045/laredo/2606-ne-bob-bullock-loop-20?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI3MDQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+f4160cc9982d	Papa Johns Pizza	fastfood	pizza restaurant	27.50685	-99.47387	2204 GUADALUPE ST	Laredo	78043	+19562675151	https://locations.papajohns.com/united-states/tx/78043/laredo/2204-guadalupe-st?utm_source=bing-maps&utm_medium=organic&y_source=1_OTQwMTA3MzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+17a721bd132f	Pizza Hut	fastfood	pizza restaurant	27.50635	-99.48051	1519 Guadalupe St Webb	Laredo	78040	+19567220222	https://locations.pizzahut.com/tx/laredo/1519-guadalupe-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299835	Pizza Hut	0.99
+19d9c8a5dc96	Pizza Hut	fastfood	pizza restaurant	27.53033	-99.46947	2619 E Saunders St	Laredo	78041	+19567271354	http://www.pizzahut.com/	Pizza Hut	0.99
+30d59bf5937f	Pizza Hut	fastfood	pizza restaurant	27.59926	-99.48097	9810 N McPherson Ave Webb	Laredo	78045	+19567259933	https://locations.pizzahut.com/tx/laredo/9810-n-mcpherson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299424	Pizza Hut	0.99
+3dc315cd65f6	Pizza Hut	fastfood	pizza restaurant	27.54544	-99.50404	4821 San Bernardo Ave Webb	Laredo	78041	+19567223682	https://locations.pizzahut.com/tx/laredo/4821-san-bernardo-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299524	Pizza Hut	0.99
+55a277a03b6d	Pizza Hut	fastfood	pizza restaurant	27.48032	-99.47375	2119 Pine St	Laredo	78046	+19567911199	https://locations.pizzahut.com/tx/laredo/2119-pine?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300019	Pizza Hut	0.99
+69190cf52f5c	Pizza Hut	fastfood	pizza restaurant	27.58366	-99.50916	9001 FM 1472 Webb	Laredo	78041	+19567918888	https://locations.pizzahut.com/tx/laredo/9001-fm-1472?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299090	Pizza Hut	0.97
+a5e81fd14248	Pizza Hut	fastfood	pizza restaurant	27.56239	-99.45464	2329 Jacaman Road Webb	Laredo	78041	+19565680414	https://locations.pizzahut.com/tx/laredo/2329-jacaman-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311569	Pizza Hut	0.99
+ad0bad89922e	Pizza Hut	fastfood	pizza restaurant	27.45248	-99.47678	4415 S Zapata Hwy Webb	Laredo	78046	+19564770103	https://locations.pizzahut.com/tx/laredo/4415-s-zapata-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315985	Pizza Hut	0.97
+d4d997b1ed9b	Pizza Hut	fastfood	pizza restaurant	27.51855	-99.50375	2106 Santa Ursula Ave Webb	Laredo	78040	+19567221234	https://locations.pizzahut.com/tx/laredo/2106-santa-ursula-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299039	Pizza Hut	1.00
+f9047d886501	Pizza Hut	fastfood	pizza restaurant	27.54552	-99.48224	5303 McPherson Rd	Laredo	78041	+19567278988	https://locations.pizzahut.com/tx/laredo/5303-mcpherson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299696	Pizza Hut	0.99
 200a865e7094	Popeyes	fastfood		27.51677	-99.50375	801 Park St	Laredo	78040	+19567264711	https://www.popeyes.com/store-locator/store/restaurant_82057	Popeyes Louisiana Kitchen	0.99
 60f1c752bb04	Popeyes	fastfood		27.47726	-99.47411	2307 S Zapata Hwy	Laredo	78046	+19567916555	https://www.popeyes.com/store-locator/store/restaurant_82221	Popeyes Louisiana Kitchen	0.99
 9366bc5bb8de	Popeyes	fastfood		27.50674	-99.48006	1602 Guadalupe St	Laredo	78043	+19567269731	https://www.popeyes.com/store-locator/store/restaurant_81717	Popeyes Louisiana Kitchen	0.99
@@ -791,11 +825,31 @@ df4170ec7723	Restaurant - Snack Bar Río	fastfood		27.36312	-99.46753		Rio Bravo
 c727671970dc	Sonic	fastfood		27.95292	-99.37953	23138 I-35 Frontage Rd	Encinal	78019		https://www.sonicdrivein.com/locations/us/tx/encinal/23138-i-35-frontage-rd/store-6750/	Sonic	0.96
 522b71ab025f	Sonic Drive In	fastfood		27.47895	-99.47297	2001 Highway 83	Laredo	78046	+19565083939	https://locations.sonicdrivein.com/tx/laredo/2001-highway-83.html	Sonic Drive-In	0.99
 b5b6d0f9c9f6	Sonic Drive In	fastfood		27.54939	-99.48156	5505 Mcpherson Road	Laredo	78041	+19565230533	https://locations.sonicdrivein.com/tx/laredo/5505-mcpherson-road.html	Sonic Drive-In	0.99
+485fb51eeaf2	Sonic Drive-In	fastfood	burger restaurant	27.58765	-99.47637	1302 International Blvd	Laredo	78045	+19567255202	https://locations.sonicdrivein.com/tx/laredo/1302-internation-boulevard.html		0.96
+94542c8ed4c5	Sonic Drive-In	fastfood	theme restaurant	27.98977	-99.37006	23138 I-35 S	Encinal	78019		https://locations.sonicdrivein.com/tx/encinal/23138-i-35-frontage-rd.html	Sonic Drive-In	0.99
+0e1fe255225c	Subway	fastfood	sandwich shop	27.58684	-99.51100	9320 Mines Road Unit 1	Laredo	78045	+19567128377	https://restaurants.subway.com/united-states/tx/laredo/9320-mines-road	Subway	0.97
+19755d379058	Subway	fastfood	sandwich shop	27.53023	-99.47480	2117 E. Saunders #2	Laredo	78041	+19567958840	https://restaurants.subway.com/united-states/tx/laredo/2117-e-saunders	Subway	0.97
+19c89405c9ba	Subway	fastfood	sandwich shop	27.55562	-99.50459	5724 San Bernardo Ave Ste 103	Laredo	78041	+19567275727	http://www.Subway.com/	Subway	0.98
 2ae8b7ec5b79	Subway	fastfood		27.36333	-99.46099	900 Espejo Molina Rd	Laredo	78046	+19567530647	http://www.subway.com		0.92
+33d13af0096d	Subway	fastfood	sandwich shop	27.60535	-99.51749	11801 FM 1472	Laredo	78045	+19567917137	https://www.subway.com		0.92
+40c803450185	Subway	fastfood	sandwich shop	27.54345	-99.48338	5112 McPherson Rd #103	Laredo	78041	+19567291556	https://restaurants.subway.com/united-states/tx/laredo/5112-mcpherson-rd	Subway	0.99
+68a1e5457b83	Subway	fastfood	sandwich shop	27.56618	-99.47340	6966 McPherson Road Suite A	Laredo	78041	+19562678056	https://restaurants.subway.com/united-states/tx/laredo/6966-mcpherson-road	Subway	0.98
+6b3315e9c636	Subway	fastfood	sandwich shop	27.68437	-99.46138	1101 Uniroyal Dr	Laredo	78045	+19567170294	http://www.subway.com/en-us	Subway	0.96
+878d4818bc1d	Subway	fastfood	sandwich shop	27.49038	-99.45951	3519 Jaime Zapata Memorial Hwy	Laredo	78043	+19567297472	https://restaurants.subway.com/united-states/tx/laredo/3519-jaime-zapata-memorial-hwy	Subway	0.99
+8f21da2ecb94	Subway	fastfood	sandwich shop	27.64491	-99.55584	101 Pinnacle Road	Laredo	78045	+19567276098	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=70055&utm_campaign=evergreen-2020&y_source=1_MTYwMzY0MDQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
+99e77b019096	Subway	fastfood	sandwich shop	27.58720	-99.47717	1212 International Blvd Ste 1	Laredo	78045	+19567262616	https://restaurants.subway.com/united-states/tx/laredo/1212-international-blvd	Subway	0.97
+b372eeebbc29	Subway	fastfood	sandwich shop	27.56720	-99.49949	W Del Mar Blvd	Laredo	78041	+19569512398	https://restaurants.subway.com/united-states/tx/laredo/201-w-del-mar-blvd	Subway	0.99
+b415c0731a69	Subway	fastfood	sandwich shop	27.56660	-99.50191	7045 San Dario, Kwik Chek	Laredo	78041			Subway	0.80
+b80ce7feb01f	SUBWAY	fastfood	sandwich shop	27.60568	-99.52982	I-35	Laredo	78041		http://subway.com		0.77
+bbcefa305b96	Subway	fastfood	sandwich shop	27.61186	-99.46729	2517 Bob Bullock Loop Suite 102	Laredo	78045	+19567297701	https://restaurants.subway.com/united-states/tx/laredo/2517-bob-bullock-loop	Subway	0.97
+c17bd1344ee6	Subway	fastfood	sandwich shop	27.50547	-99.48061	1020 N Meadow Ave	Laredo	78040	+19567297472	https://restaurants.subway.com/united-states/tx/laredo/1020-n-meadow	Subway	0.95
+d71d68f96f9f	Subway	fastfood	sandwich shop	27.53028	-99.50468	3402 San Bernardo Ave # 1	Laredo	78040	+19565684838	https://www.subway.com		0.95
+d71e6a98cae9	Subway	fastfood	sandwich shop	27.51631	-99.45190	4311 Clark Blvd	Laredo	78043	+19565238627	http://subway.com/	Subway	0.94
+de2f69a32250	Subway	fastfood	sandwich shop	27.57152	-99.43584	5201 University Blvd	Laredo	78041	+19563262095	https://restaurants.subway.com/united-states/tx/laredo/5201-university-blvd?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=30545&utm_campaign=evergreen-2020&y_source=1_MTQ5MTE1MjctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
 fcbcb1f41f72	Subway	fastfood		27.45243	-99.47678	4415 Hwy 83, Suite 400	Laredo	78046	+19567266006	https://restaurants.subway.com/united-states/tx/laredo/4415-hwy-83?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=39234&utm_campaign=evergreen-2020&y_source=1_MTQ4OTY3NjItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		1.00
 2c99b903f1f8	Taco Bell	fastfood		27.53099	-99.47360	2306 E Saunders	Laredo	78041	+19567182645	http://www.tacobell.com/	Taco Bell	0.99
 4e1ac524e2de	Taco Bell	fastfood		27.53878	-99.50388	4309 San Bernardo Ave	Laredo	78041	+19567264936			0.98
-66004234b63c	Taco Bell	fastfood		27.68841	-99.46462	1010 Beltway Pkwy	Laredo	78045	+19567242016			0.75
+9cd518a5f585	Taco Bell	fastfood	mexican restaurant	27.50654	-99.50255	801 San Dario Ave	Laredo	78040	+15122499500	www.tacobell.com		0.92
 adf09a9e93bb	Taco Bell	fastfood		27.61065	-99.47070	2455 Monarch Ste-105	Laredo	78045	+19567910900	http://www.tacobell.com/	Taco Bell	0.98
 b49c12c875d2	Taco Bell	fastfood		27.68728	-99.46358	1010 Beltway Pkwy	Laredo	78045	+19567242016	http://www.tacobell.com/	Taco Bell	0.98
 75743f406455	Taco Palenque	fastfood		27.50796	-99.52338	1 West End Washington St	Laredo	78040		https://tacopalenque.com/locations/tx/laredo/1-west-end-washington-st/	Taco Palenque	0.80
@@ -816,10 +870,18 @@ cac2ad928a77	Wendy's	fastfood		27.51128	-99.50443	1319 San Bernardo	Laredo	78040
 2d511dd15795	Whataburger	fastfood		27.46052	-99.47803	809 Riverhill Dr	Laredo	78046	+19567227100	http://whataburger.com/	Whataburger	0.99
 60b966c4a2cc	Whataburger	fastfood		27.50690	-99.47443	2118 Guadalupe St	Laredo	78043	+19567239757	http://whataburger.com/	Whataburger	0.99
 711932e19f83	Whataburger	fastfood		27.59152	-99.47952	9102 Mcpherson Rd	Laredo	78045	+19567263119	http://whataburger.com/	Whataburger	0.99
+85cb02ae19aa	Whataburger	fastfood	burger restaurant	27.52014	-99.44946	2420 Bob Bullock Loop	Laredo	78043	+19564770477	wasafety.com.au		0.55
+87d33398bec9	Whataburger	fastfood	burger restaurant	27.50663	-99.49986		Laredo			http://www.whataburger.com/	Whataburger	0.97
+9a8f0a4f3042	Whataburger	fastfood	burger restaurant	27.55979	-99.44817	7010 Lancer Rd	Laredo	78041	+19567530200	http://whataburger.com/	Whataburger	0.99
 b0da43400a00	Whataburger	fastfood		27.49779	-99.44888	4416 Highway 359	Laredo	78043	+19567129889	https://locations.whataburger.com/tx/laredo/4416-highway-359.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 b8bde9632d87	Whataburger	fastfood		27.61288	-99.47038	2420 NE Bob Bullock	Laredo	78043	+19564770477	https://locations.whataburger.com/tx/laredo/2420-ne-bob-bullock.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 cec5d7744ec7	Whataburger	fastfood		27.54483	-99.50486	4902 San Bernardo	Laredo	78041	+19567238283	http://whataburger.com/	Whataburger	0.99
+d004d816b274	Whataburger	fastfood	burger restaurant	27.59260	-99.51326	10112 FM 1472	Laredo	78045	+19567178506	http://whataburger.com/	Whataburger	0.96
+e4bab8f0bfb9	Whataburger	fastfood	burger restaurant	27.56684	-99.50141	221 W. Del Mar Blvd.	Laredo	78041	+19567252509	http://whataburger.com/	Whataburger	0.97
 fbbc56025545	Whataburger	fastfood		27.56699	-99.47335	7110 McPherson Rd.	Laredo	78041	+19567291160	https://locations.whataburger.com/tx/laredo/7110-mcpherson-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+15d019de4da4	Wingstop	fastfood	chicken restaurant	27.45251	-99.47697	4415 US Hwy 83 S Ste 300	Laredo	78046	+19567969464	https://www.wingstop.com/location/wingstop-322-laredo-tx-78046/menu?y_source=1_NTUyMDY1OTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+1e3041bc4e55	Wingstop	fastfood	chicken restaurant	27.52035	-99.44849	2420 Bob Bullock Loop Ste 20	Laredo	78043	+19567179464	https://www.wingstop.com/location/wingstop-765-laredo-tx-78043/menu?y_source=1_NTUyMDc1NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.93
+b938bdf78964	Wingstop	fastfood	chicken wings restaurant	27.61243	-99.46451	2603 NE Bob Bullock Loop, Suites 2 & 3	Laredo	78045	+19569379464	https://www.wingstop.com/location/wingstop-4031-laredo-tx-78045/menu?y_source=1_MTA5NjY4NTk0OS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 d1d2f4529d29	Wingstop	fastfood		27.56907	-99.50166	7309 San Dario Ave Ste 150	Laredo	78045	+19567539464	https://www.wingstop.com/location/wingstop-150-laredo-tx-78045/menu?y_source=1_NTUyMDY0OTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 d47361b35655	Wok-A-Molé	fastfood		27.50745	-99.50860	916 Salinas Ave	Laredo	78040				0.77
 68a47e36df98	35 and Calton H-E-B	grocery		27.54220	-99.50089	4801 SAN DARIO	Laredo	78041		https://www.heb.com/heb-store/us/tx/laredo/35-and-calton-h-e-b-255	H-E-B	0.80
@@ -879,7 +941,6 @@ c10f711742b5	Specialties Of Mexico	grocery	mexican grocery store	27.61357	-99.53
 63825f7a6986	Tacos Randy	grocery		27.52863	-99.42790	calle Casa del Sol Col. Dan José	Laredo	78043	+19569778767			0.84
 f4c1871aec1e	Tacos rendon	grocery		27.45304	-99.47819	4318 S Zapata Hwy	Laredo	78046	+19563944657			0.86
 497562ad1a36	Taqueria Suadero	grocery		27.52333	-99.48017	3001 N Meadow Ave	Laredo	78040	+19565680482			0.69
-04b264be4714	Taquería la Mexicana	grocery		27.61940	-99.21265	Ampliación los fresnos	Laredo	88000	+528673041443			0.64
 d2d5f1c2a3f4	Tortillas De Harina Los Mendoza	grocery		27.49297	-99.45376	3919 Jaime Zapata Memorial Hwy	Laredo	78043	+19567172560			0.96
 35752ea7f530	Tortillas de Harina Los Mendoza 2	grocery		27.50905	-99.47478	2100 Corpus Christi St SUIT #2	Laredo	78043	+19567013017			0.89
 14b383f87b96	Tortilleria La Fe	grocery		27.47519	-99.46753	2720 Zacatecas St	Laredo	78046	+19567961279			0.92
@@ -895,7 +956,6 @@ a721268a6a69	Yumm! Laredo	grocery		27.58629	-99.44114	9811 Bob Bullock Lp	Laredo
 8c707fa43f2a	Budget Medical CARE	hospital		27.56187	-99.47267	1405 Jacaman Rd	Laredo	78041	+19567220808	http://budgetmedicalcaretx.com/		0.75
 833b424c8b70	Cedar Health Clinic	hospital		27.51991	-99.49052		Laredo		+19567954900	http://www.ci.laredo.tx.us/Health/Healthindex.htm		0.97
 6ed0b222c5b5	Chanderbhan - Psychological Services in Laredo, Texas	hospital		27.51595	-99.48198	Chanderbhan Psychological Services 5219 ,McPherson Road, Suite 312 Laredo, Texas 78041, McPherson Road	Laredo	78041	+19568981595	https://www.chandpsych.com		0.77
-d89e60be5073	Chanderbhan - Psychological Services in Laredo, Texas	hospital		27.51797	-99.45916	Chanderbhan Psychological Services 5219 ,McPherson Road, Suite 312 Laredo, Texas 78041, McPherson Road	Laredo	78041	+19568981595	https://www.chandpsych.com		0.77
 daf9f89f9621	Davita Ravenna Dialysis	hospital		27.60679	-99.47278	2443 Monarch Dr	Laredo	78045	+19567255026	http://www.davita.com/	DaVita	0.92
 54b5851a89a8	Doctors Hospital Mines Road Family Clinic	hospital		27.58870	-99.51048	9505 Mines Rd	Laredo	78045	+19565233400			0.71
 fa845823741f	Doctors Hospital of Laredo	hospital		27.60658	-99.47849	10700 McPherson Rd	Laredo	78045	+19565232000	https://www.doctorshosplaredo.com/?utm_source=Facebook&utm_medium=Yext	Doctors Hospital of Laredo	0.98
@@ -905,7 +965,6 @@ b04cbb32e1ee	Doctors Hospital Wound Care	hospital		27.60685	-99.48012		Laredo		+
 b34b4f83861b	Driscoll Laredo High Risk Clinic	hospital		27.60593	-99.48000	10710 McPherson	Laredo					0.85
 04dfd0d68e20	Drs Hospital of Laredo 2nd floor	hospital		27.60694	-99.47836		Laredo					0.76
 3e6f7c17f78a	Endovascular & Minimally Invasive Therapies & Interventional Radiology	hospital		27.55690	-99.47783	2519 E Saunders St	Laredo	78041	+19567272362	https://www.flaviocastanedamd.com/	Azura Vascular Care	0.97
-543d2374d974	Endovascular & Minimally Invasive Therapies & Interventional Radiology	hospital		27.53013	-99.47028	2519 E Saunders St	Laredo	78041	+19567272362	https://www.flaviocastanedamd.com/	Azura Vascular Care	0.85
 d6810c40b244	Gateway Community Health Center - North Clinic	hospital		27.58678	-99.49405	208 Shiloh Dr	Laredo	78045	+19567958100	https://gatewaychc.com/north-clinic	Gateway Community Health Center	0.92
 8624a38cd696	Gateway Health Clinic on Papas	hospital		27.53582	-99.47665		Laredo		+18779377844			0.97
 0629c37064f8	Getwey Clinic	hospital		27.53582	-99.47660		Laredo					0.76
@@ -920,7 +979,6 @@ af9c0664eb98	Laredo Physicians Group	hospital		27.58666	-99.47690		Laredo			http
 d799aa9a7647	Laredo Rehabilitation Hospital	hospital		27.53376	-99.47392	2005 E Bustamante St	Laredo	78041	+19567648555	http://lrh.ernesthealth.com		0.99
 8fda57902d6e	Laredo Specialty Hospital	hospital		27.53372	-99.47391	2005 Bustamante St	Laredo	78041	+19567535353	http://lsh.ernesthealth.com/		0.99
 0ee21aab3b06	Lmc Icu Waiting Area	hospital		27.53248	-99.47807	1700 E Saunders St	Laredo	78041	+19567962202	manta.com		0.69
-ef064ff3f28b	Lmc Icu Waiting Area	hospital		27.53292	-99.47791	1700 E Saunders St	Laredo	78041	+19567962202	manta.com		0.67
 51bb00b9bc91	Loop 20 Medical Plaza	hospital		27.49407	-99.45190	4151 Jaime Zapata Memorial Hwy	Laredo	78046	+19567963100	http://laredomedical.com	Laredo Medical Center	0.92
 4361141391da	Mercy Hospital	hospital		27.51013	-99.48814	1500 Logan Ave	Laredo	78040	+19567965000		Mercy	0.59
 684f3d8c27a3	Mercy Regional Medical Center	hospital		27.50761	-99.48255	1320 Laredo St	Laredo	78040	+19567186770			0.60
@@ -938,7 +996,6 @@ d2dc169449d5	South Texas Spinal Clinic	hospital		27.56542	-99.47227	6801 McPhers
 424b326af48b	Americas Best Value Inn	hotel		27.50511	-99.50872	5240 San Bernardo Ave	Laredo	78041	+19567231510	http://www.americasbestvalueinn.com		0.77
 d86abf4e790f	Americas Best Value Inn Laredo	hotel	motel	27.54740	-99.50491	5240 San Bernardo Ave	Laredo	78041	+19567231510	https://www.redlion.com/americas-best-value-inn/tx/laredo/americas-best-value-inn-laredo		0.99
 c078e8c05a32	AmeriK Suites	hotel		27.55450	-99.49142	6551 Metro Ct	Laredo	78041	+19567255222	http://www.malldelnortehotel.com/		1.00
-e288d395242a	Amit International	hotel		27.50225	-99.50771	1214 Zaragoza St Ste 2	Laredo	78040				0.95
 688fe80fd459	Awh Laredo Hotel Llc	hotel		27.55511	-99.49493	110 Calle del Norte	Laredo	78041		laredo.embassysuites.com		0.95
 5ed10234fe68	Baymont by Wyndham Laredo	hotel	resort	27.54537	-99.50429	4910 San Bernardo Ave	Laredo	78041	+19566020172	https://www.wyndhamhotels.com/baymont/laredo-texas/baymont-laredo/overview?CID=LC:cfixxwa8fefdt79:56064&iata=00093796		0.99
 d877db43141b	Best Western Plus Laredo Inn & Suites	hotel		27.52741	-99.50393	3110 Santa Ursula Ave	Laredo	78040	+19566082491	https://www.bestwestern.com/en_US/book/hotel-rooms.44702.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44702	Best Western Hotels & Resorts	1.00
@@ -961,10 +1018,7 @@ e9c9605e9092	El Palacio Rey (del) Mundo	hotel		27.52210	-99.48580	1017 E Lyon St
 b1cbbe27611a	Fairfield	hotel		27.54701	-99.50114	700 W. Hillside Road	Laredo	78041	+19567224533	https://www.marriott.com/hotels/travel/lrdfi-fairfield-inn-and-suites-laredo/?scid=5d6c9ba8-fdb3-45cd-90d4-fc3cbfe3681c&y_source=1_MjgxOTEzNC01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Fairfield by Marriott	1.00
 64e96fe5f770	Family Garden Inn & Suites	hotel		27.55755	-99.50452	5830 San Bernardo Ave	Laredo	78041	+19567235300	http://www.familygardeninn.com		1.00
 375120dc6d20	Gateway Inn	hotel		27.54535	-99.50515	4910 San Bernardo Ave	Laredo	78041	+19567225272			0.92
-deb06fdb9381	Hampton Inn Laredo	hotel		27.57317	-99.50127	7903 San Dario Ave	Laredo	78045	+19567178888			0.99
 efcd80cdf1f4	Hampton Inn Laredo	hotel		27.57309	-99.50150	7903 San Dario Ave	Laredo	78045	+19567178888	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-laredo-LRDTXHX/index.html	Hampton by Hilton	0.99
-c0e43df5781d	Harrison Manor	hotel		27.51662	-99.50710	1907 Convent Ave	Laredo	78040				0.81
-c5635d22c016	Hilton Hotel	hotel		27.56061	-99.44720		Laredo					0.74
 ec8fae40d138	Holiday Inn Express and Suites Laredo Event Center Area	hotel		27.56108	-99.44214	7223 Bob Bullock Lp	Laredo	78041	+19562188888	https://www.ihg.com/holidayinnexpress/hotels/us/en/laredo/lrdtx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-LRDTX	Holiday Inn Express	0.99
 fb0742d7e80b	Holiday Inn Laredo-Civic Center	hotel		27.52175	-99.50347	800 Garden St	Laredo	78040	+19567275800	https://www.ihg.com/holidayinn/hotels/us/en/laredo/lrdcc/hoteldetail?cm_mmc=BingMaps-_-hi-_-USEN-_-lrdcc		0.97
 b445310bd037	Home2 Suites by Hilton Laredo Airport	hotel		27.56039	-99.44661	7120 Rosson Rd	Laredo	78041	+19566151700	http://www.laredoairport.home2suitesbyhilton.com/		1.00
@@ -976,16 +1030,12 @@ be670b0a6cd0	Hotel springs hills marriots Texas USA	hotel		27.56032	-99.50466		L
 ca1f07fc01bd	Hwy 59 Motel	hotel	motel	27.53006	-99.47066	2503 E Saunders St	Laredo	78041	+19564411772	http://www.hwy59motel.com/		0.99
 3e2b99c786b2	International Dispatch Services, Inc.	hotel		27.61198	-99.48270	501 Nafta Blvd	Laredo	78045	+18677191804	http://indisein.com		0.82
 ba6da0593b68	International Inn of Laredo	hotel	motel	27.58451	-99.51019	9006 Mines Rd	Laredo	78045	+19567269811	https://www.groupon.com/biz/laredo/international-inn		0.99
-44cd760b9f8c	Juan Rubio	hotel		27.56535	-99.47246	6801 Mcpherson Rd Ste 338	Laredo	78041				0.98
 a30c9d26e375	La Hacienda Hotel	hotel	motel	27.54663	-99.50439	4914 San Bernardo Ave	Laredo	78041	+19567222441	http://www.lahaciendahotel.net/		0.99
-6ef2efe6d384	La Mansion Restaurant	hotel		27.54637	-99.50512	4914 San Bernardo Ave	Laredo	78041				0.55
 477142701ba9	La Posada Hotel	hotel	resort	27.50217	-99.50625	1000 Zaragoza St	Laredo	78040	+19567221701	https://www.laposada.com/		1.00
 dee15bc5f1b8	La Quinta Inn & Suites Laredo Airport	hotel		27.56096	-99.44445	7220 Bob Bullock Loop	Laredo	78041	+19567247222	https://www.wyndhamhotels.com/laquinta/laredo-texas/la-quinta-laredo-airport/overview	La Quinta by Wyndham	1.00
 c5fba07a6af2	La Quinta Inn Laredo I-35	hotel		27.53243	-99.50370	3610 Santa Ursula Ave	Laredo	78041	+19567220511	http://www.laquintalaredoi35.com/?cid=local_506	La Quinta by Wyndham	1.00
 f40779115d15	Laredo Executive Inn	hotel		27.52335	-99.50362	2620 Santa Ursula Ave	Laredo	78040	+19567226321			0.55
 5fc1f5dec141	Laredo Hotel Group Lp	hotel		27.56218	-99.50459	5940 San Bernardo Ave	Laredo	78041		https://www.delbarriolaw.laredowebsitecompany.com		0.95
-f17f6fadc320	Laredo Hotels Llc	hotel		27.55577	-99.49527	98 Calle del Norte	Laredo	78041				0.95
-4dedb9ad425c	Laredo Texas City	hotel		27.50779	-99.50391		Laredo					0.70
 a3d184613758	Las Palmas Inn	hotel		27.53762	-99.50385	4201 San Bernardo Ave	Laredo	78041		https://palmasinnpuertorico.com		0.95
 4fd84ce8bc51	Loma Alta Motel	hotel	motel	27.53474	-99.50391	3915 San Bernardo Ave	Laredo	78041	+19567261628	http://www.lomaaltamotel.com/rates.html		0.98
 770ca1ef1ffe	Marriot Laredo Tx	hotel		27.54696	-99.50128		Laredo			http://www.marriott.com/hotels/travel/sfobg-san-francisco-airport-marriott/		0.80
@@ -995,10 +1045,8 @@ ddb0af13f64d	Mayan Inn	hotel		27.52882	-99.50391	3219 San Bernardo Ave	Laredo	78
 8e8fe5f295c0	Motel 6	hotel	motel	27.54848	-99.50502	5310 San Bernardo Ave	Laredo	78041	+19562014078	http://www.motel6.com/	Motel 6	0.99
 ed38e60a0ad0	Motel 6	hotel	motel	27.56036	-99.50507	5920 San Bernardo Ave	Laredo	78041	+19562014086	http://www.motel6.com/	Motel 6	0.92
 c5401dad2aa2	Motel 9	hotel	motel	27.58858	-99.49603	9017 San Dario Ave	Laredo	78045	+19566150123	https://www.motel9laredo.com/		0.97
-1b87bfa3d30d	New Cactus Courts Motel	hotel	motel	27.53741	-99.50388	4119 Santa Maria Ave	Laredo	78041	+19567229076			0.92
 4b9a26ca4ccc	New Cactus Courts Motel	hotel	motel	27.53716	-99.50980	4119 Santa Maria Ave	Laredo	78041	+19567229076	https://new-cactus-courts-motel-tx.hub.biz		0.99
 cadf991fc881	Paradise Inn	hotel		27.54407	-99.50470	4820 San Bernardo Ave	Laredo	78041	+19565689990			0.58
-901f87f3cfb5	Plantation Townhomes	hotel		27.57898	-99.46505	2110 Bermuda Dr	Laredo	78045				0.67
 747d0de31463	Quality Inn Laredo - Nuevo Laredo	hotel		27.46335	-99.47561	2010 Lomas Del Sur Boulevard	Laredo	78046	+19567044338	http://www.econolodgelaredo.com/		0.99
 25b813036d2e	Rams Hotel Management L.l.c	hotel		27.56131	-99.44440	7220 Bob Bullock Loop Ste 4a	Laredo	78041				0.95
 3bfd1ec5cc7d	Ras Capital Group Llc	hotel		27.53242	-99.50383	3610 Santa Ursula Ave	Laredo	78041				0.95
@@ -1011,10 +1059,8 @@ cb2af2301989	Rio Grande Plaza Hotel	hotel		27.49989	-99.51234	1 S Main Ave	Lared
 3b6f6e90d329	Rodeway Inn	hotel		27.46390	-99.47558	2010 Lomas del Sur	Laredo	78046	+19567247300	https://www.choicehotels.com		0.55
 cdf189176278	Royal View Center	hotel		27.55879	-99.47568	6262 McPherson Rd	Laredo	78041	+19567277750			0.99
 cbbf508d2991	San Carlos Hwy 359	hotel		27.48919	-99.36835		Laredo			www.nonprofitfacts.com/TX/San-Carlos-Mission-Catholic-Mission.html		0.97
-baab93e603d1	Shyam Hotels Llc	hotel		27.54637	-99.50512	4914 San Bernardo Ave	Laredo	78041				0.95
 dce4c2a0ded2	Siesta Motel	hotel	motel	27.53685	-99.50384	4109 San Bernardo Ave	Laredo	78041	+19565681958	http://www.siestamotel.net	Siesta Motel	0.99
 3a4d7f25ddc5	Signs Inn Llc	hotel		27.56160	-99.47452	6414 Mcpherson Rd Ste 5	Laredo	78041		https://signs-inn.com		0.95
-6e8f36a2c9f9	Sonterra Apartments	hotel		27.59958	-99.48183		Laredo					0.76
 62bd2387e542	Spanish Trails Inn	hotel		27.54407	-99.50470	4820 San Bernardo Ave	Laredo	78041	+19565689990	https://spanishtrailslaredo.com/		0.69
 176cf16ddbf1	SpringHill Suites by Marriott Laredo	hotel		27.56214	-99.50455	5940 San Bernardo Ave	Laredo	78041	+19567170800	https://springhillsuites.marriott.com/		0.99
 638db0d91f35	Stay America Hotel Nd Suites	hotel		27.56525	-99.50128		Laredo					0.75
@@ -1046,7 +1092,6 @@ f133fdd8b732	Ascending Technologies	office	information technology company	27.542
 2978dad21d09	Axys Logistics	office		27.62629	-99.54587	4108 Trade Center Blvd	Laredo	78045	+19567255655	https://axyslog.com		0.65
 b12f29b4f56c	Back Tax	office		27.52215	-99.50390	2620 Santa Ursula Ave Ste 77	Laredo	78040	+18885779086	http://back-taxhelp.com		0.92
 9ebc24a7ae36	Blogic, Inc	office		27.61878	-99.52915	14203 Distribution Ave	Laredo	78045	+19566321101			0.92
-83817d144363	Bowling	office		27.61541	-99.53684	616 Enterprise St	Laredo	78045	+19567045049			0.60
 c5a70bc7b7c1	Bowling	office		27.61569	-99.53701	616 Enterprise St	Laredo	78045	+19567045049			0.60
 f4bbc2aa6333	C Lounge	office	private association	27.55957	-99.45528	6427 Polaris Dr	Laredo	78041	+19564410014			0.74
 f08e4e0a82b3	Canavati & Associates	office		27.56167	-99.47462	6414 McPherson	Laredo	78041	+19567914999	http://www.canavati-associates.com		0.77
@@ -1055,7 +1100,6 @@ c9ac11a16c0b	Clark-Mobilelink	office	telecommunications company	27.51644	-99.452
 06df7e4c6a34	Comanche Statuary Imports	office		27.67782	-99.59547	386 Papalote Rd	Laredo	78045	+19567951277			0.92
 5524974e6264	Compufax Inc	office	information technology company	27.54495	-99.49097	5415 Springfield Ave Ste 3a	Laredo	78041	+19567917040			0.75
 492ee67d096a	Destiny Trevino Sales	office	auto company	27.55340	-99.45198	3219 E Saunders St	Laredo	78041	+19565523674	http://powellwatson.com/		0.65
-66f1c119ad37	Destiny Trevino Sales	office	auto company	27.52968	-99.46353	3219 E Saunders St	Laredo	78041	+19565523674	http://powellwatson.com/		0.60
 d4b3b91f160f	Dragonfly Aviation, Llc	office		27.53554	-99.47272	4207 N Jarvis Ave	Laredo	78041	+19567222929	http://www.dragonflyaviation.com		0.75
 719699d33f9e	Driscoll Health Plan	office		27.55863	-99.49986	500 E Mann Rd	Laredo	78041	+19567286300			0.92
 c4214781b3b1	Electricity Services with Ambit	office	energy company	27.57943	-99.49085	8512 Forest Loop	Laredo	78045	+19567541816	http://www.elsamoreno.myambit.com/		0.92
@@ -1068,7 +1112,6 @@ c4214781b3b1	Electricity Services with Ambit	office	energy company	27.57943	-99.
 b10852e0e7aa	Grupo Cambiario Usa-mex., Inc	office		27.50769	-99.50361	918 Santa Ursula Ave	Laredo	78040				0.84
 1f31067f92fb	Grupo Comercial Mundial INC	office		27.62494	-99.53664	14404 Import Rd	Laredo	78045	+19567960030			0.92
 1aab2e56c405	Grupo Importex	office		27.56494	-99.50366	7100 San Bernardo Ave Ste 107	Laredo	78041	+19562532730	https://www.grupoimportex.com		0.65
-65a4cb145656	Infinite Logistics Solutions	office		27.60558	-99.52336	405 Logistics	Laredo	78045				0.65
 035eccb973c6	Integra Systems	office	information technology company	27.56478	-99.50066	216 W Village Blvd	Laredo	78045	+19567040010	http://www.integrapos.com/		0.92
 96026bdd148c	Integralis Solutions	office		27.62344	-99.54353	4113 Free Trade St	Laredo	78045		integralissolutions.com		0.65
 3aec7e929268	Itos Group Inc.	office		27.62542	-99.53885	14410 Export Rd	Laredo	78045	+19567262605	http://www.itosgroup.com		0.65
@@ -1079,7 +1122,6 @@ b10852e0e7aa	Grupo Cambiario Usa-mex., Inc	office		27.50769	-99.50361	918 Santa 
 424360b2f981	Leon Imports	office		27.62632	-99.53055	14404 Maquila Loop	Laredo	78045	+19567533025	leonimport.com		0.92
 c9c17641399a	LPE Inc. PowerLines & Communications	office	telecommunications company	27.57730	-99.50064	8405 San Dario Ave	Laredo	78045	+19567013943	https://start.cortera.com/company/research/l7p3pus4n/lpe-inc		0.91
 2e129ca9d381	Maprex International Inc.	office	plastics company	27.61228	-99.47868	602 Nafta Blvd	Laredo	78045	+19567256358	https://maprex.com		0.75
-7f8d6c24a4a5	Masapavi Transportation	office		27.49678	-99.45355	3916 Rotary Dr	Laredo	78043				0.88
 57a3758e25cb	NEXRAD PTT	office	telecommunications company	27.57569	-99.46774	1705 E Del Mar Blvd a106	Laredo	78041	+19563273275	https://talknexl.com/pages/nexl-app		0.92
 69b415f43e12	Nh Trade & Services Llc	office		27.58565	-99.50200	8519 Las Cruces Dr	Laredo	78045	+19562909049	http://www.nhtrade.com.mx		0.92
 7ebfacc91495	Nippon Express, Inc.	office		27.62404	-99.50059	9001 Killam Industrial Blvd	Laredo	78045	+19567179289	https://www.nipponexpress.com		0.65
@@ -1099,8 +1141,6 @@ ed12a4baff5f	Pimplastic, Inc	office	plastics company	27.58681	-99.49922	8701 Las
 ed36a3bc4ea0	Skyali	office	energy company	27.58525	-99.47466	8511 McPherson Rd	Laredo	78045	+19564411124			0.75
 e104bc950cd6	Skyali Energy Group	office	energy company	27.50658	-99.50687	1100 Matamoros St 2nd Fl	Laredo	78040	+19564892095			0.92
 4c85ac69e4b6	Smart Energy Management Llc	office	energy company	27.61800	-99.51460	8402 Killam Industrial Blvd	Laredo	78045	+12109877954	https://smartenergymanagement.net		0.95
-99cbe48a3028	Smart Logistics Commerce	office		27.56730	-99.47104	7010 Rocio Dr Apt B	Laredo	78041				0.65
-8d845333d0a0	Suncommobile Guadalupe	office	telecommunications company	27.50681	-99.47370	2212 Guadalupe St	Laredo	78043				0.92
 e1f6f5ca6fc0	Sunline Commercial Carriers	office		27.62337	-99.54004	14402 Atlanta Dr, Laredo, TX 78045	Laredo	78045	+19567951050	http://www.sunlineglobal.com		0.77
 e68b444202ed	The Phone-up Studios Inc	office		27.50957	-99.51844	2301 Moctezuma St Ste 102155	Laredo	78040	+18887687705			0.95
 6c782afdfefa	TQ Tools and Industrial Supplies	office	industrial company	27.71680	-99.71790	Room for More, 2107 Shiloh Dr	Laredo	78045	+19567869231	http://www.tqtools.com/		0.63
@@ -1158,20 +1198,12 @@ c2192787e195	Bubba's 33	restaurant		27.55395	-99.50469	5706 San Bernardo Ave	Lar
 fe7344a21168	Buffalo Wild Wings	restaurant	chicken wings restaurant	27.61340	-99.46262	2610 Bob Bullock Loop	Laredo	78045			Buffalo Wild Wings	0.80
 df00804bdacb	Burger Grill	restaurant	mexican restaurant	27.52721	-99.49267	402 E Ash St	Laredo	78040	+19569496670			0.92
 983b713e4f9a	Burger Grill Laredo Texas	restaurant		27.52716	-99.49905	402 W Ash St	Laredo	78040	+19569496670			0.61
-1524e35ce3dc	Burger King	restaurant		27.55050	-99.50299	5300 San Dario Ave Ste 167	Laredo	78041	+19566020204	https://burgerking.com/store-locator/store/restaurant_74992		0.92
-17918dcaf377	Burger King	restaurant	burger restaurant	27.53044	-99.50384	801 Lafayette St	Laredo	78041	+19565167453	https://burgerking.com/store-locator/store/11338	Burger King	0.96
-4a0ead00eea9	Burger King	restaurant	burger restaurant	27.59879	-99.45550	1920 Shiloh Dr	Laredo	78045	+19564625092	https://burgerking.com/store-locator/store/26665	Burger King	0.98
-4a6bc80c0591	Burger King	restaurant	burger restaurant	27.53089	-99.48219	1402 E Saunders St	Laredo	78041	+19565167284	https://burgerking.com/store-locator/store/3983	Burger King	0.99
-6fe03005fb5c	Burger King	restaurant	burger restaurant	27.57232	-99.47220	7515 McPherson Rd	Laredo	78041	+19565682217	https://burgerking.com/store-locator/store/11414	Burger King	0.99
-dd1142219bd5	Burger King	restaurant	burger restaurant	27.50552	-99.50884	1301 Farragut St	Laredo	78040	+19565167369	https://burgerking.com/store-locator/store/14016	Burger King	0.98
 a385d0543527	Burgerim	restaurant	burger restaurant	27.56132	-99.45114	2413 Jacaman Rd Ste 7	Laredo	78041	+19567045656	https://burgerimbrambleton.com		0.95
 9f5d4c05448c	Burritos,tacos y mas	restaurant		27.53447	-99.50412	3819 San Bernardo Ave	Laredo	78041	+19567045482			0.85
 921ec88ae6fc	Cab Ex Cargo Llc	restaurant		27.61687	-99.51911	13619 N Lamar Dr	Laredo	78045	+19562824710	http://www.cab-ex.com/		0.66
 737b957c07b0	Cantu's Tacos	restaurant	mexican restaurant	27.50870	-99.49300	320 Corpus Christi St	Laredo	78040	+19565684388	http://www.mkt.com/benjamin-cantu		0.92
 8619f43747ca	Cantu's Tacos	restaurant	taco restaurant	27.47361	-99.46173	3301-3311 Chacota St	Laredo	78046	+19565684388	http://twitter.com/patcantu26		0.92
 134c8b7140d2	Carche Global Inc	restaurant		27.49462	-99.44968	4205 Jaime Zapata Memorial Hwy Ste D1	Laredo	78043				0.95
-4fb93ee67baa	Carl's Jr.	restaurant	burger restaurant	27.60593	-99.47601	10519 McPherson Rd	Laredo	78045	+19567258491	https://www.carlsjr.com/	Carl's Jr.	0.98
-d3c21f2c56e4	Carl's Jr.	restaurant	burger restaurant	27.61348	-99.52350	13602 Mines Rd	Laredo	78045	+19566021084	https://locations.carlsjr.com/tx/laredo/13602-fm-1472	Carl's Jr.	0.99
 b66e500d174d	Carne Seca el Sabinal	restaurant	mexican restaurant	27.53202	-99.50980	3601 Santa Maria Ave suite B	Laredo	78041	+19565264198			0.92
 75179b8447e8	Carnes Asadas La Palma	restaurant	spanish restaurant	27.53084	-99.48736	902 E Saunders St	Laredo	78041	+19567951125	https://lapalmacarnesasadas.com		0.99
 a735813f3d87	Carnes Asadas La Palma	restaurant	mexican restaurant	27.60963	-99.47422	2019 Bob Bullock Loop	Laredo	78045	+19564411225	http://carnesasadaslapalma.com/		0.99
@@ -1182,7 +1214,6 @@ d16cdb727b7c	Carnitas Uruapan	restaurant	mexican restaurant	27.50666	-99.47307	2
 a4658c634db7	Casa de Azul	restaurant	mexican restaurant	27.56323	-99.45592	2322 Jacaman Rd #3A	Laredo	78041	+19564152288	http://www.casadeazullaredo.com/		0.97
 6df7c37b23fb	CASA RAMONA	restaurant	mexican restaurant	27.56010	-99.46847	1701 Jacaman Rd	Laredo	78041	+19565167034	http://casaramona.us/		0.99
 35f92195f673	Caterpillar Logistics	restaurant		27.61508	-99.47348	11302 Eastpoint Dr	Laredo	78045	+19567960284	http://neovialogistics.com		0.84
-459ccf68be51	Caterpillar Logistics	restaurant		27.61952	-99.46931	11302 Eastpoint Dr	Laredo	78045	+19567960284	http://neovialogistics.com		0.82
 f0e833ed654b	Cazuelas y Takiza Frida	restaurant	texmex restaurant	27.52294	-99.46780	2620 N Arkansas Ave	Laredo	78043	+19565239148			0.75
 736a1adb3348	Cevichitos	restaurant		27.48424	-99.46318	3220 Santa Barbara St	Laredo	78043	+19567274520			0.92
 686595e8d794	Chachos Snacks	restaurant	bar and grill restaurant	27.56306	-99.45580		Laredo		+19564802844			0.90
@@ -1195,7 +1226,6 @@ f27279fa4915	Charleys Philly Steaks	restaurant	sandwich shop	27.95202	-99.37917	
 c9d548af484c	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	27.61259	-99.47180	2320 Bob Bullock Loop	Laredo	78045	+19567234410	https://www.cheddars.com/locations/tx/laredo/laredo/2123?cmpid=br:csk_ag:ie_ch:loc_ca:CSKGMB_dt:20200622_sn:gmb_gt:laredo-tx-2123_pl:locurl_rd:1098		0.99
 1a7ebc0ef14f	Chester's Chicken	restaurant	chicken restaurant	27.64532	-99.55615	101 Pinnacle Rd	Laredo	78045	+19567276098	https://www.chesterschicken.com/		0.96
 3fccf85487bb	Chester's Chicken	restaurant	chicken restaurant	27.53140	-99.50336	3502 Santa Ursula Ave	Laredo	78041	+12104137921	https://www.chesterschicken.com/		0.92
-82aa0f287c63	Chick-Fil-A	restaurant	american restaurant	27.60797	-99.50394	Northlaredo 2460Monarchdr Laredo Tx	Laredo	78045	+19567640451	http://www.chick-fil-a.com		0.77
 91f9c548b931	Chico's Comida Casera	restaurant	mexican restaurant	27.56220	-99.45450	2329 Jacaman Rd	Laredo	78041	+19564411045	http://chicos.com/		0.96
 4a630dd68308	Chili's Grill & Bar	restaurant		27.60663	-99.47569	10601 McPherson Rd	Laredo	78045	+19567128488	https://www.chilis.com/		1.00
 ef5a805a2bc4	Chili's Grill & Bar	restaurant		27.55353	-99.50489	5702 San Bernardo	Laredo	78041	+19567259939	https://www.chilis.com/		0.99
@@ -1207,16 +1237,11 @@ cc2f49e48d6a	China Express	restaurant	asian restaurant	27.53454	-99.48476	4202 M
 95b2294794f6	China Wok	restaurant	chinese restaurant	27.53456	-99.48470	4202 McPherson Rd	Laredo	78041	+19567570799			0.91
 7cf1cd19e0d2	Chinese Gourmet Express	restaurant	chinese restaurant	27.55180	-99.50062	5300 San Dario Ave	Laredo	78041	+19567128801	http://www.chinese-gourmet-express.com/frontend/default.asp		0.77
 d6f05ad7952c	Ching-n-Chong	restaurant		27.53031	-99.49500	119 E Saunders St	Laredo	78041	+19567918226			0.75
-ebbc040608da	Chipotle Mexican Grill	restaurant	mexican restaurant	27.57332	-99.47386	1211 E Del Mar Blvd Suite #1	Laredo	78041	+19567234905	https://locations.chipotle.com/tx/laredo/1211-del-mar-blvd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2728	Chipotle Mexican Grill	0.99
 6df397f4d776	Chocolate Café Comida Mexicana	restaurant	mexican restaurant	27.48582	-99.47112	1301 S Zapata Hwy	Laredo	78046	+19569064559			0.92
 c68a099c7a91	Chocolateka	restaurant		27.58561	-99.47618	8602 McPherson Rd	Laredo	78045	+19567533544	http://www.chocolateka.com		0.98
 ce46f4eb0895	Chopsticks	restaurant	sushi restaurant	27.56355	-99.50214	313 W Village Blvd #110	Laredo	78041	+19567223888	http://www.chopstickslaredo.com		0.99
 4c688f07887b	Chopsticks South	restaurant	sushi restaurant	27.49010	-99.46043	3511 Jaime Zapata Memorial Hwy	Laredo	78043	+19563019291	http://chopstickslaredo.com		0.96
 91abebb1bbe4	Chopsticks Sushi Y Mas	restaurant	sushi restaurant	27.49028	-99.46023	3511 Jaime Zapata Memorial Hwy	Laredo	78043	+19567234055			0.90
-6f0a49998f37	Church's Chicken	restaurant	chicken wings restaurant	27.51583	-99.49477	2201 Sanders Ave	Laredo	78040	+19567262656	https://churchs.com		0.55
-1b3b3cd84142	Church's Texas Chicken	restaurant	chicken restaurant	27.59116	-99.51276	611 Rancho Viejo Dr	Laredo	78045	+19567271495	https://churchs.com		0.69
-83d277da23ed	Church's Texas Chicken	restaurant	chicken restaurant	27.60291	-99.47733	10219 McPherson Rd	Laredo	78045	+19567916358	https://churchs.com		0.92
-9997b805062c	Church's Texas Chicken	restaurant	chicken restaurant	27.53030	-99.47392	2201 E. Saunders Street	Laredo	78040	+19567262656	https://locations.churchs.com/tx/laredo/2201-e.-saunders-street		0.99
 8db127507b8e	Cicis Pizza	restaurant	pizza restaurant	27.55089	-99.50491	5504 San Bernardo Avenue	Laredo	78041	+19567128646	https://www.cicis.com		0.98
 e87bb539f11a	Cicis Pizza	restaurant	pizza restaurant	27.52685	-99.50475	5504 San Bernardo Ave	Laredo	78041	+19567128646	https://www.cicis.com		0.95
 f2b5aeec7a56	Cielito Lindo	restaurant	mexican restaurant	27.52716	-99.49258	402 E Ash St	Laredo	78040	+19567275054			0.55
@@ -1266,12 +1291,6 @@ fd012b3005b6	Delicias Snacks	restaurant	delicatessen	27.43850	-99.47990	666 Prad
 73fd3d170653	District Tacos Banda	restaurant		27.56621	-99.49774		Laredo	78041	+19565680149	http://www.districtsf.com/		0.97
 6674cc39ccd1	Dog's Fries Laredo	restaurant		27.46411	-99.46106	1519 Market St	Laredo	78040	+19566494082	http://Facebook.com/Dogsfries		0.64
 65c7c753c670	Dogs Fries Laredo	restaurant	diner	27.50364	-99.48069	1519 Market St	Laredo	78040	+19566494082	http://Facebook.com/Dogsfries		0.61
-4c641ed24dd7	Domino's	restaurant	pizza restaurant	27.59113	-99.47900	611 Shiloh	Laredo	78045	+19567263333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-633e03d2c897	Domino's	restaurant	pizza restaurant	27.49294	-99.45406	3919 Jaime Zapata Memorial Hwy Ste 1	Laredo	78043	+19567960021	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-7156bbc56d72	Domino's	restaurant	pizza restaurant	27.54443	-99.48323	5220 Mc Pherson Rd	Laredo	78041	+19567261974	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-85147d31ee98	Domino's	restaurant	pizza restaurant	27.47187	-99.47591	1920 Thurman St	Laredo	78046	+19567222221	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-72861b01969a	Domino's Pizza	restaurant	pizza restaurant	27.53851	-99.50399	4301 San Bernardo Ave	Laredo	78041	+19566352025	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-9e2ae9e8ca0f	Domino's Pizza	restaurant	pizza restaurant	27.61078	-99.52190	12602 Mines Rd	Laredo	78045	+19569482672	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
 83d70ffacb86	Don Pablo's Restaurant	restaurant	mexican restaurant	27.51083	-99.50806	1206 Scott St	Laredo	78040	+19567535058	http://orderdonpablosrestaurant.com/		0.98
 567093dd38da	Don Vicente Restaurante	restaurant	mexican restaurant	27.52935	-99.50389	3301 San Bernardo Ave	Laredo	78040	+19564135377			0.99
 a5390e43537b	Don Vicente Restaurante	restaurant	mexican restaurant	27.52281	-99.50414	2601 San Bernardo Ave	Laredo	78040	+19567750092			0.99
@@ -1288,9 +1307,7 @@ c4023c158974	Eduardo's North Bar	restaurant	mexican restaurant	27.56100	-99.4511
 d19b63d08172	El antojito los Portillos	restaurant	mexican restaurant	27.51928	-99.50433	2205 San Bernardo Ave	Laredo	78040				0.92
 639fbf4ba06c	El Arcoiris	restaurant	mexican restaurant	27.48990	-99.46356	3119 State Spur 260	Laredo	78043	+19565689620	https://el-arcoiris-snack-tx.hub.biz		0.98
 622968270a0e	El Buen Sabor Snack	restaurant		27.58534	-99.51083	1001 Bristol Rd	Laredo	78045	+19565167997			0.92
-6f6565bf8f07	El Buen Sabor Snacks	restaurant		27.58525	-99.51070	10700 McPherson Rd	Laredo	78045	+17265821377			0.95
 f57df562f198	El Buen Sabor Snacks	restaurant		27.60679	-99.47836	10700 McPherson Rd	Laredo	78045	+17265821377			0.96
-1757b3a0ea9e	El Buen sazon	restaurant		27.48900	-99.42636	5908 State Highway 359	Laredo	78043	+19565684519			0.75
 92b68da4eadf	El Buen sazon	restaurant		27.49066	-99.41843	5908 State Highway 359	Laredo	78043	+19565684519			0.75
 50d060d2bb44	El Capataz	restaurant	gastropub	27.56157	-99.44379	7220 Bob Bullock Loop	Laredo	78041	+19567237400	https://www.el-capataz.com/		0.94
 dc73850a9672	El Chalala Restaurante	restaurant		27.62021	-99.54166	405 Muller Blvd	Laredo	78045	+19565681200			0.74
@@ -1322,7 +1339,6 @@ ab64c07202d8	El pilon cocina & snack	restaurant		27.50893	-99.50102	1102 San Fra
 edf43dca007d	El Querreque Grill	restaurant	texmex restaurant	27.59744	-99.48048	9701 McPherson Rd	Laredo	78045	+19567960313	http://www.elquerrequegrill.com/		0.99
 977b4a6de3be	El Quinto Sol	restaurant	vegetarian restaurant	27.56282	-99.45361	2330 Jacaman Rd	Laredo	78041	+19567951452	https://www.elquintosolusa.com/		0.97
 3568878801d4	El Rancho - Hwy 359	restaurant	mexican restaurant	27.48956	-99.37164		Laredo					0.97
-6d6b9b8bd53d	El Rancho - Hwy 359	restaurant	mexican restaurant	27.49254	-99.37751		Laredo					0.61
 3d61dcd79cc9	El Rey Del Elote	restaurant		27.44195	-99.47992	4920 US Highway 83	Laredo	78046	+19566937535			0.97
 f15aaebf4deb	El Rincon	restaurant	mexican restaurant	27.50511	-99.50864	1307 Hidalgo St	Laredo	78040	+19567235382	http://www.elrinco.net		0.92
 5a7631089a91	El Rinconcito	restaurant	mexican restaurant	27.53012	-99.49073	3716 Lexington Ave	Laredo	78040	+19564410141	http://el-rinconcito-laredo.jany.io		0.96
@@ -1347,8 +1363,6 @@ d7b03e6f2b12	Escondido Laredo Hoa	restaurant	vietnamese restaurant	27.53213	-99.
 87fe39d87838	Exel Logistics	restaurant		27.60088	-99.52274	7802 W Bob Bullock Loop	Laredo	78045	+19567942600	http://exel.com		0.91
 47016c83ef9a	F&A Express, LLC	restaurant		27.62274	-99.52576	14415 Mines Rd	Laredo	78045	+19567124555	http://www.fandaexpress.com/		0.79
 e0aae56cb844	Famous Dave's Bar-b-que (to Go Only)	restaurant	barbecue restaurant	27.57073	-99.50012	7605 San Dario Ave	Laredo	78045	+19565284060	https://www.famousdaves.com		0.93
-46aa095ac36b	Firehouse Subs	restaurant	sandwich shop	27.51958	-99.44855	2402 Bob Bullock Loop Unit 5	Laredo	78043	+19565683296	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1658	Firehouse Subs	0.98
-4c8cf76bef4c	Firehouse Subs	restaurant	sandwich shop	27.60721	-99.47493	2438 Monarch Dr	Laredo	78045	+19567533404	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1165	Firehouse Subs	0.99
 212982c3dd4a	Fish O Roll	restaurant	seafood restaurant	27.53028	-99.48624	1003 E Saunders St	Laredo	78041	+19567287747			0.55
 b21e9af3dc5c	Five Guys	restaurant	burger restaurant	27.57318	-99.47421	1211 E Del Mar Blvd	Laredo	78041	+19564627579	https://restaurants.fiveguys.com/1211-del-mar-blvd		0.92
 7013fe0182e5	Flaming Bird By H-E-B	restaurant	chicken restaurant	27.54289	-99.50064	4801 San Dario Avenue	Laredo	78041	+19567253061	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.98
@@ -1356,7 +1370,6 @@ b21e9af3dc5c	Five Guys	restaurant	burger restaurant	27.57318	-99.47421	1211 E De
 a40154d48f07	Flaming Bird By H-E-B	restaurant	chicken restaurant	27.60703	-99.47344	1911 NE Bob Bullock Loop	Laredo	78045	+12109381095	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.97
 05e7a741e20e	Fonda Don Martin	restaurant	mexican restaurant	27.45749	-99.47797	4100 S Zapata Hwy	Laredo	78046	+19567249900			0.76
 22df8ae3c639	Fonda Don Martin	restaurant	mexican restaurant	27.59632	-99.48119	9652 McPherson Rd	Laredo	78045	+19567237778	http://fondadonmartin.com/		1.00
-5e19134b2c20	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	27.61378	-99.46465	2604 Bob Bullock Lp	Laredo	78045	+19566255661	https://www.freddys.com/location/laredo?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 72224f79edf9	Frida’s Snack Bar	restaurant		27.52302	-99.46783	2620 N Arkansas Ave	Laredo	78043	+9565239148			0.89
 d2eedf38a081	Frontera de Mexico y USA laredo TX	restaurant	latin american restaurant	27.64767	-99.53458		Laredo			http://fronteralaredo.com/		0.71
 aa56fce1a0e1	Frutta Bowls	restaurant	acai bowls	27.58121	-99.45171	3311 Del Mar Blvd Unit 211	Laredo	78041	+19565680735	https://restaurants.fruttabowls.com/tx/laredo/3311-del-mar-blvd/		0.92
@@ -1400,12 +1413,9 @@ fc9685dd5b73	Iron Mind Coaching & Wellness	restaurant		27.57620	-99.47335		Lared
 618056a751ed	It's Just Wings	restaurant	chicken wings restaurant	27.60663	-99.47569	10601 McPherson Rd	Laredo	78045	+14697887970	https://itsjustwings.com/		1.00
 dc440ccaa0c0	It's Just Wings	restaurant	chicken wings restaurant	27.55353	-99.50489	5702 San Bernardo	Laredo	78041	+14692506981	https://itsjustwings.com/		0.96
 0261f0ee50f0	Italian Garden Restaurant	restaurant	italian restaurant	27.58887	-99.48770	416 Shiloh Dr	Laredo	78045	+19566150152			0.69
-bb8c1b208c1f	Jack in the Box	restaurant	taco restaurant	27.54148	-99.48345	5106 Mcpherson Ave	Laredo	78041	+19567171881	http://www.jackinthebox.com/locations/TX/Laredo/78041/3662?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80c1f		0.97
 847f72d04148	Jalapenos Pizza and Wings	restaurant	pizza restaurant	27.51744	-99.45889	3502 Clark Blvd Ste 103	Laredo	78043	+19566020600			0.99
 24aaa2cc9e53	Jalapeños Pizza & Wings	restaurant	pizza restaurant	27.59868	-99.48113	9802 McPherson Rd	Laredo	78045	+19567227777	http://www.jalapenos-pizza.com/		1.00
 70fb1ec068f1	Jarochos Taqueria	restaurant	mexican restaurant	27.51716	-99.48777	820 Clark Blvd	Laredo	78040	+19564410248			0.85
-aabf19d3c6a6	Jersey Mike's	restaurant	sandwich shop	27.60957	-99.47408	2019 NE Bob Bullock Loop Suite C-350	Laredo	78045	+19565974515	https://www.jerseymikes.com/15259/laredo-tx	Jersey Mike's Subs	0.99
-6609ab7bf2b9	Jimmy John's	restaurant	sandwich shop	27.57527	-99.47128	1408 E Del Mar Blvd Suite 4C	Laredo	78041	+19565680300	https://locations.jimmyjohns.com/tx/laredo/sandwiches-3849.html	Jimmy John's	0.96
 c84a0800d441	Johnny Carino's	restaurant	italian restaurant	27.57180	-99.50179	7605 San Dario Ave	Laredo	78045	+19567288945	http://www.carinos.com/	Johnny Carino's	0.99
 22d1195849b1	Johnny Rockets	restaurant	burger restaurant	27.50215	-99.51257	1600 Water St	Laredo	78040	+19562315203	https://www.johnnyrockets.com/locations/		0.99
 5e5ba2c1e0ca	Johnny Rockets	restaurant	burger restaurant	27.57484	-99.47420	7718 McPherson Rd	Laredo	78045	+19565381842	http://www.johnnyrockets.com	Johnny Rockets	0.80
@@ -1417,8 +1427,6 @@ baa2e552d32e	Junior snacks	restaurant		27.49742	-99.45126	4401 State Highway 359
 218497f5948f	Kaxi Restaurant	restaurant	mexican restaurant	27.52282	-99.50363	2602 Santa Ursula Ave	Laredo	78040	+19565681635			0.92
 38b5695973d0	Kc Restaurant	restaurant	texmex restaurant	27.50740	-99.51315	1718 Houston St	Laredo	78040	+19567234894	https://drafthouse.com/food-and-drink/venues		0.96
 8b2ef8527011	Kettle Pancake House	restaurant	breakfast and brunch restaurant	27.54825	-99.50469	5503 San Bernardo Ave	Laredo	78041	+19567228965	http://www.kettle.com		1.00
-df4e7ae7a5e4	KFC	restaurant	chicken restaurant	27.50906	-99.50411	802 Washington St	Laredo	78040	+19567227011	http://www.kfc.com		0.92
-fb7ca41ceada	KFC	restaurant	chicken restaurant	27.56714	-99.48389	7605 Mcpherson Dr	Laredo	78041	+19567122339	http://www.kfc.com/storelocator/Default.aspx?address=7605%20McPherson%20Drive,Laredo,TX		0.85
 24d4616d2152	Kika's Restaurant	restaurant	mexican restaurant	27.49030	-99.46429	3101 Blaine St	Laredo	78043	+19567179390	https://www.restaurant.com/theidealmeal/listing/?zip=78043		0.96
 55fadd0063d8	Kiki’s Snacks	restaurant		27.54412	-99.49924	502 W Calton Rd	Laredo	78041	+19565688228			0.95
 a2011e6f8d8c	Kiwami Ramen	restaurant	japanese restaurant	27.53101	-99.47395	2202 E Saunders St	Laredo	78041	+19566083060	https://www.kiwami-ramenbar.com/	Kiwami Ramen - Louisville	0.99
@@ -1426,7 +1434,6 @@ d1b4ad242011	Korean Bbq	restaurant	korean restaurant	27.58480	-99.44544	3910 E D
 d84fed660be9	Kwdx Restaurant Management Llc	restaurant		27.57319	-99.47450	1201 E Del Mar Blvd	Laredo	78041				0.95
 242ed20678e9	La Besucona - ceviches, cocteles & aguachiles	restaurant	seafood restaurant	27.50761	-99.46616	2916 Laredo St	Laredo	78043	+19564629338			0.65
 4d495dddb06d	La Besucona - ceviches, cocteles & aguachiles	restaurant	seafood restaurant	27.50362	-99.50465	2916 Chestnut St	Laredo	78046	+19564629338			0.70
-6a70de3761db	La Besucona - ceviches, cocteles & aguachiles	restaurant	seafood restaurant	27.47969	-99.46616	2916 Chestnut St	Laredo	78046	+19564629338			0.69
 710f056e51ac	La Bodeguita del medio	restaurant		27.50372	-99.50645	1016 Iturbide St	Laredo	78040	+9565280008			0.94
 94233c9b0539	La Botanita Elotera	restaurant		27.33029	-99.50330	503 Rodriguez	Laredo	78046				0.68
 0c3389ae1134	La Buena Vida Restaurante Vegano	restaurant		27.55991	-99.46871	1701 Jacaman Rd Ste Rb1	Laredo	78041	+19566088185			0.75
@@ -1557,14 +1564,6 @@ a976e4783402	Lin's Grand Buffet	restaurant	buffet restaurant	27.53175	-99.47254	
 353c4988075d	Lindo Michoacan	restaurant	mexican restaurant	27.51627	-99.50380	1902 Santa Ursula Ave	Laredo	78040	+19565682677	https://lindomichoacanco.com		0.55
 330fa8fc458a	Lira's	restaurant	barbecue restaurant	27.51009	-99.50469	1206 San Bernardo Ave	Laredo	78040	+19565684570	http://lirasrestaurant.com/		0.99
 2ea52df67a2b	Lira's Restaurant Bartlett	restaurant	texmex restaurant	27.50763	-99.47465	1302 N Bartlett Ave	Laredo	78043	+19565684174			0.96
-c2a816ebce6e	Little Caesars	restaurant	pizza restaurant	27.54070	-99.48492	1001 E Calton Rd	Laredo	78041	+19567128223	https://littlecaesars.com/en-us/store/10717	Little Caesars	0.99
-0d5b41b84d8e	Little Caesars Pizza	restaurant	pizza restaurant	27.50645	-99.48106	1503 Guadalupe St	Laredo	78040	+19567129997	https://littlecaesars.com/en-us/store/7482	Little Caesars	0.99
-0f09bfc71db6	Little Caesars Pizza	restaurant	pizza restaurant	27.58720	-99.51127	9502 Mines Rd	Laredo	78045	+19566020473	https://littlecaesars.com/en-us/store/12440	Little Caesars	0.99
-5f4239ecc0a9	Little Caesars Pizza	restaurant	pizza restaurant	27.46232	-99.47797	3706 S Zapata Hwy	Laredo	78046	+19567913900	https://littlecaesars.com/en-us/store/9342	Little Caesars	0.99
-83cd434bb7dc	Little Caesars Pizza	restaurant	pizza restaurant	27.51795	-99.44916	2420 Bob Bullock Loop	Laredo	78043	+19567291424	https://littlecaesars.com/en-us/store/11023	Little Caesars	0.97
-a391abcfb0e8	Little Caesars Pizza	restaurant	pizza restaurant	27.52020	-99.44853	2420 Bob Bullock Loop	Laredo	78043	+19567291424	https://littlecaesars.com/en-us/store/11023	Little Caesars	0.97
-da70147756f3	Little Caesars Pizza	restaurant	pizza restaurant	27.60719	-99.47484	2438 Monarch Dr Ste A-175	Laredo	78045	+19567237724	http://www.littlecaesars.com/	Little Caesars	0.99
-e4bf1868e7e8	Little Caesars Pizza	restaurant	pizza restaurant	27.51795	-99.51038	2020 Santa Maria Ave	Laredo	78040	+19567228662	http://www.littlecaesars.com/	Little Caesars	0.99
 437bcadcaa4c	Livi's Mexicue	restaurant	texmex restaurant	27.56069	-99.46848	6402 N Bartlett Ave	Laredo	78041		http://www.livismexicue.com/		0.92
 68d29ee335c6	Logan's Roadhouse	restaurant	steakhouse	27.55046	-99.50294	5300 San Dario Ave	Laredo	78041	+19567288513	http://www.logansroadhouse.com	Logan's Roadhouse	0.98
 91ccc2d6d829	Lolitas Bistro	restaurant	american restaurant	27.56599	-99.47340	6950 McPherson Rd	Laredo	78041	+19565685334	http://www.lolitasbistro.com/		0.99
@@ -1578,8 +1577,6 @@ da12a87b6bef	Loncheria La Esperanza.	restaurant	mexican restaurant	27.51704	-99.
 42b521b3c1b8	Lonches La Abuela	restaurant	mexican restaurant	27.50523	-99.50835	1408 Zaragoza St	Laredo	78040	+19566020037	https://lonches-la-abuela.hub.biz		0.96
 6c0777c8b7fc	Lonches Pepe	restaurant	mexican restaurant	27.56045	-99.47025	1603 Jacaman Rd	Laredo	78045	+19566155564			0.92
 61e07846a7b9	LongHorn Steakhouse	restaurant	steakhouse	27.54829	-99.50278	5301 San Dario Ave	Laredo	78041	+19567268504	https://www.longhornsteakhouse.com/locations/tx/laredo/laredo-mall-del-norte/5559?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Alaredo-tx-5559_pl%3Alocurl_rd%3A1484	LongHorn Steakhouse	0.99
-0c05bf32a8b2	Loop 20	restaurant	mexican restaurant	27.50872	-99.44862		Laredo			https://www.starbucks.com/store-locator/store/16966		0.71
-84ca4cf5ecb6	Loop 20	restaurant	mexican restaurant	27.43100	-99.48600		Laredo			https://www.starbucks.com/store-locator/store/16966		0.77
 a43bb615e492	Loop 20	restaurant	mexican restaurant	27.50411	-99.44604		Laredo			https://www.starbucks.com/store-locator/store/16966		0.97
 d207f55c323f	Los 3 Potrillos Ranch	restaurant	mexican restaurant	27.79520	-99.46776	199 Tomcat Ln	Laredo	78045	+19564150911	http://www.los3potrillosranch.com		0.99
 083ed0a5c791	Los Arrieros Mexican Grill	restaurant		27.50619	-99.50771	720 Convent Ave	Laredo	78040	+19564776971			0.89
@@ -1592,7 +1589,6 @@ b024f4e0bfc3	Los Magueyes	restaurant	mexican restaurant	27.46417	-99.46035	3401 
 b5ce58b5b7cd	Los Olivos Restaurant	restaurant	mexican restaurant	27.50472	-99.50206	609 Hidalgo St	Laredo	78040	+19567175117	https://www.chamberofcommerce.com/.../39169127-los-olivos-restaurant		0.92
 34ef0e82da64	Los regios	restaurant	taco restaurant	27.58350	-99.44875	3502 E Del Mar Blvd	Laredo	78041	+19567541258			0.92
 74f6a993cb42	Los Reyes del Taco De Caballo	restaurant	mexican restaurant	27.53669	-99.48400	4419 McPherson Ave	Laredo	78041	+19567287070	https://m.facebook.com/1tacosdecaballo/?ref=bookmarks		0.86
-57573690399a	Los Tacos de Papa Laredo	restaurant	mexican restaurant	27.59858	-99.48117		Laredo		+19567408608			0.87
 c42bb5eb14e2	Los Tacos de Papa Laredo	restaurant	mexican restaurant	27.59862	-99.48161		Laredo		+19567408608			0.89
 5a281f0babed	Los Tacos del Pepe	restaurant	taco restaurant	27.55008	-99.48087	5517 McPherson Rd STE 7	Laredo	78041	+19564802653			0.92
 737a93b9e977	Los Tacos Pirata	restaurant	mexican restaurant	27.56360	-99.47298	6719 McPherson Rd	Laredo	78041	+19567287070			0.91
@@ -1669,14 +1665,7 @@ d878bb8710c7	Palenque Grill Highway 35	restaurant	mexican restaurant	27.54305	-9
 0574fb5625a8	Paly's Restaurant & Snack	restaurant		27.50690	-99.47075	2502 Guadalupe St	Laredo	78043	+19567404047			0.86
 ee06e9f40455	Pam Transport B1 Trabajo	restaurant		27.69360	-99.46697	13601 Mercury Dr	Laredo	78045	+19562827934			0.77
 1eee249b7937	Panaderia La Mies	restaurant	mexican restaurant	27.58538	-99.47695	8602 McPherson Rd Ste 101-102	Laredo	78045	+19564411021	http://lamieslaredo.com		0.77
-4208147fe817	Panda Express	restaurant	chinese restaurant	27.51784	-99.44908	2324 Bob Bullock Loop	Laredo	78043	+19567969112	http://www.pandaexpress.com/	Panda Express México	0.97
-5520a57ba245	Panda Express	restaurant	chinese restaurant	27.61220	-99.46463	2603 North East Bob Bullock Loop Suite #100 Suite #100	Laredo	78045	+19567220061	http://www.pandaexpress.com/	Panda Express México	0.97
 45be92652b5f	PAO’s Ramen	restaurant	japanese restaurant	27.56705	-99.50321	Del Mar Blvd, Laredo, TX 78041, United States	Laredo	78041				0.62
-32b588cf1cc2	Papa John's Pizza	restaurant	pizza restaurant	27.54434	-99.50428	4803 San Bernardo Ave	Laredo	78041	+19567237272	http://www.papajohns.com/		0.92
-5bab1dbb8b92	Papa John's Pizza	restaurant	pizza restaurant	27.58740	-99.47735	1212 International Blvd Ste 4	Laredo	78045	+19567123335	https://www.papajohns.com/		0.92
-5fa74d89a60a	Papa Johns Pizza	restaurant	pizza restaurant	27.45251	-99.47781	4410 ZAPATA Highway	Laredo	78046	+19569372990	https://locations.papajohns.com/united-states/tx/78046/laredo/4410-zapata-highway?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2NzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
-a8febb03aa99	Papa Johns Pizza	restaurant	pizza restaurant	27.61377	-99.46417	2606 NE BOB BULLOCK LOOP 20, Suite 102	Laredo	78045	+19564622270	https://locations.papajohns.com/united-states/tx/78045/laredo/2606-ne-bob-bullock-loop-20?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI3MDQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
-f4160cc9982d	Papa Johns Pizza	restaurant	pizza restaurant	27.50685	-99.47387	2204 GUADALUPE ST	Laredo	78043	+19562675151	https://locations.papajohns.com/united-states/tx/78043/laredo/2204-guadalupe-st?utm_source=bing-maps&utm_medium=organic&y_source=1_OTQwMTA3MzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
 5b04247dfe42	Paradise Salad	restaurant	salad bar	27.58606	-99.49147	401 Shiloh Dr	Laredo	78045	+19567250801			0.97
 e367eecb752f	Paulita's Restaurant	restaurant	mexican restaurant	27.54268	-99.48355	5110 McPherson Rd	Laredo	78041	+19567172300	https://locu.com/places/paulitas-restaurant-laredo-us-1		0.96
 cacf27946f6b	Paulita's Restaurant No 1	restaurant	mexican restaurant	27.52125	-99.46823	2720 N Arkansas Ave	Laredo	78043	+19567270570	http://www.paulitasrestaurants.com		0.99
@@ -1695,16 +1684,6 @@ ab26a07ac02c	Pho Oi	restaurant	vietnamese restaurant	27.60699	-99.47469	2438 Mon
 56f9871b2b0c	Pino Burger	restaurant	burger restaurant	27.57890	-99.45866	2517 E Del Mar Blvd	Laredo	78041	+19567237466	http://www.pinoburgerlaredo.com		0.99
 d18cd4f7c017	Pino Burger	restaurant	burger restaurant	27.49513	-99.44974	4205 Jaime Zapata Memorial Hwy	Laredo	78043	+19567247466	http://www.pinoburgerlaredo.com/		0.99
 604d44acd2f9	Pizza Box	restaurant	pizza restaurant	27.56703	-99.49939	201 W Del Mar Blvd	Laredo	78041	+19565683132	http://www.mypizzaboxonline.com/		1.00
-17a721bd132f	Pizza Hut	restaurant	pizza restaurant	27.50635	-99.48051	1519 Guadalupe St Webb	Laredo	78040	+19567220222	https://locations.pizzahut.com/tx/laredo/1519-guadalupe-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299835	Pizza Hut	0.99
-19d9c8a5dc96	Pizza Hut	restaurant	pizza restaurant	27.53033	-99.46947	2619 E Saunders St	Laredo	78041	+19567271354	http://www.pizzahut.com/	Pizza Hut	0.99
-30d59bf5937f	Pizza Hut	restaurant	pizza restaurant	27.59926	-99.48097	9810 N McPherson Ave Webb	Laredo	78045	+19567259933	https://locations.pizzahut.com/tx/laredo/9810-n-mcpherson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299424	Pizza Hut	0.99
-3dc315cd65f6	Pizza Hut	restaurant	pizza restaurant	27.54544	-99.50404	4821 San Bernardo Ave Webb	Laredo	78041	+19567223682	https://locations.pizzahut.com/tx/laredo/4821-san-bernardo-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299524	Pizza Hut	0.99
-55a277a03b6d	Pizza Hut	restaurant	pizza restaurant	27.48032	-99.47375	2119 Pine St	Laredo	78046	+19567911199	https://locations.pizzahut.com/tx/laredo/2119-pine?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300019	Pizza Hut	0.99
-69190cf52f5c	Pizza Hut	restaurant	pizza restaurant	27.58366	-99.50916	9001 FM 1472 Webb	Laredo	78041	+19567918888	https://locations.pizzahut.com/tx/laredo/9001-fm-1472?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299090	Pizza Hut	0.97
-a5e81fd14248	Pizza Hut	restaurant	pizza restaurant	27.56239	-99.45464	2329 Jacaman Road Webb	Laredo	78041	+19565680414	https://locations.pizzahut.com/tx/laredo/2329-jacaman-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311569	Pizza Hut	0.99
-ad0bad89922e	Pizza Hut	restaurant	pizza restaurant	27.45248	-99.47678	4415 S Zapata Hwy Webb	Laredo	78046	+19564770103	https://locations.pizzahut.com/tx/laredo/4415-s-zapata-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315985	Pizza Hut	0.97
-d4d997b1ed9b	Pizza Hut	restaurant	pizza restaurant	27.51855	-99.50375	2106 Santa Ursula Ave Webb	Laredo	78040	+19567221234	https://locations.pizzahut.com/tx/laredo/2106-santa-ursula-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299039	Pizza Hut	1.00
-f9047d886501	Pizza Hut	restaurant	pizza restaurant	27.54552	-99.48224	5303 McPherson Rd	Laredo	78041	+19567278988	https://locations.pizzahut.com/tx/laredo/5303-mcpherson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299696	Pizza Hut	0.99
 34f86d7f2efc	Pizza Patron	restaurant	pizza restaurant	27.51649	-99.45283	4311 Clark Blvd	Laredo	78043	+19567259499	http://www.pizzapatron.com/	Pizza Patrón	0.99
 241a5af32be7	Pizza Patrón	restaurant	pizza restaurant	27.56899	-99.50189	7309 San Dario Ave Ste 130	Laredo	78045	+19567919799	http://www.pizzapatron.com/	Pizza Patrón	0.96
 4aac3f3aaad9	Pizza Patrón Bob Bullock Loop	restaurant	pizza restaurant	27.61243	-99.46451	2603 NE Bob Bullock Loop, Ste 110	Laredo	78045	+19567919799	https://www.pizzapatron.com/		0.92
@@ -1718,7 +1697,6 @@ cf26e8ec9934	Pollo Palenque	restaurant	mexican restaurant	27.59407	-99.47957	910
 cda0c0dc2bf9	Pollo Palenque San Bernardo	restaurant	mexican restaurant	27.54112	-99.50394	4507 San Bernardo Ave	Laredo	78041	+19567255295		Pollo Palenque	0.99
 03a54ff01baf	Pollos Asados Coyutla	restaurant	chicken restaurant	27.53716	-99.50455	4120 San Bernardo Ave #3	Laredo	78041	+19566150002			0.92
 a433179b60b1	Pollos Del Centro, Inc	restaurant		27.54742	-99.50708	5201 Tesoro Plz	Laredo	78041				0.95
-37aa0da45b9a	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	27.58613	-99.51090	9312 Mines Rd	Laredo	78045	+19567172271	https://www.popeyes.com/store-locator/store/restaurant_83839?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.99
 b50ee49b7e25	Posh	restaurant	sushi restaurant	27.55186	-99.50053	5300 San Dario Ave	Laredo	78041	+19567536621	http://poshsushi.com		0.92
 c81646311e07	Posh Sushi	restaurant	sushi restaurant	27.61190	-99.46723	2517 Bob Bullock Lp #104	Laredo	78045	+19567960808	http://poshsushi.com/	Posh Sushi & Grill	0.99
 d98455e09aa2	Posh Sushi & Grill	restaurant	sushi restaurant	27.57983	-99.45626	2715 E Del Mar Blvd Ste A6	Laredo	78041	+19567247674	http://poshsushi.com/	Posh Sushi & Grill	0.97
@@ -1742,7 +1720,6 @@ d05dfd9e5f49	Rancho Los Gatos	restaurant	mexican restaurant	27.51575	-99.49874	1
 247575ed541e	Rauls BBQ	restaurant	barbecue restaurant	27.48069	-99.47345	1820 S Zapata Hwy	Laredo	78046	+19567244328	http://restaurantportals.com/RaulsBBQ		0.96
 bf1aba7e427b	Ravi Restaurant	restaurant	mexican restaurant	27.52612	-99.50439	2919 San Bernardo Ave	Laredo	78040	+19567124969	www.menupix.com/laredo/restaurants/4325440/Ravi-Restaurant-Laredo-TX		0.92
 2d04b6c07a5d	Red Lobster	restaurant	seafood restaurant	27.55188	-99.50294	5315 San Dario Ave	Laredo	78041	+19567915667	https://www.redlobster.com/seafood-restaurants/locations/tx/laredo/5315-san-dario-avenue/	Red Lobster	0.99
-56cd3987a177	Red Lobster	restaurant	seafood restaurant	27.54795	-99.50307	5315 San Dario Ave	Laredo	78041	+19567915667	http://www.redlobster.com/locations/default.aspx?q=78041&RestaurantID=6291		0.85
 5084bb9dd0ea	Remolinos Snack & Grill	restaurant	mexican restaurant	27.58531	-99.51078	1001 Bristol Rd	Laredo	78045	+19567013494			0.99
 6c069ae69f10	REPUBLICA 359	restaurant	mexican restaurant	27.49502	-99.43342	110 Willow Oak	Laredo	78043	+19564411717			0.97
 5d1cc785d736	Republica Cantina de Mexico	restaurant	mexican restaurant	27.58295	-99.45047	3402 E Del Mar Blvd	Laredo	78041	+19565685003			0.98
@@ -1763,7 +1740,6 @@ f585595793ae	Rincon Mexico Restaurante	restaurant	mexican restaurant	27.48390	-9
 9224c9f53777	Rincon Oaxaqueno	restaurant	mexican restaurant	27.56635	-99.49796	120 W Village Blvd Suit 115	Laredo	78041	+19567016546	https://drive.google.com/file/d/1WqQwrd_25ELAtu36RRUc7DcxMl0eBOXz/view?usp=sharing		0.95
 00580f7b628d	Ringo's BBQ and Burgers	restaurant	barbecue restaurant	27.49721	-99.44033	5102 TX-359 #800	Laredo	78043	+19567013304	http://www.ringosbbq.com		0.95
 3a55b9468e3d	River-sea North Ltd	restaurant		27.58585	-99.49426	207 Shiloh Dr	Laredo	78045				0.95
-8879ea20456f	Road Kitchen	restaurant	american restaurant	27.56095	-99.45116	9811 Bob Bullock Loop	Laredo	78041	+19566089737			0.93
 f3860b37ada5	Road Kitchen	restaurant	american restaurant	27.58639	-99.44087	9811 Bob Bullock Loop	Laredo	78041	+19566089737			0.95
 20f216fab14d	Rocha & Sons, Llc	restaurant		27.55980	-99.45090	6501 Arena Ste 101	Laredo	78041				0.95
 b7ceec9a5a31	Rochas Bar and Grill	restaurant	bar and grill restaurant	27.56029	-99.45060	6501 Arena Blvd Ste. 101	Laredo	78041	+19567129000	http://RochasBarAndGrill.com/		0.99
@@ -1797,8 +1773,6 @@ d46c15b00f02	Sizzle Smoke Shop	restaurant		27.55399	-99.48032	5816 Mcpherson Rd	
 41d6ca8f2253	SnackStop	restaurant		27.50535	-99.48368	1219 Chihuahua St	Laredo	78040	+19562859176			0.86
 b02b2cdfe5cd	Social Bar & Grill	restaurant	bar and grill restaurant	27.56185	-99.44608	7128 Rosson Rd	Laredo	78041	+19569489281			0.92
 6203c7964518	Son's Of Sals, Inc	restaurant		27.52889	-99.50489	3220 San Bernardo Ave	Laredo	78040				0.95
-485fb51eeaf2	Sonic Drive-In	restaurant	burger restaurant	27.58765	-99.47637	1302 International Blvd	Laredo	78045	+19567255202	https://locations.sonicdrivein.com/tx/laredo/1302-internation-boulevard.html		0.96
-94542c8ed4c5	Sonic Drive-In	restaurant	theme restaurant	27.98977	-99.37006	23138 I-35 S	Encinal	78019		https://locations.sonicdrivein.com/tx/encinal/23138-i-35-frontage-rd.html	Sonic Drive-In	0.99
 b8e2cab8d823	Soto's Brew and Chew	restaurant		27.59811	-99.46050		Laredo					0.97
 73b2ebdc9e06	South side tacos	restaurant		27.48062	-99.46416	3110 Pine St	Laredo	78046	+19564398862			0.86
 562ebff17d9e	Speedy Tacos	restaurant	mexican restaurant	27.47202	-99.47475	2802 S Malinche Ave	Laredo	78046	+19563333590	http://speedytacos.org/		0.85
@@ -1806,24 +1780,6 @@ b8e2cab8d823	Soto's Brew and Chew	restaurant		27.59811	-99.46050		Laredo					0.9
 94b2a816a3f5	Stars Drive-in	restaurant	theme restaurant	27.50677	-99.47748	1820 Guadalupe St	Laredo	78043	+19567264143	http://starsdrivein.com	Stars Drive-In	0.99
 d6b2670a62db	Stars Restaurant, Laredo, Texas, Llc	restaurant		27.50686	-99.47759	1820 Guadalupe St	Laredo	78043				0.95
 124c33ae3f0f	Suarez Restaurant	restaurant	mexican restaurant	27.53872	-99.48460	4800 McPherson Rd #3	Laredo	78041	+19566020230	http://www.suarez.restaurant/		0.99
-0e1fe255225c	Subway	restaurant	sandwich shop	27.58684	-99.51100	9320 Mines Road Unit 1	Laredo	78045	+19567128377	https://restaurants.subway.com/united-states/tx/laredo/9320-mines-road	Subway	0.97
-19755d379058	Subway	restaurant	sandwich shop	27.53023	-99.47480	2117 E. Saunders #2	Laredo	78041	+19567958840	https://restaurants.subway.com/united-states/tx/laredo/2117-e-saunders	Subway	0.97
-19c89405c9ba	Subway	restaurant	sandwich shop	27.55562	-99.50459	5724 San Bernardo Ave Ste 103	Laredo	78041	+19567275727	http://www.Subway.com/	Subway	0.98
-33d13af0096d	Subway	restaurant	sandwich shop	27.60535	-99.51749	11801 FM 1472	Laredo	78045	+19567917137	https://www.subway.com		0.92
-40c803450185	Subway	restaurant	sandwich shop	27.54345	-99.48338	5112 McPherson Rd #103	Laredo	78041	+19567291556	https://restaurants.subway.com/united-states/tx/laredo/5112-mcpherson-rd	Subway	0.99
-68a1e5457b83	Subway	restaurant	sandwich shop	27.56618	-99.47340	6966 McPherson Road Suite A	Laredo	78041	+19562678056	https://restaurants.subway.com/united-states/tx/laredo/6966-mcpherson-road	Subway	0.98
-6b3315e9c636	Subway	restaurant	sandwich shop	27.68437	-99.46138	1101 Uniroyal Dr	Laredo	78045	+19567170294	http://www.subway.com/en-us	Subway	0.96
-878d4818bc1d	Subway	restaurant	sandwich shop	27.49038	-99.45951	3519 Jaime Zapata Memorial Hwy	Laredo	78043	+19567297472	https://restaurants.subway.com/united-states/tx/laredo/3519-jaime-zapata-memorial-hwy	Subway	0.99
-8f21da2ecb94	Subway	restaurant	sandwich shop	27.64491	-99.55584	101 Pinnacle Road	Laredo	78045	+19567276098	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=70055&utm_campaign=evergreen-2020&y_source=1_MTYwMzY0MDQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
-99e77b019096	Subway	restaurant	sandwich shop	27.58720	-99.47717	1212 International Blvd Ste 1	Laredo	78045	+19567262616	https://restaurants.subway.com/united-states/tx/laredo/1212-international-blvd	Subway	0.97
-b372eeebbc29	Subway	restaurant	sandwich shop	27.56720	-99.49949	W Del Mar Blvd	Laredo	78041	+19569512398	https://restaurants.subway.com/united-states/tx/laredo/201-w-del-mar-blvd	Subway	0.99
-b415c0731a69	Subway	restaurant	sandwich shop	27.56660	-99.50191	7045 San Dario, Kwik Chek	Laredo	78041			Subway	0.80
-b80ce7feb01f	SUBWAY	restaurant	sandwich shop	27.60568	-99.52982	I-35	Laredo	78041		http://subway.com		0.77
-bbcefa305b96	Subway	restaurant	sandwich shop	27.61186	-99.46729	2517 Bob Bullock Loop Suite 102	Laredo	78045	+19567297701	https://restaurants.subway.com/united-states/tx/laredo/2517-bob-bullock-loop	Subway	0.97
-c17bd1344ee6	Subway	restaurant	sandwich shop	27.50547	-99.48061	1020 N Meadow Ave	Laredo	78040	+19567297472	https://restaurants.subway.com/united-states/tx/laredo/1020-n-meadow	Subway	0.95
-d71d68f96f9f	Subway	restaurant	sandwich shop	27.53028	-99.50468	3402 San Bernardo Ave # 1	Laredo	78040	+19565684838	https://www.subway.com		0.95
-d71e6a98cae9	Subway	restaurant	sandwich shop	27.51631	-99.45190	4311 Clark Blvd	Laredo	78043	+19565238627	http://subway.com/	Subway	0.94
-de2f69a32250	Subway	restaurant	sandwich shop	27.57152	-99.43584	5201 University Blvd	Laredo	78041	+19563262095	https://restaurants.subway.com/united-states/tx/laredo/5201-university-blvd?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=30545&utm_campaign=evergreen-2020&y_source=1_MTQ5MTE1MjctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
 964a67fec2eb	Sun Foods Of Texas	restaurant		27.61901	-99.51841	13110 Spivey Dr	Laredo	78045				0.95
 c67cab2dd22e	Super Pollo	restaurant	chicken restaurant	27.53075	-99.48701	906 E Saunders St	Laredo	78041	+19567013025	https://superpollolaredotx.com		0.96
 b23a3574c904	Sure-Fire Carrier Inc	restaurant		27.62151	-99.52882	14216 Transportation Ave	Laredo	78045	+19567010340			0.58
@@ -1833,8 +1789,6 @@ a91fe9598225	Sushi Madre	restaurant	sushi restaurant	27.56031	-99.44487	7124 Bob
 e8a036cb8f82	Sushi Madre	restaurant	sushi restaurant	27.58629	-99.47643	8610 McPherson Rd	Laredo	78045	+19567178744	http://sushimadre.com/	Sushi Madre	0.98
 ecbec8638a18	Sushi Madre	restaurant	sushi restaurant	27.53024	-99.49898	401 W Saunders St	Laredo	78041	+19567265509	http://sushimadre.com/	Sushi Madre	0.99
 c74aa3fb7328	Sweet And Spicy	restaurant		27.50900	-99.47477	2100 Corpus Christi St Ste 9	Laredo	78043	+19564418524	http://sweet-spicy.jany.io		0.92
-9cd518a5f585	Taco Bell	restaurant	mexican restaurant	27.50654	-99.50255	801 San Dario Ave	Laredo	78040	+15122499500	www.tacobell.com		0.92
-0dedd2b67bc3	Taco Fest Laredo	restaurant		27.53679	-99.50463	4120 San Bernardo Ave	Laredo	78041	+19565317990			0.97
 7817dbca0350	Taco Fest Laredo	restaurant		27.57481	-99.47434	4120 San Bernardo Ave	Laredo	78041	+19565317990			0.98
 644fc599e4e2	Taco Mais	restaurant	mexican restaurant	27.53137	-99.50464	3510 San Bernardo Ave	Laredo	78041	+19567298226	http://taco-mais.com		0.99
 6a4a9f2f68be	Taco Mais	restaurant	mexican restaurant	27.43839	-99.47974	666 Prada Machin Dr	Laredo	78046	+19565680245	https://accountant21.wixsite.com/taco-mais		0.96
@@ -1885,7 +1839,6 @@ dfaff32f271b	Tacos Locos	restaurant	mexican restaurant	27.50211	-99.50906	1600 W
 b11a20661598	Tacos los Dos Carnales	restaurant	mexican restaurant	27.45556	-99.47824	4210 S Zapata Hwy	Laredo	78046	+19567010367			0.92
 b919246b534f	Tacos los sombreros	restaurant	mexican restaurant	27.50456	-99.46791	919 N Arkansas Ave	Laredo	78043	+19562066276	https://www.facebook.com/profile.php?id=100089922815663&mibextid=LQQJ4d		0.92
 97dda137d1b3	Tacos Mexicanos	restaurant	mexican restaurant	27.45558	-99.47823	Las Palmas Food Trucks & Park, 4210 S Zapata Hwy	Laredo	78046	+19565399820			0.94
-b69a6e09606e	Tacos Mexicanos	restaurant		27.44226	-99.47961	Las Palmas Food Trucks & Park, 4210 S Zapata Hwy	Laredo	78046	+19565399820			0.94
 613c7c836c1a	Tacos Monterrey	restaurant	mexican restaurant	27.48279	-99.47255	1602 S Zapata Hwy	Laredo	78046	+19567752638	https://mexicoo.mx/tacos-laredo-6217548		0.96
 57013b1f7095	Tacos Regios	restaurant	latin american restaurant	27.51619	-99.49716	204 W Gustavus St	Laredo	78040	+19564800970			0.80
 88fb04fca8bd	Tacos Tumbras	restaurant	taco restaurant	27.52545	-99.48743	902 E Locust St	Laredo	78040	+19566020405	https://tacostumbrasee.com		0.92
@@ -1904,7 +1857,6 @@ d9f93c010535	Taqueria Costa Azul	restaurant	mexican restaurant	27.48993	-99.4632
 62e77af6f88c	Taqueria Coyutla	restaurant	mexican restaurant	27.53712	-99.50454	4120 San Bernardo Ave	Laredo	78041	+19567241000	http://coyutlarestaurant.com/		0.97
 742b308b71ff	Taqueria Don Gallo	restaurant		27.44194	-99.47948	4910 S Zapata Hwy	Laredo	78046	+19567400709			0.68
 1c8995848dbf	Taqueria El Rincon	restaurant		27.52244	-99.49299	2901 Marcella Ave	Laredo	78040	+19567252444			0.92
-6e088847b3f8	Taqueria El Rincon	restaurant	mexican restaurant	27.52244	-99.49299	2901 Marcella Ave	Laredo	78040	+19566089900	https://la-raza-restaurant.negocio.site		0.78
 48edb0a6390d	Taqueria mi Mexico	restaurant	mexican restaurant	27.48529	-99.36651	7572 TX-359	Laredo	78043				0.92
 e3b799b30b66	Taqueria Ruiz	restaurant	mexican restaurant	27.50632	-99.47506	2101 Guadalupe St	Laredo	78043	+19567757920			0.99
 da52d4c95b1e	Taqueria Sanchez	restaurant		27.50354	-99.46411	3119 Market St	Laredo	78043	+19569990737			0.71
@@ -1964,20 +1916,12 @@ fdb54590cb2d	Veronica	restaurant		27.61543	-99.51861	13601 N Lamar Dr	Laredo	780
 25f4eb3e0804	Wayback Burgers	restaurant	burger restaurant	27.57233	-99.47313	7510 Mcpherson Ave	Laredo	78041	+19566020127	http://www.waybackburgers.com/		0.88
 7b580b84fd2b	Wayback Burgers	restaurant	burger restaurant	27.61178	-99.46732	2517 Bob Bullock Loop	Laredo	78045	+19565688097	http://www.waybackburgers.com/		0.92
 4598f0ef7b55	Welldex Logistics	restaurant		27.61953	-99.46933	11302 Eastpoint Dr	Laredo	78045	+19567265502	http://www.welldex-nte.com.mx		0.85
-85cb02ae19aa	Whataburger	restaurant	burger restaurant	27.52014	-99.44946	2420 Bob Bullock Loop	Laredo	78043	+19564770477	wasafety.com.au		0.55
-87d33398bec9	Whataburger	restaurant	burger restaurant	27.50663	-99.49986		Laredo			http://www.whataburger.com/	Whataburger	0.97
-9a8f0a4f3042	Whataburger	restaurant	burger restaurant	27.55979	-99.44817	7010 Lancer Rd	Laredo	78041	+19567530200	http://whataburger.com/	Whataburger	0.99
-d004d816b274	Whataburger	restaurant	burger restaurant	27.59260	-99.51326	10112 FM 1472	Laredo	78045	+19567178506	http://whataburger.com/	Whataburger	0.96
-e4bab8f0bfb9	Whataburger	restaurant	burger restaurant	27.56684	-99.50141	221 W. Del Mar Blvd.	Laredo	78041	+19567252509	http://whataburger.com/	Whataburger	0.97
 2bf1221b59cc	Whispers Bar & Lounge	restaurant	bar and grill restaurant	27.56666	-99.49946	201 W Del Mar Blvd	Laredo	78041	+19562361111			0.99
 e0fb26b11beb	Wicked Wingz	restaurant	chicken restaurant	27.58599	-99.49088	401 Shiloh Dr #15	Laredo	78045	+19562678793	http://www.thewickedwingz.com/		0.98
 cdbbfcd4ed5a	Wing Daddy's Sauce House - Laredo	restaurant	bar and grill restaurant	27.60308	-99.47633	2445 San Isidro Pkwy	Laredo	78045	+19567279464	https://wingdaddys.com/	Wing Daddy's Sauce House	0.99
 0516b81160ed	Wings and Rings	restaurant		27.59681	-99.48035	9651 McPherson Rd	Laredo	78045	+19567229464	https://www.wingsandrings.com/		0.99
 a11c0c193748	Wings Route	restaurant		27.57640	-99.47305	7815 Mcpherson Rd Ste 107a	Laredo	78045	+19567045558			0.95
 e7bed9433ef0	Wings To Go	restaurant	chicken restaurant	27.60973	-99.47426	2019 NE Bob Bullock Lp C 150	Laredo	78045	+19567289464	https://webclip.getunion.com/?venue_uuid=d24577a1-a122-4e3a-b0c5-df58030b774f		0.98
-15d019de4da4	Wingstop	restaurant	chicken restaurant	27.45251	-99.47697	4415 US Hwy 83 S Ste 300	Laredo	78046	+19567969464	https://www.wingstop.com/location/wingstop-322-laredo-tx-78046/menu?y_source=1_NTUyMDY1OTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-1e3041bc4e55	Wingstop	restaurant	chicken restaurant	27.52035	-99.44849	2420 Bob Bullock Loop Ste 20	Laredo	78043	+19567179464	https://www.wingstop.com/location/wingstop-765-laredo-tx-78043/menu?y_source=1_NTUyMDc1NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.93
-b938bdf78964	Wingstop	restaurant	chicken wings restaurant	27.61243	-99.46451	2603 NE Bob Bullock Loop, Suites 2 & 3	Laredo	78045	+19569379464	https://www.wingstop.com/location/wingstop-4031-laredo-tx-78045/menu?y_source=1_MTA5NjY4NTk0OS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 bf8d9587deed	Wizard Wicks Pizza	restaurant	pizza restaurant	27.52072	-99.48024	2701 N Meadow Ave	Laredo	78040	+19567545606	http://wizardwickspizzamenu.com/		0.99
 ced08ad90c0b	X Cell Logistic Services Inc	restaurant		27.62015	-99.47511	814 Union Pacific Blvd	Laredo	78045	+19565238612	https://x-cell-logistic-services-inc.hub.biz/		0.96
 98797c1c8fcc	Xarochito's Snack	restaurant	mexican restaurant	27.47354	-99.46121	3302 Cuatro Vientos Dr Ste 4a	Laredo	78046	+19566020098	https://xarochitos-snack.myshopify.com/		0.96

@@ -1,6 +1,5 @@
 id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 baf15969ea92	Best Donuts	bakery	donut shop	31.34450	-93.84657	220 TX-87	Hemphill	75948	+14097874979			0.96
-09eeef58b3c7	Cafe in the Pines Bakery	bakery		31.34782	-93.83955		Hemphill		+14097872738			0.88
 c41bc2f0b993	Cafe in the Pines Bakery	bakery		31.34220	-93.84882		Hemphill					0.97
 31997b31ed67	Deedee Donuts	bakery	donut shop	31.24817	-93.98600	102 US-96	Pineland	75968	+14095843545	http://deedee-donuts.jany.io		0.96
 0bfcfdca1375	Pineywoods Pie Co	bakery		31.34988	-93.83744	730 Sabine St	Hemphill	75948				0.96
@@ -9,7 +8,6 @@ c41bc2f0b993	Cafe in the Pines Bakery	bakery		31.34220	-93.84882		Hemphill					0
 a9840f799f36	Polar Bear Daiquiri's To Go - Brookeland, TX	bar		31.14435	-93.98469	15698 US Highway 96 N	Brookeland	75931	+14096989955			0.92
 b47639a2646c	Shelly’s Hideaway	bar		31.00654	-93.98154	5996 US Highway 96 N	Jasper	75951	+14092941222			0.70
 ee76f31a525a	Small Town Pool Hall	bar		31.25670	-93.98786	679 US Highway 96 N	Pineland	75968	+14095841559			0.97
-fb5f715ecdd0	Small Town Pool Hall	bar		31.25711	-93.98813	679 US Highway 96 N	Pineland	75968	+14095841559			0.96
 a11d188e5c38	Tebo Creek Winery	bar	winery	31.34501	-93.84494	350 Sabine St	Hemphill	75948				0.95
 704516d4c32a	The Speakeasy Lounge	bar	cocktail bar	31.34093	-93.85270	170 Ironwood	Hemphill	75948	+14097874115			0.92
 b3d8df3d152d	Beall's Auto Sales	cardealer		31.34790	-93.84070		Hemphill		+14097873859			0.92
@@ -38,6 +36,7 @@ e57e8b849315	The Trading Post	convenience		31.16337	-93.57098	13816 FM-692	Burke
 d72936251127	Trails End Grocery	convenience		31.76251	-93.86846	5437 FM3172	Huxley	75973	+19363687171	http://www.trailsendgrocery.com/		0.95
 bdc2dcb2d6c8	Valero	convenience		31.14390	-93.98547	15635 US Highway 96 N	Brookeland	75931	+14096989702	https://www.valero.com		0.65
 885994a2c032	Dairy Queen	fastfood		31.24867	-93.98573	100 U S 96	Pineland	75968	+14095842123	http://www.dqtexas.com/		0.97
+c9417bdba1b9	Subway	fastfood	sandwich shop	31.34746	-93.84093	602 Sabine Street	Hemphill	75948	+14097879910	https://restaurants.subway.com/united-states/tx/hemphill/602-sabine-street	Subway	0.95
 62d682d5c314	Brookshire Brothers	grocery		31.34292	-93.84706	245 E Main St	Hemphill	75948	+14097872611	https://www.brookshirebrothers.com/store-location/store-20	Brookshire Brothers	0.92
 b9ef107abb06	Country Corner	grocery		31.00163	-93.66456	483 State Highway 63 E	Burkeville	75932	+14095652050	http://www.countrycornerguthrie.com		0.55
 e01ac6ef1b7f	Sno-Conez	grocery		31.24798	-93.98709	158 S US Highway 96	Pineland	75968	+14095842306	http://www.pcsolutionzetc.com/snoconez.html		0.66
@@ -46,16 +45,11 @@ eb5575123624	Sabine County Hospital	hospital		31.33383	-93.86285	2301 Worth St	H
 6545eb774c52	Captain's Fishing Resort	hotel	resort	31.52725	-93.79116	3775 Carters Ferry Rd E	Milam	75959	+14099990949			0.55
 1e4ae872d26a	Cooper's Cabin	hotel		31.25127	-93.74549	468 Clay Banks Dr	Hemphill	75948	+14095793368			0.74
 403fbde34fd7	Dove Cove Cottage	hotel		31.05133	-93.97681	411 Old TX-96	Brookeland	75931	+14093840939	http://dovecove.net		0.77
-a179af5ea4cf	Fox's Lodge & Marina	hotel	lodge	31.27892	-93.70244	159 Foxs Ldg	Hemphill	75948	+14095793232	http://foxslodgemarina.com/		0.92
 72ae32c206bc	Frontier Park Resort	hotel		31.45417	-93.76762	360 Frontier Dr	Hemphill	75948	+19163460000			0.98
-6be7eb5c396d	Indian Creek Lodge & Resort	hotel	lodge	31.14829	-93.60333	118 Cedar Ln	Burkeville	75932	+14095654239	http://toledo-bend.net/Indian		0.94
 46e0e87a7bfd	Pendleton Harbor Marina	hotel		31.46404	-93.75191	405 Clubhouse Dr	Hemphill	75948	+14096254912	http://pendletonharbor.net		0.92
 12cdb1a8af23	Rodeway Inn & Suites	hotel	resort	31.46057	-93.75386	6500 Highway 21 E	Hemphill	75948	+14096253747	https://www.choicehotels.com/texas/hemphill/rodeway-inn-hotels/txk36?mc=llbillpx&pmf=local		0.97
-7efa09838f8e	Ruttin Bucks Lodge	hotel	lodge	31.72507	-93.91863	850 County Road 2575	Shelbyville	75973	+19363680000			0.85
 4a82acf9fa9e	Sandstone Ridge " in Burkeville Tx	hotel		31.07546	-93.54279		Burkeville					0.70
 200e66310466	Scott’s Hideaway	hotel		31.24779	-93.77207	9765 State Highway 87 S	Hemphill	75948	+14097287290			0.71
-67746202d9e9	Scrappin' Valley Lodge	hotel	lodge	31.14365	-93.75017	702 Private Rd 5022	Wiergate	75977	+14095653500	http://www.scrappinvalley.com/		0.90
-eb9720fb9d65	Toledo Bend Outdoors, LLC	hotel	lodge	31.45056	-93.76420	5518 TX-21	Hemphill	75948	+14097873138			0.92
 76257a11288d	Fairmount Family Practice	office		31.21673	-93.67841	3732 Fairdale Rd	Hemphill	75948	+14095792044			0.81
 41508773f897	Mill Creek Bay Rv	office		31.20560	-93.66090	648 Paradise Loop	Hemphill	75948	+14095793079			0.92
 48bdea9cc444	Angie’s Chicken Farm Cooperative - ACFC	restaurant	chicken restaurant	31.17731	-93.97208	181 Cardinal Way	Brookeland	75931	+14095947839	http://angieschickenfarco.wixsite.com/acfc		0.58
@@ -82,7 +76,6 @@ ba7f83a27d70	Lost Frontier	restaurant	bar and grill restaurant	31.34237	-93.8481
 a1f2c81a2362	Rosevine BBQ	restaurant	barbecue restaurant	31.43565	-93.91310	1592 TX-103	Bronson	75930	+19362406734			0.64
 0ea05b8b4fc7	Slice Pizza	restaurant	pizza restaurant	31.34197	-93.84875	103 North Oak Street	Hemphill	75948	+14097870009			0.97
 f0c1ec14065c	Sportys tavern	restaurant	bar and grill restaurant	31.24583	-93.77072	9848 TX-87	Hemphill	75948				0.98
-c9417bdba1b9	Subway	restaurant	sandwich shop	31.34746	-93.84093	602 Sabine Street	Hemphill	75948	+14097879910	https://restaurants.subway.com/united-states/tx/hemphill/602-sabine-street	Subway	0.95
 f02de5912420	TEXAS JOE'S BACKPORCH BBQ	restaurant	barbecue restaurant	31.15114	-93.99708	378 Coopers Xing, Mill Creek Park Rd	Brookeland	75931	+14093833987			0.96
 a86a5b13eac4	The Feed Store Cafe BREAKFAST	restaurant	breakfast and brunch restaurant	31.34174	-93.85020	310 Worth St	Hemphill	75948	+14097873335			0.92
 753296eda967	Valero San Augustine	restaurant	pizza restaurant	31.45102	-93.90894	1007 State Highway 21 W	San Augustine	75972	+19362752132			0.85

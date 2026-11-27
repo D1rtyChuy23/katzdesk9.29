@@ -12,7 +12,6 @@ cb41c57daa0a	ALON Gas Station	convenience		30.91432	-101.89899	199 West 6th Stre
 577f13e6a544	Chevron Station Ozona	convenience		30.70623	-101.19978	1309 Ave C	Ozona	76943	+18322343600			0.92
 0ab5f43a1eb0	Exxon	convenience		30.77584	-101.03503	County Road 108	Ozona	76943	+13253922637	http://www.exxon.com/		0.59
 1e76b967e440	Exxon in the Middle of Nowhere	convenience		30.69918	-101.09074	3331 I-10 E	Ozona	76943	+13253922637	http://exxon.com/		0.81
-95b04cfce201	Exxon in the Middle of Nowhere	convenience		30.69472	-101.08846	3331 I-10 E	Ozona	76943	+13253922637	http://exxon.com/		0.81
 92d91f86b2c9	LITTLE STORE	convenience		30.70640	-101.20130	504 14th Street	Ozona	76943		https://locations.valero.com/en-us/LocationDetails/Index/504-14TH-STREET/0000012924	Valero	0.92
 e9219685ab79	Phillips 66	convenience		30.70863	-101.20811	1101 Sheffield Rd	Ozona	76943	+13253923779	https://www.phillips66gas.com/		1.00
 f17502f45178	Phillips 66	convenience		30.70800	-101.20169	1206 Avenue E	Ozona	76943	+13253922473	https://www.phillips66gas.com/		1.00
@@ -31,6 +30,7 @@ d84eafc020c3	Sunoco	convenience		30.70630	-101.19939	1309 Ave C	Ozona	76943	+132
 4a148148956d	Ortiz Burritos	fastfood		30.91236	-101.90042	206 W 4th St	Iraan	79744	+14323021066			0.92
 97fe0f63b302	Sip-N-Slurp	fastfood		30.91205	-101.89818	403 S Drake	Iraan	79744				0.88
 4853409f8a99	Sonic Drive In	fastfood		30.70647	-101.20294	704 East 14Th Street	Ozona	76943	+13253929501	https://locations.sonicdrivein.com/tx/ozona/704-east-14th-street.html	Sonic Drive-In	0.94
+ee0cc0ba631b	Subway	fastfood	sandwich shop	30.70829	-101.20187	1204 Ave E	Ozona	76943	+13253924782	http://www.subway.com/en-us	Subway	0.97
 a5cd62469ac5	Fruit and snacks Ozona	grocery		30.70166	-101.21104	111 Swaps St	Ozona	76943	+13252268332			0.74
 1b511f1d6389	Hilltop Tortilla Factory	grocery		30.70096	-101.19892	211 Buena Vista St	Ozona	76943	+3253924208			0.88
 8efe1c0a9459	Lowe's Market	grocery		30.71690	-101.20126	305 Avenue E P.O. Box 1949	Ozona	76943	+13253923324	http://www.lowesmarket.com/	Lowe's Market	0.92
@@ -50,7 +50,6 @@ d0d88bb0afdf	MainStay Suites Ozona I-10	hotel	resort	30.70708	-101.19659	1307 Av
 7207afdb85a3	Quality Inn Ozona I-10	hotel		30.70664	-101.19644	1307 Ave A Building B	Ozona	76943	+13253085674	https://www.choicehotels.com/texas/ozona/quality-inn-hotels/tx303?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 4ab35130bb97	Super 8 by Wyndham Ozona	hotel	resort	30.69905	-101.09054	3331 10th E # I	Ozona	76943	+13253922611	https://www.wyndhamhotels.com/super-8/ozona-texas/super-8-ozona/overview?CID=LC:SE::BING:RIO:National:13432&iata=00093796		0.83
 0f2630ee234a	Trail West Lodge	hotel	motel	30.91364	-101.89314	406 E 6th St	Iraan	79744	+14326392548	https://trailwestlodgeiraan.com/		0.92
-2936e385b917	Travelodge by Wyndham Ozona	hotel	resort	30.70889	-101.20417	8 11th St	Ozona	76943	+13253924450	https://www.wyndhamhotels.com/travelodge/ozona-texas/travelodge-ozona/overview?CID=LC:g22xy9tahqskhx3:11449&iata=00093796		0.85
 320b4049cc74	Travelodge by Wyndham Ozona	hotel		30.71048	-101.19453	8 11th St	Ozona	76943	+13253924450	https://www.wyndhamhotels.com/en-ca/travelodge/ozona-texas/travelodge-ozona/overview		0.98
 63e373e6a402	Bonfire Energy	office	energy company	30.70689	-101.21027	1201 Sheffield Rd	Ozona	76943	+13253083006	http://bonfireenergy.com/		0.92
 fed952ff03ca	dcp Midstream	office	energy company	30.68771	-101.20855	594 TX-163	Ozona	76943	+19189777696	http://www.dcpmidstream.com		0.92
@@ -74,7 +73,6 @@ cca1c64fa141	Mi Taco	restaurant	mexican restaurant	30.70971	-101.20742	1002 Shef
 d3ca8db35e45	Mingo'S Burritos	restaurant	mexican restaurant	30.70337	-101.20406	1606 Del Rio St	Ozona	76943	+13253924239			0.68
 f394c99007bf	Old House Cafe	restaurant	comfort food restaurant	30.91396	-101.90103	303 W 6th St	Iraan	79744	+14326395015	http://www.oldhousecafe.net/		0.96
 760943e14b11	Pepe's Cafe	restaurant	texmex restaurant	30.70900	-101.20767	1003 Sheffield Rd	Ozona	76943	+13253922923	https://www.chamberofcommerce.com/ozona-tx/30871983-pepes-cafe		0.98
-ee0cc0ba631b	Subway	restaurant	sandwich shop	30.70829	-101.20187	1204 Ave E	Ozona	76943	+13253924782	http://www.subway.com/en-us	Subway	0.97
 7fb73861bd11	Taqueria 163	restaurant	texmex restaurant	30.64645	-101.20435	1810 TX-163	Ozona	76943	+13253924400			0.68
 7a33c66ba0f8	Taqueria Mi Casita	restaurant	mexican restaurant	30.70122	-101.19861	Buena Vista St	Ozona	76943	+13253922281	http://www.taqueriamicasita.com/our-authentic-menu.html	Taqueria Mi Casita	0.97
 eb5ffb216fef	Taquitos Don Manuel	restaurant	mexican restaurant	30.91108	-101.89778	Drake St	Iraan	79744	+13252772655			0.95

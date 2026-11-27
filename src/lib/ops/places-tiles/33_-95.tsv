@@ -12,7 +12,6 @@ c76bd7bb798f	Coleman Cattle Company	bakery		33.34309	-94.09275	4270 Buchanan Loo
 679dd6b6f69b	Daingerfield Donuts	bakery	donut shop	33.01731	-94.72078	1300 Linda Dr	Daingerfield	75638	+19036452004			0.96
 f9fc2685ce41	Dandy Donut Shoppe	bakery	donut shop	33.46090	-94.04434	4843 Texas Blvd	Texarkana	75503	+19037924371	http://dandydonuts.com	Dandy Donuts	0.96
 f0eba857c918	Danny's Donuts	bakery	donut shop	33.46469	-94.40807	400 N McCoy Blvd	New Boston	75570	+19036287510			0.96
-01213e7091a9	Daylight Donuts	bakery	donut shop	33.03236	-94.73542	114 Webb St	Daingerfield	75638	+19036454808	https://detourdoughnutsandcoffee.com		0.55
 a56539b4eec8	Daylight Donuts	bakery	donut shop	33.14204	-94.96765	1401 S Jefferson Ave	Mt Pleasant	75455	+19035773688	https://detourdoughnutsandcoffee.com		0.92
 e7a9ed14828b	Daylight Donuts	bakery	donut shop	33.03197	-94.72282	114 Webb St	Daingerfield	75638	+19036454808	http://www.daylightdonuts.com		0.92
 ed3b3d6a77b8	Daylight Donuts	bakery		33.01802	-94.72031	1211 Linda Dr	Daingerfield	75638	+19036454664	http://www.daylightdonuts.com	Daylight Donuts of Portales	0.92
@@ -103,7 +102,6 @@ f47f643d37e1	Car-Mart of Texarkana	cardealer		33.44490	-94.06534	3015 Summerhill
 76c6b9c40bbe	Chago's Auto Sales Llc	cardealer		33.02178	-94.71636	1001 Bert St	Daingerfield	75638	+19039464244			0.92
 75a16e8a629b	Champion Auto Sales	cardealer		33.14555	-94.96899	1200 S Jefferson Ave	Mount Pleasant	75455	+19035725353	http://www.championtx.com		0.92
 a8321fe93ece	Classic Auto Park	cardealer		33.45176	-94.09511	4333 Mall Dr	Texarkana	75501	+19032234333	http://www.greggorrauto.com/		0.97
-0aa399d7a25a	Classic Chrysler Dodge Jeep Ram	cardealer		33.45176	-94.09510	1102 Walton Dr	Texarkana	75501	+19037166660	https://www.cdjrtexarkana.com		0.77
 d37267d1d2fb	Classic Chrysler Dodge Jeep Ram	cardealer		33.45079	-94.10389	1102 Walton Dr	Texarkana	75501	+19037166660	http://www.cdjrtexarkana.com/	Chrysler	0.97
 ef7f9f2373ab	Classic Kia	cardealer		33.45023	-94.10155	902 Walton Dr	Texarkana	75501	+18336515314	http://www.classictexarkanakia.com/		0.92
 12d54c8ad66a	CLASSIC MAZDA	cardealer		33.52653	-94.13092	802 Sowell Lane	Texarkana	75503		http://www.classictexarkanamazda.com/	Mazda	0.80
@@ -124,7 +122,6 @@ c7885ee00a59	Elliott Ford Lincoln	cardealer		33.15215	-94.97163	203 W Ferguson R
 06d717ab35fc	Elliott Motors	cardealer		33.17134	-94.97816	928 W 16th St	Mt Pleasant	75455	+19035724371			0.55
 53724d960d4b	First Gear Auto	cardealer	used auto dealer	33.44329	-94.06477	2719 Summerhill Rd	Texarkana	75503	+19037911396			0.58
 79c5f40dbd87	Fly boi sales	cardealer		33.45171	-94.09509	4333 Mall Dr	Texarkana	75501	+18705716136			0.92
-9094f25daa3f	Gregg Orr Motors of Texarkana, Inc.	cardealer		33.45133	-94.09611	804 Sowell Lane	Texarkana				Mercedes-Benz	0.80
 585c8b478a2b	Hartline Auto	cardealer		33.47392	-94.41264	1016 N Center St	New Boston	75570	+19036280007			0.92
 5a6e6e109a52	Hartline Family Auto	cardealer		33.46131	-94.41897	107 US-82	New Boston	75570	+19036280007	http://www.hartlineauto.com/		0.92
 166b467155a6	Headers	cardealer		33.11538	-94.16979	208 W Main St	Atlanta	75551	+19032800003			0.56
@@ -134,7 +131,6 @@ c7dbeb385e92	Jo Jo Benson Auto Sales	cardealer		33.45909	-94.04357	4411 N State 
 39ecd5de7d4a	Joe For The Low	cardealer		33.46550	-94.06979	2300 St Michael Dr	Texarkana	75503	+19037010244			0.68
 d52d40c7e0ec	Johnston Ford	cardealer		33.47259	-94.40746	615 James Bowie Dr	New Boston	75570	+19036282513	https://www.johnstonford.com/	Ford Motor Company	0.92
 f57e85d102d9	Jon's Truck Network	cardealer		33.46689	-94.06751	1902 St Michael Dr	Texarkana	75503	+19037484889	http://Texarkana.SelecTrucks.com/		0.63
-44c585a59b0f	K&M Auto Sales	cardealer		33.42915	-94.03198	4333 Mall Dr	Texarkana	75501	+19039081139			0.95
 aad0f7d50239	K&M Auto Sales	cardealer		33.45169	-94.09509	4333 Mall Dr	Texarkana	75501	+19039081139			0.95
 a92ab4fafd89	Kyler Sells Cars	cardealer		33.45448	-94.10156	4602 Gus Orr Dr	Texarkana	75503	+13272102334			0.56
 72d8e08894de	Lawless Auto Sales	cardealer	used auto dealer	33.03448	-94.31949	1525 US-59	Linden	75563	+19037565733			0.58
@@ -160,9 +156,7 @@ dc68dd7b99de	Performance Motor Company	cardealer	used auto dealer	33.02299	-94.7
 1904fd6909c1	Pudge's Page	cardealer		33.45171	-94.09509	4333 Mall Dr	Texarkana	75501	+19035596631			0.92
 6474899ae468	Raglands Auto Sales & Detail	cardealer		33.42311	-94.05516	1223 W 7th St	Texarkana	75501				0.97
 06c4902e688c	Robbins Toyota	cardealer		33.45225	-94.12787	6233 Mall Dr	Nash	75569	+19033062755	http://www.robbinstoyota.com/	TOYOTA	0.99
-9140751d0d2a	RPM Auto Service and Sales	cardealer		33.50267	-94.61231	610 south holy street	De Kalb	72761	+4793731144			0.78
 05d620a34343	Sandlin Chevrolet	cardealer		33.17133	-94.96916	204 E 16th St	Mt Pleasant	75455	+19032856627	http://www.chevrolet.com/	Chevrolet	0.92
-7bca2d7b3fda	Sandlin Chevrolet	cardealer		33.17098	-94.96913	204 E 16th St	Mt Pleasant	75455	+19032856627	https://www.chevyhouse.com		0.92
 d99ace3afc3b	SE Motors	cardealer		33.46551	-94.12324	2021 Brinlee Rd	Nash	75569	+18707842853	http://www.semotorcompany.com/		0.87
 3ce3f900051b	Shipp Motor Co	cardealer	used auto dealer	33.42838	-94.05028	1015 Texas Blvd	Texarkana	75501	+19037933116	https://shippmotors.com		0.92
 b11ef3809a6a	Smart Auto Sales	cardealer		33.44691	-94.04804		Texarkana					0.73
@@ -235,7 +229,6 @@ bb39796cb4b3	The Stained Page	coffee		33.42045	-94.04393	115 Main St	Texarkana	7
 e416f5215ad3	EMS at NTCC	college		33.10604	-94.88272	2866 Farm Road 1735	Mt Pleasant	75455	+19034348269	http://www.ntcc.edu/EMS		0.65
 4863115f8fd3	Naples Omaha Education Crt	college		33.19840	-94.68656	412 W WL Doc Dodson St	Naples	75568	+19038972935	http://ntcc.edu		0.92
 8fba67568318	Northeast Texas Community College	college		33.10465	-94.88063	2886 FM1735	Mt Pleasant	75455	+19034348100	http://www.ntcc.edu/		0.97
-354a3818da92	Northeast Texas Community College Adult Education Center	college		33.15791	-94.96972	209 N Madison Ave	Mt Pleasant	75455	+19035725154	http://www.ntcc.edu		0.74
 cbd5fcffd0cc	Northeast Texas Community College Adult Education Center	college		33.15751	-94.97263	209 N Madison Ave	Mt Pleasant	75455	+19035725154	http://www.ntcc.edu		0.74
 876d22a36c25	NTCC Housing	college		33.10483	-94.87817	2886 Farm To Market Road 1735	Mt Pleasant	75455	+19034348168	http://www.ntcc.edu/housing		0.88
 29a51002b312	NTCC Industrial Technology Training Center	college		33.17300	-94.99411	1100 Lakewood Dr	Mt Pleasant	75455	+19034348145	https://www.ntcc.edu		0.82
@@ -292,7 +285,6 @@ acb375cd2ad0	DK Gas Station	convenience		33.47327	-94.28975	803 Main Street	Hook
 2e99e0b975e5	E-Z Mart	convenience		33.17693	-94.97012	2004 N Jefferson Ave	Mt Pleasant	75455	+19035726532	http://www.e-zmart.com		0.93
 2ff52a33791e	E-Z Mart	convenience		33.42073	-94.12424	102 Redwater Rd	Wake Village	75501	+19038389410	http://www.e-zmart.com		0.93
 3b49c3918504	E-Z Mart	convenience		33.41351	-94.09212	602 Falvey Ave	Texarkana	75501	+19038326502	https://gpminvestments.com/		0.92
-598acd40bcb2	E-z Mart	convenience		33.43124	-94.08162	1603 N Robison Rd	Texarkana	75501	+19038389562	https://www.gpminvestments.com		0.65
 5fbaa8c917de	E-z Mart	convenience		33.46109	-94.09084	2802 Richmond Rd	Texarkana	75503	+19038389871	https://www.gpminvestments.com		0.95
 706e8f24ea15	E-Z Mart	convenience		33.46712	-94.27258	1501 E Avenue A	Hooks	75561	+19035472213	http://www.ezmart.com		0.92
 754ded160298	E-z Mart	convenience		33.14656	-94.95284	1201 E Ferguson Rd	Mt Pleasant	75455	+19035724773	https://www.gpminvestments.com		0.65
@@ -403,7 +395,6 @@ f39639f1c72d	Road Ranger	convenience		33.47743	-94.41003	907 N McCoy Blvd	New Bo
 75b8f695e792	Road Runner	convenience		33.45066	-94.07655	1632 Richmond Rd	Texarkana	75503	+19032550502	https://roadrunnerstores.com	Road Runner Stores	0.92
 935b908f8b5e	Roadway Food Mart	convenience		33.41870	-94.09418	4103 W 7th St	Texarkana	75501	+16013347042			0.92
 519355981065	Rocky Branch Grocery	convenience		33.11300	-94.69832	5134 US-259	Naples	75568	+19036452175			0.96
-060dd41e8827	Shell	convenience		33.36957	-94.12346	6307 US Highway 59 S	Texarkana	75501	+19038389634	http://www.shell.us/	Shell	0.92
 06e1cf15adb6	Shell	convenience		33.10662	-94.19668	2007 W Main St	Atlanta	75551	+19037963841	http://www.shell.us/	Shell	0.92
 127e2f2840cf	Shell	convenience		33.17700	-94.97041	2011 N Jefferson Ave	Mt Pleasant	75455	+19035750376	http://www.shell.us/	Shell	0.92
 291e8c01dcee	Shell	convenience		33.42087	-94.12459	102 Redwater Rd	Wake Village	75501	+19038389410	http://www.shell.us/	Shell	0.92
@@ -435,10 +426,8 @@ fa40112d2ff7	Shell	convenience		33.45582	-94.13132	4101 North Kings Highway	Texa
 f3567a277723	Spring Market	convenience		33.21099	-94.67172	504 E WL Doc Dodson St	Naples	75568	+19038971461	https://www.spring-market.com/store-information/Naples/710	Spring Market	0.92
 6411519eda3b	Spring Market Fuel Center	convenience		33.19648	-94.68929	504 Wl Doc Dodson	Naples	75568	+19038971461	https://www.spring-market.com/fuel	Spring Market	0.99
 70b0b49c20f7	Spring Market Fuel Center	convenience		33.49643	-94.59865	12522 Fm 1840	De Kalb	75559	+19036677527	https://www.spring-market.com/		0.97
-7f16eb1c066b	Spring Market Fuel Center	convenience		33.20593	-94.67600	504 Wl Doc Dodson	Naples	75568	+19038971461	https://www.spring-market.com/		0.85
 b15f381a1e7c	Spring Market Fuel Center	convenience		33.33066	-94.34489	115 W Main St	Maud	75567	+19036713159	https://www.spring-market.com/fuel	Spring Market	0.75
 d5165c4ddc86	Spring Market Fuel Center	convenience		33.00767	-94.63139	870 Taylor St	Hughes Springs	75656	+19036393746	https://www.spring-market.com/fuel		0.92
-dac0a95f4446	Spring Market Fuel Center	convenience		33.50872	-94.61633	12522 Fm 1840	De Kalb	75559	+19036677527	https://www.spring-market.com/		0.85
 40955d1af494	Star Mart	convenience		33.13536	-94.90968	3446 Texas Highway 49	Mount Pleasant	75455	+19035778823	http://www.shell.com		0.92
 50472b5fd29a	Star Mart	convenience		33.11483	-94.16877	201 W Main St	Atlanta	75551	+19037961112	http://exxonmobilstations.com		0.92
 ffc06bb4c5c6	STEP IN #1-RICHMOND	convenience		33.45440	-94.08450	2305 RICHMOND RD	Texarkana	75503		https://locations.valero.com/en-us/LocationDetails/Index/2305-RICHMOND-RD/0000004008	Valero	0.93
@@ -473,15 +462,24 @@ fd7efe1bc530	Valero	convenience		33.45437	-94.08460	2305 RICHMOND RD	Texarkana	7
 d69c658f5b6f	Antojitos Y Mariscos Sirenia	fastfood		33.15352	-94.97136	400 W Ferguson Rd Ste 1	Mount Pleasant	75455	+14302222149	http://www.okxoantojitos.com		0.77
 0f2078bce01d	Arby's	fastfood		33.45350	-94.07911	3223 Kennedy Ln	Texarkana	75503	+19038327631	https://locations.arbys.com/tx/texarkana/3223-kennedy-lane.html		0.99
 66a28f08ea08	Arby's	fastfood		33.48325	-94.50534	2980 US Highway 82 W	New Boston	75570	+19034176062	https://locations.arbys.com/tx/newboston/2980-us-hwy-82-w.html		0.85
+749fab252746	Arby's	fastfood	sandwich shop	33.47185	-94.46129	2980 US Hwy 82 W	New Boston	75570		https://www.arbys.com/locations/us/tx/new-boston/2980-us-hwy-82-w/store-9019/	Arby's	0.96
 7848cc84475b	Arby's	fastfood		33.14438	-94.96877	1300 S. Jefferson S Jefferson Ave & W Pecan St	Mt Pleasant	75455	+19035346236	http://www.arbys.com/menu/	Arby's	0.98
-963b21417edc	Arby's	fastfood		33.47338	-94.46934	2980 US Hwy 82 W	New Boston	75570	+19034176062	https://locations.arbys.com/tx/newboston/2980-us-hwy-82-w.html		0.85
 e3fd4dd61b1c	Autentico Taco Shop	fastfood		33.16825	-94.98438	1409 W 16th St	Mt Pleasant	75455	+19037461703			0.92
 7b46e9d51f38	Avery 7-11	fastfood		33.55263	-94.78377	155 W US-82	Avery	75554	+19036844144	http://www.Avery711.com/		0.92
 0bf30263f96b	Big Jake's Smokehouse	fastfood		33.43528	-94.07376	2610 New Boston Rd	Texarkana	75501	+19037931169		Big Jake's BBQ	0.61
 60d2ce855d97	Braum's Ice Cream & Dairy Store	fastfood		33.14478	-94.96785	1303 S Jefferson Ave	Mt Pleasant	75455	+19035720772	https://www.braums.com/store/1303-s-jefferson-ave-mt-pleasant-tx/	Braums	1.00
+199ec8eb48e5	Burger King	fastfood	burger restaurant	33.17595	-94.97002	2000 N Jefferson Ave	Mt Pleasant	75455	+19035775613	https://burgerking.com/store-locator/store/3101	Burger King	0.99
 291c1946656a	Burger King	fastfood		33.47288	-94.40860	708 N McCoy Blvd	New Boston	75570	+19036283999	http://www.burgerking.com/		0.77
+3a7fe8a30055	Burger King	fastfood	burger restaurant	33.11783	-94.18176	299 US-59	Atlanta	75551	+14305627070	https://burgerking.com/store-locator/store/23086	Burger King	0.94
+3cdd7e7f35a9	Burger King	fastfood	burger restaurant	33.46732	-94.23632	580 Lone Star Dr	Hooks	75561	+19035471057	https://burgerking.com/store-locator/store/26015	Burger King	0.95
+3f67b878d7b1	Burger King	fastfood	burger restaurant	33.47608	-94.40858	900 N McCoy Blvd	New Boston	75570	+19033145450	https://burgerking.com/store-locator/store/24008	Burger King	0.97
+92721ca4c6cb	Burger King	fastfood	burger restaurant	33.44846	-94.05782	1107 College Dr	Texarkana	75503	+19037923999	https://www.rbi.com		0.55
 97cb89b48aba	Burger King	fastfood		33.41960	-94.12377	602 N Kings Hwy	Wake Village	75501	+19038324795	http://www.burgerking.com		0.97
 a2f95339c240	Burger King	fastfood		33.45911	-94.08906	2626 Richmond Rd	Texarkana	75503	+19038315623	https://burgerking.com/store-locator/store/8395	Burger King	0.99
+be70d72aebf7	Burger King	fastfood	burger restaurant	33.46714	-94.04420	5025 N State Line Ave	Texarkana	75503	+19037936680	https://www.bk.com/store-locator/store/restaurant_1576	Burger King	0.99
+c6b30db8bf70	Burger King	fastfood	burger restaurant	33.45220	-94.13033	1970 N Kings Hwy	Nash	75569	+19038316999	https://burgerking.com/store-locator/store/10358	Burger King	0.98
+ca71cdaf2cdb	Burger King	fastfood	burger restaurant	33.43496	-94.07503	2631 New Boston Rd	Texarkana	75501	+19037925511	https://burgerking.com/store-locator/store/7614	Burger King	0.99
+cc350f5d52a8	Burger King	fastfood	burger restaurant	33.38861	-94.10785	4621 S Lake Dr	Texarkana	75501	+19038389941	https://burgerking.com/store-locator/store/11935	Burger King	0.99
 208f682b0177	Champs Chicken	fastfood		33.45576	-94.13147	4101 N Kings Hwy	Texarkana	75503	+19032239676	https://champschicken.com/locations/road-runner-1101-texarkana-tx/	Champs Chicken	0.94
 3a877e294bf9	Champs Chicken	fastfood		33.41757	-94.10101	4603 W 7th St	Texarkana	75501	+19037940612	https://champschicken.com/locations/road-runner-1106-texarkana-tx/	Champs Chicken	0.94
 4216ff91264a	Champs Chicken	fastfood		33.45055	-94.07659	1632 Richmond Rd	Texarkana	75503	+19032550502	https://champschicken.com/locations/road-runner-1105-texarkana-tx/	Champs Chicken	0.94
@@ -491,7 +489,9 @@ e7a2d3868a7f	Chick-fil-A	fastfood		33.45844	-94.08955	2601 Richmond Rd	Texarkana
 3013301db51d	Chicken Express	fastfood		33.11545	-94.18122	124 Loop 59	Atlanta	75551	+19037967777	http://Www.chickene.com/	Chicken Express	0.99
 371bae743aa3	Chicken Express	fastfood		33.41846	-94.10123	4708 W 7th St	Wake Village	75501	+19032238888	http://www.chickene.com/	Chicken Express	0.98
 80ee194037be	Chicken Express	fastfood		33.46234	-94.09205	2902 Richmond Rd	Texarkana	75503	+14302000064	https://www.chickene.com	Chicken Express	0.99
-01494e23033c	Chipotle Mexican Grill	fastfood		33.44118	-94.05830	2502 Richmond Rd	Texarkana	75503		https://locations.chipotle.com/tx/texarkana/2502-richmond-rd	Chipotle	0.80
+96d2264aad6c	Chicken Express	fastfood	chicken restaurant	33.13653	-94.96780	1903 S Jefferson Ave	Mt Pleasant	75455	+19035720708	https://chickene.com/location/mount-pleasant,-tx-31517119/?pickup=true&utm_source=gfo&rwg_token=AE37R_iTDvmGuqIabLdOAWKYMAaVGKXWvYTwgJsBXjMZxcaLC1tLUv09xMYDcKaWpYFBazoufk2p-5tbIn-eF_qmx3LI9UIR4w%3D%3D	Chicken Express	0.99
+7b495c65931c	Chipotle Mexican Grill	fastfood	mexican restaurant	33.45790	-94.08768	2502 Richmond Rd	Texarkana	75503	+19037930166	https://locations.chipotle.com/tx/texarkana/2502-richmond-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2175	Chipotle Mexican Grill	0.99
+afcfab769037	Church's Chicken	fastfood	chicken restaurant	33.43456	-94.06908	2223 New Boston Rd	Texarkana	75501	+19037948134	https://locations.churchs.com/tx/texarkana/2223-new-boston-road	Church's Chicken	0.98
 00d703af54c3	Church's Texas Chicken	fastfood		33.46479	-94.40820	400 N. McCoy Boulevard	New Boston	75570	+19036282149	https://locations.churchs.com/tx/new-boston/400-n.-mccoy-boulevard	Church's Chicken	0.96
 3e7e07bb3d54	Dairy Queen	fastfood		33.14586	-94.96919	1102 S Jefferson Ave 1102 S Jefferson Ave	Mt Pleasant	75455	+14302222017	https://www.dairyqueen.com/en-us/locations/tx/mount-pleasant/1102-s-jefferson-ave/44482/?y_source=1_MjkzMzkwMDEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 412fd0dceea7	Dairy Queen	fastfood		33.40066	-94.07990	3025 S Lake Dr	Texarkana	75501	+19032557688	https://www.dairyqueen.com/en-us/locations/tx/texarkana/3025-lake-dr/14650/?y_source=1_MjkzMzkxMzctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
@@ -502,6 +502,11 @@ e7a2d3868a7f	Chick-fil-A	fastfood		33.45844	-94.08955	2601 Richmond Rd	Texarkana
 7a90bf944f05	Dairy Queen	fastfood		33.00392	-94.36124	1102 Us Highway 59 S 1102 Us Highway 59 S	Linden	75563	+19037567421	https://www.dairyqueen.com/en-us/locations/tx/linden/1102-us-highway-59-s/14353/?y_source=1_MjkzMzg5MDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 a5d883272efa	Dairy Queen	fastfood		33.47250	-94.28947	711 Main St 711 Main St	Hooks	75561	+19035471194	https://www.dairyqueen.com/en-us/locations/tx/hooks/711-main-st/14213/?y_source=1_MjkzMzk0MDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 d284741663f0	Dairy Queen	fastfood		33.45840	-94.08836	2506 Richmond Rd 2506 Richmond Rd	Texarkana	75501	+19038320271	https://www.dairyqueen.com/en-us/locations/tx/texarkana/2506-richmond-rd/14651/?y_source=1_MjkzMzkxMDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+0f25e8b962ea	Domino's	fastfood	pizza restaurant	33.46039	-94.09035	2730 Richmond Road	Texarkana	75503	+19038323030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+114bbda54897	Domino's	fastfood	pizza restaurant	33.47299	-94.40269	930 James Bowie Dr	New Boston	75570	+19036281415	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+33f0c9687a85	Domino's	fastfood	pizza restaurant	33.42731	-94.10582	602 Redwater Road	Wake Village	75501	+19038383030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+5cc54d64e4bf	Domino's	fastfood	pizza restaurant	33.12190	-94.17885	506 Loop 59	Atlanta	75551	+19037968281	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
+e3c1fab0914d	Domino's	fastfood	pizza restaurant	33.14084	-94.96867	1600 S Jefferson Ave	Mt Pleasant	75455	+19035773030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
 0acca26cb2af	DQ Grill & Chill	fastfood		33.40065	-94.07993	3025 Lake Dr	Texarkana	75501		https://www.dairyqueen.com/en-us/locations/tx/texarkana/3025-lake-dr/4422	DQ Grill & Chill	0.80
 2befbd1b51b3	DQ Grill & Chill	fastfood		33.47281	-94.40971	707 N McCoy Blvd	New Boston	75570		https://www.dairyqueen.com/en-us/locations/tx/new-boston/707-n-mccoy-blvd/4215	DQ Grill & Chill	0.80
 8b932629aaf0	DQ Grill & Chill	fastfood		33.14585	-94.96877	1102 S Jefferson Ave	Mount Pleasant	75455		https://www.dairyqueen.com/en-us/locations/tx/mount-pleasant/1102-s-jefferson-ave/14106	DQ Grill & Chill	0.80
@@ -512,18 +517,28 @@ a6b5ee33ce66	DQ Grill & Chill	fastfood		33.00385	-94.36118	1102 US Highway 59 S	
 cef3ccf508ec	DQ Grill & Chill	fastfood		33.45841	-94.08829	2506 Richmond Rd	Texarkana	75503		https://www.dairyqueen.com/en-us/locations/tx/texarkana/2506-richmond-rd/4423	DQ Grill & Chill	0.80
 ef8b8c28ba50	DQ Grill & Chill	fastfood		33.47251	-94.28958	711 Main St	Hooks	75561		https://www.dairyqueen.com/en-us/locations/tx/hooks/711-main-st/3986	DQ Grill & Chill	0.80
 79be6bc59600	Dunkin Donuts	fastfood		33.47091	-94.40391	800 James Bowie Drive, WM Store # 181	New Boston	75570		https://www.dunkindonuts.com/locations/us/tx/new-boston/800-james-bowie-drive/store-366661/	Dunkin'	0.89
+0aa4c9682343	Firehouse Subs	fastfood	sandwich shop	33.45352	-94.07870	3213 Kennedy Lane	Texarkana	75503	+19038312372	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=544	Firehouse Subs	0.99
 087dc46d91c3	Golden Chick	fastfood		33.45965	-94.04385	4411 N State Line Ave	Texarkana	75503	+14302004517	https://locations.goldenchick.com/tx/texarkana/1389/	Golden Chick	0.99
 0946c0ff40ab	Golden Chick	fastfood		33.45257	-94.13184	1943 N Kings Hwy	Nash	75569	+19032557494	https://locations.goldenchick.com/tx/nash/1289/	Golden Chick	0.99
 449080c05921	Golden Chick	fastfood		33.45059	-94.07706	1702 Richmond Rd	Texarkana	75503	+19032550573	http://locations.goldenchick.com/tx/texarkana/1212/		0.95
 92d7ba6c2ecc	Golden Chick	fastfood		33.41670	-94.09823	4415 W 7th St	Texarkana	75501	+19033060196	https://locations.goldenchick.com/tx/texarkana/1400/	Golden Chick	0.97
 33d9dc8bb81a	Grandy's	fastfood		33.45163	-94.07848	1720 Richmond Rd	Texarkana	75503	+19038325206	https://grandyschicken.com/	Grandy's	0.99
 90c9f91fc68e	Jack in the Box	fastfood		33.46003	-94.04392	4407 N Stateline Ave	Texarkana	75503	+19032557393	https://www.jackinthebox.com		0.97
+eaf0da6a097d	Jimmy John's	fastfood	sandwich shop	33.45386	-94.09598	4222 St. Michael Dr	Texarkana	75503	+19033062987	https://locations.jimmyjohns.com/tx/texarkana/sandwiches-1677.html	Jimmy John's	0.98
 2624e0a78dc3	Joscoffee	fastfood		33.15675	-94.96829	102 N Jefferson Ave	Mt Pleasant	75455	+19035723173			0.56
+0e8ec56dbfd8	KFC	fastfood	chicken restaurant	33.12612	-94.17812	601 Loop 59	Atlanta	75551	+19037995173	http://www.kfc.com/storelocator/Default.aspx?address=601%20Highway%2059%20North,Atlanta,TX		0.97
 541199a12be3	KFC	fastfood		33.43581	-94.08002	2839 New Boston Road	Texarkana	75501	+19038326511	https://locations.kfc.com/tx/texarkana/2839-new-boston-road	KFC	0.98
 7743c9309be4	KFC	fastfood		33.14728	-94.96852	1001 South Jefferson	Mt Pleasant	75455	+19035722086	https://locations.kfc.com/tx/mount-pleasant/1001-south-jefferson	KFC	0.99
 dae619df6a74	KFC	fastfood		33.47224	-94.40929	705 N. McCoy Boulevard	New Boston	75570	+19036280741	https://locations.kfc.com/tx/new-boston/705-n-mccoy-boulevard	KFC	0.96
+e321ecd4c26e	KFC	fastfood	chicken restaurant	33.14609	-94.15813	601 Highway 59 N	Atlanta	75551	+19037995173			0.85
 252c5e5230ce	Krispy Krunchy Chicken	fastfood		33.40370	-94.06455	2023 S Lake Dr	Texarkana	75501		https://locations.krispykrunchy.com/tx/texarkana/2023-s-lake-dr	Krispy Krunchy Chicken	0.96
 e9916846ebf1	Krispy Krunchy Chicken	fastfood		33.18046	-94.97137	2302 N Jefferson Ave	Mt Pleasant	75455	+19035728312	https://locations.krispykrunchy.com/tx/mount-pleasant/2302-n-jefferson	Krispy Krunchy Chicken	0.96
+04e62021d6f1	Little Caesars	fastfood	pizza restaurant	33.14882	-94.96809	901 S Jefferson Ave	Mt Pleasant	75455	+19037178899	https://littlecaesars.com/en-us/store/9133	Little Caesars	0.92
+3557b1aa23b7	Little Caesars Pizza	fastfood	pizza restaurant	33.47096	-94.09489	3634 Richmond Rd	Texarkana	75503	+19033062820	https://littlecaesars.com/en-us/store/7921	Little Caesars	0.97
+3fe62abeb363	Little Caesars Pizza	fastfood	pizza restaurant	33.11376	-94.17450	703 West Main Street	Atlanta	75551	+19036509622	https://littlecaesars.com/en-us/store/20852		0.92
+94ba30b2668c	Little Caesars Pizza	fastfood	pizza restaurant	33.45897	-94.08874	2600 Richmond Rd	Texarkana	75503	+19032231992	http://www.littlecaesars.com		0.98
+a7de39185bb7	Little Caesars Pizza	fastfood	pizza restaurant	33.43578	-94.06322	2003 Summerhill Rd	Texarkana	75501	+19037925555	https://littlecaesars.com/en-us/store/10406	Little Caesars	0.99
+ed8404548130	Little Caesars Pizza	fastfood	pizza restaurant	33.46091	-94.04414	4847 Texas Blvd SUITE B	Texarkana	75503	+19032550051	https://littlecaesars.com/en-us/store/8006	Little Caesars	0.99
 0603ffc75288	McDonald's	fastfood		33.46376	-94.20400	451 Leary Rd	Texarkana	75501	+19038313417	https://www.mcdonalds.com/us/en-us/location/tx/texarkana/451-leary-rd/35871.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 5246b0e017f7	McDonald's	fastfood		33.17653	-94.97018	2002 N Jefferson	Mt Pleasant	75455	+19035728392	https://www.mcdonalds.com/us/en-us/location/tx/mount-pleasant/2002-n-jefferson/5927.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 8440552ed83b	McDonald's	fastfood		33.02881	-94.72078	607 Linda Dr	Daingerfield	75638	+19036452933	https://www.mcdonalds.com/us/en-us/location/tx/daingerfield/607-linda-dr/19385.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
@@ -537,13 +552,26 @@ e74d64f54c4c	McDonald's	fastfood		33.45319	-94.08253	2105 Richmond Rd	Texarkana	
 f2c324b6986c	McDonald's	fastfood		33.41818	-94.09823	4411 W 7th St	Texarkana	75501	+19038310222	https://www.mcdonalds.com/us/en-us/location/tx/texarkana/4411-w-7th-st/12544.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 f94b241df9e8	McDonald's	fastfood		33.11638	-94.18081	200 N Loop 59	Atlanta	75551	+19037969211	https://www.mcdonalds.com/us/en-us/location/tx/atlanta/200-n-loop-59/27121.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 e9121eece840	McDonald's Office	fastfood		33.46361	-94.41511	303 N Center St	New Boston	75570	+19036285839	http://mcdonalds.com/		0.92
+2a25d7876e92	Panda Express	fastfood	chinese restaurant	33.13624	-94.96777	1907 S Jefferson Ave	Mt Pleasant	75455	+19035778810	http://www.pandaexpress.com/		0.94
 98da772d3de7	Panda Express	fastfood		33.45999	-94.08043	3200 St Michael Dr	Texarkana	75503	+19032846039	https://www.pandaexpress.com/locations/tx/texarkana/3515		0.99
 9de2b221fbcd	Panera Bread	fastfood		33.45536	-94.09139	4002 St Michael Dr	Texarkana	75503		https://www.panerabread.com/content/panerabread_com/en-us/cafe/locations/tx/texarkana/4002-st-michael-dr	Panera Bread	0.98
+cbaa39ed64b3	Papa Johns	fastfood	pizza restaurant	33.45561	-94.04336	4003 N State Line Ave	Texarkana	75503	+19037927272	https://locations.papajohns.com/united-states/tx/75503/texarkana/4003-n-state-line-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+2e85c4b5b302	Papa Johns Pizza	fastfood	pizza restaurant	33.14953	-94.96803	815 S JEFFERSON AVE.	Mount Pleasant	75455	+19037173177	https://locations.papajohns.com/united-states/tx/75455/mount-pleasant/815-s-jefferson-ave.?utm_source=bing-maps&utm_medium=organic&y_source=1_MTYyMzY4NDktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+25633b450290	Pizza Hut	fastfood	pizza restaurant	33.45439	-94.08806	3747 Mall Drive Bowie	Texarkana	75501	+19038315252	https://locations.pizzahut.com/tx/texarkana/3747-mall-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314933	Pizza Hut	0.97
+27d505ddbebc	Pizza Hut	fastfood	pizza restaurant	33.47305	-94.41005	1012 N Center St Bowie	New Boston	75570	+19036285527	https://locations.pizzahut.com/tx/new-boston/1012-n-center-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299128	Pizza Hut	0.98
+7c8d40340577	Pizza Hut	fastfood	pizza restaurant	33.02743	-94.72154	611 Linda Dr	Daingerfield	75638	+19032051198	https://locations.pizzahut.com/tx/daingerfield/611-linda-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315307	Pizza Hut	0.97
+86bfbc6c2cd9	Pizza Hut	fastfood	pizza restaurant	33.41943	-94.09753	4416 W 7th St	Texarkana	75501	+19032237575	https://locations.pizzahut.com/tx/texarkana/4416-w-7th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303825	Pizza Hut	0.96
+a038bde63185	Pizza Hut	fastfood	pizza restaurant	33.13680	-94.96880	1902 S Jefferson Ave Titus	Mt Pleasant	75455	+19035721871	https://locations.pizzahut.com/tx/mount-pleasant/1902-s-jefferson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296383	Pizza Hut	0.98
+b67d2b607e57	Pizza Hut	fastfood	pizza restaurant	33.12043	-94.17936	404 Loop 59 Cass	Atlanta	75551	+19037967189	https://locations.pizzahut.com/tx/atlanta/404-loop-59?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286814	Pizza Hut	0.98
+49c1f728b7ce	Pizza Hut Express	fastfood	pizza restaurant	33.45613	-94.09518	4230 St. Michael Drive, Cinemark 14 #350	Texarkana	75503		https://locations.pizzahut.com/tx/texarkana/4230-st-michael-drive		0.97
+d0370f3f3cab	Pizza Hut Express	fastfood	pizza restaurant	33.45804	-94.09090	102 Richmond Ranch Rd	Texarkana	75503		https://locations.pizzahut.com/tx/texarkana/102-richmond-ranch-rd		0.95
 6df00c03b14a	Popeyes	fastfood		33.17285	-94.97092	1604 N Jefferson Av	Mt Pleasant	75455	+14302220617	https://www.popeyes.com/store-locator/store/restaurant_86565	Popeyes Louisiana Kitchen	0.95
 c71337e1c4df	Potato Patch	fastfood		33.13105	-94.17405	797 US-59	Atlanta	75551	+19036500990	https://atlanta.potatopatchedenbubbletea.com/		1.00
 d4ea77e4c1db	Potato Patch	fastfood		33.45423	-94.04334	3815 N State Line Ave	Texarkana	75503	+19037935811	https://stateline.potatopatchedenbubbletea.com/		0.99
 66647f13a98f	Raising Cane's	fastfood		33.45755	-94.08843	2505 Richmond Rd	Texarkana	75503	+19038380006	https://locations.raisingcanes.com/tx/texarkana/2505-richmond-rd	Raising Cane's Chicken Fingers	0.99
 46f1cfd1a444	Sbarro	fastfood		33.42092	-94.12415	102 Redwater Rd	Wake Village	75501	+19038389410	https://sbarro.com		0.92
+cacd40a0cbbe	Schlotzsky's	fastfood	sandwich shop	33.47108	-94.09486	3652 Richmond Rd	Texarkana	75503	+19038310036	https://locations.schlotzskys.com/tx/texarkana/3652-richmond-rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
+e4e9ffc543ab	Schlotzsky's	fastfood	sandwich shop	33.14745	-94.96906	1000 S Jefferson Ave	Mount Pleasant	75455	+19037178207	https://www.schlotzskys.com/texas/mount-pleasant/101574		0.70
 53997af7b373	Sonic	fastfood		33.36417	-94.25062	106 Redwater Boulevard East	Texarkana	75573		https://www.sonicdrivein.com/locations/us/tx/texarkana/106-redwater-boulevard-east/store-6846/	Sonic	0.96
 33d7f258840f	Sonic Drive In	fastfood		33.38899	-94.10752	4619 S. Lake Drive	Texarkana	75501	+19032237822	https://locations.sonicdrivein.com/tx/texarkana/4619-s.-lake-drive.html	Sonic Drive-In	0.99
 72116bb49733	SONIC Drive In	fastfood		33.46029	-94.31123	320 First Dr	New Boston	75570	+19036289086	http://sonicdrivein.com		0.77
@@ -559,10 +587,27 @@ eb2114bc732a	Sonic Drive In	fastfood		33.50636	-94.61045	500 Ne Front Street	De 
 ed065593b8be	Sonic Drive In	fastfood		33.46254	-94.06660	4619 Summerhill Drive	Texarkana	75503	+19037926280	https://locations.sonicdrivein.com/tx/texarkana/4619-summerhill-drive.html	Sonic Drive-In	0.99
 f4bbc5ca8e10	Sonic Drive In	fastfood		33.47005	-94.28865	500A Main Street	Hooks	75561	+19035471520	https://locations.sonicdrivein.com/tx/hooks/500a-main-street.html	Sonic Drive-In	0.96
 7165575d1507	Sonic Drive-In	fastfood		33.41858	-94.10082	4706 W 7th St	Wake Village	75501	+19038384949	https://locations.sonicdrivein.com/tx/wakevillage/4706-w-seventh.html	Sonic Drive-In	0.98
+9161176e728d	Sonic Drive-In	fastfood	burger restaurant	33.44320	-94.04311	2723 N State Line Ave	Texarkana	75503	+19037937066	https://locations.sonicdrivein.com/tx/texarkana/2723-north-state-line.html		0.99
 a9dc5223eeac	Sonic Drive-in	fastfood		33.18041	-94.97116	1701 N Jefferson Ave	Mt Pleasant	75455	+19035750141	https://www.sonicdrivein.com		0.55
+001864b6a3b3	Subway	fastfood	sandwich shop	33.45272	-94.08170	2019 Richmond Rd	Texarkana	75503	+19038314330	http://www.Subway.com/	Subway	0.99
+0e74121507a7	Subway	fastfood	sandwich shop	33.17742	-94.97012	2204 N Jefferson Ave	Mt Pleasant	75455	+19035771599	https://restaurants.subway.com/united-states/tx/mount-pleasant/2204-n-jefferson-ave	Subway	0.96
+0f096e7c19fd	Subway	fastfood	sandwich shop	33.01235	-94.37183	704 W Houston St	Linden	75563	+19037568590	https://www.order.subway.com		0.92
+1dbe2c2c20f7	Subway	fastfood	sandwich shop	33.41870	-94.09429	4103 West 7th Street	Texarkana	75501	+19032557844	https://restaurants.subway.com/united-states/tx/texarkana/4103-west-7th-street	Subway	0.98
+3139c4622aa2	Subway	fastfood	sandwich shop	33.13489	-94.96919	2306 S Jefferson Suite 1	Mt Pleasant	75455	+19035724500	http://www.Subway.com/	Subway	0.98
+47a77b41cb43	Subway	fastfood	sandwich shop	33.11372	-94.16357	205 E Main St	Atlanta	75551	+19037962555	https://restaurants.subway.com/united-states/tx/atlanta/205-east-main-street	Subway	0.96
+4f86ecc3cac3	Subway	fastfood	sandwich shop	33.26234	-94.15142	22406 US Highway 59 N	Queen City	75572	+19037961751	https://restaurants.subway.com/united-states/tx/queen-city/22406-us-highway-59-n?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=63835&utm_campaign=evergreen-2020&y_source=1_MTQ4OTkwMzQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+5c5a067db77a	Subway	fastfood	sandwich shop	33.03006	-94.72487	303 W WM Watson Blvd	Daingerfield	75638	+19038000012	https://restaurants.subway.com/united-states/tx/daingerfield/303-w-wm-watson-blvd	Subway	0.93
+79e6f4a9a3fd	Subway	fastfood	sandwich shop	33.13438	-94.96461	2311 S Jefferson	Mt Pleasant	75455	+19035759691	https://restaurants.subway.com/united-states/tx/mt-pleasant/2311-s-jefferson?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=37681&utm_campaign=evergreen-2020&y_source=1_MTQ5MDQ1ODMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+932f5d0a96f0	Subway	fastfood	sandwich shop	33.14991	-94.15465	N Louise St.	Queen City	75572	+19037966690	http://subway.com		0.77
+945f12c977ce	Subway	fastfood	sandwich shop	33.47196	-94.09683	5602 Richmond Road Ste. 102	Texarkana	75503	+19037934242	https://restaurants.subway.com/united-states/tx/texarkana/5602-richmond-road	Subway	0.99
+9850fc72a317	Subway	fastfood	sandwich shop	33.47119	-94.40411	800 James Bowie Drive	New Boston	75570	+19036287565	https://restaurants.subway.com/united-states/tx/new-boston/800-james-bowie-drive	Subway	0.96
+e1db7e67cb27	Subway	fastfood	sandwich shop	33.44437	-94.09858	404 Walton Dr Ste 900	Texarkana	75501	+14302004517	https://www.subway.com		0.99
 fa8eb52fe3b9	Subway	fastfood		33.47725	-94.40938	907 N McCoy Blvd	New Boston	75570	+18158600925	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73093&utm_campaign=evergreen-2020&y_source=1_MTA5NDMyMjYyNy00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+ff14bf4c5406	Subway	fastfood	sandwich shop	33.46361	-94.20399	451 Leary Road	Leary	75503	+19038380857	https://restaurants.subway.com/united-states/tx/texarkana/451-leary-road	Subway	0.97
+ffec274288fb	Subway	fastfood	sandwich shop	33.46708	-94.06784	5115 Summerhill Rd	Texarkana	75503	+19037933482	https://restaurants.subway.com/united-states/tx/texarkana/5115-summerhill-rd	Subway	0.96
 2d7ef2dc0a93	Taco Bell	fastfood		33.46627	-94.04367	5021 N. Stateline Road	Texarkana	75503	+19037940358	http://www.tacobell.com/	Taco Bell	0.99
 5a3279de519d	Taco Bell	fastfood		33.45701	-94.08896	3820 St. Michael Drive	Texarkana	75503	+19038387368	http://www.tacobell.com/	Taco Bell	0.99
+5c0948d97563	Taco Bell	fastfood	taco restaurant	33.14609	-94.15813	601 Highway 59 N	Atlanta	75551	+19037995173			0.85
 89be9f332d1b	Taco Bell	fastfood		33.14821	-94.96845	905 S Jefferson	Mt Pleasant	75455	+19035723366	http://www.tacobell.com/	Taco Bell	0.99
 b119035f9bea	Taco Bell	fastfood		33.43474	-94.06021	1609 New Boston Rd	Texarkana	75501	+19037942900			0.92
 dca204ecbcba	Taco Bell	fastfood		33.12616	-94.17841	601 Highway 59 North	Atlanta	75551	+19037995173	http://www.tacobell.com/	Taco Bell	0.98
@@ -570,12 +615,19 @@ e4eae003e159	Taco Bell	fastfood		33.41804	-94.09965	4507 West 7th Street	Texarka
 5dee206d8f29	Taco Bueno	fastfood		33.45607	-94.08413	3505 Mall Dr	Texarkana	75503	+19033347060	https://www.tacobueno.com		0.94
 53810a7573e2	Tacos el Güero	fastfood		33.16344	-94.96855	902 N Jefferson Ave	Mt Pleasant	75455	+17089326815			0.66
 ba7c808f1527	Texarkana TX #164 - Richmond Square	fastfood		33.46028	-94.08981	2700 Richmond Rd, Suite 3	Texarkana	75503		https://www.mooyah.com/locations/texarkana-tx-164	Mooyah	0.80
+03c15399d202	Wendy's	fastfood	burger restaurant	33.46233	-94.09200	2902 Richmond Rd	Texarkana	75503	+19038316597	https://locations.wendys.com/tx?utm_source=bing&utm_medium=local&utm_campaign=bing-distrib		0.92
+15a61866f379	Wendy's	fastfood	burger restaurant	33.43473	-94.06062	1611 New Boston Rd	Texarkana	75501	+19037937716	https://www.wendys.com		0.55
+450a1ea5b483	Wendy's	fastfood	burger restaurant	33.45778	-94.04347	4201 N State Line Ave	Texarkana	75503	+19037922606	https://www.wendys.com		0.80
 76a5a478b195	Wendy's	fastfood		33.44283	-94.09576	3737 New Boston Rd	Texarkana	75501	+19038327835	https://locations.wendys.com/united-states/tx/texarkana/3737-new-boston-road	Wendy's	0.99
 e944cf800db3	Wendy's	fastfood		33.16399	-94.99637	2428 W Ferguson Rd	Mount Pleasant	75455		https://locations.wendys.com/united-states/tx/mount-pleasant/2428-w-ferguson-rd	Wendy's	0.80
 ef80aef589b9	Wendy's	fastfood		33.47738	-94.40990	907 North Mccoy Blvd.	New Boston	75570	+19036283531	https://locations.wendys.com/united-states/tx/new-boston/907-north-mccoy-blvd	Wendy's	0.93
 44ea32dcea2e	Whataburger	fastfood		33.13371	-94.96762	2321 South Jefferson Ave	Mt Pleasant	75455	+19035723115	https://locations.whataburger.com/tx/mt-pleasant/2321-south-jefferson-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+789d7333028d	Whataburger	fastfood	burger restaurant	33.00649	-94.96217	700 N Greer Blvd	Pittsburg	75686	+19037087011	https://locations.whataburger.com/tx/pittsburg/700-n-greer-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 95465c98738c	Whataburger	fastfood		33.10624	-94.19651	2005 W Main Street	Atlanta	75551	+19032001813	https://locations.whataburger.com/tx/atlanta/2005-w-main-street.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.93
 eb7cee50a563	Whataburger	fastfood		33.43542	-94.07806	2727 New Boston Rd	Texarkana	75501	+19038322727	https://locations.whataburger.com/tx/texarkana/2727-new-boston-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+0bd0f7acf7cd	Wingstop	fastfood	chicken restaurant	33.41937	-94.09804	4444 W 7th St	Wake Village	75501	+19032557810	https://www.wingstop.com/location/wingstop-2121-texarkana-tx-75501/menu?y_source=1_NTUyMDgxMjctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+752291078ec5	Wingstop	fastfood	chicken restaurant	33.13587	-94.96916	2306 S Jefferson Ave	Mt Pleasant	75455	+19035779464	https://www.wingstop.com/location/wingstop-1526-mt-pleasant-tx-75455/menu?y_source=1_NTUyMDc5NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
+7da8fd3dc445	Wingstop	fastfood	chicken restaurant	33.46013	-94.08897	2700 Richmond Rd Ste 14 A-1	Texarkana	75503	+19032550090	https://www.wingstop.com/location/wingstop-466-texarkana-tx-75503/menu?y_source=1_NTUyMDY2MTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 c5ac10d515e0	Wingstop	fastfood		33.46156	-94.04414	4501 N State Line Ave Ste 106	Texarkana	75503	+19037929464	https://www.wingstop.com/location/wingstop-93-texarkana-tx-75503/menu?y_source=1_NTUyMDcyNjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 1c42ae73420f	Albertsons	grocery		33.41706	-94.09918	4415 W 7th St	Texarkana	75501	+19038315882	https://local.albertsons.com/tx/texarkana/4415-w-7th-st.html	Albertsons	1.00
 88b6c079fa91	Aldi	grocery		33.45317	-94.08550	2315 Richmond Rd Suite 1A Suite 1A	Texarkana	75503	+18559552534	https://www.aldi.us/store/aldi/pages/locator/l/tx/texarkana/2315-richmond-rd-ste-1a/fk26	ALDI	0.99
@@ -589,9 +641,7 @@ d8d84ca8487c	Brookshire's	grocery		33.02778	-94.72050	609 Linda Dr	Daingerfield	
 ef02888b8188	Brookshire's	grocery		33.46412	-94.40909	210 N McCoy Blvd	New Boston	75570	+19036285549			0.96
 3a1433d4bee0	Cash Saver	grocery		33.47058	-94.28980	101 Wilder Dr	Hooks	75561	+19035472442	http://rehkopfs.com/	Rehkopf Cash Saver	0.92
 ccfb59f48ae5	Cash Saver	grocery		33.42418	-94.12576	800 N Kings Hwy	Wake Village	75501	+19038327001	https://www.rehkopfs.com		0.77
-8d6482054b8f	Cash Saver.	grocery		33.44171	-94.08985	1706 New Boston Rd	Texarkana	75501	+19037929696	rehkopfs.com		0.65
 fba7d8a0843d	Cash Saver.	grocery		33.43589	-94.06216	1706 New Boston Rd	Texarkana	75501	+19037929696	http://www.rehkopfs.com/	Rehkopf Cash Saver	0.96
-66179508f3ae	Country Stores	grocery		33.01477	-94.35168	155 US Highway 59 N	Linden	75563	+19037563075	https://www.yellowpagesgoesgreen.org/Linden-TX/Country		0.72
 70f229c6ac26	Country Stores	grocery		33.00188	-94.36353	155 US Highway 59 N	Linden	75563	+19037563075	https://www.yellowpagesgoesgreen.org/Linden-TX/Country		0.93
 e39be7e014f8	Crump Food Store	grocery		33.01207	-94.37198	704 W Houston St	Linden	75563	+19037568570	http://crumpfoods.com/		0.92
 f8adf8225d4b	Daingerfield #109	grocery		33.02792	-94.72070	609 Linda Dr	Daingerfield	75638			Brookshire's	0.80
@@ -625,7 +675,6 @@ c84fe92aa3fc	Save Mart Grocery	grocery		33.50892	-94.61449	134 N Centre St	De Ka
 48d7d541520a	Silver Spoon Cafe & Cater	grocery		33.46027	-94.41641	113A N Ellis St	New Boston	75570				0.95
 a9ebeade94b9	South End Exxon	grocery		33.14622	-94.96818	1101 S Jefferson Ave	Mount Pleasant	75455	+19035725066	https://www.exxonmobil.com		0.55
 6b4fbf3b7499	South Lakewood Grocery	grocery		33.29563	-94.15366	24725 US-59 N	Queen City	75572	+19037962505			0.94
-47a82d21ccc3	Spring Market	grocery		33.36388	-94.25168	114 Redwater Blvd W	Redwater	75567	+19036713159	https://www.spring-market.com/store-information/Maud/707	Spring Market	1.00
 98cd3b19447d	Spring Market	grocery		33.36380	-94.25185	114 Redwater Blvd W	Redwater	75567	+19036713159	https://www.spring-market.com/store-information/Maud/707	Spring Market	1.00
 f19da21487ea	Spring Market	grocery		33.50379	-94.60636	12522 Farm to Market Rd 1840	De Kalb	75559	+19036677527	https://www.spring-market.com/store-information/DeKalb/708	Spring Market	1.00
 6c91eb32552a	Stop & Shop	grocery		33.43530	-94.07202	2502 New Boston Rd	Texarkana	75501				0.55
@@ -685,7 +734,6 @@ bc247b575886	Americas Best Value Inn New Boston	hotel		33.47266	-94.41227	1024 N
 9bb03d8e9a84	Ava Hotels Llc	hotel		33.18088	-94.97059	2306 Greenhill Rd	Mount Pleasant	75455		pollardrealtors.com		0.95
 68c1fe80332c	BEST WESTERN Pineywoods Inn	hotel	resort	33.14320	-94.16022	306 US Highway 59	Atlanta	75551	+19037998500			0.85
 ea7d287755c7	Best Western Pineywoods Inn	hotel		33.11883	-94.17976	306 Loop 59	Atlanta	75551	+19037998500	https://www.bestwestern.com/en_US/book/hotel-rooms.44545.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44545	Best Western Hotels & Resorts	1.00
-90b6fd194589	Border Masonic Lodge	hotel	lodge	33.43418	-94.09226	918 Westlawn Dr	Texarkana	75501	+19038322725	https://www.borderlodge672.com/		0.97
 5b33a932f256	Bostonian Inn	hotel	motel	33.47186	-94.40936	703 N McCoy Blvd	New Boston	75570	+19036285561	bostonianinn.com		1.00
 e2ae3b78668c	Bringle Lake Village	hotel		33.49158	-94.10156	7101 University Ave	Texarkana	75503		http://tamut.edu		0.99
 8616d1ee03f9	Budget Host Northgate Inn	hotel		33.47134	-94.04585	400 W 53rd St	Texarkana	75503	+19037936565	http://budgethost.com		0.92
@@ -702,16 +750,13 @@ c7aa428c8754	D & D Lodging 7 Llc	hotel		33.47276	-94.06683	2010 Moores Ln Ste 10
 019bc3640a55	D Hospitality Llc	hotel		33.47276	-94.06683	2010 Moores Ln Ste 108	Texarkana	75503				0.95
 ff9737c1dc69	Daingerfield Motel	hotel		33.02061	-94.72088	1019 Linda Dr	Daingerfield	75638	+19036452275	https://daingerfield-motel.hub.biz		0.92
 1837f4777f8d	Days Inn by Wyndham Mt. Pleasant	hotel		33.16596	-94.99908	2501 W Ferguson Rd	Mount Pleasant	75455	+19035770152	https://www.wyndhamhotels.com/days-inn/mount-pleasant-texas/days-inn-mt-pleasant/overview?CID=LC:DI::BING:RIO:National:02095&iata=00065402		0.92
-973a62bcae67	DeKalb Lodge 9 AF and AM	hotel	lodge	33.50986	-94.61549	101 NE Bowie St	De Kalb	75559	+19036672714			0.70
 01c0bfdeff61	Diamond S Ranch Marietta Texas	hotel		33.11952	-94.50449	403 County Road 2617	Marietta	75566				0.62
-d5734950caaf	Econo Lodge Texarkana I-30	hotel	lodge	33.46194	-94.04398	4505 N State Line Ave	Texarkana	75503	+19037935546	https://www.choicehotels.com/texas/texarkana/econo-lodge-hotels/tx268	Choice Hotels	0.99
 d7db5a3523d8	Encore Waggoner Creek	hotel		33.45847	-94.11135	6210 Gibson Ln	Texarkana	75503	+14302000445	http://encorewaggonercreek.com/		0.82
 a877c88b1f82	Evohere Digital	hotel		33.45964	-94.04563	4800 Texas Blvd	Texarkana	75503		evohere.com		0.95
 3d5fc1de4d8e	Executive	hotel	motel	33.01722	-94.96587	949 N Greer Blvd	Pittsburg	75686	+19038557900	http://www.executiveinnpittsburgtx.com/		0.98
 61cf70a5945f	Executive Inn Mount Pleasant TX	hotel		33.16553	-94.99915	2501 W Ferguson Rd	Mt Pleasant	75455	+19035770152	http://www.daysinn.com/		0.99
 4e5e20e07286	Fairfield by Marriott Inn & Suites Texarkana	hotel		33.45250	-94.09318	4209 Mall Dr	Texarkana	75503	+19038381000	http://www.fairfieldtexarkana.com/	Fairfield by Marriott	1.00
 16a72c8ec417	Forest Point Apartments	hotel		33.45365	-94.07552	2605 Kennedy Ln	Texarkana	75503	+19038389809	https://north.creeksidetexarkana.com		0.81
-d1a10dcd37b7	Gte Phone Mart	hotel		33.45438	-94.08804	3747 Mall Ln	Texarkana	75501				0.95
 bb626e72b95d	Hampton Inn & Suites Mount Pleasant	hotel		33.16722	-94.99667	2504 W Ferguson Rd	Mt Pleasant	75455	+19035727100	http://hamptoninn.hilton.com/en/hp/hotels/index.jhtml?moreDesc=true&ctyhocn=MTPTXHX	Hampton by Hilton	1.00
 04fba197c242	Hampton Inn and Suites Texarkana	hotel		33.45816	-94.07684	4601 Cowhorn Creek Rd	Texarkana	75503	+19038323499	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-and-suites-texarkana-TKATXHX/index.html	Hampton by Hilton	1.00
 d62d57e403d8	Hilton Garden Inn Texarkana	hotel		33.45776	-94.07459	2910 S Cowhorn Creek Loop	Texarkana	75503	+19037921065	http://texarkana.hgi.com/	Hilton Garden Inn	1.00
@@ -721,15 +766,9 @@ c635659c5c16	Holiday Inn Express and Suites New Boston	hotel		33.47265	-94.41230
 8e338d380a36	Home2 Suites by Hilton Texarkana	hotel		33.45600	-94.07601	4603 Cowhorn Creek Rd	Texarkana	75503	430-200-1767	https://www.hilton.com/en/hotels/txkhtht-home2-suites-texarkana/	Home2 Suites by Hilton	0.97
 be61b1efee58	Howard Johnson Texarkana	hotel		33.46169	-94.04356	5401 N State Line Ave	Texarkana	75503	+19037922640	https://www.wyndhamhotels.com/hojo/texarkana-texas/howard-johnson-texarkana/overview?CID=LC:HJ::BING:RIO:National:32485&iata=00065402		0.85
 2ba4d9601066	Hyatt Studios Texarkana	hotel		33.45372	-94.11005	2401 University Ave	Texarkana	75503		https://www.hyatt.com/hyatt-studios/en-US/txkqt-hyatt-studios-texarkana	Hyatt Studios	0.86
-a72343e8cfef	Ishkrupa Hospitality Llc	hotel		33.47266	-94.41227	1024 N Center St	New Boston	75570				0.95
-9021ee1b019a	Jalarambapa Inc	hotel		33.47706	-94.40872	906 N McCoy Blvd	New Boston	75570				0.95
-880397ef621e	Jayamba Inc	hotel		33.47186	-94.40936	703 N McCoy Blvd	New Boston	75570				0.95
-79ff01fbf08e	Jayfal Hotels Llc	hotel		33.13192	-94.96770	2407 S Jefferson Ave	Mount Pleasant	75455				0.95
 0beaa6593d1d	La Quinta Inn Texarkana	hotel		33.46918	-94.04554	5201 N State Line Ave	Texarkana	75503	+19037941900	http://www.lq.com/		0.92
-0850e4405434	Linden Masonic Lodge	hotel	lodge	33.01270	-94.36432	192 W Frazior St	Linden	75563	+19037565093			0.68
 89de0c838693	Lucky Buck's Lodge & Motel	hotel	motel	33.18479	-94.73289	400 White Oak Ave	Omaha	75571	+19038842622	https://www.luckybuckslodge.com/explore		0.99
 9686b54790fc	Magnuson Hotel Texarkana	hotel		33.46917	-94.04549	5201 N State Line Ave	Texarkana	75503	+19037941900	http://www.magnusonhotels.com/Magnuson-Hotel-Texarkana		0.99
-900f9da0cf3e	Masonic Lodge Wake Village	hotel	lodge	33.42585	-94.11071	411 E Redwater Rd	Wake Village	75501	+19038387911	www.msana.com		0.92
 65af9544ef39	Menefee Ranch, Mt. Pleasant, TX	hotel		33.13684	-94.87261		Mount Pleasant					0.97
 7080738d1f13	Motel 6	hotel	motel	33.16586	-94.99763	2502 W Ferguson Rd	Mt Pleasant	75455	+19032053993	http://www.motel6.com/	Motel 6	0.99
 cbc77c78ac17	Motel 6	hotel	motel	33.11127	-94.18520	1100 W Main St	Atlanta	75551	+19037968235	http://www.motel6.com/	Motel 6	0.96
@@ -738,9 +777,6 @@ e9e9b0df2c81	Motel 6 Texarkana- Tx	hotel	resort	33.42604	-94.04317	5105 N State 
 63d529cfec2a	New Boston Hotel Lp	hotel		33.47267	-94.41224	1018 N Center St	New Boston	75570		https://www.texinnmotelnewboston.us		0.95
 91db639c9973	New Boston Investments Llc	hotel		33.47227	-94.40673	625 Sam Houston St	New Boston	75570				0.95
 ff2e756fc0b0	OYO Hotel Atlanta TX Hwy 59	hotel	resort	33.14361	-94.16048	301 US Hwy 59 South, Queen City	Queen City	75572	+16202348740	https://www.oyorooms.com/us/108966/?checkin=12%2F07%2F2022&checkout=13%2F07%2F2022&rooms=1&guests=1&rooms_config=1-1_0?utm_source=bing&utm_medium=listing&utm_campaign=binglistings		0.96
-898295080304	OYO Hotel Texarkana Trinity AR Hwy I-30	hotel	resort	33.48347	-94.04305	5210 N State Line Ave	Texarkana Tx	71854	+14302000059	https://www.oyorooms.com/us/54252/?utm_source=bing&utm_medium=listing&utm_campaign=binglistings		0.85
-34f8f2ab1b95	OYO USA	hotel		33.46258	-94.04227	N State Line Ave	Texarkana	71854	+16282630414	https://www.oyorooms.com/us/54252/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_TEX001	OYO USA	0.80
-d58ceaa50841	OYO USA	hotel		33.44329	-94.04330	N State Line Ave	Texarkana	71854	+16282630414	https://www.oyorooms.com/us/54252/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_TEX001	OYO USA	0.80
 66dff44830c1	Quality Inn	hotel		33.37376	-94.62283	1215 I-30 E	De Kalb			http://www.qualityinn.com/		0.65
 b4595e95cffc	Quality Inn	hotel		33.47392	-94.04434	5403 N State Line Ave	Texarkana	75503	+19037923366	https://www.choicehotels.com/texas/texarkana/quality-inn-hotels/txi86?pmf=yext&mc=llyxyxpx	Choice Hotels	0.63
 aea02c0c5cb3	Quality Inn & Suites	hotel		33.47339	-94.41069	1024 N Center St	New Boston	75570	+19035015346	https://www.choicehotels.com/texas/new-boston/quality-inn-hotels/txm05?mc=llbillpx&pmf=local		0.99
@@ -756,7 +792,6 @@ ad2d6dd67f6c	Queen City Travelodge	hotel		33.14354	-94.16059	301 Highway 59	Quee
 9b366df2d328	Sands Motel	hotel		33.42278	-94.05127	901 W 7th St	Texarkana	75501	+19037928271	http://www.sandsmotel.com	Sands Motel	0.93
 69e99e1fd3b3	Shamrock Motel	hotel	motel	33.42782	-94.04355	717 N State Line Ave	Texarkana	75501	+19037948276	http://www.shamrock-dells.com	Shamrock Motel Resort & Suites	0.92
 4c1caaf3c9b8	Shree Ram Hospitality Llc	hotel		33.46832	-94.04493	5105 N State Line Ave	Texarkana	75503				0.95
-4ff4d72173f0	Shree Thakorji Llc	hotel		33.11125	-94.18530	1100 W Main St	Atlanta	75551				0.95
 b49b04847bcb	Sierra Motel	hotel		33.42289	-94.06378	1831 W 7th St	Texarkana	75501	+19037933341			0.92
 d12701382b07	Studio 6	hotel	motel	33.46818	-94.11479	5105 N State Line Ave	Texarkana	75503	+19033061010	https://www.studio6.com/en/home/motels.tx.texarkana.3692.html		0.77
 a34ee2faf366	Studio 6 Texarkana, TX	hotel	resort	33.46827	-94.04489	5105 N State Line Ave	Texarkana	75503	+19032053994	https://www.studio6.com/en/home/motels.tx.texarkana.3692.html?utm_source=bing&utm_medium=organic&utm_campaign=bing_listing		0.99
@@ -791,7 +826,6 @@ f49cf3ff539f	Dekoron Wire and Cable	office	industrial company	33.16707	-94.96496
 18dcd899246a	ITNS	office	information technology company	33.39613	-94.09486	3900 S Lake Dr	Texarkana	75501	+19037165930	https://www.itns.com/		0.68
 166d573bbbc2	Kemper Life	office		33.45964	-94.05139	4303 Texas Blvd Ste 5	Texarkana	75503	+19037919500	https://local.kemper.com/tx/texarkana/4303-texas-blvd		0.92
 d810ba0875c9	King Invo, Llc.	office		33.46550	-94.09569	4132 McKnight Rd	Texarkana	75503	+19037417127	https://kinginvo.com		0.75
-81e779c07e7f	Kittrell Walker House	office	private association	33.45145	-94.05033	3524 Pine St	Texarkana	75503				0.70
 9858f51b6ac1	Lonestar Specialty Vehicles	office	auto company	33.46770	-94.06461	1902 St Michael Dr	Texarkana	75503	+19033060801	http://www.lonestarsv.com/		0.99
 b1965adb7347	Mjs Management	office		33.01074	-94.35975	200 S Sunny Ln	Linden	75563	+19037565554	https://www.mjsmanagementinc.com		0.65
 d2357285abc2	Motivated Marketing	office		33.41537	-94.10061	610 S Wake Village Rd	Wake Village	75501	+19032807099			0.92
@@ -822,7 +856,6 @@ e2b7e6beb295	Amigo Juan	restaurant	mexican restaurant	33.47323	-94.41039	1026 N 
 93b90e398bb5	Ann's Seafood	restaurant	seafood restaurant	33.23764	-94.15354	51C.R 3657	Queen City	75572	+19033365803			0.92
 7b84ae397f89	Applebee's	restaurant	american restaurant	33.18027	-94.97029	2300 Greenhill Road	Mt Pleasant	75455	+19035777234	https://restaurants.applebees.com/en-us/tx/mount-pleasant/2300-greenhill-road-96099	Applebee's Grill & Bar	0.99
 f4c89f35d53e	Applebee's	restaurant	american restaurant	33.46735	-94.06676	5110 Summerhill Road	Texarkana	75503	+19037929476	https://restaurants.applebees.com/en-us/tx/texarkana/5110-summerhill-road-87074	Applebee's Grill & Bar	0.99
-749fab252746	Arby's	restaurant	sandwich shop	33.47185	-94.46129	2980 US Hwy 82 W	New Boston	75570		https://www.arbys.com/locations/us/tx/new-boston/2980-us-hwy-82-w/store-9019/	Arby's	0.96
 1af6bdbbfd0e	Atlanta cafe Diner	restaurant	diner	33.13022	-94.17580	803 US-59	Atlanta	75551	+14305623385			0.69
 90b394533cbd	Atlanta Ce, Inc	restaurant		33.11543	-94.18116	124 Loop 59	Atlanta	75551		https://atlisd.net		0.95
 689586e9e585	Awaken Nutrition	restaurant		33.11189	-94.15797	410 E Main St	Atlanta	75551	+13186171921			0.92
@@ -845,18 +878,8 @@ cc828241c16d	Bayou Ben's Crawfish	restaurant	cajun and creole restaurant	33.4153
 2506934a2be5	Boondocks Backyard	restaurant		33.48649	-94.11909	6812 Richmond Rd	Texarkana	75503	+19036915714			0.92
 7dfa4c0989e7	Boston Bar and Grill	restaurant		33.46079	-94.41736	142 N Elm St	New Boston	75570	+19036280129			0.82
 0ec7ca10fa35	Bryce's Cafeteria	restaurant		33.46317	-94.06947	2021 Mall Dr	Texarkana	75503	+19037921611	http://www.brycescafeteria.com/		0.92
-199ec8eb48e5	Burger King	restaurant	burger restaurant	33.17595	-94.97002	2000 N Jefferson Ave	Mt Pleasant	75455	+19035775613	https://burgerking.com/store-locator/store/3101	Burger King	0.99
-3a7fe8a30055	Burger King	restaurant	burger restaurant	33.11783	-94.18176	299 US-59	Atlanta	75551	+14305627070	https://burgerking.com/store-locator/store/23086	Burger King	0.94
-3cdd7e7f35a9	Burger King	restaurant	burger restaurant	33.46732	-94.23632	580 Lone Star Dr	Hooks	75561	+19035471057	https://burgerking.com/store-locator/store/26015	Burger King	0.95
-3f67b878d7b1	Burger King	restaurant	burger restaurant	33.47608	-94.40858	900 N McCoy Blvd	New Boston	75570	+19033145450	https://burgerking.com/store-locator/store/24008	Burger King	0.97
-92721ca4c6cb	Burger King	restaurant	burger restaurant	33.44846	-94.05782	1107 College Dr	Texarkana	75503	+19037923999	https://www.rbi.com		0.55
-be70d72aebf7	Burger King	restaurant	burger restaurant	33.46714	-94.04420	5025 N State Line Ave	Texarkana	75503	+19037936680	https://www.bk.com/store-locator/store/restaurant_1576	Burger King	0.99
-c6b30db8bf70	Burger King	restaurant	burger restaurant	33.45220	-94.13033	1970 N Kings Hwy	Nash	75569	+19038316999	https://burgerking.com/store-locator/store/10358	Burger King	0.98
-ca71cdaf2cdb	Burger King	restaurant	burger restaurant	33.43496	-94.07503	2631 New Boston Rd	Texarkana	75501	+19037925511	https://burgerking.com/store-locator/store/7614	Burger King	0.99
-cc350f5d52a8	Burger King	restaurant	burger restaurant	33.38861	-94.10785	4621 S Lake Dr	Texarkana	75501	+19038389941	https://burgerking.com/store-locator/store/11935	Burger King	0.99
 9c27da41f0a1	Cajun Cowboy Steakhouse	restaurant	american restaurant	33.18104	-94.74452	113 W Main St	Omaha	75571	+19038843330	http://cajuncowboymotel.net/		0.79
 74d6e07bca06	Cajun Cowboy Steakhouse/Club/Motel	restaurant	american restaurant	33.18460	-94.73338	County Road 3345	Omaha	75571	+19038842622	http://cajun-cowboy-motel-tx.us/		0.83
-2381f44b1f69	Camp 8 Kitchen	restaurant		33.39846	-94.04370	2411 N State Line Ave	Texarkana	75503	+19032557557			0.83
 48519104919b	Camp 8 Kitchen	restaurant		33.44021	-94.04327	2411 N State Line Ave	Texarkana	75503	+19032557557			0.84
 b9711e063892	Captain D’s Mt Pleasant	restaurant	seafood restaurant	33.14983	-94.96841	811 S Jefferson Ave	Mt Pleasant	75455	+19032241400	http://www.captainds.com/	Captain D's of NWA	0.83
 48c160139059	Carino's Italian Grill	restaurant	italian restaurant	33.45956	-94.08226	3402 Saint Michael Dr	Texarkana	75503	+19032238655	http://www.carinos.com		0.92
@@ -873,7 +896,6 @@ b5e940303d0a	Cheddar's	restaurant	american restaurant	33.45014	-94.10671	1602 Wa
 da0b12e7fbc2	Chester's Chicken	restaurant	chicken restaurant	33.00248	-94.36314	1308 S Main St	Linden	75563	+19037563075	https://www.chesterschicken.com/		0.96
 f4f781405edd	Chester's Chicken	restaurant	chicken restaurant	33.19622	-94.91957	2330 IH-30 E	Mount Pleasant	75455	+19035759456	https://www.chesterschicken.com/		0.96
 5d45bd5e7e5b	Chia's Creations	restaurant		33.15926	-94.96835	402 N Jefferson Ave	Mount Pleasant	75455	+19035728967	http://chiascreations.com/		0.92
-96d2264aad6c	Chicken Express	restaurant	chicken restaurant	33.13653	-94.96780	1903 S Jefferson Ave	Mt Pleasant	75455	+19035720708	https://chickene.com/location/mount-pleasant,-tx-31517119/?pickup=true&utm_source=gfo&rwg_token=AE37R_iTDvmGuqIabLdOAWKYMAaVGKXWvYTwgJsBXjMZxcaLC1tLUv09xMYDcKaWpYFBazoufk2p-5tbIn-eF_qmx3LI9UIR4w%3D%3D	Chicken Express	0.99
 4e610631a279	Chicken Fry	restaurant	chicken restaurant	33.02153	-94.72171	1000 Linda Dr	Daingerfield	75638	+19032350613	https://www.google.com/search?safe=active&sca_esv=183dc6637f0766c0&sca_upv=1&rlz=1C5GCCM_en&cs=0&output=search&q=Chicken+Fry&ludocid=9171954840439473037&ibp=gwp%3B0%2C7&lsig=AB86z5UIKpKPgr1Jcnditlq_Z8GK&kgs=030adf13625fdc3e&shndl=-1&shem=lsde%2Clsp%2Cvslce&source=sh%2Fx%2Floc%2Fact%2Fm1%2F1		0.92
 f101fb36aa96	Chilango's Mexican Restaurant	restaurant	mexican restaurant	33.43485	-94.07402	2605 New Boston Rd	Texarkana	75501	+19036095093	https://chilangosmexicanrestaurant.com		0.99
 39932fd3134d	Chilangos Mexican Restaurant Texarkanna	restaurant	mexican restaurant	33.43486	-94.07404	2605 New Boston Rd	Texarkana	75501	+19034917391			0.97
@@ -882,8 +904,6 @@ f101fb36aa96	Chilango's Mexican Restaurant	restaurant	mexican restaurant	33.4348
 9cfa52e48fd2	China Cafe	restaurant	chinese restaurant	33.02466	-94.72163	905 Linda Dr	Daingerfield	75638	+19036454142			0.98
 2061ae7403bf	China Cuisine	restaurant	chinese restaurant	33.12714	-94.17800	605 US-59	Atlanta	75551	+19037969396	https://www.chamberofcommerce.com/atlanta-tx/6445603-china-cuisine		0.94
 2f4165d0221f	China Inn	restaurant	chinese restaurant	33.45842	-94.04331	4305 N State Line Ave	Texarkana	75503	+19037938319			0.97
-7b495c65931c	Chipotle Mexican Grill	restaurant	mexican restaurant	33.45790	-94.08768	2502 Richmond Rd	Texarkana	75503	+19037930166	https://locations.chipotle.com/tx/texarkana/2502-richmond-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2175	Chipotle Mexican Grill	0.99
-afcfab769037	Church's Chicken	restaurant	chicken restaurant	33.43456	-94.06908	2223 New Boston Rd	Texarkana	75501	+19037948134	https://locations.churchs.com/tx/texarkana/2223-new-boston-road	Church's Chicken	0.98
 3a76951890b0	Cicis Pizza	restaurant	pizza restaurant	33.14934	-94.97092	666 S Jefferson Ave	Mt Pleasant	75455	+19035721414	https://www.cicis.com		0.99
 55eb80fdcf19	Cicis Pizza	restaurant	pizza restaurant	33.45757	-94.08939	2535 Richmond Rd	Texarkana	75503	+14302004281	https://www.cicis.com		0.98
 0fbaa1dbc5dd	Cindy's Restaurant	restaurant	american restaurant	33.32374	-94.34689	399 Houston St	Maud	75567	+19035852552	http://cindysmaud.shopsettings.com		0.95
@@ -901,11 +921,6 @@ cac7ac7df733	David's Diner	restaurant	diner	33.55198	-94.77445	315 US-82	Avery	7
 178363ec875a	Dickey's Barbecue Pit	restaurant	barbecue restaurant	33.47597	-94.28860	902 Main St	Hooks	75561	+18662272328	https://www.dickeys.com/		0.92
 b5958a01016d	Dixie Diner	restaurant	diner	33.45708	-94.13150	4115 N Kings Hwy #120	Texarkana	75503	+19032230841	http://dixiedinertxk.com/		0.99
 e18537742ea4	Dixie Dinner	restaurant	diner	33.41698	-94.12316	415 N Kings Hwy	Texarkana	75501	+19032230841	http://www.chow.com/profile/45031		0.92
-0f25e8b962ea	Domino's	restaurant	pizza restaurant	33.46039	-94.09035	2730 Richmond Road	Texarkana	75503	+19038323030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-114bbda54897	Domino's	restaurant	pizza restaurant	33.47299	-94.40269	930 James Bowie Dr	New Boston	75570	+19036281415	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
-33f0c9687a85	Domino's	restaurant	pizza restaurant	33.42731	-94.10582	602 Redwater Road	Wake Village	75501	+19038383030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-5cc54d64e4bf	Domino's	restaurant	pizza restaurant	33.12190	-94.17885	506 Loop 59	Atlanta	75551	+19037968281	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
-e3c1fab0914d	Domino's	restaurant	pizza restaurant	33.14084	-94.96867	1600 S Jefferson Ave	Mt Pleasant	75455	+19035773030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
 89b68f8f457a	Don Juan's Mexican Restaurant	restaurant	mexican restaurant	33.13636	-94.96873	1904 S Jefferson Ave	Mt Pleasant	75455	+19035728014	http://donjuansmex.com	Don Juan's Mexican Restaurant	0.79
 c2842a4c9ee3	Drake Land Works Llc	restaurant		33.13515	-94.96854	2306 S Jefferson Ave Ste I	Mount Pleasant	75455				0.95
 740b311a730c	El Chico	restaurant	mexican restaurant	33.16716	-94.99812	2506 W Ferguson Rd	Mount Pleasant	75455	+19035721981	http://www.elchico.com		0.92
@@ -917,7 +932,6 @@ b61e5a096eee	El Rey	restaurant	mexican restaurant	33.46549	-94.31254	1429 W 22nd
 9f5db903a12c	Elotes Y Frutas Del Valle	restaurant	mexican restaurant	33.16759	-94.96671	1211 N Washington Ave	Mt Pleasant	75455	+19035759707			0.98
 a2d39a779e9f	Eonta Brothers Ii, Inc Dba Stanley Steemer	restaurant		33.35814	-94.13181	7219 US Highway 59 S	Texarkana	75501				0.95
 0f2d214dbdc0	Esperanza's Mexican Kitchen	restaurant	mexican restaurant	33.43479	-94.07398	2605 New Boston Rd	Texarkana	75501	+19563302010	http://esperanzasmexicankitchen.com/		0.62
-0aa4c9682343	Firehouse Subs	restaurant	sandwich shop	33.45352	-94.07870	3213 Kennedy Lane	Texarkana	75503	+19038312372	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=544	Firehouse Subs	0.99
 6272eeb52dba	First Watch	restaurant	breakfast and brunch restaurant	33.45538	-94.09119	4000 Saint Michael Drive	Texarkana	75503	+19032308762	https://www.firstwatch.com/locations/texarkana/?utm_source=facebook&utm_medium=organic&utm_campaign=fb-listing&utm_content=texarkana%2F	First Watch	0.95
 abe1524757cc	Flying Burger & Seafood	restaurant	burger restaurant	33.47008	-94.06829	5302 Summerhill Rd	Texarkana	75503	+19032557667	http://www.flyingburgerandseafood.com/	Flying Burger & Seafood of Texarkana	0.95
 95d1707eb421	Forand Family Barbecue	restaurant	barbecue restaurant	33.47636	-94.07821	2903 Landon Ln	Texarkana	75503	+19032772223	http://forandfamilybarbecue.com/		0.92
@@ -928,11 +942,9 @@ efc73369b958	Fuddruckers	restaurant	burger restaurant	33.41961	-94.09281	4002 W 
 f92079a1fb06	Fuji Kim's Sushi & Grill | Japanese • Korean	restaurant	sushi restaurant	33.46192	-94.09093	2830 Richmond Rd	Texarkana	75503	+19033346903	http://fujikimsushiandgrill.com		0.96
 1a44f5fdb2b7	Fuzzy's Taco Shop	restaurant	mexican restaurant	33.45301	-94.13261	1955 N Kings Hwy	Nash	75569	+19032557277	https://fuzzystacoshop.com/locations/texas/nash/	Fuzzy's Taco Shop	0.99
 ad4a751845db	Fuzzy's Taco Shop	restaurant	taco restaurant	33.46104	-94.04408	4849 Texas Blvd	Texarkana	75503	+19037918226	https://www.fuzzystacoshop.com		0.99
-b7c3496a899d	Gabby's Tacos	restaurant	mexican restaurant	33.16016	-94.96825	502 N Jefferson Ave	Mt Pleasant	75455	+19037174775	https://www.gabbystacostx.com		0.92
 d72a6b2d4d8d	Gabby's Tacos	restaurant	taco restaurant	33.16002	-94.96833	502 N Jefferson Ave	Mt Pleasant	75455	+19037174775			0.99
 e7ae9fd89f99	Georgia Southern Fried Chicken	restaurant	chicken restaurant	33.44492	-94.09852	408 Walton Dr	Texarkana	75501	+19032937990	https://georgiasouthernfriedchicken.com		0.95
 b28f64ddc065	Get It N Go Frozen Drinks and food	restaurant	theme restaurant	33.43447	-94.04339	1321 N State Line Ave	Texarkana	75501				0.92
-8f092d6d54db	Gharb Rangers Bar & Restaurant - New	restaurant		33.47634	-94.41790	118 church street	New Boston		+35621565666			0.80
 723aeae73c86	Giovanni's Italian Restaurant	restaurant	italian restaurant	33.01138	-94.36278	302 E Houston St	Linden	75563	+19037565626	http://www.giovannisnypizza.net/		0.59
 acf5a77d2097	Go Loco Mexican	restaurant	mexican restaurant	33.46971	-94.45376	1890 US-82 W	New Boston	75570	+19728004443	http://www.goloco.com		0.94
 8a42b4f97ade	Godfather's Pizza Express	restaurant	pizza restaurant	33.26015	-94.15325	22263 Us-59	Queen City	75572	+19037961751	http://www.godfathers.com/godfathers-pizza-44854		0.85
@@ -966,7 +978,6 @@ f865f8c9864f	IHOP	restaurant	breakfast and brunch restaurant	33.16655	-94.99806	
 4bf9744d0628	Jason's Deli	restaurant	delicatessen	33.46023	-94.08881	2700 Richmond Rd	Texarkana	75503	+19032550480	https://www.jasonsdeli.com/	Jason's Deli	0.99
 5431bb017799	JB's Authentic Taco Kitchen	restaurant	taco restaurant	33.11249	-94.17783	801 W Main St	Atlanta	75551	+17146430632			0.92
 ef1415cea6c2	Jefferson Buffet	restaurant	buffet restaurant	33.13877	-94.96851	1702 S Jefferson Ave	Mt Pleasant	75455	+19035773777	http://www.dynastychinesebuffet.com		0.97
-eaf0da6a097d	Jimmy John's	restaurant	sandwich shop	33.45386	-94.09598	4222 St. Michael Dr	Texarkana	75503	+19033062987	https://locations.jimmyjohns.com/tx/texarkana/sandwiches-1677.html	Jimmy John's	0.98
 e568c393cb93	Joe's Pizza and Pasta	restaurant	italian restaurant	33.46009	-94.08846	2700 Richmond Rd #17	Texarkana	75503	+19033062004	http://www.joestexarkana.com/		0.94
 eafc53ac97c5	Joes Pizza & Pasta Italian Cuis	restaurant	italian restaurant	33.45507	-94.08074	2400 Richmond Rd	Texarkana	75503	+19033347140			0.92
 cb0f0dace79c	Jorge's	restaurant	texmex restaurant	33.15797	-94.98122	1306 W Ferguson Rd	Mt Pleasant	75455	+19032048370			0.97
@@ -976,8 +987,6 @@ b6798a2f9266	Juana Y Luz Taqueria	restaurant	mexican restaurant	33.46197	-94.428
 5b33065b9f5b	Juicy Seafood -texarkana	restaurant	seafood restaurant	33.45376	-94.09751	4320 Saint Michael Dr	Texarkana	75503		http://www.juicyseafoodtx.com		0.88
 3053a4b8cc9d	Julie's Deli & Market	restaurant	delicatessen	33.45574	-94.06410	4055 Summerhill Rd	Texarkana	75503	+19037923354	http://www.juliesdeli.com/		0.99
 08bfbfee0fdb	K Town Grill	restaurant	korean restaurant	33.46037	-94.08895	2700 Richmond Rd #1	Texarkana	75503	+14307108008	https://www.ohkdog.com		0.96
-0e8ec56dbfd8	KFC	restaurant	chicken restaurant	33.12612	-94.17812	601 Loop 59	Atlanta	75551	+19037995173	http://www.kfc.com/storelocator/Default.aspx?address=601%20Highway%2059%20North,Atlanta,TX		0.97
-e321ecd4c26e	KFC	restaurant	chicken restaurant	33.14609	-94.15813	601 Highway 59 N	Atlanta	75551	+19037995173			0.85
 0f1ed6fc6e5e	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.16764	-94.99982	2511 W Ferguson	Mount Pleasant	75455	+19035720196	https://locations.krispykrunchy.com/tx/mount-pleasant/2511-w-ferguson		0.96
 a575cf8c0e6f	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.47593	-94.28931	902 Main St	Hooks	75561	+19035471179	https://locations.krispykrunchy.com/tx/hooks/902-main-street		0.92
 e4709e0fff28	Krispy Krunchy Chicken	restaurant	chicken restaurant	33.03408	-94.72584	304 Broadnax St	Daingerfield	75638	+19036453880	https://www.krispykrunchy.com/		0.96
@@ -995,12 +1004,6 @@ a7c95a11e68c	Lee's Catfish & Steakhouse	restaurant	american restaurant	33.48351	
 60572c33932d	Linden Donuts	restaurant		33.00080	-94.36262	1409 US-59 S	Linden	75563	+19037568145	https://start.cortera.com/company/research/l2p6jwm7o/linden-donuts		0.92
 7cd710b1c9c0	Linric Company	restaurant		33.46821	-94.09647	3421 Richmond Rd	Texarkana	75503				0.95
 92ccc828e89a	Little Caesar's Pizza	restaurant	pizza restaurant	33.43521	-94.07883	2817 New Boston Rd	Texarkana	75501	+19038327057	https://littlecaesarsstore.com		0.55
-04e62021d6f1	Little Caesars	restaurant	pizza restaurant	33.14882	-94.96809	901 S Jefferson Ave	Mt Pleasant	75455	+19037178899	https://littlecaesars.com/en-us/store/9133	Little Caesars	0.92
-3557b1aa23b7	Little Caesars Pizza	restaurant	pizza restaurant	33.47096	-94.09489	3634 Richmond Rd	Texarkana	75503	+19033062820	https://littlecaesars.com/en-us/store/7921	Little Caesars	0.97
-3fe62abeb363	Little Caesars Pizza	restaurant	pizza restaurant	33.11376	-94.17450	703 West Main Street	Atlanta	75551	+19036509622	https://littlecaesars.com/en-us/store/20852		0.92
-94ba30b2668c	Little Caesars Pizza	restaurant	pizza restaurant	33.45897	-94.08874	2600 Richmond Rd	Texarkana	75503	+19032231992	http://www.littlecaesars.com		0.98
-a7de39185bb7	Little Caesars Pizza	restaurant	pizza restaurant	33.43578	-94.06322	2003 Summerhill Rd	Texarkana	75501	+19037925555	https://littlecaesars.com/en-us/store/10406	Little Caesars	0.99
-ed8404548130	Little Caesars Pizza	restaurant	pizza restaurant	33.46091	-94.04414	4847 Texas Blvd SUITE B	Texarkana	75503	+19032550051	https://littlecaesars.com/en-us/store/8006	Little Caesars	0.99
 65cd0fca8f1f	Loca Luna Mexican Grill	restaurant	mexican restaurant	33.47091	-94.09819	4400 Moores Ln	Texarkana	75503	+19033060531	https://www.localunamexicangrill.com/		0.99
 7f3168493417	Loca Luna | Mexican Grill	restaurant	mexican restaurant	33.41785	-94.10613	5200 W 7th St	Wake Village	75501	+19033060096	https://www.localunatexarkana.com/	Luna Grill	0.99
 d988e9a3ba38	LongHorn Steakhouse	restaurant	steakhouse	33.45573	-94.09035	3912 St Michael Dr	Texarkana	75503	+19038312309	https://www.longhornsteakhouse.com/locations/tx/texarkana/texarkana/5376?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Atexarkana-tx-5376_pl%3Alocurl_rd%3A1321	LongHorn Steakhouse	0.95
@@ -1021,7 +1024,6 @@ d3939d653df5	Marquee Restaurant	restaurant		33.16605	-94.99799	2502 W Ferguson R
 7f3d3b4f768f	Mayberry Hospitality, Llc	restaurant		33.14611	-94.96948	1102 S Jefferson Ave	Mt Pleasant	75455				0.95
 03990792f27a	McAlister's Deli	restaurant	delicatessen	33.46291	-94.07845	5001 Cowhorn Creek Road	Texarkana	75503	+19032236060	https://locations.mcalistersdeli.com/tx/texarkana/5001-cowhorn-creek-road?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 17403f60bfec	McClanahan Meadows	restaurant	theme restaurant	33.53721	-94.84931	2756 FM 1701	Avery	75554	+13375774088			0.79
-26fe4b7c544b	McClanahan Meadows	restaurant	theme restaurant	33.53602	-94.84789	2756 FM 1701	Avery	75554	+13375774088			0.79
 30bd8b776e96	Mexico Restaurant	restaurant	mexican restaurant	33.15352	-94.97324	301 W Ferguson Rd	Mt Pleasant	75455	+19035779421	https://www.chamberofcommerce.com/.../7030185-restaurant-mexico		0.97
 6c6c97a9683e	Michoacan Mexican Restaurant	restaurant		33.16676	-94.96708	305 E 12th St	Mount Pleasant	75455				0.95
 6f9c6b8ecbd4	Milano's Pizza	restaurant	pizza restaurant	33.02689	-94.72144	703 Linda Dr	Daingerfield	75638	+19036455570	http://www.milanos-pizza.ca		0.92
@@ -1053,10 +1055,7 @@ ff7172435f0c	Outback Steakhouse	restaurant	steakhouse	33.45915	-94.07815	3209 Ma
 0a0d65f63750	Outlaw's Bar-B-Que	restaurant	barbecue restaurant	33.15282	-94.97032	100 W Ferguson Rd	Mt Pleasant	75455	+19035727860	https://www.groupon.com/biz/mount-pleasant-tx/bodacious-bbq		0.98
 cf85f6ac2145	Outlaw's Bar-B-Que	restaurant	barbecue restaurant	33.01487	-94.72003	1404 Linda Dr	Daingerfield	75638	+19036453444	https://www.outlawsbbq.com/?fbclid=IwAR0PtoOwisKSeM2UbsWiWSsUCXSBPRSAI10IEIr4XOvl8w3RvF6hVlPrQMo		1.00
 e4768af81c95	Pancho's Mexican Buffet	restaurant	mexican restaurant	33.46033	-94.08897	2700 Richmond Rd Ste 10	Texarkana	75503	+19038316639	http://panchosmexicanbuffetdfw.com		0.92
-2a25d7876e92	Panda Express	restaurant	chinese restaurant	33.13624	-94.96777	1907 S Jefferson Ave	Mt Pleasant	75455	+19035778810	http://www.pandaexpress.com/		0.94
 b7e68e2e93b1	Panda's Chinese Restaurant	restaurant		33.43721	-94.08300	3002 New Boston Rd	Texarkana	75501	+19032557017	http://www.pandaswoktexarkana.com/		0.92
-cbaa39ed64b3	Papa Johns	restaurant	pizza restaurant	33.45561	-94.04336	4003 N State Line Ave	Texarkana	75503	+19037927272	https://locations.papajohns.com/united-states/tx/75503/texarkana/4003-n-state-line-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
-2e85c4b5b302	Papa Johns Pizza	restaurant	pizza restaurant	33.14953	-94.96803	815 S JEFFERSON AVE.	Mount Pleasant	75455	+19037173177	https://locations.papajohns.com/united-states/tx/75455/mount-pleasant/815-s-jefferson-ave.?utm_source=bing-maps&utm_medium=organic&y_source=1_MTYyMzY4NDktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
 c085342a4d8d	Papa Murphy's	restaurant	pizza restaurant	33.46827	-94.09627	3421 Richmond Road	Texarkana	75503	+19038325251	http://www.papamurphys.com/		0.95
 57285e463f2d	Papa Tim's crawdads hole	restaurant	seafood restaurant	33.50441	-94.58987	10300 US-82	De Kalb	75559	+19037016971			0.92
 d79c1546dc3e	Pecan Point Brewing Company	restaurant	gastropub	33.42140	-94.04469	213 Main St	Texarkana	75501	+19033060661	https://www.pecanpointbrewing.com		0.92
@@ -1064,14 +1063,6 @@ d79c1546dc3e	Pecan Point Brewing Company	restaurant	gastropub	33.42140	-94.04469
 d828c8b9ffc5	Pier 49 Steak	restaurant	seafood restaurant	33.50792	-94.61665	101 S Runnels St	De Kalb	75559	+19036670206	https://pier49.com		0.92
 0027da9dcf83	Pitt Grill	restaurant	burger restaurant	33.11834	-94.18137	303 Loop 59	Atlanta	75551	+19037995369	http://pittgrill.com		0.77
 9d2b2d9aed9a	Pitt Grill	restaurant	diner	33.47702	-94.40887	912 N McCoy Blvd	New Boston	75570	+19036281333	http://pittgrill.com		0.97
-25633b450290	Pizza Hut	restaurant	pizza restaurant	33.45439	-94.08806	3747 Mall Drive Bowie	Texarkana	75501	+19038315252	https://locations.pizzahut.com/tx/texarkana/3747-mall-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314933	Pizza Hut	0.97
-27d505ddbebc	Pizza Hut	restaurant	pizza restaurant	33.47305	-94.41005	1012 N Center St Bowie	New Boston	75570	+19036285527	https://locations.pizzahut.com/tx/new-boston/1012-n-center-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299128	Pizza Hut	0.98
-7c8d40340577	Pizza Hut	restaurant	pizza restaurant	33.02743	-94.72154	611 Linda Dr	Daingerfield	75638	+19032051198	https://locations.pizzahut.com/tx/daingerfield/611-linda-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315307	Pizza Hut	0.97
-86bfbc6c2cd9	Pizza Hut	restaurant	pizza restaurant	33.41943	-94.09753	4416 W 7th St	Texarkana	75501	+19032237575	https://locations.pizzahut.com/tx/texarkana/4416-w-7th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303825	Pizza Hut	0.96
-a038bde63185	Pizza Hut	restaurant	pizza restaurant	33.13680	-94.96880	1902 S Jefferson Ave Titus	Mt Pleasant	75455	+19035721871	https://locations.pizzahut.com/tx/mount-pleasant/1902-s-jefferson-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296383	Pizza Hut	0.98
-b67d2b607e57	Pizza Hut	restaurant	pizza restaurant	33.12043	-94.17936	404 Loop 59 Cass	Atlanta	75551	+19037967189	https://locations.pizzahut.com/tx/atlanta/404-loop-59?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286814	Pizza Hut	0.98
-49c1f728b7ce	Pizza Hut Express	restaurant	pizza restaurant	33.45613	-94.09518	4230 St. Michael Drive, Cinemark 14 #350	Texarkana	75503		https://locations.pizzahut.com/tx/texarkana/4230-st-michael-drive		0.97
-d0370f3f3cab	Pizza Hut Express	restaurant	pizza restaurant	33.45804	-94.09090	102 Richmond Ranch Rd	Texarkana	75503		https://locations.pizzahut.com/tx/texarkana/102-richmond-ranch-rd		0.95
 3d4ca507fac4	Pizza Inn	restaurant	pizza restaurant	33.15771	-94.96870	211 N Jefferson Ave	Mount Pleasant	75455	+19035750307	http://www.pizzainn.com		0.92
 17f63ce25210	Pizza Pro	restaurant	pizza restaurant	33.15601	-94.97888	515 W Ferguson Rd	Mount Pleasant	75455	+19035723633	http://www.pizzapro.com		0.92
 86b01047c6a2	Pizza Pro	restaurant	pizza restaurant	33.34437	-94.08752	3920 Buchanan Loop Rd	Texarkana	75501	+19037938860	http://www.pizzapro.com		0.92
@@ -1093,7 +1084,6 @@ e0cd01fbf871	Rear Of The Steer	restaurant	barbecue restaurant	33.18000	-94.72813
 89fb6bb3d161	Red Barn Steak & Grill	restaurant		33.31719	-94.55887	11470 US Highway 67 W	Simms	75574	+19035433516			0.55
 cbf542c2de70	Red Lobster	restaurant	seafood restaurant	33.46118	-94.07859	3002 St Michael Dr	Texarkana	75503	+19032235335	https://www.redlobster.com/seafood-restaurants/locations/tx/texarkana/3002-saint-michael-dr	Red Lobster	0.98
 3187f7a54826	Redwater Diner	restaurant	diner	33.36105	-94.25681	318 Redwater Blvd W	Maud	75567	+19036717789	http://www.redwatervfd.org		0.92
-28f70dfd9c9d	Regina restaurant	restaurant	mexican restaurant	33.15573	-94.97610	400 W Ferguson Rd	Mt Pleasant	75455	+19033053606			0.96
 aca85e1fe54a	Regina restaurant	restaurant	latin american restaurant	33.15573	-94.97610	400 W Ferguson Rd	Mt Pleasant	75455	+19033053606			0.99
 0aa019741b11	Restaurant & Pupusería Liera's	restaurant	salvadoran restaurant	33.15673	-94.97620	915 W 1st St	Mt Pleasant	75455	+19037178444			1.00
 f3da4b308b92	Restaurant Equipment Service	restaurant		33.42127	-94.05330	508 Lelia St	Texarkana	75501	+19037932088			0.55
@@ -1113,8 +1103,6 @@ e12c21cfa6e2	Sams Southern Eatery	restaurant		33.45748	-94.08853	2511 Richmond R
 712c3f984ad1	Sashi International Corporation	restaurant		33.17741	-94.97005	2204 N Jefferson Ave	Mt Pleasant	75455				0.95
 af126e655f25	Sbarro	restaurant	pizza restaurant	33.48347	-94.11119	6424 Richmond Rd	Texarkana	75503	+19038388293			0.96
 ff440aea1a7a	Sbarro	restaurant	pizza restaurant	33.42076	-94.12424	102 Redwater Rd	Wake Village	75501	+19038389410	https://sbarro.com/		0.85
-cacd40a0cbbe	Schlotzsky's	restaurant	sandwich shop	33.47108	-94.09486	3652 Richmond Rd	Texarkana	75503	+19038310036	https://locations.schlotzskys.com/tx/texarkana/3652-richmond-rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
-e4e9ffc543ab	Schlotzsky's	restaurant	sandwich shop	33.14745	-94.96906	1000 S Jefferson Ave	Mount Pleasant	75455	+19037178207	https://www.schlotzskys.com/texas/mount-pleasant/101574		0.70
 e31ea0e71653	Scooter's Pizzeria	restaurant	pizza restaurant	33.46657	-94.28734	107 E Ave A	Hooks	75561	+19035477070			0.96
 b1f829c2d6ed	Scottie's Grill	restaurant	seafood restaurant	33.40067	-94.16897	8400 W 7th St	Texarkana	75501	+19038384745			0.92
 876542bda771	Shamsie's Crawfish	restaurant	cajun and creole restaurant	33.43521	-94.05775	1304 New Boston Rd	Texarkana	75501	+13182183720			0.97
@@ -1126,35 +1114,17 @@ d3a2222701dc	Slim Chickens	restaurant	chicken restaurant	33.45768	-94.04366	4201
 4f44fc9aac66	Smith Texstar Properties, Llc	restaurant		33.03199	-94.72245	104 Webb St	Daingerfield	75638				0.95
 5c6aec873703	Smokey Joe BBQ	restaurant		33.44186	-94.12612	300 E New Boston Rd	Nash	75569	+19033348227	http://www.smokeyjoesbbqtx.com		0.92
 0a006dace003	Snappy's Bar B Q	restaurant	barbecue restaurant	33.44130	-94.08073	2425 N Robison Rd	Texarkana	75501	+19032230335			0.92
-9161176e728d	Sonic Drive-In	restaurant	burger restaurant	33.44320	-94.04311	2723 N State Line Ave	Texarkana	75503	+19037937066	https://locations.sonicdrivein.com/tx/texarkana/2723-north-state-line.html		0.99
 28d4c0fca89f	Soup Man	restaurant	soup restaurant	33.41728	-94.09893	4415 W 7th St	Wake Village	75501	+19028317226	http://www.originalsoupman.com		0.92
 c9241a4ec529	Soup Man	restaurant	soup restaurant	33.45303	-94.08695	2315 Richmond Rd	Texarkana	75503	+19038322561	http://www.originalsoupman.com		0.92
 4c4b44dc278a	Steak 'n Shake	restaurant	burger restaurant	33.45245	-94.13152	1955 North Kings Highway	Nash	75569	+19032557277	https://www.steaknshake.com/locations/tx-nash-n-kings-highway/		0.97
 c9e9b1cc5dd6	Steak 'n Shake	restaurant	american restaurant	33.46175	-94.07912	5002 N Cowhorn Creek Loop Road	Texarkana	75503	+19033062690	https://www.steaknshake.com/locations/tx-texarkana-n-cowhorn-creek-loop-road/		0.96
 eda4c984cc36	Steak 'n Shake	restaurant	burger restaurant	33.45071	-94.13063	1943 N Kings Hwy	Nash	75569	+19035021026			0.92
-a11304e36c76	Stone City De Kalb	restaurant	bar and grill restaurant	33.52925	-94.68572	CR 4328	De Kalb	75559	+19725136297			0.66
 f8c3f6df726e	Stone City De Kalb	restaurant	bar and grill restaurant	33.52662	-94.68639	CR 4328	De Kalb	75559	+19725136297			0.69
 48420a8ec033	Stryk's Pit Barbeque	restaurant	barbecue restaurant	33.01396	-94.35163	106 US-59	Linden	75563	+19036506905	https://www.facebook.com/strykspit		0.97
 a78c21c3a438	Subies Deli & Grill	restaurant	delicatessen	33.46159	-94.04434	4501 N State Line Ave #107	Texarkana	75503	+19037935077	http://subiesdeli.com/		0.99
-001864b6a3b3	Subway	restaurant	sandwich shop	33.45272	-94.08170	2019 Richmond Rd	Texarkana	75503	+19038314330	http://www.Subway.com/	Subway	0.99
-0e74121507a7	Subway	restaurant	sandwich shop	33.17742	-94.97012	2204 N Jefferson Ave	Mt Pleasant	75455	+19035771599	https://restaurants.subway.com/united-states/tx/mount-pleasant/2204-n-jefferson-ave	Subway	0.96
-0f096e7c19fd	Subway	restaurant	sandwich shop	33.01235	-94.37183	704 W Houston St	Linden	75563	+19037568590	https://www.order.subway.com		0.92
-1dbe2c2c20f7	Subway	restaurant	sandwich shop	33.41870	-94.09429	4103 West 7th Street	Texarkana	75501	+19032557844	https://restaurants.subway.com/united-states/tx/texarkana/4103-west-7th-street	Subway	0.98
-3139c4622aa2	Subway	restaurant	sandwich shop	33.13489	-94.96919	2306 S Jefferson Suite 1	Mt Pleasant	75455	+19035724500	http://www.Subway.com/	Subway	0.98
-47a77b41cb43	Subway	restaurant	sandwich shop	33.11372	-94.16357	205 E Main St	Atlanta	75551	+19037962555	https://restaurants.subway.com/united-states/tx/atlanta/205-east-main-street	Subway	0.96
-4f86ecc3cac3	Subway	restaurant	sandwich shop	33.26234	-94.15142	22406 US Highway 59 N	Queen City	75572	+19037961751	https://restaurants.subway.com/united-states/tx/queen-city/22406-us-highway-59-n?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=63835&utm_campaign=evergreen-2020&y_source=1_MTQ4OTkwMzQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-5c5a067db77a	Subway	restaurant	sandwich shop	33.03006	-94.72487	303 W WM Watson Blvd	Daingerfield	75638	+19038000012	https://restaurants.subway.com/united-states/tx/daingerfield/303-w-wm-watson-blvd	Subway	0.93
-79e6f4a9a3fd	Subway	restaurant	sandwich shop	33.13438	-94.96461	2311 S Jefferson	Mt Pleasant	75455	+19035759691	https://restaurants.subway.com/united-states/tx/mt-pleasant/2311-s-jefferson?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=37681&utm_campaign=evergreen-2020&y_source=1_MTQ5MDQ1ODMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-932f5d0a96f0	Subway	restaurant	sandwich shop	33.14991	-94.15465	N Louise St.	Queen City	75572	+19037966690	http://subway.com		0.77
-945f12c977ce	Subway	restaurant	sandwich shop	33.47196	-94.09683	5602 Richmond Road Ste. 102	Texarkana	75503	+19037934242	https://restaurants.subway.com/united-states/tx/texarkana/5602-richmond-road	Subway	0.99
-9850fc72a317	Subway	restaurant	sandwich shop	33.47119	-94.40411	800 James Bowie Drive	New Boston	75570	+19036287565	https://restaurants.subway.com/united-states/tx/new-boston/800-james-bowie-drive	Subway	0.96
-e1db7e67cb27	Subway	restaurant	sandwich shop	33.44437	-94.09858	404 Walton Dr Ste 900	Texarkana	75501	+14302004517	https://www.subway.com		0.99
-ff14bf4c5406	Subway	restaurant	sandwich shop	33.46361	-94.20399	451 Leary Road	Leary	75503	+19038380857	https://restaurants.subway.com/united-states/tx/texarkana/451-leary-road	Subway	0.97
-ffec274288fb	Subway	restaurant	sandwich shop	33.46708	-94.06784	5115 Summerhill Rd	Texarkana	75503	+19037933482	https://restaurants.subway.com/united-states/tx/texarkana/5115-summerhill-rd	Subway	0.96
 8e351aa08e8e	Super 1 Foods Fuel Center	restaurant		33.16080	-94.96840	602 Jefferson Ave	Mt Pleasant	75455	+19035778020	https://www.super1foods.com/fuel	Super 1 Foods	0.77
 710ede0f6fb8	Super Plaza Stores	restaurant		33.15777	-94.97968	1210 W Ferguson Rd	Mount Pleasant	75455	+19035759449	http://superplazastores.com/		0.77
 0a2d8c380184	Susan O'rand Dba The Lunch Box Cafe & Catering	restaurant		33.41623	-94.08000	503 S Robison Rd	Texarkana	75501				0.95
-5c0948d97563	Taco Bell	restaurant	taco restaurant	33.14609	-94.15813	601 Highway 59 N	Atlanta	75551	+19037995173			0.85
 990d81951ced	Taco Delite	restaurant		33.46489	-94.41377	309 E Hoskins St	New Boston	75570				0.95
 0f40caae8767	Taco K	restaurant	mexican restaurant	33.01436	-94.96564	903 N Greer Blvd	Pittsburg	75686	+19037678350			0.92
 93ff8a2f5c24	Taco Madres	restaurant	mexican restaurant	33.44039	-94.05298	2410 Texas Blvd	Texarkana	75503	+19035066410			0.92
@@ -1214,21 +1184,13 @@ cc2a7779f439	Two Senoritas	restaurant	mexican restaurant	33.20506	-94.96356	High
 56f44a6a782a	Venice Pizza	restaurant	pizza restaurant	33.02692	-94.72150	703 Linda Dr	Daingerfield	75638	+19036452190			0.92
 65e61b73ce5b	Vero's Latino Store/Mercado La Fe	restaurant	mexican restaurant	33.43523	-94.06721	2106 New Boston Rd	Texarkana	75501	+19037949515	http://dineoptions.com/VerosLatinoStore		0.73
 6c34cb3d6217	Vu Tran Llc	restaurant		33.14998	-94.97120	632 S Jefferson Ave	Mount Pleasant	75455				0.95
-606f80526a9d	Waffle House	restaurant	american restaurant	33.46746	-94.06793	5117 SUMMERHILL RD	Texarkana	75503		https://locations.wafflehouse.com/texarkana-tx-1158/	Waffle House	0.96
 c4eb628b705d	Waffle House	restaurant	diner	33.46748	-94.06797	5117 Summerhill Rd	Texarkana	75503	+19037924859	https://locations.wafflehouse.com/shop/178725/Waffle-House-1158	Waffle House	1.00
 dcc2bf482f83	Waffle House	restaurant	diner	33.47365	-94.04366	5329 N State Line Ave	Texarkana	75503	+19037922759	https://locations.wafflehouse.com/shop/178724/Waffle-House-1155	Waffle House	0.99
 253aa50a252e	Walkers BBQ	restaurant		33.51047	-94.61999	411 W Front St	De Kalb	75559	+19034171537			0.62
 8a41e8e5ec4f	Wayback Burgers	restaurant	burger restaurant	33.45772	-94.08910	2511 Richmond Rd	Texarkana	75503	+19033062426	https://waybackburgers.com/locations/us/texas/texarkana/	Wayback Burgers United Arab Emirates	0.98
 204700336b75	Wayne's Family Restaurant	restaurant	american restaurant	33.40289	-94.06677	2219 S Lake Dr	Texarkana	75501	+19037923561			0.97
-03c15399d202	Wendy's	restaurant	burger restaurant	33.46233	-94.09200	2902 Richmond Rd	Texarkana	75503	+19038316597	https://locations.wendys.com/tx?utm_source=bing&utm_medium=local&utm_campaign=bing-distrib		0.92
-15a61866f379	Wendy's	restaurant	burger restaurant	33.43473	-94.06062	1611 New Boston Rd	Texarkana	75501	+19037937716	https://www.wendys.com		0.55
-450a1ea5b483	Wendy's	restaurant	burger restaurant	33.45778	-94.04347	4201 N State Line Ave	Texarkana	75503	+19037922606	https://www.wendys.com		0.80
-789d7333028d	Whataburger	restaurant	burger restaurant	33.00649	-94.96217	700 N Greer Blvd	Pittsburg	75686	+19037087011	https://locations.whataburger.com/tx/pittsburg/700-n-greer-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 7ae0bfbfb225	Williams Chicken	restaurant	chicken restaurant	33.15548	-94.97773	507 W Ferguson Rd	Mount Pleasant	75455	+19035750717	http://www.williamsfriedchicken.com/		0.92
 bd67a48635f3	Willrest Co Llc	restaurant		33.45664	-94.13257	4115 N Kings Hwy	Texarkana	75503				0.95
-0bd0f7acf7cd	Wingstop	restaurant	chicken restaurant	33.41937	-94.09804	4444 W 7th St	Wake Village	75501	+19032557810	https://www.wingstop.com/location/wingstop-2121-texarkana-tx-75501/menu?y_source=1_NTUyMDgxMjctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-752291078ec5	Wingstop	restaurant	chicken restaurant	33.13587	-94.96916	2306 S Jefferson Ave	Mt Pleasant	75455	+19035779464	https://www.wingstop.com/location/wingstop-1526-mt-pleasant-tx-75455/menu?y_source=1_NTUyMDc5NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-7da8fd3dc445	Wingstop	restaurant	chicken restaurant	33.46013	-94.08897	2700 Richmond Rd Ste 14 A-1	Texarkana	75503	+19032550090	https://www.wingstop.com/location/wingstop-466-texarkana-tx-75503/menu?y_source=1_NTUyMDY2MTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 0ee951a46466	Yang's China Buffet	restaurant	chinese restaurant	33.11859	-94.18005	302 US-59	Atlanta	75551	+19037992828	https://yangs-china-buffet.hub.biz/		0.96
 58e34e425b7b	Yoli's Mexican Grill	restaurant		33.42764	-94.10603	607 E Redwater Rd	Wake Village	75501	+19032807554	http://www.yolismexicangrill.com		0.93
 67f0393e8f81	Yoli's Mexican Grill	restaurant	mexican restaurant	33.50833	-94.61496	209 E Front St	De Kalb	75559	+19036673302	http://yolismexicangrill.com		0.92
@@ -1258,8 +1220,6 @@ daf9fd6f4a4e	Heritage Park Village | Assisted Living In Mt. Pleasant	senior	assi
 e622df797031	Indigo Assisted Living	senior	retirement home	33.18364	-94.73109	205 Giles Ave	Omaha	75571	+19038847070	http://www.indigoassistedliving.com/		0.92
 3b4e21121bc7	Kindred at Home	senior	assisted living facility	33.14064	-94.96886	106 Morgan St	Mt Pleasant	75455	+19035728751	https://www.kindredhealthcare.com/locations/home-health/mt-pleasant-tx-3557		0.92
 11f0bc227ec8	Mt Pleasant Assisted Living	senior	retirement home	33.17569	-94.98641	2009 N Edwards Ave	Mt Pleasant	75455	+19035728123	http://mountpleasantassistedliving.com/		0.92
-7b7f24ee821a	Mt Pleasant Assisted Living	senior	assisted living facility	33.17004	-94.97837	2009 N Edwards Ave	Mount Pleasant	75455	+19035728123	https://www.savaseniorcare.com/		0.85
-82ac3ad59e3f	Pleasant Springs Healthcare Center	senior	assisted living facility	33.17004	-94.97837	2003 N Edwards Ave	Mount Pleasant	75455	+19035725511	https://www.savaseniorcare.com/pleasant-springs-healthcare-center		0.85
 eb969dd6b5be	Pleasant Springs Healthcare Center	senior	retirement home	33.17526	-94.98538	2003 N Edwards Ave	Mt Pleasant	75455	+19035725511	http://pleasantspringshealth.com/		0.92
 f92604fdc06a	Pleasant View	senior	retirement home	33.15708	-94.94137	2003 Happy St	Mt Pleasant	75455	+19035726402			0.92
 5ae43a2ea563	Reunion Plaza Senior Care and Rehabilitation Center	senior	retirement home	33.47092	-94.06019	1401 Hampton Rd	Texarkana	75503	+19037927994	https://rpsnf.com/		0.99

@@ -39,6 +39,7 @@ d024afc7ab6e	Robin's Market & Cafe	convenience		31.69149	-101.58717	3801 Farm to
 7c27a53f5a46	DQ Grill & Chill	fastfood		31.19095	-101.45127	E Hwy 67	Big Lake	76932		https://www.dairyqueen.com/en-us/locations/tx/big-lake/e-hwy-67/3634	DQ Grill & Chill	0.80
 15a64f9ed3a6	Red Devil Pit Stop	fastfood		31.22220	-101.94065	200 W US Highway 67	Rankin	79778	+14322578262			0.61
 920727e96d87	Sonic Drive In	fastfood		31.19127	-101.45981	510 East Second	Big Lake	76932	+13258841001	https://locations.sonicdrivein.com/tx/biglake/510-east-second.html	Sonic Drive-In	0.96
+a168043abb0c	Subway	fastfood	sandwich shop	31.19115	-101.46178	118 N Main Ave	Big Lake	76932	+13258843663	http://www.subway.com/en-us	Subway	0.98
 7a1bc7cca7ae	Taco Bell	fastfood		31.19057	-101.44964	NWQ US 67 & TX-137	Big Lake	76932	+13258842609	http://www.tacobell.com/	Taco Bell	0.94
 004dcc579e85	EcoStream	grocery		31.84567	-101.69608	7556 TX-137	Garden City	79739	+14322199011	https://www.ecostreamusa.com/		0.92
 142fb5b3bd10	Hounds Desert Creek Farms	grocery		31.44655	-101.93764	2 TX-349	Midkiff	79706	+14327030111			0.88
@@ -56,13 +57,10 @@ acd71af2ef59	Best Western Plus Big Lake Inn	hotel		31.19182	-101.44994	1401 E US
 cc79e9a271bf	Cobblestone Inn and Suites	hotel		31.19068	-101.44831	1318 E US Hwy 67	Big Lake	76932	+13258843338	http://www.staycobblestone.com/tx/big-lake/		1.00
 92c0c220bcf1	Derrick Inn Motel	hotel	motel	31.19136	-101.46752	121 North TX-137	Big Lake	76932	+13258842513			0.92
 e758429bbf87	Grand Inn	hotel		31.17882	-101.46706	190 Hughes Rd	Big Lake	76932	+13255008080	http://www.grandinntx.com/		0.97
-91e19c7afd3d	lone star lodge	hotel	lodge	31.19162	-101.44890	1455 East US-67	Big Lake	76932	+13257991506			0.92
 523401f68f41	Mustang Motel	hotel	motel	31.19153	-101.45538	905 E 2nd St	Big Lake	76932	+13258843777	https://www.mustanghotelbiglake.com/en-us		0.97
 2bc6b511cbc0	OYO Hotel Big Lake Hwy 137	hotel		31.17864	-101.46210	330 Hughes Rd	Big Lake	76932	+18012908029	https://www.oyorooms.com/us/104450/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_BLT001	OYO Rooms	0.85
 c5ecf393af3f	The Lodge at Big Lake	hotel		31.17924	-101.46332	330 Hughes Road	Big Lake	76932	+12106213642	http://petrostates.net/lodge-at-big-lake.php		0.77
 efab30b23318	The Republic Hotel	hotel		31.19154	-101.45696	801 E 2nd St	Big Lake	76932	+13258842212	http://www.TheRepublicHotelBigLake.com/		0.97
-1fb9526a5f65	Twistflower Ranch	hotel	lodge	31.00340	-101.69029	4942 County Road 208	Big Lake	76932	+15125161750	http://www.twistflowerranch.com/		0.87
-b52ba7d6571b	Vara Guest House Lodging, Cabins and RV Park	hotel	lodge	31.86745	-101.47933	341 Gold St	Garden City	79739	+14328945686	http://www.varaguesthouse.net/		0.99
 cb27ba0c7186	2 Friends	restaurant		31.63335	-101.83962	13301 EFM 2401	Midkiff	79755	+14325352007			0.92
 980c560f168d	Burritos Las Netias.	restaurant	mexican restaurant	31.19180	-101.46439	111 E 2nd St	Big Lake	76932	+3252269705			0.72
 b182c694d84f	Burritos Rey	restaurant	mexican restaurant	31.62334	-101.98085	1236 Cotton Flat Rd	Midkiff	79755	+14323015022			0.92
@@ -83,11 +81,8 @@ f010b8ccbae0	Mariscos Chuyita	restaurant	seafood restaurant	31.94214	-101.99149	
 40eb4c316953	Ortiz Burritos	restaurant	mexican restaurant	31.21987	-101.94516		Rankin		+14324380976	https://brand.page/ortizburritos2		0.88
 8f1d95bcb140	Ortiz Burritos #2	restaurant		31.22169	-101.94139	210 W US Highway 67	Rankin	79778	+14324380976	https://brand.page/ortizburritos2		0.89
 b17b31502e65	Rancho Honduras	restaurant	mexican restaurant	31.88892	-101.95240	9704 S CR-1136	Midland	79706	+14326318370			0.85
-e15edbe36fa4	Rancho Honduras	restaurant	mexican restaurant	31.89088	-101.95400	9704 S CR-1136	Midland	79706	+14326318370			0.84
 8cee1d767d6e	Sdi Big Lake, L.l.c	restaurant		31.19126	-101.45968	510 E 2nd St	Big Lake	76932				0.95
-a168043abb0c	Subway	restaurant	sandwich shop	31.19115	-101.46178	118 N Main Ave	Big Lake	76932	+13258843663	http://www.subway.com/en-us	Subway	0.98
 b970e9270a92	Sugar Creek Grill	restaurant		31.19141	-101.46289	304 E 2nd St	Big Lake	76932	+13252632000			0.96
-280f4832bf94	The Backyard Shack	restaurant		31.22109	-101.94372	716 N Main St	Rankin	79778				0.92
 34b9d0374701	The Backyard Shack	restaurant		31.22323	-101.93904	716 N Main St	Rankin	79778				0.92
 7e2e17416ceb	Reagan County Care Center	senior	retirement home	31.20414	-101.46097	1298 N Main Ave	Big Lake	76932	+13258845614	https://www.ourparents.com/texas/big_lake/reagan_county_care_center		0.95
 da94869311c5	Reagan County Care Center	senior	retirement home	31.19787	-101.46188	805 N Main Ave	Big Lake	76932	+13258842561			0.91

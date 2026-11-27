@@ -52,7 +52,7 @@ import { firstEmail, statusTone, telHref, websiteHref, websiteLabel } from "@/li
 import { formatLongDate } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
 import { inBounds, ZIP_MIN_ZOOM, zipFromAddress, type ZipStat } from "@/lib/ops/market-map";
-import { matchAccounts, padBounds, PLACE_CATEGORY, type AccountPoint, type Place, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
+import { matchAccounts, padBounds, placeFitsSearch, PLACE_CATEGORY, type AccountPoint, type Place, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
 
 type ColorBy = "rep" | "work" | "pms" | "type";
 
@@ -298,6 +298,8 @@ export function CustomerMap({
   }, [userId]);
 
   function chooseShow(next: MapShow) {
+    // The search box searches accounts in one view and prospects in the other: text typed for one means nothing in the other.
+    if ((next === "prospects") !== (show === "prospects")) setQ("");
     setShow(next);
     if (next === "customers" || next === "prospects") setProviderPick(null);
     if (next === "providers") setSelectedId(null);
@@ -488,7 +490,7 @@ export function CustomerMap({
   const zipRows = useMemo(() => (zipShown ? (zipQ.data?.zips ?? NO_ZIPS) : NO_ZIPS), [zipShown, zipQ.data]);
   const zipByCode = useMemo(() => new Map(zipRows.map((z) => [z.zip, z])), [zipRows]);
   const zipLayer = useMemo(() => zipPins(zipRows), [zipRows]);
-  const placesQ = usePlaces(mapView, placesOn, layers.categories);
+  const placesQ = usePlaces(mapView, placesOn, layers.categories, prospectsMode ? needle : "");
   const allPlaces = placesQ.places;
   // A name match is that account (a current account, not a prospect); a street-address match alone stays a prospect.
   const placeMatches = useMemo(() => (allPlaces.length ? matchAccounts(allPlaces, accountPoints) : new Map<string, PlaceMatch>()), [allPlaces, accountPoints]);
@@ -503,9 +505,8 @@ export function CustomerMap({
     if (!placesOn || !mapView) return { placesDrawn: [], placesInView: [], prospectsInView: [] };
     const wanted = new Set<PlaceCategory>(layers.categories);
     const near = padBounds(mapView, 1);
-    const drawn = allPlaces.filter(
-      (p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near) && (!needle || p.name.toLowerCase().includes(needle)),
-    );
+    // The server already matched the search; this keeps the list right while an answer for new text is on its way.
+    const drawn = allPlaces.filter((p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near) && placeFitsSearch(p, needle));
     const inView = drawn.filter((p) => inBounds(p, mapView));
     return { placesDrawn: drawn, placesInView: inView, prospectsInView: inView.filter((p) => !currentAccounts.has(p.id)) };
   }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, currentAccounts, needle]);
@@ -541,8 +542,13 @@ export function CustomerMap({
 
   // ZIP circles underneath everything, then places, then accounts, then provider diamonds on top.
   const mapPins = useMemo(
-    () => (zipLayer.length || placeLayer.length || providerPins.length || tapPin.length ? [...zipLayer, ...placeLayer, ...pins, ...providerPins, ...tapPin] : pins),
-    [zipLayer, placeLayer, pins, providerPins, tapPin],
+    () =>
+      prospectsMode
+        ? [...zipLayer, ...pins, ...placeLayer, ...tapPin]
+        : zipLayer.length || placeLayer.length || providerPins.length || tapPin.length
+          ? [...zipLayer, ...placeLayer, ...pins, ...providerPins, ...tapPin]
+          : pins,
+    [prospectsMode, zipLayer, placeLayer, pins, providerPins, tapPin],
   );
 
   /** Pick a ZIP circle or a place: whatever else was picked closes. */
@@ -554,12 +560,13 @@ export function CustomerMap({
     setZipPick(kind === "zip" ? id : null);
     setPlacePick(kind === "place" ? id : null);
   }
-  /** A prospect from the map or the list; from the list the map pans to it. */
+  /**
+   * A prospect from the map or the list. The list holds only what is on screen, so the map stays put (moving it would
+   * load a new box and reshuffle the list being worked through); on a phone the map scrolls back into view.
+   */
   function pickPlace(p: Place, fromList: boolean) {
     pickLayer("place", p.id);
-    if (!fromList) return;
-    setFocus({ lat: p.lat, lng: p.lng });
-    showMapAfterListPick();
+    if (fromList) showMapAfterListPick();
   }
   function closeLayerPick() {
     setZipPick(null);
@@ -947,7 +954,7 @@ export function CustomerMap({
                     {zipQ.error instanceof Error ? zipQ.error.message : "Population could not load."}
                   </p>
                 ) : null}
-                {placesOn ? <PlacesNote status={placesQ.status} truncated={placesQ.truncated} total={placesQ.total} error={placesQ.error} onRetry={placesQ.retry} /> : null}
+                {placesOn ? <PlacesNote status={placesQ.status} truncated={placesQ.truncated} updating={placesQ.updating} total={placesQ.total} error={placesQ.error} onRetry={placesQ.retry} /> : null}
               </div>
             ) : null}
             {selectedZip || selectedPlace ? (

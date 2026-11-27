@@ -29,7 +29,6 @@ eb50ef9ee75e	Alicia’s Nite Club	bar	pub	28.78025	-96.96690	805 S Delmar Dr	Vic
 f861121e0ba4	Andustoria Wines	bar	winery	28.88125	-96.99738	104 Broadmoor St #200	Victoria	77904	+13618946140	http://andustoria.com/		0.94
 a25b7d4f7a13	Atilanos Night Club	bar		28.79364	-96.98981	1705 Port Lavaca Dr	Victoria	77901	+13615799908	https://www.reverbnation.com/venue/1044867		0.92
 ae17ea52da76	Barkays Music Bar	bar		28.78538	-96.98808	1901 Kern Dr	Victoria	77901	+13612208958			0.55
-857f8b9ad703	Beneath The Oaks Winery	bar	winery	28.90996	-96.19418	1796 TX-71	Midfield	77458	+19794593889	https://canva.link/oojusenwp4cdzqu		0.94
 fb767daf5e06	Beneath The Oaks Winery	bar	winery	28.94058	-96.21104	1796 TX-71	Midfield	77458	+19794593889	https://canva.link/oojusenwp4cdzqu		0.98
 49c956f9f8e0	BierWulf's Bar	bar		28.83846	-96.95988		Victoria					0.73
 ebfd29fd016b	Bob's Bar	bar		28.43630	-96.43361	2530 Adams St	Port Oconnor	77982	+13619832900			0.97
@@ -141,7 +140,6 @@ eb7da06cd03a	Starbucks	coffee		28.63303	-96.62914	926 State Hwy 35 N	Port Lavaca
 fa081695ac0a	Starbucks Coffee Company	coffee		28.86174	-96.99732	7105 N. Navarro	Victoria	77904	+13614859851	https://www.starbucks.com/store-locator/store/17823/		0.99
 f84e69c05481	Tejas Cafe	coffee		28.82177	-97.00000	2902 N Navarro St	Victoria	77901	+13615729433	http://www.tejascafe.com/		0.92
 5669ec40ef4a	Texas Boba Tea	coffee	bubble tea shop	28.85229	-96.99542	6106 N Navarro St	Victoria	77904	+13615793006			0.92
-36f8fcdb0b44	The Box Coffee Bar	coffee		28.82068	-96.99167	2916 N Laurent St	Victoria	77901	+13617035016	http://www.boxcoffeebar.com		0.97
 d652947af6ba	The Box Coffee Bar	coffee		28.82060	-96.99160	2916 N Laurent St	Victoria	77901	+13617035016	http://www.boxcoffeebar.com		1.00
 7df315425b0a	The Dos Aguas Grind	coffee		28.90391	-96.79280	87 Dincans St	Inez	77968	+13615328572	https://thedosaguasgrind.toast.site/		0.77
 9a208b0aceed	The Grind Cafe	coffee		28.81531	-96.97710	2200 E Red River St	Victoria	77901	+13614856820	http://www.thegrindaz.com/		0.96
@@ -154,7 +152,6 @@ b323d4d6e613	A&M-Victoria Student Involvement	college		28.81623	-96.97635	3006 N
 c0b0ec990f67	BSM Victoria	college		28.81528	-96.98341	2601 N Ben Jordan St	Victoria	77901	+13615755281	https://linktr.ee/bsmvictoria		0.92
 81aa7a8ab08e	School of Nursing	college		28.81679	-96.97815	3007 N Ben Wilson St	Victoria	77901				0.92
 bf76fc6f8d88	University Beach	college		28.13008	-96.98795		Rockport					0.59
-e530018606da	University Beach	college		28.13052	-96.98816		Rockport					0.58
 994367a753ea	University Center	college		28.81627	-96.97617	3007 N Ben Wilson St	Victoria	77901	+13615704848	https://x.com/TAMU_VICTORIA		1.00
 b055c8946b52	University of Houston-Victoria Northwest Campus	college		28.82221	-96.98912	1604 E Airline Rd	Victoria	77901				0.92
 1ef3784fc9e4	VC Fine Arts Building	college		28.81505	-96.97988	2200 E Red River St	Victoria	77901				0.78
@@ -167,7 +164,6 @@ a31f8f93d3b6	Victoria College	college		28.81623	-96.97926	2200 E Red River St	Vi
 5bb990f733bf	7-Eleven	convenience		28.84087	-96.99413	3302 Sam Houston Dr	Victoria	77904	+13615783098	https://www.7-eleven.com/		0.98
 63e776c6e06d	7-Eleven	convenience		28.63503	-96.62186	1901 S US Highway 281	Marble Falls	78654	+18302623226	https://www.7-eleven.com		0.77
 655e66d3d4be	7-Eleven	convenience		28.97273	-96.64063	629 S Wells St	Edna	77957	+13617810590	https://www.7-eleven.com/locations/tx/edna/629-s-wells-st-36503		0.96
-87d2a6a7ef8b	7-Eleven	convenience		28.79530	-96.99232	1501 PORT LAVACA DR	Victoria	77901	+13615824229	https://www.7-eleven.com/locations/tx/victoria/1501-port-lavaca-dr-36521		0.95
 96d33789418d	7-Eleven	convenience		28.97324	-96.65661	905 W. Main St	Edna	77957	+13617825413	https://www.7-eleven.com/locations/tx/edna/905-w-main-40882	7-Eleven	1.00
 9f97241c5079	7-Eleven	convenience		28.82271	-96.95077	5006 Houston Hwy	Victoria	77901	+13615824467	http://www.7-eleven.com/	7-Eleven	0.91
 b2e281367eb6	7-Eleven	convenience		28.79558	-96.99212	1501 Port Lavaca Dr	Victoria	77901	+13615824229	http://www.7-eleven.com/?yext=36521		0.97
@@ -194,10 +190,8 @@ a5b5fbcaf7b8	CAT Scale	convenience	truck gas station	28.77818	-96.96653	4507 Por
 9fc5a5bedf7f	Cimarron Fastop	convenience		28.71321	-96.94888	34008 US Hwy 59N	Victoria	77904	+13615761741		Cimarron Fastop	0.78
 3e213fefebcb	Circle R Drive In	convenience		28.84012	-96.54221	8945 FM1593	Lolita	77971	+13618744259	https://circle-r-drive-in.hub.biz		0.90
 b0c94d8b006a	CITGO Petroleum Corporation	convenience		28.80732	-96.98193	1708 N Ben Jordan St	Victoria	77901	+13615734031	http://www.citgo.com/		0.65
-bfbfb161b8d4	Cobra Corner Store	convenience		28.86170	-96.30731	5895 FM 616	Vanderbilt	77991		https://locations.valero.com/en-us/LocationDetails/Index/5895-FM-616/0000034187	Valero	0.80
 e5fc8a67f39b	Cobra Corner Store	convenience		28.82269	-96.61756	5895 FM 616	Vanderbilt	77991	+13612843360			0.88
 4e05ecfe6625	Coinsource	convenience		28.81334	-96.99964	2002 N Navarro St	Victoria	77901	+18055002646		Coinsource	0.63
-20714d8947cf	Conoco	convenience		28.72312	-96.95160	8074 Tx-185 E	Victoria	77905	+13615785620	https://www.conoco.com/station/CON-CRACKER-BARREL-7-0000913578/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
 4013f3ad7633	Conoco	convenience		28.79935	-96.98122	2173 Lone Tree Rd	Victoria	77901	+13615786681	https://www.conoco.com/		0.99
 569d8db4e7ed	Conoco	convenience		28.71571	-96.21043	1500 1st St	Palacios	77465	+15129722810	https://www.conoco.com/		1.00
 61cc02c30009	Conoco	convenience		28.82646	-96.94047	5903 Houston Hwy	Victoria	77901	+13614851675	https://www.conoco.com/		0.92
@@ -287,7 +281,6 @@ fb2f7671a201	Snax Max 13	convenience		28.81340	-96.99980	2002 N NAVARRO ST	Victo
 ad8c934755b4	Stripes	convenience		28.78947	-96.98341	2501 Ben Jordan	Victoria	77901	+13615761021	https://www.7-eleven.com/	Stripes	0.93
 af69f15139d7	Stripes	convenience		28.76759	-96.97752	3204 South Laurent Street	Victoria	77901	+13615790239	https://stripesstores.com/		1.00
 c4edd5264065	Stripes	convenience		28.80634	-96.99088	1302 E Rio Grande St	Victoria	77901	+3615729704		Stripes	0.92
-cf163f4c30b4	Stripes	convenience		28.81441	-96.98345	2501 Ben Jordan	Victoria	77901	+13615761021	https://www.7-eleven.com/	Stripes	0.90
 b4ece2ad9af9	Sunoco	convenience		28.82902	-96.98792	3801 HALSEY STREET	Victoria	77901		https://www.sunoco.com/locations/store/3801-halsey-street-victoria-tx-8002322901	Sunoco	0.80
 2d1e40919fbf	Super Stop Food Store	convenience		28.80731	-96.97394	779017421, 2006 N Ben Wilson St	Victoria	77901	+13615762155			0.99
 b8f658615e36	Texana Food Mart	convenience		28.96864	-96.63381	1021 S Wells St	Edna	77957	+13617822600			0.99
@@ -309,6 +302,7 @@ c77336e5dd3b	WHOLESALE 59282	convenience		28.71417	-96.22664	1110 HENDERSON	Pala
 0cf871ee532c	Zain Corporation	convenience		28.80726	-96.97358	2006 N Ben Wilson St	Victoria	77901	+13615762155	http://zaincorp.com		0.65
 75a5082224be	Arby's	fastfood		28.87280	-96.99777	8503 N Navarro St	Victoria	77904	+13614655100	https://locations.arbys.com/tx/victoria/8503-n.-navarro-st.html		0.99
 d7299235d3bb	Burger King	fastfood		28.87195	-96.99825	8401 N Navarro St	Victoria	77904	+13615792425	https://burgerking.com/store-locator/store/29438	Burger King	0.92
+e089c3eace8e	Burger King	fastfood	burger restaurant	28.63297	-96.62990	914 State Hwy 35 N	Port Lavaca	77979	+13619870034	https://burgerking.com/store-locator/store/restaurant_242466		0.94
 ff2e238cf8a5	Burger King	fastfood		28.80833	-96.98162	2103 Houston Hwy	Victoria	77901	+13615787057	https://burgerking.com/store-locator/store/16248	Burger King	1.00
 3b524dccab8f	Chick-fil-A	fastfood		28.86617	-96.99459	7800 N Navarro St Ste 155 # 155	Victoria	77904	+13615765070	http://www.chick-fil-a.com/victoriamall		0.98
 5e25d1447315	Chick-fil-A	fastfood		28.81669	-96.97447	3006 N Ben Wilson St	Victoria	77901	+13614854506	https://www.chick-fil-a.com/universityofhoustonvictoria		0.92
@@ -325,6 +319,9 @@ e7c447053f58	Church's Texas Chicken	fastfood		28.83153	-96.98471	4305 N. Ben Jor
 828aa7b3730e	Dairy Queen	fastfood		28.78836	-96.98121	2702 Port Lavaca Dr 2702 Port Lavaca Dr	Victoria	77901	+13615781534	https://www.dairyqueen.com/en-us/locations/tx/victoria/2702-port-lavaca-dr/14680/?y_source=1_MjkzMzkxMTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 8e141569c77c	Dairy Queen	fastfood		28.62406	-96.63498	1205 N Virginia St 1205 N Virginia St	Port Lavaca	77979	+13615520935	https://www.dairyqueen.com/en-us/locations/tx/port-lavaca/1205-n-virginia-st/14505/?y_source=1_MjkzMzg5MzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 f21d55731819	Dairy Queen	fastfood		28.45338	-96.88809	111 TX-239	Tivoli	77990	+13612863307	https://www.dairyqueen.com/en-us/locations/tx/tivoli/111-state-hwy-239-e/14656/?y_source=1_MjkzMzg5MTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+4955143031d1	Domino's	fastfood	pizza restaurant	28.62272	-96.63670	320 State Highway 35 South	Port Lavaca	77979	+13615525678	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
+c2f5ef6393f7	Domino's	fastfood	pizza restaurant	28.81247	-96.99171	2007 N Laurent	Victoria	77901	+13615764154	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+dd6bb4e40624	Domino's	fastfood	pizza restaurant	28.87796	-96.99742	8809 N Navarro St Suite 200	Victoria	77904	+13614850990	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
 1f92930b009d	DQ Grill & Chill	fastfood		28.45343	-96.88815	111 State Hwy 239 E	Tivoli	77990		https://www.dairyqueen.com/en-us/locations/tx/tivoli/111-state-hwy-239-e/4428	DQ Grill & Chill	0.80
 74604c06fc28	DQ Grill & Chill	fastfood		28.81437	-96.97554	2801 E Red River	Victoria	77901		https://www.dairyqueen.com/en-us/locations/tx/victoria/2801-e-red-river/4454	DQ Grill & Chill	0.80
 96159504a677	DQ Grill & Chill	fastfood		28.60466	-96.63363	1409 W Austin St	Port Lavaca	77979		https://www.dairyqueen.com/en-us/locations/tx/port-lavaca/1409-w-austin-st/4271	DQ Grill & Chill	0.80
@@ -337,16 +334,25 @@ fa4989d7d712	DQ Grill & Chill	fastfood		28.71347	-96.21322	215 Henderson	Palacio
 abe5af3d007c	Great American Cookies	fastfood		28.85415	-96.99564	6362 N. Navarro	Victoria	77904		https://ordernew.greatamericancookies.com/gac/6362-n-navarro-victoria-tx-77904	Great American Cookies	0.80
 44096c59fe37	Jocelynn's	fastfood		28.43722	-96.43356	17 Elizabeth Ln	Port Oconnor	77982	+13617461513			0.92
 f58f3708e58c	KFC	fastfood		28.80626	-96.99367	1010 E. Rio Grande	Victoria	77901	+13615736111	https://locations.kfc.com/tx/victoria/1010-e-rio-grande	KFC	0.98
+9d31b12a4728	KFC - Kentucky Fried Chicken	fastfood	chicken restaurant	28.78159	-96.97133		Victoria		+13615736111	http://www.kfc.com/	KFC	0.59
 e8ec2ab45c81	Lemur Kitchen	fastfood		28.72465	-96.21012	2100 1st St	Palacios	77465	+13614030083	https://forms.zohopublic.com/lemurexpress11/form/JobApplication/formperma/CKMZaBkgNqbLlF9tdGimKcrDeEIcSuEYi-1s8Rw-F1s		0.92
+2553d20fd625	Little Caesars Pizza	fastfood	pizza restaurant	28.80579	-96.99069	1301 E Rio Grande St	Victoria	77901	+13615753555	https://littlecaesars.com/en-us/store/10408	Little Caesars	0.98
+bee21a15afed	Little Caesars Pizza	fastfood	pizza restaurant	28.62895	-96.63437	419 NORTH HIGHWAY 35	Port Lavaca	77979	+13614820359	https://littlecaesars.com/en-us/store/10127	Little Caesars	0.81
+c35be5760ee6	Little Caesars Pizza	fastfood	pizza restaurant	28.83733	-96.96387	1907 John Stockbauer Dr	Victoria	77901	+13615769181	http://www.littlecaesars.com/	Little Caesars	0.99
 223b5784ef0b	McDonald's	fastfood		28.76779	-96.97820	3112 S Laurent St	Victoria	77901	+13614850201	https://www.mcdonalds.com/us/en-us/location/tx/victoria/3112-s-laurent-st/36398.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 2fb18760e23d	McDonald's	fastfood		28.81030	-96.97720	2701 Houston Hwy	Victoria	77901	+13615784461	https://www.mcdonalds.com/us/en-us/location/tx/victoria/2701-houston-hwy/4028.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 4b006e867110	McDonald's	fastfood		28.83380	-96.95979	1310 N John Stockbauer Dr	Victoria	77904		https://www.mcdonalds.com/us/en-us/location/43924.html	McDonald's	0.80
 6cd41c5fb481	McDonald's	fastfood		28.98513	-96.65062	817 N Wells St	Edna	77957	+13617822005	https://www.mcdonalds.com/us/en-us/location/tx/edna/817-n-wells-st/10959.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 e86745d843b9	McDonald's	fastfood		28.61955	-96.63933	801 S Hwy 35 Byp	Port Lavaca	77979	+13615524442	https://www.mcdonalds.com/us/en-us/location/tx/port-lavaca/801-s-hwy-35-byp/10491.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 eea0a049052d	McDonald's	fastfood		28.86794	-96.99720	7808 N Navarro	Victoria	77904	+13615753390	https://www.mcdonalds.com/us/en-us/location/tx/victoria/7808-n-navarro/18899.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+6a7f69fb5410	McDonald's & Sons	fastfood		28.78852	-96.99258	203 Hopkins St	Victoria	77901	+13615800028	http://mcdonalds.com		0.77
 02276780f9f4	Moo Moo	fastfood		28.82230	-96.97558	3701 N Ben Wilson St	Victoria	77901	+13617035358	http://www.MooMooTexas.com/		0.96
 3223c1234da1	Mr G's Snow Wiz	fastfood		28.97317	-96.64102	621 S Wells St	Edna	77957	+13616521418	http://mkt.com/mr-gs		0.75
 ca18a8f74956	Panda Express	fastfood		28.87687	-96.99767	8709 N. Navarro	Victoria	77904	+13615720688	http://www.pandaexpress.com/	Panda Express México	0.94
+29276fba446c	Pizza Hut	fastfood	pizza restaurant	28.62915	-96.63416	425 N. 35 Hwy Bypass Calhoun	Port Lavaca	77979	+13615526868	https://locations.pizzahut.com/tx/port-lavaca/425-n-35-hwy-bypass?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284423	Pizza Hut	0.99
+8a61d08114bf	Pizza Hut	fastfood	pizza restaurant	28.97380	-96.65537	803 W Main St	Edna	77957	+13617827197	https://locations.pizzahut.com/tx/edna/803-w-main?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284051	Pizza Hut	0.94
+90edb4a4c43d	Pizza Hut	fastfood	pizza restaurant	28.86599	-96.99946	7608 N.E. Zac Lentz Parkway Victoria	Victoria	77904	+18009488488	https://locations.pizzahut.com/tx/victoria/7608-ne-zac-lentz-parkway	Pizza Hut	0.92
+ffd30be3756b	Pizza Hut	fastfood	pizza restaurant	28.86500	-96.99261	7002 NE Zac Lentz Pkwy. Victoria	Victoria	77904	+13615739137	https://locations.pizzahut.com/tx/victoria/7002-ne-zac-lentz-pkwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304181	Pizza Hut	0.99
 ce13e5a97336	Pizza Hut Express	fastfood		28.83146	-96.91238	11011 US 59	Victoria	77901		https://locations.pizzahut.com/tx/victoria/11011-us-59	Pizza Hut	0.80
 a0cf40fa8e01	Popeyes	fastfood		28.87503	-96.99700	8702 N Navarro St	Victoria	77904	+13615786938	https://www.popeyes.com/store-locator/store/restaurant_82592	Popeyes Louisiana Kitchen	0.99
 d678bec0efd0	Popeyes	fastfood		28.81282	-96.97361	2912 Houston Hwy	Victoria	77901	+13614335857	https://www.popeyes.com/store-locator/store/restaurant_84940	Popeyes Louisiana Kitchen	1.00
@@ -358,8 +364,20 @@ d678bec0efd0	Popeyes	fastfood		28.81282	-96.97361	2912 Houston Hwy	Victoria	7790
 ce5c68b66167	Sonic Drive In	fastfood		28.71356	-96.21481	317 Henderson	Palacios	77465	+13619726281	https://locations.sonicdrivein.com/tx/palacios/317-henderson.html	Sonic Drive-In	0.98
 703690bf8659	Sonic Drive-In	fastfood		28.97261	-96.65887	920 W Main St	Edna	77957	+13617827422	https://locations.sonicdrivein.com/tx/edna/920-w.-main-street.html	Sonic Drive-In	0.96
 a4087cedf1a6	Sonic Drive-In	fastfood		28.62864	-96.63476	411 S. Interstate 35	Port Lavaca	77979	+13615523526	https://locations.sonicdrivein.com/tx/port-lavaca/411-s--interstate-35.html		0.77
+0ad256bdb1e9	Subway	fastfood	sandwich shop	28.80629	-96.99278	1102 E. Rio Grande Street Suite 300	Victoria	77901	+13614850387	https://restaurants.subway.com/united-states/tx/victoria/1102-e-rio-grande-street	Subway	0.98
+0b5368e59a7d	Subway	fastfood	sandwich shop	28.81693	-96.96293	4001 Houston Hwy	Victoria	77901	+13614859500	https://www.subway.com		0.95
 116e2182944a	Subway	fastfood		28.81651	-96.97920	2200 E Red River, Student Center	Victoria	77901	+13615822477	https://restaurants.subway.com/united-states/tx/victoria/2200-e-red-river?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=63510&utm_campaign=evergreen-2020&y_source=1_MTQ5MTAwNDItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+1f121a022123	Subway	fastfood	sandwich shop	28.71325	-96.21413	307 Henderson	Palacios	77465	+13619722273	https://restaurants.subway.com/united-states/tx/palacios/307-henderson	Subway	0.97
+35ff7b819067	Subway	fastfood	sandwich shop	28.82230	-96.94965	5101 Houston Hwy	Victoria	77901	+13618084399	https://www.subway.com		0.95
 369571aa5f9d	Subway	fastfood		28.44238	-96.42029	1620 W Adams St Stop C-STORESUBWAY	Port O Connor	77982	+13619832496	http://www.subway.com		0.77
+4508f9f61162	Subway	fastfood	sandwich shop	28.78201	-96.95843	4008 US-59	Victoria	77902	+13615761353	https://restaurants.subway.com/united-states/tx/victoria/4008-n-hwy-59	Subway	0.98
+595f645062c5	Subway	fastfood	sandwich shop	28.84765	-96.97580	3410 John Stockbauer Suite A	Victoria	77901	+13615707827	https://restaurants.subway.com/united-states/tx/victoria/3410-john-stockbauer	Subway	0.98
+5ad96d3e585a	Subway	fastfood	sandwich shop	28.78631	-96.95296	4008 US Highway 59 N	Victoria	77905	+13615761353	https://alibabacharleston.com		0.55
+a7763f96ccd8	Subway	fastfood	sandwich shop	28.63186	-96.62726	400 Tiney Browning Blvd Suite 1	Port Lavaca	77979	+13615526073	https://restaurants.subway.com/united-states/tx/port-lavaca/400-tiney-browning-blvd	Subway	0.96
+b43268274ed4	Subway	fastfood	sandwich shop	28.98903	-96.62529	1509 E Rose St	Edna	77957	+13617826700	http://www.subway.com/en-us	Subway	0.97
+bd29f9cbcc67	Subway	fastfood	sandwich shop	28.87777	-96.99473	9002 N Navarro St	Victoria	77904	+13614850908	https://restaurants.subway.com/united-states/tx/victoria/9002-n-navarro-street	Subway	0.95
+d4aafeda7748	Subway	fastfood	sandwich shop	28.62327	-96.63659	306 Highway 35 S Suites 304 & 306	Port Lavaca	77979	+13615527300	http://www.subway.com/en-us	Subway	0.97
+e03840c5abaf	Subway	fastfood	sandwich shop	28.87529	-96.99822	8701 N Navarro Street	Victoria	77904	+13615731501	http://www.subway.com/en-us	Subway	0.95
 05699f315780	Taco Bell	fastfood		28.86835	-96.99725	7902 North Navarro St	Victoria	77901	+13615824400	http://www.tacobell.com/	Taco Bell	0.99
 445280619cca	Taco Bell	fastfood		28.63422	-96.62464	1782 State Hwy 35 N	Port Lavaca	77979	+13615520445	https://locations.tacobell.com/tx/port-lavaca/1782-state-hwy-35-n.html	Taco Bell	0.96
 ded9b024387b	Taco Bell	fastfood		28.80968	-96.99931	1602 N Navarro St	Victoria	77901	+13615769380	http://www.tacobell.com/	Taco Bell	0.99
@@ -367,8 +385,11 @@ ded9b024387b	Taco Bell	fastfood		28.80968	-96.99931	1602 N Navarro St	Victoria	7
 6853fc4efa43	Taqueria El Rodeo	fastfood		28.80557	-96.99957	407 E Rio Grande St	Victoria	77901	+13615759993			0.66
 f3aa4a7b9cf7	Tolbert's Dairy Treet	fastfood		28.82826	-96.99252	3808 N Laurent St	Victoria	77901	+13615733104	https://dairytreet.com/home		0.98
 afe23c08e9b8	Wendy's	fastfood		28.81161	-96.97411	2901 Houston Highway	Victoria	77901	+13615416028	https://locations.wendys.com/united-states/tx/victoria/2901-houston-highway	Wendy's	0.95
+2000c74428be	Whataburger	fastfood	burger restaurant	28.63470	-96.62786	1207 STATE HIGHWAY 35 N	Port Lavaca	77979	+13615527416	https://locations.whataburger.com/tx/port-lavaca/1207-state-hwy-35-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 2ee230a0db75	Whataburger	fastfood		28.80546	-96.99879	509 E RIO GRANDE ST	Victoria	77901	+13615752326	https://locations.whataburger.com/tx/victoria/509-e-rio-grande-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+303debde7bab	Whataburger	fastfood	burger restaurant	28.81544	-96.96521	3603 HOUSTON HWY	Victoria	77901	+13615766623	https://locations.whataburger.com/tx/victoria/3603-houston-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 908773aee9cf	Whataburger	fastfood		28.87779	-96.99661	8908 N NAVARRO ST	Victoria	77904	+13615789858	https://locations.whataburger.com/tx/victoria/8908-n-navarro-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+99d208d5e36f	Whataburger	fastfood	burger restaurant	28.62275	-96.63675	1207 TX-35	Port Lavaca	77979	+13615527416	http://www.whataburger.com/	Whataburger	0.92
 af589af9f5b9	Whataburger	fastfood		28.98839	-96.64870	112 E HOUSTON HWY	Edna	77957	+13617822455	https://locations.whataburger.com/tx/edna/112-east-houston-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 91a92efab670	Wingstop	fastfood		28.84410	-96.99825	5208 N Navarro St	Victoria	77904	+13615769464	https://www.wingstop.com/location/wingstop-262-victoria-tx-77904/menu?y_source=1_NTUyMDY1NTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
 2b91e1711924	59 and Laurent H-E-B	grocery		28.80620	-96.98960	1505 EAST RIO GRANDE	Victoria	77901		https://www.heb.com/heb-store/us/tx/victoria/59-and-laurent-h-e-b-554	H-E-B	0.80
@@ -410,9 +431,7 @@ a3b0eedd4562	Palacios Community Medical Center	hospital		28.71692	-96.21429	311 
 de35b53018f6	PAM Health Specialty Hospital of Victoria Southeast	hospital		28.81270	-96.97778	2701 Hospital Dr 6th Floor	Victoria	77901	+13612371957	https://pamhealth.com/hospitals/pam-health-specialty-hospital-of-victoria-southeast/	PAM Health	0.97
 9671472018a3	Physical Therapy	hospital		28.62451	-96.63426	1300 N Virginia St	Port Lavaca	77979	+13615512513	http://mmcportlavaca.com		0.62
 b53781e2019e	Texas Industrial Medical plaza	hospital		28.61622	-96.62762	225 N Virginia St	Port Lavaca	77979	+13615524886			0.80
-6b29e991dd2b	Victoria Allergy & Asthma Clinic	hospital		28.80866	-96.99976	1501 N Navarro St	Victoria	77901	+13615730713			0.65
 1204e9b03e3d	Victoria Clinica Familiar	hospital		28.79916	-96.98096	2203 Lone Tree Rd	Victoria	77901	+13615793378			0.95
-095c968c0c26	10th Street Lodge	hotel	lodge	28.45012	-96.41669	612 10th St	Port Oconnor	77982	+15126775915	http://www.10thstreetlodge.com		0.92
 d4d853fcb139	5th St Rentals: Anchor Inn - Port O’Cottage - Blue Heron	hotel		28.40736	-96.62850	411 W Madison Ave	Port Oconnor	77982				0.56
 013c639bff0b	American Inn And Suites	hotel		28.81238	-96.97280	3005 Houston Hwy	Victoria	77901	+13615734351	https://american-inn-suites-tx.hub.biz/		0.99
 dd372ab62395	American Inn and Suites	hotel	motel	28.44084	-96.41569	1306 Maple St	Port Oconnor	77982	+13619832606	http://www.americaninnandsuitespoc.com		0.99
@@ -421,27 +440,20 @@ baf943e009c9	Americas Best Value Inn & Suites	hotel		28.81588	-96.96326	3901 Hou
 558e0518589b	Americas Best Value Inn Port Lavaca	hotel	resort	28.63563	-96.62238	2100 State Highway 35 N	Port Lavaca	77979	+13615524511	https://www.redlion.com/port-lavaca		0.92
 a72ed52f9890	Americas Best Value Inn Port Lavaca	hotel	resort	28.67124	-96.71806	2100 Texas Ave 35	Port Lavaca	77979	+13615524511	https://www.redlion.com/americas-best-value-inn/tx/port-lavaca/americas-best-value-inn-port-lavaca		0.85
 71beb53c6ccc	Applewood Inn	hotel	motel	28.97432	-96.65445	701 W Main St	Edna	77957	+13617810833			0.92
-21394bb30459	Back Lakes Lodge	hotel	lodge	28.13933	-96.99712	721 Main St	Rockport	78382	+13614639568	http://www.backlakeslodge.com/		0.94
-523ec4ae1d1b	Bay Flats Lodge Resort	hotel	lodge	28.39057	-96.70620	391 Bayside Dr	Seadrift	77983	+18886774868	http://www.bayflatslodge.com/		0.97
 d1e0a67438fb	Bay Flats Lodge Resort	hotel		28.39057	-96.70620	391 Bayside Dr	Seadrift	77983	+18886774868	http://www.bayflatslodge.com/		0.95
 d89d2c7a1502	Bay Motel	hotel	motel	28.41550	-96.71339	322 W Broadway Ave	Seadrift	77983	+13617852226	http://bay-motel.com		0.95
 67d7efdeb9a7	Bay Prairie Lodge	hotel		28.93806	-96.20883	4029 State Highway 71	Bay City	77414	+13615886565	http://texas-goose-hunting.com		0.96
-dc619aeab38a	Baymont by Wyndham Victoria	hotel	resort	28.86226	-96.98251	8107 NE Zac Lentz Pkwy	Victoria	77904	+13612373306	https://www.wyndhamhotels.com/baymont/victoria-texas/baymont-inn-and-suites-victoria/overview?CID=LC:w1ep4ap58ea2s4j:47698&iata=00093796		0.85
-88f27fde5f56	Bayshore Lodge	hotel		28.71486	-96.20257	514 E Bayshore Dr	Palacios	77465				0.92
 83eea526b3c8	Best Western Lone Star Inn	hotel		28.98921	-96.64777	310 E Houston Hwy	Edna	77957	+13617810500	https://www.bestwestern.com/en_US/book/hotel-rooms.44596.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44596	Best Western Hotels & Resorts	1.00
 fdd587f30e41	Best Western Port Lavaca Inn	hotel		28.63537	-96.62103	2202 TX-35	Port Lavaca	77979	+13615536800	https://www.bestwestern.com/en_US/book/hotel-rooms.44503.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44503	Best Western Hotels & Resorts	1.00
-3c070d3458ae	Blessing Masonic Lodge	hotel	lodge	28.87156	-96.21897		Blessing					0.73
 eb7b50b64d86	Branson Grand Hotel Inc	hotel		28.85913	-96.99509	111 Huvar St	Victoria	77904				0.95
 d39157db1a8f	Breezy Palms Cottages	hotel		28.40832	-96.71083	101 E Bay Ave	Seadrift	77983	+13615506069	http://breezypalmscottages.com/		0.96
 eff3d23f6cd8	Budget Inn Port Lavaca	hotel	motel	28.60970	-96.64350	2016 W Main St	Port Lavaca	77979	+13615529755			0.98
-89ce7f35be64	Bunkhouse Lodge	hotel	lodge	28.41331	-96.68632	1811 TX-185	Seadrift	77983	+18007227200	http://www.Bunkhouse-Lodge.com/		0.98
 622bd20a8de0	Cameron Inn & Suites	hotel	motel	28.80789	-96.98406	1906 US-59T Business	Victoria	77901	+13615749393	http://www.comfortinn.com		0.99
 7a38f57dc8b5	Candlewood Suites Victoria By Ihg	hotel		28.86155	-96.99768	7103 N Navarro St	Victoria	77904	+13615780236	https://www.ihg.com		1.00
 4edcb89cf567	Captain's Quarters	hotel	motel	28.41696	-96.71719	Seadrift, TX	Seadrift	77983	+13617854982	http://www.captainsquartershotel.com		0.77
 56c2b4afcafb	Captain's Quarters	hotel		28.43990	-96.43698	396 Byers Dr	Port O'Connor	77982	+13619834982	http://www.captainsquartershotel.com		0.98
 409d27c305b5	Captains Quarters Motel	hotel		28.41506	-96.71239	201 State Highway 185 N	Seadrift	77983		https://www.captains-quarters.com		0.95
 6969c8358531	Carriage Park Apartments	hotel		28.81133	-96.98544	1810 E Colorado St	Victoria	77901	+13615765122	http://www.Woolson.com/		0.82
-61b1d458bcb2	Castaway Lodge, Inc.	hotel	lodge	28.41586	-96.71111	109 Austin Ave	Seadrift	77983	+18886184868	http://www.seadriftbayfishing.com/		0.97
 011c73c52ec8	Chaparral Motel	hotel		28.78190	-96.96071	3401 US Highway 59 N	Victoria	77905	+13615769222	https://www.chaparraltravel.com/default.asp		0.55
 c937082f20a8	Chaparral Motel	hotel	resort	28.63543	-96.62299	2086 state highway 35 N	Port Lavaca	77979	+13615527581			0.95
 2eddff4ea5fc	Chaparral Motel Victoria TX US	hotel	motel	28.77773	-96.96731	3401 US-59	Victoria	77901	+13615769222	https://www.chaparralmotelvictoriatx.com/		0.99
@@ -449,16 +461,12 @@ c937082f20a8	Chaparral Motel	hotel	resort	28.63543	-96.62299	2086 state highway 
 5147f196b0e1	Clarion Pointe Port Lavaca	hotel		28.63500	-96.62702	1211 State Highway 35 N	Port Lavaca	77979		https://www.choicehotels.com/texas/port-lavaca/clarion-hotels	Clarion	0.80
 b84c326a2963	Coastal Bend at Seadrift, Motel & RV Park	hotel	motel	28.41706	-96.71761	201 TX-185	Seadrift	77983	+13617853322	http://www.coastalbendSeadrift.com/		0.97
 c0aa38cb6a19	Comfort Inn & Suites Victoria North	hotel		28.86298	-96.98888	6603 NE Zac Lentz Pkwy	Victoria	77904	+13618946480	https://www.choicehotels.com/texas/victoria/comfort-inn-hotels/txf83?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-d2f7ad4c390e	Copano Bay Fishing Lodge	hotel	lodge	28.16014	-96.99982	6544 Hwy 35 N	Rockport	78382	+13612050389			0.92
 dc3ff3fd5706	Courtyard by Marriott Victoria	hotel		28.86827	-96.99212	8002 North Navarro Street	Victoria	77904	+13615783945	https://www.marriott.com/hotels/travel/vctcy-courtyard-victoria/?scid=5d6c9ba8-fdb3-45cd-90d4-fc3cbfe3681c&y_source=1_MjU3ODIzMi01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Courtyard by Marriott	1.00
 72be92adbaa6	Crossroads Inn and Suites	hotel	motel	28.81596	-96.96407	3807 Houston Hwy	Victoria	77901	+13618948710	http://crossroads-inn.com/		0.99
 5e271359bc41	Days Inn	hotel		28.63498	-96.62180	2100 Texas 35	Port Lavaca	77979	+13615524511	http://www.daysinn.com		0.77
 3603e6a90f11	Days Inn by Wyndham Victoria	hotel	resort	28.86189	-96.99516	6203 Dairy Rd	Victoria	77904	+13612371815	https://www.wyndhamhotels.com/days-inn/victoria-texas/days-inn-victoria/overview?CID=LC:DI::BING:RIO:National:46471&iata=00093796		0.99
 167e06b45b4d	Deluxe Inn	hotel	motel	28.71601	-96.21059	1505 1st St	Palacios	77465	+13619722547	http://www.deluxeinnmarksville.com		0.99
 d83bd0932a7e	Discovery Inn	hotel		28.77632	-96.96862		Victoria		+13615731110	http://www.magnusonhotels.com/Hotel-Details.cfm?pcode=M19713		0.83
-76f42c9fe4a3	Drumrunner Lodge	hotel	lodge	28.44893	-96.42565	186 Cassie St	Port Oconnor	77982	+12102878150			0.83
-d49aca726830	El Pescador Lodge	hotel	lodge	28.44217	-96.41836	1402 W Olive Ave	Port Oconnor	77982	+12812350600	http://www.elpescadorlodge.com/		0.94
-d1fb51d329a2	Empire Lodge	hotel	lodge	28.45316	-96.41331	512 Tyler Ave	Port Oconnor	77982	+13615715071			0.97
 702b14b588c3	Executive Inn	hotel	motel	28.63633	-96.62303	2007 State Highway 35 N	Port Lavaca	77979	+13854863668	http://www.executiveinnpl.com/		0.97
 ad20a81ad4d4	Extend a Suites Victoria	hotel		28.81569	-96.96381	3807 Houston Hwy	Victoria	77901	+13618948710	http://www.extendasuites.com		0.92
 2abfd3cbec3e	Fairfield	hotel		28.86506	-96.99647	7502 N Navarro Street	Victoria	77904	+13615820660	https://www.marriott.com/en-us/hotels/vctfi-fairfield-inn-and-suites-victoria/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	0.99
@@ -491,7 +499,6 @@ de352e474f8b	La Quinta Inn	hotel	motel	28.86623	-96.99807	7603 N Navarro St	Vict
 7c6186ae571e	La Quinta Inn & Suites Port Lavaca	hotel		28.63215	-96.63028	910 State Highway 35 N	Port Lavaca	77979	+13615516071	http://www.laquintaportlavaca.com/?cid=local_6191	La Quinta by Wyndham	1.00
 eb557f5b193b	La Quinta Inn and Suites by Wyndham Victoria - South	hotel		28.76727	-96.97887	3107 S Laurent St	Victoria	77901	+13612373051	http://www.laquintavictoriasouth.com/?cid=local_6653	La Quinta by Wyndham	0.97
 f6b33a8d1b2e	La Quinta Inn Victoria	hotel	resort	28.87233	-96.99670	7603 N Navarro St	Victoria	77904	+13615723585	http://www.laquintavictoria.com/?cid=local_577		0.85
-d3aa929c85a2	Lavkush Hotels Llc	hotel		28.86211	-96.99500	6203 Dairy Rd	Victoria	77904				0.95
 ce43aa5bc744	Lone Star Inn and Suites Victoria	hotel		28.76860	-96.97643	1907 US-59 N	Victoria	77905	+13615790225			0.97
 2c97c64d87cf	Luther Hotel	hotel		28.69952	-96.21594	408 S Bay Blvd	Palacios	77465		https://www.lutherhotelpalacios.com		0.94
 8b83a9ae8955	Magnolia Beachfront Cottage	hotel		28.56147	-96.54123	112 Wedig St	Port Lavaca	77979	+18303129289			0.55
@@ -501,21 +508,15 @@ c8e1fbb2685c	Motel 6	hotel	motel	28.81628	-96.96558	3716 Houston Hwy	Victoria	77
 0d0004d5bf0d	Motel 6 Port Lavaca- Tx	hotel	resort	28.63894	-96.61407	2621 State Highway 35 N	Port Lavaca	77979	+13615523393			0.92
 3361b396e2cb	Motel 6 Port Lavaca- Tx	hotel	resort	28.67124	-96.71806	2100 Texas Ave 35	Port Lavaca	77979	+13615524511			0.85
 d6681d9be742	Nautical Landings Marina	hotel		28.61621	-96.62349	106 S Commerce St Ste 6	Port Lavaca	77979	+13615537041			0.55
-07fd9a42be69	Navarro Hospitality	hotel		28.86630	-96.99809	7603 N Navarro St	Victoria	77904				0.95
 23e82f5d761d	Oakglen Apartments	hotel		28.63501	-96.64165	115 Oakglen Dr	Port Lavaca	77979	+13615526100	https://oakglen-apartments.hub.biz/		0.92
 6e5ef7c63865	Poco Loco Lodge	hotel	motel	28.44737	-96.40688	305 Adams Ave	Port Oconnor	77982	+13619830300	https://www.staypocoloco.com/		0.92
 dd306b8f10d5	Port O' Connor Rentals	hotel		28.43835	-96.42810	2245 W Adams Ave	Port Oconnor	77982	+13619834371	http://www.pocrentals.com/		0.92
-7797bfd45831	Port O'Connor Premier Lodge	hotel	lodge	28.45197	-96.40534	110 Monroe Ave	Port Oconnor	77982	+13612108494	http://pocpremierlodge.com/		0.92
 8c220945750a	Quality Inn & Suites Victoria East	hotel	resort	28.82509	-96.94254	5401 Houston Hwy	Victoria	77901	+13614335699	https://www.choicehotels.com/texas/victoria/quality-inn-hotels/txh53?mc=llbillpx&pmf=local		1.00
 2e0e3a5c6410	Quality Inn & Suites Victoria South	hotel		28.76847	-96.97621	1907 US Highway 59 N	Victoria	77905		https://www.choicehotels.com/texas/port-lavaca/clarion-hotels	Quality Inn	0.98
-d5f24c44da64	Rancho Flores	hotel		28.67069	-96.71959	298 Texas Ave	Port Lavaca	77979				0.92
-0959cc4ded83	Redfish Lodge Bar & Restaurant | Port O'Connor	hotel	lodge	28.44792	-96.41280	710 Madison Ave	Port Oconnor	77982	+18669037742	https://www.redfishpoc.com/booking-engine		0.92
 62e5c4a9f833	Reel Time Lodging	hotel	motel	28.41611	-96.71642	604 W Broadway Ave	Seadrift	77983	+13617854335	http://www.reeltimelodging.com		0.92
 96e2515808b5	Royal Inn	hotel	motel	28.62747	-96.63399	150 TX-35	Port Lavaca	77979	+13615536640	https://royal-inn-the.hub.biz		0.97
 e94cca2404ad	Royal Inn	hotel	motel	28.81297	-96.97326	3004 Houston Hwy	Victoria	77901	+13615754531	http://www.royalinnvictoria.com/		0.98
 a5b1b22f0b0d	Sage Creek	hotel		28.83342	-96.99900	607 Fillmore Ave	Victoria	77901	+13615731666	http://sagecreekapts.com		0.99
-e6c8c9265e7f	Saltwater Lodge	hotel	lodge	28.41736	-96.61891	5929 State Highway 185 E	Seadrift	77983	+13617853825	http://saltwaterlodgetx.com		0.92
-8c0fcb102e52	Sanctuary Costa Grande	hotel		28.41667	-96.49361		Port O'Connor					0.65
 3ae549b9f1b1	Sands Motel Port Lavaca	hotel	motel	28.60979	-96.63445	1207 W Main St	Port Lavaca	77979	+13615523791	http://www.superpages.com		0.92
 1e39a99ddd25	Seadrifter Inn	hotel	motel	28.40850	-96.71181	106 W Bay Ave	Seadrift	77983	+13617852031	http://www.seadriftbayfishing.com		0.98
 ea808227b8ab	Shoalwater Flats	hotel		28.36538	-96.57858	4197 Lane Rd	Seadrift	77983	+13617852907			0.74
@@ -531,18 +532,14 @@ b37eec301d87	The Bayshore Hotel at Magnolia Beach	hotel		28.55325	-96.52306	1301
 4379b312edcb	The Habitat Vacation Cabins	hotel		28.14398	-96.98098	164 4th St	Rockport	78382	+18558092080	http://www.habitatvacationcabins.com		0.92
 9b97ccff32b9	The Lakes of Colony Creek Country Club Victoria Tx	hotel		28.83629	-96.95494	307 Legend Dr	Victoria	77904	+13612206061			0.73
 9d6592bb2616	The Lighthouse at Sandcastle	hotel		28.57742	-96.56557	73 Sandcastle Dr	Port Lavaca	77979	+13615524709	http://www.lighthouseatsandcastle.com		0.92
-73c3ef90edfb	Tivoli Motel	hotel		28.46181	-96.88566	118 Highway 35 N	Tivoli	77990				0.92
 6b9a3e6033eb	Topside Lodging	hotel		28.72131	-96.20441	1801 Petersen St	Palacios	77465	+13619720495			0.92
 ae57b2ad0d3d	Victoria Akshar Hotels Inc	hotel		28.86021	-96.99420	123 Huvar St	Victoria	77904				0.95
 a85d6e14c83b	Victoria Comfort Inn	hotel		28.80801	-96.98404	1906 Houston Hwy	Victoria	77901		https://victoriacomfortinn.com		0.95
-abdce3deba2a	Victoria Motel	hotel	motel	28.80572	-96.99638	709 E Rio Grande St	Victoria	77901				0.92
 3e288f71cab3	Whiskey's Fish Camp	hotel		28.43941	-96.44184	88 Rutherford St	Port Oconnor	77982	+19797020535			0.70
-2e03173f77a1	Woodlawn Bowling Center	hotel		28.81390	-96.99041	1326 E Red River St	Victoria	77901				0.99
 8c81346005ca	Archrock	office	energy company	28.82208	-96.92660	8193 Lone Tree Rd	Victoria	77905	+13615794000		Archrock	0.92
 27c63acf645e	Bay City Country Club	office	private association	28.97989	-96.01463	1129 TX-35	Bay City	77414	+19792455779	https://calendar.google.com/calendar/u/1?cid=MzZkMjA5OWQ0YjAzMmFmYWE4NjVkMzI3ZDc4YWNhYjAwZWVmZDk5ZGVhOTgyZGRlYTM3ZWQwOWUwMzViZjgyY0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t		0.97
 7d3c358fefa6	Energy Fishing and Rental Services	office	energy company	28.77740	-96.96746	1085 Northside Rd	Victoria	77904	+13615723213	http://www.energyfrs.com/efrs/home	Energy Fishing & Rental Service	0.92
 0b979c84f26d	Formosa Plastics Corporation, USA	office	industrial company	28.69975	-96.55124	201 Formosa Drive	Point Comfort	77978	+13619877000	https://www.fpcusa.com/	Formosa Plastics Corporation, USA	0.84
-6b2278f991d9	Formosa Plastics Corporation, USA	office	industrial company	28.69940	-96.54468	201 Formosa Drive	Point Comfort	77978	+13619877000	https://www.fpcusa.com/		0.82
 87b9b851d702	Get My Energy Rate	office	energy company	28.84027	-96.98495	101 Mockingbird Cir	Victoria	77901	+18336374989	https://www.getmyenergyrate.com/		0.92
 a258bd4675e4	Golden Crescent Construction	office	coworking space	28.74145	-96.96258	5392 Hwy 185	Victoria	77905	+13615735775	http://gccbuildingstx.com		0.77
 2891b863cca0	GrantWorks	office		28.83875	-96.98405	2208 Leary Ln #100	Victoria	77904	+13614850000			0.92
@@ -552,7 +549,6 @@ ff1221e5262e	Ineos Nitriles Green Lake Operations	office	industrial company	28.5
 41b09d1cfe31	Inteplast Group - Lolita, TX	office	plastics company	28.79783	-96.54814		Lolita		+13618743000	http://www.inteplast.com/	Inteplast	0.77
 ba2266e7bdaa	KST Energy Services	office	energy company	28.96844	-96.67342	1112 US-59	Edna	77957	+13612352323	http://www.kstenergyservices.com/		0.92
 2ec05d86cb17	La Ward Communications	office	telecommunications company	28.84554	-96.46413	12991 TX-172	La Ward	77970	+13618722211	https://laward.net/		0.87
-aa297868b333	Lolita Packaging LLC	office		28.82537	-96.51215	1026 County Road 435	Lolita	77971	+13618744781			0.55
 dd0b0b7e81ab	Lolita Packaging LLC	office		28.82577	-96.50650	1026 County Road 435	Lolita	77971	+13618744781			0.57
 aea69044395f	Manpower	office		28.83564	-96.54228	3333 FM 1593	Lolita	77971	+13618744825	http://www.manpower.com		0.77
 4889ba2cf574	Miller Mechanical Group	office		28.81563	-96.96898	3406 E Red River St	Victoria	77901	+13612352640			0.65
@@ -592,7 +588,6 @@ f8bd0293e59e	Bubba's Seafood, Seadrift Tx.	restaurant	seafood restaurant	28.6802
 575975aeae11	Bubba’s Seafood - Seadrift, TX	restaurant		28.41340	-96.69890	1142 State Highway 185 E	Seadrift	77983	+13617852645			0.92
 8832d29a5237	Buffalo Creek Barbecue	restaurant	barbecue restaurant	28.82350	-96.61739	FM 616 & FM 234	Vanderbilt	77991	+13614042020			0.89
 648135c9d6c1	Burdogz Bar & Grill	restaurant		28.82071	-96.99261	1209 E Airline Rd	Victoria	77901	+13615797365	http://burdogzbarandgrill.com		0.92
-e089c3eace8e	Burger King	restaurant	burger restaurant	28.63297	-96.62990	914 State Hwy 35 N	Port Lavaca	77979	+13619870034	https://burgerking.com/store-locator/store/restaurant_242466		0.94
 e7b4c0c731eb	Bush's Chicken	restaurant	chicken restaurant	28.61930	-96.63961	803 State Highway 35 S	Port Lavaca	77979	+13614820887	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.96
 6fa748b931c7	Cafe Rey	restaurant	texmex restaurant	28.79343	-96.99528	1303 E Juan Linn St	Victoria	77901	+13615747944			0.98
 c8c6230cea0a	Canales Cafe	restaurant	texmex restaurant	28.45687	-96.88747	302 Main St	Tivoli	77990	+13612863255	https://canales-cafe.hub.biz/		0.98
@@ -625,15 +620,11 @@ f8c360ee9b31	Daniel's Tacos	restaurant	mexican restaurant	28.97364	-96.65656	902
 5d11cb0f71a2	Danny's Seafood House	restaurant	seafood restaurant	28.70934	-96.21023	1000 1st St	Palacios	77465	+13614030181	http://dannys-seafood-house.paqe.io		0.97
 a7af90318ba1	Denny's Restaurant	restaurant		28.86585	-96.99764	7601 Navarro St	Victoria	77904	+13615780600	https://www.dennys.com/		1.00
 63e77c247d58	Dickey's Barbecue Pit	restaurant	barbecue restaurant	28.87895	-96.99622	9006 N Navarro St Ste c	Victoria	77904	+13615501973	https://www.dickeys.com/locations/Texas/Victoria/victoria?		0.95
-4955143031d1	Domino's	restaurant	pizza restaurant	28.62272	-96.63670	320 State Highway 35 South	Port Lavaca	77979	+13615525678	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
-c2f5ef6393f7	Domino's	restaurant	pizza restaurant	28.81247	-96.99171	2007 N Laurent	Victoria	77901	+13615764154	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-dd6bb4e40624	Domino's	restaurant	pizza restaurant	28.87796	-96.99742	8809 N Navarro St Suite 200	Victoria	77904	+13614850990	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
 ee002666766f	Don Jose Mexican Restaurant	restaurant	mexican restaurant	28.82231	-96.97504	2902 E Airline Rd	Victoria	77901	+13615755673	http://www.donjoserestaurant.net		0.92
 56b90fc5cbf2	Don Julio's Mexican Restaurant	restaurant	mexican restaurant	28.61410	-96.62755	227 W Main St	Port Lavaca	77979	+13614820535	http://donjuliomexicanrestaurant.us	Don Julios Pine City	0.95
 6f831bd9eabf	Dos Hermanos Mexican Cafe	restaurant	mexican restaurant	28.98777	-96.64981	106 E Houston Hwy	Edna	77957	+13617810869			0.98
 c7648c8ee658	Double J Eatery	restaurant	comfort food restaurant	28.87415	-96.99859	8607 N Navarro St	Victoria	77904	+13615707744	http://www.doublejeatery.com/		0.97
 a3170fd12e13	DoubleDave's PizzaWorks	restaurant	pizza restaurant	28.86230	-96.99628	2202 N Navarro St	Victoria	77901	+13615753283	https://www.doubledaves.com/locations/tx/victoria/victoria		0.98
-ed575e608a65	DoubleDave's Pizzaworks	restaurant	pizza restaurant	28.81540	-96.99989	2202 N Navarro St	Victoria	77904	+13615753283	https://www.doubledaves.com/locations/tx/victoria/victoria	DoubleDave's Pizzaworks	0.92
 aeb379ef43f5	Edna Seafood And Grill	restaurant	seafood restaurant	28.96880	-96.63335	1022 S Wells St	Edna	77957	+13617829272	http://ednaseafoodandgrill1.placeweb.site		0.97
 6ed1da446e28	El Gordo's Food Trailer	restaurant		28.79574	-96.99294	1411 Port Lavaca Dr	Victoria	77901	+3613059570			0.73
 eb2d02fda11a	El Guerrerense	restaurant	mexican restaurant	28.81290	-96.99171	2101 N Laurent St	Victoria	77901	+13615797148			0.96
@@ -668,7 +659,6 @@ f03694683355	Iron Sharpens Iron BBQ	restaurant	barbecue restaurant	28.79253	-96.
 a3b1c02a92d0	Jurek's Smokehouse	restaurant	barbecue restaurant	28.96692	-96.06745	310 10th St E	Markham	77456	+19798435211	http://www.jurekssmokehouse.com/		0.98
 a42fc6802948	Just Wingin' It	restaurant	american restaurant	28.81485	-96.96861	3402 Houston Hwy	Victoria	77901	+13618946792			0.79
 51cf9a0e2ead	Kb's Bbq	restaurant	barbecue restaurant	28.82209	-96.95042		Victoria		+13616520377			0.72
-9d31b12a4728	KFC - Kentucky Fried Chicken	restaurant	chicken restaurant	28.78159	-96.97133		Victoria		+13615736111	http://www.kfc.com/	KFC	0.59
 c03d66b69e83	Kikko Ramen and Poke	restaurant	japanese restaurant	28.86823	-96.99810	7905 N Navarro St Ste 200	Victoria	77904	+13618946959	http://order.kikkoramentx.com/	Kikko Ramen & Poke Beaumont	0.92
 be171f50c8aa	Krispy Krunchy Chicken	restaurant	chicken restaurant	28.87136	-96.21986	689 Fm 616	Blessing	77419	+13615881124	https://locations.krispykrunchy.com/tx/blessing/689-fm-616		0.96
 d22833ae58af	Krispy Krunchy Chicken	restaurant	chicken restaurant	28.72402	-96.21035	2100 1St St	Palacios	77465	+13164030589	https://locations.krispykrunchy.com/tx/palacios/2100-1st-street		0.96
@@ -692,9 +682,6 @@ ee26bc19fadf	Laredo Taco Company	restaurant		28.76759	-96.97752	3204 South Laure
 9429255be3fb	Lighthouse Cafe	restaurant	diner	28.63531	-96.62263	2090 TX-35	Port Lavaca	77979	+13615512009	https://lighthousecafe2090.wixsite.com/lighthouse-cafe		0.92
 f62e0dc21ac7	Lighthouse Seafood	restaurant	seafood restaurant	28.62580	-96.62439	915 Broadway St	Port Lavaca	77979	+13615521231	https://lighthouse-seafood-tx.hub.biz/		0.96
 ba2e5ffdbe6b	Ling's	restaurant	pan asian restaurant	28.86795	-96.99442	7800 N NAVARRO St Ste 179	Victoria	77904	+13618946477	https://www.lingsvictoriatx.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
-2553d20fd625	Little Caesars Pizza	restaurant	pizza restaurant	28.80579	-96.99069	1301 E Rio Grande St	Victoria	77901	+13615753555	https://littlecaesars.com/en-us/store/10408	Little Caesars	0.98
-bee21a15afed	Little Caesars Pizza	restaurant	pizza restaurant	28.62895	-96.63437	419 NORTH HIGHWAY 35	Port Lavaca	77979	+13614820359	https://littlecaesars.com/en-us/store/10127	Little Caesars	0.81
-c35be5760ee6	Little Caesars Pizza	restaurant	pizza restaurant	28.83733	-96.96387	1907 John Stockbauer Dr	Victoria	77901	+13615769181	http://www.littlecaesars.com/	Little Caesars	0.99
 f7fc2c76af67	LongHorn Steakhouse	restaurant	steakhouse	28.86460	-96.99516	7306 NE Zac Lentz Pkwy	Victoria	77904	+13614123212	https://www.longhornsteakhouse.com/locations/tx/victoria/victoria-victoria-mall/5670?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Avictoria-tx-5670_pl%3Alocurl_rd%3A1582	LongHorn Steakhouse	0.99
 34541eadd65e	Los Charritos Express	restaurant	mexican restaurant	28.62228	-96.62637	623 Broadway St	Port Lavaca	77979	+13614331576			0.92
 71c325dfcb73	Los Cucos	restaurant	mexican restaurant	28.71760	-96.21101	1601 1st St	Palacios	77465	+13619726024	http://loscucos.com/		0.92
@@ -712,7 +699,6 @@ fe54fd5fa193	Matamoros Taco House	restaurant	mexican restaurant	28.71532	-96.210
 7e1568e6001f	Maw & Paw Wooton's Cajun Boils	restaurant	cajun and creole restaurant	28.85138	-96.97449	106 Chesapeake Ave	Victoria	77904	+3612295002			0.92
 d18b3be330d5	Mazatlan Mexican Restaurant	restaurant	mexican restaurant	28.62799	-96.63390	150 TX-35	Port Lavaca	77979	+13615528040	http://www.taqueriamazatlan.us		1.00
 9ca63ec2114d	McAlister's Deli	restaurant	delicatessen	28.87247	-96.99828	8501 N Navarro St	Victoria	77904	+13612338146	https://locations.mcalistersdeli.com/tx/victoria/8501-n-navarro-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
-6a7f69fb5410	McDonald's & Sons	restaurant		28.78852	-96.99258	203 Hopkins St	Victoria	77901	+13615800028	http://mcdonalds.com		0.77
 ca0ce4312029	Mexico Tipico	restaurant	mexican restaurant	28.61783	-96.62896	421 N Virginia St	Port Lavaca	77979	+13615525713	http://mexicotipicoportlavaca.usdirectory.com/		0.97
 dd8dd60d96d8	Mi Casa Mexican Cafe LLC	restaurant	mexican restaurant	28.71762	-96.21097	1601 1st St	Palacios	77465	+13619726024	http://loscucos.com/		0.94
 d985e0567d2d	Mi Casita Bar & Grill	restaurant	texmex restaurant	28.82287	-96.95093	5006 Houston Hwy	Victoria	77901	+13612207007			0.99
@@ -746,10 +732,6 @@ f017848d5dd1	ParaVida Wellness	restaurant	health food restaurant	28.82085	-96.99
 dd4d2b66aa4c	Parisian Tony's Sandwich	restaurant	vietnamese restaurant	28.70333	-96.21062	411 1st St	Palacios	77465	+18322487225			0.92
 ac140a11b3ac	Pinto Bean	restaurant	texmex restaurant	28.97497	-96.65462	700 W Main St #20	Edna	77957	+13617810190	http://foodeist.com/place/pinto-bean		0.97
 b9e89d92cd17	Pit Devil BBQ & Catering	restaurant	barbecue restaurant	28.61286	-96.62927	503 W Main St	Port Lavaca	77979	+13614080141			0.68
-29276fba446c	Pizza Hut	restaurant	pizza restaurant	28.62915	-96.63416	425 N. 35 Hwy Bypass Calhoun	Port Lavaca	77979	+13615526868	https://locations.pizzahut.com/tx/port-lavaca/425-n-35-hwy-bypass?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284423	Pizza Hut	0.99
-8a61d08114bf	Pizza Hut	restaurant	pizza restaurant	28.97380	-96.65537	803 W Main St	Edna	77957	+13617827197	https://locations.pizzahut.com/tx/edna/803-w-main?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=284051	Pizza Hut	0.94
-90edb4a4c43d	Pizza Hut	restaurant	pizza restaurant	28.86599	-96.99946	7608 N.E. Zac Lentz Parkway Victoria	Victoria	77904	+18009488488	https://locations.pizzahut.com/tx/victoria/7608-ne-zac-lentz-parkway	Pizza Hut	0.92
-ffd30be3756b	Pizza Hut	restaurant	pizza restaurant	28.86500	-96.99261	7002 NE Zac Lentz Pkwy. Victoria	Victoria	77904	+13615739137	https://locations.pizzahut.com/tx/victoria/7002-ne-zac-lentz-pkwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304181	Pizza Hut	0.99
 7e73c05df2d1	PMR	restaurant	mexican restaurant	28.70141	-96.21734	511 Main St	Palacios	77465	+13619722766	http://www.palacioschamber.com/		0.92
 38dbc6de9bc1	POC 475 Bar & Grill	restaurant	bar and grill restaurant	28.43334	-96.43051	2441 Maple St	Port O'Connor	77982	+13619838001			0.92
 81c355ea3b45	POC OASIS	restaurant		28.44370	-96.41722	1304 W Adams Ave	Port Oconnor	77982	+13619838008	http://Pocoasis.com/		0.92
@@ -778,19 +760,6 @@ bc32b6c276f9	Skillets Hwy 35	restaurant		28.63529	-96.62272	2090 State Highway 3
 890207ea7622	Skillets Restaurant	restaurant	american restaurant	28.81389	-96.97062	3202 Houston Hwy	Victoria	77901	+13615761349	http://www.skilletstreetfood.com		0.85
 5cdf8a25e47f	Sky Restaurant	restaurant		28.83957	-96.92086	236 Foster Field Dr	Victoria	77904	+13615765335	https://www.skyrestaurant.com/		0.97
 92f759d99d36	Snowie Snow Cones of Victoria	restaurant	american restaurant	28.87310	-96.99719	8504 N Navarro St	Victoria	77904	+13617726936			0.94
-19606366b06d	Sonic Drive-In	restaurant	burger restaurant	28.60679	-96.62283	411 S Interstate 35	Port Lavaca	77979	+13615522303	https://locations.sonicdrivein.com/tx/portlavaca/411-s.-interstate-35.html		0.85
-0ad256bdb1e9	Subway	restaurant	sandwich shop	28.80629	-96.99278	1102 E. Rio Grande Street Suite 300	Victoria	77901	+13614850387	https://restaurants.subway.com/united-states/tx/victoria/1102-e-rio-grande-street	Subway	0.98
-0b5368e59a7d	Subway	restaurant	sandwich shop	28.81693	-96.96293	4001 Houston Hwy	Victoria	77901	+13614859500	https://www.subway.com		0.95
-1f121a022123	Subway	restaurant	sandwich shop	28.71325	-96.21413	307 Henderson	Palacios	77465	+13619722273	https://restaurants.subway.com/united-states/tx/palacios/307-henderson	Subway	0.97
-35ff7b819067	Subway	restaurant	sandwich shop	28.82230	-96.94965	5101 Houston Hwy	Victoria	77901	+13618084399	https://www.subway.com		0.95
-4508f9f61162	Subway	restaurant	sandwich shop	28.78201	-96.95843	4008 US-59	Victoria	77902	+13615761353	https://restaurants.subway.com/united-states/tx/victoria/4008-n-hwy-59	Subway	0.98
-595f645062c5	Subway	restaurant	sandwich shop	28.84765	-96.97580	3410 John Stockbauer Suite A	Victoria	77901	+13615707827	https://restaurants.subway.com/united-states/tx/victoria/3410-john-stockbauer	Subway	0.98
-5ad96d3e585a	Subway	restaurant	sandwich shop	28.78631	-96.95296	4008 US Highway 59 N	Victoria	77905	+13615761353	https://alibabacharleston.com		0.55
-a7763f96ccd8	Subway	restaurant	sandwich shop	28.63186	-96.62726	400 Tiney Browning Blvd Suite 1	Port Lavaca	77979	+13615526073	https://restaurants.subway.com/united-states/tx/port-lavaca/400-tiney-browning-blvd	Subway	0.96
-b43268274ed4	Subway	restaurant	sandwich shop	28.98903	-96.62529	1509 E Rose St	Edna	77957	+13617826700	http://www.subway.com/en-us	Subway	0.97
-bd29f9cbcc67	Subway	restaurant	sandwich shop	28.87777	-96.99473	9002 N Navarro St	Victoria	77904	+13614850908	https://restaurants.subway.com/united-states/tx/victoria/9002-n-navarro-street	Subway	0.95
-d4aafeda7748	Subway	restaurant	sandwich shop	28.62327	-96.63659	306 Highway 35 S Suites 304 & 306	Port Lavaca	77979	+13615527300	http://www.subway.com/en-us	Subway	0.97
-e03840c5abaf	Subway	restaurant	sandwich shop	28.87529	-96.99822	8701 N Navarro Street	Victoria	77904	+13615731501	http://www.subway.com/en-us	Subway	0.95
 ff8355bb4ea7	Surfing Crab Express Victoria	restaurant	seafood restaurant	28.84378	-96.99803	5206 N Navarro St	Victoria	77904	+13618947210	https://surfingcrabtx.com/	Surfing Crab （Cajun Seafood Boil）	0.99
 5202d1420402	T's Kitchen	restaurant	vietnamese restaurant	28.40929	-96.71072	621 S Main St	Seadrift	77983	+13616553939	http://tkitchen.us/		0.93
 f704e024402c	Taco Bueno	restaurant	mexican restaurant	28.87311	-96.99824	8507 N Navarro St	Victoria	77904	+13615415837	http://www.tacobueno.com/	Taco Bueno	0.88
@@ -839,9 +808,6 @@ cbcac4e6dcc8	Victoria's Cafe	restaurant	texmex restaurant	28.77787	-96.96677	340
 7a542dfc13f3	Victoria's Kitchen	restaurant	mexican restaurant	28.82528	-96.99231	3408 N Laurent St	Victoria	77901	+13618946254			0.97
 613cc3046cdd	Victorias Café 2	restaurant	mexican restaurant	28.78922	-96.99122	607 S Laurent St	Victoria	77901	+13615783308			0.96
 59d87ab3f79f	Watering Hole on 2853	restaurant	bar and grill restaurant	28.82834	-96.14510	5853 FM2853	Palacios	77465	+13615881200			0.96
-2000c74428be	Whataburger	restaurant	burger restaurant	28.63470	-96.62786	1207 STATE HIGHWAY 35 N	Port Lavaca	77979	+13615527416	https://locations.whataburger.com/tx/port-lavaca/1207-state-hwy-35-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-303debde7bab	Whataburger	restaurant	burger restaurant	28.81544	-96.96521	3603 HOUSTON HWY	Victoria	77901	+13615766623	https://locations.whataburger.com/tx/victoria/3603-houston-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
-99d208d5e36f	Whataburger	restaurant	burger restaurant	28.62275	-96.63675	1207 TX-35	Port Lavaca	77979	+13615527416	http://www.whataburger.com/	Whataburger	0.92
 8bc8f753f807	White's BBQ	restaurant	barbecue restaurant	28.60956	-96.63997	1728 W Main St	Port Lavaca	77979	+13615522235	https://whitesbarbque.com	whites_me	0.96
 c308e517eb79	Wienerschnitzel	restaurant	hot dog restaurant	28.80633	-96.99133	1218 E Rio Grande St	Victoria	77901	+13615780962	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
 f871d5b3b695	Wienerschnitzel	restaurant	hot dog restaurant	28.84842	-96.97663	3602 John Stockbauer Dr	Victoria	77904	+13615783132	http://www.wienerschnitzel.com/	Wienerschnitzel	0.92

@@ -32,6 +32,8 @@ e245c83474e0	Shamrock	convenience		35.24287	-102.42867	502 S Main St	Vega	79092	
 e63995fad0d0	Valero	convenience		35.26898	-102.67621	2190 Interstate 40 W	Adrian	79001	+19065386218	https://locations.valero.com/en-us/LocationDetails/Index/2190-INTERSTATE-40-W/0000026317	Valero	0.92
 ffb69ea93792	Valero	convenience		35.24313	-102.42878	1000 Vega Blvd	Vega	79092	+18062670633	https://locations.valero.com/en-us/LocationDetails/Index/1000-VEGA-BLVD/0000030470	Valero	0.97
 e6a1d2c690d9	Valero Energy	convenience		35.23816	-102.42912	1001 Vega Blvd	Vega	79092	+18062672206	http://www.valero.com	Valero	0.98
+75cad2dfab65	Subway	fastfood	sandwich shop	35.24073	-102.42815	701 S Main St	Vega	79092	+18062670004	https://www.subway.com		0.75
+93b7f0130e0f	Subway	fastfood	sandwich shop	35.18931	-102.01123	14701 I-40	Amarillo	79124	+18063582551	https://restaurants.subway.com/united-states/tx/amarillo/14701-i-40-w	Subway	0.98
 878d827cfbfb	Taylor's Vega Market	grocery		35.24685	-102.42719	107 S 9th St	Vega	79092	+18062672331	http://vegamarket.com		0.99
 ce22fa10623c	Americas Best Value Inn & Suites Vega	hotel		35.24528	-102.43787	1800 Vega Blvd	Vega	79092	+18062672131	https://www.redlion.com		0.92
 9d8dababd3f2	Bonanza Motel	hotel	motel	35.24271	-102.42444	607 Vega Blvd	Vega	79092	+18062672158	http://www.bonanzamotelvega.com		0.99
@@ -39,7 +41,6 @@ ce22fa10623c	Americas Best Value Inn & Suites Vega	hotel		35.24528	-102.43787	18
 364e8774f1ee	Comfort Inn Vega	hotel		35.23772	-102.42773	1005 S Main St	Vega	79092	+18062670126	http://www.comfortinn.com		0.92
 d30bd2eb77d0	Days Inn by Wyndham Vega TX	hotel		35.23752	-102.42773	1005 S Main St	Vega	79092	+18062670126	https://www.wyndhamhotels.com/days-inn/vega-texas/days-inn-vega-tx/overview	Days Inn	0.99
 979ad28bc3c0	Deadman Canyon	hotel		35.24525	-102.81111		Adrian			http://deadmanspassranch.com		0.73
-b0d9d3e51c07	Deadman Canyon	hotel		35.24107	-102.82720		Adrian			http://deadmanspassranch.com		0.72
 72ffab554656	Fabulous 40s Motel	hotel	motel	35.27078	-102.67242	301 Historic Rte 66	Adrian	79001	+18062143043	http://facebook.com/fabulous40smotel		0.92
 081fba3f2a4d	Richardson Agco	hotel		35.24465	-102.43602	1500 Vega Blvd	Vega	79092	+18062672459			0.65
 b3e408f38516	Rodeway Inn-Dalhart	hotel		35.76094	-102.87915	1110 US Highway 54	Dalhart	79022	+18062498585	http://www.choicehotels.com		0.72
@@ -60,8 +61,6 @@ b4931a609ad8	Piccadilly Circus Pizza	restaurant	pizza restaurant	35.26878	-102.6
 74ef87a21e28	Route 66 Smokehouse	restaurant	barbecue restaurant	35.18788	-102.01141	2420 Arnot Rd	Amarillo	79124	+18063569295			0.85
 8cee95ca66bf	Sam’s Southern Eatery / Dumas	restaurant	southern american restaurant	35.86368	-102.01201	5928 US-87	Dumas	79029	+18069345740	http://www.samssouthern.com/		0.92
 3094255a0eb3	Shem's Burritos	restaurant	latin american restaurant	35.80274	-102.03269	6320 FM-722	Dumas	79029	+18069308940			0.65
-75cad2dfab65	Subway	restaurant	sandwich shop	35.24073	-102.42815	701 S Main St	Vega	79092	+18062670004	https://www.subway.com		0.75
-93b7f0130e0f	Subway	restaurant	sandwich shop	35.18931	-102.01123	14701 I-40	Amarillo	79124	+18063582551	https://restaurants.subway.com/united-states/tx/amarillo/14701-i-40-w	Subway	0.98
 c895eea46b90	The Falcon in Bushland TX	restaurant	comfort food restaurant	35.19036	-102.06565	2300 Wells St	Bushland	79012	+18068030219	http://www.thefalconinbushland.com/		0.96
 42b91d344f2f	The Trails Cafe	restaurant		35.57679	-102.66232	none	Gunter					0.73
 adff613aba46	LoretoOnThePlains	senior	retirement home	35.89054	-102.39949		Hartley		+18063615097	http://loretoontheplains.org/		0.63

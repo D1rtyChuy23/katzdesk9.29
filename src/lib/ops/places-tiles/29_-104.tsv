@@ -1,7 +1,6 @@
 id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 2a8163d6de95	La Kiva Restaurant & Bar	bar		29.32624	-103.55363	23220 FM170	Terlingua	79852		http://la-kiva.com		0.96
 de87d1f0e636	Mavericks' Ice House	bar		29.31342	-103.66972	23327 FM 170	Terlingua	79852	+14323713900			0.77
-d65ea6e7b590	The Boathouse Bar & Bungalows	bar		29.34163	-103.63005	390 Ivey Rd	Terlingua	79852	+14323712338	http://theboathousetx.com/		0.97
 df3b3ae4e43e	The Boathouse Bar & Bungalows	bar		29.32085	-103.61336	390 Ivey Rd	Terlingua	79852	+14323712338	http://theboathousetx.com/		0.98
 d4da1497f33a	The Lazy Bear Saloon	bar		29.32120	-103.61600	100 Terlingua Ranch Gate 5 Rd	Terlingua	79852	+14322981100			0.97
 1537f62b8bfc	Diego's Tire Shop	cardealer		29.32025	-103.61893		Terlingua		+14323713014			0.76
@@ -32,9 +31,7 @@ c1825219b463	Big Bend Resort & Adventures	hotel		29.26305	-103.77634	100 Main St
 b8a7024095cb	Big Bend Resort and Adventures	hotel		29.32140	-103.61601	53623 Texas State Highway 118	Terlingua	79852	+14323713382	http://www.BigBendResortadventures.com/		0.74
 ffc924c272c3	Big Bend Resort and Adventures	hotel		29.32921	-103.53419	53623 State Highway Texas	Terlingua	79852	+14323713382	http://www.BigBendResortadventures.com/		0.74
 4cf20ee6914b	Big Bend StarGazer	hotel		29.31342	-103.66972	FM170	Terlingua			http://bigbendstargazer.com/		0.59
-647ed3ca1c8d	Big Bend StarGazer	hotel		29.30793	-103.67262	FM170	Terlingua			http://bigbendstargazer.com/		0.59
 3869c8c939db	Black Jack's Crossing	hotel	resort	29.25974	-103.77590	100 Main St	Lajitas	79852	+14324245000	https://www.lajitasgolfresort.com/golf		0.92
-4dd4d6764eb5	Cavalry Post	hotel		29.26538	-103.77465	1 Main St	Terlingua	79852				0.77
 2b6238c47d64	Chisos Mining Co. Motel	hotel	motel	29.32487	-103.54762	23280 FM170	Terlingua	79852	+14323712254	http://www.motelsbigbend.com/		0.98
 e8a8fcaa1352	Chisos Mountains Lodge Restaurant	hotel		29.27043	-103.29932	1 Basin Jct Station	Big Bend National Park	79834	+14324772291	https://www.chisosmountainslodge.com		0.97
 5e9c27e8baec	Easter Egg Valley Motel	hotel	motel	29.36875	-103.62461	100 Easter Egg Valley Rd	Terlingua	79852	+14323712254	http://www.cmcm.cc/		0.85
@@ -42,32 +39,24 @@ d8b185481369	Easter Egg Valley Motel	hotel	motel	29.32486	-103.54762	100 Easter 
 403ebbbe8fb6	El Dorado Hotel	hotel		29.31973	-103.60746	110 Ivey Rd	Terlingua	79852	+14323712111	http://www.eldorado-hotel.net		0.92
 f19c63a5c781	Ghost Town Casitas -- Stay Minutes from Big Bend Natl Park	hotel		29.31999	-103.61098	212 Ivey Rd	Terlingua	79852	+14322441120	http://ghosttowncasitas.com/		0.94
 29a49e54c827	Ghost Town Hotel Terlingua	hotel		29.32057	-103.61816	100 Terlingua Ghost Town Road	Terlingua	79852	+14323712111	https://www.ghosttownhotel.com/		0.92
-b5a6cc455ebc	Ghost Town Hotel Terlingua	hotel		29.31771	-103.61040	100 Terlingua Ghost Town Road	Terlingua	79852	+14323712111	https://www.ghosttownhotel.com/		0.91
 5905a8a7468f	Javelina Hideout	hotel		29.52074	-103.49242	Javelina Hideout	Terlingua			http://www.javelinahideout.com/		0.76
-08f1206acf6f	La Posada Milagro	hotel	lodge	29.32263	-103.61575	101 Milagro Wy	Terlingua	79852	+14246458017	http://www.laposadamilagro.net		0.94
 84ebbe730bee	Lajitas 501	hotel		29.26050	-103.77559		Terlingua					0.90
 bcf9a98a90f3	Lajitas Golf Resort and Spa	hotel		29.49580	-103.65331	400 HC 70	Terlingua	79852	+14324243467	http://www.lajitasgolfresort.com	Lajitas Golf Resort	0.97
-bca269f8b4b0	Lajitas Rv Resort	hotel		29.26498	-103.77432		Terlingua					0.75
 45c941f98d3d	Las Casitas at Far Flung Outdoor Center	hotel		29.32504	-103.54195		Terlingua					0.72
 6903a70c5fff	Luna Nova Terlingua	hotel		29.33125	-103.53420	53660 Texas State Highway 118	Terlingua	79852		https://basecampterlingua.com/luna-nova/		0.66
 730f55c0c8de	Maverick Ranch & RV Resort	hotel		29.26352	-103.77138	21707 Fm 170	Terlingua	79852	+14324245180	http://lajitasgolfresort.com		0.97
 ec864f9b9403	Ocotillos Village	hotel		29.28857	-103.69060	23006 FM 170	Terlingua	79852	+14323006695	http://www.ocotillosvillage.com/		0.97
 b7880ba4d8ac	Stardust Big Bend	hotel	resort	29.30458	-103.67613	23121 FM 170	Terlingua	79852	+14328970990	https://stardustbigbend.com/		0.90
-ac0e45bff014	Ten Bits Ranch	hotel	lodge	29.46220	-103.55270	6000 N County Rd	Terlingua	79852	+14323713110	http://www.tenbitsranch.com		0.98
 3493edb15d98	Terlingua Ghost Town	hotel		29.32919	-103.53415	Ghost Town Rd	Terlingua	79852	+14696079828	http://villaterlingua.com		0.97
-5479cb6acb79	Terlingua Ranch Lodge	hotel	lodge	29.45214	-103.39381	16000 Terlingua Ranch Rd, 29.4525654, -103.3941576	Alpine	79852	+14323713146	http://www.terlinguaranch.com/	Terlingua Ranch Lodge	0.99
 29bf829e4533	The Boardwalk at Lajitas	hotel	resort	29.26089	-103.77577	21071 FM 170, Lajitas, TX 79852, United States	Terlingua	79852	+14324245035	https://www.lajitasgolfresort.com/rooms/boardwalk-condos		0.77
 f08cb58c3406	The Perch-Terlingua,Texas	hotel		29.30789	-103.62000	1400 Reed Plateau Rd	Terlingua	79852		http://www.perchterlingua.com/		0.79
-520590373b9f	The Summit at Big Bend	hotel		29.30556	-103.69720	2500 N Lone Star Mine	Terlingua	79852	+14327777866	https://linktr.ee/thesummitbigbend		0.92
 8324310c30b9	The Summit at Big Bend	hotel		29.30950	-103.71810	2500 N Lone Star Mine	Terlingua	79852	+14327777866	https://linktr.ee/thesummitbigbend		0.98
-3cef1145a45e	Tres Arroyos	hotel	lodge	29.55576	-103.52711	101 Beau Dog Trl	Alpine	79830	+12544213857			0.96
 35e4b07007b3	Boardwalk Bakery & Pizzeria	restaurant	pizza restaurant	29.32083	-103.61663		Terlingua		+14324245035	http://www.lajitasgolfresort.com/		0.73
 1ce4d7b1a0a7	Candelilla Cafe	restaurant		29.26081	-103.77499	100 Main St	Terlingua	79852	+14324245000	http://www.lajitasgolfresort.com/default.aspx?pg=candelilla_cafe		0.98
 772e935c6c7f	Chili Pepper Cafe	restaurant	mexican restaurant	29.33234	-103.53461	100 TX-118	Terlingua	79852	+14323712233	http://chilipeppercafe.homestead.com/		0.97
 40d03e401a91	DB's Rustic Iron BBQ	restaurant	barbecue restaurant	29.31769	-103.61043	10 Terlingua Ghost Town	Terlingua	79852	+14323713939	http://www.rusticironbbq.com/		0.97
 a038b6f9fc88	DB's Rustic Iron BBQ	restaurant	barbecue restaurant	29.32473	-103.54644	23270 FM 170	Terlingua	79852	+14322103457	http://www.rusticironbbq.com		0.95
 3f548fe83e0c	High Sierra Bar & Grill	restaurant		29.32738	-103.59817	100 Ghost Town Rd	Terlingua	79852		https://highsierra.homestead.com		0.98
-5e8388f3e51c	High Sierra Bar & Grill	restaurant	bar and grill restaurant	29.31961	-103.60737	100 Ghost Town Rd	Terlingua	79852	+14323712111	https://hotels.cloudbeds.com/reservation/eFaT0s		0.94
 1b906f0eea37	La Kiva Restaurant & Bar	restaurant		29.29071	-103.66975	23220 FM 170	Terlingua	79852		https://lakiva.com/		0.97
 2d82ccaf4d97	Long Draw Pizza	restaurant	pizza restaurant	29.31342	-103.66972	22720 FM 170	Terlingua	79852	+14323712608	http://longdrawpizza.com/		0.98
 c0b3770cd3be	Rio Bravo Mexican Resturant	restaurant	texmex restaurant	29.32533	-103.54251		Terlingua		+14323712101	http://riobravorestaurant.mapforfood.com/		0.92

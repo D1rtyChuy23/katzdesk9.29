@@ -8,7 +8,8 @@ cover Texas are downloaded (about 300 MB). Needs Python 3 with pyarrow (pip inst
 
     python3 scripts/build-places.py                      # newest release
     python3 scripts/build-places.py --release 2026-11-18.0
-    python3 scripts/build-places.py --from tx-raw.parquet  # reuse rows already downloaded (written by an earlier run)
+    python3 scripts/build-places.py --save tx-raw.parquet  # also keep the downloaded rows
+    python3 scripts/build-places.py --from tx-raw.parquet  # rebuild from them without downloading again
 
 Kept: places in Texas (address region US-TX or TX) of the types below, not marked permanently closed, with Overture's
 confidence of at least MIN_CONFIDENCE. Columns (tab separated, header first) match PLACE_TILE_COLUMNS in
@@ -37,8 +38,33 @@ BASIC = {
 BAKERY = {"bakery", "donut_shop", "bagel_shop", "cupcake_shop", "kolache_shop"}
 EATERY_RESTAURANT = {"sandwich_shop", "diner", "delicatessen", "gastropub", "casual_eatery", "breakfast_and_brunch_restaurant"}
 TEA = {"bubble_tea_shop", "tea_room", "tea_house", "teahouse"}
-LODGING = {"lodging", "lodge", "hostel", "service_apartment"}
+LODGING = {"lodging", "hostel", "service_apartment"}  # not "lodge": in Texas that is mostly Masonic and Elks lodges
 NOT_CAFE = {"internet_cafe", "dog_cafe", "animal_cafe", "cat_cafe"}
+
+
+# Fast-food chains Overture files as restaurants or sandwich shops: Fast Food, not Restaurants (a national chain buys
+# coffee and service by contract, not from a local rep). Matched at the start of the name or brand, lower case.
+FAST_FOOD_CHAINS = (
+    "subway", "mcdonald", "burger king", "wendy's", "whataburger", "taco bell", "sonic drive", "jack in the box", "chick-fil-a",
+    "popeyes", "kfc", "church's", "domino's", "pizza hut", "little caesars", "papa john", "arby's", "dairy queen", "raising cane",
+    "jersey mike", "jimmy john", "firehouse subs", "panda express", "chipotle", "wingstop", "del taco", "carl's jr", "taco cabana",
+    "schlotzsky", "potbelly", "quiznos", "long john silver", "golden chick", "chicken express", "freddy's", "smashburger",
+)
+# Names that are not the place type they are filed under.
+LODGE_HALL = r"masonic|elks|moose|odd fellows|knights of columbus|a\.?\s?f\.? ?& ?a\.?\s?m|lodge\s+(no\.?\s*|#\s*)?\d+"
+NOT_HOTEL = re.compile(rf"\b({LODGE_HALL}|residence hall|dormitory|hunting( ranch| lodge| lease)?)\b", re.I)
+NOT_OFFICE = re.compile(rf"\b({LODGE_HALL}|smoke|vape|tobacco|wireless|boost mobile|cricket|metro by t-mobile|cell ?phone)\b", re.I)
+# A doctor or nurse listed by name ("Gustavo Garcia, MD"): a person, not a hospital or clinic.
+PERSON_TITLE = re.compile(r",?\s+(m\.?d|d\.?o|n\.?p|f\.?n\.?p(-c)?|p\.?a(-c)?|d\.?p\.?m|d\.?d\.?s|d\.?m\.?d|ph\.?d|r\.?n)\.?$", re.I)
+# "Victor H Portillo": two or three capitalized words, maybe a middle initial; with no phone, website or brand, likely a
+# person's registration filed as a business.
+PERSON_NAME = re.compile(r"^[A-Z][a-z]+( [A-Z]\.?)?( [A-Z][a-z]+){1,2}$")
+TX_ZIP = re.compile(r"^(7[5-9]\d{3}|885\d{2}|733\d{2})$")
+
+
+def chain_of(name, brand):
+    n = f"{name} {brand or ''}".lower().replace("’", "'")
+    return any(n.startswith(c) or (brand or "").lower().replace("’", "'").startswith(c) for c in FAST_FOOD_CHAINS)
 
 
 def category_of(basic, tax):
@@ -199,8 +225,9 @@ def first(xs):
 
 def write_tiles(table):
     tiles, kept, why = defaultdict(list), 0, defaultdict(int)
-    seen = set()
-    for r in table.to_pylist():
+    seen, same = set(), set()
+    # Surest first, so when Overture lists one place twice (same name, street and type) the surer copy is kept.
+    for r in sorted(table.to_pylist(), key=lambda r: -(r["conf"] or 0)):
         cat = category_of(r["basic"], r["tax"])
         if not cat:
             why["type"] += 1; continue
@@ -215,13 +242,27 @@ def write_tiles(table):
         name = clean(r["name"])
         if not name:
             why["no name"] += 1; continue
+        phone, web, brand = clean(first(r["phones"] or [])), clean(first(r["web"] or [])), clean(r["brand"])
+        if cat == "restaurant" and chain_of(name, brand):
+            cat = "fastfood"
+        if (cat == "hotel" and NOT_HOTEL.search(name)) or (cat == "office" and NOT_OFFICE.search(name)) or (cat == "hospital" and PERSON_TITLE.search(name)):
+            why["not that type"] += 1; continue
+        if cat in ("hotel", "office") and PERSON_NAME.match(name) and not (phone or web or brand):
+            why["a person's name"] += 1; continue
+        zip_raw = clean(a.get("postcode"))[:5]
+        if zip_raw and not TX_ZIP.match(zip_raw):
+            why["not a Texas ZIP"] += 1; continue
+        dup = (name.lower(), clean(a.get("freeform")).lower(), cat)
+        if dup in same:
+            why["listed twice"] += 1; continue
+        same.add(dup)
         pid = (r["id"] or "").replace("-", "")[:12]
         if not pid or pid in seen:
             why["id"] += 1; continue
         seen.add(pid)
         zip5 = re.match(r"\d{5}", clean(a.get("postcode")))
         row = [pid, name, cat, kind_of(r["tax"]), f"{r['y']:.5f}", f"{r['x']:.5f}", clean(a.get("freeform")), clean(a.get("locality")).title(),
-               zip5.group(0) if zip5 else "", clean(first(r["phones"] or [])), clean(first(r["web"] or [])), clean(r["brand"]), f"{r['conf']:.2f}"]
+               zip5.group(0) if zip5 else "", phone, web, brand, f"{r['conf']:.2f}"]
         row = [c.replace("\t", " ") for c in row]
         # The square from the written (rounded) numbers, so a place at 32.999996°N, written 33.00000, files under 33.
         tiles[f"{math.floor(float(row[4]))}_{math.floor(float(row[5]))}"].append(row)
@@ -242,7 +283,7 @@ def write_tiles(table):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--release", help="Overture release, e.g. 2026-11-18.0 (default: the newest)")
-    ap.add_argument("--from", dest="src", nargs="*", help="parquet files written by --save, instead of downloading")
+    ap.add_argument("--from", dest="src", nargs="*", help="parquet files an earlier run wrote with --save, instead of downloading")
     ap.add_argument("--save", help="also write the downloaded rows to this parquet file")
     args = ap.parse_args()
     if args.src:

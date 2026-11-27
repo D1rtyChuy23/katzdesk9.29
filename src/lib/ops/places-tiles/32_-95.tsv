@@ -86,7 +86,6 @@ a707eeca4b11	Star Donuts	bakery	donut shop	32.15331	-94.78431	301 US-79	Henderso
 f59bf12596ba	Star Donuts	bakery	donut shop	32.50359	-94.76260	1203 W Marshall Ave	Longview	75604				0.92
 52e2dfd0897a	Star Doughnuts	bakery	donut shop	32.76223	-94.35458	106 N Walcott St	Jefferson	75657	+19036658941			0.92
 b71d13674740	Super Donut	bakery	donut shop	32.16480	-94.34047	701 N Saint Mary St	Carthage	75633	+19036900303			0.55
-66c938664be7	SWEET As DAY	bakery		32.14441	-94.34724	1993 SW Loop	Carthage	75633	+19036311756			0.65
 ec2bbdc071bf	SWEET As DAY	bakery		32.13180	-94.34081	1993 SW Loop	Carthage	75633	+19036311756			0.65
 5738884cc450	Tasty Donuts	bakery	donut shop	32.38831	-94.86663	806 US-259 BUS	Kilgore	75662	+19039319779			0.96
 6579cc009180	Tex Mex Panaderia Meat Market Restaurante	bakery		32.47067	-94.73096	2009 S Mobberly Ave	Longview	75602	+19032341215	https://tex-mex-bakery.hub.biz/		0.92
@@ -146,7 +145,6 @@ eb9800b223fc	Peoples Bar & Grill	bar		32.49767	-94.76165	1119 W Cotton St	Longvi
 1b7beaf4e08a	Pig Trail Inn	bar		32.49450	-94.74039	100 S Center St # 7445	Longview	75601	+19032309870			0.92
 7e80f2cd88c8	RMC	bar		32.52942	-94.79665	1825 Rodden St	Longview	75604				0.68
 25bbea04ac3c	Rowdy Creek Ranch	bar	winery	32.68217	-94.90858	4048 State Highway 300	Gilmer	75645	+19037340144	https://rowdycreekranch.com/		0.97
-9c2e9ac4a1d5	Rowdy Creek Ranch	bar	winery	32.68253	-94.91434	4048 State Highway 300	Gilmer	75645	+19037340144	https://rowdycreekranch.com/		0.95
 bf08fc858363	Rueggenbach Brewing Co	bar	brewery	32.54464	-94.36790	108 W Houston St	Marshall	75670	+19032062552	https://www.rueggenbach.com/		0.96
 7b773aec1718	Ruthy's Art Bar	bar	cocktail bar	32.72992	-94.94481	102 Buffalo St	Gilmer	75644	+19033994201	http://ruthysartbar.com/		0.92
 9a4088b0bc8b	Screaming Eagle Bar	bar		32.50262	-94.72664	1016 E Marshall Ave	Longview	75601	+19036766515			0.88
@@ -188,7 +186,6 @@ b55107fb35d9	Auto Texas	cardealer		32.50229	-94.74014	618 N High St	Longview	756
 e8f427588e99	Ballow Brothers	cardealer		32.16843	-94.82861	2326 State Highway 64 W	Henderson	75652	+19036572743	http://www.ballowbrothers.com/		0.92
 6545f7146684	Best Chance Auto	cardealer		32.52786	-94.77693	1508 W Loop 281	Longview	75604	+19035531800			0.79
 a7086361fd17	best chance auto	cardealer		32.51412	-94.71174	1296 E Marshall Ave	Longview	75601	+19035531800	http://bestchanceauto.com		0.77
-b3577c1bf5e6	Best Chance Auto	cardealer		32.50312	-94.72222	1296 E Marshall Ave	Longview	75601	+19035531800			0.55
 82bb1c7a6137	BHJ Motors	cardealer		32.49865	-94.78599	3802 W Loop 281	Longview	75604	+19032952205			0.92
 4d6feec3e7c7	Biggs Auto Sales	cardealer	used auto dealer	32.50697	-94.80000	4100 W Marshall Ave	Longview	75604	+19032977555	http://biggsautosales.net/		0.99
 863dea9bd1a1	Bird Motor Company, Llc	cardealer	used auto dealer	32.18300	-94.79510	1000 Kilgore Dr	Henderson	75652	+19033928030	https://www.birdmotorco.business.site		0.92
@@ -233,7 +230,6 @@ a2f56c52eb09	DV Motors	cardealer		32.50229	-94.74075	615 N High St	Longview	7560
 b7b228781340	eCar Financial	cardealer	used auto dealer	32.53438	-94.93433	808 E Broadway Ave	Gladewater	75647	+19033742135	https://ecargladewater.com/		0.92
 ed53bf373e94	eCar Financial	cardealer		32.49607	-94.75258	600 W Cotton St	Longview	75601	+19037533227	http://www.ecarfinancial.com/		0.98
 38a88b5b924f	eCar Financial LLC	cardealer		32.50411	-94.76715	1304 W Marshall Ave	Longview	75604	+19032951877	http://www.ecarfinancial.com/		1.00
-5cde3551a724	Ecar Financial Llc	cardealer	used auto dealer	32.50389	-94.76711	1304 W Marshall Ave	Longview	75604	+19032951877	https://ecarfinancial.com		0.92
 96c842c34382	Elliott CDJR of Carthage Buyback Center	cardealer		32.15205	-94.32063	2054 SE Loop	Carthage	75633	+14302592270	http://www.elliottcdjrcarthage.com/		0.71
 a7de9264c426	Elliott Chrysler Dodge Jeep Ram	cardealer		32.15657	-94.32027	2054 Lasalle Pkwy	Carthage	75633	+19036942633	https://www.eagdodgecarthage.com/		1.00
 efb9454aca2a	ETX Auto Group	cardealer		32.15086	-94.32253		Carthage		+19365549795	http://etxautogroup.com/		0.67
@@ -320,7 +316,6 @@ d837bc2c7ae4	PRO AUTO Lube&tint	cardealer		32.54880	-94.39754	3011 W Grand Ave	M
 ed2f92ae6a79	R & R Restorations	cardealer		32.61293	-94.79504	1935 N Fuller Rd	Longview	75605	+19036633975	http://www.rrrestorations.com		0.92
 e04116b6483a	Raceway Cars and Trucks	cardealer		32.52022	-94.85913	111 E US-80	White Oak	75693	+19032957223	http://www.racewaycarsandtrucks.com/home		0.59
 864a10226557	Ralo's Auto Sales	cardealer		32.48914	-94.35931	3591 E End Blvd S	Marshall	75672	+19034727256	http://ralosauto.com/		0.93
-9026227f181d	Ralo's Auto Sales	cardealer		32.51150	-94.35503	3591 E End Blvd S	Marshall	75672	+19034727256			0.92
 11d9ada8f6b2	Randall Dodge Chrysler Jeep Ram	cardealer		32.16969	-94.78588	100 Kilgore Dr	Henderson	75652	+19036579513	http://randalljeep.com/	Chrysler	0.97
 69b013f85b08	Red Boy Motorsports	cardealer		32.44157	-94.93388	144 Lasalle St	Kilgore	75662	+19039875990	http://www.redboymotorsports.com/		0.87
 2dfb62541cd3	Rhodes Auto Sales	cardealer	used auto dealer	32.50063	-94.75737	926 W Marshall Ave	Longview	75604	+19037579952	www.rhodesautosales.us		1.00
@@ -391,7 +386,6 @@ f37327b1aed2	Downtown D'Lites Cafe	coffee		32.38665	-94.87578	103 N Kilgore St	K
 55c1e968ad3c	Drew's Brew	coffee		32.47102	-94.05416	670 TX-156 Spur	Waskom	75692	+19037020058	http://drewsbrewcoffee.com/		0.60
 52e5b0b373b7	Dunkin'	coffee		32.43145	-94.86362	4405 Highway 42 N	Kilgore	75662	+19033456050	https://locations.dunkindonuts.com/en/tx/kilgore/4405-highway-42-n/355149?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=355149&y_source=1_MTIxMDgzNDEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dunkin'	0.98
 1247438c8711	Dutch Bros Coffee	coffee		32.54278	-94.73850	309 E Loop 281	Longview	75605	+18778992767	https://www.dutchbros.com/locations/tx/longview/309-e-loop-281?y_source=1_OTEyOTM4MTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dutch Bros Coffee	0.94
-743ac56eb7e0	Dutch Bros Coffee	coffee		32.52859	-94.77583	1500 W Loop 281	Longview	75604	+18778992767	https://www.dutchbros.com/locations/tx/longview/1500-w-loop-281?y_source=1_Nzk2MjY4MzgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dutch Bros Coffee	0.92
 d4774ecff394	Dutch Bros Coffee	coffee		32.53217	-94.77142	1500 W Loop 281	Longview	75604	+18778992767	https://www.dutchbros.com		0.95
 a81c464f0f6b	Dutch Brothers	coffee		32.52841	-94.77580	1500 W Loop 281	Longview	75604	+15419554700	https://www.dutchbros.com		0.77
 1c0105ffa51c	E Marshall Ave & N Fredonia St	coffee		32.50054	-94.73831	108 E Marshall Ave	Longview	75601			Scooter's Coffee	0.80
@@ -428,7 +422,6 @@ cf9ec37b4d4d	Roughneck Cafe	coffee		32.52909	-94.86211	311 S White Oak Rd	White 
 0cbb538b6e68	Sage's Coffee Cup	coffee		32.32219	-94.52294	811 N Hill St	Tatum	75691	+19039472298	http://sagescoffeecup.com		0.92
 a7b15ef8ea9a	Scooter's Coffee	coffee		32.50037	-94.73748	108 E Marshall Ave	Longview	75601	+19037040241	https://scooterscoffee.com/	Scooter's Coffee	0.99
 bdfb40a68804	Scooter's Coffee	coffee		32.50759	-94.79677	3817 W Marshall Ave	Longview	75604	+19032158060	https://scooterscoffee.com/	Scooter's Coffee	0.98
-4584f6c899e4	Shady Glade Cafe	coffee		32.71285	-94.12097	510 Cypress Dr	Karnack	75661	+19037892123	http://www.shadygladeresort.com		0.92
 4952d186cba1	Shady Glade Cafe	coffee		32.71285	-94.12097	510 Cypress Dr	Karnack	75661	+19037892123	http://shadygladeresort.com/		1.00
 3c5766bca459	Shivers Snow Cone Stand	coffee		32.55387	-94.97460	1351 North St	Gladewater	75647				0.91
 78396bbe0d8f	Silver Grizzly Espresso	coffee		32.49523	-94.74049	100 W Tyler St	Longview	75601	+19033092766	http://silvergrizzlyespresso.com/		0.99
@@ -477,7 +470,6 @@ bc85bc473fb5	ETBU Department of Chemistry	college		32.55541	-94.37398	1 Tiger Dr
 f383bdf26783	ETBU International Education Office	college		32.55678	-94.37645	1 Tiger Dr	Marshall	75670	+19039232114	http://www.etbu.edu/international		0.92
 551d1405b37c	ETBU Kinesiology Department	college		32.55457	-94.37276	1 Tiger Dr	Marshall	75670	+18008043828	https://www.etbu.edu/education/kinesiology/		0.78
 0b264c1dcd9d	ETBU School of Christian Studies	college		32.55457	-94.37276	1 Tiger Dr	Marshall	75670	+19039232180	http://www.etbu.edu/academic_programs/School_of_Christian_Studies/		0.70
-1e832c879963	ETBU Theatre Department	college		32.55684	-94.37515	1 Tiger Dr	Marshall	75670		https://linktr.ee/etbutheatre		0.76
 364850125f80	ETBU Theatre Department	college		32.55581	-94.37344	1 Tiger Dr	Marshall	75670		https://linktr.ee/etbutheatre		0.77
 b428b450b4b6	ETBU_TigerBass	college		32.55714	-94.37423	1 Tiger Dr	Marshall	75670	+17408259416	http://www.goetbutigers.com/fishing/		0.92
 3a7534f8daed	Heath Hardwick Hall	college		32.46743	-94.72656	Stegall Dr	Longview	75602				0.77
@@ -486,7 +478,6 @@ c397a7ace8fb	Kilgore College	college		32.37814	-94.87217	1100 Broadway Blvd	Kilg
 be3eeb3152c3	Kilgore College Campus - Devall Ballroom	college		32.37851	-94.87289	702 Nolen St	Kilgore	75662				0.97
 86e8b5d2deab	Kilgore College Cosmetology & Barber Programs	college		32.49231	-94.74261	300 S High St	Longview	75601	+19032362027	http://www.kilgore.edu/cosmetology		0.92
 e8c89ffc7bbc	Kilgore College Demonstration Farm	college		32.29023	-94.94743	2215 State Highway 135 E	Overton	75684	+19038346255	http://www.kilgore.edu/		0.57
-b3c84695de14	Kilgore College Longview Hendrix Building	college		32.49256	-94.74258	300 S High St	Longview	75601	+19032362000	http://www.kilgore.edu		0.98
 b6a7c4002d78	Kilgore College Longview Hendrix Building	college		32.49256	-94.74258	300 S High St	Longview	75601	+19032362000	https://www.kilgore.edu/academics/adult-education-literacy/		0.99
 c69b9bb17746	Kilgore College Technical Vocational Building	college		32.37683	-94.86900	1350-1398 S Henderson Blvd	Kilgore	75662				0.64
 023f038a478d	Kilgore College-School of Nursing	college		32.37380	-94.86766		Kilgore			https://www.kilgore.edu/.../nursing-rn-lvn-to-rn		0.97
@@ -512,7 +503,6 @@ a097ca65806e	Vista College Longview	college		32.52411	-94.78769	1905 W Loop 281 
 1bf90ba1053e	Wiley College	college		32.53376	-94.37635	711 Wiley Ave	Marshall	75670	+19039273300	http://www.wileyc.edu		0.77
 e0796363335e	Wiley College Faculty Apartments	college		32.53474	-94.37646	1101 University Ave	Marshall	75670	+19039271257			0.60
 7086ed948b0d	Wiley University	college		32.53850	-94.37524	711 Wiley Ave	Marshall	75670	+19039273300	http://www.wileyc.edu/		0.97
-f5ebc16c7dfd	Wiley University	college		32.53772	-94.37640	711 Wiley Ave	Marshall	75670	+19039273300	https://www.wileyc.edu		0.97
 eca20658ed05	3BN Ranch	convenience		32.60918	-94.91553	8580 US Hwy 271 S	Gilmer	75645	+19037344399	http://3bnranch.com/		0.92
 3c17f0485c1d	7-Eleven	convenience		32.51596	-94.74059	1401 Judson Rd	Longview	75601	+18002550711	https://www.7-eleven.com/		1.00
 b53c77482573	7-Eleven	convenience		32.45848	-94.66683	15605 Fm 968 W	Longview	75602	+18002550711	https://www.7-eleven.com/		1.00
@@ -687,7 +677,6 @@ c2959030861a	Exxon	convenience		32.51614	-94.79903	1000 Pine Tree Rd	Longview	75
 c3ce65859af6	Exxon	convenience		32.80952	-94.95293	5653 US Highway 271 N	Gilmer	75644	+19037621150	http://www.exxonmobilstations.com/15860-daddy-ts-gilmer		0.92
 c712fe3df607	Exxon	convenience		32.31588	-94.51682	120 N Hill St	Tatum	75691	+19039472200	https://www.exxon.com/en/find-station/exxon-tatum-tx-grabngo11-200312423?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.93
 cccff68ff7c2	Exxon	convenience		32.59056	-94.81908	6182 State Hwy 300	Longview	75604	+19032951030	https://www.exxon.com/en/find-station/exxon-longview-tx-quicktracklama101-200313782?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
-d06862f5391b	Exxon	convenience		32.72910	-94.94243		Gilmer		+19038432272	http://www.exxon.com		0.61
 d12456a1091c	Exxon	convenience		32.49714	-94.77701	4108 W Loop 281	Longview	75604	+19032367322	http://www.exxon.com	Exxon & Mobil Stations	0.92
 d353fda3ec01	Exxon	convenience		32.50774	-94.58563	494 W Main St	Hallsville	75650	+19036603044	https://www.exxonmobilfuels.com/en/find-gas-station/200315630		0.92
 db0a1fcf0518	Exxon	convenience		32.89750	-94.55065	Hwy 155	Avinger	75630	+19035621357	https://www.exxonmobilfuels.com/en/find-gas-station/200316387		0.97
@@ -737,7 +726,6 @@ d5c355a94607	Graves Travel Plaza	convenience		32.18310	-94.33901	1025 North US H
 1c3732fb23d4	Halo Energy Llc	convenience		32.37440	-94.88881	1709 Industrial Blvd	Kilgore	75662	+19039833013	https://www.halo.energy		0.65
 fee0c9a9affd	Handy Mart	convenience		32.79973	-94.72147	100 W Main St	Ore City	75683	+19039683061	http://www.handymart.com		0.92
 d8ca87bde405	Henderson Depot 661	convenience		32.18752	-94.80261	1609 Kilgore Dr	Henderson	75652	+19365644801	http://www.depotslc.com/		0.99
-e6c385ee9d1b	Henderson Depot 661	convenience		32.18752	-94.80261	1609 Kilgore Dr	Henderson	75652	+19365644801	http://www.depotslc.com/		0.97
 fd609aa7895b	Heritage the Market at Green Top	convenience		32.61122	-94.75511	7486 N US Highway 259	Longview	75605	+19032391122	http://www.shell.com		0.92
 b5868ab199ca	Hill's Grocery	convenience		32.99883	-94.63458	304 W 1st	Hughes Springs	75656	+14307014133	http://www.exxonmobilstations.com		0.96
 d8cde08567cf	HOP IN 430469	convenience		32.15368	-94.79925	101 E MAIN ST	New Deal	79350			Phillips 66	0.80
@@ -812,7 +800,6 @@ d7950d25e2b2	Night & Day Convenience Store	convenience		32.49332	-94.35762	5506 
 057e4d8fa79a	Nu-Way Convenience Store	convenience		32.47654	-94.73490	1306 S Green St	Longview	75602	+19037579173			0.73
 ef4eef15f8b3	On the Run	convenience		32.16267	-94.78536	924 US Highway 79 N	Henderson	75652	+19036571393			0.92
 87163acde970	One Stop Shop	convenience		32.50777	-94.79919	4005 W Marshall Ave	Longview	75604	+14303392048			0.92
-2394a13ba868	Ore City Exxon	convenience		32.79969	-94.72138	100 N US Highway 259 N	Ore City	75683	+19039683061			0.92
 7bdc59b36f5c	Ore City Exxon	convenience		32.80153	-94.72073	100 N US Highway 259 N	Ore City	75683	+19039683061			0.93
 fcdd343f5451	ORE CITY FUEL CENTER	convenience		32.80423	-94.71973	229 N US HWY 259 N	Ore City	75683			Phillips 66	0.80
 d1a1c59c1a6b	Ore City Valero	convenience		32.80482	-94.71943	517 US-259	Ore City	75683	+19039682038	http://www.valero.com		0.97
@@ -823,7 +810,6 @@ fa690a241572	Panther Quick Stop	convenience		32.56553	-94.80458	4405 Gilmer Rd #
 7241708c84e4	PENNY'S #6	convenience		32.49180	-94.70821	401 S Eastman Rd	Longview	75602		https://locations.valero.com/en-us/LocationDetails/Index/401-S-EASTMAN-RD/0000010090	Valero	0.80
 da68cb958a29	PENNY'S FOOD & FUEL #13	convenience		32.52911	-94.95417	807 S. TYLER RD	Gladewater	75647		https://www.exxon.com/en/find-station/mobil-gladewater-tx-pennysfoodfuel13-200328311	Mobil	0.80
 ac4d076388ec	Penny's Food and Fuel	convenience		32.70935	-94.75291	11658 TX-154	Diana	75640	+19036630200	http://www.exxonmobilstations.com/14662-pennys-2-diana		0.92
-b8490ecf1667	Penny's Food and Fuel	convenience		32.52096	-94.71738	2001 N Eastman Rd	Longview	75601	+19033742174	https://corporate.exxonmobil.com		0.92
 f60d2b8481f4	Penny's Food and Fuel	convenience		32.52096	-94.71738	2001 N Eastman Rd	Longview	75601	+19033742174	https://corporate.exxonmobil.com		0.98
 dfdab677355d	Petro Max #7	convenience		32.14824	-94.78782	411 S HWY 79	Henderson	75652		https://www.exxon.com/en/find-station/exxon-henderson-tx-petromax%C3%A27-200316683	Exxon	0.80
 75c31d494ffc	Petro Max #8	convenience		32.16293	-94.78496	924 HWY 79 NORTH	Henderson	75652		https://www.exxon.com/en/find-station/exxon-henderson-tx-petromax%C3%A28-200316681	Exxon	0.80
@@ -889,7 +875,6 @@ d3d4a5ef1e8d	Shamrock Allen's Good Old Country Store	convenience		32.38183	-94.8
 3f53e25f3252	Shell	convenience		32.54696	-94.75509	401 W Hawkins Pkwy	Longview	75605	+19036636503	https://find.shell.com/us/fuel/10014675-401-w-hawkins-pkwy	Shell	0.92
 42f15f7100af	Shell	convenience		32.37125	-94.72147	15785 State Highway 322 N	Longview	75603	+19036432038	https://find.shell.com/us/fuel/10003101-15785-state-highway-322-n	Shell	0.92
 4b4c12a49206	Shell	convenience		32.53823	-94.94547	400 W Upshur Ave	Gladewater	75647	+19038454675	https://find.shell.com/us/fuel/10056469-400-w-upshur-ave	Shell	0.92
-50a75f72ca04	Shell	convenience		32.54534	-94.71491	1188 E Hawkins Pkwy	Longview	75605	+14306258070	https://find.shell.com/us/fuel/12547339-1188-e-hawkins-parkway	Shell	0.92
 5a1a470dbc02	Shell	convenience		32.38005	-94.86887	100 N Henderson Blvd	Kilgore	75662	+19039832776	https://find.shell.com/us/fuel/10079204-100-n-henderson-blvd	Shell	0.92
 6cbc89088384	Shell	convenience		32.54665	-94.72769	1188 E Hawkins Pkwy	Longview	75605	+14306258070	https://find.shell.com/us/fuel/12547339-1188-e-hawkins-parkway	Shell	0.99
 73a2cb4a008c	Shell	convenience		32.43522	-94.94360	984 Rice Rd	Kilgore	75662	+19039832781	https://find.shell.com/us/fuel/10052253-984-rice-rd	Shell	0.92
@@ -906,7 +891,6 @@ ae4f0b318e09	Shell	convenience		32.45241	-94.70753	3302 S Eastman Rd	Longview	75
 c0e3a023dbb8	Shell	convenience		32.56547	-94.80453	4405 Gilmer Road	Longview	75604	+14306257839	https://find.shell.com/us/fuel/12571869-4405-gilmer-rd/en_US		1.00
 de1e412f2336	Shell	convenience		32.52415	-94.71913	2309 N Eastman Rd	Longview	75605	+19032124305	https://find.shell.com/us/fuel/10013986-2309-n-eastman-rd		0.92
 e83502109552	Shell	convenience		32.15108	-94.78614	100 Us Highway 79 S	Henderson	75654	+19033922260	https://find.shell.com/us/fuel/10089704-100-us-highway-79-s	Shell	0.92
-ef3c936c366b	Shell	convenience		32.38945	-94.86572	100 N Henderson Blvd	Kilgore	75662	+19039832776	https://find.shell.com/us/fuel/10079204-100-n-henderson-blvd		0.85
 f191989d1289	Shell	convenience		32.50470	-94.77452	1470 W Marshall Ave	Longview	75604	+19037530522	https://find.shell.com/us/fuel/10083067-1470-w-marshall-ave	Shell	0.92
 f42602ca9526	Shell	convenience		32.54624	-94.71979	1188 East Hawkins Parkway	Longview	75605	+14306258070	https://find.shell.com/us/fuel/12547339-1188-e-hawkins-parkway/en_US		1.00
 79bc77391674	Shell Gas Station	convenience		32.15749	-94.37164	79 NW Loop	Carthage	75633		http://www.shell.us/ontheroad		0.83
@@ -931,7 +915,6 @@ dbb74f8042f4	Stop N Geaux	convenience		32.51360	-94.83771	6135 E US HWY 80	Longv
 edb9a4b9dec1	Stop N Geaux	convenience		32.50706	-94.63473	6135 US-80	Longview	75605	+14302958685			0.92
 6f9bb008de00	Sundown Liquor #2	convenience		32.38935	-94.86589	826 N Henderson Blvd	Kilgore	75662	+19039846276			0.92
 59f91d004320	Sunoco Logistics	convenience		32.46796	-94.07036	1100 Elysian Fields Rd	Waskom	75692	+19036873314	http://sunocologistics.com	GoSunoco	0.76
-7a6a5fb1854b	Sunoco Logistics	convenience		32.46464	-94.06865	1100 Elysian Fields Rd	Waskom	75692	+19036873314	https://www.sunocologistics.com		0.65
 f868ed033ccf	SUNRISE FOOD MART	convenience		32.52630	-94.36801	100 WEST PINECREST DRIVE	Marshall	75670		https://locations.valero.com/en-us/LocationDetails/Index/100-WEST-PINECREST-DRIVE/0000002042	Valero	0.80
 3a261894164d	Super C North	convenience		32.16285	-94.78479	924 US Highway 79 N	Henderson	75652	+19036571393	https://super-c-north.hub.biz/		0.97
 d8721faaaec0	Super C West	convenience		32.15071	-94.81919	1414 W Main St	Henderson	75652	+19037222147	http://shell.com		0.92
@@ -941,8 +924,6 @@ a8da4ae85b3f	Super Stop	convenience		32.54134	-94.94068	601 N Main St	Gladewater
 ce5083ac96e3	TA Express	convenience		32.43129	-94.86384	4403 Highway 42 N	Kilgore	75662	+19039868450	https://www.ta-petro.com/	TravelCenters-TA-Petro	1.00
 e02e688e93ee	TA Express	convenience		32.12974	-94.33289	1086 US-59 S	Carthage	75633	+19036900272	https://www.ta-petro.com/location/tx	TravelCenters-TA-Petro	1.00
 98d2a9ab61bf	TA EXPRESS KILGORE	convenience		32.43569	-94.86217		Kilgore	75662		https://www.gulfinc.com/ta-express-kilgore	Gulf	0.80
-a4c8e297422a	TA EXPRESS KILGORE	convenience		32.33943	-94.92300		Kilgore	75662		https://www.gulfinc.com/ta-express-kilgore	Gulf	0.80
-ca883a78c7d9	TA EXPRESS KILGORE	convenience		32.41934	-94.86844		Kilgore	75662		https://www.gulfinc.com/ta-express-kilgore	Gulf	0.80
 81a146735609	TA Express Travel Center	convenience	truck gas station	32.12975	-94.33309	1086 U S 59	Carthage	75633	+19036900272	https://www.ta-petro.com/location/tx		0.92
 6cc2b31b6783	TATUM EAGLE MART	convenience		32.31570	-94.51540	240 W Johnson St	Tatum	75691		https://locations.valero.com/en-us/LocationDetails/Index/240-W-JOHNSON-ST/0000006409	Valero	0.80
 c2e8190d2e15	Tess's Grocery	convenience		32.38450	-94.13166	3257 FM 451	Waskom	75692	+19036339994	http://phillips66gas.com/locations		0.92
@@ -986,7 +967,6 @@ f5a9dad18e44	Twice The Ice	convenience		32.99857	-94.95907	108 N Greer Blvd	Pitt
 68774f1db655	Valero	convenience		32.54843	-94.79865	3400 Gilmer Rd	Longview	75604	+19032952222	http://www.valero.com	Valero Energy	0.72
 7f045ce14178	Valero	convenience		32.45010	-94.72481	3099 Estes Pkwy	Longview	75602	+19037531417	https://www.valero.com		0.65
 835794d87095	Valero	convenience		32.51421	-94.79787	800 Pine Tree Rd	Longview	75604	+12103452000	https://www.valero.com		0.65
-845a81a56f6c	Valero	convenience		32.74227	-94.94195		Gilmer	75644	+12103452000	http://www.valero.com/	Valero	0.92
 8d5d0016c192	Valero	convenience		32.44833	-94.71021	3607 S EASTMAN RD	Longview	75602	+19037588099	https://locations.valero.com/en-us/LocationDetails/Index/3607-S-EASTMAN-RD/0000004011	Valero Energy	0.92
 a063c8601f30	Valero	convenience		32.36215	-94.86849	2826 S Henderson Blvd	Kilgore	75662	+19039889862	https://locations.valero.com/en-us/LocationDetails/Index/2516-N-HWY-42/0000026520	Valero Energy	0.92
 abea762cd727	Valero	convenience		32.41389	-94.70634	5031 Estes Pkwy	Longview	75603	+19036437046	https://www.valero.com		0.65
@@ -1025,8 +1005,12 @@ fd5127b00903	3 daughters food	fastfood		32.15645	-94.75191	2664 US-79	Henderson	
 accb0d96b345	Braum's	fastfood		32.52917	-94.77520	1420 West Loop 281	Longview	75604		https://www.braums.com/store/store-330-1420-west-loop-281-longview-tx-75604/	Braum's	0.80
 f5cee2b9c8a8	Braum's	fastfood		32.50094	-94.75018	280 N. Spur 63	Longview	75601		https://www.braums.com/store/store-325-280-n-spur-63-longview-tx-75601/	Braum's	0.80
 1bdb1c506891	Burger King	fastfood		32.52711	-94.77988	1623 W Loop 281	Longview	75604	+19032979937	https://burgerking.com/store-locator/store/5826	Burger King	0.99
+39c7d47a5df3	Burger King	fastfood	burger restaurant	32.49940	-94.75013	701 W Marshall Ave	Longview	75601	+19035530244	https://burgerking.com/store-locator/store/13191	Burger King	0.96
 3d176347fed7	Burger King	fastfood		32.46975	-94.05624	825 TX-156 Spur	Waskom	75692	+14302016482	https://burgerking.com/store-locator/store/14429	Burger King	0.98
+806d994f4e81	Burger King	fastfood	burger restaurant	32.52636	-94.35247	1310 E Pinecrest Dr	Marshall	75670	+19039383062	https://burgerking.com/store-locator/store/3062	Burger King	0.98
 afad29417d7c	Burger King	fastfood		32.38879	-94.86703	803 US-259 BUS	Kilgore	75662	+19039835396	https://burgerking.com/store-locator/store/11579	Burger King	1.00
+c81fa98a5a93	Burger King	fastfood	burger restaurant	32.45167	-94.70792	3306 S Eastman Rd	Longview	75602	+19037589449	https://burgerking.com/store-locator/store/5316	Burger King	0.99
+fe603d9bf697	Burger King	fastfood	burger restaurant	32.53983	-94.75484	3511 McCann Rd	Longview	75605	+19037530513	https://burgerking.com/store-locator/store/3630	Burger King	0.99
 8a945dce9800	Cambodian &Chinese Food	fastfood		32.54812	-94.36958	300 W Grand Ave	Marshall	75670	+15623107999			0.59
 4692e5ddedba	Chick-fil-A	fastfood		32.54100	-94.72993	507 E Loop 281	Longview	75605	+19036636631	https://www.chick-fil-a.com/locations/tx/east-longview?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 569b93dd75ff	Chick-fil-A	fastfood		32.52478	-94.78077	1740 W Loop 281	Longview	75604	+19032956633	https://www.chick-fil-a.com/locations/tx/west-longview?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
@@ -1043,6 +1027,7 @@ bfce2c088a0c	Chicken Express	fastfood		32.38137	-94.86919	209 N Henderson Blvd	K
 e5af718399ed	Chicken Express	fastfood		32.53672	-94.79008	2702 Gilmer Rd	Longview	75604	+19037592651	https://chickene.com/	Chicken Express	0.99
 e650ba2b8c26	Chicken Express	fastfood		32.53425	-94.74318	2102 Judson Rd	Longview	75605	+19037539200	http://www.chickenexpress.us/	Chicken Express	0.96
 fffc78e92300	Chicken Express	fastfood		32.72460	-94.94241	433 US Hwy 271 S	Gilmer	75644	+19036803697	https://www.chickene.com	Chicken Express	0.96
+79eb5e5617fa	Chipotle Mexican Grill	fastfood	mexican restaurant	32.54211	-94.73351	415 E Loop 281	Longview	75605	+19036637664	https://locations.chipotle.com/tx/longview/415-e-loop-281?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2249	Chipotle Mexican Grill	0.99
 eb093581d3ea	Church's Texas Chicken	fastfood		32.18293	-94.33928	1039 US-59	Carthage	75633	+19036939312	https://locations.churchs.com/tx/carthage/1039-u.s.-highway-59-n.	Church's Chicken	0.96
 f3b43ed99a8c	Church's Texas Chicken	fastfood		32.50077	-94.73593	217 E. Marshall Avenue	Longview	75601	+19037581822	https://locations.churchs.com/tx/longview/217-e.-marshall-avenue	Church's Chicken	0.95
 afbf12f7b9e6	Corn Dog 7 General Office	fastfood		32.99446	-94.60540	1914 E 1st	Hughes Springs	75656	+19036393575	http://www.corndog7.com/		0.92
@@ -1063,6 +1048,17 @@ c4c10b51f82d	Dairy Queen	fastfood		32.43523	-94.94535	161 Access Rd	Kilgore	7566
 fb98933e99b3	Dairy Queen	fastfood		32.41532	-94.70703	5002 Estes Pkwy	Longview	75603	+19036437311	https://www.dairyqueen.com/en-us/locations/tx/longview/5002-estes-pkwy/14363/?y_source=1_MjkzMzkyMDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
 fbb0f326c164	Dairy Queen	fastfood		32.15882	-94.32188	Dairy Queen Store 1001 E Sabine St	Carthage	75633	+19036942815	https://dqtexas.com/?y_source=1_MjkzMzg5NTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
 bfb463c98d5f	Dairy Queen TX	fastfood		32.26497	-94.98117	1113 S Commerce St	Overton	75684	+19038346132	https://www.dairyqueen.com/en-us/locations/tx/overton/1113-state-highway-135-s/14461/?y_source=1_MjkzMzg5MTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+2671db30ee80	Domino's	fastfood	pizza restaurant	32.54755	-94.34532	2100 Victory Dr.	Marshall	75672	+19039354383	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+3ad6faefbf07	Domino's	fastfood	pizza restaurant	32.53912	-94.79100	2906 Gilmer	Longview	75604	+19032979009	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test	Domino's Pizza	0.99
+4ec1375e297d	Domino's	fastfood	pizza restaurant	32.74070	-94.94210	879 Us Hwy 271	Gilmer	75644	+19034021090	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.93
+5c9a68408155	Domino's	fastfood	pizza restaurant	32.53402	-94.93134	1050 E Broadway Ave	Gladewater	75647	+19038447171	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
+78924a456d8b	Domino's	fastfood	pizza restaurant	32.99269	-94.96059	300 S Greer Blvd	Pittsburg	75686	+19038553035	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+903629185103	Domino's	fastfood	pizza restaurant	32.52002	-94.73823	110 Triple Creek Cir	Longview	75601	+19037538939	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+be55786451bd	Domino's	fastfood	pizza restaurant	32.14647	-94.78914	511 Hwy 79 S	Henderson	75654	+19036552222	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+ca6063b4c73c	Domino's	fastfood	pizza restaurant	32.57364	-94.73501	4532 N Us Highway 259	Longview	75605	+19036860303	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+d5a3356fc4bc	Domino's	fastfood	pizza restaurant	32.43953	-94.71465	711 Estes Drive Suite 101	Longview	75602	+19035539110	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+d6e275309177	Domino's	fastfood	pizza restaurant	32.38035	-94.86925	201 N. Henderson Blvd.	Kilgore	75662	+19039831530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
+e1e525339463	Domino's Pizza	fastfood	pizza restaurant	32.51282	-94.59413	231 Renaissance Dr	Hallsville	75650	+19036688500	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 086c731fd9bb	DQ Grill & Chill	fastfood		32.99793	-94.62890	Hwy 11 & Main St	Hughes Springs	75656		https://www.dairyqueen.com/en-us/locations/tx/hughes-springs/hwy-11-main-st/4050	DQ Grill & Chill	0.80
 25ab6b1c1502	DQ Grill & Chill	fastfood		32.72338	-94.94199	613 S Wood St	Gilmer	75644		https://www.dairyqueen.com/en-us/locations/tx/gilmer/613-s-wood-st/3934	DQ Grill & Chill	0.80
 2ed76f22efc0	DQ Grill & Chill	fastfood		32.43517	-94.94531	I-20 & Fm 3053, Rt 1 Box 262lf	Kilgore	75662		https://www.dairyqueen.com/en-us/locations/tx/kilgore/i-20-fm-3053-rt-1-box-262lf/4124	DQ Grill & Chill	0.80
@@ -1078,17 +1074,21 @@ f40814072bf7	DQ Grill & Chill	fastfood		32.55322	-94.35065	1001 E End Blvd N	Mar
 28c36dcf9d0f	Dunkin Donuts	fastfood		32.53192	-94.78484	2440 GILMER RD, WM399	Longview	75604		https://www.dunkindonuts.com/locations/us/tx/longview/2440-gilmer-rd/store-367155/	Dunkin'	0.80
 a8e2491a32d0	Dunkin Donuts	fastfood		32.13044	-94.80211	2121 US Highway 79 S, WM165	Henderson	75654		https://www.dunkindonuts.com/locations/us/tx/henderson/2121-us-highway-79-s/store-366918/	Dunkin'	0.80
 f8467b11eb65	Food Fast	fastfood		32.50168	-94.73195	611 E Marshall Ave	Longview	75601	+19037537360		Food Fast	0.73
+e23d0dbb7b1f	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	32.55395	-94.34959	916 E End Blvd N	Marshall	75670	+19035786608	https://www.freddys.com/location/marshall-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 34f8f5e0c37f	Golden Chick	fastfood		32.15754	-94.34832	606 W Panola St	Carthage	75633	+19036909000	http://goldenchick.com		0.77
 3a502377f142	Golden Chick	fastfood		32.53078	-94.35143	1517 E End Blvd S	Marshall	75670	+19039272400	https://locations.goldenchick.com/tx/marshall/1219/	Golden Chick	0.97
+59598d3478cd	Golden Chick	fastfood		32.13212	-94.80396	2123 US Highway 79 S	Henderson	75654	+19036571367	http://goldenchick.com		0.92
 760f0e95d6c9	Golden Chick	fastfood		32.53918	-94.75483	3507 McCann Rd	Longview	75605	+19037572828	https://locations.goldenchick.com/tx/longview/1136/	Golden Chick	0.99
 ac0aa7d7a52b	Golden Chick	fastfood		32.99180	-94.96198	308 S Greer Blvd	Pittsburg	75686	+19037087507	https://locations.goldenchick.com/tx/pittsburg/1313/	Golden Chick	0.93
 7ad4649dde71	Grandy's	fastfood		32.45204	-94.70914	3305 S Eastman Rd	Longview	75602	+19037589171	https://www.grandys.com		0.99
 1a341cf1a624	Jack in the Box	fastfood		32.13212	-94.80396	2123 US Highway 79 S	Henderson	75654	+19036579188	http://www.jackinthebox.com/		0.92
 cd8f96076726	Jack in the Box	fastfood		32.73309	-94.94276	516 N Wood St	Gilmer	75644	+19038432665	https://www.jackinthebox.com		0.94
 ef31821baa2d	Jack in the Box	fastfood		32.54029	-94.73167	490 E Loop 281	Longview	75605	+19037580193	https://www.jackinthebox.com		0.99
+3e8c8d66f937	Jersey Mike's	fastfood	sandwich shop	32.54363	-94.73035	3312 N. Fourth Street Ste. 100	Longview	75605	+19036633362	https://www.jerseymikes.com/15040/longview-tx	Jersey Mike's Subs	0.99
 49a594c8b66d	Jimmy John's	fastfood		32.53996	-94.73058	510 E Loop 281, Ste A	Longview	75605	+19035539025	https://locations.jimmyjohns.com/tx/longview/sandwiches-2266.html		0.92
 a88666649ec7	Johnny's Ozark Fried Chicken	fastfood		32.36698	-94.86912	2418 S Henderson Blvd	Kilgore	75662	+19039847481	https://m.facebook.com/pages/Johnnys-Ozark-Fried-Chicken/154487094586935#_=_		0.94
 031645c2646b	KFC	fastfood		32.39033	-94.86481	1000 US Hwy 259 North	Kilgore	75662	+19039835208	https://locations.kfc.com/tx/kilgore/1000-us-hwy-259-north	KFC	0.95
+44d89d1129d2	KFC	fastfood	chicken restaurant	32.52003	-94.85995	107 E Us Highway 80	White Oak	75693	+19032977900	http://www.kfc.com/storelocator/Default.aspx?address=107%20East%20Highway%2080,White%20Oak,TX		0.98
 919026b1693c	KFC	fastfood		32.53865	-94.74559	2407 Judson Road	Longview	75605	+14302015375	https://locations.kfc.com/tx/longview/2407-judson-road	KFC	0.93
 9733fdb89001	KFC	fastfood		32.14956	-94.78778	300 Highway 79 South	Henderson	75654		https://locations.kfc.com/tx/henderson/300-highway-79-south	KFC	0.98
 a5c94d9e8dd1	KFC	fastfood		32.53837	-94.34880	700 East End Boulevard South	Marshall	75670	+19039382727	https://locations.kfc.com/tx/marshall/700-east-end-boulevard-south	KFC	0.99
@@ -1097,6 +1097,17 @@ c9e22604e034	KFC	fastfood		32.73196	-94.94312	404 North Wood	Gilmer	75644	+19038
 8990609eeda3	Krispy Krunchy Chicken	fastfood		32.55031	-94.39453	710 W Loop 390 N # 1	Marshall	75670	+19039354100	https://www.krispykrunchy.com		0.77
 90c323477bef	Krispy Krunchy Chicken	fastfood		32.45985	-94.66312	15481 FM 968 W	Longview	75602		https://locations.krispykrunchy.com/tx/longview/15481-fm-968-w	Krispy Krunchy Chicken	0.80
 e0253d240d53	Krispy Krunchy Chicken	fastfood		32.44024	-94.93137	6420 State Highway 135 N	Kilgore	75662		https://locations.krispykrunchy.com/tx/kilgore/6420-state-highway-135-n	Krispy Krunchy Chicken	0.80
+4bcb3d2c0973	Lafayette St & Highland Ave.	fastfood	sandwich shop	32.99148	-94.96223	310 S Greer Blvd.	Pittsburg	75686			Quiznos	0.80
+32744b91497e	Little Caesars	fastfood	pizza restaurant	32.12991	-94.80769	2327 Us Highway 79 South	Henderson	75654	+19036575550	https://littlecaesars.com/en-us/store/8789	Little Caesars	0.98
+bb914b384a2a	Little Caesars	fastfood	pizza restaurant	32.53251	-94.35051	1300 East End Blvd South	Marshall	75670	+19039230811	https://littlecaesars.com/en-us/store/9962	Little Caesars	0.97
+0dcf43039c5b	Little Caesars Pizza	fastfood	pizza restaurant	32.38996	-94.87058	908 N Kilgore St	Kilgore	75662	+19039845050	https://littlecaesars.com/en-us/store/10426	Little Caesars	0.96
+1b4725882dac	Little Caesars Pizza	fastfood	pizza restaurant	32.51729	-94.85124	608 E U.S. Hwy 80	White Oak	75693	+19032956857	https://littlecaesars.com/en-us/store/12450	Little Caesars	0.92
+2d609add1090	Little Caesars Pizza	fastfood	pizza restaurant	32.46301	-94.73153	2430 S High St Ste E10	Longview	75602	+19033539230	https://littlecaesars.com/en-us/store/10695	Little Caesars	0.96
+6787a6a3629c	Little Caesars Pizza	fastfood	pizza restaurant	32.52566	-94.78516	1809 W Loop 281	Longview	75604	+19032950111	https://littlecaesars.com/en-us/store/2496	Little Caesars	0.96
+80b88d4616ce	Little Caesars Pizza	fastfood	pizza restaurant	32.71677	-94.94176	1011 US Hwy 271 S	Gilmer	75644	+19036809424	https://littlecaesars.com/en-us/store/12090	Little Caesars	0.96
+960b41b7e512	Little Caesars Pizza	fastfood	pizza restaurant	32.50360	-94.72399	1201 E Marshall Ave Ste B	Longview	75601	+19037539000	https://littlecaesars.com/en-us/store/9277	Little Caesars	0.96
+ae81d3d9e9d3	Little Caesars Pizza	fastfood	pizza restaurant	32.16035	-94.37278	4399 NW Loop	Carthage	75633	+19032657318	https://littlecaesars.com/en-us/store/11183	Little Caesars	0.96
+5f7c83e0feb0	Little Ceasers	fastfood		32.53270	-94.78822	2414 Gilmer Rd	Longview	75604	+19032950111		Little Caesars Fundraising	0.96
 a8729e38d73c	Long John Silver's	fastfood		32.54229	-94.75071	209 W Loop 281	Longview	75605	+19036632311	https://www.ljsilvers.com/?y_source=1_MTc1NzMxNjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	1.00
 b6fbee208363	Maria's Kitchen	fastfood		32.42838	-94.71642	4509 Estes Pkwy	Longview	75603				0.80
 2b3173c6c313	McDonald's	fastfood		32.55990	-94.80009	3920 Gilmer Rd	Longview	75605		https://www.mcdonalds.com/us/en-us/location/44208.html	McDonald's	0.80
@@ -1104,6 +1115,7 @@ b6fbee208363	Maria's Kitchen	fastfood		32.42838	-94.71642	4509 Estes Pkwy	Longvi
 45670ac9f7d2	McDonald's	fastfood		32.53381	-94.93078	1100 E Broadway	Gladewater	75647	+19038459910	https://www.mcdonalds.com/us/en-us/location/tx/gladewater/1100-e-broadway/30762.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 4fe0cba176c0	McDonald's	fastfood		32.54784	-94.34762	2000 Victory Dr	Marshall	75670	+19039387031	https://www.mcdonalds.com/us/en-us/location/tx/marshall/2000-victory-dr/2183.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 543dab4e0384	McDonald's	fastfood		32.99619	-94.95956	101 S Greer Blvd	Pittsburg	75686	+19038561000	https://www.mcdonalds.com/us/en-us/location/tx/pittsburg/101-s-greer-blvd/19384.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+54d199515e38	McDonald's	fastfood	burger restaurant	32.39325	-94.86587	2101 Stone Rd	Kilgore	75662	+19039832675	https://www.mcdonalds.com/us/en-us/location/tx/kilgore/2101-stone-rd/29447.html?cid=RF:YXT:RoN::Clicks		0.97
 6bb9d762ba66	McDonald's	fastfood		32.44334	-94.71891	3632 Estes Pkwy	Longview	75602	+19037587470	https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.97
 6c0f71f2c184	McDonald's	fastfood		32.50755	-94.58575	404 W Main	Hallsville	75650	+19036684650	https://www.mcdonalds.com/us/en-us/location/tx/hallsville/404-w-main/31187.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 6ca460044b2f	McDonald's	fastfood		32.76064	-94.35548	109 S Walcott	Jefferson	75657	+19036656120	https://www.mcdonalds.com/us/en-us/location/tx/jefferson/109-s-walcott/27965.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
@@ -1114,6 +1126,7 @@ b6fbee208363	Maria's Kitchen	fastfood		32.42838	-94.71642	4509 Estes Pkwy	Longvi
 a5d55cf83b4c	McDonald's	fastfood		32.51812	-94.85133	609 E Us Hwy 80	White Oak	75693	+19032952944	https://www.mcdonalds.com/us/en-us/location/tx/white-oak/609-e-us-hwy-80/37798.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 ba8cea69c6c0	McDonald's	fastfood		32.13268	-94.80464	2130 S Hwy 79	Henderson	75654	+19036572442	https://www.mcdonalds.com/us/en-us/location/tx/henderson/2130-s-hwy-79/6391.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 cb2e89a0d289	McDonald's	fastfood		32.52438	-94.78382	1803 Nw Loop 281	Longview	75604	+19032970991	https://www.mcdonalds.com/us/en-us/location/tx/longview/1803-nw-loop-281/6567.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+df982c651fae	McDonald's	fastfood	burger restaurant	32.54203	-94.72826	515 E Loop 281	Longview	75605	+19036636808	https://www.mcdonalds.com/us/en-us/location/tx/longview/515-e-loop-281/14772.html?cid=RF:YXT:RoN::Clicks		0.92
 f968c9bdd5cc	McDonald's	fastfood		32.44888	-94.72267	3118 Estes Pkwy	Longview	75602	+19037587470	https://www.mcdonalds.com/us/en-us/location/tx/longview/3118-estes-parkway/10273.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 fa792048546c	McDonald's	fastfood		32.49400	-94.35780	5408 East End Blvd S	Marshall	75672	+19039386411	https://www.mcdonalds.com/us/en-us/location/tx/marshall/5408-east-end-blvd-s/7815.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
 fcb665aa485f	McDonald's	fastfood		32.54877	-94.72704	3086 N Eastman Road	Longview	75605	+19037368301	https://www.mcdonalds.com/us/en-us/location/tx/longview/3086-n-eastman-road/35908.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
@@ -1122,16 +1135,38 @@ fd655e31e54d	McDonald's	fastfood		32.54131	-94.74844	128 W Loop 281	Longview	756
 7a3cecd59e37	Panda Express	fastfood		32.54790	-94.72678	3082 N. Eastman Road	Longview	75605	+19036630969	http://www.pandaexpress.com/	Panda Express México	0.98
 c69b2fe5d3e5	Panda Express	fastfood		32.39111	-94.86619	1201 N Kilgore St	Kilgore	75662	+19039813181	http://www.pandaexpress.com/	Panda Express México	0.96
 d66014a6f205	Panda Express	fastfood		32.13203	-94.80387	2123 Us Hwy 79 S	Henderson	75654	+19036551998	http://www.pandaexpress.com/	Panda Express México	0.96
+8ba5c5a74cb7	Papa John's Pizza	fastfood	pizza restaurant	32.54720	-94.35013	1711 NE End North Blvd	Marshall	75670	+19039380700	http://www.papajohns.com/		0.85
+5e537e93487e	Papa Johns	fastfood	pizza restaurant	32.50266	-94.72856	905 E Marshall Ave	Longview	75601	+19032429090	https://locations.papajohns.com/united-states/tx/75601/longview/905-e-marshall-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+08b83002cb5e	Papa Johns Pizza	fastfood	pizza restaurant	32.53042	-94.77609	1409c W Loop 281 Ste C	Longview	75604	+19037598899	https://www.papajohns.com		0.99
+36ae775bc432	Papa Johns Pizza	fastfood	pizza restaurant	32.50272	-94.72865	905 E Marshall Ave	Longview	75601	+19032429090	https://www.papajohns.com		0.99
+1e2d833dc5ea	Pizza Hut	fastfood	pizza restaurant	32.53043	-94.35156	1601 E End Blvd S Harrison	Marshall	75670	+19039359306	https://locations.pizzahut.com/tx/marshall/1601-e-end-blvd-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287131	Pizza Hut	0.98
+2ab01a63958a	Pizza Hut	fastfood	pizza restaurant	32.14788	-94.78893	430 US Highway 79 S Rusk	Henderson	75654	+19036571665	https://locations.pizzahut.com/tx/henderson/430-us-highway-79-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290130	Pizza Hut	0.99
+2c1a1ff9a7c3	Pizza Hut	fastfood	pizza restaurant	32.53518	-94.74361	2106 Judson Rd	Longview	75605	+19037588111	https://locations.pizzahut.com/tx/longview/2106-judson-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306682	Pizza Hut	0.99
+7a5228eb6d82	Pizza Hut	fastfood	pizza restaurant	32.53334	-94.92719	1408 E Broadway Ave Gregg	Gladewater	75647	+19038455571	https://locations.pizzahut.com/tx/gladewater/1408-e-broadway-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295014	Pizza Hut	0.96
+8a6aa0187ae2	Pizza Hut	fastfood	pizza restaurant	32.52707	-94.78579	2100 Gilmer Rd Gregg	Longview	75604	+19032974771	https://locations.pizzahut.com/tx/longview/2100-gilmer-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298114	Pizza Hut	0.99
+95b9c5880e03	Pizza Hut	fastfood	pizza restaurant	32.39178	-94.86478	1213 1/2 N Kilgore St Gregg	Kilgore	75662	+19039844026	https://locations.pizzahut.com/tx/kilgore/1213-1/2-n-kilgore-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299790	Pizza Hut	1.00
+a94669d81883	Pizza Hut	fastfood	pizza restaurant	32.99754	-94.95866	96 N Greer Blvd Camp	Pittsburg	75686	+19037081150	https://locations.pizzahut.com/tx/pittsburg/96-n-greer-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315964	Pizza Hut	0.96
+e4c67f29f62d	Pizza Hut	fastfood	pizza restaurant	32.15883	-94.35740	1208 W Panola St Panola	Carthage	75633	+19036934331	https://locations.pizzahut.com/tx/carthage/1208-w-panola-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309840	Pizza Hut	0.98
+fb722468f7e0	Pizza Hut	fastfood	pizza restaurant	32.50390	-94.71259	1906 E Marshall Ave Gregg	Longview	75601	+19037532234	https://locations.pizzahut.com/tx/longview/1906-e-marshall-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292481	Pizza Hut	0.99
+fd829bbf9982	Pizza Hut	fastfood	pizza restaurant	32.74194	-94.94135	1413 N Wood St	Gilmer	75644	+19038435589	https://locations.pizzahut.com/tx/gilmer/1413-n-wood?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286047	Pizza Hut	0.95
+136c7fd3ec6c	Pizza Hut Of East Texas, Inc.	fastfood		32.53857	-94.76734	2824 Bill Owens Pkwy	Longview	75605	+19032971111			0.92
 2c421ec4278e	Popeyes	fastfood		32.38776	-94.86798	745 - US Highway 259 N	Kilgore	75662	+19034833322	https://www.popeyes.com/store-locator/store/restaurant_239799	Popeyes Louisiana Kitchen	0.96
 52fae6b18fcf	Popeyes	fastfood		32.52848	-94.78678	2110 Gilmer Road	Longview	75604	+19033090900	https://www.popeyes.com/store-locator/store/restaurant_87085	Popeyes Louisiana Kitchen	0.99
 f06581d2c976	Popeyes	fastfood		32.50088	-94.73434	409 E. Marshall Avenue	Longview	75601	+19037580938	https://www.popeyes.com/store-locator/store/restaurant_81744	Popeyes Louisiana Kitchen	0.99
+815738cf9e83	Popeyes Chicken Marshall Tx	fastfood	chicken restaurant	32.54832	-94.36717	100 E Grand Ave	Marshall	75670				0.76
 fe35b7d87583	Popeyes Louisiana Kitchen	fastfood		32.54887	-94.35115	1711 East Grand Avenue	Marshall	75670	+19039343069	https://www.popeyes.com/store-locator/store/restaurant_85198	Popeyes Louisiana Kitchen	0.97
 cf9a4f3f032a	Quiznos	fastfood		32.99151	-94.96233	310 S Greer Blvd	Pittsburg	75686	+19038567700	http://www.quiznos.com/Home.aspx		0.94
 ef1018616037	Raising Cane's	fastfood		32.54160	-94.73994	212 E Loop 281	Longview	75605	+19032388800	https://locations.raisingcanes.com/tx/longview/212-e-loop-281	Raising Cane's Chicken Fingers	0.98
 c729191e9e0c	Rollin' Taquitos	fastfood		32.54351	-94.34946	222 E End Blvd S	Marshall	75670	+19035786615	http://rollintaquitos.com/		0.65
 bd0d62f2b9bf	Rudy's Street Taco Stand	fastfood		32.38847	-94.90653	1895 Old TX-135	Kilgore	75662				0.95
 d6b57a5c84cd	Salsarita's Fresh Cantina	fastfood		32.54468	-94.72923	1009 Wal St	Longview	75605	+19036639500	http://salsaritas.com/longview-tx-wal-st/		0.92
+672193af088e	Schlotzsky's	fastfood	sandwich shop	32.39167	-94.86549	1211 N Kilgore St Airport	Kilgore	75662	+19032180768	https://locations.schlotzskys.com/tx/kilgore/1211-north-kilgore-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.96
+8bf59b7a86f4	Schlotzsky's	fastfood	sandwich shop	32.73785	-94.94233	720 US Highway 271 N	Gilmer	75644	+19036803354	www.schlotzskys.com		0.96
+a3a92a355b5e	Schlotzsky's	fastfood	sandwich shop	32.55748	-94.34928	1600 E End Blvd N	Marshall	75670	+19037027997	www.schlotzskys.com		0.97
+dc919be371bf	Schlotzsky's	fastfood	sandwich shop	32.14791	-94.78822	419 US-79	Henderson	75654	+19037222064	https://locations.schlotzskys.com/tx/henderson/419-s-us-hwy-79?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	1.00
+f1aa0e4eb0d0	Schlotzsky's	fastfood	sandwich shop	32.52925	-94.77698	1429 W Loop 281 Ste B1	Longview	75604	+19032978030	http://www.schlotzskys.com/	Schlotzsky's	0.98
 aa528c8599c9	Shun's Sno-Balls and More	fastfood		32.27370	-94.97698	111 S Rusk St	Overton	75684	+19036581063			0.92
+da8b72a1582e	Smashburger	fastfood	burger restaurant	32.54733	-94.72608	3080 N Eastman Rd	Longview	75605	+19036632319	http://smashburger.com		0.92
 d318116993fa	Snow Queens Snowballs	fastfood		32.74363	-94.93909	271 Old Coffeeville Rd	Gilmer	75644	+19028634890	https://www.snowqueenrestaurant.ca/		0.87
 1779d17c6b61	Sonic Drive In	fastfood		32.50467	-94.57869	306 W Main	Hallsville	75650	+19036682220	https://locations.sonicdrivein.com/tx/hallsville/306-w-main.html	Sonic Drive-In	0.98
 2541401d95bc	Sonic Drive In	fastfood		32.32263	-94.52301	820 North Hill Street	Tatum	75691	+19039472668	https://locations.sonicdrivein.com/tx/tatum/820-north-hill-street.html	Sonic Drive-In	0.96
@@ -1153,9 +1188,42 @@ d53379bd5cc3	Sonic Drive In	fastfood		32.56236	-94.80143	4100 Gilmer Road	Longvi
 d9d72fad9a77	Sonic Drive In	fastfood		32.52044	-94.86261	100 W. Highway 80	White Oak	75693	+19032972772	https://locations.sonicdrivein.com/tx/whiteoak/100-w.-highway-80.html	Sonic Drive-In	0.98
 e2dfbf72d0e1	Sonic Drive In	fastfood		32.54719	-94.73163	3501 North 4Th Street	Longview	75605	+19036638699	http://www.sonicdrivein.com/	Sonic Drive-In	1.00
 f38380b05158	Sonic Drive In	fastfood		32.53559	-94.34971	900 East End Blvd South	Marshall	75672	+19034074110	http://www.sonicdrivein.com/	Sonic Drive-In	0.99
+0b60f0d4eca7	Sonic Drive-In	fastfood	burger restaurant	32.15608	-94.78310	500 Us Highway 79 N	Henderson	75652	+19036573840	https://locations.sonicdrivein.com/tx/henderson/500-highway-79-n..html		0.97
+13fb8c551bfb	Sonic Drive-In	fastfood	burger restaurant	32.54883	-94.35896	901 E Grand Ave	Marshall	75670	+19039352951	https://locations.sonicdrivein.com/tx/marshall/901-e.-grand.html		0.92
+6090b3b52c6e	Sonic Drive-In	fastfood	burger restaurant	32.79371	-94.72378	600 Highway 259 N	Ore City	75683	+19039682010	https://locations.sonicdrivein.com/tx/orecity/600-highway-259-north.html		0.85
+7498101bb174	Sonic Drive-In	fastfood	burger restaurant	32.74182	-94.94217	909 N WOOD	Gilmer	75644	+19038433936	https://locations.sonicdrivein.com/tx/gilmer/909-n.-wood.html		0.85
 75308c5e5cd5	Sonic Drive-In	fastfood		32.99836	-94.61863	1006 E 1st	Hughes Springs	75656	+19036391551	https://locations.sonicdrivein.com/tx/hughessprings/1006-e.-first-street.html	Sonic Drive-In	0.95
+9f94813712dd	Sonic Drive-In	fastfood	burger restaurant	32.75980	-94.35558	203 S Walcott St	Jefferson	75657	+19036652800	https://locations.sonicdrivein.com/tx/jefferson/203-s.-walcott-street.html		0.97
 c6fffe1db55f	Sonic Drive-In	fastfood		32.45840	-94.66685	15605 Farm to Market 968 W	Longview	75602	+14302013613	https://locations.sonicdrivein.com/tx/longview/15605-fm-968-west.html	Sonic Drive-In	0.96
+df95c6713e6c	Sonic Drive-In	fastfood	burger restaurant	32.45973	-94.62847	15605 Fm 968 W	Longview	75602	+14302013613	https://locations.sonicdrivein.com/tx/longview/15605-fm-968-west.html		0.85
+c922a041ce38	Sonic Drive-in Carthage, Llc	fastfood		32.15809	-94.35072	710 W Panola St	Carthage	75633				0.98
 ccdcfe5fe433	Southern Classic Chicken	fastfood		32.47644	-94.74239	1300 S High St	Longview	75602	+19032389066	https://www.southernclassicchicken.com	Southern Classic Chicken	0.98
+0951a5a8966e	Subway	fastfood	sandwich shop	32.53225	-94.78535	2440 Gilmer Rd	Longview	75604	+19032955299	https://restaurants.subway.com/united-states/tx/longview/2440-gilmer-rd	Subway	0.95
+253072c83acb	SUBWAY	fastfood	sandwich shop	32.31772	-94.51768	335 North Hill Street	Tatum	75691	+19039472255	http://subway.com		0.77
+2654c215bf42	Subway	fastfood	sandwich shop	32.76031	-94.35533	201 South Walcott Street	Jefferson	75657	+19036658655	https://restaurants.subway.com/united-states/tx/jefferson/201-south-walcott-street	Subway	0.95
+2d193ca8990d	Subway	fastfood	sandwich shop	32.16151	-94.31903	975 E. Sabine	Carthage	75633	+18008884848	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71716&utm_campaign=evergreen-2020&y_source=1_Njk5MDcyNTYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
+2f390ae06c9b	Subway	fastfood	sandwich shop	32.53607	-94.94235	106 E Upshur Ave	Gladewater	75647	+19038458200	https://restaurants.subway.com/united-states/tx/gladewater/106-e-upshur-blvd	Subway	0.95
+3aca9fa34305	Subway	fastfood	sandwich shop	32.32560	-94.53445	1523 North Hill	Tatum	75691	+19039472600	https://restaurants.subway.com/united-states/tx/tatum/1523-north-hill	Subway	0.98
+3cef57dd97a7	Subway	fastfood	sandwich shop	32.43523	-94.94496	6242 Old Highway 135 N	Kilgore	75662	+19038125022	https://restaurants.subway.com/united-states/tx/kilgore/6242-old-highway-135-n	Subway	0.95
+5e4ebb3cf8f1	Subway	fastfood	sandwich shop	32.54905	-94.35503	1209 E Grand Ave	Marshall	75670	+19039271551	https://restaurants.subway.com/united-states/tx/marshall/1209-e-grand-ave	Subway	0.95
+6142bf91c975	Subway	fastfood	sandwich shop	32.72511	-94.94250	325 US Hwy 271 S.	Gilmer	75644	+19038433079	http://www.subway.com/en-us	Subway	0.97
+7914e59ff338	Subway	fastfood	sandwich shop	32.15263	-94.78481	203 Hwy 79 N	Henderson	75652	+19036572919	https://restaurants.subway.com/united-states/tx/henderson/203-hwy-79-n	Subway	0.98
+83c73ab0e1fd	Subway	fastfood	sandwich shop	32.51057	-94.59259	702 W Main St Ste A	Hallsville	75650	+19036603257	https://www.subway.com		0.97
+844882dcb371	Subway	fastfood	sandwich shop	32.52572	-94.78589	2011 Gilmer Rd	Longview	75604	+19032979512	https://www.subway.com		0.99
+853790ad2125	Subway	fastfood	sandwich shop	32.13150	-94.80448	2127 Highway 79 South, Suite 300	Henderson	75654	+14306254277	https://restaurants.subway.com/united-states/tx/henderson/2127-highway-79-south?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=39292&utm_campaign=evergreen-2020&y_source=1_MTQ5MTM0ODctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+85989d9db79b	Subway	fastfood	sandwich shop	32.51900	-94.85732	206 Hwy 80 Suite K	White Oak	75693	+19032976667	https://restaurants.subway.com/united-states/tx/white-oak/206-hwy-80	Subway	0.97
+988a97fe1922	Subway	fastfood	sandwich shop	32.52129	-94.71746	2001 N Eastman Rd	Longview	75601	+19032348458	https://www.subway.com		0.97
+a2778fed4336	Subway	fastfood	sandwich shop	32.37969	-94.86977	923 Houston St	Kilgore	75662	+19039846899	https://restaurants.subway.com/united-states/tx/kilgore/923-houston-st	Subway	0.97
+a2937449a069	Subway	fastfood	sandwich shop	32.99640	-94.61192	1413 E 1st	Hughes Springs	75656	+19036392576	https://www.subway.com		0.98
+a96850efb9e0	Subway	fastfood	sandwich shop	32.38957	-94.87132	96 Midtown Plz	Kilgore	75662	+19039817827	https://restaurants.subway.com/united-states/tx/kilgore/96-n-midtown	Subway	0.98
+b0718774fd3e	Subway	fastfood	sandwich shop	32.50083	-94.73812	101 E Marshall Ave	Longview	75601	+19037585506	https://restaurants.subway.com/united-states/tx/longview/101-e-marshall-ave	Subway	0.95
+b8ac8c948adf	Subway	fastfood	sandwich shop	32.15846	-94.35509	1018 W Panola St	Carthage	75633	+19036938438	https://restaurants.subway.com/united-states/tx/carthage/1018-w-panola-street	Subway	0.96
+c8d5d30f3a2e	Subway	fastfood	sandwich shop	32.55782	-94.35264	1701 E End Blvd N	Marshall	75670	+19039388101	https://www.subway.com		0.92
+d64fe04cb263	Subway	fastfood	sandwich shop	32.69868	-94.75048	101 Village Dr.	Diana	75640	+14305581005	https://restaurants.subway.com/united-states/tx/diana/101-village-dr	Subway	0.97
+ea334e2c0caa	Subway	fastfood	sandwich shop	32.43731	-94.71399	4006 Estes Pkwy	Longview	75603	+19032349924	https://www.subway.com		0.95
+f4bee5e3ef74	Subway	fastfood	sandwich shop	32.49817	-94.35696	5018 East End Blvd South	Marshall	75672	+19039383336	https://restaurants.subway.com/united-states/tx/marshall/5018-east-end-blvd-south	Subway	0.98
+ff4c790f4055	Subway	fastfood	sandwich shop	32.53886	-94.74489	2330 Judson Rd.	Longview	75605	+19032389399	https://restaurants.subway.com/united-states/tx/longview/2330-judson-rd	Subway	0.98
+0ddd7cf3152e	Taco Bell	fastfood	taco restaurant	32.14927	-94.78735	300 US Highway 79 S	Henderson	75654	+19036577303			0.96
 33063d502c78	Taco Bell	fastfood		32.52041	-94.85982	107 US-80	White Oak	75693	+19032977900	http://www.tacobell.com/	Taco Bell	0.99
 3de1a5d62f41	Taco Bell	fastfood		32.50048	-94.74068	200 W. Marshall	Longview	75601	+19037583316	http://www.tacobell.com/	Taco Bell	0.98
 8ce53f969a8b	Taco Bell	fastfood		32.44377	-94.71976	3603 Estes Parkway	Longview	75602	+19037536331	http://www.tacobell.com/	Taco Bell	0.99
@@ -1165,25 +1233,37 @@ b370dab77481	Taco Bell	fastfood		32.39031	-94.86477	1000 US Hwy 259 North	Kilgor
 bdab1ac80db1	Taco Bell	fastfood		32.54039	-94.74652	2553 Judson Rd	Longview	75605	+19037581910	http://www.tacobell.com/	Taco Bell	0.98
 ec7478c39034	Taco Bell	fastfood		32.52324	-94.78532	1901 NW Loop	Longview	75604	+19032971200	http://www.tacobell.com/	Taco Bell	0.98
 ee3fede34ffe	Taco Bell	fastfood		32.53889	-94.34882	618 E End Blvd S	Marshall	75670	+19039350207	http://www.tacobell.com/	Taco Bell	0.98
-7d08d1cf77f5	Taco Bueno	fastfood		32.50069	-94.73312	500 E Marshall Ave	Longview	75601	+19037586473	https://www.tacobueno.com/locations/longview/500-e-marshall		0.97
 8a845a073c8b	Taco Bueno	fastfood		32.50041	-94.73340	500 E Marshall Ave	Longview	75601	+19034018591	https://locations.tacobueno.com/longview/500-e-marshall-ave	Taco Bueno	0.98
+ca02211e6c22	Taco Cabana	fastfood	taco restaurant	32.54383	-94.73495	411 E Loop 281 Ste A	Longview	75605	+14694985919	http://www.tacocabana.com/		0.99
 68edc7d4acde	Taqueria Matamoros	fastfood		32.42496	-94.71651	4701 Estes Pkwy	Longview	75603	+19033713768	http://taqueria-jalisco.com		0.77
 1401b0333d0b	Wendy's	fastfood		32.55690	-94.35052	1511 E End Blvd N	Marshall	75670	+19039271229	https://www.wendys.com		0.88
 380ecff488ef	Wendy's	fastfood		32.54197	-94.73043	3302 N Fourth St	Longview	75605	+19036639330	https://locations.wendys.com/united-states/tx/longview/3302-north-4th-street	Wendy's	0.98
+495ebb6c98c8	Wendy's	fastfood	burger restaurant	32.49722	-94.35693	5120 E End Blvd S	Marshall	75672	+19039230767	https://locations.wendys.com/tx?utm_source=bing&utm_medium=local&utm_campaign=bing-distrib		0.98
 853505af066f	Wendy's	fastfood		32.15813	-94.32265	975 E Sabine St.	Carthage	75633	+19036312034	https://locations.wendys.com/united-states/tx/carthage/975-e-sabine-st	Wendy's	0.94
 c5a9e3d0ad6c	Wendy's	fastfood		32.53304	-94.78944	2417 Gilmer Rd	Longview	75604	+19032971040	https://locations.wendys.com/united-states/tx/longview/2417-gilmer-road	Wendy's	0.99
 dbbc066c0bd2	Wendy's	fastfood		32.43113	-94.86385	4401 N State Hwy 42	Kilgore	75662	+19039888600	https://locations.wendys.com/united-states/tx/kilgore/4401-n-state-hwy-42	Wendy's	0.99
 04a26ea69457	Whataburger	fastfood		32.38044	-94.86868	108 N Henderson Blvd	Kilgore	75662	+19039841324	https://locations.whataburger.com/tx/kilgore/108-n-henderson-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+08746413c349	Whataburger	fastfood	burger restaurant	32.52081	-94.86060	103 E US HIGHWAY 80	White Oak	75693	+19032911995	http://whataburger.com/	Whataburger	0.99
 36b174e4c7bb	Whataburger	fastfood		32.49738	-94.77762	4108 W LOOP 281 # 100	Longview	75604	+19032367730	https://locations.whataburger.com/tx/longview/4108-w-loop-281-100.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+41807f60bdd1	Whataburger	fastfood	burger restaurant	32.43554	-94.94386	6241 Old Highway 135 N	Kilgore	75662	+19039832800	https://locations.whataburger.com/tx/kilgore/6241-old-highway-135-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+88a03ff58a70	Whataburger	fastfood	burger restaurant	32.52388	-94.35146	2406 E END BLVD S	Marshall	75672	+19039356161	https://locations.whataburger.com/tx/marshall/2406-e-end-blvd-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
+92e390ab2a7f	Whataburger	fastfood	burger restaurant	32.74110	-94.94141	892 US Highway 271 N	Gilmer	75644	+19036803001	https://locations.whataburger.com/tx/gilmer/892-us-highway-271-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 a168350e58fa	Whataburger	fastfood		32.54292	-94.73041	3308 N 4TH ST	Longview	75605	+19036632267	https://locations.whataburger.com/tx/longview/3308-n-4th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+a4a579aa9e9a	Whataburger	fastfood	burger restaurant	32.50592	-94.79115	3400 W Marshall Ave Ste 340	Longview	75604	+19039356161	http://www.whataburger.com		0.92
 a776353b6229	Whataburger	fastfood		32.49839	-94.75146	105 S SPUR 63	Longview	75601	+19037537231	https://locations.whataburger.com/tx/longview/105-s-spur-63.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+ada64e076d7f	Whataburger	fastfood	burger restaurant	32.15868	-94.78394	630 U.S. 79	Henderson	75652	+19036578538	https://locations.whataburger.com/tx/henderson/630-us-79.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 b37223e91217	Whataburger	fastfood		32.50942	-94.59064	602 W MAIN ST	Hallsville	75650	+19036682842	https://locations.whataburger.com/tx/hallsville/602-w-main-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 b5b94142ea82	Whataburger	fastfood		32.53182	-94.78896	2401 GILMER RD	Longview	75604	+19037598858	https://locations.whataburger.com/tx/longview/2401-gilmer-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 e30f10decb77	Whataburger	fastfood		32.15746	-94.35302	819 West Panola Street	Carthage	75633	+19036909600	https://locations.whataburger.com/tx/carthage/819-west-panola-street.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 e8fef207fffd	Whataburger	fastfood		32.54745	-94.34641	2010 VICTORY DR	Marshall	75672	+19039382064	https://locations.whataburger.com/tx/marshall/2010-victory-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 ed34133516e8	Whataburger	fastfood		32.45360	-94.70820	3123 S EASTMAN RD	Longview	75602	+19037574927	https://locations.whataburger.com/tx/longview/3123-s-eastman-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
 d5484bcd9013	Whataburger Of East Texas	fastfood		32.51609	-94.73840	1 Pegues Pl	Longview	75601	+19032368775	http://www.whataburgerofeasttexas.com		0.55
+023e339b85d8	Wingstop	fastfood	chicken restaurant	32.12973	-94.80716	2319 US Highway 79	Henderson	75654	+19035513339	https://www.wingstop.com/location/wingstop-2003-henderson-tx-75654/menu?y_source=1_NTUyMDcyNzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.93
+51229a56139e	Wingstop	fastfood	chicken restaurant	32.39141	-94.86317	1214 N US Hwy 259, Ste 200	Kilgore	75662	+19039869464	https://www.wingstop.com/location/wingstop-1159-kilgore-tx-75662/menu?y_source=1_NTUyMDY5MDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 7fbcb4375847	Wingstop	fastfood		32.53999	-94.73013	518 E Loop 281	Longview	75605	+19037539464	https://www.wingstop.com/location/wingstop-475-longview-tx-75605/menu?y_source=1_NTUyMDY2MTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+84aa94996aa7	Wingstop	fastfood	chicken restaurant	32.54462	-94.35042	101 East End Blvd South	Marshall	75670	+19039359464	https://www.wingstop.com/location/wingstop-1788-marshall-tx-75670/menu?y_source=1_NTUyMDcwOTktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
+a92c33fd8d63	Wingstop	fastfood	chicken restaurant	32.46297	-94.73170	2430 S. High Street, Suite E3	Longview	75602	+19037579464	https://www.wingstop.com/location/wingstop-1146-longview-tx-75602/menu?y_source=1_NTUyMDc2MTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
+b18b8b6ae061	Wingstop	fastfood	chicken restaurant	32.52697	-94.78185	1723 W Loop 281	Longview	75604	+19032919464	https://www.wingstop.com/location/wingstop-119-longview-tx-75604/menu?y_source=1_NTUyMDc0NDAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
 c19dbfb62dbe	154 Exxon Harleton Supermarket	grocery		32.67483	-94.57169	16995 State Highway 154	Harleton	75651	+19037773663	http://www.exxon.com/		0.74
 d60a5453a186	4-D Grocery	grocery		32.10049	-94.32050	1917 US-59 S	Carthage	75633	+19036934340			0.78
 3eb9b1c46b2e	Albertsons	grocery		32.54293	-94.75527	3603 McCann Rd	Longview	75605	+19036632056	https://local.albertsons.com/tx/longview/3603-mccann-rd.html	Albertsons	0.98
@@ -1202,7 +1282,6 @@ a5b80e3b2051	Brookshire's	grocery		32.99716	-94.96005	102 N Greer Blvd	Pittsburg
 a71e7a6bf5ff	Brookshire's	grocery		32.53239	-94.92822	1300 E Broadway Ave	Gladewater	75647	+19038452189	https://www.brookshires.com/store-information/Gladewater/7	Brookshire's	0.96
 b55997480260	Brookshire's	grocery		32.76096	-94.35110	404 E Broadway St	Jefferson	75657	+19036653601	https://www.brookshires.com/store-information/Jefferson/110	Brookshire's	0.92
 bcc5a7c59311	Brookshire's	grocery		32.52040	-94.86361	200 W Hwy 80	White Oak	75693	+19032979894	https://www.brookshires.com/store-information/White_Oak/50	Brookshire's	0.96
-d996386d9612	Brookshire's	grocery		32.50680	-94.72920		Longview			http://www.brookshires.com/	Brookshire's	0.57
 dbf3ae177b6e	Brookshire's	grocery		32.50906	-94.58874	590 W Main St	Hallsville	75650	+19036681410	https://www.brookshires.com/store-information/Hallsville/130	Brookshire's	0.99
 3cdcd49a70e5	Carter's Grocery	grocery		32.46973	-94.72169	1001 Raney St	Longview	75602	+19037535980	http://carters.com	Carter's Georgia	0.92
 6da1b342a019	Carthage H-E-B	grocery		32.15920	-94.37280	419 NW LOOP 436	Carthage	75633		https://www.heb.com/heb-store/us/tx/carthage/carthage-h-e-b-458	H-E-B	0.80
@@ -1276,7 +1355,6 @@ accff8d5b371	Super 1 Foods Fuel Center	grocery		32.51793	-94.79205	2301 W Loop 2
 881655b28e1a	Top Homestead General Store and Market	grocery		32.64705	-94.75884	9999 US-259	Longview	75605	+19032807224	http://www.tophomesteadgeneralstore.com/		0.97
 e551d508d5fc	Tri-County Farmers Market	grocery		32.53746	-94.93799	500 Allison St	Gladewater	75647	+19038455436	http://www.gym101fitness.com		0.92
 d810ccea97c1	U.s.v. Llc	grocery		32.53883	-94.94743	701 W Upshur Ave	Gladewater	75647				0.95
-838644dd6e9a	Wal-Mart Supercenter	grocery		32.55666	-94.38262		Marshall		+19039380256	http://www.walmart.com/		0.67
 bfc5ee504901	Wal-Mart Supercenter	grocery		32.55971	-94.38589		Marshall		+19039380256	http://www.walmart.com/		0.69
 a9e776802d46	Walmart	grocery		32.54385	-94.72868	3310 N 4th St	Longview	75605	+19036635588	http://www.walmart.com		0.77
 8ba52e8b873c	Walmart Grocery Pickup	grocery		32.55783	-94.35264	1701 E End Blvd N	Marshall	75670	+19036817133	https://grocery.walmart.com/locations/pickup/Walmart-Marshall-TX-Supercenter-918		0.92
@@ -1316,7 +1394,6 @@ ec66de6cf373	Neurological Institute At Good Shepherd	hospital		32.50230	-94.7309
 f8511bb876e1	Open Door Resource Center	hospital		32.99458	-94.96014	117 S Greer Blvd	Pittsburg	75686	+19039469910	https://www.opendoortx.org/		0.92
 9b9bae9fa26a	PhyNet - Hughes Springs	hospital		32.99903	-94.63067	201 E 2nd St	Hughes Springs	75656		http://www.Phynetinc.com/	PhyNet - Linden Clinic	0.92
 806cfd93a1bf	Primary Care Associates	hospital		32.51896	-94.78973	2101 W Loop 281	Longview	75604	+19037597200			0.70
-f4e3af4eacf4	Primary Care Associates	hospital		32.51905	-94.78983	2101 W Loop 281	Longview	75604	+19037597200	http://www.pca-longview.com		0.69
 a80506a89691	Roy H Laird Memorial Hospital	hospital		32.37384	-94.86810	1612 S Henderson Blvd	Kilgore	75662	+19039843505	http://www.kisd.org		0.83
 40840a585a4a	The Beverly Clinic	hospital		32.49454	-94.73225	103 Woodbine Pl	Longview	75601	+19032127788	http://www.thebeverlyclinic.com/		0.99
 3f3e529402c6	The Center For Wound Healing And Hyperbaric Medicine	hospital		32.53413	-94.73072	802 Medical Dr Ste 401	Longview	75605	+19035537670	https://www.longviewregional.com		0.75
@@ -1330,16 +1407,13 @@ ba285c7740af	Voyage Medical Solutions	hospital		32.50864	-94.73911	1121 Judson R
 6d6f1ba3af0d	281 Lodgings	hotel		32.54673	-94.73228	908 E Hawkins Pkwy	Longview	75605	+19036637646	https://281lodginggroup.com		0.55
 685eb007afac	A Motel Among the Pines	hotel	motel	32.79288	-94.55491	8945 FM729	Avinger	75630	+19037552725	http://motelamongthepines.com/		1.00
 41aa40c5d814	Affordable Longview Texas Rooms by All Oilfield Accommodations	hotel		32.54052	-94.73170	490 E Loop 281	Longview	75605	+18007604234	http://www.oilfieldreservations.com/		0.56
-b33da4c8f77c	Akshar Krupa Llc	hotel		32.45147	-94.70757	3304 S Eastman Rd	Longview	75602				0.95
 9c6d1855e09d	Alley Creek Campground	hotel		32.79403	-94.62300		Marion			http://www.recreation.gov/camping/alley-creek-camp/r/campgroundDetails.do?...		0.74
-ad839477c75b	Alley Creek Campground	hotel		32.79602	-94.59512		Marion			http://www.recreation.gov/camping/alley-creek-camp/r/campgroundDetails.do?...		0.74
 1a0a46fbcee5	Americas Best Value Inn	hotel	motel	32.49003	-94.36111	100 I-20 W	Marshall	75672	+19039271718	https://www.redlion.com/americas-best-value-inn/tx/marshall/americas-best-value-inn-marshall		0.96
 785ab56ad1ab	Americas Best Value Inn & Suites Kilgore	hotel	resort	32.41293	-94.84698	3298 U S 259	Kilgore	75662	+19039882800	https://www.redlion.com/americas-best-value-inn/tx/kilgore/americas-best-value-inn-suites-kilgore		0.99
 6df664234c45	Americas Best Value Inn Longview	hotel	motel	32.44918	-94.72299	3100 Estes Pkwy	Longview	75602	+19037584322	https://www.sonesta.com/americas-best-value-inn/tx/longview/americas-best-value-inn-longview		0.99
 b970fd8a4c64	Americas Best Value Inn.	hotel		32.40467	-94.84858		Kilgore					0.57
 50a7430366d1	Amp Lodging, Llc	hotel		32.54260	-94.73305	431 E Loop 281	Longview	75605				0.95
 f184f5ad9d37	Arti, Inc	hotel		32.48658	-94.35911	6002 E End Blvd S	Marshall	75672				0.95
-a1a45756b3d6	Ashland Masonic Lodge 1138 Diana TX	hotel		32.70947	-94.77305	10478 State Highway 154 E	Diana	75640				0.66
 9681c772eeb4	Avatar Frontera Marshall Llc	hotel		32.49328	-94.36034	105 Interstate 20 W	Marshall	75672				0.95
 4b6e3d8818fa	Awesome Cedar Lodge	hotel		32.67652	-94.10005	110 Private Road 2624	Karnack	75661	+19039308148	http://www.awesomecedarlodge.com		0.92
 ab9a83576dd8	Baymont by Wyndham Henderson	hotel		32.14841	-94.78958	410 US-79	Henderson	75652	+19036577900	https://www.wyndhamhotels.com/baymont/henderson-texas/baymont-inn-and-suites-henderson/overview		1.00
@@ -1351,11 +1425,9 @@ c8b8a9510345	Belmont Inn and Suites	hotel	motel	32.32312	-94.52354	858 N Hill St
 7252d537b0d0	Best Western Carthage Inn & Suites	hotel		32.15030	-94.32026	2235 SE Loop	Carthage	75633	+19036936700	https://www.choicehotels.com/texas/carthage/comfort-inn-hotels/txa08?pmf=yext&mc=llyxyxpx	Best Western Hotels & Resorts	1.00
 cd636116292b	Best Western Executive Inn	hotel		32.49604	-94.35831	5201 E End Blvd S	Marshall	75672	+19039350707	https://www.bestwestern.com/en_US/book/hotel-rooms.44525.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44525	Best Western Hotels & Resorts	1.00
 2c01d25405e3	BEST WESTERN Inn of Kilgore	hotel	resort	32.39242	-94.86165	1411 US Highway 259 N	Kilgore	75662	+19039861195			0.92
-996c7900848f	Best Western Inn Of Kilgore	hotel		32.40691	-94.85057	1411 US Highway 259 N	Kilgore	75662	+19039861195	https://www.lacasadelzorro.com		0.55
 f8f94f8de1be	Best Western Longview	hotel		32.54129	-94.73799	310 E Loop 281	Longview	75605	+19037578888	https://www.bestwestern.com/en_US/book/hotel-rooms.44590.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44590	Best Western Hotels & Resorts	1.00
 1b3250a71f1e	Best Western Of Jefferson	hotel		32.75834	-94.35416	400 S Walcott St	Jefferson	75657	+19036653536	https://www.lacasadelzorro.com		0.55
 2b30b6510981	Best Western Plus Longview University Hotel	hotel		32.44963	-94.70663	900 S Access Rd	Longview	75602	+19032473000	https://www.ihg.com/garner-hotels/hotels/us/en/longview/ggglg/hoteldetail	Best Western Hotels & Resorts	0.99
-6a6e8655807c	Bmb Hospitality Llc	hotel		32.44394	-94.72115	110 S Access Rd	Longview	75603				0.95
 fb2d8d2d54ea	Box Office Travel	hotel		32.50418	-94.74558	1000 McCann Rd	Longview	75601		boxofficetravel.com		0.95
 6b6f266e1c11	Breiton Hospitality Llc	hotel		32.54239	-94.73171	3307 4th St	Longview	75605		adventconstructionwa.com		0.95
 dead15bc3fe8	Buckhorn Camping Ground At Lake Of The Pines	hotel		32.75739	-94.49829		Jefferson			www.reserveamerica.com/camping/buckhorn-creek/r/campgroundDetails...		0.84
@@ -1366,14 +1438,9 @@ dead15bc3fe8	Buckhorn Camping Ground At Lake Of The Pines	hotel		32.75739	-94.49
 92ba54be4ad3	Budget Inn	hotel	motel	32.16800	-94.78536	100 TX-43 East	Henderson	75652	+19036572592	http://www.budgetinn.com	Budget Inn	0.98
 1e140bb87e51	Burnett Motel	hotel	motel	32.52719	-94.36641	205 E Pinecrest Dr	Marshall	75670	+19039386648			0.99
 8f5fea3d9573	Caddo Lake Island Inn	hotel		32.73716	-94.11972	4731 Cypress Village Rd	Karnack	75661	+19037893215			0.69
-4ba8286fa071	Caddo Lake Lodge	hotel	lodge	32.73590	-94.14436	2325 Blair Landing Rd	Karnack	75661	+13183499768	http://www.caddolakelodge.com		0.92
 651ee680d573	Candlewood Suites Longview By Ihg	hotel		32.54440	-94.75044	2904 Tuttle Blvd	Longview	75605	+19036639751	https://www.ihg.com		1.00
-11e4c37ac0c7	Carlex Hospitality Llc	hotel		32.39045	-94.86315	1210 US Highway 259 N	Kilgore	75662				0.95
-57a57d01570f	Castaway Inn	hotel	lodge	32.84748	-94.70882	16851 State Hwy 155 N	Ore City	75683				0.92
-20113749bb27	Cement Pond	hotel		32.19447	-94.99265	25558 FM 15	Troup	75789				0.97
 51bbaf62a7c4	Centerstone Suites	hotel		32.44913	-94.71297	711 N Access Rd	Longview	75602	+19037587848	http://www.centerstonehotels.com/		0.88
 2460e238f8fd	Clarion Pointe Marshall	hotel		32.49512	-94.35882	5301 E End Blvd S	Marshall	75672	+19039270009	https://www.choicehotels.com/texas/marshall/rodeway-inn-hotels/txi79	Clarion Hotel	0.99
-28e2f10b1c3c	Clinton Lodge 23	hotel	lodge	32.17909	-94.82433	477 Loop 571	Henderson	75652				0.93
 4afc1c9b409f	Comfort Inn & Suites	hotel		32.44939	-94.71328	711 N Access Rd	Longview	75602	+19037587848	https://www.ihg.com/holidayinnexpress/hotels/us/en/longview/gggna/hoteldetail		0.77
 3a9bcff7d888	Comfort Inn Suites Longview	hotel	resort	32.44948	-94.71439	707 N Access Rd	Longview	75602	+19032123333	http://www.comfortinnsuiteslongview.com/		0.67
 da6e0e343fe3	Comfort Suites	hotel		32.54252	-94.73227	3307 N Fourth St	Longview	75605	+19037173057	https://www.choicehotels.com/texas/longview/comfort-suites-hotels/tx703	Choice Hotels	1.00
@@ -1385,19 +1452,15 @@ fb3312056faf	Countryside Motel	hotel		32.31598	-94.51684	165 N Hill St	Tatum	756
 cabf903baee0	Courtyard by Marriott Longview North	hotel		32.54724	-94.72284	1125 E Hawkins Pkwy	Longview	75605	+19032302700	https://www.marriott.com/en-us/hotels/lgvcy-courtyard-longview-north/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Courtyard by Marriott	1.00
 e1ad9aa16a27	Crestwood Complex Center	hotel		32.79264	-94.55550	150 Slampa Dr	Avinger	75630	+19037552353	http://www.lakeothepineslodge.com		0.90
 839d89e3db85	Crossroads	hotel		32.44058	-94.23093	FM-2625	Marshall	75672	+13183934401	http://www.crossroads.com/		0.69
-b381700f76fe	Davis Hall	hotel		32.46788	-94.72429	Stegall Dr	Longview	75602				0.58
 515ad7740bfb	Days Inn & Suites by Wyndham Marshall	hotel	resort	32.49380	-94.35835	5555 E End Blvd S	Marshall	75672	+19039351941	https://www.wyndhamhotels.com/days-inn/marshall-texas/days-inn-and-suites-marshall/overview?CID=LC:iqv0j1dklijly45:13776&iata=00093796		0.99
 c863ec5f655e	Days Inn By Wyndham Kilgore	hotel		32.42942	-94.86314	4312 State Highway 42	Kilgore	75662	+18003291073	https://www.wyndhamhotels.com		0.94
 e0433891152b	Days Inn Kilgore, TX	hotel		32.38741	-94.87511	4312 State Highway 42 N	Kilgore	75662	+19039832975			0.85
 f22df7d3180d	Days Inn Longview South	hotel		32.44418	-94.72209	112 S Access Rd	Longview	75603	+19038070711	https://days-inn-longview-south.hub.biz/		1.00
 e8ec60334444	Delux Inn	hotel	motel	32.38770	-94.86887	801 N Henderson Blvd	Kilgore	75662	+19039845501	https://www.deluxe.com		0.99
-f1997f124e0e	Dhruvi Llc	hotel		32.51177	-94.82974	2314 E US Highway 80	White Oak	75693				0.95
-fbfc15c8e371	Diya Hospitality Inc	hotel		32.54133	-94.34912	502 E End Blvd S	Marshall	75670				0.95
 54c3b6e53909	East Texas Rentals	hotel		32.53941	-94.73221		Longview		+19037203739			0.74
 608c37ac0300	Economy Inn	hotel	motel	32.50803	-94.80657	4700 W Marshall Ave	Longview	75604	+19032300709			0.99
 8796968b6f65	Economy Inn	hotel	motel	32.13209	-94.80612	2300 US-79	Henderson	75654	+19036573532	http://www.economyinnflorence.com	Economy Inn	0.92
 ff147b5bfbb3	Economy Inn	hotel	motel	32.53513	-94.93684	701 E Broadway Ave	Gladewater	75647	+19038452286	http://www.economyinn.us/		0.96
-8191fc74a91c	El Cerrito Lodge	hotel	lodge	32.75638	-94.68212	6819 FM 726 W	Diana	75640	+19034311672	http://www.ElCerritoLodge.com/		0.92
 04d24ffe4673	Excelsior House Hotel	hotel		32.75591	-94.34559	211 W Austin St	Jefferson	75657	+19036652513	https://theexcelsiorhouse.com/		0.92
 2f017b6c0374	Executive Inn	hotel	motel	32.50455	-94.71193	1905 E Marshall Ave	Longview	75601	+19032342920	http://executiveinnlongviewtx.com/		0.98
 f85327a0327c	Executive Inn & Suites	hotel	motel	32.71782	-94.94262	920 US-271	Gilmer	75644	+19038436099	http://www.executiveinngilmertx.com/		0.92
@@ -1408,11 +1471,8 @@ b8c834e20c6c	Executive Inn and Suites	hotel	motel	32.75985	-94.35474	200 S Walco
 a0e2b5280099	Extended Stay America	hotel		32.44506	-94.71861	502 S Access Rd	Longview	75603		https://www.extendedstayamerica.com/hotels/tx/longview/longview	Extended Stay America	0.80
 d30077f44c5b	Fairfield	hotel		32.49260	-94.36053	105 West Interstate 20	Marshall	75672	+19039387666	https://www.marriott.com/en-us/hotels/lgvfs-fairfield-inn-and-suites-marshall/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 8db2015b3362	Fairfield by Marriott Inn & Suites Longview	hotel		32.54247	-94.73123	3305 N Fourth St	Longview	75605	+19036631995	https://www.marriott.com/en-us/hotels/lgvfi-fairfield-inn-and-suites-longview/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
-bcf3d9f4a1cf	Frank Sexton Masonic Lodge 206	hotel	lodge	32.99499	-94.96545	202 Jefferson St	Pittsburg	75686	+19038562842			0.62
 9e54d73b1b8f	French Cottages Jefferson	hotel		32.75097	-94.34763	408 Houston St	Jefferson	75657	+19034718224	https://frenchcottages.hospitable.rentals/		0.92
 102e11ac6f5d	Garner Hotel Longview South	hotel		32.44962	-94.70645	900 S Access Rd	Longview	75602	+19032473000	https://www.ihg.com		1.00
-b36b1654ac28	Gator Lodge	hotel	lodge	32.70654	-94.08012	County Rd	Jefferson	75657	+19034079717	http://www.gatorlodge.com		0.92
-91a18e5951a9	Gilbert Hall	hotel		32.46790	-94.72560	Stegall Dr	Longview	75602				0.58
 cbe1cc0d0cfc	Governor's House	hotel		32.75969	-94.34772	321 N Walnut St	Jefferson	75657	+19036657933	http://www.thegovernorshouse.com		0.61
 19a4f282e0fd	GreenTree Inn & Suites Longview South I-20	hotel	resort	32.44874	-94.71404	707 N Access Rd	Longview	75602	+19032123333	https://www.greentreeinn.com/hotels/tx/longview/		0.92
 d08c56f89301	Guest Inn Longview	hotel	motel	32.44777	-94.71902	605 N Access Rd	Longview	75602	+19037530350	http://www.guest-inn.com		1.00
@@ -1422,17 +1482,13 @@ d08c56f89301	Guest Inn Longview	hotel	motel	32.44777	-94.71902	605 N Access Rd	L
 d0aff53859fd	Hampton Inn by Hilton	hotel		32.44385	-94.72234	112 S Access Rd	Longview	75603	+19037580959	http://hamptoninn1.hilton.com/		0.92
 ebca83e09912	Hampton Inn Kilgore	hotel	resort	32.41153	-94.84861	3109 N Highway 259 N	Kilgore	75662	+19039833300			0.98
 e9336aef453b	Hampton Inn Longview	hotel		32.44830	-94.70782	160 Lucy Drive	Longview	75602	1-903-803-4100	https://www.hilton.com/en/hotels/ggglvhx-hampton-longview/	Hampton by Hilton	1.00
-dacb6c99a96d	Hampton Inn Marshall	hotel		32.49768	-94.35656	5100 E End Blvd S	Marshall	75672	+19039270079	https://www.hilton.com		0.95
 e7ad9c5aa1bd	Hampton Inn Marshall	hotel		32.49775	-94.35645	5100 E End Blvd S	Marshall	75672	+19039270079	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
 fc99c01eee9d	Hawthorn Suites by Wyndham Longview	hotel	resort	32.53996	-94.73326	3211 Hotel Way	Longview	75605	+19032122818			0.94
 9931c7e30437	Heard House	hotel		32.54600	-94.36307	511 E Austin St	Marshall	75670	+19039264875	http://dlb2323.wix.com/heard-house		0.92
 8733e588b242	Heather's Guesthaus	hotel		32.76204	-94.35040	107 N Main St	Jefferson	75657	+19366615631			0.71
 5987a57995de	Heights Hall	hotel		32.38029	-94.87256	905 Broadway Blvd	Kilgore	75662	+19037227711	http://www.Heights-Hall.com/		0.92
-573830931bb8	Hillbilly Hyatt	hotel		32.54173	-94.50793	PR 420	Hallsville					0.95
 c682d39e0cf7	Hilton Garden Inn Longview	hotel		32.54745	-94.73296	905 E Hawkins Pkwy	Longview	75605	+19032123000	http://www.longview.hgi.com/	Hilton Garden Inn	1.00
 ef2f858aaaf4	Historic W.C. Hargrove House	hotel		32.99864	-94.97147	312 Quitman St	Pittsburg	75686	+19038418251			0.57
-ad933e0b1509	Holiday Hill	hotel		32.89482	-94.78849		Gilmer					0.55
-f00f03446781	Holiday Hill	hotel		32.89272	-94.78162		Gilmer					0.55
 9fd373502ba8	Holiday Inn Express & Suites	hotel		32.49045	-94.35306	500 I-20	Marshall	75670	+19039349700	https://www.ihg.com/holidayinnexpress/hotels/us/en/marshall/mshtx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-MSHTX	Holiday Inn Express	1.00
 2122d45c49f0	Holiday Inn Express & Suites Henderson-Traffic Star	hotel		32.17239	-94.78767	300 Kilgore Dr	Henderson	75652	+19036575250	https://www.ihg.com/holidayinnexpress/hotels/us/en/henderson/hdrex/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-HDREX	Holiday Inn Express	0.99
 66befede812b	Holiday Inn Express & Suites Kilgore North	hotel	resort	32.41351	-94.84650	3308 US Highway 259 N	Kilgore	75662	+19039863533	https://www.ihg.com/holidayinnexpress/hotels/us/en/kilgore/gggki/hoteldetail?cm_mmc=BingMaps-_-EX-_-USA-_-GGGKI		0.99
@@ -1441,7 +1497,6 @@ bde6302871d0	Holiday Inn Express & Suites Longview South I-20 by IHG	hotel		32.4
 d159c411990e	Holiday Inn Express and Suites Carthage	hotel		32.14870	-94.32237	2295 SE Loop	Carthage	75633	+19036938585	https://www.ihg.com/holidayinnexpress/hotels/us/en/carthage/crhtc/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-CRHTC	Holiday Inn Express	1.00
 6799c9a9b2ea	Holiday Inn Express Marshall	hotel		32.49915	-94.35825	4911 S East End Blvd	Marshall	75672	+19039357923	http://www.hiexpress.com/		0.70
 d127a970f995	Holiday Inn Longview North	hotel		32.54475	-94.75260	300 Tuttle Cir	Longview	75605	+19036636464	https://www.ihg.com/holidayinn/hotels/us/en/longview/gggmc/hoteldetail?cm_mmc=FacebookMaps-_-HI-_-US-_-GGGMC	Holiday Inn Express	1.00
-0a6453b5d075	Holland Hill	hotel		32.27457	-94.85452	679 FM-850	Overton	75684				0.73
 a45c8a7369d7	HomeTown Inn & Suites	hotel	motel	32.53112	-94.72090	2700 N Eastman Rd	Longview	75605	+19037584443	https://www.hometowninnsuiteslongviewtx.com/		0.99
 febee2408576	Homewood Suites by Hilton Longview	hotel		32.50128	-94.75098	205 N Spur 63	Longview	75601	+19032340214	http://www.longview.homewoodsuites.com/	Homewood Suites by Hilton	1.00
 09cf59a9207f	Hotel Marshall	hotel		32.54480	-94.36560		Marshall	75670		http://en.wikipedia.org/wiki/Hotel_Marshall		0.69
@@ -1451,9 +1506,7 @@ febee2408576	Homewood Suites by Hilton Longview	hotel		32.50128	-94.75098	205 N 
 2561ad927332	Imperial Motel	hotel		32.50312	-94.72628	1019 E Marshall Ave	Longview	75601		https://www.imperialmotel100.com		0.99
 2e1ac6bf9f86	Inn Of Jeffrson	hotel		32.75834	-94.35424	400 S Walcott St	Jefferson	75657	+19036653983	http://innofjefferson.com		0.89
 624ccb9d5f27	Jefferson Hotel	hotel		32.75600	-94.34492	124 W Austin St	Jefferson	75657	+19033342631	http://www.historicjeffersonhotel.com		0.92
-3f53ce0ec7ca	Kilgore Travel Agency	hotel		32.38681	-94.87509	120 N Kilgore St	Kilgore	75662				0.95
 cc0927286cc9	Knights Inn Longview	hotel	motel	32.44886	-94.72356	3103 Estes Pkwy	Longview	75602	+19037581113	https://www.knightsinn.com/us/tx/longview/knights-inn-longview	Knights Inn Port Charlotte FL	1.00
-5f5553956c97	Knollmont Scouter Ranch	hotel		32.52674	-94.74084		Longview					0.74
 b697db99a017	La Quinta Inn and Suites	hotel		32.54650	-94.73241	908 E Hawkins Pkwy	Longview	75605	+19032428877	http://www.laquintalongviewnorth.com/?cid=local_6057	La Quinta by Wyndham	0.97
 ee0099204e37	La Quinta Inn and Suites	hotel		32.44878	-94.71619	3416 S Martin Luther King Jr Blvd	Longview	75602	+19032389965	https://www.wyndhamhotels.com/laquinta/longview-texas/la-quinta-i-20-longview-south/overview	La Quinta by Wyndham	1.00
 21b9b5f874bb	La Quinta Inn and Suites by Wyndham Marshall	hotel		32.48652	-94.36038	6015 E End Blvd S	Marshall	75672	+19039343080	http://www.laquintamarshall.com/?cid=local_6596	La Quinta by Wyndham	1.00
@@ -1483,13 +1536,10 @@ c2eb838dd017	Motel 6 Henderson- Tx	hotel	resort	32.13634	-94.78772	1500 US Highw
 9e3b899135db	Palace Inn	hotel	motel	32.50465	-94.70584	2107 E Marshall Ave	Longview	75601	+19037583391	https://www.palaceinn.com	Palace Inn Blue US-59 & Harwin	0.99
 fac9533b0f53	Panola Apartments	hotel		32.14146	-94.34856	1100 S Adams St	Carthage	75633	+19036938942	http://www.rentalhousingdeals.com/TX/Carthage/Panola-Apartments		0.91
 62e0093b80e2	Perfect Tatum Investment Llc	hotel		32.32300	-94.52354	858 N Hill St	Tatum	75691				0.95
-d936bcd1b96d	Pine Hill Lodge #95	hotel	lodge	32.15768	-94.44419	10454 FM 1798 E	Henderson	75654				0.71
 ad9d324a41a9	Pine Ridge AHC - Longview	hotel		32.43289	-94.76434	1060 E I 20 Access Rd	Longview	75603	+19032180117	https://pineridgeahc.com/		0.93
 116db008d9ac	Pine Ridge RV Park	hotel		32.43602	-94.80531	1060 W I 20 Access Rd	Longview	75603	+19032384207	http://www.58e8944c949440e58f6ffb8d6e76d3ad.sites.yp.com		0.77
-9e01e746cd65	Pine Tree Masonic Lodge No. 1396	hotel	lodge	32.53492	-94.80862	2709 Pine Tree Rd	Longview	75604	+19037599512	http://www.pinetree1396.org/		0.92
 9a47a3472774	Pineview Motel	hotel	motel	32.16618	-94.34023	802 N Saint Mary St	Carthage	75633	+19036933047	http://pineview-motel.keeq.io		0.65
 6d081c17dec7	Prayer House	hotel		32.15377	-94.80554	207 W Main St	Henderson	75652		https://www.prayerhouseministries.com		0.95
-417738fd9d1f	Prisha Hospitality Llc	hotel		32.44371	-94.72247	112 S Access Rd	Longview	75603				0.95
 e036d2bc8fea	Quality Inn	hotel		32.50014	-94.75124	203 N TX-63-SPUR	Longview	75601	+19037577858	http://www.qualityinn.com/		0.93
 982afbdc74fc	Quality Inn & Suites Longview I-20	hotel	resort	32.45189	-94.71027	803 N Access Rd	Longview	75602	+19032428896	https://www.choicehotels.com/texas/longview/quality-inn-hotels/txl84?mc=llbillpx&pmf=local		1.00
 d63003e1e991	Quality Inn Carthage	hotel		32.14853	-94.32460	2332 SE Loop	Carthage	75633	+19032653007	https://www.choicehotels.com/texas/carthage/quality-inn-hotels/txh69?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
@@ -1500,22 +1550,18 @@ d8f912c89653	Regency Inn	hotel	motel	32.53467	-94.93157	1009 E Broadway Ave	Glad
 e192dd5d869a	Relax And Wine Down Country Casitas	hotel		32.92379	-94.97774	514 County Road 1334	Pittsburg	75686	+19035984667	https://www.relaxandwinedown.com/		0.98
 2f9a9b3fc4ef	Relax Inn	hotel	motel	32.51183	-94.82981	2314 E U.S. Hwy 80	White Oak	75693	+19037599167	http://relaxinn.com		0.92
 ff5f52ca5c27	Residence Inn by Marriott Longview	hotel		32.44038	-94.71771	3661 Estes Parkway	Longview	75603		https://www.marriott.com/GGGRI	Residence Inn	0.80
-b33e62840e85	Rice Lakehouse	hotel		32.73922	-94.12843		Karnack					0.75
 9b925a064dac	Richard Henson	hotel		32.55262	-94.80019	3607 Gilmer Rd	Longview	75604		https://www.richardhensonfoundation.org		0.95
 b22cb6bedeeb	Rock Hill Cottage Bed & Breakfast	hotel		32.85451	-94.32501	2294 Hall Rd	Jefferson	75657	+19039307943	http://www.rockhillcottagebedandbreakfast.com/		0.78
 f9920c26827c	Rodeway Inn	hotel		32.49484	-94.35934	5301 S East End Blvd	Marshall	75672	+19039270009	https://www.choicehotels.com/texas/marshall/rodeway-inn-hotels/txi79?pmf=yext&mc=llyxyxpx	Choice Hotels	0.93
 b9607036aa9f	Rodeway Inn & Suites	hotel		32.45179	-94.71054	803 N Access Rd	Longview	75602	+19032342001	https://www.choicehotels.com/texas/longview/rodeway-inn-hotels/txl84?pmf=yext&mc=llyxyxpx	Choice Hotels	0.75
 dd8c5ca08f72	Rodeway Inn & Suites Jefferson	hotel	motel	32.75803	-94.35429	400 S Walcott St	Jefferson	75657		https://www.choicehotels.com/texas/longview/quality-inn-hotels	Rodeway Inn	0.98
-dbd6b6d5a29b	Ronav Llc	hotel		32.48970	-94.36109	100 Interstate 20 W	Marshall	75672				0.95
 86be4278a58e	Sawan, Llc	hotel		32.16789	-94.78474	100 State Highway 43 E	Henderson	75652				0.95
 d84fe506ad1a	Scenic View Motel & RV Park	hotel	motel	32.93599	-94.71671	108 Southshore Dr	Lone Star	75668	+19037670031	http://www.scenicviewmarina.com/		0.99
-8207d01a6cdb	Selah Resort	hotel	lodge	32.81730	-94.60963	12501 FM729	Avinger	75630				0.70
 6185dcfbf70e	Sleep Inn and Suites	hotel		32.54075	-94.73478	615 City Center Way	Longview	75605	+19032126520	https://www.choicehotels.com/texas/longview/sleep-inn-hotels/txg30?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
 946c55959731	Sonesta Essential Hotels Longview	hotel		32.45190	-94.71051	803 N Access Road	Longview	75602		https://www.sonesta.com/sonesta-essential/tx/longview/sonesta-essential-hotels-longview	Sonesta Essential	0.80
 5fd4d35cd732	Spark by Hilton Longview	hotel		32.54006	-94.73382	3211 Hotel Way	Longview	75605	+19032360000	https://www.hilton.com/en/hotels/gggitpe-spark-longview/?SEO_id=YEXTN-AMER-PE-GGGITPE	Spark By Hilton	0.99
 20f46c79a7c6	SpringHill Townhomes	hotel		32.55123	-94.79607	51 Sunrise Dr	Longview	75605	+19032971218			0.92
 988d20390eda	Staybridge Suites	hotel		32.54569	-94.73280	3409 N 4th St	Longview	75605	+19032123800	https://www.ihg.com/staybridge/hotels/us/en/longview/gggsb/hoteldetail?cm_mmc=FacebookMaps-_-SB-_-US-_-GGGSB	Staybridge Suites	1.00
-1908608de467	Stokers Restaurant	hotel		32.55973	-94.80097	3919 Gilmer Rd	Longview	75604				0.95
 69883fa03dda	Stratford House Inn	hotel		32.44929	-94.72285	3100 Estes Pkwy	Longview	75602		https://www.stratfordhouseedmond.com		0.95
 624381c3540a	Studio 6 Longview, TX	hotel	resort	32.49210	-94.75741	717 E Highway 31	Longview	75604	+19037578887	https://www.studio6.com/en/home/motels.tx.longview.5155.html?lid=Local_Milestone_5155&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.97
 f670f1ea231c	Sunset Inn	hotel	motel	32.50367	-94.76793	1307-1383 W Marshall Ave	Longview	75604	+19037585571	http://www.sunsetinn.com	Sunset Inn Restaurant	0.99
@@ -1523,7 +1569,6 @@ f670f1ea231c	Sunset Inn	hotel	motel	32.50367	-94.76793	1307-1383 W Marshall Ave	
 1c12cef505e9	Super 8 by Wyndham Longview North	hotel	motel	32.50020	-94.75113	203 N Spur 63	Longview	75601	+19037577858	https://www.wyndhamhotels.com/super-8/longview-texas/super-8-longviewdowntown/overview		1.00
 e29c46de6e64	Super 8 by Wyndham Longview/I-20	hotel		32.45182	-94.70715	3304 S Eastman Rd	Longview	75602	+19037040388	https://www.wyndhamhotels.com/super-8/longview-texas/super-8-longview/overview?CID=LC:7xnkh22o63wf5qj:02489		0.97
 d01e0115e6c7	Super 8 Carthage	hotel	motel	32.14669	-94.32608	2386 SE Loop	Carthage	75633	+19036937200	https://www.wyndhamhotels.com/super-8/carthage-texas/super-8-carthage-tx/overview		1.00
-deef563bba7a	Tejas Village	hotel	lodge	32.73978	-94.54661	509 Tejas Rd	Jefferson	75657	+19037772460	http://ww38.tejasvillage.com/		0.92
 a0256b64021d	Tex-An Motel	hotel	motel	32.50311	-94.71900	1402 E Marshall Ave	Longview	75601	+19037582743			0.99
 2c39f44bf2db	Texas	hotel		32.43119	-94.86363		Kilgore			http://www.texas.gov/		0.97
 0cd1bf9fa7cd	Texas Inn	hotel	motel	32.53461	-94.34996	1100 E End Blvd S	Marshall	75670	+19039384333	http://www.texasinnmotelmarshall.us		0.94
@@ -1556,7 +1601,6 @@ b847a4db9f4d	Agis Software Development Llc	office	information technology company
 375a2de5f379	AT&T	office	telecommunications company	32.54261	-94.74898	109 W Loop 281	Longview	75605	+19034750996	https://www.att.com/stores/texas/longview/279?source=E-Fls10000000000X&wtExtndSource=website	AT&T	1.00
 89b3fa71bcd2	Baker Hughes	office	energy company	32.36426	-94.89228	808 Paluxy	Kilgore	75662	+19039832628	http://bakerhughes.com		0.70
 e94499328c50	Blazer Services	office	energy company	32.17176	-94.32066	1537 NE Loop	Carthage	75633	+19036932365			0.89
-70674e5c6b10	Boost Mobile Local	office	telecommunications company	32.46901	-94.73132	2015 S Mobberly Ave	Longview	75602	+19034675660	http://locations.prepaidphonestores.com/ll/US/TX/Longview/2015-S-Mobberly-Ave	Boost Mobile	0.59
 65be24873645	Boral Bricks-Henderson	office	industrial company	32.18048	-94.80334		Henderson		+19036556807	https://boral-bricks-henderson-tx.hub.biz/		0.93
 5662bbbbf50e	BP America- Hallsville Field Office	office		32.48436	-94.48326	886 Finklea Rd	Hallsville	75650	+19039278999	http://www.bp.com		0.92
 13e940620fa4	C&C Oilfield Services	office	industrial company	32.48521	-94.49516	7220 I H 20 S Service Rd W	Hallsville	75650	+19039355454	http://ccoilfield.net/		0.57
@@ -1576,7 +1620,6 @@ e0bd71828e4e	Davis Elite Energy Services, LLC	office		32.16003	-94.41120	2181 S 
 a3831aa65fdd	Design903	office	information technology company	32.55778	-94.76330	4214 Mccann Rd # 304	Longview	75605	+19036860489	design903.com		0.75
 e75e7d19fa8d	Dish Network	office	telecommunications company	32.45851	-94.70792	2889 S Eastman Rd	Longview	75602	+19037573695	http://dish.com		0.56
 d2af8fdea15f	E&J Custom Apparel, Direct To Film & More	office	clothing company	32.73000	-94.94494	104 Buffalo St	Gilmer	75644	+14302019767	https://dtfbuulder.web.app/?clientId=9GWNqSdZK6Pw8V0PcNy3rZZTPGR2		0.92
-fb415379d552	Elwood Club Lake	office	private association	32.89006	-94.78305	Private Road	Pittsburg					0.97
 3ccb632b0866	Enbridge Processing LP	office	energy company	32.41235	-94.70044	268 Milam Rd	Longview	75603	+19036437728	http://enbridge.com		0.92
 84fe480691b7	Encore Multimedia	office		32.49495	-94.73672	208 N Green St Ste 513	Longview	75601	+19037576111	http://encoremultimedia.com		0.77
 dab913b8f733	EndTech Computer Repair	office	information technology company	32.15445	-94.34844	606 W Sabine St	Carthage	75633	+19037069929			0.92
@@ -1612,7 +1655,6 @@ fd55a632265a	Kelly Services	office		32.53773	-94.74443	2318 Judson Rd	Longview	7
 c2f7b92365d7	Knighten Industries Inc	office		32.16491	-94.32120	1733 NE Loop 436	Carthage	75633	+19034052932	http://www.knightenindustries.com		0.77
 ccfc54815e4c	Knox Lee Power Plant	office	energy company	32.37675	-94.64127	306 Knox Lee Rd	Longview	75603	+19036437696	http://www.usa.com/frs/aep-knox-lee-power-plant.html		0.92
 0255abb45543	Lambert Southwest	office		32.16150	-94.82684	1110 N Frisco St	Henderson	75652	+19036574680	http://www.lambertsw.com		0.65
-1826660bd0b7	Langseth Wofford Inc	office		32.50849	-94.73905	1121 Judson Rd Ste 151	Longview	75601				0.65
 739c67119ef1	Lighthouse Oilfield Services, Llc	office		32.37799	-94.72414	235 Johnny Clark Rd	Longview	75603	+19036439311			0.92
 74614eabe724	Little Nutt Oil Co	office		32.15227	-94.33233	344 Klondike St	Carthage	75633	+19036936121			0.65
 248e3dd6d9e6	Longview Laminated Plastics	office	plastics company	32.52070	-94.80193	1403 Pine Tree Rd	Longview	75604	+19037594660	http://www.longviewplastics.com/		0.92
@@ -1626,8 +1668,6 @@ e3174398c3fb	M G Cleaners	office		32.14732	-94.33929	216 W Hayden St	Carthage	75
 107212f50326	McAdams Propane Company	office	energy company	32.51428	-94.35381	3410 E End Blvd S	Marshall	75672	+19039355033	http://www.mcadamspropane.com		0.92
 4062e64a47b4	Moab Energy Llc	office		32.45805	-94.73087	2601 Estes Pkwy	Longview	75602	+19032247612	https://www.moabenergy.com		0.65
 5f577d2efb04	More Life Nutrition	office	private association	32.51220	-94.81789	315 Fairview Dr	Longview	75604	+19033713957	https://lettymm.herbalife.com/es-us/u/cart?recommendedCartId=b4a1a02a-b997-489e-8091-2524c249c7ca&cmp=WTA-4552831231a		0.89
-ad7d09b6397f	More Life Nutrition	office	private association	32.50827	-94.80367	315 Fairview Dr	Longview	75604	+19033713957	https://lettymm.herbalife.com/es-us/u/cart?recommendedCartId=b4a1a02a-b997-489e-8091-2524c249c7ca&cmp=WTA-4552831231a		0.83
-ea14e82d8644	Oak Hall	office	private association	32.37738	-94.86678	1217 Oak Dr	Kilgore	75662				0.73
 427b0886ce9a	Onward Press and Designs	office	clothing company	32.53797	-94.93104	1099 Sherwood St	Gladewater	75647		http://www.onwardpressshop.com/		0.55
 a18293fab461	Plastic Granules	office	plastics company	32.50191	-94.74081	N High St	Longview	75601	+916354364206	https://plastic-granules.com		0.77
 b02fecb98ff8	Quality Circle International Limited Llc	office	information technology company	32.50366	-94.76889	1402 W Marshall Ave	Longview	75604	+19037818111	https://www.qualitycircleint.com		0.75
@@ -1674,7 +1714,6 @@ a98dde19760d	Watermark Industrial Services	office		32.49207	-94.80693	304 Cullen
 6b6f180a4f29	1852 on Austin	restaurant	american restaurant	32.75707	-94.34346	124 E Austin St	Jefferson	75657	+19036014457	http://1852onaustin.com/		0.92
 ddb312478b55	19th Hole Bar & Grill	restaurant	bar and grill restaurant	32.37820	-94.86044	1306 Houston St	Kilgore	75662	+19032842781			0.89
 7841c406ec47	24 Karrots Café	restaurant	vegetarian restaurant	32.47528	-94.85071	4630 Texas N Ste 200	Kilgore	75662	+19039858829	https://www.24karrotscafe.com		0.58
-f7c9237318ba	24 Karrots Café	restaurant	vegetarian restaurant	32.43706	-94.86166	4630 Texas N Ste 200	Kilgore	75662	+19039858829	https://www.24karrotscafe.com		0.58
 85b163dcea83	2B Tavern and Longhorns	restaurant	bar and grill restaurant	32.49643	-94.58336	425 Country Club Rd	Hallsville	75650	+19034241188			0.94
 0522d2be4f08	309 Management Services Llc	restaurant		32.53842	-94.76759	2814 Bill Owens Pkwy Ste 200d	Longview	75605				0.95
 ac30c0fa3d16	3F Bait Company and Diner	restaurant	diner	32.66310	-94.18040	16091 State Highway 43 N	Karnack	75661	+14309751020			0.92
@@ -1741,10 +1780,6 @@ d1e0e30366b1	Buffalo Bell	restaurant	american restaurant	32.42437	-94.71591	4800
 b655309c50ac	Buffet Village	restaurant	buffet restaurant	32.73309	-94.94287	509 N Wood St	Gilmer	75644	+19038439696	https://hudut.top/buffet-village		0.92
 704b3bc86472	Bulldawg Burger	restaurant		32.18151	-94.34119	5372 NW Loop	Carthage	75633	+19032636475			0.92
 af8478abefcc	Bulldog Pizza	restaurant	pizza restaurant	32.76173	-94.34929	603 E Broadway St	Jefferson	75657	+19036659499	http://www.bulldogpizza.net		0.97
-39c7d47a5df3	Burger King	restaurant	burger restaurant	32.49940	-94.75013	701 W Marshall Ave	Longview	75601	+19035530244	https://burgerking.com/store-locator/store/13191	Burger King	0.96
-806d994f4e81	Burger King	restaurant	burger restaurant	32.52636	-94.35247	1310 E Pinecrest Dr	Marshall	75670	+19039383062	https://burgerking.com/store-locator/store/3062	Burger King	0.98
-c81fa98a5a93	Burger King	restaurant	burger restaurant	32.45167	-94.70792	3306 S Eastman Rd	Longview	75602	+19037589449	https://burgerking.com/store-locator/store/5316	Burger King	0.99
-fe603d9bf697	Burger King	restaurant	burger restaurant	32.53983	-94.75484	3511 McCann Rd	Longview	75605	+19037530513	https://burgerking.com/store-locator/store/3630	Burger King	0.99
 1496f72809ef	Burrito Shop	restaurant	mexican restaurant	32.39002	-94.87228	601 N Kilgore St	Kilgore	75662	+19039889251			0.96
 0baae3baf894	Bush's Chicken	restaurant	chicken restaurant	32.51157	-94.59511	804 W Main St	Hallsville	75650	+19036686014	http://www.bushschicken.com		0.92
 ab9a4195d6b9	Buster's Fried Chicken and Funnel Cakes	restaurant	chicken restaurant	32.50581	-94.74826	510 N Spur 63 #100	Longview	75601	+14306257024	http://buster-funnel-cakes.jeeq.io		0.92
@@ -1801,7 +1836,6 @@ a07ba09b28f9	China King	restaurant	chinese restaurant	32.53843	-94.76148	440 W L
 106c3768b3c4	China King Buffet	restaurant	buffet restaurant	32.54900	-94.35645	1109 E Grand Ave	Marshall	75670	+19039356888	http://chinaking.org		0.92
 89b2e0e9a6b5	CHINA MAX	restaurant	chinese restaurant	32.53932	-94.75111	3500 McCann Rd	Longview	75605	+18633992203	https://longviewmall.com		0.95
 8034e0d91c79	China Palace	restaurant	chinese restaurant	32.14761	-94.78938	440 US-79	Henderson	75654	+19036578003	http://www.chinapalacehenderson.com		0.96
-79eb5e5617fa	Chipotle Mexican Grill	restaurant	mexican restaurant	32.54211	-94.73351	415 E Loop 281	Longview	75605	+19036637664	https://locations.chipotle.com/tx/longview/415-e-loop-281?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2249	Chipotle Mexican Grill	0.99
 3d42f098f4de	Chuy's	restaurant	texmex restaurant	32.54142	-94.74074	208 E Loop 281	Longview	75605	+14302427771	https://www.chuys.com/locations/tx/longview/longview-tx/6096	Chuy's	0.99
 67ae548be5fc	Chuya’s Mexican Kitchen	restaurant		32.70049	-94.75256	1970 US Highway 259 S	Diana	75640	+14306252441			0.97
 65a787e3ca98	Cicis Pizza	restaurant	pizza restaurant	32.55272	-94.34925	900 E End Blvd N	Marshall	75670	+19039357788	https://www.cicis.com		0.98
@@ -1851,17 +1885,6 @@ ffb48a6efcdb	Denny's Restaurant	restaurant		32.15112	-94.78671	100 US Highway 79
 b765a012184c	Dmfh Restaurant Enterprises, Llc	restaurant		32.73886	-94.94355	105 E Redbud St	Gilmer	75644				0.95
 ea1c78f27f70	Doc's Hot Links	restaurant	barbecue restaurant	32.72729	-94.94265	208 S Wood St	Gilmer	75644	+19038432025	https://www.goldbelly.com/docs-hot-links		0.97
 872bd0a6c26a	DoeBoy's Taste of Chicago	restaurant	diner	32.36368	-94.86906	2701 S Henderson Blvd	Kilgore	75662	+19034835633	http://www.doeboyskilgore.com/		0.92
-2671db30ee80	Domino's	restaurant	pizza restaurant	32.54755	-94.34532	2100 Victory Dr.	Marshall	75672	+19039354383	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-3ad6faefbf07	Domino's	restaurant	pizza restaurant	32.53912	-94.79100	2906 Gilmer	Longview	75604	+19032979009	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test	Domino's Pizza	0.99
-4ec1375e297d	Domino's	restaurant	pizza restaurant	32.74070	-94.94210	879 Us Hwy 271	Gilmer	75644	+19034021090	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.93
-5c9a68408155	Domino's	restaurant	pizza restaurant	32.53402	-94.93134	1050 E Broadway Ave	Gladewater	75647	+19038447171	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
-78924a456d8b	Domino's	restaurant	pizza restaurant	32.99269	-94.96059	300 S Greer Blvd	Pittsburg	75686	+19038553035	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-903629185103	Domino's	restaurant	pizza restaurant	32.52002	-94.73823	110 Triple Creek Cir	Longview	75601	+19037538939	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-be55786451bd	Domino's	restaurant	pizza restaurant	32.14647	-94.78914	511 Hwy 79 S	Henderson	75654	+19036552222	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-ca6063b4c73c	Domino's	restaurant	pizza restaurant	32.57364	-94.73501	4532 N Us Highway 259	Longview	75605	+19036860303	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-d5a3356fc4bc	Domino's	restaurant	pizza restaurant	32.43953	-94.71465	711 Estes Drive Suite 101	Longview	75602	+19035539110	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-d6e275309177	Domino's	restaurant	pizza restaurant	32.38035	-94.86925	201 N. Henderson Blvd.	Kilgore	75662	+19039831530	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
-e1e525339463	Domino's Pizza	restaurant	pizza restaurant	32.51282	-94.59413	231 Renaissance Dr	Hallsville	75650	+19036688500	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 ad353b9badea	Don Benito’s Mexican Cafe	restaurant	texmex restaurant	32.53999	-94.75722	410 W Loop 281	Longview	75601	+19032363491	http://donbenitosmexicancafe.com		0.99
 b2bd4175d684	Don Chepe's Tacos Y Mas	restaurant	mexican restaurant	32.40036	-94.87341	613 TX-31	Kilgore	75662	+19036235244			0.92
 75b865034930	Don Chepe's Taqueria	restaurant	mexican restaurant	32.32101	-94.51833	565 Crystal Farms Rd	Tatum	75691	+19032379383			0.92
@@ -1923,7 +1946,6 @@ e276623cfcda	Flying Cow Burger &wing Co.	restaurant	burger restaurant	32.99554	-
 90666e5a0771	Food Fast	restaurant		32.54137	-94.34967		Marshall	75670	+19039351155		Food Fast	0.92
 5c61cebbcad1	Francisco's Mexican Restaurant	restaurant	mexican restaurant	32.16516	-94.77805	505 US-79	Henderson	75652	+19033928262			0.93
 23d13f5f360f	Fre'Duh's Scratch Kitchen	restaurant	cajun and creole restaurant	32.49011	-94.72935	401 S Mobberly Ave	Longview	75602	+19038078998			0.92
-e23d0dbb7b1f	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	32.55395	-94.34959	916 E End Blvd N	Marshall	75670	+19035786608	https://www.freddys.com/location/marshall-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 7090d7eb5340	Frenchy's Chicken	restaurant	chicken restaurant	32.46178	-94.73097	2338 S Mobberly Ave	Longview	75602	+19032120568	frenchyschicken.com		0.55
 01a8ca084807	Friends Of Riverbend	restaurant	seafood restaurant	32.72552	-94.14989	211 Private Road 2422	Karnack	75661	+19036799000			0.58
 50e457bd15c8	Fuji Japanese Restaurant	restaurant	japanese restaurant	32.55134	-94.72611	3098 N Eastman Rd Ste 106	Longview	75605	+19036639888	http://www.fujisushilongviewtx.com/		0.97
@@ -1936,7 +1958,6 @@ b7ec79c725a8	Fun Noodle Bar	restaurant	asian fusion restaurant	32.52562	-94.7851
 f2019b21c539	Gino's Tacos- Food Truck & Catering	restaurant	taco restaurant	32.52085	-94.71565	2000 N Eastman Rd	Longview	75601	+19032402326	http://Ginostacos.com/		0.92
 01d53597ca73	Ginocchio Bar & Grill	restaurant	bar and grill restaurant	32.53473	-94.34750	1109 Booker St	Marshall	75672	+19039230600			0.92
 fe17dd44b6d7	Giovanni's Italian Restaurant	restaurant	italian restaurant	32.99841	-94.62930	304 E 1st	Hughes Springs	75656	+19036391110	http://giovannisrestaurant.com		0.94
-59598d3478cd	Golden Chick	restaurant		32.13212	-94.80396	2123 US Highway 79 S	Henderson	75654	+19036571367	http://goldenchick.com		0.92
 681100a53493	Golden Corral	restaurant	buffet restaurant	32.54149	-94.74348	E. Loop 281	Longview	75605	+19032348736	https://www.goldencorral.com/locations/986/golden-corral-e-loop-281/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=986	Golden Corral Buffet & Grill	0.98
 da5e010703ca	Golden Corral	restaurant	buffet restaurant	32.49876	-94.35677	5012 S East End Blvd	Marshall	75672	+19039271934	https://www.goldencorral.com/locations/801/golden-corral-east-end-blvd-south/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=801	Golden Corral Buffet & Grill	0.95
 094605bab84a	Gonzalo's Mexican Restaurant	restaurant	latin american restaurant	32.52699	-94.78025	1625 W Loop 281	Longview	75604	+19032975921	http://longviewrestaurantguide.com/		0.92
@@ -1970,13 +1991,11 @@ d80afacc3279	Hot Head Burritos	restaurant	mexican restaurant	32.56525	-94.80440	
 6f0e88b479c1	Huddle House	restaurant	american restaurant	32.75515	-94.35514	549 S Walcott St	Jefferson	75657	+19036652643	https://www.huddlehouse.com		0.93
 df987a37b357	Huddle House	restaurant	breakfast and brunch restaurant	32.39122	-94.86804	1009 N Kilgore St	Kilgore	75662	+19039831139	https://huddlehouse.com/locations/tx/kilgore/1009-north-kilgore-street		0.94
 4dd03db05d11	Hupei Chinese Restaurant	restaurant	chinese restaurant	32.50502	-94.74969	421 N Spur 63	Longview	75601	+19037533020	http://www.hupeichineserestaurant1.placeweb.site		1.00
-3e8653ff61a5	Hushpuppies Catering & Seafood Market	restaurant	seafood restaurant	32.13137	-94.80737	503 US-79 S	Henderson	75654	+19036461661			0.70
 8d167dd42e9e	Hushpuppies Catering & Seafood Market	restaurant	seafood restaurant	32.14735	-94.78890	503 US-79 S	Henderson	75654	+19037222038			0.72
 3fc6425b1667	HushPuppies Catfish and Seafood Restaurant	restaurant	seafood restaurant	32.14666	-94.79081	721 Fair Park Dr	Henderson	75654	+19036557933			0.95
 eee3a0efb2ee	Ichiban Jabez Sushi & Grill	restaurant	sushi restaurant	32.51200	-94.59367	201 Renaissance Dr	Hallsville	75650	+13184697905			0.97
 03654064e5c2	IHOP	restaurant	breakfast and brunch restaurant	32.49302	-94.35961	111 Interstate 20 W	Marshall	75672	+19039354686	https://restaurants.ihop.com/en-us/tx/marshall/breakfast-111-interstate-20-w-2004		0.99
 49a8a97dd76c	IHOP	restaurant		32.96434	-94.95715	2241 Highway 271 N	Pittsburg	75686		https://restaurants.ihop.com/tx/pittsburg/breakfast-2241-highway-271-n-5672	IHOP	0.80
-605fe8ca2061	IHOP	restaurant	breakfast and brunch restaurant	32.52380	-94.37685		Marshall			http://www.ihop.com/		0.70
 951004592285	IHOP	restaurant	diner	32.54258	-94.75010	203 W Loop 281	Longview	75605	+19036639552	http://www.ihop.com/	IHOP	0.99
 b8547f298947	iHop	restaurant	breakfast and brunch restaurant	32.56107	-94.67446	1001 Bob White Rd	Longview	75605		http://www.ihop.com/		0.73
 adfbffb847ed	InJapan Steak House & Sushi Bar	restaurant	japanese restaurant	32.49866	-94.35784	5011 E End Blvd S	Marshall	75672	+19034724707	http://injapantexas.com/		1.00
@@ -1991,7 +2010,6 @@ cb216e1db969	Jack Rabbit Grill	restaurant		32.84545	-94.71634	16420 State Highwa
 1c51a2fac1bd	Jaggers	restaurant	burger restaurant	32.53979	-94.74612	2541 Judson Rd	Longview	75605	+19035002774	https://www.eatjaggers.com/	Jaggers Restaurant	0.99
 a2cd39f6190c	Jalapeño Tree Mexican Restaurant	restaurant	mexican restaurant	32.16586	-94.78259	300 US Highway 79 N	Henderson	75652	+19036572065	https://www.jalapenotree.com		0.55
 981dd7202eea	Jason's Deli	restaurant	delicatessen	32.54386	-94.75082	103 W Loop 281	Longview	75605	+19036635161	https://www.jasonsdeli.com/restaurants/longview-deli	Jason's Deli	0.98
-3e8c8d66f937	Jersey Mike's	restaurant	sandwich shop	32.54363	-94.73035	3312 N. Fourth Street Ste. 100	Longview	75605	+19036633362	https://www.jerseymikes.com/15040/longview-tx	Jersey Mike's Subs	0.99
 7e1fd1aa3ca0	Jian Shi Inc	restaurant		32.53515	-94.93570	709 Broadway Ave	Gladewater	75647				0.95
 556f17a5e5e7	Jim's BBQ	restaurant	barbecue restaurant	32.46987	-94.05461	720 TX-156 Spur	Waskom	75692	+19036873316			0.98
 041f3b69f694	Jocelyn's Mexican Grill	restaurant	mexican restaurant	32.51443	-94.79876	809 Pine Tree Rd	Longview	75604	+14306257404			0.92
@@ -2020,7 +2038,6 @@ b0d75e29aaa3	Jucys Taco	restaurant	texmex restaurant	32.43825	-94.71597	4002 Est
 36811e2c9c00	Kdj Enterprises Llc	restaurant		32.54127	-94.73568	400 E Loop 281	Longview	75605				0.95
 b4cd50475eda	Kelly's Country Smokehouse	restaurant	barbecue restaurant	32.04175	-94.41601	4934 Farm to Market 1970 S	Carthage	75633	+19032207592			0.97
 7cfc5fddad10	Kerime's Kitchen	restaurant	mexican restaurant	32.55614	-94.92850	2179 US-271	Gladewater	75647	+19032159228			0.91
-44d89d1129d2	KFC	restaurant	chicken restaurant	32.52003	-94.85995	107 E Us Highway 80	White Oak	75693	+19032977900	http://www.kfc.com/storelocator/Default.aspx?address=107%20East%20Highway%2080,White%20Oak,TX		0.98
 e20a30dc12d1	Ki Mexico ETX & Greenside Beverage Company	restaurant	mexican restaurant	32.49390	-94.73719	102 N Green St	Longview	75601	+19036869194			0.99
 eae5d43751db	Kilgore Crawfish & Seafood	restaurant	seafood restaurant	32.40092	-94.86882	2522 TX-42	Kilgore	75662	+19039844070	http://kilgorecrawfish.com		0.99
 21bea3e2ef6d	Kitt's Kornbread Sandwich & Pie Bar	restaurant	sandwich shop	32.75743	-94.34511	125 N Polk St	Jefferson	75657	+19036650505	http://www.kittskornbreadsandwich.com/		0.97
@@ -2059,7 +2076,6 @@ e755d226242b	La Finca	restaurant	mexican restaurant	32.72400	-94.94344	200 Warre
 8cd9f7e81221	La Mexicana	restaurant	mexican restaurant	32.38552	-94.87765	220 S Commerce St	Kilgore	75662	+19038124266	https://la-mexicana-tx-3.hub.biz		0.96
 5cc1a71e96b6	La Mexicana Taqueria	restaurant	mexican restaurant	32.53244	-94.35008	1206 E End Blvd S	Marshall	75670	+19039272038	http://lamexicanataqueria1.placeweb.site		0.97
 648318cb1147	La Taqueria	restaurant	mexican restaurant	32.72839	-94.94181	106 S Roberts St	Gilmer	75644	+19038418688	http://www.lataqueria.com		0.92
-4bcb3d2c0973	Lafayette St & Highland Ave.	restaurant	sandwich shop	32.99148	-94.96223	310 S Greer Blvd.	Pittsburg	75686			Quiznos	0.80
 ff4cd4947bd0	Laffy Happy	restaurant	theme restaurant	32.54887	-94.35896	901 E Grand Ave	Marshall	75670	+19034074242	http://www.laffyhappy.com/		0.92
 707e44cd9650	Laffy Happy Arcade	restaurant	pizza restaurant	32.66312	-94.18042	16091 State Highway 43 N	Karnack	75661	+19034074242			0.55
 fe9c63d13b09	Lambortini Bar & Grill	restaurant	bar and grill restaurant	32.54450	-94.75281	300 Tuttle Cir	Longview	75605	+19036636464	http://hilongview.com/		0.99
@@ -2080,16 +2096,6 @@ fd253bce10f9	Lil Thai House	restaurant	thai restaurant	32.49517	-94.73833	212 N 
 22c04f1ed716	Lina's Tacos	restaurant	taco restaurant	32.58666	-94.75269	5848 Judson Rd	Longview	75606	+19039855340			0.92
 88b3db115c59	Linda's Place	restaurant	sandwich shop	32.53431	-94.94497	104 S Main St	Gladewater	75647	+19038457315			0.55
 8d4344d80d3a	Linden Public House II	restaurant	american restaurant	32.99594	-94.60979	1517 E 1st	Hughes Springs	75656	+19035016395			0.75
-32744b91497e	Little Caesars	restaurant	pizza restaurant	32.12991	-94.80769	2327 Us Highway 79 South	Henderson	75654	+19036575550	https://littlecaesars.com/en-us/store/8789	Little Caesars	0.98
-bb914b384a2a	Little Caesars	restaurant	pizza restaurant	32.53251	-94.35051	1300 East End Blvd South	Marshall	75670	+19039230811	https://littlecaesars.com/en-us/store/9962	Little Caesars	0.97
-0dcf43039c5b	Little Caesars Pizza	restaurant	pizza restaurant	32.38996	-94.87058	908 N Kilgore St	Kilgore	75662	+19039845050	https://littlecaesars.com/en-us/store/10426	Little Caesars	0.96
-1b4725882dac	Little Caesars Pizza	restaurant	pizza restaurant	32.51729	-94.85124	608 E U.S. Hwy 80	White Oak	75693	+19032956857	https://littlecaesars.com/en-us/store/12450	Little Caesars	0.92
-2d609add1090	Little Caesars Pizza	restaurant	pizza restaurant	32.46301	-94.73153	2430 S High St Ste E10	Longview	75602	+19033539230	https://littlecaesars.com/en-us/store/10695	Little Caesars	0.96
-6787a6a3629c	Little Caesars Pizza	restaurant	pizza restaurant	32.52566	-94.78516	1809 W Loop 281	Longview	75604	+19032950111	https://littlecaesars.com/en-us/store/2496	Little Caesars	0.96
-80b88d4616ce	Little Caesars Pizza	restaurant	pizza restaurant	32.71677	-94.94176	1011 US Hwy 271 S	Gilmer	75644	+19036809424	https://littlecaesars.com/en-us/store/12090	Little Caesars	0.96
-960b41b7e512	Little Caesars Pizza	restaurant	pizza restaurant	32.50360	-94.72399	1201 E Marshall Ave Ste B	Longview	75601	+19037539000	https://littlecaesars.com/en-us/store/9277	Little Caesars	0.96
-ae81d3d9e9d3	Little Caesars Pizza	restaurant	pizza restaurant	32.16035	-94.37278	4399 NW Loop	Carthage	75633	+19032657318	https://littlecaesars.com/en-us/store/11183	Little Caesars	0.96
-5f7c83e0feb0	Little Ceasers	restaurant		32.53270	-94.78822	2414 Gilmer Rd	Longview	75604	+19032950111		Little Caesars Fundraising	0.96
 3e3a679bbf5d	Little Mexico	restaurant	mexican restaurant	32.53889	-94.74780	2517 Judson Rd	Longview	75605	+19037582194	https://www.littlemexicorestaurant.com/	Little Mexico Restaurant; Longview, Texas	0.96
 1156f5b180f3	Little Mexico Restaurant	restaurant	texmex restaurant	32.51084	-94.74953	1301 McCann Rd	Longview	75601	+19037580292	http://www.littlemexicorestaurantlongview.com	Little Mexico Restaurant; Longview, Texas	0.92
 f3ed4ddae545	Little Mexico Restaurant	restaurant	mexican restaurant	32.53780	-94.75497	3495 Mccann Rd	Longview	75605	+19037580292	https://www.littlemexicorestaurant.com/		0.92
@@ -2127,9 +2133,6 @@ a516b863a419	Maxan Business Holdings, Llc	restaurant		32.15109	-94.78506	100 US 
 df2bc021d126	Mazzio's Italian Eatery	restaurant	pizza restaurant	32.39685	-94.85392	1704 US-259 BUS	Kilgore	75662	+19039835555	http://www.mazzios.com	Mazzio's Pizza Tahlequah	0.97
 8103ff51bf4d	McAlister's Deli	restaurant	sandwich shop	32.54355	-94.74690	2804 Judson Road	Longview	75605	+19036636868	https://locations.mcalistersdeli.com/tx/longview/2804-judson-road?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.98
 19e8f1da50df	McCann Street Bar & Grill	restaurant	bar and grill restaurant	32.51004	-94.74944	1217 McCann Rd	Longview	75601	+14302677300	http://www.Mccannst.com/		0.96
-54d199515e38	McDonald's	restaurant	burger restaurant	32.39325	-94.86587	2101 Stone Rd	Kilgore	75662	+19039832675	https://www.mcdonalds.com/us/en-us/location/tx/kilgore/2101-stone-rd/29447.html?cid=RF:YXT:RoN::Clicks		0.97
-df982c651fae	McDonald's	restaurant	burger restaurant	32.54203	-94.72826	515 E Loop 281	Longview	75605	+19036636808	https://www.mcdonalds.com/us/en-us/location/tx/longview/515-e-loop-281/14772.html?cid=RF:YXT:RoN::Clicks		0.92
-f6bc9b6c4a21	McDonald's	restaurant	burger restaurant	32.39070	-94.85549	2101 Stone Rd	Kilgore	75662	+19039832675	https://www.mcdonalds.com/us/en-us/location/tx/kilgore/2101-stone-rd/29447.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.72
 aea7481c2850	Mcgarity's Restaurant & Saloon	restaurant		32.49487	-94.35906	5301 S East End Blvd	Marshall	75672	+19034718345	http://www.mcgaritysrestaurant.com		0.84
 9a884583efc2	Mcgarity's Saloon 61	restaurant	breakfast and brunch restaurant	32.75463	-94.34569	208 W Dallas St	Jefferson	75657	+19036014407	https://www.mcgarityssaloon61.com		0.92
 3ae4541f76ef	McKay's Ranch House	restaurant	buffet restaurant	32.39604	-94.85611	1609 US Highway 259 N	Kilgore	75662	+19039833020	http://mckaysranchhouse.food73.com		0.92
@@ -2140,7 +2143,6 @@ c4e2341e7a6c	Mi Ranchito	restaurant	mexican restaurant	32.52097	-94.80228	1409 P
 f6836dc3cdfb	Midway Cafe	restaurant	mexican restaurant	32.85709	-94.95119	8966 US Highway 271 N	Gilmer	75644	+19037622022	https://www.midwaycafe.com		0.92
 40db3f2dd2fb	Miguel's	restaurant	mexican restaurant	32.54567	-94.36697	105 E Houston St	Marshall	75670	+19039354311	https://www.miguelsfrankfort.com		0.55
 5dcd04ecae9e	Milano Pizza Hallsville	restaurant	pizza restaurant	32.50571	-94.58129	324 W Main St	Hallsville	75650	+19036682904			1.00
-906a9f060430	Milano Pizza Hallsville	restaurant	pizza restaurant	32.51233	-94.59344	324 W Main St	Hallsville	75650	+19036682500	http://www.milanopizzahallsville.com		0.77
 04b9f262a536	Milano's Pizza	restaurant	pizza restaurant	32.32141	-94.52081	669 Hill St	Tatum	75691	+19039472808	http://www.milanospizzafrederick.com		0.93
 5330b08e4191	Milano's Pizza	restaurant	pizza restaurant	32.27395	-94.97839	109 S Commerce St	Overton	75684	+19038343087	http://www.milanospizzaoverton.com/		0.96
 cb005694a0bb	Milano's Pizza	restaurant	italian restaurant	32.15614	-94.34645	467 W Panola St	Carthage	75633	+19036937747	http://www.milanos-restaurants.com/index.html		0.96
@@ -2163,7 +2165,6 @@ df0f0f15e175	Nanny Goats Cafe	restaurant	sandwich shop	32.51596	-94.74062	1401 J
 ea704d77a195	Newk's Eatery	restaurant	sandwich shop	32.54132	-94.74407	110 E Loop 281	Longview	75605	+19037537000	https://newks.com/locations/tx/longview/110-e-loop-281	Newk's Eatery	0.99
 59968bb78fd3	No Probllama Nutrition Llc	restaurant	health food restaurant	32.53053	-94.70911	116 E Loop 281 Ste 103	Longview	75605	+19039324749			0.75
 7a5e940c354f	Nuggets Ice Cream & Snack Shop - Lone Star Texas	restaurant		32.93995	-94.71088	116 N Main St	Lone Star	75668	+19036561262	https://www.facebook.com/NUGGETSONTHERUNTEXAS/		0.95
-d5b9047c8514	Ocean Restaurant	restaurant		32.37312	-94.88801	1801 Industrial Blvd	Kilgore	75662	+19038085901			0.83
 eb5389f45c66	Ocean Restaurant	restaurant	diner	32.37308	-94.88808	1801 Industrial Blvd	Kilgore	75662	+19038085901			0.84
 35814972db1f	Okidoki Hibachi Express Longview	restaurant	japanese restaurant	32.50434	-94.72135	1204 Alpine Rd	Longview	75601	+19037460149			0.92
 14c8a332bc7b	Okidoki Hibachi Express on Wheel Kilgore	restaurant	japanese restaurant	32.38006	-94.86971	916 E Main St	Kilgore	75662	+19032412731			0.70
@@ -2177,12 +2178,7 @@ ea34d78c3a4c	Outback Steakhouse	restaurant	steakhouse	32.54126	-94.73054	501 E L
 d383deb1650c	Paleteria Y Elotes Ramoncitos	restaurant	mexican restaurant	32.54837	-94.35829	906 E Grand Ave	Marshall	75670	+19037025514			0.92
 e60adb53858f	Panda Korea	restaurant	korean restaurant	32.49985	-94.74014	420 N High St	Longview	75601	+19037579137	http://pan.pandakorea.biz/		0.97
 bf2c21b3faa2	Panera Bread	restaurant	sandwich shop	32.54180	-94.73226	481 East Loop 281	Longview	75605	+19036635200	https://www.panerabread.com/en-us/cafe/locations/tx/longview/481-east-loop-281?utm_medium=local&utm_source=facebook&utm_campaign=dpm-dist&utm_term=606233&utm_content=main	Panera Bread	0.99
-87f6963594fc	Panola Pines Travel Plaza	restaurant		32.14746	-94.32553	2360 SE Loop	Carthage	75633	+19032630586			0.92
 d1917203bed3	Panola Pines Travel Plaza	restaurant		32.14772	-94.32581	2360 SE Loop	Carthage	75633	+19032630586			0.99
-8ba5c5a74cb7	Papa John's Pizza	restaurant	pizza restaurant	32.54720	-94.35013	1711 NE End North Blvd	Marshall	75670	+19039380700	http://www.papajohns.com/		0.85
-5e537e93487e	Papa Johns	restaurant	pizza restaurant	32.50266	-94.72856	905 E Marshall Ave	Longview	75601	+19032429090	https://locations.papajohns.com/united-states/tx/75601/longview/905-e-marshall-ave?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMzNDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
-08b83002cb5e	Papa Johns Pizza	restaurant	pizza restaurant	32.53042	-94.77609	1409c W Loop 281 Ste C	Longview	75604	+19037598899	https://www.papajohns.com		0.99
-36ae775bc432	Papa Johns Pizza	restaurant	pizza restaurant	32.50272	-94.72865	905 E Marshall Ave	Longview	75601	+19032429090	https://www.papajohns.com		0.99
 510261acd025	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	32.52560	-94.78150	1753 W Loop 281	Longview	75604	+19037598000	https://order.papamurphys.com/menu/papa-murphys-nw-loop-281		0.92
 b402ab3d8e1b	Papa Nachos	restaurant	texmex restaurant	32.99190	-94.96160	308 S Greer Blvd	Pittsburg	75686	+19038567679	https://local.yahoo.com/info-18798406-papa-nachos-pittsburg		0.95
 a458fee24d5e	Papacita's Mexican Restaurant	restaurant	texmex restaurant	32.54382	-94.75169	305 W Loop 281	Longview	75605	+19036631700	http://www.papacitas.com/		0.99
@@ -2203,17 +2199,6 @@ ba388ff9f513	Pittsburg Hot Links	restaurant	barbecue restaurant	32.99497	-94.968
 a4ec34fd6749	Pizza Boy (Liberty City)	restaurant	pizza restaurant	32.43647	-94.94521	6144 Old Hwy 135 N	Kilgore	75662	+19039861001			0.94
 7ecba6a43430	Pizza House	restaurant	pizza restaurant	32.50488	-94.57774	302 W Main St	Hallsville	75650	+19036684475	http://www.pizzahouse.com/	Pizza House	0.96
 f79f7724b871	Pizza House	restaurant	pizza restaurant	32.71032	-94.75278	11679 TX-154	Diana	75640	+14306253448			0.96
-1e2d833dc5ea	Pizza Hut	restaurant	pizza restaurant	32.53043	-94.35156	1601 E End Blvd S Harrison	Marshall	75670	+19039359306	https://locations.pizzahut.com/tx/marshall/1601-e-end-blvd-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287131	Pizza Hut	0.98
-2ab01a63958a	Pizza Hut	restaurant	pizza restaurant	32.14788	-94.78893	430 US Highway 79 S Rusk	Henderson	75654	+19036571665	https://locations.pizzahut.com/tx/henderson/430-us-highway-79-s?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290130	Pizza Hut	0.99
-2c1a1ff9a7c3	Pizza Hut	restaurant	pizza restaurant	32.53518	-94.74361	2106 Judson Rd	Longview	75605	+19037588111	https://locations.pizzahut.com/tx/longview/2106-judson-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306682	Pizza Hut	0.99
-7a5228eb6d82	Pizza Hut	restaurant	pizza restaurant	32.53334	-94.92719	1408 E Broadway Ave Gregg	Gladewater	75647	+19038455571	https://locations.pizzahut.com/tx/gladewater/1408-e-broadway-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=295014	Pizza Hut	0.96
-8a6aa0187ae2	Pizza Hut	restaurant	pizza restaurant	32.52707	-94.78579	2100 Gilmer Rd Gregg	Longview	75604	+19032974771	https://locations.pizzahut.com/tx/longview/2100-gilmer-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298114	Pizza Hut	0.99
-95b9c5880e03	Pizza Hut	restaurant	pizza restaurant	32.39178	-94.86478	1213 1/2 N Kilgore St Gregg	Kilgore	75662	+19039844026	https://locations.pizzahut.com/tx/kilgore/1213-1/2-n-kilgore-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299790	Pizza Hut	1.00
-a94669d81883	Pizza Hut	restaurant	pizza restaurant	32.99754	-94.95866	96 N Greer Blvd Camp	Pittsburg	75686	+19037081150	https://locations.pizzahut.com/tx/pittsburg/96-n-greer-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315964	Pizza Hut	0.96
-e4c67f29f62d	Pizza Hut	restaurant	pizza restaurant	32.15883	-94.35740	1208 W Panola St Panola	Carthage	75633	+19036934331	https://locations.pizzahut.com/tx/carthage/1208-w-panola-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309840	Pizza Hut	0.98
-fb722468f7e0	Pizza Hut	restaurant	pizza restaurant	32.50390	-94.71259	1906 E Marshall Ave Gregg	Longview	75601	+19037532234	https://locations.pizzahut.com/tx/longview/1906-e-marshall-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292481	Pizza Hut	0.99
-fd829bbf9982	Pizza Hut	restaurant	pizza restaurant	32.74194	-94.94135	1413 N Wood St	Gilmer	75644	+19038435589	https://locations.pizzahut.com/tx/gilmer/1413-n-wood?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286047	Pizza Hut	0.95
-136c7fd3ec6c	Pizza Hut Of East Texas, Inc.	restaurant		32.53857	-94.76734	2824 Bill Owens Pkwy	Longview	75605	+19032971111			0.92
 85193b767541	Pizza King	restaurant	pizza restaurant	32.50279	-94.72569	1100 E Marshall Ave	Longview	75601	+19037530912	https://www.pizzaking1965.com/		0.95
 619219d2067a	Pizza Pan	restaurant	pizza restaurant	32.73040	-94.96627	1372 Hwy 154	Gilmer	75644	+19036800539	http://pizzapanonline.com		0.77
 de4c3b45de9a	Pizza Paradise	restaurant	pizza restaurant	32.54776	-94.96172	1002 Chevy Chase St	Gladewater	75647	+19038455885	http://www.paradisepoint.com		0.92
@@ -2222,7 +2207,6 @@ de4c3b45de9a	Pizza Paradise	restaurant	pizza restaurant	32.54776	-94.96172	1002 
 40826a1204f9	Pizza Pro	restaurant	sandwich shop	32.15080	-94.81916	1414 W Main St	Henderson	75652	+19036573014	https://www.pizzapro.com		0.92
 6a147e39aac4	Poco Loco Bar & Grill	restaurant	bar and grill restaurant	32.74562	-94.99507	1053 Fawn Crossing	Gilmer	75644	+19037975626			0.92
 223236e7c705	Pollo cachuchon	restaurant		32.39750	-94.87751	208 E TX-31	Kilgore	75662	+19039172501			0.63
-815738cf9e83	Popeyes Chicken Marshall Tx	restaurant	chicken restaurant	32.54832	-94.36717	100 E Grand Ave	Marshall	75670				0.76
 a55a151e65b0	Pops Last Stand	restaurant		32.72485	-94.75028	2205 US-259	Diana	75640	+14306252307			0.87
 c6356be5e480	PorkNBeef Smokehouse	restaurant	barbecue restaurant	32.49229	-94.73656	314 E Cotton St	Longview	75601	+19037044595	https://www.etsy.com/shop/PorknBeefSMOKEHOUSE		0.94
 c3b1f5a7ec84	Porky's Smokehouse and Grill	restaurant	barbecue restaurant	32.51689	-94.35445	504 E Carolanne Blvd	Marshall	75672	+19039272144	http://PORKYSMOKEHOUSE.COM/		0.97
@@ -2267,13 +2251,6 @@ f25339396c01	Rounder's Pizza	restaurant	pizza restaurant	32.54499	-94.72939	226 
 6c45b97ce999	Sam's Southern Eatery	restaurant		32.13113	-94.80576	2303 US-79	Henderson	75654	+19037222372	https://www.samssouthernhenderson.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
 6d40f78ad524	Sams Malts And More	restaurant	american restaurant	32.24393	-94.45660	124 S Washington St	Beckville	75631	+19032633105			0.84
 66620c578c6d	Sbarro	restaurant	pizza restaurant	32.40581	-94.81635	4525 Fm 349	Kilgore	75662	+19039861985	https://sbarro.com/locations/tx/kilgore/e-z-mart-kilgore-sbarro/		0.96
-551d0735fdfa	Schlotzsky's	restaurant	sandwich shop	32.52933	-94.77707			75604		https://locations.schlotzskys.com/tx/longview/1429-w-loop-281	Schlotzsky's	0.98
-6275951a70fe	Schlotzsky's	restaurant	sandwich shop	32.73779	-94.94195			75644		https://locations.schlotzskys.com/tx/gilmer/720-us-hwy-271-n	Schlotzsky's	0.97
-672193af088e	Schlotzsky's	restaurant	sandwich shop	32.39167	-94.86549	1211 N Kilgore St Airport	Kilgore	75662	+19032180768	https://locations.schlotzskys.com/tx/kilgore/1211-north-kilgore-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.96
-8bf59b7a86f4	Schlotzsky's	restaurant	sandwich shop	32.73785	-94.94233	720 US Highway 271 N	Gilmer	75644	+19036803354	www.schlotzskys.com		0.96
-a3a92a355b5e	Schlotzsky's	restaurant	sandwich shop	32.55748	-94.34928	1600 E End Blvd N	Marshall	75670	+19037027997	www.schlotzskys.com		0.97
-dc919be371bf	Schlotzsky's	restaurant	sandwich shop	32.14791	-94.78822	419 US-79	Henderson	75654	+19037222064	https://locations.schlotzskys.com/tx/henderson/419-s-us-hwy-79?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	1.00
-f1aa0e4eb0d0	Schlotzsky's	restaurant	sandwich shop	32.52925	-94.77698	1429 W Loop 281 Ste B1	Longview	75604	+19032978030	http://www.schlotzskys.com/	Schlotzsky's	0.98
 4926deda6b16	Scotties-Bistro	restaurant		32.54665	-94.72769	1188 E Hawkins Pkwy	Longview	75605	+14306257310			0.95
 44cb1bacc0e2	Serenity Ranch	restaurant		32.71660	-94.42316	6296 FM-2208	Jefferson	75657	+19033990740	https://serenityranchtexas.com/		0.98
 a130a6f1760c	Sertex Of Longview	restaurant		32.54667	-94.75043	101 W Hawkins Pkwy	Longview	75605	+19036636790			0.55
@@ -2283,18 +2260,9 @@ fcb9ded563b7	Simple Simon's Pizza	restaurant	pizza restaurant	32.47844	-94.05646
 3cdb474abb5b	Sirgio's SnoBalls & Snack Bar	restaurant		32.47174	-94.73570		Longview		+19033998066			0.69
 05825df86b41	Skipper's Pier Coastal Cajun Kitchen	restaurant	seafood restaurant	32.53508	-94.94418	103 N Main St	Gladewater	75647	+19033005480	http://Www.skipperspiertx.com/		0.96
 5192456fdf99	Slim Chickens	restaurant	chicken restaurant	32.54146	-94.74107	204 E Loop 281	Longview	75605	+19032362909	https://slimchickens.com/menu/slim-chickens-texas-longview	Slim Chickens	0.99
-da8b72a1582e	Smashburger	restaurant	burger restaurant	32.54733	-94.72608	3080 N Eastman Rd	Longview	75605	+19036632319	http://smashburger.com		0.92
 88cfb49b7d6b	SNOWFOX Sushi	restaurant	sushi restaurant	32.49987	-94.74958	701 West Marshall Avenue	Longview	75601		https://www.snowfox.com/		0.92
 ba8eecd1d2b1	SNOWFOX Sushi	restaurant	sushi restaurant	32.54758	-94.34861	300 East End Boulevard North	Marshall	75670		https://www.snowfox.com/		0.92
 134e2be522ca	Sonic	restaurant	american restaurant	32.55265	-94.34943	900 N East End Blvd	Marshall	75670	+19034074110			0.65
-0b60f0d4eca7	Sonic Drive-In	restaurant	burger restaurant	32.15608	-94.78310	500 Us Highway 79 N	Henderson	75652	+19036573840	https://locations.sonicdrivein.com/tx/henderson/500-highway-79-n..html		0.97
-13fb8c551bfb	Sonic Drive-In	restaurant	burger restaurant	32.54883	-94.35896	901 E Grand Ave	Marshall	75670	+19039352951	https://locations.sonicdrivein.com/tx/marshall/901-e.-grand.html		0.92
-6090b3b52c6e	Sonic Drive-In	restaurant	burger restaurant	32.79371	-94.72378	600 Highway 259 N	Ore City	75683	+19039682010	https://locations.sonicdrivein.com/tx/orecity/600-highway-259-north.html		0.85
-6b71a467f255	Sonic Drive-In	restaurant	burger restaurant	32.14815	-94.78844	500 Us Highway 79 N	Henderson	75652	+19036573840	https://locations.sonicdrivein.com/tx/henderson/500-highway-79-n..html		0.85
-7498101bb174	Sonic Drive-In	restaurant	burger restaurant	32.74182	-94.94217	909 N WOOD	Gilmer	75644	+19038433936	https://locations.sonicdrivein.com/tx/gilmer/909-n.-wood.html		0.85
-9f94813712dd	Sonic Drive-In	restaurant	burger restaurant	32.75980	-94.35558	203 S Walcott St	Jefferson	75657	+19036652800	https://locations.sonicdrivein.com/tx/jefferson/203-s.-walcott-street.html		0.97
-df95c6713e6c	Sonic Drive-In	restaurant	burger restaurant	32.45973	-94.62847	15605 Fm 968 W	Longview	75602	+14302013613	https://locations.sonicdrivein.com/tx/longview/15605-fm-968-west.html		0.85
-c922a041ce38	Sonic Drive-in Carthage, Llc	restaurant		32.15809	-94.35072	710 W Panola St	Carthage	75633				0.98
 24d576d9a151	Sothy's Kitchen	restaurant	asian restaurant	32.72828	-94.94383	107 Chandler St	Gilmer	75644	+19037464191			0.92
 8e3daec70b94	Soto's Mexican Restaurant	restaurant	mexican restaurant	32.51278	-94.59401	231 Renaissance Dr	Hallsville	75650	+19036686009	http://soto-s-mexican.edan.io		0.99
 a78496607a74	Soul Palace	restaurant	comfort food restaurant	32.53908	-94.37409	612 S Carter St	Marshall	75670	+19032635881			0.96
@@ -2305,31 +2273,6 @@ ed1c891346bc	Stillwater Inn	restaurant	french restaurant	32.76190	-94.35339	203 
 38d3dc7108bb	Street Licious	restaurant	american restaurant	32.55325	-94.72846		Longview		+19032610468	http://streetlicious.com/		0.85
 69c752bce7bd	Street-licious Gourmet Grilled Cheese	restaurant		32.52702	-94.72074	2455 N Eastman Rd	Longview	75605	+19032610468	http://www.streetlicious.com		0.75
 758145e0f101	Su Casita	restaurant	salvadoran restaurant	32.15355	-94.79831	127 E Main St	Henderson	75654	+19037222501			0.92
-0951a5a8966e	Subway	restaurant	sandwich shop	32.53225	-94.78535	2440 Gilmer Rd	Longview	75604	+19032955299	https://restaurants.subway.com/united-states/tx/longview/2440-gilmer-rd	Subway	0.95
-253072c83acb	SUBWAY	restaurant	sandwich shop	32.31772	-94.51768	335 North Hill Street	Tatum	75691	+19039472255	http://subway.com		0.77
-2654c215bf42	Subway	restaurant	sandwich shop	32.76031	-94.35533	201 South Walcott Street	Jefferson	75657	+19036658655	https://restaurants.subway.com/united-states/tx/jefferson/201-south-walcott-street	Subway	0.95
-2d193ca8990d	Subway	restaurant	sandwich shop	32.16151	-94.31903	975 E. Sabine	Carthage	75633	+18008884848	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71716&utm_campaign=evergreen-2020&y_source=1_Njk5MDcyNTYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
-2f390ae06c9b	Subway	restaurant	sandwich shop	32.53607	-94.94235	106 E Upshur Ave	Gladewater	75647	+19038458200	https://restaurants.subway.com/united-states/tx/gladewater/106-e-upshur-blvd	Subway	0.95
-3aca9fa34305	Subway	restaurant	sandwich shop	32.32560	-94.53445	1523 North Hill	Tatum	75691	+19039472600	https://restaurants.subway.com/united-states/tx/tatum/1523-north-hill	Subway	0.98
-3cef57dd97a7	Subway	restaurant	sandwich shop	32.43523	-94.94496	6242 Old Highway 135 N	Kilgore	75662	+19038125022	https://restaurants.subway.com/united-states/tx/kilgore/6242-old-highway-135-n	Subway	0.95
-5e4ebb3cf8f1	Subway	restaurant	sandwich shop	32.54905	-94.35503	1209 E Grand Ave	Marshall	75670	+19039271551	https://restaurants.subway.com/united-states/tx/marshall/1209-e-grand-ave	Subway	0.95
-6142bf91c975	Subway	restaurant	sandwich shop	32.72511	-94.94250	325 US Hwy 271 S.	Gilmer	75644	+19038433079	http://www.subway.com/en-us	Subway	0.97
-7914e59ff338	Subway	restaurant	sandwich shop	32.15263	-94.78481	203 Hwy 79 N	Henderson	75652	+19036572919	https://restaurants.subway.com/united-states/tx/henderson/203-hwy-79-n	Subway	0.98
-83c73ab0e1fd	Subway	restaurant	sandwich shop	32.51057	-94.59259	702 W Main St Ste A	Hallsville	75650	+19036603257	https://www.subway.com		0.97
-844882dcb371	Subway	restaurant	sandwich shop	32.52572	-94.78589	2011 Gilmer Rd	Longview	75604	+19032979512	https://www.subway.com		0.99
-853790ad2125	Subway	restaurant	sandwich shop	32.13150	-94.80448	2127 Highway 79 South, Suite 300	Henderson	75654	+14306254277	https://restaurants.subway.com/united-states/tx/henderson/2127-highway-79-south?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=39292&utm_campaign=evergreen-2020&y_source=1_MTQ5MTM0ODctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-85989d9db79b	Subway	restaurant	sandwich shop	32.51900	-94.85732	206 Hwy 80 Suite K	White Oak	75693	+19032976667	https://restaurants.subway.com/united-states/tx/white-oak/206-hwy-80	Subway	0.97
-988a97fe1922	Subway	restaurant	sandwich shop	32.52129	-94.71746	2001 N Eastman Rd	Longview	75601	+19032348458	https://www.subway.com		0.97
-a2778fed4336	Subway	restaurant	sandwich shop	32.37969	-94.86977	923 Houston St	Kilgore	75662	+19039846899	https://restaurants.subway.com/united-states/tx/kilgore/923-houston-st	Subway	0.97
-a2937449a069	Subway	restaurant	sandwich shop	32.99640	-94.61192	1413 E 1st	Hughes Springs	75656	+19036392576	https://www.subway.com		0.98
-a96850efb9e0	Subway	restaurant	sandwich shop	32.38957	-94.87132	96 Midtown Plz	Kilgore	75662	+19039817827	https://restaurants.subway.com/united-states/tx/kilgore/96-n-midtown	Subway	0.98
-b0718774fd3e	Subway	restaurant	sandwich shop	32.50083	-94.73812	101 E Marshall Ave	Longview	75601	+19037585506	https://restaurants.subway.com/united-states/tx/longview/101-e-marshall-ave	Subway	0.95
-b8ac8c948adf	Subway	restaurant	sandwich shop	32.15846	-94.35509	1018 W Panola St	Carthage	75633	+19036938438	https://restaurants.subway.com/united-states/tx/carthage/1018-w-panola-street	Subway	0.96
-c8d5d30f3a2e	Subway	restaurant	sandwich shop	32.55782	-94.35264	1701 E End Blvd N	Marshall	75670	+19039388101	https://www.subway.com		0.92
-d64fe04cb263	Subway	restaurant	sandwich shop	32.69868	-94.75048	101 Village Dr.	Diana	75640	+14305581005	https://restaurants.subway.com/united-states/tx/diana/101-village-dr	Subway	0.97
-ea334e2c0caa	Subway	restaurant	sandwich shop	32.43731	-94.71399	4006 Estes Pkwy	Longview	75603	+19032349924	https://www.subway.com		0.95
-f4bee5e3ef74	Subway	restaurant	sandwich shop	32.49817	-94.35696	5018 East End Blvd South	Marshall	75672	+19039383336	https://restaurants.subway.com/united-states/tx/marshall/5018-east-end-blvd-south	Subway	0.98
-ff4c790f4055	Subway	restaurant	sandwich shop	32.53886	-94.74489	2330 Judson Rd.	Longview	75605	+19032389399	https://restaurants.subway.com/united-states/tx/longview/2330-judson-rd	Subway	0.98
 49bcd865ad67	Sumo Japanese Grill & Sushi Bar	restaurant	japanese restaurant	32.51086	-94.74946	1301 McCann Rd	Longview	75601	+19032388320	https://sumosushingrill.com/		0.99
 e4de2828899a	Sunbird Barbecue	restaurant	barbecue restaurant	32.49921	-94.74055	415 N High St	Longview	75601	+19033996562			0.99
 fcc5fec64955	Sundowner's Bar & Grill	restaurant	bar and grill restaurant	32.14835	-94.78947	410 US-79	Henderson	75654	+19036577902	http://www.sundownersbarandgrill.com		0.96
@@ -2342,10 +2285,8 @@ cda5949cb92f	T Post Crawfish Llc	restaurant		32.05133	-94.92493	10819 Us Highway
 09e50fbbc9a9	T's Cafe and Catering	restaurant	burger restaurant	32.31875	-94.50910	120 E Johnson St	Tatum	75691	+19039472076			0.85
 f53a5a1c7c3d	T's Cafe and Catering	restaurant	american restaurant	32.31535	-94.51665	130 Hill St	Tatum	75691	+19039472076	http://www.tscafeandcatering.com/		0.95
 7acde355403f	T. Blanco's Mexican Cafe	restaurant	texmex restaurant	32.40789	-94.71685	1045 Gardiner Mitchell Pkwy	Longview	75603	+19036430100	http://www.tblancos.com/		0.98
-0ddd7cf3152e	Taco Bell	restaurant	taco restaurant	32.14927	-94.78735	300 US Highway 79 S	Henderson	75654	+19036577303			0.96
 104c9e53ce37	Taco Bueno	restaurant	texmex restaurant	32.39178	-94.86440	1217 N Kilgore St	Kilgore	75662	+19032188978	https://locations.tacobueno.com/kilgore/1217-n-kilgore	Taco Bueno	0.99
 a9f77355d2d3	Taco Bueno	restaurant	texmex restaurant	32.54404	-94.73039	3314 N Fourth St	Longview	75605	+19037411124	https://locations.tacobueno.com/longview/3314-north-fourth-st	Taco Bueno	0.98
-ca02211e6c22	Taco Cabana	restaurant	taco restaurant	32.54383	-94.73495	411 E Loop 281 Ste A	Longview	75605	+14694985919	http://www.tacocabana.com/		0.99
 5cc261039e9f	Taco Casa	restaurant	mexican restaurant	32.15109	-94.78506	100 US Highway 79 N	Henderson	75652	+19037229075	https://www.c-we.com		0.96
 b80fa378a999	Taco's King	restaurant	mexican restaurant	32.75292	-94.93916	1418 US Hwy 271 N	Gilmer	75644	+19037970223			0.96
 2c9725a0c421	Tacos & Tortas Don Cosme	restaurant	mexican restaurant	32.11827	-94.83402	411 Meadowbrook Dr	Henderson	75654	+19038542270			0.99
@@ -2408,10 +2349,8 @@ bc2f48cd3a44	The Concession Stand	restaurant	seafood restaurant	32.12409	-94.935
 5aa9d9f1f1ac	The Crawfish Cartel	restaurant	cajun and creole restaurant	32.54715	-94.75505	401 W Hawkins Pkwy	Longview	75605	+19038062228			0.81
 6666b08797f8	The Fillin Station	restaurant		32.15074	-94.79932	303 S Main St	Henderson	75654	+19036577771	http://www.fillingstation.com/		0.92
 f6f6153e8a90	The Ginocchio	restaurant	steakhouse	32.55143	-94.36759	707 N Washington Ave	Marshall	75670	+19039271400	https://www.theginocchio.com/		1.00
-0a9911c8a563	The Jalapeno Tree	restaurant	mexican restaurant	32.40691	-94.85057	1520 US Highway 259 N	Kilgore	75662	+19039841076	https://www.jalapenotree.com		0.55
 966bb65b07f5	The Jalapeno Tree	restaurant	texmex restaurant	32.50467	-94.70972	508 N Eastman Rd	Longview	75601	+19037574221	http://www.jalapenotree.com/	Jalapeno Tree	1.00
 d7c7d743b050	The Jalapeno Tree	restaurant	texmex restaurant	32.39458	-94.85619	1520 US Highway 259 N	Kilgore	75662	+19039841076	http://www.jalapenotree.com/	Jalapeno Tree	1.00
-e0a24b937aea	The Jalapeno Tree	restaurant	texmex restaurant	32.53515	-94.34972	1000 E End Blvd S	Marshall	75670	+19039272777	http://www.jalapenotree.com/	Jalapeno Tree	0.92
 e31c5f1194f2	The Jalapeno Tree	restaurant	mexican restaurant	32.55479	-94.34962	1000 E End Blvd S	Marshall	75670	+19039272777	https://www.jalapenotree.com		0.95
 ea7d540e7aa0	The Jalapeno Tree	restaurant	mexican restaurant	32.15701	-94.34770	510 W Panola St	Carthage	75633	+19036942219	http://www.jalapenotree.com/	Jalapeno Tree	1.00
 fd1da86e493d	The Jalapeno Tree	restaurant	mexican restaurant	32.15278	-94.78400	300 US-79	Henderson	75652	+19036572065	http://www.jalapenotree.com/	Jalapeno Tree	1.00
@@ -2460,16 +2399,8 @@ f2b9575bfed7	Vicky's - Pizza Pro	restaurant	pizza restaurant	32.31507	-94.51709	
 76e03461bd6b	Waffle House	restaurant	diner	32.54161	-94.73763	318 E Loop 281	Longview	75605	+19032341010	https://locations.wafflehouse.com/shop/179920/Waffle-House-1557	Waffle House	0.99
 a4c43a3ca95f	Waffle House	restaurant	diner	32.44860	-94.72337	3107 Estes Pkwy	Longview	75602	+19037574060	https://locations.wafflehouse.com/shop/179921/Waffle-House-370	Waffle House	0.99
 1c6025b49362	Waffle Shoppes Of Texas	restaurant	breakfast and brunch restaurant	32.49940	-94.75054	707 W Marshall Ave	Longview	75601	+19037531481			0.92
-657e4908852c	Wall 2 Wall Bbq Pitts and Trailers	restaurant		32.58554	-94.91618	10393 US-271	Gladewater	75647	+19035766285			0.74
 b14f7a10a746	Wall 2 Wall Bbq Pitts and Trailers	restaurant		32.58556	-94.91667	10393 US-271	Gladewater	75647	+19035766285			0.80
 2ce81deeeac3	Wanda's Kountry Korner	restaurant		32.46006	-94.66044	15229 Gum Springs Rd	Longview	75602	+19037576421	http://www.wandaskountrykorner.com		0.96
-495ebb6c98c8	Wendy's	restaurant	burger restaurant	32.49722	-94.35693	5120 E End Blvd S	Marshall	75672	+19039230767	https://locations.wendys.com/tx?utm_source=bing&utm_medium=local&utm_campaign=bing-distrib		0.98
-08746413c349	Whataburger	restaurant	burger restaurant	32.52081	-94.86060	103 E US HIGHWAY 80	White Oak	75693	+19032911995	http://whataburger.com/	Whataburger	0.99
-41807f60bdd1	Whataburger	restaurant	burger restaurant	32.43554	-94.94386	6241 Old Highway 135 N	Kilgore	75662	+19039832800	https://locations.whataburger.com/tx/kilgore/6241-old-highway-135-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-88a03ff58a70	Whataburger	restaurant	burger restaurant	32.52388	-94.35146	2406 E END BLVD S	Marshall	75672	+19039356161	https://locations.whataburger.com/tx/marshall/2406-e-end-blvd-s.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
-92e390ab2a7f	Whataburger	restaurant	burger restaurant	32.74110	-94.94141	892 US Highway 271 N	Gilmer	75644	+19036803001	https://locations.whataburger.com/tx/gilmer/892-us-highway-271-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
-a4a579aa9e9a	Whataburger	restaurant	burger restaurant	32.50592	-94.79115	3400 W Marshall Ave Ste 340	Longview	75604	+19039356161	http://www.whataburger.com		0.92
-ada64e076d7f	Whataburger	restaurant	burger restaurant	32.15868	-94.78394	630 U.S. 79	Henderson	75652	+19036578538	https://locations.whataburger.com/tx/henderson/630-us-79.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 8fbe4a381a44	Which Which Superior Sandwiches	restaurant	sandwich shop	32.54412	-94.74957	103 W Loop 281 Ste 430	Longview	75605		http://www.whichwich.com		0.92
 31bc6782121c	Which Wich Superior Sandwiches	restaurant	sandwich shop	32.71698	-94.94256	1011 US Highway 271 S Ste 102	Gilmer	75644	+19036809424	http://locations.whichwich.com/TX/Gilmer/Gilmer		0.92
 49dd48df022e	Which Wich White Oak	restaurant	sandwich shop	32.51760	-94.85132	608 U S 80	White Oak	75693	+19032959424	https://www.whichwich.com/		0.97
@@ -2479,11 +2410,6 @@ cbfd8636f4e4	White Oak Cafe	restaurant	breakfast and brunch restaurant	32.52808	
 a9b20340eacc	White Oak DQ	restaurant		32.52003	-94.86122	100 E US-80	White Oak	75693	+19037591441	http://dairyqueen.godaddysites.com/		0.80
 701069115783	Wildflower Inn & Restaurant	restaurant	diner	32.99374	-94.60412	2004 TX-11	Hughes Springs	75656	+19036397342	http://www.wildflowerinnandrestaurant.Weebly.com/		0.98
 c0826bd7deab	Wing Boss	restaurant	chicken wings restaurant	32.52275	-94.78587	1903 W Loop 281	Longview	75604	+19033310281	https://longview.wingbosstogo.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
-023e339b85d8	Wingstop	restaurant	chicken restaurant	32.12973	-94.80716	2319 US Highway 79	Henderson	75654	+19035513339	https://www.wingstop.com/location/wingstop-2003-henderson-tx-75654/menu?y_source=1_NTUyMDcyNzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.93
-51229a56139e	Wingstop	restaurant	chicken restaurant	32.39141	-94.86317	1214 N US Hwy 259, Ste 200	Kilgore	75662	+19039869464	https://www.wingstop.com/location/wingstop-1159-kilgore-tx-75662/menu?y_source=1_NTUyMDY5MDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-84aa94996aa7	Wingstop	restaurant	chicken restaurant	32.54462	-94.35042	101 East End Blvd South	Marshall	75670	+19039359464	https://www.wingstop.com/location/wingstop-1788-marshall-tx-75670/menu?y_source=1_NTUyMDcwOTktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
-a92c33fd8d63	Wingstop	restaurant	chicken restaurant	32.46297	-94.73170	2430 S. High Street, Suite E3	Longview	75602	+19037579464	https://www.wingstop.com/location/wingstop-1146-longview-tx-75602/menu?y_source=1_NTUyMDc2MTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
-b18b8b6ae061	Wingstop	restaurant	chicken restaurant	32.52697	-94.78185	1723 W Loop 281	Longview	75604	+19032919464	https://www.wingstop.com/location/wingstop-119-longview-tx-75604/menu?y_source=1_NTUyMDc0NDAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
 2b45586a1402	Wok-On	restaurant	taiwanese restaurant	32.46791	-94.70775	2133 S Eastman Rd	Longview	75602	+19033455488			0.99
 08664caf3ef2	Wright On Taco	restaurant		32.54881	-94.36385	409 E Grand Ave	Marshall	75670	+19039302995	https://www.wrightontaco.com		0.96
 fd771f556594	Xbros More Land, Llc	restaurant		32.41379	-94.70638	5003 Estes Pkwy	Longview	75603				0.95

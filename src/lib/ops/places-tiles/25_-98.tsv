@@ -94,12 +94,10 @@ c6c0ecbbf234	La Poderosa Banda Sinaloense	bar		25.93623	-97.51122	2223 Central B
 c12ec0f8f0ff	La Shoteria	bar		25.95275	-97.48763	2501 Paredes Line Rd	Brownsville	78526	+19568327883			0.68
 846c2dc66c37	Las Ramblas at Market Square	bar	cocktail bar	25.90229	-97.49798	1101 E Washington St	Brownsville	78520		http://www.lasramblaslounge.com/		0.99
 105207c85efc	Levanta Muertos by Palace	bar		25.91120	-97.48354	1655 FM-802	Brownsville	78521	+19562805493			0.97
-7d1de63f2af9	Levanta Muertos by Palace	bar		25.95222	-97.49368	1655 FM-802	Brownsville	78521	+19562805493			0.96
 3b0c80d08568	Los Amigos Brownsville	bar		25.95065	-97.50456	2312 N EXPRESSWAY	Brownsville	78526				0.68
 3266832b1469	Malachela	bar	beer bar	25.93355	-97.49384	800 Frontage Rd Unit 28	Brownsville	78521	+19565257272	https://www.themalachela.com/popmenu-order		0.99
 67aaf8004ea0	Market Square Saloon	bar		25.90205	-97.49767	1137 E Washington St	Brownsville	78520				0.93
 074f2a3c62b8	McCarthy’s Irish Pub	bar	irish pub	25.95175	-97.49720	1425 Ruben M Torres Blvd	Brownsville	78526	+19568012066	https://www.mccarthys-usa.com		0.93
-e154d2ee9c7d	Mel S Honky Tonk	bar		25.99739	-97.60285		Brownsville		+19562446908	http://www.melshonkytonkngrill.com/		0.64
 93a211940b2b	Monterrey's Consulate Bar&grill	bar		25.95848	-97.46800	1520 Red Dr	Brownsville	78526	+19565729496			0.73
 c7eccdcf20b6	Mynt Bar & Grill	bar	sports bar	25.96371	-97.50801	600 Springmart Blvd Ste 8	Brownsville	78526	+19566214552	https://www.myntbarandgrill.com/		0.92
 bad319a99dc4	Nuevo Monkey Bar	bar		25.91133	-97.48251	2535 E 14th St	Brownsville	78521				0.96
@@ -139,8 +137,6 @@ ffd64c508ffe	Allstar Motors	cardealer		25.90884	-97.46944	2325 Southmost Rd	Brow
 04b372340e9e	Angel's Auto Sales	cardealer	used auto dealer	25.92960	-97.45177	5525 S Padre Island Hwy	Brownsville	78521	+19568317744	http://www.angelautosales.com/contact-us.html		0.92
 e8cf4ed17bcf	Ara Auto Sales	cardealer		25.92568	-97.49162	257 Frontage Rd	Brownsville	78520	+19565925894			0.92
 9e185d6aeafe	Auto sales J&M	cardealer		25.93339	-97.43102	2525 13th St	Brownsville	78521	+19565450666			0.87
-cfb673d3de47	Auto sales J&M	cardealer		25.91215	-97.48322	2525 13th St	Brownsville	78521	+19565450666			0.86
-a3940351bcd0	Autopartes DAGA	cardealer		25.91565	-97.51228	Calle océano pacífico 13-23	Brownsville	87456	+528442408417			0.60
 0af62c5e9b92	Autos Barron	cardealer	used auto dealer	25.91258	-97.47983	2876 E 14th St	Brownsville	78521	+19565420095	http://autos-barron.edan.io		0.92
 ae86f923c366	Autos Barron	cardealer		25.90619	-97.48441	1705 N Frontage Rd	Brownsville	78521	+19565452244			0.92
 93cfb2d28e09	Autos Gonzalez	cardealer		25.90796	-97.46700	3298 E 26th St	Brownsville	78521	+19564351917			0.92
@@ -353,7 +349,6 @@ c7f69fe2cf68	the roast house	coffee		25.98071	-97.49202	1393 E Alton Gloor Blvd 
 ea19b1241108	The Roast House	coffee		25.90099	-97.49695	1254 E Washington St	Brownsville	78520	+19565450354	http://www.theroasthousergv.com		0.92
 24005ed6809e	The Sip Society Company	coffee		25.90277	-97.49890	1018 E Washington St	Brownsville	78520	+19564667429	https://www.thesipsocietycompany.com/		0.64
 0de7cdcdcf77	Tora Bakery Co.	coffee		25.96792	-97.51476		Brownsville		+19562303224	https://torabakerycafe.square.site/		0.95
-54dc400d55e5	Tora Bakery Co.	coffee		25.96795	-97.51467		Brownsville		+19562303224	https://torabakerycafe.square.site/		0.92
 1b0f83f1dd6d	Vida Cafe	coffee		25.93837	-97.44580	1800 N Central Ave	Brownsville	78521				0.97
 bec4e75714f1	Warbler Coffee Co.	coffee		25.90835	-97.49947	540 E Monroe St	Brownsville	78520		https://www.warblercoffee.com/curbside		0.99
 cd1b1ef91404	Biomedical Research and Health	college		25.89561	-97.48553	Biomedical Research Building	Brownsville	78520		http://www.buffalo.edu/buildings/building?id=biomedical_research		0.72
@@ -372,7 +367,6 @@ edb563413eaf	Music, Science, And Learning Center	college		25.89317	-97.48550		Br
 8312fa8bf5a4	Texas Southmost College	college		25.90259	-97.51361	301 Mexico Blvd	Brownsville	78520	+19562953600	http://tsc.edu/		0.92
 0e0f111bb33e	The Salon and Spa at Southern Careers Institute - Brownsville	college	business school	25.93641	-97.50087	935 N Expy	Brownsville	78520	+18446869100	http://thesalonandspa.com/		0.99
 694f51794742	The University of Texas at Brownsville	college		25.89914	-97.49155	1 University Blvd	Brownsville	78520	+19568828200	http://clicks.superpages.com/ct/clickThrough?SRC=&target=SP&PN=1&FP=profile&PGID=yp608.8081.1457946759650.11662141972&ALG=113&TS=nbt&OF=1&ACTION=log		0.68
-b54a917723d4	The University of Texas at Brownsville	college		25.89336	-97.48711	1 University Blvd	Brownsville	78520	+19568828200	http://clicks.superpages.com/ct/clickThrough?SRC=&target=SP&PN=1&FP=profile&PGID=yp608.8081.1457946759650.11662141972&ALG=113&TS=nbt&OF=1&ACTION=log		0.68
 e84680e19ef8	The University of Texas Rio Grande Valley Mathematics and Science Academy	college		25.89363	-97.48734	2051 W University Blvd	Brownsville	78520	+19566652425			0.97
 68daef9043fc	Translation & Interpreting Programs at UTRGV	college		25.89422	-97.49115	1 University Blvd	Brownsville	78520	+19568827450	http://www.utrgv.edu/translation-and-interpreting-programs/		0.92
 99522102145b	TSC Criminal Justice Institute	college		25.90289	-97.51073	301 Mexico Blvd	Brownsville	78520	+19562953579	http://www.utb.edu/cji		0.73
@@ -541,7 +535,6 @@ fb0bd13d36bc	Stripes	convenience		25.94163	-97.46977	4100 Coffee Rd	Brownsville	
 46560b88316a	Sunoco	convenience		25.97963	-97.49805	1180 E Alton Gloor Blvd	Brownsville	78521	+19565047163	http://www.sunoco.com	Sunoco	0.99
 6e620c1fefb8	Sunoco	convenience		25.98203	-97.48478	1998 E Alton Gloor Blvd	Brownsville	78526	+19565501144	https://www.sunoco.com/locations/store/1998-alton-gloor-brownsville-tx-0848597100		0.92
 7aee1c8de579	Sunoco	convenience		25.96576	-97.51455	200 Morrison Rd	Brownsville	78520	+19563509299	http://www.sunoco.com	GoSunoco	0.99
-7bac784d9684	Sunoco	convenience		25.93366	-97.52670	2255 E Loop	Brownsville	78520	+19569860348	https://www.sunoco.com/locations/store/2255-east-loop-brownsville-tx-0678034000		0.85
 80981cd7e1c8	Sunoco	convenience		25.89469	-97.47486	2400 E University Blvd	Brownsville	78521	+19569826857	https://www.sunoco.com/		0.92
 83794fde64ff	Sunoco	convenience		25.93248	-97.44593	6106 Padre Island Hwy	Brownsville	78521	+19568310775	https://www.sunoco.com/locations/store/6106-padre-island-hwy-brownsville-tx-0699900700		0.92
 869f1965e0ca	Sunoco	convenience		25.94053	-97.53733	1400 Military Road	Brownsville	78520	+19565543214	https://www.sunoco.com/locations/store/1400-military-hwy-brownsville-tx-0404577900		0.92
@@ -564,7 +557,6 @@ e316dda64a96	TX0325	convenience		25.93230	-97.51000	1964 CENTRAL BLVD	Brownsvill
 0a8725270dc6	Valero	convenience		25.93234	-97.51029	1964 Central Blvd	Brownsville	78520	+19565481580	https://www.valero.com		0.65
 2bc775a131ad	Valero	convenience		25.90292	-97.45616	3301 Southmost Rd	Brownsville	78521	+19566244656	http://www.valero.com	Valero Energy	0.83
 39d7dd20b5a7	Valero	convenience		25.93491	-97.44672	6106 S Padre Island Hwy	Brownsville	78521	+19568310775	http://www.valero.com/	Valero	0.69
-da9583399bf2	Valero	convenience		25.93226	-97.44576	6106 S Padre Island Hwy	Brownsville	78521	+19568310775	http://www.valero.com/	Valero	0.66
 de8543cc6f43	Valero	convenience		25.96226	-97.42442	4030 FM-511	Brownsville	78526	+19568313621	http://www.valero.com/		0.64
 f183c0095d51	Valero	convenience		25.93114	-97.49887	1564 E Los Ebanos Blvd	Brownsville	78520	+19565420136	http://www.valero.com	Valero Energy	0.57
 338490f71e10	Valero Corner Store	convenience		25.92127	-97.48121	2636 Boca Chica Blvd	Brownsville	78521	+19562805091			0.65
@@ -582,10 +574,13 @@ aa6f901360b6	Arbys	fastfood		25.91961	-97.47979		Brownsville		+19565464444			0.6
 6a0ba4d03a35	Burger King	fastfood		25.92394	-97.51129	1300 Central Blvd	Brownsville	78520	+19565445475	https://www.bk.com/store-locator/store/restaurant_7569	Burger King	0.99
 bc8f16b176cd	Burger King	fastfood		25.91047	-97.47555	3235 International Blvd	Brownsville	78521	+19569823945	https://www.bk.com/store-locator/store/restaurant_7822	Burger King	0.99
 be0a78f1c443	Burger King	fastfood		25.94456	-97.42683	7411 Padre Island Hwy	Brownsville	78521	+19562805262	https://burgerking.com/store-locator/store/9330	Burger King	1.00
+d345cc11ed6e	Burger King	fastfood	burger restaurant	25.97841	-97.51933	3585 West Alton Gore	Brownsville	78526	+19563506290	https://burgerking.com/store-locator/store/13145	Burger King	0.99
+f65b3a4f14c1	Carl's Jr	fastfood	burger restaurant	25.96837	-97.51212	4250 N Expressway	Brownsville	78526	+19563508112	https://www.carlsjr.com/?utm_source=Yext&utm_medium=Visit+Website&utm_campaign=Homepage	Carl's Jr.	0.82
 23727f129578	Chick-fil-A	fastfood		25.92128	-97.46767	3385 Boca Chica Blvd	Brownsville	78521	+19565412456	https://www.chick-fil-a.com/locations/tx/boca-chica?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 b9782fd0ede6	Chick-fil-A	fastfood		25.96851	-97.51414	4325 N Expressway # 77	Brownsville	78520	+19563509488	https://www.chick-fil-a.com/locations/tx/morrison-road?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 c5e1651d279c	Chick-fil-A	fastfood		25.95320	-97.50294	2370 N Expressway Ste 1348	Brownsville	78521	+19565414222	https://www.chick-fil-a.com/locations/tx/sunrise-mall-bv?utm_source=yext&utm_medium=link	Chick-fil-A	0.97
 cfed307ba82c	Chick-fil-A	fastfood		25.95035	-97.48385	2150 Ruben M Torres Blvd	Brownsville	78526	+19565047222	https://www.chick-fil-a.com/locations/tx/ruben-torres	Chick-fil-A	0.99
+9fd31acb9d17	Chipotle Mexican Grill	fastfood	mexican restaurant	25.95191	-97.48731	2425 Paredes Line Rd	Brownsville	78526	+19565946474	https://locations.chipotle.com/tx/brownsville/2425-paredes-line-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
 28dde334bcb8	Church's Chicken	fastfood		25.90088	-97.49683	1264 E. Washington Street	Brownsville	78520	+19565446587	https://locations.churchs.com/tx/brownsville/1264-e.-washington-street	Church's Chicken	0.97
 3fec36c49fbe	Church's Chicken	fastfood		25.94915	-97.50209	1104 Ruben M. Torres Boulevard	Brownsville	78521	+19565415455	https://locations.churchs.com/tx/brownsville/1104-ruben-m.-torres-boulevard	Church's Chicken	0.98
 4bb7051e2c6b	Church's Chicken	fastfood		25.90630	-97.48239	2121 International Blvd	Brownsville	78521	+19565468360	https://locations.churchs.com/tx/brownsville/2121-international-boulevard	Church's Chicken	0.99
@@ -600,11 +595,16 @@ ba299ccd5985	Dairy Queen	fastfood		25.92123	-97.46848	3343 Boca Chica Blvd	Brown
 df1bb0eb80da	Dairy Queen	fastfood		25.93519	-97.48861	2044 E Price Rd	Brownsville	78521	+19565424707	http://www.dairyqueen.com/	Dairy Queen	0.99
 e63adf04a383	Dairy Queen	fastfood		25.94230	-97.42880	7284 Padre Island Hwy 7284 Padre Island Hwy	Brownsville	78521	+19564650697	https://www.dairyqueen.com/en-us/locations/tx/brownsville/7284-padre-island-hwy/44330/?y_source=1_MjkzMzk0MTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 f550a01bf271	Dave's Hot Chicken	fastfood		25.94996	-97.50289	1165 FM 802	Brownsville	78526			Dave's Hot Chicken	0.80
+38703c2735e4	Domino's	fastfood	pizza restaurant	25.93761	-97.50085	943 N. Expressway #23	Brownsville	78520	+19565414040	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+714d3f65ea3d	Domino's	fastfood	pizza restaurant	25.92244	-97.46749	3355 Boca Chica Boulevard	Brownsville	78521	+19565547200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+ca331cdb7b66	Domino's	fastfood	pizza restaurant	25.98243	-97.48282	5460 Paredes Line Rd Suite 193	Brownsville	78526	+19565413800	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 01796090b97c	DQ Grill & Chill	fastfood		25.92545	-97.50940	844 Boca Chica Blvd	Brownsville	78520		https://www.dairyqueen.com/en-us/locations/tx/brownsville/844-boca-chica-blvd/3653	DQ Grill & Chill	0.80
 3ec1897e3085	DQ Grill & Chill	fastfood		25.92118	-97.46854	3343 Boca Chica Blvd	Brownsville	78521		https://www.dairyqueen.com/en-us/locations/tx/brownsville/3343-boca-chica-blvd/3651	DQ Grill & Chill	0.80
 530ff44b11bd	DQ Grill & Chill	fastfood		25.94246	-97.42873	7284 Padre Island Hwy	Brownsville	78521		https://www.dairyqueen.com/en-us/locations/tx/brownsville/7284-padre-island-hwy/13940	DQ Grill & Chill	0.80
 60717dbb7bc8	DQ Grill & Chill	fastfood		25.93510	-97.48869	2044 Price Rd	Brownsville	78521		https://www.dairyqueen.com/en-us/locations/tx/brownsville/2044-price-rd/3652	DQ Grill & Chill	0.80
 5cd7dd541164	El Pollo Loco	fastfood		25.97949	-97.51559	85 E Alton Gloor Blvd	Brownsville	78526	+19563503501	https://restaurants.elpolloloco.com/tx/brownsville/85-e-alton-gloor-blvd?utm_source=fb&utm_medium=yext	El Pollo Loco	0.99
+895892d1f6f3	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	25.95258	-97.50613	2435 N Expressway	Brownsville	78520	+19562775918	https://www.freddys.com/location/brownsville-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
+7013fb02bf6e	Golden Chick	fastfood	chicken restaurant	25.97827	-97.51723	4990 N Frontage Rd	Brownsville	78520	+19563503311	http://goldenchick.com		0.92
 6fb489f7112d	Gomi Locas	fastfood		25.90768	-97.47943	2606 International Blvd	Brownsville	78521	+19566216319			0.82
 1f4ae2a456fd	Jack in the Box	fastfood		25.93466	-97.49617	916 N Expressway	Brownsville	78521	+19565418511	https://www.jackinthebox.com		0.99
 2d39ca0b9da6	Jack in the Box	fastfood		25.95057	-97.48692	2150 Paredes Line Rd	Brownsville	78521	+19565508994	https://www.jackinthebox.com		0.99
@@ -613,14 +613,24 @@ dfbacdb10834	Jack in the Box	fastfood		25.91138	-97.47397	3355 International Blv
 e02c959d64be	Jack in the Box	fastfood		25.92562	-97.45789	5120 S Padre Island Hwy	Brownsville	78521	+19568317199	https://www.jackinthebox.com		0.99
 f95a520d3dc4	Jack in the Box	fastfood		25.96630	-97.50224	4250 N Expressway # 77	Brownsville	78526	+19565257059	https://www.jackinthebox.com		1.00
 4a0f29f1982d	Jersey Mike's Subs	fastfood		25.97818	-97.51823	4455 S Frontage Road, Pad C	Brownsville	78520	+19563224452	https://www.jerseymikes.com/15250/brownsville-tx		0.85
+4e44545a419c	Jersey Mike's Subs	fastfood	sandwich shop	25.96941	-97.51466	4455 Frontage Rd Pad C	Brownsville	78520	+19563224452	https://www.jerseymikes.com/15250/brownsville-tx	Jersey Mike's Subs	0.96
+b5bc6df1e72f	KFC	fastfood	chicken restaurant	25.90262	-97.48716	1444 International Blvd	Brownsville	78520	+19565428078	http://www.kfc.com		0.92
 b9c5b22a4ebd	KFC	fastfood		25.94287	-97.42901	7284 Padre Island Hwy	Brownsville	78521	+19568380525	http://www.kfc.com/storelocator/Default.aspx?address=7284%20S.%20Padre%20Island%20Highway,Brownsville,TX		0.92
 be0d7010ced1	KFC	fastfood		25.97811	-97.52024	3565 W. Alton Gloor Blvd	Brownsville	78520	+19563504411	https://locations.kfc.com/tx/brownsville/3565-w-alton-gloor-blvd	KFC	0.98
 f4d7c658d0b6	KFC	fastfood		25.92197	-97.47995	2701 Boca Chica Boulevard	Brownsville	78521	+19565482295	https://locations.kfc.com/tx/brownsville/2701-boca-chica-boulevard	KFC	0.98
+42018ff71248	Little Caesars	fastfood	pizza restaurant	25.95189	-97.49128	1725 Ruben M Torres Blvd	Brownsville	78526	+19566203042	https://littlecaesars.com/en-us/store/12309	Little Caesars	0.99
+625ed42cd2aa	Little Caesars	fastfood	pizza restaurant	25.92552	-97.50890	904 Boca Chica Blvd	Brownsville	78520	+19568012220	https://littlecaesars.com/en-us/store/11076	Little Caesars	0.99
+150ba13311cf	Little Caesars Pizza	fastfood	pizza restaurant	25.98235	-97.48640	1601 E Alton Gloor Blvd	Brownsville	78526	+19569860909	https://littlecaesars.com/en-us/store/7334	Little Caesars	0.98
+32f385b432e3	Little Caesars Pizza	fastfood	pizza restaurant	25.92204	-97.47927	2715 Boca Chica Boulevard	Brownsville	78521	+19565187017	https://littlecaesars.com/en-us/store/20941		0.92
+36b84fc05f77	Little Caesars Pizza	fastfood	pizza restaurant	25.94378	-97.42837	5850 Ruben M Torres Blvd	Brownsville	78526	+19568381345	https://littlecaesars.com/en-us/store/10128	Little Caesars	0.98
+d54c9916e84e	Little Caesars Pizza	fastfood	pizza restaurant	25.90678	-97.46385	2905 Southmost Rd	Brownsville	78521	+19565466767	https://littlecaesars.com/en-us/store/2599	Little Caesars	0.99
 301319ad2f2f	Los Trevi Drive Thru	fastfood		25.90334	-97.44901	691 Morningside Rd	Brownsville	78521	+19565426588			0.96
 eac08c178f5e	Manny's Pigeon Coop	fastfood		25.92604	-97.50024	1365 Crestview Dr	Brownsville	78520				0.81
 06a10dbdceb3	McDonald's	fastfood		25.95215	-97.48628	117 America Drive	Brownsville	78526	+19565549821	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/117-america-drive/32933.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+13df1a4cefb2	McDonald's	fastfood	burger restaurant	25.92465	-97.47764	2721 Boca Chica Boulevard	Brownsville	78521	+19565547715	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/2721-boca-chica-boulevard/31806.html?cid=RF:YXT:RoN::Clicks		1.00
 4e23bdca337e	McDonald's	fastfood		25.92655	-97.51190	1609 Central Blvd	Brownsville	78520	+19565049442	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/1609-central-blvd/26558.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 53427394e74a	McDonald's	fastfood		25.96740	-97.51350	4315 North Expy	Brownsville	78526	+19563502527	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/4315-n-expressway-77/34972.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+54c231d50919	McDonald's	fastfood	burger restaurant	25.97579	-97.52090	3500 W Alton Gloor	Brownsville	78520	+19563508064	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/3500-w-alton-gloor/28615.html?cid=RF:YXT:RoN::Clicks		0.98
 5895962d39c1	McDonald's	fastfood		25.91667	-97.40595	7980 Boca Chica Blvd	Brownsville	78521		https://www.mcdonalds.com/us/en-us/location/43788.html	McDonald's	0.80
 a5092ff70f49	McDonald's	fastfood		25.91987	-97.46706	4484 E 14th St	Brownsville	78521	+19565425088	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/4484-e-14th-st/11300.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 a5f2da0e5c41	McDonald's	fastfood		25.98342	-97.48347	5500 Paredes Line Rd	Brownsville	78526		https://www.mcdonalds.com/us/en-us/location/39921.html	McDonald's	0.80
@@ -633,24 +643,58 @@ fec4de73352c	McDonald's	fastfood		25.94494	-97.54473	2025 U.S. Hwy 281	Brownsvil
 5c8d6e3ec274	Oquin McDs	fastfood		25.92126	-97.49142	101 S Expressway 83	Brownsville	78520				0.88
 08a485f1c833	Panda Express	fastfood		25.92133	-97.47652	2920 Boca Chica Blvd	Brownsville	78521	+19566086336	https://www.pandaexpress.com/locations/tx/brownsville/3636		0.99
 b03793347783	Panda Express	fastfood		25.96964	-97.51465	4435 N. Expressway	Brownsville	78520	+19563503998	http://www.pandaexpress.com/	Panda Express México	0.97
+79b97c02da86	Papa John's Pizza	fastfood	pizza restaurant	25.92113	-97.47318	3254 Boca Chica Blvd	Brownsville	78521	+19565045044	http://www.papajohns.com/		0.92
+a92de494d699	Papa John's Pizza	fastfood	pizza restaurant	25.92095	-97.46855	3343 Boca Chica Blvd	Brownsville	78521	+19565040995	http://www.papajohns.com/		0.92
+eb44b80e0acc	Papa John's Pizza	fastfood	pizza restaurant	25.92571	-97.50956	824 Boca Chica Blvd	Brownsville	78520	+19569862221	http://www.papajohns.com/		0.92
+210cf3c681f3	Papa Johns	fastfood	pizza restaurant	25.96475	-97.51207	4237 N Expressway #77 Ste 5	Brownsville	78520	+19564358000	https://www.papajohns.com/order/menu	Papa John's Pizza	0.97
+41c93b9c1b61	Papa Johns Pizza	fastfood	pizza restaurant	25.94480	-97.42990	5740 RUBEN TORRES Blvd Ste 101	Brownsville	78526	+19566942555	https://locations.papajohns.com/united-states/tx/78526/brownsville/5740-ruben-torres-blvd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI3MzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+19476f8ebb2f	Pizza Hut	fastfood	pizza restaurant	25.91954	-97.46941	245 Security Dr Cameron	Brownsville	78521	+19565416393	https://locations.pizzahut.com/tx/brownsville/245-security-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299460	Pizza Hut	0.99
+33d9a2b14102	Pizza Hut	fastfood	pizza restaurant	25.98025	-97.49799	1175 E Alton Gloor Blvd Cameron	Brownsville	78526	+19563381510	https://locations.pizzahut.com/tx/brownsville/1175-e-alton-gloor-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313246	Pizza Hut	0.97
+36bd28ea9bed	Pizza Hut	fastfood	pizza restaurant	25.92221	-97.48664	2333 Boca Chica Blvd Cameron	Brownsville	78521	+19565447711	https://locations.pizzahut.com/tx/brownsville/2333-boca-chica-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300032	Pizza Hut	0.99
+569c470d4adb	Pizza Hut	fastfood	pizza restaurant	25.92990	-97.51071	1830 Central Blvd Cameron	Brownsville	78520	+19565468272	https://locations.pizzahut.com/tx/brownsville/1830-central-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299750	Pizza Hut	0.98
+8a5fa20979f8	Pizza Hut	fastfood	pizza restaurant	25.95035	-97.50034	1179 FM802	Brownsville	78526	+19565447733	https://locations.pizzahut.com/tx/brownsville/1179-fm-802?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299983	Pizza Hut	0.98
+87c6f4af7dfb	Pizza Hut Express	fastfood	pizza restaurant	25.96844	-97.50994	301 E Morrison Road, Target-T2152	Brownsville	78526		https://locations.pizzahut.com/tx/brownsville/301-east-morrison-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315026		0.92
 f536cb935aa6	Pizza Hut Express	fastfood		25.89323	-97.48772	1 West University Boulevard	Brownsville	78521		https://locations.pizzahut.com/tx/brownsville/1-west-university-boulevard	Pizza Hut	0.80
 92de5b29d2a1	Popeyes	fastfood		25.92224	-97.48595	2335 Boca Chica Blvd	Brownsville	78521	+19565740685	https://www.popeyes.com/store-locator/store/restaurant_84834	Popeyes Louisiana Kitchen	0.97
 374ff68b41f1	Raising Cane's	fastfood		25.92129	-97.46899	3341 Boca Chica Blvd	Brownsville	78521	+19565749944	https://locations.raisingcanes.com/tx/brownsville/3341-boca-chica-blvd	Raising Cane's Chicken Fingers	0.97
+7f548f94378d	Raising Cane's	fastfood	chicken restaurant	25.96760	-97.51049	215 E. Morrison Road	Brownsville	78520	+19563508240	https://locations.raisingcanes.com/tx/brownsville/215-e.-morrison-road	Raising Cane's Chicken Fingers	0.99
 04d18eedf563	Raising Cane's Chicken Fingers	fastfood		25.96281	-97.53841	215 Morrison Rd	Brownsville	78526	+19563508240	https://www.raisingcanes.com/locations/c267		0.85
 ee23fc56f9c3	Solobary’s Tacos Y Carnitas	fastfood		25.88991	-97.45273	1065 Calle Milpa Verde	Brownsville	78521	+19567471475			0.72
 f45f375389a3	Sonic Drive In	fastfood		25.94944	-97.50067	1174 E. Ruben Torres	Brownsville	78521	+19565044003	https://locations.sonicdrivein.com/tx/brownsville/1174-e.-ruben-torres.html	Sonic Drive-In	0.98
+08682f7a5eb6	Subway	fastfood	sandwich shop	25.91730	-97.40760	7878 Boca Chica Blvd	Brownsville	78521			Subway	0.80
+09a9a06b7ce2	Subway	fastfood	sandwich shop	25.97875	-97.50439	800 E Alton Gloor Blvd Ste C	Brownsville	78526	+19563503558	https://www.subway.com		0.99
+13cf6ccc1892	Subway	fastfood	sandwich shop	25.97768	-97.48513	5015 Paredes Suite A	Brownsville	78521	+19565041409	https://restaurants.subway.com/united-states/tx/brownsville/5015-paredes	Subway	0.99
+13de0a37604e	Subway	fastfood	sandwich shop	25.91399	-97.50087	1400 Palm Blvd	Brownsville	78520	+19565549137	https://www.subway.com		0.92
+487f46e38386	Subway	fastfood	sandwich shop	25.94488	-97.42960	5850 FM 802 Space A8	Brownsville	78521	+19568320060	https://restaurants.subway.com/united-states/tx/brownsville/5850-fm-802	Subway	0.98
+500b16a3c295	Subway	fastfood	sandwich shop	25.93474	-97.48591	2384 E Price Rd	Brownsville	78521	+19569866101	https://restaurants.subway.com/united-states/tx/brownsville/2384-price-rd	Subway	0.98
 66e60f297a17	Subway	fastfood		25.94911	-97.50173	1122 Ruben Torres Blvd	Brownsville	78521	+19569869090	https://restaurants.subway.com/united-states/tx/brownsville/1122-ruben-torres-blvd?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=21973&utm_campaign=evergreen-2020&y_source=1_MTQ5MTI5ODgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+7acb254b2f76	Subway	fastfood	sandwich shop	25.96158	-97.53907	2740 W Alton Gloor Blvd Ste G	Brownsville	78520	+19563508600	https://www.subway.com		0.74
+922790188bfc	Subway	fastfood	sandwich shop	25.92085	-97.47327	3254 Boca Chica Blvd	Brownsville	78521	+19565447821	https://restaurants.subway.com/united-states/tx/brownsville/3254-boca-chica-blvd	Subway	0.96
+b30f04c7aac7	Subway	fastfood	sandwich shop	25.92568	-97.51061	764 Boca Chica Ave	Brownsville	78520	+19565440544	https://restaurants.subway.com/united-states/tx/brownsville/764-boca-chica-ave	Subway	0.95
+b3e1882ebae9	Subway	fastfood	sandwich shop	25.89426	-97.44759	4660 Southmost Rd.	Brownsville	78521	+19565427900	https://restaurants.subway.com/united-states/tx/brownsville/4660-southmost-rd	Subway	0.97
+b5eea3fee5c1	Subway	fastfood	sandwich shop	25.91522	-97.44543	4710 Boca Chica Suite A	Brownsville	78521	+19565422556	https://restaurants.subway.com/united-states/tx/brownsville/4710-boca-chica	Subway	0.96
 d1a9119201c9	Subway	fastfood		25.95662	-97.54021	2608 W Alton Gloor Blvd.	Brownsville	78520	+19563508600	https://restaurants.subway.com/united-states/tx/brownsville/2608-w-alton-gloor-blvd?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=45069&utm_campaign=evergreen-2020&y_source=1_MTQ5MTA3MTctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.85
+e1b7b70428b3	Subway	fastfood	sandwich shop	25.90025	-97.49420	755 International Blvd Suite B	Brownsville	78520	+19565043400	https://restaurants.subway.com/united-states/tx/brownsville/755-international-blvd	Subway	1.00
+e2a4200648a5	Subway	fastfood	sandwich shop	25.95194	-97.48150	2205 Ruben Torres Sr Blvd	Brownsville	78526	+19565414717	https://restaurants.subway.com/united-states/tx/brownsville/2205-e-ruebn-torres-sr-blvd	Subway	0.95
+a8ba05b61269	Subway Restaurants	fastfood	sandwich shop	25.95287	-97.50321	2370 N Expressway Ste 1338	Brownsville	78521	+19565425424	https://alibabacharleston.com		0.55
 047d51f2636a	Taco Bell	fastfood		25.91630	-97.47117	3801 International Blvd	Brownsville	78521	+19565047197	http://www.tacobell.com/	Taco Bell	0.99
 7d56ee7a7c53	Taco Bell	fastfood		25.94948	-97.50687	925 East Fm 802	Brownsville	78520	+19565482005	http://www.tacobell.com/	Taco Bell	0.99
 ee18b585e2db	The Snack Shack	fastfood		25.91568	-97.51241	770 W Washington St	Brownsville	78520	+19566010234			0.92
 6da01abe6d67	Tony's Snack Shack	fastfood		25.90842	-97.47824	2814 International Blvd STE B	Brownsville	78521	+19563718388			0.92
 8819361e09e5	Wendy's	fastfood		25.95276	-97.48630	1001 Main Street	Brownsville	78526	+19565421406	https://locations.wendys.com/united-states/tx/brownsville/1001-main-street	Wendy's	0.99
+32e0da34014c	Whataburger	fastfood	burger restaurant	25.92224	-97.48436	2419 BOCA CHICA BLVD	Brownsville	78521	+19565462361	http://whataburger.com/	Whataburger	0.99
 48e6ecfc17b7	Whataburger	fastfood		25.94270	-97.42737	6100 FM 802	Brownsville	78526	+19568310761	https://locations.whataburger.com/tx/brownsville/6100-fm-802.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 4dc71921f2b8	Whataburger	fastfood		25.92439	-97.51115	1400 CENTRAL BLVD	Brownsville	78520	+19565428044	http://whataburger.com/	Whataburger	0.99
 5c314ee0f6a7	Whataburger	fastfood		25.97777	-97.51917	3580 W ALTON GLOOR BLVD	Brownsville	78520	+19563508863	https://locations.whataburger.com/tx/brownsville/3580-w-alton-gloor-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 698fd49e1f48	Whataburger	fastfood		25.94888	-97.50425	2290 N EXPRESSWAY	Brownsville	78521	+19565462572	https://locations.whataburger.com/tx/brownsville/2290-n-expressway.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 88e8db3831e8	Whataburger	fastfood		25.95146	-97.48435	2103 RUBEN TORRES BLVD	Brownsville	78526	+19569824352	https://locations.whataburger.com/tx/brownsville/2103-ruben-torres-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+f32799ee80cd	Whataburger	fastfood	burger restaurant	25.90591	-97.48324	2021 INTERNATIONAL BLVD	Brownsville	78521	+19565420963	https://locations.whataburger.com/tx/brownsville/2021-international-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+161449253afe	Wingstop	fastfood	chicken restaurant	25.90501	-97.46442	2950 Southmost Rd Ste 106	Brownsville	78521	+19565419464	https://www.wingstop.com/location/wingstop-235-brownsville-tx-78521/menu?y_source=1_NTUyMDY1MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+6f3239ed3a1b	Wingstop	fastfood	chicken restaurant	25.90038	-97.49382	755 International Blvd Ste G	Brownsville	78520	+19565469464	https://www.wingstop.com/location/wingstop-604-brownsville-tx-78520/menu?y_source=1_NTUyMDc2ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+84c0a6e63405	Wingstop	fastfood	chicken restaurant	25.97937	-97.51059	400 E Alton Gloor Blvd Ste C	Brownsville	78526	+19563508500	https://www.wingstop.com/location/wingstop-647-brownsville-tx-78526/menu?y_source=1_NTUyMDc0NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+a19b37a4b816	Wingstop	fastfood	chicken restaurant	25.94329	-97.42912	5850 Fm 802 Ste E1	Brownsville	78526	+19568319464	https://www.wingstop.com/location/wingstop-287-brownsville-tx-78526/menu?y_source=1_NTUyMDc1OTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+e867a801489f	Wingstop	fastfood	chicken restaurant	25.93029	-97.51127	1905 Central Blvd	Brownsville	78520	+19565429464	https://www.wingstop.com/location/wingstop-577-brownsville-tx-78520/menu?y_source=1_NTUyMDY2ODYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+f3c88e791db6	Wingstop	fastfood	chicken restaurant	25.95274	-97.48753	2501 Paredes Line Rd Ste A3	Brownsville	78526	+19565466700	https://www.wingstop.com/location/wingstop-68-brownsville-tx-78526/menu?y_source=1_NTUyMDY1MjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 73a2b528c4c7	Yellow Bar n Coffee	fastfood		25.91188	-97.51743	4727 Ave A	Brownsville	78520				0.67
 d0c0b41ddc89	Yoli's	fastfood		25.90979	-97.47157	2055 Southmost Rd	Brownsville	78521	+19565482388			0.92
 9683770041aa	Yukis	fastfood		25.92677	-97.51885	33 Boca Chica Blvd	Brownsville	78520	+19563721391			0.99
@@ -686,7 +730,6 @@ bbe885b6127d	H-E-B	grocery		25.90516	-97.46520	2950 Southmost Rd	Brownsville	785
 49f950e86a37	Janet's Grocery	grocery		25.89467	-97.45871	515 Calle Milpa Verde	Brownsville	78521	+19565423318			0.96
 78ca7a4e54cf	Jason's Deli	grocery		25.97274	-97.51605	4365 S Expwy 77	Brownsville	78520	+19563502400	https://www.jasonsdeli.com/locations/tx/brownsville/4365-s-expwy-77		0.77
 47af5c6d21cb	Johnny's Grocery & Meat Market # 2	grocery		25.89174	-97.44267	4922 Southmost Rd	Brownsville	78521	+19565420205			0.66
-1d3fa680823b	K&Q	grocery		25.89333	-97.44805	.	Brownsville			https://www.instagram.com/kings_and_queens_snack?igsh=MXc4Z2VseXo0MXF2cQ%3D%3D&utm_source=qr		0.57
 62bed0c35a29	K&Q	grocery		25.88660	-97.42367	.	Brownsville			https://www.instagram.com/kings_and_queens_snack?igsh=MXc4Z2VseXo0MXF2cQ%3D%3D&utm_source=qr		0.59
 88aeba20b262	La Frontera Meat Market & Groceries	grocery		25.90465	-97.49073	1302 E 14th St	Brownsville	78520	+19565549222			0.99
 38f05fcd8ea3	La Michoacana Meat Market	grocery		25.91497	-97.51237	770 W Elizabeth St	Brownsville	78520	+19565444806	http://www.lamichoacanameatmarket.com/770-w-elizabeth-brownsville/	La Michoacana Meat Market "Official Page"	0.96
@@ -722,7 +765,6 @@ e073b299f7d4	Driscoll Childrens Hospital	hospital		25.89764	-97.50401	1098 E St	
 06a3dbb7edc2	Foot Care Institute	hospital		25.91851	-97.51135	844 Central Blvd #140	Brownsville	78520	+19566985052	http://www.valleybaptist.net/		0.92
 e76c8edbb4aa	Helping Hands Community Center	hospital		25.93136	-97.50931	1940 Pecan	Brownsville	78520	+19565461885	http://helpinghandscommunitycenter.com		0.72
 e91e59b84c4c	Jose Perez Enriquez	hospital		25.93215	-97.47286	58 E Price Rd	Brownsville	78521	+19565450080	www.healthgrades.com/physician/dr-jose-perez-enriquez-26tkk		0.98
-36bbe0808c94	L V Imaging	hospital		25.94321	-97.50266	1900 Expressway	Brownsville	78521	+19565481199	http://www.lvimagingcenter.com		0.95
 8bf1d52a716e	L V Imaging	hospital		25.94351	-97.50269	1900 Expressway	Brownsville	78521	+19565481199			0.99
 3a59e4b92c7e	Mary P. Lucio Health Center	hospital		25.90508	-97.43857	1204 Jose Colunga Jr St	Brownsville	78521	+19565748745	https://www.cameroncountytx.gov		0.97
 84f0cfd92507	Pediatric Unit At Valley Baptist Medical Center	hospital		25.91769	-97.51127		Brownsville					0.76
@@ -740,7 +782,6 @@ bb7dce653994	Urgent Center	hospital		25.93886	-97.49921	1100 N Expressway	Browns
 c793b427839b	Valley Region Hospital	hospital		25.97830	-97.51492		Brownsville					0.77
 bfac0925a638	Valley Regional Medical Center	hospital		25.97821	-97.51463	100 E Alton Gloor Blvd	Brownsville	78526	+19563507000	https://valleyregionalmedicalcenter.com/service/rehabilitation-therapy	HCA Houston Healthcare	0.97
 657862ae5750	Valley Regional Medical Center.	hospital		25.92977	-97.43631		Brownsville					0.72
-ae2319cca845	Valley Regional Medical Center.	hospital		25.92515	-97.43502		Brownsville					0.71
 dd2adad8229c	Vrmc Labor & Delivery	hospital		25.97693	-97.51543	100A E Alton Gloor Blvd	Brownsville	78526	+19563507000	http://valleyregionalmedicalcenter.com/service/womens		0.99
 464061715862	Well Care Medical Center	hospital		25.92194	-97.48317	2495 Boca Chica Blvd	Brownsville	78521	+19565040810			0.71
 212acf9ab8bb	America's Best Value Inn	hotel	motel	25.94269	-97.42799	7364 Padre Island Hwy	Brownsville	78521	+19568320202	https://www.redlion.com/americas-best-value-inn/tx/brownsville/americas-best-value-inn-brownsville		1.00
@@ -748,13 +789,10 @@ dd2adad8229c	Vrmc Labor & Delivery	hospital		25.97693	-97.51543	100A E Alton Glo
 f0e6406912d3	Boca Chica Inn & Suites Brownsville	hotel	motel	25.92066	-97.47176	3280 Boca Chica Blvd	Brownsville	78521	+19565549090	http://www.bocachicainn.com/		0.99
 5479c6d89fa8	Casa Grande Apartments	hotel		25.93738	-97.50405	2425 Barnard Rd	Brownsville	78520	+19565460313	https://www.apartments.com/casa-grande-apartments-brownsville-tx/...		0.70
 068039308ec1	Days Inn Brownsville	hotel		25.93244	-97.49537	715 N Expressway	Brownsville	78520	+19565412201	https://www.wyndhamhotels.com		0.92
-658b76a071d7	Ebony Parkway	hotel		25.96038	-97.51742		Brownsville					0.71
-29594abe2aee	Estevez High Precision	hotel		25.92831	-97.39633	8636 N Oklahoma Ave	Brownsville	78521	+19568313805	http://www.ehpmanufacturing.webs.com		0.82
 3344ed0968a0	Estevez High Precision	hotel		25.93146	-97.40137	8636 N Oklahoma Ave	Brownsville	78521	+19568313805			0.82
 429228d294a9	Expressway Suites	hotel	service apartment	25.93217	-97.49569	715 Frontage Rd	Brownsville	78520	+19565412201	https://www.facebook.com/expresswaysuitesllc		0.92
 9aedb08bee6d	Fairfield by Marriott Inn & Suites Brownsville North	hotel		25.96637	-97.50216	804 E Morrison Rd	Brownsville	78526	+19566675278	https://www.marriott.com/en-us/hotels/brofi-fairfield-inn-and-suites-brownsville-north/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 addd930b17e7	Flamingo Motel	hotel	motel	25.92834	-97.51147	1741 Central Blvd	Brownsville	78520	+19565462478	http://flamingomotelbrownsville.com		0.99
-5d4f0860fa01	Grajusa Llp	hotel		25.94582	-97.50588	1985 N Expressway	Brownsville	78520				0.95
 abc9373eebea	Gran Mansion Hotel	hotel	motel	25.92933	-97.51127	1801 Central Blvd	Brownsville	78520	+19565045454	http://granmansionhotelbrownsville.com/		0.94
 37961de7176e	Grande Motel	hotel	motel	25.93264	-97.51011	2004 Central Blvd	Brownsville	78520	+19565411961	http://grandemotel.com		0.99
 5ce34c106fa2	Hampton Inn and Suites Brownsville	hotel		25.96049	-97.50804	3000 North Expy	Brownsville	78526	+19565480005	http://hilton.com/	Hampton by Hilton	1.00
@@ -773,8 +811,6 @@ d0fe0c3d18de	La Copa Inn Brownsville	hotel	motel	25.97834	-97.51996	3575 W Alton
 952987d08e12	Lavista Hotel	hotel		25.93257	-97.49596	713 N Expressway	Brownsville	78520	+19565428383	https://brownsville.org?doing_wp_cron=1555647620.1047830581665039062500		0.99
 6950a08fbdf7	Lomas Del Bosque Subdivision	hotel		25.93744	-97.45556		Brownsville					0.71
 2357fc4102a0	Magnuson Hotel Brownsville	hotel	resort	25.93232	-97.49555	715 N Drive #77/83	Brownsville	78520	+19565412201	https://www.magnusonhotels.com/hotel/magnuson-hotel-brownsville		1.00
-a1d36b3d923c	Magnuson Hotel Brownsville	hotel	resort	25.93865	-97.53310	715 N Drive #77/83	Brownsville	78520	+19565412201	https://www.magnusonhotels.com/hotel/magnuson-hotel-brownsville		0.85
-2e704ee8f525	Medrano Ranch	hotel		25.92766	-97.38799	1015 Haven Way	Brownsville	78521				0.77
 cf457dc17db9	Motel 6	hotel	motel	25.95173	-97.50600	2377 North Expy	Brownsville	78520	+19566342865	http://www.motel6.com/	Motel 6	0.97
 199d624b44d3	Motel 6 Brownsville, TX North	hotel	resort	25.93690	-97.49903	2377 N Expressway	Brownsville	78520	+19566342868	https://www.motel6.com/en/home/motels.tx.brownsville.4625.html?lid=Local_Milestone_4625&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.85
 ef575e5873fc	Motel 6 Brownsville- Tx	hotel	resort	25.94798	-97.50520	2255 N Expy	Brownsville	78520	+19565464699			0.99
@@ -785,7 +821,6 @@ f72b94a1ae3a	Plaza Square Motel	hotel	motel	25.93686	-97.51060	2255 Central Blvd
 aad1c36e2960	Quality Inn Brownsville	hotel		25.94160	-97.43204	7051 S Padre Island Hwy	Brownsville	78526	+19563381847		Choice Hotels	1.00
 8feb3896a252	Rancho Caracol	hotel		25.93648	-97.49330	2424 Village Dr	Brownsville	78521	+18882463164	http://www.ranchocaracol.com		0.65
 b8a6bcabde34	Rancho Caracol	hotel		25.94587	-97.42329	7650 Padre Island Hwy	Brownsville	78521	+19565425765	http://www.ranchocaracol.com		0.65
-ca727db4b67a	Rancho Mescalero	hotel	lodge	25.94581	-97.42308	7650 Padre Island Hwy	Brownsville	78521	+19563716141	http://mexico-bird-hunts.com/		0.66
 0786c75b0e38	Residence Inn by Marriott Brownsville	hotel	resort	25.96772	-97.51331	3975 N. Expressway 83	Brownsville	78520	+19563508100	https://www.marriott.com/en-us/hotels/brori-residence-inn-brownsville/overview/?scid=ba372e19-3116-406f-8c8c-cd1679a20d2d		0.99
 c86c6a406d34	Residence Inn by Marriott Brownsville	hotel		25.96044	-97.51031	3975 N Expressway 83	Brownsville	78520	+19563508100	https://www.marriott.com/en-us/hotels/brori-residence-inn-brownsville/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Residence Inn by Marriott	0.99
 f8d028693bfb	Rio Del Sol	hotel		25.96054	-97.43221	5133 Morrison Rd	Brownsville	78526		http://www.riodelsol.info/		0.83
@@ -800,13 +835,11 @@ fe5d3a328dff	SureStay	hotel	motel	25.93332	-97.49657	825 Frontage Rd #83	Brownsv
 1790f2250d75	Texas Inn Brownsville Hotel	hotel	motel	25.93428	-97.49741	845 North Expy #77	Brownsville	78520	+19565425501	http://hotelbrownsvilletexas.com/		0.99
 c9cc5835e729	Texas Inn South Padre Island Airport Brownsville	hotel		25.94173	-97.43217	7051 Padre Island Hwy	Brownsville	78521	+19566213299	http://www.texasinnbrownsville.com		0.96
 c0d9ddd3ee61	Tradewinds Motel	hotel	motel	25.91583	-97.51279	555 Central Blvd	Brownsville	78520	+19565508011			0.92
-379109132b11	Traditional Chinese Messa	hotel		25.93454	-97.49481	800 N Expressway Ste 36	Brownsville	78521				0.95
 7d22825053ed	University Inn and Suites	hotel	motel	25.89866	-97.50209	55 Sam Perl Blvd	Brownsville	78520	+19565460381	http://www.universityinnandsuites.com/		0.99
 01f211cca732	UTRGV Casa Bella Apartments	hotel		25.89591	-97.48126	2651 FJRM Ave	Brownsville	78520	+19568827191	http://www.utrgv.edu/housing		0.85
 a8c5814b4650	WoodSpring Suites	hotel		25.94431	-97.50597	995 Media Luna Rd	Brownsville	78520	+19565421684	https://www.woodspring.com/extended-stay-hotels/locations/texas/brownsville-harlingen/woodspring-suites-brownsville	WoodSpring Suites	0.99
 396975395c28	Z2006 Enterprise Llc	hotel		25.92936	-97.51137	1801 Central Blvd	Brownsville	78520				0.95
 35c4c1d8e964	Blue Box Technologies Llc	office		25.93866	-97.50820	2685 N Coria St Ste D4	Brownsville	78520	+19566551778	http://www.blueboxlive.com		0.75
-eb612225283a	Boost Mobile	office	telecommunications company	25.94161	-97.54085	1575 US Highway 281	Brownsville	78520	+19569824420	https://www.boostmobile.com/	Boost Mobile	0.92
 38716f282738	Brownsville Landfill	office		25.93852	-97.41518	650 Ruben M Torres Blvd	Brownsville	78520	+19568313641			0.97
 c20f62bfeb84	Core Molding Technologies	office	plastics company	25.93298	-97.45249	1385 Cheers St	Brownsville	78521	+19568383040	http://coremt.com	Core Composites de México - Oficial	0.96
 3bf765a8422f	Custom Computing Products	office	information technology company	25.92660	-97.45145	825 Calle Roble	Brownsville	78521	+19565020227	http://ccp421.info/		0.92
@@ -815,7 +848,6 @@ cbaee1b3d8f2	Entail Engine Llc	office		25.95213	-97.45714	2600 Quality Ln	Browns
 ad7012d8a5c0	IdentoGO	office		25.94430	-97.42595	7470 Padre Island Hwy	Brownsville	78521		https://uenroll.identogo.com		0.92
 93b68c726b9d	International Dielectric Products	office	plastics company	25.90681	-97.43694	2025 Billy Mitchell Boulevard	Brownsville	78521	+19565418890	http://idptubing.com		0.92
 14045189886f	Karzo Corporation Llc	office		25.92251	-97.47102	274 Kings Hwy Ste 117a	Brownsville	78521	+19563560083			0.75
-661cdab3de52	Metro by T-Mobile	office	telecommunications company	25.94392	-97.42947	5850 FM-802	Brownsville	78526	+19565257711	https://www.metrobyt-mobile.com/stores/bd/metro-by-t-mobile-brownsville-tx-10231152/?utm_source=facebook&utm_medium=lastmile&utm_campaign=59366	Metro by T-Mobile	1.00
 86b4f326f346	Metro PCS Southmost Rd	office	telecommunications company	25.90765	-97.46474	Melrose Family Fashions, 2865 Southmost Rd	Brownsville	78521	+19566201142	https://www.metropcs.com/		0.89
 fc2940715aff	Milenium Trade Llc	office		25.91896	-97.47237	174 Industrial Dr	Brownsville	78521	+19563721260	https://www.mileniumtrade.us		0.65
 480f747b68a9	Portage Plastics	office	plastics company	25.90542	-97.44228	1900 Billy Mitchell Blvd	Brownsville	78521	+19565046102	https://www.portageplastics.com/		0.92
@@ -831,7 +863,6 @@ eb2f20b543bd	Scrub Masters, Llc	office		25.93506	-97.49947	1474 W Price Rd # 7-1
 a444f9093bac	Spectrum	office	telecommunications company	25.96301	-97.50396	3260 Galeno Crossing Ste 10	Brownsville	78526	+18332939411	https://www.spectrum.com/locations/tx/brownsville/3260-galeno-crossing?cmp=yxt_fb	Spectrum	0.99
 a5541c1c8e88	St. Joseph Water & Ice Corp.	office	bottled water company	25.92574	-97.45938	630 E Price Rd	Brownsville	78521	+19568313193			0.92
 d3891016571c	Sunset Palms Park Office	office		25.92930	-97.43182	1129 N Minnesota Ave	Brownsville	78521	+19568314852	http://paulsrvpark.com		0.77
-8005910affbb	Supernatural Designz Corporation	office		25.91833	-97.46712	3413 Burton Dr	Brownsville	78521				0.92
 d20ee4c41526	Sweet Little Mexico	office		25.94216	-97.45528	1921 Anei Cir	Brownsville	78521	+19568310506			0.75
 2131851ee38b	Tmd Solar Energy	office	energy company	25.92290	-97.49424	1725 Boca Chica Blvd Apt B	Brownsville	78520	+19564354991			0.92
 6e171e199185	Veae Services	office	information technology company	25.91304	-97.47850	3054 E 14th St	Brownsville	78521	+19564650808	https://www.veaeservices.com		0.95
@@ -893,7 +924,6 @@ c3852c65d4b1	Black Bear Diner	restaurant	diner	25.95840	-97.50869	3867 North Exp
 f62621ee3762	Blue Mermaid Seafood	restaurant	seafood restaurant	25.91520	-97.45494	119 Billy Mitchell Boulevard	Brownsville	78521	+19566378532			0.92
 9aaff78cd18d	Boca Chica Cafe	restaurant	texmex restaurant	25.91868	-97.46180	3714 Boca Chica Blvd	Brownsville	78521	+19565413004	https://www.eventseeker.com/venue/964788-boca-chica-state-park-harlingen-tx	Boca Chica 3	0.96
 c587134577cb	Boca Chica Cafe 3	restaurant	texmex restaurant	25.91783	-97.47040	3855 International Blvd	Brownsville	78521	+19565450383		Boca Chica 3	0.99
-06f6d4331266	Boca Chica Cafe Pablo Kisel	restaurant		25.96183	-97.50449	3340 Pablo Kisel Blvd	Brownsville	78526	+19562805373			0.65
 3a07d22cd03f	Boca Chica Cafe Pablo Kisel	restaurant		25.96513	-97.50397	3340 Pablo Kisel Blvd	Brownsville	78526	+19562805373			0.69
 f8507a3ab705	Bocata	restaurant	sandwich shop	25.93373	-97.49386	77/83 Frontage Rd	Brownsville	78521	+19565257709			0.92
 23ad96be8439	Brenda’s Mexican Restaurant	restaurant	mexican restaurant	25.92962	-97.43184	1155 N Minnesota Ave	Brownsville	78521	+19563129474			0.86
@@ -906,7 +936,6 @@ df432a962f46	Buffalo Wild Wings Grill & Bar	restaurant	american restaurant	25.95
 c9936c8d9c65	Buffalo Wings & Rings	restaurant	chicken wings restaurant	25.96544	-97.50408	3340 Pablo Kisel Blvd.	Brownsville	78526		https://www.wingsandrings.com/locations/pablo-kisel-blvd-78526	Buffalo Wings & Rings	0.80
 ee9b9963bff8	Buffet City	restaurant	chinese restaurant	25.92251	-97.47671	2921 Boca Chica Blvd	Brownsville	78521	+19565508888	honeycombnetwork.net		0.55
 ac889352256a	Buffet y Eventos Polanco	restaurant		25.94419	-97.42584	7470 Padre Island Hwy	Brownsville	78521				0.70
-d345cc11ed6e	Burger King	restaurant	burger restaurant	25.97841	-97.51933	3585 West Alton Gore	Brownsville	78526	+19563506290	https://burgerking.com/store-locator/store/13145	Burger King	0.99
 ee8817cb168a	C&C Wings Central	restaurant	chicken restaurant	25.93341	-97.51026	2034 Central Blvd	Brownsville	78520	+19565043459	http://www.ccwings.com	C&C WINGS	1.00
 91f2ecc3009a	Cafe Amiga	restaurant	mexican restaurant	25.91017	-97.50546	644 Palm Blvd	Brownsville	78520	+19565411172			0.97
 e80ef0ebcaf0	Cafe La Veracruzana	restaurant		25.91207	-97.47706	1703 Southmost Rd	Brownsville	78521	+19565421908			0.92
@@ -919,14 +948,12 @@ e3d4f6d54169	Capistran Tortillas BBQ Tacos	restaurant	mexican restaurant	25.9044
 8da3b27578c9	Capistrano Tortillas and Barbecue	restaurant	barbecue restaurant	25.90970	-97.48635	1305 Lincoln St	Brownsville	78521	+19565413053			0.92
 53b334cee60e	Capricho Cantina y Parrilla	restaurant	mexican restaurant	25.96510	-97.50593	3341 Pablo Kisel Blvd	Brownsville	78526	+19562436320			0.99
 2cda02f3d619	Captain Bob's Restaurant	restaurant	seafood restaurant	25.93512	-97.48893	2034 E Price Rd	Brownsville	78521	+19565721126	https://start.cortera.com/.../k3r8pvo9k/captain-bobs-restaurant		0.73
-f65b3a4f14c1	Carl's Jr	restaurant	burger restaurant	25.96837	-97.51212	4250 N Expressway	Brownsville	78526	+19563508112	https://www.carlsjr.com/?utm_source=Yext&utm_medium=Visit+Website&utm_campaign=Homepage	Carl's Jr.	0.82
 1b17ee12f990	Carnitas Don Pepe	restaurant	mexican restaurant	25.91614	-97.43425	5487 Boca Chica Blvd	Brownsville	78521	+19567471613	http://carnitaslosnietosdedonpepe.weebly.com		0.96
 2753262d0186	Carnitas Y Asados Los Martinez	restaurant	mexican restaurant	25.91809	-97.47021	3855 International Blvd Ste 4	Brownsville	78521	+19565450105	http://ordercarnitasandasadoslosmartinez.com		0.98
 99e8d7565a05	Carolina's Buffet	restaurant	buffet restaurant	25.93701	-97.51032	2201-2399 U.S. 77 Business	Brownsville	78520				0.66
 fd78fff96934	Carta Brava Restaurant Grill	restaurant	bar and grill restaurant	25.90435	-97.49995	811 E Washington St	Brownsville	78520	+19566400750			0.96
 e9fa4d2e15d4	Casa Abuelos - Restaurante Casero	restaurant		25.93832	-97.42040	6830 E Ruben M Torres Blvd	Brownsville	78521	+19564430058			0.97
 517a0d1e6994	Casa Antigua Restaurant & Grill	restaurant	mexican restaurant	25.93356	-97.51000	2040 Central Blvd	Brownsville	78520	+19565187996			0.92
-122a84f6cc81	Casa De Sandy	restaurant	breakfast and brunch restaurant	25.90428	-97.51283		Brownsville		+19564552153			0.65
 72d419f23c86	Casa De Sandy	restaurant	breakfast and brunch restaurant	25.91390	-97.49994		Brownsville		+19564552153			0.67
 d2bb787bc1b1	Casa Mexicana	restaurant	mexican restaurant	25.97902	-97.51718	31 E Alton Gloor Blvd	Brownsville	78526	+19565512374			0.93
 e5ba3bfa3b75	Cayuco Seafood & Grill	restaurant	seafood restaurant	25.95171	-97.49734	1425 Ruben M Torres Blvd	Brownsville	78526	+19564359008			0.97
@@ -947,7 +974,6 @@ c9a82b6dfe88	Chilaquiles	restaurant		25.89452	-97.49491	2501 Dr Hugh Emerson Rd 
 202d0c6629fe	Chili's Grill & Bar	restaurant		25.95813	-97.50690	2750 N Expressway	Brownsville	78526	+19565749955	https://www.chilis.com/		0.94
 ffbe05ebfea9	Chilmoli Mexican Steakhouse	restaurant	steakhouse	25.90303	-97.49870	1001 E Washington St	Brownsville	78520	+19565187000	https://www.chilmolimexsh.com		0.99
 c895c3692f6d	Chinese Gourmet Express	restaurant	chinese restaurant	25.95287	-97.50321	2370 N Expressway Ste 1344	Brownsville	78521	+19565423799	http://www.chinese-gourmet-express.com		0.93
-9fd31acb9d17	Chipotle Mexican Grill	restaurant	mexican restaurant	25.95191	-97.48731	2425 Paredes Line Rd	Brownsville	78526	+19565946474	https://locations.chipotle.com/tx/brownsville/2425-paredes-line-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
 5e3bfe852a53	Chirina's Fish Tacos	restaurant	taco restaurant	25.97847	-97.51700	4990 Frontage Rd	Brownsville	78520	+19564430104			0.99
 cbe12a4e631b	Chopstix Asian Cuisine	restaurant	chinese restaurant	25.94164	-97.43050	7102 Padre Island Hwy	Brownsville	78521	+19568320700			0.98
 39f8aede637b	Chuy's Super B-B-Q & Tortillas	restaurant	barbecue restaurant	25.91284	-97.50301	1035 Palm Blvd	Brownsville	78520	+19565418031	http://chuys.com	Chuy's	0.98
@@ -983,9 +1009,6 @@ a07235e7d0b3	Denny's Restaurant	restaurant		25.98500	-97.48453	6131 Paredes Line
 d78019802c49	Dochii Korean Corn Dogs	restaurant		25.97944	-97.51031	450 E Alton Gloor Blvd	Brownsville	78526	+19566210908			0.62
 f61d63ab2313	Dodici Pizza & Wine	restaurant	pizza restaurant	25.90218	-97.49673	1200 E Adams St	Brownsville	78520	+19568012420	https://www.dodicipizza.com/		0.99
 3e48e4a5472b	Dollar King	restaurant		25.90020	-97.49705	1303 E Elizabeth St	Brownsville	78520		https://www.dollar-king.net		0.99
-38703c2735e4	Domino's	restaurant	pizza restaurant	25.93761	-97.50085	943 N. Expressway #23	Brownsville	78520	+19565414040	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-714d3f65ea3d	Domino's	restaurant	pizza restaurant	25.92244	-97.46749	3355 Boca Chica Boulevard	Brownsville	78521	+19565547200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-ca331cdb7b66	Domino's	restaurant	pizza restaurant	25.98243	-97.48282	5460 Paredes Line Rd Suite 193	Brownsville	78526	+19565413800	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
 b6086f23f7af	Don Chucho Tacos Y Tequilas	restaurant	mexican restaurant	25.93425	-97.48824	814 Paredes Line Rd	Brownsville	78521	+19567471872	http://DONCHUCHOTACOSYTEQUILAS.COM/		0.99
 d99541126a1c	Don Taco	restaurant	mexican restaurant	25.91509	-97.44534	4710 Boca Chica Blvd	Brownsville	78521	+19566800940			0.92
 88febaa05afa	Dona Carmen's Restaurant	restaurant	mexican restaurant	25.97771	-97.48512	5015 Paredes Line Rd	Brownsville	78526	+19565189966	https://www.doordash.com/store/1868364?utm_source=mx_share		0.95
@@ -1034,7 +1057,6 @@ e7559509c433	El Piquin Sabores Mexicanos	restaurant	mexican restaurant	25.92878	
 bb630a040a2f	El Rey De Taco	restaurant	mexican restaurant	25.98064	-97.49372	1293 E Alton Gloor Blvd	Brownsville	78526	+19565540055	http://events.themonitor.com/brownsville-tx/venues/show/276261		0.96
 3340e3792464	El Rey Del Elote/Hamburguesa	restaurant		25.95672	-97.52012	9963 Anacua St	Brownsville	78575	+19567553123			0.95
 cb7fd5a2fbfb	El Rincón De La Tia	restaurant	mexican restaurant	25.93837	-97.42011	6840 E Ruben M Torres Blvd	Brownsville	78526	+19564430087			0.92
-384a277cf3cb	El Rincón De Mi Tierra	restaurant	mexican restaurant	25.95328	-97.50308	2370 N Expressway	Brownsville	78521	+19562665456			0.81
 788f5f0a5334	El Rincón De Mi Tierra	restaurant	mexican restaurant	25.94576	-97.50386	2370 N Expressway	Brownsville	78521	+19562665456			0.84
 9125eff24975	El Sabor De La Frontera LLC	restaurant		25.88765	-97.42296	2701 S Dakota Ave	Brownsville	78521	+19565594860			0.56
 50f799dcee36	El Sazón de Doña Coco Restaurant	restaurant	texmex restaurant	25.90177	-97.45600	3424 Southmost Rd	Brownsville	78521	+19565597748			0.58
@@ -1059,7 +1081,6 @@ cfb62a41063a	Fiŝo Restaurant Brownsville	restaurant	latin american restaurant	2
 db6d7022d116	Flaming Bird By H-E-B	restaurant	chicken restaurant	25.91929	-97.48888	2250 Boca Chica Blvd	Brownsville	78521	+12109381489	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.99
 a95a15e30240	Flying Pig Grill & Cantina at Pablo Kisel	restaurant	bar and grill restaurant	25.95907	-97.50634	2451 Pablo Kisel Blvd	Brownsville	78526				0.58
 ac03f2cb9a3a	Food Court at Sunrise Mall	restaurant		25.95446	-97.50254	2370 N Expressway	Brownsville	78521		http://www.subway.com/		0.92
-895892d1f6f3	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	25.95258	-97.50613	2435 N Expressway	Brownsville	78520	+19562775918	https://www.freddys.com/location/brownsville-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
 263fd3341db6	Frida's Cafe	restaurant	mexican restaurant	25.92584	-97.45885	645 E Price Rd	Brownsville	78521	+19566210203	http://fridascafebrownsville.com/		0.92
 b60d647ce988	Frijoles Restaurant	restaurant	mexican restaurant	25.97949	-97.49838	1160 E Alton Gloor Blvd Ste B	Brownsville	78526	+19565461616	https://www.instagram.com/frijolesrestaurant?igsh=aHNrM28zaW40ZjI3&utm_source=qr		0.92
 51b3a0536cb1	Gabazo	restaurant	mexican restaurant	25.94933	-97.46420	3531 FM-802	Brownsville	78526	+528681185253			0.83
@@ -1072,7 +1093,6 @@ f5446b0f74f1	Generosity 44	restaurant	korean restaurant	25.91451	-97.50813	804 W
 f1bcee78d369	Gina's Cafe	restaurant	mexican restaurant	25.95054	-97.46464	2515 Old Port Isabel Rd	Brownsville	78526	+19565508600	http://ginascafebville.wixsite.com/comidamexicana		0.96
 913b3c1f738f	Gio's Villa	restaurant	italian restaurant	25.93857	-97.51057	2325 Central Blvd	Brownsville	78520	+19565425054	https://giosvilla.com		0.92
 6c5aa09a9108	Godfather's Pizza Express	restaurant	pizza restaurant	25.95461	-97.41875	3400 Nafta Pkwy	Brownsville	78526	+19568316776	http://www.godfatherspizza.com	Godfathers Pizza	0.96
-7013fb02bf6e	Golden Chick	restaurant	chicken restaurant	25.97827	-97.51723	4990 N Frontage Rd	Brownsville	78520	+19563503311	http://goldenchick.com		0.92
 257d2170796c	Golden Corral	restaurant	buffet restaurant	25.97232	-97.51633	N. Expressway	Brownsville	78520	+19563508266	https://www.goldencorral.com/locations/984/golden-corral-n-expressway/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=984	Golden Corral Buffet & Grill	1.00
 31f63a6bd8ca	Gomitas Snack	restaurant		25.94208	-97.53216	975 W Ruben M Torres Blvd	Brownsville	78520	+19564430120			0.92
 637ccd28e968	Good Eats Healthy Meals Brownsville	restaurant	health food restaurant	25.93465	-97.48627	74 S Price Rd	Brownsville	78521	+19563120907	http://www.goodeatsmeals.com/		0.99
@@ -1087,7 +1107,6 @@ ff76f79c1aa6	Gulf Quality Seafood	restaurant	seafood restaurant	25.91715	-97.415
 342931fe37dd	Hooters	restaurant	american restaurant	25.94411	-97.50333	1800 Expressway	Brownsville	78521	+19565429464	http://www.hooters.com/		0.71
 67bbe18aa8f4	Huddle House	restaurant	american restaurant	25.94900	-97.45663	3771 Ruben M. Torres Blvd	Brownsville	78526		https://www.huddlehouse.com/locations/tx/brownsville/3771-e-ruben-m-torres-blvd	Huddle House	0.91
 641c4c4b8b9c	Humdingers	restaurant	burger restaurant	25.91986	-97.46936	2207 E Price Rd	Brownsville	78521	+19568320098			0.96
-b427038d305c	Humdingers	restaurant	burger restaurant	25.93519	-97.48651	2207 E Price Rd	Brownsville	78521	+19565257263	http://humdingersrestaurant.com		0.55
 40e2d39d6767	IHOP	restaurant	breakfast and brunch restaurant	25.95744	-97.50569	2430 Pablo Kisel Blvd	Brownsville	78526	+19565500333	http://www.ihop.com/	IHOP	0.99
 e9eade44dfcb	IHOP	restaurant	breakfast and brunch restaurant	25.95214	-97.48550	1004 Main Street	Brownsville	78526	+19564359768	https://restaurants.ihop.com/en-us/tx/brownsville/breakfast-1004-main-street-3697	IHOP	0.99
 bc902d804da7	Il Contrappunto	restaurant		25.90200	-97.49622	1237 E Adams St	Brownsville	78520	+19565929313	http://www.contrappunto1237.com		0.92
@@ -1097,7 +1116,6 @@ b4b0d33992fc	Japan Cafe	restaurant	japanese restaurant	25.95450	-97.50233	2370 F
 f3086fd9877a	Jason's Deli	restaurant		25.90175	-97.49750	4365 Route 77, Ste 900	Brownsville	76520	+19563502400	https://www.jasonsdeli.com/restaurants/brownsville-deli		0.85
 fbf5a5f533a1	Jason's Deli	restaurant	delicatessen	25.96865	-97.51528	4365 S Expwy 77, 900	Brownsville	78520	+19563502400	http://jasonsdeli.com/	Jason's Deli	0.98
 a9193c65d73f	Jenny Delicias	restaurant	mexican restaurant	25.96932	-97.51574	4365 I-69E, Frontage Rd	Brownsville	78520	+19565450855			0.96
-4e44545a419c	Jersey Mike's Subs	restaurant	sandwich shop	25.96941	-97.51466	4455 Frontage Rd Pad C	Brownsville	78520	+19563224452	https://www.jerseymikes.com/15250/brownsville-tx	Jersey Mike's Subs	0.96
 768ace056fda	Jimmy's Tortas	restaurant	mexican restaurant	25.94211	-97.53217	975 W Ruben Torres Sr Blvd	Brownsville	78520	+19565441346	http://www.rgvmenu.com/jimmys.html		0.92
 21466362c7b5	Joe's Hamburger Stand	restaurant	burger restaurant	25.90735	-97.46645	2644 Southmost Rd	Brownsville	78521	+19565424771	https://joe-s-burger-stand.hub.biz	Hamburger Stand	0.92
 18018316c1fb	Johnny Carino's	restaurant		25.92281	-97.48551	77 North St	Brownsville	78521	+19569862550	http://www.carinos.com/		0.57
@@ -1112,7 +1130,6 @@ f7bf5194a0a2	Kailani Poke Bowl	restaurant	poke restaurant	25.96621	-97.50735	500
 7ef4a2499ea5	Karolina's Restaurant	restaurant	mexican restaurant	25.91943	-97.46777	4434 E 14th St	Brownsville	78521	+19565441911	http://www.restaurantbillboard.com/pdf/TX/Places-to-eat-Brownsville-TX.pdf		0.99
 80081cc265be	Ke Buen Taco	restaurant	mexican restaurant	25.94534	-97.43224	5560 Ruben M Torres Blvd	Brownsville	78526	+19568385413	http://www.mr-taco.com		1.00
 10b274ede609	Kekos	restaurant		25.90834	-97.49345	945 E Tyler St	Brownsville	78520				0.95
-b5bc6df1e72f	KFC	restaurant	chicken restaurant	25.90262	-97.48716	1444 International Blvd	Brownsville	78520	+19565428078	http://www.kfc.com		0.92
 991174e5cfc8	Khan's Grill	restaurant	barbecue restaurant	25.95089	-97.47847	2701. E. Ruben Torres Sr. Blvd.Brownsville, TX 78521, 2701 Ruben M Torres Blvd	Brownsville	78526	+19565428881	http://www.khansgrill.com/	Khan's Grill	0.99
 1d8e7942d1f1	Kikis	restaurant	mexican restaurant	25.93313	-97.44501	6170 S Padre Island Hwy	Brownsville	78521	+19568382115	http://www.kikistx.com/		0.97
 23ed855ded17	Kikis	restaurant	mexican restaurant	25.94091	-97.53697		Brownsville	78520	+19565426224	http://www.kikistx.com		0.77
@@ -1142,7 +1159,6 @@ b1b92a9da465	La Gorderia de Torreon	restaurant	mexican restaurant	25.94391	-97.4
 cf618f3f84a6	La Leyenda "Tacos Con Tradición"	restaurant	mexican restaurant	25.96442	-97.51279	4255 Old Highway 77	Brownsville	78520	+19563502807	http://laleyenda.com		0.92
 725d4d051c6b	La Leyenda Tacos Brownsville	restaurant	mexican restaurant	25.94663	-97.50533	2155 N Expressway	Brownsville	78520	+19563502807	https://www.instagram.com/tacoslaleyenda/		0.99
 34dd34d2e5fc	LA LOLA RESTAURANTE BROWNSVILLE	restaurant	mexican restaurant	25.92322	-97.48063	123 Old Port Isabel Rd	Brownsville	78521	+19566212258	https://www.instagram.com/la.lola.brownsville/		0.92
-954729da51a6	La Nueva Frontera Mexican Grill	restaurant	mexican restaurant	25.97128	-97.47009	125 FM511	Olmito	78526	+19564507323	https://mexicanrestaurantolmito.com		0.77
 f7b74fee4886	La Pampa	restaurant	argentine restaurant	25.95252	-97.49379	1655 Ruben Torres Blvd	Brownsville	78521	+19565045858	http://lapamparestaurant.com		0.99
 45a63a8c7a82	La Pampa Argentinean Steak House	restaurant	argentine restaurant	25.96377	-97.50471	3230 Pablo Kisel Blvd	Brownsville	78526	+19565045858	http://www.lapamparestaurant.us/		0.92
 59f20053443c	La Papa Escondida	restaurant	latin american restaurant	25.93712	-97.50087	943 N Expressway	Brownsville	78520				0.77
@@ -1203,12 +1219,6 @@ f5d33e7b6bbe	Letty's Cafe	restaurant	mexican restaurant	25.92745	-97.48916	401 P
 ce9b186b5243	Liam's Steakhouse	restaurant	steakhouse	25.97032	-97.51554	4495 Frontage Rd 77/83	Brownsville	78520	+19567727043	http://liamssteakhouse.com/		0.99
 98ee6ce0f293	Lin's Buffet	restaurant	chinese restaurant	25.92133	-97.48335	2474 Boca Chica Blvd	Brownsville	78521	+19569821168	http://www.linsrestaurant.com/index.html		0.92
 b748a0c73bfe	Lin's Buffet	restaurant	buffet restaurant	25.95973	-97.50783	2988 Frontage Rd	Brownsville	78526	+19565446600	https://linsbuffettx.com/	Lin's Grand Buffet	0.99
-42018ff71248	Little Caesars	restaurant	pizza restaurant	25.95189	-97.49128	1725 Ruben M Torres Blvd	Brownsville	78526	+19566203042	https://littlecaesars.com/en-us/store/12309	Little Caesars	0.99
-625ed42cd2aa	Little Caesars	restaurant	pizza restaurant	25.92552	-97.50890	904 Boca Chica Blvd	Brownsville	78520	+19568012220	https://littlecaesars.com/en-us/store/11076	Little Caesars	0.99
-150ba13311cf	Little Caesars Pizza	restaurant	pizza restaurant	25.98235	-97.48640	1601 E Alton Gloor Blvd	Brownsville	78526	+19569860909	https://littlecaesars.com/en-us/store/7334	Little Caesars	0.98
-32f385b432e3	Little Caesars Pizza	restaurant	pizza restaurant	25.92204	-97.47927	2715 Boca Chica Boulevard	Brownsville	78521	+19565187017	https://littlecaesars.com/en-us/store/20941		0.92
-36b84fc05f77	Little Caesars Pizza	restaurant	pizza restaurant	25.94378	-97.42837	5850 Ruben M Torres Blvd	Brownsville	78526	+19568381345	https://littlecaesars.com/en-us/store/10128	Little Caesars	0.98
-d54c9916e84e	Little Caesars Pizza	restaurant	pizza restaurant	25.90678	-97.46385	2905 Southmost Rd	Brownsville	78521	+19565466767	https://littlecaesars.com/en-us/store/2599	Little Caesars	0.99
 6bde43d5ce71	Lola's Bistro	restaurant	breakfast and brunch restaurant	25.91472	-97.50096	1335 Palm Blvd	Brownsville	78520	+19565422200			0.99
 944ba09ddb93	LongHorn Steakhouse	restaurant	steakhouse	25.95868	-97.50900	3891 Expressway 77 S. Frontage Rd.	Brownsville	78520	+19569833115	https://www.longhornsteakhouse.com/locations/tx/brownsville/brownsville/5675?cmpid=br:lh_ag:ie_ch:loc_ca:LHBINGPLACES_sn:bingplaces_gt:rocky-hill-ct-5665_pl:locurl_rd:1580		0.99
 f5b4524e6321	LongHorn Steakhouse	restaurant	steakhouse	25.95868	-97.50901	3891 Expressway, 77 Frontage Rd	Brownsville	78520	+19569833115	https://www.longhornsteakhouse.com/locations/tx/brownsville/brownsville/5675?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Abrownsville-tx-5675_pl%3Alocurl_rd%3A1576	LongHorn Steakhouse	0.99
@@ -1253,7 +1263,6 @@ bae704dd3a42	Mariscos De La Rosa	restaurant	seafood restaurant	25.94550	-97.4290
 eec9cdde9eae	Mariscos De La Rosa	restaurant	seafood restaurant	25.92979	-97.48206	2588 Rockwell Dr	Brownsville	78521	+19565500024	mariscosdelarosa.com		0.88
 9eb56535585d	Mariscos El Pilón	restaurant	seafood restaurant	25.98344	-97.46556	1420 Dr Hugh Emerson Rd	Brownsville	78526	+19564317316			0.92
 8da7a4ce0b92	Mariscos el Puerto de Brownsville	restaurant	seafood restaurant	25.94656	-97.42194	7738 Padre Island Hwy	Brownsville	78521	+773878521	http://www.mariscosdelarosa.com		0.92
-6c4c58b70e0d	Mariscos El Pulpo	restaurant	seafood restaurant	25.90215	-97.49919	226 security Dr	Brownsville	78521	+19568015259	https://mariscoselpulpotx.com/		0.58
 e57f9f8b0e18	Mariscos El pulpo	restaurant	seafood restaurant	25.92023	-97.47049	226 Security Dr	Brownsville	78521	+19568015259	https://mariscoselpulpotx.com/		0.59
 a83ab0e54215	Mariscos El Wero	restaurant	seafood restaurant	25.91263	-97.51080	505 W Elizabeth St	Brownsville	78520	+19566205514			0.57
 4ecb7adfe017	Mariscos Lauro Villar	restaurant	seafood restaurant	25.90649	-97.50419	354 E Elizabeth St	Brownsville	78520	+19565463333	http://www.rgvmenu.com/MLV		0.99
@@ -1271,8 +1280,6 @@ ffb92653fd94	Mas Natural	restaurant	mexican restaurant	25.93025	-97.51125	1905 C
 cf2a112343c3	Maíz	restaurant		25.90968	-97.51019	239 W St Charles St	Brownsville	78520	+19566213048			0.92
 015afc2d3d18	Maíz Mexican Cuisine	restaurant		25.95444	-97.50232	Sunrise Mall, 2370 N Expy	Brownsville	78526	+19562660000			0.93
 f4646634f429	McAlister's Deli	restaurant	delicatessen	25.94997	-97.50282	1165 FM 802	Brownsville	78521	+19563380050	https://mcalistersdeli.com		0.94
-13df1a4cefb2	McDonald's	restaurant	burger restaurant	25.92465	-97.47764	2721 Boca Chica Boulevard	Brownsville	78521	+19565547715	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/2721-boca-chica-boulevard/31806.html?cid=RF:YXT:RoN::Clicks		1.00
-54c231d50919	McDonald's	restaurant	burger restaurant	25.97579	-97.52090	3500 W Alton Gloor	Brownsville	78520	+19563508064	https://www.mcdonalds.com/us/en-us/location/tx/brownsville/3500-w-alton-gloor/28615.html?cid=RF:YXT:RoN::Clicks		0.98
 0ea3f3586805	Mejia's Easy to Go	restaurant	mexican restaurant	25.89825	-97.46356	2974 East Ave	Brownsville	78521	+19565447266	https://start.cortera.com/company/research/k9p7lsk6m/mejias-easy-to-go		0.99
 1fbf6c517405	Mejia's Easy To Go	restaurant	mexican restaurant	25.89231	-97.45578	2104 Tulipan St	Brownsville	78521	+19565447266	http://mejiaseasytogo.com/		0.97
 80d5f3989f88	Mestizo Kitchen	restaurant	mexican restaurant	25.95284	-97.48764	2501 Paredes Line Rd Ste A-1	Brownsville	78526	+19562805603	http://mestizokitchenbtx.com/		0.61
@@ -1319,8 +1326,6 @@ f72cf4279021	Nolita Ny Pizza	restaurant	pizza restaurant	25.90310	-97.49988	915 
 115db95b6529	O`leary`s Bar & Grill Brownsville	restaurant	bar and grill restaurant	25.96337	-97.50807	600 Springmart Blvd Ste 8	Brownsville	78526	+19564359978	https://olearys-bar-grill-brownsville.business.site		0.75
 ace33421ec32	Ocean Buffet	restaurant	buffet restaurant	25.92309	-97.47795	2921 Boca Chica Blvd	Brownsville	78521	+19562805558			0.99
 0d23d53030c0	Ojos Locos Sports Cantina (Brownsville, TX)	restaurant	mexican restaurant	25.96098	-97.50840	3100 N Expressway 83	Brownsville	78526	+19563382861	https://www.ojoslocos.com/	Ojos Locos Southwest	0.93
-01c1a16a58c6	Olive Garden	restaurant	italian restaurant	25.95197	-97.49635		Brownsville			http://www.olivegarden.com/	Olive Garden	0.72
-b1224bd0e702	Olive Garden	restaurant	italian restaurant	25.95620	-97.47787		Brownsville			http://www.olivegarden.com/	Olive Garden	0.72
 e57d467811a0	Olive Garden Brownsville	restaurant	italian restaurant	25.90490	-97.50191		Brownsville					0.97
 5831d5d6288f	Olive Garden Italian Restaurant	restaurant	salad bar	25.95714	-97.50828	3807 N Expressway 77/83 83	Brownsville	78520	+19563508607	https://www.olivegarden.com/locations/tx/brownsville/brownsville/6408		0.97
 da1fea20bbac	Ostionería Mocambo	restaurant	mexican restaurant	25.95879	-97.50626	2451 Pablo Kisel Blvd d1	Brownsville	78526	+19569826886			0.94
@@ -1329,11 +1334,6 @@ fd953f5109e3	Oyster Bar I	restaurant	seafood restaurant	25.90134	-97.49957	1057 
 8e23e2cfacc3	Palenque Grill Brownsville	restaurant	mexican restaurant	25.95755	-97.50656	2600 Frontage Rd	Brownsville	78526	+19565615506	https://palenquegrill.com/	Palenque Grill	0.98
 ded0087cb316	Panaderia El Trigal	restaurant		25.89405	-97.44637	2392 Morningside Rd	Brownsville	78521		eltrigal.com		0.95
 8ade3f6fefd5	Panchito's Granite	restaurant	mexican restaurant	25.97488	-97.47444	2406 Ofelia Ave	Brownsville	78526	+19566404378			0.73
-79b97c02da86	Papa John's Pizza	restaurant	pizza restaurant	25.92113	-97.47318	3254 Boca Chica Blvd	Brownsville	78521	+19565045044	http://www.papajohns.com/		0.92
-a92de494d699	Papa John's Pizza	restaurant	pizza restaurant	25.92095	-97.46855	3343 Boca Chica Blvd	Brownsville	78521	+19565040995	http://www.papajohns.com/		0.92
-eb44b80e0acc	Papa John's Pizza	restaurant	pizza restaurant	25.92571	-97.50956	824 Boca Chica Blvd	Brownsville	78520	+19569862221	http://www.papajohns.com/		0.92
-210cf3c681f3	Papa Johns	restaurant	pizza restaurant	25.96475	-97.51207	4237 N Expressway #77 Ste 5	Brownsville	78520	+19564358000	https://www.papajohns.com/order/menu	Papa John's Pizza	0.97
-41c93b9c1b61	Papa Johns Pizza	restaurant	pizza restaurant	25.94480	-97.42990	5740 RUBEN TORRES Blvd Ste 101	Brownsville	78526	+19566942555	https://locations.papajohns.com/united-states/tx/78526/brownsville/5740-ruben-torres-blvd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI3MzctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
 9a4155d759ba	PapAlitas	restaurant		25.89540	-97.47331	2500 East University Blvrd Ste 7	Brownsville	78521	+19565410269			0.99
 57453ac05497	Parry's Pizzeria and Taphouse	restaurant	pizza restaurant	25.95102	-97.50260	2320 N Expressway	Brownsville	78521	+19563826077	https://parryspizza.com/locations/brownsville/	Parry's Pizza	0.99
 4558fcbbb12c	Patty's Cafe	restaurant	mexican restaurant	25.93670	-97.50663	946 W Price Rd	Brownsville	78520	+19566203322	https://www.pattyscafe.com		0.92
@@ -1345,12 +1345,6 @@ cf95272786bb	Philly's Americana Cheesesteaks	restaurant	american restaurant	25.9
 8e58e39f51fb	Pho and Chinese	restaurant	asian fusion restaurant	25.95171	-97.48272	2155 Ruben M Torres Blvd	Brownsville	78526	+19566210913	http://phonchinese.weebly.com		0.99
 b0412fddafeb	Pikin Restaurant	restaurant		25.92881	-97.51136	1775 Central Blvd	Brownsville	78520				0.80
 8fcd6bf08242	Pitti's Pizza	restaurant	italian restaurant	25.91436	-97.50076	1552 Palm Blvd	Brownsville	78520	+19569821616	https://www.orderpittispizza.com		0.96
-19476f8ebb2f	Pizza Hut	restaurant	pizza restaurant	25.91954	-97.46941	245 Security Dr Cameron	Brownsville	78521	+19565416393	https://locations.pizzahut.com/tx/brownsville/245-security-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299460	Pizza Hut	0.99
-33d9a2b14102	Pizza Hut	restaurant	pizza restaurant	25.98025	-97.49799	1175 E Alton Gloor Blvd Cameron	Brownsville	78526	+19563381510	https://locations.pizzahut.com/tx/brownsville/1175-e-alton-gloor-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313246	Pizza Hut	0.97
-36bd28ea9bed	Pizza Hut	restaurant	pizza restaurant	25.92221	-97.48664	2333 Boca Chica Blvd Cameron	Brownsville	78521	+19565447711	https://locations.pizzahut.com/tx/brownsville/2333-boca-chica-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300032	Pizza Hut	0.99
-569c470d4adb	Pizza Hut	restaurant	pizza restaurant	25.92990	-97.51071	1830 Central Blvd Cameron	Brownsville	78520	+19565468272	https://locations.pizzahut.com/tx/brownsville/1830-central-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299750	Pizza Hut	0.98
-8a5fa20979f8	Pizza Hut	restaurant	pizza restaurant	25.95035	-97.50034	1179 FM802	Brownsville	78526	+19565447733	https://locations.pizzahut.com/tx/brownsville/1179-fm-802?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299983	Pizza Hut	0.98
-87c6f4af7dfb	Pizza Hut Express	restaurant	pizza restaurant	25.96844	-97.50994	301 E Morrison Road, Target-T2152	Brownsville	78526		https://locations.pizzahut.com/tx/brownsville/301-east-morrison-road?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=315026		0.92
 18f5e4f13391	Pizza Master	restaurant	pizza restaurant	25.99316	-97.52360	Browntown Flea Market, 55 Sam Perl Blvd	Brownsville	78520				0.93
 fea4bf98bf3b	Pizza Master	restaurant	pizza restaurant	25.99218	-97.52245	77 Flea Market, 5955 N Expressway	Brownsville	78520	+19565901651			0.92
 7ae1c2ece880	Pizza Patron	restaurant	pizza restaurant	25.92349	-97.51133	1304 Central Blvd	Brownsville	78520	+19565442006	http://www.pizzapatron.com/	Pizza Patrón	1.00
@@ -1361,11 +1355,9 @@ e951ab45f58d	Plaza Garibaldi	restaurant	mexican restaurant	25.88175	-97.43665	60
 2a4db986ae33	Pollo Palenque Brownsville	restaurant	chicken restaurant	25.96330	-97.51171	4157 US-77, B	Brownsville	78520	+19566214877			0.61
 65d168215deb	Popeii	restaurant	american restaurant	25.92729	-97.47721	400 Old Port Isabel Rd	Brownsville	78521	+19565414429	http://www.albisolacoffee.com		0.96
 5169096e2f42	Querido Mexico Lindo	restaurant	mexican restaurant	25.92221	-97.48497	2403 Boca Chica Blvd	Brownsville	78521	+19567136746	http://www.mi-mexicolindo.com		0.96
-7f548f94378d	Raising Cane's	restaurant	chicken restaurant	25.96760	-97.51049	215 E. Morrison Road	Brownsville	78520	+19563508240	https://locations.raisingcanes.com/tx/brownsville/215-e.-morrison-road	Raising Cane's Chicken Fingers	0.99
 fc23c2e8c296	Ramirez Tortilleria	restaurant	mexican restaurant	25.91523	-97.48339	915 Roosevelt St	Brownsville	78521	+19565425238			0.99
 da81be30d943	Ramses Tacos & Tequilas	restaurant	texmex restaurant	25.95896	-97.50648	2451 Pablo Kisel Blvd Apt F1	Brownsville	78526	+19564359858	http://www.ramsestacos.com/	Ramses Tacos & Tequilas - Harlingen	0.96
 78708aa434a8	Rancho "El Salado"	restaurant		25.87319	-97.37769	S Oklahoma Ave	Brownsville	78521	+19562434157			0.94
-b52620764576	Rancho "El Salado"	restaurant		25.88901	-97.37890	S Oklahoma Ave	Brownsville	78521	+19562434157			0.92
 75dff28816aa	Rancho Grande Tortillería	restaurant	mexican restaurant	25.93846	-97.41114	8030 Coffee Port Rd	Brownsville	78521	+19568319333			0.92
 557d077f82cc	Red Lobster	restaurant	seafood restaurant	25.94985	-97.50386	1075 FM 802	Brownsville	78521		https://www.redlobster.com/locations/list/tx/brownsville/1075-fm-802/	Red Lobster	0.97
 aeb8b94b61e4	Red Lobster	restaurant	seafood restaurant	25.94979	-97.50386	1075 FM802	Brownsville	78521	+19565442614	https://www.redlobster.com/seafood-restaurants/locations/tx/brownsville/1075-fm-802	Red Lobster	1.00
@@ -1419,20 +1411,6 @@ dd1ba296e821	Sportsman Club	restaurant	bar and grill restaurant	25.90222	-97.500
 e546b5da8a3d	Stars Drive-in	restaurant	theme restaurant	25.93623	-97.49539	1619 E Price Rd	Brownsville	78521	+19565446508	http://starsdrivein.com/stars-locator	Stars Drive-In	0.92
 95586ce5288f	Stars Restaurant #2, Brownsville, Texas, Llc	restaurant		25.92214	-97.51215	1121 Central Blvd	Brownsville	78520				0.95
 370d3b373670	Stars Restaurant #3, Brownsville, Texas, Llc	restaurant		25.93625	-97.49532	1619 E Price Rd	Brownsville	78521				0.95
-08682f7a5eb6	Subway	restaurant	sandwich shop	25.91730	-97.40760	7878 Boca Chica Blvd	Brownsville	78521			Subway	0.80
-09a9a06b7ce2	Subway	restaurant	sandwich shop	25.97875	-97.50439	800 E Alton Gloor Blvd Ste C	Brownsville	78526	+19563503558	https://www.subway.com		0.99
-13cf6ccc1892	Subway	restaurant	sandwich shop	25.97768	-97.48513	5015 Paredes Suite A	Brownsville	78521	+19565041409	https://restaurants.subway.com/united-states/tx/brownsville/5015-paredes	Subway	0.99
-13de0a37604e	Subway	restaurant	sandwich shop	25.91399	-97.50087	1400 Palm Blvd	Brownsville	78520	+19565549137	https://www.subway.com		0.92
-487f46e38386	Subway	restaurant	sandwich shop	25.94488	-97.42960	5850 FM 802 Space A8	Brownsville	78521	+19568320060	https://restaurants.subway.com/united-states/tx/brownsville/5850-fm-802	Subway	0.98
-500b16a3c295	Subway	restaurant	sandwich shop	25.93474	-97.48591	2384 E Price Rd	Brownsville	78521	+19569866101	https://restaurants.subway.com/united-states/tx/brownsville/2384-price-rd	Subway	0.98
-7acb254b2f76	Subway	restaurant	sandwich shop	25.96158	-97.53907	2740 W Alton Gloor Blvd Ste G	Brownsville	78520	+19563508600	https://www.subway.com		0.74
-922790188bfc	Subway	restaurant	sandwich shop	25.92085	-97.47327	3254 Boca Chica Blvd	Brownsville	78521	+19565447821	https://restaurants.subway.com/united-states/tx/brownsville/3254-boca-chica-blvd	Subway	0.96
-b30f04c7aac7	Subway	restaurant	sandwich shop	25.92568	-97.51061	764 Boca Chica Ave	Brownsville	78520	+19565440544	https://restaurants.subway.com/united-states/tx/brownsville/764-boca-chica-ave	Subway	0.95
-b3e1882ebae9	Subway	restaurant	sandwich shop	25.89426	-97.44759	4660 Southmost Rd.	Brownsville	78521	+19565427900	https://restaurants.subway.com/united-states/tx/brownsville/4660-southmost-rd	Subway	0.97
-b5eea3fee5c1	Subway	restaurant	sandwich shop	25.91522	-97.44543	4710 Boca Chica Suite A	Brownsville	78521	+19565422556	https://restaurants.subway.com/united-states/tx/brownsville/4710-boca-chica	Subway	0.96
-e1b7b70428b3	Subway	restaurant	sandwich shop	25.90025	-97.49420	755 International Blvd Suite B	Brownsville	78520	+19565043400	https://restaurants.subway.com/united-states/tx/brownsville/755-international-blvd	Subway	1.00
-e2a4200648a5	Subway	restaurant	sandwich shop	25.95194	-97.48150	2205 Ruben Torres Sr Blvd	Brownsville	78526	+19565414717	https://restaurants.subway.com/united-states/tx/brownsville/2205-e-ruebn-torres-sr-blvd	Subway	0.95
-a8ba05b61269	Subway Restaurants	restaurant	sandwich shop	25.95287	-97.50321	2370 N Expressway Ste 1338	Brownsville	78521	+19565425424	https://alibabacharleston.com		0.55
 7fd3c15c30b3	Sunrise Tortas	restaurant	mexican restaurant	25.95473	-97.50256	2370 North Expy	Brownsville	78521	+19565415031			0.97
 f4bb942b9a2d	Sunrise Tortas	restaurant	mexican restaurant	25.95164	-97.48351	2155 Ruben Torres Sr Blvd	Brownsville	78526	+19568012234			0.86
 e1d020be2049	Super Cream	restaurant	mexican restaurant	25.94878	-97.50370	1014 Ruben M Torres Blvd	Brownsville	78521	+19565450147	http://www.gruposupercream.com/	Super Cream	0.99
@@ -1506,7 +1484,6 @@ e3388ddbf124	Texas Gold Shrimp	restaurant		25.97915	-97.34429	1430 Everglades Rd
 146787d57bc7	Texas Roadhouse	restaurant	steakhouse	25.96264	-97.50959	3400 Frontage Rd #77/83	Brownsville	78526	+19565549900	https://www.texasroadhouse.com/locations/texas/brownsville?utm_source=facebook&utm_medium=social&utm_content=about	Texas Roadhouse	0.99
 e33db7f83800	Texas Roadhouse	restaurant	barbecue restaurant	25.95029	-97.50651	3400 N Expressway # 77/83	Brownsville	78526	+19565549900	https://www.texasroadhouse.com/restaurant-locations/texas/brownsville		0.85
 1ac3728e0dfe	Texican Bbq Company	restaurant	barbecue restaurant	25.99211	-97.48411	6305 Paredes Line Rd	Brownsville	78526	+19564438400			0.92
-c5a8a32b7980	Texican Bbq Company	restaurant	barbecue restaurant	25.99311	-97.48477	6305 Paredes Line Rd	Brownsville	78526	+19564438400		Texican BBQ Company	0.89
 820d34295085	That little bbq place	restaurant	barbecue restaurant	25.91255	-97.51084	505 W Elizabeth St	Brownsville	78520	+19562805630			0.97
 72a73d6163b9	That Little BBQ Supply Place	restaurant	barbecue restaurant	25.92272	-97.51158	1200 Central Blvd Ste A6	Brownsville	78520	+19562935958			0.92
 61a853b81d66	The Broken Sprocket	restaurant	bar and grill restaurant	25.99212	-97.48412	6305 Paredes Line Rd	Brownsville	78526	+19565516365	https://linktr.ee/thebrokensprocketrgv		0.99
@@ -1551,20 +1528,12 @@ b54830ff7337	Vera's Backyard Bar-B-Que	restaurant	barbecue restaurant	25.90828	-
 b0b17a3702b9	Vfw	restaurant	barbecue restaurant	25.93458	-97.49196	S Price Rd	Brownsville	78521				0.55
 eacd2662fed4	Vida loca	restaurant	latin american restaurant	25.96523	-97.50539	3341 Pablo Kisel Blvd V	Brownsville	78526	+19563720333			0.99
 a0f70b035ef8	Vintage Press Waffle Co	restaurant	breakfast and brunch restaurant	25.95217	-97.50220	2370 North Expy	Brownsville	78526	+19565513541			0.99
-32e0da34014c	Whataburger	restaurant	burger restaurant	25.92224	-97.48436	2419 BOCA CHICA BLVD	Brownsville	78521	+19565462361	http://whataburger.com/	Whataburger	0.99
-f32799ee80cd	Whataburger	restaurant	burger restaurant	25.90591	-97.48324	2021 INTERNATIONAL BLVD	Brownsville	78521	+19565420963	https://locations.whataburger.com/tx/brownsville/2021-international-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 7bcb1d2bc6c3	Whiskero	restaurant	american restaurant	25.90196	-97.49793	1128 E Washington St	Brownsville	78520	+19562805017			0.99
 a6fe7bca89f4	Wienerschnitzel	restaurant	hot dog restaurant	25.94480	-97.42632	7501 Padre Island Hwy	Brownsville	78526	+19566210872	https://www.wienerschnitzel.com/location/901-padre-island-hwy-brownsville-7501-padre-island-hwy-brownsville-tx-78526/	Wienerschnitzel	0.92
 0e555cd699e0	Wing Barn	restaurant	bar and grill restaurant	25.92231	-97.47521	3025 Boca Chica Blvd I-1	Brownsville	78521	+19565412276	http://www.thewingbarn.com		0.99
 d9e761182010	Wing Barn	restaurant	chicken wings restaurant	25.96214	-97.50541	3000 Pablo Kisel Blvd	Brownsville	78526	+19565450833	https://thewingbarn.com		0.55
 56db484374c8	Wing Barn Pablo Kisel	restaurant	burger restaurant	25.96307	-97.50493	3260 Galeno Crossing	Brownsville	78526	+19565450833	https://wingbarn.com/		0.92
 aab84182a4b3	Wings and Rings	restaurant	chicken wings restaurant	25.96544	-97.50408	3340 Pablo Kisel Blvd.	Brownsville	78526	+19563509570	https://www.wingsandrings.com/		0.99
-161449253afe	Wingstop	restaurant	chicken restaurant	25.90501	-97.46442	2950 Southmost Rd Ste 106	Brownsville	78521	+19565419464	https://www.wingstop.com/location/wingstop-235-brownsville-tx-78521/menu?y_source=1_NTUyMDY1MzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-6f3239ed3a1b	Wingstop	restaurant	chicken restaurant	25.90038	-97.49382	755 International Blvd Ste G	Brownsville	78520	+19565469464	https://www.wingstop.com/location/wingstop-604-brownsville-tx-78520/menu?y_source=1_NTUyMDc2ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-84c0a6e63405	Wingstop	restaurant	chicken restaurant	25.97937	-97.51059	400 E Alton Gloor Blvd Ste C	Brownsville	78526	+19563508500	https://www.wingstop.com/location/wingstop-647-brownsville-tx-78526/menu?y_source=1_NTUyMDc0NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
-a19b37a4b816	Wingstop	restaurant	chicken restaurant	25.94329	-97.42912	5850 Fm 802 Ste E1	Brownsville	78526	+19568319464	https://www.wingstop.com/location/wingstop-287-brownsville-tx-78526/menu?y_source=1_NTUyMDc1OTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-e867a801489f	Wingstop	restaurant	chicken restaurant	25.93029	-97.51127	1905 Central Blvd	Brownsville	78520	+19565429464	https://www.wingstop.com/location/wingstop-577-brownsville-tx-78520/menu?y_source=1_NTUyMDY2ODYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-f3c88e791db6	Wingstop	restaurant	chicken restaurant	25.95274	-97.48753	2501 Paredes Line Rd Ste A3	Brownsville	78526	+19565466700	https://www.wingstop.com/location/wingstop-68-brownsville-tx-78526/menu?y_source=1_NTUyMDY1MjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 ca58355c0c51	Ybanez Tortilleria	restaurant	mexican restaurant	25.97458	-97.48474	4726 Paredes Line Rd	Brownsville	78526	+19565419594			0.96
 5febb6aa14ca	Ybarra's Tamales	restaurant	mexican restaurant	25.98057	-97.49496	1233 E Alton Gloor Blvd	Brownsville	78526	+19566211514	http://www.ybarrastamales.com/		0.92
 6d0079429f23	Yoyoy’s To Go	restaurant		25.89477	-97.45859	515 Calle Milpa Verde	Brownsville	78521	+19564791427			0.88

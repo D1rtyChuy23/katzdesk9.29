@@ -29,7 +29,6 @@ fca47b762a6d	Ford Motor Company	cardealer		34.83633	-102.40536	550 N. 25 Mile Av
 0932c20f94f1	Pickup Corner	cardealer		34.81502	-102.39848	100 W 1st St	Hereford	79045	+18063642571			0.92
 6b437b02fab9	Reveles Tire Services and Used Cars	cardealer	used auto dealer	34.64183	-102.71252	512 E 11th St	Friona	79035	+18065843066			0.92
 88775cd68461	Stevens 5-Star Car & Truck Center	cardealer		34.83564	-102.40603	545 N 25 Mile Ave	Hereford	79045	+18063642160	http://www.stevens5star.com	Chevrolet	0.97
-84766f552328	WB Equipment Local Napa Auto Dealer	cardealer		34.54045	-102.30505		Dimmitt		+18066472999	https://www.napaonline.com/en/TX/Dimmitt/store/21931?cid=pl_jobber_google_dac_21931_ao		0.59
 df85a4aeaed8	WB Equipment Local Napa Auto Dealer	cardealer		34.54434	-102.30173		Dimmitt		+18066472999	https://www.napaonline.com/en/TX/Dimmitt/store/21931?cid=pl_jobber_google_dac_21931_ao		0.59
 eeaee6e725b2	West Texas Machinery	cardealer		34.24236	-102.75670	2900 W American Blvd	Muleshoe	79347	+18069776011	http://www.westtexasmachinery.com/		0.92
 aac7d923c854	Western Equipment | Olton	cardealer		34.18850	-102.13409	502 1st St #70	Olton	79064	+18062852636	http://www.west-equip.com/	Western Equipment	0.92
@@ -113,7 +112,6 @@ a907a469b6d6	SEI FUELS STORE 42444-134	convenience		34.22633	-102.72354	107 E AM
 df99ea60f6a6	SEI FUELS STORE 42550-5017	convenience		34.23690	-102.74612	1900 W AMERICAN BLVD	Muleshoe	79347			Phillips 66	0.80
 ad48a32d5857	SEI FUELS STORE 42568-5037	convenience		34.82952	-102.36967	2901 1ST ST	Hereford	79045			Conoco	0.80
 3fd71c4edd19	Sinclair Gas Station	convenience		34.82790	-102.40582	301 N 25 Mile Ave	Hereford	79045	+18063647623	https://www.sinclairoil.com/	Sinclair Oil	0.92
-2eb6c84fcba5	Stripes	convenience		34.82255	-102.38322	2901 E 1ST St	Hereford	79045	+18063631030	https://stripesstores.com		0.77
 465c09ad807f	Stripes	convenience		34.81168	-102.40557	100 S 25 MILE Ave	Hereford	79045	+18063645126	https://stripesstores.com/		0.99
 4710ac0a61db	Stripes	convenience		34.23711	-102.74595	1900 W American Blvd	Muleshoe	79347	+18062725337	http://www.stripesstores.com	Stripes	1.00
 7e8920159954	Stripes	convenience		34.82939	-102.36967	2901 E 1st St	Hereford	79045	+18063631030	http://www.stripesstores.com/	Stripes	1.00
@@ -125,20 +123,32 @@ ad48a32d5857	SEI FUELS STORE 42568-5037	convenience		34.82952	-102.36967	2901 1S
 35bb21f013a4	UNITED EXPRESS 550	convenience		34.23138	-102.73325	104 W 9TH ST	Muleshoe	79347			Phillips 66	0.80
 233ae37b4832	Valero	convenience		34.81792	-102.39268	601 E 1st St	Hereford	79045	+12103452000	https://www.valero.com		0.92
 f61a67aefe11	Valero	convenience		34.55528	-102.31274	419 N Broadway St	Dimmitt	79027	+12103452000	https://www.valero.com		0.65
-8eccc04473b3	Yesway	convenience		34.39122	-102.12657	2200 Hwy 194	Hart	79043			Yesway	0.80
 c636dd4d5b5a	Yesway	convenience		34.43670	-102.17976	2200 Hwy 194	Hart	79043	+18066075189	https://yesway.com/	Yesway	0.92
 e7ce50e4a7fb	Yesway	convenience		34.64195	-102.72518	604 W 11th St	Friona	79035	+18062503254	https://yesway.com	Yesway	0.56
 ee29d7468b47	Yesway 1155	convenience		34.38390	-102.11630	TX-194	Hart	79043		https://locations.valero.com/en-us/LocationDetails/Index/TX-194/0000002411	Valero	0.95
+801f1e89e224	Burger King	fastfood	burger restaurant	34.80918	-102.40963	1005 W 1st St	Hereford	79045	+18065912100	https://burgerking.com/store-locator/store/25007	Burger King	0.97
+b6431bf7d328	Carl's Jr.	fastfood	burger restaurant	34.80976	-102.40746	901 W 1st St	Hereford	79045	+18063464494	https://locations.carlsjr.com/tx/hereford/901-w.-1st-street	Carl's Jr.	0.97
 0d99052065e7	Dairy Queen	fastfood		34.18800	-102.13741	Dairy Queen Store 1612 US Hwy 70 W	Olton	79064	+18062852882	https://dqtexas.com/?y_source=1_MjkzMzkxMTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.85
 a456432ca3ea	Dairy Queen	fastfood		34.82233	-102.39471	801 E Park Ave	Hereford	79045	+18063636320	https://dqtexas.com/?y_source=1_MjkzMzkzMTctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
+e4b26431b1b2	Domino's	fastfood	pizza restaurant	34.83926	-102.40607	701 N 25 Mile Road	Hereford	79045	+18063604200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
 b79439ae3453	Golden Chick	fastfood		34.83448	-102.40707	539 N 25 Mile Ave	Hereford	79045	+18063604818	https://locations.goldenchick.com/tx/hereford/1361/	Golden Chick	0.92
 02a2f4c7ccd7	KFC	fastfood		34.81129	-102.40543	741 West First	Hereford	79045	+18063646131	https://locations.kfc.com/tx/hereford/741-west-first	KFC	0.96
+3d90fd6c258d	Little Caesars	fastfood	pizza restaurant	34.82115	-102.40596	819 S 25 Mile Ave	Hereford	79045	+18063603940	https://littlecaesars.com/en-us/store/10614	Little Caesars	0.95
+fcd0e9ec33ea	Long John Silver's	fastfood	seafood restaurant	34.80954	-102.41012	1220 W 1st St	Hereford	79045	+18063644411	http://www.longjohnsilvers.com/		0.92
 139c9af78b49	McDonald's	fastfood		34.83777	-102.40493	616 N 25 Mile Ave	Hereford	79045		https://www.mcdonalds.com/us/en-us/location/41269.html	McDonald's	0.80
 2f9419ead27f	McDonald's	fastfood		34.81028	-102.40927	1112 W 1st St	Hereford	79045	+18063636161	https://www.mcdonalds.com/us/en-us/location/tx/hereford/1112-w-1st-st/3866.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 ceafc5bf279d	McDonald's	fastfood		34.23213	-102.73418	1025 W American Blvd	Muleshoe	79347	+18062723333	https://www.mcdonalds.com/us/en-us/location/tx/muleshoe/1025-w-american-blvd/36246.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
+025fbddb8113	Pizza Hut	fastfood	pizza restaurant	34.54898	-102.31306	216 S Broadway St Castro	Dimmitt	79027	+18066474233	https://locations.pizzahut.com/tx/dimmitt/216-s-broadway-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286568	Pizza Hut	0.96
+b77144e8ed4e	Pizza Hut	fastfood	pizza restaurant	34.23466	-102.73840	1414 W American Blvd	Muleshoe	79347	+18062724213	https://locations.pizzahut.com/tx/muleshoe/1412-n-american-blvd	Pizza Hut	1.00
+dc43ae745548	Pizza Hut	fastfood	pizza restaurant	34.80923	-102.41091	1304 W 1st St	Hereford	79045	+18063645551	https://locations.pizzahut.com/tx/hereford/1304-west-first-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287343	Pizza Hut	1.00
 853bdad14add	Sonic Drive In	fastfood		34.23550	-102.74199	1633 W. American Boulevard	Muleshoe	79347	+18062723998	https://locations.sonicdrivein.com/tx/muleshoe/1633-w.-american-boulevard.html	Sonic Drive-In	0.96
 94a821687d9f	Sonic Drive In	fastfood		34.82842	-102.40581	305 North 25 Mile Avenue	Hereford	79045	+18063646881	https://locations.sonicdrivein.com/tx/hereford/305-north-25-mile-avenue.html	Sonic Drive-In	0.99
 b1cc761fae58	Sonic Drive In	fastfood		34.55594	-102.31284	501 N Broadway Street	Dimmitt	79027	+18066479296	https://locations.sonicdrivein.com/tx/dimmitt/501-n-broadway-street.html	Sonic Drive-In	0.97
+08bed1ff835e	Subway	fastfood	sandwich shop	34.64173	-102.72813	806 W 11th Street	Friona	79035	+18062502727	https://restaurants.subway.com/united-states/tx/friona/806-w-11th-street	Subway	0.95
+1fc084510521	Subway	fastfood	sandwich shop	34.23710	-102.74600	1900 W American Blvd	Muleshoe	79347	+18062725337	https://www.subway.com		0.97
+2db953175dbf	Subway	fastfood	sandwich shop	34.82264	-102.40544	104 N 25 Mile Ave	Hereford	79045	+18063645140	https://restaurants.subway.com/united-states/tx/hereford/104-n-25-mile-ave	Subway	0.95
+3f298970ef74	Subway	fastfood	sandwich shop	34.55653	-102.31255	600 N Broadway	Dimmitt	79027	+18066470777	https://restaurants.subway.com/united-states/tx/dimmitt/600-n-broadway	Subway	0.98
+d9c59aef991f	Subway	fastfood	sandwich shop	34.83948	-102.40760	315 W 15th St	Hereford	79045	+18063636060	https://restaurants.subway.com/united-states/tx/hereford/315-w-15th-st	Subway	0.96
 dc6a1ea74152	Taco Bell	fastfood		34.80969	-102.40979	1200 W 1st St	Hereford	79045	+18063631402	http://www.tacobell.com/	Taco Bell	0.97
 f3dafc2f667b	Tortilleria Martinez	fastfood		34.63730	-102.71813	622 S Main St	Friona	79035	+18063329397			0.73
 d1c32320384c	Wendy's	fastfood		34.81038	-102.40848	1100 W 1st St	Hereford	79045	+18063917064	https://www.wendys.com		0.92
@@ -160,7 +170,6 @@ a75f9f44eaf9	Hereford Hospital!!	hospital		34.83960	-102.41366		Hereford					0.7
 7b854be23483	Hereford Regional Medical Center	hospital		34.83933	-102.41422	801 East Third	Hereford	79045	+18063642141	http://dschd.org		0.98
 2848180c1e5c	Muleshoe Area Medical Center	hospital		34.22126	-102.72856	708 S 1 St St	Muleshoe	79347	+18062724524	http://www.muleshoehospital.com/		0.92
 cf69b85d82df	Parmer Medical Center	hospital		34.64429	-102.72183	1307 N Cleveland Ave	Friona	79035	+18062502754	http://www.parmermedicalcenter.com/		0.92
-2d3dee354a7a	Plains Memorial Hospital	hospital		34.55610	-102.31573	310 W Halsell St	Dimmitt	79027	+18066472191	http://www.plainsmemorial.com		0.97
 8ce2a54cc3dc	Plains Memorial Hospital	hospital		34.55576	-102.31512	310 W Halsell St	Dimmitt	79027	+18066472191	http://www.plainsmemorial.com		1.00
 fb6c295ff9a2	Best Western Red Carpet Inn	hotel		34.81097	-102.40710	830 W 1st St	Hereford	79045	+18063640540	https://www.bestwestern.com/en_US/book/hotel-rooms.44044.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44044	Best Western Hotels & Resorts	1.00
 e049ddda3435	Budget Motor Inn	hotel		34.80944	-102.40911	915 W 1st St	Hereford	79045	+18063648275	http://budget-motor-inn-us.book.direct		0.77
@@ -169,7 +178,6 @@ fec8371cc6ef	Dimmitt Motel	hotel	motel	34.54739	-102.31281	400 S Broadway SUITE 
 0595dafbff3c	Earth Motel & Cafe	hotel	motel	34.23318	-102.40308	701 US-70	Earth	79031	+18062573377			0.92
 97bbad8e78a5	Economy Inn	hotel		34.24090	-102.75643	2701 W American Blvd	Muleshoe	79347	+18062724261	http://www.economyinnflorence.com		0.94
 a3c94bd72b1f	Executive Inn	hotel	motel	34.55394	-102.31179	320 N Broadway	Dimmitt	79027	+18066472177			0.95
-f848874c42b1	Fiji Hotel Group	hotel		34.80905	-102.41102	1400 W 1st St	Hereford	79045				0.95
 48f94a9d0d02	Friona Inn	hotel	resort	34.64148	-102.73354	1204 W 11th St	Friona	79035	+18062502784	http://www.frionainn.com/		0.99
 8c38a77fd62b	Herford	hotel		34.82336	-102.38130		Hereford					0.97
 40c775bd74a9	Heritage Budget Inn	hotel	motel	34.23675	-102.74516	1827 W American Blvd	Muleshoe	79347	+18062724533	http://www.heritagehouseinn.net		0.81
@@ -202,10 +210,7 @@ fa1b9fbdb204	WT Services	office		34.81835	-102.39954	119 E 4th St	Hereford	79045
 759c7dda3b20	Anna's Mexican Restaurant	restaurant	mexican restaurant	34.18818	-102.13888	809 1st St	Olton	79064	+18062852524	http://annastexmex.com/		0.95
 80bb9fe24414	Antojitos Locos	restaurant	mexican restaurant	34.22519	-102.72647	308 W 2nd St	Muleshoe	79347	+18062722912	https://muleshoechamber.com/directory-tag/antojitos		0.96
 7511eb3e6d05	Becky's Burritos	restaurant	latin american restaurant	34.64200	-102.71316	506 E 11th St	Friona	79035	+18062502010	https://beckys-burritos.slue.io		0.97
-801f1e89e224	Burger King	restaurant	burger restaurant	34.80918	-102.40963	1005 W 1st St	Hereford	79045	+18065912100	https://burgerking.com/store-locator/store/25007	Burger King	0.97
-8b502a1507a1	Burger King	restaurant		34.80888	-102.40973	1005 W 1st St	Hereford	79045	+18065912100	https://burgerking.com/store-locator/store/restaurant_74992		0.92
 d1b1b115d28e	Burrito's Plus	restaurant	mexican restaurant	34.81807	-102.40556	610 S 25 Mile Ave	Hereford	79045	+18063602475	https://www.groupon.com/biz/hereford-tx/burritos-plus		0.95
-b6431bf7d328	Carl's Jr.	restaurant	burger restaurant	34.80976	-102.40746	901 W 1st St	Hereford	79045	+18063464494	https://locations.carlsjr.com/tx/hereford/901-w.-1st-street	Carl's Jr.	0.97
 5e481a7c0f45	Carniceria Hernandez	restaurant	mexican restaurant	34.64138	-102.72639	703 W 11th St	Friona	79035	+18062503060			0.92
 f4c1a1341543	Casa Abalos	restaurant	mexican restaurant	34.81927	-102.38993	847 E 1st St	Hereford	79045	+18063604485			0.92
 78d59a049f0e	Casa Durango	restaurant	mexican restaurant	34.82172	-102.39340	706 E 5th St	Hereford	79045	+18063604235			0.99
@@ -214,7 +219,6 @@ f4c1a1341543	Casa Abalos	restaurant	mexican restaurant	34.81927	-102.38993	847 E
 7c68377d6a31	Dakotas Steak House	restaurant	steakhouse	34.80895	-102.41135	1404 W 1st St	Hereford	79045	+18063602800	http://www.dakotasofhereford.com/		0.92
 ee4ff6139f81	Dinner Bell Restaurant	restaurant	diner	34.23774	-102.74778	2103 W American Blvd	Muleshoe	79347	+18062724080	http://thedinnerbell.net		0.98
 7f4593496bb8	Dollar City Plus	restaurant	mexican restaurant	34.51443	-102.88447	700 3rd St	Bovina	79009	+18063911192			0.90
-e4b26431b1b2	Domino's	restaurant	pizza restaurant	34.83926	-102.40607	701 N 25 Mile Road	Hereford	79045	+18063604200	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
 4b96c42c387d	Dos Chixx	restaurant	chicken restaurant	34.63812	-102.71900	715 N Main St A	Friona	79035	+18062505712	http://www.doschixx.com/		0.92
 08df9feddc70	Earth Locker	restaurant	barbecue restaurant	34.23305	-102.41106	104 E Main St	Earth	79031	+18062573393			0.62
 adb95c918933	El Sazon De La Abuela	restaurant	mexican restaurant	34.22697	-102.72462	104 W American Blvd	Muleshoe	79347	+18062727716			0.96
@@ -245,8 +249,6 @@ db3f19560521	Las Palmas Taqueria	restaurant	mexican restaurant	34.82228	-102.397
 b2f95f6e8410	LAURA'S RESTAURANT	restaurant	mexican restaurant	34.18817	-102.13765	715 1st St	Olton	79064	+18062852938	https://laurasrestauranttx.com		0.92
 95c3199a0bc0	Leal's Mexican Food Cafe Since 1957	restaurant	mexican restaurant	34.23207	-102.73304	1010 W American Blvd	Muleshoe	79347	+18062723294	http://www.myleals.com/		1.00
 c0b02cc0afbb	Li House	restaurant	buffet restaurant	34.23704	-102.74460	1820 W American Blvd	Muleshoe	79347	+18062728999			0.96
-3d90fd6c258d	Little Caesars	restaurant	pizza restaurant	34.82115	-102.40596	819 S 25 Mile Ave	Hereford	79045	+18063603940	https://littlecaesars.com/en-us/store/10614	Little Caesars	0.95
-fcd0e9ec33ea	Long John Silver's	restaurant	seafood restaurant	34.80954	-102.41012	1220 W 1st St	Hereford	79045	+18063644411	http://www.longjohnsilvers.com/		0.92
 05c8c1101d46	Longhorn Diner	restaurant	diner	34.38565	-102.11555	613 FM168	Hart	79043	+18069382606			0.58
 02b96103eade	Los Arcos	restaurant	mexican restaurant	34.64225	-102.72385	512 W 12th St	Friona	79035	+18062502409	http://losarcosmerida.com	LOS ARCOS	0.93
 2185079de0d0	Manantial De Sabores	restaurant	mexican restaurant	34.22046	-102.72879	111 E Ave H	Muleshoe	79347	+18062723223			0.92
@@ -263,9 +265,6 @@ dd86cd51c878	New China Buffet	restaurant	buffet restaurant	34.81114	-102.40616	8
 32933dc1b4d1	Norma's Burritos	restaurant	mexican restaurant	34.82084	-102.40624	815 S 25 Mile Ave	Hereford	79045	+18063605678			0.96
 d8a8c4caa79a	Osaki Steak House of DC	restaurant	japanese restaurant	34.82942	-102.40524	310 N 25 Mile Ave	Hereford	79045	+18063603188	http://www.osakahibachiandsushi.com/		0.95
 fdff2bcdac43	Parson's Steakhouse	restaurant	steakhouse	34.81291	-102.40601	215 S 25 Mile Ave	Hereford	79045	+18063646413	http://www.kbobs.com		0.95
-025fbddb8113	Pizza Hut	restaurant	pizza restaurant	34.54898	-102.31306	216 S Broadway St Castro	Dimmitt	79027	+18066474233	https://locations.pizzahut.com/tx/dimmitt/216-s-broadway-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286568	Pizza Hut	0.96
-b77144e8ed4e	Pizza Hut	restaurant	pizza restaurant	34.23466	-102.73840	1414 W American Blvd	Muleshoe	79347	+18062724213	https://locations.pizzahut.com/tx/muleshoe/1412-n-american-blvd	Pizza Hut	1.00
-dc43ae745548	Pizza Hut	restaurant	pizza restaurant	34.80923	-102.41091	1304 W 1st St	Hereford	79045	+18063645551	https://locations.pizzahut.com/tx/hereford/1304-west-first-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287343	Pizza Hut	1.00
 05197ff793ff	Pizza Parlor	restaurant	pizza restaurant	34.18124	-102.13340	410 8th St	Olton	79064	+18062852325	https://pizza-parlor-tx-3.hub.biz/		0.92
 665fadc43243	R & R Deli	restaurant	delicatessen	34.73910	-102.51051	4 Th Walnut St	Summerfield	79085	+18063572250			0.89
 82ca4dcc880f	R&j Cafe	restaurant		34.82177	-102.39179	914 E Park Ave	Hereford	79045				0.95
@@ -281,11 +280,6 @@ dc0f0cad2b24	Samuel Inc	restaurant		34.23220	-102.73296	1010 W American Blvd	Mul
 dbbcdf6c06dc	Simple Simon's Pizza	restaurant	pizza restaurant	34.52306	-102.88916	101 E Gardner Ave	Bovina	79009	+18062517437	https://www.simplesimonspizza.com/		0.96
 9b979116b399	Somboune's Thai Chinese	restaurant	thai restaurant	34.54441	-102.30964	612 S Highway 385	Dimmitt	79027	+18066472406	http://sombounes-chinese.edan.io		0.98
 dca06ced65bf	Sports Cartel	restaurant	bar and grill restaurant	34.23746	-102.74704	2015 W American Blvd	Muleshoe	79347	+18062721806			0.96
-08bed1ff835e	Subway	restaurant	sandwich shop	34.64173	-102.72813	806 W 11th Street	Friona	79035	+18062502727	https://restaurants.subway.com/united-states/tx/friona/806-w-11th-street	Subway	0.95
-1fc084510521	Subway	restaurant	sandwich shop	34.23710	-102.74600	1900 W American Blvd	Muleshoe	79347	+18062725337	https://www.subway.com		0.97
-2db953175dbf	Subway	restaurant	sandwich shop	34.82264	-102.40544	104 N 25 Mile Ave	Hereford	79045	+18063645140	https://restaurants.subway.com/united-states/tx/hereford/104-n-25-mile-ave	Subway	0.95
-3f298970ef74	Subway	restaurant	sandwich shop	34.55653	-102.31255	600 N Broadway	Dimmitt	79027	+18066470777	https://restaurants.subway.com/united-states/tx/dimmitt/600-n-broadway	Subway	0.98
-d9c59aef991f	Subway	restaurant	sandwich shop	34.83948	-102.40760	315 W 15th St	Hereford	79045	+18063636060	https://restaurants.subway.com/united-states/tx/hereford/315-w-15th-st	Subway	0.96
 af83e13f1a60	Sugarland Mall Grill	restaurant	burger restaurant	34.83239	-102.40369	400 N 25 Mile Ave	Hereford	79045	+18063648889			0.95
 8fb8a57ab062	Sunshine Cafe	restaurant	american restaurant	34.06742	-102.52498	110 N Main St	Sudan	79371	+18062272233	http://www.shelbysbridge.org/		0.95
 5866aac87e05	T.H.E Taco Loco LLC	restaurant	taco restaurant	34.18330	-102.13844	804 6th St	Olton	79064	+18062404387			0.92

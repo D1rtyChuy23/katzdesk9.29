@@ -15,7 +15,6 @@ d1cae21ab071	Allsup's	convenience		36.19800	-101.19704	305 W Kenneth Ave	Spearma
 b248dd460a3f	Allsup's Convenience Store	convenience		36.01770	-101.82487	700 Main St	Sunray	79086	+18069485313	https://www.allsups.com/	Allsup’s	0.92
 3e0304fab8e6	Bp	convenience		36.20243	-101.19244	406 N Bernice St	Spearman	79081	+18066592646	https://www.bp.com		0.92
 1c5920c46cff	CEFCO Convenience Store	convenience		36.19839	-101.19752	107 Collard St	Spearman	79081	+18066592043	https://www.cefcostores.com/		0.92
-a62b0b038c97	Cenex	convenience		36.49762	-101.79131	W, US-54	Texhoma	73949	+18068277261		Cenex	0.63
 b0443901de7a	Country Store	convenience		36.02122	-101.82497	100-198 W 4th St	Sunray	79086	+18069485442	http://www.terrellcountrystore.com		0.77
 223c009810f3	GRUB'S MARKET 2	convenience		36.03009	-101.99641	616 BIRCH	Cactus	79013		https://locations.valero.com/en-us/LocationDetails/Index/616-BIRCH/0000001356	Valero	0.80
 56e8c3d0bfc2	Laredo Petroleum Inc	convenience		36.18608	-101.19937	511 W 11th Ave	Spearman	79081	+18066595088	https://www.vitalenergy.com		0.65
@@ -27,6 +26,7 @@ a10d210efc18	Toot'n Totum	convenience		36.02120	-101.82480	308 Main St	Sunray	79
 520d01291095	Dairy Queen	fastfood		36.01914	-101.82500	514 Avenue M	Sunray	79086	+18069484320	https://www.dqtexas.com/?y_source=1_MjkzMzkyMjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 676e349ae430	Dairy Queen	fastfood		36.19039	-101.20490	700 TX-207 700 S Highway 207	Spearman	79081	+18066595601	https://dqtexas.com/?y_source=1_MjkzMzkyODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.80
 279f533a8c43	Over the Rainbow	fastfood		36.19781	-101.19057	21 S Endicott St	Spearman	79081				0.91
+383145f5edb9	Pizza Hut	fastfood	pizza restaurant	36.18899	-101.20586	207 S Hwy Hansford	Spearman	79081	+18066592547	https://locations.pizzahut.com/tx/spearman/207-s-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297361	Pizza Hut	0.98
 8b7d62a61431	Etter Grocery & Market	grocery		36.03014	-101.99670	598 S US Highway 287	Dumas	79029	+18069665237	http://valero.com		0.87
 5a6a9fe33c5a	Lowe's Market	grocery		36.19231	-101.20266	505 TX-207	Spearman	79081	+18066593212	https://lowes-market-place.hub.biz/	Lowe's Market	0.92
 d17188b70e0f	Neighbors Grocery	grocery		36.26315	-101.40710	615 Main St	Gruver	79040	+18067332471	https://neighbors-grocery-tx.hub.biz		0.92
@@ -48,9 +48,7 @@ bdb4b11b7bf5	La Casita	restaurant	mexican restaurant	36.01571	-101.82452	811 Mai
 4ee55adf9298	Los Socios | Mexican	restaurant	mexican restaurant	36.19067	-101.20241	719 W 7th Ave	Spearman	79081	+18066448035			0.92
 a87477d19280	Mi Cafe	restaurant	comfort food restaurant	36.01949	-101.82441	505-511 Main St	Sunray	79086	+18069480089	https://www.facebook.com/profile.php?id=100083684755541		0.92
 165bc73f319e	Murmurs	restaurant	burger restaurant	36.19673	-101.20015	100 S Roland St	Spearman	79081	+18066593580	http://www.cine-tamaris.com/agnes-varda		0.97
-383145f5edb9	Pizza Hut	restaurant	pizza restaurant	36.18899	-101.20586	207 S Hwy Hansford	Spearman	79081	+18066592547	https://locations.pizzahut.com/tx/spearman/207-s-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297361	Pizza Hut	0.98
 8758520d65fe	Pollos Chavira	restaurant	chicken restaurant	36.19830	-101.19341	102 W Kenneth Ave	Spearman	79081	+18062700527			0.99
-9f992e46fec1	Pollos Chavira	restaurant	mexican restaurant	36.19830	-101.19341	102 W Kenneth Ave	Spearman	79081	+18062700527			0.99
 448f942c9505	Safari Restaurant: A Taste of East Africa	restaurant	middle eastern restaurant	36.05280	-101.99829	287 Center Dr	Cactus	79013	+18065533530			0.96
 7e229f467340	Salt and Light	restaurant		36.19581	-101.20148	212 TX-207	Spearman	79081	+18062028723			0.98
 1aafaa8813ca	Taco Stop	restaurant	mexican restaurant	36.03578	-101.99847	318 Stoney Dr	Cactus	79013	+18064214678			0.92

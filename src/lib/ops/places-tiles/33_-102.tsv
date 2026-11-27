@@ -47,7 +47,6 @@ a48b3a1f3db3	Panaderia 3 Hermanos	bakery		33.59723	-101.85688	1808 Clovis Rd	Lub
 2f4ad7e7c82e	Paris Croisserie Bakery And Cafe	bakery		33.52468	-101.95744	7610 Milwaukee Ave	Lubbock	79424	+18067771229			0.88
 587157f92277	Peace O'Cake	bakery		33.56342	-101.88851	3412 34th St	Lubbock	79410	+18067712253	http://www.peaceocake.com/		0.92
 f764a03be688	Plain Jane's Fried Pie	bakery		33.50491	-101.88914	3407 98th St	Lubbock	79423	+18069935135	https://plainjanesfriedpies.com		0.90
-a7622962a7f7	Pop & Crunch	bakery		33.49079	-101.92361	5240 114th St	Lubbock	79424	+14323124667			0.89
 ff28542522ee	Pop & Crunch	bakery		33.49123	-101.92584	5240 114th St	Lubbock	79424	+14323124667			0.89
 c9925010077a	R2 Donuts	bakery	donut shop	33.66010	-101.24805	806 W Main St	Crosbyton	79322	+18066750020			0.99
 0f419bcf4ac2	Ralls Donut Shop	bakery	donut shop	33.67914	-101.38423	Main Ave	Ralls	79357	+18062530729			0.63
@@ -140,7 +139,6 @@ ca219f974dc4	Fast Eddie's Lubbock	bar	sports bar	33.52801	-101.86971	7301 Univer
 b9051d80da17	Fiesta-Center Lubbock	bar		33.59202	-101.81617	1902 E 4th St	Lubbock	79403	+18067296695	http://fiestacenter.square.site/		0.92
 734c0248b8dd	FireSky Vineyards	bar	winery	33.54987	-101.99291	7916 County Rd 6900	Lubbock	79407	+18064749654	https://www.texastribune.org/2025/07/05/texas-hill-country-flooding-how-to-help/		0.97
 4d06b2425150	FlySo	bar		33.59500	-101.81805		Lubbock					0.69
-51d8f70c9b0f	FlySo	bar		33.57586	-101.81844		Lubbock					0.68
 4d8f65fff8d3	Fox & Hound	bar	pub	33.52071	-101.90180	4210 82nd Street	Lubbock	79423	+18067911526	http://www.foxandhound.com/locations/lubbock/		0.92
 48d62e30a4d2	Frost Brewhouse	bar	brewery	33.56292	-101.88293	3121 34th St	Lubbock	79410	+18067780190	https://frostbrewhouse.com		0.92
 c653a373c75a	Funky Door Wine Bar	bar	wine bar	33.50038	-101.94368	5901 102nd St	Lubbock	79424	+18067788099			0.86
@@ -213,7 +211,6 @@ aefec64e5349	The Lava Lounge Bar	bar		33.57270	-101.90643	4435 Marsha Sharp Fwy	
 bf7f41b5b061	The Library Bar Lubbock	bar		33.57971	-101.84552	1701 Texas Ave	Lubbock	79401	+18064075667	http://thelibrarybarlbk.com		0.99
 5388b366c537	The Office Grill and Sports Bar	bar	sports bar	33.54764	-101.94042	5004 Frankford Ave	Lubbock	79424	+18062146410	https://www.facebook.com/TheOfficeGrillandSportsbar		0.95
 d68c44ad5166	The Red Zone Sports Bar	bar	sports bar	33.53243	-101.84573	6624 I-27	Lubbock	79404	+18067455780	http://redzonesportscards.com/		0.99
-57158152b034	The tumbleweed	bar	pub	33.19551	-101.34896	1331 US Highway 380	Post	79356	+18066320444			0.95
 64dbc3d720aa	The tumbleweed	bar	pub	33.19653	-101.34823	1331 US Highway 380	Post	79356	+18066320444			0.95
 6e49fd31c2a5	Tom's Daiquiri Place	bar	dive bar	33.57870	-101.84457	1802 Buddy Holly Ave	Lubbock	79401	+18067495442	http://www.thebluelightlive.com/		0.97
 3a4e512ad510	Tumbleweed Vineyards	bar	winery	33.94605	-101.96881	711 County Road 255	Hale Center	79041	+18067293915			0.65
@@ -333,7 +330,6 @@ c1d325e3537e	Hunt Motor Company	cardealer		33.56104	-101.85498	3609 Avenue Q	Lub
 1db9b5b33e16	J&L Auto Sales and Auto Repair	cardealer		33.59906	-101.86190	2020 Clovis Rd	Lubbock	79415	+18067783985			0.72
 d37e8ec4fee3	James The Car Guy	cardealer		33.53526	-101.95838	6312 Milwaukee Ave	Lubbock	79424	+18065359813			0.90
 4e4cd2e9d45e	Joe Gonzales at Pollard Ford	cardealer		33.52810	-101.88577	3301 S Loop 289	Lubbock	79423	+18065447575			0.72
-cfcb93e0383e	Joe Gonzales at Pollard Ford	cardealer		33.52765	-101.88745	3301 S Loop 289	Lubbock	79423	+18065447575			0.72
 c293685a6888	Johnny's Automotive Wrecker Service	cardealer	used auto dealer	33.66456	-101.68002	108 Main St	Idalou	79329	+18068923520	https://www.johnnyswreckerservice.com/		0.99
 b2da00def267	Jolly's Auto Sales	cardealer		33.59948	-101.86225	2101 Clovis Rd	Lubbock	79415	+18067015213	http://www.jollysautosaleslbk.com/		0.92
 1fc8f4ad6060	KD Motors	cardealer		33.56348	-101.90047	4020 34th St	Lubbock	79410	+18067015383	http://www.kdmotorslubbock.com/		0.92
@@ -396,7 +392,6 @@ b4cdd63534ca	Save More Auto Sales	cardealer		33.59228	-101.86506	2211 Marsha Sha
 cd8bbc61147f	Scoggin-Dickey Subaru	cardealer		33.53785	-101.94312	5901 TX-327 Spur	Lubbock	79424	+18067984000	http://www.scoggindickey.com/ContactUsForm	Subaru España	0.98
 051edaab0783	Scott The Garage	cardealer		33.57745	-101.85298	1611 19th St	Lubbock	79401	+18069830494	http://www.thegaragelubbock.com/		0.85
 1084a4425336	Seth at Tejas Motors	cardealer		33.55665	-101.85566	4110 Avenue Q	Lubbock	79412	+18066876878	http://Tejasmotors.com/		0.97
-4feeda712fee	Shift Automotive Group	cardealer		33.54196	-101.93678	5610 58th St	Lubbock	79424	+18069931094	http://shiftlubbock.com/		0.99
 d4d61690912c	Shift Automotive Group	cardealer	used auto dealer	33.54196	-101.93678	5610 58th St	Lubbock	79424	+18069931094	http://shiftlubbock.com/		1.00
 cf6c31a23832	Shoppas Scissor Lift & Aerial Equipment of Lubbock	cardealer		33.53325	-101.83357	118 E Slaton Rd	Lubbock	79404	+18663026491	http://www.aichilifts.com/texas/lubbock.php		0.87
 e81c2c95481b	Smith Auto Family	cardealer		33.43351	-101.66208	1700 W Division St	Slaton	79364	+18068286291	http://smithautofamily.com/	Smith Auto Family	1.00
@@ -426,7 +421,6 @@ bb97b9958cb5	V12 Auto Group	cardealer		33.47980	-101.93578	5614 126th St	Lubbock
 7d16a4e89102	Valentine Ramirez	cardealer		33.57849	-101.84940	1302 19th St	Lubbock	79401	+14326642136	https://www.cavenderlexusoflubbock.com/		0.71
 0c750491e2ae	Valmont Lubbock Parts Distribution	cardealer		33.61591	-101.82994	222 Texas 289 Loop Frontage Rd	Lubbock	79403	+18067410892	https://www.valmont.com		0.92
 5ae947ea8885	West Texas Car-Mart	cardealer		33.57217	-101.84607	2418 Texas Ave	Lubbock	79411	+18066017813			0.99
-7ac82c1af67d	West Texas Consignments	cardealer		33.66380	-101.83823	6007 I-27 S	Lubbock	79403	+18067825739	http://www.westtexasconsignments.com/		0.98
 a1627b382124	West Texas Consignments	cardealer		33.66372	-101.83760	6007 I-27 S	Lubbock	79403	+18067825739	http://www.westtexasconsignments.com/		0.98
 c8de7b562682	West Texas Motor Cars	cardealer		33.50806	-101.91184	4615 94th St	Lubbock	79424	+18065481550	https://www.westtexasmotorcars.com/		0.97
 5236f9adbfe2	Western Direct Auto	cardealer	used auto dealer	33.55089	-101.84403	4715 I 27	Lubbock	79404	+18062818611	http://www.westerndirectauto.com		0.75
@@ -445,9 +439,7 @@ fabc28d1e1d5	Medina-Mark Theaters	cinema		33.59205	-101.96446		Lubbock			https:/
 bbfa75282f95	Stars & Stripes Drive-in Theatre	cinema	drive in theater	33.63021	-101.92115	5101 Clovis Rd	Lubbock	79416	+18067497469	http://www.driveinusa.com		0.92
 155fc4c31f61	Tejano Club Ninety-Seven	cinema		33.54429	-101.85120	5401 N Avenue Q, Lubbock , 79413, United States	Lubbock	79413	+18067779797	https://tejano-club-97.hub.biz		0.77
 12d0801b1d0f	The Movie Store	cinema		33.66690	-101.47174	606 US-82	Ralls	79357	+18062531414	http://www.moviestore.com		0.57
-2dd2e877a8c6	Tinseltown Lubbock Tx	cinema		33.54447	-101.91029		Lubbock			http://www.cinemark.com/		0.76
 a42c92734659	Tinseltown Lubbock Tx	cinema		33.54538	-101.90594		Lubbock			http://www.cinemark.com/		0.77
-6ee9441c8d71	Tinseltown Movie Theater	cinema		33.52158	-101.89401		Lubbock			http://www.cinemark.com/theatre-detail.aspx?node_id=1542&showtime_date		0.77
 f50e86c755cb	19th Street	coffee		33.57748	-101.94629	5923 19th St	Lubbock	79407		https://locations.dutchbros.com/dutch-bros-coffee-tx/lubbock/5923-19th-st	Dutch Bros. Coffee	0.80
 22a8fa670f60	7 Brew Coffee	coffee		33.52656	-101.95661	7403 Milwaukee Ave	Lubbock	79424	+18067583504	https://7brew.com/location/texas-lubbock-000154		0.99
 2611af732700	7 Brew Coffee	coffee		33.58192	-101.87031	1415 University Ave	Lubbock	79401	+18067583501	https://7brew.com/location/texas-lubbock-000134		0.99
@@ -538,7 +530,6 @@ cd4fd39dbd0c	Starbucks	coffee		33.59122	-101.92245	405 Slide Rd (4th & Slide)	Lu
 e8b66ebecb16	Starbucks	coffee		33.57335	-101.90634	4411 Marsha Sharp Fwy	Lubbock	79407	+18066994511	https://www.starbucks.com/store-locator/store/1022449	Starbucks	1.00
 ebd90da12318	Starbucks	coffee		33.58805	-101.87055	801 University Ave (University & 8th)	Lubbock	79401	+18067448234			0.98
 ef37da8474c8	Starbucks	coffee		33.54845	-101.88596	3229 50th St	Lubbock	79413	+18067246871	https://www.starbucks.com/store-locator/store/1026892	Starbucks	1.00
-f8d3f33418ca	Starbucks	coffee		33.52760	-101.89967		Lubbock	79409		http://www.starbucks.com		0.77
 2e6dc58418c3	Starbucks Coffee Company	coffee		33.59035	-101.87038	2414 Mac Davis Ln	Lubbock	79401	+18067441396	https://www.starbucks.com/store-locator/store/1017310	Starbucks	0.99
 7316be026ec3	Starbucks Coffee Company	coffee		33.49138	-101.92336	11310 Slide Rd	Lubbock	79424	+18067054100	https://www.starbucks.com/store-locator	Starbucks	0.92
 77db4345c05a	Starbucks Coffee Company	coffee		33.50562	-101.92187	5110 98th St	Lubbock	79424	+18062416854	https://www.starbucks.com/store-locator/store/1015499	Starbucks	0.99
@@ -620,7 +611,6 @@ c8c56dff9e35	Marsha Sharp Freeway Campus	college		33.57175	-101.90813	4515 Marsh
 e0fd0bfc49b4	Meat Sciences Lab	college		33.58336	-101.88939		Lubbock	79415		http://www.depts.ttu.edu/meatscience/		0.99
 c53b0e9fe32a	Neofluidics	college		33.57448	-101.90202	4110 22nd Pl Ste 200	Lubbock	79410	+18063193083	https://www.lubbocksportsmed.com		0.55
 23ad84d1fde6	Office of the Registrar	college		33.58544	-101.87248	103 West Hall	Lubbock	79401	+18067423661	http://www.depts.ttu.edu/registrar/		0.92
-83b0a18d6387	Osher Lifelong Learning Institute at Texas Tech University, Lubbock	college		33.59067	-101.88589	1901 University Ave	Lubbock	79410	+18067426554	http://www.olli.ttu.edu/		0.78
 8b7e8057ecf1	Osher Lifelong Learning Institute at Texas Tech University, Lubbock	college		33.57744	-101.87012	1901 University Ave	Lubbock	79410	+18067426554	http://www.olli.ttu.edu/		0.79
 2d8ffda22e2a	Pi Beta Phi	college		33.58370	-101.90311	17 Greek Cir	Lubbock	79416	+16362560680	pibetaphi.org		0.92
 158b5204fe36	Rawls College of Business	college		33.58785	-101.87923	Jerry S. Rawls College of Business Administration Building, 703 Flint Ave	Lubbock	79409	+18067423188	http://rawlsbusiness.ba.ttu.edu/		0.99
@@ -646,7 +636,6 @@ a09d93efc0eb	Texas Tech Nutritional Sciences	college		33.58307	-101.87317	1301 A
 c1cc4d787981	Texas Tech Plaza	college		33.57724	-101.87032	1901 University Ave	Lubbock	79401	+18067424762			0.99
 dba24badda79	Texas Tech Research	college		33.58467	-101.87087	2500 Broadway	Lubbock	79409	+18067423905	https://www.depts.ttu.edu/research/		0.59
 47d60334d8b9	Texas Tech UIL	college		33.58165	-101.87202	Drane Hall University Ave and, 15th St	Lubbock	79410	+18067422350	https://www.depts.ttu.edu/access-engagement/university-interscholastic-league/		0.92
-791b28bd3d69	Texas Tech University	college		33.58562	-101.89227		Lubbock		+18067422011	http://www.ttu.edu/		0.79
 b8db74ed1cc8	Texas Tech University	college		33.58483	-101.88000		Lubbock		+18067422011	http://www.ttu.edu/		0.97
 de30a8d77d11	Texas Tech University	college		33.58450	-101.87515	Texas Tech University, 2500 Broadway	Lubbock	79409	+18067422011	http://linktr.ee/texastechuniversity		0.97
 1edf499ce808	Texas Tech University Athletics Mens & Womens Intercollegiate	college		33.58773	-101.85430		Lubbock		+18067427600	http://bit.ly/Virtual_Camp		0.71
@@ -665,7 +654,6 @@ d8d9e529809d	Texas Tech University Online	college		33.57743	-101.87036	1901 Univ
 7f7375a3cd84	Texas Tech University System	college		33.57504	-101.85883	1920 22nd St	Lubbock	79411	+18067421995	http://www.depts.ttu.edu		0.92
 f64d26a79d5b	Texas Tech University Theatre	college		33.58006	-101.87783	1801 Flint Ave	Lubbock	79410	+18067423603	http://www.depts.ttu.edu/theatreanddance/facilities/maedgen.php		0.89
 46597e159675	Texas Tech West Hall	college		33.58521	-101.87254	2500 Broadway	Lubbock	79409	+18067421480	http://gototexastech.com		0.97
-d9528e048053	The Hub@TTU	college		33.58373	-101.87459	3082 University Ave	Lubbock	79410	+18068346657	http://ttuhub.net/		0.78
 dd50db537582	The Hub@TTU	college		33.56601	-101.87087	3082 University Ave	Lubbock	79410	+18068346657	http://ttuhub.net/		0.79
 ede565341d49	THFCollege	college		33.53473	-101.95039	6108 66th St	Lubbock	79424	+18067718415	https://www.theheightsfellowship.org/university/		0.85
 d923fef6a279	TTU - School of Art - 3D Annex	college		33.58477	-101.88491	2802 18th St	Lubbock	79409	+18067422011	https://www.depts.ttu.edu/art/SOA/homepage/archives/news/...		0.97
@@ -761,7 +749,6 @@ dd55bc5d6cf3	Buddy's Convenience Store	convenience		33.54917	-101.84184	518 50th
 668e3e0efe3e	CAT Scale	convenience	truck gas station	33.64236	-101.83631	4221 N Interstate 27	Lubbock	79403	+18067441531	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
 9fd57de881f0	CAT Scale	convenience	truck gas station	33.55198	-101.83515	4609 Avenue A	Lubbock	79404	+18067472505	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
 d98e7ff38c3b	CAT Scale	convenience	truck gas station	33.73656	-101.84322	70 S Aspen Ave	Lubbock	79350	+18156558352	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
-23f95be7e195	CEFCO	convenience		33.19862	-101.37851	905 N Broadway St	Post	79356	+18064958366	https://cefcostores.com		0.77
 3870be81df1a	CEFCO	convenience		33.20072	-101.38301	905 N Broadway St	Post	79356	+18064958366	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
 23af18da0268	CEFCO Convenience Store	convenience		33.42229	-101.64316	1755 S 9th St	Slaton	79364	+18068286255	https://www.cefcostores.com/	CEFCO Convenience Stores	0.99
 273fe17ad633	Charge Up 8-valero	convenience		33.56815	-101.92201	2815 Slide Rd	Lubbock	79407	+19185606494	https://www.valero.com		0.92
@@ -938,7 +925,6 @@ fcbcf6fd47b9	Phillips 66	convenience		33.50562	-101.86980	2478 98th St	Lubbock	7
 fe87f2781cc0	Phillips 66	convenience		33.50632	-101.97400	9703 Upland Avenue	Lubbock	79423	+18065165809	https://www.phillips66gas.com/		1.00
 2df8ae106767	Phillips 66 Gas	convenience		33.43371	-101.65886	100 E Division St	Slaton	79364	+18068283511	https://www.phillips66gas.com/	Phillips 66 Gas	0.98
 7f5d261fb030	Phillips 66 Gas	convenience		33.19556	-101.37868	409 N Broadway St	Post	79356	+18064954146	https://www.phillips66gas.com/	Phillips 66 Gas	0.62
-f5556c485a48	Phillips 66 Gas	convenience		33.43431	-101.64172	100 E Division St	Slaton	79364	+18068283511	https://www.phillips66gas.com/	Phillips 66 Gas	0.92
 4b498109676c	Phillips 66 Terminal Lubbock, Texas	convenience		33.61232	-101.88148	3102 Clovis Rd	Lubbock	79415	+18067621305	http://www.phillips66.com/EN/products/business/asphalt/map/Pages/index.aspx		0.82
 0bcf90e503db	Pinki's Mini Mart	convenience		33.58511	-101.73212	1208 N FM 1729	Lubbock	79403	+18067621951	http://www.pinkiestexas.com		0.92
 188ced141d73	Pinkie's Mini Mart	convenience		33.50124	-101.84395		Lubbock	79423	+18067452934			0.71
@@ -947,7 +933,6 @@ f5556c485a48	Phillips 66 Gas	convenience		33.43431	-101.64172	100 E Division St	
 f095f45fcfc8	Pronto Mart	convenience		33.54901	-101.84047	502 50th St	Lubbock	79404	+18067650468	http://www.pronto.com	Pronto	1.00
 e697c60cdb0c	Quick 69	convenience		33.54900	-101.86216	2102 50th St	Lubbock	79412	+18067448495			0.97
 5e1bcb0444f4	Quick Mart	convenience		33.54078	-101.92701	6002 Slide Rd	Lubbock	79414	+18067971244	http://www.quikmartstores.com		0.66
-c603353cbe62	Quick Mart	convenience		33.53917	-101.92538	6002 Slide Rd	Lubbock	79414	+18067971244	http://www.quikmart.com/	Quick Mart	0.66
 869f634339b8	Quick Stop Grocery Beer and Wine	convenience		33.53985	-101.85325	5908 Avenue P	Lubbock	79412	+18066875945	http://kwikstop.org	Kwik Stop - Smoke & Vape Shop	0.92
 f313dde55c39	QUICK TRACK 48	convenience		33.66450	-101.68867	704 FRONTAGE RD	Idalou	79329			Conoco	0.80
 9fb63800d7cd	QUICK TRACK 65	convenience		33.50569	-101.88822	3402 98TH ST	Lubbock	79423			Conoco	0.80
@@ -1058,7 +1043,6 @@ a2393bd89ee0	UNITED EXPRESS 657	convenience		33.56559	-101.92240	114 TH STREET S
 6a05f74e9d4f	Valero	convenience		33.56363	-101.85506	3311 AVE Q	Lubbock	79411	+18067444179	https://locations.valero.com/en-us/LocationDetails/Index/3311-AVE-Q/0000021450	Valero Energy	0.95
 882ee695e054	Valero	convenience		33.54839	-101.86141	2017 50th St	Lubbock	79412	+18063171610	https://www.valero.com		0.92
 9abbf2876b83	Valero	convenience		33.54842	-101.92287	5002 Slide Rd	Lubbock	79414	+18067960473	https://www.valero.com		0.95
-d0fcd5509267	Valero	convenience		33.66038	-101.24346	502 W Main St	Crosbyton	79322	+18066752076	https://www.valero.com		0.65
 e93939fd1f84	Valero	convenience		33.53014	-101.82236	1129 SE LOOP 289	Lubbock	79404	+18068530546	https://locations.valero.com/en-us/LocationDetails/Index/1129-SE-LOOP-289/0000021458	Valero Energy	1.00
 f40d1644788d	Valero	convenience		33.55187	-101.83485	4609 Avenue A	Lubbock	79404	+12103452000	https://www.valero.com		0.65
 f862480ebe09	Valero	convenience		33.16685	-101.80032	1800 Lockwood St	Tahoka	79373	+12103452000	https://www.valero.com		0.65
@@ -1111,8 +1095,13 @@ cc36dc1b3695	Chick-fil-A	fastfood		33.57689	-101.89249	3615 19th St	Lubbock	7941
 0d1088c81f1d	Chicken Express	fastfood		33.52009	-101.96423	6720 82nd St # B-1	Lubbock	79424	+18067715226	http://www.chickenexpress.us/	Chicken Express	0.99
 96f5abec7c40	Chicken Express	fastfood		33.51999	-101.86752	2308 82nd St	Lubbock	79423	+18067485226	http://www.chickenexpress.us/	Chicken Express	0.99
 bd16ac6f65da	Chicken Express	fastfood		33.59336	-101.92306	210 Slide Rd	Lubbock	79416	+18067925226	http://www.chickenexpress.us/	Chicken Express	1.00
+0cf79c40a5f4	Chipotle Mexican Grill	fastfood	mexican restaurant	33.52349	-101.95653	7715 Milwaukee Ave	Lubbock	79424	+18068536508	https://locations.chipotle.com/tx/lubbock/7715-milwaukee-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4453	Chipotle Mexican Grill	0.99
+2b03e9630e6f	Chipotle Mexican Grill	fastfood	mexican restaurant	33.51846	-101.90348	8201 Quaker Ave	Lubbock	79424	+18067830211	https://locations.chipotle.com/tx/lubbock/8201-quaker-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D1606	Chipotle Mexican Grill	0.98
 2ba0f62d481a	Chipotle Mexican Grill	fastfood		33.48544	-101.90488	11909 Quaker Ave	Lubbock	79424	+18067584086	https://locations.chipotle.com/tx/lubbock/11909-quaker-ave?utm_source=bing&utm_medium=yext&utm_campaign=yext_listings		0.99
+47d80baf250c	Chipotle Mexican Grill	fastfood	mexican restaurant	33.58809	-101.86933	2411 Glenna Goodacre Blvd	Lubbock	79401	+18067444503	https://locations.chipotle.com/tx/lubbock/2411-glenna-goodacre-blvd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
+a020ab6f5e57	Chipotle Mexican Grill	fastfood	mexican restaurant	33.56738	-101.94487	2912 W Loop 289	Lubbock	79407	+18067840083	https://locations.chipotle.com/tx/lubbock/2912-w-loop-289?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
 271f63ad0fa0	Church's Chicken	fastfood		33.57830	-101.95544	6410 19th Street	Lubbock	79407	+18067916710	https://locations.churchs.com/tx/lubbock/6410-19th-street	Church's Chicken	0.98
+d6353a9839c6	Church's Chicken	fastfood		33.58475	-101.81788	1702 E Broadway	Lubbock	79403	+18067495235	http://churchs.com/		0.92
 d9c0e8367084	Church's Chicken	fastfood		33.58685	-101.85490	905 Avenue Q	Lubbock	79401	+18067471312	https://locations.churchs.com/tx/lubbock/905-avenue-q	Church's Chicken	0.99
 f5aed5de437e	Church's Texas Chicken	fastfood		33.54906	-101.85587	1702 S. 50th Street	Lubbock	79412	+18067495184	https://locations.churchs.com/tx/lubbock/1702-s.-50th-street	Church's Chicken	0.99
 52699bbaedc1	Cinnabon	fastfood		33.57745	-101.89558	3715 19th Street	Lubbock	79410		https://locations.cinnabon.com/tx/lubbock/3715-19th-street	Cinnabon	0.92
@@ -1125,6 +1114,16 @@ f5aed5de437e	Church's Texas Chicken	fastfood		33.54906	-101.85587	1702 S. 50th S
 a17df63bfbc8	Dairy Queen	fastfood		33.57317	-101.85496	2311 Ave Q 2311 Ave Q	Lubbock	79411	+18067449561	https://www.dairyqueen.com/en-us/locations/tx/lubbock/2311-ave-q/14376/?y_source=1_MjkzMzkwOTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 c72dd959f9f1	Dairy Queen	fastfood		33.53188	-101.86998	6925 University Ave 6925 University Ave	Lubbock	79413	+18067454434	https://www.dairyqueen.com/en-us/locations/tx/lubbock/6925-university-ave/14374/?y_source=1_MjkzMzkyODAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 73e192e2a747	Dixie Dog	fastfood		33.97868	-101.32993	410 E Houston St	Floydada	79235	+18069832222	https://dixie-dog-floydada.edan.io		0.95
+0d2192a4964f	Domino's	fastfood	pizza restaurant	33.59284	-101.81650	1708 Parkway Drive	Lubbock	79403	+18067418000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+595e0830c131	Domino's	fastfood	pizza restaurant	33.59209	-101.92654	5407 4th St Unit A	Lubbock	79416	+18067923816	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+666eefb4f6d0	Domino's	fastfood	pizza restaurant	33.54824	-101.86257	2113 50th St	Lubbock	79412	+18067628484	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+755512a643c8	Domino's	fastfood	pizza restaurant	33.59346	-101.87174	2510 Marsha Sharp Fwy.	Lubbock	79415	+18067633030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+a779900c12bb	Domino's	fastfood	pizza restaurant	33.51930	-101.98824	7611 82nd Street Ste 400	Lubbock	79424	+18062241914	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
+a9fc9cd2d69f	Domino's	fastfood	pizza restaurant	33.55122	-101.95629	4525 Milwaukee Ave Unit 300	Lubbock	79407	+18067014570	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+c79d77faffa9	Domino's	fastfood	pizza restaurant	33.51913	-101.94120	5815 82nd St Ste 135	Lubbock	79424	+18067945000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test_menutest	Domino's Pizza	0.98
+ca8c831ff88f	Domino's	fastfood	pizza restaurant	33.51490	-101.84340	8901 Hwy 87	Lubbock	79404	+18067497222	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
+fb91deee879b	Domino's	fastfood	pizza restaurant	33.56303	-101.91754	4921 34 St.	Lubbock	79410	+18067923030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+0a80eca7fe95	Domino's Pizza	fastfood	pizza restaurant	33.47278	-101.88828	13404 Indiana Ave	Lubbock	79424	+18067015700	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 392db316c2e2	DQ Grill & Chill	fastfood		33.57331	-101.85499	2311 Ave Q	Lubbock	79405		https://www.dairyqueen.com/en-us/locations/tx/lubbock/2311-ave-q/4149	DQ Grill & Chill	0.80
 881b94196004	DQ Grill & Chill	fastfood		33.52217	-101.92194	7813 Slide Rd	Lubbock	79424		https://www.dairyqueen.com/en-us/locations/tx/lubbock/7813-slide-rd/1698	DQ Grill & Chill	0.80
 9c13a37287d8	DQ Grill & Chill	fastfood		33.83380	-101.84164	1005 W Service Rd	Abernathy	79311		https://www.dairyqueen.com/en-us/locations/tx/abernathy/1005-w-service-rd/2520	DQ Grill & Chill	0.80
@@ -1134,19 +1133,44 @@ e9118420c745	DQ Grill & Chill	fastfood		33.97839	-101.34067	411 W Houston St	Flo
 f2fdf3cd3e0d	DQ Grill & Chill	fastfood		33.52047	-101.88714	8103 Indiana Ave	Lubbock	79423		https://www.dairyqueen.com/en-us/locations/tx/lubbock/8103-indiana-ave/4148	DQ Grill & Chill	0.80
 d329f4b072c1	El Pollo Loco	fastfood		33.52856	-101.90699	7102 Quaker Ave	Lubbock	79424			El Pollo Loco	0.89
 a4ede0775724	Fazoli's	fastfood		33.52004	-101.90021	4008 82nd St	Lubbock	79423	+18067854554	https://fazolis.com/stores/tx-lubbock-4008-82nd-street-79423/?utm_source=yext&utm_medium=local&utm_campaign=website&y_source=1_MzExNzA1OS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Fazoli's	0.99
+3d7a9015916f	Firehouse Subs	fastfood	sandwich shop	33.50398	-101.92300	9810 Slide Rd	Lubbock	79424	+18067028251	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1437	Firehouse Subs	0.99
+de63def84e80	Firehouse Subs	fastfood	sandwich shop	33.59335	-101.87167	2510 Marsha Sharp Fwy	Lubbock	79415	+18067479600	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=489	Firehouse Subs	0.98
+f21c8e70ccf6	Firehouse Subs	fastfood	sandwich shop	33.54533	-101.95565	5027 Milwaukee Ave	Lubbock	79407	+18067991098	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=701	Firehouse Subs	0.98
 51dc798f24e0	Five Guys	fastfood		33.54902	-101.94805	6076 Marsha Sharp Fwy	Lubbock	79407	+18067714897	https://www.fiveguys.com		0.75
+3021604cd9da	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	33.52171	-101.95744	7732 Milwaukee Ave	Lubbock	79424	+18067830285	https://www.freddys.com/location/lubbock-milwaukee-ave-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
+f2c38fda5636	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	33.57810	-101.95131	6208 19th St	Lubbock	79407	+18067015349	https://www.freddys.com/location/lubbock-19th-st-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 51a9b28c7d92	Golden Chick	fastfood		33.51630	-101.95532	6315 82nd St	Lubbock	79424	+18064075097	https://locations.goldenchick.com/tx/lubbock/1434/	Golden Chick	0.99
+177b31f29259	Jack in the Box	fastfood	taco restaurant	33.50562	-101.92186	5110 98th St	Lubbock	79424	+18067945222	http://www.jackinthebox.com/locations/4815		0.92
 2b9e460292f9	Jack in the Box	fastfood		33.59273	-101.92301	5212 4th St	Lubbock	79416	+18067926800	http://www.jackinthebox.com/locations/4821		0.92
 fe55849d10d4	Jack in the Box	fastfood		33.59036	-101.87025	2414 Mac Davis Ln	Lubbock	79401	+18067679700	http://www.jackinthebox.com/locations/4822		0.92
+4b679b4734f1	Jersey Mike's	fastfood	sandwich shop	33.49032	-101.92061	11417 Slide Road Suite 150	Lubbock	79424	+18065893822	https://www.jerseymikes.com/15231/lubbock-tx	Jersey Mike's Subs	0.98
+815ae85ede03	Jersey Mike's	fastfood	sandwich shop	33.51918	-101.95640	6319 82nd Street Suite #300	Lubbock	79424	+18063685691	https://www.jerseymikes.com/15065/lubbock-tx	Jersey Mike's Subs	0.99
+c22921c49159	Jersey Mike's	fastfood	sandwich shop	33.57754	-101.89532	3711 19th Street	Lubbock	79410	+18065774558	https://www.jerseymikes.com/15258/lubbock-tx	Jersey Mike's Subs	0.92
+0c4bead6a9d9	Jimmy John's	fastfood	sandwich shop	33.54903	-101.92284	4730 Slide Rd	Lubbock	79414	+18067950800	https://locations.jimmyjohns.com/tx/lubbock/sandwiches-1117.html	Jimmy John's	0.99
+3345fc9e52b4	Jimmy John's	fastfood	sandwich shop	33.58434	-101.86948	2413 Broadway	Lubbock	79401	+18067400002	https://locations.jimmyjohns.com/tx/lubbock/sandwiches-824.html	Jimmy John's	0.99
 5dc264cc4b8b	Jimmy John's	fastfood		33.48787	-101.90419	11435 Quaker Ave Ste 100	Lubbock	79423	+18064075625	https://locations.jimmyjohns.com/tx/lubbock/sandwiches-4382.html		0.96
 06a53b5e18f4	KFC	fastfood		33.57737	-101.95560	6411 19th St	Lubbock	79407	+18067850400	https://locations.kfc.com/tx/lubbock/6411-19th-street	KFC	0.99
 1ded7ca15adf	KFC	fastfood		33.52126	-101.92200	7823 Slide Road	Lubbock	79424	+18067947655	https://locations.kfc.com/tx/lubbock/7823-slide-road	KFC	0.96
 1f2dfcbc3301	KFC	fastfood		33.57782	-101.86380	2219 19th St	Lubbock	79401	+18067449610	http://www.kfc.com/storelocator/Default.aspx?address=2219%2019th%20Street,Lubbock,TX		0.92
+af99528d805e	KFC	fastfood	chicken restaurant	33.54800	-101.92290	5004 Slide Road	Lubbock	79414	+18063701101	https://locations.kfc.com/tx/lubbock/5004-slide-road		0.97
+c1da5fd0fabc	KFC	fastfood	chicken restaurant	33.51933	-101.98697	7601 82nd Street	Lubbock	79424	+18067718888	https://locations.kfc.com/tx/lubbock/7601-82nd-street		0.96
+d7942fd302da	Kfc	fastfood	chicken restaurant	33.52219	-101.87083	7902 University Ave	Lubbock	79423	+18066862919	https://www.kfc.com		1.00
 da5a89e8a15f	KFC	fastfood		33.59499	-101.87017	215 University Avenue	Lubbock	79415	+18066862923	https://locations.kfc.com/tx/lubbock/215-university-avenue	KFC	0.99
 f6253e876ec8	KFC	fastfood		33.54903	-101.84730	1208 50th Street	Lubbock	79412	+18067475656	https://locations.kfc.com/tx/lubbock/1208-50th-street	KFC	0.99
 9af65663efdf	Leticias Piglet Kitchen	fastfood		33.56403	-101.86435	2213 33rd St	Lubbock	79411				0.76
+335f66a9a76f	Little Caesars	fastfood	pizza restaurant	33.57808	-101.86681	2312 19th St	Lubbock	79401	+18067714682	https://littlecaesars.com/en-us/store/121	Little Caesars	1.00
+63b392990b2e	Little Caesars	fastfood	pizza restaurant	33.59976	-101.87106	2508 Auburn St	Lubbock	79415	+18067028275	https://littlecaesars.com/en-us/store/12064	Little Caesars	0.97
+7bd260f70ebe	Little Caesars	fastfood	pizza restaurant	33.51924	-101.92332	5217 82 Nd St	Lubbock	79424	+18069930222	https://littlecaesars.com/en-us/store/12163	Little Caesars	0.99
+19dd26263c10	Little Caesars Pizza	fastfood	pizza restaurant	33.59103	-101.93861	417 Frankford Ave #100a	Lubbock	79416	+18067714681	https://littlecaesars.com/en-us/store/7990	Little Caesars	0.99
+354925209e5d	Little Caesars Pizza	fastfood	pizza restaurant	33.52789	-101.86987	7301 University Ave Ste 600	Lubbock	79423	+18067714688	https://littlecaesars.com/en-us/store/7729	Little Caesars	0.99
+ccfca0543239	Little Caesars Pizza	fastfood	pizza restaurant	33.54826	-101.90649	4423 50th St	Lubbock	79414	+18066878100	https://littlecaesars.com/en-us/store/9647	Little Caesars	0.99
 0fff197ffbcb	Long John Silver's	fastfood		33.59265	-101.92532	5402 4th St	Lubbock	79416	+18067927960	https://www.ljsilvers.com/?y_source=1_MTc1NzI4NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
+3be37be2e6b5	Long John Silver's	fastfood	seafood restaurant	33.57808	-101.86797	2344 19th St	Lubbock	79401	+18067657339	http://www.longjohnsilvers.com		0.92
 bdd0351b84a3	Long John Silver's	fastfood		33.54844	-101.84708	1101 50th St	Lubbock	79412	+18067631732	https://www.ljsilvers.com/?y_source=1_MTc1NzI4NjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
+efcf875ca25a	Long John Silver's	fastfood	seafood restaurant	33.52840	-101.88911	3415 S Loop 289	Lubbock	79423	+18067925017	http://www.ljsilvers.com/	Long John Silver's	0.60
+1ffa590c0d96	Lubbock - Milwaukee Ave - Drive Thru	fastfood	sandwich shop	33.53392	-101.95780	6616 Milwaukee Avenue	Lubbock	79424			Potbelly	0.80
+f1b265f882c9	Lubbock - Texas Tech	fastfood	sandwich shop	33.58751	-101.86868	2402 9th Street	Lubbock	79401			Potbelly	0.80
+e93bc1ca82d4	Lubbock South	fastfood		33.48546	-101.90428	11909 Quaker Ave	Lubbock	79424	+18067584086	https://locations.chipotle.com/tx/lubbock/11909-quaker-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4454	Chipotle Mexican Grill	0.95
 c7ec1c7586d5	Lubbock, Texas	fastfood		33.54473	-101.95537	5031 Milwaukee Avenue	Lubbock	79407		https://www.portillos.com/locations/lubbock/	Portillo's	0.80
 0ada90d8b70a	McDonald's	fastfood		33.53905	-101.92186	6007 Slide Rd	Lubbock	79414	+18067932959	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/6007-slide-rd/26420.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 0d2afd8b1930	McDonald's	fastfood		33.51919	-101.95832	6511 82nd Street	Lubbock	79424	+18067830898	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/6511-82nd-street/32375.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
@@ -1154,6 +1178,7 @@ c7ec1c7586d5	Lubbock, Texas	fastfood		33.54473	-101.95537	5031 Milwaukee Avenue	
 26e890ec3ac2	McDonald's	fastfood		33.47779	-101.88834	12806 Indiana Ave	Lubbock	79423	+18064450333	http://www.mcdonalds.com/?cid=RF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 285f0df291cb	McDonald's	fastfood		33.50492	-101.90314	4220 98th Street	Lubbock	79423	+18066986734	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/4220-98th-street/35081.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
 3153ec78e3d7	McDonald's	fastfood		33.56267	-101.90495	3403 Quaker Ave	Lubbock	79413	+18067993434	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/3403-quaker-ave/38736.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
+359ffe76d657	McDonald's	fastfood	burger restaurant	33.61661	-101.84274	1710 Amarillo Service Rd	Lubbock	79403		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 42714195cfd3	McDonald's	fastfood		33.19121	-101.37783	102 N Broadway	Post	79356	+18064950495	https://www.mcdonalds.com/us/en-us/location/tx/post/102-n-broadway/25155.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 440b3cb5550f	McDonald's	fastfood		33.59811	-101.86997	102 N University	Lubbock	79410	+18067400662	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/102-n-university/18382.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 653f153b8030	McDonald's	fastfood		33.59024	-101.85854	1911 4th St (Walmart #3826)	Lubbock	79401	+18067443002	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/1911-4th-st/31504.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
@@ -1167,20 +1192,50 @@ c7ec1c7586d5	Lubbock, Texas	fastfood		33.54473	-101.95537	5031 Milwaukee Avenue	
 9080a787ed78	McDonald's	fastfood		33.54829	-101.84611	5010 Interstate 27	Lubbock	79404	+18067435200	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/5010-interstate-27/26903.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 90b38226731f	McDonald's	fastfood		33.57726	-101.94717	6001 W 19th St	Lubbock	79407	+18067970422	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/6001-w-19th-st/7511.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 e3302c1258b5	McDonald's	fastfood		33.52004	-101.92187	8011 Slide Rd	Lubbock	79424	+18067942089	https://www.mcdonalds.com/us/en-us/location/tx/lubbock/8011-slide-rd/14468.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+9a43ab6124a0	Panda Express	fastfood	pan asian restaurant	33.59183	-101.92979	5806 19th St.	Lubbock	79407	+18068103966	https://www.pandaexpress.com/locations/tx/lubbock/3690		0.92
+abb9e738d33c	Panda Express	fastfood	pan asian restaurant	33.57775	-101.94150	5806 19th St	Lubbock	79407	+18068103966	https://www.pandaexpress.com/locations/tx/lubbock/3690		0.97
 b631f56d8a2c	Panda Express	fastfood		33.51937	-101.95533	6311 82nd St #2 #2	Lubbock	79424	+18067830253	http://www.pandaexpress.com/	Panda Express México	0.99
+b8bda918f778	Panda Express	fastfood	chinese restaurant	33.48982	-101.90448	11411 Quaker Ave	Lubbock	79424	+18067830280	http://www.pandaexpress.com/	Panda Express México	0.92
 dd86131175c5	Panda Express	fastfood		33.59343	-101.87001	313 University Ave	Lubbock	79415	+18067441999	http://www.pandaexpress.com/	Panda Express México	0.99
+4b700b682104	Papa Johns	fastfood	pizza restaurant	33.51896	-101.94368	5905 82nd St	Lubbock	79424	+18067987272	https://locations.papajohns.com/united-states/tx/79424/lubbock/5905-82nd-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+ae6abdcdee69	Papa Johns	fastfood	pizza restaurant	33.58755	-101.87015	2420 9th street	Lubbock	79401	+18067497272	https://locations.papajohns.com/united-states/tx/79401/lubbock/2420-9th-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	1.00
+30524b9d7323	Papa Johns Pizza	fastfood	pizza restaurant	33.59121	-101.92165	405 Slide Rd Ste 108	Lubbock	79416	+18067977272	https://locations.papajohns.com/united-states/tx/79416/lubbock/405-slide-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.95
+3d535eba4372	Papa Johns Pizza	fastfood	pizza restaurant	33.58771	-101.87012	2420 9th St	Lubbock	79401	+18067497272	https://www.papajohns.com		0.98
+11c510999f0b	Pizza Hut	fastfood	pizza restaurant	33.54834	-101.87928	3001 50th Street Lubbock	Lubbock	79412	+18067498200	https://locations.pizzahut.com/tx/lubbock/3001-50th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303055	Pizza Hut	0.99
+1cf77c8ef3fa	Pizza Hut	fastfood	pizza restaurant	33.59373	-101.93906	305 Frankford Ave	Lubbock	79416	+18067990090	https://locations.pizzahut.com/tx/lubbock/305-frankford-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306936	Pizza Hut	0.98
+27dd06123a75	Pizza Hut	fastfood	pizza restaurant	33.48610	-101.88801	11814 S Indiana Ave. Lubbock	Lubbock	79423	+18069937700	https://locations.pizzahut.com/tx/lubbock/11814-s-indiana-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312681	Pizza Hut	0.99
+5533c66c6b77	Pizza Hut	fastfood	pizza restaurant	33.59355	-101.81464	1824 Parkway Dr Lubbock	Lubbock	79403	+18067715570	https://locations.pizzahut.com/tx/lubbock/1824-parkway-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313225	Pizza Hut	0.98
+a019c917ed5c	Pizza Hut	fastfood	pizza restaurant	33.54403	-101.92358	5412 Slide Rd Lubbock	Lubbock	79414	+18067970700	https://locations.pizzahut.com/tx/lubbock/5412-slide-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314067	Pizza Hut	0.97
+b3a0c3248f4c	Pizza Hut	fastfood	pizza restaurant	33.18676	-101.37801	402 S. Broadway Garza	Post	79356	+18064952844	https://locations.pizzahut.com/tx/post/402-s-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296728	Pizza Hut	0.99
+b7ecd1a08c4f	Pizza Hut	fastfood	pizza restaurant	33.50484	-101.88535	3301 98th Street Lubbock	Lubbock	79423	+18067970007	https://locations.pizzahut.com/tx/lubbock/3301-98th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311856	Pizza Hut	0.99
+b9bc12f65fff	Pizza Hut	fastfood	pizza restaurant	33.51922	-101.99264	7907 82nd St	Wolfforth	79382	+18068333333	https://locations.pizzahut.com/tx/wolfforth/7907-82nd-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300830	Pizza Hut	0.92
+f4d9e1b79f95	Pizza Hut	fastfood	pizza restaurant	33.57693	-101.90557	1910 Quaker Ave. Lubbock	Lubbock	79407	+18067929922	https://locations.pizzahut.com/tx/lubbock/1910-quaker-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309257	Pizza Hut	0.99
+f7d2de58c735	Pizza Hut	fastfood	pizza restaurant	33.50163	-101.92274	9830 Slide Rd Lubbock	Lubbock	79424	+18067949100	https://locations.pizzahut.com/tx/lubbock/9830-slide-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311851	Pizza Hut	0.96
+fafa5dd316f2	Pizza Hut	fastfood	pizza restaurant	33.43369	-101.66014	1535 W Division St Lubbock	Slaton	79364	+18068285888	https://locations.pizzahut.com/tx/slaton/1535-w-division-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297490	Pizza Hut	0.99
+3d4cfc688250	Pizza Hut Express	fastfood	pizza restaurant	33.58153	-101.87477	15th Street & Akron Avenue, Texas Tech University - Student Union Building	Lubbock	79409		https://locations.pizzahut.com/tx/lubbock/15th-street-&-akron-avenue		0.99
+b245d0ba9225	Pizza Hut Express	fastfood	pizza restaurant	33.51788	-101.87285	2535 82nd Street, Tinseltown Lubbock #233	Lubbock	79423		https://locations.pizzahut.com/tx/lubbock/2535-82nd-street		0.97
+e76ce096198c	Pizza Hut Express	fastfood	pizza restaurant	33.65653	-101.82242	5401 N Mlk Blvd	Lubbock	79403	+18067638278			0.85
 f3c5d5cdab2f	Pizza Hut Express	fastfood		33.54800	-101.95322	6064 Brownfield Rd	Lubbock	79407		https://locations.pizzahut.com/tx/lubbock/6064-brownfield-rd	Pizza Hut	0.96
 f7c82596ec91	Pizza Hut Express	fastfood		33.52829	-101.87299	7302 University Ave	Lubbock	79423		https://locations.pizzahut.com/tx/lubbock/7302-university-ave	Pizza Hut	0.80
-a4319c6113c4	Pizza Takeout & Delivery	fastfood		33.51909	-101.88719					https://locations.papamurphys.com/tx/lubbock/8205-indiana-avenue	Papa Murphy's	0.80
+7389bfcdf3b2	Pizza Hut Of Clovis, Inc	fastfood		33.52734	-101.88954	3415 73rd St	Lubbock	79423				0.95
+e5907a4423e7	Pizza Hut Of Levelland, Inc	fastfood		33.52734	-101.88954	3415 73rd St	Lubbock	79423				0.95
 3a777382b671	Popeyes	fastfood		33.52343	-101.95761	7714 Milwaukee Avenue	Lubbock	79424	+18064075008	https://www.popeyes.com/store-locator/store/restaurant_85078	Popeyes Louisiana Kitchen	1.00
 5d29bc97f5d2	Popeyes	fastfood		33.51937	-101.87143	2505 82nd St	Lubbock	79423	+18063706660	https://www.popeyes.com/store-locator/store/restaurant_83255	Popeyes Louisiana Kitchen	0.99
 9fa9e29556b5	Popeyes	fastfood		33.59455	-101.87074	224 University Ave	Lubbock	79415	+18066878193	https://www.popeyes.com/store-locator/store/restaurant_83824	Popeyes Louisiana Kitchen	0.99
+94da37e263c6	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	33.54761	-101.92294	51st and slide	Lubbock	79414	+18067991127	https://popeyes.com		0.77
 3c30e79a45e1	Potato Corner	fastfood		33.53938	-101.92548	6002 Slide Rd	Lubbock	79414	+18067806711	https://www.potatocornerusa.com		0.93
+ac2bcaff646f	Potbelly	fastfood	sandwich shop	33.53340	-101.95774	6616 Milwaukee Ave #900	Lubbock	79424	+18066874635	https://www.potbelly.com/locations/texas/lubbock-milwaukee-ave-drive-thru	Potbelly Sandwich Shop	0.98
+ad915750a176	Potbelly	fastfood	sandwich shop	33.58760	-101.86864	2402 9th St	Lubbock	79401	+18067475667	https://www.potbelly.com/locations/texas/lubbock-texas-tech	Potbelly Sandwich Shop	0.99
+9d35ed8a7c9b	Quiznos	fastfood	sandwich shop	33.57814	-101.86665	2312 19th St	Lubbock	79401	+18067717827	http://www.quiznos.com		0.92
 855838c6f8a9	Raising Cane's	fastfood		33.59257	-101.93497	5702 4th Street	Lubbock	79416	+18067881588	https://locations.raisingcanes.com/tx/lubbock/5702-4th-street	Raising Cane's Chicken Fingers	0.99
 b772d25c0de2	Raising Cane's	fastfood		33.58685	-101.87019	907 University Ave.	Lubbock	79401	+18067448552	https://locations.raisingcanes.com/tx/lubbock/907-university-ave.	Raising Cane's Chicken Fingers	0.99
 c15420eb0279	Raising Cane's	fastfood		33.54219	-101.92311	5203 57th st.	Lubbock	79414	+18067840572	https://locations.raisingcanes.com/tx/lubbock/5203-57th-st.	Raising Cane's Chicken Fingers	0.99
 d42bc0edbb27	Raising Cane's	fastfood		33.51946	-101.87758	2725 82nd Street	Lubbock	79423	+18064450213	https://locations.raisingcanes.com/tx/lubbock/2725-82nd-street	Raising Cane's Chicken Fingers	0.99
 9c99e41a4229	Raising Cane's Chicken Fingers	fastfood		33.58215	-101.84937	907 University Ave	Lubbock	79401	+18067448552	http://raisingcanes.com/		0.85
+344400a6d5b1	Schlotzsky's	fastfood	sandwich shop	33.52009	-101.96496	6804 82nd St	Lubbock	79424	+18067014960	https://locations.schlotzskys.com/tx/lubbock/6804-82nd-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
+6abd44e8c176	Schlotzsky's	fastfood	sandwich shop	33.54651	-101.92300	5204 Slide Rd	Lubbock	79414	+18067931233	https://www.schlotzskys.com/texas/lubbock/1176		0.94
+88d77a7105ad	Schlotzsky's	fastfood	sandwich shop	33.57763	-101.89560	3715 19th St	Lubbock	79410	+18067935542	https://locations.schlotzskys.com/tx/lubbock/3715-19th-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
+d8af5115a4a3	Schlotzsky's	fastfood	sandwich shop	33.52101	-101.88774	8101 Indiana Ave	Lubbock	79423	+18067923396	http://www.schlotzskys.com/lubbock/1179/home		0.99
 116391cc0d83	Sonic Drive In	fastfood		33.59186	-101.90554	4401 4Th Street	Lubbock	79416	+18067710117	https://locations.sonicdrivein.com/tx/lubbock/4401-4th-street.html	Sonic Drive-In	0.99
 3d6b0b3cc82e	Sonic Drive In	fastfood		33.53548	-101.94025	5802 64Th Street	Lubbock	79424	+18066876928	https://locations.sonicdrivein.com/tx/lubbock/5802-64th-street.html	Sonic Drive-In	0.99
 4275824af538	Sonic Drive In	fastfood		33.54977	-101.88809	4904 Indiana Avenue	Lubbock	79413	+18067996633	https://locations.sonicdrivein.com/tx/lubbock/4904-indiana-avenue.html	Sonic Drive-In	0.99
@@ -1201,14 +1256,39 @@ e2d657dbc997	Sonic Drive In	fastfood		33.57731	-101.95629	6419 W. 19TH STREET	Lu
 e7199173a50c	Sonic Drive In	fastfood		33.50068	-101.92164	10109 Slide Road	Lubbock	79424	+18069930500	https://locations.sonicdrivein.com/tx/lubbock/10109-slide-road.html	Sonic Drive-In	0.96
 e9139d4344a8	Sonic Drive In	fastfood		33.56278	-101.85762	1901 34Th Street and Avenue S	Lubbock	79412	+18067656415	https://locations.sonicdrivein.com/tx/lubbock/1901-34th-street-and-avenue-s.html	Sonic Drive-In	0.99
 f8fce67f465e	Sonic Drive In	fastfood		33.59805	-101.87069	101 N University Ave	Lubbock	79415	+18067492414	https://locations.sonicdrivein.com/tx/lubbock/101-n-university-ave.html	Sonic Drive-In	0.98
+6d198ac72315	Sonic Drive-In	fastfood	burger restaurant	33.57779	-101.84032	6419 W 19th St	Lubbock	79407	+18067804555	https://locations.sonicdrivein.com/tx/lubbock/6419-w.-19th-street.html		0.85
 8624cf38a549	Sonic Drive-In	fastfood		33.43436	-101.64297	400 S 9th St	Slaton	79364	+18068286556	http://sonicdrivein.com/		0.92
+9a688ec04aad	Sonic Drive-In	fastfood	burger restaurant	33.61583	-101.81852	1609 Martin Luther King Blvd	Lubbock	79403	+18066873428	https://locations.sonicdrivein.com/tx/lubbock/1609-martin-luther-king-blvd.html		0.85
+1cdc6f464200	Subway	fastfood	sandwich shop	33.57759	-101.95307	6301 19th Street	Lubbock	79407	+18066875071	https://restaurants.subway.com/united-states/tx/lubbock/6301-19th-street	Subway	0.98
+26392ca398d5	Subway	fastfood	sandwich shop	33.59264	-101.94131	5816 4th St	Lubbock	79416	+18067910991	https://restaurants.subway.com/united-states/tx/lubbock/5816-4th-st	Subway	0.98
+2ffed732161c	Subway	fastfood	sandwich shop	33.51657	-101.95539	6315 82nd St	Lubbock	79424	+18067717934	https://alibabacharleston.com		0.90
+31f777bbae3b	Subway	fastfood	sandwich shop	33.47591	-101.84370	13001 Highway 87	Lubbock	79423	+18067453023	https://alibabacharleston.com		0.55
+3bdd1addeccd	Subway	fastfood	sandwich shop	33.50597	-101.92417	5214 98th Street Suite 105	Lubbock	79424	+18067830155	https://restaurants.subway.com/united-states/tx/lubbock/5214-98th-street	Subway	0.95
+46de7cc40907	Subway	fastfood	sandwich shop	33.64227	-101.83715	4221 N Interstate 27	Lubbock	79403	+18067441531	https://restaurants.subway.com/united-states/tx/lubbock/4221-north-interstate-27	Subway	0.95
 4c0f2e2042c0	Subway	fastfood		33.16600	-101.79491	1405 Lockwood St	Tahoka	79373	+18069985452	https://restaurants.subway.com/united-states/tx/tahoka/1405-lockwood-rd	Subway	0.96
+4d497ebb06d9	Subway	fastfood	sandwich shop	33.98501	-101.34135	102 S 2nd St	Floydada	79235	+18069835941	https://restaurants.subway.com/united-states/tx/floydada/102-s-2nd-st	Subway	0.98
+4e64de51c699	Subway	fastfood	sandwich shop	33.56391	-101.85558	3302 Ave Q Suite 1	Lubbock	79411	+18066874114	https://restaurants.subway.com/united-states/tx/lubbock/3302-ave-q	Subway	0.98
+4fffa4f6c35e	Subway	fastfood	sandwich shop	33.54906	-101.90670	4412 50th St Suite B	Lubbock	79414	+18067960581	https://restaurants.subway.com/united-states/tx/lubbock/4412-50th-st	Subway	0.98
+6b60f4854859	Subway	fastfood	sandwich shop	33.66442	-101.68883	708 Frontage Rd	Idalou	79329	+18068923314	https://www.subway.com		0.92
+6bbc90164788	Subway	fastfood	sandwich shop	33.56297	-101.91795	4923 34th St	Lubbock	79410	+18067923252	https://restaurants.subway.com/united-states/tx/lubbock/4923-34th-st	Subway	0.96
+797ae9cdca80	Subway	fastfood	sandwich shop	33.58584	-101.92283	1018 Slide Road Suite A	Lubbock	79416	+18066872692	https://restaurants.subway.com/united-states/tx/lubbock/1018-slide-road	Subway	0.99
+8ecc69df6ea7	Subway	fastfood	sandwich shop	33.53635	-101.94018	6302 Frankford Ave	Lubbock	79424	+18066875275	https://restaurants.subway.com/united-states/tx/lubbock/6302-frankford-ave	Subway	0.95
+b726c519ffe4	Subway	fastfood	sandwich shop	33.54778	-101.87009	5015 University Ave Suite A-2	Lubbock	79413	+18067939650	https://restaurants.subway.com/united-states/tx/lubbock/5015-university-ave	Subway	0.97
+b80d6facac2b	Subway	fastfood	sandwich shop	33.49078	-101.90669	4414 114th St	Lubbock	79424	+18069027311	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72256&utm_campaign=evergreen-2020&y_source=1_MTAxODk5MTAzOC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
+c5e54061373f	Subway	fastfood	sandwich shop	33.59480	-101.87085	216 University Avenue, Suite 200	Lubbock	79415	+18064075370	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71727&utm_campaign=evergreen-2020&y_source=1_Njk5MTIzMDYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
+e1f3ec298331	Subway	fastfood	sandwich shop	33.51930	-101.96420	6819 82nd St	Lubbock	79424			Subway	0.80
+f208b259e0f1	Subway	fastfood	sandwich shop	33.51958	-101.87265	2515 82nd St	Lubbock	79423	+18067486794	https://restaurants.subway.com/united-states/tx/lubbock/2515-82nd-st	Subway	0.97
+f2c56b00e03b	Subway	fastfood	sandwich shop	33.19768	-101.37817	612 N Broadway St	Post	79356	+18064954186	https://restaurants.subway.com/united-states/tx/post/612-broadway-rd	Subway	0.97
+f808534d0216	Subway	fastfood	sandwich shop	33.59314	-101.84097	602 4th Street	Lubbock	79401	+18067442486	https://restaurants.subway.com/united-states/tx/lubbock/602-4th-street?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50360&utm_campaign=evergreen-2020&y_source=1_MTQ5MTMxMTQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+f86ca4f96343	Subway	fastfood	sandwich shop	33.58509	-101.87036	1109 University Ave	Lubbock	79401	+18067013875	https://www.subway.com		0.97
+f9565e848526	Subway	fastfood	sandwich shop	33.73664	-101.84225	70 S Aspen Ave	New Deal	79350	+18156558352	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72418&utm_campaign=evergreen-2020&y_source=1_MTAxMzU0MDkzMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 0211e0da413b	Taco Bell	fastfood		33.52030	-101.87001	2408 82nd Street	Lubbock	79423	+18069935035	http://www.tacobell.com/	Taco Bell	0.99
 4f67a364a8b6	Taco Bell	fastfood		33.59205	-101.85569	402 Avenue Q	Lubbock	79401	+18069935076	http://www.tacobell.com/	Taco Bell	0.99
 501eab973931	Taco Bell	fastfood		33.54914	-101.91779	4928 50th St	Lubbock	79414	+18067713133			0.92
 8336020246b6	Taco Bell	fastfood		33.54721	-101.95747	5010 Milwaukee Ave	Lubbock	79407	+18069930038	https://locations.tacobell.com/tx/lubbock/5010-milwaukee-ave.html	Taco Bell	0.97
 93762b7ed203	Taco Bell	fastfood		33.59196	-101.93878	5713 Fourth Street	Lubbock	79416	+18066871157	https://locations.tacobell.com/tx/lubbock/5713-fourth-street.html	Taco Bell	0.99
 cc4ab672917b	Taco Bell	fastfood		33.50475	-101.92272	9832 Slide Rd	Lubbock	79424	+18067987513	http://www.tacobell.com/	Taco Bell	0.97
+cfa6068681f7	Taco Bell	fastfood	taco restaurant	33.51973	-101.92109	5111 82nd St	Lubbock	79424	+18067987513			0.92
 dae72980b102	Taco Bell	fastfood		33.54946	-101.91121	4618 50th St	Lubbock	79414	+18063706155	https://locations.tacobell.com/tx/lubbock/4618-50th-st.html	Taco Bell	0.99
 df4e9b637e2c	Taco Bell	fastfood		33.52016	-101.95840	6512 82nd St	Lubbock	79424	+18066980709	http://www.tacobell.com/	Taco Bell	0.99
 f99176056d9e	Taco Bell	fastfood		33.54814	-101.85814	1905 50th St	Lubbock	79412	+18069932000			1.00
@@ -1220,12 +1300,13 @@ fc7c7e63fda8	Tenderfix By Noah Schnapp	fastfood		33.57855	-101.87024	1627 Univer
 8aac1d96507c	The Little Blue Trailer	fastfood		33.54749	-101.89394	3701 50th St	Lubbock	79413	+18064737374			0.93
 fced02bbbf00	Weinerschnitzel west 4th Lubbock tx	fastfood		33.59320	-101.93387		Lubbock					0.71
 0ed05da4ee3e	Wendy's	fastfood		33.59534	-101.87096	212 University Ave	Lubbock	79415	+18063709120	https://locations.wendys.com/united-states/tx/lubbock/212-university-ave	Wendy's	0.99
-392e85854ce1	Wendy's	fastfood		33.50467	-101.92110	5111 98th St	Lubbock	79424	+18065032549	https://www.wendys.com		0.95
 5b3266ef9c41	Wendy's	fastfood		33.50521	-101.92113	5111 98th St	Lubbock	79424	+18065032549	https://locations.wendys.com/united-states/tx/lubbock/5111-98th-st		0.99
 78eaad3ad4cf	Wendy's	fastfood		33.52996	-101.81173	2171 E Slaton Road	Lubbock	79404	+18069027336	https://locations.wendys.com/united-states/tx/lubbock/2171-e-slaton-road	Wendy's	1.00
 91b27ed11d17	Wendy's	fastfood		33.52866	-101.87112	2505 S Loop 289	Lubbock	79423	+18065033459	https://locations.wendys.com/united-states/tx/lubbock/2505-s-loop-289	Wendy's	0.99
+9f6d2ac0f719	Wendy's	fastfood	burger restaurant	33.54623	-101.92306	5212 Slide Rd	Lubbock	79414	+18067998855			0.92
 a6a929c0d35b	Wendy's	fastfood		33.59189	-101.93936	5721 4th St	Lubbock	79416	+18065032531	https://locations.wendys.com/united-states/tx/lubbock/5721-4th-st	Wendy's	0.99
 c0ae5715c461	Wendy's	fastfood		33.72385	-101.84148	70 S Aspen Ave	Lubbock	79403	+18064167862	http://www.wendys.com		0.96
+f53d3b63eece	Wendy's	fastfood	burger restaurant	33.57746	-101.86768	2401 19th St	Lubbock	79401	+18067410955			0.97
 f9db1baa7af6	Wendy's	fastfood		33.53030	-101.95652	6815 Milwaukee Ave	Lubbock	79424	+18065032529	https://locations.wendys.com/united-states/tx/lubbock/6815-milwaukee-avenue	Wendy's	0.99
 ef631fd20736	West Loop 289	fastfood		33.57708	-101.94669	1902 West Loop 289	Lubbock	79407		https://fazolis.com/stores/tx-lubbock-1902-west-loop-289-79407/	Fazoli's	0.80
 19fc332c4c03	Whataburger	fastfood		33.52793	-101.90545	7201 QUAKER AVE	Lubbock	79424	+18067840190	http://whataburger.com/	Whataburger	0.99
@@ -1235,7 +1316,6 @@ ef631fd20736	West Loop 289	fastfood		33.57708	-101.94669	1902 West Loop 289	Lubb
 99f0425c302f	Whataburger	fastfood		33.57814	-101.85574	1702 19th St	Lubbock	79401	+18067475622	https://www.whataburger.com		1.00
 b0425bc8cf3c	Whataburger	fastfood		33.51754	-101.87086	8226 UNIVERSITY AVE	Lubbock	79423	+18067488220	http://whataburger.com/	Whataburger	0.99
 bbbb59d3f537	Whataburger	fastfood		33.59269	-101.93359	5512 4TH ST	Lubbock	79416	+18067991955	https://locations.whataburger.com/tx/lubbock/5512-4th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-cb418e056c8f	Whataburger	fastfood		33.57800	-101.85574	1702 19TH ST	Lubbock	79401	+18067475622	https://locations.whataburger.com/tx/lubbock/1702-19th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
 dd3a863f58b4	Whataburger	fastfood		33.58757	-101.86929	2412 9TH ST	Lubbock	79401	+18067440528	https://locations.whataburger.com/tx/lubbock/2412-9th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 f41e2fbb251e	Whataburger	fastfood		33.54922	-101.91402	4802 50TH ST	Lubbock	79414	+18067922725	https://locations.whataburger.com/tx/lubbock/4802-50th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 dde68fa2bd25	Wienerschnitzel	fastfood		33.51914	-101.95674	6319 82nd St	Lubbock	79424	+18066981790	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
@@ -1243,7 +1323,9 @@ e22144783990	Wienerschnitzel	fastfood		33.59333	-101.93394	5510 4th St Ste 300	L
 e8dadf93f34a	Wienerschnitzel	fastfood		33.49041	-101.91142	4501 114th St., Suite 100	Lubbock	79424		https://www.wienerschnitzel.com/location/405-114th-street-richmond-ave-lubbock-4501-114th-street-lubbock-tx-79424/	Wienerschnitzel	0.80
 f0bf0fcbaf56	Wienerschnitzel	fastfood		33.56300	-101.90552	4401 34th St	Lubbock	79410	+18064075319	https://www.wienerschnitzel.com/location/880-34th-street-quaker-ave-lubbock-4401-34th-st-lubbock-tx-79410/	Wienerschnitzel	0.99
 f6ca8eeb1583	Wienerschnitzel	fastfood		33.54901	-101.84694	1202 50th St	Lubbock	79412	+18067448331	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
+5cbb2e6420f0	Wingstop	fastfood	chicken restaurant	33.48972	-101.90748	4409 114th St Suite100	Lubbock	79424	+18063106484	https://www.wingstop.com/location/wingstop-1911-lubbock-tx-79424/menu?y_source=1_NTUyMDcxOTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 6834eb306652	Wingstop	fastfood		33.53181	-101.92110	6807 Slide Rd	Lubbock	79424	+18067983226	https://www.wingstop.com/location/wingstop-63-lubbock-tx-79424/menu?y_source=1_NTUyMDczODAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+78270f611923	Wingstop	fastfood	chicken restaurant	33.58892	-101.85721	1803 7th St Ste 501	Lubbock	79401	+18067447675	https://www.wingstop.com/location/wingstop-341-lubbock-tx-79401/menu?y_source=1_NTUyMDY3MTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 9d20be567cf0	Wingstop	fastfood		33.53235	-101.92091	6807 Slide Rd Ste G	Lubbock	79424		https://www.wingstop.com/location/wingstop-63-lubbock-tx-79424/menu	Wingstop	0.80
 ed9b72f3a5dc	Wingstop	fastfood		33.59335	-101.93331	5510 4Th St Ste 220	Lubbock	79416	+18067881310	https://www.wingstop.com/location/wingstop-274-lubbock-tx-79416/menu?y_source=1_NTUyMDc0NDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 a469793b96e4	2 J's Thriftway	grocery		33.66211	-101.69411	902 Frontage Rd #2 PO Box 1056	Idalou	79329	+18068922503	https://thriftwayidalou.com/		1.00
@@ -1276,7 +1358,6 @@ c9cc478b7657	La Super Economica Meat Market	grocery		33.60067	-101.86406	2131 Cl
 79b24ba8c42c	Lakeside Grocery Lubbock TX	grocery		33.53654	-101.72762	6508 FM-835	Lubbock	79403	+18067490660	http://lakesidegrocery.com/		0.96
 4ab095d4e4d1	Lowe's	grocery		33.57677	-101.93885	5725 19th St	Lubbock	79407	+18067806745	http://www.lowes.com		0.92
 a2bbb1b6316a	Lowe's Market	grocery		33.98357	-101.34139	220 S 2nd St	Floydada	79235	+18069833149	http://www.lowesmarket.com/	Lowe's Market	0.92
-b5d4ea6b2409	Lowe's Market	grocery		33.95131	-101.20706	220 S 2nd St	Floydada	79235		https://www.lowesmarket.com/StoreLocator/Store/?L=6	Lowe's Market	0.80
 f43faace2c4f	Lowe's Market	grocery		33.82758	-101.84367	405 Ave D	Abernathy	79311	+18062982627	http://www.lowesmarket.com/	Lowe's Market	1.00
 d54ea1e68619	Lowe's Market #81	grocery		33.51789	-101.92323	8208 Slide Rd	Lubbock	79424	+18063853366			0.92
 d50c2b41bab1	Lubbock H-E-B	grocery		33.48904	-101.90611	4405 114TH STREET	Lubbock	79424		https://www.heb.com/heb-store/us/tx/lubbock/lubbock-h-e-b-772	H-E-B	0.98
@@ -1290,7 +1371,6 @@ bd62cba7edf7	Mirch Masala	grocery		33.56299	-101.87764	2815 34th St	Lubbock	7941
 99329dc03b0d	Oriental Market	grocery		33.54902	-101.90343	4220 50th St	Lubbock	79413	+18067880688	https://oriental-market-tx-3.hub.biz/		0.96
 d80f59b12b1b	Russell E. Womack, Inc.	grocery		33.55574	-101.82076	1300 E 42nd St	Lubbock	79404	+18067472581	https://www.casserolebean.com		0.92
 df3cd563dfea	Shameless Snacks	grocery		33.52081	-101.99796	1005 Cambridge Dr	Wolfforth	79382	+12147050310		Shameless Snacks	0.56
-869409e0990c	Sonik Mart	grocery		33.59616	-101.87093	120 N University Ave	Lubbock	79415				0.66
 aaa5558fc453	Sonik Mart	grocery		33.59932	-101.87027	120 N University Ave	Lubbock	79415				0.97
 c66f67f03dcc	Sungold Foods	grocery		33.53506	-101.82640	901 E 66th St	Lubbock	79404	+18067482500	http://redriv.com		0.78
 7f2b569babc0	Tahoka Thriftway	grocery		33.16615	-101.79957	1729 Lockwood St	Tahoka	79373	+18065614110	http://www.awginc.com		0.90
@@ -1300,7 +1380,6 @@ e76d26d7fc20	TD Ameritrade	grocery		33.52066	-101.90281	4210 82nd St Ste 216	Lub
 905abc14d56c	The Grocery Store	grocery		33.68888	-101.99985	701 Avenue F	Shallowater	79363	+18068324607			0.95
 148e5491acd2	United Express	grocery		33.51943	-101.87543	2703 82nd St	Lubbock	79423	+18067487192	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92
 1bd5b1e0428d	United Supermarkets	grocery		33.53984	-101.81753	5701 Martin L King Blvd	Lubbock	79404		http://www.unitedsupermarkets.com/	United Supermarket	0.85
-44be1d7b847c	United Supermarkets	grocery		33.59164	-101.92120	401 Slide Rd	Lubbock	79416	+18067960330	https://local.unitedsupermarkets.com/tx/lubbock/401-slide-rd.html		0.97
 48b67893f1b3	United Supermarkets	grocery		33.58483	-101.84989	1318 Broadway	Lubbock	79401	+18067639999	http://www.unitedsupermarkets.com/	United Supermarket	0.64
 69ea7d45a4d6	United Supermarkets	grocery		33.51865	-101.87517	2703 82nd St	Lubbock	79423	+18067454443	https://local.unitedsupermarkets.com/tx/lubbock/2703-82nd-st.html	United Supermarkets	1.00
 6c03a02e86b4	United Supermarkets	grocery		33.53994	-101.81637	5801 Martin Luther King Jr Blvd	Lubbock	79404	+18064725900	http://www.unitedsupermarkets.com/	United Supermarkets	0.97
@@ -1326,7 +1405,6 @@ cdd2dad508d1	BritKare Home Medical	hospital		33.56273	-101.88924	3407 34th St	Lu
 9c30dec03d85	Caprock Hospital District	hospital		33.97731	-101.34971	901 W Crockett St	Floydada	79235				0.57
 b0a6e8670ca7	CMG Urgent Care	hospital		33.60747	-101.94098	611 N Frankford Ave	Lubbock	79416	+18067255480			0.89
 60801919ab76	Correctional Managed Health Care	hospital		33.52837	-101.88428	3223 S Loop 289	Lubbock	79423	+18067914433	http://www.ttuhsc.edu/som/cmhc		0.57
-9757172d9bf3	Covenant Children's Hematology And Oncology	hospital		33.57348	-101.90169	4102 24th St	Lubbock	79410				0.77
 da4a8807104b	Covenant Children's Hematology And Oncology	hospital		33.57342	-101.90182	4102 24th St	Lubbock	79410				0.78
 a7814176d28d	Covenant Children's Hospital	hospital		33.57365	-101.90011	4002 24th St	Lubbock	79410	+18067250000	http://www.covenantchildrens.org/	Covenant Health	1.00
 7ad88ace8ca6	Covenant Health System	hospital		33.57734	-101.89101	3525 19th St	Lubbock	79410	+18067256039			0.55
@@ -1372,8 +1450,6 @@ a2fe3e7ddbff	TTUHSC Pharmacy	hospital		33.58907	-101.89182	3601 4th St Rm 1B300	
 6ddbc1efcef3	UMC GI and Outpatient Services	hospital		33.50124	-101.90561	10206 Quaker Ave	Lubbock	79424	+18067610250	https://www.umchealthsystem.com/locations/umc-gi-and-outpatient-services/		0.99
 c001f3fa7593	Umc Health System	hospital		33.56067	-101.92610	5219 City Bank Pkwy	Lubbock	79407	+18067222021	http://www.umchealthsystem.com		0.59
 74477fc6bbb0	UMC in Lubbock, Texas	hospital		33.58838	-101.89149	602 Indiana Ave	Lubbock	79415		http://www.umc.org/		0.97
-bcbde67d179d	UMC in Lubbock, Texas	hospital		33.59224	-101.88806	602 Indiana Ave	Lubbock	79415		http://www.umc.org/		0.81
-5460e9ff9470	Umc Labor	hospital		33.59224	-101.88806	602 Indiana Ave	Lubbock	79415		http://www.umchealthsystem.com/index.php/labor-a-delivery		0.85
 9d4ba76462df	Umc Labor	hospital		33.58768	-101.89060	602 Indiana Ave	Lubbock	79415		http://www.umchealthsystem.com/index.php/labor-a-delivery		0.97
 2b76d2fb025c	UMC Orthopaedic Surgery & Rehabilitation	hospital		33.58788	-101.89005	3601 4th St	Lubbock	79415	+18067432465	www.ttuhsc.edu/som/ortho		0.97
 9ac734e73a1f	UMC Radiology at Health & Wellness Hospital	hospital		33.49348	-101.92106	11011 Slide Rd 1st Floor, Suite 1331	Lubbock	79424	+18064726820	https://www.umchealthsystem.com/umc-health-wellness-hospital/		0.97
@@ -1411,7 +1487,6 @@ b1b151740758	Belmont Ridge	hotel		33.54927	-101.92888	5430 50th St	Lubbock	79414
 432638b124e6	Best Western Plus Tech Medical Center Inn	hotel		33.60299	-101.91161	4703 N Loop 289	Lubbock	79416	+18067015299	https://www.bestwestern.com/en_US/book/hotel-rooms.44725.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44725	Best Western Hotels & Resorts	1.00
 64a1a76c9340	Best Western Plus Windsor Inn	hotel		33.54314	-101.84597	5410 I-27	Lubbock	79404	+18067628400	https://www.bestwestern.com/en_US/book/hotels-in-lubbock/best...		0.97
 3c006d3b01c2	Best Western Post Inn	hotel		33.20166	-101.38610	1011 N Broadway St	Post	79356	+18064959933	https://www.bestwestern.com/en_US/book/hotel-rooms.44527.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44527	Best Western Hotels & Resorts	1.00
-54f620d1ccf0	Best Western Post Inn	hotel		33.20166	-101.38610	1011 N Broadway St	Post	79356	+18064959933	https://www.bestwestern.com/en_US/book/hotel-rooms.44527.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44527	Best Western Hotels & Resorts	1.00
 fcc215587c5e	Beyond Heaven Outdoors Meadows	hotel		33.04638	-101.14650	2456 Farm to Market 3519-House	Justiceburg	79330	+18065350034	http://www.beyondheavenoutdoors.com/		0.85
 12695b31162d	Big Spring Hospitality Llc	hotel		33.56109	-101.94409	3430 W Loop 289	Lubbock	79407				0.95
 99b062ae4323	Bleacher's Sports Cafe	hotel		33.57914	-101.84405	1719 Buddy Holly Ave	Lubbock	79401				0.95
@@ -1424,7 +1499,6 @@ a0b1ba0265e2	Bunkhouse Motel	hotel	motel	33.98239	-101.34148	500 W Kentucky St	F
 17f9492586cc	Carriage House	hotel	motel	33.53097	-101.82591	910 Slaton Rd	Lubbock	79404	+18067454500			0.99
 b46013ce355f	Century Heights Apartments	hotel		33.44789	-101.65813	1305 Woodrow Rd	Slaton	79364	+18068283866	http://www.grassanoproperties.com		0.98
 621c69b7daeb	Clark Apartments LLC	hotel		33.58139	-101.86392	2123 15th St	Lubbock	79401	+14322085428	http://www.clarkapartmentsllc.com/		0.89
-6ef08486cc17	Clement Hall	hotel		33.57903	-101.88017	3003 18th St	Lubbock	79410				0.64
 01252a407f9e	Comfort Inn & Suites	hotel	resort	33.53467	-101.84505	6510 Interstate 27	Lubbock	79404	+18067718000	https://www.choicehotels.com/texas/lubbock/comfort-inn-hotels/txm31		1.00
 3bc78d8bdd27	Comfort Inn & Suites	hotel		33.54033	-101.84616	5828 Interstate 27	Lubbock	79404	+18067636500	https://www.choicehotels.com/texas/lubbock/quality-inn-hotels/tx530?mc=llyxyxpx		0.77
 b222559021d5	Comfort Inn & Suites	hotel		33.56115	-101.94395	3430 W Loop 289	Lubbock	79407	+18067804000	https://www.comfortinnsuiteslubbock.com/	Choice Hotels	1.00
@@ -1440,7 +1514,6 @@ c613c862ac1e	Country Inn & Suites by Radisson, Lubbock Southwest, TX	hotel	resor
 46619d554b6e	Courtyard By Marriott	hotel		33.52755	-101.89993	4011 South Loop 289	Lubbock	79423	+18067951633	https://www.marriott.com/en-us/hotels/lbbcy-courtyard-lubbock/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Courtyard by Marriott	1.00
 84c0db562d4f	Courtyard By Marriott	hotel		33.59357	-101.86475	308 Avenue V	Lubbock	79415	+18063688403	https://www.marriott.com/en-us/hotels/lbbdt-courtyard-lubbock-downtown-university-area/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Courtyard by Marriott	0.99
 0c0fc05419ab	Courtyards At Monterey	hotel		33.54936	-101.89121	3521 49th Pl	Lubbock	79413	+18067954427			0.93
-e9d6fa4c4958	Crosbyton Masonic Lodge No. 1020	hotel	lodge	33.65948	-101.23788	111 S Ayrshire Ave	Crosbyton	79322	+18062531031			0.92
 51508c8dc341	Cuddle Care	hotel		33.58781	-101.93132	5502 9th Street	Lubbock	79416	+18065167798			0.86
 654fe3d8b8e6	Days Inn	hotel	motel	33.53757	-101.84235	6025 Avenue A	Lubbock	79404	+18067455111	https://www.wyndhamhotels.com/days-inn/lubbock-texas/days-inn-lubbock-south/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A07538	Days Inn	0.99
 3dfefed3b0d2	Days Inn & Suites by Wyndham Lubbock Medical Center	hotel	resort	33.59198	-101.86943	4923 Marsha Sharp Fwy	Lubbock	79407	+18068538791			0.85
@@ -1459,7 +1532,6 @@ bfe47d42b4c1	Extended Stay America Select Suites - Lubbock - West	hotel	resort	3
 f60c357317a1	Fairfield by Marriott Inn & Suites Lubbock	hotel		33.52752	-101.89927	4007 S Loop 289	Lubbock	79423	+18067951288	https://www.marriott.com/en-us/hotels/lbbfi-fairfield-inn-and-suites-lubbock/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 ea5c33793bc1	Fairfield by Marriott Inn & Suites Lubbock Downtown	hotel		33.58879	-101.85600	708 Avenue Q	Lubbock	79401		https://www.marriott.com/LBBFD	Fairfield Inn	0.80
 30330a2b876c	Fairfield Inn and Suites Lubbock Southwest	hotel		33.54849	-101.95629	6435 County Road 6900	Lubbock	79407	+18069939000	https://www.marriott.com/hotels/travel/lbbfw-fairfield-inn-and-suites-lubbock-southwest/	Fairfield by Marriott	1.00
-d54d365298a7	Fairfield Inn and Suites Lubbock Southwest	hotel		33.54956	-101.95242	6435 County Road 6900	Lubbock	79407	+18069939000	https://www.marriott.com/hotels/travel/lbbfw-fairfield-inn-and-suites-lubbock-southwest/	Fairfield by Marriott	1.00
 7f1272dd9fa6	Falcon Cove Townhomes	hotel		33.53454	-101.85963	6519 Temple Ave	Lubbock	79412	+18067454610			0.58
 3a8722367883	Floydada Motel Inc	hotel	motel	33.97486	-101.34489	1105 S Ralls Hwy	Floydada	79235	+18069835826	http://floydadachamber.com/		0.92
 deb247bc6446	Four Seasons Hotel Sydney	hotel		33.60151	-101.83353	601 Municipal Dr	Lubbock	79403	+18067656679	https://www.fourseasons.com/sydney/?utm_source=google&utm_medium=organicsearch&utm_campaign=tor-syd-hre-mid-seo-na&utm_content=na-na&utm_term=na		0.77
@@ -1469,13 +1541,11 @@ d1ddaabca752	Hair By Jessie	hotel		33.54929	-101.90096	4204 50th St	Lubbock	7941
 85b29f4964d4	Hampton Inn & Suites Lubbock University	hotel		33.59274	-101.87817	2828 Marsha Sharp Fwy W	Lubbock	79415	+18067585959	https://www.hilton.com/en/hotels/lbbluhx-hampton-suites-lubbock-university/?SEO_id=BING-HX-LBBLUHX&y_source=1_MTg0ODI4MTUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D	Hampton by Hilton	0.99
 e5c1244ca2a3	Hampton Inn and Suites Lubbock Southwest	hotel		33.54321	-101.93797	5614 Englewood Ave	Lubbock	79424	+18067979600	https://www.hilton.com/en/hotels/lbbhshx-hampton-suites-lubbock-southwest/	Hampton by Hilton	1.00
 26d775903619	Hampton Inn Lubbock	hotel		33.52764	-101.89865	4003 S Loop 289	Lubbock	79423	+18067951080	https://www.hilton.com/en/hotels/lbbtxhx-hampton-lubbock/	Hampton by Hilton	0.99
-37b1d3fdc43f	Hann Investments Llc	hotel		33.53813	-101.84277	6021 Avenue A	Lubbock	79404				0.95
 e9b27c1b0d60	Hatton Place Lubbock	hotel		33.48328	-101.88900	122nd Street & Indiana Avenue	Lubbock	79423	+18067980098	http://HattonPlaceLubbock.com/		0.97
 0873da42c9f9	Hawthorn Suites by Wyndham Lubbock	hotel	resort	33.57322	-101.90704	4435 Marsha Sharp Fwy	Lubbock	79407	+18067923600	https://www.wyndhamhotels.com/hawthorn-extended-stay/lubbock-texas/hawthorn-suites-by-wyndham-lubbock/overview		1.00
 61aee7ec3a6e	Hi Lubbock, Inc	hotel		33.53767	-101.94993	6107 Justice Ave	Lubbock	79424				0.95
 b8c8ad9a9ff8	Hilltop Apartments	hotel		33.59275	-101.81376	2105 E 4th St	Lubbock	79403	+18064724607	http://www.meyermeyertx.com/hilltop		0.95
 8576732a0046	Hilton Garden Inn Lubbock	hotel		33.55293	-101.94616	6027 45th St	Lubbock	79407	+18067763900	https://www.hilton.com/en/hotels/lbbltgi-hilton-garden-inn-lubbock	Hilton Garden Inn	1.00
-1c73c17bcf59	Hodge Podge Hotel	hotel		33.54358	-101.89627		Lubbock					0.73
 577ed7956352	Holiday Inn Express & Suites Lubbock South By Ihg	hotel		33.53527	-101.84586	6506 I 27	Lubbock	79404	+18067719900	https://www.ihg.com		1.00
 b877bd20caf9	Holiday Inn Express & Suites Lubbock West	hotel		33.55303	-101.94447	6023 45th St	Lubbock	79407	+18066872600	https://www.ihg.com/holidayinnexpress/hotels/us/en/lubbock/lbbms/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-LBBMS	Holiday Inn Express	0.99
 5e6b480e5858	Holiday Inn Express and Suites Lubbock Central - University Area	hotel		33.59232	-101.86340	2115 Marsha Sharp Fwy	Lubbock	79415	+18067442189	http://www.hiexpress.com/	Holiday Inn Express	1.00
@@ -1483,7 +1553,6 @@ b877bd20caf9	Holiday Inn Express & Suites Lubbock West	hotel		33.55303	-101.9444
 a8a14d8df60c	Holiday Inn Express Hotel & Suites Lubbock	hotel		33.54108	-101.84716	5806 I-27 S	Lubbock	79404	+18066872500	http://www.holidayinn.com		0.92
 10cca7e158bc	Holiday Inn Lubbock Hotel & Towers	hotel	resort	33.58784	-101.85500	801 Avenue Q	Lubbock	79401	+18067631200	http://www.hilubbocktowers.com/		0.92
 919b9c57b73d	Holiday Inn Lubbock South	hotel		33.53752	-101.95029	6107 Justice Ave	Lubbock	79424	+18067224466	https://www.ihg.com/holidayinn/hotels/us/en/lubbock/lbbhs/hoteldetail?cm_mmc=FacebookMaps-_-HI-_-US-_-LBBHS	Holiday Inn Express	1.00
-2790e014ace5	Home	hotel		33.51497	-101.88721		Lubbock					0.97
 ddbf13649679	Home2 Suites by Hilton Lubbock	hotel		33.55165	-101.94469	6004 Marsha Sharp Fwy	Lubbock	79407	+18068335000	https://www.hilton.com/en/hotels/lbbmsht-home2-suites-lubbock/		1.00
 1019f3c10002	Home2 Suites by Hilton Lubbock University	hotel		33.59399	-101.85600	1704 Marsha Sharp Fwy	Lubbock	79415	806-758-5950	https://www.hilton.com/en/hotels/lbbaqht-home2-suites-lubbock-university/	Home2 Suites by Hilton	0.99
 6a4d95bf262b	Homestyle Suites	hotel		33.53498	-101.94180	5815 64th St Ste B	Lubbock	79424		https://hssuites.com		0.92
@@ -1495,7 +1564,6 @@ a88dafc25860	Homewood Suites by Hilton Lubbock	hotel		33.54401	-101.93648	5320 W
 b73235612fd5	Hotel Little Panda	hotel		33.58374	-101.87049	Hotel Little panda Near IOCL petrol pump	Lubbock	79401	+18173719797	https://www.wix.com/website/builder?storyId=a43a1ab8-fd40-478a-9719-868d09391fb5&editorSessionId=5e2ba8db-78c3-4385-945d-98b3836b4506&referralInfo=dashboard#!/builder/story/a43a1ab8-fd40-478a-9719-868d09391fb5:23a1bd37-c8b7-4aba-91ee-cd3613ba4d80/preview		0.70
 2e0a047b2bdf	Hotel Palacio	hotel		33.58933	-101.85389	601 Avenue Q	Lubbock	79401	+18067639441	http://www.hotelpalacio.net/		0.70
 0365f8130f8d	Howard Johnson by Wyndham Lubbock TX	hotel	resort	33.54763	-101.84569	5108 Interstate 27	Lubbock	79404	+18067411600	https://www.wyndhamhotels.com/hojo/lubbock-texas/howard-johnson-lubbock-tx/overview		0.98
-bb5117bd3c45	Howard Johnson by Wyndham Lubbock TX	hotel	resort	33.63731	-101.83565	5108 Interstate 27	Lubbock	79404	+18067411600	https://www.wyndhamhotels.com/hojo/lubbock-texas/howard-johnson-lubbock-tx/overview?CID=LC:lr92o94qvvlxmkc:46208		0.85
 ff7f67ca6a2b	Hulen Hall	hotel		33.57924	-101.87955	3003 18th St	Lubbock	79410	+18067422615			0.91
 803f6204c807	Hyatt Place Lubbock	hotel		33.58986	-101.86691	2309 Mac Davis Ln	Lubbock	79401	+18067410200	http://lubbock.place.hyatt.com/		1.00
 98683de5dbf8	Inn Of The South Plains	hotel		33.59355	-101.85555	310 Avenue Q	Lubbock	79415	+18067632861			0.76
@@ -1513,37 +1581,25 @@ c2128f0aa34a	L & J Investments Inc	hotel		33.53710	-101.83927	150 Slaton Rd	Lubb
 bba4e15b37ab	La Quinta Inn and Suites	hotel		33.60201	-101.91914	5006 Auburn St	Lubbock	79416	+18063195967	http://www.laquintalubbocknorth.com/?cid=local_6018	La Quinta by Wyndham	1.00
 89d48833f2d7	La Quinta Inn and Suites by Wyndham Lubbock West Medical Center	hotel		33.57604	-101.90209	4115 Marsha Sharp Fwy W	Lubbock	79410	+18067920065	http://www.laquintalubbockmedctr.com/?cid=local_922	La Quinta by Wyndham	1.00
 142f8f039ede	La Quinta Inn by Wyndham Lubbock - Downtown Civic Center	hotel	resort	33.58981	-101.85515	601 Avenue Q	Lubbock	79401	+18067639441	https://www.wyndhamhotels.com/laquinta/lubbock-texas/la-quinta-inn-lubbock-downtown-civic-center/overview		0.99
-d4f978e5b6e0	Lake Alan Henry Lodges	hotel	lodge	33.04675	-101.16400	2361 FM2458	Justiceburg	79330	+18067770337	http://www.lakealanhenrylodges.com/		0.95
 61f3d73c143c	Lf3 Lubbock Casa Trs Llc	hotel		33.55169	-101.94450	6004 Marsha Sharp Fwy	Lubbock	79407				0.95
 bb8665b71e0b	Lone Star Inn Motel	hotel	motel	33.54990	-101.85478	4801 Avenue Q	Lubbock	79412	+18067471671			0.99
 d673952c827d	Lubbock Englewood Hotel Llc	hotel		33.54461	-101.93685	5310 W Loop 289	Lubbock	79424				0.95
 12b34d420948	Lubbock Hospitality Salon	hotel		33.55072	-101.92310	4710 Slide Rd	Lubbock	79414		https://lubbockhospitality.net		0.99
 f769706702f2	Lubbock Inn	hotel	motel	33.60222	-101.86649	2305 Clovis Rd	Lubbock	79415	+18063687889	http://www.lubbockhotelmotel.org		0.95
 c6cd30e6d091	Lubbock Interstate Hotels Llc	hotel		33.53813	-101.84277	6021 Avenue A	Lubbock	79404				0.95
-73caacb565c5	Lubbock Masonic Lodge	hotel	lodge	33.57079	-101.90813	4539 Brownfield Dr	Lubbock	79410	+18067955414	http://lubbockmasoniclodge.org		0.69
 729b76e23e77	Lubbock Regency Inn	hotel		33.53236	-101.84616	6624 I-27	Lubbock	79404	+18067452208			0.98
 6bbccb21cddc	M & M Hospitality, Llc	hotel		33.57089	-101.90897	4521 Marsha Sharp Fwy	Lubbock	79407		https://www.studio6lubbockmedicalcenter.com		0.95
 746256d27f42	MCM Elegante Hotel and Suites	hotel		33.58787	-101.85461	801 Avenue Q	Lubbock	79401	+18067631200	http://www.mcmelegantelubbock.com/		1.00
 d1c0c6913622	Merket Alumni Center	hotel		33.57951	-101.87283	2521 17th St	Lubbock	79409	+18067423641			0.93
 944a5aa4fb4a	Mesquite Village Apartments	hotel		33.19622	-101.39057	509 N Avenue S	Post	79356	+18064744696			0.62
 9fb44a1bf5e9	Microtel Inn & Suites By Wyndham	hotel		33.55094	-101.84615	4620 I-27 Frontage Rd	Lubbock	79412	+18067014180	https://www.wyndhamhotels.com/microtel/lubbock-texas/microtel-inn-and-suites-by-wyndham-lubbock/overview		1.00
-35994939b420	Mjsi Investments Inc	hotel		33.53321	-101.91917	5113 S Loop 289	Lubbock	79424				0.95
 0b71ec01ec89	Motel 6	hotel	motel	33.53351	-101.84593	909 66th St	Lubbock	79412	+18065500241	http://www.motel6.com/	Motel 6	0.99
-80a3f5fff1c0	Motel 6	hotel	motel	33.57109	-101.90919		Lubbock	79407	+18066876666	http://www.motel6.com		0.77
 d1a301714593	Murdough Hall	hotel		33.58373	-101.88094	3009 Main St	Lubbock	79409	+18067422622	http://www.depts.ttu.edu/		0.94
 f8d1f2d9efd5	Murray Hall	hotel		33.58757	-101.87774	903 Flint Ave	Lubbock	79409	+18067424543			0.99
 6749ea42810e	My Place Hotel	hotel		33.53711	-101.95316	6219 62nd St	Lubbock	79424	+18067014196	https://www.myplacehotels.com/my-place-hotel-lubbock-tx?utm_source=local-listing&utm_medium=referrer&utm_campaign=lubbock-tx	My Place Hotels	1.00
-97e6ed275397	Niravi Investments Llc	hotel		33.53467	-101.84585	6510 Interstate 27	Lubbock	79404				0.95
-c7068f7ba3da	Nitai Texas Llc	hotel		33.55278	-101.94441	6023 45th St	Lubbock	79407				0.95
-a144446f836f	Northhub Investment Llp	hotel		33.60189	-101.91927	5006 Auburn St	Lubbock	79416				0.95
 7c00653a7c86	Occasional Party Place, LLC	hotel		33.55632	-101.85609	1710 42nd St	Lubbock	79412	+18067789884			0.91
-ef2f33aa988a	Overton Hotel	hotel		33.58702	-101.86023		Lubbock					0.70
-f70935c4c1ca	Overton Hotel	hotel		33.58775	-101.85410		Lubbock					0.69
 6bb3e1629b09	Overton Hotel & Conference Center	hotel		33.59066	-101.86791	2322 Mac Davis Ln	Lubbock	79401	+18067767000	https://www.instagram.com/overtonhotel/		1.00
-1ba3301a3cd9	Pd Hospitality Llc	hotel		33.56670	-101.91619	4923 Marsha Sharp Fwy	Lubbock	79407				0.95
 e13f1165d3c8	Pioneer Pocket Hotel	hotel		33.58474	-101.84830	1204 Broadway St	Lubbock	79401	+18064010610	https://pioneerpockethotel.com/		0.99
-8e2eeab66c57	Presidential Hotel Ltd	hotel		33.52745	-101.90831	4416 74th St Ste 85	Lubbock	79424				0.95
-b75b2159163f	Prestige Fabricare	hotel		33.51831	-101.90300	8201 Quaker Ave Unit 154	Lubbock	79424				0.95
 de85c4d504f7	Quality Inn & Suites	hotel		33.56115	-101.94399	3430 W Loop 289	Lubbock	79407	+18067804000	https://www.choicehotels.com/texas/lubbock/quality-inn-hotels/tx998?mc=llyxyxpx		0.77
 48de7f667918	Quality Inn & Suites Lubbock South	hotel	resort	33.54070	-101.84574	5828 I-27 S	Lubbock	79404	+18063008084	https://www.choicehotels.com/texas/lubbock/quality-inn-hotels/tx530?mc=llbillpx&pmf=local		0.99
 4054fd244abf	Quality Suites Lubbock Southwest	hotel		33.53344	-101.91926	5113 S Loop 289	Lubbock	79424	+18062241565	https://www.qualitysuiteslubbock.com/		1.00
@@ -1554,7 +1610,6 @@ de85c4d504f7	Quality Inn & Suites	hotel		33.56115	-101.94399	3430 W Loop 289	Lub
 5b8201904655	Rodeway Inn	hotel	motel	33.53416	-101.84573	909 66th St	Lubbock	79412		https://www.choicehotels.com/texas/lubbock/econo-lodge-hotels	Rodeway Inn	0.80
 d4b28d3e99bb	Rodeway Inn	hotel	motel	33.19337	-101.37843	215 N Broadway St	Post	79356		https://www.choicehotels.com/texas/post/rodeway-inn-hotels	Rodeway Inn	0.80
 fd8cdb693c02	Rodeway Inn	hotel		33.58705	-101.85570	910 Avenue Q	Lubbock	79401	+18067656307	http://www.rodewayinn.com/		0.84
-446aca420e86	Ruby Ranch	hotel		33.44871	-101.69914	7725 E Woodrow Rd	Slaton	79364				0.97
 8918e2aa8bc8	Sai Bhole-nath Hotels Inc	hotel		33.58974	-101.85422	601 Avenue Q	Lubbock	79401				0.95
 1954eaa33d7f	San Pedro HomeLess shelter.	hotel		33.59666	-101.85739	1900 Clovis Rd	Lubbock	79415	+18067029926	http://www.placestogoinlubbock.com/places/8111840-San-Pedro-HomeLess-shelter-		0.69
 f7a67daf9535	Satellite Motel	hotel	motel	33.60995	-101.87968	2921 Clovis Rd	Lubbock	79415	+18066877532			0.99
@@ -1564,11 +1619,8 @@ d17ca35e7ae2	Scottish Inns & Suites Lubbock, Tx	hotel		33.61081	-101.84814	1000 
 5bd161f45f54	Silver Falls Motel	hotel	motel	33.65968	-101.24176	323 W Main St	Crosbyton	79322	+18063700713	http://www.cityofcrosbyton.org/site/visitors/silver-falls		0.92
 f9afc567cad8	Skyviews Restaurant Of Texas Tech University	hotel		33.57747	-101.87006	1901 University Ave Ste 600	Lubbock	79410	+18067424762			0.90
 bd5c8192e398	Sleep Inn & Suites	hotel		33.56372	-101.94142	5816 34th St	Lubbock	79407	+18064511252	https://www.choicehotels.com/texas/lubbock/sleep-inn-hotels/txc63?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
-e94dcb1133c2	Slide Breakfast House	hotel		33.56712	-101.92203	2907 Slide Rd	Lubbock	79407				0.95
-aef0412b4725	Smokey River Restaurant	hotel		33.57932	-101.84513	1711 Texas Ave	Lubbock	79401				0.95
 c1a0ba5cb937	Sneed Hall	hotel		33.58499	-101.87140	2508 Broadway St	Lubbock	79406	+18067420073	http://housing.ttu.edu/sneed		0.99
 5685aec109d5	South Loop S6 Llc	hotel		33.52827	-101.87511	2551 S Loop 289	Lubbock	79423				0.95
-b2018b0b2787	Ssnrm Investments Llc	hotel		33.56611	-101.91709	4927 Marsha Sharp Fwy	Lubbock	79407				0.95
 98f99f4001a7	Stadium Motel	hotel	motel	33.57698	-101.90041	4105 19th St	Lubbock	79410	+18067955271			0.75
 fb660f3b2958	Stangel Hall	hotel		33.58361	-101.88009	3211 Main St	Lubbock	79406	+18067422622	http://housing.ttu.edu/stangel-murdough		0.91
 f2f9a05e2b4d	Staybridge Suites Lubbock - University Area by IHG	hotel		33.57746	-101.87189	2515 19th St	Lubbock	79410	+18067658900	https://www.ihg.com/staybridge/hotels/us/en/lubbock/lbbsb/hoteldetail?cm_mmc=FacebookMaps-_-SB-_-US-_-LBBSB	Staybridge Suites	0.99
@@ -1591,7 +1643,6 @@ d9dc4835721e	TownePlace Suites	hotel		33.54446	-101.93669	5310 West Loop 289	Lub
 d42644b67f3e	Value Place	hotel		33.57307	-101.94341	2311 W Loop 289	Lubbock	79407	+18067850025	https://www.choicehotels.com		0.55
 dda7239ea0dc	Verjandel Hotel	hotel		33.59660	-101.81005	2524 Parkway Dr	Lubbock	79403	+18067637983	https://www.dusit.com/dusitthani-manila/?utm_source=google_maps&utm_medium=seo_maps&utm_campaign=seo_maps		0.90
 b883ab1688c1	Wall Hall	hotel		33.57891	-101.87644	2803 18th St	Lubbock	79410	+18067422610			0.99
-a7454535f84b	Weeks Hall	hotel		33.58350	-101.87120	1300 University Ave	Lubbock	79401				0.75
 16acfd0d021a	West Village	hotel		33.57819	-101.89004	1825 Texas Tech Pkwy	Lubbock	79406	+18067425265			0.78
 e54e79665184	Weymouth-Chitwood Hall	hotel		33.57970	-101.88190	3115 18th St	Lubbock	79406	+18067422633	http://housing.ttu.edu/chitwood-weymouth		0.99
 f9c6d8eee778	Wingate by Wyndham Lubbock near Texas Tech Univ. Medical Ctr	hotel	resort	33.59448	-101.91660	5214 2nd Dr	Lubbock	79416	+18065894727	https://www.wyndhamhotels.com/wingate/lubbock-texas/wingate-by-wyndham-lubbock-near-texas-tech-univ-medical-ctr/overview?CID=LC:5k2uqy0fy14xj3o:49513&iata=00093796		0.85
@@ -1602,7 +1653,6 @@ f738d9fc31ee	WoodSpring Suites Lubbock South	hotel	resort	33.53022	-101.85043	14
 e85fadf51d30	Bahama Buck's Franchise Corporation	office		33.53078	-101.91766	5123 69th St	Lubbock	79424	+18067712189	http://www.bahamabucks.com		0.98
 c3b83fe9b4f5	Bazar Solutions Inc	office	information technology company	33.56744	-101.83675	2914 Avenue A Unit B	Lubbock	79404	+18068537757	https://www.bazarsolutions.com		0.65
 7110568df900	Bolt Fdi	office		33.60259	-101.86414	2131 Baylor Dr	Lubbock	79415	+18064124795	https://www.boltfdi.com		0.92
-c63841f8ea6a	Boost Mobile	office	telecommunications company	33.51888	-101.87511	2703 82nd St	Lubbock	79423	+18066860837	https://www.boostmobile.com/locations/bd/boost-mobile-tx-lubbock-2703-82nd-st-79423/?utm_source=facebook&utm_medium=lastmile&utm_campaign=0018000001YhWr1AAF	Boost Mobile	0.70
 598cc3be1c01	Bowers Plastics	office	plastics company	33.60335	-101.84508	401 N Interstate 27	Lubbock	79403	+18067635925	http://www.bowersplastics.com/		0.92
 ba55060d35da	Business Communications Solutions	office	information technology company	33.54852	-101.86755	2315 50th St	Lubbock	79412	+18065891328	https://www.bcs-ip.com	Business Communication Solutions	0.92
 b0c60a4f7c22	Cajun Texan	office		33.58566	-101.86030	2012 Main St Apt 504	Lubbock	79401	+18324921756	http://www.cajuntexan.com		0.92
@@ -1617,7 +1667,6 @@ b0c60a4f7c22	Cajun Texan	office		33.58566	-101.86030	2012 Main St Apt 504	Lubboc
 705fdea68ee0	Endeavour Enterprises	office		33.52734	-101.88954	3415 73rd St	Lubbock	79423	+18067850507	https://www.endeavouremployee.com		0.75
 58b399c8d701	Essence Bottling Company	office	bottled water company	33.61520	-101.81193	2401 NE TX-289-LOOP	Lubbock	79403	+18069931391	http://essencebottling.com/		0.92
 a94a95824d74	Eyeguide	office	biotechnology company	33.54816	-101.86800	2321 50th St	Lubbock	79412	+18669319418	eye.guide		0.75
-f3c5dd46b70c	Flat Wireless	office		33.53495	-101.92603	5225 S Loop 289 Ste 128	Lubbock	79424	+18064383382	https://www.flatwireless.com		0.65
 ba45e744cd85	Flower Turbines	office	energy company	33.53284	-101.80817	2601 SE Loop 289	Lubbock	79404	+18063181116	http://www.flowerturbines.com/		0.92
 5a95f27e3438	Food Concepts International	office		33.51908	-101.90669	4413 82nd St	Lubbock	79424	+18067858686			0.65
 440bfd72fa8b	Forge Laboratories	office		33.61979	-101.87683	2804 N Loop 289	Lubbock	79415		https://forgelabs.us		0.65
@@ -1633,7 +1682,6 @@ b2051431e1e4	Jacob's Well Purified Water & Ice	office	bottled water company	33.5
 2c181ac59510	Jonsar	office		33.51839	-101.88824	8302 Indiana Ave	Lubbock	79423	+18063689591			0.97
 c75901d0962d	Junior Senior Inc.	office		33.53400	-101.83133	601 E Slaton Rd	Lubbock	79404	+18067487827			0.65
 db961c478922	Kemper Life	office		33.53493	-101.92604	5225 S. Loop 289, Suite 100	Lubbock	79424	+18067830489	https://local.kemper.com/tx/lubbock/5225-s.-loop-289		0.85
-6bcedf9462fc	Kendrick Oil Company	office		33.47426	-101.90436	13025 Quaker Ave	Lubbock	79423				0.65
 87e0d365e58f	KGB	office		33.54541	-101.85500	5302 Avenue Q	Lubbock	79412	+18067472474	http://www.kgbusa.com		0.92
 cbce3370b185	Kiromic	office	biotechnology company	33.55391	-101.94913	6104 45th St Unit D	Lubbock	79407	+18445392873			0.75
 d0ded4ef9096	LATINO LUBBOCK MAGAZINE	office	coworking space	33.56944	-101.87493	2701 Boston Ave, Lubbock, TX 79410	Lubbock	79410	+18067921212	http://latinolubbock.net		0.92
@@ -1678,7 +1726,6 @@ d5d5e07a0c28	Solartech Energy Solutions, Llc	office	energy company	33.47893	-101
 caa124dd1930	Tandem	office	information technology company	33.56546	-101.95077	6224 34th St	Lubbock	79407	+18446989800			0.75
 c6b79bbbdbfa	Texas Star Co-Op Gin	office	industrial company	33.41451	-101.77110	4421 E FM 41	Slaton	79364	+18068283083	http://texasstarcoop.yourgin.com/		0.92
 279b1ec297b2	Texas Tech Parents Association	office		33.58328	-101.87018	1305 University Ave	Lubbock	79401	+18064124722	https://www.texastechparents.org		0.92
-c098271978c6	The Lab	office	private association	33.54397	-101.91853	5504 Wayne Ave	Lubbock	79414				0.72
 f71ab20d5006	The Texas Tech Club	office	private association	33.59105	-101.87169	550 University Ave	Lubbock	79407	+18067424496	https://ovgsocialclubs.com/the-texas-tech-club/	Invited Clubs	0.99
 9a4f692fb5df	Trac9 Informatics	office	information technology company	33.49644	-101.95599	6405 107th St # 100	Lubbock	79424	+18887927106	trac9.com		0.75
 bc7f913e0dad	Tri Global Energy Llc	office	energy company	33.51915	-101.91570	4903 82nd St Ste 30	Lubbock	79424	+18067857770	www.triglobalenergy.com		0.75
@@ -1696,7 +1743,6 @@ dc6b2cac02bf	West Texas Foods	office		33.53255	-101.91879	6820 Wayne Ave	Lubbock
 6b7bbfa78b32	WillScot	office		33.48565	-101.84397	1201 E 40th St	Lubbock	79404	+18062212737	https://www.willscot.com/locations/lubbock		0.97
 19237047e6eb	1000 Degrees Pizza Salad Wings	restaurant	pizza restaurant	33.57754	-101.89536	3711 19th St	Lubbock	79410	+18064075666	https://www.1000degreespizzasaladwingslubbock.com/?utm_source=organic_bing&utm_medium=bing_pw		0.92
 2e31df097dd3	2 Brothers from NJ	restaurant	pizza restaurant	33.16671	-101.80784	2220 Lockwood St	Tahoka	79373	+18065614616			0.94
-3a1cdc19defb	3G Cantina TOO	restaurant	bar and grill restaurant	33.23373	-101.43466		Post		+12144994240			0.82
 3f6a12a0ff01	3G Cantina TOO	restaurant	bar and grill restaurant	33.22667	-101.43884		Post		+12144994240			0.97
 902829cb6bab	4 Bar K Ranch	restaurant	barbecue restaurant	33.51870	-101.83344	302 E 82nd St	Lubbock	79404	+18067898682	http://www.fourbark.com		0.77
 a775176eb21e	50 Yard Line Steakhouse	restaurant	steakhouse	33.52854	-101.87405	2549 S Loop 289 # 1426	Lubbock	79423	+18067453991	lubbockonline.com		0.92
@@ -1815,17 +1861,12 @@ c00fbaa1e33a	Chimy's	restaurant	mexican restaurant	33.58418	-101.86993	2417 Broa
 d946220b4ed8	China Wok	restaurant	chinese restaurant	33.19620	-101.37804	508 N Broadway St	Post	79356	+18064950149	http://chinawok.us		0.92
 dd5886e2f970	China Wok	restaurant	chinese restaurant	33.53629	-101.94016	6302 Frankford Ave #3	Lubbock	79424	+18067838888	https://www.china-wok-lubbock.com/		0.92
 3aac2144a449	Chinese Kitchen	restaurant	asian fusion restaurant	33.54540	-101.92314	5308 Slide Rd, Ste A	Lubbock	79414	+18067929142	http://www.chinese-kitchen.us/index.html		0.94
-0cf79c40a5f4	Chipotle Mexican Grill	restaurant	mexican restaurant	33.52349	-101.95653	7715 Milwaukee Ave	Lubbock	79424	+18068536508	https://locations.chipotle.com/tx/lubbock/7715-milwaukee-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4453	Chipotle Mexican Grill	0.99
-2b03e9630e6f	Chipotle Mexican Grill	restaurant	mexican restaurant	33.51846	-101.90348	8201 Quaker Ave	Lubbock	79424	+18067830211	https://locations.chipotle.com/tx/lubbock/8201-quaker-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D1606	Chipotle Mexican Grill	0.98
-47d80baf250c	Chipotle Mexican Grill	restaurant	mexican restaurant	33.58809	-101.86933	2411 Glenna Goodacre Blvd	Lubbock	79401	+18067444503	https://locations.chipotle.com/tx/lubbock/2411-glenna-goodacre-blvd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
-a020ab6f5e57	Chipotle Mexican Grill	restaurant	mexican restaurant	33.56738	-101.94487	2912 W Loop 289	Lubbock	79407	+18067840083	https://locations.chipotle.com/tx/lubbock/2912-w-loop-289?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings	Chipotle Mexican Grill	0.99
 50b2a486f978	Choochai Thai Cuisine	restaurant	thai restaurant	33.57802	-101.86746	2330 19th St	Lubbock	79401	+18067471767	http://lubbockmenu.com/choochai-thai-cuisine-menu/		0.99
 37947a5b2393	Chop Chop	restaurant	chinese restaurant	33.51941	-101.88579	82nd	Lubbock	79423	+18066424977	https://www.chopchoprice.com		0.77
 25fe8d476eda	Chop Chop Rice Co.	restaurant	asian restaurant	33.59164	-101.93728	5707 4th St Ste 100	Lubbock	79416	+18064781775	http://www.chopchoprice.com		0.97
 49ff9869220e	Chopped And Sliced BBQ	restaurant	barbecue restaurant	33.54816	-101.89035	3501 50th St #110	Lubbock	79413	+18063171920			0.99
 3f6340168afe	Christakis Burgers	restaurant	burger restaurant	33.56307	-101.84768	1111 34th St	Lubbock	79411	+18067446833	http://www.christakisburgers.com		0.99
 950a5b47aabe	Chubby's BBQ	restaurant		33.59299	-101.80615	239 Beech Ave	Lubbock	79403	+18064665075			0.66
-d6353a9839c6	Church's Chicken	restaurant		33.58475	-101.81788	1702 E Broadway	Lubbock	79403	+18067495235	http://churchs.com/		0.92
 c4f26dd31219	Chuy's	restaurant	texmex restaurant	33.53157	-101.91521	4805 S Loop 289 Ste 300	Lubbock	79424	+18066986264	https://www.chuys.com/locations/tx/lubbock/lubbock-tx/6037	Chuy's	0.98
 21dd52354cfa	Chuy's Tex-Mex Restaurant	restaurant	texmex restaurant	33.54905	-101.82903	701 E 50th St	Lubbock	79404	+18067446016	http://chuystexmexrestaurant.dinehere.us/		0.80
 5258b9be57bd	Cicis Pizza	restaurant	pizza restaurant	33.54027	-101.92118	5102 60Th St	Lubbock	79414	+18067881010	https://www.cicis.com		0.99
@@ -1865,16 +1906,6 @@ b8afff2be3e5	Dirk's Signature Chicken & Bar	restaurant	chicken restaurant	33.583
 086c42e05f44	DJRB & Co	restaurant		33.52523	-101.95796	7604 Milwaukee Ave	Lubbock	79424	+18067871718			0.92
 921963b2714c	Doc's Cafeteria	restaurant	buffet restaurant	33.56298	-101.91747	4919 34th St	Lubbock	79410	+18067013413	http://www.leescafelubbock.com/		0.96
 7c21f5c22597	Doc's Grill	restaurant	bar and grill restaurant	33.16397	-101.79649	1525 S 2nd St	Tahoka	79373	+18062013007			0.92
-0d2192a4964f	Domino's	restaurant	pizza restaurant	33.59284	-101.81650	1708 Parkway Drive	Lubbock	79403	+18067418000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-595e0830c131	Domino's	restaurant	pizza restaurant	33.59209	-101.92654	5407 4th St Unit A	Lubbock	79416	+18067923816	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-666eefb4f6d0	Domino's	restaurant	pizza restaurant	33.54824	-101.86257	2113 50th St	Lubbock	79412	+18067628484	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-755512a643c8	Domino's	restaurant	pizza restaurant	33.59346	-101.87174	2510 Marsha Sharp Fwy.	Lubbock	79415	+18067633030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-a779900c12bb	Domino's	restaurant	pizza restaurant	33.51930	-101.98824	7611 82nd Street Ste 400	Lubbock	79424	+18062241914	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
-a9fc9cd2d69f	Domino's	restaurant	pizza restaurant	33.55122	-101.95629	4525 Milwaukee Ave Unit 300	Lubbock	79407	+18067014570	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-c79d77faffa9	Domino's	restaurant	pizza restaurant	33.51913	-101.94120	5815 82nd St Ste 135	Lubbock	79424	+18067945000	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test_menutest	Domino's Pizza	0.98
-ca8c831ff88f	Domino's	restaurant	pizza restaurant	33.51490	-101.84340	8901 Hwy 87	Lubbock	79404	+18067497222	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	1.00
-fb91deee879b	Domino's	restaurant	pizza restaurant	33.56303	-101.91754	4921 34 St.	Lubbock	79410	+18067923030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-0a80eca7fe95	Domino's Pizza	restaurant	pizza restaurant	33.47278	-101.88828	13404 Indiana Ave	Lubbock	79424	+18067015700	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 02b3e66f5605	Donut House N Oriental Food Express	restaurant	american restaurant	33.57769	-101.85951	1947 19th St	Lubbock	79401	+18065163118			0.56
 f1433309cce4	Dorsey Cattle Co.	restaurant	steakhouse	33.68910	-101.99500	1676 County Road P	Hale Center	79041	+19407338781	http://www.munsoncattle.com/		0.60
 f8bde2e8950e	Dos Hermanas	restaurant	mexican restaurant	33.54912	-101.90710	4416 50th St	Lubbock	79414		https://www.doshermanasinfo.com		0.75
@@ -1910,17 +1941,12 @@ ee5cfbc8c5c8	Estela's	restaurant	mexican restaurant	33.67972	-101.38524	702 Tilf
 718431cff0fc	Fazoli's	restaurant	italian restaurant	33.57709	-101.94657	1902 W Loop 289	Lubbock	79407	+18067914400	https://fazolis.com/stores/tx-lubbock-1902-west-loop-289-79407/?utm_source=yext&utm_medium=local&utm_campaign=website&y_source=1_MzExNjk4NS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Fazoli's	0.99
 618b966f8b0d	Fb Nks Tx 1 Llc	restaurant		33.58479	-101.85191	1500 Broadway Ste 1500	Lubbock	79401				0.95
 34b837963bd7	Feed Your Spirit Pizza	restaurant	pizza restaurant	33.87112	-101.59812	1503 Main St	Petersburg	79250	+18066670274	http://www.alabamalandloan.com/		0.96
-3d7a9015916f	Firehouse Subs	restaurant	sandwich shop	33.50398	-101.92300	9810 Slide Rd	Lubbock	79424	+18067028251	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1437	Firehouse Subs	0.99
-de63def84e80	Firehouse Subs	restaurant	sandwich shop	33.59335	-101.87167	2510 Marsha Sharp Fwy	Lubbock	79415	+18067479600	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=489	Firehouse Subs	0.98
-f21c8e70ccf6	Firehouse Subs	restaurant	sandwich shop	33.54533	-101.95565	5027 Milwaukee Ave	Lubbock	79407	+18067991098	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=701	Firehouse Subs	0.98
 3f22d8e96f3b	Five Guys	restaurant	burger restaurant	33.54673	-101.95560	6076 Marsha Sharp Fwy W	Lubbock	79407	+18067714897	https://restaurants.fiveguys.com/6076-marsha-sharp-freeway	Five Guys	0.99
 79b5c1a1555b	Five Guys	restaurant	burger restaurant	33.57836	-101.90641	4410 19th St	Lubbock	79407	+18063683490	https://restaurants.fiveguys.com/4410-19th-street	Five Guys	0.99
 db5bd6d4f85d	Five Guys	restaurant	burger restaurant	33.49095	-101.90582	4406 114th St	Lubbock	79424	+18067012080	https://restaurants.fiveguys.com/4406-114th-st	Five Guys	0.97
 ace8ecb7c023	Flippers Tavern	restaurant	bar and grill restaurant	33.58240	-101.85543	1406 Avenue Q	Lubbock	79401	+18067015130	http://www.instagram.com/flipperstavern		0.99
 43ac2ee49a0e	Fortune Cookie Chinese Restaurant	restaurant	chinese restaurant	33.53053	-101.87191	7006 University Ave	Lubbock	79413	+18067452205	https://fortunecookietx.com/		0.96
 2e17fc6ca542	Frankford And 64th Sdi, Ltd	restaurant		33.53554	-101.94022	5802 64th St	Lubbock	79424				0.95
-3021604cd9da	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	33.52171	-101.95744	7732 Milwaukee Ave	Lubbock	79424	+18067830285	https://www.freddys.com/location/lubbock-milwaukee-ave-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
-f2c38fda5636	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	33.57810	-101.95131	6208 19th St	Lubbock	79407	+18067015349	https://www.freddys.com/location/lubbock-19th-st-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 e72d6ea94f2c	Freebirds World Burrito	restaurant	mexican restaurant	33.53596	-101.91939	4930 S Loop 289, Ste 250	Lubbock	79414	+18067910101	https://freebirds.com/		0.92
 13ae0d72a8af	Freshii	restaurant	mediterranean restaurant	33.52517	-101.95793	7604 Milwaukee Ave Ste 600	Lubbock	79424	+18063199678	http://freshii.com/us		0.92
 b7ebfa4fd241	FruterÃ­a Vega	restaurant	mexican restaurant	33.56746	-101.84839	1121 29th St	Lubbock	79411	+18065484446			0.92
@@ -1992,18 +2018,12 @@ c5bf13af3bcd	It's Just Wings	restaurant	chicken wings restaurant	33.54090	-101.9
 3d6edbf308f1	J&m Bar-b-q Express	restaurant	barbecue restaurant	33.52163	-101.92283	7924 Slide Rd	Lubbock	79424	+18067982525	https://jandmbbq.com		0.92
 3cc97078bddd	J&M BBQ	restaurant	barbecue restaurant	33.51916	-101.94683	6023 82nd St Unit 100	Lubbock	79424	+18067982525	https://jandmbbq.menufy.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.99
 ee5f17101668	J&M BBQ	restaurant	barbecue restaurant	33.56308	-101.89278	3605 34th St	Lubbock	79410	+18067961164	http://jandmbbq.com/		0.99
-177b31f29259	Jack in the Box	restaurant	taco restaurant	33.50562	-101.92186	5110 98th St	Lubbock	79424	+18067945222	http://www.jackinthebox.com/locations/4815		0.92
 09c99386bcf9	Jackrabbit Grill	restaurant	american restaurant	33.67403	-101.38571	624 US-82	Ralls	79357	+18062531211	http://www.basilspizzaonline.com		0.99
 af7b982e0b25	Jaliscos Restaurant	restaurant		33.57424	-101.85493	2211 Avenue Q	Lubbock	79411				0.60
 8339c097e653	Jason's Deli	restaurant	delicatessen	33.52868	-101.89880	4001 S Loop 289	Lubbock	79423	+18067998660	https://www.jasonsdeli.com/	Jason's Deli	0.96
 8a491bf7819e	Jazz A Louisiana Kitchen	restaurant	cajun and creole restaurant	33.57758	-101.89494	3703 19th St	Lubbock	79410	+18067992124	http://jazzcajunkitchen.com	Jazz, A Louisiana Kitchen - Kansas City, MO	0.99
-4b679b4734f1	Jersey Mike's	restaurant	sandwich shop	33.49032	-101.92061	11417 Slide Road Suite 150	Lubbock	79424	+18065893822	https://www.jerseymikes.com/15231/lubbock-tx	Jersey Mike's Subs	0.98
-815ae85ede03	Jersey Mike's	restaurant	sandwich shop	33.51918	-101.95640	6319 82nd Street Suite #300	Lubbock	79424	+18063685691	https://www.jerseymikes.com/15065/lubbock-tx	Jersey Mike's Subs	0.99
-c22921c49159	Jersey Mike's	restaurant	sandwich shop	33.57754	-101.89532	3711 19th Street	Lubbock	79410	+18065774558	https://www.jerseymikes.com/15258/lubbock-tx	Jersey Mike's Subs	0.92
 c72ffb346296	Jim Dandy Drive In	restaurant	theme restaurant	33.60610	-101.87265	2601 Clovis Rd	Lubbock	79415	+18067624012	https://jim-dandy-drive-in.hub.biz/		0.99
 7dd52e440d1a	Jimenez y Friends	restaurant		33.56360	-101.90913	4606 34th St	Lubbock	79410	+18064075771	https://www.texasmonthly.com/food/jimenez-tortilleria-taqueria/		0.97
-0c4bead6a9d9	Jimmy John's	restaurant	sandwich shop	33.54903	-101.92284	4730 Slide Rd	Lubbock	79414	+18067950800	https://locations.jimmyjohns.com/tx/lubbock/sandwiches-1117.html	Jimmy John's	0.99
-3345fc9e52b4	Jimmy John's	restaurant	sandwich shop	33.58434	-101.86948	2413 Broadway	Lubbock	79401	+18067400002	https://locations.jimmyjohns.com/tx/lubbock/sandwiches-824.html	Jimmy John's	0.99
 5dde91cc4199	Jimmy's Egg	restaurant	breakfast and brunch restaurant	33.53592	-101.92174	6253 Slide Rd	Lubbock	79414	+18063688212	https://lubbock.orderjimmysegg.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.93
 915e58b6a838	Jimmy's Egg	restaurant	breakfast and brunch restaurant	33.49092	-101.90581	4406 114th St	Lubbock	79424	+18063689251	https://jimmysegg.com/locations/lubbock-tx/	Jimmy's Egg	0.97
 246c489b7d26	Jj S Cafe Rent	restaurant		33.43371	-101.65893	1455 W Division St	Slaton	79364		https://jjscafe.net		0.95
@@ -2025,9 +2045,6 @@ d7311400df6a	Kaveri Indian Cuisine	restaurant	indian restaurant	33.54910	-101.89
 72151d6031aa	Ken Chan Ramen	restaurant	japanese restaurant	33.53056	-101.90890	4415 S Loop 289	Lubbock	79424	+18067013686	https://kenchanramen.kwickmenu.com/		0.99
 29a6c2f9f4a4	Kennard's Bar & Grill	restaurant	bar and grill restaurant	33.57066	-101.91023	2608 Salem Ave	Lubbock	79410	+15806958263			0.72
 256f0c26246b	Kennard's Festival Snacks	restaurant		33.57679	-101.83674	1924 Avenue A	Lubbock	79404		http://kennards-festival-snacks.business.site		0.95
-af99528d805e	KFC	restaurant	chicken restaurant	33.54800	-101.92290	5004 Slide Road	Lubbock	79414	+18063701101	https://locations.kfc.com/tx/lubbock/5004-slide-road		0.97
-c1da5fd0fabc	KFC	restaurant	chicken restaurant	33.51933	-101.98697	7601 82nd Street	Lubbock	79424	+18067718888	https://locations.kfc.com/tx/lubbock/7601-82nd-street		0.96
-d7942fd302da	Kfc	restaurant	chicken restaurant	33.52219	-101.87083	7902 University Ave	Lubbock	79423	+18066862919	https://www.kfc.com		1.00
 4a505b1f820f	Kin Korean BBQ & Sushi Lounge	restaurant	korean restaurant	33.53066	-101.95774	6810 Milwaukee Ave	Lubbock	79424	+18063683830	http://www.kinkoreanbbq.com/		0.92
 f507eae4427b	Kobe Japanese Steakhouse	restaurant	japanese restaurant	33.53077	-101.95763	6810 Milwaukee Ave Ste 300	Lubbock	79424	+18063171179	https://kobelubbock.com/		0.86
 92345807a771	Kokio Chicken	restaurant	korean restaurant	33.54840	-101.88461	3211 50th St	Lubbock	79413	+18063171127	https://www.kokiolubbocktx.com		0.99
@@ -2078,12 +2095,6 @@ b110d31a078d	Leal's Tamale Factory	restaurant	mexican restaurant	33.57768	-101.9
 6a4d35cad958	Lin's Buffet	restaurant	buffet restaurant	33.54287	-101.92327	5608 Slide Rd	Lubbock	79414	+18067855858	http://www.linsrestaurant.com/index.html	Lin's Chinese Buffet	0.96
 14d5c3a4a2ff	Linda's Cafe	restaurant	asian restaurant	33.57680	-101.94106	1901 W Loop 289	Lubbock	79407	+18067951225	http://www.flatlandslubbock.com		0.66
 38e6c55295c0	Lite Bite Mediterranean Markets	restaurant	mediterranean restaurant	33.54912	-101.89375	3624 50th St	Lubbock	79413	+18067880215	https://www.litebitemediterraneancafe.com/#/		0.99
-335f66a9a76f	Little Caesars	restaurant	pizza restaurant	33.57808	-101.86681	2312 19th St	Lubbock	79401	+18067714682	https://littlecaesars.com/en-us/store/121	Little Caesars	1.00
-63b392990b2e	Little Caesars	restaurant	pizza restaurant	33.59976	-101.87106	2508 Auburn St	Lubbock	79415	+18067028275	https://littlecaesars.com/en-us/store/12064	Little Caesars	0.97
-7bd260f70ebe	Little Caesars	restaurant	pizza restaurant	33.51924	-101.92332	5217 82 Nd St	Lubbock	79424	+18069930222	https://littlecaesars.com/en-us/store/12163	Little Caesars	0.99
-19dd26263c10	Little Caesars Pizza	restaurant	pizza restaurant	33.59103	-101.93861	417 Frankford Ave #100a	Lubbock	79416	+18067714681	https://littlecaesars.com/en-us/store/7990	Little Caesars	0.99
-354925209e5d	Little Caesars Pizza	restaurant	pizza restaurant	33.52789	-101.86987	7301 University Ave Ste 600	Lubbock	79423	+18067714688	https://littlecaesars.com/en-us/store/7729	Little Caesars	0.99
-ccfca0543239	Little Caesars Pizza	restaurant	pizza restaurant	33.54826	-101.90649	4423 50th St	Lubbock	79414	+18066878100	https://littlecaesars.com/en-us/store/9647	Little Caesars	0.99
 6c2ab1d9854b	Little Panda	restaurant	chinese restaurant	33.52629	-101.87091	7412 University Ave #1	Lubbock	79423	+18067458885			0.98
 88ded2bc2a38	Little Panda	restaurant	chinese restaurant	33.58369	-101.87045	1221 University Ave	Lubbock	79401	+18067220888	http://www.littlepandattu.com		0.99
 0611d7ddc0d4	Little Tokyo	restaurant	japanese restaurant	33.53923	-101.92577	6002 Slide Rd	Lubbock	79414	+18066875514	http://www.littletokyopittsburgh.com		0.92
@@ -2092,15 +2103,10 @@ e904a24f85aa	Llano Cubano	restaurant		33.47649	-101.87286	2614 130th St	Lubbock	
 9b335565bf28	Lone Star Oyster Bar	restaurant	seafood restaurant	33.54168	-101.92180	5116 58th St	Lubbock	79414	+18067973773	http://www.lonestaroysterbarlubbock.com		0.99
 c323f446f007	Lone Wolf	restaurant	mexican restaurant	33.57834	-101.93633	5702 19th St	Lubbock	79407	+18067952066			0.92
 fdc576d22f34	Lonestar Grill	restaurant	bar and grill restaurant	33.53717	-101.72775	6501 FM 835	Lubbock	79403	+18067400700			0.92
-3be37be2e6b5	Long John Silver's	restaurant	seafood restaurant	33.57808	-101.86797	2344 19th St	Lubbock	79401	+18067657339	http://www.longjohnsilvers.com		0.92
-efcf875ca25a	Long John Silver's	restaurant	seafood restaurant	33.52840	-101.88911	3415 S Loop 289	Lubbock	79423	+18067925017	http://www.ljsilvers.com/	Long John Silver's	0.60
 0f3267d3461e	Longhorn Steakhouse	restaurant	steakhouse	33.53160	-101.91445	4805 S Loop 289 Ste 500	Lubbock	79424	+18067830015	https://www.longhornsteakhouse.com		0.95
 3c337dcd9bc2	LongHorn Steakhouse	restaurant	steakhouse	33.53214	-101.91589	4805 S Loop 289	Lubbock	79424	+18067830015	https://www.longhornsteakhouse.com/locations/tx/lubbock/lubbock/5472?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Alubbock-tx-5472_pl%3Alocurl_rd%3A1411	LongHorn Steakhouse	0.99
 870a1f83389c	Los Tacos	restaurant	mexican restaurant	33.56192	-101.83568	3501 Avenue A	Lubbock	79404	+18067710836	http://www.lostacoslv.com		0.92
-1ffa590c0d96	Lubbock - Milwaukee Ave - Drive Thru	restaurant	sandwich shop	33.53392	-101.95780	6616 Milwaukee Avenue	Lubbock	79424			Potbelly	0.80
-f1b265f882c9	Lubbock - Texas Tech	restaurant	sandwich shop	33.58751	-101.86868	2402 9th Street	Lubbock	79401			Potbelly	0.80
 335c2bc515f3	Lubbock Hibachi Express	restaurant	japanese restaurant	33.48973	-101.90753	4409 114th St #200	Lubbock	79424	+18067013472			0.97
-e93bc1ca82d4	Lubbock South	restaurant		33.48546	-101.90428	11909 Quaker Ave	Lubbock	79424	+18067584086	https://locations.chipotle.com/tx/lubbock/11909-quaker-ave?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4454	Chipotle Mexican Grill	0.95
 aee32ebd44c2	Lubbock's Breakfast House & Grill	restaurant	breakfast and brunch restaurant	33.57825	-101.86971	2422 19th St	Lubbock	79401	+18067896384	http://www.lubbockbreakfasthouse.com/		0.95
 fc7f94fdf2c7	Lubbock's Breakfast House & Grill	restaurant	breakfast and brunch restaurant	33.53002	-101.87200	7006 University Ave	Lubbock	79413	+18066878912	http://lubbockbreakfasthouse.com/		0.99
 a4c9e6163162	Lubbock's Breakfast House and Grill	restaurant	breakfast and brunch restaurant	33.54847	-101.89127	3515 50th St	Lubbock	79413	+18063080010	https://lubbockbreakfasthouse.com/		1.00
@@ -2124,7 +2130,6 @@ e0cf60bd5adf	Marco's Pizza	restaurant	pizza restaurant	33.50025	-101.88713	10303
 c9220beeb5df	McAlister's Deli	restaurant	delicatessen	33.53025	-101.95768	6810 Milwaukee Ave	Lubbock	79424	+18065774349	https://locations.mcalistersdeli.com/tx/lubbock/6810-milwaukee-ave?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 cf28232f4958	McAlister's Deli	restaurant	delicatessen	33.57736	-101.86868	2415 19th Street	Lubbock	79401	+18067400022	https://locations.mcalistersdeli.com/tx/lubbock/2415-19th-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 e3fb98092c90	McAlister's Deli	restaurant	delicatessen	33.52058	-101.90343	4210 82nd Street Suite 212	Lubbock	79423	+18067995200	https://locations.mcalistersdeli.com/tx/lubbock/4210-82nd-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.96
-359ffe76d657	McDonald's	restaurant	burger restaurant	33.61661	-101.84274	1710 Amarillo Service Rd	Lubbock	79403		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 23876459ceb1	Meals On Wheels	restaurant		33.19682	-101.36937	630 Oak St	Post	79356	+18064953019	http://www.mowaa.org		0.92
 8ba3e91f0a47	Mesa Grill	restaurant		33.53938	-101.92548	6002 Slide Rd	Lubbock	79414		https://mesagrill.com		0.95
 36d7a05c541a	Mexican Garden	restaurant	mexican restaurant	33.58373	-101.85406	1636 13th St	Lubbock	79401	+18069931364	http://www.houseoftaipeinc.com		0.92
@@ -2156,7 +2161,6 @@ cd11028f59a9	Ohana Japanese Steakhouse	restaurant	pan asian restaurant	33.59678	
 a71457798afc	Ohana Steakhouse and Sushi Bar	restaurant	japanese restaurant	33.51939	-101.92432	5217 82nd St	Lubbock	79424	+18067838298	http://www.ohanasteakhouse.com/		1.00
 d16980d2f8c6	Olive Garden	restaurant	italian restaurant	33.54178	-101.92300	5702 Slide Rd	Lubbock	79414	+18067913575	https://www.olivegarden.com/locations/tx/lubbock/lubbock-south-plains-mall/1218?cmpid=br%3Aog_ag%3Aie_ch%3Asoc_ca%3AOGFB_sn%3Afacebook_gt%3Alubbock-tx-1218_pl%3Alocurl_rd%3A1160	Olive Garden	0.99
 07f8def7b669	Omi Sushi Delivery	restaurant	sushi restaurant	33.53056	-101.95723	7010 Milwaukee Ave	Lubbock	79424	+18062837773			0.82
-5beaa743534d	One Guy From Italy Family Restaurant	restaurant	pizza restaurant	33.54916	-101.90376	4320 50th St	Lubbock	79413	+18067911210	https://www.oneguyfromitaly.com		0.92
 b3e08c5f8417	One Guy From Italy Family Restaurant	restaurant	italian restaurant	33.54904	-101.90377	4320 50th St	Lubbock	79413	+18067911210	http://oneguyfromitaly.com/		0.97
 2db1f4456069	One Guy from Italy University	restaurant	italian restaurant	33.58530	-101.87039	1101 University Ave	Lubbock	79401	+18067471226	http://www.oneguyfromitalylubbock.com		0.97
 023c60a08d45	Oriental Food Express	restaurant	american restaurant	33.53427	-101.95430	6309 66th St	Lubbock	79424	+18065163118	https://oriental-food-express.square.site/		0.63
@@ -2169,15 +2173,8 @@ b3e08c5f8417	One Guy From Italy Family Restaurant	restaurant	italian restaurant	
 b258afc22409	P.F. Chang's	restaurant	asian fusion restaurant	33.56806	-101.94478	2906 W TX-289-LOOP	Lubbock	79407	+18065077020	https://www.pfchangs.com/locations/us/tx/lubbock/2906-west-loop-289/9893-lubbock.html	P.F. Chang's	0.99
 d758474273d3	Pancake House	restaurant	diner	33.59045	-101.85557	510 Avenue Q	Lubbock	79401	+18067658506	http://www.originalpancakehouse.com/		0.99
 0f46c45ec88f	Panchitas Breakfast Burritos	restaurant	mexican restaurant	33.97870	-101.32912	416 E Houston St	Floydada	79235	+18069833955			0.76
-9a43ab6124a0	Panda Express	restaurant	pan asian restaurant	33.59183	-101.92979	5806 19th St.	Lubbock	79407	+18068103966	https://www.pandaexpress.com/locations/tx/lubbock/3690		0.92
-abb9e738d33c	Panda Express	restaurant	pan asian restaurant	33.57775	-101.94150	5806 19th St	Lubbock	79407	+18068103966	https://www.pandaexpress.com/locations/tx/lubbock/3690		0.97
-b8bda918f778	Panda Express	restaurant	chinese restaurant	33.48982	-101.90448	11411 Quaker Ave	Lubbock	79424	+18067830280	http://www.pandaexpress.com/	Panda Express México	0.92
 570393c91626	Panhandle BBQ	restaurant	barbecue restaurant	33.66408	-101.68877	708 Frontage Rd	Idalou	79329	+18064714538	https://www.google.com/search?gs_ssp=eJzj4tVP1zc0zDHNy6tMzkoyYLRSNaiwMEtLNQaiREMDkxQzI0MrgwqjFOPUFMM048TEZBNDy-REL5GCxLyMxLyUnFSFpKRChcyUxJz8UgBjtBe6&q=panhandle+bbq+idalou&oq&gs_lcrp=EgZjaHJvbWUqEggAEC4YJxivARjHARjqAhiMBDISCAAQLhgnGK8BGMcBGOoCGIwEMgwIARAjGCcY6gIYjAQyDAgCECMYJxjqAhiMBDIMCAMQIxgnGOoCGIwEMgwIBBAjGCcY6gIYjAQyDAgFECMYJxjqAhiMBDIMCAYQIxgnGOoCGIwEMgwIBxAjGCcY6gIYjAQyDAgIECMYJxjqAhiMBDIMCAkQIxgnGOoCGIwEMgwIChAjGCcY6gIYjAQyDAgLECMYJxjqAhiMBDIMCAwQIxgnGOoCGIwEMgwIDRAjGCcY6gIYjAQyDAgOECMYJxjqAhiMBNIBBi0xajBqOagCD7ACAQ&client=ms-android-tmus-us-rvc3&sourceid=chrome-mobile&ie=UTF-8		0.99
 81bf4be79c84	Panhandle Deli Provisions Inc.	restaurant	delicatessen	33.55953	-101.83607	3802 Avenue A	Lubbock	79404	+18067441420			0.65
-4b700b682104	Papa Johns	restaurant	pizza restaurant	33.51896	-101.94368	5905 82nd St	Lubbock	79424	+18067987272	https://locations.papajohns.com/united-states/tx/79424/lubbock/5905-82nd-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
-ae6abdcdee69	Papa Johns	restaurant	pizza restaurant	33.58755	-101.87015	2420 9th street	Lubbock	79401	+18067497272	https://locations.papajohns.com/united-states/tx/79401/lubbock/2420-9th-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	1.00
-30524b9d7323	Papa Johns Pizza	restaurant	pizza restaurant	33.59121	-101.92165	405 Slide Rd Ste 108	Lubbock	79416	+18067977272	https://locations.papajohns.com/united-states/tx/79416/lubbock/405-slide-rd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.95
-3d535eba4372	Papa Johns Pizza	restaurant	pizza restaurant	33.58771	-101.87012	2420 9th St	Lubbock	79401	+18067497272	https://www.papajohns.com		0.98
 5d5adcf72a42	Papa Murphy's	restaurant	pizza restaurant	33.51912	-101.88742	8205 Indiana Avenue	Lubbock	79423	+18067922200	https://locations.papamurphys.com/tx/lubbock/8205-indiana-avenue	Papa Murphy's - Jefferson City	0.99
 72b719ecda94	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	33.51903	-101.95647	6319 82nd St	Lubbock	79424	+18066980022	https://order.papamurphys.com/menu/papa-murphys-82nd		0.98
 d177caf13c4a	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	33.59200	-101.94000	421 Frankford Ave Ste B	Lubbock	79416	+18067960600	https://order.papamurphys.com/menu/papa-murphys-frankford		0.98
@@ -2206,22 +2203,6 @@ cb35c5e86c7a	Picoso's Mexican Kitchen	restaurant	texmex restaurant	33.52490	-101
 c6b3e60388c5	Pinocchio's Pizza	restaurant	pizza restaurant	33.59312	-101.92685	5404 4th St #B5	Lubbock	79416	+18067961111	https://www.pinocchiospizzamenu.com/?utm_source=organic_bing&utm_medium=bing_pw		0.95
 b51f41a448e8	Pinocchios Pizza	restaurant	pizza restaurant	33.54763	-101.86928	5015 University Ave	Lubbock	79413	+18067961111	http://www.campusspecial.com/texas-tech/restaurant/pinocchios-pizza?q=menupix		0.92
 b225e1d6124b	Pitforks and Smokerings BBQ	restaurant	barbecue restaurant	33.42152	-101.64448	1808 US 84 E	Slaton	79364	+18063175818	https://riny.top/pitforks-smokerings-bbq		0.92
-11c510999f0b	Pizza Hut	restaurant	pizza restaurant	33.54834	-101.87928	3001 50th Street Lubbock	Lubbock	79412	+18067498200	https://locations.pizzahut.com/tx/lubbock/3001-50th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303055	Pizza Hut	0.99
-1cf77c8ef3fa	Pizza Hut	restaurant	pizza restaurant	33.59373	-101.93906	305 Frankford Ave	Lubbock	79416	+18067990090	https://locations.pizzahut.com/tx/lubbock/305-frankford-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306936	Pizza Hut	0.98
-27dd06123a75	Pizza Hut	restaurant	pizza restaurant	33.48610	-101.88801	11814 S Indiana Ave. Lubbock	Lubbock	79423	+18069937700	https://locations.pizzahut.com/tx/lubbock/11814-s-indiana-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312681	Pizza Hut	0.99
-5533c66c6b77	Pizza Hut	restaurant	pizza restaurant	33.59355	-101.81464	1824 Parkway Dr Lubbock	Lubbock	79403	+18067715570	https://locations.pizzahut.com/tx/lubbock/1824-parkway-dr?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313225	Pizza Hut	0.98
-a019c917ed5c	Pizza Hut	restaurant	pizza restaurant	33.54403	-101.92358	5412 Slide Rd Lubbock	Lubbock	79414	+18067970700	https://locations.pizzahut.com/tx/lubbock/5412-slide-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314067	Pizza Hut	0.97
-b3a0c3248f4c	Pizza Hut	restaurant	pizza restaurant	33.18676	-101.37801	402 S. Broadway Garza	Post	79356	+18064952844	https://locations.pizzahut.com/tx/post/402-s-broadway?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296728	Pizza Hut	0.99
-b7ecd1a08c4f	Pizza Hut	restaurant	pizza restaurant	33.50484	-101.88535	3301 98th Street Lubbock	Lubbock	79423	+18067970007	https://locations.pizzahut.com/tx/lubbock/3301-98th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311856	Pizza Hut	0.99
-b9bc12f65fff	Pizza Hut	restaurant	pizza restaurant	33.51922	-101.99264	7907 82nd St	Wolfforth	79382	+18068333333	https://locations.pizzahut.com/tx/wolfforth/7907-82nd-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=300830	Pizza Hut	0.92
-f4d9e1b79f95	Pizza Hut	restaurant	pizza restaurant	33.57693	-101.90557	1910 Quaker Ave. Lubbock	Lubbock	79407	+18067929922	https://locations.pizzahut.com/tx/lubbock/1910-quaker-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309257	Pizza Hut	0.99
-f7d2de58c735	Pizza Hut	restaurant	pizza restaurant	33.50163	-101.92274	9830 Slide Rd Lubbock	Lubbock	79424	+18067949100	https://locations.pizzahut.com/tx/lubbock/9830-slide-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=311851	Pizza Hut	0.96
-fafa5dd316f2	Pizza Hut	restaurant	pizza restaurant	33.43369	-101.66014	1535 W Division St Lubbock	Slaton	79364	+18068285888	https://locations.pizzahut.com/tx/slaton/1535-w-division-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=297490	Pizza Hut	0.99
-3d4cfc688250	Pizza Hut Express	restaurant	pizza restaurant	33.58153	-101.87477	15th Street & Akron Avenue, Texas Tech University - Student Union Building	Lubbock	79409		https://locations.pizzahut.com/tx/lubbock/15th-street-&-akron-avenue		0.99
-b245d0ba9225	Pizza Hut Express	restaurant	pizza restaurant	33.51788	-101.87285	2535 82nd Street, Tinseltown Lubbock #233	Lubbock	79423		https://locations.pizzahut.com/tx/lubbock/2535-82nd-street		0.97
-e76ce096198c	Pizza Hut Express	restaurant	pizza restaurant	33.65653	-101.82242	5401 N Mlk Blvd	Lubbock	79403	+18067638278			0.85
-7389bfcdf3b2	Pizza Hut Of Clovis, Inc	restaurant		33.52734	-101.88954	3415 73rd St	Lubbock	79423				0.95
-e5907a4423e7	Pizza Hut Of Levelland, Inc	restaurant		33.52734	-101.88954	3415 73rd St	Lubbock	79423				0.95
 97ab23118dea	Pj's	restaurant	delicatessen	33.17049	-101.79704	2101 Avenue J	Tahoka	79373	+18065616507	http://www.cateringfromtheheart.com		0.77
 bbf0cac1fcfb	Plain Janes fried pies (A Cafe & Bakery)	restaurant		33.50478	-101.88905	3407 98th Ste 600	Lubbock	79423	+18069935125			0.85
 162b17a1ee38	Platform Restaurant Presented By BCS Catering	restaurant		33.58391	-101.84828	1212 Avenue K	Lubbock	79401	+18067621088	http://www.platformlbk.com		0.95
@@ -2230,9 +2211,6 @@ bbf0cac1fcfb	Plain Janes fried pies (A Cafe & Bakery)	restaurant		33.50478	-101.
 2519c3d4d9e1	Polibertos Taco Shop 2	restaurant	mexican restaurant	33.54833	-101.85997	2001 50th St	Lubbock	79412	+18064075866			0.99
 1408e48b0048	Pollo Rico Mexican Restaurant	restaurant	mexican restaurant	33.59716	-101.85829	1912 Clovis Rd	Lubbock	79415	+18063927912	https://order.online/store/pollo-rico-lubbock-23582667/?delivery=true&hideModal=true		0.96
 666be4cf46d4	Polly's Place	restaurant	mexican restaurant	33.57807	-101.83714	1815 Avenue B	Lubbock	79401	+18067449800			0.99
-94da37e263c6	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	33.54761	-101.92294	51st and slide	Lubbock	79414	+18067991127	https://popeyes.com		0.77
-ac2bcaff646f	Potbelly	restaurant	sandwich shop	33.53340	-101.95774	6616 Milwaukee Ave #900	Lubbock	79424	+18066874635	https://www.potbelly.com/locations/texas/lubbock-milwaukee-ave-drive-thru	Potbelly Sandwich Shop	0.98
-ad915750a176	Potbelly	restaurant	sandwich shop	33.58760	-101.86864	2402 9th St	Lubbock	79401	+18067475667	https://www.potbelly.com/locations/texas/lubbock-texas-tech	Potbelly Sandwich Shop	0.99
 6b162f10b094	Powell's Country Bar-B-Q	restaurant	barbecue restaurant	33.57761	-101.98943	7729 19th St	Lubbock	79407	+18067927270	http://www.countryinns.com		0.96
 d0a50f9c8022	Promised Rest 4:1	restaurant	comfort food restaurant	33.42719	-101.64265	1250 S 9th St	Slaton	79364				0.92
 87545e4f8032	Pure Tejano Bar & Grill	restaurant	bar and grill restaurant	33.54776	-101.86946	5015 University Ave	Lubbock	79412	+18067013010			0.97
@@ -2240,7 +2218,6 @@ d0a50f9c8022	Promised Rest 4:1	restaurant	comfort food restaurant	33.42719	-101.
 aca3b9694455	Qdoba Mexican Grill	restaurant	mexican restaurant	33.48059	-101.88777	12406 Indiana Ave	Lubbock	79423	+18065169393	https://locations.qdoba.com/us/tx/lubbock/12406-indiana-ave	Qdoba	1.00
 e338012d0b5e	Quaker Ave Sonic, Lubbock, Tx. Ltd	restaurant		33.52743	-101.90639	7220 Quaker Ave	Lubbock	79424				0.95
 f129fb7be857	Quince's Taco Shack	restaurant	mexican restaurant	33.54829	-101.85403	5001 Avenue Q	Lubbock	79412	+18062241802			0.97
-9d35ed8a7c9b	Quiznos	restaurant	sandwich shop	33.57814	-101.86665	2312 19th St	Lubbock	79401	+18067717827	http://www.quiznos.com		0.92
 399c7e5bb0f4	Q’s Restaurant	restaurant	mexican restaurant	33.54908	-101.84961	1308 50th St	Lubbock	79412	+18064075537			0.92
 b879b137ca0b	Rachael's Restaurant	restaurant	breakfast and brunch restaurant	33.51994	-101.88920	3416 82nd St	Lubbock	79423	+18067777064	https://www.makeitbutter.com/rachaels-restaurant-and-tortilla-factory/online-ordering		0.99
 28582176f53d	Raider Bar and Grill	restaurant	bar and grill restaurant	33.58440	-101.87018	2419 Broadway St	Lubbock	79401	+18063686731			0.99
@@ -2280,7 +2257,6 @@ be0ba763dcc1	Rosa's Cafe	restaurant	texmex restaurant	33.54813	-101.88282	3115 5
 b0036a4f2cc0	Rosa's Café & Tortilla Factory	restaurant	texmex restaurant	33.59184	-101.90659	4407 4th St	Lubbock	79416	+18067855334	https://www.rosascafe.com/	Rosa's Cafe	0.99
 53bb3333dfeb	Royal Indian Cuisine	restaurant	halal restaurant	33.54910	-101.89790	3806 50th St	Lubbock	79413	+18068539876	https://royalindianlubbock.com/order-now		0.99
 bd0b3c65c0b0	Royal Seafood Shack	restaurant	american restaurant	33.52530	-101.95791	4919 34th St	Lubbock	79410	+18067013413	http://www.royalseafoodshack.com/		0.98
-f09169dfc2d4	Royal Seafood Shack	restaurant	american restaurant	33.56298	-101.91737	4919 34th St	Lubbock	79410	+18067013413	http://www.royalseafoodshack.com/		0.97
 dd428681acee	Ruby Tequila's Mex-Tex Kitchen	restaurant	mexican restaurant	33.51669	-101.86976	8601 University Ave	Lubbock	79423	+18066877829	http://www.rubytequilas.com/		0.92
 fc664864c06c	Ruby Tequila's Mexican Kitchen	restaurant		33.59092	-101.86951	413 University Ave Ste 200	Lubbock	79401	+18067477829	rubytequilas.com		0.92
 658d9f7d077e	Rudy's Country Store and Bar-B-Q	restaurant	barbecue restaurant	33.53519	-101.91890	4930 S Loop 289 #300	Lubbock	79414	+18067971777	http://rudysbbq.com/location/detail/lubbock-tx	Rudy's "Country Store" and Bar-B-Q	0.90
@@ -2300,10 +2276,6 @@ eab1e3d58c82	Sams Place West Wigg	restaurant		33.57967	-101.88334	3211 18th St	L
 8bd11bdb01d2	Sarah's	restaurant	burger restaurant	33.68134	-101.38757	1010 Avenue E	Ralls	79357	+18062532743			0.96
 393a7f7927ed	Savage Tiki Lounge	restaurant	bar and grill restaurant	33.57869	-101.87025	1625 University Ave	Lubbock	79401	+18069028709	https://savagetavern806.com/		0.85
 536df0ee89f3	Sbarro	restaurant	pizza restaurant	33.58167	-101.87480		Lubbock	79409	+18067424610	https://sbarro.com/	Sbarro	1.00
-344400a6d5b1	Schlotzsky's	restaurant	sandwich shop	33.52009	-101.96496	6804 82nd St	Lubbock	79424	+18067014960	https://locations.schlotzskys.com/tx/lubbock/6804-82nd-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
-6abd44e8c176	Schlotzsky's	restaurant	sandwich shop	33.54651	-101.92300	5204 Slide Rd	Lubbock	79414	+18067931233	https://www.schlotzskys.com/texas/lubbock/1176		0.94
-88d77a7105ad	Schlotzsky's	restaurant	sandwich shop	33.57763	-101.89560	3715 19th St	Lubbock	79410	+18067935542	https://locations.schlotzskys.com/tx/lubbock/3715-19th-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
-d8af5115a4a3	Schlotzsky's	restaurant	sandwich shop	33.52101	-101.88774	8101 Indiana Ave	Lubbock	79423	+18067923396	http://www.schlotzskys.com/lubbock/1179/home		0.99
 495c6be5ec2c	Sdi 34th & S Lubbock, Texas, Ltd	restaurant		33.56367	-101.85781	1902 34th St	Lubbock	79411				0.95
 8a333646202b	Sdi Idalou Tx Llc	restaurant		33.66591	-101.68485	306 W 1st St	Idalou	79329				0.95
 8bb5b8933b1b	Sdi Indiana Ave, Llc	restaurant		33.54969	-101.88840	4904 Indiana Ave	Lubbock	79413				0.95
@@ -2333,8 +2305,6 @@ bee5bcbaa1a4	Snack Shack	restaurant		33.99003	-101.34136	509 N 2nd St, Floydada,
 5b1661f454ec	Sograte BBQ and Brew	restaurant		33.51749	-101.83563	8405 Ash Ave	Lubbock	79404	+18063195227	http://sograte.com/		0.66
 3cd315550c0d	Something Different Grill	restaurant		33.49884	-101.90441	10501 Quaker Ave Ste 100	Lubbock	79423	+18069996700		Something Different Grill - Texas	0.99
 48261532c83a	Something Different Grill	restaurant	american restaurant	33.54826	-101.90331	4317 50th St	Lubbock	79413	+18067979797	http://www.somethingdifferentgrill.com	Something Different Grill - Texas	0.99
-6d198ac72315	Sonic Drive-In	restaurant	burger restaurant	33.57779	-101.84032	6419 W 19th St	Lubbock	79407	+18067804555	https://locations.sonicdrivein.com/tx/lubbock/6419-w.-19th-street.html		0.85
-9a688ec04aad	Sonic Drive-In	restaurant	burger restaurant	33.61583	-101.81852	1609 Martin Luther King Blvd	Lubbock	79403	+18066873428	https://locations.sonicdrivein.com/tx/lubbock/1609-martin-luther-king-blvd.html		0.85
 28a5afb7fac7	Soup Man	restaurant	soup restaurant	33.53392	-101.92408	6524 Slide Rd	Lubbock	79424	+18067944674	http://www.originalsoupman.com		0.92
 7b82c31ab9c4	Souper Salad	restaurant	buffet restaurant	33.53342	-101.92111	6703 Slide Rd	Lubbock	79424	+18067940997	https://locations.soupersalad.com/ll/US/TX/Lubbock/6703-slide-road/?ll%2FUS%2FTX%2FEl-Paso%2F7019-N-Mesa	Souper Salad	0.94
 0a52a6de2749	Spanky's	restaurant	burger restaurant	33.58772	-101.87035	811 University Ave	Lubbock	79401	+18067445677	http://www.spankys.com/		0.99
@@ -2346,38 +2316,13 @@ fb649106e231	Stacked Breakfast and Lunch	restaurant	breakfast and brunch restaur
 85bbff15d8f3	Stella's Restaurant & Catering	restaurant	italian restaurant	33.51920	-101.94613	6015 82nd St	Lubbock	79424	+18067859299	https://stellaslubbock.us/product/chefs-dinner/		0.95
 937c9a203f8f	Step Values Llc	restaurant		33.53601	-101.94083	5807 63rd St Unit 100	Lubbock	79424				0.95
 6d1961727f4b	Stubb's Bar-B-Que	restaurant	barbecue restaurant	33.58440	-101.83516	108 E Broadway	Lubbock	79403	+12547096697			0.97
-1cdc6f464200	Subway	restaurant	sandwich shop	33.57759	-101.95307	6301 19th Street	Lubbock	79407	+18066875071	https://restaurants.subway.com/united-states/tx/lubbock/6301-19th-street	Subway	0.98
-26392ca398d5	Subway	restaurant	sandwich shop	33.59264	-101.94131	5816 4th St	Lubbock	79416	+18067910991	https://restaurants.subway.com/united-states/tx/lubbock/5816-4th-st	Subway	0.98
-2ffed732161c	Subway	restaurant	sandwich shop	33.51657	-101.95539	6315 82nd St	Lubbock	79424	+18067717934	https://alibabacharleston.com		0.90
-31f777bbae3b	Subway	restaurant	sandwich shop	33.47591	-101.84370	13001 Highway 87	Lubbock	79423	+18067453023	https://alibabacharleston.com		0.55
-3bdd1addeccd	Subway	restaurant	sandwich shop	33.50597	-101.92417	5214 98th Street Suite 105	Lubbock	79424	+18067830155	https://restaurants.subway.com/united-states/tx/lubbock/5214-98th-street	Subway	0.95
-46de7cc40907	Subway	restaurant	sandwich shop	33.64227	-101.83715	4221 N Interstate 27	Lubbock	79403	+18067441531	https://restaurants.subway.com/united-states/tx/lubbock/4221-north-interstate-27	Subway	0.95
-4d497ebb06d9	Subway	restaurant	sandwich shop	33.98501	-101.34135	102 S 2nd St	Floydada	79235	+18069835941	https://restaurants.subway.com/united-states/tx/floydada/102-s-2nd-st	Subway	0.98
-4e64de51c699	Subway	restaurant	sandwich shop	33.56391	-101.85558	3302 Ave Q Suite 1	Lubbock	79411	+18066874114	https://restaurants.subway.com/united-states/tx/lubbock/3302-ave-q	Subway	0.98
-4fffa4f6c35e	Subway	restaurant	sandwich shop	33.54906	-101.90670	4412 50th St Suite B	Lubbock	79414	+18067960581	https://restaurants.subway.com/united-states/tx/lubbock/4412-50th-st	Subway	0.98
-6b60f4854859	Subway	restaurant	sandwich shop	33.66442	-101.68883	708 Frontage Rd	Idalou	79329	+18068923314	https://www.subway.com		0.92
-6bbc90164788	Subway	restaurant	sandwich shop	33.56297	-101.91795	4923 34th St	Lubbock	79410	+18067923252	https://restaurants.subway.com/united-states/tx/lubbock/4923-34th-st	Subway	0.96
-797ae9cdca80	Subway	restaurant	sandwich shop	33.58584	-101.92283	1018 Slide Road Suite A	Lubbock	79416	+18066872692	https://restaurants.subway.com/united-states/tx/lubbock/1018-slide-road	Subway	0.99
-8ecc69df6ea7	Subway	restaurant	sandwich shop	33.53635	-101.94018	6302 Frankford Ave	Lubbock	79424	+18066875275	https://restaurants.subway.com/united-states/tx/lubbock/6302-frankford-ave	Subway	0.95
-b726c519ffe4	Subway	restaurant	sandwich shop	33.54778	-101.87009	5015 University Ave Suite A-2	Lubbock	79413	+18067939650	https://restaurants.subway.com/united-states/tx/lubbock/5015-university-ave	Subway	0.97
-b80d6facac2b	Subway	restaurant	sandwich shop	33.49078	-101.90669	4414 114th St	Lubbock	79424	+18069027311	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72256&utm_campaign=evergreen-2020&y_source=1_MTAxODk5MTAzOC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
-b859da5d6740	Subway	restaurant	sandwich shop	33.59038	-101.85596		Lubbock		+18067410805	http://www.subway.com/	Subway	0.65
-c5e54061373f	Subway	restaurant	sandwich shop	33.59480	-101.87085	216 University Avenue, Suite 200	Lubbock	79415	+18064075370	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=71727&utm_campaign=evergreen-2020&y_source=1_Njk5MTIzMDYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.99
-e1f3ec298331	Subway	restaurant	sandwich shop	33.51930	-101.96420	6819 82nd St	Lubbock	79424			Subway	0.80
-f208b259e0f1	Subway	restaurant	sandwich shop	33.51958	-101.87265	2515 82nd St	Lubbock	79423	+18067486794	https://restaurants.subway.com/united-states/tx/lubbock/2515-82nd-st	Subway	0.97
-f2c56b00e03b	Subway	restaurant	sandwich shop	33.19768	-101.37817	612 N Broadway St	Post	79356	+18064954186	https://restaurants.subway.com/united-states/tx/post/612-broadway-rd	Subway	0.97
-f808534d0216	Subway	restaurant	sandwich shop	33.59314	-101.84097	602 4th Street	Lubbock	79401	+18067442486	https://restaurants.subway.com/united-states/tx/lubbock/602-4th-street?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50360&utm_campaign=evergreen-2020&y_source=1_MTQ5MTMxMTQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
-f86ca4f96343	Subway	restaurant	sandwich shop	33.58509	-101.87036	1109 University Ave	Lubbock	79401	+18067013875	https://www.subway.com		0.97
-f9565e848526	Subway	restaurant	sandwich shop	33.73664	-101.84225	70 S Aspen Ave	New Deal	79350	+18156558352	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72418&utm_campaign=evergreen-2020&y_source=1_MTAxMzU0MDkzMS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 2f1f9c3b02ce	Super Suppers	restaurant	diner	33.51889	-101.94353	5905 82nd St	Lubbock	79424	+18067942300	http://www.supersuppers.com		0.92
 e86aae389631	Susaki Sushi Steakhouse	restaurant	steakhouse	33.51818	-101.95313	6301 82nd St	Lubbock	79424	+18067948881	http://www.susakilubbock.com/		0.92
 3affc6018c8f	Sushi Nami	restaurant	sushi restaurant	33.54609	-101.95609	5015 Milwaukee Ave	Lubbock	79407	+18066462804	https://sushinamilubbock.com/		0.99
-6d0aa7d962b8	Sweet Pea's BBQ	restaurant		33.57206	-101.82130	1321 E 25th St	Lubbock	79404	+18065441370			0.73
 83df6c993a5c	Sweet Pea's BBQ	restaurant		33.57211	-101.82131	1321 E 25th St	Lubbock	79404	+18065441370			0.74
 56ac1d63cad6	T and A's Bar A Chill	restaurant	bar and grill restaurant	33.57074	-101.84577	2512 Texas Ave	Lubbock	79411	+18067474600			0.92
 6d8b56817480	T&M Smoked Meats	restaurant	barbecue restaurant	33.34406	-101.55662	402 FM-2106	Slaton	79364	+18067822945			0.74
 68a1bd09cc59	Table 82	restaurant		33.52066	-101.90282	4210 82nd St	Lubbock	79423	+18067993408	http://www.brisaslounge.com		0.92
-cfa6068681f7	Taco Bell	restaurant	taco restaurant	33.51973	-101.92109	5111 82nd St	Lubbock	79424	+18067987513			0.92
 a1525cee0d96	Taco Casa	restaurant	texmex restaurant	33.51490	-101.87061	8720 University Ave	Lubbock	79423	+18069935082	https://tacocasatexas.com/location/107-lubbock/	Taco Casa	1.00
 ec6a80ea96ba	Taco Casa	restaurant	texmex restaurant	33.51948	-101.96326	6815 82nd St	Lubbock	79424	+18063680244	http://www.tacocasatexas.com/	Taco Casa	0.95
 56d1a0a64660	Taco Villa	restaurant	texmex restaurant	33.52141	-101.88831	8006 Indiana Ave	Lubbock	79424	+18067955688	http://www.tacovillaonline.com/	Taco Villa Fanatics	0.97
@@ -2472,9 +2417,6 @@ bf25e5035459	Vito’s Pizzeria & Ice Cream	restaurant	pizza restaurant	33.50491	
 bee774d816fd	Vizo’s	restaurant	african restaurant	33.53515	-101.91884	3131 34th St	Lubbock	79410	+18063686490	http://www.vizoslubbock.com		0.77
 3b0ab90e37d8	Ware's Backyard Bar-B-Q	restaurant		33.44587	-101.87786	2819 Woodrow Rd	Lubbock	79423	+18062418551			0.71
 a86b230799d8	Weigh Of Life Nutrition	restaurant		33.52010	-101.92383	5206 82nd St	Lubbock	79424	+18066986866	https://www.goherbalife.com/ahaskell		0.92
-85706ae95d37	Wendy's	restaurant	burger restaurant	33.60245	-101.86996	212 University Ave	Lubbock	79415	+18063709120	https://locations.wendys.com/united-states/tx/lubbock/212-university-ave		0.85
-9f6d2ac0f719	Wendy's	restaurant	burger restaurant	33.54623	-101.92306	5212 Slide Rd	Lubbock	79414	+18067998855			0.92
-f53d3b63eece	Wendy's	restaurant	burger restaurant	33.57746	-101.86768	2401 19th St	Lubbock	79401	+18067410955			0.97
 23a6ac836116	West Crust Artisan Pizza	restaurant	pizza restaurant	33.52030	-101.94615	6012 82nd St #A	Lubbock	79424	+18067719378	http://westcrust.com		0.77
 15ecd09192d6	West Texas Bent Nail, Llc	restaurant		33.50475	-101.92549	5217 98th St Ste 900	Lubbock	79424		https://www.thebentnaillubbock.com		0.95
 a6d619550480	Which Wich? Superior Sandwiches	restaurant	sandwich shop	33.58580	-101.87038	1021 University Ave	Lubbock	79401		http://www.whichwich.com		0.92
@@ -2485,8 +2427,6 @@ ce6fa4f90e90	Whiskey River	restaurant		33.57911	-101.84477	1720 Buddy Holly Ave	
 9a5790cde9b9	Wienerschnitzel	restaurant	american restaurant	33.52855	-101.90701	7102 Quaker Ave	Lubbock	79424	+18067935941	http://www.wienerschnitzel.com/	Wienerschnitzel	0.98
 9b01a793e5d2	Wienerschnitzel	restaurant	hot dog restaurant	33.59391	-101.87008	301 University Ave	Lubbock	79415	+18064075593	http://www.wienerschnitzel.com/	Wienerschnitzel	1.00
 3d4ebeeecdf2	Wiley's Old Fashion Bar-B-Q	restaurant	barbecue restaurant	33.59517	-101.81496	1805 Parkway Dr	Lubbock	79403	+18067657818	http://www.barbecuingusa.com		0.77
-5cbb2e6420f0	Wingstop	restaurant	chicken restaurant	33.48972	-101.90748	4409 114th St Suite100	Lubbock	79424	+18063106484	https://www.wingstop.com/location/wingstop-1911-lubbock-tx-79424/menu?y_source=1_NTUyMDcxOTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-78270f611923	Wingstop	restaurant	chicken restaurant	33.58892	-101.85721	1803 7th St Ste 501	Lubbock	79401	+18067447675	https://www.wingstop.com/location/wingstop-341-lubbock-tx-79401/menu?y_source=1_NTUyMDY3MTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 85814c1f98bb	Wjw Restaurant Group Llc	restaurant		33.51906	-101.94627	6015 82nd St Ste 5	Lubbock	79424				0.95
 310705edca95	Wolforth Sdi, Ltd	restaurant		33.51897	-101.99211	7901 82nd St	Wolfforth	79382				0.95
 943353ca093a	Woody's Pizza & Grill	restaurant	diner	33.56271	-101.88310	3135 34th St	Lubbock	79410	+18063685263	https://woodysbrickovenpizzaandgrill.com/		0.99
@@ -2537,8 +2477,6 @@ df02b5a861f7	Lakeside Rehabilitation and Care Center	senior	retirement home	33.5
 c9e01b5b311a	Lubbock Health Care Center	senior	retirement home	33.57494	-101.90310	4120 22nd Pl	Lubbock	79410	+18067933252	http://www.lubbockcarecenter.com/		0.99
 da880d4f848f	Lubbock LTC Nursing and Rehabilitation	senior	retirement home	33.57200	-101.90559	2400 Quaker Ave	Lubbock	79410	+18067922831	http://lubbockltccare.com/index.html		0.92
 5f302ddc4bea	Lubbock State Supported Living Center	senior	retirement home	33.63250	-101.87830	3401 N University Ave	Lubbock	79415	+18067637041			0.98
-93ac6a888cd8	Lubbock State Supported Living Center	senior	retirement home	33.63014	-101.87614	3401 N University Ave	Lubbock	79415	+18067637041			0.97
-be2feec103dd	Lubbock State Supported Living Center	senior	assisted living facility	33.63386	-101.87147	3401 N University Ave	Lubbock	79415	+18067637041			0.65
 d9dd2328adb4	Lynnwood Assisted Living	senior	retirement home	33.16793	-101.81541	1801 Country Club Ln	Tahoka	79373	+18069981226	http://www.lchdhealthcare.org/		1.00
 663451200719	Mackenzie Court	senior	retirement home	33.51551	-101.87276	8609 Boston Ave	Lubbock	79423	+18065901241	https://12oaks.net/senior-living-communities/mackenzie-court/		0.97
 b88af5a78c74	Manna Acres Assisted Living Facility	senior	retirement home	33.57162	-101.92333	2510 Slide Rd	Lubbock	79407	+18067813268	http://www.assistedlivinglubbock.com		0.98

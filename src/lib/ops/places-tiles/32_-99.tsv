@@ -105,7 +105,6 @@ a4486b8b341a	Certified Auto Direct	cardealer		32.40121	-98.79279	1411 E Main St	
 6e53d179865c	Holiday Gordon Ford	cardealer		32.51451	-98.36610	70570 Interstate 20	Gordon	76453		https://www.holidaygordonfordtx.com	Ford	0.86
 c816ede65aa7	Holiday Gordon Ford	cardealer		32.54944	-98.37038	104 W Crockett St	Gordon	76453	+12546935323	https://www.holidaygordonfordtx.com	Ford Motor Company	0.92
 793d368a5ca0	Hood King Motor Company	cardealer		32.40181	-98.79299	1308 East Main, Eastland	Eastland	76448	+12546291786	http://www.stanleyfordeastland.com	Ford Motor Company	0.86
-10db919986f2	Howorth Auto Group	cardealer		32.80901	-98.10213	1302 E Hubbard St	Mineral Wells	76067	+18179017778	http://www.howorthautogroup.com/		0.97
 c524d9c10d04	I-20 Motors	cardealer		32.37514	-98.98064	800 W Interstate 20	Cisco	76437	+12544424262	http://www.desai.com		0.92
 4cc966b09916	Jack Powell Ford	cardealer		32.80812	-98.10056	1418 SE 1st St	Mineral Wells	76067	+19403251331	https://www.jackpowellford.com/	Ford Motor Company	0.92
 5614e16d7796	Jeep	cardealer		32.81121	-98.07352	4011 Highway 180 E	Mineral Wells	76067	+19406543120	https://www.ramcountrymineralwells.com		0.92
@@ -204,13 +203,10 @@ e005ecaf5d41	Ranger College	college		32.45470	-98.68547	1240 College Cir	Ranger	
 2d88124913b8	Tarleton Center	college		32.21562	-98.21455	Nancy Golden Dr	Stephenville	76401				0.93
 9e9448838002	Tarleton Mobile Welcome Center	college		32.22810	-98.18958	1333 E Washington St	Stephenville	76401	+12549689845	http://www.tarleton.edu/welcome		0.57
 954bde045b79	Tarleton State Dairy Center	college		32.25652	-98.19601		Stephenville					0.73
-3985e8b196d0	Tarleton State Duck Camp	college		32.21829	-98.21935	1451 W Jones St	Stephenville	76401	+12549689256	https://www.tarleton.edu/orientation/index.html		0.70
 f207f2ba0599	Tarleton State Duck Camp	college		32.21458	-98.21465	1451 W Jones St	Stephenville	76401	+12549689256	https://www.tarleton.edu/orientation/index.html		0.70
 5540c2214aa8	Tarleton State Math Building	college		32.21693	-98.21690	Mathematics Building, 500 Doc Blanchard Blvd	Stephenville	76401	+12549689000			0.92
-24a402325cda	Tarleton State University	college		32.20211	-98.23978		Stephenville		+12549689000	http://www.tarleton.edu/		0.79
 7b0e2674d2c4	Tarleton State University	college		32.20421	-98.23942		Stephenville		+12549689000	http://www.tarleton.edu/		0.97
 b11c74c044a8	Tarleton State University	college		32.21605	-98.21596	1333 W Washington St	Stephenville	76401	+12549689000	http://www.tarleton.edu/		0.94
-daf14979c2f8	Tarleton State University	college		32.22020	-98.21360		Stephenville					0.97
 2bfbbefdb4d1	Tarleton State University - Communication Studies Department	college		32.22810	-98.18958	1333 E Washington St	Stephenville	76401	+12549689149	http://www.tarleton.edu/communications/		0.73
 9ca35e781dfe	Tarleton State University Honors College	college		32.22810	-98.18958	1333 E Washington St	Stephenville	76401	+12549681926	http://www.tarleton.edu/honors		0.92
 a961706c636a	Tarleton State University Social Work Department	college		32.22810	-98.18958	1333 E Washington St	Stephenville	76401	+12549689276	https://www.tarleton.edu/socialwork/index.html		0.93
@@ -258,7 +254,6 @@ f5d7b66e34d4	Alon	convenience		32.40185	-98.79222	1488 E Main St	Eastland	76448	
 4dee42935ef6	B & B Food Mart	convenience		32.52079	-98.12801	20482 US-281	Santo	76462	+12546463678	http://citgo.com		0.90
 dc18ef6c5c85	B & B Food Mart	convenience		32.52072	-98.12908	20482 S Highway 281	Lipan	76462	+12546463677			0.55
 2e1469b73d13	B and B Country Store	convenience		32.34281	-98.29476	19525 TX-108	Stephenville	76401	+12549180073			0.92
-06836b87be91	Bargain Town	convenience		32.22699	-98.19200	1111 E Washington St	Stephenville	76401	+12549684410	http://www.vwstores.com/		0.65
 6424bdb45b0c	Bargain Town	convenience		32.22649	-98.19526	1111 E Washington St	Stephenville	76401	+12549684410	http://www.vwstores.com/		0.68
 f6e947e8c2d9	Bass Hollow Lodge & Store	convenience		32.90134	-98.55638	4553 FM 1148	Graham	76450	+19404408471	https://basshollow.com		0.92
 59a9fe428f65	Bluff Dale Country Store	convenience		32.35153	-98.02247	28359 US-377	Bluff Dale	76433	+12547283690	http://valero.com		1.00
@@ -288,11 +283,9 @@ c2bee99dd103	Circle K	convenience		32.11707	-98.53460	100 E Navarro Ave	De Leon	
 04b1b2fc284f	Conoco	convenience		32.75205	-98.90286	411 S Breckenridge Ave	Breckenridge	76424	+12542128021	https://www.conoco.com/		0.92
 16c7cbb9936f	Conoco	convenience		32.78938	-98.11037	80 281 Tlpk	Mineral Wells	76067	+19403252412	https://www.conoco.com/		1.00
 1f020b0c8e9b	Conoco	convenience		32.80344	-98.13501	1901 US-180	Mineral Wells	76067	+19403258372	https://www.conoco.com/		0.92
-218cf3bd0b86	Conoco	convenience		32.80348	-98.18386	1901 Us-180	Mineral Wells	76067	+19403258372	https://www.conoco.com/station/con-tommys-12-0000876532/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
 2ff3c1c7cf14	Conoco	convenience		32.22501	-98.22765	1660 W Lingleville Rd	Stephenville	76401	+12549180124	https://www.conoco.com/		1.00
 647a18eeec89	Conoco	convenience		32.60427	-98.21613	13884 Crockett St	Santo	76472	+19407693977	https://www.conoco.com/		0.92
 8bb47bfdd81b	Conoco	convenience		32.80917	-98.08662	101 SE 25th Ave	Mineral Wells	76067	+19403252412	https://www.conoco.com/	Conoco	0.86
-9a6dda8d27b9	Conoco	convenience		32.26631	-98.14738	9001 Us-377	Tolar	76476	+12548354408	https://www.conoco.com/station/con-tommys-35-0000879422/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
 ab800fce28ba	Conoco	convenience		32.82589	-98.11295	2423 US-281	Mineral Wells	76067	+19403281683	https://www.conoco.com/		1.00
 dd8aae78290f	Conoco	convenience		32.46953	-98.67904	100 Railroad Ave	Ranger	76470	+12546475393	https://www.conoco.com/		1.00
 b403f100e4b6	Corner Stop	convenience		32.80418	-98.10780	716 SE 6th Ave	Mineral Wells	76067	+19403256118			0.92
@@ -324,7 +317,6 @@ cd1376e943b7	E-z Mart	convenience		32.80435	-98.08898	700 SE 25th Ave	Mineral We
 2444cdba39b5	Eastland Truck Stop	convenience		32.37775	-98.83022	11618 IH-20	Eastland	76448		https://www.exxon.com/en/find-station/exxon-eastland-tx-eastlandtruckstop-200329480	Exxon	0.80
 0d7c95243b7a	Everisto's Tire & Appliance	convenience		32.40176	-98.81574	305 E Main St	Eastland	76448	+12546293608	http://www.everistostire.com/		0.92
 3d32acf6dad4	Exxon	convenience		32.60608	-98.11141	14100 S HWY 281	Santo	76472		https://www.exxon.com/en/find-station/exxon-santo-tx-exxon-200331560	Exxon	0.80
-71d79d254cce	Exxon	convenience		32.20205	-98.24512		Stephenville		+12549682912	http://www.exxon.com		0.92
 8f7d4ce9dd02	Exxon	convenience		32.20635	-98.23178	2963 W. Washington	Stephenville	76401	+12549682912	https://www.exxon.com/en/find-station/exxon-stephenville-tx-foodplaza10-200312134?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
 a584976739d5	Exxon	convenience		32.40039	-98.78848	10075 Ih 20	Eastland	76448	+12546291280	https://www.exxonmobilfuels.com/en/find-gas-station/200317115	Exxon Hop In	1.00
 a5de5d91424e	Exxon	convenience		32.51374	-98.36807	103 W I 20 & Hwy 108	Gordon	76463	+12546935599	https://www.exxonmobilfuels.com/en/find-gas-station/200312420		1.00
@@ -353,7 +345,6 @@ d56e208b3d10	Kwik Stop #3	convenience		32.79666	-98.09128	1607 SE 22nd St	Minera
 305b1ab4f3e2	Lone Camp General	convenience		32.67933	-98.26920	7128 S Farm to Market 4	Palo Pinto	76472	+19406592142	http://www.lone-stardepot.com		0.93
 d0c814503cc1	Lone Star Mini Mart	convenience		32.81585	-98.11273	902 N Oak Ave	Mineral Wells	76067	+19403253891			0.94
 445fbc9c418c	Love's Travel Stop	convenience		32.44111	-98.69443	6950 I-20	Ranger	76470	+12546473700	https://www.loves.com/locations/270		0.98
-7bda3aac6004	Love's Travel Stop	convenience		32.44885	-98.67574	6950 I-20	Ranger	76470	+12546473700	https://www.loves.com/locations/270		0.85
 68d24d84111a	Many's Minimart	convenience		32.08205	-98.33492	209 Liberty St	Dublin	76446	+12544454640	https://many-s-minimart.hub.biz/		0.92
 46c35d8a3994	Maverick Travel Center	convenience		32.40306	-98.78817	9986 Interstate 20	Eastland	76448	+12546293100	https://mavericktxusa.com/		0.92
 9b1bed008580	Maverick Travel Center	convenience		32.60597	-98.11189	14100 S Highway 281	Santo	76472	+19407692206	http://www.mavericktravel-center.com/		0.98
@@ -430,7 +421,6 @@ a23b98dbf153	TOMMYS 15	convenience		32.80888	-98.08643	101 SW 25TH ST	Mineral We
 b151a95858ee	Tommys Handy Mart	convenience		32.81579	-98.11282	902 N Oak Ave	Mineral Wells	76067	+19403259222	http://www.texaco.com/		0.92
 d126d8e62dc4	Trailway Trading Post	convenience		32.81484	-98.03873	Lake Mineral Wells State Park	Mineral Wells	76067	+19403253630	https://www.trailwaytradingpost.store		0.77
 0de34ca89676	Valero	convenience		32.35173	-98.02242	28359 US Highway 377 N	Bluff Dale	76433	+12547283690	http://www.valero.com	Valero Energy	0.97
-31acf3d11e8a	Valero	convenience		32.08390	-98.33775		Dublin	76446	+12544453533	https://locations.valero.com/en-us/LocationDetails/Index/505-EAST-BLACKJACK-STREET/0000026897	Valero	0.92
 d10b5e50964a	Valero	convenience		32.09585	-98.33926	720 N Patrick St	Dublin	76446	+12103452000	https://www.valero.com		0.92
 946b011f0bc5	Valero Energy	convenience		32.75562	-98.89104	900 E Walker St	Breckenridge	76424	+12545592306	http://www.valero.com	Valero	0.83
 d33465a4546b	Valero Energy	convenience		32.37772	-98.83026	11618 I-20 W	Eastland	76448	+12546298616	http://www.valero.com	Valero Energy	0.63
@@ -439,9 +429,9 @@ d33465a4546b	Valero Energy	convenience		32.37772	-98.83026	11618 I-20 W	Eastland
 98ce8964fce0	Yesway	convenience		32.43761	-98.69794	7201 I-20	Ranger	76470	+12546473388	https://yesway.com/	Yesway	0.92
 d944d62eb07c	Yesway	convenience		32.45043	-98.67060	7201 Interstate 20	Ranger	76470	+12546473388	https://yesway.com/		0.85
 7003acd28896	Arby's	fastfood		32.81020	-98.08221	103 Garrett Morris Pkwy	Mineral Wells	76067	+19408427001	https://locations.arbys.com/tx/mineralwells/103-garrett-morris-pkwy.html		0.97
+c21d9aceab31	Burger King	fastfood	burger restaurant	32.37564	-98.83060	11617 I-20	Eastland	76448	+12544887041	https://burgerking.com/store-locator/store/28663	Burger King	0.94
 3a46ae50684e	Chick-fil-A	fastfood		32.20376	-98.23888	2798 W Washington St	Stephenville	76401	+12544313336	https://www.chick-fil-a.com/locations/tx/stephenville-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 61e322a3932a	Chick-fil-A	fastfood		32.21755	-98.21879	1451 W Jones St	Stephenville	76401	+12549689444	https://www.chick-fil-a.com/locations/tx/tarleton-state-university?utm_source=yext&utm_medium=link	Chick-fil-A	0.96
-f8f3bc733f32	Chick-fil-A	fastfood		32.20311	-98.23891	2798 W Washington St	Stephenville	76401	+12544313336	https://www.chick-fil-a.com/locations/tx/stephenville-tx?utm_source=yext&utm_medium=link		0.99
 17b7c83d2b59	Chicken Express	fastfood		32.37555	-98.96954	2211 Railroad Ave	Cisco	76437	+12544423333	https://www.doordash.com/store/23272706?utm_source=mx_share&aw=HX33PpI_NdOiEn4k	Chicken Express	0.95
 6f0c34d81c95	Chicken Express	fastfood		32.80905	-98.08820	100 SE 25th Ave	Mineral Wells	76067	+19403256909	https://www.chickene.com	Chicken Express	0.98
 7cf65c2f20d6	Chicken Express	fastfood		32.75558	-98.91330	922 W Walker St	Breckenridge	76424	+12545493030	https://chickene.com/	Chicken Express	0.98
@@ -458,6 +448,11 @@ c1585b32d79f	Dairy Queen	fastfood		32.81618	-98.11301	1001 N Oak Ave 1001 N Oak 
 f274e46de57d	Dairy Queen	fastfood		32.21358	-98.21864	Dairy Queen Store 1601 W Washington St	Stephenville	76401	+12549682106	https://www.dairyqueen.com/en-us/locations/tx/stephenville/1601-w-washington-st/14630/?y_source=1_MjkzMzg5OTktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 f6af6ec7c179	Dairy Queen	fastfood		32.09629	-98.33855	803 N Patrick St 803 N Patrick St	Dublin	76446	+12544453610	https://www.dairyqueen.com/en-us/locations/tx/dublin/803-n-patrick-st/14029/	Dairy Queen	0.96
 f95d3705913e	Dairy Queen	fastfood		32.44132	-98.69550	I-20 & HWY 80 W	Ranger	76470	+12546473001	https://www.dairyqueen.com/en-us/locations/tx/ranger/i-20-hwy-80-w/14517/?y_source=1_MjkzMzg4NjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+0ffbc711c3ad	Domino's	fastfood	pizza restaurant	32.40323	-98.78755	9972 Interstate 20	Eastland	76448	+12546293399	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+74e6ce16f620	Domino's	fastfood	pizza restaurant	32.81168	-98.08361	103 FM 1821	Mineral Wells	76067	+19403281151	https://www.dominos.com		0.55
+9bb3b3c8b1b1	Domino's	fastfood	pizza restaurant	32.20555	-98.23491	2753 W Washington	Stephenville	76401	+12549685551	http://pizza.dominos.com/texas/stephenville/76401/1256-w-washington-st/	Domino's Pizza	0.98
+d6b5ff10830c	Domino's	fastfood	pizza restaurant	32.80854	-98.10650	801 Se 1st Street	Mineral Wells	76067	+19403281151	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+9168afc0409c	Domino's Pizza	fastfood	pizza restaurant	32.21479	-98.21317	1256 W Washington St	Stephenville	76401	+12549685551	https://www.dominos.com		0.55
 0b772c6e541c	DQ Grill & Chill	fastfood		32.09631	-98.33839	803 N Patrick St	Dublin	76446		https://www.dairyqueen.com/en-us/locations/tx/dublin/803-n-patrick-st/3802	DQ Grill & Chill	0.80
 1a894a3c7bf0	DQ Grill & Chill	fastfood		32.75512	-98.92701	1838 W Walker St	Breckenridge	76424		https://www.dairyqueen.com/en-us/locations/tx/breckenridge/1838-w-walker-st/3646	DQ Grill & Chill	0.80
 20c4dbbafe63	DQ Grill & Chill	fastfood		32.37662	-98.97150	2101 Ave D	Cisco	76437		https://www.dairyqueen.com/en-us/locations/tx/cisco/2101-ave-d/3686	DQ Grill & Chill	0.80
@@ -468,7 +463,7 @@ f95d3705913e	Dairy Queen	fastfood		32.44132	-98.69550	I-20 & HWY 80 W	Ranger	764
 a4c81135bff6	DQ Grill & Chill	fastfood		32.44102	-98.69548	I-20 & Hwy 80 W	Ranger	76470		https://www.dairyqueen.com/en-us/locations/tx/ranger/i-20-hwy-80-w/4289	DQ Grill & Chill	0.80
 a79ea7eaffc2	DQ Grill & Chill	fastfood		32.21359	-98.21864	703 E South Loop	Stephenville	76401		https://www.dairyqueen.com/en-us/locations/tx/stephenville/703-e-south-loop/4402	DQ Grill & Chill	0.80
 d932649fed19	DQ Grill & Chill	fastfood		32.11446	-98.53615	600 Fannin St	De Leon	76444		https://www.dairyqueen.com/en-us/locations/tx/de-leon/600-fannin-st/3785	DQ Grill & Chill	0.80
-3ff1acd4ee65	Golden Chick	fastfood		32.21591	-98.21136	1112 W Washington St	Stephenville	76401	+12549652474	https://locations.goldenchick.com/tx/stephenville/1188/	Golden Chick	0.96
+9ec3c7a83eb2	Firehouse Subs	fastfood	sandwich shop	32.20785	-98.23439	2675 W Washington St	Stephenville	76401	+12544345050	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1998	Firehouse Subs	1.00
 caafebc507b5	Golden Chick	fastfood		32.81095	-98.08556	3113 NE 2nd St	Mineral Wells	76067	+19406545050	http://locations.goldenchick.com/tx/mineral-wells/1031/	Golden Chick	0.96
 d3c1d5040085	Golden Chick	fastfood		32.22030	-98.20200	1112 W Washington St	Stephenville	76401	+12549652474	https://locations.goldenchick.com/tx/stephenville/1188/		0.97
 deb5ef5797eb	Golden Chick	fastfood		32.10027	-98.33641	1036 N Patrick St	Dublin	76446	+12544451922	https://locations.goldenchick.com/tx/dublin/1186/	Golden Chick	0.96
@@ -476,27 +471,51 @@ deb5ef5797eb	Golden Chick	fastfood		32.10027	-98.33641	1036 N Patrick St	Dublin	
 219fd05d7ad7	Interstate 20	fastfood		32.66881	-98.02673		Millsap			https://www.interstate-guide.com/i-020.html		0.73
 0b211b5b65a1	Jack in the Box	fastfood		32.20400	-98.23866	2801 W Washington St	Stephenville	76401	+12549185002	https://www.jackinthebox.com		0.96
 5f130eb248a4	Jack in the Box	fastfood		32.80909	-98.09639	2008 E Hubbard St	Mineral Wells	76067	+19403255561	https://www.jackinthebox.com		0.97
+e8f3afdbd9b0	Jimmy John's	fastfood	sandwich shop	32.21034	-98.22513	2101 W Washington St Ste. 115	Stephenville	76401	+12549655595	https://locations.jimmyjohns.com/tx/stephenville/sandwiches-3244.html	Jimmy John's	0.96
+36a21c34580c	KFC	fastfood	chicken restaurant	32.20446	-98.23734	2780 W Washington St	Stephenville	76401	+12549185276	http://www.kfc.com/storelocator/Default.aspx?address=2780%20W.%20Washington%20Street,Stephenville,TX		0.92
 6e0824d0a7de	Krispy Krunchy Chicken	fastfood		32.93600	-98.25020	204 W Lee Ave	Graford	76449		https://locations.krispykrunchy.com/tx/graford/204-w-lee-ave	Krispy Krunchy Chicken	0.80
 e82c74047c91	Krispy Krunchy Chicken	fastfood		32.95208	-98.06306	10530 Highway 281	Perrin	76486		https://locations.krispykrunchy.com/tx/perrin/10530-highway-281	Krispy Krunchy Chicken	0.80
+fc1188f09e8c	Little Caesars	fastfood	pizza restaurant	32.75557	-98.90947	606 W Walker St	Breckenridge	76424	+12542463700	https://littlecaesars.com/en-us/store/20263	Little Caesars	0.96
+7a49c12f09bf	Little Caesars Pizza	fastfood	pizza restaurant	32.21524	-98.21262	1186 W Washington St	Stephenville	76401	+12549187447	http://www.littlecaesars.com/	Little Caesars	0.94
+bedde912c6ab	Little Caesars Pizza	fastfood	pizza restaurant	32.80815	-98.09676	1706 Southeast 1st Street	Mineral Wells	76067	+19404682230	https://littlecaesars.com/en-us/store/12385		0.96
 434c3e309964	McDonald's	fastfood		32.20377	-98.24084	2819 W Washington St	Stephenville	76401	+12549658928	https://www.mcdonalds.com/us/en-us/location/tx/stephenville/2819-w-washington-st/32768.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 48b33c8d672c	McDonald's	fastfood		32.40214	-98.79166	1490 E Main St	Eastland	76448	+12546293613	https://www.mcdonalds.com/us/en-us/location/tx/eastland/1490-e-main-st/7139.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
 63a52dd0cf74	McDonald's	fastfood		32.75933	-98.94409	3726 W Walker St	Breckenridge	76424	+12545593313	https://www.mcdonalds.com/us/en-us/location/tx/breckenridge/3726-w-walker/11178.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 7d355c7f6dc8	McDonald's	fastfood		32.21392	-98.21526	1416 W Washington St	Stephenville	76401	+12549653777	https://www.mcdonalds.com/us/en-us/location/tx/stephenville/1416-w-washington-st/4240.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 a037045bd25a	McDonald's	fastfood		32.81018	-98.08339	100 Garret Morris Pky	Mineral Wells	76067	+19403281930	https://www.mcdonalds.com/us/en-us/location/tx/mineral-wells/100-garret-morris-pky/7838.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+325455ee96c5	Panda Express	fastfood	chinese restaurant	32.20292	-98.24271	2861 W Washington St	Stephenville	76401	+12549680600	http://www.pandaexpress.com/		0.96
+dd1ef8eb6070	Panda Express	fastfood	chinese restaurant	32.81109	-98.08080	3705 Us - 180	Mineral Wells	76067	+19407570622	http://www.pandaexpress.com/	Panda Express México	0.96
 05b36ef0db7c	Panera Bread	fastfood		32.21247	-98.22052	115 N Felix St	Stephenville	76401		https://www.panerabread.com/content/panerabread_com/en-us/cafe/locations/tx/stephenville/115-n-felix-st	Panera Bread	0.88
+2e54d2fc5755	Papa Johns Pizza	fastfood	pizza restaurant	32.20465	-98.24020	100 N WOLFE NURSERY Rd Ste 135 Ste 135	Stephenville	76401	+12544342748	https://locations.papajohns.com/united-states/tx/76401/stephenville/100-n-wolfe-nursery-rd-135?utm_source=bing-maps&utm_medium=organic&y_source=1_MTA4MzczMDA5NC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 68c35a24d12f	Pizza Heaven	fastfood		32.75760	-98.94008	3121 W Walker St	Breckenridge	76424	+12545591133			0.94
+81c6ff1e7dbf	Pizza Hut	fastfood	pizza restaurant	32.40119	-98.79160	1481 Main St	Eastland	76448	+12546310444	https://locations.pizzahut.com/tx/eastland/1481-e-main-st	Pizza Hut	0.84
+8fcaca61365f	Pizza Hut	fastfood	pizza restaurant	32.20801	-98.22865	2320 W Washington St	Stephenville	76401	+12549683941	https://locations.pizzahut.com/tx/stephenville/2320-w-washington?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292573	Pizza Hut	0.98
+ddedeb9f521c	Pizza Hut	fastfood	pizza restaurant	32.80889	-98.10443	100 SE 10th Ave Palo Pinto	Mineral Wells	76067	+19403254461	https://locations.pizzahut.com/tx/mineral-wells/100-se-10th-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299948	Pizza Hut	0.99
+ae3765c4b1a4	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	32.80915	-98.09300	2501 E Hubbard St	Mineral Wells	76067	+19402746347	https://www.popeyes.com/store-locator/store/restaurant_882611		0.97
 c27ba83c33c1	Sbarro	fastfood		32.54313	-98.75560	9800 I-20	Canton	75103		https://sbarro.com/locations/tx/canton/canton-pilot-travel-center/	Sbarro	0.80
+02b23ddbd037	Schlotzsky's	fastfood	sandwich shop	32.21112	-98.22278	2012 W Washington St	Stephenville	76401	+12544345180	http://www.schlotzskys.com/stephenville/4936/home		0.97
 040e79b80712	Sonic Drive In	fastfood		32.75595	-98.92773	1850 West Walker	Breckenridge	76424	+12545592662	https://locations.sonicdrivein.com/tx/breckenridge/1850-west-walker.html	Sonic Drive-In	0.98
 0cf63c6afe7d	Sonic Drive In	fastfood		32.21584	-98.21098	1086 W. Washington	Stephenville	76401	+12549657666	https://locations.sonicdrivein.com/tx/stephenville/1086-w.-washington.html	Sonic Drive-In	0.96
 20defc2b367c	Sonic Drive In	fastfood		32.09859	-98.33708	941 N Patrick	Dublin	76446	+12544454447	https://locations.sonicdrivein.com/tx/dublin/941-n-patrick.html	Sonic Drive-In	0.97
 50fffc6a1962	Sonic Drive In	fastfood		32.20098	-98.24696	3010 West Washington	Stephenville	76401	+12549180399	https://locations.sonicdrivein.com/tx/stephenville/3010-west-washington.html	Sonic Drive-In	0.98
 9e6d4df28f81	Sonic Drive In	fastfood		32.40112	-98.79190	1475 Main Street	Eastland	76448	+12546291492	https://locations.sonicdrivein.com/tx/eastland/1475-main-street.html	Sonic Drive-In	0.96
+0830f8eb6540	Sonic Drive-In	fastfood	burger restaurant	32.75566	-98.91373	1000 W Walker St	Breckenridge	76424	+12545598117	http://www.sonicdrivein.com		0.92
 28aa7077e21a	Sonic Drive-In	fastfood		32.40180	-98.83552	1475 Main St	Eastland	76448	+12546291492	https://locations.sonicdrivein.com/tx/eastland/1475-main-street.html		0.85
 41cd01a526fa	Sonic Drive-In	fastfood		32.80960	-98.09684	1715 E Hubbard St	Mineral Wells	76067	+19403259532	https://locations.sonicdrivein.com/tx/mineralwells/1715-east-hubbard.html	Sonic Drive-In	1.00
 d0675886f581	Sonic Drive-In	fastfood		32.37640	-98.97192	2106 Conrad Hilton Blvd	Cisco	76437	+12544424677	https://locations.sonicdrivein.com/tx/cisco/2106-conrad-hilton-drive.html	Sonic Drive-In	0.95
 db2a6fe65a6f	Sonic Drive-In	fastfood		32.61183	-98.11017	87125 Interstate 20 W	Santo	76472	+19407692584	https://locations.sonicdrivein.com/tx/santo/87125-i-20-west.html		0.96
 f75b060e6147	Sonic Drive-In	fastfood		32.61547	-98.10853	87125 I-20 W	Santo	76472	+19407692584	https://locations.sonicdrivein.com/tx/santo/87125-i-20-west.html		0.97
+20816d7dcfe2	Subway	fastfood	sandwich shop	32.40194	-98.79203	1488 E Main St	Eastland	76448	+12546293262	https://restaurants.subway.com/united-states/tx/eastland/1488-e-main-st	Subway	0.98
+266c2ccbdfe6	Subway	fastfood	sandwich shop	32.81361	-98.08610	601 FM 1821	Mineral Wells	76067	+19403258680	https://restaurants.subway.com/united-states/tx/mineral-wells/601-fm-1821	Subway	0.94
+32133ee8b108	Subway	fastfood	sandwich shop	32.37598	-98.97099	2111 Conrad Hilton Ave	Cisco	76437	+12544421990	https://restaurants.subway.com/united-states/tx/cisco/2111-conrad-hilton-ave	Subway	0.96
+70a4a979e1e5	Subway	fastfood	sandwich shop	32.21471	-98.21356	1236 W. Washington Street	Stephenville	76401	+12549656800	https://restaurants.subway.com/united-states/tx/stephenville/1236-w-washington-street	Subway	0.98
+7c86dfd4a58a	Subway	fastfood	sandwich shop	32.76151	-98.94678	3808 W Walker	Breckenridge	76424	+12545493016	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72559&utm_campaign=evergreen-2020&y_source=1_MTAxNzEyNDkxOC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
 8947fc8dd940	Subway	fastfood		32.81020	-98.06323	4516 Hwy 180 East	Mineral Wells	76067	+19403280939	https://restaurants.subway.com/united-states/tx/mineral-wells/4516-hwy-180-east?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=12518&utm_campaign=evergreen-2020&y_source=1_MTQ4OTY3NTEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.98
+92f54f44ed5d	Subway	fastfood	sandwich shop	32.20465	-98.23972	100 Wolfe Nursery Rd Ste 120	Stephenville	76401	+12549685111	http://www.subway.com/en-us	Subway	0.95
+bb5638809b8d	Subway	fastfood	sandwich shop	32.61163	-98.10966	87125 Hwy 20 W	Santo	76472	+19407692584	http://www.subway.com/en-us	Subway	1.00
+c2a5b1be09bd	Subway	fastfood		32.75901	-98.94571	3715 W Walker St	Breckenridge	76424	+12545595633	https://restaurants.subway.com/united-states/tx/breckenridge/3715-w-walker	Subway	0.92
+d3f5d176584d	Subway	fastfood	sandwich shop	32.44178	-98.69453	1600 W Loop 254	Ranger	76470	+12546473700	https://www.subway.com		0.98
+ed9a06b9011c	Subway	fastfood	sandwich shop	32.11700	-98.53469	100 E Navarro Ave	De Leon	76444	+12548935656	https://www.subway.com		0.98
 40d653097fda	Taco Bell	fastfood		32.80937	-98.09519	2203 E Hubbard St.	Mineral Wells	76067	+19404682744	http://www.tacobell.com/	Taco Bell	0.99
 61f8f0955f40	Taco Bell	fastfood		32.20483	-98.23809	2769 W Washington Blvd	Stephenville	76401	+12549654312	http://www.tacobell.com/	Taco Bell	0.99
 df200aa824d6	Taco Bell	fastfood		32.40199	-98.79317	1430 E Main St	Eastland	76448	+12546310807			0.97
@@ -504,12 +523,14 @@ b66c171747d7	Taco Casa	fastfood		32.20193	-98.24360	2898 W Washington St	Stephen
 c4e364daef94	Taco Casa	fastfood		32.80957	-98.09589	2103 E Hubbard St	Mineral Wells	76067	+19403270985	https://tacocasatexas.com/location/11-mineral-wells/	Taco Casa	0.96
 c69d2f4d3d7e	Taco Casa	fastfood		32.60581	-98.11175	14100 US-281	Santo	76472	+19407694515	https://tacocasatexas.com/location/45-santo/	Taco Casa	0.96
 e193fe17b5a8	Taco Casa	fastfood		32.40291	-98.78811	9986 I-20	Eastland	76448	+12546310744	http://www.tacocasatexas.com	Taco Casa	0.94
-3943d04c3618	Tropical ice	fastfood		32.40142	-98.80343	12050 e main	Eastland	76448	+12545953742			0.75
 a07dadecb340	Tropical ice	fastfood		32.40229	-98.79826	12050 e main	Eastland	76448	+12545953742			0.79
 becd3a9bcb69	Wendy's	fastfood		32.37370	-98.96919	202 I-20 Frontage	Cisco	76437	+12544829330	https://locations.wendys.com/	Wendy's	0.97
 ccc93cbe4109	Wendy's	fastfood		32.21642	-98.21114	1083 W Washington St	Stephenville	76401	+12544313952	https://locations.wendys.com/united-states/tx/stephenville/1083-w-washington-st	Wendy's	0.94
+9774932f9ee8	Whataburger	fastfood	burger restaurant	32.40125	-98.79497	1401 East Main Street	Eastland	76448	+12544884001			0.97
+e476bdbbe5df	Whataburger	fastfood	burger restaurant	32.20282	-98.24119	2830 W Washington St	Stephenville	76401	+12549686285	https://locations.whataburger.com/tx/stephenville/2830-w-washington-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 f891febd32e6	Whataburger	fastfood		32.80948	-98.09246	2503 E HUBBARD ST	Mineral Wells	76067	+19403259539	https://locations.whataburger.com/tx/mineral-wells/2503-e-hubbard-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-1ff9dbddd86d	Wingstop	fastfood		32.20351	-98.24203	2851 W. Washington	Stephenville	76401		https://www.wingstop.com/location/wingstop-356-stephenville-tx-76401/menu	Wingstop	0.99
+98611944b457	Wingstop	fastfood	chicken restaurant	32.20324	-98.24198	2851 W. Washington	Stephenville	76401	+12549182100	https://www.wingstop.com/location/wingstop-356-stephenville-tx-76401/menu?y_source=1_NTUyMDY3MTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
+e28e7f639c99	Wingstop	fastfood	chicken restaurant	32.81592	-98.08417	937 FM 1821	Mineral Wells	76067	+19406542700	https://www.wingstop.com/location/wingstop-2104-mineral-wells-tx-76067/menu?y_source=1_NTUyMDcyNzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 dff79d73f35b	Brookshire Brothers	grocery		32.08649	-98.34253	208 N Patrick St	Dublin	76446	+12544453229	https://www.brookshirebrothers.com/store-location/store-95	Brookshire Brothers	0.92
 26cbfee4208f	Brookshire's	grocery		32.38564	-98.97925	1010 Avenue E	Cisco	76437	+12544421126	https://www.brookshires.com/store-information/Cisco/99	Brookshire's	0.99
 9f900a067bd0	Brookshire's	grocery		32.40202	-98.81779	111 N Seaman St	Eastland	76448	+12546291667			0.92
@@ -529,7 +550,6 @@ b9ec238f7b91	Market Latina - Tu Tiendita Latina	grocery		32.08023	-98.34445	502 
 14a2f5659ee5	Mineral Wells #118	grocery		32.80875	-98.09764	100 SE 17th Ave	Mineral Wells	76067			Brookshire's	0.80
 77cb0fb81001	Mr C's Food Stores	grocery		32.90335	-98.43439	1400 St Park Rd 36	Graford	76449	+19407793055	https://www.chevronwithtechron.com		0.72
 6eedd505de64	P K General Store & Restaurant	grocery		32.78329	-98.47594	2503 TX-16	Strawn	76475	+19406593394	http://www.pkgeneral.store/		0.92
-a500ae31e081	P K General Store Inc	grocery		32.92003	-98.33560	2503 Highway 16 N	Graford	76449	+19406593394			0.59
 d3981b401862	P K General Store Inc	grocery		32.91300	-98.34120	2503 Highway 16 N	Graford	76449	+19406593394			0.61
 080a6a381bb3	Pecan Valley Partners	grocery		32.01221	-98.53052	751 County Road 424	Comanche	76442	+12548935729	http://pecanvalleyresidence.com		0.92
 1c24ec261d62	Ranger #739	grocery		32.46661	-98.68044	300 Loop 254	Ranger	76470			Spring Market	0.80
@@ -561,21 +581,15 @@ daeff445d8ee	Texas Health Resources	hospital		32.22571	-98.20523	725 N Graham Av
 3ef0b920219d	Wound Care Service	hospital		32.22573	-98.20535	725 N Graham Ave	Stephenville	76401	+12549651171	http://www.texashealth.org		0.79
 5ac4ae9faace	America's Best Inn & Suites	hotel		32.75766	-98.93958	3111 W Walker St	Breckenridge	76424	+12545596502	http://www.americasbestvalueinn.com/bestv.cfm?idp=1047		0.92
 c38f0576eba0	Americas Best Value Inn Stephenville	hotel		32.20513	-98.21333	1625 W South Loop	Stephenville	76401	+12549682114	https://www.sonesta.com/americas-best-value-inn/tx/stephenville/americas-best-value-inn-stephenville?utm_medium=soci&utm_source=bing		0.99
-c2ce6bf59ce0	Ask Hospitality Llc	hotel		32.80975	-98.06693	105 Karl Kessler Blvd	Mineral Wells	76067				0.95
 9601c8bd8531	B & T Horse Hotel	hotel		32.48587	-98.32416	8345 County Road 120	Gordon	76453	+13605167536			0.80
-9723bd356caf	Bar F Ranch	hotel		32.66905	-98.00005	4044 Grindstone Rd	Millsap	76066				0.72
 01752ffc3b74	Bass Hollow Lodging on Possum Kingdom Lake	hotel		32.89920	-98.56731	4501 FM-1148	Graham	76450	+19404408471	https://basshollow.com/		0.72
-86c2bf976f7f	Bd Baps Llc	hotel		32.20015	-98.24845	3030 W Washington St	Stephenville	76401				0.95
 3e9be7f73587	Bell Mare Hotel	hotel		32.75572	-98.92709	1822 W Walker St	Breckenridge	76424	+12545597247	http://www.thebellmarehotel.com/		0.92
-c0a47b9c680d	Bender Hall	hotel		32.21416	-98.21602		Stephenville					0.92
 5f113342536e	Best Western Club House Inn & Suites	hotel		32.81008	-98.06663	4410 US-180	Mineral Wells	76067	+19403252270	https://www.bestwestern.com/en_US/book/hotel-rooms.44508.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44508	Best Western Hotels & Resorts	0.99
 f37036f8d2e4	Best Western Eastland	hotel		32.40253	-98.79278	1460 E Main St	Eastland	76448	+12546298071	https://www.bestwestern.com/en_US/book/hotel-rooms.44776.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44776	Best Western Hotels & Resorts	1.00
 a1d1f1dd42e2	Best Western Plus Stephenville Inn	hotel		32.20214	-98.23986	121 S Lockhart Rd	Stephenville	76401	+12549658899	https://www.bestwestern.com/en_US/book/hotel-rooms.44777.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44777	Best Western Hotels & Resorts	1.00
 c01a60bd9213	Bosque Crossing	hotel		32.21892	-98.21602	1191 W Vanderbilt St	Stephenville	76401	+12549687177	http://www.bosquecrossing.com/		0.94
-fa4dba7cdeca	Breckenridge Elks Lodge #1480	hotel	lodge	32.76065	-98.97172	6074 FM Road 2231 W	Breckenridge	76424	+12544773544	http://www.elks.org/lodges/ContactUs.cfm?LodgeNumber=1480		0.93
 43662d9d97ab	Budget Host Inn	hotel	motel	32.39920	-98.78893	I-20	Eastland	76448	+12546293324	http://www.budgethosteastland.com/	Budget Host St Ignace	0.98
 b0a2f6f46c57	Budget Host Inn	hotel	motel	32.81141	-98.08447	3601 US-180	Mineral Wells	76067	+19403253377	https://www.budgethost.com/hotels/Budget_Host_Mesa_Motel_Mineral_Wells_TX.aspx	Budget Host St Ignace	0.95
-5a9f9a451046	Centennial Hall	hotel		32.21714	-98.22211	1600 W Shirley St	Stephenville	76401				0.97
 7880e15f124b	Central Inn	hotel	motel	32.09595	-98.33881	723 N Patrick St Unit B	Dublin	76446	+12544452138	http://centralinndublintx.com/		0.90
 9290f12ee057	Chandeliers Private Venue	hotel		32.81073	-98.11254	216 N Oak Ave	Mineral Wells	76067	+18666391530			0.98
 b3781ca37331	Cisco Inn	hotel	motel	32.37532	-98.97301	204 I-20	Cisco	76437	+12544423040			0.99
@@ -593,36 +607,26 @@ ed5ff9ec9e09	Economy INN and Suites	hotel		32.20260	-98.24516	2925 W Washington 
 cef6da43202f	Executive Inn By OYO Mineral Wells US-180	hotel		32.80294	-98.14931	2809 Highway 180 W	Mineral Wells	76067	+19403281111	http://www.executiveinntexas.com		0.99
 2f5a38ed168f	Great Eastland Hotel Group Inc	hotel		32.40047	-98.79164	10150 Interstate 20 W	Eastland	76448				0.95
 8f06ccd19406	Hampton Inn and Suites Stephenville	hotel		32.20422	-98.21581	910 S Harbin Dr	Stephenville	76401	+12549185400	http://www.stephenvillesuites.hamptoninn.com/	Hampton by Hilton	1.00
-ee862fcd3cfa	Harmony Masonic Lodge	hotel	lodge	32.38585	-98.16602	Co Rd 158	Stephenville	76433				0.71
 115c0266704c	Heritage Hall	hotel		32.21857	-98.21981	757 N Lillian	Stephenville	76401	+12549689000	https://www.highlands.edu/campus-locations/heritage-hall		0.99
 430ebfdf3aaf	Homestead Properties	hotel		32.21307	-98.22357	1901 W Washington St	Stephenville	76401	+12549684116	http://www.tarletonrentals.com/		0.92
-27acccd6a076	Honors Hall	hotel		32.21594	-98.21909	1505 W Tarleton St	Stephenville	76401				0.99
-2b7027c0e33b	Hunewell Hall	hotel		32.21664	-98.21459	1202 Military Dr	Stephenville	76401				0.99
 51f5807283de	Hunten Lodge Inn	hotel	motel	32.09547	-98.97515	905 W College St	Rising Star	76471	+19367149489	http://thehuntenlodgeinn.com/		1.00
 6399b85231f6	Interstate Inn	hotel	motel	32.21515	-98.18678	811 E Rd	Stephenville	76401	+12549643009	https://us2.cloudbeds.com/en/reservation/Z7ISap?currency=usd		0.92
-7449ce830dd0	Keshav Inc	hotel		32.81139	-98.08447	3601 Highway 180 E	Mineral Wells	76067				0.95
 ce70894a1127	Knights Inn Mineral Wells	hotel		32.81142	-98.07215	4103 Highway 180 E	Mineral Wells	76067	+19403256956	https://www.knightsinn.com/Mineral-Wells-TX?CID=LC:KG::BING:RIO:National:07568		0.92
 acc205345406	Knights Inn Stephenville	hotel		32.19999	-98.24828	3030 W Washington St	Stephenville	76401	+12549685003	https://www.redlion.com/knights-inn/tx/stephenville/knights-inn-stephenville		0.92
 920f8318d860	La Quinta Inn & Suites by Wyndham Eastland	hotel	resort	32.39128	-98.79736	10150 Highway 20	Eastland	76448	+12546291414			0.85
 1c47317be2e5	La Quinta Inn & Suites Stephenville	hotel	resort	32.19782	-98.24471	105 Christy Plz	Stephenville	76401	+12549182444	http://www.laquintastephenville.com/?cid=local_847		1.00
 38e2071dfd8f	La Quinta Inn and Suites	hotel		32.20179	-98.24171	105 Christy Plaza	Stephenville	76401	+12549182444	http://www.laquintastephenville.com/?cid=local_847	La Quinta by Wyndham	0.99
 95837738bcc2	La Quinta Inn and Suites	hotel		32.40047	-98.79167	10150 I-20	Eastland	76448	+12542714130	http://www.laquintaeastland.com/?cid=local_6173	La Quinta by Wyndham	1.00
-e47b4b2712c5	Lake Cisco Campground	hotel		32.43669	-98.98564	County Road 561	Cisco	76437				0.96
 cf7baa2a2193	Lamancha Lake Resort	hotel		32.36271	-98.69244	402 County Road 567	Eastland	76448	+12546473651			0.77
-b4a171ecc015	Lazy Bend River Ranch Brock,TX	hotel		32.62975	-98.00177	421 N Lazy Bend Estates Rd	Millsap	76066		https://lazybendriverranch.com/		0.64
 bdac705c240d	Lazy Bend River Ranch Brock,TX	hotel		32.63091	-98.00262	421 N Lazy Bend Estates Rd	Millsap	76066		https://lazybendriverranch.com/		0.65
-e9d2c9136e31	Lipan Masonic Lodge	hotel	lodge	32.52018	-98.04678	207 N Kickapoo St	Lipan	76462	+12546462230	http://www.msana.com		0.93
 3d24695fefb1	Lofts & Hospitality	hotel		32.81069	-98.11256	104 NE 2nd St	Mineral Wells	76067	+18666391530	https://loftsandhospitality.com		0.92
-e55a8277d8b6	Lone Oak Ranch	hotel		32.91975	-98.40151		Graford					0.75
 f20f67d0ed0c	Lone Star Inn	hotel	motel	32.38475	-98.99149	1898 Highway 206	Cisco	76437	+18774113436	https://www.lonestarinncisco.com		0.77
 1a9444f28761	Longhorn Inn Motel	hotel	motel	32.51368	-98.36814	105 I-20	Gordon	76453	+12546938277			0.94
 233aff72dba6	Longhorn Inn, Lodge & Country Store	hotel		32.54264	-98.42361	105 West St	Mingus	76463	+2546938277			0.93
 ea9764db6816	Lush Resort	hotel	resort	32.88502	-98.46500	3201 Redbird Rd	Graford	76449	+19407793731	http://www.lushresort.com/		0.94
-8f0a1287326d	Meeks Tender Care	hotel		32.79564	-98.08632	1709 Airport Rd	Mineral Wells	76067				0.95
 b55715b8c044	Motel 6	hotel	motel	32.21579	-98.18884	701 E South Loop	Stephenville	76401	+12542181372	http://www.motel6.com/	Motel 6	0.99
 3887872f95da	Motel 6 Mineral Wells, TX	hotel	motel	32.81173	-98.08221	108 FM 1821	Mineral Wells	76067	+19403256961	https://www.motel6.com/en/motels.tx.mineral-wells.8904.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305		0.98
 cfc12b8cc5a8	Motel 6 Mineral Wells- Tx	hotel	resort	32.80973	-98.06762	105 Karl Kessler Blvd	Mineral Wells	76067	+19403270077			1.00
-f44f56df0159	Motorboat Inn	hotel	lodge	32.88956	-98.46584	1762 Park Rd 36	Graford	76449	+19402607874	http://www.motorboatinnpk.com/		0.98
 f61576385032	Motorboat Inn	hotel		32.88939	-98.44640	1762 Park Rd 36	Graford	76449	+19402607874	https://motorboatinnpk.com/		0.85
 c5bc8b88661a	Oak Cottage	hotel		32.81768	-98.11967	1212 NW 7th Ave	Mineral Wells	76067	+19496826640			0.76
 410e14616870	Oak Hills Ranch	hotel		32.43485	-98.88184		Eastland			http://www.oakhillstx.com/		0.61
@@ -637,20 +641,14 @@ caa111ee245c	Regency Inn	hotel		32.75737	-98.93945	3111 W Walker St	Breckenridge
 f5d26d19d77e	Relax Inn	hotel	motel	32.08864	-98.34149	312 N Patrick St	Dublin	76446	+12544450499	http://www.hotelrelaxinn.com/index.html		0.98
 7c54985d53a7	Relax Inn Mineral Wells	hotel	motel	32.81172	-98.07211	4103 US-180	Mineral Wells	76067	+19403256956			0.92
 60dae296fe79	Ridge Motel	hotel		32.75716	-98.93442	2602 W Walker St	Breckenridge	76424	+12545592244	http://www.ridgemotelbreckenridge.com		0.97
-6a02ee777bd7	Rivers West Ranch	hotel	lodge	32.89101	-98.78234	9303 FM-701	Breckenridge	76424	+19186079998	http://www.riverswestranch.com/		0.98
-b2d57a2c2efe	Rivers West Ranch	hotel	lodge	32.93819	-98.78086	9303-9395 FM 701	Breckenridge	76424	+19186079998	http://www.riverswestranch.com		0.77
 b6e49a4f5a19	Roadway Inn	hotel	motel	32.44415	-98.68740	6750 I-20 W	Ranger	76470	+12546472589			0.79
-6f1213bff79e	Rodeway Inn	hotel		32.20259	-98.24516	2925 W Washington St	Stephenville	76401	+12549657162	https://www.choicehotels.com/texas/stephenville/rodeway-inn-hotels/tx076?pmf=yext&mc=llyxyxpx	Choice Hotels	0.69
 c409edf725e4	Rodeway Inn	hotel	motel	32.44239	-98.69237	6750 I-20	Ranger	76470	+12546475289	https://www.choicehotels.com/texas/ranger/rodeway-inn-hotels/txi36?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
 eeb72738b666	Rodeway Inn	hotel	motel	32.20259	-98.24516	2925 W Washington St	Stephenville	76401	+12549657162	https://www.choicehotels.com/texas/stephenville/rodeway-inn-hotels/tx076?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 2b4c690dd208	Royal Inn	hotel	motel	32.22652	-98.19148	1190 E Washington St	Stephenville	76401	+12549653807			0.92
 c2ce64b33f02	Soda Springs River Camp	hotel		32.68959	-98.05267	2323 Soda Springs Rd	Millsap	76066				0.66
 0c407deade6d	Stephensville, Tx	hotel		32.23944	-98.16844		Stephenville					0.97
 3c8d849f04eb	Stephenville Lodging, Ltd	hotel		32.20223	-98.23986	121 S Lockhart Rd	Stephenville	76401				0.95
-cec6d9a7be44	Stephenville Masonic Lodge	hotel	lodge	32.21908	-98.20319	244 S Columbia St	Stephenville	76401	+12544854726			0.92
 3250f97db336	Stillwater Cabins	hotel		32.40541	-98.18401	3173 W FM 1188	Stephenville	76401	+12545921331			0.67
-6fe388546546	Stillwater Cabins	hotel		32.40558	-98.18539	3173 W FM 1188	Stephenville	76401	+12545921331	http://stillwatercabins.com/		0.61
-fe40c2f4903f	Strawn Masonic Lodge	hotel		32.55217	-98.49833	111 W Housley St	Strawn	76475				0.89
 211fdfc652b2	Sunset Inn Ranger	hotel		32.44254	-98.69246	6750 I-20 W	Ranger	76470	+12546471176			0.71
 e07c5e9d2b91	Sunstone Hospitality, Inc	hotel		32.20427	-98.21586	910 S Harbin Dr	Stephenville	76401				0.95
 0279457ffc17	Super 8	hotel	motel	32.40384	-98.78645	3900 I-20	Eastland	76448	+12546293336	https://www.wyndhamhotels.com/super-8/eastland-texas/super-8-eastland/overview		0.99
@@ -662,9 +660,7 @@ d1ebdd9ae2b4	Tarleton Texan Village	hotel		32.21865	-98.22256	Tarleton State Uni
 f063ec48e35d	The Cliffs Resort on Possum Kingdom Lake	hotel	resort	32.83973	-98.42882	160 Cliffs Dr	Graford	76449	+19407794040	https://ddresorts.com/the-cliffs		0.92
 d3c9ea89fe55	The Crazy Water Hotel	hotel		32.81180	-98.11301	401 N Oak Ave	Mineral Wells	76067	+19403254605	https://tinyurl.com/Thanksgiving26O3		0.99
 dfe783ccae1f	The Eastland Historic Hotel	hotel		32.40226	-98.81934	112 N Lamar St	Eastland	76448	+12143547480	http://www.theeastlandhotel.com		0.97
-f3e59b35e30b	The Hutcheson Hacienda	hotel		32.33025	-98.01386		Bluff Dale					0.72
 bacc8dc20913	The Lodge on Lake Palo Pinto	hotel		32.64878	-98.29248	2602 N Lakeview Dr	Palo Pinto	76484	+19407692600	http://www.palopintolodge.com/index.htm		0.88
-e05c37e13f17	The Miller Resort	hotel		32.89480	-98.56516		Graham					0.71
 76da9395fb68	The Southwest Lodge	hotel		32.75335	-98.90271	305 S Breckenridge Ave	Breckenridge	76424	+12544774830	http://thesouthwestlodge.com/		0.88
 4d6a9d31ca3a	Village Inn Breckenridge	hotel	motel	32.79312	-98.95412	3128 Co Rd 315	Breckenridge	76424	+12545593472	http://www.villageinnbreckenridge.com/		0.99
 41a3f8a449e1	AT&T	office	telecommunications company	32.20394	-98.24034	2811 W Washington Suite 18	Stephenville	76401	+12543406975	https://www.att.com/stores/texas/stephenville/77594?source=E-Fls10000000000X&wtExtndSource=website	AT&T	1.00
@@ -673,7 +669,6 @@ c67465cc494f	Breck Minerals, LP	office	energy company	32.75741	-98.90227	300 N B
 a4ae7564cb29	Breckenridge Geophysical, Llc.	office		32.38114	-98.97139	301 E 18th St	Cisco	76437	+12545597566	https://www.breckex.com		0.65
 18f5a43359cb	Brooke Josserand, Coldwell Banker Preferred Properties	office		32.22010	-98.23746	2441 Northwest Loop	Stephenville	76401	+12549657775	http://www.coldwellbankererath.com		0.92
 434f4954593a	Cantex	office	plastics company	32.80723	-98.09192	509 Lincoln Ave	Mineral Wells	76067	+19403253344	http://www.cantexinc.com/Company/Company_Information.php		0.73
-5cfd432a27f1	Cantex	office	plastics company	32.80417	-98.09029	509 Lincoln Ave	Mineral Wells	76067	+19403253344	http://www.cantexinc.com/Company/Company_Information.php		0.71
 7435fff21775	Cool Clear Water	office	bottled water company	32.38689	-98.97881	900 Conrad Hilton Blvd	Cisco	76437	+12544423131			0.92
 f1ac590199e4	Crazy Water Company	office	bottled water company	32.81357	-98.11420	209 NW 6th St	Mineral Wells	76067	+19403258870	https://drinkcrazywater.com		0.89
 28e172bfbea4	Fibergrate Composite Structures	office	plastics company	32.21972	-98.18217	900 FM 205	Stephenville	76401	+12549653148	https://www.fibergrate.com		0.95
@@ -686,7 +681,6 @@ dc06bec70e07	Motec, Ltd	office		32.37461	-98.87898	13051 I 20	Cisco	76437	+12546
 ba7486b03a8e	Northwestern Mutual	office		32.23866	-98.16844	3324 N US Highway 377	Stephenville	76401	+14325709800	https://www.northwesternmutual.com/financial-professional-locator?address=3324%20N%20US%20Highway%20377,76401&distance=1&cmpid=LL-Lo3-Search		0.85
 e5778b76573d	PECOFacet	office		32.81455	-98.05254	118 Washington Rd	Mineral Wells	76067	+19403252575	http://www.pecousa.com		0.92
 ccd646bbeb8c	Raymond James	office		32.22094	-98.20238	154 N Graham St	Stephenville	76401	+12549657956	http://www.raymondjames.com/srwilliams/		0.92
-6210f11d3701	Rock House Ranch	office	travel company	32.65074	-98.24319	1484 Ward Mountain Rd	Palo Pinto	76484				0.70
 2395ed5077df	S-TEC Corporation	office		32.78645	-98.05748	One S-TEC Way	Mineral Wells	76067	+19403259406	http://www.s-tec.com		0.77
 d259b478a051	Sundance Club	office	private association	32.57453	-98.30282	110 Stagecoach Trl	Gordon	76453	+12546935858			0.98
 7209c5640600	The BMC	office	private association	32.91849	-98.44228	1113 Airport Rd	Graford	76449				0.77
@@ -727,7 +721,6 @@ c102f470d747	Brazos River Catfish Café	restaurant	seafood restaurant	32.66744	-
 d224ea6d4ad2	Breckenridge Pizza Company	restaurant	pizza restaurant	32.75583	-98.92871	1906 W Walker St	Breckenridge	76424	+12542128111			0.96
 319fa2113c77	Bubba'z	restaurant		32.88990	-98.45058	1706 Park Road 36	Graford	76449				0.88
 b0da605bd2b5	Buckin’ Grizz Barbecue	restaurant	barbecue restaurant	32.20648	-98.22282	1954 W South Loop	Stephenville	76401	+12544322748			0.92
-c21d9aceab31	Burger King	restaurant	burger restaurant	32.37564	-98.83060	11617 I-20	Eastland	76448	+12544887041	https://burgerking.com/store-locator/store/28663	Burger King	0.94
 2c7d86b4f583	Burro	restaurant	mexican restaurant	32.81657	-98.07773	3801 Ram Blvd	Mineral Wells	76067	+19403251451	https://www.getburro.com		0.55
 ead98e63d037	Caam's	restaurant	pizza restaurant	32.22084	-98.20052	223 E College St	Stephenville	76401	+12549773992	http://www.caamsrestaurant.com/		0.92
 4e9150bbdf4e	Cafe Rico	restaurant	mexican restaurant	32.40191	-98.82907	1013 W Main St	Eastland	76448	+12546310064	http://www.caferico.com		0.94
@@ -765,11 +758,6 @@ da24823cfb1c	Deck Hand Dolly’s fish and Shrimp	restaurant		32.20662	-98.22303	
 047696a1615a	Denny's	restaurant	breakfast and brunch restaurant	32.37492	-98.89974	16851 Interstate 20	Cisco	76437	+12544421055	http://locations.dennys.com/TX/CISCO/249251/		0.85
 6f1abfd22b05	Dianne's Ranch Diner	restaurant	diner	32.18164	-98.16591	5396 US-281	Stephenville	76401	+12544311108	https://linktr.ee/greatamericanentertainmentco		1.00
 22ac31621e5d	Doc's Drive-In	restaurant	burger restaurant	32.10611	-98.53783	341 S Texas St	De Leon	76444	+12548932591			0.92
-0ffbc711c3ad	Domino's	restaurant	pizza restaurant	32.40323	-98.78755	9972 Interstate 20	Eastland	76448	+12546293399	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-74e6ce16f620	Domino's	restaurant	pizza restaurant	32.81168	-98.08361	103 FM 1821	Mineral Wells	76067	+19403281151	https://www.dominos.com		0.55
-9bb3b3c8b1b1	Domino's	restaurant	pizza restaurant	32.20555	-98.23491	2753 W Washington	Stephenville	76401	+12549685551	http://pizza.dominos.com/texas/stephenville/76401/1256-w-washington-st/	Domino's Pizza	0.98
-d6b5ff10830c	Domino's	restaurant	pizza restaurant	32.80854	-98.10650	801 Se 1st Street	Mineral Wells	76067	+19403281151	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-9168afc0409c	Domino's Pizza	restaurant	pizza restaurant	32.21479	-98.21317	1256 W Washington St	Stephenville	76401	+12549685551	https://www.dominos.com		0.55
 944733de5c23	Don Nico's Mexican Restaurant	restaurant	texmex restaurant	32.80939	-98.09467	100 NE 22nd Ave	Mineral Wells	76067	+19406545295	https://www.donnicosrestaurant.com/		0.92
 9d05cdf68905	Don Nico's Mexican Restaurant	restaurant	mexican restaurant	32.24412	-98.37368	18945 W FM 8	Stephenville	76401	+12549686552	http://donnicosmexicanrestaurant.com		0.65
 9eec82b0cbc9	Don Nico's Mexican Restaurant	restaurant	mexican restaurant	32.21689	-98.20944	966 W Washington St	Stephenville	76401	+12549680046	http://www.donnicosrestaurant.com/		0.99
@@ -785,7 +773,6 @@ f106ec28497b	El Trompo Mexican Grill	restaurant	mexican restaurant	32.20396	-98.
 13a78e036528	Ernie's Spanish Kitchen	restaurant	american restaurant	32.75707	-98.93764	2915 W Walker St	Breckenridge	76424	+12545224957	http://chowhound.com		0.95
 b95ff0848f9f	Familias Mexican Restaurant	restaurant		32.75697	-98.93419	2600 W Walker St	Breckenridge	76424	+12545595519	http://www.familiasmexicanrestaurant.com/1201907.html		0.98
 af2afa8718f6	Feed Mill	restaurant	burger restaurant	32.23053	-98.21355	513 W Lingleville Rd	Stephenville	76401	+12549680015	http://www.feedmachinery.com/		0.96
-9ec3c7a83eb2	Firehouse Subs	restaurant	sandwich shop	32.20785	-98.23439	2675 W Washington St	Stephenville	76401	+12544345050	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1998	Firehouse Subs	1.00
 a08c024937ec	Full Stack BBQ	restaurant	barbecue restaurant	32.70378	-98.40376	2231 Teichmann Rd	Gordon	76453	+12142406120	https://fullstackbbq.com/		0.60
 78a1cb39772d	Fuzzy's Taco Shop	restaurant	mexican restaurant	32.22132	-98.20114	265 E Washington St	Stephenville	76401	+12542656570	https://fuzzystacoshop.com/locations/texas/stephenville/	Fuzzy's Taco Shop	0.99
 6a1fec05dcb3	G.V Bar & Grill	restaurant		32.11640	-98.52647	901 E Navarro Ave	De Leon	76444	+12548932270			0.89
@@ -820,7 +807,6 @@ ff25d79ef868	Jake and Dorothy's Cafe	restaurant	diner	32.22169	-98.19982	406 E W
 d07d2a9ae600	Jay Kali Son, Inc	restaurant		32.21506	-98.21255	1186 W Washington St Unit B	Stephenville	76401				0.95
 d3a863c4f22e	JC's Deli & Grill	restaurant	american restaurant	32.37607	-98.99756	1498 I-20 Frontage	Cisco	76437	+12544425400	https://www.myrtlewilkscenter.com/jcsdeli		0.96
 5f98182cf913	Jesse's Drive-In	restaurant	burger restaurant	32.79728	-98.11327	1504 S Oak Ave	Mineral Wells	76067	+19403257369	http://sonicdriveinmineralwells2.gastro-america.com		0.95
-e8f3afdbd9b0	Jimmy John's	restaurant	sandwich shop	32.21034	-98.22513	2101 W Washington St Ste. 115	Stephenville	76401	+12549655595	https://locations.jimmyjohns.com/tx/stephenville/sandwiches-3244.html	Jimmy John's	0.96
 2190bf6571de	Jimmy's Cafe	restaurant	diner	32.80772	-98.08766	411 SE 25th Ave	Mineral Wells	76067	+19403259997	https://www.google.com/search?client=firefox-b-1-d&q=jimmy%27s+cafe+mineral+wells		0.98
 cb659a6f27c3	Jin's Express	restaurant	asian fusion restaurant	32.81021	-98.09103	213 NE 27th Ave	Mineral Wells	76067	+19403258880	https://www.jinsexpress.com		0.96
 afdd177add71	JMP Donuts	restaurant		32.21290	-98.67024	104 W Lubbock St	Gorman	76454	+16825008777			0.83
@@ -830,7 +816,6 @@ afdd177add71	JMP Donuts	restaurant		32.21290	-98.67024	104 W Lubbock St	Gorman	7
 76ec3ebb8ff5	Kc's Rock house cafe	restaurant	burger restaurant	32.51749	-98.04617	105 S Kickapoo St	Lipan	76462	+12546462500			0.96
 c73a956a9859	Ken's Chicken-n-fish	restaurant		32.75627	-98.93073	2116 W Walker St	Breckenridge	76424	+12545598732	http://kens-chicken-n-fish.edan.io		0.98
 d3800ced96b6	Key's Place Burgers and BBQ	restaurant	burger restaurant	32.79729	-98.11312	1504 S Oak Ave	Mineral Wells	76067	+18176322337	http://clover.com/online-ordering/KeysPlaceBurgersAndBBQ		1.00
-36a21c34580c	KFC	restaurant	chicken restaurant	32.20446	-98.23734	2780 W Washington St	Stephenville	76401	+12549185276	http://www.kfc.com/storelocator/Default.aspx?address=2780%20W.%20Washington%20Street,Stephenville,TX		0.92
 e7d9ce716abe	Knotty Dogs	restaurant	hot dog restaurant	32.21719	-98.20009	620 S Graham Ave	Stephenville	76401	+16158799288			0.92
 1680179faaf3	Krispy Krunchy Chicken	restaurant	chicken restaurant	32.60437	-98.21596	13850 Fm 4	Santo	76472	+19407693977	https://www.krispykrunchy.com/		0.96
 a4ffd8cce8e6	Krispy Krunchy Chicken	restaurant	chicken restaurant	32.74722	-98.01082	100 NW Front St	Millsap	76066	+19406824676	https://www.krispykrunchy.com/		0.96
@@ -854,9 +839,6 @@ eefaf7d979d1	La Hacienda Restaurant	restaurant	texmex restaurant	32.40361	-98.78
 e799c25a3a8e	Laura's Kitchen	restaurant	theme restaurant	32.75578	-98.88560	1318 E Walker St	Breckenridge	76424	+19402821923			0.97
 d979470cd2a2	Lilia's taqueria	restaurant	mexican restaurant	32.08242	-98.34299	102 O'Neil St	Dublin	76446	+12544451921			0.74
 06ac6df67775	Lisa’s Coffeehouse	restaurant		32.10979	-98.53709	166 N Texas St	De Leon	76444	+12548933050	https://lisascoffeehouse.com		0.92
-fc1188f09e8c	Little Caesars	restaurant	pizza restaurant	32.75557	-98.90947	606 W Walker St	Breckenridge	76424	+12542463700	https://littlecaesars.com/en-us/store/20263	Little Caesars	0.96
-7a49c12f09bf	Little Caesars Pizza	restaurant	pizza restaurant	32.21524	-98.21262	1186 W Washington St	Stephenville	76401	+12549187447	http://www.littlecaesars.com/	Little Caesars	0.94
-bedde912c6ab	Little Caesars Pizza	restaurant	pizza restaurant	32.80815	-98.09676	1706 Southeast 1st Street	Mineral Wells	76067	+19404682230	https://littlecaesars.com/en-us/store/12385		0.96
 5dccca8d81c3	Los Arcos de Castillos	restaurant	texmex restaurant	32.21537	-98.18777	802 E Rd	Stephenville	76401	+12549685556			0.98
 a822db834050	Love Fitness	restaurant		32.22443	-98.17995	265 Private Road 1092	Stephenville	76401	+12545929327	https://www.mindbodyonline.com/get-the-app		0.92
 09d6ed07bf28	Ma Chèrie TK	restaurant	cajun and creole restaurant	32.37752	-98.99057	106 W Travis Ave	Putnam	76469	+12546615654			0.79
@@ -894,9 +876,6 @@ c43ce2effcab	Newton's Saddlerack	restaurant	steakhouse	32.21952	-98.20258	216 W 
 14def5e1c364	Ol Timers Diner	restaurant	diner	32.75569	-98.90585	318 W Walker St	Breckenridge	76424	+12545590900			0.94
 0ec7b2779512	Old School Pizza Company	restaurant	pizza restaurant	32.81010	-98.09113	215 NE 27th Ave	Mineral Wells	76067	+19403251515	http://oldschoolpizzaco.net		0.92
 794827154437	Panda Chinese Restaurant	restaurant	chinese restaurant	32.80875	-98.09947	1501 SE 1st St	Mineral Wells	76067	+19403256332	https://www.pandachinesewoodbridge.com		0.92
-325455ee96c5	Panda Express	restaurant	chinese restaurant	32.20292	-98.24271	2861 W Washington St	Stephenville	76401	+12549680600	http://www.pandaexpress.com/		0.96
-dd1ef8eb6070	Panda Express	restaurant	chinese restaurant	32.81109	-98.08080	3705 Us - 180	Mineral Wells	76067	+19407570622	http://www.pandaexpress.com/	Panda Express México	0.96
-2e54d2fc5755	Papa Johns Pizza	restaurant	pizza restaurant	32.20465	-98.24020	100 N WOLFE NURSERY Rd Ste 135 Ste 135	Stephenville	76401	+12544342748	https://locations.papajohns.com/united-states/tx/76401/stephenville/100-n-wolfe-nursery-rd-135?utm_source=bing-maps&utm_medium=organic&y_source=1_MTA4MzczMDA5NC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
 dbb9db7e5628	Papa's Cantina & Mexican Restaurant	restaurant	mexican restaurant	32.93782	-98.24873	208B N Main St	Graford	76449	+19402606277	http://papascantina.com/		0.61
 c036cc3f8e0c	Paradise Pizza	restaurant	pizza restaurant	32.93667	-98.24880	108 N Main St	Graford	76449	+19406642000	http://paradisepizzagraford.mealcreator.website/		0.94
 25b982ece26f	Pastafina	restaurant	italian restaurant	32.20249	-98.24392	2897 W Washington St	Stephenville	76401	+12549185552	http://www.pastafinas.com	Pastafina of Granbury	0.99
@@ -910,9 +889,6 @@ b05b9e7b385a	Pie House	restaurant	pizza restaurant	32.88163	-98.44834	3415 -A Sc
 ee167ac15517	Pie House	restaurant	pizza restaurant	32.88717	-98.45001	3415- A Scenic Point Road	Graford	76449	+19405218780	https://www.pkpiehouse.com/		0.90
 0410f25eb6a3	Pizza Heaven	restaurant	pizza restaurant	32.40122	-98.80164	1001 E Main St	Eastland	76448	+12546292233	http://pizzaheavenexpress.com/		0.97
 75040a2af4eb	Pizza Heaven	restaurant	pizza restaurant	32.37606	-98.97184	2108 Conrad Hilton Blvd	Cisco	76437	+12544423354	http://pizzaheavenexpress.com/		0.94
-81c6ff1e7dbf	Pizza Hut	restaurant	pizza restaurant	32.40119	-98.79160	1481 Main St	Eastland	76448	+12546310444	https://locations.pizzahut.com/tx/eastland/1481-e-main-st	Pizza Hut	0.84
-8fcaca61365f	Pizza Hut	restaurant	pizza restaurant	32.20801	-98.22865	2320 W Washington St	Stephenville	76401	+12549683941	https://locations.pizzahut.com/tx/stephenville/2320-w-washington?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=292573	Pizza Hut	0.98
-ddedeb9f521c	Pizza Hut	restaurant	pizza restaurant	32.80889	-98.10443	100 SE 10th Ave Palo Pinto	Mineral Wells	76067	+19403254461	https://locations.pizzahut.com/tx/mineral-wells/100-se-10th-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299948	Pizza Hut	0.99
 7cd13eee30ad	Pizza Pro	restaurant	pizza restaurant	32.11739	-98.53530	132 W Navarro Ave	De Leon	76444	+12548934119			0.92
 9715d00f79ce	Pizza Pro	restaurant	pizza restaurant	32.10929	-98.53676	125 N Texas St	De Leon	76444	+12548935570	https://www.pizzapro.com		0.96
 bc8464938170	Pizza Pro	restaurant	pizza restaurant	32.47261	-98.67710	100 Railroad Ave	Ranger	76470	+12546471199			0.92
@@ -920,7 +896,6 @@ e617dd7a00e6	Pizza Pro	restaurant	pizza restaurant	32.39220	-98.98238	200 Conrad
 fcef2ae4a399	Pizza Pro	restaurant	pizza restaurant	32.21300	-98.66954	207 Lubbock St	Gorman	76454	+12547343500	https://www.pizzapro.com		0.98
 3ae090fa9a34	Pizza Pro of Dublin	restaurant	pizza restaurant	32.08562	-98.34263	102 W Blackjack St	Dublin	76446	+12544454452	http://www.pizzapro.com/		0.77
 a53d1bfa7fa3	Pk Ice House	restaurant		32.91769	-98.43429	359 N FM 2353	Graford	76449	+19402606190	http://www.pkicehouse.net		0.93
-ae3765c4b1a4	Popeyes Louisiana Kitchen	restaurant	chicken restaurant	32.80915	-98.09300	2501 E Hubbard St	Mineral Wells	76067	+19402746347	https://www.popeyes.com/store-locator/store/restaurant_882611		0.97
 5f2fbe05b78c	Poseidon Sushi & Hibachi	restaurant	japanese restaurant	32.20738	-98.23418	2675 W Washington St Ste 500	Stephenville	76401	+12544344155	https://poseidonsushistephenville.com/		0.95
 8f6276d9e75d	Prado's Cafe	restaurant	mexican restaurant	32.11278	-98.53643	424 N Texas St	De Leon	76444	+12548933910	https://riny.top/prado-s-cafe		0.96
 c6cfdbbad0e6	Prado’s Mexican Cafe	restaurant	mexican restaurant	32.20027	-98.24523	2900 W Washington St	Stephenville	76401	+12549654445			0.55
@@ -941,34 +916,20 @@ b2b31611ce44	Rodeo Roots American Fare Kitchen	restaurant	american restaurant	32
 2b3dde05659b	Rollie's On Texas	restaurant	breakfast and brunch restaurant	32.10615	-98.53772	341 South Texas Street	De Leon	76444	+12548932591	https://www.rolliesontexas.com/menu		0.93
 07d6c3fcaf74	Rolling Smoke BBQ	restaurant	barbecue restaurant	32.21327	-98.67050	104 E Lubbock St	Gorman	76454	+12542430201	http://www.spiritbbq.com		0.92
 670ee6fe4a07	Rooms at The Oak Dale	restaurant	steakhouse	32.28711	-98.24836	9771 N State Highway 108	Stephenville	76401		https://www.airbnb.com/users/show/442058261		0.78
-c28bfc3e5240	Rooms at The Oak Dale	restaurant	steakhouse	32.28715	-98.24846	9771 N State Highway 108	Stephenville	76401		https://www.airbnb.com/users/show/442058261		0.71
 aff44652c96a	Ruby's Texas Bistro	restaurant		32.21905	-98.20249	211 W McNeill St	Stephenville	76401	+12549185966	https://rubystexasbistro.com		0.95
 9b8ac12760d7	Sabor a Mexico	restaurant	mexican restaurant	32.81025	-98.08935	2801 US-180	Mineral Wells	76067	+19403469856			0.92
 5f2397e3e143	Sadie’s Eats	restaurant	salad bar	32.76702	-98.10640	3400 S Highway 281	Mineral Wells	76067	+16823334229			0.92
 fe6e936728ec	Sammiches	restaurant	sandwich shop	32.40144	-98.80737	905 E Main St	Eastland	76448	+12544339848			0.92
 89e2aa652810	Santa Fe Taco Company	restaurant	mexican restaurant	32.20765	-98.22880	2330 W Washington St	Stephenville	76401	+12549683668	http://santafetacos.com		0.92
-02b23ddbd037	Schlotzsky's	restaurant	sandwich shop	32.21112	-98.22278	2012 W Washington St	Stephenville	76401	+12544345180	http://www.schlotzskys.com/stephenville/4936/home		0.97
 7026c21d741c	Shooters Cafe	restaurant	breakfast and brunch restaurant	32.45856	-98.68452	1000-1098 TX-254 Loop	Ranger	76470	+12546471355	https://shooters-cafe.hub.biz/		0.97
 8187d62273e1	Shooterz Bar And Grill	restaurant	american restaurant	32.20695	-98.23241	2847 W Washington St	Stephenville	76401	+12549680620	http://shooterzseafood.com		0.77
 b759cab52b87	Shooterz Scratch Kitchen & Bar	restaurant		32.20351	-98.24191	2847 W Washington St	Stephenville	76401	+12544401508	https://www.shooterzseafood.com		0.92
 cd0f8d1f3ede	Sissy's	restaurant	american restaurant	32.75053	-98.90245	420 S Breckenridge Ave	Breckenridge	76424	+12545592900	http://wildberrypancakesandcafechicago2.gastrobars.com		0.97
 4aec415461d0	SK Saloon	restaurant	steakhouse	32.93693	-98.24844	114 N Main St	Graford	76449	+19402608370			0.67
-0830f8eb6540	Sonic Drive-In	restaurant	burger restaurant	32.75566	-98.91373	1000 W Walker St	Breckenridge	76424	+12545598117	http://www.sonicdrivein.com		0.92
 3535b560d95c	Starlite Cafe	restaurant	american restaurant	32.09504	-98.96423	118 S Main St	Rising Star	76471	+12546410856	https://starlite-cafe-tx.hub.biz/		0.96
 0aa1431d0ad5	Stephenville, TX - Tarleton State University	restaurant	pizza restaurant	32.21606	-98.21527	1333 West Washington St.	Stephenville	76402		https://locations.blazepizza.com/us/tx/stephenville/blazepizza-1418	Blaze Pizza	0.80
 ce2092e81f55	Stuart Group Inc	restaurant	chicken restaurant	32.80886	-98.08906	100 SE 25th Ave	Mineral Wells	76067	+18175949300	https://www.chickene.com		0.65
 27697067c3f5	Su Casa Cafe	restaurant	mexican restaurant	32.75851	-98.94125	3218 W Walker St	Breckenridge	76424	+12545592788			0.95
-20816d7dcfe2	Subway	restaurant	sandwich shop	32.40194	-98.79203	1488 E Main St	Eastland	76448	+12546293262	https://restaurants.subway.com/united-states/tx/eastland/1488-e-main-st	Subway	0.98
-266c2ccbdfe6	Subway	restaurant	sandwich shop	32.81361	-98.08610	601 FM 1821	Mineral Wells	76067	+19403258680	https://restaurants.subway.com/united-states/tx/mineral-wells/601-fm-1821	Subway	0.94
-32133ee8b108	Subway	restaurant	sandwich shop	32.37598	-98.97099	2111 Conrad Hilton Ave	Cisco	76437	+12544421990	https://restaurants.subway.com/united-states/tx/cisco/2111-conrad-hilton-ave	Subway	0.96
-48bae61929c8	Subway	restaurant	sandwich shop	32.20493	-98.24006	100 Wolfe Nursery Rd Ste 120	Stephenville	76401	+12549685111	https://www.subway.com		0.94
-70a4a979e1e5	Subway	restaurant	sandwich shop	32.21471	-98.21356	1236 W. Washington Street	Stephenville	76401	+12549656800	https://restaurants.subway.com/united-states/tx/stephenville/1236-w-washington-street	Subway	0.98
-7c86dfd4a58a	Subway	restaurant	sandwich shop	32.76151	-98.94678	3808 W Walker	Breckenridge	76424	+12545493016	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72559&utm_campaign=evergreen-2020&y_source=1_MTAxNzEyNDkxOC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
-92f54f44ed5d	Subway	restaurant	sandwich shop	32.20465	-98.23972	100 Wolfe Nursery Rd Ste 120	Stephenville	76401	+12549685111	http://www.subway.com/en-us	Subway	0.95
-bb5638809b8d	Subway	restaurant	sandwich shop	32.61163	-98.10966	87125 Hwy 20 W	Santo	76472	+19407692584	http://www.subway.com/en-us	Subway	1.00
-c2a5b1be09bd	Subway	restaurant		32.75901	-98.94571	3715 W Walker St	Breckenridge	76424	+12545595633	https://restaurants.subway.com/united-states/tx/breckenridge/3715-w-walker	Subway	0.92
-d3f5d176584d	Subway	restaurant	sandwich shop	32.44178	-98.69453	1600 W Loop 254	Ranger	76470	+12546473700	https://www.subway.com		0.98
-ed9a06b9011c	Subway	restaurant	sandwich shop	32.11700	-98.53469	100 E Navarro Ave	De Leon	76444	+12548935656	https://www.subway.com		0.98
 05c44d96d81f	Sunrise burritos	restaurant	breakfast and brunch restaurant	32.75551	-98.91106	710 W Walker St	Breckenridge	76424	+12545597376			0.96
 96ac85a3a5f7	Taco Truck- Los Cunados	restaurant	taco restaurant	32.80949	-98.10257	1207 E Hubbard St	Mineral Wells	76067	+19403289985			0.97
 11dadd3bf4d6	Taqueria & Fondita Celaya	restaurant	mexican restaurant	32.80824	-98.10795	604 SE 1st St	Mineral Wells	76067	+19403270988			0.92
@@ -978,7 +939,6 @@ ed9a06b9011c	Subway	restaurant	sandwich shop	32.11700	-98.53469	100 E Navarro Av
 514d6a683c12	TAQUERIA EL RIO& SEAFOOD	restaurant	mexican restaurant	32.09677	-98.33895	810 N Patrick St	Dublin	76446	+12544450398			0.99
 47ddfc330f64	Taqueria El Taquito	restaurant	mexican restaurant	32.20225	-98.24564	2963 W Washington St	Stephenville	76401	+12544859060			0.89
 56384f8d08e1	TAQUERIA ESPERANZA	restaurant	mexican restaurant	32.09558	-98.37542	3770 Hwy 6	Dublin	76446	+12544031782			0.92
-c153ef538345	Taqueria Hernandez	restaurant	mexican restaurant	32.80415	-98.10786	716 SE 6th Ave	Mineral Wells	76067	+18172581289			0.95
 f4858c6133e8	Taqueria Hernandez	restaurant	mexican restaurant	32.80454	-98.10807	716 SE 6th Ave	Mineral Wells	76067	+18172581289			0.95
 16ac694a55fc	Taqueria La Chaparrita	restaurant	mexican restaurant	32.20504	-98.21539	1755 W South Loop	Stephenville	76401	+12549791821			0.92
 3cc563bdfc95	Taqueria La Esmeralda	restaurant	mexican restaurant	32.21579	-98.21268	101-187 N McIlhaney St	Stephenville	76401	+12544598997	http://www.esmeraldataqueria.com/		0.92
@@ -1011,11 +971,7 @@ b1d0fad84e0d	The SmokeStack Restaurant	restaurant	comfort food restaurant	32.508
 5c87af5b158d	The Water Store	restaurant	burger restaurant	32.75553	-98.91497	1022 W Walker St	Breckenridge	76424	+12545595880	https://members.breckenridgetexas.com/list/category/fast-food-99		0.96
 b1f8e9f198aa	Thurber Historic District	restaurant	american restaurant	32.49928	-98.43205		Bluff Dale			http://pdfhost.focus.nps.gov/docs/NRHP/Text/79002936.pdf		0.56
 68007bd06b91	Vietnamese cuisine	restaurant	ramen restaurant	32.21424	-98.21918	1603 W Washington St	Stephenville	76401	+12544136202	https://usmapi.com/details/vietnamese-cuisine-ChIJDzA		0.92
-9774932f9ee8	Whataburger	restaurant	burger restaurant	32.40125	-98.79497	1401 East Main Street	Eastland	76448	+12544884001			0.97
-e476bdbbe5df	Whataburger	restaurant	burger restaurant	32.20282	-98.24119	2830 W Washington St	Stephenville	76401	+12549686285	https://locations.whataburger.com/tx/stephenville/2830-w-washington-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 500265c31462	Wilfong's	restaurant	cajun and creole restaurant	32.35089	-98.02087	28601 US-377	Bluff Dale	76433	+12547283238			0.97
-98611944b457	Wingstop	restaurant	chicken restaurant	32.20324	-98.24198	2851 W. Washington	Stephenville	76401	+12549182100	https://www.wingstop.com/location/wingstop-356-stephenville-tx-76401/menu?y_source=1_NTUyMDY3MTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
-e28e7f639c99	Wingstop	restaurant	chicken restaurant	32.81592	-98.08417	937 FM 1821	Mineral Wells	76067	+19406542700	https://www.wingstop.com/location/wingstop-2104-mineral-wells-tx-76067/menu?y_source=1_NTUyMDcyNzAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 b22b2fc44d16	Woody's	restaurant	american restaurant	32.12039	-98.31902	17157 S US Highway 377	Dublin	76446	+12544454660	http://www.woodysplacetexas.com		0.87
 e8f6640e90e9	Woody's Bar & Grill	restaurant	bar and grill restaurant	32.81107	-98.06062	6105 US-180	Mineral Wells	76067	+19403259817	http://www.woodysplacetexas.com		0.99
 66f73e7ce2dc	Avir at Cisco	senior	retirement home	32.37593	-98.99208	1404 Front St	Cisco	76437	+12544424202	https://avirhg.com/avir-at-cisco/	Avir at Bowie	0.97

@@ -9,11 +9,12 @@ d8f5097efec4	Dollar Tree	convenience		29.56067	-104.37976	312 E Oreilly St	Presi
 c4eeb4b1ad93	FRONTIER TRAVEL CENTER	convenience		29.58140	-104.37550	99220 US HWY 67	Presidio	79845		https://locations.valero.com/en-us/LocationDetails/Index/99220-US-HWY-67/0000028510	Valero	0.80
 abcdc79f4824	Presidio 67	convenience		29.56393	-104.38032	316 Jose Rodriguez St	Presidio	79845	+14322294949			0.99
 d10ba102868c	Tom's Service Station	convenience		29.56087	-104.37354	203 O Reilly St	Presidio	79845	+14322293259	http://tomsstation.com/		0.92
+8122635d0b91	McDonald's	fastfood	burger restaurant	29.56068	-104.38490	1305 O Reilly St	Presidio	79845		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
+eb7df859e4e0	Subway	fastfood	sandwich shop	29.56907	-104.37583	Corner First St And Second	Presidio	79845	+14322292505	http://www.subway.com/en-us	Subway	0.95
 b5446ede9dd2	Porter's Thriftway	grocery		29.56524	-104.37106	504 N Erma Ave	Presidio	79845	+14322293776	http://exxonmobil.com		0.77
 06e49521f741	Presidio Senior Citizens Center	hospital		29.56164	-104.36394	1400 E Oreilly St	Presidio	79845	+14322293290			0.97
 c3846f7d9473	Riata Inn	hotel		29.81833	-104.30656	99205 US Highway 67	Presidio	79845	+14322292528	http://www.riatainnpresidio.com		0.57
 0b6c790afd3b	Riata Inn Motel	hotel		29.58235	-104.37461	99205 US Highway 67	Presidio	79845	+14322292528	http://www.riatainnpresidio.com/		0.99
-4ea9af1cb560	Riata Inn Motel	hotel		29.56800	-104.37117	99205 US Highway 67	Presidio	79845	+14322292528	http://www.riatainnpresidio.com/		0.96
 18defd11708c	Riata Inn Presidio	hotel		29.56452	-104.38050	99205 US Hwy 67	Presidio	79845	+14322292528	http://www.riatainnpresidio.com/		0.98
 fc3c5807b836	Three Palms Inn	hotel	motel	29.57164	-104.36916	1200 Erma Ave	Presidio	79845	+14322293211	http://www.threepalmsinn.com		0.92
 58f679e1b153	Villa Vieja Big Bend	hotel		29.98237	-104.67995	170 E Oreilly St	Presidio	79845				0.61
@@ -23,13 +24,10 @@ f60e7f3dbe45	El Changarrito	restaurant	mexican restaurant	29.55689	-104.35809	79
 efd4f7eb7540	El Mariachi	restaurant		29.61958	-104.20305	201 O" Rally St	Presidio	79845	+14322942424			0.83
 52b35259bd68	El Patio Restaurant	restaurant	mexican restaurant	29.56056	-104.37521	516 O Reilly St	Presidio	79845	+14322294409	http://ojinaga.com/elpatio		0.95
 588145652830	Krispy Krunchy Chicken	restaurant	chicken restaurant	29.58128	-104.37545	99220 Us-67	Presidio	79845	+14322292777	https://locations.krispykrunchy.com/tx/presidio/99220-us-67		0.96
-8122635d0b91	McDonald's	restaurant	burger restaurant	29.56068	-104.38490	1305 O Reilly St	Presidio	79845		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 9e22445dfe91	Oasis Restaurant	restaurant	american restaurant	29.57190	-104.36910	1204 Erma Ave	Presidio	79845	+14322293998			0.92
 e3b1ae8d00a0	Pizza Pro	restaurant	pizza restaurant	29.56025	-104.36889	504 N Erma Ave	Presidio	79845	+14322293776	https://www.pizzapro.com		0.77
 97ed076636ed	Poncho's Pizza	restaurant	pizza restaurant	29.56178	-104.38551	114 Puerto Rico St	Presidio	79845	+14322292663			0.92
 fc2e3878629d	Presidio Trading Post & Cantina	restaurant	bar and grill restaurant	29.54857	-104.34873	1412 Park Valley Ave	Presidio	79845	+14322293916			0.96
-eb7df859e4e0	Subway	restaurant	sandwich shop	29.56907	-104.37583	Corner First St And Second	Presidio	79845	+14322292505	http://www.subway.com/en-us	Subway	0.95
-fdfc18f40ec6	Subway	restaurant	sandwich shop	29.56139	-104.37583		Presidio	79845	+14322292505	http://subway.com		0.77
 22f47cd2983b	The Bean Cafe	restaurant		29.56067	-104.35783	201 West O'Reilly	Presidio	79845	+14322293131	http://www.thebeancafe.com		0.77
 bfe8dbd6c651	The Bean Cafe	restaurant	breakfast and brunch restaurant	29.56064	-104.36221	201 W O'Reilly	Preidio	79845	+14322293131			0.85
 efafc9e388f2	The Bean Cafe	restaurant	american restaurant	29.56093	-104.37288	201 W Oreilly St	Presidio	79845	+14322293131	http://www.thebeancafe.com	The Bean Cafe	0.94

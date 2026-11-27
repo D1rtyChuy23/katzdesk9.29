@@ -45,7 +45,6 @@ decefb076cef	Panaderia La Mexicana	bakery		26.15779	-97.82468	124 W Oleander Ave
 b97a4a0ea129	Panaderia Mexico	bakery		26.10423	-97.95831	1102 FM 1015 E	Progreso	78579	+19563357299			0.92
 7ba2dfd12b51	Panificadora Morelia	bakery		26.09347	-97.95632	207 E Shelby Ave	Progreso	78596	+19563144836			0.73
 7ba26320b5ce	Pastry House	bakery		26.19230	-97.69572	Filmore Ave	Harlingen	78550	+19568902810			0.92
-c77e02241344	Pastry House	bakery		26.18990	-97.70049	Filmore Ave	Harlingen	78550	+19568902810			0.66
 46ddb1fe2c0f	Ramírez Bakery Pan 100% mexicano	bakery		26.06792	-97.21056	521 S Shore Dr	Port Isabel	78578	+19562932637			0.89
 4deecc35b515	Reach for the Sky BakeShop	bakery		26.13327	-97.63077	277 N Sam Houston Blvd	San Benito	78586	+19566261838	http://www.ordernowreachforthesky.com/		0.99
 6a0b679fbc9a	Reyes Bakery	bakery		26.15779	-97.82469	124 W Oleander Ave	La Feria	78559	+19562770107			0.99
@@ -100,7 +99,6 @@ c7022f9cbca3	El Encanto Daiquiris To-go	bar		26.20626	-97.95895	3301 Western Dr 
 f1285d0a114b	El Santuario Tacos & Cocktails	bar	cocktail bar	26.01441	-97.53133	7077 N Expressway 77	Olmito	78575	+19562805525	http://elsantuariotacos.com/		0.83
 58d5956f5d06	El Vaquero Bar	bar		26.02338	-97.62617	36957 Estero St	San Benito	78586		http://www.yellowpages.com/san-benito-tx/el-vaquero		0.96
 9a3c02a4de7c	Envys	bar		26.17336	-97.77746	1105 S Tamm Ln	Harlingen	78552	+19568931635			0.65
-ec8fc854aaf1	Envys	bar		26.17307	-97.77840	1105 S Tamm Ln	Harlingen	78552	+19568931635			0.65
 cff4fe5a51a1	Equis Bar	bar		26.15349	-97.91369	217 Ruben Nela & Gilberto Perez Ave	Mercedes	78570	+19568846142			0.84
 bec35506a278	Feege’s Octopus bar	bar	beer bar	26.11226	-97.63940		San Benito					0.72
 e105299c651c	Fork and Craft	bar	wine bar	26.19301	-97.69692	204 W Jackson St	Harlingen	78550	+19566223134	http://jacksonstreetcorkncraft.com/		0.92
@@ -131,7 +129,6 @@ bb66b8edc7b1	La Cabaña Bar	bar		26.13231	-97.63313	106 S Travis St	San Benito	7
 c02975ef3586	La Escondida	bar		26.15032	-97.91616	115 S Virginia Ave	Mercedes	78570	+19567568175			0.92
 d4b9bfb75f43	La Guera Micheladas	bar		26.01079	-97.53070	6933 N Expressway 77	Olmito	78575	+19565718191			0.97
 1e2cef9205e6	La Malquerida	bar		26.20762	-97.70667	1510 N Commerce St	Harlingen	78550	+19562917017			0.96
-fd5f16772be1	La Malquerida	bar		26.20757	-97.70718	1510 N Commerce St	Harlingen	78550	+19562917017			0.96
 002d0a30e448	La Tejana lounge	bar		26.19153	-97.69875	209 S C St	Harlingen	78550		https://local.yahoo.com/info-73284437-tejano-grill-harlingen		0.92
 bc45dbd8e507	Lala's Bar	bar		26.07985	-97.25954	209 Van Buren St	Port Isabel	78578	+19564336549			0.93
 8080dcea71d3	Larry's Blue Bar	bar		26.14865	-97.91235	313 S Ohio Ave	Mercedes	78570	+19565659912	http://www.larrysbluebar.com/		0.91
@@ -198,7 +195,6 @@ cebdc3ebd42f	Torres Sports Pub	bar	pub	26.14081	-97.89777	1010 Arroyo Cir	Merced
 658374c36fde	Transmigrantes La Union	bar		26.13986	-97.72048	28918 Rangerville Rd	Harlingen	78552		https://transmigrantes-g-t.hub.biz		0.71
 bf67b8c4c059	Trevino's Blue Bar	bar	beer bar	26.14865	-97.91230	313 S Ohio Ave	Mercedes	78570	+19568904773			0.99
 f21095fdd767	Triple M Headquarters	bar	pub	26.22184	-97.70149	2917 N Rose St	Harlingen	78550				0.69
-0946a4735728	Tropical Bar	bar		26.11932	-97.62428	1241 E Expressway 83	San Benito	78586				0.60
 3c1cde83f124	Tropical Bar	bar		26.12011	-97.62572	1241 E Expressway 83	San Benito	78586				0.61
 a3d63c39ad60	VFW II	bar		26.47808	-97.76977	484 S Expressway 77	Raymondville	78580	+19566992518	http://www.vfw.org/		0.97
 cf7d5cbc75da	Wagon Wheel Saloon and Bar	bar		26.26404	-97.99217	N. FM 88 & Mile 14 1/2	Weslaco	78599	+19562079902			0.89
@@ -273,12 +269,9 @@ a22f5a1bae31	Gillman Chevrolet GMC	cardealer		26.13667	-97.65197	1801 Industrial
 6d935b64792a	Gillman Honda Harlingen	cardealer		26.18605	-97.76353	7701 W Expy 83	Harlingen	78552	+19562558120	https://www.gillmanhondaharlingen.com/	Honda	0.98
 8f211de321dc	Gillman Honda San Benito	cardealer		26.13638	-97.65276	1801 Industrial Way	San Benito	78586	+19562558120	https://www.gillmanhondasanbenito.com		0.97
 e5d6a88f06ab	Guzman Auto	cardealer		26.12527	-97.63554	290 E Expressway 83	San Benito	78586	+19564561450			0.92
-bed76a091f9a	Harlingen Luxury Motors, Inc.	cardealer		26.18752	-97.77454	8522 W. Expressway 83	Harlingen			https://www.mercedesbenzofharlingen.com/	Mercedes-Benz	0.80
-43705d5e5a01	Harlingen Powersports	cardealer		26.15183	-97.75081	28020 S Dilworth Rd	Harlingen	78552	+19562005736			0.93
 8e63e0a32835	Harlingen Powersports	cardealer		26.15299	-97.75108	28020 S Dilworth Rd	Harlingen	78552	+19562005736			0.93
 e7421ac64694	Hector's Auto Sales	cardealer	used auto dealer	26.48202	-97.79970	12880 TX-186	Raymondville	78580	+19566895472			0.92
 a4a45ce1bfc6	Hercules Auto Sales	cardealer		26.14547	-97.66239	2319 W Expy 83	San Benito	78586	+19566261796	http://Herculesautosales.com/		0.92
-62f37840f491	HM Auto Plex	cardealer	used auto dealer	26.12478	-97.61065	1391 US-77 BUS	San Benito	78586	+19562026647	http://www.hmautoplex.com/		0.85
 cbf00e734cda	Hm Auto Plex	cardealer		26.15088	-97.64475	1391 US-77 BUS	San Benito	78586	+19562026647	http://www.hmautoplex.com/		0.99
 6fd9da9f0526	Homer Rodriguez Auto Center	cardealer		26.19125	-97.66432	3105 E Harrison Ave	Harlingen	78550	+19564129877	http://www.rodriguezfordmerc.com/		0.92
 31c6479c9e47	J C's Auto Sales	cardealer	used auto dealer	26.18181	-97.70203	1121 S F St	Harlingen	78550	+19563642433			0.82
@@ -466,7 +459,6 @@ d21a1d8a5bb5	Tropics Cafe	coffee		26.22598	-97.65392	Harlingen Airport	Harlingen
 c5f878066a89	Windjammer's Beachfront Cafe	coffee		26.08841	-97.16306	500 Padre Blvd	South Padre Island	78597	+19567616511	http://www.islagrand.com/		0.92
 176fe96f9bda	World Flavors Coffee House	coffee		26.12259	-97.17095	5009 Padre Blvd	South Padre Island	78597	+19567728050	http://www.sopadre.com/listings/world-flavors-coffee/408		0.92
 dad5de783590	Yo Mama Bubble Tea & Health Bar	coffee	bubble tea shop	26.14562	-97.65118	240 S Williams Rd	San Benito	78586	+19566261223	https://www.yomama.cafe		0.93
-8f2072d2bbde	Yo mama Healthy cafe	coffee		26.14554	-97.64991	2396 La Palma St	San Benito	78586				0.75
 e113619b173c	Yo mama Healthy cafe	coffee		26.14562	-97.64993	2396 La Palma St	San Benito	78586				0.77
 903340ffc369	BCMS Greypups	college		26.15128	-97.65862	2901 Shafer Rd	San Benito	78586	+19563616600	http://BCMS.sbcisd.net/		0.89
 5db48cc471da	Harlingen Clinical Education Building - UTRGV School of Medicine	college		26.17351	-97.66587	2102 Treasure Hills Blvd	Harlingen	78550				0.97
@@ -476,7 +468,6 @@ db40abd45141	Our Lady of the Lake University	college		26.14355	-97.82454	1650 S 
 7c507511bef7	South Texas ISD Medical Professions	college		26.03364	-97.53602	10650 North Expy 77/83	Olmito	78575	+19562146100	http://medicalprofessions.stisd.net/	South Texas ISD Science Academy	0.97
 df3071687dc8	Stvt Weslaco	college		26.17327	-97.96725	2419 Haggar Ave	Weslaco	78599		http://www.stvt.edu/locations/weslaco		0.97
 e387bae62efd	Texas State Technical College	college		26.21942	-97.66664	1902 N Loop 499	Harlingen	78550	+18008528784	http://www.harlingen.tstc.edu		0.97
-ebc3bce16827	Texas State Technical College	college		26.22404	-97.70823	1902 N Loop 499	Harlingen	78550	+18008528784	http://www.harlingen.tstc.edu		0.77
 eba41fbbc4f7	TSTC Cultural Arts Center	college		26.22841	-97.71369	1825 Loop 499	Harlingen	78550	+19563644819	http://harlingen.tstc.edu/index.aspx		0.92
 42cc439653c1	TSTC Enrollment Services	college		26.22152	-97.66527	1902 N Loop 499	Harlingen	78550	+19563644997	http://tstc.edu/		0.73
 19c82ea87ff1	TSTC in Harlingen	college		26.22695	-97.71433	1902 N Loop 499	Harlingen	78550	+19563644000	http://www.tstc.edu/campuses/harlingen/		0.95
@@ -498,7 +489,6 @@ a7ebaf0a5f0f	1 Stop	convenience		26.15330	-97.95800	811 S INTERNATIONAL BLVD	Wes
 19d9ba8677e3	7-Eleven	convenience		26.48210	-97.75517	1905 E Hidalgo & Hwy 77	Raymondville	78580	+18002550711	https://www.7-eleven.com/locations/tx/raymondville/1905-e-hidalgo-hwy-77-40707		0.85
 1e8b904e5cb3	7-Eleven	convenience		26.17872	-97.66995	2305 Loop 499	Harlingen	78550	+18002550711	https://www.7-eleven.com/locations/tx/harlingen/2305-n-loop-499-40703		0.97
 21600380beb3	7-Eleven	convenience		26.23367	-97.56858	28281 Fm 106	Rio Hondo	78583	+19567483404	https://www.7-eleven.com/locations/tx/rio-hondo/28281-fm-106-40743	7-Eleven	0.99
-27483a3ce1a2	7-Eleven	convenience		26.15415	-97.82594	TBD	La Feria	78559	+18002550711	https://www.7-eleven.com/	7-Eleven	0.84
 27f7d24f9768	7-Eleven	convenience		26.21100	-97.75864	1837 N Stuart Place Rd	Harlingen	78550	+19564232860	https://www.7-eleven.com/locations/tx/harlingen/1837-n-stuart-place-40704	7-Eleven	1.00
 288abfc04824	7-Eleven	convenience		26.20595	-97.68945	1301 N 77 Sunshine Strip	Harlingen	78550	+19569531589	https://www.7-eleven.com/		1.00
 2e5938304d88	7-Eleven	convenience		26.14965	-97.91613	602 W 2nd St	Mercedes	78570	+19565652591	https://www.7-eleven.com/		1.00
@@ -507,7 +497,6 @@ a7ebaf0a5f0f	1 Stop	convenience		26.15330	-97.95800	811 S INTERNATIONAL BLVD	Wes
 4270e25d6cd1	7-Eleven	convenience		26.18778	-97.75774	6780 W Expressway 83	Harlingen	78552	+19564408663	http://www.7-eleven.com		0.77
 42ab49586bfd	7-Eleven	convenience		26.17272	-97.97933	901 E Expressway 83	Weslaco	78599	+18002550711	https://www.7-eleven.com/locations/tx/weslaco/901-w-u-s-highway-83-40612	7-Eleven	0.74
 43b60cd0efcb	7-Eleven	convenience		26.20206	-97.67707	930 Morgan Blvd	Harlingen	78550	+18002550711	https://www.7-eleven.com/locations/tx/harlingen/930-morgan-boulevard-40762		0.85
-481e1f009606	7-Eleven	convenience		26.26643	-97.74062	21469 US 77 Expressway	Combes	78552	+18002550711	https://www.7-eleven.com/locations/tx/combes/21469-us-77-expressway-40705		0.85
 48f9e7cb4ef2	7-Eleven	convenience		26.19818	-97.69539	602 N First St	Harlingen	78550	+19564284492	https://www.7-eleven.com/locations/tx/harlingen/602-n-first-street-40760	7-Eleven	0.99
 4c7f0ead8645	7-Eleven	convenience		26.18450	-97.95929	2455 N International Blvd	Weslaco	78596	+19565141900	https://www.7-eleven.com/locations/tx/weslaco/2455-n-international-boulevard-40719	7-Eleven	0.99
 4cb66fcd192d	7-Eleven	convenience		26.22092	-97.67013	2426 E Loop 499	Harlingen	78550	+18002550711	https://www.7-eleven.com/locations/tx/harlingen/2426-e-loop-499-40754		0.85
@@ -551,7 +540,6 @@ eecbb4daa600	7-Eleven	convenience		26.05090	-97.73563	702 Us Hwy 281	Los Indios	
 f6ab870abd8d	7-Eleven	convenience		26.16654	-97.82456	100 W Expy 83	La Feria	78559	+19563571939	https://www.7-eleven.com/		1.00
 f6d6d8342abf	7-Eleven	convenience		26.24819	-97.82478	206 Val Verde	Santa Rosa	78593	+18002550711	https://www.7-eleven.com/locations/tx/santa-rosa/206-val-verde-road-40716		0.92
 f7a6c5507cba	7-Eleven	convenience		26.29373	-97.92928	101 W. Hwy. 107	La Villa	78562	+19562628061	https://www.7-eleven.com/locations/tx/la-villa/101-w-hwy-107-40715	7-Eleven	0.99
-f867aedf9ea6	7-Eleven	convenience		26.04380	-97.62528	30984 FM 1577	San Benito	78586	+18002550711	https://www.7-eleven.com/locations/tx/san-benito/30984-fm-1577-40741	7-Eleven	0.75
 fa18ecb89015	7-Eleven	convenience		26.16006	-97.65780	2195 W Business 77	San Benito	78586	+19563615170	https://www.7-eleven.com/locations/tx/san-benito/2195-west-hwy-77-40730	7-Eleven	0.98
 fc4cf353a1fa	7-Eleven	convenience		26.16022	-97.99452	901 W US Highway 83	Weslaco	78596	+18002550711	https://www.7-eleven.com/locations/tx/weslaco/901-w-u-s-highway-83-40612		0.85
 fc6169d53e46	7-Eleven	convenience		26.02538	-97.62974	24523 W US Highway 281	San Benito	78586	+18002550711	https://www.7-eleven.com/locations/tx/san-benito/24523-us-hwy-281-40782		0.97
@@ -597,7 +585,6 @@ cdef169043f5	Checo's Convenience Store	convenience		26.14091	-97.98071	1012 E 18
 7de52025ef94	Circle K	convenience		26.15076	-97.66760	2410 W Expwy 83	San Benito	78586	+19563614559	https://www.circlek.com/		1.00
 abd975a622b5	Circle K	convenience		26.13014	-97.63405	304 S Sam Houston Blvd	San Benito	78586	+19563990741	https://www.circlek.com.mx		0.55
 c97c27341df0	Circle K	convenience		26.14493	-97.65904	2410 W Expressway 83	San Benito	78586	+19563614559	https://www.circlek.com/store-locator		0.77
-cf18a913a67d	Circle K	convenience		26.13785	-97.62622	800 S Sam Houston Blvd	San Benito	78586	+19563610554	http://www.circlek.com		0.92
 cf6c7512a25a	Circle K	convenience		26.19107	-97.70190	620 W Harrison Ave	Harlingen	78550	+19564281915	https://www.circlek.com.mx		0.55
 d2fb295fd19a	Circle K	convenience		26.08422	-97.16353	331 Padre Blvd	South Padre Island	78597	+19567611244	https://www.circlek.com.mx		0.55
 e7096a15c5c4	Circle K	convenience		26.18925	-97.70635	1025 W Tyler Ave	Harlingen	78550	+19564286521	http://www.circlek.com		0.92
@@ -658,7 +645,6 @@ c653d8bf8fcb	La Casa del Charro	convenience		26.11722	-97.67439	21917 Kilgore Rd
 886266379d62	La Michoacana Snack Ba	convenience		26.17175	-97.70116	2222 S F St	Harlingen	78552	+19563736500			0.71
 9d9a653fb078	Lezama’s Drive Thru	convenience		26.02523	-97.62801	24611 US Highway 281	San Benito	78586	+19564423013	https://instagram.com/lezamas_drive_thru?utm_medium=copy_link		0.88
 bccb128c94cf	Little League Drive Thru	convenience		26.20364	-97.73340	18082 Lafayette St	Harlingen	78552	+19562302201			0.65
-859c06c963df	Love's Travel Stop	convenience	truck gas station	26.26643	-97.74062	21379 Us-77 Expressway	Harlingen	78550	+19565077934	http://www.loves.com/locations/885		0.85
 b775e8340051	Love's Travel Stop	convenience	truck gas station	26.24921	-97.72669	21379 US-77 Expressway	Harlingen	78550	+19565077934	https://www.loves.com/locations/885		0.97
 070ff61f4bfe	Lyford Superette	convenience		26.40915	-97.78588	US 77 and E Broadway St, US-77	Lyford	78569	+19563475141			0.92
 a9c70b1ff3de	Marinas Grocerys	convenience		26.01947	-97.53600	9113 Fresnos St	Olmito	78575	+19568016379			0.80
@@ -765,7 +751,6 @@ a346eff8f2ff	stans drive thru	convenience		26.10295	-97.95135	515 S Internationa
 61c952f33e78	Stripes	convenience		26.17202	-97.99037	1006 N Texas Blvd, Ste A	Weslaco	78596	+19569692303	https://stripesstores.com/		1.00
 675bbeb208ec	Stripes	convenience		26.19133	-97.66365	3201 E Harrison Ave	Harlingen	78550	+19564235249	https://stripesstores.com/		0.97
 68670a70b335	Stripes	convenience		26.23375	-97.56873	28281 Fm 106	Rio Hondo	78583	+19567483404	https://stripesstores.com/		0.97
-68bdeb96e724	Stripes	convenience		26.22712	-97.82170	206 Val Verde Road	Santa Rosa	78593	+19566361348	https://www.7-eleven.com/	Stripes	0.97
 6ed1005779ff	Stripes	convenience		26.01567	-97.53139	9670 Anacua	Olmito	78575	+19563505810	http://calscstores.com		0.55
 6f16158adf92	Stripes	convenience		26.15710	-97.82364	117 S Main St	La Feria	78559	+19567971929	http://www.stripesstores.com		0.77
 7e8e243a8c0f	Stripes	convenience		26.20829	-97.69513	1560 N 77 Sunshine Strip	Harlingen	78550	+18002550711	https://www.7-eleven.com/	Stripes	1.00
@@ -790,14 +775,12 @@ b260f1d19c10	Stripes	convenience		26.48262	-97.77000	1095 E Hidalgo Ave	Raymondv
 b4aec2f226d9	Stripes	convenience		26.16075	-97.68106	202 N Ed Carey Dr	Harlingen	78550	+19564237737	https://stripesstores.com/		1.00
 b79712824cea	Stripes	convenience		26.07276	-97.22453	1656 W Highway 100	Port Isabel	78578	+19569433783	https://stripesstores.com/		1.00
 b824aad7589f	Stripes	convenience		26.18454	-97.95954	2455 N International Blvd, Weslaco, TX 78596, United States	Weslaco	78599	+19565141900	https://stripesstores.com/		0.96
-bc43e5600737	Stripes	convenience		26.01880	-97.59132	2305 FM 511	Brownsville	78520	+19568313178	http://www.stripesstores.com		0.77
 be197234c610	Stripes	convenience		26.14122	-97.65505	2500 West Expressway 83	San Benito	78586	+19563611400	https://stripesstores.com/		0.96
 c482f3717625	Stripes	convenience		26.17961	-97.71311	1313 Haverford Boulevard	Harlingen	78552	+19564285811	https://stripesstores.com/		1.00
 c9f7d00f124e	Stripes	convenience		26.19027	-97.67068	2423 E Tyler Ave	Harlingen	78550	+19564251097	https://stripesstores.com/		1.00
 cea82080775c	Stripes	convenience		26.48232	-97.77843	423 E Hidalgo Ave	Raymondville	78580	+19566896363	https://www.7-eleven.com/		0.85
 d15154805ae5	Stripes	convenience		26.07232	-97.47563	101 E Ocean Blvd	Los Fresnos	78566	+19562331019	https://stripesstores.com/		0.98
 d79d21b40681	Stripes	convenience		26.16069	-97.99899	901 W Business 83	Weslaco	78596	+19569692131	https://stripesstores.com/		0.97
-dbd7db8afde4	Stripes	convenience		26.07972	-97.24918	102 State Highway 100	Port Isabel	78578	+19569437933	https://www.7-eleven.com/	Stripes	0.91
 dfec187305c8	Stripes	convenience		26.17003	-97.99081	904 N Texas Blvd Ste A	Weslaco	78596	+19569686918	http://calscstores.com		0.55
 e82ec6db01b4	Stripes	convenience		26.08424	-97.16397	331 Padre Boulevard	South Padre Island	78597	+19567611244	https://stripesstores.com/		1.00
 ecc05185e20d	Stripes	convenience		26.15311	-97.95782	3302 E. Business Hwy 83	Weslaco	78596	+19565656058	https://stripesstores.com/		1.00
@@ -809,7 +792,6 @@ f6351327c4c1	STRIPES #2153	convenience		26.09920	-97.16570	2000 PADRE BLVD	South
 476a8a965eae	STRIPES #2478	convenience		26.48237	-97.76988	1095 E HIDALGO AVE	Raymondville	78580		https://www.exxon.com/en/find-station/exxon-raymondville-tx-stripes2478-200317001	Exxon	0.80
 1390368c5041	Stripes Convenience Store	convenience		26.17619	-97.70187	1725 S F St	Harlingen	78550	+19564255920	https://www.7-eleven.com/	Stripes	0.97
 065093c22d14	Sunoco	convenience		26.15999	-97.82000	418 E HIGHWAY 83	La Feria	78559		https://www.sunoco.com/locations/store/418-e-highway-83-la-feria-tx-8003279501	Sunoco	0.80
-1d1ca212134b	Sunoco	convenience		26.09309	-97.28578	102 TX-100	Laguna Vista	78578	+19569437933	http://www.sunoco.com	GoSunoco	0.92
 63e7665f1c86	Sunoco	convenience		26.14995	-97.91611	602 W 2nd St	Mercedes	78570	+19565652591	https://www.sunoco.com/locations/store/602-n-2nd-mercedes-tx-0436191100		0.92
 73910a5aa54e	Sunoco	convenience		26.07191	-97.47567	101 E Ocean Blvd &, N Arroyo Blvd	Los Fresnos	78566	+19562331019	https://www.sunoco.com/locations/store/101-e-ocean-blvd---arroyo-blvd-los-fresnos-tx-0215913500		0.92
 b590876c478c	Sunoco	convenience		26.17219	-97.70075	2202 S F ST	Harlingen	78552		https://www.sunoco.com/locations/store/2202-s-f-st-harlingen-tx-8003279301	Sunoco	0.80
@@ -842,7 +824,6 @@ dff3934567b5	Tonys Drive In	convenience		26.10130	-97.94306	720 E Baker Rd	Progr
 0799ebcf02a6	Valero	convenience		26.15188	-97.95789	811 S International Blvd	Weslaco	78596	+12103452000	https://www.valero.com		0.65
 114dce29a530	Valero	convenience		26.19828	-97.69534	602 N 1ST ST	Harlingen	78550	+19564284492	http://www.valero.com	Valero Energy	0.96
 19a47974f48a	Valero	convenience		26.07529	-97.21001	102 E QUEEN ISABELLA	Port Isabel	78578	+19569435011	http://www.valero.com/	Valero	0.92
-45e1dcd0221b	Valero	convenience		26.09311	-97.28580		Laguna Vista					0.84
 473c99ace6f9	Valero	convenience		26.17205	-97.99059	1006 N Texas Blvd	Weslaco	78596	+19569685063	https://locations.valero.com/en-us/LocationDetails/Index/1006-N-TEXAS-BLVD/0000011823	Valero	0.77
 48f01397089b	Valero	convenience		26.17958	-97.71307	1313 Haverford Blvd	Harlingen	78552	+19564285811	https://locations.valero.com/en-us/LocationDetails/Index/1313-HAVERFORD-BLVD/0000007503	Valero Energy	0.92
 4e335a3b5c84	Valero	convenience		26.23345	-97.56872	28281 FM 106	Rio Hondo	78583	+12103452000	https://www.valero.com		0.65
@@ -854,7 +835,6 @@ dff3934567b5	Tonys Drive In	convenience		26.10130	-97.94306	720 E Baker Rd	Progr
 835233cb68bf	Valero	convenience		26.15948	-97.82457	221 N Main St	La Feria	78559	+19567979682	https://www.valero.com		0.65
 8e951ba31272	Valero	convenience		26.05060	-97.73568	FM 509	Los Indios	78586	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/702-E-US-HWY-281/0000007305	Valero Energy	0.99
 912fcaf89268	Valero	convenience		26.18203	-97.78700	14755 W EXPRESSWAY 83	Harlingen	78552	+19564253669	http://www.valero.com	Valero Energy	0.83
-b60194458ac0	Valero	convenience		26.21185	-97.72241	US-77-BR	Harlingen	78550	+19564120771	http://www.valero.com/	Valero	0.72
 bf332168e67f	Valero	convenience		26.17356	-97.99124	102 W EXPRESSWAY 83	Weslaco	78596	+19569699779	https://locations.valero.com/en-us/LocationDetails/Index/102-W-EXPRESSWAY-83/0000007533	Valero Energy	0.92
 c7191f31e0fa	Valero	convenience		26.24849	-97.82480	206 VAL VERDE AVE	Santa Rosa	78593	+19566244656	http://www.valero.com	Valero Energy	0.82
 d858675a00d7	Valero	convenience		26.12627	-97.63734	800 S Sam Houston Blvd	San Benito	78586		https://ccc.valero.com		1.00
@@ -877,19 +857,20 @@ c45e9d9f2180	Your Mini Mart	convenience		26.04564	-97.55196	101 Carmen Ave B	Ran
 e3a4b6a8d19b	Aryellah’s Restaurant	fastfood		26.26464	-97.99328	12205 N FM 88	Weslaco	78599	+19563752010			0.90
 ec1c08071f2a	Auntie Anne's	fastfood		26.18764	-97.75080	6102 West Expressway 83	Harlingen	78552		https://locations.auntieannes.com/tx/harlingen/6102-west-expressway-83	Auntie Anne's	0.80
 6c5240cf2fae	Burger King	fastfood		26.16723	-97.82373	1102 N Main St	La Feria	78559	+19567979546	https://burgerking.com/store-locator/store/13392	Burger King	0.99
+89c312f5ae04	Burger King	fastfood	burger restaurant	26.15813	-97.95803	419-1/2 South International	Weslaco	78596	+19564478868	https://burgerking.com/store-locator/store/13003	Burger King	0.98
 bc6e0f2d31c2	Burger King	fastfood		26.17679	-97.99146	1617 N Texas Blvd	Weslaco	78596	+19569683747	https://burgerking.com/store-locator/store/9726	Burger King	0.97
+dda2c08cc937	Burger King	fastfood	burger restaurant	26.12731	-97.63541	601 S Sam Houston Blvd	San Benito	78586	+19563619797	https://burgerking.com/store-locator/store/11180	Burger King	0.98
+e458df61df23	Burger King	fastfood	burger restaurant	26.17338	-97.67429	1902 S 77 Sunshine Strip	Harlingen	78550	+19564252040	https://burgerking.com/store-locator/store/4539	Burger King	0.98
 e830209138be	Burger King	fastfood		26.18873	-97.71671	1925 W Tyler Ave	Harlingen	78550	+19564287169	https://burgerking.com/store-locator/store/9444	Burger King	1.00
 8aa5573c7663	Burgerfi	fastfood		26.12238	-97.17065	5001 Padre Blvd	South Padre Island	78597	+19564335502	http://www.burgerfi.com		0.92
-50ba95642fa3	Charleys Cheesesteaks	fastfood		26.15879	-97.95436	5001 E Expressway 83 Ste 350D	Mercedes	78570	+19562941441	https://www.charleys.com/locations/northpark-mall-b/		0.92
-77a208f865ad	Charleys Cheesesteaks	fastfood		26.14213	-97.89388	5001 E Expressway 83 Ste 350D	Mercedes	78570	+15043452180	https://charleys.com/		0.85
 8aef18519296	Charleys Cheesesteaks	fastfood		26.16367	-97.88861	5001 E Expressway 83 Ste 350D	Mercedes	78570	+19562941441			0.97
 f1a09e39017e	Chatto's Taqueria	fastfood		26.18289	-97.99181		Weslaco		+19565651746	http://www.chattostaqueria.com/		0.64
 3aa26b4a67c7	Chick-fil-A	fastfood		26.18200	-97.72044	1021 Dixieland Rd	Harlingen	78552	+19563653833	https://www.chick-fil-a.com/locations/tx/dixieland-road-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 616e9a061658	Chick-fil-A	fastfood		26.14517	-97.63520	1062 W Business 77	San Benito	78586	+19562306141	https://www.chick-fil-a.com/locations/tx/san-benito?utm_source=yext&utm_medium=link		0.98
 8ab3d05e1358	Chick-fil-A	fastfood		26.17393	-97.67473	1814 South Business 77 Sunshine Strip Blvd.	Harlingen	78550	+19564120550	https://www.chick-fil-a.com/locations/tx/sunshine-strip?utm_source=yext&utm_medium=link	Chick-fil-A	0.96
-8ac08dfc82af	Chick-fil-A	fastfood		26.15172	-97.64561	1062 W Business 77	San Benito	78586		https://www.chick-fil-a.com/locations/tx/san-benito	Chick-fil-A	0.80
 af28a0831af1	Chick-fil-A	fastfood		26.16011	-97.87630	8007 E Expressway 83	Mercedes	78570	+19569034700	https://www.chick-fil-a.com/locations/tx/mercedes-tx?utm_source=yext&utm_medium=link		0.99
 b28780976ad4	Chick-fil-A Mercedes	fastfood		26.15991	-97.86920	8007 E Expressway 83	Mercedes	78570	+19569034700	https://www.chick-fil-a.com/locations/tx/mercedes-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.97
+5896ba2b4aeb	Chipotle Mexican Grill	fastfood	mexican restaurant	26.18664	-97.72137	410 Dixieland Rd	Harlingen	78552	+19564120809	https://locations.chipotle.com/tx/harlingen/410-dixieland-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2891	Chipotle Mexican Grill	0.97
 0c2b4d788df2	Church's Chicken	fastfood		26.15941	-97.99186	205 W Business 83	Weslaco	78596	+19569685611	https://locations.churchs.com/tx/weslaco/205-w.-business-83	Church's Chicken	0.98
 429ea9dc99fa	Church's Chicken	fastfood		26.20101	-97.68288	819 N 13th St	Harlingen	78550	+19564237975	https://locations.churchs.com/tx/harlingen/819-n.-13th-street	Church's Chicken	0.99
 736a7f0eb52c	Church's Chicken	fastfood		26.18939	-97.70509	921 W. Tyler Avenue	Harlingen	78550	+19564237494	https://locations.churchs.com/tx/harlingen/921-w.-tyler-avenue	Church's Chicken	0.99
@@ -902,6 +883,7 @@ dd9708303f47	Church's Chicken	fastfood		26.17461	-97.67554	1714 S. 77 Sunshine S
 b2da774ec023	Church's Texas Chicken	fastfood		26.48175	-97.77579	694 E. Hildalgo Avenue	Raymondville	78580	+19566895000	https://locations.churchs.com/tx/raymondville/694-e.-hildalgo-avenue	Church's Chicken	0.96
 bcb38a3f8d18	Church's Texas Chicken	fastfood		26.17470	-97.99065	1308 N. Texas Street	Weslaco	78596	+19569735028	https://locations.churchs.com/tx/weslaco/1308-n.-texas-street	Church's Chicken	0.99
 cff827bad26d	Church's Texas Chicken	fastfood		26.07385	-97.22667	1748 East TX 100	Port Isabel	78578	+19569438592	https://locations.churchs.com/tx/port-isabel/1748-east-tx-100	Church's Chicken	0.99
+f1508f1de76d	Church's Texas Chicken	fastfood	chicken restaurant	26.15333	-97.95924	3218 US Highway 83	Weslaco	78596	+19569688123	https://locations.churchs.com/tx/weslaco/3218-us-highway-83		0.98
 fb48341026a1	Church's Texas Chicken	fastfood		26.22713	-97.71940	2310 TX-499 Loop	Harlingen	78550	+19564237390	https://locations.churchs.com/tx/harlingen/2310-tx-499-loop	Church's Chicken	0.99
 1745daa0d027	Dairy Queen	fastfood		26.17065	-97.99046	916 N Texas Blvd 916 N Texas Blvd	Weslaco	78596	+19569689115	http://www.dairyqueen.com/	Dairy Queen	0.96
 252691436ba5	Dairy Queen	fastfood		26.07469	-97.21259	302 TX-100	Port Isabel	78578	+19569432101	https://www.dairyqueen.com/en-us/locations/tx/port-isabel/302-st-hwy-100/14498/?y_source=1_MjkzMzkxMzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
@@ -916,6 +898,16 @@ eed67a45937e	Dairy Queen	fastfood		26.48176	-97.77735	534 E Hidalgo Ave	Raymondv
 ffaa31132919	Dairy Queen	fastfood		26.14310	-97.63242	801 W Us Business Highway 77 801 W Us Business Highway 77	San Benito	78586	+19563992850	https://www.dairyqueen.com/en-us/locations/tx/san-benito/801-w-us-business-highway-77/14580/?y_source=1_MjkzMzg4NjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	1.00
 c40f4b177d48	Delicious Concessions LLC.	fastfood		26.16383	-97.88811	5001 E Expressway 83	Mercedes	78570				0.88
 f2812ff625fc	Dennny's Harlingen Tx	fastfood		26.16022	-97.68029	4703 S Expressway 77	Harlingen	78550				0.81
+0eeb44007f7b	Domino's	fastfood	pizza restaurant	26.19924	-97.68122	713 N 77 Sunshine Strip	Harlingen	78550	+19564286296	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+3d1ab940da0e	Domino's	fastfood	pizza restaurant	26.16272	-97.82384	700 N Main St	La Feria	78559	+19567972121	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+4a16a08162c7	Domino's	fastfood	pizza restaurant	26.07339	-97.22538	1702 Highway 100 Suite D	Port Isabel	78578	+19569438880	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+77fcafa793e7	Domino's	fastfood	pizza restaurant	26.29228	-97.98634	512 East Edinburg Ave Ste G	Elsa	78543	+19565672590	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+d7aa47bd0381	Domino's	fastfood	pizza restaurant	26.17367	-97.99353	320 W Expressway 83 Ste C	Weslaco	78596	+19564474262	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test_menutest	Domino's Pizza	0.98
+fdd9ef1d53f1	Domino's	fastfood	pizza restaurant	26.18533	-97.71387	509 South Expressway 83 Suite C6	Harlingen	78550	+19564282300	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
+717f028d44ea	Domino's Pizza	fastfood	pizza restaurant	26.16719	-97.99049	604 N Texas Blvd	Weslaco	78596	+19564474262	https://www.dominos.com		0.55
+7af8c6313ad8	Domino's Pizza	fastfood	pizza restaurant	26.15307	-97.64583	795 W US Highway 77	San Benito	78586	+19562769696	https://www.dominos.com		0.55
+7e4b16844d9c	Domino's Pizza	fastfood	pizza restaurant	26.14228	-97.63230	795 W Business Hwy 77	San Benito	78586	+19562769696	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+9f8fee71f0b2	Domino's Pizza	fastfood	pizza restaurant	26.01357	-97.53105	7055 Frontage Rd 77 Suite 1	Brownsville	78575	+19562615060	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 2afb3569be74	DQ Grill & Chill	fastfood		26.17049	-97.99052	916 N Texas Blvd	Weslaco	78596		https://www.dairyqueen.com/en-us/locations/tx/weslaco/916-n-texas-blvd/4480	DQ Grill & Chill	0.92
 3fae09e9400a	DQ Grill & Chill	fastfood		26.07479	-97.21267	302 St Hwy 100	Port Isabel	78578		https://www.dairyqueen.com/en-us/locations/tx/port-isabel/302-st-hwy-100/4270	DQ Grill & Chill	0.80
 a462ff7c7622	DQ Grill & Chill	fastfood		26.20824	-97.69630	1613 N 77 Sunshine Strip	Harlingen	78550		https://www.dairyqueen.com/en-us/locations/tx/harlingen/1613-n-77-sunshine-strip/3968	DQ Grill & Chill	0.80
@@ -931,8 +923,12 @@ e229fd0174bb	DQ Grill & Chill	fastfood		26.14311	-97.63238	801 W US Business Hig
 e77ffd3899f7	El Malecon Mariscos	fastfood		26.09315	-97.95825	110 E Shelby Ave	Progreso	78596	+19564631855			0.98
 deeaebbe6538	El valle Tortilleria	fastfood		26.07568	-97.21079	103 W Queen Isabella Blvd	Port Isabel	78578	+19569432759			1.00
 0bf22a1b3817	Ellis McD	fastfood		26.16794	-97.81940		La Feria		+19567970313	https://linktr.ee/ellis.mcd		0.81
+438d434f874b	Firehouse Subs	fastfood	sandwich shop	26.18636	-97.73487	2709 W Expressway 83	Harlingen	78552	+19562301472	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1713	Firehouse Subs	0.99
+bc6a1abe29b9	Firehouse Subs	fastfood	sandwich shop	26.18594	-97.72372	2709 West Expressway 83 Ste 150	Harlingen	78552	+19562301472	https://www.firehousesubs.com/store-locator/store/1ZSPnXZDeYJU9TycMBnFHY	Firehouse Subs	0.99
 cb5875fc5609	Food’z Snack Bar	fastfood		26.15558	-97.92131	601 N Vermont Ave Ste 201	Mercedes	78570	+19569034362			0.95
+0b859a58d66c	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	26.18390	-97.72124	902 Dixieland Rd Suite 101	Harlingen	78552	+19562913499	https://www.freddys.com/location/harlingen-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 dccaafcab4e3	Freddy's Frozen Custard & Steakburgers	fastfood		26.15952	-97.99084	716 E Hwy 2	Weslaco	78596		https://www.freddys.com/location/weslaco	Freddy's	0.80
+d031abf307c7	Freddy's Frozen Custard and Steakburgers	fastfood	burger restaurant	26.17192	-97.98398	716 E Interstate Hwy 2	Weslaco	78596	+19562740079	https://www.freddys.com/location/weslaco?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 73e0a3448cf9	Fully Loaded	fastfood		26.23407	-97.95211	234 E Business 83	San Juan	78589				0.61
 bc4a488097a0	Great American Cookies	fastfood		26.17072	-97.67422	1334 Ed Cary Dr.	Harlingen	78550		https://ordernew.greatamericancookies.com/gac/1334-ed-cary-dr-harlingen-tx-78550	Great American Cookies	0.80
 f5312c72f374	Hacienda Yturria	fastfood		26.66289	-97.73714	County Road 3976	Kenedy	78338		https://farm.ewg.org/top_recips.php?fips=48261&progcode=livestock		0.73
@@ -941,15 +937,34 @@ f5312c72f374	Hacienda Yturria	fastfood		26.66289	-97.73714	County Road 3976	Kene
 4c220771108b	Jack in the Box	fastfood		26.18990	-97.68026	322 S 77 Sunshine Strip	Harlingen	78550	+19565197807	https://locations.jackinthebox.com/us/tx/harlingen/322-s-77-sunshine-strip?utm_source=Facebook&utm_medium=local&utm_campaign=facebook-local	Jack in the Box	0.98
 8563554abc57	Jack in the Box	fastfood		26.12700	-97.63626	692 S Sam Houston Blvd	San Benito	78586	+19562471307	https://www.jackinthebox.com		0.99
 93ede893533d	Jack in the Box	fastfood		26.17647	-97.99087	1538 N Texas Blvd	Weslaco	78596	+19569730018	https://www.jackinthebox.com		0.99
-a322be2651e9	Jack in the Box	fastfood		26.19044	-97.68011	322 S 77 Sunshine Strip	Harlingen	78550	+19565197807	https://www.jackinthebox.com		0.97
 ab4e9342fbfc	Jack in the Box	fastfood		26.16298	-97.95895	101 N International Blvd	Weslaco	78596	+19562464127	https://www.jackinthebox.com		0.99
 e1eb1a504d0f	Jack in the Box	fastfood		26.07222	-97.22600	1681 State Highway 100	Port Isabel	78578	+19567727293	https://www.jackinthebox.com		0.96
 f92ed12e53cb	Jack in the Box	fastfood		26.15964	-97.68147	4714 S Expressway 83	Harlingen	78552	+19563653500	https://www.jackinthebox.com		0.97
 56aa8976c293	Jamba	fastfood		26.18764	-97.75080	6102 West Expressway 83	Harlingen	78552		https://locations.jamba.com/tx/harlingen/6102-west-expressway-83	Jamba	0.80
+409348651bb6	Jersey Mike's	fastfood	sandwich shop	26.17360	-97.98656	515 Expressway 83 Suite D	Weslaco	78599	+19566461185	https://www.jerseymikes.com/15264/weslaco-tx	Jersey Mike's Subs	0.99
+8f1f1b29a2bc	Jersey Mike's	fastfood	sandwich shop	26.18126	-97.71986	2217 W Lincoln Ave	Harlingen	78552	+19565973240	https://www.jerseymikes.com/15225/harlingen-tx	Jersey Mike's Subs	0.92
+836a4c83d5c5	Jimmy John's	fastfood	sandwich shop	26.17431	-97.67506	1802 S 77 Sunshine Strip Suite 100	Harlingen	78550	+19563201632	https://locations.jimmyjohns.com/tx/harlingen/sandwiches-3926.html	Jimmy John's	0.99
 1a479ffaef1a	KFC	fastfood		26.19144	-97.67947	201 South 77 Sunshine Strip	Harlingen	78550	+19564255392	https://locations.kfc.com/tx/harlingen/201-south-77-sunshine-strip	KFC	0.99
+1e10874c6264	KFC	fastfood	chicken restaurant	26.16529	-97.66376	1120 S Business 77	San Benito	78586	+19563992106	http://www.kfc.com/storelocator/Default.aspx?address=1120%20S.%20Business%2077,San%20Benito,TX		0.85
+37896a44bbe4	KFC	fastfood	chicken restaurant	26.29379	-97.98685	505 E. Edinburg Ave	Elsa	78543	+19562552386	https://locations.kfc.com/tx/elsa/505-e-edinburg-ave		0.98
 b6a49b99f417	KFC	fastfood		26.15990	-97.99466	421 W Expressway 83	Weslaco	78596	+19569683322	https://locations.kfc.com/tx/weslaco/421-west-business-highway-83	KFC	0.95
 bdc1845a5b09	KFC	fastfood		26.14571	-97.63592	1120 S. Business 77	San Benito	78586	+19563992106	https://locations.kfc.com/tx/san-benito/1120-s-business-77	KFC	0.99
 e0dfbaa27de5	KFC	fastfood		26.10779	-97.16904	3201 Padre Boulevard	South Padre Island	78597	+19567612392	https://locations.kfc.com/tx/south-padre-island/3201-padre-boulevard	KFC	0.98
+0b13b28cd055	Little Caesars	fastfood	pizza restaurant	26.07375	-97.21339	415 State Highway 100	Port Isabel	78578	+19567727048	https://littlecaesars.com/en-us/store/12124	Little Caesars	0.96
+610105fcc5d1	Little Caesars	fastfood	pizza restaurant	26.18477	-97.71493	1520 W Harrison Ave	Harlingen	78550	+19564212121	https://littlecaesars.com/en-us/store/2608		0.98
+7b44d5bdd4b9	Little Caesars	fastfood	pizza restaurant	26.07265	-97.48753	810 W Ocean Blvd Suite A 3	Los Fresnos	78566	+19562331495	https://littlecaesars.com/en-us/store/10363	Little Caesars	0.92
+902967290a30	Little Caesars	fastfood	pizza restaurant	26.22706	-97.71803	2206 TX-499 Loop	Harlingen	78550	+19563685031	https://littlecaesars.com/en-us/store/20508	Little Caesars	0.97
+e6d02238088e	Little Caesars	fastfood	pizza restaurant	26.14973	-97.90642	425 2nd St	Mercedes	78570	+19565650222	https://littlecaesars.com/en-us/store/2601		0.97
+2786c8dc5f70	Little Caesars Pizza	fastfood	pizza restaurant	26.19999	-97.67809	810 Morgan Blvd	Harlingen	78550	+19564284545	https://littlecaesars.com/en-us/store/2598	Little Caesars	0.99
+4d3e46b51013	Little Caesars Pizza	fastfood	pizza restaurant	26.29346	-97.96470	1310 W Santa Rosa Ave	Edcouch	78538	+19562621331	https://littlecaesars.com/en-us/store/2603	Little Caesars	1.00
+509b32c3771e	Little Caesars Pizza	fastfood	pizza restaurant	26.19100	-97.71187	1520 W Harrison Ave	Harlingen	78550	+19564212121	https://littlecaesars.com/en-us/store/2608	Little Caesars	0.96
+6528b150fb1d	Little Caesars Pizza	fastfood	pizza restaurant	26.48177	-97.77538	704 E Hidalgo Ave	Raymondville	78580	+19566904134	https://littlecaesars.com/en-us/store/10095	Little Caesars	0.98
+909246ae5e40	Little Caesars Pizza	fastfood	pizza restaurant	26.16179	-97.82378	508 N Main St	La Feria	78559	+19567970030	https://littlecaesars.com/en-us/store/10641	Little Caesars	0.97
+93082b36ab58	Little Caesars Pizza	fastfood	pizza restaurant	26.15947	-97.99234	209 83	Weslaco	78596	+19569683333	https://littlecaesars.com/en-us/store/2597	Little Caesars	0.98
+a5907644e4a0	Little Caesars Pizza	fastfood	pizza restaurant	26.13751	-97.62558	190 S 77 Sunshine Strip	San Benito	78586	+19563993400	http://sizzlingplatter.com/brands/little-caesars	Little Caesars	0.98
+b33976414b65	Little Caesars Pizza	fastfood	pizza restaurant	26.18398	-97.95947	2445 N International Blvd Ste 1	Weslaco	78596	+19563752656	https://littlecaesars.com/en-us/store/12200	Little Caesars	0.99
+c09b7e9990e7	Little Caesars Pizza	fastfood	pizza restaurant	26.15018	-97.91409	425 W 2nd St	Mercedes	78570	+19565650222	https://littlecaesars.com/en-us/store/2601	Little Caesars	0.99
+d6074fca6a76	Little Caesars Pizza	fastfood	pizza restaurant	26.17104	-97.67097	2325 S 77 Sunshine Strip # A	Harlingen	78550	+19562910944	https://littlecaesars.com/en-us/store/12414	Little Caesars	0.97
 aeb069e03db6	Lonesome Cowboy Ranch	fastfood		26.10403	-97.50325	32373 Kretz Rd	Los Fresnos	78566	+19567931326			0.81
 661a9c4b1cf1	Long John Silver's	fastfood		26.18016	-97.68213	1202 S Commerce St	Harlingen	78550	+19562020634	http://www.ljsilvers.com/	Long John Silver's	1.00
 299160d8651e	Margos Raspas	fastfood		26.17018	-97.98763	906 N Iowa Ave	Weslaco	78596	+19564726713			0.90
@@ -957,12 +972,15 @@ aeb069e03db6	Lonesome Cowboy Ranch	fastfood		26.10403	-97.50325	32373 Kretz Rd	L
 01e510575545	McDonald's	fastfood		26.48240	-97.76827	1105 E Hwy 186	Raymondville	78580	+19566895546	https://www.mcdonalds.com/us/en-us/location/tx/raymondville/1105-e-hwy-186/7758.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 10c149918022	McDonald's	fastfood		26.18044	-97.71690	1801 W Lincoln Ave	Harlingen	78552	+19564127777	https://www.mcdonalds.com/us/en-us/location/TX/Harlingen/1801-W-Lincoln/14570.html?cid=RF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.85
 28f6110bddfa	McDonald's	fastfood		26.14647	-97.63695	1144 Business Hwy 77	San Benito	78586	+19563996845	https://www.mcdonalds.com/us/en-us/location/tx/san-benito/1144-business-hwy-77/25416.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+37328cb6f04e	McDonald's	fastfood	burger restaurant	26.06896	-97.22253	1401 Highway 100	Port Isabel	78578	+19569434770	https://www.mcdonalds.com/us/en-us/location/tx/port-isabel/1401-highway-100/31088.html?cid=RF:YXT:RoN::Clicks		0.97
 4b7a0c0c263e	McDonald's	fastfood		26.15321	-97.95741	3318 Business Hwy 83 E	Weslaco	78596	+19565142454	https://www.mcdonalds.com/us/en-us/location/tx/weslaco/3318-e-bus-hwy-83/17859.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+7d640714dc95	McDonald's	fastfood	burger restaurant	26.17215	-97.99143	1025 N Texas	Weslaco	78596	+19569686554	https://www.mcdonalds.com/us/en-us/location/tx/weslaco/1025-n-texas/5132.html?cid=RF:YXT:RoN::Clicks		0.99
 852d4a858c3f	McDonald's	fastfood		26.29311	-97.99289	112 E Edinburg Ave	Elsa	78543	+19562623226	https://www.mcdonalds.com/us/en-us/location/tx/elsa/112-e-edinburg-ave/26344.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 89da1e34970f	McDonald's	fastfood		26.15315	-97.91386	216 N Texas Ave	Mercedes	78570	+19562941218	http://www.mcdonalds.com/?cid=RF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 9213cd9483bd	McDonald's	fastfood		26.18485	-97.71880	2000 S Expressway 83	Harlingen	78552	+19564255555	http://www.mcdonalds.com/		0.92
 9aa3d8383d80	McDonald's	fastfood		26.21161	-97.75838	23994 Stuart Place Rd	Harlingen	78552		https://www.mcdonalds.com/us/en-us/location/43133.html	McDonald's	0.80
 a23e4a7f62b9	McDonald's	fastfood		26.16497	-97.82281	204 E Expressway 83	La Feria	78559	+19567971461	https://www.mcdonalds.com/us/en-us/location/tx/la-feria/204-e-expressway-83/19089.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+a797c2dc7296	McDonald's	fastfood	burger restaurant	26.17519	-97.98830	1310 N Texas Ave	Weslaco	78596	+19564472580	https://www.mcdonalds.com/us/en-us/location/tx/weslaco/1310-n-texas-ave/28812.html?cid=RF:YXT:RoN::Clicks		0.85
 ad27cd401aea	McDonald's	fastfood		26.19849	-97.67976	602 N Sunshine Strip	Harlingen	78550	+19564212207	https://www.mcdonalds.com/us/en-us/location/tx/harlingen/602-n-sunshine-strip/4245.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 aedebf767a8c	McDonald's	fastfood		26.09108	-97.16456	908 S Padre Blvd	South Padre Island	78597	+19567614999	https://www.mcdonalds.com/us/en-us/location/tx/south-padre-island/908-s-padre-blvd/10905.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 b412642cbe2b	McDonald's	fastfood		26.17203	-97.67278	2020 S Sunshine Strip	Harlingen	78550	+19564287997	https://www.mcdonalds.com/us/en-us/location/tx/harlingen/2020-s-sunshine-strip/11705.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
@@ -975,16 +993,33 @@ fdf67c4c2c30	McDonald's	fastfood		26.07185	-97.47493	115 Ocean Boulevard	Los Fre
 88012a117277	Messy Popcorn & Treats	fastfood		26.29547	-97.99295	306 N Broadway St	Elsa	78543	+19562554440	http://www.messypopcorn.com/		0.72
 a7a66c85a482	Montoya Boys Drive Thru	fastfood		26.06854	-97.43551	36620 State Highway 100	Los Fresnos	78566	+19568015927			0.59
 3ba0c50c48aa	Panda Express	fastfood		26.17197	-97.67182	2205 S 77 Sunshine Strip	Harlingen	78550	+19562020689	http://www.pandaexpress.com/	Panda Express México	0.96
+dd471f4e64a3	Panda Express	fastfood	chinese restaurant	26.18125	-97.71836	2005 W Lincoln Ave	Harlingen	78552	+19564215786	http://www.pandaexpress.com/	Panda Express México	0.99
 f108bfcb2388	Panda Express	fastfood		26.17023	-97.99056	904 N. Texas Blvd.	Weslaco	78596	+19569688881	http://www.pandaexpress.com/		0.97
 7a1d72e6b762	Panthers' Den	fastfood		26.16977	-97.99518	821 N Republic St	Weslaco	78596	+19563633473	http://listings.findthecompany.com/l/9376237/Panthers-Den-in-Weslaco-TX		0.92
+be0a394ed0db	Papa John's Pizza	fastfood	pizza restaurant	26.25336	-97.72991	401 Highway 77	Harlingen	78550	+19564440100	http://www.papajohns.com/		0.85
+dd8cc80b7d57	Papa Johns	fastfood	pizza restaurant	26.18956	-97.67939	401 S 77 Sunshine Strip	Harlingen	78550	+19564280100	http://www.youtube.com/PapaJohns	Papa John's Pizza	0.98
 7f344e0dd5e6	Papa's Restaurant	fastfood		26.07236	-97.20276	814 S Garcia St	Port Isabel	78578	+19569437715			0.98
 cecf90cfd72f	Pete’s Sno Shack	fastfood		26.48312	-97.78206	220 N 7th St	Raymondville	78580				0.74
+0d0e85a56f89	Pizza Hut	fastfood	pizza restaurant	26.17426	-97.99062	1302 N Texas Hidalgo	Weslaco	78596	+19569691133	https://locations.pizzahut.com/tx/weslaco/1302-n-texas?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299168	Pizza Hut	0.99
+3f009aea4c8e	Pizza Hut	fastfood	pizza restaurant	26.13343	-97.64522	1130 W US Highway 77	San Benito	78586	+19563991612	https://www.yum.com		0.55
+3f9ce59712bb	Pizza Hut	fastfood	pizza restaurant	26.07172	-97.22148	1202 TX-100	Port Isabel	78578	+19569438888	https://locations.pizzahut.com/tx/port-isabel/1202-hwy-100?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299968	Pizza Hut	0.98
+4531cc073581	Pizza Hut	fastfood	pizza restaurant	26.48217	-97.77716	501 E Hidalgo Ave Willacy	Raymondville	78580	+19566895564	https://locations.pizzahut.com/tx/raymondville/501-e-hidalgo-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299395	Pizza Hut	0.98
+539b83277747	Pizza Hut	fastfood	pizza restaurant	26.17290	-97.98564	623 W US Highway 83	Weslaco	78596		https://locations.pizzahut.com/tx/weslaco/623-w-us-highway-83	Pizza Hut	0.80
+5c7be96267e7	Pizza Hut	fastfood	pizza restaurant	26.09845	-97.16631	1905 Padre Blvd Cameron	South Padre Island	78597	+19567611361	https://locations.pizzahut.com/tx/south-padre-island/1905-padre-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298955	Pizza Hut	0.99
+5c7f270b6bdf	Pizza Hut	fastfood	pizza restaurant	26.16332	-97.82442	717 N Main St Cameron	La Feria	78559	+19568873058	https://locations.pizzahut.com/tx/la-feria/717-n-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=316085	Pizza Hut	0.97
+806aac1990ac	Pizza Hut	fastfood	pizza restaurant	26.29389	-97.98235	709 E Edinburg Ave Hidalgo	Elsa	78543	+19562624744	https://locations.pizzahut.com/tx/elsa/709-e-edinburg-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299539	Pizza Hut	0.99
+87c912726cdf	Pizza Hut	fastfood	pizza restaurant	26.20160	-97.67687	920 Morgan Blvd Cameron	Harlingen	78550	+19564282191	https://locations.pizzahut.com/tx/harlingen/920-morgan-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299369	Pizza Hut	0.99
+9610a575348d	Pizza Hut	fastfood	pizza restaurant	26.14600	-97.63638	1130 US-77	San Benito	78586	+19563991612	https://locations.pizzahut.com/tx/san-benito/1130-w-us-highway-77?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299863	Pizza Hut	0.99
+967f340edd1f	Pizza Hut	fastfood	pizza restaurant	26.07337	-97.49244	1010 W. Ocean Blvd. Cameron	Los Fresnos	78566	+19563030060	https://locations.pizzahut.com/tx/los-fresnos/1010-w-ocean-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=316654	Pizza Hut	0.97
+afe8ac3e54cd	Pizza Hut	fastfood	pizza restaurant	26.14973	-97.91892	826 W 2nd St Hidalgo	Mercedes	78570	+19565656319	https://locations.pizzahut.com/tx/mercedes/826-w-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299007	Pizza Hut	0.98
+c919f078eab5	Pizza Hut	fastfood	pizza restaurant	26.17979	-97.68102	1224 S Commerce St Cameron	Harlingen	78550	+19564231900	https://locations.pizzahut.com/tx/harlingen/1224-s-commerce-st	Pizza Hut	0.99
+c9d744c6245d	Pizza Hut	fastfood	pizza restaurant	26.18987	-97.71423	1802 W Tyler Ave	Harlingen	78550	+19564256520	https://locations.pizzahut.com/tx/harlingen/1802-w-tyler-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299315	Pizza Hut	0.98
+ef9437048c67	Pizza Hut	fastfood	pizza restaurant	26.16059	-97.99798	623 W U.S. Hwy 83	Weslaco	78596	+19569691444	https://locations.pizzahut.com/tx/weslaco/623-w-us-highway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299139	Pizza Hut	0.97
+d450201fd24f	Pizza Hut Express	fastfood	pizza restaurant	26.18716	-97.71456	401 S Expressway 83, Cinemark Ste 195	Harlingen	78550		https://locations.pizzahut.com/tx/harlingen/401-s-expressway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313778		0.97
 1a9ede6d25ad	Popeye's Louisiana Kitchen	fastfood		26.12639	-97.63725	151 US-83 S	San Benito	78586	+19563991950	http://www.popeyes.com		0.55
 6786d299fb73	Popeyes	fastfood		26.18541	-97.72097	722 Dixieland Rd	Harlingen	78552	+19564231132	https://www.popeyes.com/store-locator/store/restaurant_84961	Popeyes Louisiana Kitchen	0.96
-afcb238ce0e7	Prime Time Moon Jump Rentals	fastfood		26.49365	-97.78354	324 N Loop St	Raymondville	78580	+19563988462			0.96
 eb039a389b68	Prime Time Moon Jump Rentals	fastfood		26.49358	-97.78398	324 N Loop St	Raymondville	78580	+19563988462			0.96
 e2a0a6a1d933	Prine-Time Pizza	fastfood		26.18402	-97.71809	2020 S Expressway 83	Harlingen	78552	+19566597468			0.94
-81844a826238	PuRa ViDa Seafood Bistro	fastfood		26.12788	-97.93760	321 Juarez St	Mercedes	78570				0.78
 f415063310e6	PuRa ViDa Seafood Bistro	fastfood		26.12799	-97.93774	321 Juarez St	Mercedes	78570				0.82
 9fde74005c43	Raising Cane's	fastfood		26.17174	-97.67248	2120 S. 77 Sunshine Strip	Harlingen	78550	+19564408719	https://locations.raisingcanes.com/tx/harlingen/2120-s.-77-sunshine-strip	Raising Cane's Chicken Fingers	0.99
 db428cbe906c	Restaurant Los Indios	fastfood		26.05344	-97.76031	16494 S US Highway 281	San Benito	78586	+19563642221	https://restaurant-los-indios.hub.biz		0.92
@@ -1002,7 +1037,40 @@ b71a434ba2e6	Sonic Drive In	fastfood		26.15060	-97.90430	620 East 2Nd Street	Mer
 632cf58dde70	Stars Drive Ins	fastfood		26.15740	-97.91373	510 N Texas Ave	Mercedes	78570	+19565652548		Stars Drive-In	0.85
 c2b125305140	Stars Drive-in	fastfood		26.18952	-97.70580	1007 W Tyler Ave	Harlingen	78550	+19564251802		Stars Drive-In	0.96
 ef3f6fd64d89	Stars Drive-In	fastfood		26.16016	-97.99686	617 W Business 83	Weslaco	78596	+19569687277	http://starsdrivein.com	Stars Drive In-Alice,Tx	0.97
+02fbc06dbb6e	Subway	fastfood	sandwich shop	26.21258	-97.75806	23969 Stuart Pl Rd Ste 200	Harlingen	78552	+19563685005	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72770&utm_campaign=evergreen-2020&y_source=1_MTAyNzQyNTE1My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+0658dc305d64	Subway	fastfood	sandwich shop	26.23437	-97.57366	325 East Colorado Suite A	Rio Hondo	78583	+19567482500	https://restaurants.subway.com/united-states/tx/rio-hondo/325-east-colorado	Subway	0.96
+099cbb9d97de	Subway	fastfood	sandwich shop	26.07464	-97.49104	1004 W, Ocean Blvd	Los Fresnos	78566	+19562331770	http://www.subway.com/en-us	Subway	0.95
+0e9b03d07e7b	Subway	fastfood	sandwich shop	26.08722	-97.95809	103 US-281	Progreso	78579	+19565658500	https://restaurants.subway.com/united-states/tx/progreso/103-east-highway-281	Subway	0.95
+11ac9a9fae5b	Subway	fastfood	sandwich shop	26.15307	-97.64583	1126 W US Highway 77	San Benito	78586	+19563991370	https://alibabacharleston.com		0.55
+1261fa73533c	Subway	fastfood	sandwich shop	26.07187	-97.48310	507 W Ocean Blvd	Los Fresnos	78566	+19562331617	https://restaurants.subway.com/united-states/tx/los-fresnos/507-w-ocean-blvd	Subway	0.97
+26117310daa4	Subway	fastfood	sandwich shop	26.17456	-97.99063	1306 N. Texas Ave	Weslaco	78596	+19569699765	https://restaurants.subway.com/united-states/tx/weslaco/1306-n-texas-ave	Subway	0.96
+269e369598ff	Subway	fastfood	sandwich shop	26.18468	-97.71410	509 S Expressway 83	Harlingen	78550		http://www.Subway.com/	Subway	0.92
+2a237c5aa2c1	Subway	fastfood	sandwich shop	26.14770	-97.63476	1126 W. US Highway 77	San Benito	78586	+19563991370	http://www.subway.com/en-us	Subway	0.96
+49d466248990	Subway	fastfood	sandwich shop	26.16471	-97.82431	901 N Main St.	La Feria	78559	+19567970106	https://restaurants.subway.com/united-states/tx/la-feria/901-n-main-st	Subway	0.99
+4dd47471c27f	Subway	fastfood	sandwich shop	26.12872	-97.97514	721 N Martinez St	Rio Grande City	78582		http://www.subway.com/	Subway	0.74
+4f446103e3de	Subway	fastfood	sandwich shop	26.09982	-97.16589	2100 Padre Blvd. Unit 5	South Padre Island	78597	+19567616700	https://restaurants.subway.com/united-states/tx/south-padre-island/2100-padre-blvd	Subway	0.96
+502d4f3b335c	Subway	fastfood	sandwich shop	26.12771	-97.63703	160 W Expressway 83 Ste A	San Benito	78586	+19563995151	https://restaurants.subway.com/united-states/tx/san-benito/160-w-expressway-83	Subway	0.98
+5472c08c93bc	Subway	fastfood	sandwich shop	26.15548	-97.91319	369 North Avenue	Mercedes	78570	+19565145337	https://restaurants.subway.com/united-states/tx/mercedes/369-north-avenue	Subway	0.95
+59942fd525ec	Subway	fastfood	sandwich shop	26.18800	-97.95850	2810 N International Blvd.	Weslaco	78596			Subway	0.80
+5ca4cef61c3b	Subway	fastfood	sandwich shop	26.19033	-97.71438	1801 W. Harrison Suite 400	Harlingen	78550	+19562300667	https://restaurants.subway.com/united-states/tx/harlingen/1801-w-harrison	Subway	0.95
+629fb4bba5e4	SUBWAY	fastfood	sandwich shop	26.07375	-97.22728	48 Park Rd	Port Isabel	78578	+19569437821	http://www.subway.com/		0.98
+68252b3ced32	Subway	fastfood	sandwich shop	26.24864	-97.72884	18337 Templeton Ave.	Combes	78535	+18159777376	http://www.subway.com/en-us	Subway	1.00
+6cf93cba7a0d	Subway	fastfood	sandwich shop	26.15967	-97.68166	4706 S Expressway 83	Harlingen	78552	+19564214612	https://www.subway.com		0.97
+72b987fcea8a	Subway	fastfood	sandwich shop	26.29366	-97.99571	305 W Edinburg Suite A	Elsa	78543	+19562621987	http://www.Subway.com/	Subway	0.98
+81c1d1ee909a	Subway	fastfood	sandwich shop	26.28763	-97.99117	411 South Broadway Street	Elsa	78543	+19562628899	https://restaurants.subway.com/united-states/tx/elsa/411-south-broadway-street	Subway	0.95
+8e962d6e7eaf	Subway	fastfood	sandwich shop	26.18997	-97.67818	1617 E Tyler St	Harlingen	78550	+19564257999	https://restaurants.subway.com/united-states/tx/harlingen/1617-e-tyler-st	Subway	0.96
+971c56bc7170	Subway	fastfood	sandwich shop	26.17015	-97.67246	2230 S77 Sunshine Strip Ste 203	Harlingen	78550	+19564251189	https://restaurants.subway.com/united-states/tx/harlingen/2230-s77-sunshine-strip	Subway	0.98
+a3376cf58629	Subway	fastfood	sandwich shop	26.22720	-97.71831	2210 Loop 499 Suite A	Harlingen	78550	+19564231605	https://restaurants.subway.com/united-states/tx/harlingen/2210-loop-499	Subway	0.99
+ae0b52ee6e9c	Subway	fastfood	sandwich shop	26.48377	-97.76833	123 N Expy 77	Raymondville	78580	+19566894949	https://restaurants.subway.com/united-states/tx/raymondville/123-n-expy-77	Subway	0.98
+b01a285bf033	Subway	fastfood	sandwich shop	26.41339	-97.78955	8318 N Business	Lyford	78569	+19563492008	https://restaurants.subway.com/united-states/tx/lyford/8318-north-business	Subway	0.98
+b429308acb60	Subway	fastfood	sandwich shop	26.19920	-97.68097	715 N. 77 Sunshine Strip	Harlingen	78550	+19564124905	http://www.subway.com/en-us	Subway	0.98
+c22b54025a14	Subway	fastfood	sandwich shop	26.18766	-97.75799	6780 W Expwy 83	Harlingen	78550	+19564214542	https://restaurants.subway.com/united-states/tx/harlingen/6780-w-expwy-83	Subway	0.95
+c914c8fa8d5c	Subway	fastfood	sandwich shop	26.14846	-97.63997	1220 W Business Hwy 77, Unit 1	San Benito	78586	+19563617821	https://restaurants.subway.com/united-states/tx/san-benito/1220-w-business-hwy-77?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=38475&utm_campaign=evergreen-2020&y_source=1_MTQ5MTE3ODEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
+c9bd2b22e3ad	Subway	fastfood	sandwich shop	26.01656	-97.53100	9675 Anacua Street Suite A	Brownsville	78575	+19563503544	https://restaurants.subway.com/united-states/tx/olmito/9675-anacua-street	Subway	0.99
+d8210a6ec19e	Subway	fastfood	sandwich shop	26.07101	-97.22295	1401 Hwy 100 Suite 8	Port Isabel	78578	+19569437571	https://restaurants.subway.com/united-states/tx/port-isabel/1401-hwy-100	Subway	0.95
+ee045f50ca46	Subway	fastfood	sandwich shop	26.15475	-97.96555	2518 E Business 83	Weslaco	78596	+19564475100	https://restaurants.subway.com/united-states/tx/weslaco/2518-e-business-83	Subway	0.98
 4537c7babc9f	Taco Bell	fastfood		26.18713	-97.72166	402 Dixieland Rd	Harlingen	78552	+19564258836	http://www.tacobell.com/	Taco Bell	1.00
+723a2f9d5099	Taco Bell	fastfood	mexican restaurant	26.09949	-97.16591	2000 Padre Blvd	South Padre Island	78597	+19567614456	http://www.tacobell.com		0.92
 d162f893c724	Taco Bell	fastfood		26.28756	-97.99355	404 S Broadway St	Elsa	78543	+12102360346	https://locations.tacobell.com/tx/elsa/404-south-broadway.html	Taco Bell	0.97
 eb5f9b186b8b	Taco Bell	fastfood		26.17237	-97.67374	1518 Ed Carey Road	Harlingen	78550	+19564400500	http://www.tacobell.com/	Taco Bell	0.99
 ec2a28c52ba0	Taco Bell	fastfood		26.17215	-97.99032	1006 North Texas Street	Weslaco	78596	+19564471433	http://www.tacobell.com/	Taco Bell	0.99
@@ -1017,15 +1085,31 @@ fde1c182b1a0	Taqueria Azteca	fastfood		26.17058	-97.99091	1025 N Texas Blvd	Wesl
 b3d1598d3950	Wendy's	fastfood		26.17188	-97.67484	1415 Ed Carey Drive	Harlingen	78550	+19564280611	https://locations.wendys.com/united-states/tx/harlingen/1415-ed-carey-drive	Wendy's	0.99
 0efb416665a0	Whataburger	fastfood		26.11043	-97.16945	3509 PADRE BLVD	South Padre Island	78597	+19567617862	https://locations.whataburger.com/tx/south-padre-island/3509-padre-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 10daa8e4581d	Whataburger	fastfood		26.13327	-97.64500	1110 W US Highway 77	San Benito	78586	+19563997440	wasafety.com.au		0.55
+13948d0c9c8d	Whataburger	fastfood	burger restaurant	26.29387	-97.98139	623 E Edinburg Ave	Elsa	78543	+19562621321	https://locations.whataburger.com/tx/elsa/623-e-edinburg-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+3112cd1c9497	Whataburger	fastfood	burger restaurant	26.14540	-97.63555	1110 US-77	San Benito	78586	+19563997440	https://locations.whataburger.com/tx/san-benito/1110-w-us-highway-77.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
 47966ad14044	Whataburger	fastfood		26.18982	-97.71325	1605 W HARRISON AVE	Harlingen	78550	+19564238800	https://locations.whataburger.com/tx/harlingen/1605-w-harrison-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 494758634720	Whataburger	fastfood		26.07106	-97.22185	1301 STATE HIGHWAY 100	Port Isabel	78578	+19569431335	https://locations.whataburger.com/tx/port-isabel/1301-hwy-100.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 5217f365189e	Whataburger	fastfood		26.07316	-97.49033	1002 HWY 100	Los Fresnos	78566	+19562384019	https://locations.whataburger.com/tx/los-fresnos/1002-hwy-100.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 569daa939e10	Whataburger	fastfood		26.15635	-97.97592	1520 E BUSINESS 83	Weslaco	78596	+19569689505	https://locations.whataburger.com/tx/weslaco/1520-e-business-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 5ff8d8168e59	Whataburger	fastfood		26.29380	-97.99297	100 E EDINBURG AVE	Elsa	78543	+19562621321	https://locations.whataburger.com/tx/elsa/100-e-edinburg-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+68bab627a6a2	Whataburger	fastfood	burger restaurant	26.15991	-97.89057	4801 E EXPRESSWAY 83	Mercedes	78570	+19565144879	https://locations.whataburger.com/tx/mercedes/4801-e-expressway-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+6ef7b08a64ed	Whataburger	fastfood	burger restaurant	26.15578	-97.91280	400 E Expressway 83	Mercedes	78570	+19565652420	http://www.whataburger.com/	Whataburger	0.97
 a022da14f9d9	Whataburger	fastfood		26.48240	-97.77038	1007 E HIDALGO AVE	Raymondville	78580	+19566895578	https://locations.whataburger.com/tx/raymondville/1007-east-hidalgo-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 aad42cb3612b	Whataburger	fastfood		26.16489	-97.82475	90 W EXPRESSWAY 83	La Feria	78559	+19567979009	https://locations.whataburger.com/tx/la-feria/90-w-expy-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+c41d023c0718	Whataburger	fastfood	burger restaurant	26.17160	-97.99052	1100 N TEXAS BLVD	Weslaco	78596	+19569680521	https://locations.whataburger.com/tx/weslaco/1100-texas-blvd-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 e672f709781a	Whataburger	fastfood		26.19034	-97.67950	1522 E HARRISON AVE	Harlingen	78550	+19564230372	https://locations.whataburger.com/tx/harlingen/1522-e-harrison-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-1ee098117018	Wingstop	fastfood		26.29405	-97.99276	512 E Edinburg Ave	Elsa	78543		https://www.wingstop.com/location/wingstop-773-elsa-tx-78543/menu	Wingstop	0.80
+e97d1ff87a09	Whataburger	fastfood	burger restaurant	26.16569	-97.67883	613 N ED CAREY DR	Harlingen	78550	+19564280774	https://locations.whataburger.com/tx/harlingen/613-n-ed-carey-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+01daa9986484	Wingstop	fastfood	chicken restaurant	26.48179	-97.77104	994 E. Hidalgo Ave	Raymondville	78580	+19566994500	https://www.wingstop.com/location/wingstop-1681-raymondville-tx-78580/menu?y_source=1_NTUyMDc5OTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
+0441f94a8ef3	Wingstop	fastfood	chicken restaurant	26.14456	-97.63771	1141 US-77 Business Ste D	San Benito	78586	+19563615500	https://www.wingstop.com/location/wingstop-562-san-benito-tx-78586/menu?y_source=1_NTUyMDY2OTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+0d9090a19950	Wingstop	fastfood	chicken restaurant	26.15910	-97.82410	109 W Main Suites C&D	La Feria	78559	+19566461177	https://www.wingstop.com/location/wingstop-2845-la-feria-tx-78559/menu?y_source=1_MTA4NjYyODI5NC01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Wingstop	0.58
+24acb264ff32	Wingstop	fastfood	chicken wings restaurant	26.16423	-97.82433	109 W Main, Suites C&D	La Feria	78559	+19566461177	https://www.wingstop.com/location/wingstop-2845-la-feria-tx-78559/menu?y_source=1_MTA4NjYyODI5NC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
+3cc93f8a0d32	Wingstop	fastfood	chicken restaurant	26.19023	-97.71372	1729 W Harrison Ave Ste B	Harlingen	78550	+19564409464	https://www.wingstop.com/location/wingstop-413-harlingen-tx-78550/menu?y_source=1_NTUyMDY1ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+5813ff8b1c95	Wingstop	fastfood	chicken restaurant	26.29212	-97.98666	512 E Edinburg Ave	Elsa	78543	+19562629464	http://www.wingstop.com/	Wingstop	0.99
+67acba10e668	Wingstop	fastfood	chicken wings restaurant	26.11355	-97.16924	3900 Padre Blvd Ste A	South Padre Island	78597	+19567611300	http://order.wingstop.com/menu/wingstop-571-SOUTH-PADRE-ISLAND-TX-78597		0.96
+86b1c78fe856	Wingstop	fastfood	chicken restaurant	26.07149	-97.47150	405 E Ocean Blvd	Los Fresnos	78566	+19562339464	https://www.wingstop.com/location/wingstop-1060-los-fresnos-tx-78566/menu?y_source=1_NTUyMDc2NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+9b8c1f10c7fd	Wingstop	fastfood	chicken restaurant	26.10217	-97.16707	2400 Padre Blvd	South Padre Island	78597	+19567611300	https://www.wingstop.com/location/wingstop-571-south-padre-island-tx-78597/menu?y_source=1_NTUyMDY2ODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
+ce4f5e5980fe	Wingstop	fastfood	chicken restaurant	26.07117	-97.22289	1401 Highway 100	Port Isabel	78578	+19569439464	https://www.wingstop.com/location/wingstop-442-port-isabel-tx-78578/menu?y_source=1_NTUyMDc0NjItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
+e97cfdce2f85	Wingstop	fastfood	chicken restaurant	26.17227	-97.67319	2010 S 77 Sunshine Strip	Harlingen	78550	+19564289464	https://www.wingstop.com/location/wingstop-339-harlingen-tx-78550/menu?y_source=1_NTUyMDc2MzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 11d015c260cc	83 and Lincoln H-E-B	grocery		26.18328	-97.71404	613 S EXPWY 83	Harlingen	78550		https://www.heb.com/heb-store/us/tx/harlingen/83-and-lincoln-h-e-b-291	H-E-B	0.80
 e046fcd955f3	83 and N Texas H-E-B	grocery		26.17128	-97.98924	1004 N. TEXAS	Weslaco	78596		https://www.heb.com/heb-store/us/tx/weslaco/83-and-n-texas-h-e-b-231	H-E-B	0.80
 28cd61fe76af	A&V Lopez Supermarket	grocery		26.12566	-97.63777	860 S Sam Houston Blvd	San Benito	78586	+19563994111	http://avlopezsupermarket.wix.com/brownsville		0.96
@@ -1104,20 +1188,16 @@ ac4abb2311c6	Burke Michael MD - Driscoll Children's Specialty Center	hospital		2
 0c46fb45c634	Center For Medical Genetics	hospital		26.17167	-97.66910	1713 Treasure Hills Blvd #2b	Harlingen	78550	+19563509231	https://www.geneticstesting.com		0.92
 35834cfb7b3b	Children's Heart Center	hospital		26.17424	-97.66973	2121 Pease St	Harlingen	78550	+19564409827		Valley Baptist Church	0.92
 06ca0230f111	Department of Veterans Affairs	hospital		26.17084	-97.66759	2601 Veterans Dr	Harlingen	78550	+19562919000			0.92
-82a32a162d4e	Doctors Hospital At Renaissance Cancer Center At San Benito	hospital		26.13970	-97.65615	1401 W Expressway 83	San Benito	78586	+19563994791	https://www.dhr-rgv.com/mobileweb/home.aspx		0.71
 a24bd8172e84	Doctors Hospital At Renaissance Cancer Center At San Benito	hospital		26.13388	-97.64777	1401 W Expressway 83	San Benito	78586	+19563994791	https://www.dhr-rgv.com/mobileweb/home.aspx		0.71
 40d51f5164bf	Driscoll Maternal Fetal	hospital		26.17420	-97.66987	2220 Haine Dr	Harlingen	78550	+19564280899			0.91
 6fd849983f41	Endoscopy Center	hospital		26.17562	-97.67133	2101 Pease St	Harlingen	78550				0.80
 fb660d905105	Family Care Clinic	hospital		26.14458	-97.63789	1141 W US Highway 77	San Benito	78586	+19564165900	http://vbphysiciannetwork.com/specialties/family-medicine/		0.73
 94446c5c347c	Family Medical Center	hospital		26.16401	-97.67936	618 Ed Carey Dr	Harlingen	78550				0.65
 663ae7ee49bc	Family Practice Associates	hospital		26.16471	-97.68215	597 Sesame Dr # B	Harlingen	78550	+19564233343	https://vbphysiciannetwork.com		0.92
-1f0672fd5028	George Huddleston, Md	hospital		26.17470	-97.67017	2101 Pease St Ste Vly	Harlingen	78550	+19563896565			0.55
-f19b6fddb8a9	Gustavo Garcia, MD	hospital		26.17420	-97.67139	2101 Pease St Ste 1G	Harlingen	78550	+19563896565	https://www.valleybaptist.net/find-a-doctor#term=GustavoGarcia0MD&detail=1942299607		0.92
 d5e1df90baa5	Harlingen Medical Center	hospital		26.15756	-97.67570	5501 US-77	Harlingen	78550	+19563651000	http://www.harlingenmedicalcenter.com		0.97
 9dd6ad69ac4d	Harlingen Public Health Center-Well Baby Clinic	hospital		26.19891	-97.70982	711 N L St	Harlingen	78550	+19564233516	https://well-baby-clinic.hub.biz/		0.59
 1f5657b5b54a	Harlingen Tx Veterans Affairs Hospital	hospital		26.17112	-97.66753	2601 Veterans Drive	Harlingen	78550				0.97
 00ed1d820bc5	Health and Wellness Specialties	hospital		26.15675	-97.67558	512 Victoria Ln	Harlingen	78550	+19564283702	http://www.hwsmain.org/		0.67
-6acb3a232a54	Health and Wellness Specialties	hospital		26.16083	-97.67198	512 Victoria Ln	Harlingen	78550	+19564283702	http://www.hwsmain.org/		0.66
 93229efa5518	Intensive Care Unit	hospital		26.17494	-97.67024	2101 Pease St	Harlingen	78550				0.92
 487d49e09027	KMC Conference Center	hospital		26.15312	-97.97842	1401 E 8th St	Weslaco	78596	+19569688567	www.knappmed.org		0.81
 eaac19d2fea9	Knapp Medical Center	hospital		26.15255	-97.97726	1401 E 8th St	Weslaco	78596	+19569688567	http://www.knappmed.org/		1.00
@@ -1125,8 +1205,6 @@ eaac19d2fea9	Knapp Medical Center	hospital		26.15255	-97.97726	1401 E 8th St	Wes
 46039cd5d964	Lauro Guerrero III, O.D.	hospital		26.17035	-97.67610	1205 N Ed Carey Dr	Harlingen	78550	+19564232100	https://www.gulfcoast2020.com/locations/p-a-harlingen-office/		0.92
 97fec7e4e03f	Mercedes Family Health Clinic	hospital		26.15200	-97.92511		Mercedes					0.73
 fc5f88cacdb5	Mercedes Medical Clinic	hospital		26.15541	-97.91206	330 N Ohio Ave	Mercedes	78570	+19565651561	http://www.mercedesmedical.com		0.92
-01df4a25846c	Mihaela Ringheanu, Md	hospital		26.16719	-97.68013	1810 Hale Ave	Harlingen	78550	+19564120055	www.healthgrades.com/physician/dr-mihaela-ringheanu-293p6		0.85
-ba85c28d7c61	Niru Iglesias Cepeda, Md	hospital		26.17470	-97.67017	2101 Pease St Ste Vly	Harlingen	78550	+19563896565	https://valleybaptist-intensivist.com		0.55
 a948e30e06de	Origins Recovery Centers Of Texas	hospital		26.11945	-97.16944	4610 Padre Blvd	South Padre Island	78597	+19567729200	https://www.originsrecovery.com		0.86
 065f25eff732	QTC Medical Group	hospital		26.18999	-97.67274	2117 E Tyler Ave	Harlingen	78550	+19564215897	https://www.qtcm.com		0.76
 46444005d4e9	Ramada Limited South Padre Island	hospital		26.11514	-97.17047	4109 Padre Blvd	South Padre Island	78597	+19567614097	http://www.ramada.com/hotels/texas/south-padre-island/ramada-limited-south-padre-island/hotel-overview?WID=LC:RA:20160226:RIO:Local:SM-rawsct		0.92
@@ -1137,7 +1215,6 @@ ae5a15854e6f	Retama Manor Nursing Center/Harlingen	hospital		26.16436	-97.67324	
 b2e9635de566	RGV Adult & Internal Medicine	hospital		26.15020	-97.97683	1001 Rone Dr	Weslaco	78596	+19564472047			0.75
 4fc1c7a432f0	RGV Pain Management	hospital		26.15681	-97.67529	5505 S Expressway 77	Harlingen	78550	+19564215660	http://www.rgvpainmanagement.com/	South Texas Clinic for Pain Management, PA	0.87
 7f6cd061e417	Rio Grande State Center	hospital		26.15951	-97.70841	1401 S Rangerville Rd	Harlingen	78552	+19563648000	http://www.dshs.state.tx.us/mhhospitals/RioGrandeSC/RGSC_Directions.shtm		1.00
-b0bd0cfbf123	Rio Grande State Center	hospital		26.15951	-97.70841	1401 S Rangerville Rd	Harlingen	78552	+19563648000	http://www.dshs.state.tx.us/mhhospitals/RioGrandeSC/RGSC_Directions.shtm		0.99
 2ffdfaa6610b	Samuels, Martel Dr-Pediatrics Plus Clinic	hospital		26.15534	-97.97796	1220 E 6th St	Weslaco	78596	+19569689571			0.55
 c120c3ee7c8a	San Benito Wic Clinic	hospital		26.14022	-97.65378	1390 W TX-83-EXPY	San Benito	78586	+19562473646	http://www.wicprograms.org/ci/tx-san_benito		0.82
 f806102594fa	Solara Specialty Hospitals Harlingen	hospital		26.16005	-97.67323	508 Victoria Ln	Harlingen	78550	+19564259600	https://www.solarahospitals.com/locations/texas/Harlingen		1.00
@@ -1166,11 +1243,8 @@ a0ff51f01d92	A & S Rentals	hotel		26.33498	-97.43769	36529 FM-2925	Rio Hondo	785
 c81c8950c33e	Americas Best Value Inn	hotel		26.16353	-97.96030	3021 E Expressway 83	Weslaco	78599	+19564478088	https://www.kingsinnmichigancity.com		0.92
 079f8684fa82	Americas Best Value Inn & Suites	hotel		26.12581	-97.63821	175 W Expy 83	San Benito	78586	+19563612222	http://www.bestwestern.com/		0.99
 f3cfad2cb3f8	Americas Best Value Inn & Suites-San Benito-Harlingen	hotel		26.16398	-97.66203	2597 W Business 77	San Benito	78586	+19562764457			0.98
-01ecfc8bdb1c	Amvs Inc	hotel		26.18181	-97.71301	1115 S Expressway 83	Harlingen	78550				0.95
 22a8a9c35b9f	Antlers Inn	hotel		26.46564	-97.77238	1800 Expressway 77 S	Raymondville	78580	+19566895531	http://www.antlers-inn.com		0.97
 214f0d424782	Arenas Del Mar	hotel		26.10978	-97.16736	115 E Atol St	South Padre Island	78597	+19567610000	http://www.vacationpadreisland.com/		0.91
-c586ed0e2d61	Arroyo City Fisherman's Lodge	hotel	lodge	26.32361	-97.44855	35609 Marshall Hutts Rd	Rio Hondo	78583	+19567483581	http://arroyocitylodge.com		0.92
-f46bd3b39ad0	Arroyo Lodge	hotel	lodge	26.32374	-97.44822	35617 Marshall Hutts Rd	Rio Hondo	78583	+18306601184	https://arroyolodge.com/		0.99
 5be6c9407516	Bahia Mar Resort	hotel		26.13320	-97.16924	6300 Padre Blvd	South Padre Island	78597	+19567611343	http://www.bahiamar.com		0.88
 5f902bbc8b65	Bay Breeze Condos	hotel		26.10470	-97.16975	201 W Red Snapper St	South Padre Island	78597	+19567617281	http://www.rentalprorentals.com/		0.63
 5c87f9bf1ae3	Beachside Lodging, Llc	hotel		26.11843	-97.16901	4500 Padre Blvd	South Padre Island	78597				0.95
@@ -1181,7 +1255,6 @@ c6b2f85b90a4	Best Western Beachside Inn	hotel		26.11847	-97.16890	4500 Padre Blv
 b864e1c6b9a5	Best Western Casa Villa Suites	hotel		26.16310	-97.68272	4317 S Expressway 83	Harlingen	78550	+19564121500	https://www.bestwestern.com/en_US/book/hotel-rooms.44541.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44541	Best Western Hotels & Resorts	1.00
 5fee615f7f07	Best Western Palm Air	hotel		26.15891	-97.95720	415 S International Blvd	Weslaco	78596		https://www.palmairehotel.com		0.95
 6723ae08d93f	Blue Bay Inn and Suites	hotel		26.09084	-97.16566	901 Padre Blvd	South Padre Island	78597	+19567614350	https://www.southpadreinn.com		0.99
-18c5a2202e7d	Blue Bunting Lodge	hotel	lodge	26.14210	-97.88438	2415 Mile 6 Rd N	Mercedes	78570	+12063569245	http://bluebuntinglodge.com/		0.92
 5b906171eed7	Blue Ocean Townhouse Vacation Rental	hotel		26.11856	-97.16714	128 E Venus Ln	South Padre Island	78597	+19564108862	https://www.bovr-spi.com/vacation-rentals/rental/128EVenus/		0.70
 23646ad806bc	Bob's South Padre Island Condo	hotel		26.12263	-97.16659	5008 Gulf Blvd	South Padre Island	78597	+15122619552	http://www.bobssouthpadrecondo.com/		0.58
 8e81ba129848	Budget Inn	hotel	motel	26.15875	-97.65648	2055 W U.S. 77	San Benito	78586	+19563996148	http://www.budgetinn.com		0.99
@@ -1196,11 +1269,9 @@ eb420f2feffa	Casa de Tortuga - South Padre Island Vacation Getaway	hotel		26.103
 f14f228669d9	Casa Del Sol	hotel		26.11462	-97.16851		South Padre Island		+19567617560	http://www.sol-hotels.com/en/index.php		0.77
 52b44871d4e2	Casa Messina	hotel		26.28731	-97.97395	7766 Mile 16 N	Edcouch	78538	+19562554126	https://chavezfoundation.org	Casa Messina	0.63
 706748220357	Casa Rosa Inn	hotel	motel	26.07110	-97.21697	761 TX-100	Port Isabel	78578	+19569432052	http://www.casarosainn.com/		0.99
-218e7a6e904d	Casa Vecchio	hotel		26.14342	-97.97469	1702 S Airport Dr	Weslaco	78596				0.70
 7cb98daf911d	Cemetery Lyford,tx	hotel		26.41836	-97.79443		Lyford					0.71
 efff1105f978	Coco Beach Hotel	hotel		26.10373	-97.16476	2612 Gulf Blvd	South Padre Island	78597	+19565244400	http://www.cocobeachspi.com/		0.99
 0119ef6127ac	Comfort Inn South Padre Island Central	hotel		26.11299	-97.16948	3813 Padre Blvd	South Padre Island	78597		https://www.choicehotels.com/texas/south-padre-island/comfort-inn-hotels	Comfort Inn	1.00
-1a4fab1263cf	Comfort Inn South Padre Island Central	hotel		26.11273	-97.16998	3813 Padre Blvd	South Padre Island	78597	+19564261002	https://www.choicehotels.com/texas/south-padre-island/comfort-inn-hotels/tx515	Choice Hotels	0.99
 b1cd5596dded	Comfort Suites Beachside	hotel		26.09123	-97.16380	912 Padre Blvd	South Padre Island	78597	+19567729020	https://www.choicehotels.com/texas/south-padre-island/comfort-suites-hotels/tx467?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 b800234e4b50	Country Inn & Suites by Radisson	hotel		26.19043	-97.69579	3825 S Expressway 83	Harlingen	78550	+19564280043	https://www.countryinns.com/harlingen-hotel-tx-78550/txharlin?s_cid=os.amer-us-cis-txharlin-gmb		0.77
 944c765e71db	Country Inn and Suites	hotel		26.16539	-97.68800	3825 S Expressway 83	Harlingen	78550	+19564280043	https://www.radissonhotelsamericas.com/en-us/hotels/country-inn-harlingen-tx?cid=a%3Ase+b%3Afbk+c%3Aamer+i%3Alocal+e%3Acis+d%3Aus+h%3ATXHARLIN	Radisson	1.00
@@ -1216,7 +1287,6 @@ bb372c077fb6	Del Mar Motel	hotel		26.07388	-97.22454	200 2nd St	Port Isabel	7857
 4aa371a84875	Deluxe Inn & Suites	hotel		26.47911	-97.77005	450 US 77 Frontage Rd	Raymondville	78580	+19566895900	http://www.americasbestvalueinn.com/		0.99
 540991437cf3	Dharma 3 Investments, Llc Dba Lone Star Inn	hotel		26.14924	-97.66559	2340 W Expressway 83	San Benito	78586				0.95
 520cd30e3a17	Dna Hotels Ltd	hotel		26.48392	-97.77015	128 N Expressway 77	Raymondville	78580		https://dnahotels.com		0.95
-b28f5a1aa3aa	Dos Rios Rod And Gun Club	hotel	lodge	26.33814	-97.43437	36666 Marshall Hutts Rd	Rio Hondo	78583	+19562420837	https://www.airbnb.com/rooms/15834217		0.92
 541908061213	Dunes Condominiums - By Island Services	hotel		26.12467	-97.16790	125 Georgia Ruth Dr	South Padre Island	78597	+19565745800			0.87
 e8fe937afa19	Econo Lodge SPI	hotel	motel	26.11353	-97.17008	3813 Padre Blvd	South Padre Island	78597	+19567617831	https://www.choicehotels.com/texas/south-padre-island/econo-lodge-hotels/txb98		0.92
 42a346f7c45d	Economy Inn & Suites	hotel		26.15673	-97.98118	709 E Business 83	Weslaco	78596	+19569683192	http://www.economyinnandsuites.net	Economy Inn & Suites	0.83
@@ -1236,9 +1306,7 @@ ca6dbd85db22	Gonzalez Ranch	hotel		26.13116	-97.86214		Bixby			http://www.peekyo
 7bb89ff2bd63	Guest Inn	hotel	motel	26.16369	-97.66231	2597 US-77 Bldg C	San Benito	78586	+19562764457	http://guestinnsanbenito.com		0.96
 10d240927a65	Gulf Oasis	hotel		26.11256	-97.16882	3800 Padre Blvd	South Padre Island	78597		http://www.vacationrentalsouthpadre.com/		0.73
 d29ad673e12f	Gulfpoint.condos.spi	hotel		26.08175	-97.16275	200 Padre Blvd	South Padre Island	78597	+19567615611			0.93
-d38902cb2922	Gulfpoint.condos.spi	hotel		26.08191	-97.16325	200 Padre Blvd	South Padre Island	78597	+19567615611			0.69
 6f109042e79e	Hampton Inn & Suites Harlingen	hotel		26.16882	-97.67564	1202 N Ed Carey Dr	Harlingen	78550	+19564289800	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
-fb907663c907	Harlingen Homes	hotel		26.18993	-97.67847	1617 E Tyler Ave Ste H	Harlingen	78550				0.95
 cfd148116cef	Haunted Hotel: La Niña	hotel		26.15914	-97.99108	260 S Texas Blvd	Weslaco	78596	+19569693100	https://www.eventbrite.com/e/haunted-hotel-la-nina-tickets-67069002191		0.62
 ece3e89ba13c	Heidelburg "El Rancho"	hotel		26.19755	-97.88193		Mercedes			http://heidelbergannarbor.com/		0.97
 d51813c43306	Hibiscus Condos	hotel		26.11552	-97.16840	111 E Hibiscus St	South Padre Island	78597	+19564335650			0.76
@@ -1246,7 +1314,6 @@ d51813c43306	Hibiscus Condos	hotel		26.11552	-97.16840	111 E Hibiscus St	South P
 133912d30bc0	Hilton Garden Inn Harlingen Convention Center	hotel		26.19966	-97.72422	751 Harlingen Heights Dr	Harlingen	78552	+19564281400	https://www.hilton.com/en/hotels/hrlnogi-garden-inn-harlingen-convention-center/		0.97
 a113ac00b764	Hilton Garden Inn South Padre	hotel		26.11286	-97.16891	3808 Padre Blvd	South Padre Island	78597	+19567613996	http://hiltongardeninn3.hilton.com		0.92
 7290a3b5a2a3	Hilton Garden Inn South Padre Island	hotel	beach resort	26.13837	-97.17023	7010 Padre Blvd	South Padre Island	78597	+19567618700	https://www.hilton.com/en/hotels/brospgi-hilton-garden-inn-south-padre-island-beachfront/	Hilton Garden Inn	1.00
-5f90c8c5f641	Holiday Inn	hotel		26.18120	-97.69971		Harlingen			http://www.holidayinn.com/		0.74
 ceddb9d9a8d0	Holiday Inn Express & Suites Raymondville	hotel		26.48375	-97.76834	220 N Expressway 77	Raymondville	78580	+19566993111	https://www.ihg.com/holidayinnexpress/hotels/us/en/raymondville/rayvl/hoteldetail		0.99
 0c808e34717e	Holiday Inn Express & Suites South Padre Island	hotel		26.13495	-97.17115	6502 Padre Blvd	South Padre Island	78597	+19567618844	https://www.ihg.com/holidayinnexpress/hotels/us/en/south-padre-island/pdisl/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-PDISL	Holiday Inn Express	1.00
 a86ce496f46c	Holiday Inn Express & Suites Weslaco	hotel		26.15804	-97.95690	421 S International Blvd	Weslaco	78596	+19569732222	https://www.ihg.com/holidayinnexpress/hotels/us/en/weslaco/wslac/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-WSLAC	Holiday Inn Express	0.98
@@ -1255,17 +1322,14 @@ e9942a7a8863	Holiday Inn Express Harlingen	hotel		26.18785	-97.71339	501 S P St	
 e834d1c4d5b6	Home	hotel		26.20037	-97.66764		Harlingen					0.97
 63af03972c12	Home2 Suites by Hilton South Padre Island	hotel		26.09700	-97.16702	1709 Padre Blvd	South Padre Island	78597	956-4269090	https://www.hilton.com/en/hotels/bropdht-home2-suites-south-padre-island/	Home2 Suites by Hilton	0.99
 f3ef7d62f2a8	Homewood Suites by Hilton Harlingen	hotel		26.16513	-97.68043	603 E Sesame Dr	Harlingen	78550	+19562302939	https://www.hilton.com/en/homewood/	Homewood Suites by Hilton	1.00
-c0f741ad0ad4	Horn Fin and Feather Lodge, El Sauz ranch	hotel	lodge	26.49271	-97.50413		San Perlita			http://closedb.com/popular/TX/San-Perlita		0.74
 d8443c2de5c6	Howard Johnson Inn & Resort	hotel		26.09713	-97.16599	1709 Padre Blvd	South Padre Island	78597	+19567615520			0.55
 4e165c65d321	Hudson House Motel	hotel	motel	26.16322	-97.67931	500 N Ed Carey Dr	Harlingen	78550	+19564288911			0.99
 a08f2d78455c	Hunter Temporary Housing	hotel	service apartment	26.21633	-97.68203	2302 N 13th St	Harlingen	78550	+19567782193	http://www.hunterhousing.com/		0.94
 42c69f21102f	Inverness At South Padre	hotel		26.12820	-97.16763	5600 Gulf Blvd	South Padre Island	78597	+19567617919	http://www.invernessatsouthpadre.com		0.99
-e72045e42745	Isla Del Padre	hotel		26.12807	-97.16755		South Padre Island					0.97
 a6ba30fd3d28	Island Breeze Beach house	hotel		26.11400	-97.16645	131 E Oleander St	South Padre Island	78597	+19566556975	https://abnb.me/8sEnB2LGzX		0.64
 749c14a448b2	Island Inn	hotel		26.11280	-97.16928	3813 Padre Blvd	South Padre Island	78597	+19567618500			0.98
 952bcbcfdbd1	Island Inn On The Beach	hotel		26.12295	-97.16656	5100 Gulf Blvd	South Padre Island	78597	+19567617677	http://www.palmsresortcafe.com		0.81
 714cc69ae2e2	Knights Inn South Padre Island	hotel		26.11514	-97.17035	4109 Padre Blvd	South Padre Island	78597	+19567614097	https://www.wyndhamhotels.com/knights-inn/south-padre-island-texas/knights-inn-south-padre-island/overview?CID=LC:KG::BING:RIO:National:05572		0.92
-959075b70901	Krishna Laxmi Llc	hotel		26.16278	-97.66304	2597 W Us Highway 77 Bldg C	San Benito	78586				0.95
 481167ba1151	La Copa Inn Beach Hotel	hotel	beach resort	26.08608	-97.16179	350 Padre Blvd	South Padre Island	78597	+19567616000	https://www.lacoparesort.com		1.00
 b43822f49f22	La Quinta Inn & Suites	hotel		26.16007	-97.88038	7007 WB Frontage Rd	Mercedes	78570	+19565650505	http://www.laquintamercedes.com/?cid=local_6129	La Quinta by Wyndham	1.00
 05b8a1ec2d64	La Quinta Inn & Suites Raymondville	hotel		26.48373	-97.77022	128 North Expressway #77	Raymondville	78580	+19566894000	http://www.laquintaraymondville.com/?cid=local_6304	La Quinta by Wyndham	1.00
@@ -1275,7 +1339,6 @@ dc31695d8ebd	La Quinta Inn & Suites South Padre Island Beach	hotel	resort	26.133
 6f21b6938ae7	LA QUINTA INN-Harlingen	hotel		26.18210	-97.71307	1002 S Expressway 83	Harlingen	78550	+19564286888	http://www.lq.com/en/findandbook/hotel-details.harlingen.html		0.77
 88ee94235a4d	Laguna House	hotel		26.54062	-97.42072	1222 E Matagorda Dr	Port Mansfield	78598	+12102406928	http://Fishtailexcursions.com/		0.71
 670ce9f729ed	Lakewood Village	hotel		26.19028	-97.74532	4515 Graham Rd	Harlingen	78552	+19564408065	https://lakewood-village-tx-1.hub.biz		0.97
-8cd85085f5b3	Lakewood Village	hotel		26.18930	-97.74977	4515 Graham Rd	Harlingen	78552	+19564408065	https://lakewood-village-tx-1.hub.biz		0.92
 d73c69ea04c2	Latitude 26 - South Padre Island,tx	hotel		26.09768	-97.16540	1800 Padre Blvd	South Padre Island	78597		latitude26.com		0.95
 344f1568a9df	Lighthouse Inn	hotel	motel	26.09685	-97.16587	1701 Padre Blvd	South Padre Island	78597	+19562994154	http://lighthouseinnspi.com/		1.00
 ec4766e33ddf	Llano Grande Lake	hotel	resort	26.12044	-97.95486		Weslaco	78570	+19565652975	http://www.llanogranderesort.com/	Llano Grande Resort & Golf Club	0.68
@@ -1284,10 +1347,7 @@ e298edbd7b29	Llano Grande RV Resort	hotel		26.12784	-97.93840		Mercedes					0.71
 c8dd1ef5b4ea	Lone Star Inn & Suites Harlingen TX	hotel		26.18866	-97.71618	1901 W Tyler Ave	Harlingen	78550	+19564251810	http://plazainnharlingen.com/		0.99
 f305f1ae066c	Los Fresnos Inn	hotel	motel	26.07275	-97.48923	906 W Ocean Blvd #3662	Los Fresnos	78566	+19562331133	http://www.losfresnosinn.com/		0.99
 d71395df3272	Margaritaville Beach Resort - South Padre Island	hotel	beach resort	26.08320	-97.16084	310 Padre Blvd	South Padre Island	78597	+19567616551	https://www.margaritavilleresorts.com/margaritaville-beach-resort-south-padre-island?utm_source=facebook&utm_medium=organic&utm_campaign=lastmile_maplink		1.00
-ad2edce26363	Mariposa Ranch Subdivision	hotel		26.17838	-97.79778		La Feria					0.74
 963793d93fe6	Meierhaus Beachfront Condo- South Padre Island, TX	hotel		26.12263	-97.16659	5008 Gulf Blvd	South Padre Island	78597	+15074388882	https://www.pirentals.com/vacation-rentals/rental/li106/		0.64
-3b892a9c71e3	Mercedes Gardens	hotel		26.17284	-97.90859	3800 S Mercedes Dr	Mercedes	78570				0.81
-3f0418d5897b	Mercedes Lodge #1010	hotel	lodge	26.15759	-97.99905	901 W 4th St	Weslaco	78596	+19562459163			0.67
 391d9adfc997	Modern Resort Lodging Llc	hotel		26.13623	-97.17130	6700 Padre Blvd	South Padre Island	78597				0.95
 b770189e54ee	Motel 6	hotel	motel	26.19386	-97.71845	205 US-77 Frontage Rd	Harlingen	78550	+19562014081	http://www.motel6.com/	Motel 6	0.99
 ddd4a992e51f	Motel 6 Harlingen, TX	hotel	resort	26.12715	-97.63792	205 US-77 Frontage Rd	Harlingen	78550	+19562014081	https://www.motel6.com/en/home/motels.tx.harlingen.4144.html?lid=Local_Milestone_4144&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.85
@@ -1299,32 +1359,25 @@ d9f270c3ed94	Nuestro Lindo Hogar	hotel		26.17435	-97.99876		Weslaco		+1956351513
 2def1a7d1772	Palace Inn	hotel	motel	26.22121	-97.71603	3010 N 77 Sunshine Strip	Harlingen	78550	+19564213434	https://www.palaceinn.com	Palace Inn Blue US-59 & Harwin	0.89
 95c11a346336	Palm Aire Hotel & Suites	hotel		26.15903	-97.95735	415 S International Blvd	Weslaco	78596	+19569692411	http://palmairehotel.com/		0.92
 d1dd6ab59f0a	Paradise Bay 4 - Vacation Rentals	hotel		26.11348	-97.17285	201 W Oleander St	South Padre Island	78597	+19564333151	https://www.airbnb.com/rooms/19053444		0.66
-958fc8d81967	Peace of Heaven Lodge	hotel	lodge	26.32622	-97.44402	35901 Marshall Hutts Rd	Rio Hondo	78583				0.92
 4b7a496966e7	Peninsula Island Resort & Spa	hotel	beach resort	26.08543	-97.16144	340 Padre Blvd	South Padre Island	78597	+19567612514	https://www.peninsulaislandresort.info/		0.99
 94e4771c9ee7	Perspective Hospitality Management Services	hotel		26.13852	-97.17080	7010 Padre Blvd # 7726	South Padre Island	78597	+19567723605	https://rubyredtx.com		0.65
 5710f7b9cbcd	Port Isla Inn	hotel	motel	26.07370	-97.22462	200 2nd St	Port Isabel	78578	+19567722020	http://www.portislainn.com/		0.99
 a39d65e8b44c	Posada de Campo San Cono	hotel		26.23914	-97.91183	Rita 2 km 259	Mercedes	75000	+59898808789			0.79
 16395e627361	Posada Del Sol Resort	hotel		26.14474	-97.72978	28513 S Palm Court Dr	Harlingen	78552	+19566491836	https://calendly.com/posadadelsol-hometowncommunities/30min		0.98
-4e84bac6d8ee	Prm Management Co	hotel		26.11122	-97.16534	3616 Gulf Blvd	South Padre Island	78597				0.95
 12f0a60ea099	Puerto Del Sol	hotel		26.07840	-97.20945	301 E Houston St	Port Isabel	78578	+18007377781			0.92
 d47684d91250	Quality Inn and Suites at The Outlets Mercedes Weslaco	hotel		26.16006	-97.89128	4701 E Expressway 83	Mercedes	78570	+19562940541	https://www.choicehotels.com/texas/mercedes/quality-inn-hotels/txj48?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
 c0da2971d9f0	Quality Inn Harlingen	hotel		26.18214	-97.71323	1002 S Expressway 83	Harlingen	78550	+19563200987	https://www.choicehotels.com/texas/harlingen/quality-inn-hotels/txi15?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
 fdaf221ae553	R. Ramos Ranch	hotel		26.31082	-97.99342	2812 N Broadway St	Edcouch	78538				0.77
 ef71d43ae2e0	Ramada South Padre Island	hotel	motel	26.13218	-97.17089	6200 Padre Blvd	South Padre Island	78597	+19562992481	https://www.ramadaspi.com/	Ramada Worldwide	0.97
 53f0fdd506dc	Rancho De Mis Amores	hotel		26.03880	-97.62777	34686 FM-1577	San Benito	78586				0.74
-77d14eef0486	Rancho San Juditas	hotel		26.22236	-97.96022		Mercedes		+11453194	https://mbiparts.com		0.73
 d6a032a5789b	Rancho San Juditas	hotel		26.19184	-97.88689		Mercedes		+11453194	https://mbiparts.com		0.75
 d1e4550c8df5	Rancho Viejo Resort & CC Olmito	hotel	resort	26.04092	-97.54869	1 Rancho Viejo Dr	Rancho Viejo	78575	+19563504000	http://www.rvrcc.com		0.97
 e37a411fccf5	Raymondville Raymondville Inn	hotel		26.48118	-97.78604	689 W Hidalgo Ave	Raymondville	78580	+19566892193			0.63
 9ce63c2a625f	Residence Inn by Marriott Harlingen	hotel		26.19293	-97.72227	109 Bass Pro Drive	Harlingen	78552	+19562301662	https://www.marriott.com/en-us/hotels/brobv-residence-inn-harlingen/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Residence Inn by Marriott	1.00
-bd68c80c697d	Rio Hondo-City	hotel		26.23450	-97.57343		Rio Hondo		+19567481050	http://www.riohondoisd.net	Rio Hondo Bobcat Band	0.63
 e33b521e16be	Rio Hondo-City	hotel		26.23508	-97.57921		Rio Hondo		+19567481050	http://www.riohondoisd.net	Rio Hondo High School P-Tech	0.97
 411fc1d1e87a	Royale Beach & Tennis Club	hotel	beach resort	26.08743	-97.16254	400 Padre Blvd	South Padre Island	78597	+19567611166	http://www.royalespi.com		1.00
-968dc4720d88	Sai Nath Llc	hotel		26.16353	-97.96030	3021 E Expressway 83	Weslaco	78599				0.95
 875aa8d3e086	Saida Royale Interval Owners Council Of Purchasers Inc	hotel		26.08685	-97.16361	410 Padre Blvd	South Padre Island	78597				0.95
 a9303655e5c0	Saida Towers	hotel	resort	26.09692	-97.16535	1700 Padre Blvd	South Padre Island	78597		https://saidatowerssouthpadre.com/		0.90
-905ea49233a3	Saini Hospitality Llc	hotel		26.16903	-97.97434	1702 E Expressway 83	Weslaco	78596				0.95
-bdbe6e5905df	Sand Rose Beach Resort	hotel		26.13171	-97.16875	7000 Padre Blvd	South Padre Island	78597	+19567727000	https://www.sandroseresort.com		0.95
 ca4af6eb5eb1	Sand Rose Beach Resort	hotel	beach resort	26.13789	-97.16953	7000 Padre Blvd	South Padre Island	78597	+19567727000	https://www.sandroseresort.com/		1.00
 adfae3ca340a	Santa Barbara Condominium	hotel		26.10241	-97.16459	2412 Gulf Blvd	South Padre Island	78597	+19567614315			0.79
 fc0236b0ef22	Schilliterbahn Beach Resort South Padre Island	hotel		26.08172	-97.16043		South Padre Island			www.schlitterbahn.com/south-padre-island/resort		0.76
@@ -1335,12 +1388,10 @@ fc0236b0ef22	Schilliterbahn Beach Resort South Padre Island	hotel		26.08172	-97.
 a82301972ba5	South Padre Island Condo	hotel		26.08695	-97.16274	404 Padre Blvd	South Padre Island	78597	+12547222595	http://www.southpadreislandoceanview.com		0.97
 f8c0cd7ba5b0	South Padre Island Convention And Visitors Bureau	hotel		26.14097	-97.17505	7355 Padre Blvd	South Padre Island	78597				0.97
 d1597774ad83	South Padre Island Inn	hotel		26.11531	-97.16988	4109 Padre Blvd	South Padre Island	78597	+19567615531	http://www.southpadrislandinn.com		0.99
-4d31077f38c7	South Padre Island Lodge	hotel	lodge	26.11370	-97.16989	3913 Padre Blvd	South Padre Island	78597	+19567617831	http://www.southpadreislandlodge.com		0.99
 4141caa3b4ea	South Padre Marina Condominium	hotel		26.13371	-97.17529	6201 Padre Blvd	South Padre Island	78597	+19567617476	http://www.spimarina.com/		0.92
 a81321a7b1cc	South Padre Motel	hotel	motel	26.11475	-97.17110	204 W Gardenia St	South Padre Island	78597	+19567616701	http://www.sopadremotel.net		0.92
 8cac2fa711a7	South Padre Radisson Resort	hotel		26.08843	-97.16250	500 Padre Blvd	South Padre Island	78597	+19567616511	http://www.islagrandbeach-hub.com/		0.96
 7be9cb4cf751	Southwind Inn	hotel	resort	26.07751	-97.21208	600 E Davis St	Port Isabel	78578	+19569433392	http://www.southwindinn.com/		0.93
-9ea6898fac79	Spanish Acres	hotel		26.22476	-97.71386		Harlingen					0.72
 5863de7221c0	SPI Cabanas	hotel		26.10813	-97.16653	125 E Campeche St	South Padre Island	78597	+16302442900	http://www.spadre.com/cabanas.htm		0.59
 315895d559ff	SPI Condo For Rent	hotel		26.08257	-97.16233	310 Padre Blvd	South Padre Island	78597	+15123505872	https://www.airbnb.com/slink/Rrv0HgvS		0.63
 d0ac4b2ece63	SPInn	hotel		26.11845	-97.16988	204 West Gardenia	South Padre Island	78597	+19567616701			0.94
@@ -1365,34 +1416,28 @@ f02bb9d394d7	The Inn At South Padre	hotel		26.09713	-97.16599	1709 Padre Blvd	So
 689ca44afe16	The Lighthouse Boutique Hotel	hotel		26.07797	-97.20803	401 E Maxan St	Port Isabel	78578	+19563361794	https://lighthouseboutiquehotel.com/		0.99
 ea4d4451c364	The Marlin Place SPI TX!	hotel		26.10147	-97.16617	120 E Marlin St	South Padre Island	78597	+18005440300	https://www.vacasa.com/unit/57098		0.86
 67d586de3ba7	The Palms Resort	hotel	beach resort	26.11115	-97.16557	3616 Gulf Blvd	South Padre Island	78597	+19567611316	http://palmsresortcafe.com/		0.99
-a15140377232	Tiger Crossing Subdivision	hotel		26.14273	-97.89859		Mercedes					0.73
 3e624a0670db	Tiki Hut Apartments	hotel		26.19950	-97.71230	716 O St	Harlingen	78550	+19564123828			0.86
 8b8773749a40	Tipsy Pelican	hotel		26.10770	-97.16740	110 E Acapulco St	South Padre Island	78597	+19563713226			0.87
 d5892905b488	Town & Country Apartments	hotel		26.15186	-97.64727	1495 W US Highway 77	San Benito	78586	+19563991556			0.88
 09696f7960d3	Tri-city Hotel Llc	hotel		26.16892	-97.67595	1202 N Ed Carey Dr	Harlingen	78550				0.95
 44e6da00824d	Upper Deck Hotel & Bar	hotel		26.11018	-97.16695	120 E Atol St	South Padre Island	78597	+19567615953	https://upperdeckhotelandbar.com		0.99
 40de7e224daf	Vali Ho Motel	hotel	motel	26.15510	-97.96784	2100 Business Hwy 83 E	Weslaco	78596	+19183878154	https://oyorooms.com/us/213077/	OYO Rooms	0.99
-b56825f3a5e2	Valley Hospitality Inc	hotel		26.16392	-97.68293	4401 S Expressway 83	Harlingen	78550				0.95
 566ead9838dc	Value Place	hotel		26.16423	-97.68658	3905 S Expressway 83	Harlingen	78550	+19564232200	https://www.choicehotels.com		0.55
 ad07fbbe67da	Velasco-Cruz Resort	hotel		26.08821	-97.52866		San Benito			https://www.agoda.com/the-farm-at-san-benito/hotel/batangas-ph.html		0.82
 8bf8fe5ee6b2	Vida Mar Bed & Breakfast	hotel		26.11278	-97.16692	S Padre Blvd	South Padre Island	78597	+15124663443	http://www.vidamarspi.com/		0.89
 db25e978ac93	Villas at Bahia Mar	hotel		26.13313	-97.16879	6300 Padre Blvd	South Padre Island	78597	+19564335480	http://www.vacationvillasofspi.com/		0.99
-1f2e42f8a34f	Vista Del Mar	hotel		26.10003	-97.16514	110 E Pompano St	South Padre Island	78597				0.90
 6ce1bf36f464	Weslaco Inn	hotel		26.15423	-97.96424	2716 E Business 83	Weslaco	78596	+19563515158	http://www.weslacoinn.com/		0.99
 66415b48bb16	White Sands Bar & Grill	hotel		26.07414	-97.21416	418 TX-100	Port Isabel	78578	+19569432414	http://www.wsinnandsuites.com/		0.97
 37fedd0d7405	White Sands Motel	hotel		26.07429	-97.21423	418 W State Highway 100	Port Isabel	78578	+19569432414			0.55
 72882a944178	White Sands Motel Marina & Restaurant	hotel		26.07717	-97.20721	418 E Queen Isabella Blvd	Port Isabel	78578	+19569432414			0.92
 e544c760d283	WindWater Hotel	hotel		26.12829	-97.17141	5701 Padre Blvd	South Padre Island	78597	+19567614913	https://www.windwater-spi.com/		0.99
 7e2379dc1a39	WoodSpring Suites	hotel		26.16390	-97.68628	3905 S Expressway 83	Harlingen	78550	+19564232200	https://www.woodspring.com/extended-stay-hotels/locations/texas/brownsville-harlingen/woodspring-suites-harlingen	WoodSpring Suites	1.00
-d07a53a1eb73	Zepeda Ranch	hotel		26.02673	-97.63560	24169 W US Highway 281	San Benito	78586				0.78
 4932500e6ecf	Admiral Linen and Uniform Service	office		26.21374	-97.70855	2121 US-77-BR	Harlingen	78550	+19564251948	http://www.admiralservices.com		0.64
 91b5c715fb33	Anderson Recovery	office		26.08219	-97.67675	32934 FM2520	San Benito	78586	+19563999500	https://anderson-recovery-tx.hub.biz/		0.92
 9e1db2b06949	Applied Resources International	office	plastics company	26.18122	-97.71971	2211 W Lincoln St	Harlingen	78552	+16037386800	https://www.appliedresourcesint.com		0.65
 d8a1aa27ba41	Associated General Contractors office	office		26.18762	-97.76256	6918 W Expressway 83	Harlingen	78552	+19564234091	http://www.agc.org		0.77
-c4cf34707860	AT&T/Optimum Wireless	office	telecommunications company	26.14828	-97.63651	1145 Ross St	San Benito	78586	+19566261220			0.90
 b30ebc617859	Avant Premium Water & Ice	office	bottled water company	26.22273	-97.71954	2810 US-77 Frontage Rd	Harlingen	78552	+19563642211	http://www.avantwater.com/		0.70
 ade940156847	Bert Ogden Rio Grande Valley	office	auto company	26.18919	-97.72114		Harlingen			http://www.bertogden.com/		0.63
-e7dbc21f4e05	Boost Mobile- Sam Elizondo	office	telecommunications company	26.14754	-97.63464	1126 US-77-Br	San Benito	78586	+19568737778	https://premiumretail.com/		0.72
 b0786f2899da	Border States Electric	office		26.19272	-97.70693	1101 W Jackson St	Harlingen	78550	+19564281613	http://www.borderstates.com/		0.92
 6278e05b8ee3	Credit Central	office		26.18423	-97.68023	1006 S 77 Sunshine Strip	Harlingen	78550	+19564962025	http://www.creditcentralllc.com/		0.97
 975832e3e1c3	Credit Central	office		26.17128	-97.99370	1025 N Texas Blvd Ste 4	Weslaco	78596	+19563515604	http://www.creditcentralllc.com/		0.99
@@ -1405,7 +1450,6 @@ bd905339dcf9	Harlingen Country Club	office	private association	26.20378	-97.7568
 ffc60f59fac4	Intel Solar	office	energy company	26.19844	-97.68105	605 N 77 Sunshine Strip	Harlingen	78550	+19569664663	http://www.intelsolarrgv.com		0.92
 8875eafdd293	J R Inc	office	information technology company	26.18027	-97.97104	1908 Joe Stephens Ave	Weslaco	78599	+12106586364	https://www.jrinc.org		0.65
 70b60841803e	Kemper Life	office		26.20396	-97.68628	1106 N 77 Sunshine Strip	Harlingen	78550	+19564232030	https://local.kemper.com/tx/harlingen/1106-n-77-sunshine-strip		0.92
-2024f44457a4	Metro by T-Mobile	office	telecommunications company	26.14392	-97.63200		San Benito	78586	+19566261396	https://www.metrobyt-mobile.com/stores/bd/metro-by-t-mobile-san-benito-tx-10231156/?utm_source=facebook&utm_medium=lastmile&utm_campaign=36186	T-Mobile	1.00
 37161fdac7a6	Mountain Glacier	office	bottled water company	26.19123	-97.99232	3201 N Texas Blvd	Weslaco	78599	+18884231955	https://www.mountainglacier.com		0.92
 bfb1230b6e82	Mr G Propane Management	office	energy company	26.28604	-97.99478	9093 W Mile 16 N	Weslaco	78599	+19562623772	http://www.mrgpropane.com/		0.92
 4131aad33493	Multitech Inc.	office	information technology company	26.13092	-97.63329	216 S Sam Houston Blvd Ste 2D	San Benito	78586	+19563208350	https://multitechincorporated.com/index.php		0.92
@@ -1456,10 +1500,8 @@ f00f2007cae6	Watermill Express	office	bottled water company	26.18792	-97.68008	5
 b45d2973abd6	100% Antojitos Mexicanos	restaurant	mexican restaurant	26.18640	-97.73412	2310 W Expressway 83	Harlingen	78552	+19562300551		100% Antojitos Mexicanos	0.80
 657e94b75192	508 Drive Thru	restaurant	theme restaurant	26.24877	-97.68197	21223 FM508	Harlingen	78550	+19567783152	https://508studiodrivethrumenu.my.canva.site/		0.97
 0ea80d548fa4	8ight Limbs Muay Thai	restaurant	thai restaurant	26.19303	-97.70050	516 W Jackson St	Harlingen	78550	+19564546015			0.83
-4e32437b8c69	A&J Tacos y Lonches Escandon	restaurant	mexican restaurant	26.14900	-97.91297		Mercedes		+19564744159			0.57
 7f2106d83c27	A&J Tacos y Lonches Escandon	restaurant	mexican restaurant	26.15349	-97.91369		Mercedes		+19564744159			0.59
 40199c948300	Abbys Cafe	restaurant	mexican restaurant	26.12160	-97.49329	FM1575	San Benito	78586	+19562331858			0.96
-d4743804b75a	Abel garcia jr	restaurant	mexican restaurant	26.29330	-97.98996	330	Edinburg	78543	+19564789789	https://www.instagram.com/abel.35garcia		0.98
 54b10ca432af	Acevedo’s Hot Dogs & More	restaurant	hot dog restaurant	26.12675	-97.49210	29789 FM-1575	Los Fresnos	78566				0.95
 2c49d57b3824	Agave Restaurant & Cantina	restaurant	mexican restaurant	26.01750	-97.53724	9051 Huitt St Unit B & C	Olmito	78575	+19566212234	https://drive.google.com/file/d/1d1b5lprOD7fBVkteIlFtmDvlLhIMg0cD/view		0.99
 dcd386c91425	Aguilar's Kitchen	restaurant	mexican restaurant	26.14973	-97.91090	200 S Illinois Ave	Mercedes	78570	+19569035034			0.92
@@ -1476,7 +1518,6 @@ f87f127c0550	Ama's Taco's	restaurant	mexican restaurant	26.13156	-97.99574	2500 
 cfa1246c2eaa	Angeles Restaurant	restaurant	mexican restaurant	26.07160	-97.47690	103 W Ocean Blvd	Los Fresnos	78566	+19562338131	http://www.angelsrestretreat.com		0.74
 f389abc3d42b	Angie's Tex Mex Restaurant	restaurant		26.15832	-97.82537	401 Expressway 83	La Feria		+19562770340			0.86
 1157355b842a	Antojeria Santa Rosa TX	restaurant	theme restaurant	26.29315	-97.98827	410 W Edinburg Ave	Elsa	78543	+19567563281			0.65
-cf4d2f0a5151	Antojeria Santa Rosa TX	restaurant	theme restaurant	26.29318	-97.99845	410 W Edinburg Ave	Elsa	78543	+19567563281			0.62
 c9495130eac7	Antojitos Cardenas	restaurant	mexican restaurant	26.15497	-97.91628	350 N Virginia Ave	Mercedes	78570	+19563575041			0.92
 6e43aee11a99	Antojitos Dona Tere	restaurant	texmex restaurant	26.18949	-97.77242	25456 Altas Palmas Rd	Harlingen	78552	+19565775668	https://start.cortera.com/company/research/l3q1jvm8k/antojitos-tere		0.69
 6670c168ffc9	Antojitos EL TORITO	restaurant	mexican restaurant	26.21101	-97.70225	1831 N 77 Sunshine Strip	Harlingen	78550			El Torito	0.82
@@ -1531,9 +1572,6 @@ a143a5fc6587	BS RedZone Chill & Grill	restaurant	bar and grill restaurant	26.129
 668c659b215b	Bucks Pizza	restaurant	pizza restaurant	26.15386	-97.99098	620 S Texas Blvd	Weslaco	78596	+19569687883	http://www.buckspizza.com/		0.92
 db51cd73f4d3	Buen Apetito	restaurant	mexican restaurant	26.19932	-97.69579	701 N 1st St	Harlingen	78550	+19566595095			0.96
 ea1acfce3b6b	Buffalo Wings & Rings	restaurant	chicken wings restaurant	26.18823	-97.75620	6710 W Expy 83	Harlingen	78552		https://www.wingsandrings.com/locations/w-expy-83-78552	Buffalo Wings & Rings	0.80
-89c312f5ae04	Burger King	restaurant	burger restaurant	26.15813	-97.95803	419-1/2 South International	Weslaco	78596	+19564478868	https://burgerking.com/store-locator/store/13003	Burger King	0.98
-dda2c08cc937	Burger King	restaurant	burger restaurant	26.12731	-97.63541	601 S Sam Houston Blvd	San Benito	78586	+19563619797	https://burgerking.com/store-locator/store/11180	Burger King	0.98
-e458df61df23	Burger King	restaurant	burger restaurant	26.17338	-97.67429	1902 S 77 Sunshine Strip	Harlingen	78550	+19564252040	https://burgerking.com/store-locator/store/4539	Burger King	0.98
 47b8d8681fb3	Burger Shack at Saida	restaurant	burger restaurant	26.10711	-97.16896	3100 Padre Blvd	South Padre Island	78597	+19564269094			0.63
 5a2e3a1467c2	Butcher Llc	restaurant		26.18916	-97.70882	1219 W Tyler Ave	Harlingen	78550				0.95
 e4eb7b91b6c0	Buzz Bee's Texas Bar & Grill	restaurant	burger restaurant	26.26467	-97.99335	12205 N FM 88, Ste K	Elsa	78543	+19562722334			0.76
@@ -1551,7 +1589,6 @@ c99ce7f333d8	Carnitas Y barbacoa La Fe	restaurant		26.08019	-97.25337	47929 TX-1
 001abf52953b	Casa Blanca Restaurant	restaurant	mexican restaurant	26.46722	-97.78471	1695 S 7th St	Raymondville	78580	+19566893230	http://casablancarestaurants.com		0.95
 ab017d3746be	Casa De Marisco	restaurant	mexican restaurant	26.17017	-97.99509	502 W Pike Blvd	Weslaco	78596	+19569681777	https://www.toasttab.com/casa-de-marisco/v3/		0.99
 c1cd0f7f0938	Casa De Marisco	restaurant		26.14894	-97.91344	S Texas Ave 301	Mercedes	78570	+19569681777	www.casademarisco.trustab.org		0.58
-31747f2e311d	Casa Del Taco	restaurant	mexican restaurant	26.15462	-97.97025	1800 E Business 83	Weslaco	78596	+19565818523	http://www.casadeltacorgv.com/	Casa del Taco	0.92
 8fa3fd1ae59e	Casa Del Taco Restaurants	restaurant		26.18633	-97.99071	2708 N Texas Blvd	Weslaco	78599		https://casadeltacorgv.com		0.95
 d9b12b87822a	Casa Sushi y Más	restaurant	sushi restaurant	26.27263	-97.99239	16986 N Farm To Market 88	Weslaco	78599	+19569981962			0.60
 7b0a7314015e	Causeway Cafe SPI	restaurant		26.13055	-97.17093	5908 Padre Blvd	South Padre Island	78597	+19565248066	http://www.mycausewaycafe.com		0.92
@@ -1565,7 +1602,6 @@ e316363e4cea	Charleys Philly Steaks	restaurant	sandwich shop	26.16046	-97.88892	
 c4c360bbfcc9	Charlie's Pizza	restaurant	pizza restaurant	26.09247	-97.16486	1004 Padre Blvd	South Padre Island	78597	+19564335202	https://restaurantguru.com/widget-awards?MTExNjk4MjM0fGFiMmI0Y2Y0ZmIyNzZjMGQ1NjZhNGFhMmQ3MjMyZGIw		0.99
 2aa7f1d557e6	Charlie’s	restaurant	burger restaurant	26.19250	-97.69872	323 W Jackson Ave	Harlingen	78550	+19565773433			0.97
 e83eed75f66a	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	26.18792	-97.75498	6702 W Expy 83	Harlingen	78552	+19563653134	https://www.cheddars.com/locations/tx/harlingen/harlingen/2171?cmpid=br%3Acsk_ag%3Aie_ch%3Asoc_ca%3ACSKFB_sn%3Afacebook_gt%3Aharlingen-tx-2171_pl%3Alocurl_rd%3A1143	Cheddar's Scratch Kitchen	0.94
-6e38ba35701c	Chicken Coop	restaurant	chicken restaurant	26.29835	-97.92571	416 E 6th St	La Villa	78562				0.74
 780f988b00b7	Chicken Coop	restaurant	chicken restaurant	26.29831	-97.92567	416 E 6th St	La Villa	78562		http://chickencoopinc.com/		0.74
 a11a97eb37b1	Chili Willie's Bar and Grill	restaurant	bar and grill restaurant	26.32319	-97.45403	35420 Marshall Hutts Rd	Rio Hondo	78583	+19567482444			1.00
 c5dd43835964	Chili's Grill & Bar	restaurant		26.15982	-97.89001	4901 E. Expressway 83	Mercedes	78570	+19565650055	https://www.chilis.com/		0.99
@@ -1575,11 +1611,9 @@ f72021326e03	China Coast	restaurant	chinese restaurant	26.17199	-97.98940	1008 N
 7aa83fe74b7a	China Pantry	restaurant	chinese restaurant	26.18357	-97.71819	2020 S Expressway 83	Harlingen	78552	+19564288886	http://vallevistamall.com/stores/china-pantry		0.92
 ad778487dd70	China Restaurant	restaurant	chinese restaurant	26.17640	-97.67719	1506 S 77 Sunshine Strip	Harlingen	78550	+19564256511	http://chinastar.us/	China Restaurant	0.99
 89cf8c50a9e1	China Star	restaurant	chinese restaurant	26.17466	-97.67445	1801 S 77 Sunshine Strip	Harlingen	78550	+19564252991	https://chinastarharlingen.kwickmenu.com/		0.96
-5896ba2b4aeb	Chipotle Mexican Grill	restaurant	mexican restaurant	26.18664	-97.72137	410 Dixieland Rd	Harlingen	78552	+19564120809	https://locations.chipotle.com/tx/harlingen/410-dixieland-rd?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2891	Chipotle Mexican Grill	0.97
 64925a009586	Chirag Enterprises Ltd	restaurant		26.16714	-97.82345	1202 N Main St	La Feria	78559				0.95
 e3f6391ffdc0	Chopstix	restaurant	chinese restaurant	26.06742	-97.46508	31230 State Highway 100	Los Fresnos	78566	+19562332305	https://www.chopstix.us		0.55
 e15546a7b2dd	Chuck's Ice House/Volleybar	restaurant	bar and grill restaurant	26.20234	-97.67642	1002 Morgan Blvd	Harlingen	78550	+19564400660	https://chuck-s-ice-house-volleybar-grill.hub.biz		0.96
-f1508f1de76d	Church's Texas Chicken	restaurant	chicken restaurant	26.15333	-97.95924	3218 US Highway 83	Weslaco	78596	+19569688123	https://locations.churchs.com/tx/weslaco/3218-us-highway-83		0.98
 d5a609d8d6f3	Churros Don Juan	restaurant	mexican restaurant	26.16064	-97.88824	5001 E Expressway 83	Mercedes	78570	+19564830195			0.92
 4f9ebb96f3bb	CiCi's Pizza	restaurant	pizza restaurant	26.17211	-97.99149	1025 N Texas Blvd	Weslaco	78596	+19564472266	http://cicispizza.com/		0.92
 c646517f8855	CiCi's Pizza	restaurant	pizza restaurant	26.19400	-97.67980	206 N 77 Sunshine Strip	Harlingen	78550	+19564254097	http://cicispizza.com/		0.92
@@ -1620,16 +1654,6 @@ ec4d4918e226	Dilfs Kitchen	restaurant	theme restaurant	26.16966	-97.91295		Merce
 b34911d77e34	Dirty Al's	restaurant	seafood restaurant	26.07574	-97.16401	33396 State Park Rd 100	South Padre Island	78597	+19567614901	http://dirtyalspi.com/		0.99
 84a9ad13efc4	Dirty South Cajun Comfort Food	restaurant	cajun and creole restaurant	26.16423	-97.68443	4111 S Expressway 83 Food trailer	Harlingen	78550	+19565454176	http://south-in-your-mouth.square.site/		0.99
 fbaf381aceea	Divots SPI Golf Course	restaurant		26.10242	-97.29146	1 Golf Rd	Laguna Vista	78578	+19562994615			0.87
-0eeb44007f7b	Domino's	restaurant	pizza restaurant	26.19924	-97.68122	713 N 77 Sunshine Strip	Harlingen	78550	+19564286296	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-3d1ab940da0e	Domino's	restaurant	pizza restaurant	26.16272	-97.82384	700 N Main St	La Feria	78559	+19567972121	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-4a16a08162c7	Domino's	restaurant	pizza restaurant	26.07339	-97.22538	1702 Highway 100 Suite D	Port Isabel	78578	+19569438880	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-77fcafa793e7	Domino's	restaurant	pizza restaurant	26.29228	-97.98634	512 East Edinburg Ave Ste G	Elsa	78543	+19565672590	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-d7aa47bd0381	Domino's	restaurant	pizza restaurant	26.17367	-97.99353	320 W Expressway 83 Ste C	Weslaco	78596	+19564474262	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test_menutest	Domino's Pizza	0.98
-fdd9ef1d53f1	Domino's	restaurant	pizza restaurant	26.18533	-97.71387	509 South Expressway 83 Suite C6	Harlingen	78550	+19564282300	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.99
-717f028d44ea	Domino's Pizza	restaurant	pizza restaurant	26.16719	-97.99049	604 N Texas Blvd	Weslaco	78596	+19564474262	https://www.dominos.com		0.55
-7af8c6313ad8	Domino's Pizza	restaurant	pizza restaurant	26.15307	-97.64583	795 W US Highway 77	San Benito	78586	+19562769696	https://www.dominos.com		0.55
-7e4b16844d9c	Domino's Pizza	restaurant	pizza restaurant	26.14228	-97.63230	795 W Business Hwy 77	San Benito	78586	+19562769696	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-9f8fee71f0b2	Domino's Pizza	restaurant	pizza restaurant	26.01357	-97.53105	7055 Frontage Rd 77 Suite 1	Brownsville	78575	+19562615060	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
 745812282fc6	Don Betos	restaurant	texmex restaurant	26.15017	-97.91800	735 W 2nd St	Mercedes	78570	+19565140886	https://murti.top/don-beto-s-restaurant		0.92
 6209e315fcaf	Don Birria Tacos y Mas, LLC	restaurant	mexican restaurant	26.15683	-97.97691	1400 E Business 83	Weslaco	78596	+19563327910	https://bit.ly/3d4dKX3		0.99
 7e39e48326c7	Don Carlos Restaurant	restaurant	american restaurant	26.18864	-97.71011	505 S M St	Harlingen	78550	+19564408744	http://doncarlosrestaurants.com		0.92
@@ -1648,7 +1672,6 @@ bf7b71d4c699	Don Ponchitos Cafe Jardin	restaurant	mexican restaurant	26.16918	-9
 063d05cdb97b	Double J's Dog House	restaurant	hot dog restaurant	26.38597	-97.78767	US 77 Bus.	Lyford	78569	+19562461268			0.72
 3aca1db2d301	Dub-Town Grub	restaurant		26.14180	-97.96694	2413 E 18th St	Weslaco	78596	+19563768853			0.73
 a895f2107aee	East Indian Hills	restaurant	indian restaurant	26.21216	-97.90742		Mercedes					0.97
-bbbb4d2ff374	East Indian Hills	restaurant	indian restaurant	26.21451	-97.90427		Mercedes					0.71
 6f398c8c00da	Easy To Go Tacos	restaurant		26.07433	-97.21172	225 W Queen Isabella	Port Isabel	78578		https://easy-to-go-tacos.business.site		0.95
 3ca2e49896f3	Edith's Mexican Buffet	restaurant	buffet restaurant	26.19114	-97.71362	1600 W Harrison Ave Ste A1	Harlingen	78550	+19565203139	https://edithskitchenrgv.com/		0.99
 1921a065ff97	EK's Drive-Thru	restaurant		26.48208	-97.77979	347 E Hidalgo Ave	Raymondville	78580	+19569661888			0.94
@@ -1670,7 +1693,6 @@ df02c485e745	El Malecon	restaurant	seafood restaurant	26.18409	-97.95956	2445 N 
 7d839646703b	El Molcajete Restaurant	restaurant	mexican restaurant	26.28831	-97.99347	408 S Broadway St	Elsa	78543	+19562626630	http://www.yellowpages.com/elsa-tx/mip/el-molcajete-restaurant-13621453		0.96
 79414ec639ca	El Pato Mexican Food	restaurant	texmex restaurant	26.18710	-97.67981	601 S 77 Sunshine Strip	Harlingen	78550	+19564286224	http://www.elpatomexicanfood.com/	El Pato Mexican Food #06	0.97
 d317e0fedbb6	El Patrón	restaurant		26.15734	-97.91380	25597 N Sam Houston Blvd	San Benito	78586	+9567423234			0.99
-d790295c7ab2	El Patrón	restaurant		26.18671	-97.58106	25597 N Sam Houston Blvd	San Benito	78586	+9567423234			0.99
 c29bed99e584	El Perico	restaurant	mexican restaurant	26.19925	-97.99263	202 Mile 10 N	Weslaco	78596				0.92
 731faf49a645	El Pescador	restaurant	mexican restaurant	26.12410	-97.63405	360 E Us Highway 77 Ste 6	San Benito	78586	+19562769000	http://www.restaurantpescador.com		0.55
 8ad186a5db00	El Pescador	restaurant	seafood restaurant	26.13608	-97.62380	360 US-77 BUS	San Benito	78586	+19562769000	https://el-pescador-tx.hub.biz/		0.92
@@ -1705,8 +1727,6 @@ ab204aab31e2	Fiesta Tex Mex	restaurant	texmex restaurant	26.16026	-97.99646	615 
 41febeef2083	File Right, Llc	restaurant		26.07560	-97.21101	112 W Queen Isabella Ste B	Port Isabel	78578				0.92
 5f0a60d383aa	Fina's Family Restaurant	restaurant	mexican restaurant	26.30092	-97.99317	902 East Broadway St	Elsa	78543	+19562624252	http://finas-family.poi.place		0.77
 606baaae30fb	Fire Fire Pizza	restaurant	pizza restaurant	26.19628	-97.71684	1904 W Jefferson Ave	Harlingen	78550	+19562301194	http://Firefire.comfirepizza/		0.95
-438d434f874b	Firehouse Subs	restaurant	sandwich shop	26.18636	-97.73487	2709 W Expressway 83	Harlingen	78552	+19562301472	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1713	Firehouse Subs	0.99
-bc6a1abe29b9	Firehouse Subs	restaurant	sandwich shop	26.18594	-97.72372	2709 West Expressway 83 Ste 150	Harlingen	78552	+19562301472	https://www.firehousesubs.com/store-locator/store/1ZSPnXZDeYJU9TycMBnFHY	Firehouse Subs	0.99
 34da3b07d985	Flaming Bird By H-E-B	restaurant	chicken restaurant	26.18352	-97.71379	613 South Expwy 83	Harlingen	78550	+12109381291	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.94
 3e9529fd3cfb	Flavor Gainz	restaurant		26.16111	-97.98241	203 S Bridge Ave	Weslaco	78596	+19562469892			0.65
 599d976911c9	Flying Pig Grill & Cantina	restaurant	gastropub	26.01800	-97.53114	7197 Burnias St	Olmito	78575	+19563505555	http://flyingpiggrillandcantina.com/		0.97
@@ -1716,8 +1736,6 @@ bd6514f06cd4	Four-Twenty Eats & Treats	restaurant	comfort food restaurant	26.161
 bb5eeef3d656	Francis Mexican Restaurant	restaurant	mexican restaurant	26.12696	-97.62295	935 E Stenger St	San Benito	78586	+19562760224	https://start.cortera.com/.../l7q7szp5q/francis-mexican-restaurant		0.96
 82c418b4fd68	Frankie Flav'z Craft Burger House Llc	restaurant		26.20554	-97.68923	711 N 77 Sunshine Strip	Harlingen	78550		http://frankieflavz.com		0.95
 98d3a1cefd56	Frankie Flavz Craft Burge	restaurant	burger restaurant	26.19927	-97.68120	711 N 77 Sunshine Strip	Harlingen	78550	+19562305050	https://frankieflavz.com/		0.95
-0b859a58d66c	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	26.18390	-97.72124	902 Dixieland Rd Suite 101	Harlingen	78552	+19562913499	https://www.freddys.com/location/harlingen-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
-d031abf307c7	Freddy's Frozen Custard and Steakburgers	restaurant	burger restaurant	26.17192	-97.98398	716 E Interstate Hwy 2	Weslaco	78596	+19562740079	https://www.freddys.com/location/weslaco?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.97
 ad078550532e	Fude Bar And Grill	restaurant	bar and grill restaurant	26.16328	-97.88775	5001 E Expressway 83	Mercedes	78570	+19562941093			0.92
 41a9f6ba233f	Full Court Entertainment Bar & Grill	restaurant	bar and grill restaurant	26.31065	-97.99413	1817 N Broadway St	Elsa	78543	+19562554114	http://valleycentral.com/news/local/8-liner-raid-in-elsa-tied-to-school-board-trustee		0.92
 761911802699	Gabriella's	restaurant	italian restaurant	26.08985	-97.16393	700 Padre Blvd	South Padre Island	78597	+19567616111			0.99
@@ -1733,7 +1751,6 @@ e5cfbbad55c4	Garza Tortilla Factory	restaurant	mexican restaurant	26.18316	-97.7
 85dfd9fbf55d	Gigi's Wing Shack	restaurant	chicken restaurant	26.12778	-97.63520	587 S Sam Houston Blvd	San Benito	78586	+19563991399	http://thewingshacksb.cloveronline.com/		0.96
 4d8df727deeb	Glizzey's	restaurant	hot dog restaurant	26.21111	-97.72782	3131 Wilson Rd	Harlingen	78552	+19563827630	https://specialtyhotdogsharlingen.com/		0.92
 a9b02f4ff1be	Global Vending, Llc	restaurant		26.08661	-97.16364	410 Padre Blvd Ste 113a	South Padre Island	78597				0.95
-2839ab0ea37a	Godfather's Pizza Express	restaurant	pizza restaurant	26.24539	-97.72549	21379 US-77 EXPRESSWAY	Harlingen	78550			Godfather's Pizza	0.80
 fb2c241720ef	Godfather's Pizza Express	restaurant	pizza restaurant	26.26643	-97.74062	21379 us-77 Expressway	Harlingen	78550	+19565077962	https://www.godfathers.com/		0.85
 03d429e66a36	Golden Corral	restaurant	buffet restaurant	26.18925	-97.71176	1525 W Tyler Ave	Harlingen	78550	+19564215817	https://www.goldencorral.com/locations/994/golden-corral-w-tyler-avenue/?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=994	Golden Corral Buffet & Grill	0.99
 ae453e030cf6	Golden Corral Buffet & Grill	restaurant	buffet restaurant	26.17378	-97.99270	300 W Expressway 83	Weslaco	78599	+19569692565	https://www.goldencorral.com/locations/596/golden-corral-w-expressway-83		0.98
@@ -1743,7 +1760,6 @@ ae453e030cf6	Golden Corral Buffet & Grill	restaurant	buffet restaurant	26.17378	
 bd291e3d9f65	Gorditas Doña Lula	restaurant	mexican restaurant	26.16720	-97.67825	821 N Ed Carey Dr	Harlingen	78550	+19564408018	http://donalulausa.com/	Gorditas Doña Lula	0.92
 a4e6158d5d3f	Grandma's Kitchen	restaurant	mexican restaurant	26.48173	-97.77130	956 E Hidalgo Ave	Raymondville	78580	+19564799429			0.97
 25641eac33ec	Great China	restaurant	chinese restaurant	26.17026	-97.99432	1015 N Texas Blvd #20C	Weslaco	78596	+19569689277	http://www.greatchinaweslaco.com/		1.00
-6d0cf8f76c98	Great China	restaurant	chinese restaurant	26.17022	-97.99426	1015 N Texas Blvd #20C	Weslaco	78596	+19569689277	http://www.greatchinaweslaco.com/		0.97
 dd6aa2e87c0e	Great China Chinese Restaurant	restaurant	chinese restaurant	26.16980	-97.67072	2416 S 77 Sunshine Strip	Harlingen	78550	+19564238885	http://greatchinamadison.com		0.96
 61717b12db98	Gulf Seafood Market	restaurant	seafood restaurant	26.07694	-97.20949	207 E Maxan St	Port Isabel	78578	+19569434501	http://www.gulfseafoodjoesoysterbar.com		0.99
 cb63ab43b071	Gulf Seafood Market 2	restaurant	seafood restaurant	26.07667	-97.20750	324 E Queen Isabella Blvd	Port Isabel	78578	+19569434505			0.58
@@ -1785,11 +1801,8 @@ a2fee9be82ba	Jason's Deli	restaurant	sandwich shop	26.21509	-97.70956	2224 N 77 
 bb904fa3466f	Jason's Deli	restaurant	delicatessen	26.16995	-97.67294	2224 US-77 #100	Harlingen	78550	+19564283354	https://www.jasonsdeli.com/	Jason's Deli	0.99
 d4edfeb79f5f	JC Wing Company	restaurant	bar and grill restaurant	26.15699	-97.82369	117 S Main St	La Feria	78559	+19562770278			0.95
 7d7c02827185	JC Wing Company / Famous Original Louie's New York Pizzeria	restaurant	pizza restaurant	26.16369	-97.66226	2597 US-77	San Benito	78586	+19562764107	https://riny.top/jc-wing-company-famous-original-louie-s-new-york-pizzeria		0.96
-409348651bb6	Jersey Mike's	restaurant	sandwich shop	26.17360	-97.98656	515 Expressway 83 Suite D	Weslaco	78599	+19566461185	https://www.jerseymikes.com/15264/weslaco-tx	Jersey Mike's Subs	0.99
-8f1f1b29a2bc	Jersey Mike's	restaurant	sandwich shop	26.18126	-97.71986	2217 W Lincoln Ave	Harlingen	78552	+19565973240	https://www.jerseymikes.com/15225/harlingen-tx	Jersey Mike's Subs	0.92
 c6abea8bf441	Jim's Pizza House	restaurant	pizza restaurant	26.20468	-97.68980	1209 N 7th St	Harlingen	78550	+19569469191			0.86
 0b2c3f5e535c	Jim's Pizzeria & Pasta House	restaurant	pizza restaurant	26.20468	-97.68980	1209 N 7th St	Harlingen	78550	+19562917099			0.83
-836a4c83d5c5	Jimmy John's	restaurant	sandwich shop	26.17431	-97.67506	1802 S 77 Sunshine Strip Suite 100	Harlingen	78550	+19563201632	https://locations.jimmyjohns.com/tx/harlingen/sandwiches-3926.html	Jimmy John's	0.99
 b00a66716cd5	Joe's Oyster Bar	restaurant	seafood restaurant	26.07697	-97.20948	207 E Maxan St	Port Isabel	78578	+19569434501	https://www.gulfseafoodmarket.com/		0.99
 dc681e723d3a	Joe's Patio Bar	restaurant	bar and grill restaurant	26.21106	-97.69273		Harlingen					0.78
 bbd5f686edb6	Joesfatboybbq	restaurant	barbecue restaurant	26.29340	-97.99107		Elsa					0.75
@@ -1812,8 +1825,6 @@ f830c2aaa850	Jump Harlingen, Inc	restaurant		26.18299	-97.71915	2020 S Expresswa
 b4384a8dead9	Juni's Takeout	restaurant		26.07445	-97.50972	30854 Hwy 100	Los Fresnos	78566	+19562332234			0.84
 23344b140d15	Just Fresh	restaurant	sandwich shop	26.17872	-97.70432	1501 S H St	Harlingen	78550	+19562305379			0.99
 67aacab54457	Keno Cafe	restaurant	diner	26.16035	-97.99059	253 S Texas Blvd	Weslaco	78596	+19568544320	http://www.kenocafe.com		0.99
-1e10874c6264	KFC	restaurant	chicken restaurant	26.16529	-97.66376	1120 S Business 77	San Benito	78586	+19563992106	http://www.kfc.com/storelocator/Default.aspx?address=1120%20S.%20Business%2077,San%20Benito,TX		0.85
-37896a44bbe4	KFC	restaurant	chicken restaurant	26.29379	-97.98685	505 E. Edinburg Ave	Elsa	78543	+19562552386	https://locations.kfc.com/tx/elsa/505-e-edinburg-ave		0.98
 8ca8ea2373f0	Khan's Grill	restaurant	mongolian restaurant	26.16362	-97.67611	610 Maco Dr	Harlingen	78550	+19564238881	http://www.khansgrill.com/	Khan's Grill	0.94
 b355eb3cf353	Kiki's	restaurant	mexican restaurant	26.19090	-97.67361	2101 E Harrison Ave	Harlingen	78550	+19564120850	http://www.kikisrestaurantharlingen.com		0.92
 701ed947d9a0	Kikis	restaurant	mexican restaurant	26.12872	-97.63445	485 S Sam Houston Blvd	San Benito	78586	+19562769126	https://kikis.hub.biz		0.92
@@ -1922,27 +1933,10 @@ c435a90ab142	Liam's Steakhouse & Oyster Bar	restaurant	steakhouse	26.10964	-97.1
 ab48fe567b0c	Lil Rita's Grill House (Thai Cuisine)	restaurant	thai restaurant	26.18939	-97.69192	410 E Tyler Ave	Harlingen	78550	+19564256242	http://www.lilritasgrillhouse.com		0.96
 76aeefdf4bfa	Linda's Lounge	restaurant	bar and grill restaurant	26.48417	-97.78375	355 N 6th St	Raymondville	78580	+19566895198	https://linda-s-lounge.hub.biz		0.92
 b3269f183706	Lisa & Doug, Lp	restaurant		26.10484	-97.16787	100 E Swordfish St	South Padre Island	78597				0.95
-0b13b28cd055	Little Caesars	restaurant	pizza restaurant	26.07375	-97.21339	415 State Highway 100	Port Isabel	78578	+19567727048	https://littlecaesars.com/en-us/store/12124	Little Caesars	0.96
-610105fcc5d1	Little Caesars	restaurant	pizza restaurant	26.18477	-97.71493	1520 W Harrison Ave	Harlingen	78550	+19564212121	https://littlecaesars.com/en-us/store/2608		0.98
-7b44d5bdd4b9	Little Caesars	restaurant	pizza restaurant	26.07265	-97.48753	810 W Ocean Blvd Suite A 3	Los Fresnos	78566	+19562331495	https://littlecaesars.com/en-us/store/10363	Little Caesars	0.92
-902967290a30	Little Caesars	restaurant	pizza restaurant	26.22706	-97.71803	2206 TX-499 Loop	Harlingen	78550	+19563685031	https://littlecaesars.com/en-us/store/20508	Little Caesars	0.97
-e6d02238088e	Little Caesars	restaurant	pizza restaurant	26.14973	-97.90642	425 2nd St	Mercedes	78570	+19565650222	https://littlecaesars.com/en-us/store/2601		0.97
-2786c8dc5f70	Little Caesars Pizza	restaurant	pizza restaurant	26.19999	-97.67809	810 Morgan Blvd	Harlingen	78550	+19564284545	https://littlecaesars.com/en-us/store/2598	Little Caesars	0.99
-4d3e46b51013	Little Caesars Pizza	restaurant	pizza restaurant	26.29346	-97.96470	1310 W Santa Rosa Ave	Edcouch	78538	+19562621331	https://littlecaesars.com/en-us/store/2603	Little Caesars	1.00
-509b32c3771e	Little Caesars Pizza	restaurant	pizza restaurant	26.19100	-97.71187	1520 W Harrison Ave	Harlingen	78550	+19564212121	https://littlecaesars.com/en-us/store/2608	Little Caesars	0.96
-6528b150fb1d	Little Caesars Pizza	restaurant	pizza restaurant	26.48177	-97.77538	704 E Hidalgo Ave	Raymondville	78580	+19566904134	https://littlecaesars.com/en-us/store/10095	Little Caesars	0.98
-909246ae5e40	Little Caesars Pizza	restaurant	pizza restaurant	26.16179	-97.82378	508 N Main St	La Feria	78559	+19567970030	https://littlecaesars.com/en-us/store/10641	Little Caesars	0.97
-93082b36ab58	Little Caesars Pizza	restaurant	pizza restaurant	26.15947	-97.99234	209 83	Weslaco	78596	+19569683333	https://littlecaesars.com/en-us/store/2597	Little Caesars	0.98
-a1e24fab9939	Little Caesars Pizza	restaurant	pizza restaurant	26.29328	-97.97385	1310 W Santa Rosa Ave	Edcouch	78538	+19562621331	https://littlecaesars.com/en-us/store/2603	Little Caesars	0.98
-a5907644e4a0	Little Caesars Pizza	restaurant	pizza restaurant	26.13751	-97.62558	190 S 77 Sunshine Strip	San Benito	78586	+19563993400	http://sizzlingplatter.com/brands/little-caesars	Little Caesars	0.98
-b33976414b65	Little Caesars Pizza	restaurant	pizza restaurant	26.18398	-97.95947	2445 N International Blvd Ste 1	Weslaco	78596	+19563752656	https://littlecaesars.com/en-us/store/12200	Little Caesars	0.99
-c09b7e9990e7	Little Caesars Pizza	restaurant	pizza restaurant	26.15018	-97.91409	425 W 2nd St	Mercedes	78570	+19565650222	https://littlecaesars.com/en-us/store/2601	Little Caesars	0.99
-d6074fca6a76	Little Caesars Pizza	restaurant	pizza restaurant	26.17104	-97.67097	2325 S 77 Sunshine Strip # A	Harlingen	78550	+19562910944	https://littlecaesars.com/en-us/store/12414	Little Caesars	0.97
 7a1896ed7c57	Liz's Drive In	restaurant	theme restaurant	26.09358	-97.96993	1219 Malone Dr	Progreso	78570	+19568257218	https://liz-s-drive-in.hub.biz/		0.92
 48c76cd8b6e3	Llano Grande	restaurant		26.29317	-97.97525	1 Yellowjacket Dr.	Edcouch	78538	+19562624474	http://www.llanogrande.org		0.77
 433809992646	Lobo del Mar	restaurant	bar and grill restaurant	26.11345	-97.17229	221 W Oleander St	South Padre Island	78597	+19563126886			0.68
 f93e61d39c47	Lobo Del Mar Cafe	restaurant	seafood restaurant	26.09723	-97.16838	204 W Palm St	South Padre Island	78597	+19567727256	http://www.lobodelmarcafe.com/		0.99
-2bebad32505d	Logan's Roadhouse	restaurant		26.18639	-97.73518	2809 W Expressway 83	Harlingen	78552	+19564400870	https://logansroadhouse.com/locations/us/tx/harlingen/2809-w-expressway-83/	Logan's Roadhouse	0.97
 ba6b564c88ee	Logan's Roadhouse	restaurant	steakhouse	26.18624	-97.72465	2809 W Expressway 83	Harlingen	78552	+19564400870	http://www.logansroadhouse.com	Logan's Roadhouse	0.97
 6f84acc7da7f	Lone Star Cafe	restaurant		26.22404	-97.68299	1218 Loop 499	Harlingen	78550	+19562268850			0.89
 8e4e91b65050	LongBoard Bar and Grill	restaurant	bar and grill restaurant	26.09693	-97.16832	205 W Palm St	South Padre Island	78597	+19567727022	http://www.longboardspi.com/		0.99
@@ -1996,9 +1990,6 @@ a654c25277e4	Mariscos y Tacos el Gordo Rb	restaurant	seafood restaurant	26.17025
 440ec1ed1d9a	Mary's Cafe	restaurant	mexican restaurant	26.23509	-97.57955	206 W Colorado St, 202 Colorado Ave	Rio Hondo	78583	+19567484777	https://foxysglendale.com		0.98
 e77939c8f0a2	Marylu's	restaurant	mexican restaurant	26.02731	-97.63664	24096 US-281	San Benito	78586	+19563619233	https://local.yahoo.com/info-44563316-mariluz-tortilleria-san-benito		0.97
 ca6984cc3e51	Mayan Taqueria	restaurant	mexican restaurant	26.11629	-97.60794	2680 Hwy 77	San Benito	78586	+19563200266			0.76
-37328cb6f04e	McDonald's	restaurant	burger restaurant	26.06896	-97.22253	1401 Highway 100	Port Isabel	78578	+19569434770	https://www.mcdonalds.com/us/en-us/location/tx/port-isabel/1401-highway-100/31088.html?cid=RF:YXT:RoN::Clicks		0.97
-7d640714dc95	McDonald's	restaurant	burger restaurant	26.17215	-97.99143	1025 N Texas	Weslaco	78596	+19569686554	https://www.mcdonalds.com/us/en-us/location/tx/weslaco/1025-n-texas/5132.html?cid=RF:YXT:RoN::Clicks		0.99
-a797c2dc7296	McDonald's	restaurant	burger restaurant	26.17519	-97.98830	1310 N Texas Ave	Weslaco	78596	+19564472580	https://www.mcdonalds.com/us/en-us/location/tx/weslaco/1310-n-texas-ave/28812.html?cid=RF:YXT:RoN::Clicks		0.85
 c84137eed7f5	Meatball Entertainment Inc	restaurant		26.09018	-97.16398	700 Padre Blvd	South Padre Island	78597				0.95
 12ec498f54c5	Meats & Sweets	restaurant	barbecue restaurant	26.40863	-97.79096	8040 Park Ave	Lyford	78569	+19563474048			0.97
 f4e8f4b4233b	Mel's Diner	restaurant	burger restaurant	26.22482	-97.52199	31164 FM 106	Rio Hondo	78583	+19567482002	http://melsdiner.com		0.77
@@ -2054,16 +2045,12 @@ e7cf3751a19f	Oliver's Hotdogs and Burgers	restaurant	burger restaurant	26.23004	
 81d07a2419f8	On the Border Mexican Grill and Cantina	restaurant		26.13841	-97.17004	7010 Padre Blvd	South Padre Island	78597	+19567721087	http://hgisouthpadreisland.com/restaurant	On The Border Northern California	0.92
 4af4725aa76d	Oyster Bar Harlingen Tx	restaurant	seafood restaurant	26.17118	-97.67133	2301 S 77 Sunshine Strip	Harlingen	78550	+19564259904	http://oysterbarharlingentx.com/		0.95
 e1527df7ff25	O’s Burgers & More	restaurant		26.16021	-97.87907	7013 W Expy 83	Mercedes	78570				0.92
-3a3b6053ed3f	Pacific Island Kitchen	restaurant	filipino restaurant	26.17025	-97.67288	2224 S 77 Sunshine Strip	Harlingen	78550	+19564233618			0.95
 3ac884297c6e	Pacific Island Kitchen	restaurant	filipino restaurant	26.17010	-97.67313	2224 S 77 Sunshine Strip	Harlingen	78550	+19564233618			0.96
 5ec17d4179d8	Palm Street Pier	restaurant	bar and grill restaurant	26.09733	-97.16839	204 W Palm St	South Padre Island	78597	+19567727256	https://www.palmstreetpier.com		0.95
 3dd81dda1d07	Panchito's Restaurant	restaurant	mexican restaurant	26.18266	-97.68794	1021 S Commerce St	Harlingen	78550	+19564288083	https://www.panchitosrestaurant.com		0.96
-dd471f4e64a3	Panda Express	restaurant	chinese restaurant	26.18125	-97.71836	2005 W Lincoln Ave	Harlingen	78552	+19564215786	http://www.pandaexpress.com/	Panda Express México	0.99
 393b9d7ea025	Panzone's	restaurant	sandwich shop	26.15762	-97.99146	409 S Missouri Ave	Weslaco	78596	+13179690494			0.97
 14e0353176bb	Papa Joe's Burgers and Brew	restaurant	burger restaurant	26.19614	-97.70850	422 N L St	Harlingen	78550	+19562304512	https://papa-joes-burgers-and-brew.popmenu.com/		0.79
 ac1463af6958	Papa Joe's Café	restaurant	comfort food restaurant	26.15042	-97.91410	103 S Texas Ave	Mercedes	78570	+19568259504	http://www.papajoes.com	Papa Joe's Italian Restaurant	0.97
-be0a394ed0db	Papa John's Pizza	restaurant	pizza restaurant	26.25336	-97.72991	401 Highway 77	Harlingen	78550	+19564440100	http://www.papajohns.com/		0.85
-dd8cc80b7d57	Papa Johns	restaurant	pizza restaurant	26.18956	-97.67939	401 S 77 Sunshine Strip	Harlingen	78550	+19564280100	http://www.youtube.com/PapaJohns	Papa John's Pizza	0.98
 b5b013cebcdd	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	26.18445	-97.68023	920 S 77 Sunshine Strip	Harlingen	78550	+19564237272			0.85
 61803a86df70	Papas & Papas	restaurant		26.18867	-97.75493	6704 W Expy 83	Harlingen	78552	+19566223003			0.97
 ec964ae3434e	Papi's Mexican Restaurant	restaurant	mexican restaurant	26.18178	-97.68572	1037 S Commerce St	Harlingen	78550	+19562300696			0.92
@@ -2090,22 +2077,6 @@ dacfbc3f4d0c	Pitti's Pizza	restaurant	pizza restaurant	26.07191	-97.48174	407 W 
 cd239546c77e	Pittis Pizza	restaurant		26.07146	-97.47604	104 E Ocean Blvd	Los Fresnos	78566		https://www.pittispizza.com		0.99
 2ad5d0873f11	Pizza Express	restaurant	italian restaurant	26.10728	-97.16825	3112 Padre Blvd	South Padre Island	78597	+19567617273	http://www.pizzaexpress.com		0.92
 6f295788aa0a	Pizza Express	restaurant	pizza restaurant	26.23517	-97.58342	102 S Arroyo Blvd	Rio Hondo	78583	+19567489000	https://www.pizzaexpress.com/offers	Pizza Express	0.96
-0d0e85a56f89	Pizza Hut	restaurant	pizza restaurant	26.17426	-97.99062	1302 N Texas Hidalgo	Weslaco	78596	+19569691133	https://locations.pizzahut.com/tx/weslaco/1302-n-texas?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299168	Pizza Hut	0.99
-3f009aea4c8e	Pizza Hut	restaurant	pizza restaurant	26.13343	-97.64522	1130 W US Highway 77	San Benito	78586	+19563991612	https://www.yum.com		0.55
-3f9ce59712bb	Pizza Hut	restaurant	pizza restaurant	26.07172	-97.22148	1202 TX-100	Port Isabel	78578	+19569438888	https://locations.pizzahut.com/tx/port-isabel/1202-hwy-100?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299968	Pizza Hut	0.98
-4531cc073581	Pizza Hut	restaurant	pizza restaurant	26.48217	-97.77716	501 E Hidalgo Ave Willacy	Raymondville	78580	+19566895564	https://locations.pizzahut.com/tx/raymondville/501-e-hidalgo-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299395	Pizza Hut	0.98
-539b83277747	Pizza Hut	restaurant	pizza restaurant	26.17290	-97.98564	623 W US Highway 83	Weslaco	78596		https://locations.pizzahut.com/tx/weslaco/623-w-us-highway-83	Pizza Hut	0.80
-5c7be96267e7	Pizza Hut	restaurant	pizza restaurant	26.09845	-97.16631	1905 Padre Blvd Cameron	South Padre Island	78597	+19567611361	https://locations.pizzahut.com/tx/south-padre-island/1905-padre-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=298955	Pizza Hut	0.99
-5c7f270b6bdf	Pizza Hut	restaurant	pizza restaurant	26.16332	-97.82442	717 N Main St Cameron	La Feria	78559	+19568873058	https://locations.pizzahut.com/tx/la-feria/717-n-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=316085	Pizza Hut	0.97
-806aac1990ac	Pizza Hut	restaurant	pizza restaurant	26.29389	-97.98235	709 E Edinburg Ave Hidalgo	Elsa	78543	+19562624744	https://locations.pizzahut.com/tx/elsa/709-e-edinburg-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299539	Pizza Hut	0.99
-87c912726cdf	Pizza Hut	restaurant	pizza restaurant	26.20160	-97.67687	920 Morgan Blvd Cameron	Harlingen	78550	+19564282191	https://locations.pizzahut.com/tx/harlingen/920-morgan-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299369	Pizza Hut	0.99
-9610a575348d	Pizza Hut	restaurant	pizza restaurant	26.14600	-97.63638	1130 US-77	San Benito	78586	+19563991612	https://locations.pizzahut.com/tx/san-benito/1130-w-us-highway-77?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299863	Pizza Hut	0.99
-967f340edd1f	Pizza Hut	restaurant	pizza restaurant	26.07337	-97.49244	1010 W. Ocean Blvd. Cameron	Los Fresnos	78566	+19563030060	https://locations.pizzahut.com/tx/los-fresnos/1010-w-ocean-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=316654	Pizza Hut	0.97
-afe8ac3e54cd	Pizza Hut	restaurant	pizza restaurant	26.14973	-97.91892	826 W 2nd St Hidalgo	Mercedes	78570	+19565656319	https://locations.pizzahut.com/tx/mercedes/826-w-2nd-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299007	Pizza Hut	0.98
-c919f078eab5	Pizza Hut	restaurant	pizza restaurant	26.17979	-97.68102	1224 S Commerce St Cameron	Harlingen	78550	+19564231900	https://locations.pizzahut.com/tx/harlingen/1224-s-commerce-st	Pizza Hut	0.99
-c9d744c6245d	Pizza Hut	restaurant	pizza restaurant	26.18987	-97.71423	1802 W Tyler Ave	Harlingen	78550	+19564256520	https://locations.pizzahut.com/tx/harlingen/1802-w-tyler-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299315	Pizza Hut	0.98
-ef9437048c67	Pizza Hut	restaurant	pizza restaurant	26.16059	-97.99798	623 W U.S. Hwy 83	Weslaco	78596	+19569691444	https://locations.pizzahut.com/tx/weslaco/623-w-us-highway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299139	Pizza Hut	0.97
-d450201fd24f	Pizza Hut Express	restaurant	pizza restaurant	26.18716	-97.71456	401 S Expressway 83, Cinemark Ste 195	Harlingen	78550		https://locations.pizzahut.com/tx/harlingen/401-s-expressway-83?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313778		0.97
 1c7113d0cae5	Pizza Joint Headquarters	restaurant	pizza restaurant	26.11674	-97.16837		South Padre Island			http://thepizzajoint.net/		0.97
 992a2f39b5b6	Pizza Patrón North 13th Street	restaurant	chicken wings restaurant	26.20041	-97.68227	806 N 13th St	Harlingen	78550	+19563654213	http://www.pizzapatron.com/		0.96
 bac8995aca62	Pizza Xpress	restaurant	pizza restaurant	26.29876	-97.99303	616 N Broadway St	Elsa	78538	+19565672171	http://www.pizzaxpressnow.com/		0.96
@@ -2115,7 +2086,6 @@ f206f4f1c725	Pizzeria 77	restaurant		26.01438	-97.53154	7077 N Expressway 77	Olm
 5a031ad5d662	Pizzeria Express by Gabriellas	restaurant	pizza restaurant	26.10371	-97.16723	2600 Padre Blvd	South Padre Island	78597	+19567077111	http://Www.gabriellasspi.com/		0.92
 cd5524432804	Platillo's	restaurant	mexican restaurant	26.18646	-97.66500	1010 N Loop 499	Harlingen	78550	+19563654144	http://platillos-mexican-restaurant.hub.biz		0.95
 5efe4386c0d4	Platillo's Mexican Restaurant	restaurant	mexican restaurant	26.16628	-97.70755	1010 Colorado St	Harlingen	78552	+19563654144			0.58
-aaf5ef8b72db	Platillo's Mexican Restaurant	restaurant	mexican restaurant	26.16800	-97.67681	1010 Colorado St	Harlingen	78552	+19563654144			0.58
 043fd7b42a5d	Plazas Oulet Mercedes Texas	restaurant	mexican restaurant	26.16159	-97.88809		Mercedes					0.71
 0b389524d945	Pollita's Kitchen	restaurant	mexican restaurant	26.20173	-97.70358	902 N Commerce St	Harlingen	78550	+19562302243			0.96
 dd639471e461	Pollo y Carnes Asadas RB	restaurant	mexican restaurant	26.15248	-97.92027	161 Vermont Ave	Mercedes	78570	+19562945072			0.71
@@ -2129,7 +2099,6 @@ f6cb3948d67d	Puente de Los Indios	restaurant	mexican restaurant	26.03798	-97.737
 1bcb78e734a2	Puerta del Cielo	restaurant	mexican restaurant	26.05829	-97.67245	34505 Leal Rd	San Benito	78586				0.86
 5dc61db7ee9f	Pupusas Antojitos	restaurant		26.13137	-97.63335	174 W Robertson St	San Benito	78586	+19563678920			0.75
 36132f53b91a	Pupusas Antojitos #2	restaurant	salvadoran restaurant	26.04619	-97.71178	2901 US-281	San Benito	78586	+19563678920			0.92
-3a159ed645a7	PYC Restaurant	restaurant	mexican restaurant	26.23262	-97.95972	7720 N Farm to Market Rd 1015	Mercedes	78570	+19565653948	https://pyc-restaurant.hub.biz/		0.99
 824d038c81d2	PYC Restaurant	restaurant	barbecue restaurant	26.23262	-97.95972	7720 N Farm to Market Rd 1015	Mercedes	78570	+19565653948	https://pyc-restaurant.hub.biz/		1.00
 94a51e53b8bd	Qing Sushi Rolls & Chinese Food	restaurant	sushi restaurant	26.16867	-97.99852	805 W Pike Blvd	Weslaco	78596	+19564054468	https://dxx.jdf.mybluehost.me/		0.97
 84704c05f3dc	Quesomidilla Birria Restaurant	restaurant	taco restaurant	26.18505	-97.99159	2517 N Texas Blvd	Weslaco	78599	+19565208011	http://quesomidilla.com		0.75
@@ -2147,7 +2116,6 @@ ce92276f95c2	Reyna's Bar-B-Q	restaurant	barbecue restaurant	26.19503	-97.72240	2
 a5f2599b17fd	Reyna's Tacos	restaurant	taco restaurant	26.18372	-97.70204	917 S F St	Harlingen	78550	+19564910821			0.92
 58742d310a42	RGV Crawfish Shack	restaurant	seafood restaurant	26.15108	-97.92115	350 N Virginia Ave	Mercedes	78570	+19566502264			0.84
 97d8fed67f7a	RGV Crawfish Shack	restaurant	seafood restaurant	26.12701	-97.96375	2701 E 34th St	Weslaco	78596	+19564725362			0.70
-a3575ed2195b	RGV Crawfish Shack	restaurant	cajun and creole restaurant	26.15476	-97.91615	350 N Virginia Ave	Mercedes	78570	+19566502264			0.63
 ac3b9d998394	Rgv Stx Management Group Llc	restaurant		26.19932	-97.67983	712 N 77 Sunshine Strip Ste 30	Harlingen	78550				0.95
 d904f2fd265d	Ricardo's Restaurant-harlingen	restaurant	mexican restaurant	26.16834	-97.69278	3201 S Expressway 83 Unit C	Harlingen	78550	+19566223213	https://ricardosrestaurant.net/reservations		0.96
 db0ff0e5d41d	Richard's Restaurant	restaurant	texmex restaurant	26.18083	-97.68420	1116 S Commerce St	Harlingen	78550	+19563685062			0.92
@@ -2190,10 +2158,8 @@ a753921774fa	SMOKE: Texas BBQ and Watering Hole	restaurant	barbecue restaurant	2
 f5c99e9250fd	Smokin' Joe's BBQ and Catering	restaurant	barbecue restaurant	26.07357	-97.49783	32623 TX-100	Los Fresnos	78566	+19562957631			0.93
 8363fedcfb69	Smoking Joe's BBQ	restaurant	barbecue restaurant	26.08425	-97.87271	1675 US-281	Mercedes	78570	+19563757402	http://www.yellowpages.com/mercedes-tx/smokin-joe-s-bbq		0.92
 6267ccf5153d	Snack el chavito	restaurant	mexican restaurant	26.19094	-97.70864	1214 W Harrison Ave	Harlingen	78550	+19567424809	http://www.flowersbyselenatx.com/		0.83
-90d4d4fc6c23	Snack el chavito	restaurant	mexican restaurant	26.19080	-97.71444	1214 W Harrison Ave	Harlingen	78550	+19567424809	http://www.flowersbyselenatx.com/		0.79
 021f83409864	Snow Buddies	restaurant		26.12862	-97.17130	5709 Padre Blvd	South Padre Island	78597	+19562991763			0.82
 f0438b46e8b8	South Padre Crab Box Co.	restaurant	seafood restaurant	26.12523	-97.17023	5312 Padre Blvd	South Padre Island	78597	+19563315443			0.92
-fd6754643a65	South Padre Crab Box Co.	restaurant	seafood restaurant	26.09328	-97.16525	5312 Padre Blvd	South Padre Island	78597	+19566628782			0.85
 edafb132c2f3	South Philly Steaks and Fries	restaurant	sandwich shop	26.16195	-97.88820	5001 E Expressway 83 Suite 350D	Mercedes	78570	+19565654202	https://locations.southphillycheesesteaksfries.com/us/tx/mercedes/5001-e-expressway-83.html		0.98
 fbd7277ca206	South Texas Craft Smokers, LLC	restaurant	barbecue restaurant	26.18468	-97.54044	25797 E Brown Tract Rd	San Benito	78586	+19563671052			0.92
 3dc90f63cf55	South Texas Quesobirria Y MAS	restaurant	taco restaurant	26.19561	-97.71534	1811 W Jefferson Ave	Harlingen	78550	+19567421944	https://south-texas-quesobirria.square.site/		0.92
@@ -2205,7 +2171,6 @@ e03abd50a1aa	St.Taco Shop	restaurant		26.24229	-97.99262	8831 FM-88	Weslaco	7859
 636cdde1beb7	Stars Drive-In	restaurant	theme restaurant	26.16436	-97.82388	816 N Main St	La Feria	78559	+19567970610	http://www.starsdrivein.com/index.html	Stars Drive-In	0.96
 63c7f82f474f	Stars Drive-In	restaurant	theme restaurant	26.48207	-97.77807	465 E Hidalgo Ave	Raymondville	78580	+19566895497	http://www.starsdrivein.com	Stars Drive-In	0.96
 6bb151826909	Stars Drive-in	restaurant	theme restaurant	26.08875	-97.95875	704 S Business Farm To Market 1015	Progreso	78579	+19565651113	http://starsdrivein.com	Stars Drive In-Alice,Tx	1.00
-72102f7558ad	Stars Drive-in	restaurant	theme restaurant	26.29378	-97.98487	601 E Edinburg Ave	Elsa	78543	+19562629217	https://www.starsdrivein.com	Stars Drive-In	0.96
 a6a7a52e60c8	Stars Drive-in	restaurant	theme restaurant	26.07215	-97.49146	747 W Ocean Blvd	Los Fresnos	78566	+19562334996	http://starsdrivein.com	Stars Drive-In	0.96
 ccf4076eb741	Stars Drive-In	restaurant	theme restaurant	26.14644	-97.91299	510 S Texas Ave	Mercedes	78570	+19565655241	http://www.starsdrivein.com	Stars Drive In-Alice,Tx	0.98
 fe14be811bff	Stars Restaurant Mercedes Texas Llc	restaurant		26.14642	-97.91295	510 S Texas Ave	Mercedes	78570				0.95
@@ -2216,39 +2181,6 @@ f8c80195f027	Stars Restaurant, Weslaco, Texas, Llc	restaurant		26.16011	-97.9968
 238368910305	Stefano's Brooklyn Pizza	restaurant	pizza restaurant	26.18228	-97.74219	4201 W Business 83	Harlingen	78552	+19564256281	https://www.toasttab.com/stefanos-brooklyn-pizza-harlingen/rewardsSignup		0.99
 9b2d45e3eda5	Stefano's Brooklyn Pizza	restaurant	pizza restaurant	26.18024	-97.75026	5999 W Business 83	Harlingen	78552	+19564256281			0.99
 f09d2e3c3bfa	Stefanos Pizza Express (weslaco)	restaurant	pizza restaurant	26.17118	-97.98463	636 E Interstate Hwy 2 #105	Weslaco	78596	+19564766944	https://order.toasttab.com/online/stefanos-pizza-express-weslaco		0.97
-02fbc06dbb6e	Subway	restaurant	sandwich shop	26.21258	-97.75806	23969 Stuart Pl Rd Ste 200	Harlingen	78552	+19563685005	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72770&utm_campaign=evergreen-2020&y_source=1_MTAyNzQyNTE1My00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
-0658dc305d64	Subway	restaurant	sandwich shop	26.23437	-97.57366	325 East Colorado Suite A	Rio Hondo	78583	+19567482500	https://restaurants.subway.com/united-states/tx/rio-hondo/325-east-colorado	Subway	0.96
-099cbb9d97de	Subway	restaurant	sandwich shop	26.07464	-97.49104	1004 W, Ocean Blvd	Los Fresnos	78566	+19562331770	http://www.subway.com/en-us	Subway	0.95
-0e9b03d07e7b	Subway	restaurant	sandwich shop	26.08722	-97.95809	103 US-281	Progreso	78579	+19565658500	https://restaurants.subway.com/united-states/tx/progreso/103-east-highway-281	Subway	0.95
-11ac9a9fae5b	Subway	restaurant	sandwich shop	26.15307	-97.64583	1126 W US Highway 77	San Benito	78586	+19563991370	https://alibabacharleston.com		0.55
-1261fa73533c	Subway	restaurant	sandwich shop	26.07187	-97.48310	507 W Ocean Blvd	Los Fresnos	78566	+19562331617	https://restaurants.subway.com/united-states/tx/los-fresnos/507-w-ocean-blvd	Subway	0.97
-26117310daa4	Subway	restaurant	sandwich shop	26.17456	-97.99063	1306 N. Texas Ave	Weslaco	78596	+19569699765	https://restaurants.subway.com/united-states/tx/weslaco/1306-n-texas-ave	Subway	0.96
-269e369598ff	Subway	restaurant	sandwich shop	26.18468	-97.71410	509 S Expressway 83	Harlingen	78550		http://www.Subway.com/	Subway	0.92
-2a237c5aa2c1	Subway	restaurant	sandwich shop	26.14770	-97.63476	1126 W. US Highway 77	San Benito	78586	+19563991370	http://www.subway.com/en-us	Subway	0.96
-49d466248990	Subway	restaurant	sandwich shop	26.16471	-97.82431	901 N Main St.	La Feria	78559	+19567970106	https://restaurants.subway.com/united-states/tx/la-feria/901-n-main-st	Subway	0.99
-4dd47471c27f	Subway	restaurant	sandwich shop	26.12872	-97.97514	721 N Martinez St	Rio Grande City	78582		http://www.subway.com/	Subway	0.74
-4f446103e3de	Subway	restaurant	sandwich shop	26.09982	-97.16589	2100 Padre Blvd. Unit 5	South Padre Island	78597	+19567616700	https://restaurants.subway.com/united-states/tx/south-padre-island/2100-padre-blvd	Subway	0.96
-502d4f3b335c	Subway	restaurant	sandwich shop	26.12771	-97.63703	160 W Expressway 83 Ste A	San Benito	78586	+19563995151	https://restaurants.subway.com/united-states/tx/san-benito/160-w-expressway-83	Subway	0.98
-5472c08c93bc	Subway	restaurant	sandwich shop	26.15548	-97.91319	369 North Avenue	Mercedes	78570	+19565145337	https://restaurants.subway.com/united-states/tx/mercedes/369-north-avenue	Subway	0.95
-59942fd525ec	Subway	restaurant	sandwich shop	26.18800	-97.95850	2810 N International Blvd.	Weslaco	78596			Subway	0.80
-5ca4cef61c3b	Subway	restaurant	sandwich shop	26.19033	-97.71438	1801 W. Harrison Suite 400	Harlingen	78550	+19562300667	https://restaurants.subway.com/united-states/tx/harlingen/1801-w-harrison	Subway	0.95
-629fb4bba5e4	SUBWAY	restaurant	sandwich shop	26.07375	-97.22728	48 Park Rd	Port Isabel	78578	+19569437821	http://www.subway.com/		0.98
-68252b3ced32	Subway	restaurant	sandwich shop	26.24864	-97.72884	18337 Templeton Ave.	Combes	78535	+18159777376	http://www.subway.com/en-us	Subway	1.00
-6cf93cba7a0d	Subway	restaurant	sandwich shop	26.15967	-97.68166	4706 S Expressway 83	Harlingen	78552	+19564214612	https://www.subway.com		0.97
-72b987fcea8a	Subway	restaurant	sandwich shop	26.29366	-97.99571	305 W Edinburg Suite A	Elsa	78543	+19562621987	http://www.Subway.com/	Subway	0.98
-81c1d1ee909a	Subway	restaurant	sandwich shop	26.28763	-97.99117	411 South Broadway Street	Elsa	78543	+19562628899	https://restaurants.subway.com/united-states/tx/elsa/411-south-broadway-street	Subway	0.95
-8e962d6e7eaf	Subway	restaurant	sandwich shop	26.18997	-97.67818	1617 E Tyler St	Harlingen	78550	+19564257999	https://restaurants.subway.com/united-states/tx/harlingen/1617-e-tyler-st	Subway	0.96
-950a915dafc6	Subway	restaurant	sandwich shop	26.19674	-97.68819		Harlingen	78550	+19564251189	http://subway.com		0.77
-971c56bc7170	Subway	restaurant	sandwich shop	26.17015	-97.67246	2230 S77 Sunshine Strip Ste 203	Harlingen	78550	+19564251189	https://restaurants.subway.com/united-states/tx/harlingen/2230-s77-sunshine-strip	Subway	0.98
-a3376cf58629	Subway	restaurant	sandwich shop	26.22720	-97.71831	2210 Loop 499 Suite A	Harlingen	78550	+19564231605	https://restaurants.subway.com/united-states/tx/harlingen/2210-loop-499	Subway	0.99
-ae0b52ee6e9c	Subway	restaurant	sandwich shop	26.48377	-97.76833	123 N Expy 77	Raymondville	78580	+19566894949	https://restaurants.subway.com/united-states/tx/raymondville/123-n-expy-77	Subway	0.98
-b01a285bf033	Subway	restaurant	sandwich shop	26.41339	-97.78955	8318 N Business	Lyford	78569	+19563492008	https://restaurants.subway.com/united-states/tx/lyford/8318-north-business	Subway	0.98
-b429308acb60	Subway	restaurant	sandwich shop	26.19920	-97.68097	715 N. 77 Sunshine Strip	Harlingen	78550	+19564124905	http://www.subway.com/en-us	Subway	0.98
-c22b54025a14	Subway	restaurant	sandwich shop	26.18766	-97.75799	6780 W Expwy 83	Harlingen	78550	+19564214542	https://restaurants.subway.com/united-states/tx/harlingen/6780-w-expwy-83	Subway	0.95
-c914c8fa8d5c	Subway	restaurant	sandwich shop	26.14846	-97.63997	1220 W Business Hwy 77, Unit 1	San Benito	78586	+19563617821	https://restaurants.subway.com/united-states/tx/san-benito/1220-w-business-hwy-77?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=38475&utm_campaign=evergreen-2020&y_source=1_MTQ5MTE3ODEtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
-c9bd2b22e3ad	Subway	restaurant	sandwich shop	26.01656	-97.53100	9675 Anacua Street Suite A	Brownsville	78575	+19563503544	https://restaurants.subway.com/united-states/tx/olmito/9675-anacua-street	Subway	0.99
-d8210a6ec19e	Subway	restaurant	sandwich shop	26.07101	-97.22295	1401 Hwy 100 Suite 8	Port Isabel	78578	+19569437571	https://restaurants.subway.com/united-states/tx/port-isabel/1401-hwy-100	Subway	0.95
-ee045f50ca46	Subway	restaurant	sandwich shop	26.15475	-97.96555	2518 E Business 83	Weslaco	78596	+19564475100	https://restaurants.subway.com/united-states/tx/weslaco/2518-e-business-83	Subway	0.98
 07970158e49a	Sunrise Restaurant	restaurant	texmex restaurant	26.16460	-97.99061	301 N Texas Blvd	Weslaco	78596	+19569689901	http://Sunrise.com/		0.92
 bc17cd9bb65f	Superbenllc	restaurant		26.08685	-97.16361	410 Padre Blvd Ste 102	South Padre Island	78597				0.95
 46833439f3b5	Sweet B's	restaurant	comfort food restaurant	26.41677	-97.78890	8502 77 Business	Lyford	78569	+19563358283			0.63
@@ -2256,7 +2188,6 @@ bc17cd9bb65f	Superbenllc	restaurant		26.08685	-97.16361	410 Padre Blvd Ste 102	S
 24cbfb3fffc5	Sweet Gregory P's Smokehouse Grill	restaurant	barbecue restaurant	26.54828	-97.43484	1171 S Port Rd	Port Mansfield	78598	+19569442440	http://www.sweetgregoryps.com/		0.92
 cbda02c03a9f	T-Ghost BBQ	restaurant	barbecue restaurant	26.15739	-97.98985	400 S Kansas Ave	Weslaco	78596	+19562744504	https://t-ghost-bbq.square.site		0.92
 6e24515da525	TA-CO-MADRE tacos & more	restaurant	taco restaurant	26.15520	-97.91313	345 N Texas Ave	Mercedes	78570	+19569034320	http://ta-co-madre-tacos-more.edan.io		0.99
-723a2f9d5099	Taco Bell	restaurant	mexican restaurant	26.09949	-97.16591	2000 Padre Blvd	South Padre Island	78597	+19567614456	http://www.tacobell.com		0.92
 b33f3b0038a5	Taco Loco	restaurant	mexican restaurant	26.25543	-97.82560	213 TX-107	Santa Rosa	78593	+19564781466			0.92
 bdf3167dcc8c	Taco Palenque	restaurant	mexican restaurant	26.18124	-97.71505	1102 S Expressway 83	Harlingen	78552	+19562305299	https://tacopalenque.com/	Taco Palenque	0.99
 8d0d9b680070	Taco Palenque South Padre Island	restaurant	mexican restaurant	26.08204	-97.16098	100 Padre Blvd	South Padre Island	78597	+19562436580	http://tacopalenque.com/		0.92
@@ -2264,7 +2195,6 @@ b4a1a0f14c12	Taco-Che	restaurant	mexican restaurant	26.19967	-97.95891	4102 3 Mi
 b7b5f5e041c6	Tacolandia	restaurant	mexican restaurant	26.15065	-97.94514	2330 US-83	Mercedes	78570	+19565651482	http://Tacolandia956.com/		0.97
 9a87634e14cc	Tacos al carbon El Gordo	restaurant	mexican restaurant	26.26554	-97.98553	12820 Puesta del Sol Dr	Weslaco	78599	+19564058035			0.70
 980af24b86f0	Tacos Alex’s	restaurant	mexican restaurant	26.15476	-97.91613	708 N Baseline Rd	Mercedes	78570	+19564940314	https://tacosalexsrgv.square.site/		0.94
-abcf878bad4d	Tacos Alex’s	restaurant	mexican restaurant	26.16078	-97.90997	708 N Baseline Rd	Mercedes	78570	+19564940314	https://tacosalexsrgv.square.site/		0.93
 9b0e1f8fb8b5	Tacos de Carne Asada Matamoros 2	restaurant	mexican restaurant	26.20296	-97.95872	4418 N International Blvd	Weslaco	78599				0.92
 d3729222d83b	Tacos el sogo	restaurant	mexican restaurant	26.21980	-97.95943	6300 FM 1015	Mercedes	78570	+19567568802			0.94
 8a168cd5ec66	Tailwind Hrl, Llc	restaurant		26.22386	-97.66167	3002 Heritage Way	Harlingen	78550				0.95
@@ -2306,7 +2236,6 @@ a85509de844c	Taqueria la Fogata	restaurant	mexican restaurant	26.14875	-97.91265
 c4ad708c71c3	Taqueria La Fogata	restaurant	mexican restaurant	26.20459	-97.68986	1121 N 7th St	Harlingen	78550	+19564124010	http://www.ordertaquerialafogata.com		0.55
 b9e26f82dbb8	Taqueria La Mexicana	restaurant	mexican restaurant	26.19107	-97.67966	1501 E Harrison Ave	Harlingen	78550	+19564129394	https://taquerialamexicanatx.com/?doing_wp_cron=1538003451.5095438957214355468750	Taqueria La Mexicana	0.99
 2c28645e0621	Taqueria La Regia Weslaco Tx	restaurant	mexican restaurant	26.21440	-97.95785	3403 E Mile 11 N	Mercedes	78570				0.91
-ccd003d2004d	Taqueria La Regia Weslaco Tx	restaurant	mexican restaurant	26.21461	-97.95811	3403 E Mile 11 N	Mercedes	78570				0.91
 98a7bac89275	Taqueria Liz	restaurant		26.48147	-97.79063	783 W Hidalgo Ave	Raymondville	78580	+19563571420			0.92
 213a960c43d6	Taqueria Los Angeles	restaurant	mexican restaurant	26.34232	-97.79307	13469 FM-506	Lyford	78569	+19563475140			0.71
 45a8905b7f9c	Taqueria los compadres	restaurant	mexican restaurant	26.48049	-97.78298	246 7th St	Raymondville	78580	+19566892910	http://taqueriacompadres.com/		0.69
@@ -2399,12 +2328,6 @@ c10b04d91a0b	Villa Pizza	restaurant	pizza restaurant	26.18609	-97.71740	2000 S E
 e230208b6122	Wepa Caribe	restaurant	puerto rican restaurant	26.19553	-97.71541	1811 W Jefferson Ave	Harlingen	78550	+19569708219			0.92
 6b852b65cb02	Weslaco Counseling Center, Pllc	restaurant		26.14997	-97.97830	1009 S Utah Ave Ste A	Weslaco	78596		http://www.weslaco-counseling.weebly.com		0.95
 eeca479a0b6f	West Burrito California	restaurant	mexican restaurant	26.18380	-97.71832	2020 S Expressway 83	Harlingen	78552	+19564440079			0.70
-13948d0c9c8d	Whataburger	restaurant	burger restaurant	26.29387	-97.98139	623 E Edinburg Ave	Elsa	78543	+19562621321	https://locations.whataburger.com/tx/elsa/623-e-edinburg-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
-3112cd1c9497	Whataburger	restaurant	burger restaurant	26.14540	-97.63555	1110 US-77	San Benito	78586	+19563997440	https://locations.whataburger.com/tx/san-benito/1110-w-us-highway-77.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	1.00
-68bab627a6a2	Whataburger	restaurant	burger restaurant	26.15991	-97.89057	4801 E EXPRESSWAY 83	Mercedes	78570	+19565144879	https://locations.whataburger.com/tx/mercedes/4801-e-expressway-83.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-6ef7b08a64ed	Whataburger	restaurant	burger restaurant	26.15578	-97.91280	400 E Expressway 83	Mercedes	78570	+19565652420	http://www.whataburger.com/	Whataburger	0.97
-c41d023c0718	Whataburger	restaurant	burger restaurant	26.17160	-97.99052	1100 N TEXAS BLVD	Weslaco	78596	+19569680521	https://locations.whataburger.com/tx/weslaco/1100-texas-blvd-n.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
-e97d1ff87a09	Whataburger	restaurant	burger restaurant	26.16569	-97.67883	613 N ED CAREY DR	Harlingen	78550	+19564280774	https://locations.whataburger.com/tx/harlingen/613-n-ed-carey-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 00c3adfd83c4	White Sands Restaurant	restaurant	seafood restaurant	26.07414	-97.21442	418 State Highway 100	Port Isabel	78578	+19569432414			0.94
 5fda691cb1a1	Wild West Grill And Bar	restaurant		26.02676	-97.53300	8045 N Expressway 77	Olmito	78575	+19563508447			0.74
 457666e77191	Windjammer	restaurant	bar and grill restaurant	26.54707	-97.43214	1088 E Port Dr	Port Mansfield	78598	+19569442555	https://www.groupon.com/biz/raymondville-tx/windjammer		0.97
@@ -2415,19 +2338,6 @@ db544ab665c9	Windmill Ranch V Enterprises Llc	restaurant		26.15005	-97.95688	101
 07ee3196d303	Wing Barn Weslaco	restaurant	chicken restaurant	26.17324	-97.98256	915 E Interstate Hwy 2 Ste 100	Weslaco	78599	+19565935033	https://crumblcookies.com/stores/tx/txweslaco	Wing Barn Careers	0.92
 aafcb3b531cd	Wing Champs	restaurant	chicken restaurant	26.48251	-97.76755	101 US-77 N	Raymondville	78580	+19566992222	http://www.wingchamps.com/		0.95
 d369d742cd0b	Wings and Rings	restaurant		26.18823	-97.75620	6710 W Expy 83	Harlingen	78552	+19564962026	https://www.wingsandrings.com/		0.99
-01daa9986484	Wingstop	restaurant	chicken restaurant	26.48179	-97.77104	994 E. Hidalgo Ave	Raymondville	78580	+19566994500	https://www.wingstop.com/location/wingstop-1681-raymondville-tx-78580/menu?y_source=1_NTUyMDc5OTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
-0441f94a8ef3	Wingstop	restaurant	chicken restaurant	26.14456	-97.63771	1141 US-77 Business Ste D	San Benito	78586	+19563615500	https://www.wingstop.com/location/wingstop-562-san-benito-tx-78586/menu?y_source=1_NTUyMDY2OTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-0d9090a19950	Wingstop	restaurant	chicken restaurant	26.15910	-97.82410	109 W Main Suites C&D	La Feria	78559	+19566461177	https://www.wingstop.com/location/wingstop-2845-la-feria-tx-78559/menu?y_source=1_MTA4NjYyODI5NC01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Wingstop	0.58
-13975d5561e8	Wingstop	restaurant	chicken wings restaurant	26.17016	-97.67252	2010 S 77 Sunshine Strip	Harlingen	78550	+19564289464	http://www.wingstop.com		0.77
-24acb264ff32	Wingstop	restaurant	chicken wings restaurant	26.16423	-97.82433	109 W Main, Suites C&D	La Feria	78559	+19566461177	https://www.wingstop.com/location/wingstop-2845-la-feria-tx-78559/menu?y_source=1_MTA4NjYyODI5NC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
-3cc93f8a0d32	Wingstop	restaurant	chicken restaurant	26.19023	-97.71372	1729 W Harrison Ave Ste B	Harlingen	78550	+19564409464	https://www.wingstop.com/location/wingstop-413-harlingen-tx-78550/menu?y_source=1_NTUyMDY1ODQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-579837cb6f4f	Wingstop	restaurant	chicken wings restaurant	26.13133	-97.17101	2400 Padre Blvd	South Padre Island	78597	+19567611300	https://www.wingstop.com/location/wingstop-571-south-padre-island-tx-78597/menu?y_source=1_NTUyMDY2ODItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.96
-5813ff8b1c95	Wingstop	restaurant	chicken restaurant	26.29212	-97.98666	512 E Edinburg Ave	Elsa	78543	+19562629464	http://www.wingstop.com/	Wingstop	0.99
-67acba10e668	Wingstop	restaurant	chicken wings restaurant	26.11355	-97.16924	3900 Padre Blvd Ste A	South Padre Island	78597	+19567611300	http://order.wingstop.com/menu/wingstop-571-SOUTH-PADRE-ISLAND-TX-78597		0.96
-86b1c78fe856	Wingstop	restaurant	chicken restaurant	26.07149	-97.47150	405 E Ocean Blvd	Los Fresnos	78566	+19562339464	https://www.wingstop.com/location/wingstop-1060-los-fresnos-tx-78566/menu?y_source=1_NTUyMDc2NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
-9b8c1f10c7fd	Wingstop	restaurant	chicken restaurant	26.10217	-97.16707	2400 Padre Blvd	South Padre Island	78597	+19567611300	https://www.wingstop.com/location/wingstop-571-south-padre-island-tx-78597/menu?y_source=1_NTUyMDY2ODItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	1.00
-ce4f5e5980fe	Wingstop	restaurant	chicken restaurant	26.07117	-97.22289	1401 Highway 100	Port Isabel	78578	+19569439464	https://www.wingstop.com/location/wingstop-442-port-isabel-tx-78578/menu?y_source=1_NTUyMDc0NjItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
-e97cfdce2f85	Wingstop	restaurant	chicken restaurant	26.17227	-97.67319	2010 S 77 Sunshine Strip	Harlingen	78550	+19564289464	https://www.wingstop.com/location/wingstop-339-harlingen-tx-78550/menu?y_source=1_NTUyMDc2MzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 f9c047ecd935	Xaviers steak house	restaurant	steakhouse	26.15421	-97.64967	1651 US-77-Br	San Benito	78586	+19566262450	https://www.xaviers-restaurant.hub.biz/		0.97
 7322410b1ed0	XTreme Snacks	restaurant		26.47901	-97.78274	385 S 7th St	Raymondville	78580	+19566992808			0.92
 0cee47ca8ac7	Yessi's Taqueria	restaurant	mexican restaurant	26.25419	-97.82549	1 N Main St	Santa Rosa	78593	+19566553165	taqueriasantarosa.touchmenuusa.com		0.92
@@ -2468,6 +2378,5 @@ f9932713559c	Victoria Comfort Homes and Senior Living	senior	retirement home	26.
 0bc81b99f25c	Weslaco Nursing and Rehabilitation Center	senior	retirement home	26.14187	-97.98427	422 E 18th St	Weslaco	78596	+19569738451	http://www.regencyhealthcare.com/locations/weslaco		0.99
 6e2b49464cad	Windsor Atrium	senior	retirement home	26.16791	-97.65765	1814 Atrium Pl	Harlingen	78550	+19562302300	https://wellsentialhealth.org/location/windsor-atrium/		0.92
 0bc9518261e2	Windsor Nursing and Rehabilitation Center of Harlingen	senior	retirement home	26.16435	-97.67326	820 Camelot Dr	Harlingen	78550	+19564232663	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-harlingen/		0.92
-5f0de377fe33	Windsor Nursing and Rehabilitation Center of Raymondville	senior	assisted living facility	26.56578	-97.77055	1700 S Expressway 77	Raymondville	78580	+19566892126	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-raymondville/		0.85
 e9f9cf1072af	Windsor Nursing and Rehabilitation Center of Raymondville	senior	retirement home	26.46660	-97.77206	1700 S Expressway 77	Raymondville	78580	+19566892126	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-raymondville/		0.92
 fd791b584a0b	Windsor Nursing and Rehabilitation Center of Weslaco	senior	retirement home	26.15358	-97.97387	721 S Airport Dr	Weslaco	78596	+19569688502	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-weslaco/		1.00

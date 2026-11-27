@@ -58,7 +58,6 @@ ee6b8a5d6423	James with Reliance Auto Group	cardealer		28.98307	-95.99391	7 TX-3
 35da2a9c5e6d	National Auto Prep	cardealer		28.97875	-95.37399	1702 Yellowstone St	Freeport	77541	+19792924270			0.62
 8a4497fd50e0	Red and White Motors	cardealer		28.92163	-95.97656	400 Sidney Baker St S	Kerrville	78028	+18303770497			0.82
 44341a0f01ee	Reliance Chevrolet Buick GMC	cardealer		28.98636	-95.93240	5020 7th St	Bay City	77414	+18009431587	https://www.reliancechevroletbuickgmc.com	Chevrolet	1.00
-fa3e3eec8659	Reliance Chevrolet Buick GMC	cardealer		28.99020	-95.92680	5020 7th St	Bay City	77414	+19794767820	https://www.reliancechevroletbuickgmc.com		0.77
 0488732dc14e	Sabek Motors	cardealer	used auto dealer	28.97142	-95.37178	1309 N Brazosport Blvd Bldg A	Freeport	77541	+18325820140	http://www.sabekmotors.com		0.75
 3b1396c21795	Sabek Motors	cardealer		28.94973	-95.34431	21207 parkwick ln	Freeport	77541	+18323408241			0.61
 e7ddbf431176	Tony's Auto Sales	cardealer		28.95977	-95.35667	315 S Avenue D	Freeport	77541	+19792332155	https://www.tonysautosalestx.com/		0.92
@@ -76,9 +75,7 @@ dea937d7765c	King of Coffee	coffee		28.97053	-95.36968	1100 N Brazosport Blvd	Fr
 cb7df92b72c9	Starbucks	coffee		28.98349	-95.95090	3333 7th St	Bay City	77414	+19792444777	https://www.starbucks.com/store-locator/store/1028799	Starbucks	0.92
 a288e53b1acd	Turn of the Tide Cafe	coffee		28.95918	-95.35680	320 N Velasco Blvd	Freeport	77541	+19792306000			0.92
 c1d39d84c008	Center For Energy Development	college		28.96285	-95.97132	4000 Avenue F	Bay City	77414				0.87
-84daf32161d5	WCJC Manufacturing Technology	college		28.96275	-95.97078	4000 Avenue F	Bay City	77414	+19792444236	http://www.wcjc.edu/Programs/vocational-science/nuclear-power-technology/		0.75
 ee7237ba9c49	WCJC Manufacturing Technology	college		28.96281	-95.97112	4000 Avenue F	Bay City	77414	+19792444236	http://www.wcjc.edu/Programs/vocational-science/nuclear-power-technology/		0.76
-0fb85f361812	Wcjc- Bay City Campus	college		28.96291	-95.97115	4000 Avenue F	Bay City	77414	+19792444552	http://www.wcjc.edu/campuses/BayCity/default.asp		0.85
 953f53c3c438	Wcjc- Bay City Campus	college		28.96279	-95.97097	4000 Avenue F	Bay City	77414	+19792444552	http://www.wcjc.edu/campuses/BayCity/default.asp		0.85
 6685b35b6730	Wharton County Junior College	college		28.96275	-95.97079	4000 Avenue F Ste B	Bay City	77414	+19795324560	tappa.net		0.65
 181d66f90eec	3 Star Food Mart	convenience		28.95335	-95.35989	1024 W Broad St	Freeport	77541	+19792391261	http://texaco.com		0.92
@@ -96,7 +93,6 @@ d325cc54375a	Chevron	convenience		28.98327	-95.96443	2119 7 Th Ave K	Bay City	77
 d686da30e4b4	Chevron	convenience		28.97680	-95.37331	1702 BRAZOSPORT	Freeport	77541		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1702-BRAZOSPORT-FREEPORT-TX-77541-id302395	Chevron	0.80
 45c4436e28dc	Circle K	convenience		28.95593	-95.37382	1922 W 4th St	Freeport	77541	+19792331254	https://www.circlek.com/		0.92
 715cdf0a52f3	Circle K	convenience		28.95114	-95.28746	91 Fort Velasco Dr	Surfside Beach	77541	+19792331864	https://www.circlek.com/		0.92
-a0da6018a6c1	CITGO	convenience		28.97653	-95.37348		Freeport		+19792332292	http://www.citgo.com		0.55
 b409e1c9c8fb	CJs One Stop	convenience		28.69375	-95.96320	126 Fisher St	Bay City	77414	+19798637722			0.95
 4c44bf8d561b	Conoco	convenience		28.69360	-95.96310	186 Fisher St	Bay City	77414	+19798637722	https://www.conoco.com/	Conoco	0.92
 29c6a24c07cc	Corner Store	convenience		28.95137	-95.28777	91 Fort Velasco Dr	Surfside Beach	77541	+19792331864			0.92
@@ -132,7 +128,6 @@ a054e9327745	Shell	convenience		28.95445	-95.96918	4804 Avenue F	Bay City	77414	
 5e3f436ae181	Stanco Marine Inc	convenience		28.94799	-95.33096	1201 E Brazos St	Freeport	77541	+19792331614			0.65
 0612a3370aaa	Stripes	convenience		28.99058	-95.92578	5620 7th St	Bay City	77414	+19792444737	https://www.7-eleven.com/	Stripes	0.97
 920594d7a6e4	Stripes	convenience		28.96838	-95.37048	902 N Brazosport Blvd	Freeport	77541	+19792339442	https://www.7-eleven.com/	Stripes	0.96
-339c7f5599e2	Sunoco	convenience		28.96829	-95.37023	902 N BRAZOSPORT BLVD	Freeport	77541		https://www.sunoco.com/locations/store/902-n-brazosport-blvd-freeport-tx-0283251700	Sunoco	0.99
 504b6ecff01e	Sunoco	convenience		28.96843	-95.37038	902 N Brazosport Blvd	Freeport	77541	+19792339442	https://www.sunoco.com/locations/store/902-n-brazosport-blvd-freeport-tx-0283251700		0.99
 19ee30f07bce	Sunoco Gas Station	convenience		28.99062	-95.92566	5620 7TH St	Bay City	77414	+19792444737	https://www.sunoco.com/find-a-station		0.92
 c8d8733cd341	Surfside Food Mart	convenience		28.95049	-95.28839	111 Fort Velasco Dr	Surfside Beach	77541	+19798719375			0.99
@@ -149,15 +144,34 @@ f29509822759	Chicken Express	fastfood		28.98298	-95.96481	2104 7th St	Bay City	7
 76949df6715a	Church's Texas Chicken	fastfood		28.96961	-95.37086	1001 N. Brazosport Boulevard	Freeport	77541	+19796140052	https://locations.churchs.com/tx/freeport/1001-n.-brazosport-boulevard	Church's Chicken	0.99
 2c8535e86fec	Dairy Queen	fastfood		28.98287	-95.98675	Dairy Queen Store 301 7th St	Bay City	77414	+19792459101	https://www.dqtexas.com/?y_source=1_MjkzMzkyNDctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 a98d97c23d25	Dairy Queen	fastfood		28.98371	-95.95473	2921 7th St 2921 7th St	Bay City	77414	+19792457358	https://www.dairyqueen.com/en-us/locations/tx/bay-city/2921-7th-st/13844/?y_source=1_MjkzMzkyMzYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+620029b7cf9a	Domino's	fastfood	pizza restaurant	28.99106	-95.33321	2105 Fm 523	Oyster Creek	77541	+19792393333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+90e1a2fb94ff	Domino's	fastfood	pizza restaurant	28.97305	-95.96958	3001 Avenue F	Bay City	77414	+19792444775	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+ad034c3ca79b	Domino's	fastfood	pizza restaurant	28.96441	-95.36301	305 N Gulf Blvd	Freeport	77541	+19792332333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.94
+d6e1b5304962	Domino's Pizza	fastfood	pizza restaurant	28.98378	-95.93450	4600 7th St	Bay City	77414	+19794016565	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 6d2b4e3a8466	DQ Grill & Chill	fastfood		28.98389	-95.95474	2921 7th St	Bay City	77414		https://www.dairyqueen.com/en-us/locations/tx/bay-city/2921-7th-st/3617	DQ Grill & Chill	0.80
+51feff3068dc	Jack in the Box	fastfood	taco restaurant	28.98054	-95.37605	2101 N Brazosport Blvd	Freeport	77541	+19792331011	http://www.jackinthebox.com/locations/TX/Freeport/77541/3961?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80ce4		0.99
 d5164661afd4	Jack in the Box	fastfood		28.98326	-95.95683	2804 7th St	Bay City	77414	+19794013763	https://www.jackinthebox.com		0.94
+1c7950ede15a	KFC	fastfood	chicken restaurant	28.98290	-95.94641	3716 7th St	Bay City	77414	+19792451684	http://www.kfc.com/storelocator/Default.aspx?address=3716%20Seventh%20Street,Bay%20City,TX		0.92
 0c34f07346b6	La Taqueria de Surfside	fastfood		28.95153	-95.28806	403 E Highway 332	Surfside Beach	77541	+12105370890			0.92
+97753040d476	Little Caesars	fastfood	pizza restaurant	28.98293	-95.95948	2516 7th St	Bay City	77414	+19792449400	https://littlecaesars.com/en-us/store/9579	Little Caesars	0.98
+5445f389444c	Little Caesars Pizza	fastfood	pizza restaurant	28.97757	-95.37479	1822 N Brazosport Blvd	Freeport	77541	+19792333700	https://littlecaesars.com/en-us/store/9860	Little Caesars	0.99
 119f202d3e5d	McDonald's	fastfood		28.96898	-95.37128	923 N Brazosport Blvd	Freeport	77541	+19792332381	https://www.mcdonalds.com/us/en-us/location/tx/freeport/923-brazosport-blvd/7172.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 22c01cb24f80	McDonald's	fastfood		28.98335	-95.96495	2101 7th St	Bay City	77414	+19792444290	https://www.mcdonalds.com/us/en-us/location/tx/bay-city/2101-7th-st/5913.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+2ec564cd1fc9	McDonald's	fastfood	burger restaurant	28.98395	-95.93402	4600 7th St	Bay City	77414	+19793238099	https://www.mcdonalds.com/us/en-us/location/tx/bay-city/4600-7th-st/31805.html?cid=RF:YXT:RoN::Clicks		0.92
+6cdb6370defc	McDonald's	fastfood	burger restaurant	28.99701	-95.91624	6611 7th St	Bay City	77414		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
+9362c90eae86	Papa Johns Pizza	fastfood	pizza restaurant	28.98323	-95.97277	1417 7th St Ste B	Bay City	77414	+19792457272	https://www.papajohns.com		0.92
 f6d13230ee91	Pinkey's Daquiri's	fastfood		28.96628	-95.41924	307 Gulf Park Rd	Freeport	77541				0.57
+5d11f1f6de5c	Pizza Hut	fastfood	pizza restaurant	28.98416	-95.93850	4301 7th St	Bay City	77414	+19792457601	https://locations.pizzahut.com/tx/bay-city/4301-7th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304515	Pizza Hut	0.98
+6cbae8470903	Pizza Hut	fastfood	pizza restaurant	28.96669	-95.37185		Freeport		+19792309485	http://www.pizzahut.com/	Pizza Hut	0.92
+80f515dd2681	Quiznos Sub	fastfood	sandwich shop	28.98279	-95.94910	3420 7th St	Bay City	77414	+19792452276	http://quiznos.com/		0.92
 13feefea41df	Sonic Drive In	fastfood		28.97545	-95.37362	1605 Brazosport Boulevard	Freeport	77541	+19792333183	https://locations.sonicdrivein.com/tx/freeport/1605-brazosport-boulevard.html	Sonic Drive-In	0.99
 26a525286e8a	Sonic Drive In	fastfood		28.97736	-95.96963	2601 Avenue F	Bay City	77414	+19792456151	https://locations.sonicdrivein.com/tx/baycity/2601-avenue-f.html	Sonic Drive-In	0.98
 2fce699420bf	Subway	fastfood		28.98355	-95.95633	2819 7th Street	Bay City	77414	+19792442998	https://restaurants.subway.com/united-states/tx/bay-city/2819-7th-street	Subway	0.95
+34c924164bd7	Subway	fastfood	sandwich shop	28.95731	-95.37532	323 S Brazosport Blvd	Freeport	77541	+19792300304	http://subway.com/	Subway	0.92
+9b65364ca886	Subway	fastfood	sandwich shop	28.96663	-95.37164	702 N Brazosport Blvd	Freeport	77541	+19792300304	https://www.subway.com		0.99
+dc0ad0d7dc60	Subway	fastfood	sandwich shop	28.98380	-95.93640	4500 7th Street Suite 800	Bay City	77414	+19792448261	https://restaurants.subway.com/united-states/tx/bay-city/4500-7th-street	Subway	0.96
+fe8082a32c20	Subway	fastfood	sandwich shop	28.96559	-95.96935	3611 AVE F	Bay City	77414	+19792444782	http://www.subway.com/en-us	Subway	0.95
+17615da9633e	Taco Bell	fastfood	mexican restaurant	28.98278	-95.95364	3018 7th St	Bay City	77414	+19792450409	http://www.tacobell.com/	Taco Bell	0.68
 7d08b0ebf601	Taco Bell	fastfood		28.98240	-95.94526	3800 7th St	Bay City	77414		https://locations.tacobell.com/tx/bay-city/3800-7th-st.html	Taco Bell	0.92
 dfe6e30c3b1f	Taco Bell	fastfood		28.97083	-95.36990	1102 N Brazosport Blvd	Freeport	77541	+19796140038	https://locations.tacobell.com/tx/freeport/1102-n--brazosport-blvd.html	Taco Bell	0.96
 75f57952c078	This Is It	fastfood		28.95953	-95.35436	503 S Gulf Blvd	Freeport	77541	+19792333111			0.92
@@ -182,27 +196,21 @@ b06c860ac680	Matagorda General Hospital	hospital		28.98984	-95.96867	1413 Avenue
 6cdfc9856e36	Matagorda Regional Medical Center	hospital		28.98097	-95.99272	104 7 Th Street	Bay City	77414	+19792456383	https://www.matagordaregional.org/		0.97
 a648513b6be5	Matagorda Regional Medical Center Rehab	hospital		28.98353	-95.95663	2821 7th St	Bay City	77414	+19792453000	https://www.rehab.com/matagorda-regional-medical-center/5445806-r		0.64
 d494feeaebde	MMG Urgent Care	hospital		28.98141	-95.99313		Bay City					0.67
-ec783b88954a	MMG Urgent Care	hospital		28.98143	-95.99281		Bay City					0.61
 f6fea0aeb5b0	135 Staffing Llc	hotel		28.98355	-95.99007	101 7th St	Bay City	77414				0.95
 dc8d9a00cbb0	Anchor Motel & RV Park	hotel	motel	28.96273	-95.27343	1302 Bluewater Hwy	Freeport	77541	+19793139001	http://anchormotel.com/		0.99
-fea5fa2895f6	Bapu Hospitality Lp	hotel		28.98311	-95.98469	501 7th St	Bay City	77414				0.95
 ad955e661219	Bay City Inn	hotel		28.98356	-95.99007	101 7th St	Bay City	77414	+19792450985	http://www.baycityinn.com		0.92
 fef97c3e95c4	Baymont by Wyndham Freeport Texas	hotel	resort	28.96120	-95.35594	320 S Gulf Blvd	Freeport	77541	+19796140042	https://www.wyndhamhotels.com/baymont/freeport-texas/baymont-freeport-texas/overview?CID=LC:w1ep4ap58ea2s4j:56564&iata=00093796		0.92
 ef2a39293078	Beach Drive @ Surfside Beach, Tx	hotel		28.95129	-95.28753		Surfside Beach			www.CityOfSurfside.com		0.79
 681af438982e	Best Western Bay City	hotel		28.98430	-95.98582	407 7th St	Bay City	77414				0.95
 ac111a4aaec1	Best Western Plus Bay City Inn & Suites	hotel		28.98289	-95.98463	501 7th St	Bay City	77414	+19795570678	https://www.bestwestern.com/en_US/book/hotel-rooms.44740.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44740	Best Western Hotels & Resorts	1.00
-c4fb2a127f48	Big Kahuna	hotel		28.97314	-95.25977	2300 Bluewater Hwy	Freeport	77541				0.97
 0f20a571e2ff	Blue Water Courts Motel	hotel	motel	28.97307	-95.31664	2838 E TX-332	Freeport	77541	+19792483741			0.92
 eeb29cc90f91	Cambridge Inn and Suites	hotel	motel	28.95361	-95.35910	1015 W 2nd St	Freeport	77541	+19792391602	http://countryhearth.com		0.92
 8f1a647cfd16	Candlewood Suites Bay City, An Ihg Hotel	hotel		28.99085	-95.92401	5800 7th St	Bay City	77414	+19792457500	https://www.ihg.com		1.00
-3a33d0e869b8	Carowinds Group Llc	hotel		28.98355	-95.99007	101 7th St	Bay City	77414				0.95
 8d69d0cfb193	Cattails Fishing Lodge	hotel		28.69914	-95.95802	22996 State Highway 60	Bay City	77414	+19798637737	http://www.karankawavillage.com/		0.94
-4f22e5bf193b	Coastal Plains Lodge	hotel	lodge	28.69870	-95.96816	140 Ingram St	Matagorda	77457	+12102648518	https://www.coastalplainslodge.com/		0.92
 ca928ff00b16	Comfort Suites Bay City East	hotel		28.98849	-95.93013	5100 7th St	Bay City	77414	+19792459300	http://comfortsuites.com/baycitytx	Choice Hotels	1.00
 81acc26de8d1	Days Inn	hotel		28.98305	-95.98587	407 7th St	Bay City	77414	+19792660864	http://www.daysinn.com	Days Inn	0.99
 3d029528c084	Days Inn by Wyndham Freeport	hotel		28.97726	-95.37338	1700 N Avenue J	Freeport	77541		http://www.daysinn.com/		0.99
 e3f8f0daee25	Days Inn by Wyndham Freeport	hotel	resort	28.97981	-95.37140	1701 North Ave Unit K	Freeport	77541	+19792394393	https://www.wyndhamhotels.com/days-inn/freeport-texas/days-inn-by-wyndham-freeport/overview?CID=LC:iqv0j1dklijly45:50689&iata=00093796		0.98
-a18062be4d15	Digpri Investment Inc	hotel		28.97717	-95.37320	1701 N Avenue K	Freeport	77541				0.95
 7e044df300b5	Due East Beach House	hotel		28.94514	-95.29049	611 Seashell Dr	Freeport	77541				0.73
 594a970f23c9	Econo Lodge	hotel		28.98171	-95.94643	3712 7th St	Bay City	77414	+19792455115	http://www.econolodge.com		0.92
 1f9a36ef1dae	Executive Inn	hotel		28.98235	-95.94694	3620 7th St	Bay City	77414	+19792445900			0.99
@@ -211,7 +219,6 @@ a18062be4d15	Digpri Investment Inc	hotel		28.97717	-95.37320	1701 N Avenue K	Fre
 ed0d3084fef1	Fisherman's Motel	hotel	motel	28.69463	-95.96117	40 Fisher St	Bay City	77457	+19798630000	http://www.fishermansmotel.com		0.92
 9cd53e23342f	Freeport Studios	hotel		28.96793	-95.41357		Freeport		+18774770060	http://freeportstudios.com/		1.00
 a835f6a8582e	Freeport Studios	hotel		28.97783	-95.41412	525 County Road 330	Freeport	77541	+18774770060	http://freeportstudios.com/		0.85
-68e3ae4fc951	Full Stringer Lodge	hotel	lodge	28.69913	-95.95792	22996 TX-60	Matagorda	77457	+19798637737	http://www.fullstringerlodge.com/		1.00
 dd4557cbd03c	Gulf Crest Motel	hotel	motel	28.97521	-95.37318	1603 N Brazosport Blvd	Freeport	77541	+19793730964	http://www.gulfcrestmotel.com		1.00
 7532dbfd6ac9	Hamman Oaks Apartments	hotel		28.94947	-95.96262	2300 Hamman Rd	Bay City	77414	+19792451181			0.73
 713b287d365d	Hampton Inn and Suites Bay City	hotel		28.98626	-95.93504	4617 7th St	Bay City	77414	+19792457100	https://www.hilton.com/en/hotels/ljnbchx-hampton-suites-bay-city/	Hampton by Hilton	1.00
@@ -220,42 +227,29 @@ dd4557cbd03c	Gulf Crest Motel	hotel	motel	28.97521	-95.37318	1603 N Brazosport B
 b0f2b307ed9d	Holiday Inn Express Official Site	hotel		28.99447	-95.97138	920 Avenue Fr	Bay City	77414	+19793239500	http://www.holidayinnexpress.com		0.77
 94af9ab734e6	Hotel O Bay City, Tx-35	hotel		28.98355	-95.99007	101 7th St	Bay City	77414	+15744983278	https://www.oyorooms.com		0.99
 d52d0cf45c89	Hotels	hotel		28.99085	-95.92401	5800 7th St	Bay City	77414				0.55
-f282deea75c4	Hsd Llc	hotel		28.98355	-95.99007	101 7th St	Bay City	77414				0.95
-3b3f7e1a515f	Janvi Hospitality Llc	hotel		28.99452	-95.97124	920 Avenue F	Bay City	77414				0.95
 e0eff1e5cf61	Knights Inn Bay City	hotel		28.99526	-95.97070	905 Avenue F	Bay City	77414	+19792451751	https://www.wyndhamhotels.com/knights-inn/bay-city-texas/knights-inn-bay-city/overview?CID=LC:KG::BING:RIO:National:23171		0.92
 d89e21bdb208	La Quinta Inn & Suites	hotel		28.98931	-95.92858	5300 7th St	Bay City	77414	+19792163520	http://www.laquintabaycity.com/?cid=local_6190	La Quinta by Wyndham	1.00
 2ddbd6b6db5f	La Quinta Inn & Suites Bay City	hotel	resort	28.99208	-95.92436	5300 7th St	Bay City	77414	+19793239095	http://www.laquintabaycity.com/?cid=local_6190		0.85
-386225ed4234	Las Palmas Lodge	hotel	lodge	28.69882	-95.96922	1007 Ingram St	Matagorda	77457	+19793355100	http://www.laspalmaslodge.com/		0.92
-31fe444858ce	Matagorda Riverside Lodge	hotel	lodge	28.63738	-95.96748	3982 FM 2031	Matagorda	77457		https://www.vrbo.com/3870471?unitld=4444616		0.92
 10e0e70ad8d5	Motel 6	hotel	motel	28.95354	-95.35915	1015 W 2nd St	Freeport	77541	+19792504056	http://www.motel6.com/	Motel 6	0.99
-7d117a5771e5	Motel 6	hotel	motel	28.99046	-95.92873		Bay City	77414	+19792442400	http://www.motel6.com		0.77
 f4acbbf3adfd	Motel 6	hotel		28.99452	-95.97124	920 Avenue F	Bay City	77414	+19793239500	https://verdevalleyinn.com		0.55
 a67c5aa3966e	Ocean Village Hotel	hotel	resort	28.95345	-95.28201	310 Ocean Vlg Dr	Surfside Beach	77541	+18884064179	http://www.oceanvillagehotel.com/		0.99
 10062cad10d5	OYO Hotel	hotel		28.98335	-95.98974	101 7th St	Bay City	77414	+15744983278	https://www.oyorooms.com/us/98051/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_HTN026	OYO USA	0.92
 65686e1fcebc	Paradise Motel	hotel	motel	28.98339	-95.94907	3501 7th St	Bay City	77414	+19792458308	http://paradicemoteltahoe.com		0.93
 9236971c154e	Quality Inn Bay City TX	hotel	resort	28.99439	-95.97084	920 Avenue F	Bay City	77414	+19793236237	https://www.choicehotels.com/texas/bay-city/quality-inn-hotels/txq54?mc=llbillpx&pmf=local		0.99
 e076fd530eb1	Regency Inn & Suites	hotel		28.98209	-95.94646	3712 7th St	Bay City	77414	+19792455115	https://regencyinn-baycity-tx.business.site/		0.95
-1ee2fd97eef4	Saishirdi Hospitality Inc	hotel		28.99055	-95.92802	5525 7th St	Bay City	77414				0.95
 1dc1a244065b	Sandpiper Restaurant	hotel		28.98430	-95.98582	407 7th St	Bay City	77414	+19792445400			0.55
 6a267f2b3e7d	Sargent Beach	hotel	resort	28.76994	-95.61829	1760-1772 Intracoastal Dr	Bay City	77414	+19793186487	http://sargentbeachtexas.com		0.97
-b2da332ac622	Sargent Lodge	hotel	lodge	28.77155	-95.61797	27334 Highway 457	Bay City	77414	+19794761181			0.57
 c94756526447	Scottish Inns and Suites	hotel	motel	28.99032	-95.92776	5525 7th St	Bay City	77414	+19795570690	https://www.bookroomsnow.com/property/scottish-inns-suites-bay-city-tx/	Scottish Inns	0.97
 e6650d94c381	Sea it All Beach House - Surfside Beach, TX	hotel		28.94849	-95.28755	207 Seashell Dr	Surfside Beach	77541		https://www.vacasa.com/unit/77670		0.56
 99eefafb1da8	Shell Motel	hotel	motel	28.68985	-95.96809	778 Market St	Matagorda	77457	+19792168471	http://www.matagordatexas.com/shellmotel		0.92
 98d59b4b8344	South Texas Inn	hotel	motel	28.99253	-95.97026	1121 Avenue F	Bay City	77414	+19792441432	http://south-texas-inn.poi.place		0.95
-818b016a4fea	Southern Command Post	hotel		28.79700	-95.66589		Bay City					0.75
 001dadb5f528	Starland Motel	hotel	motel	28.98965	-95.92973	5409 7th St	Bay City	77414	+19792454811	http://www.cityofbaycity.org/index.aspx?SID=59		0.98
-f41d97aa2dde	Storm Shack	hotel	lodge	28.69940	-95.95581	120 S Gulf Rd	Matagorda	77457	+19794290356	http://stormshackmatagorda.com/		0.92
 b0e3ddf0e429	Studio 6	hotel	motel	28.99023	-95.92853	5511 7th St	Bay City	77414	+19792504058	https://www.staystudio6.com/#/home		1.00
-4bea2ae379bd	Sunrise Lodge	hotel	lodge	28.66545	-95.96344	190 St Marys Slough Dr	Matagorda	77457	+19792411705	http://matagordasunriselodge.com/		0.92
 d6338fac73ef	Super 8 by Wyndham Bay City	hotel	resort	28.99450	-95.97150	920 Avenue F	Bay City	77414	+19793239500	https://www.wyndhamhotels.com/super-8/bay-city-texas/super-8-bay-city-tx/overview?CID=LC:7xnkh22o63wf5qj:50428		0.88
 6151578f850f	Surfside Beach Inn	hotel		28.95716	-95.28155	330 Coral Ct	Surfside Beach	77541	+19792334585	http://www.surfsidemotel.biz		0.63
 ac65155a7f83	The Breeze Hotel & RV Park	hotel	beach resort	28.97260	-95.26087	2218 Bluewater Hwy	Surfside Beach	77541	+18327575626	https://linktr.ee/thebreezebeachfront		0.97
-ae9d2a8e26b4	The Fishing Net Lodge	hotel	lodge	28.62752	-95.97079	4550 FM 2031	Matagorda	77457	+19795330511			0.92
 c1ba1b1ea4cb	The Lodge at Karankawa Village	hotel		28.69912	-95.95789	22996 State Highway 60 S	Bay City	77414	+19798637737	http://www.karankawavillage.com		0.96
-442c90dfa5b9	The Texican on Caney Creek	hotel	lodge	28.79855	-95.65496	1583 County Road #291	Bay City	77414	+12819720423			0.92
 7d3d9bb49acd	Townhouse Motel	hotel	motel	28.98689	-95.97060	1712 Avenue F	Bay City	77414	+19792459460	http://townhousemotel.net/		0.99
-e006b419a2a0	Vahg Hospitality Llc	hotel		28.98498	-95.98589	515 7th St	Bay City	77414				0.95
 69d5c2c1a804	Villa Brazos Apartments	hotel		28.97232	-95.36407	850 N Avenue J	Freeport	77541	+13522263535	www.apartments.com/villa-brazos-apartments-freeport-tx/rb883t1		0.94
 5912cf211a01	WAFT Vacation Stays, Bay City, Matagorda County TX	hotel		28.97061	-95.96318	3225 Avenue K	Bay City	77414	+19794790627			0.60
 244823daaf06	Westwood Inn Matagorda	hotel		28.69792	-95.95844	23082 TX-60 S	Matagorda	77457	+19794265300	http://www.westwoodinn.com/		0.96
@@ -299,10 +293,6 @@ b4891c16cdda	China Chef Restaurant	restaurant	chinese restaurant	28.97639	-95.96
 729dd4c72198	Davis' BBQ & Cafe	restaurant	barbecue restaurant	28.97509	-95.95277	2901 Nichols Rd	Bay City	77414	+19792442040	http://www.davisbbqcafe.com		0.92
 9ec1da5e1a76	Diamond S Restaurant	restaurant	texmex restaurant	28.96548	-95.97005	3606 Avenue F	Bay City	77414	+19792454846	http://www.diamond-s-restaurant.com		0.95
 af5ffd78d892	Dido's Banquet Hall	restaurant		28.97346	-95.56163		Brazoria					0.69
-620029b7cf9a	Domino's	restaurant	pizza restaurant	28.99106	-95.33321	2105 Fm 523	Oyster Creek	77541	+19792393333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-90e1a2fb94ff	Domino's	restaurant	pizza restaurant	28.97305	-95.96958	3001 Avenue F	Bay City	77414	+19792444775	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-ad034c3ca79b	Domino's	restaurant	pizza restaurant	28.96441	-95.36301	305 N Gulf Blvd	Freeport	77541	+19792332333	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.94
-d6e1b5304962	Domino's Pizza	restaurant	pizza restaurant	28.98378	-95.93450	4600 7th St	Bay City	77414	+19794016565	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 e15158822e52	Don Julio's	restaurant	mexican restaurant	28.98249	-95.94588	3720 7th St	Bay City	77414	+19792441385		Don Julios Pine City	0.92
 88b57da20f5e	Dorado's	restaurant	seafood restaurant	28.95679	-95.29167	135 Shark Ln	Surfside Beach	77541	+19798714243	http://www.doradosdiveclub.com		0.99
 c8d1c0d2bc4b	Dough Boys Pizza	restaurant	pizza restaurant	28.98218	-95.97093	1617 6th St	Bay City	77414	+19792401938			0.86
@@ -318,7 +308,6 @@ f9b1289a0c3e	General Wok	restaurant	chinese restaurant	28.97667	-95.37405	1721 N
 ad8c82ff9ff7	Hooks on the Brazos	restaurant	seafood restaurant	28.95551	-95.35536	719 S Avenue A	Freeport	77541	+19798714040	http://www.hooksonthebrazos.com/		0.97
 f9119b01a5f9	Hot Rodz Cantina	restaurant	bar and grill restaurant	28.82630	-95.93365	14054 TX-60	Bay City	77414	+19794016133			0.96
 76c35521d7dd	It's Just Wings	restaurant	chicken wings restaurant	28.98371	-95.93965	4207 7th Street	Bay City	77414	+14695017423	https://itsjustwings.com/		0.92
-51feff3068dc	Jack in the Box	restaurant	taco restaurant	28.98054	-95.37605	2101 N Brazosport Blvd	Freeport	77541	+19792331011	http://www.jackinthebox.com/locations/TX/Freeport/77541/3961?utm_source=bing&utm_medium=local&utm_campaign=localmaps&utm_content=5554ffb062ed9b10e8e80ce4		0.99
 e8153d218f88	Jetty Shack	restaurant	bar and grill restaurant	28.94147	-95.29864	412 Parkview Rd	Surfside Beach	77541	+19792335300	https://www.restaurant.com/jetty-shack-bar-grill-freeport-pid		0.99
 6bac89f86ea8	JJ's Grill	restaurant	buffet restaurant	28.97053	-95.36968	1100 N Brazosport Blvd	Freeport	77541	+19792392000	http://jjsgrill.com/our-food/	JJ's Grill Fayetteville	0.80
 0935d9ba8001	Joe's Italian Restaurant	restaurant		28.98239	-95.97447	1300 7TH ST.	Bay City	77414	+19794763091	https://www.joesbaycity.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.99
@@ -327,7 +316,6 @@ df919730028a	Juicy Seafood & Wings	restaurant	seafood restaurant	28.99496	-95.91
 922fb781b0cf	KC's On the Creek	restaurant	bar and grill restaurant	28.99811	-95.30106	322 Windward Way	Freeport	77541	+19792330660			0.96
 fea027211b1d	KC's Pit Bar-B-Que	restaurant	barbecue restaurant	28.95616	-95.58064	3448 County Rd 310	Brazoria	77422	+19799644026			0.92
 b28494835a01	Kem's Old School BBQ	restaurant	barbecue restaurant	28.78222	-95.62507	26538 FM 457	Bay City	77414	+19799432030			0.92
-1c7950ede15a	KFC	restaurant	chicken restaurant	28.98290	-95.94641	3716 7th St	Bay City	77414	+19792451684	http://www.kfc.com/storelocator/Default.aspx?address=3716%20Seventh%20Street,Bay%20City,TX		0.92
 ed68b0328110	Kiki's Tiki Cantina	restaurant	bar and grill restaurant	28.94950	-95.34708	113 W Broad St	Freeport	77541	+19792394311	http://kikis-tiki-cantina.poi.place		0.92
 78093902221f	Kitty's Purple Cow	restaurant	burger restaurant	28.95508	-95.28371	323 Ocean Ave	Surfside Beach	77541	+19792339161	https://www.kittyspurplecow.com		0.75
 2828f8d18fa9	Krispy Krunchy Chicken	restaurant	chicken restaurant	28.98319	-95.96254	2300 7th St	Bay City	77414	+19792450949	https://locations.krispykrunchy.com/tx/bay-city/2300-7th-street		0.96
@@ -349,8 +337,6 @@ a8334bbe56c8	Laredo Taco Company	restaurant	taco restaurant	28.99104	-95.92391	5
 29f69a7f7223	Lazy R BBQ	restaurant	barbecue restaurant	28.97582	-95.97019	2710 Avenue F	Bay City	77414	+19794760185			0.88
 acf771618932	Lighthouse BBQ Cafe	restaurant	barbecue restaurant	28.76387	-95.94303	18411 TX-60	Bay City	77414	+19798632328	http://lighthousebbqcafe.com		0.97
 aaabda597b6b	Lisa's Burger Shoppe	restaurant	burger restaurant	28.99261	-95.33209	2225 FM 523 Rd	Freeport	77541	+19792391234			0.73
-97753040d476	Little Caesars	restaurant	pizza restaurant	28.98293	-95.95948	2516 7th St	Bay City	77414	+19792449400	https://littlecaesars.com/en-us/store/9579	Little Caesars	0.98
-5445f389444c	Little Caesars Pizza	restaurant	pizza restaurant	28.97757	-95.37479	1822 N Brazosport Blvd	Freeport	77541	+19792333700	https://littlecaesars.com/en-us/store/9860	Little Caesars	0.99
 62cee3c72f6b	Los Cucos Mexican Cafe	restaurant	mexican restaurant	28.99669	-95.91495	6600 7th St	Bay City	77414	+19796091005	http://loscucos.com/	Los Cucos Mexican Cafe - Waco	0.96
 04ffda309ac3	Lupita's Tacos	restaurant	mexican restaurant	28.96541	-95.36353	406 N Gulf Blvd	Freeport	77541	+19792330220	http://www.lupitastacos.com		0.98
 eabd70a77455	Mama C	restaurant	comfort food restaurant	28.94995	-95.34659	212 W Park Ave	Freeport	77541	+19796650062			0.71
@@ -359,8 +345,6 @@ af56169b947e	Maria's Kitchen	restaurant	mexican restaurant	28.95738	-95.35838	31
 8c6574bb1ce1	Marsep Business Inc	restaurant		28.97302	-95.96928	3001 Avenue F	Bay City	77414				0.95
 cee2990e399a	Matagordaville	restaurant	seafood restaurant	28.69142	-95.96822	180 Fisher St	Matagorda	77457	+19798637600	http://matagordaville.com		0.78
 ed995943a23d	Maverick Deli	restaurant	delicatessen	28.96098	-95.96906	4117 Avenue F	Bay City	77414	+18323681458			0.77
-2ec564cd1fc9	McDonald's	restaurant	burger restaurant	28.98395	-95.93402	4600 7th St	Bay City	77414	+19793238099	https://www.mcdonalds.com/us/en-us/location/tx/bay-city/4600-7th-st/31805.html?cid=RF:YXT:RoN::Clicks		0.92
-6cdb6370defc	McDonald's	restaurant	burger restaurant	28.99701	-95.91624	6611 7th St	Bay City	77414		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.92
 80683faa5882	Mi Ranchito Mexican Restaurant	restaurant	mexican restaurant	28.99526	-95.32899	2522 FM523	Oyster Creek	77541	+19792338226	https://www.miranchitokc.com		0.96
 393573f80516	Mi Tiera Taqueria	restaurant	buffet restaurant	28.98845	-95.97198	1511 12th St	Bay City	77414	+19792444762	https://mi-tierra-taqueria-bay-city.edan.io		0.92
 140fe2bb488d	Michelle's Cajun Shack	restaurant	cajun and creole restaurant	28.96461	-95.36353	321 N Gulf Blvd	Freeport	77541	+19793730003			0.55
@@ -372,15 +356,11 @@ f23fc741ead5	On The Corner	restaurant		28.80708	-95.64224	24522 FM457	Bay City	7
 cd4cd156dccc	On the River Restaurant & Catering	restaurant	seafood restaurant	28.95341	-95.35792	919 W 2nd St	Freeport	77541	+19792331352	http://ontheriverrestaurant.com/		0.97
 78657ee406fb	Outrigger's Bar & Grill	restaurant	bar and grill restaurant	28.95265	-95.34826	75 Oak St	Freeport	77541	+19798370020	http://Www.outriggersbarandgrill.com/		0.95
 66d091efac67	Pancho's Breakfast Tacos	restaurant	breakfast and brunch restaurant	28.78222	-95.62518	26538 FM 457	Bay City	77414	+19799432030			0.87
-9362c90eae86	Papa Johns Pizza	restaurant	pizza restaurant	28.98323	-95.97277	1417 7th St Ste B	Bay City	77414	+19792457272	https://www.papajohns.com		0.92
 ec947df65e21	Pho Gia	restaurant	vietnamese restaurant	28.99506	-95.91830	6500 7th St Unit 500	Bay City	77414	+19794013355			0.94
 7e7e1e5bc38d	Pier 30	restaurant	bar and grill restaurant	28.96191	-95.30188	1601 TX-332	Freeport	77541	+19792334250	http://mypier30.com		0.96
 3b4307232bc7	PitMasters BBQ	restaurant	barbecue restaurant	28.98796	-95.96861	1603 Avenue G	Bay City	77414	+19795576844			0.90
-5d11f1f6de5c	Pizza Hut	restaurant	pizza restaurant	28.98416	-95.93850	4301 7th St	Bay City	77414	+19792457601	https://locations.pizzahut.com/tx/bay-city/4301-7th-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304515	Pizza Hut	0.98
-6cbae8470903	Pizza Hut	restaurant	pizza restaurant	28.96669	-95.37185		Freeport		+19792309485	http://www.pizzahut.com/	Pizza Hut	0.92
 3f16009179f5	Pizza Pro	restaurant	pizza restaurant	28.96980	-95.44892	6422 Stephen F Austin Rd	Freeport	77541	+19792330571	https://www.pizzapro.com		0.92
 bb171a22e8c3	Port Cafe	restaurant	diner	28.95296	-95.35709	831 W 2nd St	Freeport	77541	+19792391550	http://www.theportcafe.com/		0.96
-80f515dd2681	Quiznos Sub	restaurant	sandwich shop	28.98279	-95.94910	3420 7th St	Bay City	77414	+19792452276	http://quiznos.com/		0.92
 2bd221559642	Ray G & Inez Garcia Limited Family Partnership	restaurant		28.98968	-95.96700	1917 13th St	Bay City	77414				0.95
 5c562e6a5c1b	red top	restaurant		28.95660	-95.37463	327 S Brazosport Blvd	Freeport	77541	+19792338149	http://www.redtoptexasstyleburgers.com		0.77
 8161225de8c5	Rikos Elotes	restaurant	mexican restaurant	28.97434	-95.37215	1502 N Brazosport Blvd	Freeport	77541	+19793209190	http://rikos_elotes.com/		0.96
@@ -397,19 +377,13 @@ f3fb5b8c2ca6	Seahorse Bar & Grill	restaurant	bar and grill restaurant	28.95324	-
 69eb09f2a002	Sharkies Bar & Grill	restaurant	bar and grill restaurant	28.95097	-95.28716	10 Surf Dr	Surfside Beach	77541	+19798719067	http://sharkiessurfside.com/		0.97
 e2f791efcec9	Sin-Tex Tacos & Mariscos	restaurant	mexican restaurant	28.96468	-95.36346	321 N Gulf Blvd	Freeport	77541	+19798719059			0.93
 578216aeed01	Snappers Bar & Grill	restaurant	seafood restaurant	28.69088	-95.96901	582 Fisher St	Matagorda	77457	+19794793763			0.99
-34c924164bd7	Subway	restaurant	sandwich shop	28.95731	-95.37532	323 S Brazosport Blvd	Freeport	77541	+19792300304	http://subway.com/	Subway	0.92
-9b65364ca886	Subway	restaurant	sandwich shop	28.96663	-95.37164	702 N Brazosport Blvd	Freeport	77541	+19792300304	https://www.subway.com		0.99
-dc0ad0d7dc60	Subway	restaurant	sandwich shop	28.98380	-95.93640	4500 7th Street Suite 800	Bay City	77414	+19792448261	https://restaurants.subway.com/united-states/tx/bay-city/4500-7th-street	Subway	0.96
-fe8082a32c20	Subway	restaurant	sandwich shop	28.96559	-95.96935	3611 AVE F	Bay City	77414	+19792444782	http://www.subway.com/en-us	Subway	0.95
 3f3ee29d4c17	Sweet T's Diner	restaurant	diner	28.95124	-95.34867	230 W 2nd St	Freeport	77541	+19798719293			0.99
-17615da9633e	Taco Bell	restaurant	mexican restaurant	28.98278	-95.95364	3018 7th St	Bay City	77414	+19792450409	http://www.tacobell.com/	Taco Bell	0.68
 9683aef196e0	Taco Jalisco Mexican Grill	restaurant	mexican restaurant	28.97068	-95.45297	6805 Highway 36	Jones Creek	77541	+19796650638			0.96
 7b0d30af580c	Taco Loco	restaurant	mexican restaurant	28.98272	-95.97514	1220 7th St	Bay City	77414	+19792444774			0.92
 1406a187810f	Tacos Clásico #2	restaurant		28.98360	-95.96089	2421 7th St	Bay City	77414	+19796104364			0.92
 7540bd747dd1	Tacos Don Juve	restaurant	mexican restaurant	28.99207	-95.97022	1205 Avenue F	Bay City	77414	+19799432787			0.92
 73e32417221b	Tacos Zayra	restaurant	mexican restaurant	28.97556	-95.37206	1515 N Avenue J	Freeport	77541	+19794824982	https://local.yahoo.com/info-169054617-tacos-zayra-freeport		0.92
 d8d665902894	Talk About Good Restaurant & Catering	restaurant	cajun and creole restaurant	28.98118	-95.37672	2105 N Brazosport Blvd	Freeport	77541	+19792330665	http://www.talkaboutgood.biz/		0.98
-987c621c341f	Taqueria Daisy	restaurant		28.97562	-95.35182	723 N Brazosport Blvd	Freeport	77541	+19794188778	https://taqueriadaisy.com		0.77
 bcabfac2b78b	Taqueria Daisy	restaurant	mexican restaurant	28.96735	-95.37189	723 N Brazosport Blvd	Freeport	77541	+19794188778	https://www.freeporttacos.com/		0.96
 9a69cc62ed5d	Taqueria Guadalajara	restaurant	mexican restaurant	28.96159	-95.35639	218 S Gulf Blvd	Freeport	77541	+19792300012	https://go.waitrapp.com/aorq/til76gxghe		0.93
 2b2379f6c216	Taqueria La Patrona	restaurant		28.98341	-95.96684	2016 Avenue I	Bay City	77414	+19799430136			0.92

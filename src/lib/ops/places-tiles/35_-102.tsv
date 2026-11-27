@@ -217,11 +217,9 @@ d9bea89eefa2	Budget Car Sales	cardealer	used auto dealer	35.13323	-101.89931	716
 e327de9e98b4	Bulldog Motor Co	cardealer		35.66169	-101.39722	700 W Wilson St	Borger	79007	+18066211364	http://www.bulldogmotorco.com/		0.92
 c6318c6f71fc	California Auto Sales	cardealer		35.20039	-101.80868	2515 SE 10th Ave	Amarillo	79104	+18063310328	http://californiaautosamarillo.com/		0.92
 c368ed2be998	Calvin's Cars	cardealer	used auto dealer	35.20694	-101.86672	828 S Georgia St	Amarillo	79106	+18063742833	calvinwan.com		0.92
-115c54ca6ebc	Car Catcher	cardealer		35.25898	-101.93851	5000 S Soncy Rd	Amarillo	79119	+18065172732	http://www.carcatcher.net		0.77
 6b0460e87bc3	Car Catcher	cardealer	used auto dealer	35.15543	-101.93816	5000 S Soncy Rd	Amarillo	79119	+18063502757	http://carcatcher.net/		0.92
 4d336bb10c8d	CarCity GPS USA	cardealer		35.11225	-101.86369	9325 S Georgia St	Amarillo	79118	+18063763100	http://Www.derksenfactory.com/		0.76
 3f7c311d2035	CarMax	cardealer	used auto dealer	35.15754	-101.93827	5000 S Soncy Rd	Amarillo	79119	+18063104774	https://www.carmax.com/stores/6176		0.99
-d8a6a8719f66	CarMax	cardealer		35.15049	-101.93186	5000 S Soncy Rd	Amarillo	79119		https://www.carmax.com/stores/6176	CarMax	0.80
 7665ca5be22d	Cars of Amarillo	cardealer	used auto dealer	35.19720	-101.79507	1301 S Grand St	Amarillo	79104	+18063678804	http://www.carsofamarillo.com		0.77
 26c6765f2655	Castillo Auto Sales	cardealer	used auto dealer	35.19636	-101.79513	1403 S Grand St	Amarillo	79104	+18063429600			0.92
 da9504fec016	Chico's CARS Tri-state ford Hyundai	cardealer		35.19162	-101.81625	1-40 and Ross	Amarillo	79103		http://Tristateford.com/		0.85
@@ -294,7 +292,6 @@ fa95ef15ed86	Kanaan auto sales	cardealer		35.20465	-101.82499	702 S Arthur St	Am
 3fa8c03cf426	Kelly's Cars	cardealer		35.22356	-101.83153	904 N Fillmore St	Amarillo	79107	+18062201823	http://www.kellys-cars.com/		0.92
 f96670c863b3	Kenny’s Cars	cardealer		35.65516	-101.39333	1115 S Main St	Borger	79007	+18068982277			0.79
 4c860a55ef1d	Kia of Amarillo	cardealer		35.15927	-101.93721	4701 S Soncy Rd	Amarillo	79119	+18063511122	https://www.kia.com	KIA Motors	0.97
-9cac6e82d63c	Kiet Trinh	cardealer		35.19221	-101.81658	1900 Interstate Dr E	Amarillo	79103	+18065768674	https://www.tri-stateford.com/		0.56
 b833c38f3ea2	Kiet Trinh	cardealer		35.19162	-101.81625	1900 Interstate Dr E	Amarillo	79103	+18065768674	https://www.tri-stateford.com/		0.58
 e611802267f0	Kindle Automotive	cardealer		35.67627	-101.38892	911 Weatherly St	Borger	79007	+18062743128			0.92
 3efde291f52a	Latinos Auto Sales	cardealer	used auto dealer	35.20441	-101.79515	507 S Grand St	Amarillo	79104	+18063723272			0.92
@@ -320,7 +317,6 @@ c820e4caaa22	No Man's Land Llc	cardealer	used auto dealer	35.26444	-101.87362	31
 99650400225a	Old Karz	cardealer		35.17648	-101.85429	3842 Canyon Dr	Amarillo	79109	+18062313844	http://www.oldkarz.net		0.92
 4bd972aa7cb4	Optimus Motors LLC	cardealer		35.14489	-101.88889	6104 Canyon Dr	Amarillo	79109	+18064715901	http://www.optimusmotorsllc.com/		0.92
 39c70520cce2	Owner Auto Sales	cardealer		35.13273	-101.90390	7148 Bell St	Amarillo	79109	+18063761121			0.79
-6b8da85bd1c2	Owner Auto Sales	cardealer		35.13277	-101.90223	7148 Bell St	Amarillo	79109	+18063761121			0.78
 438fcb7f33ee	Paul Harpole Motors, LLC	cardealer	used auto dealer	35.18860	-101.79574	2106 S Grand St	Amarillo	79103	+18063722300	http://www.buyherepayhereamarillo.com/		0.92
 5a44dd479458	Pendley Auto	cardealer		35.19083	-101.94092	8975 Business Interstate 40	Amarillo	79124	+18066742149	http://www.pendleyauto.net		0.92
 fa62d8c8677d	Pete's Car Smart	cardealer	used auto dealer	35.20984	-101.85091	1212 SW 6th Ave	Amarillo	79101	+18063726423	https://pete-s-car-smart-kia-tx.hub.biz/		0.92
@@ -347,7 +343,6 @@ a9062e0455da	Smithson Auto Sales	cardealer		35.07266	-101.92715	7910 W McCormick
 450571fda48f	Street Select	cardealer		35.15955	-101.93842	4630 S Soncy Rd	Amarillo	79119	+18065536637			0.64
 182cc83e8b78	Street Toyota	cardealer		35.16088	-101.93919	4500 S Soncy Rd	Amarillo	79119	+18063559846	http://www.streettoyota.com/	TOYOTA	0.99
 580341370df4	Street Volkswagen of Amarillo	cardealer		35.15754	-101.93929	8707 Pilgrim Dr	Amarillo	79119	+18063508999	http://www.streetvw.com/	Volkswagen	0.99
-e2cf80b20eb2	Sull Post Marines	cardealer		35.18364	-101.92970	7701 Interstate Dr W	Amarillo	79121		https://sullpost.com/		0.60
 f034b56882f1	Sull Post Marines	cardealer		35.18508	-101.92480	7701 Interstate Dr W	Amarillo	79121		https://sullpost.com/		0.60
 f82772dd2673	Sunset Motors	cardealer		35.17254	-101.86275	4172 Canyon Dr	Amarillo	79109	+18064504786	http://www.sunsetmotorsofamarillo.com/		0.92
 2c3a49e1463f	Texas Auto Sales	cardealer		35.21327	-101.85454	1610 SW 3rd Ave	Amarillo	79106	+18062903494			0.92
@@ -405,7 +400,6 @@ bc7fe2e1b2a9	Amarillo, TX	coffee		35.17663	-101.88360	3445 S Western St	Amarillo
 4e179c3014e7	Cafe Route 66 Pla Cafe Route Sixty Six	coffee		35.21873	-101.38157		Claude		+18065374661			0.57
 fb7886325bad	Café Moonwater	coffee		35.21103	-101.87423	3313 SW 6th Ave	Amarillo	79106	+18066706116			0.92
 b9d6907df6d8	Carrie's Cakes	coffee		35.18607	-101.79576	2518 S Grand St	Amarillo	79103	+18063729892	carriescakes.com		0.55
-161653d476bf	City Cafe	coffee		35.21048	-101.83482	200 SE 3rd Ave	Amarillo	79101	+18063786104	http://citycafeamarillo.com/		0.92
 de5e363b7ecd	City Cafe	coffee		35.20596	-101.84120	200 SE 3rd Ave	Amarillo	79101	+18063786104			0.93
 14f9954f726c	Cliffside Coffee	coffee		35.18680	-101.81358	2540 Ross-Osage St	Amarillo	79103	+18067316239			0.96
 3b415f7a17a4	Cliffside Coffee	coffee		35.17804	-101.88346	4167 SW 34th Ave	Amarillo	79109	+18063507906	https://www.cliffsidecoffee.com		0.92
@@ -447,7 +441,6 @@ d042c2d8cf50	Kibos Coffee and Tea	coffee		35.18457	-101.81368	2706 s Osage Suite
 c3c016d731e3	Latte Luxe Coffee Lounge	coffee		35.34399	-101.37948	304 Main St	Panhandle	79068				0.89
 4fcc4364d538	Leaf & Bubble	coffee		35.18399	-101.85974	2525 Wimberly Rd	Amarillo	79109				0.89
 6fcc8fb667d4	Leaf & Bubble Tea Co.	coffee	bubble tea shop	35.17721	-101.88295	4137 SW 34th Ave	Amarillo	79109		http://leafandbubble.com/		0.99
-05006b37d12b	Mariner	coffee		35.16139	-101.92891	7469 Pennsylvania Dr	Amarillo	79119	+18065131120	https://www.marinerwealthadvisors.com/		0.85
 ea5d174e1ea4	Mariner	coffee		35.15226	-101.92115	7469 Pennsylvania Dr	Amarillo	79119	+18065131120	https://www.marinerwealthadvisors.com/		0.92
 dcc5b7f4079c	Marshall Coffee Company	coffee		35.15815	-101.90173	4709 Bell St	Amarillo	79109	+18063567944			0.92
 130b7938d2b7	Mochinut - Amarillo	coffee		35.19345	-101.84825	1915 S Washington St Ste 300	Amarillo	79109		mochinutnewport.com		0.55
@@ -539,13 +532,11 @@ fa4d11304d26	Frank Phillips College CA and I Building	college		35.65799	-101.405
 7a416f41028e	Ordway Hall	college		35.18888	-101.84789	2201 S Washington St	Amarillo	79109	+18063715000			0.92
 921181f22ee9	Texas Tech Correctional	college		35.18775	-101.91507	7100 I-40 Frontage Rd #300	Amarillo	79106	+18063565360	http://www.ttuhsc.edu	Texas Tech University Health Sciences Center	0.90
 d072cace83e4	Texas Tech University Health Sciences Center	college		35.20059	-101.92428	1400 Coulter St	Amarillo	79106	+18064149608	https://www.ttuhsc.edu/campus/amarillo/	Texas Health Family Care	0.97
-18599ffbc1d8	Texas Tech University Research Farm	college		35.28015	-101.61806	688 FM 683	Panhandle	79068	+18063351606			0.57
 497b30bd0db8	Texas Tech University Research Farm	college		35.27741	-101.61518	688 FM 683	Panhandle	79068	+18063351606	http://www.depts.ttu.edu		0.92
 264ce00b2cfa	Texas Tech University School of Veterinary Medicine	college		35.20314	-101.92479	7671 Evans Dr	Amarillo	79106	+18067423200	https://www.depts.ttu.edu/vetschool/		0.99
 c8ebeac26b96	TTUHSC-Jerry H. Hodge School of Pharmacy	college		35.20074	-101.92378		Amarillo		+18064149300	http://www.ttuhsc.edu/pharmacy/		0.97
 d6a3d03190ea	West Texas A & M University	college		35.20595	-101.83564	701 S Taylor St	Amarillo	79101	+18063725151	http://www.smallbusinessdevelopmentcenter.com/		0.97
 cbc171ba96e9	West Texas A&M University	college		35.21341	-101.86437	2501 W 4th Ave	Amarillo	79106	+18066510000	http://www.wtamu.edu		0.83
-4aa15e2ae6a2	West Texas A&M University Horse Center	college		35.00306	-101.91821	2400 N 23rd St	Canyon	79015	+18066518463	http://www.wtamu.edu/		0.96
 815a3b3de27d	West Texas A&M University Horse Center	college		35.00282	-101.91772	2400 N 23rd St	Canyon	79015	+18066518463	http://www.wtamu.edu/		0.99
 926892628411	88 Store	convenience		35.86161	-101.97364	410 S Dumas Ave	Dumas	79029	+18066838490			0.92
 051188d9eef7	Allsup's	convenience		35.86509	-101.97653	305 W 1st St	Dumas	79029	+18069355362	https://www.allsups.com/	Allsup’s	0.92
@@ -585,7 +576,6 @@ e249ebc2c852	CAT Scale	convenience	truck gas station	35.19523	-101.74055	715 S L
 0f2bdcbf1228	CEFCO Convenience Store	convenience		35.17610	-101.92073	3400 S Coulter St	Amarillo	79109	+18063520700	https://www.cefcostores.com/		0.92
 3ed506a5ae26	CEFCO Convenience Store	convenience		35.16422	-101.88441	4430 S Western St	Amarillo	79109	+18063524876	https://www.cefcostores.com/		0.92
 4d5e9485a743	CEFCO Convenience Store	convenience		35.19212	-101.77826	5000 E Interstate Dr	Amarillo	79103	+18062200317	https://www.cefcostores.com/	CEFCO Convenience Stores	0.97
-50909d5eefee	CEFCO Convenience Store	convenience		35.83361	-101.44297	600 N MAIN St	Stinnett	79083	+18068782236	https://www.cefcostores.com/		0.85
 5275b258c6ca	CEFCO Convenience Store	convenience		35.64266	-101.59927	100 E Broadway St	Fritch	79036	+18068570254	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
 a2c94b947804	CEFCO Convenience Store	convenience		35.65341	-101.44699	3302 Fairlanes Blvd	Borger	79007	+18062732310	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
 d5ac1f4a7131	CEFCO Convenience Store	convenience		35.22160	-101.81505	1600 AMARILLO BLVD. EAST	Amarillo	79107	+18062202843	https://www.cefcostores.com		0.77
@@ -602,7 +592,6 @@ ca348bab9b49	CEFCO Travel Center	convenience		35.11108	-101.36272	331 W 1st St	C
 fd524adceefc	CHISUM TRAVEL CENTER #25	convenience		35.20790	-101.65401	890 S Fm 1912	Amarillo	79108		https://locations.valero.com/en-us/LocationDetails/Index/890-S-FM-1912/0000026353	Valero	0.80
 0f2794e40ca3	Circle K	convenience		35.12091	-101.84832	8751 S FM 1541	Amarillo	79118			Circle K	0.80
 36d2589fee9b	Circle K	convenience		35.11826	-101.93878	8704 FM 2590	Amarillo	79119	+18066410992	https://www.circlek.com		0.92
-5f80b8e187d6	Circle K	convenience		35.11752	-101.93337	8704 FM 2590	Amarillo	79119			Circle K	0.80
 62606d368f5f	Circle K	convenience		35.13138	-101.95457	7505 Helium Rd	Amarillo	79119	+18065534480	https://www.circlek.com/		0.92
 6f218ed11d0f	Circle K	convenience		35.11791	-101.90949	8720 Canyon Dr	Amarillo	79119	+18066412985	https://www.circlek.com		1.00
 8217649ff878	Circle K	convenience		35.16315	-101.87070	2801 SW 45th Ave	Amarillo	79110	+18068539940	https://www.circlek.com/		1.00
@@ -628,7 +617,6 @@ fd333973ff05	Fox Fast Stop	convenience		35.20095	-101.81580	1901 SE 10th Ave	Ama
 ef61ccc40056	GARRISON FOOD MART 11	convenience		35.20204	-101.09951	203 FM 2300	Groom	79039			Conoco	0.80
 c6346d1d5fa3	GARRISON FOOD MART 12	convenience		35.18588	-101.92120	7301 W I 40	Amarillo	79106			Conoco	0.80
 414e4bef9d3e	Garrison Food Mart, Groom Texas	convenience		35.20068	-101.10739	Exit 113	Groom	79039	+18062791126	http://Www.hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.98
-c41cd1da9343	Garrison Food Mart, Groom Texas	convenience		35.21093	-101.10036	Exit 113	Groom	79039	+18062791126	http://Www.hjgarrison.com/	Garrison Food Mart Shamrock Texas	0.97
 d2980814e423	Gas Odorant Services & Supply	convenience		35.67329	-101.38041	618 N Florida St	Borger	79007	+18062732434	gasodorant.com		0.92
 8841db6a9bbc	Grand Discount	convenience		35.23145	-101.79580	1619 N Grand St	Amarillo	79107	+18063831150			0.92
 ec6c9868c45a	Groom Fuel LLC	convenience		35.20077	-101.10772	101 E Front St	Groom	79039	+18062487586			0.95
@@ -643,8 +631,6 @@ e35ec2072d9c	KZ Discount Store	convenience		35.16170	-101.86289	2400 SW 46th Ave
 56789e46b95c	Laila Quick Stop Llc	convenience		35.18160	-101.88435	2900 S Western St	Amarillo	79109	+18063108903			0.92
 4a8972a2c8cd	Love's Travel Stop	convenience		35.87941	-101.97378	720 N Dumas Ave	Dumas	79029	+18069350189	https://www.loves.com/	Love's Travel Stops & Country Stores	0.99
 9f0d62b2ef3b	Love's Travel Stop	convenience		35.34089	-101.30176	1850 County Road 11	Panhandle	79068	+18065373393	http://www.loves.com		0.92
-1cd72197ce13	Love's Travel Stops and Country Stores	convenience		35.21876	-101.38167	300 TX-207	Panhandle	79068	+18065373393	https://www.loves.com/locations/229	Love	0.98
-a2d502ad9f7e	Love's Travel Stops and Country Stores	convenience		35.21881	-101.38206	300 TX-207	Panhandle	79068	+18065373393	https://www.loves.com/locations/229	Love	1.00
 a3636d6e35b1	Love's Travel Stops and Country Stores	convenience		35.21848	-101.38239	300 TX-207	Panhandle	79068	+18065373393	https://www.loves.com/locations/229	Love	1.00
 6b55dea7a3eb	LOWES FUEL 29	convenience		35.64521	-101.58991	316 E BROADWAY ST	Fritch	79036			Phillips 66	0.80
 86ac092258f6	Meredith Mike's Bait	convenience		35.70181	-101.53504	105 W Main St	Sanford	79078	+18063109624			0.92
@@ -717,7 +703,6 @@ e6a560695f42	Phillips 66	convenience		35.17804	-101.81382	2110 SE 34th Ave	Amari
 f049364cc8d5	Phillips 66	convenience		35.14700	-101.88327	5815 S Western St	Amarillo	79110	+18063566331	https://www.phillips66.com		0.92
 f15449df3d2d	Phillips 66	convenience		35.18746	-101.92011	I-40	Amarillo	79106	+18063547187	http://www.phillips66gas.com	Phillips 66 Gas	0.71
 f3ba764fd92e	Phillips 66	convenience		35.22266	-101.91199	1151 Rm 1061	Amarillo	79124	+18068033259	https://www.phillips66gas.com/		1.00
-f8fd870f1be1	Phillips 66	convenience		35.17065	-101.93898	3572 S Soncy Rd	Amarillo	79119	+18064676810	https://www.phillips66.com		0.92
 fd9c5d0f78f1	Phillips 66	convenience		35.14631	-101.91972	6001 Coulter St S	Amarillo	79119	+18063511651	https://www.phillips66gas.com/		0.92
 fdbff45b4181	Phillips 66	convenience		35.14984	-101.86692	2708 SW 58th Ave	Amarillo	79110	+18063314708	https://www.phillips66gas.com/		1.00
 6c05860e598c	Phillips 66 Gas	convenience		35.14684	-101.90148	5901 Bell St	Amarillo	79109	+18063547155	https://www.phillips66gas.com/	Phillips 66 Gas	0.72
@@ -835,7 +820,6 @@ a0216faac227	TOOTNTOTUM 86	convenience		35.11694	-101.93800	8800 SONCY RD	Amaril
 312bd4010a8a	Twice The Ice	convenience		35.17869	-101.86591	3313 S Georgia St	Amarillo	79109		http://twicetheice.com		0.92
 4eb4ecf9e5a0	Twice The Ice	convenience		35.16606	-101.84937	4400 S Washington St	Amarillo	79110		http://twicetheice.com		0.92
 8f4e67e61f6e	Twice The Ice	convenience		35.18646	-101.79577	2512 S. Grand	Amarillo	79103		http://twicetheice.com		0.77
-1004fa3a1964	United Express	convenience		35.24839	-101.83112	3400 River Rd	Amarillo	79107	+18063836532	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92
 5b02eb46e2a6	United Express	convenience		35.18594	-101.86663	2530 S Georiga	Amarillo	79109	+18063528115	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92
 9354de8d8f60	United Express	convenience		35.11745	-101.91931	8771 Coulter St S	Amarillo	79119	+18064682784	https://local.fuel.unitedsupermarkets.com/tx/amarillo/8771-coulter-st-s.html	United Express	0.92
 de824c28c3f1	United Express	convenience		35.18594	-101.86663	2530 S Georgia St	Amarillo	79109	+18063528115	https://www.unitedsupermarkets.com/rs/storelocator	United Express	1.00
@@ -847,20 +831,17 @@ e0df234c52e4	V and M Discount Food	convenience		35.20529	-101.84879	1000 SW 10th
 bf2718330771	V&M Discount	convenience		35.20029	-101.90160	1318 Parr St	Amarillo	79106	+18063732312			0.82
 0ae8b1f03088	Valero	convenience		35.22205	-101.84605	1012 W Amarillo Blvd	Amarillo	79107	+12103452000	https://www.valero.com		0.65
 45b83d34ab9e	Valero	convenience		35.22744	-101.88366	1200 N Western St	Amarillo	79124	+18063724187	https://www.valero.com		0.65
-4d7eb14afaa7	Valero	convenience		35.22223	-101.77132		Amarillo	79104	+12103452000	http://www.valero.com	Valero Energy	0.92
 508e773a60bc	Valero	convenience		35.25058	-101.83097	3522 River Rd	Amarillo	79107	+12103452000	https://www.valero.com		0.65
 717b4942433c	Valero	convenience		35.21487	-101.88369	211 S Western St	Amarillo	79106	+12103452000	https://www.valero.com		0.65
 790a4346352a	Valero	convenience		35.23612	-101.83078	Dumas Dr	Amarillo	79107	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/2300-N-DUMAS-DRIVE/0000001918	Valero Energy	0.93
 a1d462393331	Valero	convenience		35.27954	-101.83090	6698 River Rd	Amarillo	79108	+12103452000	https://www.valero.com		0.65
 a38673024ca1	Valero	convenience		35.18955	-101.84892	2120 S Washington St	Amarillo	79109	+18063725804	http://www.valero.com	Valero	0.64
-bbeed9c07c21	Valero	convenience		35.84778	-101.97319		Dumas	79029	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/1603-S-DUMAS-AVE/0000001359	Valero Energy	0.92
 cec237abd678	Valero	convenience		35.67127	-101.38120	511 N Florida St	Borger	79007	+12103452000	https://www.valero.com		0.65
 e07c86c7aa55	Valero	convenience		35.20762	-101.86671	822 S Georgia St	Amarillo	79106	+18063711804	https://www.valero.com		0.65
 e4b13556863a	Valero	convenience		35.19150	-101.91238	6802 Wolflin Ave	Amarillo	79106	+12103452000	https://www.valero.com		0.65
 e5133d9b735e	Valero	convenience		35.19348	-101.74400	9000 Interstate 40 Access Rd	Amarillo	79118	+12103452000		Valero	0.84
 e82dcad844f6	Valero	convenience		35.18568	-101.88385	2441 S Western St	Amarillo	79109	+12103452000	http://www.valero.com	Valero Energy	0.92
 69a9c283f981	Valero Energy	convenience		35.85456	-101.97356	1024 S Dumas Ave	Dumas	79029	+18069354608	https://locations.valero.com/en-us/LocationDetails/Index/1024-S-DUMAS-AVENUE/0000026433	Valero	0.96
-a89bf4531e3c	Yesway	convenience		35.21997	-101.86599	2305 SW 3rd Ave	Amarillo	79106			Yesway	0.80
 fe58b44537f8	Yesway	convenience		35.21408	-101.86214	2305 SW 3rd Ave	Amarillo	79106	+18063765872	https://yesway.com/	Yesway	0.99
 176aa1335396	Zino's	convenience		35.19942	-101.79514	1009 S Grand St Ste 200	Amarillo	79104	+18068039498			0.92
 011d56f1ba27	A&W Restaurant	fastfood		35.18977	-101.81644	1600 Ross St	Amarillo	79102	+18063740317	https://www.awrestaurants.com/		0.85
@@ -876,9 +857,12 @@ c0379cc06820	Braum's	fastfood		35.15032	-101.94167	8801 Town Square Blvd.	Amaril
 cf02b2b4df80	Braum's Ice Cream and Dairy Store	fastfood		35.66427	-101.39863	300 S Cedar St	Borger	79007	+18062746575	https://www.braums.com/store/300-s-cedar-st-borger-tx/	Braums	0.92
 ad0d764ea771	Braums Dumas TX	fastfood		35.85275	-101.97311	1209 S Dumas Ave	Dumas	79029	+18069353711	https://www.braums.com/store/1209-s-dumas-ave-dumas-tx/	Braums	0.97
 0cab19ceb46c	Burger King	fastfood		35.15796	-101.92080	4900 Coulter St S	Amarillo	79119	+18064688309	https://burgerking.com/store-locator/store/13483	Burger King	0.98
+0dd2bbbee5da	Burger King	fastfood	burger restaurant	35.19204	-101.88522	4210 Interstate Dr W	Amarillo	79106	+18063599373	https://burgerking.com/store-locator/store/4796	Burger King	0.99
 85d378676001	Burger King	fastfood		35.19451	-101.86681	1800 S Georgia St	Amarillo	79109	+18063532671	https://www.bk.com/store-locator/store/restaurant_6229	Burger King	0.98
 99817345a736	Burger King	fastfood		35.19156	-101.75876	7000 E Interstate 40 Hwy	Amarillo	79118	+18063423080	https://burgerking.com/store-locator/store/12472	Burger King	0.98
+b707934e9944	Burger King	fastfood	burger restaurant	35.22231	-101.82942	415 W Amarillo Blvd	Amarillo	79107	+18063741011	https://burgerking.com/store-locator/store/1583	Burger King	0.99
 bb3fdfecb48c	Burger King	fastfood		35.86438	-101.97362	124 S Dumas Ave	Dumas	79029	+18069354554	https://burgerking.com/store-locator/store/3413	Burger King	0.98
+f53f69f8ff1e	Burger King	fastfood	burger restaurant	35.19676	-101.81721	1314 Ross St	Amarillo	79102	+18063742387	https://burgerking.com/store-locator/store/3432	Burger King	0.99
 6150b0245eea	Chick-fil-A	fastfood		35.16059	-101.92066	4510 Coulter St S	Amarillo	79119	+18064688885	https://www.eventbrite.com/e/1983295655695?aff=oddtdtcreator	Chick-fil-A	0.99
 642a1b7ab3fc	Chick-fil-A	fastfood		35.14980	-101.86922	2930 SW 58th Ave	Amarillo	79110	+18062142350	https://www.chick-fil-a.com/locations/tx/58th-georgia?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
 986c6ec03bf9	Chick-fil-A	fastfood		35.18602	-101.86577	2525 S Georgia St	Amarillo	79109	+18063588055	https://www.chick-fil-a.com/locations/tx/georgia-street?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
@@ -890,6 +874,7 @@ f1160ba69ca7	Chick-fil-A	fastfood		35.18381	-101.92814	7701 I-40	Amarillo	79121	
 66ec0f1b0e90	Chicken Express	fastfood		35.18592	-101.92113	7301 I-40	Amarillo	79106	+18063536553	http://www.chickene.com/	Chicken Express	0.93
 c0c6089f242c	Chicken Express	fastfood		35.65846	-101.40975	1417 W Wilson St	Borger	79007	+18062731405	https://www.chickene.com	Chicken Express	0.96
 dae1e4cbc566	Chipotle Mexican Grill	fastfood		35.14883	-101.92067	5802 S Coulter St	Amarillo	79119		https://locations.chipotle.com/tx/amarillo/5802-s-coulter-st	Chipotle	0.96
+ede5d8386a95	Chipotle Mexican Grill	fastfood	mexican restaurant	35.18869	-101.86670	2414 S Georgia St	Amarillo	79109	+18065760764	https://locations.chipotle.com/tx/amarillo/2414-s-georgia-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2304	Chipotle Mexican Grill	0.99
 30a33db4520a	Church's Texas Chicken	fastfood		35.19253	-101.86658	2002 S. Georgia Street	Amarillo	79109	+18063531042	https://locations.churchs.com/tx/amarillo/2002-s.-georgia-street	Church's Chicken	0.99
 e896fe61e602	Church's Texas Chicken	fastfood		35.19390	-101.70800	11215 E. Interstate 40	Amarillo	79118	+18065032918	https://locations.churchs.com/tx/amarillo/11215-e.-interstate-40	Church's Chicken	0.79
 97c91b5f8a2e	Cinnabon	fastfood		35.19629	-101.86765	1619 South Kentucky	Amarillo	79109		https://locations.cinnabon.com/tx/amarillo/1619-south-kentucky	Cinnabon	0.98
@@ -900,16 +885,30 @@ e896fe61e602	Church's Texas Chicken	fastfood		35.19390	-101.70800	11215 E. Inter
 a19235975ac0	Dairy Queen	fastfood		35.17893	-101.88361	3333 S Western St 3333 S Western St	Amarillo	79109	+18063522561	https://www.dairyqueen.com/en-us/locations/tx/amarillo/3333-s-western-st/13802/?y_source=1_MjkzMzkyNzctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
 70e3c4106703	Daylight Donuts	fastfood		35.88500	-101.97578	1209 N. Dumas Ave.	Dumas	79029		https://www.facebook.com/daylightdonuts.dumastx/	Daylight Donuts	0.80
 eee18ac10237	Daylight Donuts	fastfood		35.64062	-101.60310	103 N Cornell	Fritch	79036			Daylight Donuts	0.96
+105ae0ba83a0	Domino's	fastfood	pizza restaurant	35.19276	-101.80532	1701 S Nelson St	Amarillo	79103	+18063766111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
+58dd949d9960	Domino's	fastfood	pizza restaurant	35.19040	-101.91978	2015 S. Coulter Street	Amarillo	79106	+18063983030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+73d1f353fa14	Domino's	fastfood	pizza restaurant	35.84193	-101.97074	300 E 19th St #300	Dumas	79029	+18069340030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.94
+cb40efc5a3f1	Domino's	fastfood	pizza restaurant	35.19339	-101.86403	2604 Wolflin Ave.	Amarillo	79109	+18063587181	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+ecdf8a929ce0	Domino's	fastfood	pizza restaurant	35.14700	-101.90061	5914 Hillside Rd	Amarillo	79109	+18063548889	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.97
+24a16a400699	Domino's Pizza	fastfood	pizza restaurant	35.14763	-101.86578	5895 S Georgia St Ste 101	Amarillo	79118	+18066412414	https://www.dominos.com/en/?redirect=homepage&utm_source=locallistings&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
+ba6775a4b04f	Domino's Pizza	fastfood	pizza restaurant	35.19971	-101.81608	1007 Ross St	Amarillo	79102	+18063766111	http://www.dominos.com		0.98
 0256c40a5815	DQ Grill & Chill	fastfood		35.19390	-101.84906	1900 S Washington St	Amarillo	79109		https://www.dairyqueen.com/en-us/locations/tx/amarillo/1900-s-washington-st/3574	DQ Grill & Chill	0.80
 84f547d96919	DQ Grill & Chill	fastfood		35.17898	-101.88351	3333 S Western St	Amarillo	79109		https://www.dairyqueen.com/en-us/locations/tx/amarillo/3333-s-western-st/3575	DQ Grill & Chill	0.80
 9d17e46900a8	DQ Grill & Chill	fastfood		35.18377	-101.93719	2601 S Soncy Rd	Amarillo	79124		https://www.dairyqueen.com/en-us/locations/tx/amarillo/2601-s-soncy-rd/3576	DQ Grill & Chill	0.80
 d5a9d9fb6f80	Dunkin Donuts	fastfood		35.65496	-101.41193	1501 Roosevelt Street, WM Store # 1516	Borger	79007		https://www.dunkindonuts.com/locations/us/tx/borger/1501-roosevelt-street/store-366680/	Dunkin'	0.85
+0813c2a026cd	Firehouse Subs	fastfood	sandwich shop	35.17327	-101.93855	3450 S. Soncy Rd Suite #100	Amarillo	79119	+18063980056	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1749	Firehouse Subs	0.99
+3ff57cca570f	Firehouse Subs Wolfin Square	fastfood	sandwich shop	35.19461	-101.86552	1901 S Georgia St	Amarillo	79109	+18064186651	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1594	Firehouse Subs	0.99
+d29e17f6db4d	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	35.15055	-101.91959	5225 Coulter St S	Amarillo	79119	+18068039460	https://www.freddys.com/location/amarillo-s-coulter-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
 4e5dd4706489	Golden Chick	fastfood		35.17863	-101.86797	2808 SW 34th Ave	Amarillo	79109	+18063507441	https://locations.goldenchick.com/tx/amarillo/1351/	Golden Chick	0.92
 97eb185c63bf	Golden Chick	fastfood		35.84610	-101.97383	1700 S Dumas Ave	Dumas	79029	+18064210579	http://locations.goldenchick.com/tx/ovilla/1283/	Golden Chick	0.94
 ed243b8af7d9	Golden Chick	fastfood		35.14592	-101.92066	6020 Coulter St S	Amarillo	79119	+18063503371	https://locations.goldenchick.com/tx/amarillo/1341/	Golden Chick	0.99
 c5a7677063d6	Grandma's Cocina	fastfood		35.16341	-101.87598	3609 SW 45th Ave	Amarillo	79109	+18063989999	http://grandmascocinaamarillo.com		0.92
 31b1e73eab05	Hud's	fastfood		35.19089	-101.92136	7311 W Amarillo Blvd	Amarillo	79106	+18063511499	http://www.amarillomenu.com/huds-menu		0.96
+c07aee1c5fbc	Jersey Mike's Subs	fastfood	sandwich shop	35.19012	-101.86567	2311 S Georgia St	Amarillo	79109	+18067310731	https://www.jerseymikes.com/15071/amarillo-tx	Jersey Mike's Subs	0.99
 ebb66d0ccf53	Jesse's Pizza Co - Borger	fastfood		35.67791	-101.39033	1055 Coronado Cir	Borger	79007	+18062747200	https://www.jessespizzacompany.com/		0.96
+5d693280df43	Jimmy John's	fastfood	sandwich shop	35.18774	-101.93876	2330 S Soncy Rd	Amarillo	79124	+18063549200	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-1422.html	Jimmy John's	0.99
+adac6dea7df0	Jimmy John's	fastfood	sandwich shop	35.18482	-101.88374	2807 S Western Ave	Amarillo	79109	+18063524540	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-2624.html	Jimmy John's	0.96
+f6d1b6df985d	Jimmy John's	fastfood	sandwich shop	35.20512	-101.83270	790 S Buchanan St Suite 110	Amarillo	79101	+18068039070	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-3905.html	Jimmy John's	1.00
 510c069616e6	Joel’s Tacos	fastfood		35.09102	-101.81249	11835 Osage St	Amarillo	79118	+18065848050			0.95
 326600cea167	KFC	fastfood		35.19479	-101.81754	1510 S. Ross Street	Amarillo	79102	+18063738847	https://locations.kfc.com/tx/amarillo/1510-s-ross-street	KFC	0.97
 34a28cb3640a	KFC	fastfood		35.17688	-101.90467	6100 SW 34th Avenue	Amarillo	79109	+18063599711	https://locations.kfc.com/tx/amarillo/6100-sw-34th-avenue	KFC	0.99
@@ -918,7 +917,18 @@ ebb66d0ccf53	Jesse's Pizza Co - Borger	fastfood		35.67791	-101.39033	1055 Corona
 70be8b2d1a1b	KFC	fastfood		35.84898	-101.97308	1523 Dumas Avenue	Dumas	79029	+18069354663	https://locations.kfc.com/tx/dumas/1523-dumas-avenue	KFC	0.98
 527a24dfaee8	Krispy Krunchy Chicken	fastfood		35.19374	-101.70644	11301 E Interstate 40	Amarillo	79118	+18063359437	https://www.krispykrunchy.com		0.92
 dfe1812ae80b	La Patrona Taqueria	fastfood		35.18396	-101.87881	3601 Olsen Blvd	Amarillo	79109	+18064433532			0.92
+3ad3ad1f9cc5	Little Caesars	fastfood	pizza restaurant	35.17773	-101.81530	1900 Se 34 Th Ave Suite 26	Amarillo	79118	+18064188915	https://littlecaesars.com/en-us/store/10809	Little Caesars	0.97
+4eacd99cbc44	Little Caesars	fastfood	pizza restaurant	35.22220	-101.81751	1401 E Amarillo Blvd	Amarillo	79107	+18063734507	https://littlecaesars.com/en-us/store/2216	Little Caesars	0.99
+b4ea19501263	Little Caesars	fastfood	pizza restaurant	35.17601	-101.90269	3400 Bell St	Amarillo	79109	+18063521968	https://littlecaesars.com/en-us/store/10398	Little Caesars	0.99
+088360220cd3	Little Caesars Pizza	fastfood	pizza restaurant	35.20489	-101.86734	2710 SW 10th Ave Space 400	Amarillo	79102	+18064141941	https://littlecaesars.com/en-us/store/12236	Little Caesars	0.96
+19b4f8e20202	Little Caesars Pizza	fastfood	pizza restaurant	35.14584	-101.92069	6020 Coulter St S	Amarillo	79119	+18063503373	https://littlecaesars.com/en-us/store/12632		0.99
+51f935d574a7	Little Caesars Pizza	fastfood	pizza restaurant	35.66394	-101.39869	302 S Cedar St	Borger	79007	+18063953011	https://littlecaesars.com/en-us/store/12329	Little Caesars	0.96
+70cf56fc9a82	Little Caesars Pizza	fastfood	pizza restaurant	35.15096	-101.86636	5610 S Georgia St	Amarillo	79110	+18064142456	https://littlecaesars.com/en-us/store/11901	Little Caesars	0.99
+cc72d68dbf8c	Little Caesars Pizza	fastfood	pizza restaurant	35.84916	-101.97296	1521 S Dumas Ave	Dumas	79029	+18064210462	https://littlecaesars.com/en-us/store/11222	Little Caesars	0.96
+08f466d5fa84	Long John Silver's	fastfood	seafood restaurant	35.16105	-101.88331	4615 S Western St	Amarillo	79109	+18063537021	http://www.ljsilvers.com/		0.92
 219a97ebe5ae	Long John Silver's	fastfood		35.16278	-101.90247	4406 Bell St	Amarillo	79109	+18064608974	https://www.ljsilvers.com/?y_source=1_MjAxMjU0NTk2Mi01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Long John Silver's	0.99
+907ca9e64051	Long John Silver's	fastfood	seafood restaurant	35.13266	-101.90150	7145 Bell St	Amarillo	79109	+18063532875	http://www.longjohnsilvers.com/		0.92
+b80ac72d9602	Long John Silver's	fastfood	seafood restaurant	35.68354	-101.37817	504 Borger Shopping Plz	Borger	79007	+18062737181	http://www.longjohnsilvers.com/		0.92
 27c5f73755dc	McDonald's	fastfood		35.66324	-101.39878	304 S Cedar	Borger	79007	+18062744528	https://www.mcdonalds.com/us/en-us/location/tx/borger/304-s-cedar/11392.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 311b261e8489	McDonald's	fastfood		35.11724	-101.90639	6312 Hollywood Rd	Amarillo	79118	+18063557954	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/6312-hollywood-rd/17021.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 424f95631d0b	McDonald's	fastfood		35.31659	-101.77518	52qw+8X Amarillo, TX, Usa	Amarillo	79108		https://www.mcdonalds.com/?cid=RF:YXT:RoN::Clicks		0.85
@@ -928,6 +938,7 @@ dfe1812ae80b	La Patrona Taqueria	fastfood		35.18396	-101.87881	3601 Olsen Blvd	A
 8d65fa41540d	McDonald's	fastfood		35.21530	-101.90179	5620 W Amarillo Blvd	Amarillo	79124	+18063522239	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/5620-w-amarillo-blvd/32614.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 b21949771c85	McDonald's	fastfood		35.17684	-101.92071	3320 Coulter St	Amarillo	79109	+18063325403	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/3320-coulter-st/7402.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 c1a65ec9f7eb	McDonald's	fastfood		35.14982	-101.86552	2694 Sw 58th Street	Amarillo	79110	+18066796356	http://www.mcdonalds.com/?cid=RF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+c4b2e27e65c3	McDonald's	fastfood	burger restaurant	35.17003	-101.86347	4215 Canyon Dr	Amarillo	79110	+18063520222	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/4215-canyon-dr/31000.html?cid=RF:YXT:RoN::Clicks		0.92
 ce3933ea27b7	McDonald's	fastfood		35.18073	-101.93868	2910 Soncy Rd	Amarillo	79121	+18063524890	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/2910-soncy-rd/17606.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 d304b3a24e09	McDonald's	fastfood		35.19136	-101.79493	1815 S Grand	Amarillo	79103	+18063744595	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/1815-s-grand/15809.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 df9983e751d5	McDonald's	fastfood		35.15979	-101.92004	4601 S Coulter St	Amarillo	79119	+18063524503	http://www.mcdonalds.com		0.77
@@ -936,13 +947,27 @@ f1675d29b070	McDonald's	fastfood		35.19254	-101.88489	2000 S Western Avenue	Amar
 fb9a7d89a826	McDonald's	fastfood		35.85063	-101.97386	1400 Dumas Ave	Dumas	79029	+18069340198	https://www.mcdonalds.com/us/en-us/location/tx/dumas/1400-dumas-ave/7578.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
 ec1187299046	Panchos Burguers Oficial	fastfood		35.22169	-101.80917	2408 E Amarillo Blvd	Amarillo	79107	+18066788944			0.93
 df90cea930c9	Panda Express	fastfood		35.15899	-101.92061	4710 South Coulter Street	Amarillo	79119	+18063533137	http://www.pandaexpress.com/		0.99
+e62def60e44b	Panda Express	fastfood	chinese restaurant	35.18819	-101.86671	2416 South Georgia Street	Amarillo	79109	+18063557680	http://www.pandaexpress.com/	Panda Express México	0.99
 f128079e4722	Papa J's	fastfood		35.67953	-101.38032	200 Borger Shopping Plz	Borger	79007	+18062745253	http://www.menupix.com/texas/restaurants/4322699/Papa-Js-Grille-Borger-TX		0.78
-e9c8773145a4	Pizza Takeout & Delivery	fastfood		35.14539	-101.90261					https://locations.papamurphys.com/tx/amarillo/6032-bell-street	Papa Murphy's	0.80
+ad2848445ed3	Papa Johns	fastfood	pizza restaurant	35.20429	-101.86610	1005 S Georgia St	Amarillo	79102	+18063747272	https://locations.papajohns.com/united-states/tx/79102/amarillo/1005-s-georgia-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
+d82615a25bd9	Papa Johns	fastfood	pizza restaurant	35.17569	-101.90211	3415 A Bell St Unit A	Amarillo	79109	+18063587272	https://locations.papajohns.com/united-states/tx/79109/amarillo/3415-bell-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
+24c23a8a7e02	Pizza Hut	fastfood	pizza restaurant	35.21281	-101.89971	5611 Gem Lake Rd Potter	Amarillo	79106	+18063721004	https://locations.pizzahut.com/tx/amarillo/5611-gem-lake-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314508	Pizza Hut	0.96
+4addbef37dbc	Pizza Hut	fastfood	pizza restaurant	35.15450	-101.88340	5101 S Western St	Amarillo	79109	+18063586521	https://locations.pizzahut.com/tx/amarillo/5101-s-western?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287493	Pizza Hut	0.99
+58eb9b121339	Pizza Hut	fastfood	pizza restaurant	35.18712	-101.86573	2509 S Georgia St Randall	Amarillo	79109	+18064671555	https://locations.pizzahut.com/tx/amarillo/2509-s-georgia-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291696	Pizza Hut	0.99
+6f818e8ed064	Pizza Hut	fastfood	pizza restaurant	35.23632	-101.79836	3404 NE 24th Ave A Suite A	Amarillo	79107	+18063833000	https://locations.pizzahut.com/tx/amarillo/3404-ne-24th-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309112	Pizza Hut	0.98
+bf5b5c9fbc72	Pizza Hut	fastfood	pizza restaurant	35.85035	-101.97315	1421 S Dumas Ave	Dumas	79029	+18069356111	https://locations.pizzahut.com/tx/dumas/1421-dumas-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285748	Pizza Hut	0.98
+c872857106df	Pizza Hut	fastfood	pizza restaurant	35.14594	-101.91971	6019 S Coulter Randall	Amarillo	79119	+18064671800	https://locations.pizzahut.com/tx/amarillo/6019-s-coulter?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306268	Pizza Hut	0.99
+d6248eec6075	Pizza Hut	fastfood	pizza restaurant	35.65862	-101.41109	1418 W Wilson St	Borger	79007	+18062747245	https://locations.pizzahut.com/tx/borger/1418-west-wilson-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287229	Pizza Hut	0.98
+f9f15ab6fed7	Pizza Hut	fastfood	pizza restaurant	35.18610	-101.91596	6905 I-40 West Potter	Amarillo	79106	+18063558288	https://locations.pizzahut.com/tx/amarillo/6905-i-40-west?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303501	Pizza Hut	0.99
+fe884e4884d4	Pizza Hut	fastfood	pizza restaurant	35.19173	-101.75874	7000 I-40 East Potter	Amarillo	79118	+18009488488	http://www.pizzahut.com/	Pizza Hut	0.96
 b324d3427c78	Popeyes	fastfood		35.19168	-101.75877	7000 I-40 East	Amarillo	79118	+18063423080	https://www.popeyes.com/store-locator/store/restaurant_82925	Popeyes Louisiana Kitchen	0.99
 d5a6c4f04931	Popeyes Louisiana Kitchen	fastfood		35.18980	-101.87298	2201 Paramount Blvd	Amarillo	79109	+18063580046	https://www.popeyes.com/store-locator/store/restaurant_83211	Popeyes Louisiana Kitchen	0.97
 e129a5d5eac0	Popeyes Louisiana Kitchen	fastfood		35.14999	-101.91959	5409 S. Coulter Street	Amarillo	79119	+18063536819	https://www.popeyes.com/store-locator/store/restaurant_85141	Popeyes Louisiana Kitchen	0.96
 27b0545e6598	Raising Cane's	fastfood		35.18285	-101.86674	2812 S Georgia Street	Amarillo	79109	+18063560140	https://locations.raisingcanes.com/tx/amarillo/2812-s-georgia-street	Raising Cane's Chicken Fingers	0.96
 fbef6c9e6aea	Raising Cane's	fastfood		35.15961	-101.92059	4700 S Coulter St.	Amarillo	79119	+18063567403	https://locations.raisingcanes.com/tx/amarillo/4700-s-coulter-st.	Raising Cane's Chicken Fingers	0.99
+3e962e1781c5	Schlotzsky's	fastfood	sandwich shop	35.19386	-101.81789	1612 Ross St	Amarillo	79102	+18063745513	https://locations.schlotzskys.com/tx/amarillo/1612-s-ross-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
+4bef76369892	Schlotzsky's	fastfood	sandwich shop	35.17566	-101.90298	3440 Bell St	Amarillo	79109	+18063537859	https://locations.schlotzskys.com/tx/amarillo/3440-bell-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
+ee12dad09581	Schlotzsky's	fastfood	sandwich shop	35.19635	-101.86831	1619 S Kentucky St	Amarillo	79102	+18063594445	www.schlotzskys.com		0.98
 7ca23c631c15	Snow Shack	fastfood		35.88181	-101.97495	829 N Dumas Ave	Dumas	79029	+18067178377	https://snoshack.com/		0.81
 0472945c886e	Sonic Drive In	fastfood		35.21291	-101.90301	101 Tascosa Road	Amarillo	79124	+18063533637	https://locations.sonicdrivein.com/tx/amarillo/101-tascosa-road.html	Sonic Drive-In	0.99
 4615cf1353bb	Sonic Drive In	fastfood		35.18963	-101.81711	2220 Ross Osage Drive	Amarillo	79103	+18063767841	https://locations.sonicdrivein.com/tx/amarillo/2220-ross-osage-drive.html	Sonic Drive-In	0.99
@@ -959,10 +984,31 @@ e1bd273df2ac	Sonic Drive In	fastfood		35.19555	-101.88430	1714 S Western St	Amar
 f356a44aa75e	Sonic Drive In	fastfood		35.18380	-101.86572	2707 S Georgia	Amarillo	79109	+18063542238	https://locations.sonicdrivein.com/tx/amarillo/2707-s-georgia.html	Sonic Drive-In	0.99
 6906abbf2623	Sonic Drive-In	fastfood		35.22253	-101.82173	1009 Amarillo Blvd E	Amarillo	79107	+18063420288	https://locations.sonicdrivein.com/tx/amarillo/1009-amarillo-boulevard.html	Sonic Drive-In	0.99
 bdfc036b4abe	Sonic Drive-In	fastfood		35.05596	-101.91881	14901 Interstate 27, Ste B	Amarillo	79119	+18062557855	https://locations.sonicdrivein.com/tx/amarillo/14901-interstate-27-suite-b.html		0.98
+e22930d0df8d	Sonic Drive-In	fastfood	burger restaurant	35.18481	-101.92742	7701 W Interstate 40 Ste 212 Ste 212	Amarillo	79121	+18064570228	https://locations.sonicdrivein.com/tx/amarillo/7701-i-40-w-suite-212.html		0.98
 f9582d92beec	Sonic Drive-In	fastfood		35.66472	-101.39845	208 S Cedar Street	Borger	79007	+18062737329	https://locations.sonicdrivein.com/tx/borger/208-s-cedar-street.html	Sonic Drive-In	0.99
 b8f9cb9547b4	Southern Tea & Burgers	fastfood		35.16415	-101.88480	4206 SW 45th Ave	Amarillo	79109	+18063559000	http://www.southernteaandburgers.com		0.92
+154f31ff6e9f	Subway	fastfood	sandwich shop	35.21877	-101.38156	9701 I-40	Claude	79068	+18065373393	https://restaurants.subway.com/united-states/tx/claude/9701-i-40?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=21723&utm_campaign=evergreen-2020&y_source=1_MTQ5ODM5NDMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
+2c7a47cb56a1	Subway	fastfood	sandwich shop	35.66046	-101.40639	1371 West Wilson Street	Borger	79007	+18062735002	https://restaurants.subway.com/united-states/tx/borger/1371-west-wilson-street	Subway	0.97
+3b43d32a90a7	Subway	fastfood	sandwich shop	35.14615	-101.88435	6000 S Western St	Amarillo	79110	+18067058811	https://www.subway.com		0.98
+3e8b0ea86254	Subway	fastfood	sandwich shop	35.19199	-101.76093	6930 I-40 E.	Amarillo	79120	+18063737431	https://restaurants.subway.com/united-states/tx/amarillo/6930-i-40-e?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=22155&utm_campaign=evergreen-2020&y_source=1_MTQ4OTk0OTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+48a3169f6bce	Subway	fastfood	sandwich shop	35.11763	-101.90718	8615 Canyon Dr	Amarillo	79110	+18063529501	https://restaurants.subway.com/united-states/tx/amarillo/8615-canyon-dr	Subway	0.97
+4d6e0e9bfb18	Subway	fastfood	sandwich shop	35.21167	-101.90372	5752 Amarillo Blvd Ste 111	Amarillo	79106	+18066964626	https://restaurants.subway.com/united-states/tx/amarillo/5752-amarillo-blvd	Subway	0.96
+4df84c5aa4b6	Subway	fastfood	sandwich shop	35.19578	-101.81744	1412 S Ross	Amarillo	79102	+18063720045	https://restaurants.subway.com/united-states/tx/amarillo/1412-s-ross	Subway	0.95
+5403ce7e759e	Subway	fastfood	sandwich shop	35.22220	-101.81727	1401 E Amarillo Blvd	Amarillo	79107	+18062099533	https://restaurants.subway.com/united-states/tx/amarillo/1401-amarillo-blvd	Subway	0.95
+61bbc3abacb1	Subway	fastfood	sandwich shop	35.17779	-101.81515	1900 SE 34th Street Suite 2200	Amarillo	79118	+18063731770	https://restaurants.subway.com/united-states/tx/amarillo/1900-se-34th-street	Subway	0.95
+6fbed6b3770d	Subway	fastfood	sandwich shop	35.19227	-101.79896	3300 E I 40 Bldg D R/Suite 120	Amarillo	79103	+18067058423	https://restaurants.subway.com/united-states/tx/amarillo/3300-e-i-40	Subway	0.96
 7a5e00f0a0f7	Subway	fastfood		35.19970	-101.92009	1501 S. Coulter	Amarillo	79106	+18066862818	https://restaurants.subway.com/united-states/tx/amarillo/1501-s-coulter?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=44332&utm_campaign=evergreen-2020&y_source=1_MTQ5MDk0NzItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+7f64b0522e3d	Subway	fastfood	sandwich shop	35.19257	-101.88371	2001 S Western St	Amarillo	79106	+18063542902	https://www.subway.com		0.98
+8988e7abc51e	Subway	fastfood	sandwich shop	35.19620	-101.74112	715 S Lakeside Dr	Amarillo	79118	+18063353993	https://restaurants.subway.com/united-states/tx/amarillo/715-s-lakeside-dr	Subway	0.96
+a057ca45d0a4	Subway	fastfood	sandwich shop	35.19070	-101.92088	2004 S Coulter Street	Amarillo	79106	+18062090511	https://restaurants.subway.com/united-states/tx/amarillo/2004-s-coulter-street	Subway	0.94
+be5d4f6b0bde	Subway	fastfood	sandwich shop	35.64174	-101.60036	109 W Broadway St	Fritch	79036	+18068573751	http://www.subway.com/en-us	Subway	0.97
+cc4c685ef367	Subway	fastfood	sandwich shop	35.17863	-101.86575	3325 S Georgia St Spc 100 Space 100	Amarillo	79109	+18063583881	https://restaurants.subway.com/united-states/tx/amarillo/3325-s-georgia	Subway	0.98
+d5f718291efc	Subway	fastfood	sandwich shop	35.19328	-101.84830	1915 S Washington St	Amarillo	79109	+18063732425	https://restaurants.subway.com/united-states/tx/amarillo/1915-s-washington	Subway	0.99
 d8812a73a0c5	Subway	fastfood		35.16063	-101.89951	5807 SW 45th St	Amarillo	79109	+18063528831	https://restaurants.subway.com/united-states/tx/amarillo/5807-sw-45th-st?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=7323&utm_campaign=evergreen-2020&y_source=1_MTQ5MTEzNzgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+db2c3fa3530e	Subway	fastfood	sandwich shop	35.33725	-101.38163	407 W US Highway 60	Panhandle	79068	+18065375700	https://restaurants.subway.com/united-states/tx/panhandle/407-hwy-60-west	Subway	0.92
+dda1995a129e	Subway	fastfood	sandwich shop	35.84001	-101.97105	2003 S Dumas Ave	Dumas	79029	+18069343201	https://www.subway.com		0.98
+e8b100c58893	Subway	fastfood	sandwich shop	35.16121	-101.92133	7401 W. 45th Ste. 2	Amarillo	79121	+18064670010	https://restaurants.subway.com/united-states/tx/amarillo/7401-w-45th	Subway	0.98
+ec4a0a8d6dd9	Subway	fastfood	sandwich shop	35.84942	-101.97377	1420 S Dumas Ave	Dumas	79029	+18067172365	https://restaurants.subway.com/united-states/tx/dumas/1420-s-dumas-ave	Subway	0.98
 61cb268fb4ed	Summer sno 2	fastfood		35.20460	-101.86666	1000 S Georgia St	Amarillo	79102	+18066903003	http://www.placestogoinamarillo.com/places/3797371-Summer-sno-2		0.77
 03f5577428d0	Taco Bell	fastfood		35.19195	-101.88317	4116 I-40 W	Amarillo	79102	+18063557325	http://www.tacobell.com/	Taco Bell	0.99
 169dfaf144d6	Taco Bell	fastfood		35.22152	-101.83116	300 E Amarillo Blvd	Amarillo	79107	+18062200415	http://www.tacobell.com/	Taco Bell	0.98
@@ -1000,6 +1046,9 @@ b100f00a3147	Whataburger	fastfood		35.18779	-101.86660	2424 S GEORGIA ST	Amarill
 6e65a272b135	Wienerschnitzel	fastfood		35.19592	-101.91351	5800 W. Amarillo Blvd.	Amarillo	79106		https://www.wienerschnitzel.com/location/834-w-amarillo-blvd-5800-w-amarillo-blvd-tx-79106/	Wienerschnitzel	0.80
 7f30466f2d4f	Wienerschnitzel	fastfood		35.16200	-101.90196	4431 Bell St	Amarillo	79109	+18064671006	http://www.wienerschnitzel.com/	Wienerschnitzel	0.92
 1ecedeac09dd	Wingstop	fastfood		35.23793	-101.79548	2423 North Grand St	Amarillo	79107		https://www.wingstop.com/location/wingstop-3017-amarillo-tx-79107/menu	Wingstop	0.98
+2605e6027a9b	Wingstop	fastfood	chicken restaurant	35.19223	-101.79898	3300 E Interstate 40 Ste 900	Amarillo	79103	+18063319464	https://www.wingstop.com/location/wingstop-416-amarillo-tx-79103/menu?y_source=1_NTUyMDY1ODEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+632ac48a7e07	Wingstop	fastfood	chicken restaurant	35.15995	-101.89991	5807 W 45Th Ave Ste 260	Amarillo	79109	+18063569464	https://www.wingstop.com/location/wingstop-90-amarillo-tx-79109/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.98
+bbeb8b57cb2e	Wingstop	fastfood	chicken restaurant	35.21412	-101.89891	5512 Gem Lake Rd STE 700	Amarillo	79106	+18063913786	https://www.wingstop.com/location/wingstop-1696-amarillo-tx-79106/menu?y_source=1_NTUyMDc5NDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 26aa455d3c49	Amarillo Food Co Ltd	grocery		35.22173	-101.83261	200 E Amarillo Blvd	Amarillo	79107		https://zoo.amarillo.gov		0.95
 cc8d73e11442	Amarillo International Food Market	grocery		35.19420	-101.86305	1936 Civic Cir	Amarillo	79109	+18063313799	https://amarillointernationalfoodmarket.com		0.98
 a3f3cbd1cc30	Amigos	grocery		35.19176	-101.79830	3300 E Interstate 40	Amarillo	79103	+18063735335	https://local.amigosunited.com/tx/amarillo/3300-i-40-e.html	Amigos	1.00
@@ -1079,7 +1128,6 @@ ccb5c4ff8f5c	Baylor Scott & White Liver Consultants of Texas - Amarillo	hospital
 f455daf223ff	Borger Community Hospital	hospital		35.65518	-101.40890		Borger					0.77
 a96bfb6db94a	BSA Clinic At Park Central	hospital		35.19974	-101.84263	1400 S Van Buren St	Amarillo	79101	+18062120888	https://www.bestflowers.com/?srccode=superpages		0.92
 fda1ab000b5c	BSA Hospital	hospital		35.19628	-101.92003	1600 Wallace Blvd	Amarillo	79106	+18062122000	https://ardenthealth.com/	BSA Health System	0.97
-d8b813a43c0f	BSA Labor and Delivery	hospital		35.20319	-101.91941		Amarillo			http://www.bsahs.org/content/birthing-center	BSA Health System	0.81
 e3283a40ea5c	BSA Labor and Delivery	hospital		35.19645	-101.92074		Amarillo			http://www.bsahs.org/content/birthing-center	BSA Health System	0.97
 4aade02d69ed	Chevron Phillips Chemical Company	hospital		35.67212	-101.39256	300 W 6th St	Borger	79007	+18062755500	http://chevron-phillips-chemical-company-tx.hub.biz/		0.81
 c524a58947ee	Children's Hospital	hospital		35.19972	-101.92043		Amarillo	79106	+18063541000	https://www.nwths.com/services/children		0.92
@@ -1088,7 +1136,6 @@ c524a58947ee	Children's Hospital	hospital		35.19972	-101.92043		Amarillo	79106	+
 c54462c4a715	ER Now	hospital		35.18927	-101.91974	2101 S Coulter St	Amarillo	79106	+18063507744	http://www.yourernow.com		0.92
 57951f057fd3	Exceptional Community Hospital	hospital		35.18928	-101.91970	2101 S Coulter St	Amarillo	79106	+18065414038	http://www.eer24.com/	Exceptional Emergency Center - Brownsville	0.99
 228c818cbf90	Golden Plains Community Hospital	hospital		35.65543	-101.40932	100 Medical Dr	Borger	79007	+18064675700	http://goldenplains.org/		0.98
-95ac18c3be46	Golden Plains Community Hospital	hospital		35.65532	-101.40900	100 Medical Dr	Borger	79007	+18064675700	http://goldenplains.org/		0.97
 164f33b1cc91	Golden Plains Hospital	hospital		35.66001	-101.39837	600 S Cedar St	Borger	79007	+18062731402	http://www.whlandersmd.com		0.71
 f19647cbc087	KPC Promise Hospital of Amarillo	hospital		35.19818	-101.92559	1540 Research St	Amarillo	79124	+18066398670			0.77
 10a7345c92f4	Memorial Hospital	hospital		35.86428	-101.97082	224 E 2nd St	Dumas	79029	+18069357171	http://www.mhsks.com		0.97
@@ -1097,16 +1144,13 @@ eca538dcce9c	NaVii Esthetics	hospital		35.19358	-101.87144	2921 Interstate 40, S
 28a5e8912cba	Northwest Physicians Group - Cardiothoracic Surgery	hospital		35.20129	-101.92046	1301 S Coulter St Ste 200	Amarillo	79106	+18063400550	http://nwtpg.com/		0.92
 f7e044df4133	Northwest Physicians Group - Lake View Cardiology	hospital		35.19442	-101.91298	1901 Port Ln	Amarillo	79106	+18064101992	http://nwtpg.com/		0.97
 539090e20683	Northwest Texas Balance And Hand Clinic	hospital		35.20419	-101.92307	1000 Coulter St S	Amarillo	79106	+18063536953	www.nwths.com/hospital-services/physical-therapy/the-balance-center		0.78
-b4c12a8a4b88	Northwest Texas Balance And Hand Clinic	hospital		35.20071	-101.92052	1000 Coulter St S	Amarillo	79106	+18063536953	www.nwths.com/hospital-services/physical-therapy/the-balance-center		0.77
 230dd7eec203	Northwest Texas Healthcare Systems	hospital		35.20647	-101.89916	1000 Craig Dr	Amarillo	79106	+18063583514	http://nwtpg.com	Northwest Physicians Group	0.79
 e09df7f11282	Northwest Texas Hospital	hospital		35.19982	-101.92019	1501 S Coulter St	Amarillo	79106	+18063541110	https://www.nwths.com/		1.00
 e6cb0974c933	Northwest Texas Physician Group - Primary Care	hospital		35.19062	-101.91973	2001 S Coulter St	Amarillo	79106	+18063517070	https://www.nwtpg.com		0.92
 1b00c5bdfacb	Northwest Texas Wound Care Center	hospital		35.20247	-101.91656	1200 Wallace Blvd	Amarillo	79106	+18063514152	http://www.nwtexashealthcare.com/hospital-services/wound-care		1.00
 898bc2aa9b10	Nwth Urgent Care	hospital		35.17793	-101.81543		Amarillo					0.80
-960a6e79a267	Nwth Urgent Care	hospital		35.22260	-101.81664		Amarillo					0.73
 c181459b73b5	Oceans Behavioral Hospital Amarillo	hospital		35.19439	-101.92704	7501 Wallace Blvd	Amarillo	79124	+18066963532	https://oceanshealthcare.com/location/oceans-behavioral-hospital-amarillo/	Oceans Healthcare	0.99
 2b2465d58ab6	Panhandle Cancer Care Center	hospital		35.20132	-101.92078	1301 S Coulter St, Ste 100	Amarillo	79106	+18063540950	http://www.harringtoncc.org/		0.92
-f1145483623a	Panhandle Gastroenterology, PA	hospital		35.20921	-101.91138	800 Quail Creek Dr	Amarillo	79124	+18068549400	http://www.phgastro.com/		0.97
 79e242d506a8	Pediatric Ophthalmology of the Panhandle	hospital		35.21060	-101.91070	603 Quail Creek Dr	Amarillo	79124	+18063312020	http://kidseyemd.net/		0.62
 a9dbaafbe598	Plum Creek Specialty Hospital & Health Care Center	hospital		35.21861	-101.90200	5601 Plum Creek Dr	Amarillo	79124	+18063510300	plumcreekspecialtyhosp.com		0.95
 3c343a37ab19	Quail Creek Surgical Hospital	hospital		35.21031	-101.91302	6819 Plum Creek Dr	Amarillo	79124	+18063546100	http://www.physurg.com/		0.97
@@ -1129,11 +1173,9 @@ e772e9bde820	UT Health East Texas	hospital		35.16036	-101.90276	4510 Bell St	Ama
 252440bbeca4	Vibra Hospital of Amarillo	hospital		35.19418	-101.92706	7501 Wallace Blvd	Amarillo	79124	+18064677000	http://www.vhamarillo.com/		0.92
 8957e7dfd14e	Vibra Rehabilitation Hospital of Amarillo	hospital		35.20672	-101.92101	7200 SW 9th Ave	Amarillo	79106	+18064682900	http://www.vrhamarillo.com/		1.00
 d6b748505aa6	White Deer EMS	hospital		35.43362	-101.17634	309 W 2nd Ave	White Deer	79097	+18068832288	http://www.whitedeer.us/web/?page_id=30		0.55
-4b879dc7d1aa	Aalto Ltd	hotel		35.19276	-101.93342	8330 W Amarillo Blvd	Amarillo	79124				0.95
 94d6d0ad7207	Acropolis Ltd	hotel		35.19580	-101.92278	1610 S Coulter St	Amarillo	79106		https://www.acropolis-cg.com		0.95
 9f2fcb124e0a	Ahip Tx Amarillo 6915 Enterprises Llc	hotel		35.18607	-101.91679	6915 W Interstate 40	Amarillo	79106				0.95
 fb0a0b8aebea	Ahip Tx Amarillo 8231 Enterprises Llc	hotel		35.18951	-101.93066	8231 W Amarillo Blvd	Amarillo	79124				0.95
-c72a049497cd	Amarilllo Elks Lodge #923	hotel	lodge	35.20475	-101.89827	932 Clyde St #923	Amarillo	79106	+18064371433	https://www.elks.org/lodges/home.cfm?LodgeNumber=923		0.99
 a2e38b97f785	Amarillo Air Enterprises, Llc	hotel		35.19178	-101.81879	1708 E Interstate 40	Amarillo	79103		http://www.texasairamarillo.com		0.95
 42d4520d2764	Amarillo Hospitality Master Tenant Llc	hotel		35.20602	-101.83773	724 S Polk St	Amarillo	79101				0.95
 c4ea9257943c	Amarillo Inn and Suites	hotel	resort	35.19399	-101.81609	1911 E Interstate 40	Amarillo	79102	+18063728741	http://www.amarilloinnandsuites.com/		0.98
@@ -1145,12 +1187,9 @@ a1e652d1231c	Ambassador Hotel Amarillo	hotel		35.19566	-101.86925	3100 W Interst
 4ee803d3b76b	American Motor Inn	hotel		35.16238	-101.87195	4541 Canyon Dr	Amarillo	79110	+18063555611			0.88
 5eba10f7d97d	Americas Best Value Inn Amarillo Airport	hotel	motel	35.19184	-101.78951	3930 I-40	Amarillo	79103	+18063313930	http://www.americasbestvalueinn.com/bestv.cfm?idp=1859		1.00
 cb26038f1abe	Americas Best Value Inn Amarillo Downtown	hotel		35.19127	-101.82002	1620 E Interstate 40	Amarillo	79103	+18063187350	https://www.redlion.com		0.95
-97057642006e	Anand Inc	hotel		35.19349	-101.74078	8701 E Interstate 40	Amarillo	79118				0.95
 32374f9c60eb	Ashmore Inn & Suites	hotel		35.19494	-101.81145	2301 E Interstate 40	Amarillo	79104	+18063740033	http://www.ashmoresuites-amarillo.com/		0.99
-19f432a9983a	Astro Motel	hotel	motel	35.21255	-101.90205	5703 W Amarillo Blvd	Amarillo	79106	+18063523751	originrecruiting.com		0.75
 61cfc5121b15	Astro Motel	hotel	motel	35.20405	-101.90346	5703 W Amarillo Blvd	Amarillo	79106	+18063523751	https://astro-motel-amarillo.hotelsearchusa.com		0.92
 952b7855f3da	Atrea Inn | Hotel in Amarillo	hotel		35.19085	-101.87305	2035 Paramount Blvd	Amarillo	79109	+18068032590	http://www.atreainnamarillo.com/		1.00
-c2ed5493ccb3	Avkes Ii Llc	hotel		35.19185	-101.78160	4600 E Interstate 40	Amarillo	79103				0.95
 4f4fb97c32de	Baymont	hotel		35.19114	-101.81928	1700 E Interstate Dr	Amarillo	79103	+18063721425	https://www.wyndhamhotels.com/baymont/amarillo-texas/baymont-inn-amarillo-east/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A46371	Baymont by Wyndham	1.00
 a4694404d3bb	Baymont by Wyndham Amarillo West	hotel	resort	35.19033	-101.87669	3411 W Interstate 40	Amarillo	79109	+18063566800	https://www.wyndhamhotels.com/baymont/amarillo-texas/baymont-inn-and-suites-amarillo/overview?CID=LC:BU::BING:RIO:National:17786&iata=00065402		0.99
 09f816f8f9c2	Best Western Borger Inn	hotel		35.66506	-101.39951	206 S Cedar St	Borger	79007	+18064646938	https://www.bestwestern.com/en_US/book/hotel-rooms.44495.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44495	Best Western Hotels & Resorts	1.00
@@ -1161,8 +1200,6 @@ e656d0fe1608	BEST WESTERN Santa Fe	hotel	resort	35.18471	-101.78437	4600 I40 E	A
 0f3b928da946	Best Western Windsor Inn	hotel		35.84604	-101.97269	1701 S Dumas Ave	Dumas	79029	+18069359644	https://www.bestwestern.com/en_US/book/hotel-rooms.44481.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44481	Best Western Hotels & Resorts	1.00
 81550576013e	Bhavihayan Hospitality No. 1, Llc	hotel		35.19026	-101.92113	2100 S Coulter St	Amarillo	79106				0.95
 82846cea4a47	Big Texan Motel	hotel	motel	35.19335	-101.75431	7701 Interstate 40 Access Rd	Amarillo	79118	+18063725000	https://www.bigtexan.com/		0.99
-e4da77438258	Bolton Hospitality Lp	hotel		35.19360	-101.78642	4301 E Interstate 40	Amarillo	79104				0.95
-68e603b7353d	Borger Ambassador Inn	hotel	lodge	35.66726	-101.37997	900 E 3rd St	Borger	79007	+18062736000	http://www.BorgerAmbassadorInn.com/		0.94
 5cc215aadbea	Budget Inn	hotel		35.19134	-101.76268	6810 E Interstate 40	Amarillo	79118	+18063736871	http://www.budgetinnnassawadox.us		0.55
 8f7307e42b4c	Budget Inn	hotel		35.34148	-101.37255	400 US Highway 60	Panhandle	79068	+18065373443	http://www.budgetinnnassawadox.us		0.97
 92667bc0f3eb	Budget Inn	hotel	motel	35.33875	-101.38033	400 US-60	Panhandle	79068	+18065373443	http://budgetinn.com/	Budget Inn Myrtle Beach SC	0.92
@@ -1197,7 +1234,6 @@ bdad485ef4c6	Days Inn Amarillo	hotel		35.11861	-101.90729	8601 Canyon Dr	Amarill
 5e4c3b449698	Econo Lodge	hotel	motel	35.84547	-101.97287	1719 S Dumas Ave	Dumas	79029	+18069359098	https://www.choicehotels.com/texas/dumas/econo-lodge-hotels/tx334?pmf=yext&mc=llyxyxpx	Choice Hotels	0.98
 74561c2e0b88	Econo Lodge Amarillo East	hotel		35.19381	-101.80982	2401 I-40 E	Amarillo	79104	+18063726200	https://www.choicehotels.com/texas/amarillo/sleep-inn-hotels/tx710?mc=llbillpx&pmf=local		0.99
 7458f6d781fb	economy inn	hotel	motel	35.20352	-101.90397	6011 W Amarillo Blvd	Amarillo	79106	+18063552311	http://www.economyinn.us/	Economy Inn	0.99
-a704e01c46b3	elks lodge	hotel	lodge	35.65918	-101.40684	200 Opal St	Borger	79007	+18062742061	http://www.elks.org/		0.98
 40688077b4a9	Embassy Suites by Hilton	hotel		35.20757	-101.83239	550 S Buchanan St	Amarillo	79101	+18068035500	http://embassysuites3.hilton.com/en/hotels/texas/embassy-suites-amarillo-downtown-AMADOES/index.html	Embassy Suites by Hilton	1.00
 c60f124e3cd8	Everhome Suites Amarillo West - Medical Center	hotel		35.18900	-101.92735	11 Care Cir	Amarillo	79124	+18063182240	https://www.choicehotels.com/texas/amarillo/everhome-suites-hotels/txq58?mc=llgoxxpx&checkOutDate=2025-07-09		0.99
 ac1669b8f0d4	Executive Inn	hotel	motel	35.84470	-101.97445	1712 S Dumas Ave	Dumas	79029	+18069356443	https://www.motel6.com		0.75
@@ -1219,7 +1255,6 @@ d47b5459d952	Go Burger 2	hotel		35.16406	-101.84891	4500 S Washington St	Amarill
 c515dc86bfd2	Hampton Inn & Suites- Borger	hotel		35.65839	-101.40865	1415 W Wilson St	Borger	79007	+18062732494	https://www.hilton.com/en/hampton/	Hampton by Hilton	1.00
 8ef1f952004e	Hampton Inn and Suites Amarillo East	hotel		35.19384	-101.75222	7777 E I-40	Amarillo	79118	+18064182000	https://www.hilton.com/en/hotels/amaaehx-hampton-suites-amarillo-east/	Hampton by Hilton	1.00
 cf4e8718c1cb	Hampton Inn and Suites Amarillo West	hotel		35.18516	-101.91613	6901 Interstate Dr W	Amarillo	79106	+18064679997	http://hamptoninn.hilton.com/	Hampton by Hilton	0.97
-6965130ac46b	Harley House	hotel		35.17093	-101.86681	4106 S Georgia St	Amarillo	79110				0.95
 63d58e1df81c	Heritage Inn	hotel		35.66364	-101.39959	100 Bulldog Blvd	Borger	79007	+18062739556	http://heritageinn.net		0.92
 14134bf7b78a	Hilton Garden Inn Amarillo	hotel		35.18833	-101.95411	9000 Interstate 40 West	Amarillo	79124	806-355-4400	https://www.hilton.com/en/hotels/amagigi-hilton-garden-inn-amarillo/	Hilton Garden Inn	0.95
 68c440ed76c1	Hilton Garden Inn Amarillo	hotel		35.18817	-101.94166	9000 W I-40	Amarillo	79124	+18063554400	https://www.hilton.com/en/hotels/amagigi-hilton-garden-inn-amarillo/?SEO_id=FB-AMER-HGI-AMAGIGI	Hilton Garden Inn	1.00
@@ -1234,7 +1269,6 @@ a1fe6da026c0	Holiday Inn Express & Suites Dumas	hotel		35.84128	-101.97538	1932 
 36754543d00d	Home2 Suites by Hilton	hotel		35.19071	-101.93105	8251 West Amarillo Blvd.	Amarillo	79124	+18068037777	https://www.hilton.com/en/hotels/amaamht-home2-suites-amarillo/	Home2 Suites by Hilton	1.00
 7c112b0e05a3	Home2 Suites by Hilton Amarillo East	hotel		35.19327	-101.75349	7775 I-40	Amarillo	79118	+18063734101	https://www.hilton.com/en/hotels/amaclht-home2-suites-amarillo-east/		0.99
 801e183862a8	HomeTowne Studios Amarillo West	hotel	resort	35.18826	-101.91219	6800 I-40 W Bldg B	Amarillo	79118	+18063587943	https://www.redroof.com/extendedstay/hometownestudios/property/tx/amarillo/HTS1411		0.98
-ce0395b661be	HomeTowne Studios Amarillo West	hotel	motel	35.18688	-101.93319	6800 I-40 West, Building B	Amarillo	79106		https://www.redroof.com/extendedstay/hometownestudios/property/tx/amarillo/hts1411	HomeTowne Studios	0.80
 e7b4ad7cb614	HomeTowne Studios Amarillo West	hotel	resort	35.19682	-101.92294	6800 I-40 West, Building B	Amarillo	79118	+18065564488	https://www.redroof.com/extendedstay/hometownestudios/property/tx/amarillo/HTS1411		0.85
 cf778c020e18	Homewood Suites by Hilton Amarillo	hotel		35.18817	-101.94064	8800 I-40 W	Amarillo	79124	+18063552222	https://www.hilton.com/en/hotels/amahwhw-homewood-suites-amarillo/	Homewood Suites by Hilton	1.00
 e4f0a842f7ba	Hyatt Place Amarillo	hotel		35.18989	-101.94041	8985 W Amarillo Blvd	Amarillo	79124	+18063102700	https://www.hyatt.com/en-US/hotel/texas/hyatt-place-amarillo-west/amaza		1.00
@@ -1249,15 +1283,11 @@ b66eba5271bc	La Quinta Inn & Suites Amarillo Airport	hotel		35.19364	-101.73151	
 e493504ad4ce	La Quinta Inn Amarillo Mid-City	hotel		35.19178	-101.81885	1708 E Interstate 40	Amarillo	79103	+18065760816	http://www.laquintaamarilloairport.com/?cid=local_454	La Quinta by Wyndham	1.00
 b06654b90643	La Quinta Inn and Suites by Wyndham Dumas	hotel		35.84205	-101.97555	1912 S Dumas Ave	Dumas	79029	+18063954434	https://www.wyndhamhotels.com/laquinta/dumas-texas/la-quinta-dumas/overview?CID=LC%3ALQ%3A%3AGGL%3ARIO%3ANational%3A53281&iata=00093796	La Quinta by Wyndham	1.00
 47207e273201	La Quinta Inn by Wyndham Amarillo West Medical Center	hotel	resort	35.18914	-101.92139	2108 S Coulter St	Amarillo	79106	+18063526311	https://www.wyndhamhotels.com/laquinta/amarillo-texas/la-quinta-inn-amarillo-west-medical-center/overview?CID=LC:LQ::BING:RIO:National:53151&iata=00093796		1.00
-414a9ec77b34	Liedtke Lodge	hotel	lodge	35.05796	-101.77949		Lake Tanglewood					0.80
 b1ddc5c32b9f	Lonestar Inn & Suites	hotel		35.64630	-101.59217	205 E Broadway St	Fritch	79036	+18068573191	http://www.lonestarinnandsuites.com/		0.94
 601548b1e5dd	Luxury Inn & Suites	hotel		35.19430	-101.80386	2915 E I-40	Amarillo	79104	+18063728101	http://www.luxuryinntexas.com/		0.92
-e09c60129cd0	Masonic Lodge	hotel	lodge	35.20510	-101.85539	1512 W 10th Ave	Amarillo	79101	+18063724961	http://www.grandlodgeoftexas.org		0.94
 321ddc9ce9f5	McDaniel Manor	hotel		35.87156	-101.95551	225 Pear Ave	Dumas	79029				0.88
 e3a9893ead4c	Meera Management, Llc	hotel		35.19106	-101.81937	1700 E Interstate 40	Amarillo	79103				0.95
-c5f465ad4542	Mes Hotel Management	hotel		35.19096	-101.93908	2000 S Soncy Rd	Amarillo	79124				0.95
 3b3a86cffd7b	Microtel Inn & Suites	hotel	resort	35.19500	-101.81600	1501 Ross St	Amarillo	79102	+18063728373			0.92
-6575163060b2	Monarch Hospitality Concepts	hotel		35.84856	-101.97264	1525 S Dumas Ave	Dumas	79029				0.95
 a9c98b1112fb	Motel 6	hotel	motel	35.19322	-101.78654	4301 E I-40	Amarillo	79104	+18063733045	https://www.motel6.com/en/motels.tx.amarillo.9144.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305	Motel 6	0.99
 d26eac584179	Motel 6 Amarillo	hotel	motel	35.11848	-101.90761	8601 Canyon Dr	Amarillo	79110	+18062035171	http://www.motel6.com/	Motel 6	1.00
 7c0d598a6106	Motel 6 Amarillo West	hotel	motel	35.19083	-101.90539	6030 W Interstate 40	Amarillo	79106	+18063597651	http://www.motel6.com		0.77
@@ -1270,11 +1300,8 @@ ffa6a39abbe8	My Place Hotel	hotel		35.18874	-101.93304	2208 Cinema Dr	Amarillo	7
 11dbe2e92b4a	Oyo Hotel Amarillo I-40 Central	hotel		35.19410	-101.80385	2915 E Interstate 40	Amarillo	79104	+16282630418	https://www.oyolasvegas.com		0.83
 d6c5b4bbb473	Oyo Hotel Center	hotel		35.19449	-101.80397	2915 E I-40	Amarillo	79104	+18063728101	https://www.oyorooms.com/us/96757		0.86
 8a2c3e9b2d67	OYO Hotel Panhandle TX I-40	hotel		35.21521	-101.38288	9696 I-40, 0	Panhandle Tx	79068	+16262448274			0.85
-efe0b8ce3430	Palacio Armendariz	hotel		35.87211	-101.95438	301 Bailey Ave	Dumas	79029				0.71
 ac708fd2f741	Palo Duro Motel	hotel	motel	35.22179	-101.80406	2820 E Amarillo Blvd	Amarillo	79107	+18063832268	http://paloduromotel1.placeweb.site		0.92
-70e81e8c04d0	Paramount Hospitality Lp	hotel		35.19114	-101.87421	2032 Paramount Blvd	Amarillo	79109				0.95
 4c5f500c5164	Park Lane Apartments	hotel		35.15559	-101.88647	4301 SW 49th Ave	Amarillo	79109	+18063183901	http://www.amaparklane.com/		0.92
-80d3a0022d38	Playa Petroleum Inc	hotel		35.20343	-101.83446	905 S Fillmore St Ste 530	Amarillo	79101				0.95
 8b6255cbbdcb	Prinakul, L.l.c., A Texas Limited Liability Company	hotel		35.19287	-101.80846	2508 E Interstate 40	Amarillo	79103				0.95
 2d034858c8f7	Quality Inn	hotel		35.84653	-101.97407	1620 S Dumas Ave	Dumas	79029	+18064210060	https://www.choicehotels.com/texas/dumas/quality-inn-hotels/tx350	Choice Hotels	1.00
 1b593985bdeb	Quality Inn & Suites West	hotel		35.18895	-101.91227	6800 W Interstate 40	Amarillo	79106	+18063587943	http://www.qualityinn.com		0.99
@@ -1290,8 +1317,6 @@ e359af29ab3e	Redwood Motel & Apartments	hotel	motel	35.22214	-101.80574	2801 E A
 7f5c492c089a	Relax Inn	hotel	motel	35.19080	-101.90546	6030 Interstate Dr W	Amarillo	79106	+18063540888	https://www.hotelcoupons.com/hotels/texas/amarillo/relax-inn-amarillo/7d58f688		0.91
 a42fe85ee052	Residence Inn by Marriott Amarillo	hotel	resort	35.18924	-101.91142	6700 Interstate 40 West	Amarillo	79106	+18063542978	https://www.marriott.com/en-us/hotels/amari-residence-inn-amarillo/overview/?scid=ba372e19-3116-406f-8c8c-cd1679a20d2d		0.95
 8485cab312c1	Rest Inn Amarillo & Sunburst Banquet Hall	hotel	motel	35.19390	-101.80467	E I-40	Amarillo	79104	+18063728101			0.88
-7d8e921fbb56	Riverfalls Lodge, B&B, and Retreat	hotel	lodge	35.07010	-101.76003	6901 Wild Horse Trl	Amarillo	79118	+18066783737	http://riverfallsbandb.com/		0.64
-6dd4fcd4e71f	Rk Hotels Ltd	hotel		35.18787	-101.94012	8800 W Interstate 40	Amarillo	79124				0.95
 cd7e16bb21fe	Rl Hospitality Group Llc	hotel		35.19184	-101.78939	3930 E Interstate 40	Amarillo	79103				0.95
 a143302ca9f7	Route 66 Hotels Ltd	hotel		35.18791	-101.88282	36 Western Plaza Dr	Amarillo	79109		https://www.route66innamarillo.com		0.95
 301ca9576fd3	Route 66 Inn	hotel	motel	35.22169	-101.80531	2806 E Amarillo Blvd	Amarillo	79107	+18063833318	http://route66innamarillo.com/		0.99
@@ -1330,13 +1355,11 @@ b05668a8167b	The Cactus Cove Inn and Suites	hotel		35.19373	-101.80872	2501 E In
 496fc786ed99	The Executive Inn Suites - Double Room	hotel		35.19017	-101.92077		Amarillo		+18063527222	http://www.executiveinnamarillo.com		0.99
 74578a70bc16	The Granite at Olsen Park	hotel		35.17782	-101.88461	3318 S Western St	Amarillo	79109	+18063556411	http://www.thegraniteatolsenpark.com/		0.92
 1d7f93fefe96	The Kensington Apartments	hotel		35.19799	-101.90315	1524 Bell St	Amarillo	79106	+18063551691	http://fimcrealty.com/		0.60
-036018c11f13	The Lodge at Cadillac Creek	hotel	lodge	35.19729	-101.95911	66 Helium Rd	Amarillo	79124	+18062365527	http://Thelodgeatcadillaccreek.com/		0.72
 3fd8a2cb700e	The Residence at 600	hotel		35.20761	-101.83910	600 S Tyler St #101	Amarillo	79101	+18063733111	https://www.residenceat600.com/		0.92
 467eef4caa5c	TownePlace Suites by Marriott Amarillo West/Medical Center	hotel		35.18536	-101.91553	6807 I-40	Amarillo	79106	+18062425777	https://www.marriott.com/en-us/hotels/amats-towneplace-suites-amarillo-west-medical-center/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	TownePlace Suites by Marriott	1.00
 e3d9884e9e98	Travelodge Amarillo West	hotel		35.19081	-101.87265	2035 Paramount Blvd	Amarillo	79109	+18063533541	https://www.wyndhamhotels.com/travelodge/amarillo-texas/travelodge-amarillo-west/overview?CID=LC:TL::BING:RIO:National:09639&iata=00065402		0.98
 8b454aac41b3	Triangle Motel	hotel	motel	35.22243	-101.74784	7954 E Amarillo Blvd	Amarillo	79107	+18066736180			0.92
 0c8e123ae95f	Tru by Hilton Amarillo West	hotel		35.19019	-101.94004	2202 S Soncy Rd	Amarillo	79124	+18068037202	http://tru3.hilton.com/en/hotels/texas/tru-by-hilton-amarillo-west-AMATXRU/index.html	Tru by Hilton	1.00
-4127409a1501	Unity Masonic Lodge No. 1242	hotel	lodge	35.66202	-101.39129	210 W Grand St	Borger	79007	+18065840695	https://sites.google.com/view/unity-lodge-1242/home		0.92
 cc960c471954	Value Place Hotel Amarillo	hotel		35.19331	-101.78175	4601 E Interstate 40	Amarillo	79104	+18063420222	https://www.choicehotels.com		0.55
 743b59ab01e8	Van Country Rentals	hotel		35.20044	-101.81165	2301 SE 10th Ave	Amarillo	79104	+18063768267	https://www.vancountry.net		0.92
 69a790f6e980	Vibe Hotel Hobart	hotel		35.22080	-101.83019	734 N Pierce St	Amarillo	79107	+18063767726	https://vibehotels.com/book-accommodation/hobart/hotel-hobart/?promo_code=BOOKDIRECT&utm_source=googleplaces&utm_medium=organic&utm_campaign=googleplaces&utm_content=vibe-hobart&utm_term=plcid_15164482682340546405		0.76
@@ -1344,7 +1367,6 @@ b26672b811b2	Wagon Wheel motel	hotel	motel	35.22145	-101.79486	3602 E Amarillo B
 84f6883f0fea	Wild Plum Ranch	hotel		35.54655	-101.08624	9998 County Road 25	Skellytown	79080	+13039560277			0.60
 b5c2e8f872a7	Woods Inn	hotel		35.22178	-101.78276	4600 E Amarillo Blvd	Amarillo	79107	+18063768148	https://thewoodsinn.com		0.92
 74a14efa08c8	WoodSpring Suites Amarillo East I-40	hotel		35.19347	-101.78187	4601 E I-40	Amarillo	79104	+18063420222	https://www.woodspring.com/extended-stay-hotels/locations/texas/amarillo/woodspring-suites-amarillo	WoodSpring Suites	0.99
-4f3adedc10ff	Xtacy Lounge	hotel		35.22257	-101.77313	5331 E Amarillo Blvd	Amarillo	79107				0.95
 42dc290dd8c0	4D Ag Fashion	office	clothing company	35.04033	-101.90259	16650 Robin Rd	Canyon	79015	+18065578406	https://www.4dagfashion.com/		0.97
 86eb959dbb68	A-Town Standby Generators	office	energy company	35.14122	-101.89023	6309 Canyon Dr	Amarillo	79110	+18068772463	http://www.atowngen.com/		0.92
 34f5d294d3c2	Advanta Us	office		35.21044	-101.83613	301 S Polk St Ste 860	Amarillo	79101	+18445293410			0.75
@@ -1358,7 +1380,6 @@ f9741eb66a62	Amarillo Plastic Fabricators	office	plastics company	35.21124	-101.
 e6ceae4800a8	Axigent Technologies Group	office	information technology company	35.20554	-101.83895	203 SW 8th Ave	Amarillo	79101	+18064632442	http://www.axigent.net/		0.92
 6f4014f6fea5	Ben E Keith	office		35.23412	-101.73862	2300 N Lakeside Dr	Amarillo	79108	+18063766257	http://www.benekeith.com		0.77
 d567e6c0fe0d	Bobby's Carpet Care	office		35.24384	-101.89407	5236 Hester Dr	Amarillo	79124	+18066765431	http://www.carpetcleanersamarillo.com		0.92
-919b803e1c0f	Boost Mobile	office	telecommunications company	35.22258	-101.81548	1501 E Amarillo Blvd	Amarillo	79107	+18066860835	https://www.boostmobile.com/locations/bd/boost-mobile-tx-amarillo-1501-e-amarillo-blvd-79107/?utm_source=facebook&utm_medium=lastmile&utm_campaign=0018000001YhWr7AAF	Boost Mobile	0.62
 344cf60fb302	Cabot Pampa Development and Manufacturing Center	office		35.51073	-101.03404	8430 County Road 3	Pampa	79065	+18066613217			0.84
 64397f59538c	Computer Transition Services, Inc.	office	information technology company	35.20737	-101.83880	817 S Polk St Ste 101	Amarillo	79101	+18006872874	https://www.ctsinet.com/locations/amarillo-texas/		0.97
 c4c27cd54b38	Continental Carbon Jobs - Sunray	office	industrial company	35.98099	-101.89121	11702 Carbon Black Rd	Sunray	79086	+18069223005	http://www.continentalcarbon.com/sunray.asp		0.56
@@ -1398,7 +1419,6 @@ c2aea61ff827	Northwestern Mutual	office		35.18526	-101.87508	2600 Paramount Blvd
 b2dc1a56bce9	Run Business Solutions, runbiz	office	information technology company	35.19142	-101.94727	9515 W Amarillo Blvd	Amarillo	79124	+18063222150	https://www.run.biz/		0.92
 018e35bb926d	Sambasiva R. Marupudi MD	office		35.20931	-101.91146	800 Quail Creek Dr	Amarillo	79124	+18063587911	http://www.drmarupudi.com		0.92
 a24d239007bf	Servi-Tech Laboratories	office		35.13652	-101.90130	6921 Bell St	Amarillo	79109	+18066770093	http://www.servitechlabs.com		0.92
-9acad7fc5101	Shelton Systems	office	information technology company	35.17997	-101.94885	7306 Sw 34th Ave Ste 1 Pmb 157	Amarillo	79121				0.75
 be9f92b432fd	Smith Southern	office		35.19760	-101.82651	1400 S Arthur St	Amarillo	79102	+18063316748	http://www.smithsouthern.com		0.77
 8cce629f8768	Snippy Online, Llc	office	information technology company	35.17859	-101.90103	3321 Bell St Ste D	Amarillo	79106	+18063180850			0.75
 0e971eb31f1d	Speakeasy Custom Garage	office	auto company	35.25842	-101.83282	4801 Rose Dr	Amarillo	79108	+18064710127			0.67
@@ -1407,7 +1427,6 @@ be9f92b432fd	Smith Southern	office		35.19760	-101.82651	1400 S Arthur St	Amarill
 c4a79d5831d8	Suddenlink Communications	office	telecommunications company	35.18638	-101.88175	2417 Hobbs Rd	Amarillo	79109	+18885923861	http://www.suddenlink.com/		0.92
 d1b3312aa005	Sumner Insurance Agency	office		35.19040	-101.88498	4215 SW 21st Ave Ste B	Amarillo	79106	+18063507767	http://www.amarilloinschoice.com		0.92
 06b24a8fcee7	Texas Heartland Insurance Services	office		35.18418	-101.87804	3505 Olsen Blvd Ste 214	Amarillo	79109	+18064100984	http://texasheartlandins.com		0.77
-2613c3ebebac	Texas Oncology-Amarillo Cancer Center	office	pharmaceutical company	35.19289	-101.92942	1826 Point West Pkwy	Amarillo	79124	+18063588654	https://www.texasoncology.com/cancer-centers/amarillo/amarillo-cancer-center/medical-oncology		0.85
 9058911931dd	Texas Oncology-Amarillo Cancer Center	office	pharmaceutical company	35.20503	-101.92194	1826 Point West Pkwy	Amarillo	79124	+18063588654	https://www.texasoncology.com/cancer-centers/amarillo/amarillo-cancer-center/medical-oncology		0.98
 d6ef001c85d3	The Castle of O'driscoll	office	private association	35.22132	-101.75855	East side #22	Amarillo	79107				0.72
 851592c75a16	The Chase Tower	office	coworking space	35.20739	-101.83882	600 S Tyler St	Amarillo	79101	+18063980792	https://www.amarilloclub.net		0.77
@@ -1416,9 +1435,6 @@ d6ef001c85d3	The Castle of O'driscoll	office	private association	35.22132	-101.7
 273b1f4c18d3	Twenty-two Ten, Ltd.	office		35.20879	-101.83386	411 S Fillmore St	Amarillo	79101	+18063730200	http://www.twentytwoten.com		0.75
 93e5afa22f80	Two Fish Technology	office	information technology company	35.15136	-101.91954	5215 S Coulter St Ste 300	Amarillo	79119	+18068396669	http://www.twofishtechnology.com/		0.98
 499ea81333d1	United Fiberglass Inc.	office	plastics company	35.17636	-101.70531	3625 Pullman Rd	Amarillo	79118	+18063352351	http://ufitanks.com/		0.92
-19be3c7429fb	Valero	office	energy company	35.20755	-101.65387		Amarillo	79118	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/890-S-FM-1912/0000026353	Valero	0.92
-6cb7f412d3ed	Valero	office	energy company	35.21473	-101.90725		Amarillo	79106	+12103452000	http://www.valero.com	Valero Energy	0.92
-78d1845ca1d4	Valero	office	energy company	35.17620	-101.93773		Amarillo	79119	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/3401-S-SONCY-RD/0000001913	Valero Energy	0.99
 58a5fe21f507	Valero Energy	office		35.13294	-101.89722	7201 Canyon Dr	Amarillo	79110	+18063555544	http://www.valero.com	Valero Energy	0.95
 e103ccba62a2	Vinson Process Controls	office		35.17749	-101.94128	8910 Sw 34th Ave Ste 600	Amarillo	79124	+18004206571	https://www.vinsonprocess.com		0.65
 e3d9efd56394	Virden Perma-bilt Co	office	plastics company	35.17004	-101.86868	2821 Mays St	Amarillo	79109	+18063522761	https://www.virdenproducts.com		0.92
@@ -1491,9 +1507,6 @@ fb67c431f02d	Bubba's 33	restaurant	bar and grill restaurant	35.19378	-101.86904	
 ab72eef4dce1	Buns Over Texas	restaurant	burger restaurant	35.17594	-101.90369	6045 SW 34th Ave	Amarillo	79109	+18063586808	http://www.bunsovertexas.com/		0.96
 45282735aaab	Burger Barn	restaurant		35.29589	-101.83287	8528 N US Highway 287	Amarillo	79108				0.97
 f9da82f89093	Burger barn	restaurant		35.27212	-101.83393	8528 Dumas drive	Amarillo	79108	+18063819499			0.60
-0dd2bbbee5da	Burger King	restaurant	burger restaurant	35.19204	-101.88522	4210 Interstate Dr W	Amarillo	79106	+18063599373	https://burgerking.com/store-locator/store/4796	Burger King	0.99
-b707934e9944	Burger King	restaurant	burger restaurant	35.22231	-101.82942	415 W Amarillo Blvd	Amarillo	79107	+18063741011	https://burgerking.com/store-locator/store/1583	Burger King	0.99
-f53f69f8ff1e	Burger King	restaurant	burger restaurant	35.19676	-101.81721	1314 Ross St	Amarillo	79102	+18063742387	https://burgerking.com/store-locator/store/3432	Burger King	0.99
 96ab35f57242	BurgerFi	restaurant	burger restaurant	35.16214	-101.93812	4413 S Soncy Rd	Amarillo	79119	+18065760712	https://order.burgerfi.com/locations/TX/amarillo/46561		0.92
 341be8e8d2e4	Burrito Stop	restaurant	texmex restaurant	35.20437	-101.83694	114 SE 9th Ave	Amarillo	79101	+18066745109	https://burrito-stop.square.site/		0.99
 f5a743c8d019	Butterlove Dinnerhouse	restaurant		35.17476	-101.90293	3440 Bell St Unit 130	Amarillo	79109	+18064188966	https://butterlove.com		0.96
@@ -1524,7 +1537,6 @@ baa3cbb02e07	Chicken Salad Chick	restaurant	sandwich shop	35.19339	-101.86459	26
 58d11dfa1c40	China Buffet	restaurant	chinese restaurant	35.86705	-101.97349	125 N Dumas Ave	Dumas	79029	+18069353339	http://chinabuffet.net	China Buffet	0.99
 d1eb8bace150	China Dynasty | Chinese • Buffet	restaurant	chinese restaurant	35.67759	-101.39515	Megert Ctr, 1030 Megert Ctr	Borger	79007	+18062732213	http://www.chinadynasty-cmh.com/		0.96
 3784c73e5e5b	China Max	restaurant	chinese restaurant	35.18457	-101.92917	7701 I-40 Frontage Rd	Amarillo	79121				0.96
-ede5d8386a95	Chipotle Mexican Grill	restaurant	mexican restaurant	35.18869	-101.86670	2414 S Georgia St	Amarillo	79109	+18065760764	https://locations.chipotle.com/tx/amarillo/2414-s-georgia-st?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D2304	Chipotle Mexican Grill	0.99
 521daa95889c	Chiyo's	restaurant	asian restaurant	35.22292	-101.82993	810 N Pierce St	Amarillo	79107	+18063746146	http://areaguides.net		0.99
 94ebfeee6891	Chiyo's	restaurant	asian restaurant	35.16545	-101.88844	4313 Teckla Blvd	Amarillo	79109	+18064689385	https://amarillomenu.com/chiyos-oriental-restaurant-menu		0.96
 f395e988441b	Chontos Bar & Grill	restaurant	bar and grill restaurant	35.16467	-101.92977		Amarillo					0.73
@@ -1577,13 +1589,6 @@ f555f4de5540	Diana's Burritos	restaurant	mexican restaurant	35.22170	-101.84237	
 b90d8ea65e52	Dickey's Barbecue Pit	restaurant	barbecue restaurant	35.19351	-101.71580	11215 E I-40	Amarillo	79113	+18065032918	https://amarillotx.orderdickeysbbq.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.85
 c6fa4fb5c97e	Dickey's Barbecue Pit	restaurant	barbecue restaurant	35.14623	-101.90322	6015 Hillside Rd	Amarillo	79109	+18063220127	https://www.dickeys.com/locations/Texas/Amarillo/amarillo-hillside-rd	Dickey's Barbecue Pit National	0.99
 a4edb0c5de52	DJ's Burgers	restaurant	burger restaurant	35.21408	-101.86266	2309 SW 3rd Ave	Amarillo	79106	+18063723134	https://d-js-burgers.hub.biz/		0.92
-105ae0ba83a0	Domino's	restaurant	pizza restaurant	35.19276	-101.80532	1701 S Nelson St	Amarillo	79103	+18063766111	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
-58dd949d9960	Domino's	restaurant	pizza restaurant	35.19040	-101.91978	2015 S. Coulter Street	Amarillo	79106	+18063983030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
-73d1f353fa14	Domino's	restaurant	pizza restaurant	35.84193	-101.97074	300 E 19th St #300	Dumas	79029	+18069340030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.94
-cb40efc5a3f1	Domino's	restaurant	pizza restaurant	35.19339	-101.86403	2604 Wolflin Ave.	Amarillo	79109	+18063587181	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
-ecdf8a929ce0	Domino's	restaurant	pizza restaurant	35.14700	-101.90061	5914 Hillside Rd	Amarillo	79109	+18063548889	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.97
-24a16a400699	Domino's Pizza	restaurant	pizza restaurant	35.14763	-101.86578	5895 S Georgia St Ste 101	Amarillo	79118	+18066412414	https://www.dominos.com/en/?redirect=homepage&utm_source=locallistings&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
-ba6775a4b04f	Domino's Pizza	restaurant	pizza restaurant	35.19971	-101.81608	1007 Ross St	Amarillo	79102	+18063766111	http://www.dominos.com		0.98
 6d35a335230d	Dona Juanita's	restaurant	mexican restaurant	35.22179	-101.81157	2208 E Amarillo Blvd	Amarillo	79107	+18062202610	http://areaguides.net		0.99
 e5e89340b255	Double XL Ranch	restaurant	steakhouse	35.83027	-101.66362	7900 Highway 152	Stinnett	79083	+18069353787	https://xxlsteakhouse.yolasite.com		0.77
 c1557c705513	Double XXL Ranch & Steakhouse	restaurant	steakhouse	35.84965	-101.66821	7900 Highway 152	Stinnett	79083	+18069353787	http://xxlsteakhouse.yolasite.com/		0.98
@@ -1631,14 +1636,11 @@ ce71160a289e	Fav’s	restaurant	salad bar	35.17794	-101.91972	3333 S Coulter St 
 3d6bfe373b38	Feed Me	restaurant	vegan restaurant	35.22137	-101.87457	3407 W Amarillo Blvd	Amarillo	79106	+18066000986	https://veganrestaurantamarillo.com		0.92
 7b5e91b594d3	Fernando's Mexican Restaurant & Cantina	restaurant	mexican restaurant	35.18013	-101.86711	2740 Westhaven Vlg	Amarillo	79109	+18063560342	http://www.fernandosomaha.com/		0.79
 e5e5ed8595f7	Fire Slice Pizzeria	restaurant	pizza restaurant	35.17821	-101.92206	7306 SW 34th Ave	Amarillo	79121	+18063312232	https://bit.ly/fireslicereservations		0.98
-0813c2a026cd	Firehouse Subs	restaurant	sandwich shop	35.17327	-101.93855	3450 S. Soncy Rd Suite #100	Amarillo	79119	+18063980056	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1749	Firehouse Subs	0.99
-3ff57cca570f	Firehouse Subs Wolfin Square	restaurant	sandwich shop	35.19461	-101.86552	1901 S Georgia St	Amarillo	79109	+18064186651	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1594	Firehouse Subs	0.99
 212dc7998e7e	Fisher Enterprises, Ltd	restaurant		35.17997	-101.94885	7306 Sw 34th Ave Ste 1	Amarillo	79121		http://www.fisherentfix.com		0.95
 1c6c2b47214e	Five Guys	restaurant	burger restaurant	35.19005	-101.86571	2313 S Georgia St Spc 37	Amarillo	79109	+18063980582	https://restaurants.fiveguys.com/2313-south-georgia-st	Five Guys	0.97
 5385c7359806	Flamingos Latin Bar and Grill	restaurant	latin american restaurant	35.22224	-101.82611	701 E Amarillo Blvd	Amarillo	79107	+18063677304	http://flamingos-grill.jany.io		0.99
 821d932cae01	Food Bayou	restaurant	cajun and creole restaurant	35.86576	-101.97761	402 W 1st St	Dumas	79029	+18555122586	http://www.foodbayou.com		0.55
 12503cd4209e	Freddie's Fish and Grill	restaurant	seafood restaurant	35.22792	-101.83208	1309 Dumas Dr	Amarillo	79107	+18063733581			0.92
-d29e17f6db4d	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	35.15055	-101.91959	5225 Coulter St S	Amarillo	79119	+18068039460	https://www.freddys.com/location/amarillo-s-coulter-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
 e6efdb1360ff	Fuegos Restaurant	restaurant	mexican restaurant	35.68420	-101.38973	1400 N Main St	Borger	79007	+18062749574			0.67
 4d04859a2311	Fun Noodle Bar	restaurant	asian fusion restaurant	35.19102	-101.86574	2219 S Georgia St	Amarillo	79109	+18068032219	https://www.ezordernow.com/amarillo-asian-fun-noodle-bar-amarillo-801994		0.99
 5de2b9c648d0	Funky Chicken	restaurant		35.18374	-101.92812	7701 W Interstate 40 Ste 240	Amarillo	79121				0.95
@@ -1667,8 +1669,6 @@ ba4c6abf90ff	Grillz Gone Wild	restaurant	american restaurant	35.07293	-101.91766
 a1ac6cbb51e2	Groovy Snow Cones	restaurant		35.15175	-101.88412	Ashley Furniture HomeStore, 5220 S Western St	Amarillo	79109	+18062207672			0.81
 1250fe8affab	Grumpy's Grill 1	restaurant		35.82634	-101.44341	612 S Main St	Stinnett	79083	+18067170456	http://www.grumpysgrill.com		0.83
 9d80ab7c14b6	Hacienda Meche	restaurant	mexican restaurant	35.20685	-101.83746	626 S Polk St	Amarillo	79101	+18062364288			0.99
-255d77d486e2	Hangar 54 Pizza	restaurant	pizza restaurant	35.20203	-101.09950	203 FM 2300	Groom	79039	+18062791126	https://hangar54.pizza/location/garrison-food-mart-groom-groom-tx/		0.85
-58b066ed5db4	Hangar 54 Pizza	restaurant	pizza restaurant	35.20366	-101.10683	203 FM 2300	Groom	79039	+18062480100	https://hangar54.pizza/location/garrison-food-mart-groom-groom-tx		0.77
 d4e5f777611e	Hangar 54 Pizza	restaurant	pizza restaurant	35.21059	-101.09989	203 FM 2300	Groom	79039	+18062791126	https://hangar54.pizza/location/garrison-food-mart-groom-groom-tx/	Hangar 54 Pizza	0.96
 98bd26e95bbe	Happy Burrito	restaurant	mexican restaurant	35.22172	-101.82312	908 Amarillo Blvd E	Amarillo	79107	+18067030477	https://food.google.com/chooseprovider?restaurantId=%2Fg%2F1vhkk_g8		0.96
 8a54eb151f30	Harbor Point	restaurant	american restaurant	35.06199	-101.78262	100 N Shore Dr	Lake Tanglewood	79118	+18066223121	https://www.laketanglewood.org		0.78
@@ -1705,13 +1705,9 @@ bd586de16fb1	Jackson Square Grill	restaurant		35.20042	-101.84227	400 SW 14th Av
 a2d42c1769e4	Jason's Deli	restaurant	delicatessen	35.19178	-101.86418	2600 Wolflin Village	Amarillo	79109	+18068039160	https://www.jasonsdeli.com/	Jason's Deli	1.00
 e0227790b0c6	Jeff The Burrito Guy	restaurant	latin american restaurant	35.14727	-101.90084	5901 Bell St	Amarillo	79109	+18063835658			0.65
 cf1163ebfe39	Jerry's Cafe	restaurant	texmex restaurant	35.19450	-101.79502	1601 S Grand St	Amarillo	79104	+18063744335	http://jerryscafenyc.com		0.96
-c07aee1c5fbc	Jersey Mike's Subs	restaurant	sandwich shop	35.19012	-101.86567	2311 S Georgia St	Amarillo	79109	+18067310731	https://www.jerseymikes.com/15071/amarillo-tx	Jersey Mike's Subs	0.99
 7867fc192db3	Jesse's Burritos	restaurant	mexican restaurant	35.66837	-101.38998	317 N Main St	Borger	79007	+18062738275	http://jessesburritos.co/		0.95
 7bbc023e5247	Jesse's Pizza Co.	restaurant	pizza restaurant	35.64273	-101.58608	424 E Broadway St	Fritch	79036	+18068570098	http://jessespizzacompany.com/		0.96
 37c20d168f98	Jesse's Pizza Co. - Borger	restaurant	pizza restaurant	35.66817	-101.39478	530 W 3rd St	Borger	79007	+18062747200	http://www.jessespizzacompany.com		0.92
-5d693280df43	Jimmy John's	restaurant	sandwich shop	35.18774	-101.93876	2330 S Soncy Rd	Amarillo	79124	+18063549200	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-1422.html	Jimmy John's	0.99
-adac6dea7df0	Jimmy John's	restaurant	sandwich shop	35.18482	-101.88374	2807 S Western Ave	Amarillo	79109	+18063524540	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-2624.html	Jimmy John's	0.96
-f6d1b6df985d	Jimmy John's	restaurant	sandwich shop	35.20512	-101.83270	790 S Buchanan St Suite 110	Amarillo	79101	+18068039070	https://locations.jimmyjohns.com/tx/amarillo/sandwiches-3905.html	Jimmy John's	1.00
 7b21959a2aab	Jimmy's Egg	restaurant	breakfast and brunch restaurant	35.17319	-101.93867	3450 S Soncy Rd	Amarillo	79119	+18064101810	https://jimmysegg.com/locations/amarillo-tx-s-soncy-road/	Jimmy's Egg	0.92
 bae55a204d81	Jimmy's Egg	restaurant	breakfast and brunch restaurant	35.19075	-101.86571	2225 S Georgia St	Amarillo	79109	+18064186752	https://jimmysegg.com/locations/amarillo-tx-georgia-street/	Jimmy's Egg	1.00
 d3849f47d836	Joe Taco on Wallace	restaurant	texmex restaurant	35.19486	-101.92332	7312 Wallace Blvd	Amarillo	79106	+18063318226	http://www.joetaco.net/	Joe Taco Amarillo	0.97
@@ -1757,22 +1753,10 @@ ee0e3e243a9e	Lemongrass Sushi and Pho	restaurant	asian fusion restaurant	35.1887
 82b2f556b249	Lets Eat	restaurant	burger restaurant	35.20469	-101.84499	streets everywhere	Amarillo	79101	+18065843924			0.79
 bdece3284df8	Lin's Grand Buffet	restaurant	buffet restaurant	35.18803	-101.93531	8440 W Interstate 40	Amarillo	79106	+18063505688	http://www.linsgrandbuffet.com	Lin's Grand Buffet	0.99
 96d9afc2f081	Lisas Kitchen	restaurant		35.66919	-101.38216	403 Delaware St	Borger	79007				0.65
-3ad3ad1f9cc5	Little Caesars	restaurant	pizza restaurant	35.17773	-101.81530	1900 Se 34 Th Ave Suite 26	Amarillo	79118	+18064188915	https://littlecaesars.com/en-us/store/10809	Little Caesars	0.97
-4eacd99cbc44	Little Caesars	restaurant	pizza restaurant	35.22220	-101.81751	1401 E Amarillo Blvd	Amarillo	79107	+18063734507	https://littlecaesars.com/en-us/store/2216	Little Caesars	0.99
-b4ea19501263	Little Caesars	restaurant	pizza restaurant	35.17601	-101.90269	3400 Bell St	Amarillo	79109	+18063521968	https://littlecaesars.com/en-us/store/10398	Little Caesars	0.99
-088360220cd3	Little Caesars Pizza	restaurant	pizza restaurant	35.20489	-101.86734	2710 SW 10th Ave Space 400	Amarillo	79102	+18064141941	https://littlecaesars.com/en-us/store/12236	Little Caesars	0.96
-19b4f8e20202	Little Caesars Pizza	restaurant	pizza restaurant	35.14584	-101.92069	6020 Coulter St S	Amarillo	79119	+18063503373	https://littlecaesars.com/en-us/store/12632		0.99
-51f935d574a7	Little Caesars Pizza	restaurant	pizza restaurant	35.66394	-101.39869	302 S Cedar St	Borger	79007	+18063953011	https://littlecaesars.com/en-us/store/12329	Little Caesars	0.96
-70cf56fc9a82	Little Caesars Pizza	restaurant	pizza restaurant	35.15096	-101.86636	5610 S Georgia St	Amarillo	79110	+18064142456	https://littlecaesars.com/en-us/store/11901	Little Caesars	0.99
-cc72d68dbf8c	Little Caesars Pizza	restaurant	pizza restaurant	35.84916	-101.97296	1521 S Dumas Ave	Dumas	79029	+18064210462	https://littlecaesars.com/en-us/store/11222	Little Caesars	0.96
 f48be63d75a6	Little Laos	restaurant	thai restaurant	35.21106	-101.87980	3811 SW 6th Ave	Amarillo	79106	+18068030373			0.92
 cc4a815cfd8a	Livewellfit	restaurant		35.17865	-101.90424	6040 SW 33rd Ave	Amarillo	79106	+18063418679	https://www.live-well-fit.com		0.92
 47c29330d5c5	Lonchera 2 Hermanos	restaurant	spanish restaurant	35.20149	-101.82185	1301 SE 10th Ave	Amarillo	79102				0.71
 2eb18e5a6872	Lone Star	restaurant	american restaurant	35.67733	-101.39478	1020 Megert Cir	Borger	79007	+18062747045	http://sutphensbbqborger.com		0.75
-08f466d5fa84	Long John Silver's	restaurant	seafood restaurant	35.16105	-101.88331	4615 S Western St	Amarillo	79109	+18063537021	http://www.ljsilvers.com/		0.92
-907ca9e64051	Long John Silver's	restaurant	seafood restaurant	35.13266	-101.90150	7145 Bell St	Amarillo	79109	+18063532875	http://www.longjohnsilvers.com/		0.92
-b80ac72d9602	Long John Silver's	restaurant	seafood restaurant	35.68354	-101.37817	504 Borger Shopping Plz	Borger	79007	+18062737181	http://www.longjohnsilvers.com/		0.92
-4bfa051ce93f	LongHorn Steakhouse	restaurant	steakhouse	35.18788	-101.93193	8200 W Interstate 40	Amarillo	79106			LongHorn Steakhouse	0.99
 f6458f21a4c9	LongHorn Steakhouse	restaurant	steakhouse	35.18778	-101.93192	8200 W Interstate 40	Amarillo	79106	+18063580640	https://www.longhornsteakhouse.com/locations/tx/amarillo/amarillo/5552?cmpid=br%3Alh_ag%3Aie_ch%3Asoc_ca%3ALHFB_sn%3Afacebook_gt%3Aamarillo-tx-5552_pl%3Alocurl_rd%3A1477	LongHorn Steakhouse	1.00
 727edb7046fc	Lorene's Mexican Kitchen	restaurant		35.69038	-101.39587	1600 N Main St	Borger	79007	+18062738474	http://loreneskitchen.com/		0.77
 d25a8bbac5eb	Los Braceros Mexican Restaurant	restaurant	mexican restaurant	35.17892	-101.90205	3303 Bell St	Amarillo	79106	+18063550889	https://losbraceros.com/		0.99
@@ -1798,8 +1782,6 @@ de4f39ea31ee	Mariscos y Birria El Sinaloa	restaurant	mexican restaurant	35.86512
 c968cf1e5884	Marybels Taco Stand	restaurant	mexican restaurant	35.22214	-101.80960	2405 E Amarillo Blvd	Amarillo	79107	+18065704896	http://www.restaurant.com/marybels-mexican-restaurant-amarillo-pid		0.70
 46d8daa3bc6b	McAlister's Deli	restaurant	delicatessen	35.17620	-101.93683	8605 SW 34th Ave	Amarillo	79121	+18063557500	https://locations.mcalistersdeli.com/tx/amarillo/8605-sw-34th-avenue?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
 ba57196b5fd2	McAlister's Deli	restaurant	sandwich shop	35.19180	-101.88248	4104 W Interstate 40	Amarillo	79102	+18063523354	https://www.mcalistersdeli.com/locations/tx/amarillo/deli-1400		0.98
-c4b2e27e65c3	McDonald's	restaurant	burger restaurant	35.17003	-101.86347	4215 Canyon Dr	Amarillo	79110	+18063520222	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/4215-canyon-dr/31000.html?cid=RF:YXT:RoN::Clicks		0.92
-f14da3a23c07	McDonald's	restaurant	burger restaurant	35.22279	-101.74216	715 Lakeside Dr	Amarillo	79103	+18063353391	https://www.mcdonalds.com/us/en-us/location/tx/amarillo/715-lakeside-dr/28414.html?cid=RF:YXT:RoN::Clicks		0.85
 aab60d069f15	Me So Noodle	restaurant	sushi restaurant	35.19102	-101.86574	2219 S Georgia St	Amarillo	79109	+18068032219	https://www.mesonoodleamarillotx.com/		0.99
 5ed0e83d9c83	Meme's D.O.C.	restaurant	diner	35.21135	-101.87856	3700 SW 6th Ave	Amarillo	79106	+18063221402	https://www.memes-d-o-c.ueniweb.com		0.96
 c72975e0f31c	MESA Grill	restaurant	bar and grill restaurant	35.11222	-101.91203	9400 Canyon Drive	Amarillo		+18063512647	https://mesatx.com/		0.92
@@ -1848,10 +1830,7 @@ a3311c7818b8	OVR-EZE	restaurant	breakfast and brunch restaurant	35.15073	-101.86
 509a73babc0a	Palio's Pizza and Bar	restaurant	pizza restaurant	35.17035	-101.93999	3562 S Soncy Rd	Amarillo	79119	+18063987256	https://food.orders.co/zjghcocj/menu		1.00
 5e6db8a85760	Pancho Villa	restaurant	mexican restaurant	35.25619	-101.83152	4601 River Rd	Amarillo	79108	+18063810105	http://www.pancho-villas.com		0.98
 db84f19d3680	Panchos burguers	restaurant	burger restaurant	35.23569	-101.76835	2501 Amarillo Blvd E	Amarillo	79107	+18063826499			0.89
-e62def60e44b	Panda Express	restaurant	chinese restaurant	35.18819	-101.86671	2416 South Georgia Street	Amarillo	79109	+18063557680	http://www.pandaexpress.com/	Panda Express México	0.99
 39f574815871	Panther Pizza	restaurant	pizza restaurant	35.34326	-101.37882	206 Main St	Panhandle	79068	+18065373252	https://order.spoton.com/BL-76FD-24B4-403A/app/goto		0.95
-ad2848445ed3	Papa Johns	restaurant	pizza restaurant	35.20429	-101.86610	1005 S Georgia St	Amarillo	79102	+18063747272	https://locations.papajohns.com/united-states/tx/79102/amarillo/1005-s-georgia-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.97
-d82615a25bd9	Papa Johns	restaurant	pizza restaurant	35.17569	-101.90211	3415 A Bell St Unit A	Amarillo	79109	+18063587272	https://locations.papajohns.com/united-states/tx/79109/amarillo/3415-bell-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMwMTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
 9fc04f7f7c44	Papa Murphy's	restaurant	pizza restaurant	35.14536	-101.90250	6032 Bell Street	Amarillo	79109	+18063523822	http://www.papamurphys.com/	Papa Murphy's - Jefferson City	0.99
 9be0901b8dee	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	35.19490	-101.88400	1740 S Western St	Amarillo	79106	+18063675110	https://order.papamurphys.com/menu/papa-murphys-western		0.92
 ebc56aa83434	Papi Q’s Tacos	restaurant	taco restaurant	35.18384	-101.92817	7701 W Interstate 40	Amarillo	79121	+18068030523			0.92
@@ -1866,15 +1845,6 @@ fa0acfa86c6b	Pho 84	restaurant	vietnamese restaurant	35.17603	-101.90144	5713 SW
 64cec4e24a91	Pinches Tacos And Beer	restaurant	taco restaurant	35.22225	-101.80700	2617 E Amarillo Blvd	Amarillo	79107	+18064186569	http://pinches-tacos-beer.jany.io		0.77
 1b1252529b65	Pinoy	restaurant	filipino restaurant	35.21142	-101.87841	3700 SW 6th Ave	Amarillo	79106				0.92
 2fbb9b945fd2	Pizza 9	restaurant	pizza restaurant	35.17908	-101.86572	2648 SW 34th Ave	Amarillo	79109	+18063526463	http://www.pizzanine.com		0.77
-24c23a8a7e02	Pizza Hut	restaurant	pizza restaurant	35.21281	-101.89971	5611 Gem Lake Rd Potter	Amarillo	79106	+18063721004	https://locations.pizzahut.com/tx/amarillo/5611-gem-lake-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314508	Pizza Hut	0.96
-4addbef37dbc	Pizza Hut	restaurant	pizza restaurant	35.15450	-101.88340	5101 S Western St	Amarillo	79109	+18063586521	https://locations.pizzahut.com/tx/amarillo/5101-s-western?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287493	Pizza Hut	0.99
-58eb9b121339	Pizza Hut	restaurant	pizza restaurant	35.18712	-101.86573	2509 S Georgia St Randall	Amarillo	79109	+18064671555	https://locations.pizzahut.com/tx/amarillo/2509-s-georgia-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=291696	Pizza Hut	0.99
-6f818e8ed064	Pizza Hut	restaurant	pizza restaurant	35.23632	-101.79836	3404 NE 24th Ave A Suite A	Amarillo	79107	+18063833000	https://locations.pizzahut.com/tx/amarillo/3404-ne-24th-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=309112	Pizza Hut	0.98
-bf5b5c9fbc72	Pizza Hut	restaurant	pizza restaurant	35.85035	-101.97315	1421 S Dumas Ave	Dumas	79029	+18069356111	https://locations.pizzahut.com/tx/dumas/1421-dumas-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285748	Pizza Hut	0.98
-c872857106df	Pizza Hut	restaurant	pizza restaurant	35.14594	-101.91971	6019 S Coulter Randall	Amarillo	79119	+18064671800	https://locations.pizzahut.com/tx/amarillo/6019-s-coulter?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306268	Pizza Hut	0.99
-d6248eec6075	Pizza Hut	restaurant	pizza restaurant	35.65862	-101.41109	1418 W Wilson St	Borger	79007	+18062747245	https://locations.pizzahut.com/tx/borger/1418-west-wilson-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287229	Pizza Hut	0.98
-f9f15ab6fed7	Pizza Hut	restaurant	pizza restaurant	35.18610	-101.91596	6905 I-40 West Potter	Amarillo	79106	+18063558288	https://locations.pizzahut.com/tx/amarillo/6905-i-40-west?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=303501	Pizza Hut	0.99
-fe884e4884d4	Pizza Hut	restaurant	pizza restaurant	35.19173	-101.75874	7000 I-40 East Potter	Amarillo	79118	+18009488488	http://www.pizzahut.com/	Pizza Hut	0.96
 35f4541816c2	Pizza Planet	restaurant	pizza restaurant	35.18877	-101.87363	2400 Paramount Blvd	Amarillo	79109	+18063536666	https://www.pizzaplanet.com		0.99
 736eaee309f3	Pizza Planet	restaurant	pizza restaurant	35.13905	-101.90137	6801 Bell St #100	Amarillo	79109	+18063526666	http://pizzaplanet.com/		0.99
 9f614a1c89af	Pizza Planet	restaurant	pizza restaurant	35.25143	-101.82948	335 E Hastings Ave	Amarillo	79108	+18063812333			0.96
@@ -1884,7 +1854,6 @@ a879752fe83c	Plaza Restaurant	restaurant	texmex restaurant	35.67738	-101.39030	1
 e945693c64dc	Plaza Restaurant and Bar	restaurant	texmex restaurant	35.18974	-101.93637	2101 S Soncy Rd	Amarillo	79124	+18063584897	https://www.theplazarestaurant.com/	The Plaza Restaurant & Bar - Lubbock, Texas	0.97
 2b5c2d3ccaef	Polk Street Cru Llc	restaurant		35.20641	-101.83691	701 S Polk St	Amarillo	79101				0.95
 d31d06c4615f	Polk Street Eats	restaurant		35.20716	-101.83750	614 S Polk St	Amarillo	79101	+18063764700			0.83
-16705a258ad7	Pollos Sinaloa	restaurant	mexican restaurant	35.22184	-101.80701	2618 E Amarillo Blvd	Amarillo	79107	+18063678935			0.92
 658aa1f80cfc	Pollos Sinaloa	restaurant	chicken restaurant	35.22184	-101.80701	2618 E Amarillo Blvd	Amarillo	79107	+18063678935			0.99
 ff3c1e4b8cdc	Pork N Things BBQ	restaurant	barbecue restaurant	35.19620	-101.71259	10816 SE 3rd Ave	Amarillo	79118	+18066997675	http://www.porknthings.com/		0.97
 550e416c8d82	Potato Factory	restaurant		35.17862	-101.86797	34th & Georgia	Amarillo	79109	+18064637783	http://www.thepotatofactory.net		0.77
@@ -1897,7 +1866,6 @@ b0e1375eb9b6	R J Gusinje Llc	restaurant		35.20634	-101.83640	700 S Taylor St	Ama
 d42aef6987dd	Rain Premier Sushi Bar & Lounge	restaurant	sushi restaurant	35.20479	-101.83740	817 S Polk St	Amarillo	79101	+18063311155	http://www.rainamarillo.com/		0.99
 92fd683834a2	Rancho Viejo	restaurant	mexican restaurant	35.19350	-101.81572	1915 E Interstate 40	Amarillo	79102	+18065172170	http://www.ranchoviejoamarillo.com		0.77
 c9123d35f9bc	Red Lobster	restaurant	seafood restaurant	35.19109	-101.87529	3311 W Interstate Hwy 40	Amarillo	79109	+18063539596	https://www.redlobster.com/seafood-restaurants/locations/tx/amarillo/3311-i-40-w	Red Lobster	0.81
-32f3a1c863b7	Red Lobster Restaurants	restaurant	seafood restaurant	35.15283	-101.87263		Amarillo		+18063531700	http://www.redlobster.com/	Red Lobster Brasil	0.70
 6e87cb756148	Red Lobster Restaurants	restaurant	seafood restaurant	35.14799	-101.90188		Amarillo		+18063531700	http://www.redlobster.com/	Red Lobster Brasil	0.71
 0374549cfef5	Red River Steakhouse - Amarillo	restaurant	steakhouse	35.16208	-101.88918	4332 SW 45th Ave	Amarillo	79109	+18063165082	http://www.redriversteakhouse.com		0.99
 78b19577e0ee	Red Robin	restaurant	burger restaurant	35.18781	-101.93933	8720 IH 40 W Frontage Rd	Amarillo	79124	+18063227970	https://locations.redrobin.com/tx/amarillo/507/	Red Robin Gourmet Burgers	0.99
@@ -1932,9 +1900,6 @@ d5ea4a44c08e	Sam's Southern Eatery - Amarillo	restaurant	southern american resta
 949197dbbeb8	Sazon	restaurant	mexican restaurant	35.85136	-101.97289	1315 S Dumas Ave	Dumas	79029	+18064210865			0.96
 a419907aa4d0	Sa•vor	restaurant		35.14604	-101.92496	7669 Hillside Rd	Amarillo	79119	+18063102600	https://www.savortapasbar.com/		0.99
 7f04d37d60aa	Schitts N Giggles Butt Nugget Farm	restaurant	chicken restaurant	35.29942	-101.84381	202 W Cactus St	Amarillo	79108	+18066901166			0.80
-3e962e1781c5	Schlotzsky's	restaurant	sandwich shop	35.19386	-101.81789	1612 Ross St	Amarillo	79102	+18063745513	https://locations.schlotzskys.com/tx/amarillo/1612-s-ross-st?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
-4bef76369892	Schlotzsky's	restaurant	sandwich shop	35.17566	-101.90298	3440 Bell St	Amarillo	79109	+18063537859	https://locations.schlotzskys.com/tx/amarillo/3440-bell-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.97
-ee12dad09581	Schlotzsky's	restaurant	sandwich shop	35.19635	-101.86831	1619 S Kentucky St	Amarillo	79102	+18063594445	www.schlotzskys.com		0.98
 e26627e654ea	Scott's Oyster Bar	restaurant	seafood restaurant	35.16555	-101.88321	4150 Paramount Blvd	Amarillo	79109	+18063549110	http://www.sdoyster.com/dnn		0.99
 3ca0b0fad512	Señor Braceros	restaurant	mexican restaurant	35.19342	-101.81564	1915 Interstate 40 Access Rd	Amarillo	79102	+18063524598			0.97
 e55297c47fcf	Shannon's Restaurant	restaurant	diner	35.65624	-101.39304	1016 S Main St	Borger	79007	+18062739147	https://shannon-s-restaurant-tx.hub.biz/		0.96
@@ -1950,32 +1915,11 @@ f044fc124f12	Skooterz Bar and Grill	restaurant	bar and grill restaurant	35.21000
 d4444143435d	Smokey Joe's	restaurant	bar and grill restaurant	35.21114	-101.86900	2903 SW 6th Ave	Amarillo	79106	+18063316698	https://smokeyjoesamarillo.com/		0.99
 cc0e67473a04	Sobee Sushi & Noodles	restaurant	asian restaurant	35.18814	-101.90285		Amarillo		+18068030524			0.92
 1c21287bb380	Somali African Safari Restaurant	restaurant	african restaurant	35.22216	-101.76700	5945 E Amarillo Blvd	Amarillo	79107	+18064710490	https://www.google.com/maps/place/Somali+African+Safari+Restaurant/@35.2223039,-101.7669674,15z/data=!4m5!3m4!1s0x0:0x98c45c2307c2f454!8m2!3d35.2223039!4d-101.7669674		0.92
-e22930d0df8d	Sonic Drive-In	restaurant	burger restaurant	35.18481	-101.92742	7701 W Interstate 40 Ste 212 Ste 212	Amarillo	79121	+18064570228	https://locations.sonicdrivein.com/tx/amarillo/7701-i-40-w-suite-212.html		0.98
 f35116209386	Soup Man	restaurant	soup restaurant	35.18912	-101.90364	2200 Bell St	Amarillo	79106	+18063599425	http://www.originalsoupman.com		0.92
 aceed965944a	Spicy Mike's Bar-B-Q Haven	restaurant	barbecue restaurant	35.13932	-101.88340	6723 S Western St	Amarillo	79110	+18063588550	http://www.texasmonthly.com/bbq/spicy-mikes-bar-b-q-haven-2014/		0.92
 8faf36c790c4	Spicy Mikes Bar-B-Q Haven	restaurant	barbecue restaurant	35.13555	-101.88425	6723 S Western St	Amarillo	79110	+18063588550	http://spicymikes.mymobisite.us/		0.98
 4a3a3c62578c	Stars Drive In	restaurant	theme restaurant	35.18547	-101.81181	2216 SE 27th Ave	Amarillo	79103	+18063732949	http://starsdrivein.com	Stars Drive-In	0.96
 1b870d055eeb	Stars Restaurant #4, Amarillo, Texas, Llc	restaurant		35.18531	-101.81182	2216 SE 27th Ave	Amarillo	79103				0.95
-154f31ff6e9f	Subway	restaurant	sandwich shop	35.21877	-101.38156	9701 I-40	Claude	79068	+18065373393	https://restaurants.subway.com/united-states/tx/claude/9701-i-40?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=21723&utm_campaign=evergreen-2020&y_source=1_MTQ5ODM5NDMtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.93
-2c7a47cb56a1	Subway	restaurant	sandwich shop	35.66046	-101.40639	1371 West Wilson Street	Borger	79007	+18062735002	https://restaurants.subway.com/united-states/tx/borger/1371-west-wilson-street	Subway	0.97
-3b43d32a90a7	Subway	restaurant	sandwich shop	35.14615	-101.88435	6000 S Western St	Amarillo	79110	+18067058811	https://www.subway.com		0.98
-3e8b0ea86254	Subway	restaurant	sandwich shop	35.19199	-101.76093	6930 I-40 E.	Amarillo	79120	+18063737431	https://restaurants.subway.com/united-states/tx/amarillo/6930-i-40-e?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=22155&utm_campaign=evergreen-2020&y_source=1_MTQ4OTk0OTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-48a3169f6bce	Subway	restaurant	sandwich shop	35.11763	-101.90718	8615 Canyon Dr	Amarillo	79110	+18063529501	https://restaurants.subway.com/united-states/tx/amarillo/8615-canyon-dr	Subway	0.97
-4d6e0e9bfb18	Subway	restaurant	sandwich shop	35.21167	-101.90372	5752 Amarillo Blvd Ste 111	Amarillo	79106	+18066964626	https://restaurants.subway.com/united-states/tx/amarillo/5752-amarillo-blvd	Subway	0.96
-4df84c5aa4b6	Subway	restaurant	sandwich shop	35.19578	-101.81744	1412 S Ross	Amarillo	79102	+18063720045	https://restaurants.subway.com/united-states/tx/amarillo/1412-s-ross	Subway	0.95
-5403ce7e759e	Subway	restaurant	sandwich shop	35.22220	-101.81727	1401 E Amarillo Blvd	Amarillo	79107	+18062099533	https://restaurants.subway.com/united-states/tx/amarillo/1401-amarillo-blvd	Subway	0.95
-61bbc3abacb1	Subway	restaurant	sandwich shop	35.17779	-101.81515	1900 SE 34th Street Suite 2200	Amarillo	79118	+18063731770	https://restaurants.subway.com/united-states/tx/amarillo/1900-se-34th-street	Subway	0.95
-6fbed6b3770d	Subway	restaurant	sandwich shop	35.19227	-101.79896	3300 E I 40 Bldg D R/Suite 120	Amarillo	79103	+18067058423	https://restaurants.subway.com/united-states/tx/amarillo/3300-e-i-40	Subway	0.96
-7f64b0522e3d	Subway	restaurant	sandwich shop	35.19257	-101.88371	2001 S Western St	Amarillo	79106	+18063542902	https://www.subway.com		0.98
-8988e7abc51e	Subway	restaurant	sandwich shop	35.19620	-101.74112	715 S Lakeside Dr	Amarillo	79118	+18063353993	https://restaurants.subway.com/united-states/tx/amarillo/715-s-lakeside-dr	Subway	0.96
-a057ca45d0a4	Subway	restaurant	sandwich shop	35.19070	-101.92088	2004 S Coulter Street	Amarillo	79106	+18062090511	https://restaurants.subway.com/united-states/tx/amarillo/2004-s-coulter-street	Subway	0.94
-be5d4f6b0bde	Subway	restaurant	sandwich shop	35.64174	-101.60036	109 W Broadway St	Fritch	79036	+18068573751	http://www.subway.com/en-us	Subway	0.97
-cc4c685ef367	Subway	restaurant	sandwich shop	35.17863	-101.86575	3325 S Georgia St Spc 100 Space 100	Amarillo	79109	+18063583881	https://restaurants.subway.com/united-states/tx/amarillo/3325-s-georgia	Subway	0.98
-d5f718291efc	Subway	restaurant	sandwich shop	35.19328	-101.84830	1915 S Washington St	Amarillo	79109	+18063732425	https://restaurants.subway.com/united-states/tx/amarillo/1915-s-washington	Subway	0.99
-db2c3fa3530e	Subway	restaurant	sandwich shop	35.33725	-101.38163	407 W US Highway 60	Panhandle	79068	+18065375700	https://restaurants.subway.com/united-states/tx/panhandle/407-hwy-60-west	Subway	0.92
-dda1995a129e	Subway	restaurant	sandwich shop	35.84001	-101.97105	2003 S Dumas Ave	Dumas	79029	+18069343201	https://www.subway.com		0.98
-e8b100c58893	Subway	restaurant	sandwich shop	35.16121	-101.92133	7401 W. 45th Ste. 2	Amarillo	79121	+18064670010	https://restaurants.subway.com/united-states/tx/amarillo/7401-w-45th	Subway	0.98
-ec4a0a8d6dd9	Subway	restaurant	sandwich shop	35.84942	-101.97377	1420 S Dumas Ave	Dumas	79029	+18067172365	https://restaurants.subway.com/united-states/tx/dumas/1420-s-dumas-ave	Subway	0.98
 4fcd89b3d809	Sumo Japanese Steakhouse	restaurant	japanese restaurant	35.18821	-101.90285	2300 Bell St	Amarillo	79106	+18068030874	http://sumojapaneseamarillo.com/		0.92
 0f6eb1a17acc	Sunday's Kitchen	restaurant		35.20795	-101.83775	112 SW 6th Ave	Amarillo	79101	+18064186477			0.92
 c277a5b5e5b1	Super Bowl Noodle	restaurant	asian restaurant	35.22272	-101.77069	810 Columbine St	Amarillo	79107	+18064188580	https://super-bowl-noodle.hub.biz/		0.99
@@ -2049,7 +1993,6 @@ dcb38b172fa8	The Burger	restaurant	burger restaurant	35.84960	-101.97273	1517 S 
 4cdf644083af	The Burger TX - Borger	restaurant	burger restaurant	35.66467	-101.39799	205 S Cedar St	Borger	79007	+18062743551	http://www.TheBurgerTX.com/		0.92
 5e9ba3c120f0	The Catch: Amarillo	restaurant	seafood restaurant	35.16195	-101.90096	5900 SW 45th Ave	Amarillo	79109	+18068032925	https://www.thecatchseafood.com/		0.92
 d4550044d0c3	The Corner Grill	restaurant		35.06346	-101.93646	14588 FM 2590	Amarillo	79119	+18068060007	https://thecornergrill.toast.site/		0.97
-d9c09c995eb6	The Corner Grill	restaurant	american restaurant	35.05979	-101.93665	14588 FM 2590	Amarillo	79119	+18068060007	https://www.thecornergrills.com		0.96
 c899f7249128	The Grill	restaurant	diner	35.19995	-101.10334	407 Front St	Groom	79039	+18062480202		Brewer - The Grill	0.95
 f45f3312fe99	The Handle Bar And Grill	restaurant	bar and grill restaurant	35.21146	-101.87662	3514 SW 6th Ave	Amarillo	79106	+18068039538	https://thehandlebarandgrillamarillo.webs.com		1.00
 3ded86dc819c	The Lab Nutrition	restaurant		35.14770	-101.94361	5701 Time Square Ste 100	Amarillo	79119	+19158207877	https://thelabnutrition.com		0.82
@@ -2066,7 +2009,6 @@ e69f534833a6	The Village Kids Take-out	restaurant	mexican restaurant	35.68353	-1
 c71d953cce25	Third Coast Salt Amarillo	restaurant		35.14735	-101.92486	7620 Hillside Rd Ste 150	Amarillo	79119	+18064147338	https://thirdcoastsaltamarillo.com		0.92
 439a9dc901c3	Tiffany Goodheart, Realtor	restaurant		35.14665	-101.92361		Amarillo		+19726586548			0.96
 625d0fadf8ae	Tokyo Japanese Steakhouse	restaurant	steakhouse	35.16032	-101.89951	5807 W 45th Ave	Amarillo	79109	+18063588888	http://www.tokyoamarillo.com/		0.99
-8ede6e0a4168	Tokyo Japanese Steakhouse	restaurant	steakhouse	35.16063	-101.89951	5807 W 45th Ave	Amarillo	79109	+18063588888	http://www.tokyoamarillo.com/		0.99
 6df3543b4f46	Tom & Jerry's Sports Bar and Grill	restaurant	bar and grill restaurant	35.20592	-101.83716	715 S Polk St	Amarillo	79101	+18063506596	http://www.wildcardnightclub.com		0.92
 de55252a2b86	Toom's Restaurant	restaurant	asian restaurant	35.23613	-101.79784	3416 NE 24th Ave	Amarillo	79107	+18063812568	https://www.chamberofcommerce.com/amarillo-tx/7574140-tooms-restaurant		0.98
 ba3323841c38	Torchy's Tacos	restaurant	texmex restaurant	35.17033	-101.93946	3562 S Soncy Rd Ste. 101	Amarillo	79119	+18063981111	https://torchystacos.com/	Torchy's Tacos	0.99
@@ -2096,9 +2038,6 @@ ab2d5a3ed265	Which Wich Superior Sandwiches	restaurant	sandwich shop	35.19801	-1
 618950dde440	Wienerschnitzel	restaurant	hot dog restaurant	35.19458	-101.81704	1507 Ross St	Amarillo	79102	+18063731232	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
 b8816d74df65	Wienerschnitzel	restaurant	hot dog restaurant	35.21098	-101.90297	5800 W Amarillo Blvd	Amarillo	79106	+18063109501	https://www.wienerschnitzel.com/location/834-w-amarillo-blvd-5800-w-amarillo-blvd-tx-79106/	Wienerschnitzel	0.99
 9fb19dfa66ec	William Et Inc	restaurant		35.13868	-101.90141	6801 Bell St	Amarillo	79109				0.95
-2605e6027a9b	Wingstop	restaurant	chicken restaurant	35.19223	-101.79898	3300 E Interstate 40 Ste 900	Amarillo	79103	+18063319464	https://www.wingstop.com/location/wingstop-416-amarillo-tx-79103/menu?y_source=1_NTUyMDY1ODEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-632ac48a7e07	Wingstop	restaurant	chicken restaurant	35.15995	-101.89991	5807 W 45Th Ave Ste 260	Amarillo	79109	+18063569464	https://www.wingstop.com/location/wingstop-90-amarillo-tx-79109/menu?utm_source=facebook&utm_medium=distrib&utm_campaign=facebook-distrib	Wingstop	0.98
-bbeb8b57cb2e	Wingstop	restaurant	chicken restaurant	35.21412	-101.89891	5512 Gem Lake Rd STE 700	Amarillo	79106	+18063913786	https://www.wingstop.com/location/wingstop-1696-amarillo-tx-79106/menu?y_source=1_NTUyMDc5NDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 3cd92548250d	Wizzards	restaurant	bar and grill restaurant	35.64572	-101.47195	8989 TX-136	Borger	79007	+18063956612			0.96
 ed15bc98a14d	X- Steakhouse	restaurant	steakhouse	35.14872	-101.94434	9181 Town Square Blvd	Amarillo	79119	+18063224227	https://www.xbarsteakhouse.com/		0.98
 fb6247345e55	Yanagi Hibachi	restaurant	japanese restaurant	35.18646	-101.91460	6721 Interstate Dr W	Amarillo	79106	+18068031788	https://yanagihibachi.com/		0.97

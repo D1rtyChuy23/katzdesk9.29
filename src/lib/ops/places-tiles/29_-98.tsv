@@ -2,7 +2,6 @@ id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
 c18fb9133c5a	Abuelita's Bakery Spot	bakery		29.99953	-97.86730	21511 Interstate 35 Frontage Rd	Kyle	78640	+15122565536	http://www.abuelitasbakeryspot.com/		0.95
 f20a07de3c5d	Angie’s Snax	bakery		29.64555	-97.66149	2498 S State Highway 80	Luling	78648	+18304451303	https://www.tiktok.com/@angiesnaxx?_r=1&_t=ZT-941zzxafAlh		0.80
 ca3449d0ef16	Auntie Anne's Pretzels San Marcos Premium Outlets	bakery		29.82902	-97.98515	3936 IH-35 S	San Marcos	78666	+15123921115	https://www.auntieannes.com/tx/san-marcos/155-1	Auntie Anne's	0.97
-dc5a017a900e	Auntie Anne's Pretzels San Marcos Premium Outlets	bakery		29.83026	-97.98015	3936 IH-35 S	San Marcos	78666	+15123921115		Auntie Anne's	0.97
 a5dea73ff617	Auntie Anne's Soft Pretzels	bakery		29.83026	-97.98016	3939 S Interstate 35	San Marcos	78666	+15123921115	http://auntieannes.com		0.77
 bba82c08e791	Babe's Doughnut and Coffee	bakery	donut shop	29.88370	-97.94015	214 N LBJ Dr	San Marcos	78666	+15122166217			0.99
 ca06eb44425b	Bee In Your Bonnet Seguin	bakery		29.57581	-97.96812	322 W Krezdorn St	Seguin	78155	+12107819122	https://www.beeinyourbonnetseguintx.com/		0.76
@@ -32,7 +31,6 @@ cddc2b565540	Fresh Donuts	bakery	donut shop	29.87488	-97.66856	910 S Colorado St
 96bd9578a561	Gery's Delights	bakery		29.55354	-97.94501	1400 Birmingham Dr	Seguin	78155	+15127833681	http://www.gerysdelights.com/		0.96
 4fd0ba55609d	Gil's Broiler	bakery		29.88507	-97.94037	328 N LBJ Dr	San Marcos	78666	+15128788888	http://manskeroll.com/		0.98
 a4d16de2c761	Gils Manske Roll Bakery	bakery		29.86509	-97.94279	320 Ebony St	San Marcos	78666	+15123530771			0.83
-fd1231623798	Gils Manske Roll Bakery	bakery		29.86304	-97.94042	320 Ebony St	San Marcos	78666	+15123530771			0.83
 763270634200	Great American Cookies	bakery		29.82401	-97.98837	4015 I-35 Ste 605	San Marcos	78666	+15122148056	http://order.greatamericancookies.com/menu/great-american-cookies-san-marcos-outlet?olonwp=Lij7MEMhykWQYWp4Jz8H6g	Great American Cookies	1.00
 d5e4102006ae	H & H Cafe & Bakery	bakery		29.28671	-97.15156	719 Lott St	Yoakum	77995	+13612933232	http://hhcafebakeryinc.food62.com		0.94
 6ecf49f520c3	H-e-b Bakery	bakery		29.51920	-97.45445	825 E Sarah Dewitt Dr	Gonzales	78629		https://heb.com		0.65
@@ -144,9 +142,7 @@ a9a14cfb9d10	Jr Lounge	bar		29.58073	-97.97739	918 W Kingsbury St	New Berlin	781
 c4f18d1a8ffe	Leon's Country Store	bar		29.99521	-97.43092	4033 Farm to Market 535	Red Rock	78662	+15123217346			0.96
 1aba3c5a4495	Long Branch Saloon	bar		29.50153	-97.45344	315 Saint Lawrence St	Gonzales	78629	+18305194006	https://thebashfulbandit.com		0.55
 0b02c1c0895a	Loose Grapes Vineyard & McConnell/Eicher Ranch Established 1894	bar	winery	29.35652	-97.13258	991 County Road 317	Yoakum	77995	+3617418732			0.72
-1d97e658a4f9	Loose Grapes Vineyard & McConnell/Eicher Ranch Established 1894	bar	winery	29.35855	-97.13087	991 County Road 317	Yoakum	77995	+3617418732			0.71
 5cda38652125	Lubianski's	bar		29.58005	-97.99102	957 Kunkel St	Seguin			http://www.eventective.com/saint-hedwig-tx/lubianski-s-place-641319.html		0.74
-7489cee5acb9	Lubianski's	bar		29.56422	-97.97923	957 Kunkel St	Seguin	78155		http://www.eventective.com/saint-hedwig-tx/lubianski-s-place-641319.html		0.71
 45b010867b2f	Lucky 7	bar		29.89289	-97.83261	26 Delgado St	Maxwell	78656	+15126653385	https://www.lucky7sportsbar.com		0.92
 cddf127deb8b	Lucky Break Saloon	bar		29.88456	-97.67103	106 S Commerce St	Lockhart	78644	+15126684190	https://luckybreaksaloon.com/		0.99
 be59184ef145	Marty G's	bar		29.58197	-97.96568	120 W Pine St	Seguin	78155	+18304331049			0.99
@@ -284,7 +280,6 @@ a98f9099ae98	Lo's Auto Sales	cardealer		29.50593	-97.45496	915 N St Joseph St	Go
 fc66fd8c9305	Lucas Mopars	cardealer	used auto dealer	29.08475	-97.29530	604 S Esplanade St	Cuero	77954	+13612759977	lucasmopars.net		0.95
 6c4bfbf1f6e1	Luling Motor Werks	cardealer		29.69098	-97.64614	827 N Magnolia Ave	Luling	78648	+18308756822	http://www.lulingmw.com/		0.92
 c42cfed1a77c	Lyle The Sales Professional	cardealer		29.92173	-97.89533	2661 N I-35	San Marcos	78666	+12106327406	http://GriffithfordSanMarcos.Com/		0.59
-f414696922a1	Lyle The Sales Professional	cardealer		29.92143	-97.89514	2661 N I-35	San Marcos	78666	+12106327406	http://GriffithfordSanMarcos.Com/		0.59
 8c805cc36a04	Mercer Motor Company	cardealer	used auto dealer	29.58327	-97.94665	1224 E Kingsbury St	Seguin	78155	+18304915216	http://mercermotorco.com/		0.92
 d3ae768397fd	Michael Newman at Cuero Dodge	cardealer		29.14544	-97.27963	2212 N US Highway 183	Cuero	77954	+13612109038			0.56
 5b3ae852af66	MOTO-VATED	cardealer		29.68251	-97.65921	230 W Davis St	Luling	78648	+18308753333	http://www.moto-vated.com/		0.99
@@ -296,7 +291,6 @@ c81aee516596	Ron's Auto Sales	cardealer	used auto dealer	29.23622	-97.95986	101 
 836163e35630	San Marcos Auto Center	cardealer		29.85759	-97.97034	2510 Hunter Rd	San Marcos	78666	+17372134344	http://sanmarcosautocenter.com/		0.99
 9031cbc8c9e2	San Marcos CDJR	cardealer		29.88357	-97.94181	2990 I 35 Frontage Rd	San Marcos	78666	+15124025851	https://www.sanmarcoschryslerdodge.com		0.77
 96b34141072c	San Marcos Chrysler Dodge Jeep Ram	cardealer		29.84109	-97.97249	2990 IH-35 S	San Marcos	78666	+17372148079	https://www.sanmarcoschryslerdodge.com	Chrysler	0.97
-02223039a1e5	San Marcos Toyota	cardealer	used auto dealer	29.88327	-97.94141	5101 Interstate 35	San Marcos	92069	+18339890255	https://www.sanmarcostoyota.com/?utm_medium=organic&utm_source=GMBlisting&utm_campaign=toyotasales		0.92
 874021d7c7f2	San Marcos Toyota	cardealer		29.81569	-97.99700	5101 IH-35 Frontage Rd	San Marcos	78666	+17372662655	https://www.sanmarcostoyota.com/	TOYOTA	0.97
 93555337ece1	San Marcos Toyota	cardealer	used auto dealer	29.82351	-97.99044	5101 S Interstate 35	San Marcos	78666	+15123921999	https://www.sanmarcostoyota.com/		0.85
 3f7753e374e4	Seguin Car Country	cardealer	used auto dealer	29.58093	-97.96129	420 E Kingsbury St	Seguin	78155	+18304010495	http://seguincarcountry.com/		0.92
@@ -404,7 +398,6 @@ f7bb6dfac078	Shinerville Coffee House	coffee		29.43174	-97.17204	803 N Avenue D	
 1caebadde36e	Springtown Roasters	coffee		29.98713	-97.98654	300 Fox Rd	San Marcos	78666	+15123939788	https://springtownroasters.com/		0.92
 0f5202ee12a5	Starbucks	coffee		29.82857	-97.98698	690 Centerpoint Rd. 101	San Marcos	78666	+15125582222	https://www.starbucks.com/store-locator/store/9096/	Starbucks	1.00
 3d6667320b28	Starbucks	coffee		29.60030	-97.94965	2702 Jay Rd	Seguin	78155	+18304014952	https://www.starbucks.com/store-locator/store/1007841/	Starbucks	0.99
-655f629ce617	Starbucks	coffee		29.99620	-97.84432	5188 Kyle Center Dr	Kyle	78640	+15122687550	https://www.starbucks.com/store-locator/store/9833		0.77
 7b00f06a245c	Starbucks	coffee		29.98882	-97.87139	22449 Interstate 35 Frontage Rd	Kyle	78640	+15122561624	https://www.starbucks.com/store-locator/store/1032841/	Starbucks	0.97
 95db9f4f830a	Starbucks	coffee		29.86711	-97.94047	1285 South I 35	San Marcos	78666	+15125573919	https://www.starbucks.com/store-locator/store/1009969/	Starbucks	0.99
 cda55d2206b6	Starbucks	coffee		29.88937	-97.94402	100 Student Center Dr	San Marcos	78666	+15122459902	http://www.starbucks.com	Starbucks	0.95
@@ -418,7 +411,6 @@ dfc812670492	Stellar Café	coffee		29.88397	-97.94059	235-A	San Marcos	78666	+15
 7f4466cabcf7	Summer Moon Coffee	coffee		29.88621	-97.92249	1180 Thorpe Ln	San Marcos	78666	+15123922191	https://www.summermooncoffee.com		0.99
 30ae2aead02e	Sweet Bea's	coffee		29.42916	-97.17068	501 Avenue E	Shiner	77984	+15127994370	http://sweetbeasshiner.com/		0.93
 45acff877e9d	Tantra SMTX	coffee		29.88268	-97.94337	217 W Hopkins St	San Marcos	78666	+16144067191	https://www.tantrasanmarcos.com/general-4		0.95
-f8324fc76cf5	Tea Mart Srimangal- শ্রীমঙ্গল চা বাজার	coffee	tea room	29.53523	-97.98132	Habiganj Road, sreemangal	Seguin		+8801612547535			0.77
 af2e1d903ebb	Tea2Go	coffee	tea room	29.99093	-97.87288	22420 Ih 35	Kyle	78640	+18067015264	http://www.tea2go.us	Tea2go	0.98
 41d4c2641f4c	Teapioca Lounge	coffee	bubble tea shop	29.89206	-97.91904	1504 Aquarena Springs Dr #306	San Marcos	78666	+15123557899	https://www.teapiocalounge.com/teapioca-aquarena-springs-san-marcos-boba-tea/	Teapioca Lounge	0.96
 f0bb9cff0c2f	Texas Bean & Brew House	coffee		29.88797	-97.91575	1328 I 35 N Frontage Rd	San Marcos	78666	+15122148101	http://www.texasbeanandbrewhouse.com/		0.93
@@ -444,7 +436,6 @@ d87d43df4401	We Us I Wellness	coffee		29.85432	-97.97280	2626 Hunter Rd	San Marc
 f4ddc97b3032	Austin Community College - San Marcos Goodnight Center	college		29.85669	-97.93878	1331 N State Highway 123	San Marcos	78666	+15123532019	billandcarols.com		0.55
 7f07139e401a	Bobcat Stadium, Texas State University	college		29.89094	-97.92601		San Marcos					0.95
 34e2d2b22f16	Cardiovascular Physiology Lab -Texas State University	college		29.89018	-97.93835	601 University Dr	San Marcos	78666	+15122456149	https://www.hhp.txstate.edu/research-labs/cardiovascular-physiology-lab.html		0.59
-9960ae9973a1	Cardiovascular Physiology Lab -Texas State University	college		29.88877	-97.93745	601 University Dr	San Marcos	78666	+15122456149	https://www.hhp.txstate.edu/research-labs/cardiovascular-physiology-lab.html		0.56
 eb8428841d69	Centennial Hall	college		29.88971	-97.94004	Centennial Hall, State St	San Marcos	78666				0.73
 8bb69d990181	Center for International Studies - Texas State University	college		29.88913	-97.93941	101 University Dr	San Marcos	78666	+15122452339	http://www.txstate.edu/internationalstudies/		0.58
 33ec5a8d750b	Child Development Center	college		29.88773	-97.94979	102 Lueders St	San Marcos	78666	+15122452621	https://www.fcs.txstate.edu/about/faculty-and-staff/school_directory.html		0.92
@@ -470,7 +461,6 @@ d2d5c097e376	Joann Cole Mitte Building	college		29.88877	-97.93745	601 Universit
 c2a012da48a3	Ruskin Consulting	college	engineering school	29.56793	-97.96461	204 S Austin St Ste 10	Seguin	78155	+14155067656	https://ruskinconsulting.com/		0.92
 62bbec094076	Sabinal Photo Lab & Studio	college		29.89114	-97.93948	205 Pleasant St	San Marcos	78666	+15122452243	http://www.finearts.txstate.edu/Art/academics/undergrad/ugrad-dpi.html		0.92
 98eaf80bf476	SACA Texas State	college		29.89018	-97.93835	LBJ Student Center Garage, 601 University Dr	San Marcos	78666	+15122458263	http://www.lbjsc.txstate.edu/involvement/saca.html		0.65
-e8b2045940ac	SACA Texas State	college		29.88869	-97.93262	LBJ Student Center Garage, 601 University Dr	San Marcos	78666	+15122458263	http://www.lbjsc.txstate.edu/involvement/saca.html		0.59
 5a4a56110342	School of Criminal Justice	college		29.89006	-97.93831	State St	San Marcos	78666	+15122452174	http://www.cj.txstate.edu/		0.88
 676689b3e59b	School of Social Work	college		29.88907	-97.94579	Health Professions, 712 N Comanche St	San Marcos	78666	+15122452592	http://www.socialwork.txstate.edu/		0.88
 47d8f0cac34b	Seguin ISD - Home of the Matadors	college		29.57805	-97.94554	1221 E Kingsbury St	Seguin	78155	+18304018600	http://seguinisd.net/		0.97
@@ -571,7 +561,6 @@ c02a4b12e845	Chevron Station Seguin	convenience		29.58300	-97.99373	1805 W I H 1
 3f3dfb93271c	Circle K	convenience		29.50472	-97.51337	3324 90A East	Gonzales	78629	+18306722220	https://www.circlek.com/store-locator/us/gonzales/3324-90a-east/2704054	Circle K	0.94
 4474d13bdd22	Circle K	convenience		29.60029	-97.95226	1098 E IH 10	Seguin	78155	+18303726182	https://www.circlek.com/		0.99
 455e6ee57a3d	Circle K	convenience		29.68251	-97.64769	205 N Magnolia Ave	Luling	78648	+18308753142	https://www.circlek.com/store-locator/us/luling/205-n-magnolia-ave/2740501	Circle K	0.99
-4f1ef1fca873	Circle K	convenience		29.26579	-97.77161	101 W Central Ave	Nixon	78140	+18305821002	www.circlek.com		0.95
 4f6616ca0f43	Circle K	convenience		29.58378	-97.99204	1609 I-10 WEST	Seguin	78155	+18303721589	https://www.circlek.com/store-locator/US/seguin/1609-ih-10-west/2704040	Circle K	0.92
 58729a5784ba	Circle K	convenience		29.09421	-97.29009	502 N Esplanade St	Cuero	77954	+13612758198	https://www.circlek.com/store-locator/US/cuero/502-n-esplanade-st/2704045	Circle K	0.92
 5b94a742b1b1	Circle K	convenience		29.95125	-97.67503	4887 S Highway 183	Lockhart	78644	+15123982130	https://www.circlek.com/store-locator/us/lockhart/4887-n-hwy-183/2704047		0.99
@@ -612,13 +601,11 @@ ee4fe7dc8b4b	Diamond A Convenience Store	convenience		29.52250	-97.68550	18484 N
 d1a3ea0dd8aa	Easy Lane Stop	convenience		29.99940	-97.81980	201 HIGH RD	Kyle	78640		https://locations.valero.com/en-us/LocationDetails/Index/201-HIGH-RD/0000002023	Valero	0.80
 330b7655e0c4	Express Care Seguin	convenience		29.57541	-97.94067	715 N Highway 123 Byp # 3942	Seguin	78155	+18303722812	https://www.expresscare.com		0.65
 008029138c48	Exxon	convenience		29.23659	-97.95956	100 Hwy 123 S.	Stockdale	78160	+18309969600	https://www.exxonmobilfuels.com/en/find-gas-station/200310076		0.92
-291aea711d5c	Exxon	convenience		29.95115	-97.67550		Lockhart	78644	+15123983658	http://www.exxon.com		0.96
 307e6d52925d	Exxon	convenience		29.58388	-97.99211	1609 I-10 W	Seguin	78155	+18303794311	http://www.exxon.com		0.92
 35aa9b7e5e7a	Exxon	convenience		29.99312	-97.81330	798 High Rd	Kyle	78640	+15125238352	https://www.exxon.com/en/find-station/exxon-kyle-tx-pocolocosupermercado-200320148?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
 5509d1aa614d	Exxon	convenience		29.88203	-97.91472	1103 Highway 80	San Marcos	78666		https://www.exxonmobil.com		0.92
 6e27c6ba590c	Exxon	convenience		29.88449	-97.67012	Route 2	Lockhart	78644	+15123983658	https://www.exxon.com/en/find-station/exxon-lockhart-tx-ck2704047-200317164?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.98
 76577b31159b	Exxon	convenience		29.99362	-97.88381	404 Rebel Road	Kyle	78640	+15122686000	https://www.exxonmobilfuels.com/en/find-gas-station/200315234		0.92
-776868d9e31d	Exxon	convenience		29.87629	-97.95257	1103 Highway 80	San Marcos	78666		https://www.exxon.com/en/find-station/exxon-sanmarcos-tx-7eleven41670-200327481?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
 77ae8bfe7670	Exxon	convenience		29.84244	-97.96978	3016 Interstate 35 S	San Marcos	78666	+15122034514	https://www.exxon.com/en/find-station/exxon-sanmarcos-tx-foodbox14-200328995?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
 7d648d0febb9	Exxon	convenience		29.85251	-97.97379	2700 Hunter Rd	San Marcos	78666	+15123960851	http://www.exxon.com		0.92
 81bd39a1061b	Exxon	convenience		29.86260	-97.93901	1202 Highway 123	San Marcos	78666	+15123530630	https://www.exxon.com/en/find-station/exxon-sanmarcos-tx-fastbreak8-200315693?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
@@ -788,7 +775,6 @@ e9158dc90c27	Stop & Drive	convenience		29.89659	-97.90984	1699 N Interstate 35	S
 6796d9bc744f	Stripes	convenience		29.98305	-97.87232	22801 Ih 35	Kyle	78640	+15122680054	http://www.stripesstores.com	Stripes	0.94
 6a134448268e	Stripes	convenience		29.51463	-97.46224	114 E Sarah Dewitt Dr	Gonzales	78629	+14694010807	https://stripesstores.com/		0.88
 8861a844b6fa	Stripes	convenience		29.89970	-97.90771	1901 N Interstate 35	San Marcos	78666	+15123530162	https://www.7-eleven.com/	Stripes	1.00
-8e50be9dc6c6	Stripes	convenience		29.11534	-97.28162	4200 N Esplanade St	Cuero	77954	+13612758200			0.65
 985ebd175188	Stripes	convenience		29.10419	-97.28463	4200 N Esplanade	Cuero	77954	+13612758200	https://www.7-eleven.com/	Stripes	0.93
 98be0597e1aa	Stripes	convenience		29.82925	-97.98538	3936 S Interstate 35 & Centerpoint	San Marcos	78666	+15123960016	https://www.7-eleven.com/		0.97
 ae3dd23e722b	Stripes	convenience		29.66079	-97.96747	6730 N State Highway 123	Seguin	78155	+18304014204	http://www.stripesstores.com		0.77
@@ -817,7 +803,6 @@ bc7426790304	Sunrise Market	convenience		29.85075	-97.97532	2745 Hunter Rd	San M
 76536ffc4958	Texaco	convenience		29.87637	-97.92851	101 LINDA DRIVE	San Marcos	78666		https://www.texaco.com/en_us/home/find-a-station.html?/station/101-LINDA-DRIVE-SAN-MARCOS-TX-78666-7915-id309229	Texaco	0.95
 c12ee9fbe2a0	Texaco	convenience		29.88309	-97.69566	1511 W SAN ANTONIO ST.	Lockhart	78644		https://www.texaco.com/en_us/home/find-a-station.html?/station/1511-W-SAN-ANTONIO-ST--LOCKHART-TX-78644-0000-id384655	Texaco	0.95
 cc54a3ac0000	Texaco	convenience		29.78313	-97.94696	15610 TX-123	San Marcos	78666	+15126677330	https://www.texaco.com/	Texaco	1.00
-d5da1c1c3cc8	Texaco	convenience		29.88404	-97.67830		Lockhart		+15123985200	http://www.texaco.com		0.62
 d6d92b74ad2d	Texaco	convenience		29.89622	-97.90886	1702 N I-35	San Marcos	78666	+15123921865	https://www.texaco.com/	Texaco	1.00
 dbe88caf659a	Texaco	convenience		29.95607	-97.83988	2709 FM 150	Kyle	78640		https://www.texaco.com/en_us/home/find-a-station.html?/station/2709-FM-150-KYLE-TX-78640-0000-id384044	Texaco	0.80
 888d66e8ea48	Texaco Lockhart	convenience		29.86955	-97.66890	1325 S Colorado St	Lockhart	78644	+15123989388	https://www.texaco.com/	Texaco	0.92
@@ -830,7 +815,6 @@ ed41a2ec61bc	Texas Cooler	convenience		29.22551	-97.95435	1000 State Highway 123
 a9a6e2984355	The Right Choice Food Mart	convenience		29.69238	-97.29603	715 N Railroad St	Waelder	78959	+18307887543	http://www.alonbrands.com/		0.92
 019fe283e63c	The Texan	convenience		29.08402	-97.29571	101 W Heaton St	Cuero	77954	+13612759282	https://thetexanstores.com	The Texan Stores	0.92
 8c0bf355e3ca	The Tote 29	convenience		29.26711	-97.76489	101 W Central Ave	Nixon	78140	+18305821791	http://chevron.com		0.77
-b1e554636c1f	The Tote 29	convenience		29.26579	-97.77161	101 W Central Ave	Nixon	78140	+18305821791	https://www.chevron.com		0.55
 581de5fe3ae5	Tiger Tote Food Stores	convenience		29.95127	-97.67546	4887 US-183	Lockhart	78644	+15123983658	http://www.exxonmobil.com		0.92
 785117573a8c	Tiger Tote Food Stores	convenience		29.50016	-97.45248	317 N Saint Joseph St	Gonzales	78629	+18306727195			0.55
 dad2ceb11629	Tiger Tote No 16	convenience		29.09406	-97.29016	502 N Esplanade St # D	Cuero	77954	+13612752480	http://exxonmobil.com		0.77
@@ -874,15 +858,22 @@ ae8cc8f329f5	Wildcat Express	convenience		29.68810	-97.10291	503 E NORTH MAIN ST
 6a1f431d26c9	Arby's	fastfood		29.85479	-97.95441	2219 South I 35 N S I 35 N & Ranch Road 12	San Marcos	78666	+15126677900	https://locations.arbys.com/tx/sanmarcos/2219-south-i-35-n.html	Arby's	0.99
 1fca303535a4	Burger King	fastfood		29.56576	-97.94455	550 S Highway 123 Byp	Seguin	78155	+18303791800	https://burgerking.com/store-locator/store/restaurant_13349	Burger King	0.92
 31cf704d06af	Burger King	fastfood		29.88255	-97.92374	1011 N I H 35	San Marcos	78666	+15123538450	https://locations.bk.com/tx/san-marcos/1011-n-i-h-35.html		0.77
+8fdf371f83c1	Burger King	fastfood	burger restaurant	29.86684	-97.93915	1012 TX-123	San Marcos	78666	+15123922381	https://burgerking.com/store-locator/store/9695	Burger King	0.99
+ee19842ed70d	Burger King	fastfood	burger restaurant	29.57901	-97.99183	1200 TX-46 Suite A	Seguin	78155	+18304915255	https://burgerking.com/store-locator/store/28727	Burger King	1.00
 4b7df9698b0b	Bush's Chicken	fastfood		29.86663	-97.93797	1035 TX-123	San Marcos	78666	+17372134058	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.99
 c55f7245dd3e	Bush's Chicken	fastfood		29.09130	-97.28403	601 E Broadway St	Cuero	77954	+13615245295	http://bushschicken.com	Bush's Chicken - Laredo	0.96
 8bfdf4ef7fe7	Chick-fil-A	fastfood		29.85538	-97.95364	2213 S Interstate 35	San Marcos	78666	+15123925771	https://www.chick-fil-a.com/locations/tx/i-35-at-wonder-world-dr?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
+c1ae83a0b059	Chick-fil-A	fastfood	chicken restaurant	29.88191	-97.94526	100 Moore Street Bldg 30	San Marcos	78666	+15122459930	https://www.chick-fil-a.com/texasstate		0.77
 c84635bd73db	Chick-fil-A	fastfood		29.89156	-97.91531	1433 N Interstate 35	San Marcos	78666	+15123920181	https://www.chick-fil-a.com/i35ataquarenasprings	Chick-fil-A	0.99
 e013d17f686c	Chick-fil-A	fastfood		29.88956	-97.94471	301 Student Center Dr	San Marcos	78666	+15122459930	https://www.chick-fil-a.com/locations/tx/texas-state-university?utm_source=yext&utm_medium=link		0.96
 e42f1d61c6b5	Chick-fil-A	fastfood		29.58076	-97.99403	1650 CH Matthies Jr	Seguin	78155		https://www.chick-fil-a.com/locations/tx/seguin	Chick-fil-A	0.98
 5a73ac341058	Chicken Express	fastfood		29.56288	-97.94305	910 S Highway 123 Byp	Seguin	78155	+18303798555	http://www.chickene.com/	Chicken Express	0.99
 7b420919d7a6	Chicken Express	fastfood		29.87718	-97.66869	734 S Colorado St	Lockhart	78644	+15126684661	http://www.chickene.com/	Chicken Express	0.98
 f61a49f143d6	Chicken Express	fastfood		29.86009	-97.93948	1256 TX-123	San Marcos	78666	+15123920888	http://www.chickene.com/	Chicken Express	0.99
+f85df5e3ee26	Chicken Express	fastfood		29.57799	-97.99160	1000 N State Highway 46	Seguin	78155	+18304062303	https://www.chickene.com		0.77
+52a0c5e6a73c	Chipotle Mexican Grill	fastfood	mexican restaurant	29.88551	-97.94103	401 N LBJ Dr	San Marcos	78666	+15123927577	https://locations.chipotle.com/tx/san-marcos/401-n-lbj-dr?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D1028	Chipotle Mexican Grill	0.99
+8e135360ad3a	Chipotle Mexican Grill	fastfood	mexican restaurant	29.89198	-97.91185	1506 I 35 N Frontage Rd #108	San Marcos	78666	+17379375480	https://locations.chipotle.com/tx/san-marcos/1506-n-ih-35?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4664	Chipotle Mexican Grill	0.96
+b08a49822de7	Chipotle Mexican Grill	fastfood	mexican restaurant	29.82698	-97.98532	1020 Center Point Rd	San Marcos	78666	+15123960264	http://www.chipotle.com	Chipotle Mexican Grill	0.97
 60dd6400fd39	Chit House	fastfood		29.88367	-97.94000		San Marcos			http://www.thechithouse.com/		0.61
 8beff90b64c0	Church's Texas Chicken	fastfood		29.10109	-97.28602	1230 N. Esplanade Street	Cuero	77954	+13612756629	https://locations.churchs.com/tx/cuero/1230-n.-esplanade-street	Church's Chicken	0.96
 e4296f11eb35	Church's Texas Chicken	fastfood		29.56910	-97.96895	404 W. Court Street	Seguin	78155	+18303798166	https://locations.churchs.com/tx/seguin/404-w.-court-street	Church's Chicken	0.99
@@ -900,6 +891,13 @@ c57a8ee1818e	Dairy Queen	fastfood		29.87240	-97.66934	1125 S Colorado St	Lockhar
 c67f0246d9d3	Dairy Queen	fastfood		29.58067	-97.95058	1069 E Kingsbury St	Seguin	78155	+18303796983	https://www.dairyqueen.com/en-us/locations/tx/seguin/1069-e-kingsbury-st/14595/?y_source=1_MjkzMzg4OTUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
 cf6e0ad248eb	Dairy Queen	fastfood		29.49816	-97.45102	103 Saint Joseph St 103 Saint Joseph St	Gonzales	78629	+18306727533	https://www.dairyqueen.com/en-us/locations/tx/gonzales/103-saint-joseph-st/14167/?y_source=1_MjkzMzg4ODYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
 dcb46c9277a8	Dairy Queen	fastfood		29.88139	-97.91988	900 Hwy 80 900 Hwy 80	San Marcos	78666	+15123535038	https://www.dairyqueen.com/en-us/locations/tx/san-marcos/900-hwy-80/14583/?y_source=1_MjkzMzkzNDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+3f390c146d6a	Domino's	fastfood	pizza restaurant	29.89873	-97.91574	641 Mill St #106	San Marcos	78666	+15127373030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+7dec952ad8e0	Domino's	fastfood	pizza restaurant	29.57732	-97.99150	751 Best Dr	Seguin	78155	+18303723070	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.92
+9f31c30eea54	Domino's	fastfood	pizza restaurant	29.85702	-97.66776	1906 S Colorado Suite 103	Lockhart	78644	+15123989090	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+aa1c9d39b82b	Domino's	fastfood	pizza restaurant	29.85310	-97.94957	1290 Wonder World Dr	San Marcos	78666	+15123927272	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+e80b7c571b84	Domino's	fastfood	pizza restaurant	29.88515	-97.94142	350 N Guadalupe #150	San Marcos	78666	+15123923030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+0a8e79e6f11b	Domino's Pizza	fastfood	pizza restaurant	29.51411	-97.46204	1832 Water St	Gonzales	78629	+18302036990	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
+4a71320c23ab	Domino's Pizza	fastfood	pizza restaurant	29.08717	-97.26527	1431 E Broadway St	Cuero	77954	+13617994030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
 27c38bb78872	Donut Queen	fastfood		29.56836	-97.98943	120 S State Highway 46	Seguin	78155	+18304334532			0.58
 10c57fedd96d	DQ Grill & Chill	fastfood		29.67717	-97.64771	407 S Magnolia Ave	Luling	78648		https://www.dairyqueen.com/en-us/locations/tx/luling/407-s-magnolia-ave/4159	DQ Grill & Chill	0.80
 195f9b1f1635	DQ Grill & Chill	fastfood		29.69284	-97.10365	605 N La Grange St	Flatonia	78941		https://www.dairyqueen.com/en-us/locations/tx/flatonia/605-n-la-grange-st/4761	DQ Grill & Chill	0.80
@@ -916,8 +914,10 @@ ee7ad3911e35	DQ Grill & Chill	fastfood		29.26785	-97.76440	103 N Nixon Ave	Nixon
 f569fa50a269	DQ Grill & Chill	fastfood		29.86928	-97.94054	1202 S Ih 35	San Marcos	78666		https://www.dairyqueen.com/en-us/locations/tx/san-marcos/1202-s-ih-35/4356	DQ Grill & Chill	0.80
 d092eab7fed1	Earth Burger	fastfood		29.88471	-97.92476	656 E Hopkins St	San Marcos	78666	+15126679357	https://www.earthburger.com		0.93
 46f9582f77ec	Einstein Bros. Bagels	fastfood		29.89107	-97.91194	135 Northgate Road	San Marcos	78666		https://locations.einsteinbros.com/us/tx/san-marcos/135-northgate-road	Einstein Bros. Bagels	0.91
+53e1a04fcc5d	Firehouse Subs	fastfood	sandwich shop	29.84640	-97.96597	2586 S.IH 35,	San Marcos	78666	+15123533473	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1268	Firehouse Subs	0.99
 fd1d3f70aba7	Five Guys	fastfood		29.88326	-97.92330	730 E Hopkins St Ste 100	San Marcos	78666	+15123530093	https://www.fiveguys.com		0.92
 62a389be9051	Flatonia Subway	fastfood		29.69237	-97.10538	230 E 10th St	Flatonia	78941	+13618653400	http://www.yelp.com/biz/subway-flatonia		0.68
+28cd99171ee1	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	29.87101	-97.93592	310 N IH 35 Ste 101	San Marcos	78666	+15123926020	https://www.freddys.com/location/san-marcos-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
 7276b270d264	Freebirds World Burrito	fastfood		29.87775	-97.95097	909 TX-80, C	San Marcos	78666	+15123922072	https://www.freebirds.com/locations/san-marcos-sm-909-state-highway-80-ste-c-san-marcos-tx-78666		0.85
 6b088970ce84	Golden Chick	fastfood		29.87906	-97.66879	640 S Colorado St	Lockhart	78644	+15123984442	https://locations.goldenchick.com/tx/lockhart/1025/	Golden Chick	0.93
 9244c929fdf7	Golden Chick	fastfood		29.99635	-97.88450	830 Veterans Dr	Kyle	78640	+15122688174	https://locations.goldenchick.com/tx/kyle/1162/	Golden Chick	0.94
@@ -929,8 +929,11 @@ bba3ee59afdc	Hangar 54 Pizza	fastfood		29.68339	-97.10687	609 Market Ave	Flatoni
 9a1dff2c447f	Jack in the Box	fastfood		29.85582	-97.95383	2207 S Interstate 35	San Marcos	78666	+15123922338	https://www.jackinthebox.com		0.99
 9c4ddf8b9dec	Jack in the Box	fastfood		29.88494	-97.94045	345 N L B J Dr	San Marcos	78666	+15123537308	https://www.jackinthebox.com		0.99
 bbde5af726a0	Jack in the Box	fastfood		29.56916	-97.95059	1070 E Court St	Seguin	78155	+18304337693	https://www.jackinthebox.com		0.99
+b60ca40a5f01	Jersey Mike's	fastfood	sandwich shop	29.57204	-97.94280	1417 E. Walnut Street Suite 700	Seguin	78155	+18304334283	https://www.jerseymikes.com/15244/seguin-tx	Jersey Mike's Subs	0.92
+ea70767aa698	Jersey Mike's	fastfood	sandwich shop	29.89117	-97.91297	1430 N IH 35 Suite 108	San Marcos	78666	+15127491118	https://www.jerseymikes.com/15215/san-marcos-tx	Jersey Mike's Subs	0.97
 943fdfd340a7	Jimmy John's	fastfood		29.85294	-97.94891	1290 Wonder World Dr Ste 1	San Marcos	78666	+17372134007	https://locations.jimmyjohns.com/tx/sanmarcos/sandwiches-4214.html		0.99
 bc1731271518	Jimmy John's	fastfood		29.88339	-97.94093	117 E Hopkins St	San Marcos	78666	+15123962222	https://locations.jimmyjohns.com/tx/sanmarcos/sandwiches-1051.html		0.92
+c7bd5be2bd1f	Jimmy John's	fastfood	sandwich shop	29.88822	-97.94257	614 N Guadalupe St	San Marcos	78666		https://locations.jimmyjohns.com/tx/san-marcos/sandwiches-4984.html	Jimmy John's	0.80
 34474c29c48a	K&J Roasted Korn	fastfood		29.57144	-97.96455	413 N Austin St	Seguin	78155	+18305499054	http://kandjroastedkorn.com/location.html		0.70
 0fe11408ca00	KFC	fastfood		29.88449	-97.92449	660 E. Hopkins Street	San Marcos	78666	+15126676119	https://locations.kfc.com/tx/san-marcos/660-e-hopkins-street	KFC	0.99
 2c0522dc2b66	KFC	fastfood		29.85633	-97.66782	1908 S. Colorado Street	Lockhart	78644	+15126683000	https://locations.kfc.com/tx/lockhart/1908-s-colorado-street	KFC	0.98
@@ -940,7 +943,12 @@ d28fbdba7609	Krispy Krunchy Chicken	fastfood		29.70314	-97.96521	6255 FM 758	Seg
 ad9c8439ac32	La Palma	fastfood		29.85985	-97.93978		San Marcos		+15123920471			0.97
 377261e56a07	Layne's Chicken Fingers	fastfood		29.89326	-97.91705	1617 Aquarena Springs Dr	San Marcos	78666	+17373718172		Layne's Chicken Fingers	0.99
 0bef5a4c99ed	Little Caesars	fastfood		29.56927	-97.94810	1500 East Ct St	Seguin	78155	+18303790191	https://littlecaesars.com/en-us/store/2819		0.85
+9470664c6671	Little Caesars	fastfood	pizza restaurant	29.57171	-97.93981	1500 E Court Street	Seguin	78155	+18303790191	https://littlecaesars.com/en-us/store/2819	Little Caesars	0.99
 b149897e9a06	Little Caesars	fastfood		29.88082	-97.91331	1023 Highway 80	San Marcos	78666	+15127545700	https://littlecaesars.com/en-us/store/7555		0.85
+12f9e7c981f2	Little Caesars Pizza	fastfood	pizza restaurant	29.86197	-97.66959	1711 S Colorado St Unit B	Lockhart	78644	+15123984400	https://littlecaesars.com/en-us/store/7440	Little Caesars	0.98
+4d2ccc49cca1	Little Caesars Pizza	fastfood	pizza restaurant	29.87973	-97.94035	110 E Martin Luther King Dr	San Marcos	78666	+15122108522	https://littlecaesars.com/en-us/store/20308	Little Caesars	0.99
+dc0b3671b801	Little Caesars Pizza	fastfood	pizza restaurant	29.88403	-97.91425	1023 TX-80	San Marcos	78666	+15127545700	https://littlecaesars.com/en-us/store/7555	Little Caesars	0.99
+f82be22826bb	Long John Silver's	fastfood	seafood restaurant	29.88469	-97.92177	35 Long St	San Marcos	78666	+15123538958	http://www.ljsilvers.com/		0.92
 024943b3cd07	Luby's	fastfood		29.86989	-97.93706	200 N I-35	San Marcos	78666	+15123927100	https://www.lubys.com/san-marcos-200-ih-35-north	Luby's	0.79
 1b1527309ccc	McDonald's	fastfood		29.09373	-97.28860	104 E Broadway St	Cuero	77954	+13612759886	https://www.mcdonalds.com/us/en-us/location/tx/cuero/104-e-broadway-st/36417.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
 45e9703106d4	McDonald's	fastfood		29.88416	-97.92224	1105 I 35 N	San Marcos	78666	+15123535033	https://www.mcdonalds.com/us/en-us/location/tx/san-marcos/1105-i-35-n/3842.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.96
@@ -951,12 +959,26 @@ c5d59c506311	McDonald's	fastfood		29.51647	-97.46032	309 Hwy 90 Alt	Gonzales	786
 caa6c38ef17a	McDonald's	fastfood		29.86783	-97.93840	1001 N TX-123	San Marcos	78666	+15123535110	https://www.mcdonalds.com/us/en-us/location/tx/san-marcos/1001-hwy-123/8168.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
 d5435ad57a03	McDonald's	fastfood		29.69535	-97.10394	709 N Lagrange	Flatonia	78941	+13618653730	https://www.mcdonalds.com/us/en-us/location/tx/flatonia/709-n-lagrange/28463.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
 e77656bd6cca	McDonald's	fastfood		29.82720	-97.98746	4060 S Interstate 35	San Marcos	78666	+15123922772	https://www.mcdonalds.com/us/en-us/location/tx/san-marcos/4060-s-interstate-35/31977.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+ef2782988cc0	McDonald's	fastfood	burger restaurant	29.88334	-97.91303	1015 Hwy 80	San Marcos	78666	+15123921665	https://www.mcdonalds.com/us/en-us/location/tx/san-marcos/1015-hwy-80/18466.html?cid=RF:YXT:RoN::Clicks		0.97
 f452b19df852	McDonald's	fastfood		29.56965	-97.94268	1388 E Ct	Seguin	78155	+18303794492	https://www.mcdonalds.com/us/en-us/location/tx/seguin/1388-e-ct/24335.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+17ad80deff70	Panda Express	fastfood	chinese restaurant	29.84304	-97.96964	2850 S Ih35	San Marcos	78666	+15123926988	http://www.pandaexpress.com/	Panda Express México	1.00
 1e1e2ccc83ea	Panda Express	fastfood		29.89259	-97.91112	1524 North Interstate 35	San Marcos	78666		https://www.pandaexpress.com/locations/tx/san-marcos/3977	Panda Express	0.80
 58399b7a198a	Panda Express	fastfood		29.88750	-97.94244	100 W Woods St	San Marcos	78666	+15122459935	https://www.pandaexpress.com/locations/tx/san-marcos/2569		0.99
-8efca358e232	Panda Express	fastfood		29.89039	-97.93662	100 W Woods St	San Marcos	78666	+15122459935	https://www.pandaexpress.com/locations/tx/san-marcos/2569		0.85
+6b242ae0bf43	Papa John's Pizza	fastfood	pizza restaurant	29.98133	-97.86832	575 E FM 150 J	Kyle	78640	+15122565400	https://locations.papajohns.com/united-states/tx/78640/kyle/575-e-fm-150?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE5NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
+9990c5e43949	Papa Johns	fastfood	pizza restaurant	29.88307	-97.93937	216 e hopkins	San Marcos	78666	+15123924422	https://locations.papajohns.com/united-states/tx/78666/san-marcos/216-e-hopkins-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE5NzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+c68cd9d18e8b	Papa Johns	fastfood	pizza restaurant	29.56827	-97.94398	1425 E Court St	Seguin	78155	+18305495045	https://locations.papajohns.com/united-states/tx/78155/seguin/1425-e-court-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMxNjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.96
 038f8105fc3c	Pizza Hut	fastfood		29.88355	-97.92345	720 E Hopkins St	San Marcos	78666	+15123963696	http://www.pizzahut.com/		0.95
+0a5492e04629	Pizza Hut	fastfood	pizza restaurant	29.56432	-97.94241	594 S State Hwy 123 Byp	Seguin	78155	+18305495083	https://locations.pizzahut.com/tx/seguin/594-s-state-highway-123-bypass?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307837	Pizza Hut	0.99
+2be3f40f20d5	Pizza Hut	fastfood	pizza restaurant	29.68029	-97.64732	700 E Pierce St Caldwell	Luling	78648	+18308752451	https://locations.pizzahut.com/tx/luling/700-e-pierce-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285902	Pizza Hut	0.94
+3204c086d197	Pizza Hut	fastfood	pizza restaurant	29.87979	-97.66901	610 S Colorado St	Lockhart	78644	+15123983451	https://locations.pizzahut.com/tx/lockhart/610-s-colorado?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=288871	Pizza Hut	0.98
+4b28b013ea62	Pizza Hut	fastfood	pizza restaurant	29.88076	-97.92058	900 Bugg Ln	San Marcos	78666	+15123963696	https://locations.pizzahut.com/tx/san-marcos/900-bugg-lane?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310824	Pizza Hut	0.99
+78e95d0396f7	Pizza Hut	fastfood	pizza restaurant	29.51560	-97.45979	312 US Hwy 90A E Gonzales	Gonzales	78629	+18306729616	https://locations.pizzahut.com/tx/gonzales/312-us-hwy-90a-e?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281316	Pizza Hut	0.99
+9278bff584a3	Pizza Hut	fastfood	pizza restaurant	29.88996	-97.94503	700 Student Center Drive Caldwell	San Marcos	78666	+18009488488	https://locations.pizzahut.com/tx/san-marcos/700-student-center-drive	Pizza Hut	0.96
+9d22cd5e60d2	Pizza Hut	fastfood	pizza restaurant	29.58708	-97.94350	1631 Texas 123	Seguin	78155		https://locations.pizzahut.com/tx/seguin/1631-texas-123	Pizza Hut	0.80
+eb9187320308	Pizza Hut	fastfood	pizza restaurant	29.29418	-97.16042	1201 W Grand Ave	Yoakum	77995	+13612936316	https://locations.pizzahut.com/tx/yoakum/1201-w-grand?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289784	Pizza Hut	0.98
+ecb8fa419ead	Pizza Hut	fastfood	pizza restaurant	29.09918	-97.28766	1010 N Esplanade St	Cuero	77954	+13612753434	https://locations.pizzahut.com/tx/cuero/1010-n-esplanade?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289623	Pizza Hut	1.00
 0dbcdfc08cb5	Pizza Hut Express	fastfood		29.65423	-97.96639	6293 Texas 123	Seguin	78155		https://locations.pizzahut.com/tx/seguin/6293-texas-123	Pizza Hut	0.80
+c460c2609fc9	Pizza Hut Express	fastfood	pizza restaurant	29.87536	-97.95126	700 Student Center Drive, Texas State University San M	San Marcos	78666		https://locations.pizzahut.com/tx/san-marcos/700-student-center-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296008		0.85
 d54c3f1a4ce8	Pizza Hut Express	fastfood		29.60802	-97.95975	3300 Texas 123	Seguin	78155		https://locations.pizzahut.com/tx/seguin/3300-texas-123	Pizza Hut	0.80
 deef3ed99c9e	Pizza Hut Express	fastfood		29.53756	-97.95701	6001 South State Highway 123 Bypass	Seguin	78155		https://locations.pizzahut.com/tx/seguin/6001-south-state-highway-123-bypass	Pizza Hut	0.80
 f0e195734d91	Pizza Hut Express	fastfood		29.88856	-97.93262	106 Charles Austin Dr	San Marcos	78666		https://locations.pizzahut.com/tx/san-marcos/106-charles-austin-dr	Pizza Hut	0.80
@@ -970,6 +992,12 @@ e50c6c1fe346	Qdoba	fastfood		29.88779	-97.94307	100 W Woods St	San Marcos	78666	
 7ab0ce255d22	Rusty Rooster	fastfood		29.52206	-97.44100	1826 E Sarah Dewitt Dr	Gonzales	78629	+18306721080	http://rustyroostertx.com/	Rusty Rooster, Inc.	0.97
 84539ef67ee6	Rusty Rooster	fastfood		29.68002	-97.64420	914 E Pierce St	Luling	78648	+18308753540	http://www.rustyroostertx.com/	Rusty Rooster, Inc.	0.92
 93b842b75181	San Marcos (24 Hours)	fastfood		29.88709	-97.91957	515 Springtown Way	San Marcos	78666		https://pterrys.com/locations/san-marcos-515-springtown-way-san-marcos-texas-78666/	P. Terry's	0.80
+75827d14c21a	Schlotzsky's	fastfood	sandwich shop	29.88262	-97.94283	205 W Hopkins St	San Marcos	78666	+15126679565	https://www.schlotzskys.com/texas/san-marcos/100396		0.94
+769c56ba2e23	Schlotzsky's	fastfood	sandwich shop	29.81045	-97.96829	1020 Centerpoint Dr Ste 102	San Marcos	78666	+15123925230			0.85
+a8ebde72d6e8	Schlotzsky's	fastfood	sandwich shop	29.82691	-97.98505	1020 Center Point Rd	San Marcos	78666	+15123925230	https://locations.schlotzskys.com/tx/san-marcos/1020-centerpoint-rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
+c10fad3562c8	Schlotzsky's	fastfood	sandwich shop	29.88543	-97.67068	111 N Colorado St	Lockhart	78644	+15126685298	https://www.schlotzskys.com/texas/lockhart/100870	Schlotzsky's	0.96
+f4ae37ccdf7a	Schlotzsky's	fastfood	sandwich shop	29.57900	-97.94200	330 N Hwy 123 Byp	Seguin	78155	+18303791202	http://www.schlotzskys.com/seguin/2597/home		0.85
+a5fe868039a4	Schlotzskys	fastfood	sandwich shop	29.57135	-97.94154	330 N Hwy 123 Bypass Bldg G	Seguin	78155	+18303791202	https://locations.schlotzskys.com/tx/seguin/330-north-123-bypass?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
 deb49c8abb64	Smoothie King	fastfood		29.57949	-97.99234	1300 TX-46, #300	Seguin	78155		https://locations.smoothieking.com/ll/us/tx/seguin/1300-tx-46-300/	Smoothie King	0.85
 05920b0df2a1	Sonic Drive In	fastfood		29.84369	-97.96904	2830 South 1-35	San Marcos	78666	+15123920537	https://locations.sonicdrivein.com/tx/sanmarcos/2830-south-1-35.html	Sonic Drive-In	0.99
 26925c4da4c2	Sonic Drive In	fastfood		29.87641	-97.66858	830 S. Colorado	Lockhart	78644	+15123986240	https://locations.sonicdrivein.com/tx/lockhart/830-s.-colorado.html	Sonic Drive-In	0.95
@@ -981,25 +1009,57 @@ c829a95cd026	Sonic Drive In	fastfood		29.67997	-97.64376	920 East Pierce Street	
 d46c1527a685	Sonic Drive In	fastfood		29.29396	-97.16232	706 S. US Hwy 77	Yoakum	77995	+13612935995	https://locations.sonicdrivein.com/tx/yoakum/706-s.-us-hwy-77.html	Sonic Drive-In	0.98
 eca9342b88e5	Sonic Drive In	fastfood		29.89269	-97.91518	1646 Aquarena Springs Dr	San Marcos	78666	+15123535977	https://locations.sonicdrivein.com/tx/sanmarcos/1646-aquarena-springs-drive.html	Sonic Drive-In	0.99
 effade10ee40	Sonic Drive In	fastfood		29.98168	-97.87073	400 Fm 150 East	Kyle	78640	+15122621022	https://locations.sonicdrivein.com/tx/kyle/400-fm-150-east.html	Sonic Drive-In	0.99
+f29f9c14bc01	Sonic Drive-In	fastfood	burger restaurant	29.69838	-97.09962	1410 FM 609	Flatonia	78941	+13618651000	https://locations.sonicdrivein.com/tx/flatonia/1410-fm-609.html		0.92
 fccd33f58961	Sonic Drive-In	fastfood		29.56968	-97.98014	968 West Court Street	Seguin	78155	+18303724533	https://locations.sonicdrivein.com/tx/seguin/968-west-court-street.html	Sonic Drive-In	0.96
+066e46f513e7	Subway	fastfood	sandwich shop	29.65361	-97.59238	190 US Highway 90	Luling	78648	+18308755667	https://restaurants.subway.com/united-states/tx/luling/190-us-highway-90	Subway	0.96
+0d627eb5e86b	Subway	fastfood	sandwich shop	29.86470	-97.96306	102 Wonder World Dr Ste 100	San Marcos	78666	+15123537766	https://www.subway.com		0.96
+10d430c4d754	Subway	fastfood		29.82838	-97.98734	690 Center Point Rd	San Marcos	78666	+15123927770	http://www.subway.com/	Subway	0.86
+1423f17246e4	Subway	fastfood	sandwich shop	29.82347	-97.98921	4015 S Interstate 35 Ste 320	San Marcos	78666	+15123923200			0.92
+1c487d7855c1	Subway	fastfood	sandwich shop	29.67978	-97.64243	950 E Pierce St	Luling	78648	+18308755660	https://www.subway.com		0.97
+2c18697cb90d	Subway	fastfood	sandwich shop	29.68097	-97.65470	190 E Highway 90	Luling	78648	+18308755667	https://alibabacharleston.com		0.55
+3941fd85de8d	Subway	fastfood	sandwich shop	29.52050	-97.44305	1620 N. Sarah Dewitt	Gonzales	78629	+18305194419	https://restaurants.subway.com/united-states/tx/gonzales/1620-n-sarah-dewitt		0.77
+3b15d9294abb	Subway	fastfood	sandwich shop	29.89226	-97.91921	1504 Aquarena Springs Drive	San Marcos	78666	+15127578833	https://restaurants.subway.com/united-states/tx/san-marcos/1504-aquarena-springs-drive	Subway	0.98
+3f976cba509f	Subway	fastfood	sandwich shop	29.69549	-97.10600	230 E I 10 Frontage Rd	Flatonia	78941	+13618653400	https://www.subway.com		0.95
+4e17c93a6beb	Subway	fastfood	sandwich shop	29.58224	-97.99160	1524 Highway 46	Seguin	78155	+18303797828	https://restaurants.subway.com/united-states/tx/seguin/1524-highway-46	Subway	0.99
+4e47721cb670	Subway	fastfood	sandwich shop	29.56890	-97.96461	2460 FM 464, Road Ranger Truck Stop	Seguin	78155			Subway	0.80
+50fbcd9977c9	Subway	fastfood	sandwich shop	29.60194	-97.95161	2999 North Highway 123 Bypass	Seguin	78155	+18303792649	http://www.subway.com/en-us	Subway	0.97
+57d1e8318916	Subway	fastfood	sandwich shop	29.88272	-97.66972	320 S Colorado St	Lockhart	78644	+15123983011	https://restaurants.subway.com/united-states/tx/lockhart/320-s-colorado	Subway	0.95
+6345a0761645	Subway	fastfood	sandwich shop	29.88527	-97.94029	202 University Dr	San Marcos	78666	+15123537500	https://restaurants.subway.com/united-states/tx/san-marcos/202-university-dr	Subway	0.99
+7022c296a8eb	Subway	fastfood	sandwich shop	29.43072	-97.17159	117 E 7th St	Shiner	77984	+13615945040	https://restaurants.subway.com/united-states/tx/shiner/117-e-7th-street	Subway	0.93
+73e3aab503f8	Subway	fastfood	sandwich shop	29.29020	-97.15377	412 W Grand Ave	Yoakum	77995	+13612937909	https://restaurants.subway.com/united-states/tx/yoakum/412-west-grand-ave	Subway	0.97
+96b74a1b55eb	Subway	fastfood	sandwich shop	29.56816	-97.94486	1341 E Court St	Seguin	78155	+18303798898	https://restaurants.subway.com/united-states/tx/seguin/1341-e-court-st	Subway	0.97
+9d8b1b76ee6d	Subway	fastfood	sandwich shop	29.51640	-97.44928	1114 E Sarah DeWitt Dr	Gonzales	78629	+18305194419	http://www.subway.com/	Subway	0.95
+a3e515318995	Subway	fastfood	sandwich shop	29.10817	-97.28330	2104 N. Esplanade	Cuero	77954	+13612758990	https://restaurants.subway.com/united-states/tx/cuero/2104-n-esplanade	Subway	0.96
+adb5f11b79a7	Subway	fastfood	sandwich shop	29.88168	-97.91802	1404 Clarewood Ste 101	San Marcos	78666	+15123530000	http://www.Subway.com/	Subway	0.96
+afbc1c7c834e	Subway	fastfood	sandwich shop	29.53673	-97.95610	6001 S State Hwy 123 Bypass	Seguin	78155	+18304062132	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73725&utm_campaign=evergreen-2020&y_source=1_MjAwMTc1ODA4NS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+b71e06b9278b	Subway	fastfood	sandwich shop	29.26824	-97.76271	210 E Central Ave	Nixon	78140	+18305821154	https://restaurants.subway.com/united-states/tx/nixon/210-e-central	Subway	0.95
 5bb0e7654825	Taco Bell	fastfood		29.86859	-97.66824	1400 S Colorado	Lockhart	78644	+15123985438	http://www.tacobell.com/	Taco Bell	0.99
 8932ed0fb295	Taco Bell	fastfood		29.82632	-97.98611	4007 IH 35 S	San Marcos	78666	+17372481813	http://www.tacobell.com	Taco Bell	0.99
 abe9020ce68d	Taco Bell	fastfood		29.52085	-97.44859	1225 E. Sara Dewitt Drive	Gonzales	78629	+18305194001	http://www.tacobell.com/	Taco Bell	0.96
 b0c02fe5c5c9	Taco Bell	fastfood		29.88560	-97.94144	101 University Dr	San Marcos	78666	+15122124550	http://www.tacobell.com/	Taco Bell	0.99
 be3b0ec498f0	Taco Bell	fastfood		29.57696	-97.99123	930 State Highway 46 N	Seguin	78155	+18304337320	https://locations.tacobell.com/tx/seguin/930-state-highway-46-n.html	Taco Bell	0.97
 c2e83957e085	Taco Bell	fastfood		29.56955	-97.93953	1494 East Court	Seguin	78155	+18303722710	http://www.tacobell.com/	Taco Bell	0.99
+3a34b8931292	Taco Cabana	fastfood	texmex restaurant	29.59767	-97.95077	2520 N Hwy 123 Bypass	Seguin	78155	+18303723466	https://www.tacocabana.com/	Taco Cabana	0.98
+7c011df7c42f	Taco Cabana	fastfood	texmex restaurant	29.88476	-97.92287	135 Long St	San Marcos	78666	+15123921500	https://www.tacocabana.com/	Taco Cabana	0.95
 9c87784a53ab	Tacoville	fastfood		29.82778	-97.98401	3939 S Interstate 35 Ste 900	San Marcos	78666	+15123924142	http://tacoville.net		0.92
 07ef80e74a8d	Wendy's	fastfood		29.56601	-97.94162	498 S Hwy 123 Byp	Seguin	78155	+18303722802	https://locations.wendys.com/united-states/tx/seguin/498-s-highway-123-byp	Wendy's	0.99
 268655e71155	Wendy's	fastfood		29.87200	-97.66838	1030 S Colorado St	Lockhart	78644	+17373558989	https://locations.wendys.com/	Wendy's	0.92
 418cca1aad69	Wendy's	fastfood		29.82679	-97.98566	4001 S I-35 South Frontage Rd	San Marcos	78666	+15125963318	https://locations.wendys.com/united-states/tx/san-marcos/4001-i-35-south	Wendy's	0.99
 cc0e5a199d8d	Wendy's	fastfood		29.88445	-97.92362	701 E Hopkins St	San Marcos	78666	+17377334426	https://locations.wendys.com/united-states/tx/san-marcos/701-east-hopkins-street	Wendy's	0.99
+d5d1d6a43a5c	Wendy's	fastfood	burger restaurant	29.87330	-97.66891	1030 S Colorado St.	Lockhart	78644	+17373558989	https://locations.wendys.com/		0.97
+139848135945	Whataburger	fastfood	burger restaurant	29.51398	-97.45879	1709 Saint Joseph St	Gonzales	78629	+18306722881	https://locations.whataburger.com/tx/gonzales/1709-st-joseph-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
 401b87b74be5	Whataburger	fastfood		29.58184	-97.99149	1520 N STATE HIGHWAY 46	Seguin	78155	+18303792582	https://locations.whataburger.com/tx/seguin/1520-n-state-highway-46.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 89d482a718cf	Whataburger	fastfood		29.86765	-97.93939	1004 N STATE HIGHWAY 123	San Marcos	78666	+15123530567	https://locations.whataburger.com/tx/san-marcos/1004-n-state-highway-123.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+8e662fc2897d	Whataburger	fastfood	burger restaurant	29.82744	-97.98708	4040 S INTERSTATE 35	San Marcos	78666	+15127547375	https://locations.whataburger.com/tx/san-marcos/4040-s-interstate-35.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 9511c292889a	Whataburger	fastfood		29.09772	-97.28786	905 N ESPLANADE ST	Cuero	77954	+13612753457	https://locations.whataburger.com/tx/cuero/905-n-esplanade-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 b4a5b8825ebc	Whataburger	fastfood		29.57096	-97.94144	318 N HIGHWAY 123 BYP	Seguin	78155	+18303723120	https://locations.whataburger.com/tx/seguin/318-n-highway-123-byp.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+ca6797fc86d4	Whataburger	fastfood	burger restaurant	29.94395	-97.79808	8920 Camino Real, Suite 101	Kyle	78640	+15122131322			0.99
 cd6b178c909b	Whataburger	fastfood		29.87184	-97.66953	100 STATE PARK RD	Lockhart	78644	+15123984288	https://locations.whataburger.com/tx/lockhart/100-state-park-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
 e23c02a7a827	Whataburger	fastfood		29.52531	-97.46664	2530 Water Street	Gonzales	78629		https://locations.whataburger.com/tx/gonzales/2530-water-street.html	Whataburger	0.80
 3105325b3330	Wienerschnitzel	fastfood		29.85505	-97.95035	1071 Wonder World Dr	San Marcos	78666	+15123927077	http://Wienerschnitzel.com/	Wienerschnitzel	0.99
+15438650c5dd	Wingstop	fastfood	chicken restaurant	29.88310	-97.91960	913 Highway 80	San Marcos	78666	+15123929464	https://www.wingstop.com/location/wingstop-236-san-marcos-tx-78666/menu?y_source=1_NTUyMDY1MzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+615f8829b9f3	Wingstop	fastfood	chicken restaurant	29.84488	-97.96797	651 Barnes Dr	San Marcos	78666	+15122108447	https://www.wingstop.com/location/wingstop-1989-san-marcos-tx-78666/menu?y_source=1_NTUyMDcxNDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+f8a545df6f6b	Wingstop	fastfood	chicken restaurant	29.56823	-97.94210	1465 E Court St	Seguin	78155	+18303797400	https://www.wingstop.com/location/wingstop-441-seguin-tx-78155/menu?y_source=1_NTUyMDc0NjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 f4e6c63a1768	Zaxbys	fastfood		29.82776	-97.98676	4002 S I H 35	San Marcos	78666	+15128056000	https://www.zaxbys.com/locations/tx/san-marcos/4002-s-ih-35/		0.99
 3c9ee1a892f6	Amani & Afee Llc	grocery		29.97309	-97.85808	102 Creekside Trl	Kyle	78640				0.95
 af6a2dadecc5	Arlan's Market	grocery		29.58078	-97.94769	1231 E Kingsbury St	Seguin	78155	+18303796123	https://www.arlansmarket.com	Arlan's Market	0.96
@@ -1027,8 +1087,6 @@ b225900daa07	Guadalupe Market	grocery		29.81411	-97.90582	2255 FM 1978	San Marco
 7e0c0e469a37	H-E-B	grocery		29.29304	-97.14928	201 W Gonzales St	Yoakum	77995	+13612935281	https://www.heb.com/heb-store/US/tx/yoakum/yoakum-h-e-b-355	H-E-B	0.92
 845ab74f791b	H-E-B	grocery		29.08948	-97.28021	909 E Broadway St	Cuero	77954	+13612756144	https://www.heb.com/heb-store/US/tx/cuero/cuero-h-e-b-712	H-E-B	0.97
 90455d41d5a0	H-E-B	grocery		29.88334	-97.94305	200 W Hopkins St	San Marcos	78666	+15123960100	https://www.heb.com/heb-store/US/tx/san-marcos/west-hopkins-h-e-b-455	H-E-B	1.00
-b76940cd995d	H-E-B	grocery		29.88357	-97.94336	200 W Hopkins St	San Marcos	78666	+15123960100	https://www.heb.com/heb-store/US/tx/san-marcos/west-hopkins-h-e-b-455		0.77
-bf87b0c3693b	H-e-b	grocery		29.88343	-97.94337	200 W Hopkins St	San Marcos	78666	+15123960100	https://heb.com		0.99
 eceb3212941f	H-E-B	grocery		29.88722	-97.92645	641 E Hopkins St	San Marcos	78666	+15123968880	https://www.heb.com/heb-store/US/tx/san-marcos/east-hopkins-h-e-b-243	H-E-B	0.97
 8872867156a8	H-E-B Fuel	grocery		29.51774	-97.45275	1841 Church St	Gonzales	78629	+18306727595	https://www.heb.com/heb-store/US/tx/gonzales/gonzales-h-e-b-641	H-E-B	1.00
 deb4b44834a0	Heb Grocery #716	grocery		29.57075	-97.94445	1368 E Court St	Seguin	78155	+18303790160			0.71
@@ -1064,7 +1122,6 @@ d9c2322477f2	Seguin Food Mart	grocery		29.56034	-97.96902	945 S Austin St	Seguin
 d6f77d868f45	Sunny's Food	grocery		29.89599	-97.96439	Ranch Rd 12	San Marcos	78666	+15123925631			0.58
 3e8189adab29	Super Cheesecakes	grocery		29.63624	-97.89647	Tschoepe Rd	Seguin	78155	+18304060265	http://www.supercheesecakes.com		0.77
 bbb3f2fe04d1	Super Moreliana #2	grocery		29.89513	-97.67445	1104 N Colorado St	Lockhart	78644	+15126684497			0.96
-11f06d4c6162	Super S Foods	grocery		29.26757	-97.76544		Nixon	78140	+18305821251	http://supersfoods.com		0.77
 a7ad0ed594a7	Taste Of Texas Peanut Brittle	grocery		29.53691	-97.85578	2407 Eden Rd	Seguin	78155	+18308226202	http://www.tasteoftexaspeanutbrittle.com/		0.55
 e6c17af4b94c	Tejas Sales	grocery		29.57870	-97.98717	1010 Fleming Dr	Seguin	78155				0.95
 6d6fac245bfc	The Salty Slab	grocery		29.24003	-97.96252	301 State Highway 123 N	Stockdale	78160	+18302160807	https://order.toasttab.com/online/the-salty-slab-meat-market-303-texas-hwy-123		0.92
@@ -1120,16 +1177,12 @@ c56f2454bd00	VA Outpatient Clinic	hospital		29.56918	-97.96031	526 E Court St	Se
 6d4a3010fc7d	All Tucked Inn Cabins	hotel	resort	29.24648	-97.96620	710 Texas 123	Stockdale	78160	+18309961145	http://alltuckedinncabins.com/		0.85
 06be1571d088	Americas Best Value Inn & Suites	hotel		29.58070	-97.95570	807 E Kingsbury St	Seguin	78155	+18303792363	https://www.kingsinnmichigancity.com		0.55
 c3b640b4376f	Americas Best Value Inn & Suites Cuero	hotel	resort	29.12279	-97.27806	3531 N Esplanade St	Cuero	77954	+13612753200			1.00
-0b3f7e3b554c	Americas Best Value Inn Lockhart	hotel	resort	29.86346	-97.65946	2001 S Colorado St	Lockhart	78644	+15123984911	https://www.sonesta.com/americas-best-value-inn/tx/lockhart/americas-best-value-inn-lockhart?utm_medium=soci&utm_source=bing		0.85
 9af986e2de35	Americas Best Value Inn Lockhart	hotel	resort	29.85461	-97.66889	2001 S Colorado St	Lockhart	78644	+15123984911	https://www.sonesta.com/americas-best-value-inn/tx/lockhart/americas-best-value-inn-lockhart		0.96
 a5bef03f982d	Americas Best Value Inn Schulenburg	hotel	resort	29.69416	-97.02637	205 W IH-10 Frontage Rd	Schulenburg	78956	+19797434192	https://www.redlion.com/americas-best-value-inn/tx/schulenburg/americas-best-value-inn-schulenburg		0.85
 287fa10efbf6	Antlers Inn	hotel	motel	29.08828	-97.26974	1304 E Broadway St	Cuero	77954	+13612755766	http://antlersinncuero.us		0.97
 ef35b03c7865	Arden 231	hotel	service apartment	29.83071	-97.96502	231 Windsor Drive	San Marcos		(737) 252-8992	https://arden231.com/		0.99
-c842edb88796	Austin Trophy Whitetails	hotel	lodge	29.29233	-97.30082	12024 US-183	Yoakum	77995	+15129621286	https://austintrophywhitetails.com/		0.92
 1c293b560361	Avalon Apartments	hotel		29.89766	-97.91051	1703 N I-35	San Marcos	78666	+15123534991	http://www.avalonsanmarcos.com		0.99
-d4da53aaeaf8	Avalon Apartments	hotel		29.89724	-97.90977	1703 N I-35	San Marcos	78666	+15123534991	http://www.avalonsanmarcos.com		0.96
 afcb6fe72d87	Babydoll's Ranch	hotel		29.95658	-97.85153	213 Hill Side Glow	Kyle	78640				0.84
-bba09f33eb70	Bavarian River Haus	hotel		29.82976	-97.83879		Martindale					0.64
 1ec999b873be	Baymont by Wyndham Cuero	hotel		29.09056	-97.27895	308 Park Heights	Cuero	77954	+13612106465	https://www.wyndhamhotels.com/baymont/cuero-texas/baymont-inn-and-suites-cuero/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A50211	Baymont by Wyndham	1.00
 6b30624b81d7	Baymont Inn & Suites	hotel		29.82655	-97.98926	4210 IH-35 S	San Marcos	78666	+15125184489	https://www.wyndhamhotels.com/baymont/san-marcos-texas/baymont-inn-and-suites-san-marcos/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A70129	Baymont by Wyndham	0.99
 e9b6013746a3	Baymont Inn & Suites by Wyndham San Marcos Outlet Malls	hotel	resort	29.89087	-97.91313	4210 S Interstate 35	San Marcos	78666	+15125184489	https://www.wyndhamhotels.com/baymont/san-marcos-texas/baymont-inn-and-suites-san-marcos/overview?CID=LC:w1ep4ap58ea2s4j:70129&iata=00093796		0.85
@@ -1158,7 +1211,6 @@ cb1105d8e224	Centennial Hall	hotel		29.57221	-97.98612	529 Fleming Dr	Seguin	781
 1cb389a1dbec	Classic Inn San Marcos, TX	hotel		29.88114	-97.92505	S I-35 South Frontage Rd, San Marcos, TX	San Marcos, Tx			https://www.oyorooms.com/us/361781/	OYO	0.80
 2c1ac3eb3b0e	Clayton Street Guesthouse	hotel		29.09633	-97.29073	208 W Clayton St	Cuero	77954	+13619354039	http://www.ClaytonStreetGuestHouse.com/		0.92
 0893afd4c066	Coachway Inn	hotel		29.67398	-97.63127	1908 E Pierce St	Luling	78648	+18308755635			0.96
-1c29cd38b7e2	College Inn	hotel		29.88935	-97.94642	714 N Comanche St	San Marcos	78666				0.72
 23570b4de32e	Colony of San Marcos	hotel		29.89358	-97.91562	1631 Aquarena Springs Dr	San Marcos	78666	+17372214382	http://www.colonyofsanmarcos.com/		1.00
 39f3eb553a5d	Comanche Hill Apartments	hotel		29.88676	-97.94550	327 W Woods St	San Marcos	78666	+15122452435	http://www.txstate.edu		0.90
 6dceed33b375	Comfort Inn & Suites	hotel		29.60304	-97.95212	3013 N Hwy 123 Bypass	Seguin	78155	+18303723990	https://www.choicehotels.com/texas/seguin/comfort-inn-hotels/tx252?pmf=yext&mc=llyxyxpx	Choice Hotels	0.97
@@ -1171,9 +1223,6 @@ c86ebfac73ef	Cripple Creek Ranch, Gonzales Texas	hotel		29.47910	-97.34033	8425 
 1bbaad1d656b	Cuero Hospital	hotel		29.09527	-97.28879	615 N Esplanade St	Cuero	77954		https://www.cueroregionalhospital.org		0.95
 feba124f00eb	Cuero Hospitality, Llc	hotel		29.11031	-97.28330	2400 N Esplanade St	Cuero	77954		https://www.cueroregionalhospital.org		0.95
 2f31dccbe22c	Cuero Housing Facility	hotel		29.11701	-97.29672	513 FM-766	Cuero	77954	+18302518790	http://cuerohousing.com/		0.73
-0cf7e155947b	Cuero Masonic Lodge Number 409	hotel	lodge	29.07815	-97.27646	195 FM 236	Cuero	77954	+17138294160			0.73
-744e3ad2a50b	Cuero Oilfield Housing, LLC	hotel	lodge	29.11832	-97.29766	513 F-M 766	Cuero	77954	+18446270000			0.96
-84293edfa6ca	Cute Ass Ranch	hotel	lodge	29.68820	-97.14819	458 Old Waelder Rd	Flatonia	78941	+15123488733			0.97
 bb8161b52aad	Czech Haus	hotel		29.57231	-97.14879	500 W Elm St	Moulton	77975	+17133147334	http://www.czechhaus.com		0.92
 e0cbba8f0016	Days Inn	hotel	motel	29.88175	-97.92452	1005Interstate-Highway 35North	San Marcos	78666	+15123535050	https://www.wyndhamhotels.com/days-inn/san-marcos-texas/days-inn-san-marcos/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A06447	Days Inn	0.99
 bbf8e53b0797	Days Inn & Suites by Wyndham Gonzales	hotel		29.51987	-97.46535	2131 Water St	Gonzales	78629	+18302688086	http://www.daysinn.com/hotels/texas/gonzales/days-inn-suites-gonzales/hotel-overview	Days Inn	0.92
@@ -1183,7 +1232,6 @@ bbf8e53b0797	Days Inn & Suites by Wyndham Gonzales	hotel		29.51987	-97.46535	213
 a914db3d6a46	Dove & Arrow Hill	hotel		29.79430	-97.03032		Muldoon					0.97
 e49f258a6bf1	Early Bird Townhomes	hotel		29.58191	-97.98872	1360 C H Matthies Jr	Seguin	78155	+18303799712	https://www.seguinchamber.com		0.89
 eb0f047d68a5	Econo Lodge San Marcos University Area	hotel	motel	29.87147	-97.93903	811 S Guadalupe St	San Marcos	78666	+15123535300	https://www.choicehotels.com/texas/san-marcos/econo-lodge-hotels/tx251?pmf=yext&mc=llyxyxpx	Choice Hotels	0.94
-82ae5d27fdce	Elks Lodge	hotel	lodge	29.58035	-97.98752	1331 C H Matthies Jr	Seguin	78155	+18303035844	https://www.elks.org/lodges/home.cfm?lodgenumber=1229		0.92
 420ff3f46cfd	Embassy Suites - Presidential Suite	hotel		29.86858	-97.93735		San Marcos			http://embassysuitesmediacenter.com/index.cfm/property/detail/4189?mobile=0		0.71
 f878009a3360	Embassy Suites by Hilton San Marcos Hotel Conference Center	hotel		29.83948	-97.96936	1001 E McCarty Ln	San Marcos	78666	+15123926450	http://embassysuites3.hilton.com/en/hotels/texas/embassy-suites-by-hilton-san-marcos-hotel-conference-center-and-spa-SNMESES/index.html	Embassy Suites by Hilton	1.00
 00d920381f28	Embassy Suites- San Marcos Hotel & Spa	hotel		29.88402	-97.92441		San Marcos			http://www.embassysuites.com/		0.73
@@ -1192,20 +1240,12 @@ f878009a3360	Embassy Suites by Hilton San Marcos Hotel Conference Center	hotel		
 287db253a17c	Fairfield	hotel		29.88652	-97.91697	1250 North IH-35	San Marcos	78666	+15123960131	https://www.marriott.com/en-us/hotels/ausfm-fairfield-inn-and-suites-austin-san-marcos/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
 dfa7a099620c	Fairfield	hotel		29.11031	-97.28168	2121 North Esplanade Street	Cuero	77954	+13612755200	https://www.marriott.com/en-us/hotels/vctcu-fairfield-inn-and-suites-cuero/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	0.92
 490d6b0468ab	Gaillardia Hall	hotel		29.89009	-97.94623	302 Student Center Dr	San Marcos	78666		www.reslife.txstate.edu/livingoptions/options/gaillardia.html		0.94
-f41375b31897	Ganesh Hospitality Llc	hotel		29.89424	-97.91273	1601 N Interstate 35	San Marcos	78666				0.95
 228fcee3a907	Garner Hotel Gonzales	hotel		29.51827	-97.46585	2019 Water St	Gonzales	78629	+18304439534	https://www.ihg.com/garner-hotels/hotels/us/en/gonzales/auszl/hoteldetail	Garner Hotels	1.00
 c92c41a092ae	Gateway Inn	hotel		29.88117	-97.92510	921 N I-35	San Marcos	78666	+15127547766	http://www.gatewayinn.com		0.87
 b03cfff32453	Grumpys Motor Inn Flatonia	hotel		29.69612	-97.10448	420 E Ih-10 Frontage Rd	Flatonia	78941	+13618652911			0.85
-cb9afb7c41b3	Guadalupe Ski Plex	hotel		29.74908	-97.96371	157 Ski Plex Dr	San Marcos	78155				0.76
 bf17e38c0087	Hampton Inn and Suites San Marcos	hotel		29.86859	-97.93709	106 S I-35 South Frontage Rd	San Marcos	78666	+15127547707	http://hamptoninn.hilton.com/	Hampton by Hilton	1.00
 f4fe1638dd64	Hampton Inn Seguin	hotel		29.60159	-97.95037	1130 Larkin Ave	Seguin	78155	+18303861975	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
-0bb0516edabf	Hardeman Lodge	hotel	lodge	29.68260	-97.64831	601 E Fannin St	Luling	78648	+18308752131			0.76
-953ad7540787	Hardeman Masonic Lodge #179	hotel	lodge	29.68261	-97.64836	601 E Fannin St	Luling	78648	+18302000120	http://www.grandlodgeoftexas.org/		0.62
-9f64e4011da5	Hays Hospitality Lp	hotel		29.85795	-97.95483	600 Wonder World Dr	San Marcos	78666				0.95
 09eb4d0389af	Health Professions	hotel		29.88896	-97.94568	712 N Comanche St	San Marcos	78666		www.health.txstate.edu		0.59
-601e4235e9cd	Hembre Plaza	hotel		29.89081	-97.97043	2109 Lancaster St	San Marcos	78666				0.97
-3eebff22ee20	High Point Ranch	hotel		29.39774	-97.67099	7138 State Highway 97	Cost	78614				0.72
-ac3bb81d4596	High Point Ranch	hotel		29.39304	-97.66827	7138 State Highway 97	Cost	78614				0.72
 e34c6481bf26	Hilton Garden Inn San Marcos	hotel		29.90343	-97.90421	2131 N. HWY 35	San Marcos	78666	512-8784411	https://www.hilton.com/en/hotels/aussmgi-hilton-garden-inn-san-marcos/	Hilton Garden Inn	1.00
 5ae68ddbfc2f	Holiday Inn Express & Suites Cuero By Ihg	hotel		29.12170	-97.27760	3371 N Esplanade St	Cuero	77954	+13612755700	https://www.ihg.com		1.00
 5acaf4ad866d	Holiday Inn Express & Suites Gonzales	hotel	resort	29.43709	-97.42028	126 Middlebuster Rd	Gonzales	78629	+18306722777			0.92
@@ -1236,9 +1276,7 @@ dd9c96ef77e2	Lockhart House	hotel		29.87858	-97.67496	400 Hackberry St	Lockhart	
 756077f13a6e	Luling Inn	hotel		29.68081	-97.65774	100 S Mulberry Ave	Luling	78648	+18308755646	http://OyoRooms.com/		0.96
 c807a54af704	M & K Inn L.l.c	hotel		29.87931	-97.92710	817 N Interstate 35	San Marcos	78666				0.95
 fd831d43529e	Maganbhai Patel And Janakkumar Desai	hotel		29.87861	-97.92803	801 N Interstate 35	San Marcos	78666				0.95
-48f0dc825c95	Mahajya Investments Ltd	hotel		29.60310	-97.95208	3013 N Highway 123 Byp	Seguin	78155				0.95
 ac3785ab64fb	Mani Enterprises, Inc	hotel		29.86099	-97.66915	1811 S Colorado St	Lockhart	78644		http://www.manienterprises.org		0.95
-82a50b2a595f	Masonic Lodge	hotel	lodge	29.50201	-97.45323	519 N St Joseph St	Gonzales	78629	+18306726951			0.93
 c02aacef8c1f	Melrose River Club	hotel	resort	29.86356	-97.88744	70 Riverbend Dr	San Marcos	78666	+15124006065	http://www.melroseriverclub.com/		0.99
 6539e5eef7fe	Microtel Inn & Suites by Wyndham Gonzales	hotel	resort	29.51642	-97.46357	2019 Water St	Gonzales	78629	+18304439534	https://www.wyndhamhotels.com/microtel/gonzales-texas/mictrotel-inn-and-suites-by-wyndham-gonzales/overview?CID=LC:MT::BING:RIO:National:46330&iata=00093796		0.85
 2ef1e7acf781	Mill Street Townhomes	hotel		29.89896	-97.91422	1645 Mill St	San Marcos	78666	+15123533050			0.57
@@ -1246,7 +1284,6 @@ c02aacef8c1f	Melrose River Club	hotel	resort	29.86356	-97.88744	70 Riverbend Dr	
 c08ef8dffd28	Motel 6	hotel	motel	29.58428	-97.99500	1826 I-10	Seguin	78155	+18302013801	http://www.motel6.com/	Motel 6	0.92
 96b4392e11a9	Motel 6 San Marcos- Tx - North	hotel	resort	29.89708	-97.91008	1701 N Interstate 35	San Marcos	78666	+15123958000			1.00
 9fa3a6d05364	Moulton Inn Suites	hotel	motel	29.57352	-97.14330		Moulton		+13615964200			0.98
-5e5150e7477a	Moulton Masonic Lodge No 298	hotel		29.57243	-97.14581	300 S Main St	Moulton	77975	+13615967306			0.63
 cf269a03f306	Olle Hotel	hotel		29.65817	-97.13167	815 Scotts School Rd	Flatonia	78941	+13618653404	http://www.ollehotel.com		0.92
 f6cbcbcd9e4a	OYO Hotel	hotel		29.50335	-97.45202	614 St Paul St	Gonzales	78629	+12122030940	https://www.oyorooms.com/us/105894/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_SGX001	OYO USA	0.92
 205b1c51320a	OYO Hotel Lockhart TX	hotel	resort	29.85465	-97.66823	2001 S Colorado St # 0	Lockhart	78644	+13526005308	https://www.oyorooms.com/us/54287/?utm_source=Bing_bp&utm_medium=listing&utm_campaign=US_SAO003&latitude=29.85454&longitude=-97.6688&locale=en		0.99
@@ -1259,7 +1296,6 @@ e568da554a79	Quality Inn	hotel	motel	29.52201	-97.44214	1804 E Sarah DeWitt Dr	G
 dffa13e177e2	Quality Inn San Marcos	hotel		29.89118	-97.91579	1433 N Interstate 35	San Marcos	78666				0.86
 7041d2c5e93b	Quality Inn University near Downtown	hotel		29.89507	-97.91200	1611 N I-35	San Marcos	78666	+17373871208	http://www.qualityinn.com	Choice Hotels	1.00
 cdbb846eae7e	R M Ranch	hotel		29.18737	-97.58997	5531 County Road 219	Smiley	78159	+18302365895			0.97
-777579332528	Ramila Hospitality Llc	hotel		29.60094	-97.95280	2950 N Highway 123 Byp	Seguin	78155				0.95
 97028971d759	Red Roof Inn	hotel		29.87928	-97.92680	817 N Interstate 35	San Marcos	78666	+15127548899	https://www.redroof.com/property/tx/san-marcos/RRI632	Red Roof	1.00
 cdda568b37d3	Redpoint San Marcos	hotel		29.87185	-97.92889	650 River Rd	San Marcos	78666	+14302345006	https://redpoint-sanmarcos.com/		1.00
 163c03ad47b0	Regency Inn & Suites	hotel		29.29948	-97.15952	104 Ellen May Rd	Yoakum	77995	+13612939595	http://www.yoakumregencyinn.com/		0.92
@@ -1278,7 +1314,6 @@ c627b8cb8683	Sink Creek Retreat House	hotel		29.97896	-97.99762	5350 Hilliard Rd
 2ebfa61288bd	Sleep Inn & Suites Gonzales near Palmetto State Park	hotel	resort	29.51876	-97.46440	2138 Water St	Gonzales	78629	+18303392003	https://www.choicehotels.com/texas/gonzales/sleep-inn-hotels/txa93?mc=llbillpx&pmf=local		0.99
 f218e12d3c36	Sonesta Essential Gonzales	hotel		29.51772	-97.46555	2019 Water St	Gonzales	78629	+18032035110			0.92
 2d9e71613363	SouthLake Ranch Subdivision	hotel		29.99987	-97.84506		Kyle			https://www.realtyaustin.com/southlake-ranch.php		0.72
-7348d2a4ba06	Spar Enterprises Lp	hotel		29.60169	-97.95046	1130 Larkin Ave	Seguin	78155				0.95
 d5baca2e13e2	Springs Ranch Gonzales, Tx	hotel		29.45222	-97.34284		Gonzales					0.76
 9fc9ef4b2eb7	Stockdale Inn & Suites	hotel		29.22806	-97.95673	106 Fordtran Dr	Stockdale	78160	+18309960044			0.97
 ddae241ca3c2	Stonebridge Hotels Llc	hotel		29.86888	-97.93629	106 N Interstate 35	San Marcos	78666		stonebridgehotels.com		0.92
@@ -1308,10 +1343,7 @@ bd5fb69052f5	The Weinert House	hotel		29.58007	-97.96465	1207 N Austin St	Seguin
 87f57d8e96c7	Tri-star Hotel Group L.p	hotel		29.86888	-97.93629	106 N Interstate 35	San Marcos	78666				0.95
 8eb63fca0f43	Trident Hotel Group Ltd	hotel		29.86923	-97.93644	108 N Interstate 35	San Marcos	78666				0.95
 3e0a4d7cfe60	Tropical Village Apartments	hotel		29.57929	-97.15149	601 N Lancaster	Moulton	77975	+13615964855	https://tropical-village-apartments-tx.hub.biz/		0.62
-8ccb9f9b131c	Tschoepe Hall	hotel		29.57197	-97.98270		Seguin					0.58
 9e2bc9d5ac2d	Viola Street Inn	hotel		29.88298	-97.95255	714 Viola St	San Marcos	78666	+15123926242	http://www.violastreetinn.com		0.92
-74208028eb06	Wahwahtaysee Resort	hotel	lodge	29.74767	-97.78546	17062-17002 FM 20	Kingsbury	78638	+15124134596	http://www.wahwahtayseeresort.com		0.97
-6516483bab71	Walnut Medical Plaza	hotel		29.57309	-97.94597	E Walnut St	Seguin	78155				0.87
 a179e4ca4c52	Walnut Springs Tower	hotel		29.56681	-97.97063	516 Jefferson Ave	Seguin	78155	+18303797091			0.87
 32a39cb249e2	Westwood Inn Extended Stay Studio	hotel		29.52267	-97.46675	2669 Water St	Gonzales	78629	+18305194383	http://www.westwoodinn.com		0.98
 7bee380ca727	White Rock Inn San Marcos	hotel	motel	29.87835	-97.92800	801 S I-35 South Frontage Rd	San Marcos	78666	+15123531303			1.00
@@ -1320,7 +1352,6 @@ a179e4ca4c52	Walnut Springs Tower	hotel		29.56681	-97.97063	516 Jefferson Ave	Se
 dd708a2c7ad5	Wolff Motel	hotel	motel	29.50968	-97.44891	1020 Henry St	Gonzales	78629	+18305194177			0.99
 47221ba1ab09	Woodfield Inn	hotel	motel	29.29592	-97.16100	606 US-77 ALT	Yoakum	77995	+12272066192	https://woodfield-inn.hub.biz/		1.00
 90a9926f168c	Woodfield inn	hotel		29.31240	-97.14928	606 US Highway 77A N	Yoakum	77995	+13612935211			0.89
-178c3a954b29	Yoakum Hospitality Llc	hotel		29.30069	-97.15697	207 US Highway 77A S	Yoakum	77995				0.95
 1c3878708f06	Zedler Guest House	hotel		29.66834	-97.65102	1115 S Laurel Ave	Luling	78648	+18303515165	http://www.zedlerhouse.com		0.92
 b7a1bac0f009	A2k Logistics	office		29.59715	-97.98618	2401 Huber Rd	Seguin	78155	+18304330709	https://a2klog.com/contact-us		0.65
 02476af1f234	Advanced Home Health Services	office		29.57392	-97.14338	102 S Lavaca	Moulton	77975	+13615968161	http://advancedhomehealthservices.com		0.77
@@ -1353,7 +1384,6 @@ bee9af48f7d2	Haven Management Services Llc	office		29.84267	-97.97382	900 Barnes
 e5c638b4e262	J N C Hideaway Ranch	office	private association	29.71122	-97.71191		Prairie Lea					0.97
 d45c5e0b242f	James Teleco	office		29.19095	-97.23271	341 Edgar Leesville Rd	Cuero	77954	+13615749644	http://www.jamesteleco.com		0.77
 5c8c10aca5f1	Kinder Morgan Crude	office	energy company	29.06809	-97.36472	200 Luddeke Ln	Cuero	77954	+13612758010	http://www.kindermorgan.com/pages/business/products_pipelines/crude		0.92
-913f0e4e5abd	Kissingtree Pickleball Complex	office	private association	29.83972	-97.99463		San Marcos					0.82
 305e0e15a796	Legacy Ranch	office		29.62975	-97.57995	13326 N US Highway 183	Gonzales	78629	+18308756062	http://www.legacyranchkids.com		0.77
 f75d8614800c	Lone Star I.T. Support	office	information technology company	29.56808	-97.96040	523 E Donegan St Suite 6	Seguin	78155	+18304337211	http://lonestaritsupport.com/		0.92
 5b2c4a69d00f	Lyssy Beefmasters -Headquarters	office		29.11698	-97.95687	857 FM 1347	Stockdale	78160	+18307452419	http://www.lyssybeefmasters.com		0.92
@@ -1379,7 +1409,6 @@ ff209bb149f7	TORRES FIT💚	office	private association	29.86490	-97.68282	1100 S
 17a6170b41c9	Valero	office	energy company	29.26808	-97.76277	212 E Central Ave	Nixon	78140	+12103452000	http://www.valero.com	Valero Energy	0.92
 f77a062cf10f	Visionary Fiber Technologies	office		29.87250	-97.65467	1400 Blackjack St	Lockhart	78644	+15126684928	https://www.visionaryfiber.com		0.88
 911fcff6b843	Water Tree Seguin	office	bottled water company	29.56159	-97.96907	942 S N Austin St	Seguin	78155	+18304019009	http://www.dreamtreefamily.com/?site=tbwillemin		0.92
-9031cc79bdd6	Waterloo Tiny Homes	office		29.96761	-97.87337	23703 I 35	Kyle	78640				0.65
 3156974f2f2f	Watermill Express	office	bottled water company	29.87037	-97.66840	1326 S Colorado St	Lockhart	78644	+18004879643	https://watermillexpress.com/	Watermill Express	0.98
 bdff86e5d181	Watermill Express	office	bottled water company	29.56880	-97.94391	1357 E Court St	Seguin	78155	+18004879643	https://watermillexpress.com/	Watermill Express	1.00
 85bb5d977a4c	Weatherby Energy	office		29.56876	-97.96489	100 S Austin St	Seguin	78155	+18882254459	https://weatherbyenergyllc.tumblr.com		0.65
@@ -1415,7 +1444,6 @@ ff64641a16a6	Bar-B-Q Shack	restaurant	barbecue restaurant	29.31634	-97.14591	100
 2a04ac988bbb	Bea's Place	restaurant	diner	29.42827	-97.17011	404 N Avenue E	Shiner	77984	+13615943503	http://beasplaceshiner.com/		1.00
 f0cd83b8313e	Belmonte BBQ	restaurant		29.88228	-97.94641	205 Moore St	San Marcos	78666	+15122141319			0.66
 b7cd0df1758d	Bennigan’s	restaurant	american restaurant	29.82535	-97.98728	4025 S Interstate 35	San Marcos	78666	+15123925511	http://www.bennigans.com		0.92
-7466e0c28b39	Beraka's Restaurant	restaurant		29.86963	-97.94563	Beraka's Burgers	San Marcos		+50360006646			0.78
 d74072673172	Big D Ranch BBQ	restaurant	barbecue restaurant	29.46836	-97.34445	8429 Hwy. 90A East	Gonzales	78629	+12817442400	http://Bigdranchbunkhouse.com/		0.59
 0902b027e99e	Bill Miller Bar-B-Q	restaurant	barbecue restaurant	29.58169	-97.99495	1823 I-10	Seguin	78155	+18303722668	https://www.billmillerbbq.com/locations/bill-miller-68/	Bill Miller Bar-B-Q	0.99
 a9f1de09e2ca	Bill Miller Bar-B-Q	restaurant	barbecue restaurant	29.82944	-97.98457	3928 IH-35 S	San Marcos	78666	+15126614855	https://www.billmillerbbq.com/locations/bill-miller-76/	Bill Miller Bar-B-Q	0.99
@@ -1437,8 +1465,6 @@ feeddc01532b	Bordeaux's	restaurant	french restaurant	29.98880	-97.87591	108 W Ce
 15d003acf859	Bryan's daily Treat	restaurant	comfort food restaurant	29.57402	-97.14266	109 S Lavaca Dr	Moulton	77975	+13615965006	https://sites.google.com/view/bryanscatering/catering-gallery?authuser=0		0.93
 6dbd488022aa	Buddy’s Burger	restaurant	burger restaurant	29.88231	-97.91806		San Marcos	78666		http://www.buddysburger.com		0.77
 0e2b71573c7a	Bullseye 21	restaurant	texmex restaurant	29.93768	-97.80993	8374 Camino Real	Kyle	78640	+15122109944			0.99
-8fdf371f83c1	Burger King	restaurant	burger restaurant	29.86684	-97.93915	1012 TX-123	San Marcos	78666	+15123922381	https://burgerking.com/store-locator/store/9695	Burger King	0.99
-ee19842ed70d	Burger King	restaurant	burger restaurant	29.57901	-97.99183	1200 TX-46 Suite A	Seguin	78155	+18304915255	https://burgerking.com/store-locator/store/28727	Burger King	1.00
 cfdfdc10cf09	Burnt Bean Company	restaurant	barbecue restaurant	29.56849	-97.96496	108 S Austin St	Seguin	78155		https://www.burntbeanco.com		0.99
 0e12534d8fd3	Burro. Gourmet Tacos & Burritos	restaurant	latin american restaurant	29.87229	-97.66862	1126 S Colorado St	Lockhart	78644	+15123985565	http://www.burrotacos.com		0.92
 0a24908e704e	Buzzy's Pool and Grill	restaurant	bar and grill restaurant	29.15722	-97.90997	5 Korzekwa Ln	Stockdale	78160				0.72
@@ -1461,10 +1487,7 @@ ad927d1f4973	Champs Chicken	restaurant	chicken restaurant	29.60238	-97.95116	299
 70b7910e63ba	Charlotte's	restaurant		29.88489	-97.67235	101 E San Antonio St	Lockhart	78644	+15127730855	http://littletroublelockhart.com/		0.92
 64e0ecb22743	Cheddar's Scratch Kitchen	restaurant	comfort food restaurant	29.84665	-97.96573	2540 S Ih 35	San Marcos	78666	+15123925308	https://www.cheddars.com/locations/tx/san-marcos/san-marcos/2194?cmpid=br%3Acsk_ag%3Aie_ch%3Asoc_ca%3ACSKFB_sn%3Afacebook_gt%3Asan-marcos-tx-2194_pl%3Alocurl_rd%3A1164	Cheddar's Scratch Kitchen	0.94
 2cc650943c85	Chepo's Mexican Restaurant	restaurant	mexican restaurant	29.89052	-97.95566	1400 Old Ranch Rd 12	San Marcos	78666	+15128780804	https://www.cheposmexicanrestaurant.com/		0.98
-1c7931a26bf2	Chester's Chicken	restaurant	chicken restaurant	29.69876	-97.09988	1415 Fm 609	Flatonia	78941	+18324662769	https://www.chesterschicken.com/		0.92
 c7d9acad8057	Chester's Chicken	restaurant	chicken restaurant	29.77614	-97.03155	1415 FM 609	Flatonia	78941	+18324662769	https://www.chesterschicken.com		0.96
-c1ae83a0b059	Chick-fil-A	restaurant	chicken restaurant	29.88191	-97.94526	100 Moore Street Bldg 30	San Marcos	78666	+15122459930	https://www.chick-fil-a.com/texasstate		0.77
-f85df5e3ee26	Chicken Express	restaurant		29.57799	-97.99160	1000 N State Highway 46	Seguin	78155	+18304062303	https://www.chickene.com		0.77
 75af7151991c	Chili Dog Stand	restaurant	hot dog restaurant	29.86976	-97.94038	1140 Invasion St	San Marcos	78666	+15123960900	chilidogstand.com		0.96
 9b860f1158ae	Chili's Grill & Bar	restaurant		29.86884	-97.93803	102 N. IH 35	San Marcos	78666	+15127547420	https://www.chilis.com/		0.96
 efc0e8fce069	Chili's Grill & Bar	restaurant		29.60040	-97.95055	1100 Interstate 10 East	Seguin	78155	+18303797153	https://www.chilis.com/		0.96
@@ -1472,9 +1495,6 @@ efc0e8fce069	Chili's Grill & Bar	restaurant		29.60040	-97.95055	1100 Interstate 
 773a69e96d5c	China Palace	restaurant		29.68168	-97.64825	615 E Davis St	Luling	78648	+18308755959	http://www.chinapalace1.com/location.aspx		0.92
 e52d4ad8f410	China Palace Lockhart Chinese food	restaurant	chinese restaurant	29.86356	-97.66737	1710 S Colorado St	Lockhart	78644	+15123989999	http://www.butlerchinapalace.com/		0.96
 c554c091c4a2	China Palace Super Buffet	restaurant	buffet restaurant	29.88056	-97.92103	900 Bugg Ln	San Marcos	78666	+15128780886	https://www.chinapalacesuperbuffet.com/		0.99
-52a0c5e6a73c	Chipotle Mexican Grill	restaurant	mexican restaurant	29.88551	-97.94103	401 N LBJ Dr	San Marcos	78666	+15123927577	https://locations.chipotle.com/tx/san-marcos/401-n-lbj-dr?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D1028	Chipotle Mexican Grill	0.99
-8e135360ad3a	Chipotle Mexican Grill	restaurant	mexican restaurant	29.89198	-97.91185	1506 I 35 N Frontage Rd #108	San Marcos	78666	+17379375480	https://locations.chipotle.com/tx/san-marcos/1506-n-ih-35?utm_source=facebook&utm_medium=yext&utm_campaign=yext_listings%3Frestaurant%3D4664	Chipotle Mexican Grill	0.96
-b08a49822de7	Chipotle Mexican Grill	restaurant	mexican restaurant	29.82698	-97.98532	1020 Center Point Rd	San Marcos	78666	+15123960264	http://www.chipotle.com	Chipotle Mexican Grill	0.97
 1f05544b79dc	Chisholm Trail R.V Park	restaurant		29.88379	-97.67097	117 E San Antonio St	Lockhart	78644	+15123986027	http://lockhartchisholmtrailbbq.com/		0.67
 4be0f2cdbba7	Chunk Deuce BBQ Catering	restaurant	barbecue restaurant	29.88143	-97.94157	128 S Guadalupe St	San Marcos	78666	+15122168530			0.92
 abd021c56c19	Chuy's	restaurant	texmex restaurant	29.88628	-97.92078	1121 N Interstate 35	San Marcos	78666	+15122148029	https://www.chuys.com/locations/tx/san-marcos/san-marcos-tx/6073	Chuy's	0.99
@@ -1509,13 +1529,6 @@ c7f75b631354	Diesel's Dogs and Burgers	restaurant	burger restaurant	29.87053	-97
 421259be2e40	Dimples' Smiley BBQ	restaurant	barbecue restaurant	29.26757	-97.63573	106 E US Highway 87	Smiley	78159	+18305876655	http://dimplessmileybbq.com		0.77
 43de13680fc8	Dixie Grille	restaurant	steakhouse	29.58472	-97.99044		Seguin	78155	+18303796325	http://www.dixiegrille.com		0.77
 f37939a59fe5	Dixie Grille	restaurant	american restaurant	29.57196	-97.94172	380 N Highway 123 Byp	Seguin	78155	+18303796325	http://www.dixiegrille.com		0.77
-3f390c146d6a	Domino's	restaurant	pizza restaurant	29.89873	-97.91574	641 Mill St #106	San Marcos	78666	+15127373030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-7dec952ad8e0	Domino's	restaurant	pizza restaurant	29.57732	-97.99150	751 Best Dr	Seguin	78155	+18303723070	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.92
-9f31c30eea54	Domino's	restaurant	pizza restaurant	29.85702	-97.66776	1906 S Colorado Suite 103	Lockhart	78644	+15123989090	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
-aa1c9d39b82b	Domino's	restaurant	pizza restaurant	29.85310	-97.94957	1290 Wonder World Dr	San Marcos	78666	+15123927272	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
-e80b7c571b84	Domino's	restaurant	pizza restaurant	29.88515	-97.94142	350 N Guadalupe #150	San Marcos	78666	+15123923030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-0a8e79e6f11b	Domino's Pizza	restaurant	pizza restaurant	29.51411	-97.46204	1832 Water St	Gonzales	78629	+18302036990	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.95
-4a71320c23ab	Domino's Pizza	restaurant	pizza restaurant	29.08717	-97.26527	1431 E Broadway St	Cuero	77954	+13617994030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.95
 8a0a657f440b	Don Japanese Kitchen	restaurant	japanese restaurant	29.89327	-97.94197	829 N LBJ Dr	San Marcos	78666	+12817253686	http://don-japanese-kitchen.square.site/		0.99
 6ada09502674	Dragon Place	restaurant	chinese restaurant	29.57835	-97.94136	1003 N Highway 123 Byp	Seguin	78155	+18303722910	http://seguindragonplace.com		0.92
 d96525fada95	Duett's Texas Club	restaurant	bar and grill restaurant	29.83917	-97.84369	420 Main St	Martindale	78655	+15123574149	https://duetts-merch.square.site/		0.92
@@ -1550,7 +1563,6 @@ cfe949344cdb	Enchiladita	restaurant	texmex restaurant	29.26823	-97.76513	105 W 2
 fcd50f2cdaa0	EZ-Taco and More	restaurant		29.98425	-97.83413	500 Bunton Ln	Kyle	78640	+17372485639			0.58
 5c5adc772f26	Fat Boys Pizza Trailer #4	restaurant		29.23655	-97.96023	100 Main St	Stockdale	78160	+18302597893			0.65
 d6234c5faad4	Fat Shack	restaurant	burger restaurant	29.88496	-97.94144	350 N Guadalupe St Ste 130	San Marcos	78666	+15126679380	http://www.fatshack.com/	Fat Shack	0.99
-53e1a04fcc5d	Firehouse Subs	restaurant	sandwich shop	29.84640	-97.96597	2586 S.IH 35,	San Marcos	78666	+15123533473	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1268	Firehouse Subs	0.99
 554fabde240b	First Watch	restaurant	breakfast and brunch restaurant	29.89198	-97.91193	1506 N IH 35	San Marcos	78666	+17378373010	https://www.firstwatch.com/locations/san-marcos/?utm_source=facebook&utm_medium=organic&utm_campaign=fb-listing&utm_content=san-marcos%2F	First Watch	0.97
 aba1558e6da6	Flaming Bird By H-E-B	restaurant	chicken restaurant	29.88733	-97.92594	641 East Hopkins Street	San Marcos	78666	+12109381243	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.94
 9ae29c624cdd	Flatonia Pizza Company	restaurant	pizza restaurant	29.68621	-97.10759	122 E South Main St	Flatonia	78941	+15419710368	http://www.flatoniapizzacompany.com/		0.96
@@ -1558,7 +1570,6 @@ c9ce4e84b5f3	Fonda Restaurant	restaurant	texmex restaurant	29.86899	-97.94074	12
 ea8481c335f1	Fr3sh Cubed	restaurant	sushi restaurant	29.88332	-97.94173	100 W Hopkins St	San Marcos	78666	+15123933303	http://www.freshcubed.com		0.92
 71de12359028	Frank's Place	restaurant	barbecue restaurant	29.75660	-97.77462	13321 State Park Rd	Fentress	78656	+15128787100	http://franksplaceriverside.com/		0.98
 3c578b0e2c66	Franks Of Fentress	restaurant	american restaurant	29.75792	-97.77323	Fm Rd 20	Lockhart	78644				0.73
-28cd99171ee1	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	29.87101	-97.93592	310 N IH 35 Ste 101	San Marcos	78666	+15123926020	https://www.freddys.com/location/san-marcos-tx?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.96
 3f80edcae657	Freddys 110-0016	restaurant	burger restaurant	29.87087	-97.93565	310 N Interstate 35	San Marcos	78666	+12105083754			0.58
 42601c99805b	Freebirds World Burrito	restaurant	texmex restaurant	29.88273	-97.91987	909 TX-80 C	San Marcos	78666	+15123922072	https://locations.freebirds.com/tx/san-marcos/20617	Freebirds World Burrito	0.93
 0c9c2292f361	Fresco	restaurant	salad bar	29.88615	-97.92211	200 Springtown Way Apt 120	San Marcos	78666	+17372134052	http://frescoeats.com/	Fresco	0.99
@@ -1643,9 +1654,6 @@ d46b15aff57b	Javamotion	restaurant		29.88501	-97.67167	119 E San Antonio St	Lock
 e23f158ad468	Jax Burgers Fries and Shakes	restaurant	burger restaurant	29.88324	-97.94097	117 E Hopkins St	San Marcos	78666	+15122166284	http://jaxburgerssmtx.com/		0.99
 a3150dbce36e	Jennifer Jones, Psychotherapy & Training, Pllc	restaurant		29.88268	-97.93847	100 N Edward Gary St Ste 108	San Marcos	78666				0.95
 d4ad2663d3b4	Jenny's Taco	restaurant	taco restaurant	29.28750	-97.15233	220 W Morris St	Yoakum	77995	+13612933303	https://www.chamberofcommerce.com/yoakum-tx/46465910-jennys-tacos		0.96
-b60ca40a5f01	Jersey Mike's	restaurant	sandwich shop	29.57204	-97.94280	1417 E. Walnut Street Suite 700	Seguin	78155	+18304334283	https://www.jerseymikes.com/15244/seguin-tx	Jersey Mike's Subs	0.92
-ea70767aa698	Jersey Mike's	restaurant	sandwich shop	29.89117	-97.91297	1430 N IH 35 Suite 108	San Marcos	78666	+15127491118	https://www.jerseymikes.com/15215/san-marcos-tx	Jersey Mike's Subs	0.97
-c7bd5be2bd1f	Jimmy John's	restaurant	sandwich shop	29.88822	-97.94257	614 N Guadalupe St	San Marcos	78666		https://locations.jimmyjohns.com/tx/san-marcos/sandwiches-4984.html	Jimmy John's	0.80
 30ecd86f3429	Joel's Bar-B-Q	restaurant	barbecue restaurant	29.69784	-97.10234	FM609 & I-10	Flatonia	78941	+13618652454	http://joelsbarbq.com/		0.98
 2891aed041e7	Johnny Carino's	restaurant	pizza restaurant	29.86768	-97.94046	1207 S I H 35	San Marcos	78666	+15123935060	http://www.carinos.com/		0.98
 773cf9503af7	Johnny Rockets	restaurant	burger restaurant	29.83122	-97.98360	3939 S Interstate 35 Ste 900	San Marcos	78666	+15123925575	https://www.johnnysprockets.com		0.99
@@ -1698,7 +1706,6 @@ d96330dc4ebd	La Taqueria Los MiniTacos	restaurant	mexican restaurant	29.97795	-9
 1e8cd0000e25	Laredo Taco Company	restaurant		29.89251	-97.91072	1550 I 35 N Frontage Rd	San Marcos	78666	+15123535072	https://www.laredotacocompany.com/		0.95
 343ac78696a7	Laredo Taco Company	restaurant		29.82919	-97.98538	3936 S Interstate 35	San Marcos	78666	+15123960016	https://www.laredotacocompany.com/		0.95
 4b7887d5feaf	Laredo Taco Company	restaurant		29.51462	-97.46218	114 Us-90 Alt	Gonzales	78629	+14694010807	https://www.laredotacocompany.com/		0.94
-520748d67c70	Laredo Taco Company	restaurant		29.11534	-97.28162	4200 N Esplanade St	Cuero	77954	+13612758200	https://www.laredotacocompany.com		0.92
 59e5cda84108	Laredo Taco Company	restaurant		29.89958	-97.90776	1901 N Interstate 35	San Marcos	78666	+15123530162	https://www.laredotacocompany.com/		0.97
 5a174a99741d	Laredo Taco Company	restaurant		29.13136	-97.27683	4200 N Esplanade St	Cuero	77954	+13612758200	https://www.laredotacocompany.com/		0.95
 b6a394c153f6	Laredo Taco Company	restaurant		29.93459	-97.81911	7809 Camino Real	Maxwell	78656	+15123574048	https://www.laredotacocompany.com/		0.95
@@ -1708,24 +1715,17 @@ dd9e2f834dc5	Laredo Taco Company	restaurant		29.08851	-97.27222	1200 E Broadway 
 c8c4af20012c	Las Dos Fridas	restaurant	mexican restaurant	29.88012	-97.93934	201 S L B J Dr	San Marcos	78666	+15122166141			0.63
 1ec36fad5d17	Las Palmas	restaurant	mexican restaurant	29.56951	-97.97336	724 W Court St	Seguin	78155	+18303798825	http://www.laspalmasbr.com/		0.96
 31cbf4ea00e2	Lightning J Bar B Que	restaurant	barbecue restaurant	29.82722	-97.91213	1705 Aspen St	San Marcos	78666	+17372786796			0.68
-6b83540db634	Lightning J Bar B Que	restaurant	barbecue restaurant	29.87103	-97.95793	1705 Aspen St	San Marcos	78666	+17372786796			0.63
 380c1cda2fea	Lil' Charlie's	restaurant	comfort food restaurant	29.88281	-97.67177	300 S Main St	Lockhart	78644	+15126683151			0.95
 c31dd45d3302	Lilly's Bar & Grill	restaurant	bar and grill restaurant	29.88566	-97.67310	109 W Walnut St	Lockhart	78644	+15126200745			0.95
 1316445d4644	Lit'l Italy	restaurant	italian restaurant	29.23451	-97.96412	508 W Main St	Stockdale	78160	+18309960060	http://www.lititaly.online		0.92
-9470664c6671	Little Caesars	restaurant	pizza restaurant	29.57171	-97.93981	1500 E Court Street	Seguin	78155	+18303790191	https://littlecaesars.com/en-us/store/2819	Little Caesars	0.99
-12f9e7c981f2	Little Caesars Pizza	restaurant	pizza restaurant	29.86197	-97.66959	1711 S Colorado St Unit B	Lockhart	78644	+15123984400	https://littlecaesars.com/en-us/store/7440	Little Caesars	0.98
-4d2ccc49cca1	Little Caesars Pizza	restaurant	pizza restaurant	29.87973	-97.94035	110 E Martin Luther King Dr	San Marcos	78666	+15122108522	https://littlecaesars.com/en-us/store/20308	Little Caesars	0.99
-dc0b3671b801	Little Caesars Pizza	restaurant	pizza restaurant	29.88403	-97.91425	1023 TX-80	San Marcos	78666	+15127545700	https://littlecaesars.com/en-us/store/7555	Little Caesars	0.99
 383dcd84705e	Little Johnny's Pizza	restaurant	italian restaurant	29.90604	-97.41422	520 Red Rock Ranch Rd	Red Rock	78662	+15128148706	http://www.littlejohnnys.webs.com		0.92
 3b17a98ab0e2	Little Trouble	restaurant		29.88485	-97.67230	101 E San Antonio St	Lockhart	78644	+15129956333	https://www.littletroublelockhart.com		0.95
 67e33dd58947	Load Off Fannys	restaurant	bar and grill restaurant	29.88390	-97.67094	202 E Market St	Lockhart	78644	+15126683131	http://www.loadofffannys.com		0.94
-7b5faeca40f2	Lockhart Chisholm Trail Bbq	restaurant	barbecue restaurant	29.87033	-97.66917	1323 S Colorado St	Lockhart	78644	+15123986027	https://lockhartchisholmtrailbbq.com		0.99
 7d8176834c9f	Lockhart Chisholm Trail BBQ	restaurant	barbecue restaurant	29.87038	-97.66920	1323 S Colorado St	Lockhart	78644	+15123986027	http://lockhartchisholmtrailbbq.com/bbq-catering-lockhart-tx/		0.99
 abd32d8ba6fe	Lockhart Seafood and Steak	restaurant	steakhouse	29.87467	-97.66856	912 S Commerce St	Lockhart	78644	+15123594933	https://www.lockhart-tx.org/page/visitors_restaurants		0.96
 845ea0c1f7c8	Lola's Mexican Food	restaurant	mexican restaurant	29.60500	-97.91377	3470 E U.S. Hwy 90	Seguin	78155	+18303798812	https://m.facebook.com/pages/Lolas/100761963324993		0.93
 3df088f482b2	Loli's Cafe	restaurant	mexican restaurant	29.89274	-97.92117	1501 Aquarena Springs Dr	San Marcos	78666	+15123923441	https://www.loliscafesm.com/		0.94
 6dbebc4e3639	Long Bois Seafood	restaurant	seafood restaurant	29.89252	-97.91724	1628 Aquarena Springs Dr	San Marcos	78666	+15122007662	http://www.longboisseafood.com/		0.92
-f82be22826bb	Long John Silver's	restaurant	seafood restaurant	29.88469	-97.92177	35 Long St	San Marcos	78666	+15123538958	http://www.ljsilvers.com/		0.92
 05be8d0a55eb	Longhorn Daiquiris Llc	restaurant	seafood restaurant	29.89334	-97.91685	1617 Aquarena Springs Dr	San Marcos	78666	+15124009657	https://www.longhorndaiquiris.business.site		0.92
 24d5431818c9	Loop & Lil's Pizza	restaurant	pizza restaurant	29.88506	-97.67266	107 N Main St	Lockhart	78644	+15126683108	http://www.loopandlilspizza.com/		0.99
 9f44c1ee52db	Los 4 Hermanos Fruteria Y Nieveria	restaurant	mexican restaurant	29.99314	-97.81339	798 High Rd	Kyle	78640	+15122620567	https://jeila.design/lorenzo-s-pizza		0.97
@@ -1769,7 +1769,6 @@ e4869bc98618	Mary's TexMex Restaurant	restaurant	texmex restaurant	29.43455	-97.
 9169bede1d66	Maya Mexican Restaurant	restaurant	mexican restaurant	29.10741	-97.28314	1909 N Esplanade St	Cuero	77954	+13612752600	http://www.mayarestaurant.us	Maya Restaurant	0.95
 072410ee1327	Mayfield DQ	restaurant	burger restaurant	29.87250	-97.66930	1125 S Colorado St	Lockhart	78644	+15123764817	https://www.mayfielddq.com/location/mayfield-dairy-queen-lockhart	Mayfield DQ	0.99
 bd7c86e30325	McAlister's Deli	restaurant	sandwich shop	29.88707	-97.92231	180 Springtown Way Suite 101	San Marcos	78666	+15122124004	https://locations.mcalistersdeli.com/tx/san-marcos/180-springtown-way?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.99
-ef2782988cc0	McDonald's	restaurant	burger restaurant	29.88334	-97.91303	1015 Hwy 80	San Marcos	78666	+15123921665	https://www.mcdonalds.com/us/en-us/location/tx/san-marcos/1015-hwy-80/18466.html?cid=RF:YXT:RoN::Clicks		0.97
 797e037d9779	Meme's Mexican Restaurant	restaurant	mexican restaurant	29.67990	-97.64296	942 E Pierce St	Luling	78648	+18308756222			0.95
 5d4f3ff1236c	Memo's Hangout	restaurant	bar and grill restaurant	29.50437	-97.44015	1402 Saint Louis St	Gonzales	78629	+18302035300			0.92
 e6d6d4601dce	Meuth's Place	restaurant	southern american restaurant	29.99442	-97.43033	4020 Farm to Market 535	Bastrop	78602	+15125818448			0.97
@@ -1809,10 +1808,6 @@ c0ea4ec803a8	One To Fi Cafe	restaurant	asian fusion restaurant	29.89304	-97.9417
 7da9f78bb430	P. Terry's Burger Stand	restaurant	burger restaurant	29.88703	-97.91953	515 Springtown Way	San Marcos	78666	+15122148034	https://pterrys.com/?utm_source=fb&utm_medium=yext	P. Terry's Burger Stand	0.95
 5a780d2a90d7	Palm Cafe	restaurant	mexican restaurant	29.85958	-97.93993	504 Broadway St	San Marcos	78666	+15128782044	https://orders.cake.net/10900538		0.94
 21318f800b1a	Palmer's Restaurant Bar & Courtyard	restaurant	bar and grill restaurant	29.88297	-97.94651	218 Moore St	San Marcos	78666	+15123533500	http://www.palmerstexas.com/		0.99
-17ad80deff70	Panda Express	restaurant	chinese restaurant	29.84304	-97.96964	2850 S Ih35	San Marcos	78666	+15123926988	http://www.pandaexpress.com/	Panda Express México	1.00
-6b242ae0bf43	Papa John's Pizza	restaurant	pizza restaurant	29.98133	-97.86832	575 E FM 150 J	Kyle	78640	+15122565400	https://locations.papajohns.com/united-states/tx/78640/kyle/575-e-fm-150?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE5NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.99
-9990c5e43949	Papa Johns	restaurant	pizza restaurant	29.88307	-97.93937	216 e hopkins	San Marcos	78666	+15123924422	https://locations.papajohns.com/united-states/tx/78666/san-marcos/216-e-hopkins-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE5NzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
-c68cd9d18e8b	Papa Johns	restaurant	pizza restaurant	29.56827	-97.94398	1425 E Court St	Seguin	78155	+18305495045	https://locations.papajohns.com/united-states/tx/78155/seguin/1425-e-court-st?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTMxNjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.96
 2ab556a2a636	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	29.88149	-97.91824	1404 Clarewood Dr Ste 105	San Marcos	78666	+15126676760			0.92
 4f08cb14d0dd	Papa Murphy's Take 'N' Bake Pizza	restaurant	pizza restaurant	29.56910	-97.94881	1346 E Court St	Seguin	78155	+18303797272			0.85
 9758f2cd751e	Patricia Chambers	restaurant		29.68151	-97.64708	709 E Davis St	Luling	78648				0.95
@@ -1826,16 +1821,6 @@ c39e811fcb2f	Piscis Seafood and Mexican Grill	restaurant	bar and grill restauran
 18910b641291	Pita Gourmet	restaurant		29.89222	-97.92193	1330 Aquarena Springs Dr	San Marcos	78666				0.65
 6e9993705662	Pizza Classics	restaurant	pizza restaurant	29.88514	-97.93967	205 University Dr	San Marcos	78666	+15123926005	http://pizzaclassicssm.com/		0.92
 c6bfe5e86032	Pizza Classics	restaurant	pizza restaurant	29.98779	-97.87570	118 S Front St	Kyle	78640	+15122681979	http://www.pizzaclassicskyle.com		0.99
-0a5492e04629	Pizza Hut	restaurant	pizza restaurant	29.56432	-97.94241	594 S State Hwy 123 Byp	Seguin	78155	+18305495083	https://locations.pizzahut.com/tx/seguin/594-s-state-highway-123-bypass?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307837	Pizza Hut	0.99
-2be3f40f20d5	Pizza Hut	restaurant	pizza restaurant	29.68029	-97.64732	700 E Pierce St Caldwell	Luling	78648	+18308752451	https://locations.pizzahut.com/tx/luling/700-e-pierce-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=285902	Pizza Hut	0.94
-3204c086d197	Pizza Hut	restaurant	pizza restaurant	29.87979	-97.66901	610 S Colorado St	Lockhart	78644	+15123983451	https://locations.pizzahut.com/tx/lockhart/610-s-colorado?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=288871	Pizza Hut	0.98
-4b28b013ea62	Pizza Hut	restaurant	pizza restaurant	29.88076	-97.92058	900 Bugg Ln	San Marcos	78666	+15123963696	https://locations.pizzahut.com/tx/san-marcos/900-bugg-lane?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310824	Pizza Hut	0.99
-78e95d0396f7	Pizza Hut	restaurant	pizza restaurant	29.51560	-97.45979	312 US Hwy 90A E Gonzales	Gonzales	78629	+18306729616	https://locations.pizzahut.com/tx/gonzales/312-us-hwy-90a-e?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281316	Pizza Hut	0.99
-9278bff584a3	Pizza Hut	restaurant	pizza restaurant	29.88996	-97.94503	700 Student Center Drive Caldwell	San Marcos	78666	+18009488488	https://locations.pizzahut.com/tx/san-marcos/700-student-center-drive	Pizza Hut	0.96
-9d22cd5e60d2	Pizza Hut	restaurant	pizza restaurant	29.58708	-97.94350	1631 Texas 123	Seguin	78155		https://locations.pizzahut.com/tx/seguin/1631-texas-123	Pizza Hut	0.80
-eb9187320308	Pizza Hut	restaurant	pizza restaurant	29.29418	-97.16042	1201 W Grand Ave	Yoakum	77995	+13612936316	https://locations.pizzahut.com/tx/yoakum/1201-w-grand?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289784	Pizza Hut	0.98
-ecb8fa419ead	Pizza Hut	restaurant	pizza restaurant	29.09918	-97.28766	1010 N Esplanade St	Cuero	77954	+13612753434	https://locations.pizzahut.com/tx/cuero/1010-n-esplanade?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289623	Pizza Hut	1.00
-c460c2609fc9	Pizza Hut Express	restaurant	pizza restaurant	29.87536	-97.95126	700 Student Center Drive, Texas State University San M	San Marcos	78666		https://locations.pizzahut.com/tx/san-marcos/700-student-center-drive?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296008		0.85
 7942205d5e2e	Playa Bowls	restaurant	health food restaurant	29.99263	-97.88352	400 Rebel Rd	Kyle	78640	+17373782224	https://playabowls.com/location/kyle-brick-mortar-tx	Playa Bowls	0.97
 df1d000f0d07	Pluckerserrm	restaurant		29.86925	-97.93932	105 Purple Heart Trl I-35	San Marcos	78666		https://www.pluckers.com/location/san-marcos		0.59
 205831da50e5	Plus F, Inc	restaurant		29.86470	-97.96306	102 Wonder World Dr Ste 100	San Marcos	78666				0.95
@@ -1888,21 +1873,12 @@ fdf166734874	Sakura Sushi and Steakhouse	restaurant	sushi restaurant	29.57184	-9
 5fb6851afa2b	Saltgrass Steak House	restaurant	steakhouse	29.88665	-97.92019	1141 N Interstate 35	San Marcos	78666	+15123965255	https://www.saltgrass.com/location/saltgrass-san-marcos/	Saltgrass Steak House	0.99
 47da5add5c80	Saltgrass Steakhouse	restaurant		29.88996	-97.93467	100 Sessoms Dr	San Marcos	78666	+17138501010	http://www.saltgrass.com/		0.97
 79167813e1e6	San Antontio	restaurant	mexican restaurant	29.67081	-97.29981		Waelder			http://www.todayssanantonio.com		0.69
-e1b15587e543	San Antontio	restaurant	mexican restaurant	29.66963	-97.29218		Waelder			http://www.todayssanantonio.com		0.69
 5fa472657d0f	San Jose Mexican Restaurant	restaurant	texmex restaurant	29.69764	-97.10184	420 I-10 E	Flatonia	78941	+13618659010	https://www.publicreputation.com/san-jose-mexican-restaurant-flatonia-texas-1		1.00
 47a569d67039	San Marcos BBQ	restaurant	barbecue restaurant	29.86077	-97.94771	1701 N Interstate 35 Frontage Rd	San Marcos	78666	+15126679779	http://www.sanmarcosbbq.com/		0.91
 ddc1051a0f60	San Marcos BBQ	restaurant	barbecue restaurant	29.85452	-97.97179	2601 Hunter Rd	San Marcos	78666	+15129381019	http://www.sanmarcosbbq.com		0.99
 561a4c6a99b4	San Marcos Gorditas, Tacos & Más	restaurant	mexican restaurant	29.85682	-97.95239	2041 S I-35 South Frontage Rd	San Marcos	78666	+17373731831			0.65
-2102fb1390d4	Sander's BBQ and Soul Food	restaurant	barbecue restaurant	29.86966	-97.89584	1101 Guadalupe	San Marcos	78666		http://Www.restaurant.com/		0.61
 7fde57103241	Sander's BBQ and Soul Food	restaurant	barbecue restaurant	29.88442	-97.94086	1101 Guadalupe	San Marcos	78666		http://Www.restaurant.com/		0.61
 26ee72bf87f4	Santi's Tacos	restaurant	taco restaurant	29.88021	-97.93934	201 S Lbj Dr	San Marcos	78666	+15126676996			0.55
-11bec753cb4d	Schlotzsky's	restaurant	sandwich shop	29.57138	-97.94156			78155		https://locations.schlotzskys.com/tx/seguin/330-north-123-bypass	Schlotzsky's	0.99
-75827d14c21a	Schlotzsky's	restaurant	sandwich shop	29.88262	-97.94283	205 W Hopkins St	San Marcos	78666	+15126679565	https://www.schlotzskys.com/texas/san-marcos/100396		0.94
-769c56ba2e23	Schlotzsky's	restaurant	sandwich shop	29.81045	-97.96829	1020 Centerpoint Dr Ste 102	San Marcos	78666	+15123925230			0.85
-a8ebde72d6e8	Schlotzsky's	restaurant	sandwich shop	29.82691	-97.98505	1020 Center Point Rd	San Marcos	78666	+15123925230	https://locations.schlotzskys.com/tx/san-marcos/1020-centerpoint-rd?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
-c10fad3562c8	Schlotzsky's	restaurant	sandwich shop	29.88543	-97.67068	111 N Colorado St	Lockhart	78644	+15126685298	https://www.schlotzskys.com/texas/lockhart/100870	Schlotzsky's	0.96
-f4ae37ccdf7a	Schlotzsky's	restaurant	sandwich shop	29.57900	-97.94200	330 N Hwy 123 Byp	Seguin	78155	+18303791202	http://www.schlotzskys.com/seguin/2597/home		0.85
-a5fe868039a4	Schlotzskys	restaurant	sandwich shop	29.57135	-97.94154	330 N Hwy 123 Bypass Bldg G	Seguin	78155	+18303791202	https://locations.schlotzskys.com/tx/seguin/330-north-123-bypass?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.99
 d3c0d14e9231	Schulze's Pit Room	restaurant	barbecue restaurant	29.59426	-97.94907	1013 Schriewer St	Seguin	78155	+18304915124	http://www.Schulzespitroom.com/		0.99
 1a6dba4d811a	Scorpion Bar and Grill	restaurant	bar and grill restaurant	29.50468	-97.45050	621 St Francis St	Gonzales	78629				0.72
 230f370eb7a7	Sdi Kyle, Tx Fm 150, Llc	restaurant		29.98175	-97.87085	400 E FM 150	Kyle	78640				0.95
@@ -1927,8 +1903,6 @@ c5325f245166	Simple Simon's Pizza	restaurant	pizza restaurant	29.43471	-97.17677
 f5a275da8a29	Smitty's Market	restaurant	barbecue restaurant	29.88355	-97.67100	208 S Commerce St	Lockhart	78644	+15123989344	http://www.smittysmarket.com/		0.99
 5e887f8d9d80	Smokin Down South BBQ & More	restaurant	barbecue restaurant	29.32396	-97.96149	6148 hwy. 123 N.	Stockdale	78160	+18303915992	http://www.smokindownsouth.com		0.77
 40854f13a692	Smoliks BBQ Cuero	restaurant	barbecue restaurant	29.08477	-97.29411	523 S Esplanade St	Cuero	77954	+13612773459	https://smolikscuero.com/		0.95
-d64738bbd393	Sonic Drive-In	restaurant	burger restaurant	29.77792	-97.03085	1410 FM 609	Flatonia	78941	+13618651000	https://locations.sonicdrivein.com/tx/flatonia/1410-fm-609.html		0.85
-f29f9c14bc01	Sonic Drive-In	restaurant	burger restaurant	29.69838	-97.09962	1410 FM 609	Flatonia	78941	+13618651000	https://locations.sonicdrivein.com/tx/flatonia/1410-fm-609.html		0.92
 50b5d873fe1f	Spill the Tea Tearoom LLC	restaurant		29.26941	-97.75455	105 S Artesia Ave	Nixon	78140	+12109205312	https://spilltheteatx.com/		0.96
 d8d1b9ca054b	Spinners Pizza	restaurant	pizza restaurant	29.84946	-97.94437	1400 Ranch Road 12	San Marcos	78666	+15123537499			0.85
 a94a1700c1a5	Sport Deet, Inc. Dba Grande Equipment	restaurant		29.95062	-97.87350	24801 Interstate 35	Kyle	78640				0.95
@@ -1939,29 +1913,6 @@ bc73e001e12f	St Paul Pizzeria	restaurant	pizza restaurant	29.50343	-97.45257	621
 f4f23d3aae84	Stephanie's Kitchen Llc	restaurant		29.89227	-97.94198	801 Chestnut St	San Marcos	78666				0.92
 b6a0d7a72c85	Stonecreek Crossing	restaurant	chicken wings restaurant	29.84492	-97.96777	651 Barnes Dr	San Marcos	78666	+15122108447	http://wingstop.com		0.77
 cc1ecd35aaca	Su Casa Cafe	restaurant	texmex restaurant	29.58207	-97.94801	1142 E Kingsbury St	Seguin	78155	+18304334919	https://sucasacafetx.com/		0.99
-066e46f513e7	Subway	restaurant	sandwich shop	29.65361	-97.59238	190 US Highway 90	Luling	78648	+18308755667	https://restaurants.subway.com/united-states/tx/luling/190-us-highway-90	Subway	0.96
-0d627eb5e86b	Subway	restaurant	sandwich shop	29.86470	-97.96306	102 Wonder World Dr Ste 100	San Marcos	78666	+15123537766	https://www.subway.com		0.96
-10d430c4d754	Subway	restaurant		29.82838	-97.98734	690 Center Point Rd	San Marcos	78666	+15123927770	http://www.subway.com/	Subway	0.86
-1423f17246e4	Subway	restaurant	sandwich shop	29.82347	-97.98921	4015 S Interstate 35 Ste 320	San Marcos	78666	+15123923200			0.92
-1c487d7855c1	Subway	restaurant	sandwich shop	29.67978	-97.64243	950 E Pierce St	Luling	78648	+18308755660	https://www.subway.com		0.97
-2c18697cb90d	Subway	restaurant	sandwich shop	29.68097	-97.65470	190 E Highway 90	Luling	78648	+18308755667	https://alibabacharleston.com		0.55
-3941fd85de8d	Subway	restaurant	sandwich shop	29.52050	-97.44305	1620 N. Sarah Dewitt	Gonzales	78629	+18305194419	https://restaurants.subway.com/united-states/tx/gonzales/1620-n-sarah-dewitt		0.77
-3b15d9294abb	Subway	restaurant	sandwich shop	29.89226	-97.91921	1504 Aquarena Springs Drive	San Marcos	78666	+15127578833	https://restaurants.subway.com/united-states/tx/san-marcos/1504-aquarena-springs-drive	Subway	0.98
-3f976cba509f	Subway	restaurant	sandwich shop	29.69549	-97.10600	230 E I 10 Frontage Rd	Flatonia	78941	+13618653400	https://www.subway.com		0.95
-4e17c93a6beb	Subway	restaurant	sandwich shop	29.58224	-97.99160	1524 Highway 46	Seguin	78155	+18303797828	https://restaurants.subway.com/united-states/tx/seguin/1524-highway-46	Subway	0.99
-4e47721cb670	Subway	restaurant	sandwich shop	29.56890	-97.96461	2460 FM 464, Road Ranger Truck Stop	Seguin	78155			Subway	0.80
-50fbcd9977c9	Subway	restaurant	sandwich shop	29.60194	-97.95161	2999 North Highway 123 Bypass	Seguin	78155	+18303792649	http://www.subway.com/en-us	Subway	0.97
-57d1e8318916	Subway	restaurant	sandwich shop	29.88272	-97.66972	320 S Colorado St	Lockhart	78644	+15123983011	https://restaurants.subway.com/united-states/tx/lockhart/320-s-colorado	Subway	0.95
-6345a0761645	Subway	restaurant	sandwich shop	29.88527	-97.94029	202 University Dr	San Marcos	78666	+15123537500	https://restaurants.subway.com/united-states/tx/san-marcos/202-university-dr	Subway	0.99
-7022c296a8eb	Subway	restaurant	sandwich shop	29.43072	-97.17159	117 E 7th St	Shiner	77984	+13615945040	https://restaurants.subway.com/united-states/tx/shiner/117-e-7th-street	Subway	0.93
-7057b56b1a15	SUBWAY	restaurant	sandwich shop	29.85467	-97.95533		San Marcos	78666		http://subway.com		0.77
-73e3aab503f8	Subway	restaurant	sandwich shop	29.29020	-97.15377	412 W Grand Ave	Yoakum	77995	+13612937909	https://restaurants.subway.com/united-states/tx/yoakum/412-west-grand-ave	Subway	0.97
-96b74a1b55eb	Subway	restaurant	sandwich shop	29.56816	-97.94486	1341 E Court St	Seguin	78155	+18303798898	https://restaurants.subway.com/united-states/tx/seguin/1341-e-court-st	Subway	0.97
-9d8b1b76ee6d	Subway	restaurant	sandwich shop	29.51640	-97.44928	1114 E Sarah DeWitt Dr	Gonzales	78629	+18305194419	http://www.subway.com/	Subway	0.95
-a3e515318995	Subway	restaurant	sandwich shop	29.10817	-97.28330	2104 N. Esplanade	Cuero	77954	+13612758990	https://restaurants.subway.com/united-states/tx/cuero/2104-n-esplanade	Subway	0.96
-adb5f11b79a7	Subway	restaurant	sandwich shop	29.88168	-97.91802	1404 Clarewood Ste 101	San Marcos	78666	+15123530000	http://www.Subway.com/	Subway	0.96
-afbc1c7c834e	Subway	restaurant	sandwich shop	29.53673	-97.95610	6001 S State Hwy 123 Bypass	Seguin	78155	+18304062132	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73725&utm_campaign=evergreen-2020&y_source=1_MjAwMTc1ODA4NS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
-b71e06b9278b	Subway	restaurant	sandwich shop	29.26824	-97.76271	210 E Central Ave	Nixon	78140	+18305821154	https://restaurants.subway.com/united-states/tx/nixon/210-e-central	Subway	0.95
 bf8e043a088f	Sumtin Marbelous Smoke Train	restaurant	barbecue restaurant	29.92739	-97.56597	1570 FM1854	Dale	78616				0.86
 cee9a74bbd1b	Sunken Gardens	restaurant	buffet restaurant	29.43037	-97.16885	305 E 5th St	Shiner	77984	+13615943603	https://sunkengardenshiner.com/		0.95
 6d089e638747	Sunny's Pizza & Wings	restaurant	pizza restaurant	29.89572	-97.96461	507 Craddock Ave	San Marcos	78666	+15123927437	https://sunnyspizzasandwings.com/		0.99
@@ -1971,8 +1922,6 @@ f6417f5fd027	Super Tacos 4 You	restaurant	taco restaurant	29.97273	-97.85880	100
 ecc517657871	Sutton & Shelby's Market Street Deli	restaurant	sandwich shop	29.88370	-97.67196	102 E Market St	Lockhart	78644	+15126685400	https://marketstreetlockhart.com		0.75
 e42baa392c64	Sylvia Pizza	restaurant	pizza restaurant	29.88507	-97.93873	316 N Edward Gary St	San Marcos	78666	+15622617989	http://www.sylviapizza.com/		0.99
 9792f3d45b40	Sylvia's Mexican Restaurant	restaurant	mexican restaurant	29.23030	-97.95639	617 TX-123	Stockdale	78160	+18309963233	https://sylvia-s-mexican-restaurant.hub.biz/		0.92
-3a34b8931292	Taco Cabana	restaurant	texmex restaurant	29.59767	-97.95077	2520 N Hwy 123 Bypass	Seguin	78155	+18303723466	https://www.tacocabana.com/	Taco Cabana	0.98
-7c011df7c42f	Taco Cabana	restaurant	texmex restaurant	29.88476	-97.92287	135 Long St	San Marcos	78666	+15123921500	https://www.tacocabana.com/	Taco Cabana	0.95
 0aa579cf608b	Taco Ranch	restaurant	mexican restaurant	29.26632	-97.76978	604 W Central Ave	Nixon	78140	+18305821952	https://taco-ranch-tx.hub.biz		0.97
 34cad80e6890	Taco Tejano	restaurant	texmex restaurant	29.58107	-97.96655	202 W Kingsbury St	Seguin	78155	+18303791070			0.93
 b59600cc08d9	Tacos al patron	restaurant	taco restaurant	29.99021	-97.81031	990 High Rd	Kyle	78640	+15126963720	https://maps.app.goo.gl/Egb7VbG9ccyk2iuR8?g_st=com.google.maps.preview.copy		0.89
@@ -2072,11 +2021,7 @@ fef8863f4ac6	Villa Fresh Italian Kitchen	restaurant	pizza restaurant	29.82853	-9
 d773e3c114b7	Voodoo Doughnut Burnet RD	restaurant		29.95850	-97.88818	5408 Burnet Rd	Austin	78756				0.81
 ad2037ed2dec	Waelder Sausage	restaurant		29.68913	-97.28914	908 SE Railroad	Waelder	78959				0.78
 2bdefb12ff9f	Wella Organics	restaurant		29.87012	-97.65544	1403 E Mlk Jr Industrial Blvd	Lockhart	78644		wellaorganics.com		0.95
-d5d1d6a43a5c	Wendy's	restaurant	burger restaurant	29.87330	-97.66891	1030 S Colorado St.	Lockhart	78644	+17373558989	https://locations.wendys.com/		0.97
 62305f362c86	Werner's Catering	restaurant		29.42843	-97.17113	317 N Avenue E	Shiner	77984	+13615942928	https://www.wernerssteakhouse.com/		0.94
-139848135945	Whataburger	restaurant	burger restaurant	29.51398	-97.45879	1709 Saint Joseph St	Gonzales	78629	+18306722881	https://locations.whataburger.com/tx/gonzales/1709-st-joseph-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
-8e662fc2897d	Whataburger	restaurant	burger restaurant	29.82744	-97.98708	4040 S INTERSTATE 35	San Marcos	78666	+15127547375	https://locations.whataburger.com/tx/san-marcos/4040-s-interstate-35.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
-ca6797fc86d4	Whataburger	restaurant	burger restaurant	29.94395	-97.79808	8920 Camino Real, Suite 101	Kyle	78640	+15122131322			0.99
 cfb8eba4bfb0	Which Wich	restaurant	sandwich shop	29.93146	-97.88697	3016 I 35 N Frontage Rd	San Marcos	78666	+15126187805	https://whichwich.com/	Which Wich	0.92
 fa3bda7a0c4a	Which Wich	restaurant	sandwich shop	29.88554	-97.93880	302 University Dr	San Marcos	78666	+15123964924	https://www.whichwich.com/#!		0.96
 04c8ccba497e	Which Wich?	restaurant	sandwich shop	29.94762	-97.88609	3016 I 35 N	San Marcos	78666			Which Wich?	0.80
@@ -2085,9 +2030,6 @@ bca31266f7db	Whizzerville Hall	restaurant	pizza restaurant	29.85244	-97.52006	63
 e70dfbaa99ea	Willi's Grill	restaurant	steakhouse	29.47256	-97.44493	2070 US-183	Gonzales	78629	+18306722221	http://willis-grill.com/		0.80
 7c2194d7eb0a	Windy Point	restaurant	bar and grill restaurant	29.63919	-97.66127	3030 TX-80	Luling	78648	+18308759191			0.96
 8c4133b529ee	Wine Haus	restaurant		29.68797	-97.10905	110 W North Main St	Flatonia	78941	+13618655050	http://www.winehaustx.com		0.94
-15438650c5dd	Wingstop	restaurant	chicken restaurant	29.88310	-97.91960	913 Highway 80	San Marcos	78666	+15123929464	https://www.wingstop.com/location/wingstop-236-san-marcos-tx-78666/menu?y_source=1_NTUyMDY1MzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-615f8829b9f3	Wingstop	restaurant	chicken restaurant	29.84488	-97.96797	651 Barnes Dr	San Marcos	78666	+15122108447	https://www.wingstop.com/location/wingstop-1989-san-marcos-tx-78666/menu?y_source=1_NTUyMDcxNDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
-f8a545df6f6b	Wingstop	restaurant	chicken restaurant	29.56823	-97.94210	1465 E Court St	Seguin	78155	+18303797400	https://www.wingstop.com/location/wingstop-441-seguin-tx-78155/menu?y_source=1_NTUyMDc0NjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
 9e7b9438ac17	Wok and Roll	restaurant	chinese restaurant	29.87226	-97.94009	812 S Guadalupe St	San Marcos	78666	+15122166247	http://www.wokandrollsanmarcos.com/		0.99
 91b305fc8e44	Word of Mouth BBQ	restaurant	barbecue restaurant	29.99843	-97.14977	304 Miller St	Smithville	78957	+12108440186			0.61
 d342fd7de9e5	Xian Sushi and Noodle	restaurant	sushi restaurant	29.88638	-97.92130	200 Springtown Way Ste. 138	San Marcos	78666	+15126679399	https://www.xianfresh.com/sanmarcos	Xian Sushi and Noodle	0.99

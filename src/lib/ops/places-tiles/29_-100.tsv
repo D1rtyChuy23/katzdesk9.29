@@ -27,7 +27,6 @@ e64fd50e3ef5	Joe Jimmy's	bar		29.49578	-99.71479	20970 TX-127	Concan	78838	+1830
 8a4329a00c7b	Koyote Grill	bar		29.90036	-99.26138	23195 Highway 16 N	Medina	78055	+18002250991	https://medinahighpointresort.com/		0.92
 749823fb3bf0	La Cabaña Sports Bar	bar		29.19976	-99.81417	1520 W US Highway 90	Uvalde	78801	+18309008006			0.98
 891025d8518a	La Capital De Betos Bar	bar	beer bar	29.20154	-99.80619	1025 W Main St	Uvalde	78801				0.94
-7608122ea6a2	Lonestar Bar	bar		29.23340	-99.79179		Uvalde			http://www.thelonestarsaloon.com/		0.56
 dac850ad1439	Lonestar Bar	bar		29.23068	-99.79540		Uvalde			http://www.thelonestarsaloon.com/		0.57
 6ff4f9eda1c0	Longhorn Sports Bar & Saloon	bar	sports bar	29.19985	-99.80774	1131 W Main St	Uvalde	78801				0.92
 8ff557a1e9f0	Monkey Cage Saloon	bar	dive bar	29.73140	-99.07562	243 TX-173	Bandera	78003	+18304609157			0.92
@@ -38,7 +37,6 @@ e07ba7bc6add	Red Horse Saloon	bar		29.73089	-99.10057	2440 State Highway 16 N	Ba
 05637c6b0f25	Ride The Bronc	bar		29.76746	-99.20091	Highway 16 North	Bandera	78003	+18304027662			0.80
 f019649c0a94	Roque's Nite Club	bar		29.16051	-99.81641	3422 S US Highway 83	Uvalde	78801	+18302782398			0.92
 32b8ed47388e	Seco Ridge Nano Brewery	bar	brewery	29.65762	-99.52137	600 Post Oak Ln	Utopia	78884				0.66
-b6ad0f0ccf08	Seco Ridge Nano Brewery	bar	brewery	29.60594	-99.56004	600 Post Oak Ln	Utopia	78884				0.61
 70f565e27b08	Shotgun Sports Bar and Grill	bar	sports bar	29.72767	-99.07481	707 Main St	Bandera	78003	+18303142222	https://order.toasttab.com/online/shotgun-sports-bar-grill-707-main-st		0.96
 2804c119e7c6	The First National Ice Haus	bar	pub	29.72463	-99.07137	317 Main St	Bandera	78003		http://www.fnicehaus.com/		0.92
 08201008a6cf	The Quihi Shop	bar		29.39059	-99.02919	260 County Road 4518	Hondo	78861	+18304262555	https://www.quihi-shop.business.site		0.55
@@ -91,7 +89,6 @@ bc9d0d610d32	SWTX Law Enforcement Academy	college		29.21983	-99.74127	2401 Garne
 eef932c9dce4	5 Points Market	convenience		29.62157	-99.52720	879 RM 187	Utopia	78884	+18309662162			0.92
 22616ee6448f	5 Points Market 18	convenience		29.21552	-99.77085	950 E Main St	Uvalde	78801	+18302781234	http://conocophillips.com		0.90
 755bf26856ba	7-Eleven	convenience		29.71445	-99.76299	844 Us 83	Leakey	78873	+18302325155	https://www.7-eleven.com/locations/tx/leakey/844-highway-83-south-40520	7-Eleven	0.99
-8b84c10eeb28	7-Eleven	convenience		29.31662	-99.34803	4555 Us Highway 90 W	D'Hanis	78850	+18303634290	https://www.7-eleven.com/	7-Eleven	0.76
 a9f588abd3e9	7-Eleven	convenience		29.23017	-99.75578	2815 E Main St	Uvalde	78801	+18002550711	https://www.7-eleven.com/locations/tx/uvalde/2815-e-main-street-40519		0.95
 d8f67c926d68	7-Eleven	convenience		29.33644	-99.23414	4555 US Highway 90 W	D Hanis	78850	+18002550711	https://www.7-eleven.com/locations/tx/d-hanis/4555-us-highway-90-w-40526		0.85
 ec0012cb04fa	7-Eleven	convenience		29.20867	-99.79079	312 W Main St	Uvalde	78801	+18302781626	https://www.7-eleven.com/		1.00
@@ -185,16 +182,20 @@ eae99cbcc7dc	Yancey General Store	convenience		29.14193	-99.13737	9941 FM 462	Ya
 4f84923e450a	Yumm 12	convenience		29.22087	-99.76548	2250 E Main St	Uvalde	78801				0.71
 b5a33aa51084	Zee's Beverage Barn	convenience		29.35172	-99.14619	1510 14th St	Hondo	78861	+18304442859			0.92
 71a77eb13868	Zee's Mart	convenience		29.34675	-99.14857	1705 19th St	Hondo	78861	+18303469337	https://zeeskitchenandfroyo.com/		0.92
+03ef4fb5a877	Burger King	fastfood	burger restaurant	29.34769	-99.11813	405 US-90	Hondo	78861	+18305842023	https://burgerking.com/store-locator/store/27279	Burger King	0.94
 21b599053739	Burger King	fastfood		29.31808	-99.46734	103 Fisher Ave W	Sabinal	78881	+18309885009	https://burgerking.com/store-locator/store/25693	Burger King	0.92
 663524376d1a	Burger King	fastfood		29.72940	-99.07748	979 Main St	Bandera	78003	+18303285052	https://burgerking.com/store-locator/store/21193	Burger King	0.96
 664348003763	Burger King	fastfood		29.21220	-99.77734	515 E Main St	Uvalde	78801	+18302781445	https://burgerking.com/store-locator/store/6331	Burger King	0.99
-aed04effdcf2	Burger King	fastfood		29.31705	-99.47401	103 Fisher Ave W	Sabinal	78881	+18309885009	https://burgerking.com/store-locator/store/25693	Burger King	0.89
+a653b6f72ab4	Church's Chicken	fastfood	chicken restaurant	29.73739	-99.07662	127 A Hwy 173 North	Bandera	78003	+18307963351	http://www.churchs.com		0.77
 5e8d363c149c	Church's Texas Chicken	fastfood		29.20884	-99.78797	123 W. Main Street	Uvalde	78801	+18302786867	https://locations.churchs.com/tx/uvalde/123-w.-main-street	Church's Chicken	0.96
+af40bc42ef50	Church's Texas Chicken	fastfood	chicken restaurant	29.34627	-99.15188	2101 19th St	Hondo	78861	+18304265272	https://churchs.com		0.74
 d60826b269cd	Church's Texas Chicken	fastfood		29.73054	-99.07732	1014 Main Street	Bandera	78003	+18307963351	https://locations.churchs.com/tx/bandera/1014-main-street	Church's Chicken	0.97
 07b029453981	Dairy Queen	fastfood		29.34698	-99.14538	1503 19th St	Hondo	78861	+18304262211	https://www.dairyqueen.com/en-us/locations/tx/hondo/1503-19th-st/14211/?y_source=1_MjkzMzkxMDYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 4e947ce561b8	Dairy Queen	fastfood		29.72806	-99.06760	421 St Hwy 16 S 421 St Hwy 16 S	Bandera	78003	+18307963595	https://www.dairyqueen.com/en-us/locations/tx/bandera/421-st-hwy-16-s/10574/?y_source=1_MjkzMzg5MzQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 8854899ee780	Dairy Queen	fastfood		29.31849	-99.46459	219 E Fisher Ave 219 E Fisher Ave	Sabinal	78881	+18309882022	https://www.dairyqueen.com/en-us/locations/tx/sabinal/219-e-fisher-ave/14542/?y_source=1_MjkzMzkxOTktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
 b5e595d63002	Dairy Queen	fastfood		29.22023	-99.76613	2222 E Main St	Uvalde	78801	+18302786124	https://www.dairyqueen.com/en-us/locations/tx/uvalde/2222-e-main-st/14670/?y_source=1_MjkzMzkyMDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+7ce5164a4e33	Domino's	fastfood	pizza restaurant	29.20843	-99.78947	243 West Main St	Uvalde	78801	+18305911020	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
+877dd1ba6f64	Domino's	fastfood	pizza restaurant	29.34478	-99.12907	166 Menefee Rd	Hondo	78861	+18304440600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 63e794129dc4	DQ Grill & Chill	fastfood		29.22025	-99.76607	2222 E Main St	Uvalde	78801		https://www.dairyqueen.com/en-us/locations/tx/uvalde/2222-e-main-st/4442	DQ Grill & Chill	0.80
 b3357a294370	DQ Grill & Chill	fastfood		29.72802	-99.06763	421 St Hwy 16 S	Bandera	78003		https://www.dairyqueen.com/en-us/locations/tx/bandera/421-st-hwy-16-s/571	DQ Grill & Chill	0.80
 b5b305e9d844	DQ Grill & Chill	fastfood		29.34703	-99.14539	1503 19th St	Hondo	78861		https://www.dairyqueen.com/en-us/locations/tx/hondo/1503-19th-st/3984	DQ Grill & Chill	0.80
@@ -205,15 +206,29 @@ f09b75d90395	DQ Grill & Chill	fastfood		29.31856	-99.46461	219 E Fisher Ave	Sabi
 c936a42698ec	Golden Chick	fastfood		29.21411	-99.77412	728 E Main St	Uvalde	78801	+18309007199	https://locations.goldenchick.com/tx/uvalde/1129/	Golden Chick	0.96
 0dece237f514	Hunt Brothers Pizza	fastfood		29.72699	-99.07437	607 Main St	Bandera	78003	+18307963414			0.96
 dab765d0101b	KFC	fastfood		29.22059	-99.76485	2221 East Main Street	Uvalde	78801	+18302754397	https://locations.kfc.com/tx/uvalde/2221-east-main-street	KFC	0.92
+930932e73dc8	Little Caesars Pizza	fastfood	pizza restaurant	29.21313	-99.77699	600 E Main St	Uvalde	78801	+18302782000	https://littlecaesars.com/en-us/store/3960		0.95
+94aba14286d6	Little Caesars Pizza	fastfood	pizza restaurant	29.34703	-99.14591	1509 19th St	Hondo	78861	+18304265553	https://littlecaesars.com/en-us/	Little Caesars	0.97
+fe97c51f720d	Little Caesars Pizza	fastfood	pizza restaurant	29.21506	-99.77000	1008 Garner Field Rd	Uvalde	78801	+18302782000	https://littlecaesars.com/en-us/store/3960	Little Caesars	0.92
 58460d10fa8c	Mcbee's BBQ	fastfood		29.99459	-99.02122	200 McDonald Loop N	Center Point	78010	+18306342941			0.68
 681631d009c5	McDonald's	fastfood		29.21248	-99.77798	510 E Main Street	Uvalde	78801	+18302781185	https://www.mcdonalds.com/us/en-us/location/tx/uvalde/510-e-main-street/6519.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+769b3351e691	McDonald's	fastfood	burger restaurant	29.23512	-99.75432	3100 E Main Street	Uvalde	78801	+18302783504	https://www.mcdonalds.com/us/en-us/location/tx/uvalde/3100-e-main-street/31086.html?cid=RF:YXT:RoN::Clicks		0.98
 872509d53f41	McDonald's	fastfood		29.34827	-99.12324	269 Us Hwy 90 E	Hondo	78861	+18304265300	https://www.mcdonalds.com/us/en-us/location/tx/hondo/269-us-hwy-90-e/28381.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
 b4e62a0bd5f3	Mi Ranchito	fastfood		29.71886	-99.76371	631 US-83	Leakey	78873				0.94
+9c27770c358b	Papa Johns Pizza	fastfood	pizza restaurant	29.21335	-99.77647	612 E Main St	Uvalde	78801	+18303339801	https://locations.papajohns.com/united-states/tx/78801/uvalde/612-e-main-st?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2OTktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+5b0da8fe7eea	Pizza Hut	fastfood	pizza restaurant	29.21238	-99.77851	502 E Main St Uvalde	Uvalde	78801	+18302781181	https://locations.pizzahut.com/tx/uvalde/502-e-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282827	Pizza Hut	0.98
+cb026fb0deef	Pizza Hut	fastfood	pizza restaurant	29.34755	-99.13727	801 19th St Medina	Hondo	78861	+18304263391	https://locations.pizzahut.com/tx/hondo/801-19th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290969	Pizza Hut	0.98
 502a58923060	Sbarro	fastfood		29.45027	-99.44565	2500 Funston Rd	Sam Houston	78234		https://sbarro.com/locations/tx/sam-houston/fort-sam-houston/	Sbarro	0.80
 f33ac527cdd0	Sno Ink, Llc	fastfood		29.19686	-99.79263	617 Evans St	Uvalde	78801	+18302795226	http://snoink.co		0.96
 7855c5c82f30	Sonic Drive In	fastfood		29.72997	-99.07778	1013 Main Street	Bandera	78003	+18307964280	https://locations.sonicdrivein.com/tx/bandera/1013-main-street.html	Sonic Drive-In	0.98
 864313f0ce73	Sonic Drive In	fastfood		29.34762	-99.13651	705 19Th Street	Hondo	78861	+18304264635	https://locations.sonicdrivein.com/tx/hondo/705-19th-street.html	Sonic Drive-In	0.98
 deafd98c126d	Sonic Drive In	fastfood		29.21269	-99.77534	623 E. Main	Uvalde	78801	+18302787012	https://locations.sonicdrivein.com/tx/uvalde/623-e.-main.html	Sonic Drive-In	0.96
+05f6145505d1	Subway	fastfood	sandwich shop	29.71445	-99.76273	844 South Hwy 83	Leakey	78873	+18302325155	https://restaurants.subway.com/united-states/tx/leakey/844-south-hwy-83		0.77
+105057fb925a	Subway	fastfood	sandwich shop	29.21112	-99.78078	335 E Main St	Uvalde	78801	+18302789530	https://restaurants.subway.com/united-states/tx/uvalde/335-e-main-st	Subway	0.98
+3b085f12eb44	Subway	fastfood	sandwich shop	29.02918	-99.05083	9977 N IH 35	Moore	78057	+18306632940	https://restaurants.subway.com/united-states/tx/moore/9977-n-ih-35?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50153&utm_campaign=evergreen-2020&y_source=1_MTQ5MDU4NDUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+3b9507df5c76	SUBWAY	fastfood	sandwich shop	29.06101	-99.00334	13489 N I-35	Moore	78057	+18306639382	http://subway.com		0.77
+5ff324f5c3a4	Subway	fastfood	sandwich shop	29.72902	-99.07713	907 N Main St	Bandera	78003	+18307964191	https://restaurants.subway.com/united-states/tx/bandera/907-n-main-st	Subway	0.98
+95aeb8b23dc8	Subway	fastfood	sandwich shop	29.22948	-99.75560	2809 E Main St	Uvalde	78801	+18302615145	https://www.subway.com		0.95
+fd4aeb5d71b3	Subway	fastfood	sandwich shop	29.34440	-99.12685	109 22nd St	Hondo	78861	+18304263070	https://www.subway.com		0.92
 8eb8c417bc30	Taco Bell	fastfood		29.21284	-99.77775	514 E Main	Uvalde	78801	+18302788360	http://www.tacobell.com/	Taco Bell	0.99
 f38050047272	Taco Bell	fastfood		29.34821	-99.12155	303 US Highway 90 E	Hondo	78861	+18304262371	http://www.tacobell.com/	Taco Bell	0.94
 225db28eec75	Wendy's	fastfood		29.21286	-99.77730	526 E Main St	Uvalde	78801	+18302788122	https://locations.wendys.com/united-states/tx/uvalde/526-east-main-street	Wendy's	0.98
@@ -221,6 +236,7 @@ dca0bbf07b78	Wendy's of SW Texas	fastfood		29.20393	-99.79154	308 S Grove St	Uva
 8971fa9df491	Wendys Uvalde	fastfood		29.21649	-99.76897	E Main St, Uvalde, TX 78801, United States	Uvalde	78801	+18302788122			0.91
 5728da27b6e0	Whataburger	fastfood		29.34788	-99.12895	229 19TH ST	Hondo	78861	+18304262247	https://locations.whataburger.com/tx/hondo/229-19th-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
 e1285ec6da87	Whataburger	fastfood		29.21911	-99.76634	2111 E MAIN ST	Uvalde	78801	+18302784141	https://locations.whataburger.com/tx/uvalde/2111-e-main-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+4aca0b0f8d06	Wingstop	fastfood	chicken restaurant	29.22170	-99.76641	2256 E. Main Street	Uvalde	78801	+18304073555	https://www.wingstop.com/location/wingstop-2112-uvalde-tx-78801/menu?y_source=1_NTUyMDcyNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 43a0c89c966f	5 Points Market	grocery		29.20483	-99.78445	401 S Getty St	Uvalde	78801	+18302787969	https://linktr.ee/5PointsMarket		0.92
 ef2c85960a04	Adams Apples	grocery		29.79560	-99.24301	13558 State Highway 16 N	Medina	78055	+18305892588	http://www.lovecreekorchards.com/		0.59
 f7a096b9c65e	Alvarez Food Mart	grocery		29.35154	-99.14819	1702 14th St	Hondo	78861	+18307412200	http://www.meatmarketmiami.com		0.97
@@ -247,36 +263,25 @@ e806ce87c5ee	Sage Garden's Teaching Kitchen	grocery		29.77882	-99.03133	621 Chip
 665ab144f8c4	Uvalde Memorial Hospital	hospital		29.21430	-99.76827	1025 Garner Field Road	Uvalde	78801	+18302786251	https://www.umhtx.org/womens-health-expo-2026		1.00
 9de33d27e73f	10th Street Cottage	hotel		29.72426	-99.07365	406 10th St	Bandera	78003	+12105261935	http://banderacottage.com/		0.95
 ca4b55fae5f9	4B Ranch	hotel	resort	29.80294	-99.43974	4859 Elam Creek Rd	Medina	78055	+12818024739			0.92
-9f4e5f3acb72	7 Canyons Ranch	hotel	lodge	29.67026	-99.37508	1160 Seco Pass Rd	Tarpley	78883	+18307961319	http://www.7canyonsranch.com/		0.97
 684833635154	Americas Best Value Inn Uvalde	hotel		29.21192	-99.77520	701 E Main St	Uvalde	78801	+18302785671	https://www.redlion.com		0.99
-411a2a1584c1	Antler Oaks Lodge and RV Resort	hotel	lodge	29.74160	-99.12099	3862 TX-16	Bandera	78003	+18307968111	http://www.antleroakslodge.com/		0.97
 c00377dcb730	Bader Ranch	hotel	resort	29.79936	-99.77943	4832 Ranch to Market Rd 336	Leakey	78873	+18302325820	http://www.frioriverstay.com/		0.73
-40fa06f9aea8	Bandera Bunkhouse On Main	hotel	lodge	29.72563	-99.07194	406 Main St	Bandera	78003	+12109002765	https://www.banderabunkhouseonmain.com/		0.96
 08ead04fda63	Bandera Creek Guest Cottage	hotel		29.72499	-99.07047	129 State Highway 16 S	Bandera	78003	+18304603517	http://www.ggrealty.com		0.92
-6fa22dd6abcb	Bandera Masonic Lodge	hotel	lodge	29.73890	-99.07752	794 State Highway 173 N	Bandera	78003	+18307968807	www.msana.com		0.70
 02c5f164bb97	Bandera Ranch Resort	hotel		29.72943	-99.07404	W Highway 16	Bandera	78003	+18304608008	http://flyingl.com		0.77
 a6e9a465067b	Bar M Guest Ranch	hotel		29.69340	-99.08494	2569 FM 1077 P.O. Box 153	Bandera	78003	+18307969096	http://www.bar-mranch.com		0.92
-fddf4b2a0d3d	Bella Vista Lodge	hotel	lodge	29.72765	-99.74573	475 Camino Alto	Leakey	78873	+18309662320			0.92
 d4cc98eedd3f	Best Western	hotel		29.21313	-99.77491	701 E Main St	Uvalde	78801	+18302785671	http://www.bestwestern.com		0.92
 142c2e498738	Best Western Bandera Suites & Saloon	hotel		29.72771	-99.07499	711 Main St	Bandera	78003	+18306888081	https://www.bestwestern.com/en_US/book/hotel-rooms.44767.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44767	Best Western Hotels & Resorts	0.99
 ca43102dee07	BEST WESTERN Hondo Inn	hotel	resort	29.34876	-99.12103	301 US Highway 90 E	Hondo	78861	+18304264466			0.99
-8eb4c12ce455	Big Drop Ranch	hotel	lodge	29.28142	-99.16920	5833 CR-531	Hondo	78861	+18307418906	http://www.BigDropRanch.com/		0.92
-e493c8be6b00	Bluff Springs Lodge	hotel	lodge	29.62456	-99.06700	10422 State Highway 173 S	Bandera	78003	+12108570555	http://www.bluffspringslodge.com/		0.97
-6f4fc958e297	Buffalo Creek Lodge	hotel	lodge	29.73155	-99.09409	2120 State Highway 16 N	Bandera	78003	+12102185659	https://abnb.me/7qvpDi3hVR		0.89
 32b0baa54f27	Bungalow in Bandera	hotel		29.72584	-99.07317	310 10th St	Bandera	78003	+18306881383			0.95
 7ddb8d880dfd	Camp Luna	hotel		29.72200	-99.09033	710 Rio Luna Dr	Bandera	78003		http://campluna.org/		0.68
 b228bd847e63	Casa Estrella @ Casa Rio Rentals	hotel		29.53274	-99.67937	212 Tequila Sunrise	Concan	78838	+18303336233			0.67
 f107e33cd2ae	Casita Modesta	hotel		29.21181	-99.78686	220 N Getty St	Uvalde	78801	+18302796923			0.92
 06a8e07d78db	Circle H Lodge	hotel		29.68121	-99.81454	Walter White Ranch Rd	Leakey	78873	+18302754015	http://www.circlehranchtexas.com		0.77
-c90d2f025799	Clear Springs Lodging	hotel	lodge	29.61453	-99.52695	232 Main St	Utopia	78884	+18309662164	http://www.clearspringslodging.com/		0.93
 e805533a40c4	Clearwater Ranch	hotel		29.70862	-99.78922	1120 Bison Ranch Rd	Leakey	78873	+18302326686	http://frio.net		0.73
-be1fad9c5746	Concan House	hotel	lodge	29.52646	-99.68639	#868	Concan	78838	+12103735091	http://www.concanhouse.com/		0.90
 39b20c02001e	Crider's Cabins	hotel		29.72644	-99.76289	7070 S US Highway 83	Leakey	78873	+18302325583	http://www.cridersonthefrio.com		0.63
 4df34a01cf82	Cypress Trails Guest House	hotel		29.72278	-99.07220	206 10th St	Bandera	78003	+18304603690	http://hillcountryreferrals.com/		0.81
 73f2a72c1f58	Days Inn by Wyndham Uvalde	hotel		29.21496	-99.77199	920 E Main St	Uvalde	78801	+18302784511	https://www.wyndhamhotels.com/days-inn/uvalde-texas/days-inn-uvalde/overview		1.00
 fff9dd916438	Diamond H Bed and Breakfast	hotel		29.74213	-99.14278	5322 State Highway 16 N	Bandera	78003	+18307963295	http://www.diamondhbandb.com/		0.94
 713ca92aa825	Dixie Dude Ranch	hotel		29.67121	-99.11919	FM-1077	Bandera	78003	+18307964481	http://www.dixieduderanch.com		0.97
-ae6f41527191	Dixie Dude Ranch	hotel	lodge	29.66771	-99.16129	833 Dixie Dude Ranch Rd	Bandera	78003	+18307967771	http://www.dixieduderanch.com/		0.93
 bb205d257b35	Double U Barr Ranch	hotel		29.77253	-99.12296	1016 Oak Ridge Cir	Bandera	78003	+18307969550	http://www.wbarr.com/		0.82
 eae856c538da	Encino Lodge	hotel		29.49951	-99.72067	2 River Rd	Concan	78838	+18302326298			0.61
 be3553c588e3	Encino Lodge ConCan	hotel		29.50126	-99.71430		Concan		+18302324935	http://Friorentalhomes.com/		0.77
@@ -284,25 +289,15 @@ a8305af404dd	Executive Inn Hondo	hotel	motel	29.34809	-99.12618	101 A 19th St	Ho
 6d2e0a58b28a	Farmhouse 534	hotel		29.71014	-99.75990	534 FM 1120	Leakey	78873	+12107225652	https://www.vrbo.com/1696540?unitId=2258022		0.75
 dfebc9483409	Flying L Ranch Resort	hotel	resort	29.71301	-99.04770	675 Flying L Dr	Bandera	78003	+18307967745	http://www.flyingl.com	Flying L Ranch Resort	1.00
 a1e02578b9da	Frio Cabin Rental (La Casita )	hotel		29.51411	-99.70248	644 Cat Claw Mountain Rd	Concan	78838	+12813567646			0.80
-f15b57288e42	Frio Fish Camp Lodge	hotel	lodge	29.87828	-99.69216	Hwy 83	Leakey	78024	+18302325775	http://www.friofishcamplodge.com/		0.62
 a245b78190f3	Frio River Oasis	hotel		29.72477	-99.76306		Leakey		+17138257298	http://cypressbanks.com/		0.67
 14af2862b5b6	Frio River, Concan, Texas	hotel		29.51929	-99.70338	117 S Tomahawk Way	Concan	78838	+13615229222	http://VacationFrioRiver.com/		0.74
 33befa85bc4a	Frio Springs Lodges	hotel		29.71839	-99.75986	692 S Evergreen St	Leakey	78873	+18302324174	http://www.friosprings.com/		0.92
-3647ee51a114	Frio Treetop Lodge	hotel	lodge	29.72628	-99.74655	.	Leakey	78873	+18309662134	http://www.indianblanketranch.com/		0.82
-757b6832de57	Gafford Ranch	hotel	lodge	29.52509	-99.70404	104 Tomahawk Way	Concan	78838				0.92
 62e7156c8975	Geronimo Creek Ranch	hotel		29.13854	-99.13734	1488 County Road 631	Yancey	78886	+18304264384	http://geronimocreekranch.com/		0.97
-db4aabc57a56	Golden Triangle Outfitters	hotel	lodge	29.22131	-99.75177	153 Weeping Willow	Uvalde	78801	+18305919789	http://www.GTOHunts.com/		0.92
 d93f7a582899	Gran's Country Cabins	hotel		29.73999	-99.07707	844 State Highway 173 N	Bandera	78003	+18305835729	https://grans-country-cabins.hub.biz/		0.92
 45de6b6e1f43	Hackberry Lodge	hotel		29.72435	-99.07407	1005 Hackberry St	Bandera	78003	+18882712681	http://www.hackberrygeneralstore.com/		0.58
 5e6fadc2acf0	Hampton Inn Uvalde	hotel		29.22924	-99.75734	2714 E Main St Highway 90	Uvalde	78801	+18302781300	http://hamptoninn3.hilton.com/en/hotels/texas/hampton-inn-uvalde-DRTUVHX/index.html	Hampton by Hilton	1.00
 5a166c60d33f	Hart Concan, Llc	hotel		29.71466	-99.76362	849 S US Highway 83	Leakey	78873				0.95
-eca90c341b4c	HEB Partner Lodge Kerrville	hotel	lodge	29.98477	-99.22088	445 Upper Turtle Creek Rd	Kerrville	78028	+18302575202			0.92
-89d5a0187400	Helton Hilltop Hacienda	hotel		29.68088	-99.99889	6804 CR 390	Camp Wood	78833				0.75
-cab757ab992d	Hermann Sons Life Hondo Lodge and Events Center	hotel	lodge	29.35631	-99.11671	251 State Highway 173 N	Hondo	78861	+18304261005			0.94
-2ac4db5afbb6	Hill Country Equestrian Lodge	hotel	lodge	29.64647	-99.18602	1580 Hay Hollar Rd	Bandera	78003	+18307967950	https://www.tiktok.com/@hceltx?_r=1&_t=ZT-928tItwSXF8		0.97
 9c2d40b36f7d	Holiday Inn Express and Suites Uvalde	hotel		29.22944	-99.75628	2801 E Main St	Uvalde	78801	+18302787300	https://www.ihg.com/holidayinnexpress/hotels/us/en/uvalde/uvacl/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-UVACL	Holiday Inn Express	1.00
-be73dbbada52	Hondo City Lodge 756 AF&AM	hotel	lodge	29.34059	-99.14586	2607 Avenue Q	Hondo	78861				0.84
-8d9ca2967d87	Hondo Inn	hotel		29.34739	-99.12151	301 US Highway 90 E	Hondo	78861				0.99
 a465f7212216	Inn Of Uvalde	hotel		29.21467	-99.77306	810 E Main St	Uvalde	78801	+18302789173	https://www.innofuvalde.com		0.92
 19c0ca374f60	J.M. Koch's Hotel Bed and Breakfast	hotel		29.33152	-99.27954	7254 County Road 525	D'Hanis	78850	+18303637500	http://www.kochhotel.com		0.92
 a1073816b8df	Kemosabe Ranch	hotel		29.59034	-99.39608	586 Private Rd 1102	Utopia	78884	+17132991716	http://www.KemosabeDeer.com/		0.68
@@ -310,55 +305,34 @@ a1073816b8df	Kemosabe Ranch	hotel		29.59034	-99.39608	586 Private Rd 1102	Utopia
 408172382ffe	La Vida La Frio - Frio Rental house	hotel		29.68965	-99.76220	2560 S US Hwy 83	Leakey	78873	+17138257298	http://Www.cypressbanks.com/		0.56
 235236677350	Leakey Inn & Frio	hotel		29.72188	-99.76384	527 S US Hwy 83	Leakey	78873	+12394721561			0.89
 1c221f09f373	LoneHollow Ranch	hotel		29.72406	-99.52184	1010 Cooley Ln	Utopia	78885		http://lonehollow.com/		0.92
-4381fcdcf710	Longhorn Lodge	hotel	lodge	29.52574	-99.68852	812 Tierra Linda Dr	Concan	78838	+18302758670			0.92
 24dbb610e0ed	Los Tres Canones Ranch Leakey, TX	hotel		29.77497	-99.79733		Leakey					0.71
-ac704e7e3868	Los Tres Canones Ranch Leakey, TX	hotel		29.81871	-99.74869		Leakey					0.70
-3752f6adf65b	Los Vecinos Ranch	hotel	lodge	29.17334	-99.66016	1604 La Mocha Rd	Uvalde	78801	+18302780419	http://www.losvecinosranch.com/		0.87
-e6d39285384e	Los Vecinos Ranch	hotel	lodge	29.16495	-99.60358	1604 La Mocha Rd	Uvalde	78801	+18302780419	http://www.losvecinosranch.com/		0.86
 19174f241212	Madrone Hills Ranch	hotel		29.77119	-99.52834	Evans Creek Rd.	Vanderpool	78885	+18302798504	http://www.madronehills.com/		0.65
 d50e2e9a30f3	Mayan Dude Ranch	hotel		29.71940	-99.08916	350 Mayan Ranch Rd	Bandera	78003	+18307963312	http://www.mayanranch.com/index.html		0.97
-d09f7920a4f4	Medina Highpoint Resort	hotel	lodge	29.90201	-99.26011		Medina		+18302011895	https://rvcoutdoors.com/medina-highpoint-resort/		0.92
 a78d9dec7a9c	Medina River Oaks Courts	hotel	motel	29.80177	-99.25389	14349 TX-16	Medina	78055	+18302462222	http://www.medinariveroaks.com/		0.99
-4648db2c93cc	Miracle Springs Ranch	hotel	lodge	29.73280	-99.64976	8728 Ranch Rd 337	Leakey	78873	+12102942517			1.00
 6d58a9d9dc04	Motel 6 Uvalde, Tx	hotel	motel	29.21540	-99.77145	924 E Main St	Uvalde	78801	+18302013799	https://www.motel6.com		1.00
-9dc8569efa10	Muller's Ark Guest Ranch	hotel	lodge	29.75380	-99.14861	714 Peaceful Valley Rd	Bandera	78003	+18307963420	http://www.mullersark.com		0.92
 8a3b2b824833	My Nic Nat Investments Inc	hotel		29.21540	-99.77145	924 E Main St	Uvalde	78801				0.95
-b9780e13ff58	Neal's Lodges	hotel	lodge	29.49545	-99.71411	20970 US Highway 127	Concan	78838	+18302326118	http://www.nealslodges.com/		0.96
 64786eabc251	Neon Moon Concan	hotel		29.53157	-99.68084	82 Tequila Sunrise	Concan	78838	+18303330001	https://friorivercasario.com/vacation-rentals/neon-moon-concan-golf-course-luxury-with-a-view/		0.60
 aff83d23ae65	Old Texas Square Hotel Bandera	hotel		29.72764	-99.07484	703 Main Street	Bandera	78003	+18307964100	http://www.texassquare.com		0.77
-85784753f40f	Orchard Inn	hotel		29.76106	-99.56417	RM 187	Vanderpool	78885				0.92
 0d485e491716	Popie's Place	hotel		29.61126	-99.52688	21709 N Ranch Road 187	Utopia	78884	+18779668200			0.70
 dfa27205c8f5	Purple Sage Ranch Conference Center & Retreat	hotel		29.74924	-99.03484	756 Purple Sage Rd	Bandera	78003		https://www.purplesageranch.com		0.96
 cbc1729bf718	Quality Inn	hotel		29.21496	-99.77204	920 E Main St	Uvalde	78801	+18302784511	http://www.qualityinn.com		0.92
 36a601577353	Riata Inn Crystal City	hotel	motel	29.18704	-99.79614	1531 US-83	Crystal City	78839	+18303745665	http://www.riatainncrystalcity.com/		0.90
 041855f8f3b2	Rimkus River Retreat	hotel		29.63633	-99.73685	3795 FM 350	Rio Frio	78879	+12104135278	http://RimkusRiverRetreat.com/		0.85
-ec26c27b56d9	Rio Nice Lodge	hotel	lodge	29.52839	-99.69231		Sabinal	78881		http://www.friocountry.com/		0.84
 4e3aebe13541	River Oak Inn & Restaurant	hotel	motel	29.73128	-99.07912	1203 Main St	Bandera	78003	+18307967751	http://www.riveroakinn.com		0.98
 6b17a1eedfe4	River Oaks Resort	hotel	resort	29.50266	-99.71188	49 Encino Dr Ste B	Concan	78838	+18008005773	http://www.frioriver.com		0.96
 7520bfa26b91	River Run Concan	hotel		29.52924	-99.68671	967 Mountain Valley Dr	Concan	78838	+18324708308	http://riverrunconcantx.com/		0.78
-f3ffebb713e8	Rockin' River Lodge	hotel	lodge	29.53074	-99.69393	16 Mountain Laurel Ln	Concan	78838	+18302326625	http://www.rockinriverlodge.com/		0.92
-b6e6dc938fa5	Rustic Riviera Lodge	hotel	lodge	29.52665	-99.68828	836 Tierra Linda Dr	Concan	78838	+18305701919	http://www.vacationconcan.com/		0.67
 478aeb67bc8d	Sabinal Inn & RV Park	hotel	motel	29.31879	-99.46212	413 Fisher Ave E	Sabinal	78881	+18309885002	http://AirBnB.com/		0.97
-9add8eec2e9b	Sabinal River Lodge	hotel	lodge	29.61152	-99.52722	21749 FM-187	Utopia	78884	+18309663393	http://www.sabinalriverlodge.com/		0.92
 5fccc6e9f2a4	Silver Spur Guest Ranch	hotel		29.64050	-99.16729	9266 Bandera Creek Rd	Bandera	78003	+18307963037	https://ridesilverspur.com		0.92
 d54e98f87c62	Southern Comfort @FrioRiverResorts	hotel		29.51139	-99.69695	77 Rolling Stone Rd	Concan	78838	+18302325544			0.72
 0934de188c85	Texas Hill Country Resort (Formerly Medina Highpoint Resort)	hotel	resort	29.90042	-99.25914	23195 Highway 16 N	Medina	78055	+18302011895	http://www.txhillcountryresort.com/		0.98
 ab1613a4c960	The Fig Preserve	hotel		29.68678	-99.35548	1105 Rio Hondo Rd	Tarpley	78883	+18305623447	http://www.thefigpreserve.com		0.92
 1da36f866caf	The Kincaid Hotel	hotel	service apartment	29.21051	-99.78631	104 E North St	Uvalde	78801	+19562022681	https://kincaidhotel.com/home/kincaid-3rd-corner		0.92
-89f121a0b5ed	The Lodge on San Julian Creek	hotel	lodge	29.69670	-99.05508	1919 TX-173	Bandera	78003	+18667964750	http://www.sjcreek.net		0.97
-46eefb19569b	The Lodges at Lost Maples	hotel	lodge	29.79351	-99.57964	337 Olsen Ranch Rd	Vanderpool	78885	+18309665178	http://www.lostmaplescabins.com		0.66
-b4ce98b334ef	The Palomino Lodge - Concan, Texas	hotel	lodge	29.56175	-99.73084	1047 Magers Rd	Concan	78838	+13615639128	http://www.frioriverescape.com/		0.89
 a772350f9804	The Vaquero Motel	hotel	motel	29.72351	-99.07087	1103 Maple St	Bandera	78003	+18303285110	http://www.thevaqueromotel.com/		0.98
 a34affa361da	Triple T Resort & Conference Center	hotel		29.94819	-99.11072	3900 Bandera Hwy	Kerrville	78028	+18306343000			0.55
-aec8f583a25a	Turtle Creek Ranch	hotel		29.98786	-99.24142	730 Upper Turtle Creek Rd	Kerrville	78028				0.92
 ac7212d78cbe	Tuscany Court Townhomes	hotel		29.35216	-99.15364	2208 14th St	Hondo	78861	+18304264220	http://www.abres.com/		0.92
-aa10555829ed	Ual Plaza Llc	hotel		29.22884	-99.75803	2714 E Main St	Uvalde	78801				0.95
 1cdbeb9c67a9	Uno Mas Ranch	hotel	resort	29.67417	-99.17824	5825 FM 470	Bandera	78003	+18307969689	http://www.unomasranch.com		0.77
-bc0acb760e74	Uno Mas Ranch	hotel	lodge	29.68289	-99.18241	5825 Ranch Rd 470	Bandera	78003	+18307969689	http://www.UnoMasRanch.com/		0.97
 6461a887a8c2	Utopia on the River	hotel		29.58535	-99.52000		Utopia		+18309662444	http://www.utopiaontheriver.com/		0.90
-9802a0b198f1	Utopia River Retreat	hotel	lodge	29.62391	-99.53468	360 PR 3850	Utopia	78884	+18309662444	http://utopiariverretreat.com/		0.97
 82cf8ad080aa	Utopia River Retreats	hotel	resort	29.61381	-99.52679	360 Private Road 3850	Utopia	78884	+18309662444	http://utopiariverretreats.com		0.77
-50a3fda01a09	Valdina Ranch	hotel	lodge	29.34415	-99.36092	701 Prairie Rd	D'Hanis	78850		http://www.valdinaranch.com/		0.98
 8a3478719892	Villas At Flying L	hotel		29.71374	-99.04779	566 Flying L Dr	Bandera	78003	+18002925134	http://www.flyingl.com		0.92
 530d135a9bf4	Waresville River Retreat	hotel		29.60174	-99.52509	332 Private Rd 3800	Utopia	78884	+12104788724			0.92
 1d41999cdb5d	West 1077 Guest Ranch	hotel	resort	29.63330	-99.16129	9061 Bandera Creek Rd	Bandera	78003	+18307965675	http://west1077.com		0.92
@@ -400,7 +374,6 @@ e35b05d7f2f4	Besitos Kitchen & Bar	restaurant	mexican restaurant	29.21111	-99.78
 cba9e501a459	Broadway830	restaurant	pizza restaurant	29.20936	-99.78559	102 E Main St	Uvalde	78801				0.61
 2a465735b61f	Browns Deli & Gift	restaurant	delicatessen	29.32021	-99.46732	300 N Center St	Sabinal	78881	+18309882312	http://www.sabinalchamber.com/browns_gifts_deli.html		0.77
 15ef5dd4217e	Buckhorn Bar & Grill , 4347 So. Hwy. 83, Leakey,Tx., 78873	restaurant	bar and grill restaurant	29.66432	-99.75700		Leakey					0.71
-03ef4fb5a877	Burger King	restaurant	burger restaurant	29.34769	-99.11813	405 US-90	Hondo	78861	+18305842023	https://burgerking.com/store-locator/store/27279	Burger King	0.94
 dd9ecc53b316	Bush's Chicken	restaurant		29.22239	-99.76406	2342 E Main St	Uvalde	78801	+18302615440	https://www.bushschicken.com		0.92
 5e9a66e948d0	Cajun Crab & Seafood Co	restaurant	seafood restaurant	29.20121	-99.78244	620 S Getty St	Uvalde	78801	+18302752941			0.93
 12c32911314b	Camp Verde General Store & Restaurant	restaurant	american restaurant	29.89414	-99.10473	285 Camp Verde Rd E	Center Point	78010	+18306347722	http://www.campverdegeneralstore.com		0.99
@@ -412,14 +385,10 @@ a509af6af690	Champs Chicken	restaurant	chicken restaurant	29.06095	-99.00340	134
 060f783dc26b	Chicken Charley,s	restaurant	barbecue restaurant	29.73128	-99.07819	1114 Main St	Bandera	78003	+12103233109			0.97
 f9fbba1901ae	China Bowl	restaurant	chinese restaurant	29.72693	-99.07337	1203 Pecan St	Bandera	78003	+18307968494	http://www.chinabowlbandera.com/		0.92
 c5be991f3e1f	China Wok	restaurant	chinese restaurant	29.23537	-99.75174	3250 E Main St	Uvalde	78801	+18305912335	https://website-547655937251957632825-chineserestaurant.business.site		0.92
-a653b6f72ab4	Church's Chicken	restaurant	chicken restaurant	29.73739	-99.07662	127 A Hwy 173 North	Bandera	78003	+18307963351	http://www.churchs.com		0.77
-af40bc42ef50	Church's Texas Chicken	restaurant	chicken restaurant	29.34627	-99.15188	2101 19th St	Hondo	78861	+18304265272	https://churchs.com		0.74
 79c1b657efa4	Cowboy Capital Pizza Company	restaurant	pizza restaurant	29.72518	-99.07260	1110 Hackberry St	Bandera	78003	+18307969996	http://banderarodeo.com		0.94
 deb292cd2b51	Cowboy Kool	restaurant		29.72804	-99.06770	420 State Highway 16 S	Bandera	78003	+18305220926			0.98
 a13ded484ecf	Cowboy's Restaurant	restaurant	american restaurant	29.33039	-99.28008	7345 US-90	D'Hanis	78850	+18303632282	http://www.cowboysrestauranttx.com		0.98
 c896549bf29e	Crave Hot Dogs & BBQ Uvalde, TX	restaurant	barbecue restaurant	29.23517	-99.75447	3100 E Main St	Uvalde	78801	+18309005009	http://www.iwantcrave.com/		0.60
-7ce5164a4e33	Domino's	restaurant	pizza restaurant	29.20843	-99.78947	243 West Main St	Uvalde	78801	+18305911020	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.99
-877dd1ba6f64	Domino's	restaurant	pizza restaurant	29.34478	-99.12907	166 Menefee Rd	Hondo	78861	+18304440600	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
 b3829d6ffb14	Don Chepe's Restaurant and Bar	restaurant	mexican restaurant	29.72876	-99.07613	823 Main St	Bandera	78003	+18303285018			0.94
 54b26f8b2253	Dos Gallos BBQ LLC	restaurant	barbecue restaurant	29.18578	-99.77567	125 Larkspur Dr	Uvalde	78801	+18302757837			0.96
 eb6134ce5338	DWID's Kaos Kitchen	restaurant	barbecue restaurant	29.74267	-99.02315	3810 TX-16	Bandera	78003				0.92
@@ -442,7 +411,6 @@ cabcb0f55b22	Game Tyme BBQ & Catering LLC	restaurant	barbecue restaurant	29.2397
 e3608753b4ac	Goodie Central	restaurant		29.73111	-99.08211	1407 State Highway 16 N	Bandera	78003				0.65
 cc450c8ac382	Gypsy Sally's	restaurant	texmex restaurant	29.72459	-99.76331	373 US-83	Leakey	78873	+18302601001	http://www.GypsySallysLeakey.com/		0.98
 712d3bcb1667	Hangar 6 Air Cafe	restaurant	diner	29.21860	-99.74333	249 Airport, Uvalde Rd	Uvalde	78801	+18309003113	http://www.hangar6aircafe.com/		0.96
-624e394d38ce	Hard Hats Grille	restaurant	american restaurant	29.61872	-99.52670	Food Truck Park	Utopia	78884	+12106020785			0.72
 8f30e843b174	Hard Hats Grille	restaurant	american restaurant	29.61376	-99.52688	Food Truck Park	Utopia	78884	+12106020785			0.74
 a19a7a2d084c	Heavy's Bar B Que	restaurant	barbecue restaurant	29.34717	-99.14302	1301 19th St	Hondo	78861	+18304264445	http://heavysbarbecue.food-pi.com		0.95
 f224c5765422	Heavy's Outdoor Bar B Que	restaurant	barbecue restaurant	29.34770	-99.13741	6895 TX-173 N	Hondo	78861	+18303632178			0.82
@@ -480,9 +448,6 @@ cb0f5097f227	Lala's Mexican Restaurant	restaurant	mexican restaurant	29.72781	-9
 1cd93ab1da61	Laredo Taco Company	restaurant		29.33145	-99.27480	6919 Us-90	D'Hanis	78850	+18303634290	https://www.laredotacocompany.com/		0.95
 e8d3ed13846c	Laredo Taco Company	restaurant		29.20867	-99.79079	312 W Main St	Uvalde	78801	+18302781626	https://www.laredotacocompany.com/		0.95
 4e5e56793a9c	Leakey BBQ	restaurant	barbecue restaurant	29.72382	-99.76349	441 US-83	Leakey	78873	+18326226366			0.96
-930932e73dc8	Little Caesars Pizza	restaurant	pizza restaurant	29.21313	-99.77699	600 E Main St	Uvalde	78801	+18302782000	https://littlecaesars.com/en-us/store/3960		0.95
-94aba14286d6	Little Caesars Pizza	restaurant	pizza restaurant	29.34703	-99.14591	1509 19th St	Hondo	78861	+18304265553	https://littlecaesars.com/en-us/	Little Caesars	0.97
-fe97c51f720d	Little Caesars Pizza	restaurant	pizza restaurant	29.21506	-99.77000	1008 Garner Field Rd	Uvalde	78801	+18302782000	https://littlecaesars.com/en-us/store/3960	Little Caesars	0.92
 98f5b0097482	Little Taco Factory	restaurant	mexican restaurant	29.20857	-99.78994	256 a W Main St	Uvalde	78801	+18302787673	https://partners-taco.hub.biz		0.96
 bbd10f2ab1c2	Live Oak Drive Thru	restaurant	texmex restaurant	29.20812	-99.78773	128 S High St	Uvalde	78801	+18302798647	http://liveoakdrivethru.food95.com		0.95
 8356e2f42da0	Los Alamos Mexican Restaurant	restaurant	mexican restaurant	29.20088	-99.80753	1105 W Main St	Uvalde	78801	+18305910083			0.99
@@ -498,7 +463,6 @@ c8983d9acb64	Mac & Ernie's Roadside Eatery	restaurant	comfort food restaurant	29
 78625c27e065	Maggios Pizza	restaurant	pizza restaurant	29.73057	-99.09626	120 River Bnd	Bandera	78003	+18308500815			0.55
 910f9dc4993d	Magillicuddy's	restaurant	burger restaurant	29.23730	-99.79599	104 W Antonio St	Uvalde	78801	+18302615591	http://www.magillacuddys.com		0.92
 b98ff412b369	Mama Chole's	restaurant	texmex restaurant	29.72548	-99.76276	234 US-83	Leakey	78873	+18302326111			0.97
-769b3351e691	McDonald's	restaurant	burger restaurant	29.23512	-99.75432	3100 E Main Street	Uvalde	78801	+18302783504	https://www.mcdonalds.com/us/en-us/location/tx/uvalde/3100-e-main-street/31086.html?cid=RF:YXT:RoN::Clicks		0.98
 778a9b78a1c2	Meat Cleavers & Sons Uvalde Llc	restaurant		29.22239	-99.76406	2342 E Main St	Uvalde	78801				0.95
 5c935372b7b4	Mendoza Cafe	restaurant	mexican restaurant	29.72988	-99.06447	680 TX-16	Bandera	78003	+18307969332			0.97
 d422a5e97515	Mesquite smoked BBQ	restaurant	barbecue restaurant	29.21446	-99.78564	332 N Camp St	Uvalde	78801	+18309005071			0.66
@@ -521,11 +485,8 @@ d1dbdcc3eaa9	Outhouse BBQ & Grill	restaurant	barbecue restaurant	29.23042	-99.79
 b417cc174610	Palominos Mexican Bar And Grill	restaurant	mexican restaurant	29.73064	-99.09664	120 River Bend Rd	Bandera	78003	+18303285055			0.92
 1f8c983ae166	Panjo's Pizza On The Frio	restaurant	pizza restaurant	29.72125	-99.75191	144 Red Wright Rd Hwy 337 E	Leakey	78873	+18302325022	https://friopecanfarm.com		0.77
 61aaaee99226	Pap's Italian Grill	restaurant	italian restaurant	29.72952	-99.06486	632 TX-16	Bandera	78003	+18307969400	https://www.mapquest.com/us/texas/business-bandera/paps-italian...		0.99
-9c27770c358b	Papa Johns Pizza	restaurant	pizza restaurant	29.21335	-99.77647	612 E Main St	Uvalde	78801	+18303339801	https://locations.papajohns.com/united-states/tx/78801/uvalde/612-e-main-st?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2OTktNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
 9b634b78d08c	Pepe's Pizza	restaurant	pizza restaurant	29.34840	-99.14078	1102 18th St	Hondo	78861	+18304263207	http://www.hondomenus.com/pepes-pizza	Frank Pepe Pizzeria Napoletana	0.99
 01818fbc811d	Pho Long	restaurant	vietnamese restaurant	29.21629	-99.76998	2000 E Main St Suite B	Uvalde	78801	+18302615754			0.98
-5b0da8fe7eea	Pizza Hut	restaurant	pizza restaurant	29.21238	-99.77851	502 E Main St Uvalde	Uvalde	78801	+18302781181	https://locations.pizzahut.com/tx/uvalde/502-e-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=282827	Pizza Hut	0.98
-cb026fb0deef	Pizza Hut	restaurant	pizza restaurant	29.34755	-99.13727	801 19th St Medina	Hondo	78861	+18304263391	https://locations.pizzahut.com/tx/hondo/801-19th-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=290969	Pizza Hut	0.98
 86799b2058e7	Polly Peak	restaurant		29.77213	-99.01014		Bandera			http://pollypeaktrailers.com/		0.62
 7d3c4225ab0e	R Bar B Que	restaurant	barbecue restaurant	29.32912	-99.46892	1209 N Center St	Sabinal	78881	+18309882430	https://www.rbbqsabinal.com/		0.92
 054f9f38208f	Reed Enterprises Inc	restaurant		29.34703	-99.14533	1503 19th St	Hondo	78861				0.95
@@ -537,15 +498,6 @@ d0afcde84a30	Silver Creek Specialty Meats and Gourmet Coffee	restaurant	delicate
 a826721d693a	Smoothies, Goodies and More	restaurant		29.95782	-99.21717	3876 Medina Hwy	Kerrville	78028				0.65
 15c38941295d	Sovereignty Ranch	restaurant		29.83073	-99.02110	165 Wyatt Ranch Rd E	Bandera	78003	+18189397248	https://www.sovereigntyranch.com/		0.95
 e5367e2898e7	Strudel Haus	restaurant		29.72959	-99.06525	610 Highway 16 S	Bandera	78003				0.95
-05f6145505d1	Subway	restaurant	sandwich shop	29.71445	-99.76273	844 South Hwy 83	Leakey	78873	+18302325155	https://restaurants.subway.com/united-states/tx/leakey/844-south-hwy-83		0.77
-105057fb925a	Subway	restaurant	sandwich shop	29.21112	-99.78078	335 E Main St	Uvalde	78801	+18302789530	https://restaurants.subway.com/united-states/tx/uvalde/335-e-main-st	Subway	0.98
-3b085f12eb44	Subway	restaurant	sandwich shop	29.02918	-99.05083	9977 N IH 35	Moore	78057	+18306632940	https://restaurants.subway.com/united-states/tx/moore/9977-n-ih-35?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=50153&utm_campaign=evergreen-2020&y_source=1_MTQ5MDU4NDUtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
-3b9507df5c76	SUBWAY	restaurant	sandwich shop	29.06101	-99.00334	13489 N I-35	Moore	78057	+18306639382	http://subway.com		0.77
-5ff324f5c3a4	Subway	restaurant	sandwich shop	29.72902	-99.07713	907 N Main St	Bandera	78003	+18307964191	https://restaurants.subway.com/united-states/tx/bandera/907-n-main-st	Subway	0.98
-7c70926d45d1	SUBWAY	restaurant	sandwich shop	29.31821	-99.46690		Sabinal	78881	+18309883020	http://subway.com		0.77
-95aeb8b23dc8	Subway	restaurant	sandwich shop	29.22948	-99.75560	2809 E Main St	Uvalde	78801	+18302615145	https://www.subway.com		0.95
-dafe07f1de4b	SUBWAY	restaurant	sandwich shop	29.72281	-99.76312		Leakey			http://subway.com/	Subway	0.66
-fd4aeb5d71b3	Subway	restaurant	sandwich shop	29.34440	-99.12685	109 22nd St	Hondo	78861	+18304263070	https://www.subway.com		0.92
 ff80a96a5f62	Sue's Tamales	restaurant		29.76129	-99.00897	3606 Forest Trail Dr	Bandera	78003	+12104598807			0.80
 6c5faf43380c	Sunrise Restaurant	restaurant	american restaurant	29.20695	-99.79405	510 W Main St	Uvalde	78801	+18302786100	http://sunriserestaurant.com/		0.96
 c29a1edce04d	Taco Bliss Express	restaurant	taco restaurant	29.20464	-99.79884	735 W Main St	Uvalde	78801	+18309006174			0.97
@@ -556,7 +508,6 @@ f22de96317d7	Tacos El Patio	restaurant	mexican restaurant	29.29450	-99.63731	222
 46b6ac17a25c	Tacos Los Quincitos | Mexican Food Truck	restaurant	mexican restaurant	29.74485	-99.02217	3999 State Highway 16 S	Bandera	78003	+18303282179			0.92
 79c8bbab573f	Taqueria El Rodeo De Jalisco	restaurant	mexican restaurant	29.34778	-99.13335	409 19th St	Hondo	78861	+18304265850	http://mcdonalds.com		0.98
 2919abaed057	Taqueria Jalisco	restaurant	mexican restaurant	29.06083	-99.00332	13498 N Interstate 35	Moore	78057	+18304550909	http://taqueria-jalisco-moore.edan.io	Taqueria Taxco	0.96
-6ab857521b2e	Taqueria Jalisco	restaurant		29.05177	-99.01575	13498 N Interstate 35	Moore	78057	+12105219798			0.74
 93f2631697db	Taqueria San Juan	restaurant		29.73116	-99.76063	448 N US Highway 83	Leakey	78873	+18302325388			0.95
 f4a569e5a6e2	Taqueria Utopia	restaurant	taco restaurant	29.61857	-99.52673		Utopia	78884	+18302794095			0.65
 cc53f6a1d564	TaquerÃ­a la Flor	restaurant	mexican restaurant	29.29315	-99.64286	11005 US-90	Knippa	78870	+18309342676			0.98
@@ -589,7 +540,6 @@ ade0c258bc2e	Villa's Restaurant	restaurant	mexican restaurant	29.35048	-99.15031
 d49de5850176	Wild Horse Saloon 2024	restaurant	bar and grill restaurant	29.73032	-99.09644	134 River Bend Rd	Bandera	78003	+18307963615	http://www.wildhorsesaloon.com/		0.92
 8324819af5d9	Wild West Bar & Grill	restaurant	bar and grill restaurant	29.71268	-99.04828	566 Flying L Dr	Bandera	78003	+18307967746	https://flyingl.com/wild-west-bar-grill/		0.95
 52fed28e5cc0	Wildlife Logistics LLC	restaurant		29.73160	-99.74317	64 John Sansom Dr	Leakey	78873	+12105577977	http://wildlife-logistics.com/		0.74
-4aca0b0f8d06	Wingstop	restaurant	chicken restaurant	29.22170	-99.76641	2256 E. Main Street	Uvalde	78801	+18304073555	https://www.wingstop.com/location/wingstop-2112-uvalde-tx-78801/menu?y_source=1_NTUyMDcyNzktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.96
 acda11590d04	Zanzenberg Tavern	restaurant		29.94461	-99.03794	217 Ranch to Market Rd 480	Center Point	78010	+18306342619	https://zanzenbergtavern.com/		0.97
 966015622f55	214 Martin	senior	retirement home	29.22043	-99.79393	214 Martin St	Uvalde	78801	+18302781134	http://www.Txarr.com/		0.92
 d0cda841097b	Amistad Nursing and Rehabilitation Center	senior	retirement home	29.21012	-99.77497	200 Riverside Dr	Uvalde	78801	+18302785641	https://amistadnr.com/		0.92
