@@ -12,6 +12,14 @@ export function spreadsheetText(s: string): string {
 }
 
 /**
+ * A cell read back from one of the desk's own CSVs: the apostrophe spreadsheetText put in front is taken off again
+ * ("'-AB12" → "-AB12"). An apostrophe before anything else is left alone: it is part of the value.
+ */
+export function unSpreadsheetText(s: string): string {
+  return s.replace(/^'(?=[=+\-@\t\r])/, "");
+}
+
+/**
  * A CSV cell: made safe as above, then quoted when it holds a quote, comma or line break. A real number is written as
  * a number whatever it looks like ("-1e-7" stays a number); one that is not finite is left blank.
  */
