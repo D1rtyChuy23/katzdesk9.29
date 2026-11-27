@@ -301,7 +301,7 @@ test("possible match: a listing at our pin with a similar name is shown, never o
   const elio = place("e1", "Elio's Osteria e Pizzeria", 29.84768, -98.17855, { street: "1834 FM2673", city: "Canyon Lake", zip: "78133" });
   const c = web.webCheck(acct("Elio's Pizzeria & Bar. (Canyon Lake)", 29.848, -98.1786, "1834 FM 2673, Canyon Lake, TX 78133"), [elio]);
   assert.deepEqual([c.status, c.place.id, c.listedAddress, c.sameAddress], ["maybe", "e1", null, true]);
-  assert.match(web.webCheckLine(c), /^Possible match: .*\(\d+ ft from our pin\)\. The name differs from ours/);
+  assert.match(web.webCheckLine(c), /^Possible match: Elio's Osteria e Pizzeria · 1834 FM2673, Canyon Lake 78133 \(\d+ ft from our pin\)\. The name differs from ours/);
   // Not at our pin, or a ZIP-area pin: nothing.
   assert.equal(web.webCheck(acct("Elio's Pizzeria & Bar.", 29.86, -98.1786), [elio]).status, "none");
   assert.equal(web.webCheck({ ...acct("Elio's Pizzeria & Bar.", 29.848, -98.1786), approx: true }, [elio]).status, "none");

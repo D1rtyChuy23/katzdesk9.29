@@ -324,5 +324,7 @@ export function webCheckLine(c: WebCheck): string {
       : c.status === "maybe"
         ? ". The name differs from ours: check it is the same business"
         : "";
-  return `${label}${where ? `: ${where}` : ""}${far}${pinOff}`;
+  // A possible match names the listing: its name is the thing to check.
+  const what = c.status === "maybe" ? [c.place.name, where].filter(Boolean).join(" · ") : where;
+  return `${label}${what ? `: ${what}` : ""}${far}${pinOff}`;
 }
