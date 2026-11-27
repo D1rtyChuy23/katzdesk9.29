@@ -1,41 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Download, ExternalLink, Globe, Mountain, Navigation, Phone, RotateCcw, X } from "lucide-react";
+import { Download, ExternalLink, Globe, Mountain, Navigation, Phone, RotateCcw, Search, X } from "lucide-react";
 import { getMyAccess } from "@/lib/ops/access";
 import { isDeskAdmin } from "@/lib/ops/admin-role";
-import { listZipStats } from "@/lib/ops/market-api";
-import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, zipRequest, ZIP_MIN_ZOOM, ZIP_SOURCE, type Bounds, type ZipStat } from "@/lib/ops/market-map";
+import { listPlaces, listZipStats } from "@/lib/ops/market-api";
+import { count, densityColor, density, dollars, DENSITY_STEPS, zipRadius, zipRequest, ZIP_MIN_ZOOM, ZIP_SOURCE, type ZipStat } from "@/lib/ops/market-map";
 import {
   DEFAULT_PLACE_CATEGORIES,
   isPlaceCategory,
-  containsBounds,
   formatPhone,
-  missingCategories,
   nearestAccount,
   nearestRep,
-  osmUrl,
-  overpassQuery,
-  OVERPASS_SERVERS,
   padBounds,
-  parseOverpassCsv,
   placeAddress,
   PLACE_CATEGORIES,
   PLACE_CATEGORY,
   PLACES_LIMIT,
   PLACES_MIN_ZOOM,
   PLACES_SOURCE,
-  PLACE_CACHE_MAX,
   prospectRows,
-  readPlaceCache,
   PROSPECT_COLUMNS,
+  searchUrl,
   websiteUrl,
   type AccountPoint,
-  type CachedFetch,
   type Place,
   type PlaceCategory,
 } from "@/lib/ops/places";
 import { decodeTerrarium, elevationLabel, elevationPixel, ELEVATION_SOURCE, terrariumUrl } from "@/lib/ops/elevation";
-import { directionsUrl, milesLabel, type LatLng } from "@/lib/ops/geo";
+import { directionsUrl, milesLabel, placeUrl, type LatLng } from "@/lib/ops/geo";
 import { toCsv } from "@/lib/ops/customer-export";
 import { todayChicago } from "@/lib/ops/clock";
 import { Button } from "@/components/ui/button";
@@ -56,13 +48,12 @@ export function useMarketAccess(): boolean {
 export type MapLayerPrefs = {
   base: MapBase;
   population: boolean;
-  places: boolean;
   categories: PlaceCategory[];
   /** Places that are already one of our accounts are left off (on unless the viewer turns it off). */
   hideCustomers: boolean;
 };
 
-const DEFAULT_PREFS: MapLayerPrefs = { base: "streets", population: false, places: false, categories: [...DEFAULT_PLACE_CATEGORIES], hideCustomers: true };
+const DEFAULT_PREFS: MapLayerPrefs = { base: "streets", population: false, categories: [...DEFAULT_PLACE_CATEGORIES], hideCustomers: true };
 const prefsKey = (userId: string) => `katz-desk-map-layers:${userId}`;
 
 function readPrefs(raw: string | null): MapLayerPrefs {
@@ -72,7 +63,6 @@ function readPrefs(raw: string | null): MapLayerPrefs {
     return {
       base: v.base === "terrain" ? "terrain" : "streets",
       population: v.population === true,
-      places: v.places === true,
       categories,
       hideCustomers: v.hideCustomers !== false,
     };
@@ -312,157 +302,45 @@ function Stat({ label, value, testId }: { label: string; value: string; testId?:
 // ---------------------------------------------------------------------------------------------------------------------
 // Places (prospects)
 
-/** The main server gets 40 seconds; a mirror, used only when it fails, gets 60. */
-const placeTimeout = (i: number) => (i === 0 ? 40_000 : 60_000);
-const PLACE_CACHE_KEY = "katz-desk-places-v1";
-
-function loadPlaceCache(): CachedFetch[] {
-  try {
-    return readPlaceCache(window.localStorage.getItem(PLACE_CACHE_KEY), Date.now());
-  } catch {
-    return [];
-  }
-}
-function savePlaceCache(entries: CachedFetch[]) {
-  // When the browser's storage is full, the older half goes, then half again.
-  for (let list = entries.slice(-PLACE_CACHE_MAX); list.length; list = list.slice(Math.ceil(list.length / 2))) {
-    try {
-      window.localStorage.setItem(PLACE_CACHE_KEY, JSON.stringify(list));
-      return;
-    } catch {
-      /* full or blocked: try with fewer */
-    }
-  }
-}
-
-/** Asks each Overpass server in turn until one answers with places (a busy server says so with 429 or 504). */
-async function fetchPlaces(b: Bounds, categories: readonly PlaceCategory[], signal: AbortSignal): Promise<{ places: Place[]; rows: number }> {
-  const query = overpassQuery(b, categories);
-  let problem: unknown = null;
-  for (const [i, server] of OVERPASS_SERVERS.entries()) {
-    if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-    const ctrl = new AbortController();
-    const stop = () => ctrl.abort();
-    signal.addEventListener("abort", stop);
-    const timer = setTimeout(stop, placeTimeout(i));
-    try {
-      // GET keeps it a simple request (no preflight); the query is well under any URL limit.
-      const res = await fetch(`${server}?data=${encodeURIComponent(query)}`, { signal: ctrl.signal });
-      const text = await res.text();
-      if (!res.ok || !text.startsWith("@type")) throw new Error(`${server} answered ${res.status}`);
-      // Rows as the server sent them (some are skipped as places), to tell whether it stopped at the limit.
-      const rows = text.split("\n").filter((l) => l.trim()).length - 1;
-      return { places: parseOverpassCsv(text), rows };
-    } catch (e) {
-      if (signal.aborted) throw e;
-      problem = e;
-    } finally {
-      clearTimeout(timer);
-      signal.removeEventListener("abort", stop);
-    }
-  }
-  throw problem instanceof Error ? problem : new Error("No places server answered.");
-}
-
 export type PlacesStatus = "off" | "zoom" | "loading" | "error" | "ready";
 
-/** Keep at most about this many places in memory; the oldest answers go first, whole. */
-const PLACES_KEPT = 20_000;
-
-type InFlight = { box: Bounds; categories: readonly PlaceCategory[]; ctrl: AbortController };
+/** The old in-browser copy of OpenStreetMap answers (11/26), which could hold empty answers from a busy server. */
+const OLD_PLACE_CACHE_KEY = "katz-desk-places-v1";
 
 /**
- * Places on screen for the categories picked. Asks only for what no complete answer covers (a category newly turned
- * on, or a part of the map not seen yet), a little wider than the screen so small pans need nothing new. A request
- * already on its way that covers the new view is left to finish rather than started again.
+ * Prospect places of the picked types on screen (and a little around it), from our server. Each box is asked for once
+ * and kept for the visit; a pan inside it needs nothing new.
  */
 export function usePlaces(view: MapBounds | null, on: boolean, categories: readonly PlaceCategory[]) {
-  const [places, setPlaces] = useState<Map<string, Place>>(() => new Map());
-  const [status, setStatus] = useState<PlacesStatus>("off");
-  const [truncated, setTruncated] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  /** Complete answers, oldest first: what counts as covered, and what this browser keeps for a week. */
-  const answers = useRef<CachedFetch[]>([]);
-  /** The latest answer that stopped at the limit: drawn, but not counted as covering its box. */
-  const partial = useRef<Place[]>([]);
-  const cacheRead = useRef(false);
-  const inFlight = useRef<InFlight | null>(null);
-  const catKey = categories.join(",");
-
-  /** The places from the answers kept, dropping the oldest answers whole when there are too many (so nothing dropped still counts as covered). */
-  function rebuild() {
-    let total = partial.current.length + answers.current.reduce((n, a) => n + a.places.length, 0);
-    while (answers.current.length > 1 && total > PLACES_KEPT) total -= answers.current.shift()!.places.length;
-    const next = new Map<string, Place>();
-    for (const a of answers.current) for (const p of a.places) next.set(p.id, p);
-    for (const p of partial.current) next.set(p.id, p);
-    setPlaces(next);
-  }
-
-  // Answers from earlier visits (this browser, last 7 days), read the first time the layer is on.
   useEffect(() => {
-    if (!on || cacheRead.current) return;
-    cacheRead.current = true;
-    answers.current = loadPlaceCache();
-    if (answers.current.length) rebuild();
-  }, [on]);
-
-  useEffect(() => {
-    if (!on || !view || !categories.length) {
-      inFlight.current?.ctrl.abort();
-      inFlight.current = null;
-      setStatus("off");
-      return;
+    try {
+      window.localStorage.removeItem(OLD_PLACE_CACHE_KEY);
+    } catch {
+      /* storage blocked: nothing to clear */
     }
-    if (view.zoom < PLACES_MIN_ZOOM - 0.01) {
-      setStatus("zoom");
-      return;
-    }
-    const missing = missingCategories(view, categories, answers.current);
-    if (!missing.length) {
-      setTruncated(false);
-      setStatus("ready");
-      return;
-    }
-    const going = inFlight.current;
-    if (going && containsBounds(going.box, view) && missing.every((c) => going.categories.includes(c))) {
-      setStatus("loading");
-      return;
-    }
-    // Wait a moment: the map reports each place it comes to rest, and a quick second pan replaces this one.
-    const timer = setTimeout(() => {
-      inFlight.current?.ctrl.abort();
-      const box = padBounds(view);
-      const mine: InFlight = { box, categories: missing, ctrl: new AbortController() };
-      inFlight.current = mine;
-      setStatus("loading");
-      fetchPlaces(box, missing, mine.ctrl.signal)
-        .then(({ places: found, rows }) => {
-          if (inFlight.current !== mine) return;
-          inFlight.current = null;
-          const full = rows >= PLACES_LIMIT;
-          setTruncated(full);
-          if (full) partial.current = found;
-          else {
-            answers.current = [...answers.current, { bounds: box, categories: missing, at: Date.now(), places: found }];
-            savePlaceCache(answers.current);
-          }
-          rebuild();
-          setStatus("ready");
-        })
-        .catch(() => {
-          if (inFlight.current !== mine) return;
-          inFlight.current = null;
-          setStatus("error");
-        });
-    }, 350);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- categories is keyed by catKey
-  }, [on, view, catKey, attempt]);
-
-  useEffect(() => () => inFlight.current?.ctrl.abort(), []);
-  return { places, status, truncated, retry: () => setAttempt((n) => n + 1) };
+  }, []);
+  const zoomedIn = !!view && view.zoom >= PLACES_MIN_ZOOM - 0.01;
+  const box = view && on && zoomedIn && categories.length ? padBounds(view, 0.25, view.zoom < 12 ? 0.1 : 0.02) : null;
+  const cats = [...categories].sort();
+  const q = useQuery({
+    queryKey: ["places", box?.south, box?.west, box?.north, box?.east, cats.join(",")],
+    queryFn: () => listPlaces({ data: { ...box!, categories: cats } }),
+    enabled: !!box,
+    staleTime: 60 * 60_000,
+    placeholderData: keepPreviousData,
+    retry: 1,
+  });
+  const status: PlacesStatus = !on || !view || !categories.length ? "off" : !zoomedIn ? "zoom" : q.isError ? "error" : q.isPending || (q.isFetching && q.isPlaceholderData) ? "loading" : "ready";
+  return {
+    places: (status === "off" || status === "zoom" ? null : q.data?.places) ?? NO_PLACES,
+    total: q.data?.total ?? 0,
+    truncated: status === "ready" && !!q.data?.truncated,
+    status,
+    error: q.error instanceof Error ? q.error.message : null,
+    retry: () => void q.refetch(),
+  };
 }
+const NO_PLACES: Place[] = [];
 
 export function placePins(places: readonly Place[], matched: ReadonlyMap<string, AccountPoint>): MapPin[] {
   return places.map((p) => {
@@ -482,16 +360,30 @@ export function placePins(places: readonly Place[], matched: ReadonlyMap<string,
 }
 
 /** The map's status for the Places layer, top right (under the elevation readout when both show). */
-export function PlacesNote({ status, truncated, onRetry, className }: { status: PlacesStatus; truncated: boolean; onRetry: () => void; className?: string }) {
+export function PlacesNote({
+  status,
+  truncated,
+  total,
+  error,
+  onRetry,
+  className,
+}: {
+  status: PlacesStatus;
+  truncated: boolean;
+  total: number;
+  error: string | null;
+  onRetry: () => void;
+  className?: string;
+}) {
   const text =
     status === "zoom"
-      ? "Zoom in to see places"
+      ? "Zoom in to see prospects (about a county or closer)"
       : status === "loading"
-        ? "Loading places… (OpenStreetMap can take up to a minute when it is busy)"
+        ? "Loading prospects…"
         : status === "error"
-          ? "Places could not load (the OpenStreetMap server is busy)."
+          ? (error ?? "Prospects could not load.")
           : truncated
-            ? `Showing the first ${PLACES_LIMIT.toLocaleString("en-US")} places here. Zoom in for all of them.`
+            ? `Showing the ${PLACES_LIMIT.toLocaleString("en-US")} most likely of ${total.toLocaleString("en-US")} places here. Zoom in for all of them.`
             : null;
   if (!text) return null;
   return (
@@ -593,7 +485,7 @@ export function PlaceCard({
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="inline-block size-2.5 rounded-[2px]" style={{ background: def?.color }} aria-hidden />
             {def?.label ?? "Place"}
-            {p.cuisine ? ` · ${p.cuisine.replace(/_/g, " ").replace(/;/g, ", ")}` : ""}
+            {p.kind ? ` · ${p.kind}` : ""}
           </p>
         </div>
         <Button type="button" variant="ghost" size="icon" className="-mt-1.5 -mr-2 size-9" onClick={onClose} aria-label="Close place details">
@@ -665,7 +557,6 @@ export function PlaceCard({
             </a>
           </li>
         ) : null}
-        {p.hours ? <li className="text-muted-foreground">Hours: {p.hours}</li> : null}
       </ul>
       <ElevationLine point={p} className="mt-2" />
       <div className="mt-3 flex flex-wrap gap-2">
@@ -678,9 +569,15 @@ export function PlaceCard({
           </Button>
         ) : null}
         <Button asChild size="sm" variant="outline" className="h-9 px-3">
-          <a href={osmUrl(p.id)} target="_blank" rel="noreferrer">
+          <a href={searchUrl(p)} target="_blank" rel="noreferrer" data-testid="map-place-search">
+            <Search />
+            Web Search
+          </a>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="h-9 px-3">
+          <a href={placeUrl({ point: p, quality: "exact" }) ?? undefined} target="_blank" rel="noreferrer">
             <ExternalLink />
-            OpenStreetMap
+            Google Maps
           </a>
         </Button>
       </div>
@@ -692,57 +589,49 @@ export function PlaceCard({
 // ---------------------------------------------------------------------------------------------------------------------
 // The controls
 
-/** Map, Population and Places switches, and the place types when Places is on. */
+/** Terrain for everyone; Population for Admin and Sales. (Prospects is a Show choice, next to Customers.) */
 export function LayerControls({ prefs, onChange, market }: { prefs: MapLayerPrefs; onChange: (c: Partial<MapLayerPrefs>) => void; market: boolean }) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Map layers" data-testid="map-layers">
+      <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Layers</span>
+      <FilterChip
+        selected={prefs.base === "terrain"}
+        onClick={() => onChange({ base: prefs.base === "terrain" ? "streets" : "terrain" })}
+        title="Hills, contour lines and heights. Tap the map to read the elevation there."
+        data-testid="map-layer-terrain"
+      >
+        Terrain
+      </FilterChip>
+      {market ? (
+        <FilterChip selected={prefs.population} onClick={() => onChange({ population: !prefs.population })} title="People per ZIP code (Census)" data-testid="map-layer-population">
+          Population
+        </FilterChip>
+      ) : null}
+    </div>
+  );
+}
+
+/** The place types to show as prospects, and whether places that are already accounts show too (in gray). */
+export function PlaceTypeFilter({ prefs, onChange }: { prefs: MapLayerPrefs; onChange: (c: Partial<MapLayerPrefs>) => void }) {
   const toggleCategory = (id: PlaceCategory) =>
     onChange({ categories: prefs.categories.includes(id) ? prefs.categories.filter((c) => c !== id) : PLACE_CATEGORIES.map((c) => c.id).filter((c) => c === id || prefs.categories.includes(c)) });
   return (
-    <div className="mt-3 space-y-3" data-testid="map-layers">
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Map layers">
-        <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Layers</span>
-        <FilterChip
-          selected={prefs.base === "terrain"}
-          onClick={() => onChange({ base: prefs.base === "terrain" ? "streets" : "terrain" })}
-          title="Hills, contour lines and heights. Tap the map to read the elevation there."
-          data-testid="map-layer-terrain"
-        >
-          Terrain
+    <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Prospect types" data-testid="map-place-types">
+      <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Types</span>
+      {PLACE_CATEGORIES.map((c) => (
+        <FilterChip key={c.id} selected={prefs.categories.includes(c.id)} onClick={() => toggleCategory(c.id)} data-testid={`map-place-${c.id}`}>
+          <span className="mr-1.5 inline-block size-2.5 rounded-[2px] align-middle" style={{ background: c.color }} aria-hidden />
+          {c.label}
         </FilterChip>
-        {market ? (
-          <>
-            <FilterChip selected={prefs.population} onClick={() => onChange({ population: !prefs.population })} title="People per ZIP code (Census)" data-testid="map-layer-population">
-              Population
-            </FilterChip>
-            <FilterChip
-              selected={prefs.places}
-              onClick={() => onChange({ places: !prefs.places })}
-              title="Coffee shops, restaurants, hotels, colleges and other possible customers (OpenStreetMap)"
-              data-testid="map-layer-places"
-            >
-              Prospects
-            </FilterChip>
-          </>
-        ) : null}
-      </div>
-      {market && prefs.places ? (
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Place types" data-testid="map-place-types">
-          <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Places</span>
-          {PLACE_CATEGORIES.map((c) => (
-            <FilterChip key={c.id} selected={prefs.categories.includes(c.id)} onClick={() => toggleCategory(c.id)} data-testid={`map-place-${c.id}`}>
-              <span className="mr-1.5 inline-block size-2.5 rounded-[2px] align-middle" style={{ background: c.color }} aria-hidden />
-              {c.label}
-            </FilterChip>
-          ))}
-          <FilterChip
-            selected={!prefs.hideCustomers}
-            onClick={() => onChange({ hideCustomers: !prefs.hideCustomers })}
-            title="Also show places that are already our accounts, in gray"
-            data-testid="map-place-show-customers"
-          >
-            Show Current Accounts
-          </FilterChip>
-        </div>
-      ) : null}
+      ))}
+      <FilterChip
+        selected={!prefs.hideCustomers}
+        onClick={() => onChange({ hideCustomers: !prefs.hideCustomers })}
+        title="Also show places that are already our accounts, in gray"
+        data-testid="map-place-show-customers"
+      >
+        Show Current Accounts
+      </FilterChip>
     </div>
   );
 }

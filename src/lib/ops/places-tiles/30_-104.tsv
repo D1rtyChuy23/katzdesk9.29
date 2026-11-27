@@ -1,0 +1,182 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+e73baa3a7e89	Baker's Dozen Donuts	bakery	donut shop	30.36380	-103.66409	801 N 5th St	Alpine	79830	+14328375331	http://www.bakersdozendonuts.com		0.98
+fb45fe8d68e9	Bread Garden Bakery	bakery		30.35983	-103.65462	801 E Holland Ave	Alpine	79830	+14322447478	https://www.breadgardenbakerytx.com/		0.92
+a456bc068229	Alcove Social	bar	cocktail bar	30.35825	-103.66000	211 E Holland Ave	Alpine	79830	+14322945703	https://www.alcove.social/		0.99
+ac18c7eece9a	Amigo Sports Bar and Restaurant	bar	sports bar	30.35862	-103.66204	101 W Ave E	Alpine	79830	+14328374012	https://shorturl.at/eiNQT		0.99
+bfaf290f3434	Big Bend Brewing Co	bar	brewery	30.34793	-103.69802	3401 West Highway 90	Alpine	79831	+14328373700	http://www.bigbendbrewing.com		0.69
+f933fa24aec6	Chateau Wright, Blue Mountain Trail Vineyard	bar	winery	30.54902	-103.96935	125 Blue Mountain Trl	Fort Davis	79734	+14322450750	http://www.bluemountainwine.com		0.92
+6d6651900248	Circle Bar	bar		30.96801	-103.66982	2899 County Road 303	Balmorhea	79718	+14323752557			0.63
+9c1a4a43a37b	Circle Bar	bar		30.97198	-103.67155	2899 County Road 303	Balmorhea	79718	+14323752557			0.66
+e2fc7e64f9ba	Harry's Tinaja	bar	pub	30.35858	-103.65755	412 E Holland Ave	Alpine	79830	+14328375060	http://www.harrys-tinaja.com		0.96
+04017db6161a	Mile High Vineyard	bar	winery	30.25484	-103.57095	100 Mile High Rd	Alpine	79830	+19035031352			0.59
+94f7357f5649	Ole Crystal Bar	bar		30.35852	-103.65741	410 E Holland Ave	Alpine	79830	+14328374800			0.94
+aa9366589e6b	Saddle Club Alpine	bar		30.35822	-103.65999	211 E Holland Ave	Alpine	79830	+14328379770	https://alcove.social/		0.78
+cda187a6b1a5	The Century Bar & Grill	bar		30.35735	-103.66271	209 W Holland Ave	Alpine	79830	+14328371922			0.97
+ed05308770ca	The Lobo	bar	pub	30.36119	-103.64808	1404 E Holland Ave	Alpine	79830	+14328375717	http://www.clubplanet.com/Venues/128433/Alpine/Lobo-Bar-and-Grill		0.81
+4779454c618f	The Ritchey	bar	beer bar	30.35657	-103.66073	102 E Murphy Ave	Alpine	79830	+14326610639	http://www.hotelritchey.com		0.99
+b66d258f8c17	White Buffalo Bar	bar		30.20671	-103.24596	102 NW 1st St	Marathon	79842	+14323864205	http://gagehotel.com/dining/white-buffalo-bar		0.96
+133d2dd141b6	The Stable Performance Cars	cardealer		30.35633	-103.66625	511 W Holland Ave	Alpine	79830	+14328379789	http://thestablealpine.com/		0.92
+7e5254e5ff22	Granada Theatre	cinema		30.35825	-103.66011	207 E Holland Ave	Alpine	79830	+14322945793	http://granadatheatre.events/		0.92
+067f7cd417e3	Rangra Theatres	cinema		30.37474	-103.66335	502 E June St	Alpine	79830	+14328375111	http://www.rangratheatres.com		0.92
+a6171fb0fd2a	Rangra Theatres	cinema		30.35792	-103.66095	109 E Holland Ave	Alpine	79830	+14328375111			0.95
+589a4bf67ed7	Cedar Coffee Supply	coffee		30.35825	-103.66058	103 N 4th St	Alpine	79830		http://cedarcoffeesupply.com/		0.97
+68aa0bf26751	Cedar Coffee Supply	coffee		30.35855	-103.66193	113 East Ave E	Alpine	79830		http://www.cedarcoffeesupply.com		0.77
+d45b05788c16	Double Shot Coffee Lounge	coffee		30.58952	-103.89375	108 State St	Fort Davis	79734	+14324263284			0.94
+bea710b08480	Lupita Tacos	coffee		30.59221	-103.89146	411 N State St	Fort Davis	79734	+14324262471	http://fortdavis.com/listing/lupitas-place		0.97
+90fd72899a8c	Marathon Coffee	coffee		30.20712	-103.24797	301 N. 1st St.	Marathon	79842	+14323864151	http://www.marathontexas.com		0.77
+f77f8bcc14a3	Mountain View Cafe	coffee		30.59229	-103.89143	501 N State St	Fort Davis	79734	+14324260444	https://mountainviewlodgetx.com/cafe/		0.92
+d6b2d52bc60d	Scoops Creamery	coffee		30.35909	-103.66261	106 W Sul Ross Ave Ste A	Alpine	79830	+14328374747			1.00
+10c9cc111cf2	Uncle's Cafe	coffee		30.99267	-103.66283		Balmorhea					0.81
+79277af1df4c	V6 Coffee Bar	coffee		30.20667	-103.24567	109 NE 1st St	Marathon	79842	+14323086877	http://www.gagehotel.com/		0.98
+3125b1831722	Vise Coffee	coffee		30.35796	-103.66109	105 E Holland Ave	Alpine	79830	+14328374091			0.92
+5de1a3e781d5	College of Agricultural and Natural Resource Sciences	college		30.36852	-103.62698	East Highway 90	Alpine	79832	+14328378201	https://www.sulross.edu/agricultural-natural-resource-sciences		0.92
+f939b4680b47	Lawrence Hall	college		30.36194	-103.64912	300 Centennial Dr	Alpine	79830	+14328378126			0.92
+19786f7d4d5b	SRSU Lobo Den	college		30.36205	-103.64926	400 N Harrison St	Alpine	79830	+14328378982	http://www.sulross.edu/loboden		0.87
+4d25a479f94e	Sul Ross State University	college		30.36292	-103.65159	US-90	Alpine	79832	+14328378011	https://www.sulross.edu/strategy		1.00
+a31a95966c0a	Sul Ross State University	college		30.35900	-103.65616	Us-90	Alpine	79832	+14328378011	https://www.sulross.edu		0.75
+ce66ec7b6d38	Sul Ross State University - OIT	college		30.38877	-103.58901	East hwy 90, Alpine , 79802, United States	Alpine	79802	+14328378888	http://www.sulross.edu/alumni		0.77
+bff51734b78d	Sul Ross State University Animal Science	college		30.36302	-103.65363	E Highway 90	Alpine	79832	+14328378200	http://www.sulross.edu/		0.59
+caf55513d528	Sul Ross State University College of Education	college		30.36292	-103.65372	Hwy 90	Alpine	79832	+14328378134	http://www.sulross.edu/section/205/department-education		0.71
+2c39f778b96d	The Sul Ross Desk	college		30.37077	-103.64466	111 here	Alpine	79830	+14328378145			0.97
+f679121cec69	7-Eleven	convenience		30.35985	-103.65559	700 East Avenue E	Alpine	79830	+14328371701	https://www.7-eleven.com/		1.00
+a3b36b3f7f39	Alon	convenience		30.20707	-103.24863	801 N 1st St E	Marathon	79842	+14323864238	http://myalon.com/		0.85
+bd33f76e5724	Alon	convenience		30.20678	-103.23573	801 NE 1st St	Marathon	79842	+14323864238	https://alonfuel.com/stations/alon-gas-station-4912-901-e-hwy-90-marathon-tx-79842/	Alon Gas Station	1.00
+cc08bdc1354d	ALON	convenience		30.35457	-103.67500	1500 W Highway 90	Alpine	79830	+14328370913	https://myalon.com/stations/ALON-Gas-Station-3232-1500-W-US-90-ALPINE-TX-79830		0.85
+e50233a8868a	Alon	convenience		30.98691	-103.74413	305 S Main St	Balmorhea	79718	+14326427765	https://alonfuel.com/stations/alon-gas-station-5772-305-south-main-street-balmorhea-tx-79718/	Alon Gas Station	0.92
+5bd2b33af6dd	ALON Gas Station	convenience		30.36540	-103.63950	2303 E Holland Ave, E Highway 90	Alpine	79830	+19158373477	https://alonfuel.com/stations/alon-gas-station-2208-2303-e-highway-90-alpine-tx-79830		0.97
+e83ec4b856f6	ALON Gas Station	convenience		30.36040	-103.65467	800 East Avenue East	Alpine	79830	+14328373566	https://alonfuel.com/stations/alon-gas-station-1119-800-east-avenue-east-alpine-tx-79830/		1.00
+c46e72966b17	Amigos	convenience		30.35582	-103.66709	610 W Holland Ave	Alpine	79830	+14328374770			0.92
+60e3919b34eb	DK Gas Station	convenience		30.35476	-103.67680	1500 U.S. 90	Alpine	79830	+14328370913	https://dkfuel.com/stations/dk-gas-station-3232-1500-w-us-90-alpine-tx-79830/		0.99
+a98b74cddc40	J&G Service Station	convenience		30.20679	-103.23583	901 N 1st St	Marathon	79842	+14323864238			0.78
+8d227d7559c5	KC's Quick Mart	convenience		30.36513	-103.63937	2303 US-90	Alpine	79830	+14328375497			0.92
+2aba5d0dbe79	Skelton's Runway	convenience		30.35715	-103.65377	300 S Cockrell St	Alpine	79830	+14322444107	http://Skeltonsrunway.com/		0.92
+b29aaa670245	Stripes	convenience		30.35985	-103.65562	700 E Avenue E	Alpine	79830	+14328371701	http://www.stripesstores.com	Stripes	1.00
+6d0c9d3b6582	Sunoco	convenience		30.35364	-103.68854	2303 U S 90	Alpine	79830	+14328375497	https://www.sunoco.com/		0.85
+de483b1ae626	Sunoco	convenience		30.36514	-103.63932	2303 E HIGHWAY 90	Alpine	79830		https://www.sunoco.com/locations/store/2303-e-highway-90-alpine-tx-8003038901	Sunoco	0.80
+1d323ba8c39e	Triangle Market	convenience		30.35476	-103.67575	1500 W Highway 90	Alpine	79830	+14328370901	http://trianglemarketmadison.com		0.55
+51175f649b6e	Uncle's Convenience Store	convenience		30.98679	-103.74426		Balmorhea			https://www.mapquest.com/us/texas/gas-stations-balmorhea/uncles...		0.82
+e436c9adbf4d	Uncle's Convenience Store	convenience		30.36696	-103.63483	2705 E Highway 90	Alpine	79830	+14328375252			0.99
+db9076cd0fcb	UNCLES 6390	convenience		30.36360	-103.66351	708 N 5TH ST	Alpine	79830		https://locations.valero.com/en-us/LocationDetails/Index/708-N-5TH-ST/0000026083	Valero	0.80
+6d95b311197e	Uncles Store	convenience		30.36354	-103.66351	798 N 5th St	Alpine	79830	+14328377147	http://www.wtgfuels.com/		0.92
+1ea63e6479eb	Valero	convenience		30.36357	-103.66364	708 N 5TH ST	Alpine	79830	+14328377147	https://locations.valero.com/en-us/LocationDetails/Index/708-N-5TH-ST/0000026083	Valero	0.92
+a2a8e9e1119b	Valero	convenience		30.99301	-103.66308	Co Rd 312	Balmorhea	79718	+14323750133	https://locations.valero.com/en-us/LocationDetails/Index/3-IH-10/0000026082	Valero	0.92
+dbe7e1333c06	Dairy Queen	fastfood		30.36639	-103.63400	2800 US-90	Alpine	79830	+14328372420	https://www.dairyqueen.com/en-us/locations/tx/alpine/2800-e-highway-90/13797/?y_source=1_MjkzMzkxMTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+1eae139a76c8	DQ Grill & Chill	fastfood		30.36646	-103.63404	2800 E Highway 90	Alpine	79830		https://www.dairyqueen.com/en-us/locations/tx/alpine/2800-e-highway-90/3570	DQ Grill & Chill	0.80
+b4f936bf83dc	McDonald's	fastfood		30.36079	-103.65349	900 East Ave E	Alpine	79830	+14322945458	https://www.mcdonalds.com/us/en-us/location/tx/alpine/900-east-ave-e/10868.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+ac7c73f2f775	McDonald's Observatory, Fort Davis TX	fastfood		30.40223	-103.68324	N Highway 118	Alpine	79830				0.60
+477ba6055071	Snack Shack	fastfood		30.38628	-103.67442	3201 Fort Davis Hwy	Alpine	79830	+14328375699			0.92
+a6d6915b41fa	Sonic Drive In	fastfood		30.35899	-103.65645	602 East Holland	Alpine	79830	+14328375521	https://locations.sonicdrivein.com/tx/alpine/602-east-holland.html	Sonic Drive-In	0.97
+c7f48decb26c	Balmorhea Grocery	grocery		30.98683	-103.74212	402 S Main St	Balmorhea	79718	+14323752425	https://balmorhea-grocery.edan.io		0.92
+f35a66ec14e6	Food Basket	grocery		30.35913	-103.65786	104 N 2nd St	Alpine	79830	+14328373295	https://www.hawaiifoodbasket.org		0.55
+f38bb68be792	Marfa Maid Goat Cheese	grocery		30.31648	-103.96989	Antelope Hills Rd	Marfa	79843	+14327293987	http://marfamaid.com		0.77
+65f9e8076da8	Porter's	grocery		30.35913	-103.65786	104 N 2nd St	Alpine	79830	+14328373295	https://www.myporters.net		0.96
+f7dd43152261	Porters Thriftway	grocery		30.60190	-103.88585	1600 N State St	Fort Davis	79734	+14324263812	www.portersthriftway.com		0.92
+c34af885ad3b	Big Bend Regional Hospital District	hospital		30.35760	-103.66166	105 W Holland Ave	Alpine	79830	+14328377051	http://www.bigbendhealth.org/		0.92
+a848a443813d	Big Bend Regional Medical Center	hospital		30.38421	-103.67075	2600 Highway 118 North	Alpine	79830	+14328373447	http://www.bigbendhealthcare.com/	Quorum Health	0.92
+090c7c37817f	ACP Hotel - Alpine City Place	hotel		30.35853	-103.66199	103 W Ave E	Alpine	79830	+14327772123	https://alpinecityplace.com/		0.94
+126122bbe843	Alpine City Limits	hotel		30.34952	-103.69302	2700 W Highway 90	Alpine	79830	+14328379088			0.92
+120ef4b861c2	Alpine Guest Lodging	hotel	lodge	30.35797	-103.66280	117 N 6th St	Alpine	79830	+14323862398	http://www.alpineguestlodging.rocks		0.83
+7a308bfd2599	Alpine Guest Lofts	hotel	motel	30.35790	-103.66274	117 N 6th St	Alpine	79830	+14328371818	http://www.alpineguestlodging.rocks		0.77
+9ce69e9ebc8f	Alpine Lodging Llc	hotel		30.36498	-103.63997	2000 E Highway 90	Alpine	79830		www.bienvenidobigbend.com		0.95
+24f1c1c533b8	Alpine Masonic Lodge 766	hotel	lodge	30.35857	-103.66183	State Hwy 118	Alpine	79830	+14328370718			0.56
+04ab472b6048	Americas Best Value Inn	hotel	motel	30.36435	-103.63989	2010 US-90	Alpine	79830	+14328373363	https://www.sonesta.com/americas-best-value-inn/tx/alpine/americas-best-value-inn-alpine		1.00
+9c4838199118	Americas Best Value Inn Alpine	hotel	resort	30.35499	-103.68269	2010 E Highway 90	Alpine	79830	+14328373363			0.85
+5d24da733500	Ang Alpine Hospitality Llc	hotel		30.34953	-103.69299	2607 W Highway 90	Alpine	79830				0.95
+9070302250c1	Antelope Lodge	hotel	motel	30.35432	-103.68710	2310 W Highway 90	Alpine	79830	+14328372451	http://antelopelodge.com/		0.99
+7a8d3f46f181	Balmorhea Cactus Motel	hotel		30.98772	-103.74128	102 N Main St	Balmorhea	79718	+14323750652	http://www.balmorheacactusmotel.com/		0.91
+3bb040d931ac	Captain Shepard's Inn	hotel		30.20765	-103.24541	202 Avenue D N	Marathon	79842	+14323864034	http://www.gagehotel.com		0.92
+71ac024dec85	Casa Gremich	hotel	hostel	30.35477	-103.56986	1 Scenic Ridge Rd S	Alpine	79830	+15123300288			0.71
+083d2d5cfce2	El Oso Flojo Lodge	hotel	lodge	30.98429	-103.74873	208 San Angelo St	Balmorhea	79718	+14323750459	http://www.elosoflojolodge.com		0.96
+96643eac4107	Fort Davis Inn & R.V Park	hotel	resort	30.59449	-103.88828	2201 N. State St, Fort Davis, TX 79734	Fort Davis	79734				0.70
+9618fe5928aa	Hampton Inn Alpine	hotel		30.34933	-103.69281	2607 US-90	Alpine	79830	+14328377344	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	0.99
+e61dedf05f38	Hampton Inn Alpine	hotel		30.34956	-103.69296	2607 West Highway 90	Alpine	79830	432-837-7344	https://www.hilton.com/en/hotels/aletxhx-hampton-alpine/	Hampton by Hilton	1.00
+789ddf810505	Harvard Hotel	hotel		30.58945	-103.89423	109 N State St	Fort Davis	79734	+14324262500	http://www.harvardhotelandlodge.com/		0.98
+d64b1e1358de	High Frontier	hotel		30.53270	-103.85465	1164 High Frontier	Fort Davis	79734	+14323641200	https://www.thehighfrontiertx.com/		0.90
+e0aeadbea2b6	Highland Inn	hotel	motel	30.36144	-103.64782	1404 US-90 E	Alpine	79830	+14328375811	http://www.highlandinn.net/		0.92
+7c9d9815c9ff	Holiday Inn Express & Suites	hotel		30.36384	-103.64085	2004 E Highway 90	Alpine	79830	+14328379597	https://www.ihg.com/holidayinnexpress/hotels/us/en/alpine/mrfal/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-MRFAL	Holiday Inn Express	1.00
+842603b54b59	Holland Investors Llc	hotel		30.35741	-103.66288	209 W Holland Ave	Alpine	79830				0.95
+c332802e0caa	Hotel Limpia	hotel		30.58907	-103.89391	101 Memorial Square	Fort Davis	79734	+14324263237	https://www.hotellimpia.com/		0.98
+f6af0ced91bf	Hotel Parker at Quarter Circle 7	hotel	resort	30.34766	-103.69636	2800 US-90	Alpine	79830	+14328371100	http://www.quartercircle7hotel.com/		0.92
+8ae4218eab68	Kelly Prude	hotel		30.58993	-103.89377	201 N State St	Fort Davis	79734	+14324263252	http://www.butterfieldinn.com/		0.97
+b83872763c53	Kokernot Lodge	hotel	lodge	30.37350	-103.65884	1104 Loop Rd	Alpine	79830		http://www.kokernotfield.com/		0.92
+2c1b79689848	La Loma Del Chivo	hotel	hostel	30.20117	-103.25034	401 Sw 6th St	Marathon	79842	+14322447144	http://www.lalomadelchivo.org		0.96
+38262221b9e9	La Loma Inn	hotel	motel	30.35530	-103.68026	402 Peach Landing	Alpine	79830	+14328379567			0.98
+c1e8682ae4c8	Lajitas Resort	hotel		30.35831	-103.65925	106 N 3rd St	Alpine	79830	+14323642298			0.68
+98e0a98f2716	Lobo Village	hotel		30.36455	-103.64816		Alpine	79832	+14328378190			0.97
+635c1cc89487	Marathon Motel and RV Park	hotel	motel	30.20870	-103.25392	701 US-90	Marathon	79842	+14323864241	http://www.marathonmotel.com		0.94
+6e1ab8719cf8	Maverick Investors Llc	hotel		30.35741	-103.66288	209 W Holland Ave	Alpine	79830				0.95
+2bcac0190ab4	Motel Bien Venido	hotel		30.36010	-103.65412	809 E Holland Ave	Alpine	79830	+14328373454	http://www.oyorooms.com/us		0.92
+f2fe80c6bdb1	Mountain View Lodge	hotel	lodge	30.58144	-103.88342	501 TX-118	Fort Davis	79734	+14323214217	http://www.mountainviewlodgetx.com/		0.98
+57cd7655e96d	Mountainside Inn	hotel		30.59375	-103.89388	400 4th St	Fort Davis	79734	+15127517422	https://secure.thinkreservations.com/mountainsideinntx/reservations		0.99
+c7b188ce675e	OYO Alpine TX near Big Bend National Park	hotel		30.36016	-103.65421	809 E Holland Ave	Alpine	79830	+14327550233	https://www.oyorooms.com/us/87428/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_ALPI001	OYO Rooms	1.00
+dcbbc20a7ffe	Prude Ranch	hotel		30.60795	-103.95058	201 Prude Guest Ranch Rd	Fort Davis	79734	+14324263201	http://prude-ranch.com/contact/		0.92
+fa776d13b12e	Prude Ranch Summer Camp	hotel		30.57814	-103.90916	201 Prude Guest Ranch Rd	Fort Davis	79734	+14324264406	http://www.prude-ranch.com/index.cfm		0.75
+5143932cecb6	Quality Inn	hotel		30.36564	-103.63882	2401 E Highway 90	Alpine	79830	+14323561703	https://www.choicehotels.com/texas/alpine/quality-inn-hotels/txb32?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+66527e7319b0	Quality Inn	hotel	resort	30.36727	-103.63319	2401 E Highway 90	Alpine	79830	+14323561703	https://www.choicehotels.com/texas/alpine/quality-inn-hotels/txb32?mc=llbillpx&pmf=local		0.97
+1eb18a027294	Quarter Circle 7 Hotel	hotel	resort	30.34722	-103.69580	2800 W Highway 90	Alpine	79830	+14328371100			0.98
+b7396510620c	S3 Hospitality Llc	hotel		30.36562	-103.63890	2401 E Highway 90	Alpine	79830				0.95
+10c4e0f121d7	Sproul Family Ranch	hotel		30.63508	-103.94602	2500 Sproul Road	Fort Davis	79734	+14323866225	http://www.sproulfamilyranch.com/		0.89
+6051c0050373	Stone Village Tourist Camp	hotel	motel	30.59258	-103.89098	509 N State St	Fort Davis	79734	+14324263941	http://www.stonevillagetouristcamp.com		0.99
+bd14096a1e64	Stone Village Tourist Camp	hotel	motel	30.59258	-103.89098	509 State St	Fort Davis	79734	+14324263941	http://www.stonevillagetouristcamp.com		0.99
+21b2020377d7	The High Frontier	hotel	resort	30.52708	-103.85198	1164 High Frontier Rd	Fort Davis	79734	+14327293700	https://www.thehighfrontiertx.com/?utm_medium=organic&utm_source=yext&utm_campaign=website-link		0.99
+949fd68f1565	The Holland Hotel	hotel		30.35729	-103.66274	209 W Holland Ave	Alpine	79830	+14328372800	http://thehollandhoteltexas.com/		0.92
+a9f4feeaa862	The Maverick Inn	hotel	motel	30.36075	-103.65036	1200 E Holland Ave	Alpine	79830	+14328372800	http://themaverickinn.com/		0.99
+599580a1c4e0	Travelodge by Wyndham Alpine	hotel		30.36626	-103.63749	2407 E Holland Ave	Alpine	79830	+14322945112	https://www.wyndhamhotels.com/travelodge/alpine-texas/travelodge-alpine/overview		0.99
+ef157e5a5ef7	Value Lodge	hotel	motel	30.36480	-103.64007	2000 US-90	Alpine	79830	+14328371200	http://www.valuelodgealpine.com		0.99
+fac48e513abf	Webster House Guest House	hotel		30.58677	-103.89742	2ND St	Fort Davis	79734	+14324263143			0.65
+500fb05d406d	Rio Raton Card Room	office	private association	30.37122	-103.66850	23O5 FM 1703	Alpine	79830	+14322940956	https://www.rioraton.net/		0.64
+b20bdf24f349	Velocerus Technology Solutions	office	information technology company	30.35887	-103.66252	106 W Sul Ross Ave Ste D	Alpine	79830	+14328375381	http://www.velocerustech.com/		0.92
+127621e6c7b9	12 Gage Restaurant	restaurant	american restaurant	30.20667	-103.24599	102 Northwest 1st st Highway 90w	Marathon	79842	+14323864205	http://www.gagehotel.com		0.97
+04dbac7e5b93	Alicia's Mexican Restaurant	restaurant	mexican restaurant	30.35636	-103.65402	708 E Gallego Ave	Alpine	79830	+14328372802	https://aliciasmexicangrille.com	Alicia's Mexican Grille - Cypress	0.92
+8d7f02a29cc3	Alpine 360 Hospitality	restaurant		30.35674	-103.66580	501 W Holland Ave	Alpine	79830				0.95
+b86f8931af27	Alpine Oriental Express	restaurant	asian fusion restaurant	30.34689	-103.69895	3000 W US-90	Alpine	79830	+14328371159	http://alpineorientalexpress.weebly.com/		0.92
+921f6a0a42fd	Antojitos del Comal Salvadoreño	restaurant		30.59208	-103.89096	101 Cemetery Rd	Fort Davis	79734	+13465931314			0.97
+d21203718e70	Bear Den	restaurant	texmex restaurant	30.98429	-103.74799	205 N El Paso St	Balmorhea	79718	+14323752273	http://www.elosoflojolodge.com		0.92
+eee2e78dab53	Black Bear Restaurant	restaurant		30.59284	-103.94368	16453 Park Rd 3	Fort Davis	79734	+14324263254	https://tpwd.texas.gov/state-parks/indian-lodge		0.92
+34ecd3bd8728	Black Bear Restaurant @ The Indian Lodge	restaurant	american restaurant	30.61002	-103.99065	State Highway P3 Park Rd	Fort Davis	79734	+14324263254	http://www.tpwd.state.tx.us/state-parks/indian-lodge		0.77
+828c75e4ace1	Blue Mountain Bar and Grill	restaurant	bar and grill restaurant	30.58934	-103.89388	109 State St	Fort Davis	79734		https://www.hotellimpia.com/dine/#bluemountain		0.97
+a7023044f83b	Bock Burger Takeaway	restaurant	burger restaurant	30.36011	-103.65701	601 E Ave East	Alpine	79830	+14322944580			0.96
+13be28241152	Brick Vault Brewery and Barbecue-Marathon	restaurant	barbecue restaurant	30.20664	-103.24521	102 NW 1st St	Marathon	79842	+14323867538	http://www.brickvaultbreweryandbbq.com		0.97
+b8ec0002451e	Circle Bar & Steakhouse	restaurant	steakhouse	30.99298	-103.66332	2899 Crd 303,	Balmorhea	79718	+14327554380			0.87
+48a3d9f30646	G-Ma's Food Truck	restaurant		30.35754	-103.66265	W Avenue E and 8th	Alpine	79830	+14322941484			0.57
+66af4d784e13	Guzzi Up	restaurant	italian restaurant	30.35698	-103.66256	202 W Holland Ave	Alpine	79830	+14328375151	http://www.guzziup.com		0.92
+33dbd586b480	Hotel Limpia Dining Room	restaurant	american restaurant	30.59277	-103.89089	100 Main St	Fort Davis	79734	+14324263241	http://www.hotellimpia.com/New%20Limpia/pages/restaurant.html		0.77
+1d5b8fb0e21f	Impressions Catering & Take Out	restaurant	sandwich shop	30.35644	-103.66533	501 W Holland Ave	Alpine	79830	+14328377233			0.92
+3041dc791c93	Jo's Bar & Grill	restaurant	bar and grill restaurant	30.98506	-103.74711	207 Galveston St	Balmorhea	79718	+14323750390	http://josbarandgrill.com		0.98
+4171b1167cc0	Krispy Krunchy Chicken	restaurant		30.35484	-103.67642	1500 W Highway 90	Alpine	79830	+14323868158	https://www.krispykrunchy.com		0.58
+c77207a23de1	La Birrieria	restaurant	taco restaurant	30.35719	-103.65304	300 S Cockrell St	Alpine	79830	+14322942017			0.96
+e18ed4715e1b	La Calavera	restaurant	mexican restaurant	30.35636	-103.66106	100 W Murphy Ave	Alpine	79830	+14322942680			0.71
+800c16fa4dfa	La Casita	restaurant	mexican restaurant	30.35619	-103.65003	1104 E Avenue H	Alpine	79830	+14328372842	http://www.lacasita.edu/		0.96
+234e0a405438	La Trattoria Cafe	restaurant	italian restaurant	30.36016	-103.65360	901 E Holland Ave	Alpine	79830	+14328372200	http://latrattoriacafe.com/		0.92
+0ecdbccc94f8	Laredo Taco Company	restaurant		30.35985	-103.65559	700 East Avenue E	Alpine	79830	+14328371701	https://www.laredotacocompany.com/		1.00
+c182a58e2bc1	Line Thai Cafe	restaurant	thai restaurant	30.35674	-103.66580	501 W Holland Ave	Alpine	79830	+14322951452			0.97
+36a364992208	Little Caesars Pizza	restaurant	pizza restaurant	30.35952	-103.65430	800 E Holland Ave	Alpine	79830	+14328374700	https://littlecaesars.com/en-us/store/11727	Little Caesars	0.98
+515b595b37b2	Little Mexico Cafe	restaurant		30.35580	-103.66320	200 W Murphy	Alpine	79830	+14328377036			0.85
+e638c4ca4e88	Lucia	restaurant	italian restaurant	30.35703	-103.66251	202 W Holland Ave	Alpine	79830		http://www.luciaalpine.com/		0.97
+6e5b8e920233	Magoo's Place	restaurant	texmex restaurant	30.36115	-103.65369	905 E Ave East	Alpine	79830	+14328379951	https://magoo-s-place.hub.biz		0.96
+1392007cadff	Marathon Coffee Shop	restaurant		30.21225	-103.13287	301 E 1st St N	Marathon	79842	+14323864352			0.57
+efb62fd475f0	Mary Lou's Restaurant	restaurant		30.58482	-103.88956	201 Musquiz Dr	Fort Davis	79734	+14322492531			0.92
+1fb1c3a94342	Matta's Burger Place	restaurant	burger restaurant	30.98619	-103.74422	116 S Main St	Balmorhea	79718	+14323752669	http://mattas-burger-place.edan.io	Mattas International Foods	0.95
+b8155bc11944	Oasis Cafe	restaurant	mexican restaurant	30.20660	-103.24504	103 E US Highway 90	Marathon	79842				0.92
+280876d13f0a	Panda Buffet	restaurant	buffet restaurant	30.35769	-103.66075		Alpine		+14328374022	http://www.pandabuffetalpine.com		0.92
+8826cf03c33f	Penny's Diner	restaurant	diner	30.36571	-103.63762	2407 US-90	Alpine	79830	+14328375711	https://www.oneview.link/c/PennysDinerAlpine	Penny's Diner	0.98
+6594483ecbf7	Picnic Basket	restaurant	sandwich shop	30.35635	-103.65294	403 S Walker St	Alpine	79830	+14325381770	http://www.instagram.com/picnicbasketalpine		0.92
+2d0b7ae49519	Pizza Hut	restaurant	pizza restaurant	30.36481	-103.63911	2300 Hwy 90 East Brewster	Alpine	79831	+14328375819	https://locations.pizzahut.com/tx/alpine/2300-hwy-90-east?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296913	Pizza Hut	0.99
+be0bfb6911ba	Poco Mexico Cafe	restaurant		30.59375	-103.88937	43371state highway 17	Fort Davis	79734	+4322492127			0.92
+a17a7e4eac78	Reata Restaurant-Alpine, TX	restaurant	steakhouse	30.35874	-103.66203	203 N 5th St	Alpine	79830	+14328379232	http://www.reata.net/alpine/	Reata	0.99
+dc6af0cd5fcd	Rjc Inc	restaurant		30.36007	-103.65247	1002 E Holland Ave	Alpine	79830				0.95
+c2ea35d4ddc2	RNR Smokehouse	restaurant	barbecue restaurant	30.60480	-103.88566	1902 State St	Fort Davis	79734	+14322492389			0.99
+4598e618c7e3	Roux	restaurant	cajun and creole restaurant	30.35565	-103.67165	1005 W Ave E	Alpine	79830	+15122172437			0.92
+c1bd12872503	Santana's Mexican Restaurant	restaurant	mexican restaurant	30.35822	-103.65924	300 E Holland Ave	Alpine	79830	+14322942953			0.96
+e63b0f27d572	SMOKEHOUSE BBQ	restaurant	barbecue restaurant	30.35482	-103.67626	W 1500 US-90	Alpine	79830	+14322944091	http://www.smokehousebbqak.com		0.95
+167a56af652c	Spicewood Restaurant	restaurant	steakhouse	30.34755	-103.69376	2612 US-90	Alpine	79830	+14328374227	http://www.hotelparker.com/		0.98
+902977402c78	Subway	restaurant	sandwich shop	30.36007	-103.65247	1002 E Holland Ave	Alpine	79830	+14328372533	https://www.subway.com		0.95
+c7f070c87ed4	Texas Drafthouse, Inc	restaurant		30.35611	-103.66573	504 W Holland Ave	Alpine	79830				0.95
+8a5273dd5ac7	The Feed Wagon	restaurant	comfort food restaurant	30.35717	-103.65362	300 S Cockrell St	Alpine	79830	+14323866589			0.92
+cb0fc306757c	The Rendezvous	restaurant	pizza restaurant	30.59393	-103.89052	105 2nd St	Fort Davis	79734	+14324260010	http://therendezvousfortdavis.com/		0.97
+280aa734895e	The Smokin Cuban	restaurant	cuban restaurant	30.35875	-103.65719	412 E Holland Ave	Alpine	79830	+14322449900	http://smokincubanalpine.com		0.92
+3e5451526de2	Twin Peaks	restaurant	american restaurant	30.36086	-103.67550		Alpine			http://www.twinpeaksrestaurant.com/	Twin Peaks Brewing Co.	0.58
+37c09fc8783d	Twin Peaks Restaurant	restaurant		30.35759	-103.66069	106 E Holland Ave	Alpine	79830		https://twinpeaksrestaurant.com		0.95
+96ca317278dc	West Texas Italian Delicacies	restaurant		30.35987	-103.65466	801 E Holland Ave	Alpine	79830	+14322940809	http://www.westtexasitaliandelicacies.com		0.95
+6bcd42270646	Yolanda´s Kitchen	restaurant	burger restaurant	30.98479	-103.74515	Houston St	Balmorhea	79718				0.96
+8f63c720f84b	Alpine Retirement Homes	senior	retirement home	30.35920	-103.68148	901 N Orange St	Alpine	79830	+14328372259			0.92

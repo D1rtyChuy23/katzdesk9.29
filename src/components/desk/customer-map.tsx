@@ -10,6 +10,7 @@ import {
   ElevationLine,
   LayerControls,
   PlaceCard,
+  PlaceTypeFilter,
   PlacesKey,
   PlacesNote,
   placePinId,
@@ -51,7 +52,7 @@ import { firstEmail, statusTone, telHref, websiteHref, websiteLabel } from "@/li
 import { formatLongDate } from "@/lib/ops/clock";
 import { cn } from "@/lib/utils";
 import { inBounds, ZIP_MIN_ZOOM, zipFromAddress, type ZipStat } from "@/lib/ops/market-map";
-import { matchAccounts, padBounds, type AccountPoint, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
+import { matchAccounts, padBounds, PLACE_CATEGORY, type AccountPoint, type Place, type PlaceCategory, type PlaceMatch } from "@/lib/ops/places";
 
 type ColorBy = "rep" | "work" | "pms" | "type";
 
@@ -62,16 +63,23 @@ const COLOR_BY: { id: ColorBy; label: string }[] = [
   { id: "type", label: "Type" },
 ];
 
-/** What the map shows: account pins, service provider diamonds, or both (the default). */
-type MapShow = "customers" | "providers" | "both";
+/**
+ * What the map shows: account pins, service provider diamonds, both (the default), or Prospects (Admin and Sales,
+ * Chuy 11/27): places that could be new business, with our accounts as small gray dots for where we already are.
+ */
+type MapShow = "customers" | "providers" | "both" | "prospects";
 
-const SHOW_OPTIONS: { id: MapShow; label: string; testId: string }[] = [
+const SHOW_OPTIONS: { id: MapShow; label: string; testId: string; market?: boolean }[] = [
   { id: "customers", label: "Customers", testId: "map-show-customers" },
   { id: "providers", label: "Service Providers", testId: "map-providers" },
   { id: "both", label: "Both", testId: "map-show-both" },
+  { id: "prospects", label: "Prospects", testId: "map-show-prospects", market: true },
 ];
 
-const isMapShow = (v: unknown): v is MapShow => v === "customers" || v === "providers" || v === "both";
+const isMapShow = (v: unknown): v is MapShow => v === "customers" || v === "providers" || v === "both" || v === "prospects";
+
+/** Our accounts in the Prospects view: small and gray, so the prospects stand out. */
+const CONTEXT_COLOR = "#a8a29e";
 
 /** The Show choice is remembered per viewer on this device. */
 const showKey = (userId: string) => `katz-desk-map-show:${userId}`;
@@ -258,7 +266,7 @@ export function CustomerMap({
   const [attention, setAttention] = useState(false);
   const [showApprox, setShowApprox] = useState(true);
   // Both until this viewer's saved choice is read (after mount, so the server render and the first client one match).
-  const [show, setShow] = useState<MapShow>("both");
+  const [savedShow, setShow] = useState<MapShow>("both");
   /** Which list the side panel shows when both layers are on the map. */
   const [listTab, setListTab] = useState<"accounts" | "providers">("accounts");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -291,8 +299,9 @@ export function CustomerMap({
 
   function chooseShow(next: MapShow) {
     setShow(next);
-    if (next === "customers") setProviderPick(null);
+    if (next === "customers" || next === "prospects") setProviderPick(null);
     if (next === "providers") setSelectedId(null);
+    if (next !== "prospects") setPlacePick(null);
     try {
       window.localStorage.setItem(showKey(userId), next);
     } catch {
@@ -300,8 +309,11 @@ export function CustomerMap({
     }
   }
 
+  // Prospects is for Admin and Sales: anyone else (or before access has loaded) sees Both.
+  const show: MapShow = savedShow === "prospects" && !market ? "both" : savedShow;
+  const prospectsMode = show === "prospects";
   const showAccounts = show !== "providers";
-  const showProviders = show !== "customers";
+  const showProviders = show === "providers" || show === "both";
 
   const { accounts, byId, colorOf } = geo;
   const data = geo.data;
@@ -416,6 +428,15 @@ export function CustomerMap({
   const basePins = useMemo(() => {
     const out: (MapPin & { rank: number })[] = [];
     if (!showAccounts) return out;
+    if (prospectsMode) {
+      // Where we already are, whatever the account filters say (they step aside in this view).
+      for (const a of accounts) {
+        const p = pointOf(a);
+        if (!p) continue;
+        out.push({ id: a.id, lat: p.lat, lng: p.lng, color: CONTEXT_COLOR, rank: 0, size: 4, hollow: a.quality === "approx", title: `${a.name} · Our account${a.rep ? ` · ${a.rep}` : ""}` });
+      }
+      return out;
+    }
     for (const a of filtered) {
       const p = pointOf(a);
       if (!p) continue;
@@ -437,7 +458,7 @@ export function CustomerMap({
     // Lower ranks first so red / amber pins draw over gray ones.
     out.sort((x, y) => x.rank - y.rank);
     return out;
-  }, [filtered, colorBy, colorOf, showApprox, showAccounts]);
+  }, [filtered, accounts, prospectsMode, colorBy, colorOf, showApprox, showAccounts]);
 
   const selected = showAccounts && selectedId != null ? byId.get(selectedId) ?? null : null;
 
@@ -457,7 +478,7 @@ export function CustomerMap({
 
   // ---- Map layers. Every pinned account (whatever the filters) is what "already an account" and the ZIP counts use.
   const populationOn = market && layers.population;
-  const placesOn = market && layers.places;
+  const placesOn = market && prospectsMode;
   const accountPoints = useMemo<AccountPoint[]>(
     () => accounts.flatMap((a) => (a.lat != null && a.lng != null ? [{ id: a.id, name: a.name, lat: a.lat, lng: a.lng, address: a.address ?? a.geocodeAddress, rep: a.rep }] : [])),
     [accounts],
@@ -468,7 +489,7 @@ export function CustomerMap({
   const zipByCode = useMemo(() => new Map(zipRows.map((z) => [z.zip, z])), [zipRows]);
   const zipLayer = useMemo(() => zipPins(zipRows), [zipRows]);
   const placesQ = usePlaces(mapView, placesOn, layers.categories);
-  const allPlaces = useMemo(() => [...placesQ.places.values()], [placesQ.places]);
+  const allPlaces = placesQ.places;
   // A name match is that account (a current account, not a prospect); a street-address match alone stays a prospect.
   const placeMatches = useMemo(() => (allPlaces.length ? matchAccounts(allPlaces, accountPoints) : new Map<string, PlaceMatch>()), [allPlaces, accountPoints]);
   const currentAccounts = useMemo(() => {
@@ -482,10 +503,19 @@ export function CustomerMap({
     if (!placesOn || !mapView) return { placesDrawn: [], placesInView: [], prospectsInView: [] };
     const wanted = new Set<PlaceCategory>(layers.categories);
     const near = padBounds(mapView, 1);
-    const drawn = allPlaces.filter((p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near));
+    const drawn = allPlaces.filter(
+      (p) => wanted.has(p.category) && (!layers.hideCustomers || !currentAccounts.has(p.id)) && inBounds(p, near) && (!needle || p.name.toLowerCase().includes(needle)),
+    );
     const inView = drawn.filter((p) => inBounds(p, mapView));
     return { placesDrawn: drawn, placesInView: inView, prospectsInView: inView.filter((p) => !currentAccounts.has(p.id)) };
-  }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, currentAccounts]);
+  }, [placesOn, mapView, layers.categories, layers.hideCustomers, allPlaces, currentAccounts, needle]);
+  // The Prospects list: the prospects on screen, nearest the middle of the map first.
+  const prospectList = useMemo(() => {
+    if (!mapView) return prospectsInView;
+    const mid = { lat: (mapView.south + mapView.north) / 2, lng: (mapView.west + mapView.east) / 2 };
+    const far = (p: LatLng) => (p.lat - mid.lat) ** 2 + ((p.lng - mid.lng) * Math.cos((mid.lat * Math.PI) / 180)) ** 2;
+    return [...prospectsInView].sort((a, b) => far(a) - far(b));
+  }, [prospectsInView, mapView]);
   const placeLayer = useMemo(() => placePins(placesDrawn, currentAccounts), [placesDrawn, currentAccounts]);
   const placeCounts = useMemo(() => {
     const m = new Map<PlaceCategory, number>();
@@ -524,13 +554,19 @@ export function CustomerMap({
     setZipPick(kind === "zip" ? id : null);
     setPlacePick(kind === "place" ? id : null);
   }
+  /** A prospect from the map or the list; from the list the map pans to it. */
+  function pickPlace(p: Place, fromList: boolean) {
+    pickLayer("place", p.id);
+    if (!fromList) return;
+    setFocus({ lat: p.lat, lng: p.lng });
+    showMapAfterListPick();
+  }
   function closeLayerPick() {
     setZipPick(null);
     setPlacePick(null);
   }
   function changeLayers(change: Parameters<typeof setLayers>[0]) {
     if (change.population === false) setZipPick(null);
-    if (change.places === false) setPlacePick(null);
     if (change.base === "streets") setTapAt(null);
     setLayers(change);
   }
@@ -595,9 +631,16 @@ export function CustomerMap({
     [filtered],
   );
   const filterKey = `${needle}|${rep}|${attention}`;
+  /** The last fit key outside Prospects: switching to Prospects keeps the map where it is (no refit, whatever is typed). */
+  const lastFitKey = useRef("");
+  const rememberFit = (key: string) => {
+    lastFitKey.current = key;
+    return key;
+  };
   const paged = useShowMore(list, filterKey, LIST_STEP);
   // Providers are listed A to Z (the server's order), one row per pinned location, whatever the ZIP toggle says.
   const providerPaged = useShowMore(providerMatches, `${show}|${needle}`, LIST_STEP);
+  const prospectPaged = useShowMore(prospectList, `prospects|${needle}|${layers.categories.join(",")}|${prospectList.length}`, LIST_STEP);
   const listKind = show === "both" ? listTab : show === "providers" ? "providers" : "accounts";
 
   const anyFilter = !!needle || !!rep || attention;
@@ -686,7 +729,7 @@ export function CustomerMap({
         : !providerMatches.length
           ? "No service providers match this search."
           : "These service providers only have ZIP area pins, which are hidden. Turn on ZIP Area Pins to see them.";
-  } else if (basePins.length === 0) {
+  } else if (!prospectsMode && basePins.length === 0) {
     mapNote = nothingPinned
       ? "No account has a map pin yet. Import the verified locations file from Customers → Import → Locations."
       : filtered.length === 0
@@ -699,9 +742,14 @@ export function CustomerMap({
   return (
     <div className={TYPE_COLOR_VARS} data-testid="customer-map">
       <ListToolbar>
-        <ToolbarSearch value={q} onChange={setQ} placeholder={show === "providers" ? "Search service providers…" : "Search accounts…"} testId="map-search" />
-        {/* The account filters do nothing to the service providers, so they step aside while only providers show. */}
-        {showAccounts ? (
+        <ToolbarSearch
+          value={q}
+          onChange={setQ}
+          placeholder={show === "providers" ? "Search service providers…" : prospectsMode ? "Search prospects…" : "Search accounts…"}
+          testId="map-search"
+        />
+        {/* The account filters do nothing to the service providers or the prospects, so they step aside there. */}
+        {showAccounts && !prospectsMode ? (
           <>
             <RepFilter value={rep} onChange={pickRep} extraNames={data.reps} className={TOOLBAR_SELECT} />
             <FilterChip selected={attention} onClick={() => setAttention((v) => !v)} data-testid="map-attention">
@@ -709,14 +757,16 @@ export function CustomerMap({
             </FilterChip>
           </>
         ) : null}
-        <FilterChip
-          selected={showApprox}
-          onClick={() => setShowApprox((v) => !v)}
-          title="Accounts and service providers placed only at the center of their ZIP code, drawn as hollow pins"
-          data-testid="map-approx"
-        >
-          ZIP Area Pins
-        </FilterChip>
+        {prospectsMode ? null : (
+          <FilterChip
+            selected={showApprox}
+            onClick={() => setShowApprox((v) => !v)}
+            title="Accounts and service providers placed only at the center of their ZIP code, drawn as hollow pins"
+            data-testid="map-approx"
+          >
+            ZIP Area Pins
+          </FilterChip>
+        )}
       </ListToolbar>
 
       {/* Show comes first so it stays put when Color By steps aside (Service Providers alone have one color). */}
@@ -724,7 +774,7 @@ export function CustomerMap({
         <div className="flex flex-wrap items-center gap-2 max-sm:w-full" role="group" aria-label="Show on the map" data-testid="map-show">
           <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Show</span>
           <div className="flex h-9 rounded-full bg-secondary p-0.5 max-sm:w-full">
-            {SHOW_OPTIONS.map((o) => (
+            {SHOW_OPTIONS.filter((o) => !o.market || market).map((o) => (
               <button
                 key={o.id}
                 type="button"
@@ -742,7 +792,7 @@ export function CustomerMap({
             ))}
           </div>
         </div>
-        {showAccounts ? (
+        {showAccounts && !prospectsMode ? (
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Color by">
             <span className="mr-1 text-xs font-medium text-muted-foreground max-sm:w-full">Color By</span>
             {COLOR_BY.map((c) => (
@@ -753,10 +803,12 @@ export function CustomerMap({
           </div>
         ) : null}
       </div>
+      {prospectsMode ? <PlaceTypeFilter prefs={layers} onChange={changeLayers} /> : null}
       <LayerControls prefs={layers} onChange={changeLayers} market={market} />
 
       {/* Counts and key sit above the map on a wide screen; on a phone the key and the import note move under it. */}
       <div className="mt-4 space-y-2">
+        {prospectsMode ? null : (
         <p className="text-xs text-muted-foreground" data-testid="map-counts">
           {show === "providers" ? (
             providerGeo.isError ? (
@@ -784,24 +836,37 @@ export function CustomerMap({
             </>
           )}
         </p>
-        <MapLegend items={mapLegend} className="hidden lg:flex" />
+        )}
+        {prospectsMode ? null : <MapLegend items={mapLegend} className="hidden lg:flex" />}
         {populationOn ? <PopulationKey /> : null}
         {placesOn ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" data-testid="map-places-summary">
-            {placesQ.status === "ready" || placesQ.status === "loading" ? (
+            {placesQ.status === "ready" ? (
               <>
                 <span className="text-xs font-medium" data-testid="map-prospect-count">
                   {plural(prospectsInView.length, "prospect")} on screen
                   {!layers.hideCustomers && placesInView.length > prospectsInView.length ? (
                     <span className="font-normal text-muted-foreground"> · {plural(placesInView.length - prospectsInView.length, "current account")} in gray</span>
                   ) : null}
+                  <span className="font-normal text-muted-foreground">
+                    {" · "}
+                    <span className="inline-block size-2 rounded-full align-middle" style={{ background: CONTEXT_COLOR }} aria-hidden /> our accounts
+                  </span>
                 </span>
                 <PlacesKey counts={placeCounts} />
-                <DownloadProspects places={prospectsInView} accounts={accountPoints} />
+                <DownloadProspects places={prospectList} accounts={accountPoints} />
               </>
             ) : (
-              <span className="text-xs text-muted-foreground">
-                {!layers.categories.length ? "Pick at least one place type to see prospects." : placesQ.status === "zoom" ? "Zoom in on the map to see prospects (about a city's width or closer)." : null}
+              <span className="text-xs text-muted-foreground" data-testid="map-prospect-status">
+                {!layers.categories.length
+                  ? "Pick at least one type to see prospects."
+                  : placesQ.status === "zoom"
+                    ? "Zoom in on the map to see prospects (about a county or closer)."
+                    : placesQ.status === "loading"
+                      ? "Loading prospects…"
+                      : placesQ.status === "error"
+                        ? (placesQ.error ?? "Prospects could not load.")
+                        : null}
               </span>
             )}
           </div>
@@ -843,7 +908,7 @@ export function CustomerMap({
               const a = byId.get(Number(pin.id));
               if (a) pick(a, false);
             }}
-            fitKey={show === "providers" ? `providers|${needle}|${providerRows ? providerRows.length : "loading"}` : `${filterKey}|${data.accounts.length}`}
+            fitKey={prospectsMode ? lastFitKey.current : rememberFit(show === "providers" ? `providers|${needle}|${providerRows ? providerRows.length : "loading"}` : `${filterKey}|${data.accounts.length}`)}
             fitTo={fitTo}
             fitToOnly
             focus={focus}
@@ -881,7 +946,7 @@ export function CustomerMap({
                     {zipQ.error instanceof Error ? zipQ.error.message : "Population could not load."}
                   </p>
                 ) : null}
-                {placesOn ? <PlacesNote status={placesQ.status} truncated={placesQ.truncated} onRetry={placesQ.retry} /> : null}
+                {placesOn ? <PlacesNote status={placesQ.status} truncated={placesQ.truncated} total={placesQ.total} error={placesQ.error} onRetry={placesQ.retry} /> : null}
               </div>
             ) : null}
             {selectedZip || selectedPlace ? (
@@ -921,7 +986,9 @@ export function CustomerMap({
         <aside
           ref={panelBox}
           className="flex min-w-0 scroll-mt-32 flex-col overflow-hidden rounded-lg border border-border bg-card lg:h-[calc(100vh-14rem)] lg:min-h-[28rem] lg:w-96 lg:shrink-0 lg:scroll-mt-20"
-          aria-label={show === "providers" ? "Service providers on the map" : show === "both" ? "Accounts and service providers on the map" : "Accounts on the map"}
+          aria-label={
+            show === "providers" ? "Service providers on the map" : show === "both" ? "Accounts and service providers on the map" : prospectsMode ? "Prospects on the map" : "Accounts on the map"
+          }
           data-testid="map-panel"
         >
           {selectedZip ? (
@@ -948,11 +1015,22 @@ export function CustomerMap({
             <AccountCard account={selected} type={colorBy === "type" ? accountType(selected) : null} onClose={closeAccount} />
           ) : (
             <p className="border-b border-border px-4 py-3 text-xs text-muted-foreground">
-              {listKind === "providers" ? "Tap a pin or a service provider below to see its details." : "Tap a pin or an account below to see its details."}
+              {prospectsMode
+                ? "Tap a square or a prospect below to see its details."
+                : listKind === "providers"
+                  ? "Tap a pin or a service provider below to see its details."
+                  : "Tap a pin or an account below to see its details."}
             </p>
           )}
 
-          {show === "both" ? (
+          {prospectsMode ? (
+            <div className="flex items-baseline justify-between gap-2 border-b border-border px-4 py-2.5">
+              <h2 className="text-sm font-medium" data-testid="map-prospect-list-count">
+                {placesQ.status === "ready" ? plural(prospectList.length, "prospect") : "Prospects"}
+              </h2>
+              <span className="text-[11px] text-muted-foreground">On screen, nearest the middle first</span>
+            </div>
+          ) : show === "both" ? (
             <div className="flex items-end gap-1 border-b border-border px-2" role="group" aria-label="List" data-testid="map-list-tabs">
               <ListTab selected={listKind === "accounts"} onClick={() => setListTab("accounts")} count={filtered.length} testId="map-list-accounts">
                 Accounts
@@ -976,7 +1054,30 @@ export function CustomerMap({
           )}
 
           <div ref={listPane} className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-            {listKind === "providers" ? (
+            {prospectsMode ? (
+              placesQ.status !== "ready" || !prospectList.length ? (
+                <p className="px-4 py-8 text-center text-sm text-muted-foreground" data-testid="map-prospects-empty">
+                  {placesQ.status === "zoom"
+                    ? "Zoom in on the map to list the prospects there."
+                    : placesQ.status === "loading"
+                      ? "Loading prospects…"
+                      : placesQ.status === "error"
+                        ? (placesQ.error ?? "Prospects could not load.")
+                        : !layers.categories.length
+                          ? "Pick at least one type above."
+                          : needle
+                            ? "No prospects here match this search."
+                            : "No prospects of these types here. Try more types, or move the map."}
+                </p>
+              ) : (
+                <ul data-testid="map-prospect-list">
+                  {prospectPaged.visible.map((p) => (
+                    <ProspectRow key={p.id} place={p} selected={p.id === placePick} onPick={() => pickPlace(p, true)} />
+                  ))}
+                  <ShowMoreButton as="li" remaining={prospectPaged.remaining} onClick={prospectPaged.showMore} label="prospects" />
+                </ul>
+              )
+            ) : listKind === "providers" ? (
               providerGeo.isError ? (
                 <div className="px-4 py-8 text-center text-sm text-muted-foreground" role="alert" data-testid="map-providers-error">
                   <p>Could not load the service providers.</p>
@@ -1108,6 +1209,31 @@ function ProviderRow({ provider: p, selected, onPick }: { provider: ProviderGeo;
           </span>
           <span className="block text-xs break-words text-muted-foreground">{p.address || (p.geocodeAddress ? properCase(p.geocodeAddress) : "No address")}</span>
           {p.dispatchPhone ? <span className="block text-xs text-muted-foreground tabular">{p.dispatchPhone}</span> : null}
+        </span>
+      </button>
+    </li>
+  );
+}
+
+function ProspectRow({ place: p, selected, onPick }: { place: Place; selected: boolean; onPick: () => void }) {
+  const def = PLACE_CATEGORY.get(p.category);
+  const where = [p.street, p.city].filter(Boolean).join(", ");
+  return (
+    <li className="border-b border-border last:border-b-0">
+      <button
+        type="button"
+        onClick={onPick}
+        aria-current={selected ? "true" : undefined}
+        className={cn("desk-flat flex min-h-11 w-full items-start gap-2.5 px-4 py-2.5 text-left hover:bg-muted/60", selected && "bg-muted")}
+        data-testid="map-prospect-row"
+      >
+        <span className="mt-1.5 inline-block size-2.5 shrink-0 rounded-[2px]" style={{ background: def?.color }} aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium break-words">{p.name}</span>
+          <span className="block text-xs break-words text-muted-foreground">
+            {p.kind ?? def?.label}
+            {where ? ` · ${where}` : ""}
+          </span>
         </span>
       </button>
     </li>

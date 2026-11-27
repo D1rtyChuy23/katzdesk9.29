@@ -1,0 +1,113 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+580cef22c530	Daylight Donuts	bakery	donut shop	36.39244	-100.80255	721 S Main St	Perryton	79070	+18064352720	https://www.daylightdonuts.com	Daylight Donuts of Portales	0.95
+31ede8da3152	Sanchez Bakery	bakery		36.39966	-100.80233	21 S Main St	Perryton	79070	+18064355375	http://www.krispykrunchy.com/		0.92
+7f6329cd99d8	Sugar Studio	bakery		36.37025	-100.80013	3010 Garrett Dr	Perryton	79070	+18066482072	https://www.tiktok.com/@sugarstudioperryton?_r=1&_t=ZP-98EN7Ph4kud		0.92
+a427e3beb28a	Booker NightShift LLC	bar		36.46209	-100.54998	14875 Co Rd 30	Booker	79005	+18062286286			0.96
+95dc55d8c31f	El Rodeo De Perryton	bar		36.42096	-100.79055	12275 NE Loop 143	Perryton	79070	+16206553357			0.97
+c5e52c0e2fc5	The spot	bar		36.37655	-100.80105	208 SE 24th Ave	Perryton	79070	+18064354863	http://www.the-smokehouse.com/		0.99
+3ead249f4e7c	Carmex Auto Sales	cardealer		36.38758	-100.80242	1209 S Main St	Perryton	79070	+18064340443	http://www.carmexautosales.net/		0.92
+3f248fa39b1d	Carretas Auto Sales	cardealer		36.39725	-100.80872	305 S Eton St	Perryton	79070	+18062025002			0.92
+b2d2dca5f64c	Chihuahua Auto Sales	cardealer		36.39396	-100.80289	622 S Main St	Perryton	79070	+18064356991	http://Chihuahuaautosales.com/		0.92
+24c021a4f5bf	Hergert Ford Inc.	cardealer	used auto dealer	36.39563	-100.80316	420 S Main St	Perryton	79070	+18064357676	https://www.hergert-ford.com		0.92
+f8180a0ee7f0	Kelly's Muscle Cars	cardealer		36.43296	-100.13792	135 S Young St	Follett	79034	+18066531799	http://kmcars.com/		0.92
+1da3aeb16633	PANHANDLE IMPLEMENT CO., INC.	cardealer		36.40704	-100.80247	710 N Main St	Perryton	79070	+18064356508	http://panhandleimplement.com		0.92
+477f2e8e1504	Booker Grocery Cafe and Catering	coffee		36.45541	-100.53851	1 S Main St	Booker	79005	+18066584816	https://www.thedrycreekranch.com/		0.96
+09f4ff25a0d9	Golden House Cafe	coffee		36.39140	-100.80315	822 S Main St	Perryton	79070	+18066487777			0.95
+019728db048b	Las Sisters Coffee & More	coffee		36.45397	-100.53904	112 S Main St	Booker	79005	+18066502522			0.92
+22f54c951d58	Solid Ground Coffee House	coffee		36.45399	-100.53902	112 S Main St	Booker	79005	+18066589735			0.55
+7932570fa156	State Line Coffee and Cafe llc	coffee		36.11926	-100.02546	100 Commercial St	Higgins	79046	+18068510546	http://statelinecoffeeandcafe.com/		0.92
+dc85768012b7	Frank Phillips College	college		36.37793	-100.81602	2314 S Jefferson St	Perryton	79070	+18066481450	http://www.fpctx.edu/	Frank Phillips College	0.92
+5f9d99dce5a5	Allsup's	convenience		36.39408	-100.81488	601 S Jefferson St	Perryton	79070	+18064354537	https://www.allsups.com/	Allsup’s	0.92
+9ab3c9a13aa8	Allsup's	convenience		36.45527	-100.53772	18 E Industrial Ave	Booker	79005	+18066584875	https://www.allsups.com/	Allsup’s	0.92
+74f93313e19e	Alon Gas Station	convenience		36.40118	-100.80283	19 N Main St	Perryton	79070	+18064359196	http://myalon.com/		0.92
+14396a516ee9	CEFCO Convenience Store	convenience		36.38597	-100.80302	1400 S Main St	Perryton	79070	+18064340047	https://www.cefcostores.com/		0.92
+99aaac11f872	Cenex	convenience		36.36075	-100.80169	4219 S Main St, Perryton, TX 79070					Cenex	0.80
+5b296ffcd10a	Fronk Oil Company, Inc.	convenience		36.46894	-100.53096	14950 TX-23	Booker	79005	+18066584565	http://www.fronkoil.com/		0.97
+cb904fbfa689	GARRISON FOOD MART 5	convenience		36.40114	-100.80334	19 N MAIN ST	Perryton	79070			Conoco	0.80
+96f6f6b693db	IMO's Country Store	convenience		36.45501	-100.53116	506 E Industrial Ave	Booker	79005	+18066584772	https://www.fronkoil.com	Imo's Country Store	0.92
+9bcb293dd90a	Imo's Country Store	convenience		36.37822	-100.80298	2202 S Main St	Perryton	79070	+18064353299	https://www.chamberofcommerce.com/.../25047669-imos-country-store-4		0.95
+ffea6ca92000	Imo's Country Store	convenience		36.43346	-100.14159	102 S Main St	Follett	79034	+18066532023	http://www.fronkoil.com	Imo's Country Store	0.92
+d34166409224	Kent Kwik	convenience		36.37468	-100.80315	2600 S Main St	Perryton	79070	+18064354777	http://www.thekentcompanies.com	Kent Kwik Convenience Stores	0.92
+a9983583faf9	PAK A SAK 2	convenience		36.39126	-100.81014	522 SW 9TH AVE	Perryton	79070			Phillips 66	0.80
+2d1d5a58c520	Pak-A-Sak	convenience		36.39129	-100.81013	522 SW 9th Ave	Perryton	79070	+18064354141	https://pakasak.net/		0.97
+0e1d5c3c0e21	Phillips 66	convenience		36.45513	-100.53786	18 E Industrial Ave	Booker	79005		http://www.phillips66gas.com	Phillips 66 Gas	0.68
+2eca93848c9a	Phillips 66	convenience		36.40120	-100.80282	19 N Main St	Perryton	79070	+18064359196	https://www.phillips66gas.com/		1.00
+c58e6049353b	Phillips 66	convenience		36.39132	-100.81013	572 SW 9th Ave	Perryton	79070	+18064354141	https://www.phillips66gas.com/		0.92
+f152bea7e1d8	Plains Equity Exchange	convenience		36.44316	-100.32634	109 W Santa Fe Ave	Darrouzett	79024	+18066242311	http://www.plainsequity.com		0.92
+5a7904bc8dcf	Toot'n Totum	convenience		36.37634	-100.80177	2401 S Main St	Perryton	79070	+18064253878		Toot'n Totum	0.92
+848bbdd6f038	Uncle's Convenience Store	convenience		36.40135	-100.80297	19 N Main St	Perryton	79070	+18064359196	http://www.alonbrands.com		0.92
+11d672f1676a	Valero	convenience		36.39400	-100.81498	601 S Jefferson St	Perryton	79070	+12103452000	https://www.valero.com		0.65
+4c7e3b705652	Valero	convenience		36.38596	-100.80307	1400 S Main St	Perryton	79070	+12103452000	https://www.valero.com		0.65
+f642bf6e899c	Waterhole 83	convenience		36.37470	-100.80315	2602 S Main St	Perryton	79070	+18064340223			0.92
+eb5cd149652d	Wholesale Fuels, Inc. dba Landers Oil & Propane	convenience		36.12019	-100.02449	3 E Commercial St	Higgins	79046	+18068523901			0.75
+ecb8e5976438	Chema’s Tamales	fastfood		36.40270	-100.79617		Perryton		+18062026002			0.65
+f7dfb8d012f5	Freedom Express	fastfood		36.38104	-100.82536	1922 S Utah St	Perryton	79070	+18064357039			0.56
+047132f46163	Gorditas Lucky	fastfood		36.43559	-100.14150	334 N Main St	Follett	79034				0.86
+360fd04dd766	Krispy Krunchy Chicken	fastfood		36.39972	-100.80238	21 S Main St	Perryton	79070		https://locations.krispykrunchy.com/tx/perryton/21-s-main-st	Krispy Krunchy Chicken	0.92
+727c97ed2b4d	McDonald's	fastfood		36.38852	-100.80244	1109 S Main	Perryton	79070	+18064355502	https://www.mcdonalds.com/us/en-us/location/tx/perryton/1109-s-main/15429.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
+c07ef81335c3	Sonic Drive In	fastfood		36.39265	-100.80298	718 S. Main Street	Perryton	79070	+18064355476	https://locations.sonicdrivein.com/tx/perryton/718-s.-main-street.html	Sonic Drive-In	0.97
+8ff386f56743	Wendy's	fastfood		36.37638	-100.80182	2401 S Main St	Perryton	79070	+18066482980	https://locations.wendys.com/united-states/tx/perryton/2401-south-main-street	Wendy's	0.94
+1de63b500b19	Carniceria Flores	grocery		36.40078	-100.80042	114 E Brillhart Ave	Perryton	79070		https://www.carniceriaflores.com		0.92
+99e18fc17504	Follett Food Market	grocery		36.43087	-100.14185	341 S Main St	Follett	79034	+18066533511			0.92
+8fa1a4607b30	Lowe's Market	grocery		36.39041	-100.80354	912 S Main St	Perryton	79070	+18064355511	http://www.lowesmarket.com/	Lowe's Market	0.92
+50a4090e8d3b	Shameless Snacks	grocery		36.37224	-100.80470	2806 S Main St	Perryton	79070	+18064357158		Shameless Snacks	0.60
+aafe44314da3	United Supermarkets	grocery		36.37214	-100.80492	2806 S Main St	Perryton	79070	+18064357158	https://local.unitedsupermarkets.com/tx/perryton/2806-s-main-st.html	United Supermarkets	0.92
+8d332a111260	Ochiltree General Hospital	hospital		36.36988	-100.79870	3101 Garrett Drive	Perryton	79070	+18064353606	http://www.ochiltreehospital.com/		1.00
+5361e4dba271	77 Textel Llc	hotel		36.37612	-100.80028	210 SE 24th Ave	Perryton	79070				0.65
+1fdfcb04ba15	Baymont by Wyndham Perryton	hotel		36.37478	-100.80227	2601 S Main St	Perryton	79070	+18064341010	https://www.wyndhamhotels.com/baymont/perryton-texas/baymont-inn-and-suites-perryton/overview?CID=LC%3ABU%3A%3AFACEBOOK%3ARIO%3ARegional%3A19218	Baymont by Wyndham	1.00
+d1df185b8f4e	Budget Inn Perryton	hotel	motel	36.40769	-100.80302	711 N Main St	Perryton	79070	+18064356663	http://Budgetinn.com/		0.96
+c2e8852df49a	circle c motel higgins,tx	hotel	motel	36.12266	-100.01842	502 E Commercial St	Higgins	79046	+18068523311	http://circlecmotel.com		0.92
+13b384f80655	Dalhart Bpoe 2390	hotel	lodge	36.40246	-100.81515	122 N Jefferson St	Dalhart	79022	+18062445621	https://www.elks.org/lodges/home.cfm		0.75
+d865031ecf8d	Elks Lodge	hotel	lodge	36.39143	-100.80324	4 SW 9th Ave	Perryton	79070	+18064354625	http://www.elks.org		0.92
+2ab9222d37e8	Holiday Inn Express and Suites Perryton	hotel		36.37331	-100.80238	2723 S Main St	Perryton	79070	+18066486000	https://www.ihg.com/holidayinnexpress/hotels/us/en/perryton/pxtes/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-PXTES	Holiday Inn Express	1.00
+223835bff497	Last Buffalo	hotel	lodge	36.44519	-100.32561	303 Main St	Darrouzett	79024	+18066241701	http://www.thelastbuffalo.com/		0.92
+3d3b10b4cf69	Perryton Hospitality, Inc	hotel		36.37467	-100.80191	2601 S Main St	Perryton	79070				0.95
+d343e1378428	Quality Inn Perryton	hotel		36.36482	-100.80170	3505 S Main St	Perryton	79070	+18062287160	https://www.choicehotels.com/texas/perryton/quality-inn-hotels/txk39?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+a6689ef78eb6	Ranchouse Motel	hotel	motel	36.38480	-100.80252	1513 S Main St	Perryton	79070	+18064355441	https://ranchouse-motel.hub.biz		0.96
+dec98fab8587	Sahara Srl, Inc	hotel		36.36480	-100.80205	3505 S Main St	Perryton	79070				0.95
+876d53bd30cb	Santa Fe Motel	hotel	motel	36.45575	-100.53225	427 E Industrial Ave	Booker	79005	+18064431395	http://santafemotel.com		0.92
+6a2a689b2e74	West Texas Gas Warehouse	office	energy company	36.40125	-100.80289	19 N Main St	Perryton	79070	+18064341671	http://www.westtexasgas.com		0.92
+d4b76232c996	Abolengo Restaurant	restaurant	mexican restaurant	36.40221	-100.79744	402 E Brillhart Ave	Perryton	79070	+18066480415			0.96
+03509f04e2b2	Brokenhorn Steakhouse	restaurant	steakhouse	36.37643	-100.79663	520 SE 24th Ave	Perryton	79070	+18064356523		LongHorn Steakhouse	0.98
+39d36a2de824	Carnitas En Llamas	restaurant	mexican restaurant	36.39386	-100.80817	610 S Drake St	Perryton	79070	+18062023037			0.92
+9a858f6c9299	Chihua's Mexican Restaurant	restaurant	mexican restaurant	36.38471	-100.80299	1518 S Main St	Perryton	79070	+18066484111	http://www.chihuahuamexicanrestaurant.com		0.92
+6f9631ecb09b	China Buffet	restaurant	chinese restaurant	36.37241	-100.80279	2802 S Main St	Perryton	79070	+18064342828	http://www.chinabuffet.net		0.98
+d7a676c7b4a5	Country Gorditas	restaurant	mexican restaurant	36.40493	-100.79264		Perryton		+18064340691	https://country-gorditas.hub.biz/		0.92
+cc12d6b38701	Cowboy Sub Group Llc	restaurant		36.37471	-100.80338	2602 S Main St	Perryton	79070				0.95
+5f953a1d15dd	Daddy's Dogs and More	restaurant	hot dog restaurant	36.37314	-100.80373	14 SW 28th St	Perryton	79070	+18066482015			0.98
+d5ecf4fa65a7	Dixie Dog Drive In	restaurant	theme restaurant	36.38384	-100.80286	1610 S Main St	Perryton	79070	+18064353512	http://dixiedogdrivein.com		0.92
+737a449078a7	El Jacalito	restaurant	mexican restaurant	36.39964	-100.80309	22 S Main St	Perryton	79070	+18062283648			0.92
+1dbc5b88d630	Eskimo Hut - Perryton	restaurant	american restaurant	36.37826	-100.80325	2202 S Main St	Perryton	79070	+18064353299	https://www.eskimohut.com/		0.92
+9f0d1e5f8599	Gorditas Don Chris	restaurant	mexican restaurant	36.40052	-100.79623	5 S Elm St	Perryton	79070	+18066483014	https://gorditas-don-chris.hub.biz/		0.97
+0d21c4017085	Hansen Dairy	restaurant		36.15723	-100.89979	12772 County Road 10	Perryton	79070	+18064340088	http://hansendairy.com/		0.77
+31b9d87eee5e	Haystack Cafe	restaurant	comfort food restaurant	36.12056	-100.02247		Higgins	79046	+18068523215	http://higginsfeedyardcafe.com		0.92
+e572a82be776	Ilusion La Michoacana	restaurant	mexican restaurant	36.39851	-100.80957	210 1/2 S Eton St # 79070-2545	Perryton	79070	+18066481996	http://www.lamichoacanameatmarket.com		0.77
+8c44bb7d5b33	Kellie's Grill	restaurant	burger restaurant	36.23601	-100.27374	205 W Cottonwood St	Lipscomb	79056	+18068510131			0.92
+bafc3b4daa15	La Casita	restaurant	mexican restaurant	36.39759	-100.80648	222 SW 3rd Ave	Perryton	79070	+18064354445	https://www.lacasitaonthecircle.com		0.55
+6f1987998a9b	La Casita Restaurant	restaurant	mexican restaurant	36.38964	-100.79979	1005 S Birch St	Perryton	79070	+18064354445			0.97
+1a311f3b1361	La Cocinita de Tere	restaurant	mexican restaurant	36.40044	-100.81078	2 S Fordham St	Perryton	79070	+18062022119			0.92
+a7dd822d3524	La Mariscada	restaurant	mexican restaurant	36.39606	-100.80288	406 S Main St	Perryton	79070	+18066484946	http://lamichoacanameatmarket.com		0.92
+910dcbe947e5	Las Tortugas	restaurant		36.39661	-100.80307	322 S Main St	Perryton	79070	+18064359818	http://lastortugas.restaurantwebexperts.com		0.55
+964edb1a1b69	Little Caesars Pizza	restaurant	pizza restaurant	36.37319	-100.80420	24 SW 28th St	Perryton	79070	+18066485555	https://littlecaesars.com/en-us/store/11761	Little Caesars	0.96
+c18ebca3956f	Little Rebel Bar & Grill	restaurant		36.12320	-100.02634	406 N Main St	Higgins	79046	+18068523700	http://littlerebelnyc.com		0.92
+438227ae6763	Los Charros Mexican Restaurant	restaurant	mexican restaurant	36.38833	-100.80281	1122 S Main St	Perryton	79070	+18066481551	https://www.loscharrosmexrestaurant.com		0.94
+ebb7d0427c9e	Mad Mermaid	restaurant	mexican restaurant	36.38960	-100.82611	14411 TX-143 Loop	Perryton	79070	+18062288459			0.92
+2e2198b528e4	Margarita's Steakhouse	restaurant	steakhouse	36.36450	-100.80181	3507 S Main St	Perryton	79070	+18066488800	https://www.perryton.com/margaritas/		0.96
+037b93751957	Nana's Cafe	restaurant	comfort food restaurant	36.43352	-100.13795	101 S Young St	Follett	79034	+18066532011	http://www.cafefollett.com/		0.92
+5fa312a2dba6	Ninja Sushi Steak House	restaurant	japanese restaurant	36.39737	-100.80182	14 SE 3rd Ave	Perryton	79070	+18062287965	http://ninjasushisteakhouseperryton.com/		0.98
+238cf0a91afa	Perryton Club Inc	restaurant		36.37641	-100.79673	520 SE 24th Ave	Perryton	79070	+18064356523	https://perryton-club-inc.lany.io		0.99
+047565416e04	Pizza Hut	restaurant	pizza restaurant	36.38114	-100.80309	1902 S Main St	Perryton	79070	+18064354061	https://locations.pizzahut.com/tx/perryton/1902-s-main-street?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=304778	Pizza Hut	0.98
+affa84fde7e6	Poblanos Mexican Restaurant and Buffet	restaurant	mexican restaurant	36.38768	-100.80315	1214 S Main St	Perryton	79070	+18066482120			0.92
+fc2dc5bcc0c0	Sabor MexiCano	restaurant		36.39146	-100.80549	822 S Baylor St	Perryton	79070	+18062288094			0.92
+c189abfbf26a	Smoke House Restaurant	restaurant	barbecue restaurant	36.37666	-100.80099	210 SE 24th Ave	Perryton	79070	+18064354863	http://www.smokehouseperryton.com		0.95
+b9acd7069ceb	Subway	restaurant	sandwich shop	36.37452	-100.80290	2600 S Main St	Perryton	79070	+18066481755	http://www.subway.com/en-us	Subway	0.96
+cdcd1dc80b34	The Dry Creek Ranch	restaurant	steakhouse	36.45133	-100.53876	1 S Main St	Booker	79005	+18066584816	https://www.thedrycreekranch.com/		0.85
+d553d396f5ad	The Dry Creek Ranch	restaurant	steakhouse	36.45522	-100.53841	1 S Main St	Booker	79005	+18066584816	http://www.thedrycreekranch.com		0.92
+b7955574b808	The Lobo Cafe at Wolf Creek	restaurant		36.22764	-100.64822	13560 County Road U	Perryton	79070	+18064354559			0.95
+95e2987c6653	The Longhorn Corner	restaurant	american restaurant	36.44593	-100.32494	326 Main St	Darrouzett	79024				0.61
+047f65ea5637	Turtles Place	restaurant	mexican restaurant	36.39661	-100.80307	322 S Main St	Perryton	79070	+18064359818			0.95
+699aa2884b21	Booker Hospital District Inc	senior	assisted living facility	36.46082	-100.53647	112 Pioneer Dr	Booker	79005	+18066589786	bookerems.com		0.65
+09b3208601cf	Capstone Healthcare of Perryton	senior	retirement home	36.36909	-100.80192	3101 S Main St	Perryton	79070	+18064355403	http://www.capstonehealthcareperryton.com/		0.92
+21e7c1f03f4c	Senior Village Nursing Home	senior	retirement home	36.36920	-100.80190	3101 S Main St	Perryton	79070	+18064355403	http://www.seniorvillagenursinghome.com/		0.82
+2005e1d28f08	The Seasons Assisted Living	senior	retirement home	36.37667	-100.80800	401 SW 24th Ave #401	Perryton	79070	+18066481884	http://www.ochiltreehospital.com		0.92
+9d084cc88e3e	Twin Oaks Manor	senior	retirement home	36.46067	-100.53666	112 Pioneer Dr	Booker	79005	+18066589786	http://amaonline.com		0.92

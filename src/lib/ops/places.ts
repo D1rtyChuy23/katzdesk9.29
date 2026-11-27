@@ -1,8 +1,10 @@
 /**
- * The Map's Places layer (Chuy, 11/26): coffee shops, restaurants, hotels, colleges and other places that could buy
- * coffee or service, from OpenStreetMap, for Admin and Sales. The viewer's browser asks a public Overpass server for the
- * named places in the part of the map on screen; nothing is stored. A place that is already one of our accounts (same
- * name or same street address, close by) is marked so the map can show only prospects. Pure: safe for node --test.
+ * The Map's Prospects (Chuy, 11/26–27): coffee shops, restaurants, hotels, colleges, offices and other places that could
+ * buy coffee or service, for Admin and Sales. They come from the Overture Maps places data (Overture Maps Foundation,
+ * CDLA Permissive 2.0, which includes OpenStreetMap), cut to Texas and the place types below by
+ * scripts/build-places.py into one file per 1° square under src/lib/ops/places-tiles/. The server reads only the
+ * squares on screen (market-api.ts listPlaces). A place that is already one of our accounts (same name, close by) is
+ * marked so the map can show only prospects. Pure: safe for node --test and the screens.
  */
 import { milesBetween, type LatLng } from "./geo.ts";
 import type { Bounds } from "./market-map.ts";
@@ -16,6 +18,8 @@ export type PlaceCategory =
   | "hotel"
   | "college"
   | "hospital"
+  | "office"
+  | "senior"
   | "cinema"
   | "grocery"
   | "convenience"
@@ -27,188 +31,121 @@ type CategoryDef = {
   color: string;
   /** On when the viewer has not chosen yet. */
   initially: boolean;
-  /** OpenStreetMap tags that put a place in this category. */
-  tags: Partial<Record<"amenity" | "shop" | "tourism", readonly string[]>>;
 };
 
-/** In the order the layer lists them. Colors avoid the rep colors' look by drawing places as small squares. */
+/** In the order the filter lists them. Places are drawn as small squares, so these never read as rep colors. */
 export const PLACE_CATEGORIES: readonly CategoryDef[] = [
-  { id: "coffee", label: "Coffee Shops & Cafés", color: "#6f4e37", initially: true, tags: { amenity: ["cafe"], shop: ["coffee"] } },
-  { id: "bakery", label: "Bakeries & Donuts", color: "#c2410c", initially: true, tags: { shop: ["bakery", "pastry"] } },
-  { id: "restaurant", label: "Restaurants", color: "#be123c", initially: true, tags: { amenity: ["restaurant"] } },
-  { id: "hotel", label: "Hotels", color: "#1d4ed8", initially: true, tags: { tourism: ["hotel", "motel"] } },
-  { id: "college", label: "Colleges & Universities", color: "#7e22ce", initially: true, tags: { amenity: ["university", "college"] } },
-  { id: "hospital", label: "Hospitals", color: "#0f766e", initially: false, tags: { amenity: ["hospital"] } },
-  { id: "cinema", label: "Movie Theaters", color: "#a16207", initially: false, tags: { amenity: ["cinema"] } },
-  { id: "bar", label: "Bars", color: "#9d174d", initially: false, tags: { amenity: ["bar", "pub", "biergarten"] } },
-  { id: "fastfood", label: "Fast Food", color: "#b45309", initially: false, tags: { amenity: ["fast_food"] } },
-  { id: "grocery", label: "Grocery Stores", color: "#15803d", initially: false, tags: { shop: ["supermarket"] } },
-  { id: "convenience", label: "Convenience & Gas", color: "#475569", initially: false, tags: { shop: ["convenience"], amenity: ["fuel"] } },
-  { id: "cardealer", label: "Car Dealerships", color: "#334155", initially: false, tags: { shop: ["car"] } },
+  { id: "coffee", label: "Coffee Shops & Cafés", color: "#6f4e37", initially: true },
+  { id: "bakery", label: "Bakeries & Donuts", color: "#c2410c", initially: true },
+  { id: "restaurant", label: "Restaurants", color: "#be123c", initially: true },
+  { id: "hotel", label: "Hotels", color: "#1d4ed8", initially: true },
+  { id: "college", label: "Colleges & Universities", color: "#7e22ce", initially: true },
+  { id: "office", label: "Corporate Offices", color: "#0369a1", initially: false },
+  { id: "senior", label: "Senior Living", color: "#4d7c0f", initially: false },
+  { id: "hospital", label: "Hospitals", color: "#0f766e", initially: false },
+  { id: "cinema", label: "Movie Theaters", color: "#a16207", initially: false },
+  { id: "bar", label: "Bars", color: "#9d174d", initially: false },
+  { id: "fastfood", label: "Fast Food", color: "#b45309", initially: false },
+  { id: "grocery", label: "Grocery Stores", color: "#15803d", initially: false },
+  { id: "convenience", label: "Convenience & Gas", color: "#475569", initially: false },
+  { id: "cardealer", label: "Car Dealerships", color: "#334155", initially: false },
 ];
 
 export const PLACE_CATEGORY = new Map(PLACE_CATEGORIES.map((c) => [c.id, c]));
 export const isPlaceCategory = (v: unknown): v is PlaceCategory => typeof v === "string" && PLACE_CATEGORY.has(v as PlaceCategory);
 export const DEFAULT_PLACE_CATEGORIES: readonly PlaceCategory[] = PLACE_CATEGORIES.filter((c) => c.initially).map((c) => c.id);
 
-/** Places show from this zoom in: about a 20 × 12 mile window on a laptop. Wider, a city has tens of thousands. */
-export const PLACES_MIN_ZOOM = 13;
-/** One request returns at most this many places; more means "zoom in for all of them". */
-export const PLACES_LIMIT = 4000;
+/** Prospects show from this zoom in (about a county). Wider, a city has tens of thousands and the most likely are shown. */
+export const PLACES_MIN_ZOOM = 10;
+/** One answer holds at most this many places, the surest first; more means "zoom in for all of them". */
+export const PLACES_LIMIT = 3000;
 
-export const PLACES_SOURCE = "Places: © OpenStreetMap contributors (ODbL). Not every business is listed, and some listings are out of date.";
-
-/** Public Overpass servers, tried in order (the first is the main one; the others are mirrors when it is busy). */
-export const OVERPASS_SERVERS = ["https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter", "https://overpass.kumi.systems/api/interpreter"] as const;
+export const PLACES_SOURCE =
+  "Places: Overture Maps Foundation (CDLA Permissive 2.0), including © OpenStreetMap contributors. Texas only. Not every business is listed, and some listings are out of date.";
 
 export type Place = {
-  /** OpenStreetMap id, e.g. "node/600491809". */
+  /** Overture's id for the place. */
   id: string;
   name: string;
   category: PlaceCategory;
+  /** What kind of place, in Overture's words ("mexican restaurant", "coffee shop"); null when it says no more than the category. */
+  kind: string | null;
   lat: number;
   lng: number;
-  /** "502 Texas Avenue", when OpenStreetMap has it. */
+  /** "502 Texas Ave", when the data has it. */
   street: string | null;
   city: string | null;
   zip: string | null;
   phone: string | null;
   website: string | null;
-  cuisine: string | null;
   brand: string | null;
-  hours: string | null;
+  /** How sure Overture is the place exists (0–1). */
+  confidence: number;
 };
 
-const CSV_FIELDS = [
-  "::type",
-  "::id",
-  "::lat",
-  "::lon",
-  "name",
-  "amenity",
-  "shop",
-  "tourism",
-  "cuisine",
-  "brand",
-  "addr:housenumber",
-  "addr:street",
-  "addr:city",
-  "addr:postcode",
-  "phone",
-  "contact:phone",
-  "website",
-  "contact:website",
-  "opening_hours",
-] as const;
+// ---------------------------------------------------------------------------------------------------------------------
+// The files: one per 1° square
 
-/** 4 decimals (about 10 m) is plenty for a box edge and keeps the query the same for the same box. */
-const deg = (n: number) => (Math.round(n * 1e4) / 1e4).toFixed(4);
-
-/** The Overpass query for named places of these categories in the box (CSV, so it is small). */
-export function overpassQuery(b: Bounds, categories: readonly PlaceCategory[], limit = PLACES_LIMIT): string {
-  const byKey: Record<string, Set<string>> = {};
-  for (const id of categories) {
-    const def = PLACE_CATEGORY.get(id);
-    if (!def) continue;
-    for (const [key, values] of Object.entries(def.tags)) for (const v of values ?? []) (byKey[key] ??= new Set()).add(v);
-  }
-  const box = `(${deg(b.south)},${deg(b.west)},${deg(b.north)},${deg(b.east)})`;
-  const parts = Object.entries(byKey)
-    .sort(([a], [c]) => a.localeCompare(c))
-    .map(([key, set]) => `nwr["${key}"~"^(${[...set].sort().join("|")})$"]["name"]${box};`);
-  // Donut and coffee chains are often tagged fast food: they count as Bakeries and Coffee (categoryOf), so ask for them
-  // with those, not only when Fast Food is on.
-  if (categories.includes("coffee") || categories.includes("bakery")) parts.push(`nwr["amenity"="fast_food"]["cuisine"~"${FAST_FOOD_TREATS.source}",i]["name"]${box};`);
-  const fields = CSV_FIELDS.map((f) => (f.startsWith("::") ? f : `"${f}"`)).join(",");
-  return `[out:csv(${fields};true;"|")][timeout:25];(${parts.join("")});out center ${limit};`;
+/** "29_-96" for the square from 29°N to 30°N and 96°W to 95°W: the file src/lib/ops/places-tiles/29_-96.tsv. */
+export function placeTileKey(lat: number, lng: number): string {
+  return `${Math.floor(lat)}_${Math.floor(lng)}`;
 }
 
-/** A fast-food cuisine that makes the place a coffee shop or a bakery (the query asks for exactly these). */
-const FAST_FOOD_TREATS = /coffee|donut|bakery|kolache/;
-
-/** Which category a place's tags put it in (the first match in PLACE_CATEGORIES order), or null. */
-export function categoryOf(tags: { amenity?: string | null; shop?: string | null; tourism?: string | null; cuisine?: string | null }): PlaceCategory | null {
-  // A fast-food place that sells coffee or donuts counts as coffee or bakery (a donut shop is a prospect, a burger chain less so).
-  if (tags.amenity === "fast_food" && tags.cuisine && FAST_FOOD_TREATS.test(tags.cuisine.toLowerCase())) {
-    // A donut shop that also lists coffee (most do) is a donut shop.
-    return /donut|bakery|kolache/.test(tags.cuisine.toLowerCase()) ? "bakery" : "coffee";
-  }
-  for (const def of PLACE_CATEGORIES) {
-    for (const [key, values] of Object.entries(def.tags)) {
-      const v = tags[key as "amenity" | "shop" | "tourism"];
-      if (v && values?.includes(v)) return def.id;
+/** Every square a box touches (at most `max`, so a zoomed-out box cannot ask for hundreds). */
+export function placeTilesFor(b: Bounds, max = 30): string[] {
+  const out: string[] = [];
+  for (let la = Math.floor(b.south); la <= Math.floor(b.north); la++) {
+    for (let ln = Math.floor(b.west); ln <= Math.floor(b.east); ln++) {
+      out.push(`${la}_${ln}`);
+      if (out.length >= max) return out;
     }
   }
-  return null;
+  return out;
 }
 
-const blank = (s: string | undefined) => {
+export const PLACE_TILE_COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence"] as const;
+
+const cell = (s: string | undefined) => {
   const t = (s ?? "").trim();
   return t ? t : null;
 };
 
-/** Overpass CSV ("|" separated, header first) into places. Unnamed places, and ones in no category, are skipped. */
-export function parseOverpassCsv(text: string): Place[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (!lines.length) return [];
-  const head = lines[0]!.split("|");
-  const at = (name: string) => head.indexOf(name);
-  const col = {
-    type: at("@type"),
-    id: at("@id"),
-    lat: at("@lat"),
-    lon: at("@lon"),
-    name: at("name"),
-    amenity: at("amenity"),
-    shop: at("shop"),
-    tourism: at("tourism"),
-    cuisine: at("cuisine"),
-    brand: at("brand"),
-    num: at("addr:housenumber"),
-    street: at("addr:street"),
-    city: at("addr:city"),
-    zip: at("addr:postcode"),
-    phone: at("phone"),
-    phone2: at("contact:phone"),
-    web: at("website"),
-    web2: at("contact:website"),
-    hours: at("opening_hours"),
-  };
-  if (col.id < 0 || col.lat < 0 || col.lon < 0 || col.name < 0) return [];
+/** A square's file (tab separated, header first) into places. Rows that do not parse, or name no known type, are skipped. */
+export function parsePlaceTile(text: string): Place[] {
+  const lines = text.split(/\r?\n/);
   const out: Place[] = [];
-  const seen = new Set<string>();
-  for (const line of lines.slice(1)) {
-    const c = line.split("|");
-    const get = (i: number) => (i >= 0 ? blank(c[i]) : null);
-    const name = get(col.name);
-    const lat = Number(get(col.lat));
-    const lng = Number(get(col.lon));
-    if (!name || !Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) continue;
-    const category = categoryOf({ amenity: get(col.amenity), shop: get(col.shop), tourism: get(col.tourism), cuisine: get(col.cuisine) });
-    if (!category) continue;
-    const id = `${get(col.type) ?? "node"}/${get(col.id) ?? ""}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    const num = get(col.num);
-    const street = get(col.street);
-    const zip = get(col.zip)?.match(/\d{5}/)?.[0] ?? null;
+  for (let i = 1; i < lines.length; i++) {
+    const c = lines[i]!.split("\t");
+    if (c.length < PLACE_TILE_COLUMNS.length) continue;
+    const [id, name, category, kind, lat, lng, street, city, zip, phone, website, brand, confidence] = c;
+    const la = Number(lat);
+    const ln = Number(lng);
+    if (!cell(id) || !cell(name) || !isPlaceCategory(category) || !Number.isFinite(la) || !Number.isFinite(ln)) continue;
     out.push({
-      id,
-      name,
+      id: id!,
+      name: name!.trim(),
       category,
-      lat,
-      lng,
-      street: street ? (num ? `${num} ${street}` : street) : null,
-      city: get(col.city),
-      zip,
-      phone: get(col.phone) ?? get(col.phone2),
-      website: get(col.web) ?? get(col.web2),
-      cuisine: get(col.cuisine),
-      brand: get(col.brand),
-      hours: get(col.hours),
+      kind: cell(kind),
+      lat: la,
+      lng: ln,
+      street: cell(street),
+      city: cell(city),
+      zip: cell(zip),
+      phone: cell(phone),
+      website: cell(website),
+      brand: cell(brand),
+      confidence: Number(confidence) || 0,
     });
   }
   return out;
+}
+
+/** The places of these types in the box, the surest first, at most `limit`; and how many there were in all. */
+export function placesIn(all: readonly Place[], b: Bounds, categories: readonly PlaceCategory[], limit = PLACES_LIMIT): { places: Place[]; total: number } {
+  const wanted = new Set(categories);
+  const hits = all.filter((p) => wanted.has(p.category) && p.lat >= b.south && p.lat <= b.north && p.lng >= b.west && p.lng <= b.east);
+  hits.sort((a, c) => c.confidence - a.confidence || a.name.localeCompare(c.name) || a.id.localeCompare(c.id));
+  return { places: hits.slice(0, Math.max(0, limit)), total: hits.length };
 }
 
 /** "502 Texas Avenue, Houston 77002", or null. */
@@ -218,7 +155,7 @@ export function placeAddress(p: Pick<Place, "street" | "city" | "zip">): string 
   return s || null;
 }
 
-/** A website that opens: OpenStreetMap sometimes leaves off the https://. Null for anything that is not a web address. */
+/** A website that opens: listings sometimes leave off the https://. Null for anything that is not a web address. */
 export function websiteUrl(raw: string | null | undefined): string | null {
   const s = String(raw ?? "").trim().split(/[;\s]/)[0] ?? "";
   if (!s) return null;
@@ -230,9 +167,12 @@ export function websiteUrl(raw: string | null | undefined): string | null {
   }
 }
 
-export const osmUrl = (id: string) => `https://www.openstreetmap.org/${id}`;
+/** A web search for the place by name and address: the quickest way to its hours, menu and who runs it. */
+export function searchUrl(p: Pick<Place, "name" | "street" | "city" | "zip">): string {
+  return `https://www.google.com/search?q=${encodeURIComponent([p.name, p.street, p.city, p.zip].filter(Boolean).join(" "))}`;
+}
 
-/** A U.S. number as "(713) 227-1392" (OpenStreetMap writes "+1-713-227-1392"); anything else as it was listed. */
+/** A U.S. number as "(713) 227-1392" (listings write "+17132271392" or "+1-713-227-1392"); anything else as it was listed. */
 export function formatPhone(raw: string | null | undefined): string | null {
   const s = String(raw ?? "").split(";")[0]!.trim();
   if (!s) return null;
@@ -395,47 +335,6 @@ export function padBounds(b: Bounds, share = 0.25, snap = 0.01): Bounds {
   };
 }
 
-export const containsBounds = (outer: Bounds, inner: Bounds) =>
-  inner.south >= outer.south && inner.north <= outer.north && inner.west >= outer.west && inner.east <= outer.east;
-
-export type PlaceFetch = { bounds: Bounds; categories: readonly PlaceCategory[] };
-
-/** The categories still to ask for in `view`: those no earlier answer covers for the whole box. */
-export function missingCategories(view: Bounds, wanted: readonly PlaceCategory[], done: readonly PlaceFetch[]): PlaceCategory[] {
-  return wanted.filter((c) => !done.some((f) => f.categories.includes(c) && containsBounds(f.bounds, view)));
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-// Kept in the browser: the public servers can take a minute when busy, so an answer is reused for a week
-
-export type CachedFetch = PlaceFetch & { at: number; places: Place[] };
-export const PLACE_CACHE_DAYS = 7;
-export const PLACE_CACHE_MAX = 25;
-
-/** Saved answers that still count: well formed and under a week old, newest last, at most PLACE_CACHE_MAX. */
-export function readPlaceCache(raw: string | null, now: number): CachedFetch[] {
-  let v: unknown;
-  try {
-    v = raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-  if (!Array.isArray(v)) return [];
-  const fresh = v.filter(
-    (e): e is CachedFetch =>
-      !!e &&
-      typeof e === "object" &&
-      typeof (e as CachedFetch).at === "number" &&
-      now - (e as CachedFetch).at < PLACE_CACHE_DAYS * 86_400_000 &&
-      Array.isArray((e as CachedFetch).places) &&
-      Array.isArray((e as CachedFetch).categories) &&
-      (e as CachedFetch).categories.every(isPlaceCategory) &&
-      !!(e as CachedFetch).bounds &&
-      ["south", "west", "north", "east"].every((k) => typeof (e as CachedFetch).bounds[k as keyof Bounds] === "number"),
-  );
-  return fresh.slice(-PLACE_CACHE_MAX);
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 // The prospect list
 
@@ -452,7 +351,7 @@ export const PROSPECT_COLUMNS = [
   "Nearest Account",
   "Miles Away",
   "Nearest Rep",
-  "OpenStreetMap",
+  "Web Search",
 ] as const;
 
 /**
@@ -477,7 +376,7 @@ export function prospectRows(places: readonly Place[], accounts: readonly Accoun
       n?.account.name ?? "",
       n ? n.miles.toFixed(1) : "",
       r?.account.rep ?? "",
-      osmUrl(p.id),
+      searchUrl(p),
     ];
   });
 }

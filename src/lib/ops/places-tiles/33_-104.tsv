@@ -1,0 +1,4 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+0d7a4138d100	Bronco Crossing Country Store	convenience		33.25676	-103.05912	Hwy 380	Plains	79355				0.59
+a7b6059c3e91	Baylor Scott & White Medical Center - McKinney	hospital		33.25701	-103.29646	5252 W University Dr, Highway 380 at Lake Forest Dr	Mckinney	75071	+14697641000	https://www.bswhealth.com/locations/hospital/mckinney?utm_source=pg-bing&utm_medium=organic&utm_campaign=pg-listings		0.85
+29cbab210b52	Patio barbecue lounge	restaurant	barbecue restaurant	33.61950	-103.02083	2392 Henery Street	Bledsoe	79314	+12143921063	https://patiobarbecuelounge.blogspot.com/		0.74

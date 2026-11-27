@@ -12,7 +12,7 @@ process.env.DATABASE_URL ||= "postgres://127.0.0.1:9/katzdesk-test-unused";
 const market = await import("../src/lib/ops/market-map.ts");
 const places = await import("../src/lib/ops/places.ts");
 const elevation = await import("../src/lib/ops/elevation.ts");
-const { listZipStatsFor, canUseMarketLayers, MARKET_REFUSAL } = await import("../src/lib/ops/market-api.ts");
+const { listZipStatsFor, listPlacesFor, canUseMarketLayers, MARKET_REFUSAL } = await import("../src/lib/ops/market-api.ts");
 
 const ZIP_FILE = readFileSync(new URL("../src/lib/ops/census/zip-stats.txt", import.meta.url), "utf8");
 const HOUSTON = { south: 29.6, west: -95.6, north: 29.9, east: -95.2 };
@@ -83,54 +83,6 @@ test("only Admin (or the owner flag) and Sales get the ZIP figures", async () =>
   await assert.rejects(listZipStatsFor(sql, "u-sales", { south: 31, west: -95, north: 30, east: -94 }, all), /could not be read/);
 });
 
-test("the Overpass query asks only for named places of the picked types in the box", () => {
-  const q = places.overpassQuery({ south: 29.74, west: -95.4, north: 29.77, east: -95.36 }, ["coffee", "hotel", "restaurant"], 4000);
-  assert.match(q, /^\[out:csv\(/);
-  assert.match(q, /nwr\["amenity"~"\^\(cafe\|restaurant\)\$"\]\["name"\]\(29\.7400,-95\.4000,29\.7700,-95\.3600\);/);
-  assert.match(q, /nwr\["shop"~"\^\(coffee\)\$"\]/);
-  assert.match(q, /nwr\["tourism"~"\^\(hotel\|motel\)\$"\]/);
-  assert.match(q, /out center 4000;$/);
-  assert.doesNotMatch(q, /hospital|supermarket/);
-});
-
-const CSV = [
-  "@type|@id|@lat|@lon|name|amenity|shop|tourism|cuisine|brand|addr:housenumber|addr:street|addr:city|addr:postcode|phone|contact:phone|website|contact:website|opening_hours",
-  "node|1|29.7626|-95.3673|Bean There Cafe|cafe|||coffee_shop||502|Texas Avenue|Houston|77002|+1-713-555-0101||beanthere.example||Mo-Fr 07:00-15:00",
-  "way|2|29.7600|-95.3600|Lone Star Kolaches|fast_food|||kolache;donut|||||77003-1111||+1 713 555 0102||https://kolache.example|",
-  "node|3|29.7500|-95.3700|Morning Glory Donuts|fast_food|||burger||||||||||",
-  "node|4|29.7550|-95.3650||cafe|||||||||||||",
-  "relation|5|29.7210|-95.3430|Example University|university||||||||||||||",
-  "node|6|29.7400|-95.3800|Shiny Car Lot||car||||||||||||",
-  "node|7|29.7300|-95.3900|Some Office|||||||||||||||",
-  "node|1|29.7626|-95.3673|Bean There Cafe|cafe|||||||||||||",
-].join("\n");
-
-test("Overpass CSV into places: named, in a category, once each, with tidy fields", () => {
-  const rows = places.parseOverpassCsv(CSV);
-  assert.deepEqual(
-    rows.map((p) => [p.id, p.category]),
-    [
-      ["node/1", "coffee"],
-      ["way/2", "bakery"],
-      ["node/3", "fastfood"],
-      ["relation/5", "college"],
-      ["node/6", "cardealer"],
-    ],
-    "unnamed (4) and uncategorized (7) are skipped, the repeat of 1 too; a kolache place is a bakery; a burger place is fast food",
-  );
-  const bean = rows[0];
-  assert.equal(bean.street, "502 Texas Avenue");
-  assert.equal(places.placeAddress(bean), "502 Texas Avenue, Houston 77002");
-  assert.equal(bean.phone, "+1-713-555-0101");
-  assert.equal(places.websiteUrl(bean.website), "https://beanthere.example");
-  assert.equal(rows[1].phone, "+1 713 555 0102", "contact:phone is used when phone is empty");
-  assert.equal(rows[1].zip, "77003");
-  assert.equal(places.websiteUrl("javascript:alert(1)"), null);
-  assert.equal(places.websiteUrl("ftp://x.example"), null);
-  assert.deepEqual(places.parseOverpassCsv("<html>busy</html>"), []);
-  assert.equal(places.osmUrl("way/2"), "https://www.openstreetmap.org/way/2");
-});
-
 test("a place that is already an account: same name close by, or the same street address", () => {
   const accounts = [
     { id: 10, name: "Bean There Coffee Co.", lat: 29.7627, lng: -95.3675, address: "500 Texas Ave, Houston, TX 77002", rep: "Rosa" },
@@ -157,17 +109,6 @@ test("a place that is already an account: same name close by, or the same street
   assert.equal(near.account.id, 10, "the nearest account with a rep (11 is nearer to some places but has none)");
 });
 
-test("which part of the map still needs asking for; the box grows and snaps", () => {
-  const view = { south: 29.75, west: -95.4, north: 29.77, east: -95.36 };
-  const box = places.padBounds(view);
-  assert.ok(box.south < view.south && box.north > view.north && box.west < view.west && box.east > view.east);
-  assert.ok([box.south, box.west, box.north, box.east].every((v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6), "on a 0.01° grid");
-  const done = [{ bounds: box, categories: ["coffee", "hotel"] }];
-  assert.deepEqual(places.missingCategories(view, ["coffee", "hotel"], done), []);
-  assert.deepEqual(places.missingCategories(view, ["coffee", "college"], done), ["college"], "a newly picked type");
-  assert.deepEqual(places.missingCategories({ ...view, east: -95.0 }, ["coffee"], done), ["coffee"], "a part not seen yet");
-});
-
 test("the prospect list: one row per place with the nearest account and the nearest rep; tidy phone numbers", () => {
   const p = { id: "node/9", name: "=Cafe Formula", category: "coffee", lat: 29.1, lng: -95.1, street: "1 A St", city: "Houston", zip: "77002", phone: "+1-713-555-0101", website: "x.example" };
   const accounts = [
@@ -175,7 +116,7 @@ test("the prospect list: one row per place with the nearest account and the near
     { id: 2, name: "Up The Road", lat: 29.13, lng: -95.1, address: null, rep: "Rosa" },
   ];
   const rows = places.prospectRows([p], accounts);
-  assert.deepEqual(rows[0], ["=Cafe Formula", "Coffee Shops & Cafés", "1 A St", "Houston", "77002", "(713) 555-0101", "https://x.example", "29.100000", "-95.100000", "Next Door", "0.0", "Rosa", "https://www.openstreetmap.org/node/9"]);
+  assert.deepEqual(rows[0], ["=Cafe Formula", "Coffee Shops & Cafés", "1 A St", "Houston", "77002", "(713) 555-0101", "https://x.example", "29.100000", "-95.100000", "Next Door", "0.0", "Rosa", "https://www.google.com/search?q=%3DCafe%20Formula%201%20A%20St%20Houston%2077002"]);
   assert.equal(rows[0].length, places.PROSPECT_COLUMNS.length);
   assert.deepEqual(places.prospectRows([p], [])[0].slice(9, 12), ["", "", ""], "no accounts at all");
   assert.equal(places.formatPhone("+1 832-618-1149"), "(832) 618-1149");
@@ -197,45 +138,7 @@ test("elevation: the right tile and pixel, and terrarium heights", () => {
   assert.equal(elevation.terrariumUrl(13, 1925, 3386), "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/13/1925/3386.png");
 });
 
-test("the place types: unique ids, the five starting ones, and every tag points back to its type", () => {
-  const ids = places.PLACE_CATEGORIES.map((c) => c.id);
-  assert.equal(new Set(ids).size, ids.length);
-  assert.deepEqual(places.DEFAULT_PLACE_CATEGORIES, ["coffee", "bakery", "restaurant", "hotel", "college"]);
-  for (const c of places.PLACE_CATEGORIES) {
-    for (const [key, values] of Object.entries(c.tags)) for (const v of values) assert.equal(places.categoryOf({ [key]: v }), c.id, `${key}=${v}`);
-  }
-});
-
-test("saved place answers: a week at most, well formed only, newest kept", () => {
-  const now = Date.UTC(2026, 10, 26);
-  const day = 86_400_000;
-  const entry = (at, extra = {}) => ({ bounds: { south: 29, west: -96, north: 30, east: -95 }, categories: ["coffee"], at, places: [], ...extra });
-  const raw = JSON.stringify([
-    entry(now - 8 * day),
-    entry(now - 2 * day),
-    entry(now - day, { categories: ["not-a-type"] }),
-    entry(now - day, { bounds: { south: 29 } }),
-    { junk: true },
-    entry(now - 1000),
-  ]);
-  assert.deepEqual(places.readPlaceCache(raw, now).map((e) => e.at), [now - 2 * day, now - 1000]);
-  assert.deepEqual(places.readPlaceCache("not json", now), []);
-  assert.deepEqual(places.readPlaceCache(null, now), []);
-  const many = JSON.stringify(Array.from({ length: 40 }, (_, i) => entry(now - 40 + i)));
-  const kept = places.readPlaceCache(many, now);
-  assert.equal(kept.length, places.PLACE_CACHE_MAX);
-  assert.equal(kept.at(-1).at, now - 1, "the newest are kept");
-});
-
-test("a restaurant that also lists coffee stays a restaurant; a fast-food coffee or donut place does not", () => {
-  assert.equal(places.categoryOf({ amenity: "restaurant", cuisine: "french;coffee_shop" }), "restaurant");
-  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "coffee_shop" }), "coffee");
-  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "donut" }), "bakery");
-  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "burger" }), "fastfood");
-  assert.equal(places.categoryOf({ amenity: "bench" }), null);
-});
-
-test("review follow-ups: tenants of one address, one-word names, donut and coffee fast food, spreadsheet text", async () => {
+test("review follow-ups: tenants of one address, one-word names, spreadsheet text", async () => {
   // Fable review 11/26: a strip center's account must not hide its neighbors.
   const center = [{ id: 20, name: "Nobu", lat: 29.7383, lng: -95.4630, address: "5085 Westheimer Rd Ste 100, Houston, TX 77056", rep: "Rosa" }];
   const tenants = [
@@ -251,12 +154,6 @@ test("review follow-ups: tenants of one address, one-word names, donut and coffe
   assert.equal(places.sameName("Hilton Houston", "Hilton Garden Inn Houston"), false);
   assert.equal(places.sameName("Starbucks", "Starbucks - Heights Blvd"), true);
   assert.equal(places.sameName("Black Rock - Pearland", "Black Rock Coffee Bar"), true);
-  // The query asks for what categoryOf files under Coffee and Bakeries.
-  const q = places.overpassQuery({ south: 29, west: -96, north: 30, east: -95 }, ["bakery"]);
-  assert.match(q, /nwr\["amenity"="fast_food"\]\["cuisine"~"coffee\|donut\|bakery\|kolache",i\]\["name"\]/);
-  assert.doesNotMatch(places.overpassQuery({ south: 29, west: -96, north: 30, east: -95 }, ["hotel"]), /fast_food/);
-  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "donut;coffee_shop" }), "bakery", "a donut shop that sells coffee");
-  assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "coffee_shop;breakfast" }), "coffee");
   // Formula-looking names stay text in the download.
   const row = places.prospectRows([{ id: "node/1", name: "-2+HYPERLINK(\"x\")", category: "coffee", lat: 29, lng: -95, street: "\t=1+1", city: "Houston", zip: null, phone: null, website: null }], [])[0];
   const { toCsv } = await import("../src/lib/ops/customer-export.ts");
@@ -283,4 +180,95 @@ test("ZIP requests by zoom: fewer circles and a coarser box zoomed out; the serv
   assert.equal(r.zips.length, 600);
   assert.equal(r.truncated, true);
   assert.equal((await listZipStatsFor(sql, "u-sales", texas, all, 99_999)).zips.length, market.ZIP_LIMIT, "capped");
+});
+
+// ---- Prospects from the bundled Overture files (11/27)
+
+const TILE_DIR = new URL("../src/lib/ops/places-tiles/", import.meta.url);
+const tileFiles = readdirSync(TILE_DIR).filter((n) => n.endsWith(".tsv"));
+const readTile = async (key) => {
+  try {
+    return places.parsePlaceTile(readFileSync(new URL(`${key}.tsv`, TILE_DIR), "utf8"));
+  } catch {
+    return [];
+  }
+};
+
+test("a place file: header, one place per line; a row with no name, an unknown type or bad numbers is skipped", () => {
+  const head = places.PLACE_TILE_COLUMNS.join("\t");
+  const text = [
+    head,
+    "abc123\tBean There\tcoffee\tcoffee roastery\t29.76263\t-95.36730\t502 Texas Ave\tHouston\t77002\t+17135550101\tbeanthere.example\t\t0.97",
+    "abc124\t\tcoffee\t\t29.7\t-95.3\t\t\t\t\t\t\t0.9",
+    "abc125\tMystery\tspaceport\t\t29.7\t-95.3\t\t\t\t\t\t\t0.9",
+    "abc126\tNo Spot\tbar\t\tnorth\t-95.3\t\t\t\t\t\t\t0.9",
+    "short\trow",
+  ].join("\n");
+  const rows = places.parsePlaceTile(text);
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0], {
+    id: "abc123", name: "Bean There", category: "coffee", kind: "coffee roastery", lat: 29.76263, lng: -95.3673, street: "502 Texas Ave",
+    city: "Houston", zip: "77002", phone: "+17135550101", website: "beanthere.example", brand: null, confidence: 0.97,
+  });
+  assert.equal(places.formatPhone(rows[0].phone), "(713) 555-0101");
+});
+
+test("squares and boxes: the files a box needs, and the places in it, surest first, capped", () => {
+  assert.equal(places.placeTileKey(29.76, -95.37), "29_-96");
+  assert.equal(places.placeTileKey(30, -95), "30_-95");
+  assert.deepEqual(places.placeTilesFor({ south: 29.5, west: -95.5, north: 30.2, east: -94.8 }), ["29_-96", "29_-95", "30_-96", "30_-95"]);
+  assert.equal(places.placeTilesFor({ south: 25, west: -107, north: 37, east: -93 }).length, 30, "a whole-state box is capped");
+  const mk = (id, category, lat, confidence) => ({ id, name: id, category, kind: null, lat, lng: -95.4, street: null, city: null, zip: null, phone: null, website: null, brand: null, confidence });
+  const all = [mk("a", "coffee", 29.7, 0.6), mk("b", "coffee", 29.71, 0.99), mk("c", "hotel", 29.72, 0.9), mk("d", "coffee", 31, 0.99)];
+  const r = places.placesIn(all, { south: 29.6, west: -95.5, north: 29.8, east: -95.3 }, ["coffee"], 1);
+  assert.deepEqual([r.places.map((p) => p.id), r.total], [["b"], 2], "the surest coffee shop in the box; the hotel and the far one left out");
+});
+
+test("the bundled files: every row parses, ids are unique, every place sits in its own square in Texas, every type has places", () => {
+  assert.ok(tileFiles.length > 50, `${tileFiles.length} files`);
+  const ids = new Set();
+  const byType = new Map();
+  let total = 0;
+  for (const f of tileFiles) {
+    const text = readFileSync(new URL(f, TILE_DIR), "utf8");
+    assert.equal(text.split("\n")[0], places.PLACE_TILE_COLUMNS.join("\t"), f);
+    const lines = text.split("\n").filter(Boolean).length - 1;
+    const rows = places.parsePlaceTile(text);
+    assert.equal(rows.length, lines, `${f}: every line is a place`);
+    const key = f.replace(/\.tsv$/, "");
+    for (const p of rows) {
+      assert.equal(places.placeTileKey(p.lat, p.lng), key, `${p.id} sits in ${key}`);
+      assert.ok(p.lat > 25.8 && p.lat < 36.6 && p.lng > -106.7 && p.lng < -93.4, `${p.id} in Texas`);
+      assert.ok(!ids.has(p.id), `${p.id} once`);
+      ids.add(p.id);
+      byType.set(p.category, (byType.get(p.category) ?? 0) + 1);
+      assert.ok(p.confidence >= 0.55 && p.confidence <= 1);
+      assert.ok(!/\t|\n/.test(p.name));
+    }
+    total += rows.length;
+  }
+  assert.ok(total > 150_000, `${total} places`);
+  for (const c of places.PLACE_CATEGORIES) assert.ok((byType.get(c.id) ?? 0) > 100, `${c.label}: ${byType.get(c.id) ?? 0}`);
+});
+
+test("prospects come from our server, for Admin and Sales only, and downtown Houston has coffee shops and hotels", async () => {
+  const pg = new PGlite();
+  const MIGRATIONS = new URL("../migrations/", import.meta.url);
+  for (const name of readdirSync(MIGRATIONS).filter((n) => n.endsWith(".sql")).sort()) await pg.exec(readFileSync(new URL(name, MIGRATIONS), "utf8"));
+  await pg.query(
+    `insert into desk_accounts (user_id, username, approved, is_admin, desk_role) values
+      ('u-owner', 'chuy', true, true, null), ('u-sales', 'sam', true, false, 'sales'), ('u-tech', 'tom', true, false, 'service')`,
+  );
+  const sql = Object.assign(async () => [], { query: async (text, params) => (await pg.query(text, params)).rows });
+  const downtown = { south: 29.745, west: -95.38, north: 29.77, east: -95.355 };
+  const r = await listPlacesFor(sql, "u-sales", { ...downtown, categories: ["coffee", "hotel"] }, readTile);
+  assert.ok(r.places.length > 20, `${r.places.length} coffee shops and hotels downtown`);
+  assert.ok(r.places.every((p) => (p.category === "coffee" || p.category === "hotel") && market.inBounds(p, downtown)));
+  assert.match(r.source, /Overture/);
+  const capped = await listPlacesFor(sql, "u-owner", { south: 29.5, west: -95.8, north: 30.1, east: -95.0, categories: ["restaurant"], limit: 50 }, readTile);
+  assert.deepEqual([capped.places.length, capped.truncated], [50, true]);
+  assert.ok(capped.total > 1000);
+  assert.deepEqual((await listPlacesFor(sql, "u-sales", { ...downtown, categories: ["not-a-type"] }, readTile)).places, []);
+  await assert.rejects(listPlacesFor(sql, "u-tech", { ...downtown, categories: ["coffee"] }, readTile), new RegExp(MARKET_REFUSAL));
+  await assert.rejects(listPlacesFor(sql, "u-sales", { south: 31, west: -95, north: 30, east: -94, categories: ["coffee"] }, readTile), /could not be read/);
 });

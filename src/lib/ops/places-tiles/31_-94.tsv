@@ -1,0 +1,92 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+baf15969ea92	Best Donuts	bakery	donut shop	31.34450	-93.84657	220 TX-87	Hemphill	75948	+14097874979			0.96
+09eeef58b3c7	Cafe in the Pines Bakery	bakery		31.34782	-93.83955		Hemphill		+14097872738			0.88
+c41bc2f0b993	Cafe in the Pines Bakery	bakery		31.34220	-93.84882		Hemphill					0.97
+31997b31ed67	Deedee Donuts	bakery	donut shop	31.24817	-93.98600	102 US-96	Pineland	75968	+14095843545	http://deedee-donuts.jany.io		0.96
+0bfcfdca1375	Pineywoods Pie Co	bakery		31.34988	-93.83744	730 Sabine St	Hemphill	75948				0.96
+39c6203250e9	Black Sheep Saloon	bar		31.14237	-93.98575	15590 US Highway 96 N	Brookeland	75931	+14096983300	http://black-sheep-saloon.poi.place		0.96
+5f4e7fc108e3	Pineywoods Vineyard Winery & Tasting Room	bar	winery	31.34176	-93.84879	101 N Oak St	Hemphill	75948	+14095251454	http://PineywoodsVineyard.com/		0.95
+a9840f799f36	Polar Bear Daiquiri's To Go - Brookeland, TX	bar		31.14435	-93.98469	15698 US Highway 96 N	Brookeland	75931	+14096989955			0.92
+b47639a2646c	Shelly’s Hideaway	bar		31.00654	-93.98154	5996 US Highway 96 N	Jasper	75951	+14092941222			0.70
+ee76f31a525a	Small Town Pool Hall	bar		31.25670	-93.98786	679 US Highway 96 N	Pineland	75968	+14095841559			0.97
+fb5f715ecdd0	Small Town Pool Hall	bar		31.25711	-93.98813	679 US Highway 96 N	Pineland	75968	+14095841559			0.96
+a11d188e5c38	Tebo Creek Winery	bar	winery	31.34501	-93.84494	350 Sabine St	Hemphill	75948				0.95
+704516d4c32a	The Speakeasy Lounge	bar	cocktail bar	31.34093	-93.85270	170 Ironwood	Hemphill	75948	+14097874115			0.92
+b3d8df3d152d	Beall's Auto Sales	cardealer		31.34790	-93.84070		Hemphill		+14097873859			0.92
+40cca760353b	Frontier Nutrition 360 Frontier Drive, Hemphill, Tx	coffee	bubble tea shop	31.45422	-93.76749	360 Frontier Dr	Hemphill	75948				0.72
+bbec00c41e46	K&B's Cafe	coffee		31.25738	-93.97209	601 N Temple Ave	Pineland	75968	+14095842854			0.77
+f2d9a51c97f6	Lolliz Place	coffee		31.25098	-93.97698	121 Timberland Hwy	Pineland	75968	+19362016049	http://lollizplace.com/		0.92
+3aca76e294b6	Sabean's Coffee & Creamery	coffee		31.34202	-93.84898	105 N Oak St	Hemphill	75948	+14097871007	http://www.sabeanscoffeeandcreamery.com/		0.94
+a120cbd50d79	Sportsman's Marina & Cafe	coffee		31.24583	-93.77082	9846 State Highway 87 S	Hemphill	75948	+14095793292	https://mooragemarket.com/moorage/9995/sportsmans_marina_and_cafe		0.59
+43d76d5075f2	United Coffee	coffee		31.34166	-93.86154	1130 Worth St	Hemphill	75948	+14097870070	http://serenitybooksandcoffee.com/		0.99
+34ad250755e2	Whole Hearted Nutrition	coffee		31.34599	-93.84348	390 Sabine St	Hemphill	75948				0.92
+14256b851437	Big Daddy's	convenience		31.44935	-93.76498	5408 State Highway 21 E	Hemphill	75948	+14096251767	http://www.bigdaddypumps.com		0.92
+c1956625c3f4	Bigs 3834	convenience		31.44915	-93.76483	5408 Highway 21 E	Hemphill	75948	+14096251767			0.95
+68b3b06c827a	Brookeland Country Mart	convenience		31.11312	-93.98981	13442 US-96	Brookeland	75931	+14096982541	https://brookeland-country-mart-tx.hub.biz/		0.92
+5edba1dee2de	Brookeland Fuel Stop	convenience		31.14440	-93.98521	15635 US HIGHWAY 96 N	Brookeland	75931		https://locations.valero.com/en-us/LocationDetails/Index/15635-US-HIGHWAY-96-N/0000028082	Valero	0.80
+2da17e80c672	Brookshire Brothers Express	convenience		31.25000	-93.98630	103 U.S. Hwy 96 N	Pineland	75968	+14095842232	https://www.brookshirebrothers.com/store-location/store-58	Brookshire Brothers	1.00
+393906cf5674	Conoco	convenience		31.25068	-93.78189	Hwy 87 S	Hemphill	75948	+14097872411	https://www.conoco.com/	Conoco	0.63
+5b2c5503bde3	Fairmount General Store	convenience		31.21361	-93.70167	2419 Fairdale Rd	Hemphill	75948	+14095799080	http://www.fairmountgeneralstore.com/		0.92
+c10d3788e4e9	Hemphill Express Mart	convenience		31.44930	-93.76501	5408 STATE HIGHWAY 21 E	Hemphill	75948		https://locations.valero.com/en-us/LocationDetails/Index/5408-STATE-HIGHWAY-21-E/0000032753	Valero	0.80
+63dbca72b4a4	Hemphill Fuel Stop	convenience		31.34884	-93.83947	643 Sabine St	Hemphill	75948	+14097874700			0.92
+a888db98e2ec	Pineland Travel Center	convenience		31.24650	-93.98551	212 US Hwy 96 N	Pineland	75968		https://locations.valero.com/en-us/LocationDetails/Index/212-US-HWY-96-N/0000029137	Valero	0.86
+4af656cd7287	Pleasure Bend General Store	convenience		31.21445	-93.69897	113 Pleasure Bend Rd	Hemphill	75948	+14095792203	https://pleasure-bend-general-store.hub.biz		0.92
+a2b39ce8439f	Quick Way Brookeland	convenience		31.14109	-93.98734	15365 US Highway 96 N	Brookeland	75931				0.58
+14abe064d8aa	South Lake Food Mart	convenience		31.19661	-93.73297	south, 14763 TX-87	Hemphill	75948	+14095793335			0.92
+1ce50faa09bb	Terrill Petroleum	convenience		31.34642	-93.84058	201 Rash St	Hemphill	75948	+14097873376			0.65
+e57e8b849315	The Trading Post	convenience		31.16337	-93.57098	13816 FM-692	Burkeville	75932	+14095654561	http://Facebook.com/Thetradingpost		0.88
+d72936251127	Trails End Grocery	convenience		31.76251	-93.86846	5437 FM3172	Huxley	75973	+19363687171	http://www.trailsendgrocery.com/		0.95
+bdc2dcb2d6c8	Valero	convenience		31.14390	-93.98547	15635 US Highway 96 N	Brookeland	75931	+14096989702	https://www.valero.com		0.65
+885994a2c032	Dairy Queen	fastfood		31.24867	-93.98573	100 U S 96	Pineland	75968	+14095842123	http://www.dqtexas.com/		0.97
+62d682d5c314	Brookshire Brothers	grocery		31.34292	-93.84706	245 E Main St	Hemphill	75948	+14097872611	https://www.brookshirebrothers.com/store-location/store-20	Brookshire Brothers	0.92
+b9ef107abb06	Country Corner	grocery		31.00163	-93.66456	483 State Highway 63 E	Burkeville	75932	+14095652050	http://www.countrycornerguthrie.com		0.55
+e01ac6ef1b7f	Sno-Conez	grocery		31.24798	-93.98709	158 S US Highway 96	Pineland	75968	+14095842306	http://www.pcsolutionzetc.com/snoconez.html		0.66
+fcc470efee2b	East Texas Extended Care	hospital		31.25098	-93.97697	105 W Timberland Hwy	Pineland	75968	+14095841981	http://texasquickcare.com		0.62
+eb5575123624	Sabine County Hospital	hospital		31.33383	-93.86285	2301 Worth St	Hemphill	75948	+14097873300	https://sabinecountyhospital.com		0.92
+6545eb774c52	Captain's Fishing Resort	hotel	resort	31.52725	-93.79116	3775 Carters Ferry Rd E	Milam	75959	+14099990949			0.55
+1e4ae872d26a	Cooper's Cabin	hotel		31.25127	-93.74549	468 Clay Banks Dr	Hemphill	75948	+14095793368			0.74
+403fbde34fd7	Dove Cove Cottage	hotel		31.05133	-93.97681	411 Old TX-96	Brookeland	75931	+14093840939	http://dovecove.net		0.77
+a179af5ea4cf	Fox's Lodge & Marina	hotel	lodge	31.27892	-93.70244	159 Foxs Ldg	Hemphill	75948	+14095793232	http://foxslodgemarina.com/		0.92
+72ae32c206bc	Frontier Park Resort	hotel		31.45417	-93.76762	360 Frontier Dr	Hemphill	75948	+19163460000			0.98
+6be7eb5c396d	Indian Creek Lodge & Resort	hotel	lodge	31.14829	-93.60333	118 Cedar Ln	Burkeville	75932	+14095654239	http://toledo-bend.net/Indian		0.94
+46e0e87a7bfd	Pendleton Harbor Marina	hotel		31.46404	-93.75191	405 Clubhouse Dr	Hemphill	75948	+14096254912	http://pendletonharbor.net		0.92
+12cdb1a8af23	Rodeway Inn & Suites	hotel	resort	31.46057	-93.75386	6500 Highway 21 E	Hemphill	75948	+14096253747	https://www.choicehotels.com/texas/hemphill/rodeway-inn-hotels/txk36?mc=llbillpx&pmf=local		0.97
+7efa09838f8e	Ruttin Bucks Lodge	hotel	lodge	31.72507	-93.91863	850 County Road 2575	Shelbyville	75973	+19363680000			0.85
+4a82acf9fa9e	Sandstone Ridge " in Burkeville Tx	hotel		31.07546	-93.54279		Burkeville					0.70
+200e66310466	Scott’s Hideaway	hotel		31.24779	-93.77207	9765 State Highway 87 S	Hemphill	75948	+14097287290			0.71
+67746202d9e9	Scrappin' Valley Lodge	hotel	lodge	31.14365	-93.75017	702 Private Rd 5022	Wiergate	75977	+14095653500	http://www.scrappinvalley.com/		0.90
+eb9720fb9d65	Toledo Bend Outdoors, LLC	hotel	lodge	31.45056	-93.76420	5518 TX-21	Hemphill	75948	+14097873138			0.92
+76257a11288d	Fairmount Family Practice	office		31.21673	-93.67841	3732 Fairdale Rd	Hemphill	75948	+14095792044			0.81
+41508773f897	Mill Creek Bay Rv	office		31.20560	-93.66090	648 Paradise Loop	Hemphill	75948	+14095793079			0.92
+48bdea9cc444	Angie’s Chicken Farm Cooperative - ACFC	restaurant	chicken restaurant	31.17731	-93.97208	181 Cardinal Way	Brookeland	75931	+14095947839	http://angieschickenfarco.wixsite.com/acfc		0.58
+9c3823fd23f5	Ask Top	restaurant	asian restaurant	31.22040	-93.69476	912 Park Ave	Hemphill	75948	+19852189487			0.56
+245fdca0652a	Big Mama's Seafood & Steak	restaurant	seafood restaurant	31.43229	-93.84579	5476 State Highway 21	Milam	75948	+14096251485	http://www.bigmommasseafood.net		0.77
+e9f9175a968f	Bless TT	restaurant	jamaican restaurant	31.22485	-93.68746	3219 E Ramsey Ave	Hemphill	75948	+16162002679			0.61
+e09526e78852	Bobbers Restaurant @ Six Mile Marina	restaurant	american restaurant	31.24735	-93.75864	200 Six Mile Marina Lp	Hemphill	75948	+14095799898	http://sixmilemarinarentals.com/		0.97
+bb485908c5fd	Brookeland Burger Barn	restaurant	burger restaurant	31.14699	-93.98233	7565 U.S. Hwy 96 N	Brookeland	75931	+19362397892			0.97
+bd41cf588cfd	Buzzard's Roost	restaurant		31.16123	-93.58186	10311 Recreational Rd 255 E	Burkeville	75932	+14095651049			0.95
+dd30b498c2e8	El Tio	restaurant	mexican restaurant	31.34835	-93.83866	650 Sabine St	Hemphill	75948	+14097873974	https://www.eltiomexicanrestaurant.com/menu.htm	El Tio Mexican Restaurant	0.97
+98a7978cccc7	Fatsacks crawfish	restaurant	seafood restaurant	31.25113	-93.77904	9201 TX-87	Hemphill	75948	+14092244342			0.71
+1111456c1d3c	Fin & Feather Restaurant	restaurant		31.27857	-93.72179	245 Fin & Feather Dr	Hemphill	75948	+14095793663	https://www.finnfeatherresort.com/restaurant-menu		0.80
+77076f65580d	Front Porch	restaurant	barbecue restaurant	31.24594	-93.76984	120 Oakhill Rd	Hemphill	75948	+14095794305	http://www.frontporch.com/technology		0.92
+a013b51c70f9	Fun In The Sun Inflatables & Produce	restaurant		31.24927	-93.98657	100 US Highway 96 N	Pineland	75968	+14094891600	http://www.mooneysfunjumps.com		0.92
+154ccf96004b	Hemphill BBQ	restaurant	barbecue restaurant	31.36700	-93.79091	3285 Old Sabinetown Rd	Hemphill	75948	+14097871814	http://www.sabinecountytexas.com		0.96
+ffb5b32f9a39	Lakes Area Seafood	restaurant	seafood restaurant	31.11279	-93.98956	13412 US-96	Brookeland	75931	+14096983309	http://lakesareaseafood1.placeweb.site		0.96
+385578bab806	Lane's	restaurant	delicatessen	31.34821	-93.83923	630 Sabine St	Hemphill	75948	+14097873838	http://lanes.com		0.92
+ba7f83a27d70	Lost Frontier	restaurant	bar and grill restaurant	31.34237	-93.84814		Hemphill		+14094049972	http://www.lostfrontierrvpark.com/		0.97
+12f6f1279042	Mama’s Kitchen	restaurant		31.25738	-93.97209	601 N Temple Ave	Pineland	75968	+14095842854			0.58
+0fd58b4d3eb6	Martins Corner	restaurant	comfort food restaurant	31.43247	-93.84673	101 TX-21	Milam	75959	+14096253000	http://meetthemartins.net		0.97
+9f03f078ea2c	Overcome Decent	restaurant	asian restaurant	31.42474	-93.77734	1575 Evergreen Ave	Hemphill	75948	+16517843097			0.60
+697622911071	Pizza Pro	restaurant	pizza restaurant	31.34045	-93.84808	Hwy 87	Hemphill	75948	+14097873838	https://www.pizzapro.com		0.77
+4147bf8eb686	Red’s Front Porch	restaurant	pizza restaurant	31.34248	-93.84913	Campbell Drive	Hemphill	75948				0.69
+a1f2c81a2362	Rosevine BBQ	restaurant	barbecue restaurant	31.43565	-93.91310	1592 TX-103	Bronson	75930	+19362406734			0.64
+0ea05b8b4fc7	Slice Pizza	restaurant	pizza restaurant	31.34197	-93.84875	103 North Oak Street	Hemphill	75948	+14097870009			0.97
+f0c1ec14065c	Sportys tavern	restaurant	bar and grill restaurant	31.24583	-93.77072	9848 TX-87	Hemphill	75948				0.98
+c9417bdba1b9	Subway	restaurant	sandwich shop	31.34746	-93.84093	602 Sabine Street	Hemphill	75948	+14097879910	https://restaurants.subway.com/united-states/tx/hemphill/602-sabine-street	Subway	0.95
+f02de5912420	TEXAS JOE'S BACKPORCH BBQ	restaurant	barbecue restaurant	31.15114	-93.99708	378 Coopers Xing, Mill Creek Park Rd	Brookeland	75931	+14093833987			0.96
+a86a5b13eac4	The Feed Store Cafe BREAKFAST	restaurant	breakfast and brunch restaurant	31.34174	-93.85020	310 Worth St	Hemphill	75948	+14097873335			0.92
+753296eda967	Valero San Augustine	restaurant	pizza restaurant	31.45102	-93.90894	1007 State Highway 21 W	San Augustine	75972	+19362752132			0.85
+a1f06e930d29	Wallace's Bar and Fish Camp	restaurant	seafood restaurant	31.74479	-93.83722		Huxley					0.97
+8fee0af98486	Yellow Rose Rentals Llc	restaurant		31.34200	-93.84873	105 N Oak St	Hemphill	75948				0.95
+981f38ea79aa	Hemphill Care Center	senior	retirement home	31.33905	-93.86298	2000 Worth St	Hemphill	75948	+14097873342	http://www.hemphillcarecenter.com/		0.92
+c82a87ac34f7	Hillside Nursing and Rehabilitation	senior	retirement home	31.32845	-93.86695	355 Farm to Market Rd 83	Hemphill	75948	+14097875300	http://HillsideNursing.com/		0.92

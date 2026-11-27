@@ -1,0 +1,623 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+883f7884370b	America donuts	bakery	donut shop	30.03543	-93.83170	2105 Texas Ave	Bridge City	77611	+14097925026			0.96
+0377fd6734b1	Angkor Donuts & Kolaches	bakery		30.43889	-93.96660	351 TX State Highway 62	Buna	77612	+19037017145			0.78
+8cbbeebf4bf9	Best Doughnuts	bakery	donut shop	30.90955	-93.99488	1302 S Wheeler St Suit B	Jasper	75951	+14094899415	http://best-doughnuts-jasper.lany.io		0.95
+8e4867d54a8b	Cakes Plus	bakery		30.20016	-93.87067	7677 Lamurel Willey Rd	Orange	77632	+14097453580	http://www.cakes-plus.com/		0.96
+3f75b582374a	Daily Donuts	bakery	donut shop	30.03966	-93.82658	2580 Texas Ave	Bridge City	77611	+14097356667	http://dailydonuts.placeweb.site		0.96
+73dae133da2e	Donut Hole	bakery	donut shop	30.10651	-93.74754	1613 N 16th St	Orange	77630	+14098835311	https://www.facebook.com/share/1A1JgPYAZt/	Donut Hole	0.96
+1d748edaeada	Donut Hole - West Orange	bakery	donut shop	30.08587	-93.77702	540 Highway 87 S	West Orange	77630	+14092332208			0.67
+eae40c25ec56	Donut Nation	bakery	donut shop	30.08121	-93.82195	18394 TX-62	Orange	77630	+14096973272			0.96
+26207ba437ee	Donut Palace	bakery	donut shop	30.66253	-93.89367	212 N Margaret Ave	Kirbyville	75956	+14094232383	http://www.thedonutpalace.com		0.96
+837af63a7190	Donut Palace	bakery	donut shop	30.20791	-93.87313	11258 TX-12	Orange	77632	+14097453646	http://www.thedonutpalace.com	Donut Palace Carthage, MO	0.96
+83aeaf79c5ed	Donut Palace	bakery	donut shop	30.14199	-93.75105	5603 TX-87	Orange	77630	+14098837181	http://www.thedonutpalace.com	Donut Palace Carthage, MO	0.92
+d78388a3d8c9	Donut Palace	bakery	donut shop	30.44723	-93.96676	34659 US Highway 96 S	Buna	77612	+14099944666	rachelduke.com		0.55
+d3f49cc68a4e	Dunkin donuts	bakery	donut shop	30.13101	-93.88200	12330 I-10	Orange	77632		https://locations.dunkindonuts.com/en/tx/orange/12099-farm-to-market-road-1442/359776?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=359776&y_source=1_MTAyNTAwMDAwMy01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Dunkin'	0.81
+c9eed063f486	Glenda's Bake-A-Cake	bakery		30.08365	-93.76836	3300 Western Ave	West Orange	77630	+14098865430	http://www.glendasbakeacake.com		0.92
+05da1d448f91	Happy Donuts	bakery	donut shop	30.03382	-93.84900	845 W Roundbunch Rd B	Bridge City	77611	+14097920022	http://Www.happydonut.com/		0.98
+b96251d42f65	Kim's Donut Place	bakery	donut shop	30.14958	-93.97897	3041 TX-12	Vidor	77662	+14097693511	http://www.thedonutpalace.com		0.96
+683d0c57ccc7	Orange City Donut	bakery	donut shop	30.12649	-93.78572	3640 Martin Luther King Junior Dr	Orange	77632	+14093304009			0.92
+1e9701d2cae5	Raising Dough Bakery	bakery		30.92418	-93.99937	202 E Crockett St	Jasper	75951	+14093823984			0.96
+3b38d2749472	Shipley Do-Nuts	bakery	donut shop	30.09456	-93.76148	2913 MacArthur Dr	Orange	77630	+14098860400	https://www.shipleydonuts.com/	Shipley Do-Nuts	0.96
+14667ce17cf4	Simply Sweet Treats	bakery		30.16269	-93.77334	2797 Ben Mac Rd	Orange	77632	+14096705886	http://cherissimplysweettreats.com/		0.96
+ffd14ecc0371	Simply Sweet Treats	bakery		30.11276	-93.78034	2494 Martin Luther King Jr Dr	Orange	77630	+14098862253	http://www.cherissimplysweettreats.com		0.92
+101c176236d6	Snowflake Donuts	bakery	donut shop	30.10166	-93.76953	1402 Strickland Dr	Pinehurst	77630	+14098867798	https://snowflake-donuts-west-orange.edan.io		0.96
+98072e9f8fc5	Sunrise Donuts	bakery	donut shop	30.08371	-93.76381	2826 Western Ave	West Orange	77630	+14095040952	https://www.doordash.com/store/sunrise-donut-west-orange-24627891/		0.92
+4a061cc54680	Texas Donut Ranch	bakery	donut shop	30.84845	-93.75977	202 Court St	Newton	75966	+14093791665	http://www.co.newton.tx.us		0.96
+49ac087e6925	The Donut Hole	bakery	donut shop	30.07153	-93.90414	6309 W Roundbunch Rd	Orange	77630	+14097383300	http://www.zipweb.com/?businessName=TheDonutHole		0.98
+dfbfff44732f	The Donut Hole	bakery	donut shop	30.07153	-93.90414	6309 Farm to Market Rd 1442	Bridge City	77630	+14097383300	http://www.zipweb.com/?businessName=TheDonutHole		0.99
+3ac9ffb777f7	The Donut Palace	bakery	donut shop	30.91055	-93.99717	290 E Gibson St	Jasper	75951	+14093830787	http://www.donutpalace.com	The Donut Palace San Diego TX	0.93
+18ad082af26e	The Donut Shop	bakery		30.02700	-93.84073	1125 Texas Ave	Bridge City	77611	+14097353705	https://www.thedonutshop.com		0.92
+4a21690145b8	Beers on da Bayou	bar	beer bar	30.07266	-93.73957	1204 S Texas Ave	Orange	77630				0.92
+4d755f20cb30	Bohn Hoot N Holler	bar	whiskey bar	30.09366	-93.76933	535 E Railroad St	Vidor	77662				0.55
+261dbddbf3ec	Capistrano	bar		30.09267	-93.74194	1209 Green Ave	Orange	77630	+14099204030			0.92
+b0c7516b1aec	Chili's Grill & Bar	bar		30.09577	-93.76380	292 Strickland Dr	Orange	77630	+14098862400	https://www.chilis.com/locations/us/tx/orange/pinehurst/		0.85
+62ca1f58a968	Club 87	bar		30.23419	-93.76382	2348 Ivy Dr	Orange	77632	+14097456034	http://www.club87honkytonk.com		0.84
+b6f4d967f6b5	CLUB De La Esmeralda	bar		30.90218	-93.99297	2021 S Wheeler St	Jasper	75951	+14094899355			0.65
+960ae24da7f7	Cotton's Cay	bar		30.17559	-93.75758	8379 TX-87	Orange	77632	+14092167010			0.93
+099ac1a70614	Free State Cellars	bar	winery	30.12479	-93.77354	4702 Tejas Pkwy	Orange	77632	+14092217232	https://linktr.ee/freestatecellars		0.92
+10ce7c005b4a	Frozen OC	bar		30.07042	-93.90443	6223 W Roundbunch Rd	Orange	77630	+14097358840	http://www.bullfishsetx.com/		0.87
+438897817c81	Gator's Bayou	bar		30.11356	-93.72949	2210 N Simmons Dr	Orange	77630	+14092167800			0.67
+ffc45b6d0d49	Hammered Honey Farms and Mead	bar	winery	30.08957	-93.88387	2801 Linscomb Rd	Orange	77630	+14093132001	http://www.hammeredhoneyfarmsandmead.com/		0.92
+bd75c61417a8	Hop Avenue Brewing Company	bar	brewery	30.02208	-93.84647	75 Ferry Dr	Bridge City	77611	+14093136251	http://www.hopavenuebrewing.com/		0.92
+7d780bba08e5	Just One More Tavern	bar		30.09787	-93.72746	807 Simmons Dr	Orange	77630	+14092385711	http://www.reverbnation.com/venue/justonemoretavern		0.99
+c4914af7a585	Leaux's Bar	bar		30.05184	-93.81349	2563 Patillo Rd	Orange	77630	+14093136659	http://LeauxsBar.com/		0.92
+e01a23a2df3f	Maze Of Terror	bar		30.14118	-93.99477	1745 Texas Highway 12	Vidor	77662	+14097910390	http://texasmazeofterror.com		0.77
+b6a3cbbc10f1	MVPs	bar	sports bar	30.90856	-93.99506	1275 S Wheeler St	Jasper	75951	+14092025090	https://mvps.rocks/		0.96
+1caf6a638e8e	Piney Woods Country Wines	bar	winery	30.12467	-93.77328	3408 Willow St	Orange	77632	+14098835408	http://www.pineywoodswines.com		0.57
+f56cc864e4be	Prestige Bar	bar	cocktail bar	30.77960	-93.90015	3510 Highway 6	Hitchcock	77563	+18322482676			0.78
+aa606a82ab82	QBee'z Bar & Grill	bar		30.12239	-93.79089	Pine Ridge Street	Orange		+5016011948			0.83
+33d6ed560da0	Stix Pool Hall	bar	sports bar	30.08039	-93.82153	18451 TX-62	Orange	77630	+14092332026			0.95
+56be1ca35236	Sugar Shack Night Club/Sports Bar	bar	beer bar	30.10417	-93.72746	1411 N Simmons Dr	Orange	77630	+14099200687			0.96
+15a66118a389	Texas Avenue Tavern	bar		30.04258	-93.82537	2845 Texas Ave #500	Bridge City	77611	+14093136802			0.96
+ae2dabb528ca	Texas Avenue Tavern	bar		30.02777	-93.83956	1195 Texas Ave	Bridge City	77611	+14096973053			0.92
+92d83086dfd9	The Bayou Club	bar		30.11387	-93.72935	2210 Simmons Dr	Orange	77630	+14092167212	https://www.bayouclubgolf.com		1.00
+c2a21ca975a5	The Happy Cajun	bar	dive bar	30.90973	-93.99693	249 E Gibson St	Jasper	75951	+14093844431			0.96
+650b3e9ceca9	The Rustic Saloon	bar		30.02785	-93.83973	1195 Texas Ave	Bridge City	77611	+14095402205			0.96
+fc01c0ff12eb	The Tabernacle	bar		30.10189	-93.76895	3212 Concord St	Orange	77630				0.67
+b1fddadb0f44	TROPICAL VIBES BURGERS & DAIQUIRIS "Mauriceville"	bar		30.20250	-93.88213	10335 TX-12	Orange	77632	+14092332046			0.81
+96df65fb117d	TROPICAL VIBES DAIQUIRIS	bar	cocktail bar	30.10443	-93.74033	1408 N 10th St	Orange	77630	+14092167509	http://tropicalvibesdaiquiris.com		0.92
+58f240fcfca7	VFW Post 2775 - Orange, Texas	bar		30.13935	-93.75120	5303 N 16th St	Orange	77630	+14098869738	http://www.vfw.org/		0.92
+b7bc8164504e	Autosnmore	cardealer		30.08100	-93.82156	18437 Highway 62 S	Orange	77630	+14098836688	http://www.autosnmore.com/		0.56
+f6fe721e89dd	Brandon's Auto Sales	cardealer		30.09255	-93.74635	1601 Green Ave	Orange	77630	+14092417533	https://www.robertsford.com/used-vehicles/		0.59
+4a2477e3fd7a	Car Works Auto Sales	cardealer		30.10318	-93.77077	1538 Strickland Dr	Orange	77630	+19362336954	http://www.carworksTX.com/		0.92
+76ab85b54d71	Cecil Atkission Toyota	cardealer		30.12251	-93.75761	2500 I-10	Orange	77632	+14098838451	http://www.ceciltoyota.com/	TOYOTA	0.92
+5cc162815d6d	CW ATV Repairs and Service	cardealer		30.24939	-93.88954	645 County Road 3139	Orange	77632	+14099888925			0.92
+65fb6ff7bd26	D & C Carter's Cars Inc	cardealer	used auto dealer	30.92325	-93.99720	301 N Wheeler St	Jasper	75951	+14094890700			0.65
+2232f80fa79f	Excel Automotive	cardealer		30.03997	-93.82665	2615 Texas Ave	Bridge City	77611	+14096972920	http://excelauto.com/	Excel Auto	0.92
+1edabe99feb2	Granger Chevrolet	cardealer	used auto dealer	30.11856	-93.78707	2611 MacArthur Dr	Orange	77630	+14094054261	https://www.grangerchevrolet.com/		0.85
+9c2dd5864a1e	Granger Chevrolet	cardealer		30.09347	-93.75919	2611 MacArthur Dr	West Orange	77630	+14094054261	https://www.grangerchevrolet.com		0.97
+176431e41a35	Granger Chrysler Dodge Jeep Ram	cardealer		30.11848	-93.78691	4103 I-10	Orange	77630	+14094055831	http://www.grangercdjr.com/	Chrysler	0.97
+11724e44ffc6	Jasper Auto Sales	cardealer		30.92489	-93.99669	490 N Wheeler St	Jasper	75951	+14093831600	http://www.txdmv.gov/		0.82
+427c8c60711a	Johns ATV	cardealer		30.65757	-93.89470	107 W Levert St	Kirbyville	75956	+14094205016	https://johns-atv-sxs-customes-repairs.webnode.com/		0.92
+0d51c9f07409	Mike Willis Ford Orange	cardealer		30.09299	-93.74610	1601 Green Avenue	Orange	77630		https://www.mikewillisfordorangetx.com	Ford	0.94
+34df093b1fe7	Moonlight Rod & Custom	cardealer		30.09368	-93.73054	210 Green Ave	Orange	77630	+14092990154	http://Www.moonlightrods.com/		0.92
+8055325e3155	PATV Powersports	cardealer		30.12547	-93.84768	9590 I-10	Orange	77632	+14096971330	https://www.patvpowersports.com/		0.97
+fc298f2d2b3d	Sabine River Ford	cardealer		30.09253	-93.74636	1601 Green Ave	Orange	77630	+14098833581	https://sabineriverford.com		0.75
+9701e7b6040b	Seven Motors Inc	cardealer	used auto dealer	30.10291	-93.77045	1520 Strickland Dr	West Orange	77630	+14098865580	https://www.7motorstx.com		0.65
+de24467e104b	Team Granger	cardealer		30.09362	-93.74632	400 N 16th St	Orange	77630	+14098830439	http://www.teamgranger.com/		0.86
+dd782d0d8dee	Texana Toyota	cardealer		30.12240	-93.75756	I-10	Orange	77632	+14098838451	https://www.texanatoyota.com/		0.99
+a183d1100ebe	Texas Ford Dealers	cardealer		30.94172	-93.99628	2130 N Wheeler	Jasper	75951	+14093843411		Ford Motor Company	0.91
+1821c719a8ce	The garcia project.	cardealer		30.94007	-93.99676		Jasper		+18004642749	http://silsbeeford.com/		0.92
+a9984ce9c8f6	Troy LeBlanc Auto Sales	cardealer		30.09291	-93.74662	1601 Green Ave	Orange	77630	+14092418750	http://robertsford.com/		0.56
+df49b502fc03	Troy LeBlanc Auto Sales	cardealer		30.09255	-93.74635	1601 Green Ave	Orange	77630	+14092418750	http://robertsford.com/		0.59
+4d23641a315f	Weaver Brothers Motor Company	cardealer		30.89697	-93.99319	2035 S Wheeler St	Jasper	75951	+14093846847	http://www.weaverbrosmotor.com/	Chrysler	0.92
+20ef27b3797f	Weaver Motors Inc of Kirbyville	cardealer		30.65558	-93.89484	603 S Margaret Ave	Kirbyville	75956	+14094234623	http://www.weavermotorsofkirbyville.com	Chrysler	0.92
+c2cb312ee36e	Weaver's Select Autos	cardealer		30.93619	-93.99679	1698 N Wheeler St	Jasper	75951	+14093835227	http://www.txdmv.gov		0.92
+89d071c31d3f	Wheels Unlimited	cardealer		30.92160	-93.99676		Jasper	75951	+14096222776			0.92
+8fb6dd7c7482	ShowBiz Cinema	cinema		30.09173	-93.77206		Orange	77630	+14099880202	http://www.showbizcinemas.com		0.77
+e1222888ae0f	Dunkin'	coffee		30.13101	-93.88195	12099 Farm to Market Road 1442	Orange	77632	+14092168542	https://locations.dunkindonuts.com/en/tx/orange/12099-farm-to-market-road-1442/359776?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=359776&y_source=1_MTAyNTAwMDAwMy01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Dunkin'	0.95
+535ad81de098	Gator Café at LSCO	coffee		30.09298	-93.73258	407 Green Ave	Orange	77630	+14098823388	https://www.lsco.edu/gator-cafe/gator-cafe.asp		0.98
+4902a874d3f4	Greens Bluff Nutrition	coffee	tea room	30.10209	-93.76987	1502 Strickland Dr Suite 3	Pinehurst	77630	+14099204140			0.92
+9df1b29cdb08	Lucy's Cafe and Bakery	coffee		30.11185	-93.78058	2488 Martin Luther King Jr Dr	Orange	77630	+14098833327	http://lucys-cafe.com/		0.92
+a4a1e26d1bd5	Oasis Coffee House	coffee		30.02612	-93.84150	1055 Texas Ave	Bridge City	77611	+14097920089	http://www.oasiscoffeehouse.com		0.92
+682f09ff6aed	Orange Grove Coffee House	coffee		30.16119	-93.75398	7174 Highway 87 N	Orange	77632	+14092167185			0.96
+5d374b51dcc1	Sketch Cafe & Bakery	coffee		30.16150	-93.75399	7174 Highway 87 N	Orange	77632	+14093304080			0.92
+0b238e6c052c	Starbucks	coffee		30.11949	-93.74697	3126 N 16th St	Orange	77630	+14096709555	https://www.starbucks.com/store-locator/store/1028506	Starbucks	0.92
+79131c4cb914	Texan Cafe	coffee		30.82792	-93.77441	1456 TX-87 S	Newton	75966	+14093792190			0.88
+760652e39ae6	Triple D Services	coffee		30.61367	-93.80921	17670 state highway 87 south	Kirbyville	75933	+14095948713			0.99
+c3f71eb3dd4f	Lamar State College Orange	college		30.09215	-93.73207	410 W Front St	Orange	77630	+14098837750	http://www.lsco.edu/		1.00
+7327127553c6	LCI Bears	college		30.14179	-93.76157	2300 Allie Payne Rd	Orange	77632	+14098864245	http://www.lcmcisd.org/		0.59
+5b2ca3bc1038	Shahan Events Center, Lamar State College Orange	college		30.09281	-93.73026	209 Green Ave	Orange	77630				0.94
+580d1f78f990	7-Eleven	convenience		30.08370	-93.77915	527 Highway 87 S	West Orange	77630	+14096709346	https://www.7-eleven.com/locations/tx/orange/527-hwy-87-36511		0.97
+aea1ae7316b4	7-ELEVEN 36511	convenience		30.08337	-93.77959	527 S HWY 87	West Orange	77630		https://www.exxon.com/en/find-station/exxon-westorange-tx-7eleven36511-200316292	Exxon	0.80
+c33750c899c3	ARAIN, LLC	convenience		30.03917	-93.87742	2379 W ROUND BUNCH	Orange	77630		https://www.exxon.com/en/find-station/exxon-orange-tx-arainllc-200324784	Exxon	0.80
+cf85e17a498d	BIG M'S #3	convenience		30.10796	-93.77528	1918 STRICKLAND DRIVE	Orange	77630		https://www.exxon.com/en/find-station/exxon-orange-tx-bigms3-200318622	Exxon	0.80
+db337eac7dc3	BRIDGE CITY FOOD MART	convenience		30.03530	-93.85121	1000 W ROUND BUNCH RD	Bridge City	77611		https://locations.valero.com/en-us/LocationDetails/Index/1000-W-ROUND-BUNCH-RD/0000006941	Valero	0.98
+1ba155949941	BUNA EXPRESS 786 LLC	convenience		30.43788	-93.96522	439 TX STATE HWY 62	Buna	77612		https://www.exxon.com/en/find-station/mobil-buna-tx-bunaexpress786llc-200331948	Mobil	0.80
+4464a5de4ce1	BUNA JIFFY MARKET	convenience		30.44417	-93.96801	34911 HWY 96	Buna	77612		https://www.exxon.com/en/find-station/exxon-buna-tx-bunajiffymarket-200316666	Exxon	0.80
+e204df51a2ae	Burkeville Quick Way	convenience		30.99781	-93.66988	14043 State Highway 87 N	Burkeville	75932	+14095652253	https://www.shell.com		0.92
+484f2631d11c	CAT Scale	convenience	truck gas station	30.11265	-93.82233	2205 Hwy 62 S	Orange	77630	+14097451124	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+b71302e7a77f	CAT Scale	convenience	truck gas station	30.11736	-93.81984	7112 Interstate 10 W	Orange	77632	+14098839465	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+c686ac5cfbd8	CAT Scale	convenience	truck gas station	30.12980	-93.95989	17160 Interstate 10	Vidor	77662	+14094453336	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+0cdf7e1d8a48	Cheers	convenience		30.91098	-93.99489	405 E Gibson St #5112	Jasper	75951	+14094890038	https://sunshinestoresgroup.com	Cheers	0.92
+00c93dcc6cb9	Chevron	convenience		30.15492	-93.76058	6892 FM 1130	Orange	77632		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/6892-FM-1130-ORANGE-TX-77632-3730-id168112	Chevron	0.95
+6746a2f14b26	Chevron	convenience		30.11646	-93.82168	7120 INTERSTATE 10 W	Orange	77632		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/7120-INTERSTATE-10-W-ORANGE-TX-77632-8031-id384054	Chevron	0.95
+7388c7bd360d	Chevron	convenience		30.13133	-93.95168	21440 I-10	Vidor	77662		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/21440-I-10-VIDOR-TX-77662-0000-id391010	Chevron	0.80
+787f0bc6dcda	Chevron	convenience		30.07171	-93.90353	6312 Fm 1442 & Fm 105	Bridge City	77630	+14097925531	https://www.chevronwithtechron.com/en_us/home/find-a-station.html?/station/6312-FM-1442-&-FM-105-ORANGE-TX-77630-id372617	Chevron	1.00
+da88a39b4ace	Chevron	convenience		30.27223	-93.78171	43195 HWY 87 SOUTH	Orange	77632		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/43195-HWY-87-SOUTH-ORANGE-TX-77632-8722-id387204	Chevron	0.80
+db162d244d74	Chevron	convenience		30.91286	-93.99268	559 E GIBSON ST	Jasper	75951		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/559-E-GIBSON-ST-JASPER-TX-75951-5162-id107689	Chevron	0.80
+dd73ecec1991	Chevron	convenience		30.08371	-93.77419	4208 WESTERN AVE	West Orange	77630		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/4208-WESTERN-AVE-WEST-ORANGE-TX-77630-id382412	Chevron	0.95
+aef3722127fc	Chevron Station Mauriceville	convenience		30.20916	-93.87272	11365 Highway 12	Mauriceville	77626	+14097276700			1.00
+2fedaa6e8d6e	Chevron Station Orange	convenience		30.06923	-93.82163	20871 Highway 62 S	Orange	77630	+14098352237			0.85
+4efb606f8138	Chevron Station Orange	convenience		30.12888	-93.88266	12099 Fm 1442	Orange	77630	+17138449600			0.92
+d7eb33217f65	Chevron Station Vidor	convenience		30.14965	-93.97922	3031 Highway 12	Vidor	77662	+14097276700			0.92
+b3720066b112	Circle K	convenience		30.11452	-93.82052	7253 IH 10 E	Orange	77630	+14098836103	https://www.circlek.com/		1.00
+41ba7a1546c1	City Mart	convenience		30.03922	-93.87735	2379 W Roundbunch Rd	Bridge City	77630	+14093136384			0.92
+286a0f5fbb01	Conoco	convenience		30.64272	-93.89891	2008 S Margaret Ave	Kirbyville	75956	+14094233513	https://www.conoco.com/		1.00
+414a9ffbe3d6	Conoco	convenience		30.11667	-93.81989	7112 I-10 W	Orange	77632	+14098839465	https://www.conoco.com/	Conoco	0.66
+66213203310b	Conoco	convenience		30.44110	-93.96928	35073 US-96	Buna	77612	+14099949830	https://www.conoco.com/		0.92
+759b94032aef	Conoco	convenience		30.55638	-93.93000	Hwy 96 S	Kirbyville	75956	+14094236123	https://www.conoco.com/	Conoco	0.62
+77ad04987008	Conoco	convenience		30.54209	-93.80937	17620 State Highway 87	Call	75933	+14094235433	https://www.conoco.com/	Conoco	0.77
+89a6485102e1	Conoco	convenience		30.91033	-93.99583	1125 S Wheeler St	Jasper	75951	+14093845738	http://www.conoco.com/	Conoco	0.56
+dfdf6466ac27	Conoco	convenience		30.84715	-93.77037	649 W Court St	Newton	75966	+14093792700	https://www.conoco.com/		1.00
+e534a7654e0e	Conoco	convenience		30.86836	-93.83332	Hwy 190 W	Newton	75966	+14093792001	https://www.conoco.com/	Conoco	0.78
+e6ac76c7a1f7	Conoco	convenience		30.13428	-93.99765	20345 Ih 10	Vidor	77662	+14096562458	https://www.conoco.com/	Conoco	0.63
+ed6ba6bc170e	Conoco	convenience		30.61357	-93.80907	17630 TX-87	Call	75933	+14094235433	https://www.conoco.com/		1.00
+8cfddee8f6b0	Corner	convenience		30.12655	-93.74753	3800 16th St	Orange	77632	+14098860346	http://www.valero.com/	Valero	0.62
+0d453a0b4d12	Cotton Tops	convenience		30.89760	-93.99320	2033 S WHEELER ST	Jasper	75951		https://locations.valero.com/en-us/LocationDetails/Index/2033-S-WHEELER-ST/0000027951	Valero	0.92
+fab7cf926356	Cotton Tops	convenience		30.67144	-93.89307	1112 N Margaret Ave	Kirbyville	75956	+14094232901	http://www.krispykrunchy.com		0.92
+d44100c61b6f	Cotton Tops Convenience Store	convenience		30.90167	-93.99259	2033 S Wheeler St	Jasper	75951	+14093842700	http://www.shell.us/ontheroad		0.60
+896534ebc8c6	COUGAR STOP	convenience		30.44147	-93.96928	35073 US HIGHWAY 96 S	Buna	77612			Conoco	0.95
+3708644843ae	Country Pantry	convenience		30.12391	-93.99747	1079 Orange St	Vidor	77662	+14097694950	http://www.country-pantry.com		0.92
+06fdef0e4a38	Crawdad's	convenience		30.12889	-93.88341	12099 FM1442	Orange	77632	+14097453848	https://local.yahoo.com/info-56773374-crawdad-s-convenience-center...		0.97
+5947c84373f2	Crawdads Orange	convenience		30.12098	-93.78465	4080 Lutcher Dr	Orange	77632	+14093304662			0.92
+74fa18781383	Crawdads Orange	convenience		30.12098	-93.78465	4080 Lutcher Dr	Orange	77632	+14093304662			0.81
+4c8907379572	Cypress Plaza	convenience		30.15959	-93.75368	7014 TX-87	Orange	77632	+14098834083	http://exxonmobilstations.com/		0.92
+b9d48b18565a	Cypress Plaza III Convenience Store	convenience		30.09940	-93.74679	1610 W Park Ave	Orange	77630	+14098836984	https://cypress-plaza-iii.hub.biz/		0.92
+a58baafd92dc	Dee's One Stop	convenience		30.61371	-93.80914	17620 TX-87	Kirbyville	75933	+14094235433	http://conocophillips.com		0.92
+c874bc29a3bb	DEES ONE STOP	convenience		30.51941	-93.80917	17620 STATE HIGHWAY 87 S	Call	75933			Conoco	0.80
+02809dea0145	Deweyville Quick Stop	convenience		30.29903	-93.75359	2574 TX-12	Deweyville	77614	+14097462867			0.74
+2a881b0d9a93	DOMINYS	convenience		30.64267	-93.89880	2008 S MARGARET AVE	Kirbyville	75956			Conoco	0.80
+a70455fe5092	EAGLE CONOCO	convenience		30.82079	-93.73038	1100 US 190	Newton	75966			Conoco	0.80
+0f86961e8a13	Exxon	convenience		30.05132	-93.81587	20871 Hwy 62 South	Orange	77630	+14097382200	https://www.exxon.com/en/find-station/exxon-orange-tx-exxpressmart21-200327891?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
+3fdd55765723	Exxon	convenience		30.12884	-93.88322	12099 Fm 1442	Orange	77632	+14097453848	https://locations.exxon.com/tx/orange/12099-fm-1442?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+408ac7428d57	Exxon	convenience		30.09959	-93.74683	1610 W Park Ave	Orange	77630	+14098836984	http://exxon.com/		0.58
+55b7154603c7	Exxon	convenience		30.03893	-93.87773	2379 W Round Bunch	Orange	77630		https://www.exxon.com/en/find-station/exxon-orange-tx-arainllc-200324784?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.98
+75c5b24f19f2	Exxon	convenience		30.27485	-93.78327	135 Sr 12 East	Orange	77632	+14097462000	http://www.exxon.com		1.00
+7bd41648abb7	Exxon	convenience		30.02222	-93.84545	705 Texas Ave	Bridge City	77611	+14097382424	https://www.exxonmobilfuels.com/en/find-gas-station/200311243		0.92
+812f0692ed09	Exxon	convenience		30.84792	-93.76595	200 N Hwy 87	Newton	75966	+14093794110	https://www.exxonmobilfuels.com/en/find-gas-station/200314550		0.92
+947c0ceacc51	Exxon	convenience		30.44423	-93.96797	34911 Hwy 96	Buna	77612	+14099944538	http://www.exxon.com		0.92
+a0c0104005bb	Exxon	convenience		30.10800	-93.77533	1918 Strickland Drive	Orange	77630	+14093304353	https://www.exxon.com/en/find-station/exxon-orange-tx-bigms3-200318622?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+a340e313e35b	Exxon	convenience		30.23510	-93.76947	2016 Pine Park Blvd	Orange	77632	+14092072927	https://www.exxon.com/en/find-station/exxon-orange-tx-cypressmart-200329156?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+a5099e096d2f	Exxon	convenience		30.12190	-93.74799	3701 N 16th St	Orange	77632	+14098867054	https://www.exxonmobilfuels.com/en/find-gas-station/200316886		0.92
+abedf2c9ac76	Exxon	convenience		30.07867	-93.82224	18548 Highway 62 S	Orange	77630	+14097354300	http://www.exxonmobilstations.com/22219-zapco-orange		0.92
+b89ceafceae5	Exxon	convenience		30.27493	-93.78341	135 SR-12 EAST	Orange	77632		https://www.exxon.com/en/find-station/exxon-orange-tx-exxon-200316756	Exxon	0.92
+d5adcc4e4525	Exxon	convenience		30.91160	-93.99533	1056 S Wheeler St	Jasper	75951	+14093818822	https://www.exxonmobilfuels.com/en/find-gas-station/200313059		1.00
+ed634bcc9d08	Exxon	convenience		30.08348	-93.77940	527 S Hwy 87	West Orange	77630	+14096709346	https://www.exxon.com/en	Exxon & Mobil Stations	0.99
+f52c257f8ff3	Exxon	convenience		30.12090	-93.78464	4080 Lutcher Dr	Orange	77632	+14093304662	https://www.exxon.com/en/find-station/exxon-orange-tx-petromart116-200322207?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+f5b8812c2af5	Exxon	convenience		30.16547	-93.84216	7120 TX-62	Orange	77632	+14097455454	http://exxon.com/		0.57
+f669440fd747	Exxon	convenience		30.15962	-93.75385	7014 Highway 87 N	Orange	77632	+14098838989	https://www.exxon.com/en/find-station/exxon-orange-tx-cypressplaza1-200311135?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+87c914849b00	Exxon Company Usa Service Station	convenience		30.10446	-93.74754	1415 N 16th St	Orange	77630	+14098832768	https://www.exxonmobil.com		0.55
+5191d98f260c	Exxpress Mart	convenience		30.05135	-93.81589	20871 TX-62	Orange	77630	+14097382200	http://www.expressmart.com		1.00
+9a08b086c078	Exxpress Mart	convenience		30.03232	-93.83531	1745 Texas Ave	Bridge City	77611	+14096972521	https://www.exxpressmart.com		0.99
+ec8569dd7cfd	Farmers Mercantile	convenience		30.09027	-93.73560	702 Division Ave	Orange	77630	+14098832941	http://Www.farmersmercantilefeed.com/		0.92
+b9d990d84e41	Fast Stop Food Store	convenience		30.03815	-93.82787	2410 Texas Ave	Bridge City	77611	+14097354500	https://fast-stop-food-store-tx-1.hub.biz		0.92
+24790db39cb4	Flying J Travel Center	convenience		30.11637	-93.81972	7112 I-10 W	Orange	77632	+14098839465	https://locations.pilotflyingj.com/us/tx/orange/7112-i-10-w	Pilot Flying J	0.97
+ed963bdf6abc	Flying J Travel Center	convenience		30.11680	-93.82003	7112 I-10 W	Orange	77630	+14098839465	https://www.pilotflyingj.com/stores/735		0.98
+3690434f73b9	Fuel Depot	convenience		30.03029	-93.83598	1510 Texas Ave	Bridge City	77611	+14097353454			0.99
+9aed116ae3ba	Get N Go	convenience		30.11450	-93.74799	2419 N 16th St	Orange	77630	+14093304578	http://getngo.com		0.92
+ae6441ae4cec	GULF	convenience		30.11937	-93.73161	333 E Lutcher Dr	Orange	77632	+14096709800	https://www.gulfoilltd.com/	Gulf Oil	0.92
+e0592c487ae8	Highway 190 Fuel Stop	convenience		30.91496	-93.98756	850 E Gibson St	Jasper	75951	+14093847673	https://www.c3oil.com/		1.00
+285b3576cdbf	Hwy 96 Fuel Stop	convenience		30.44351	-93.96901	35024 US-96	Buna	77612	+14099949928			0.92
+20fdf189c0df	Jiffy Market	convenience		30.92842	-93.99673	898 N Wheeler St	Jasper	75951	+14093843652	http://www.mobil.com/		0.92
+ab2ec50c24f2	Joc Stop	convenience		30.91502	-93.99686	645 S Wheeler St	Jasper	75951	+14093844700			0.92
+504e10c0fd93	Kirbyville Citgo	convenience		30.66099	-93.89381	102 N Margaret Ave	Kirbyville	75956	+14094233197	http://www.shell.com/		0.92
+a30fb0c00644	Kirbyville Fuel Stop	convenience		30.65902	-93.89359	202 S Margaret Ave	Kirbyville	75956	+14094233400	http://kirbyvillecisd.org	Kirbyville Elementary School	0.92
+35c8a39297ff	Kroger Fuel Center	convenience		30.10656	-93.74693	1600 N 16Th St	Orange	77630	+14098869000	https://www.kroger.com/d/fuel-points-program?cid=loc_03400950F_bg		1.00
+e9c0d9d46729	Kwick Stop	convenience		30.10554	-93.74757	1555 N 16th St	Orange	77630				0.92
+fc999063e401	Linc Gulf Coast Petroleum Inc	convenience		30.04667	-93.91795	11153 Bessie Heights Rd	Orange	77630	+12813850113			0.65
+6f47a6d733d7	Lutcher Food Mart	convenience		30.12120	-93.75501	2323 LUTCHER DR	Orange	77630		https://locations.valero.com/en-us/LocationDetails/Index/2323-LUTCHER-DR/0000009043	Valero	0.80
+05491751ef34	M & S Grocery	convenience		30.17910	-93.79803	10876 FM1130	Orange	77632	+14098836735	https://m-s-grocery-tx.hub.biz	Marks and Spencer	0.84
+affa2cb39f76	Mauriceville Fuel Stop	convenience		30.20505	-93.87331	11845 Highway 62 N	Orange	77632	+14097453310	https://mauricevillefuelstop.com/		0.92
+26c4a9c4a5a1	Mobil	convenience		30.92831	-93.99653	898 North Wheeler	Jasper	75951	+14093843652	https://locations.exxon.com/tx/jasper/898-north-wheeler?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.98
+3e825e097e11	Mobil	convenience		30.91935	-93.97865	1201 E Gibson St	Jasper	75951	+14094899168	https://www.exxon.com/en/find-station/200316674	Exxon & Mobil Stations	0.92
+c90d57e1999d	Mobil	convenience		30.03187	-93.83510	1745 Texas Ave	Bridge City	77611	+14096972521	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+a84a242ab578	Murphy USA	convenience		30.09327	-93.76591	3117 Edgar Brown Dr	West Orange	77630	+14098820102	http://www.murphyusa.com/	Murphy USA	0.99
+83d445afae87	Newton Jiffy Market	convenience		30.84797	-93.76611	200 TX-87	Newton	75966	+14093794110	https://newton-jiffy-market-tx-2.hub.biz/		0.92
+bb91b43f73fb	O J's Mobil Mart	convenience		30.19687	-93.88912	9508 Highway 12	Orange	77632	+14097454492	http://www.exxonmobil.com		0.92
+fc502ae21779	ONE9 Dealer	convenience		30.11782	-93.79492	5000 I-10	Orange	77632	+12816765532	https://locations.pilotflyingj.com/us/tx/orange/5000-i-10-w	Pilot Flying J	0.92
+88379e0668b0	PakCo	convenience		30.14932	-93.97932	12 3031 TX-12	Vidor	77662	+14097691300	https://www.chevronwithtechron.com		0.92
+1589f8d7e4dc	Phillips 66	convenience		30.07598	-93.85550	8770-9598 Fm-105	Orange	77630	+14097929491	https://www.phillips66gas.com/		1.00
+49af97abd4f3	Phillips 66	convenience		30.17672	-93.75772	8519 State Highway 87 S	Orange	77632	+18005275476	https://www.phillips66gas.com/		1.00
+a7c5539e2659	Phillips 66	convenience		30.11467	-93.82133	7411 I 10 East	Orange	77630	+14097451893	https://www.phillips66gas.com/		0.92
+4172735edac3	Pilot Travel Center	convenience		30.11203	-93.82181	2205 TX-62	Orange	77630	+14097451124	https://locations.pilotflyingj.com/us/tx/orange/2205-tx-62	Pilot Flying J	0.97
+ba18a77ca5d9	Prime Stop	convenience		30.14825	-93.97944	2980 TX-12	Vidor	77662	+14094224504			0.92
+715ecd61f892	Quick Stop	convenience		30.08357	-93.77390	4208 Western Ave	West Orange	77630	+14092385543			0.92
+cbc42ba5f8fc	QuikTrip	convenience		30.11780	-93.82236	2495 TX-62	Orange	77632	+14092066054	https://locations.quiktrip.com/tx/orange/2495-highway-62-n?utm_source=fb&utm_medium=yext&y_source=1_MTA5MDkwODQ5NC01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	QuikTrip	0.97
+b8b16a9d8ed9	Raceway	convenience		30.02130	-93.84529	500 Texas Ave	Bridge City	77611	+14096978006	https://www.racewaystores.com		1.00
+762f92795ca7	Road Ranger	convenience	truck gas station	30.13118	-93.95958	17160 IH-10 Vidor, TX 77662 (I-10, Exit 864)					Road Ranger	0.87
+008774c29cd2	Shell	convenience		30.14889	-93.97876	3030 Highway 12	Vidor	77662	+14097830200	http://www.shell.us/	Shell	0.92
+1b61cdacdd06	Shell	convenience		30.11876	-93.79545	5000 Interstate 10 W	Orange	77632		https://find.shell.com/us/fuel/13161242-5000-interstate-10-w/en_US		1.00
+27e851e5b7c0	Shell	convenience		30.13070	-93.88193	12330 IH-10	Orange	77632	+14096702888	https://find.shell.com/us/fuel/12766814-12330-ih-10/en_US		1.00
+336dcee5f3d4	Shell	convenience		30.44180	-93.96872	35043 Us Highway 96 S	Buna	77612	+14098845885	https://find.shell.com/us/fuel/10051224-35043-us-highway-96-s	Shell	1.00
+55a250367e41	Shell	convenience		30.10969	-93.78056	1955 Martin Luther King Jr Dr	Orange	77630	+14098834788	https://find.shell.com/us/fuel/10015587-1955-martin-luther-king-jr-dr	Shell	0.99
+6f925497c7f7	Shell	convenience		30.20894	-93.87193	11384 Highway 12	Orange	77632	+14097457088	http://www.shell.us/	Shell	0.92
+8f0388edfc01	Shell	convenience		30.19697	-93.88918	9508 Highway 12	Orange	77632	+14097454492	https://find.shell.com/us/fuel/10057122-9508-highway-12	Shell	1.00
+9fa15337082d	Shell	convenience		30.94081	-93.99713	2147 N Main St	Jasper	75951	+14093846232	http://www.shell.us/ontheroad	Shell	0.91
+b16141f0ce9f	Shell	convenience		30.17404	-93.75690	8270 Highway 87 N	Orange	77632	+14098865500	https://find.shell.com/us/fuel/10060610-8270-highway-87-n	Shell	0.92
+b9bd044a7b72	Shell	convenience		30.09310	-93.76697	250 Green Springs Hwy	Orange	77630	+14098862051	https://find.shell.com/us/fuel/10003308-3118-edgar-brown-dr	Shell	0.92
+d3149e06f3e6	Shell	convenience		30.10397	-93.74708	1402 N 16 Th St	Orange	77630	+14098820587	https://find.shell.com/us/fuel/10003307-1402-n-16th-st	Shell	0.92
+e5aff6ed3f17	Shell	convenience		30.03265	-93.83440	1805 Texas Avenue	Bridge City	77611	+14097358363	https://find.shell.com/us/fuel/10003899-1805-texas-avenue	Shell	0.92
+eef10ced62b9	Shell	convenience		30.11480	-93.82160	7411 Interstate 10 E	Orange	77630	+14097451893	https://find.shell.com/us/fuel/10003306-7411-interstate-10-e	Shell	1.00
+fedd60e543fc	Smart Stop Food Store	convenience		30.09971	-93.76876	811 Strickland Dr	Orange	77630	+14098836665	http://www.smartinsurance.com		0.99
+f04f7568caa4	Snappy's Exxpress Mart	convenience		30.05046	-93.81631	3145 Texas Ave	Bridge City	77611	+14097356466	https://www.texaco.com/en_us/home/find-a-station.html?/station/3145-TEXAS-AVE-BRIDGE-CITY-TX-77611-4919-id384290		0.92
+779d9f84a040	Speedy Stop	convenience		30.08354	-93.77947	527 Highway 87 S	West Orange	77630	+14098837188	http://www.speedystop.com	Speedy Stop	0.92
+1b4acab760f5	Star Stop	convenience		30.09287	-93.74040	1101 W Green Ave	Orange	77630	+14098835640	http://gas-stations.citgo.com/tx/orange/77630/1101-GREEN-AVE		0.92
+9dd8214d0fbf	Star Stop 12	convenience		30.20853	-93.87196	11384 Highway 12	Orange	77632	+14097453555			0.55
+b4dc91251448	Stop N drive #22	convenience		30.06750	-93.74304	1801 Dupont Dr	Orange	77630	+14098863810	http://exxonmobil.com		0.92
+d00b5cc5e433	Stuckeys Supermarket	convenience		30.27517	-93.78374	42698 TX-87	Orange	77632	+14097462000	http://www.stuckeys.com/		0.83
+07b728a2880d	Sunoco	convenience		30.13983	-93.99518	1400 TX-12	Vidor	77662	+18326299898	https://www.sunoco.com/locations/store/1400-hwy-12-vidor-tx-8002118201		0.99
+75ffa08ee802	Sunoco	convenience		30.22139	-93.88185	13535 TX-62	Mauriceville	77632		https://www.sunoco.com/locations/store/13535-tx-62-mauriceville-tx-0691403000	Sunoco	0.95
+eb232a8dacce	Sunoco	convenience		30.19305	-93.89507	STATE HWY 12 & FM 1136	Mauriceville	77632		https://www.sunoco.com/locations/store/state-hwy-12---fm-1136-mauriceville-tx-0307505800		0.97
+bf77bc170544	Sunoco Dock #4 Nederland, Tx	convenience		30.01146	-93.99694	Twin city Hwy	Nederland	77651				0.61
+dd1787861b38	Sunoco Dock #4 Nederland, Tx	convenience		30.00677	-93.98944	Twin city Hwy	Nederland	77651				0.57
+010024537260	Sunshine Groceries	convenience		30.94039	-93.99728	2147 N Wheeler St	Jasper	75951	+14093846232	http://shell.com		0.92
+6d7488af939c	Sunshine Jiffy Mart	convenience		30.91931	-93.97863	1201 E Gibson St	Jasper	75951	+14094899168	http://exxonmobilstations.com		0.97
+d03adec39866	SUNSHINE JIFFY MART #14	convenience		30.91935	-93.97855	1201 E GIBSON	Jasper	75951		https://www.exxon.com/en/find-station/mobil-jasper-tx-sunshinejiffymart14-200316674	Mobil	0.80
+424d0e662dca	SUNSHINE KIRBYVILLE	convenience		30.66393	-93.89358	402 N MARGRET AVE	Kirbyville	75956		https://www.exxon.com/en/find-station/exxon-kirbyville-tx-sunshinekirbyville-200316675	Exxon	0.80
+543eb75a62c7	Texaco	convenience		30.93039	-93.99725	1113 NORTH WHEELER	Jasper	75951		https://www.texaco.com/en_us/home/find-a-station.html?/station/1113-NORTH-WHEELER-JASPER-TX-75951-3150-id384848	Texaco	0.98
+d03b33e774de	Texaco	convenience		30.05059	-93.81630	3145 TEXAS AVE	Bridge City	77611		https://www.texaco.com/en_us/home/find-a-station.html?/station/3145-TEXAS-AVE-BRIDGE-CITY-TX-77611-4919-id384290	Texaco	0.98
+ebffde4aeaf7	TEXAS COUNTRY	convenience		30.11589	-93.82388	7411 IH 10 E	Orange	77630			Phillips 66	0.92
+3dde28ff03a6	Texas Country Store	convenience		30.12199	-93.74799	3701 N 16th St	Orange	77632	+14098867054			0.92
+e26078abc99b	TEXAS COUNTRY STORE #1	convenience		30.12202	-93.74794	3701 16TH ST.	Orange	77630		https://www.exxon.com/en/find-station/exxon-orange-tx-texascountrystore1-200316886	Exxon	0.80
+169854dc3edf	Texas Travel Plaza Deweyville	convenience		30.27233	-93.78172	43255 State Highway 87 S	Orange	77632				0.66
+acdbe10ed4ec	The Country Store	convenience		30.07248	-93.90452	Highway 1442	Orange	77630	+14097382227	http://www.exxonmobilstations.com		0.92
+17fe394cfedc	Valero	convenience		30.05277	-93.81357	6130 TX-87	Orange	77632	+14097356466	https://locations.valero.com/en-us/LocationDetails/Index/6130-TX-87/0000031537	Valero Energy	0.87
+2beca6b945c1	Valero	convenience		30.44349	-93.96915	35024 US HIGHWAY 96 S	Buna	77612	+14099949928	http://www.valero.com	Valero Energy	0.92
+319a7bdaab97	Valero	convenience		30.03517	-93.85130	1000 W ROUND BUNCH RD	Bridge City	77611	+14097353563	http://www.valero.com	Valero Energy	0.92
+34624b00a1f4	Valero	convenience		30.91502	-93.99706	645 S Wheeler St	Jasper	75951	+14094233400	http://www.valero.com	Valero Energy	0.92
+434e3ff3d33a	Valero	convenience		30.01513	-93.83852	3145 Texas Ave	Bridge City	77611	+14097356466	http://www.valero.com/	Valero	0.64
+482a8411fea6	Valero	convenience		30.14893	-93.97841	3030 TX-12	Vidor	77662	+12103452000	http://www.valero.com	Valero Energy	0.92
+848e53f99b9b	Valero	convenience		30.12091	-93.75500	2327 Lutcher Dr	Orange	77630	+12103452000	https://www.valero.com		0.65
+89e84eacc4a1	Valero	convenience		30.11453	-93.82054	7253 IH 10 E	Orange	77630	+14098836103	http://www.valero.com	Valero Energy	1.00
+9ae3a2079c16	Valero	convenience		30.65897	-93.89343	202 S MARGARET AVE	Kirbyville	75956	+14094233400	https://locations.valero.com/en-us/LocationDetails/Index/202-S-MARGARET-AVE/0000010646	Valero Energy	0.92
+a679c7e335c8	Valero	convenience		30.12681	-93.74741	3900 N 16th St	Orange	77632	+12103452000	https://www.valero.com		0.92
+c0cfdd555491	Valero	convenience		30.91539	-93.98794	850 E GIBSON ST	Jasper	75951	+14093847673	https://locations.valero.com/en-us/LocationDetails/Index/850-E-GIBSON-ST/0000002427	Valero Energy	0.92
+cfdc8494e64e	Valero	convenience		30.10556	-93.74746	1555 N 16th St	Orange	77630	+18322343600	https://locations.valero.com/en-us/LocationDetails/Index/1555-N-16TH-ST/0000029300	Valero Energy	0.92
+a99473d4f165	Zapco	convenience		30.07880	-93.82221	18548 TX-62 S	Orange	77630		https://locations.valero.com/en-us/LocationDetails/Index/18548-TX-62-S/0000028265	Valero	0.92
+d690325e0930	Zapco #9	convenience		30.15220	-93.75340	6103 TX-87	Orange	77632		https://locations.valero.com/en-us/LocationDetails/Index/6103-TX-87/0000031537	Valero	0.80
+e03aae944571	Bojangles	fastfood		30.11747	-93.79563	5010 i-10	Orange	77632	+13462514409	https://locations.bojangles.com/tx/orange/5000-i-10-1508.html	Bojangles	0.98
+de07a6adfe70	Bull Horne Burger	fastfood		30.05389	-93.90929	4743 Burwell Heights Road	Orange	77630				0.57
+21e0190ee2cb	Burger King	fastfood		30.10039	-93.82028	2302 Highway 62 South	Orange	77630	+14093304425	https://burgerking.com/store-locator/store/25348	Burger King	0.99
+3047c33c63e1	Burger King	fastfood		30.91097	-93.99697	350 E Gibson St	Jasper	75951	+14093845951	https://burgerking.com/store-locator/store/3439	Burger King	0.99
+610e9b7f9092	Chick-fil-A	fastfood		30.12001	-93.74717	3130 N 16th St	Orange	77630	+14097611231	https://www.cfaorangetx.com/	Chick-fil-A	0.94
+d90659963b96	Chicken Express	fastfood		30.03636	-93.82956	2250 Texas Ave	Bridge City	77611	+14097352250	https://chickene.com/	Chicken Express	0.99
+210b2150d2ee	Church's Texas Chicken	fastfood		30.03283	-93.83487	1805 Texas Avenue	Bridge City	77611	+14097383567	https://locations.churchs.com/tx/bridge-city/1805-texas-avenue	Church's Chicken	0.95
+679b63c403e1	Church's Texas Chicken	fastfood		30.13118	-93.95998	17160 I-10	Vidor	77662	+14094453337	https://locations.churchs.com/tx/vidor/17160-interstate-10	Church's Chicken	0.97
+0c4d6e0c322d	Dairy Queen	fastfood		30.20455	-93.87322	11785 Highway 62 N 11785 Highway 62 N	Orange	77626	+14097451161	https://www.dairyqueen.com/en-us/locations/tx/orange/11785-highway-62-n/10115/?y_source=1_MjkzMzg5MDktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
+386674001366	Dairy Queen	fastfood		30.91309	-93.99657	987 S Wheeler St	Jasper	75951	+14093831970	https://dqtexas.com/?y_source=1_MjkzMzk0NTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
+4406fde9001b	Dairy Queen	fastfood		30.11607	-93.74720	2426 N 16th St	Orange	77630	+14098837700	https://www.dairyqueen.com/en-us/locations/tx/orange/2426-n-16th-st/13126/?y_source=1_MjkzMzkyMjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+6797602570da	Dairy Queen	fastfood		30.03174	-93.83447	1780 Texas Ave 1780 Texas Ave	Bridge City	77611	+14097355535	https://www.dairyqueen.com/en-us/locations/tx/bridge-city/1780-texas-ave/13875/?y_source=1_MjkzMzkxNDEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
+bae57038f559	Dairy Queen	fastfood		30.84681	-93.76976	709 Court St	Newton	75966	+14093798583	https://www.dairyqueen.com/en-us/locations/tx/newton/709-w-court-st/14446/?y_source=1_MjkzMzkyOTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
+c49412b1287a	Dairy Queen	fastfood		30.09743	-93.76639	321 Strickland Dr 321 Strickland Dr	Orange	77630	+14098865232	https://www.dairyqueen.com/en-us/locations/tx/orange/321-strickland-dr/14458/?y_source=1_MjkzMzkyNjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
+f32be1c68d89	Dairy Queen	fastfood		30.45342	-93.96552	Dairy Queen Store 34250 US Highway 96 S	Buna	77612	+14099949180	https://dqtexas.com/?y_source=1_MjkzMzkyODMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.75
+ca3c95757d33	Deweyville Donut Palace	fastfood		30.26998	-93.78034	43443 State Highway 87 S	Orange	77632	+14097467066			0.78
+49039fd1487b	DQ Grill & Chill	fastfood		30.03161	-93.83430	1780 Texas Ave	Bridge City	77611		https://www.dairyqueen.com/en-us/locations/tx/bridge-city/1780-texas-ave/3648	DQ Grill & Chill	0.80
+608a6d5bd143	DQ Grill & Chill	fastfood		30.11626	-93.74702	2426 N 16th St	Orange	77630		https://www.dairyqueen.com/en-us/locations/tx/orange/2426-n-16th-st/2904	DQ Grill & Chill	0.80
+9e029dd027ba	DQ Grill & Chill	fastfood		30.09735	-93.76633	321 Strickland Dr	Orange	77630		https://www.dairyqueen.com/en-us/locations/tx/orange/321-strickland-dr/4230	DQ Grill & Chill	0.80
+b75aa344105b	DQ Grill & Chill	fastfood		30.20458	-93.87316	11785 Highway 62 N	Orange	77632		https://www.dairyqueen.com/en-us/locations/tx/orange/11785-highway-62-n/115	DQ Grill & Chill	0.80
+babbd3fe8b3c	DQ Grill & Chill	fastfood		30.84688	-93.76978	709 W Court St	Newton	75966		https://www.dairyqueen.com/en-us/locations/tx/newton/709-w-court-st/4218	DQ Grill & Chill	0.80
+e91409e7da7b	Golden Chick	fastfood		30.10792	-93.74715	1716 N 16th St	Orange	77630	+14092385007	http://locations.goldenchick.com/tx/orange/1346/	Golden Chick	0.97
+8f093b2810e3	Insane Chicken	fastfood		30.10398	-93.74648	1602 W Hart Ave	Orange	77630	+14099204028	https://order.toasttab.com/online/insane-chicken-orange		0.85
+4093768b7b52	Jack in the Box	fastfood		30.91165	-93.99528	1007 S Wheeler St	Jasper	75951	+14093845611	https://www.jackinthebox.com		0.97
+6210212a01b2	KFC	fastfood		30.09370	-93.75494	2207 MacArthur Dr	Orange	77630	+14092484400	https://locations.kfc.com/tx/west-orange/2207-west-mac-arthur-drive	KFC	0.99
+16728ac0b8bf	KFC - Kentucky Fried Chicken	fastfood		30.09274	-93.74484	1501 Green Ave	Orange	77630	+14098838555	http://www.kfc.com/	KFC	0.66
+22eb09de4988	McDonald's	fastfood		30.90933	-93.99541	1265 S Wheeler	Jasper	75951	+14093846464	https://www.mcdonalds.com/us/en-us/location/tx/jasper/1265-s-wheeler/6681.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
+4204f3cb616f	McDonald's	fastfood		30.10757	-93.74679	1710 N 16th St	Orange	77630	+14098860646	https://www.mcdonalds.com/us/en-us/location/tx/orange/1710-n-16th-st/4110.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+7dcf0eb57ba3	McDonald's	fastfood		30.11414	-93.82138	2311 Hwy 62 N	Orange	77630	+14097454228	https://www.mcdonalds.com/us/en-us/location/tx/orange/2311-hwy-62-n/12561.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+a328a3745b7e	McDonald's	fastfood		30.02301	-93.84465	755 Texas Ave	Bridge City	77611	+14097357503	https://www.mcdonalds.com/us/en-us/location/tx/bridge-city/755-texas-ave/7018.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+19fe55253cea	McDonald's Storage	fastfood		30.91763	-93.98120	1011 E Gibson St	Jasper	75951	+14093842548			0.64
+8190958edd29	Pizza Hut Express	fastfood		30.11917	-93.79568	5000 Interstate 10	Orange	77632		https://locations.pizzahut.com/tx/orange/5000-interstate-10	Pizza Hut	0.80
+2c573fdf6cf0	Popeyes	fastfood		30.10708	-93.74654	1604 Link Ave	Orange	77630	+13462486176	https://www.popeyes.com/store-locator/store/restaurant_82126	Popeyes Louisiana Kitchen	1.00
+8d5688b99558	Popeyes	fastfood		30.92865	-93.99648	898 N Wheeler/ Hwy 96 N	Jasper	75951	+19362749360	https://www.popeyes.com/store-locator/store/restaurant_82502	Popeyes Louisiana Kitchen	0.92
+06c643eafc9c	Sonic Drive In	fastfood		30.65221	-93.89613	909 S. Margaret	Kirbyville	75956	+14094233471	https://locations.sonicdrivein.com/tx/kirbyville/909-s.-margaret.html	Sonic Drive-In	0.99
+1ce7b97bdab5	Sonic Drive In	fastfood		30.02853	-93.83887	1265 Texas Avenue	Bridge City	77611	+14097353446	https://locations.sonicdrivein.com/tx/bridgecity/1265-texas-avenue.html	Sonic Drive-In	0.99
+1e29caaa3db5	Sonic Drive In	fastfood		30.44398	-93.96872	34910 Us Highway 96 South	Buna	77612	+14099949441	https://locations.sonicdrivein.com/tx/buna/34910-us-highway-96-south.html	Sonic Drive-In	0.94
+215eaf7c4fae	Sonic Drive In	fastfood		30.09424	-93.76083	2805 Macarthur Drive	West Orange	77630	+14098865733	https://locations.sonicdrivein.com/tx/orange/2805-macarthur-drive.html	Sonic Drive-In	0.96
+38786dbf881f	Sonic Drive In	fastfood		30.20504	-93.87234	11786 Highway 62 N	Orange	77632	+14097459014	https://locations.sonicdrivein.com/tx/mauriceville/11786-hwy-62-north.html	Sonic Drive-In	0.98
+391c6a1602fe	Sonic Drive In	fastfood		30.91383	-93.99569	850 South Wheeler	Jasper	75951	+14093849944	https://locations.sonicdrivein.com/tx/jasper/850-south-wheeler.html	Sonic Drive-In	0.97
+c17970b0a97e	Sonic Drive In	fastfood		30.11864	-93.74806	3103 N. 16Th Street	Orange	77630	+14098833060	https://locations.sonicdrivein.com/tx/orange/3103-n.-16th-street.html	Sonic Drive-In	0.95
+1ec1b93f4e0a	Sonic Drive-In	fastfood		30.11227	-93.82050	2210 TX-62	Orange	77630	+14098863558	https://locations.sonicdrivein.com/tx/orange/2210-hwy-62.html	Sonic Drive-In	0.95
+ba22abb5a3df	Sonic Drive-In	fastfood		30.43984	-93.97053	34910 US Highway 96 S	Buna	77612	+14099949441	https://locations.sonicdrivein.com/tx/buna/34910-us-highway-96-south.html		0.85
+f49a245e89af	Subway	fastfood		30.12980	-93.95989	17160 Interstate 10	Vidor	77662	+14094453336	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=73043&utm_campaign=evergreen-2020&y_source=1_MTA4NTg4NjM5Ny00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+1d43a742c5f4	Taco Bell	fastfood		30.11650	-93.74777	2901 16th Street	Orange	77630	+19363420993	http://www.tacobell.com/	Taco Bell	0.99
+2ba5ce8eb174	Taco Bell	fastfood		30.91146	-93.99359	475 East Gibson Street	Jasper	75951	+14094890208	http://www.tacobell.com/	Taco Bell	0.98
+6d1f07880848	Taco Bell	fastfood		30.02385	-93.84367	835 Texas Ave	Bridge City	77611	+14097359135	https://locations.tacobell.com/tx/bridge-city/835-texas-ave.html	Taco Bell	0.99
+fbdde6cfa917	Taco Bell	fastfood		30.11429	-93.81936	7243 I-10	Orange	77630	+14094054027	https://locations.tacobell.com/tx/orange/7243-i-10.html	Taco Bell	0.95
+30b0a375cb73	Tacos La Shula	fastfood		30.10542	-93.77345	1819 Strickland Dr	Orange	77630				0.86
+c27c50aa8a3b	Wendy's	fastfood		30.09378	-93.76497	3113 Edgar Brown Dr	West Orange	77630	+14092098063	https://locations.wendys.com/united-states/tx/west-orange/3113-edgar-brown-drive	Wendy's	0.99
+c620c02a452e	Wendy's	fastfood		30.11175	-93.82193	2205 N. Highway 62	Orange	77630	+14092098058	https://locations.wendys.com/united-states/tx/orange/2205-n-highway-62	Wendy's	0.99
+628d2e798e44	Whataburger	fastfood		30.03356	-93.83353	1905 Texas Ave	Bridge City	77611	+14096971800	https://locations.whataburger.com/tx/bridge-city/1905-texas-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+925499398bc6	Whataburger	fastfood		30.11432	-93.81897	7241 IH 10	Orange	77630	+14098838799	https://locations.whataburger.com/tx/orange/7241-ih-10.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
+3709a1b0685b	AJS Apiary and Farms, Hidden Meadows Honey	grocery		30.20759	-93.80524	6136 Hidden Meadows Dr	Orange	77632	+14099889284			0.97
+069bcca08942	Brookshire Brothers	grocery		30.91019	-93.99631	1125 S Wheeler St	Jasper	75951	+14093845738	https://www.brookshirebrothers.com/store-location/store-45	Brookshire Brothers	0.98
+81c32863c773	Brookshire Brothers	grocery	international grocery store	30.63644	-93.89944	1005 S Margaret Ave	Kirbyville	75956	+14094236123	https://www.brookshirebrothers.com/weekly-ad?store=53		0.85
+89de720cff40	Brookshire Brothers	grocery	international grocery store	30.43798	-93.96513	34692 US Highway 96 S	Buna	77612	+14099943231	https://www.brookshirebrothers.com/store-location/store-64		0.85
+c384c648c718	Brookshire Brothers	grocery		30.44719	-93.96877	34692 U.S. 96 S	Buna	77612	+14099943231	https://www.brookshirebrothers.com/store-location/store-64	Brookshire Brothers	0.92
+c5f19ac23289	Brookshire Brothers	grocery		30.84576	-93.76899	609 W Court St	Newton	75966	+14093792001	https://www.brookshirebrothers.com/store-location/store-14	Brookshire Brothers	1.00
+bd09fa6cd89a	Danny's Super Foods	grocery		30.08369	-93.75128	2003 Western Ave	West Orange	77630	+14098834433	http://WWW.K-Dans.com/		0.96
+e3b4e7dc61d9	Deweyville grocery	grocery		30.30508	-93.76013	2326 LA-12	Deweyville	77614				0.64
+270adcc8e279	Good times smoke shop lounge	grocery		30.10615	-93.74748	1607 N 16th St	Orange	77630	+14095507678	http://www.goodtimessmokeshoplounge.com/		0.80
+a3f20fe3db87	Harris Farms	grocery		30.13563	-93.82095	3616 TX-62	Orange	77632	+14098838244	http://www.harrisfarm.com.au/	Harris Farm	0.92
+f690f396e788	HEB	grocery		30.11558	-93.74631	2424 N.16 Th Street	Orange	77630	+14098835105	https://www.heb.com/heb-store/US/tx/orange/orange-h-e-b-35	H-E-B	1.00
+083d52918bf9	K-Dan's Super Foods	grocery		30.07625	-93.85555	9604 FM 105	Orange	77630	+14097929491	http://mobil.com		0.97
+9605da655fcb	M & S Brothers Inc	grocery		30.17918	-93.79810	10876 FM 1130	Orange	77632				0.95
+53b5fb499a60	Market Basket	grocery		30.03484	-93.83311	2005 Texas Ave	Bridge City	77611	+14097353022	http://MarketBasketFoods.com		0.92
+b634d91a5654	Market Basket	grocery		30.12261	-93.74846	3709 N 16th St	Orange	77632	+14098868261	http://MarketBasketFoods.com		0.92
+bf5fd975d9d2	Market Basket	grocery		30.20624	-93.87293	11916 Highway 62 N	Orange	77632	+14097453151			0.92
+297a46402ea7	Mi Cubanita	grocery		30.10599	-93.74769	1601 N 16th St	Orange	77630	+14096838281			0.92
+1147b54e4f2a	Orange H-E-B	grocery		30.11468	-93.74735	2424 N.16TH STREET	Orange	77630		https://www.heb.com/heb-store/us/tx/orange/orange-h-e-b-35	H-E-B	0.80
+93d89c344c28	Passe Patout	grocery		30.10489	-93.72948	200 W Turrett Rd	Orange	77630	+13373171112	http://www.absolutdrinks.com/en/drinks/passe-partout		0.64
+8c689ae8ad44	Sunshine Groceries	grocery		30.28144	-93.78916	42338 State Highway 87 S	Orange	77632	+14097463907			0.71
+8384f78273a9	Vaquita Orange	grocery		30.09758	-93.76490	150 Strickland Dr	Orange	77630	+14092385092	https://linktr.ee/vaquitatx		0.94
+656b400ae688	Veteran's Groc & Mkt	grocery		30.06730	-93.74406	1900 Dupont Dr	Orange	77630	+14098833282	http://cornerstore.com/StoreHome/1471		0.92
+5c6bdf833d94	Baptist Orange Hospital	hospital		30.10004	-93.76687	608 Strickland Dr	Orange	77630	+14098839361	http://www.bhset.net		0.97
+cb36ab2924ca	Christus Health Southeast Texas	hospital		30.89906	-93.99282	S Wheeler St	Jasper	75951	+14093845919			0.66
+bf7671142a15	CHRISTUS Hospital - Orange	hospital		30.11105	-93.81453	6901 Medical Center Drive	Orange	77630	+14097926500	https://www.christushealth.org/locations/orange-hospital		0.99
+86eed06a15f0	Christus Jasper Memerial Home Care	hospital		30.89950	-93.99285	2014 S Wheeler St	Jasper	75951	+14093848351	https://www.christushealth.org/find-a-doctor/christopher-hoyt?y_source=1_MTUyMTI3MzUtNDQwLWxvY2F0aW9uLndlYnNpdGU=	CHRISTUS Children's	1.00
+9d5b371ea55b	Clinica San Lucas Orange	hospital		30.09720	-93.76548	256 Strickland Dr	Orange	77630				0.86
+d2bb29d8893a	DrHah	hospital		30.10044	-93.76736	610 Strickland Dr	Orange	77630	+14098835600	http://www.BeautyMDs.com/		0.94
+5fe3c8895f9a	Harbor Hospice	hospital		30.90777	-93.99303	440 State St	Jasper	75951	+14093843662	http://www.harborhospice.com/	Harbor Hospice, Clear Lake	0.65
+1d838275b57d	Hart Lumber Company	hospital		30.88929	-93.98914	2251 US Highway 96 S	Jasper	75951	+14093842587	http://www.abe-usa.com		0.56
+d955fdb019fc	Jasper Hospital District	hospital		30.91735	-93.99661	Hwy 96	Jasper	75951				0.72
+7b4b8d74cf82	Mauriceville Community Center.	hospital		30.19424	-93.86837		Orange			http://www.yellowpages.com/mauriceville-tx/community-center		0.78
+5c84d5279e41	Memorial Hermann Baptist Belmont	hospital		30.10027	-93.76844	608 Strickland Dr	Orange	77630	+14098839361	http://www.bhset.net		0.64
+acc14f53e4cc	Nick Pomonis MD	hospital		30.10088	-93.76984	610 Strickland Dr	Orange	77630	+14098865796			0.89
+f430c15582fc	TAN Healthcare	hospital		30.12361	-93.74869	3737 N 16th St	Orange	77632	+14099204223	https://www.tanhealthcare.org		0.92
+1cece6b43bef	The Children's Clinic of Jasper	hospital		30.90746	-93.99304	1008 Dickerson Dr	Jasper	75951				0.96
+c27b11668aa3	Americas Best Value Inn Jasper	hotel	resort	30.90510	-93.99273	1700 S Wheeler St	Jasper	75951	+14093845772			0.92
+972ce0ae228b	Ameristay Inn & Suites	hotel		30.09374	-93.75684	2311 MacArthur Dr	Orange	77630	+14098830204			0.94
+f97822133d5c	Anfield Investments Llc	hotel		30.11345	-93.82189	2245 Highway 62 S	Orange	77630				0.95
+0c31f78212e1	Artesian Springs Resort	hotel		30.91596	-93.71105	565 County Road 2041	Newton	75966	+14093798826	http://artesianspringsresort.com		0.58
+d7dd3e2bcabb	Best Western Orange Inn & Suites	hotel		30.11340	-93.82224	2245 TX-62	Orange	77630	+14097459393	https://www.bestwestern.com/en_US/book/hotel-rooms.44703.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44703	Best Western Hotels & Resorts	1.00
+498f977dbea1	Brit Estates Llc	hotel		30.11276	-93.82056	2220 Highway 62 S	Orange	77630				0.95
+3c2d4677d620	Budget Inn	hotel	motel	30.13033	-93.95344	2465 North St	Vidor	77662	+14097692299	http://www.budgetinn.com		0.96
+b2ba5ddc3b19	Budget Inn	hotel	motel	30.91571	-93.98622	900 E Gibson St	Jasper	75951	+14093843424	http://budgetinn.com/	Budget Inn	0.92
+deb9de170574	Club Foxys	hotel		30.09644	-93.73003	202 W Cypress Ave	Orange	77630		https://www.clubfoxy.us		0.97
+2ab12a6ec4bb	Comfort Inn	hotel	resort	30.11451	-93.82127	2321 Highway 62 S	Orange	77630	+14097450400	https://www.choicehotels.com/texas/orange/comfort-inn-hotels/txb06?mc=llbillpx&pmf=local		1.00
+47e21dcfe1b6	Days Inn	hotel		30.12347	-93.76208	4301 27th St	Orange	77632	+14098839981	https://www.wyndhamhotels.com		0.55
+6b3f6297652d	Days Inn by Wyndham Orange	hotel	resort	30.12195	-93.76019	2630 Lutcher Dr	Orange	77632	+14092101642	https://www.wyndhamhotels.com/days-inn/orange-texas/days-inn-orange/overview?CID=LC:iqv0j1dklijly45:27673&iata=00093796		0.99
+e3c2ee794ef5	Deluxe Inn	hotel	motel	30.90412	-93.99281	1730 S Wheeler St	Jasper	75951	+14093818800	http://www.deluxeinntx.com		0.92
+c605ab5279b9	Econo Lodge Inn & Suites	hotel		30.01932	-93.84883	255 TX-73	Bridge City	77611	+14097352311	https://www.choicehotels.com/texas/bridge-city/econo-lodge-hotels/txd78?pmf=yext&mc=llyxyxpx	Choice Hotels	0.92
+8a74e87369ef	Economy Inn	hotel		30.09362	-93.75689	2311 MacArthur Dr	West Orange	77630	+14098830204	http://www.economyinnflorence.com		0.92
+a181ea95eb9f	Executive Inn & Suites	hotel	resort	30.12260	-93.76192	4301 27th St	Orange	77632	+14098839981	http://www.executiveinnorange.com/		0.87
+2426588132c5	Gateway Inn Motel	hotel	motel	30.65797	-93.89453	312 S Margaret Ave	Kirbyville	75956	+14094234611			0.92
+39491accd8db	Grannys Playhouse	hotel		30.09285	-93.74385	1403 Green Ave	Orange	77630				0.95
+d1be7da30a45	Hampton Inn Orange	hotel		30.12226	-93.75235	2080 Lutcher Dr	Orange	77632	+14098832500	https://www.hilton.com/en/hotels/bptorhx-hampton-orange/	Hampton by Hilton	1.00
+811947331fa6	Hickory Lane Apartments	hotel		30.81956	-93.73042	3100 US-190 E	Newton	75966	+14093795625			0.57
+a76e3aa05d0b	Hickory Lane Apartments	hotel		30.81859	-93.72580	3100 US-190 E	Newton	75966	+14093795625			0.56
+c823ad64d264	Holiday Inn Express & Suites Orange	hotel		30.12049	-93.75857	2655 I-10 E	Orange	77630	+14098829222	https://www.ihg.com/holidayinnexpress/hotels/us/en/orange/orges/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-ORGES	Holiday Inn Express	0.99
+f3390cb59831	HomeTowne Studios Orange, TX	hotel	resort	30.12346	-93.76324	4407 27th St	Orange	77632	+14093304860	https://www.redroof.com/extendedstay/hometownestudios/property/tx/orange/HTS1299		0.99
+0b4d7a23465e	Knights Inn Orange	hotel		30.12310	-93.75448	2208 Lutcher Dr	Orange	77632	+18884240138	https://www.kingsinnmichigancity.com		0.55
+89c1f6c785f6	La Quinta Inn and Suites	hotel		30.11266	-93.82027	2220 TX-62	Orange	77630	+14098830011	http://www.laquintaorange.com/?cid=local_6123	La Quinta by Wyndham	0.99
+32fe80d4db87	La Quinta Inn and Suites by Wyndham	hotel		30.01718	-93.84952	108 Texas Ave	Bridge City	77611	+14097352221	http://www.laquintabridgecity.com/?cid=local_6204	La Quinta by Wyndham	1.00
+9e0da295353b	Lee & Les Association	hotel		30.12347	-93.76208	4301 27th St	Orange	77632				0.95
+584d02d5adf8	Magnolia Ridge Lodge & RV Park	hotel	lodge	30.73643	-93.82082	362 Private Rd	Newton	75966	+14093369998	http://www.magnoliaridgelodgeandrvpark.com/		0.92
+50c2c21237b6	Motel 6	hotel		30.12387	-93.76335	4407 27th St	Orange	77632	+14093304860	https://www.motel6.com/en/motels.tx.orange.8734.html	Motel 6 Morehead	0.88
+ed52f0bb92c0	Newton County Powell Hotel	hotel		30.84764	-93.75957	313 Rusk St	Newton	75966	+14093794556	https://www.newton-texas.com		0.92
+b486cc0681d0	Newton Masonic Lodge #136 AF & AM	hotel	lodge	30.99740	-93.66957	Hwy 87	Burkeville					0.72
+5125ed49dbca	Park Avenue Manor	hotel		30.10969	-93.75871	2540 W Park Ave	Orange	77630	+14098869930			0.99
+afa3f31e4dcd	Quality Inn and Suites Bridge City Orange	hotel		30.01917	-93.84895	255 Texas Ave	Bridge City	77611	+14097352311	https://www.choicehotels.com/texas/bridge-city/econo-lodge-hotels/txd78?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+221087bd711f	Radha Swami Llc	hotel		30.12215	-93.76000	2630 Lutcher Dr	Orange	77632				0.95
+7096a16ca0af	Rodeway Inn	hotel	resort	30.91014	-93.99696	239 E Gibson St	Jasper	75951	+14093849021	https://www.choicehotels.com/texas/jasper/rodeway-inn-hotels/txh19?mc=llbillpx&pmf=local		0.98
+e014adce0b53	Studio 6 Orange, TX	hotel		30.11814	-93.82070	2502 TX-62	Orange	77632	+14092022322	http://www.motel6.com/	Studio 6	0.99
+4f94a8fa1998	Summer Hill Management Llc	hotel		30.12235	-93.75237	2080 Lutcher Dr	Orange	77632				0.95
+5690ac75f283	Super 8	hotel		30.12320	-93.76125	2710 Interstate 10 W	Orange	77632	+14098820888	http://www.super8.com/hotels/texas/orange/super-8-orange/hotel-overview?reg=Local-_-all-_-S8-_-all&cid=IP_Local&wid=local		0.85
+a1b8584d244a	Super 8	hotel	motel	30.93751	-93.99602	2100 N Wheeler St	Jasper	75951	+14094894871	https://www.wyndhamhotels.com/super-8/jasper-texas/super-8-jasper-tx/overview		1.00
+b8720b81ddc2	SureStay	hotel		30.12290	-93.76112	2710 Lutcher Dr	Orange	77632	+14098820888	http://Bestwestern.com/	Super 8 by Wyndham	0.99
+ef616570fc81	The Best Price Motel & Suites	hotel	motel	30.12277	-93.75907	2610 Lutcher Dr	Orange	77632	+14098830231	http://bestpriceorange.com/index.html		0.99
+f1b307471ac3	The Hotel Orange	hotel		30.12263	-93.76286	2900 Lutcher Dr	Orange	77632	+14099204045			1.00
+777956595b07	Whispering Creek RV Park & Motel	hotel		30.81518	-93.71915	3717 US Highway 190 E	Newton	75966	+14093798400			0.98
+871a7eb119c1	American Legion Post 49	office	private association	30.09365	-93.72979	108 Green Ave	Orange	77630	+18004333318	http://legion.org/	American Legion	0.92
+a3015f8cdfcb	Bludworth Marine LLC	office	ferry boat company	30.06797	-93.71830	2599 S Childers Rd	Orange	77630	+17136441595	https://bludworth-marine-llc.hub.biz/	Bludworth Marine LLC	0.92
+29af7354f897	Boost Mobile	office	telecommunications company	30.10613	-93.74770	1607 N 16th St	Orange	77630	+14093301839	https://www.boostmobile.com/	Boost Mobile	0.86
+aadfc0b954af	Borel Boat Works	office	ferry boat company	30.17289	-93.75157	755 W Bluff Rd	Orange	77632	+14098835174	https://iknowmedia.com		0.92
+5de599d9890f	Buck Springs Water	office	bottled water company	30.98997	-93.98643	4829 US-96	Jasper	75951	+14093844701	http://buckspringstexas.com/water/		0.92
+008c8c09a535	Cloeren Incorporated	office	plastics company	30.09420	-93.74734	401 N 16th St	Orange	77630	+18002563736	https://www.cloeren.com/	Cloeren	0.96
+6b63cf99805c	Dcm Fabrication	office		30.16454	-93.76574	2989 Little Cypress Dr	Orange	77632	+14093304923	https://www.dcmfabricationinc.com		0.92
+ceb1f0b62467	Deborah Ann's Tavern	office	private association	30.91002	-93.99282	645 Mays St	Jasper	75951	+14093835225			0.96
+d75e52e4ebf2	Evergreen Technology Solutions	office	information technology company	30.43284	-93.96208	844 TX-62	Buna	77612	+14092175003	https://evergreentechtx.com/		0.92
+f2c33a24d1ef	Industrial Thermal Services	office	industrial company	30.09092	-93.73455	119 N 5th St Ste C	Orange	77630	+14098869700	https://www.its-thermal.com/	Industrial Thermal Services, LLC	0.92
+d47e39cd54e8	MHC Datacomm	office	information technology company	30.11885	-93.77316	3537 Whippoorwill St	Orange	77630	+14096701356	http://www.mhcdce.com/		0.92
+cbcf4f5e038d	Orange County Ice	office	bottled water company	30.04846	-93.81845	3119 TX-87	Bridge City	77611	+14097929787			0.92
+5616fa92f8d0	Orion Engineered Carbons	office		30.15408	-93.72739	1513 Echo Ave	Orange	77632	+14098839966	http://www.orioncarbons.com		0.92
+23945459f90c	Promiles	office	information technology company	30.03306	-93.83295	1900 Texas Ave	Bridge City	77611	+14096972587	https://www.promiles.com		0.92
+bd1a7ef10b1d	Rubber Lining Specialists	office		30.13672	-93.82041	1004 Gus Ln	Orange	77632	+14098865787	http://www.rubberliningspecialists.com/		0.94
+167200b169d1	Simply Aquatics	office		30.62125	-93.86121	5875 County Road 3068	Call	75933	+14094200774			0.65
+b51e6c5ec9d1	Spectrum Internet	office	telecommunications company	30.09250	-93.76653	3121 Edgar Brown Dr	West Orange	77630	+18556846329	https://www.spectrum.com/locations/tx/orange/3121-edgar-brown-dr?cmp=yxt_fb	Spectrum	0.92
+3f75f27631d6	T-Mobile	office	telecommunications company	30.09216	-93.76695	3121 Edgar Brown Dr Ste C	Orange	77630	+14098839971	http://www.t-mobile.com/store/cell-phone-orange-tx-2663.html		0.92
+cd1707518eb7	Texas Network Services	office	information technology company	30.14338	-93.99041	2375 TX-12	Vidor	77662	+14097680896	http://www.texasnets.com/		0.92
+6525529a9ea2	Top Deck Inc	office	industrial company	30.19711	-93.86808	10861 TX-62	Orange	77632	+14097453955	http://www.topdeckinc.net/		0.92
+94fe9ff99975	Alice’s Hot Dog House	restaurant		30.10521	-93.77267	1712 Strickland Dr	Orange	77630	+16822607934	https://www.aliceshotdoghouse.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
+56fd2030f96f	Anita's Tex Mex	restaurant	texmex restaurant	30.43885	-93.96590	351 TX-62	Buna	77612	+14099948030			0.93
+b66f8067dc00	Armend Hajdari And Avni Salihu	restaurant		30.09439	-93.76372	3105 Edgar Brown Dr	West Orange	77630				0.95
+ad463ee57b9c	B&S Barbecue	restaurant	barbecue restaurant	30.13066	-93.93911	2965 North St	Vidor	77662	+14098930600			0.78
+9d3c1a67480d	Barry’s Greek Grill	restaurant	greek restaurant	30.12204	-93.74854	1720 Lutcher Dr	Orange	77632	+14093304192	https://www.barrysgg.com/		0.92
+47b990f1e8cb	Bayou Brothers Crawfish	restaurant		30.90938	-93.99573	895 Shady Ln	Jasper	75951	+14093364191	http://www.bayoubrotherscrawfish.com/		0.70
+7df5895624cd	Bayou Cafe Express Orange Tx	restaurant	cajun and creole restaurant	30.11231	-93.82039	2210 TX-62	Orange	77630	+14096002992	http://www.bayoucaferestaurants.com/		0.87
+801dbf02ecad	Beasley's Smokehouse Sausage Co. L.L.C.	restaurant	barbecue restaurant	30.36526	-93.92505	590 Co Rd 797	Buna	77612	+14099942339	https://www.instagram.com/beasleyssmokehousesausage/		0.96
+7fd65dd16638	Big Daddy's Bugs	restaurant	seafood restaurant	30.43369	-93.96286	778 TX-62	Buna	77612	+14092899945			0.92
+ced08d298dad	Big Doobie's Boudin and Cracklins	restaurant	cajun and creole restaurant	30.03921	-93.82661	2530 Texas Ave	Bridge City	77611	+14094241564			0.98
+19ffd415cadc	Big E's Barbeque	restaurant	barbecue restaurant	30.09345	-93.72900	102 Green Ave	Orange	77630	+14093304435			0.92
+63255737fb45	Black Gold Barbeque	restaurant	barbecue restaurant	30.43501	-93.97569	35660 US Highway 96 S	Buna	77612	+14099946700	https://blackgoldbuna.com/		0.97
+135cdc063c12	Bliss Box (Homsi’s #3)	restaurant		30.11448	-93.81986	7247 Interstate 10 E	Orange	77630	+14098832222	https://blissboxfood.com/		0.96
+c4e9161026f7	Bliss Box - Boudin	restaurant	cajun and creole restaurant	30.11455	-93.81988	7247 I-10	Orange	77630	+14098832222	http://blissboxfood.com/		0.94
+a73238ed2895	Blue Moon Cajun Cafe	restaurant	cajun and creole restaurant	30.03505	-93.83204	2045 Texas Ave	Bridge City	77611	+14096978001	http://bluemooncajun.com/		0.96
+4d5f1145fc43	Bluebird Fish Camp	restaurant	seafood restaurant	30.11134	-93.72731	102 N Farragut Ave	Orange	77630	+14092385410			0.96
+b10d18137b93	Brick & Barley	restaurant	gastropub	30.12253	-93.75945	2614 Lutcher Dr	Orange	77632	+14093304345	http://brickandbarleytx.com		0.99
+47e4b7b01927	Bridgecity Rw Incorporation	restaurant		30.02130	-93.84529	500 Texas Ave	Bridge City	77611				0.95
+7aed177ef6c6	Brookshire Brothers 14	restaurant	burger restaurant	30.76367	-93.68501	Hwy 190 W	Newton	75966	+14093792001			0.58
+4d74d028d243	Burger King	restaurant	burger restaurant	30.09475	-93.75786	2508 MacArthur Dr	Orange	77630	+14096709818	https://burgerking.com/store-locator/store/25780	Burger King	0.99
+adff28d09f10	Burger King	restaurant	burger restaurant	30.11385	-93.82043	2302 Highway 62 South	Orange	77630	+14093304425	https://burgerking.com/store-locator/store/restaurant_81222		0.99
+341bc61ff2ab	Burger Town	restaurant	burger restaurant	30.07035	-93.90446	6223 W Roundbunch Rd	Orange	77630	+14097358840	http://www.bt409.com/		0.98
+83d6d62744ef	CAFE 257	restaurant	bar and grill restaurant	30.96880	-93.98345	488 County Road 257	Jasper	75951	+14092896843			0.86
+e39cf00a1e99	Cajun 88	restaurant	cajun and creole restaurant	30.11695	-93.74706	2900 N 16th St	Orange	77630	+14093304580			0.92
+bf4f6b24fb61	Cajun Country	restaurant	seafood restaurant	30.14718	-93.98235	2702 Highway 12	Vidor	77662	+14097385098			0.76
+2516136bb5cb	Cajun Joe's Cafe	restaurant	cajun and creole restaurant	30.84840	-93.76124	101 Court St	Newton	75966	+14093793140			0.92
+cc6362bee0c8	Carl's Jr.	restaurant	burger restaurant	30.09782	-93.76577	288 Strickland Dr	Orange	77630	+14096709410	https://www.carlsjr.com/	Carl's Jr.	0.92
+0e463881fb0d	Casa Ole	restaurant	texmex restaurant	30.10797	-93.74767	1717 N 16th St	Orange	77630	+14098860642	http://casaole.com/	Casa Olé	0.99
+9c5ce83d60ff	Casa Ole	restaurant		30.92176	-93.99671	190 N Wheeler St	Jasper	75951	+14093838800	www.casaole.com		0.70
+3e9fccccada9	Catfish Cabin	restaurant	seafood restaurant	30.96411	-93.99227	4687 North Wheeler Street	Jasper	75951	+14093842228	http://www.catfishcabin.com		0.77
+933d32c3bd85	Cedar Tree Restaurant	restaurant	comfort food restaurant	30.90876	-93.99448	1348 S Wheeler St	Jasper	75951	+14093848832	http://cedartree.cafe/	Cedar Tree	0.97
+3ec0f65512dc	Chester's Chicken	restaurant	chicken restaurant	30.11489	-93.82167	7411 Interstate 10 E	Orange	77630	+14093304606	https://www.chesterschicken.com/		0.96
+4949b32b7b8a	Chili's Grill & Bar	restaurant		30.09871	-93.76632	292 Strickland Drive	Orange	77630	+14098862400	https://www.chilis.com/		0.99
+e7b071f4dc8b	Chinese Kitchen	restaurant	chinese restaurant	30.91466	-93.99565	760 S Wheeler St	Jasper	75951	+14093830095	http://bestchinesekitchen.com		0.98
+0e1530e73b3b	Choppy's Bbq & Sandwich Shop	restaurant	barbecue restaurant	30.03944	-93.87265		Orange		+14099202105			0.71
+27206b6f53df	Church's Chicken	restaurant	chicken wings restaurant	30.91361	-93.99687	849 S Wheeler St	Jasper	75951	+14093849478	https://churchs.com		0.92
+a06d0899c98f	Church's Texas Chicken	restaurant	chicken restaurant	30.10354	-93.74688	1322 N 16th St	Orange	77630	+14098837011	https://churchs.com		0.92
+48e23912ea37	Crawfish Capitol Sales & Restaurant	restaurant	seafood restaurant	30.17450	-93.84952	8207 Highway 62 N	Orange	77632	+14097453022	http://www.buzzfile.com/business/Crawfish-Capital-Sales-409-745-3022		0.83
+8040e658d3d6	Dane's Crawfish And More	restaurant	seafood restaurant	30.64788	-93.89673	1412 S Margaret Ave	Kirbyville	75956	+14094205042	http://www.danescrawfish.com		0.97
+a6a9ac23ca6a	Dee's Deli	restaurant	delicatessen	30.84316	-93.75785	205 Easy St	Newton	75966	+14093793281			0.81
+7da6e6715c85	Deluxe Seafood	restaurant		30.09970	-93.74031	1102 W Park Ave	Orange	77630		https://deluxeseafood.com		0.95
+f1f7b16ccbbb	Denny's Restaurant	restaurant		30.11635	-93.82018	7112 I-10 West	Orange	77632	+14098834720	https://www.dennys.com/		0.98
+23accbe47a59	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.12096	-93.75526	2327 Lutcher Dr	Orange	77630	+14099204033	https://www.dickeys.com/locations/Texas/Orange/orange	Dickey's Barbecue Pit National	0.97
+b41e27895609	Dickey's Barbecue Pit	restaurant	barbecue restaurant	30.13118	-93.95998	17160 Interstate 10	Vidor	77662	+14094453337	https://www.dickeys.com/locations/texas/vidor/vidor-tx		0.97
+e30783898537	Dickeys Barbecue Pit	restaurant	barbecue restaurant	30.12046	-93.74887	2327 Lutcher Dr	Orange	77630	+14099204033	https://dickeys.alohaorderonline.com/Locations.aspx?selectsite=1437		0.85
+cda05db1ebca	Domino's	restaurant	pizza restaurant	30.03795	-93.82809	2380 Texas Ave.	Bridge City	77611	+14097356886	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps-test_menutest	Domino's Pizza	0.96
+d694f06c3847	Domino's	restaurant	pizza restaurant	30.09375	-93.75414	2107 Macarthur Dr	West Orange	77630	+14098835552	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+b65cecdf134c	Domino's Pizza	restaurant	pizza restaurant	30.20258	-93.88203	10335 TX-12	Mauriceville	77632	+14097456662	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.94
+0a2a4ac31af1	Downing Smoke	restaurant	barbecue restaurant	30.70046	-93.87959	HIGHWAY 96	Kirbyville	75956	+14095948667	http://www.downingsmoke.com/		0.72
+b7d7588f1c30	Ebarb Inc	restaurant		30.65278	-93.89641	909 S Margaret Ave	Kirbyville	75956				0.95
+5fd780555452	El Autentico Taco El Caporal	restaurant	mexican restaurant	30.03513	-93.83105	2110 Texas Ave	Bridge City	77611	+14093136118			0.92
+7e531f198651	El Caporal	restaurant	mexican restaurant	30.03651	-93.83062	2215 Texas Ave	Bridge City	77611	+14096978007	http://www.barrigroup.com		0.92
+8e4ee646ca4c	El Flamingo	restaurant	mexican restaurant	30.84699	-93.75971	118 Main St	Newton	75966	+14093928112			0.92
+cd93a1747e7a	El Flamingo	restaurant	mexican restaurant	30.92981	-93.99670	910 N Wheeler St	Jasper	75951	+14092248203	https://hudut.top/el-flamingo-mexican-restaurant-jasper-tx		0.98
+1e83960a279b	El Flamingo Mexican Restaurant	restaurant	mexican restaurant	30.67317	-93.89349	1301 N Margaret Ave	Kirbyville	75956	+14092841171			0.97
+4930e5489983	El Lindo Mexico	restaurant	mexican restaurant	30.92980	-93.99660	910 N Wheeler St	Jasper	75951	+14094890070	http://www.mi-mexicolindo.com		0.92
+15f97874c46b	El Ranchero	restaurant	texmex restaurant	30.11421	-93.74782	2413 N 16th St	Orange	77630	+14099204410	http://www.ranchograndebarandgrill.com		0.92
+6d6671587be7	El Ranchero	restaurant	mexican restaurant	30.20283	-93.88161	10383 TX-12	Orange	77632	+14093494049			0.96
+76865233f768	Elijah's Cafe	restaurant	comfort food restaurant	30.66470	-93.89405	417 N Margaret Ave	Kirbyville	75956	+14094237283	http://www.sonbistro.com		0.97
+05fd86328c7a	Elsa's Italian Grill	restaurant		30.13142	-93.98495	18635 IH-10	Vidor	77662	+14094224256			0.96
+f7e105141e41	Fat Boy's BBQ	restaurant	barbecue restaurant	30.03668	-93.83017	2227 Texas Ave	Bridge City	77611	+14097920123			0.92
+718a8b07dd0b	Fat Frank's Grill	restaurant	burger restaurant	30.14884	-93.97865	3030 Highway 12	Vidor	77662	+18327970093			0.73
+5d4cbfc93a44	Fausto's Fried Chicken	restaurant	chicken restaurant	30.45503	-93.96471	34074 US Highway 96 S	Buna	77612	+14099945625	https://m.facebook.com/FaustosBuna		0.96
+ff30207e65cb	Fish Tales Jasper	restaurant	seafood restaurant	30.91303	-93.99437	424 E Gibson St	Jasper	75951	+14092025000	https://food.google.com/chooseprovider?restaurantId=%2Fg%2F11p0hhggxn&g2lbs=AP8S6ENjHsm6s3ZT0ShwgEACkpXurll5Y9VZKJ4TtLVfwCUyypXzN34MwrdHt42HhxKTyv0G16qzh3AR2BvUe4PwVDvJQzEW8VqJyJ0X0IMJTMettwm8JTGpSWPrOOk3IXmnJGifWppqDAzc_-5u0W8sIzvPTedx7DDSWPpk1nNe7JXhEk-zqRM%3D&hl=en-US&gl=us&cs=1&ssta=1&fo_m=MfohQo559jFvMUOzJVpjPL1YMfZ3bInYwBDuMfaXTPp5KXh-&utm_source=search&gei=it30ZN2eHJW4qtsP8Yyb2A0&ei=it30ZN2eHJW4qtsP8Yyb2A0&fo_s=OA%2CSOE&opi=89978449		0.92
+ef24378c34f0	Fresh Prep	restaurant	health food restaurant	30.03926	-93.87811	2467 W Round Bunch Rd	Orange	77630	+14097198941	http://freshpreptogo.com		0.97
+df2c04d64b5c	GRANDMA'S COUNTRY STYLE	restaurant		30.05175	-93.81304	33 PATILLO Rd	Bridge City	77611	+14093136265	https://www.bridgecitygrandmas.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
+bb6a3b482ffa	Guadalajara Restaurant	restaurant	texmex restaurant	30.09599	-93.76523	95 Strickland Dr	Orange	77630	+14098834214	http://guadalajararestaurant1.placeweb.site/		0.96
+96bf7fde79e2	Hamburger Depot	restaurant	burger restaurant	30.91965	-93.99584	270 S Wheeler St	Jasper	75951	+14093845824	http://www.hamburgerdepot.com/	Hamburger Depot	0.92
+5fed9385221e	Hangar 54 Pizza	restaurant	pizza restaurant	30.05132	-93.81590	20871 Highway 62 S	Orange	77630	+14097382200	https://hangar54.pizza/location/exxpress-mart-21-orange-tx/		0.96
+eee9064114e1	Hig's Bar & Grill	restaurant	bar and grill restaurant	30.05772	-93.90838	9190 Parkwood St	Orange	77630				0.92
+0e4d1ddb4b76	It's Just Wings	restaurant	chicken wings restaurant	30.09871	-93.76632	292 Strickland Drive	Orange	77630	+14694608861	https://itsjustwings.com/		0.92
+03617189fc7c	J & J Wings & Seafood	restaurant	seafood restaurant	30.09565	-93.75368	2246 MacArthur Dr	Orange	77630	+14098869020			0.96
+05824d2263fc	Jack in the Box	restaurant	taco restaurant	30.03830	-93.82888	2395 Texas Ave	Bridge City	77611	+14097383097	http://www.jackinthebox.com/locations/4712		0.92
+c4afd2afbb0d	Jack in the Box	restaurant	taco restaurant	30.11397	-93.82013	7247 Interstate 10 E	Orange	77630	+14098829961	http://www.jackinthebox.com/locations/3651		0.92
+daa9b43e7fad	Janices Dinner Bell Cafe	restaurant		30.67303	-93.89452	1301 N Margaret Ave	Kirbyville	75956				0.98
+9bd7416a2a5c	Jenny's Fried Chicken	restaurant	comfort food restaurant	30.65285	-93.89610	901 S Margaret Ave	Kirbyville	75956	+14094235613	http://Jennysfriedchicken.com/		0.97
+feac9dd9932d	Jimmy Nick's Bbq	restaurant	barbecue restaurant	30.13141	-93.99916	105 Sargent St	Vidor	77662	+14094224925	https://www.gubersofsetx.com		0.92
+d9ad8692aeb3	Joe's Italian Restaurant	restaurant	pizza restaurant	30.90930	-93.99831	235 E Gibson St	Jasper	75951		http://bellaseraitalianrestaurant.com/		0.59
+b06c74a79f53	Joe's Pizza & Pasta	restaurant		30.45104	-93.96538	34331 US Highway 96 S	Buna	77612	+14099942429	http://joespizzaandpastaonline.com		0.98
+28060c890af9	K.C.'s Bar	restaurant		30.18709	-93.90129	8263 Breckinwood St.	Orange	77632	+14093133830			0.60
+b861fefa0e8c	Kajun Seafood & Wings 2	restaurant	seafood restaurant	30.09949	-93.74041	1102 W Park Ave	Orange	77630	+14098869988	https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.clover.com%2Fonline-ordering%2Fkajunseafoodwingsorange&data=05%7C02%7C%7C86b8d1cfa0a94113da6708de0ab27efb%7C84df9e7fe9f640afb435aaaaaaaaaaaa%7C1%7C0%7C638959958904467314%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=wzTiyRyl9rCUHhzX5hEtFayAZ0YT%2F3LehG%2FNSQQTTaU%3D&reserved=0		0.96
+8e27a2900b98	Kam Wah Buffet	restaurant	buffet restaurant	30.09757	-93.76482	150 Strickland Dr	Orange	77630	+14096701688	https://qmenu.us/#/kam-wah-orange		0.85
+5ae99886e4c1	Kfc	restaurant	chicken restaurant	30.02354	-93.84418	785 Texas Ave	Bridge City	77611	+14092175167	https://www.kfc.com		0.92
+0af00182df3a	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.02113	-93.84502	500 Texas Avenue	Bridge City	77505	+14096978006	https://locations.krispykrunchy.com/tx/bridge-city/500-texas-avenue		0.96
+0c85efa85326	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.17411	-93.75654	8270 Highway 87 N	Orange	77632	+14098865500	https://www.krispykrunchy.com/		0.96
+14b5da03363a	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.14895	-93.97842	3030 Highway 12	Vidor	77662	+14097830200	https://locations.krispykrunchy.com/tx/vidor/3030-highway-12		0.96
+14fd2727ec86	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.11614	-93.82191	7120 Interstate 10 W	Orange	77632	+14092332070	https://locations.krispykrunchy.com/tx/orange/7120-interstate-10-west		0.96
+3fb3a9f4903f	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.64265	-93.89877	2008 S. Margaret Avenue	Kirbyville	75956	+14094233513			0.68
+8917a5e4f9bd	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.20855	-93.87195	11384 Hwy 12	Orange	77632	+14097457088	https://locations.krispykrunchy.com/tx/orange/11384-hwy-12		0.68
+c148456f8adc	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.91933	-93.97857	1201 East Gibson St	Jasper	75951	+14094899168	https://locations.krispykrunchy.com/tx/jasper/1201-east-gibson-st		0.96
+c86e78d2b980	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.10953	-93.78077	1955 Martin Luther King, Jr. Drive	Orange	77630	+14098834788	https://locations.krispykrunchy.com/tx/orange/1955-martin-luther-king-jr.-drive		0.96
+f638c181b447	Krispy Krunchy Chicken	restaurant	chicken restaurant	30.90965	-93.99983	110 E Gibson	Jasper	75951	+14092243750	https://locations.krispykrunchy.com/tx/jasper/110-e-gibson		0.97
+0b7fb09a5e40	La Cantina Mexican Grill	restaurant	mexican restaurant	30.09439	-93.76028	2709 MacArthur Dr	Orange	77630	+14096709830	https://lacantinamexicangrill.com/	La Cantina Mexican grill	0.98
+9a096858d9fe	La Doña Tacos N More	restaurant	mexican restaurant	30.91825	-93.99665	235 S Wheeler St	Jasper	75951	+14094894312			0.82
+58577739f3f7	La Salvadoreña	restaurant		30.09339	-93.76703	3118 Edgar Brown Dr	Orange	77630	+14092809418			0.86
+bd7b31d0fa2f	La Torcia Brick Oven Pizza	restaurant	pizza restaurant	30.02690	-93.84071	1125 Texas Ave	Bridge City	77611	+14097383121	https://www.latorciabrickovenpizza.com/	La Torcia Brick Oven Pizza	0.92
+7b571f23bf20	Las Palmas Restaurant	restaurant	mexican restaurant	30.11049	-93.74725	1912 N 16th St	Orange	77630	+14099992459			0.92
+aa331b99c64d	Las Rosas Mexican Restaurant Bridge City	restaurant	mexican restaurant	30.03560	-93.83038	2198 Texas Ave	Bridge City	77611	+14097925353	https://lasrosasmexicancuisine.com/		0.92
+67fe882b240e	LBS BBQ	restaurant	barbecue restaurant	30.03999	-93.85141	2005 FM 408	Orange	77630	+14099889152	http://www.lbs-bbq.com/		0.97
+c7f9fc70f2b1	Leslie's Place	restaurant	diner	30.03581	-93.83043	2198 Texas Ave	Bridge City	77611	+14097925133	http://lesliesplacetx.com/		0.92
+ee4b69955bf5	Leslie’s Place Mauriceville	restaurant	comfort food restaurant	30.20885	-93.87341	11261 TX-12	Orange	77632	+14092332049			0.92
+7ceab4551084	Lili's Tacos & Tequila	restaurant	mexican restaurant	30.03704	-93.83028	2235 Texas Ave	Bridge City	77611	+14093136426	http://toasttab.com/lilis-tacos-tequila-2235-texas-ave		0.99
+14690744726a	Little Caesars Pizza	restaurant	pizza restaurant	30.11463	-93.74790	2421 N 16th St	Orange	77630	+14098837733	https://littlecaesars.com/en-us/store/4726	Little Caesars	0.98
+4daec25a9421	Little Caesars Pizza	restaurant	pizza restaurant	30.02730	-93.84047	715 Texas Ave	Bridge City	77611	+14097382009	https://littlecaesars.com/en-us/store/10821		0.77
+54196aa033a4	Little Caesars Pizza	restaurant	pizza restaurant	30.02280	-93.84527	715 Texas Ave	Bridge City	77611	+14097382009	https://littlecaesars.com/en-us/store/10821	Little Caesars	0.94
+55cc7ec5790a	Little Caesars Pizza	restaurant	pizza restaurant	30.90989	-93.99696	335 E Gibson St	Jasper	75951	+14093842355	https://littlecaesars.com/en-us/store/4728	Little Caesars	0.98
+0bda136c12e2	Little Cypress Maurceville Domino's	restaurant	pizza restaurant	30.17322	-93.75703	8177 Highway 87 N	Orange	77632	+14096709696	https://www.dominos.com/en/		0.99
+76021ab0c237	Love's Stop	restaurant		30.11188	-93.82162	2205 Highway 62 S	Orange	77630	+14097451184	http://wendys.com		0.92
+904f0e30b275	Low Tides	restaurant	seafood restaurant	30.04374	-93.82326	3095 Texas Ave	Bridge City	77611	+14096590634	http://lowtidestx.com/		0.92
+c65297e3a4fd	Lucky Wok	restaurant	chinese restaurant	30.10862	-93.74790	1803 N 16th St	Orange	77630	+14098832262	https://www.gubersofsetx.com		1.00
+53a4f2617635	Luigi's Italian Grill	restaurant	italian restaurant	30.09394	-93.76600	3108 Edgar Brown Dr	Orange	77630	+14098863000	https://www.luigis-italian-grill.com		0.97
+cc3b18064563	Mama Martha Wings & Seafood	restaurant	seafood restaurant	30.10631	-93.74763	1609 N 16th St	Orange	77630	+14093304676	http://www.mamamarthawingsseafoodgo.com/		0.99
+71a96ddf5e64	Mama Sulma's	restaurant	texmex restaurant	30.03537	-93.85130	1000 W Round Bunch Rd	Bridge City	77611	+14095497616	http://mamasulmas.com/		0.59
+bc04af88ffc0	Marilyn's Cafe	restaurant		30.74382	-93.63908	156 County Road 2003	Bon Wier	75928	+14093974170			0.91
+6f6e6ac93d1b	Martin's Mexican Restaurant	restaurant	mexican restaurant	30.92427	-93.99671	410 N Wheeler St	Jasper	75951	+14093843365	http://Martinsmexicanrestaurant.com/		0.98
+722ea3b5de48	MayfieldStyle	restaurant	comfort food restaurant	30.10073	-93.77669	3732 Ridgemont Dr	Orange	77630	+14093135800			0.96
+f83265cb502b	Mazzio's Pizza	restaurant	pizza restaurant	30.09416	-93.76619	3108 Edgar Brown Dr	Orange	77630	+14098820434	https://www.mazzios.com		0.92
+ea3169a8dae4	McFarland's Cafe de Cajun	restaurant	cajun and creole restaurant	30.14991	-93.97842	1400 Highway 12	Vidor	77662	+14097816349			0.98
+2bffcd7b5f2a	Me-Mom's Country Store and Restaurant	restaurant		30.59205	-93.91741	24232 US-96	Kirbyville	75956	+14094200605			0.96
+4d65480d9d2b	Mi Casa Mexican Grill	restaurant	texmex restaurant	30.09702	-93.76463	110 Strickland Dr	Orange	77630	+14098869801	https://www.micasa-barandgrill.com/		0.95
+49fc50d98ba4	Michelle's Kitchen and Catering	restaurant		30.28501	-93.78846	320 County Road 4176	Orange	77632	+14097463300			0.60
+8b0a5101f455	Milano's Italian Grill	restaurant	italian restaurant	30.03601	-93.83076	2100 Texas Ave	Bridge City	77611	+14097925096			0.92
+03df3077654b	Mills Patio-Karaoke, Bar and Grill	restaurant	bar and grill restaurant	30.03327	-93.87367	735 Adam Cir	Orange	77630	+14096593884			0.65
+9a9071106a3a	Mj's Cafe	restaurant		30.67188	-93.89344	1203 N Margaret Ave	Kirbyville	75956		http://www.mjscafe.org		0.95
+02d8d1136e53	Mongolian Grill and Sushi Bar	restaurant	asian fusion restaurant	30.09412	-93.76565	3104 Edgar Brown Dr	Orange	77630	+14098838533	https://mongoliansushi.com/	HuHot Mongolian Grill	0.95
+c3bb1b6728ef	My Wifes Cafe	restaurant		30.65052	-93.89632	1203 S Margaret Ave	Kirbyville	75956	+14015167768			0.68
+67be6ba34df4	Old Mill Burger Barn	restaurant	burger restaurant	30.73958	-93.64781		Bon Wier		+14093825671			0.58
+da67c763b84e	Old Orange Cafe and Catering Company	restaurant	cajun and creole restaurant	30.09020	-93.73874	914 Division Ave	Orange	77630	+14098832233	http://www.oldorangecafe.com/		0.95
+0923a5eeba92	Papa Johns Pizza	restaurant	pizza restaurant	30.09381	-93.75625	2305 MacArthur Dr	West Orange	77630	+14099880988	https://locations.papajohns.com/united-states/tx/77630/orange/2305-macarthur-dr?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTE2NTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.98
+364db0e1b265	Papa Johns Pizza	restaurant	pizza restaurant	30.91180	-93.99532	1056 S Wheeler St	Jasper	75951	+14093818822	https://www.papajohns.com		0.70
+da6031546b96	Papa Johns Pizza	restaurant	pizza restaurant	30.44404	-93.96794	34911 U.S. 96 S	Buna	77612	+14099949743	https://locations.papajohns.com/united-states/tx/77612/buna/34911-hwy-96?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTA2OTA1NzgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.92
+3e264946df7c	Pardon My Cheesesteak	restaurant		30.93800	-93.99650	2120 N Wheeler St	Jasper	75951	+18884440934	https://pardonmycheesesteak.com?e=199888		0.93
+8215cd0f0172	Patron Grill	restaurant		30.93806	-93.99651	2120 N Wheeler St	Jasper	75951	+18327357694			0.69
+43822c65c65f	Peggy's Place	restaurant	cajun and creole restaurant	30.03822	-93.79475	2682 E Roundbunch Rd	Orange	77630	+14098861115	https://theburgerchef.cloveronline.com/menu/all?menu=LUNCH		0.95
+4b7548b73f73	Pinehurst BBQ	restaurant	barbecue restaurant	30.09662	-93.76469	100 Strickland Dr	Pinehurst	77630	+14098862223	http://www.cityseekr.com/orange/restaurants/poi-pinehurst-bbq-946140.html		0.99
+dd1607a2e42b	Pinehurst BBQ	restaurant	barbecue restaurant	30.03617	-93.83089	2100 Texas Ave	Bridge City	77611	+14097382060	http://pinehurst-barbecue.edan.io		0.92
+08c2cb3e359c	Pizza Hut	restaurant	pizza restaurant	30.91303	-93.99475	420 E. Gibson St. Jasper	Jasper	75951	+14092028244	https://locations.pizzahut.com/tx/jasper/420-e-gibson-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=314752	Pizza Hut	0.98
+a3226c588ad0	Pizza Hut	restaurant	pizza restaurant	30.09302	-93.76380	3109 Edgar Brown Dr Orange	West Orange	77630	+14098867744	http://www.pizzahut.com/	Pizza Hut	0.98
+d010bcc02001	Pizza Hut	restaurant	pizza restaurant	30.44139	-93.96956	35060 US Hwy. 96 Jasper	Buna	77612	+14099949225	https://locations.pizzahut.com/tx/buna/35060-us-hwy-96?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310608	Pizza Hut	1.00
+d4168985c9a3	Pizza Hut	restaurant	pizza restaurant	30.02679	-93.83960	1152 Texas Ave Orange	Bridge City	77611	+14097383264	https://locations.pizzahut.com/tx/bridge-city/1152-texas-ave?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=312092	Pizza Hut	0.98
+f9765f97282e	Popeyes Louisiana Kitchen	restaurant		30.02287	-93.84531	300 Ferry Drive	Bridge City	77611	+14092475407	https://www.popeyes.com/store-locator/store/restaurant_241642?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.97
+fdd12fb2790e	Real Southern Cooking	restaurant	southern american restaurant	30.09295	-93.74102	1111 Green Ave	Orange	77630	+14093304156	http://real-southern-cooking.jeeq.io		0.96
+0e3e09fb2b99	Red Apron Meal Prep Kitchen	restaurant	health food restaurant	30.03164	-93.82996	280 E Roundbunch Rd	Bridge City	77611	+14099883055	http://www.redapronkitchen.com/		0.92
+09e65d55ee5a	Rickenjacks	restaurant	bar and grill restaurant	30.13135	-93.98402		Vidor					0.97
+416c4333c5f9	Ricky Grill & Steak Seafood	restaurant	steakhouse	30.10438	-93.77269	1627 Strickland Dr	Pinehurst	77630	+14093304074			0.96
+cb1f585fe30a	Ricky’s Crawfish Hole and Southern Cooking	restaurant	seafood restaurant	30.04064	-93.82594	2675 Texas Ave	Bridge City	77611	+14094333096			0.83
+ee280bda41bc	Rikenjaks - Vidor	restaurant	bar and grill restaurant	30.13084	-93.98391	18635 I-10	Vidor	77662	+14092332058	http://www.rikenjaks.com		0.99
+5d99a4bb7f85	Roma's Italian Restaurant Mauriceville	restaurant		30.20870	-93.87366	11261 Highway 12	Orange	77632	+14092332015			0.92
+45e601cb3a73	Romano's Italian Bistro Jasper	restaurant	pizza restaurant	30.90932	-93.99828	235 E Gibson St 235	Jasper	75951	+14093835242	https://www.romanositalianbistrojaspermenu.com/?utm_source=organic_bing&utm_medium=bing_pw		0.85
+9fc5c38a1ba9	Romanos Jasper	restaurant	american restaurant	30.90975	-93.99698	235 E. Gibson St	Jasper	75951	+14093835242			0.84
+a88fe3f43211	Sammy's Taqueria	restaurant	mexican restaurant	30.03539	-93.83098	2122 Texas Ave	Bridge City	77611	+14097925013			0.78
+d7b9226a2ecc	Seafood Shack	restaurant	seafood restaurant	30.02279	-93.84529	715 Texas Ave Ste i	Bridge City	77611	+14097353475	http://seafoodshackbc.com/		1.00
+4175a37d409a	Señor Bill’s Bar-B-Que	restaurant	barbecue restaurant	30.92715	-93.99673	790 N Wheeler St	Jasper	75951	+14094899473			0.82
+38a524afa54e	Shaklee Independent Distributor-Carolyn Hillsten	restaurant		30.13252	-93.75613	4810 Oak Valley Dr	Orange	77632	+14098837384	http://www.shaklee.com/		0.92
+56bb335be4e3	Silver Fox	restaurant	bar and grill restaurant	30.03513	-93.83198	2095 Texas Ave	Bridge City	77611	+14097354762	https://www.silverfox.com		0.99
+9a76de613067	Smitty's Smoke House	restaurant	barbecue restaurant	30.91208	-93.99569	1006 S Wheeler St	Jasper	75951	+14093839025	https://www.facebook.com/profile.php?id=100063543672263&y_source=1_Mjc5NTg4NDItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+3502e16467e9	Son Bistro	restaurant	sushi restaurant	30.66391	-93.89365	413 N Margaret Ave	Kirbyville	75956	+14094205100	http://sonbistro.com		0.92
+2d51274faa05	Spanky's Bar and Grill	restaurant	bar and grill restaurant	30.10718	-93.74760	1703 N 16th St	Orange	77630	+14098862949	http://spankysbargrill.com/		0.99
+b6bf6645e1f4	Stateline Too Restaurant	restaurant		30.29836	-93.75426	2510 TX-12 E	Orange	77632	+14092073558			0.92
+142a188d65f8	Subway	restaurant	sandwich shop	30.91605	-93.99700	609 S Wheeler St	Jasper	75951	+14093846263	https://restaurants.subway.com/united-states/tx/jasper/609-south-wheeler	Subway	0.92
+4f4dda2db96c	Subway	restaurant	sandwich shop	30.11236	-93.78060	2496 Martin Luther King Jr Dr	Orange	77630	+14096700929			0.92
+525a5c55786a	Subway	restaurant	sandwich shop	30.09449	-93.76115	2809 Mac Arthur Drive	Orange	77630	+14098829908	https://restaurants.subway.com/united-states/tx/west-orange/2809-mac-arthur-drive	Subway	0.99
+a330fa86d45f	Subway	restaurant	sandwich shop	30.84588	-93.76905	609 W Court St	Newton	75966	+14093792249	https://www.subway.com		0.96
+a7747fc8f6e2	Subway	restaurant	sandwich shop	30.11198	-93.82137	2205 Hwy 62 S	Orange	77630	+14097450379	https://restaurants.subway.com/united-states/tx/orange/2205-hwy-62-s	Subway	0.96
+b3ed222571bc	Subway	restaurant	sandwich shop	30.44158	-93.96835	US Hwy 96 & State Hwy 62	Buna	77612	+14099949500	http://www.subway.com/en-us	Subway	1.00
+c89e260cc182	Subway	restaurant	sandwich shop	30.12309	-93.74688	3730 N 16th Street	Orange	77632	+14098838888	https://restaurants.subway.com/united-states/tx/orange/3730-n-16th-street	Subway	0.98
+ed1fa35bc549	Subway	restaurant	sandwich shop	30.02621	-93.84026	1090 Texas Ave	Bridge City	77611	+14097357553	https://restaurants.subway.com/united-states/tx/bridge-city/1090-texas-ave	Subway	0.96
+f86d70a23a7a	Subway	restaurant	sandwich shop	30.20316	-93.88144	10383 Hwy 12	Orange	77632	+14097453900	https://restaurants.subway.com/united-states/tx/orange/10383-hwy-12	Subway	0.98
+fb15982d05b2	Subway	restaurant	sandwich shop	30.64891	-93.89724	1117 S Margaret #A	Kirbyville	75956	+14094236334	https://restaurants.subway.com/united-states/tx/kirbyville/1117-s-margaret	Subway	0.96
+afe9f397027c	Sujey's New American Table	restaurant	american restaurant	30.92168	-93.99915	160 N Austin St	Jasper	75951	+14092025004	http://www.thebellejimhotel.com/		1.00
+bdecd6511b47	Super China Buffet	restaurant	buffet restaurant	30.91840	-93.99637	315 S Wheeler St	Jasper	75951	+14093818885	http://super-china-buffet-jasper.jany.io		0.98
+6d6b89667d3b	Sweet Beez Wingz & Tingz	restaurant		30.96732	-93.68173	115 County Road 1129	Burkeville	75932	+14094893048	https://www.facebook.com/brendabucknacole.hunter		0.97
+11aba6a77a1f	Tacos Don Guicho y fam.	restaurant	mexican restaurant	30.08089	-93.82214	18430 TX-62	Orange	77630	+19794877304			0.63
+6bf0f1bc347e	Tacos Don Guicho y su fam #1	restaurant	taco restaurant	30.09395	-93.75648	2309 MacArthur Dr	Orange	77630	+14092168971	https://tacosdonguichoysufamiliatx.com	Tacos Don Guicho y su fam. #1	0.92
+7f447700e78a	Taqueria Gonzalez	restaurant	mexican restaurant	30.07966	-93.82225	18440 TX-62	Orange	77630	+14095498114			0.96
+86c96bb001f6	Taqueria Santa Cruz	restaurant	mexican restaurant	30.64770	-93.89615	110 E Max Lee St	Kirbyville	75956	+14096225583			0.96
+6026cdaf9c9a	Taqueria Santa Cruz No.2	restaurant		30.44922	-93.96693	34502 US-96	Buna	77612	+14099370303			0.98
+2000f143d44a	Tastee Freez	restaurant		30.09475	-93.75729	2420 MacArthur Dr	Orange	77630	+14098820616	http://www.wienerschnitzel.com/		0.92
+2df2c564bdc3	Ten West Diner	restaurant	diner	30.12205	-93.76034	2650 I-10 W	Orange	77632	+14092385004	http://www.bestwestern.com/		0.92
+e4d0c193246e	Tequilas Mexican Restaurant	restaurant	mexican restaurant	30.02658	-93.84076	1085 Texas Ave	Bridge City	77611	+12545408586	http://tequilasbargrill.com	Tequilas Mexican Restaurant	0.99
+65bedc79bb89	Texas Seafood & Steak House	restaurant	steakhouse	30.03319	-93.83371	1875 Texas Ave	Bridge City	77611	+14093136212			0.96
+af66910ac200	The Boathouse	restaurant		30.09100	-93.73081	215 W Front Ave	Orange	77630		http://www.boathouserestaurants.com/		0.87
+c68ad58880ff	The Burger Den	restaurant	burger restaurant	30.11623	-93.81943	7112 I-10 West	Orange	77632	+14098834720	https://www.theburgerden.com/		1.00
+c36c49b1c4ac	The Crawfish Hole	restaurant	cajun and creole restaurant	30.03259	-93.83551	405 Parkside Dr	Bridge City	77611	+14093136013			0.85
+df60a947ae83	The Crawfish Hole	restaurant	seafood restaurant	30.03823	-93.84337	405 Parkside Pl Dr	Bridge City	77611	+14093136013	https://vindy.top/the-crawfish-hole		0.99
+547f8165ff2b	The Hut	restaurant	barbecue restaurant	30.10852	-93.74700	1804 N 16th St	Orange	77630	+14098838282	http://thehutbbqandbugs.com/		0.98
+c328b5e8a4c4	The Marina Bar & Grill, Orange Texas 77630	restaurant	bar and grill restaurant	30.07063	-93.74468		Orange					0.62
+4c69e3dd9b17	The Meltdown	restaurant		30.11635	-93.82018	7112 I-10 West	Orange	77632	+14098834720	https://themeltdown.com/		1.00
+b1f3a5aec8d7	The Sno-Barn	restaurant		30.20632	-93.87619	5570 Bubba Rd	Orange	77632	+14092722140	http://thesno-barnsnowcones.square.site/		0.96
+c3e4cd938ed7	The Stuffed Mushroom Kitchen &catering Co.	restaurant		30.03927	-93.82653	2530 Texas Ave	Bridge City	77611	+14096703144	https://www.order.online		0.75
+fdab02f5cead	Tia Juanita's Fish Camp	restaurant	seafood restaurant	30.11209	-93.76324	2900 W Sunset Dr	Orange	77630	+14092385010	https://tjfishcamp.com/	Tia Juanita's Fish Camp Beaumont	0.99
+b7947ffbad46	Tuffy's Eatery	restaurant	american restaurant	30.20884	-93.87360	11261 Highway 12	Orange	77632	+14097453170			0.68
+272f1f042d0b	Two Amigos	restaurant		30.11972	-93.74719	3130 N 16th St	Orange	77630		https://www.twoamigossarnia.com		0.95
+0437180ab0ca	Waffle House	restaurant		30.15541	-93.93581	20804 Ih 10 # 1031	Vidor	77662	+14097699942	https://www.wafflehouse.com		0.77
+71bc6400d3b2	Waffle House	restaurant	diner	30.11411	-93.82052	2610 State Hwy 62 S	Orange	77632	+14098833934	https://locations.wafflehouse.com/shop/179525/Waffle-House-824	Waffle House	0.97
+f3f0e8c68e0d	Waffle House	restaurant	diner	30.12223	-93.76144	4212 27th St	Orange	77632	+14098829006	https://locations.wafflehouse.com/shop/179526/Waffle-House-523	Waffle House	0.99
+5f17329b9f72	Whataburger	restaurant	burger restaurant	30.90802	-93.99469	1365 S Wheeler St	Jasper	75951	+14093844123	https://locations.whataburger.com/tx/jasper/1365-s-wheeler-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.98
+98e44fd2fb05	Whataburger	restaurant	burger restaurant	30.09480	-93.75681	2300 McArthur Dr.	Pinehurst	77630	+14098860044	https://locations.whataburger.com/tx/orange/2300-mcarthur-dr.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.95
+b359be9fb7a2	Whataburger	restaurant	burger restaurant	30.11947	-93.74705	3124 N 16th Street	Orange	77630	+14092161334	https://locations.whataburger.com/tx/orange/3124-n-16th-street.html	Whataburger	0.99
+b7f0f8332eb1	Wienerschnitzel	restaurant	hot dog restaurant	30.09470	-93.75724	2420 MacArthur Dr	Orange	77630	+14098834104	http://www.wienerschnitzel.com/	Wienerschnitzel	0.99
+1b9c114cd11d	Wok D-Lite	restaurant	chinese restaurant	30.09495	-93.76524	33 Strickland Dr	Orange	77630	+14098832975	https://wok-d-lite.hub.biz/		0.95
+14048a606d1f	Answered Prayer	senior	retirement home	30.09384	-93.77583	602 Azalea Ave	Orange	77630	+14093304838	http://www.iheartboba.com		0.97
+3e8fd4b8e89f	Avir at Kirbyville	senior	retirement home	30.66737	-93.90569	700 N Herndon St	Kirbyville	75956	+14094236111	http://avirhg.com/	Avir at Bowie	0.92
+50ae55f91442	Casita De Manuel Private Care Home	senior	retirement home	30.55626	-93.93039	26834 US-96	Kirbyville	75956	+14096992209			0.65
+41fda0d77ea1	Focused Care at Orange	senior	retirement home	30.08264	-93.78645	4201 FM-105	Orange	77630	+14097458085	http://www.fpacp.com/Orange.html	Focused Care at Center	0.92
+c82f06b8ab20	Golden Years Assisted Living	senior	retirement home	30.10424	-93.82108	16532 TX-62 S	Orange	77630	+14097459096	https://goldenyearsalf.com		0.92
+6c274c000fe7	Pinehurst Nursing & Rehabilitation, L.P.	senior	assisted living facility	30.09825	-93.76331	3000 Cardinal St	Orange	77630	+14098835727	http://www.daybreakventure.com/pinehurst-nursing-and-rehabilitation-lp-home.aspx		0.92
+1b9e6c7535be	Rayburn Healthcare and Rehabilitation	senior	retirement home	30.90122	-93.99721	144 Bulldog Ave	Jasper	75951	+14093818500			0.97
+9d07a80930cf	Rosewood Assisted Living II	senior	retirement home	30.79828	-93.96400	S, 8670 US-96	Jasper	75951	+14094891402			0.92
+88fef07636b9	Sabine Place	senior	retirement home	30.13954	-93.75638	5301 Meeks Dr	Orange	77632	+14092036498	https://sabineplace.seniorlivingnearme.com/		0.92
+d454365cedac	SCC - 180 - the Meadow	senior	retirement home	30.08198	-93.78654	4201 FM-105	Orange	77630	+12142527685			0.82
+bb9032fd80a2	Shady Acres Health & Rehabilitation	senior	retirement home	30.84497	-93.74524	405 Shady Acres Ln	Newton	75966	+14093798911	https://www.ShadyAcresCares.com/		0.92
+efebec5c08d7	The Meadows of Orange	senior	assisted living facility	30.08233	-93.78647	4201 Fm 105	Orange	77630	+14093491008	https://senior-care-centers.com/		0.85

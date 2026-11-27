@@ -1,0 +1,371 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+90997c6ad13b	Aguilar Bakery	bakery		29.34995	-100.91224	1411 Las Vacas St	Del Rio	78840	+18307341583			0.92
+bf37da591c22	Chapa's Bakery	bakery		29.38127	-100.90095	1700 N Bedell Ave	Del Rio	78840	+18304694060	https://www.chapasbakery.com/		0.99
+d32cf48f40cc	La Luz Bakery	bakery		29.35556	-100.88818	700 W Garza St	Del Rio	78840	+18307759694			0.96
+b57e1e9a242a	Lopez Bakery	bakery		29.31495	-100.41405	105 E Edward St	Brackettville	78832	+18305632891	http://www.lopezbakery.com/		0.96
+00e7045d394e	Luiz Delicious Cakes and Cupcakes	bakery		29.36312	-100.95081	578 Water Dr	Del Rio	78840	+18304226690			0.92
+8109a5f30cd2	Milagro Bakery	bakery		29.36409	-100.94837	414 Greenwillow St	Del Rio	78840	+18303082304			0.58
+2b62edc3cdd1	River City Doughnut & Coffee	bakery	donut shop	29.36864	-100.89962	500 Veterans Blvd	Del Rio	78840	+18307758769	http://rivercitydoughnutandcoffeehousedelrio.loungezone.website		0.97
+35069017b603	ROLIZ Bakery & Coffee	bakery		29.36716	-100.90118	208 E 2nd St	Del Rio	78840	+18303092484			0.90
+d7555b939318	Alibi Bar & Lounge, Brackettville.	bar		29.30317	-100.40227	1270 E US Hwy 90	Brackettville	78832	+18305639400			0.99
+3ca3c0016fca	Angels & Bulls	bar	pub	29.37242	-100.90018	505 E 7th St	Del Rio	78840	+18307741852			0.96
+48f375c1db0e	Bar100	bar		29.35836	-100.89873	700 S Main St	Del Rio	78840				0.96
+1477320f6902	Blue Oasis Bar & Grill	bar	sports bar	29.40986	-100.90520	3806 Veterans Blvd	Del Rio	78840	+18303137088	http://www.blueoasisbarandgrill.com/		0.99
+fb653646b3a9	Boccaccio	bar	cocktail bar	29.36622	-100.89577	615 E Gibbs St	Del Rio	78840	+18307344542	http://www.casaboccaccio.it/		0.92
+4f00cad7316b	Buzzard Roost Bar	bar	dive bar	29.42425	-100.90670	4411 Veterans Blvd	Del Rio	78840	+18304614055	https://www.buzzard-roost-saloon.hub.biz		0.96
+7b93e9a72284	Buzzard roost saloon	bar		29.42395	-100.90636	4411 Veterans Blvd	Del Rio	78840	+18307755216	https://www.buzzard-roost-saloon.hub.biz		0.77
+2b2eb7fc8304	Camel Toe Bar	bar		29.37404	-100.91054	Avenue P & W 12th St	Del Rio	78840				0.75
+fa71ca4b9324	Dickman Hall	bar		29.30728	-100.42010	1 McClernand Rd	Brackettville	78832	+18305634249			0.96
+3943cec8abd3	El Tocayo's Bar Del Rio, TX	bar		29.36910	-100.86727	901 E Morin St	Del Rio	78840	+18307788020	https://www.groupon.com/biz/del-rio-tx/el-tocayo-bar		0.82
+63053f3db84d	Gorzugis at The Herald	bar	sports bar	29.36108	-100.89996	321 S Main St	Del Rio	78840	+18304222545			0.99
+f8f168af678b	Highway 90 Sports Bar	bar	sports bar	29.45566	-100.94897	100 Rainbow Ave	Del Rio	78840	+18303137016			0.90
+592b9cf21c4a	La Cantina Bar	bar		29.39055	-100.90965	216 Mary Lou Dr	Del Rio	78840				0.87
+140963750f2d	Lorina's Cantina	bar		29.45860	-100.96642	9087 W US Highway 90	Del Rio	78840	+18307758058	https://www.lorinascantina-delrio.com		0.95
+e62c8ef4b901	Mesquite Creek Outfitters Del Rio	bar		29.35718	-100.89865	800 S Main St	Del Rio	78840	+18304886960	https://www.mesquitecreekdelrio.com/		0.99
+a96c1d0fb541	Miller Beer	bar	beer bar	29.36882	-100.84544	3801 E Highway 90	Del Rio	78840	+18302981298			0.87
+b23073aa1001	Rali Forwarding And Logistics, Llc.	bar	winery	29.35032	-100.92024	201 Farley Ln # 2	Del Rio	78840	+18304222096	http://aarali.com		0.92
+c12a50b011d3	Rancho 4 Palmas	bar	pub	29.36878	-100.84181	4005 E Highway 90	Del Rio	78840				0.96
+5e86584d5727	Seventh Street Pub	bar		29.37231	-100.90018	505 E 7th St	Del Rio	78840	+18307741852			0.92
+66e3377a0aaf	Shane's Whiskey and Bourbon House	bar	whiskey bar	29.35753	-100.89892	759 S Main St	Del Rio	78840				0.99
+9b4bfd7a5867	SoJo Cellar	bar	wine bar	29.39548	-100.90465	2413 Veterans Blvd	Del Rio	78840	+18307196360			0.96
+dade6e99202b	Stic's Night Club	bar		29.35286	-100.90329	421 W Nicholson St	Del Rio	78840	+18307520562			0.80
+9de3e3f36079	The Blitz	bar	pub	29.37978	-100.90270	1609 Avenue G	Del Rio	78840				0.61
+41409821c474	The Modern Stable	bar	drive thru bar	29.36265	-100.90838	607 W Gibbs St	Del Rio	78840	+19404564136			0.92
+c32734a95383	The Veranda Wine and Beer Garden	bar	wine bar	29.39053	-100.90965	216 Mary Lou Dr	Del Rio	78840	+18307759592	https://cnbworldtour.wordpress.com/tag/the-veranda-wine-and-beer-gard		0.92
+88fd004b61cc	Two Twisted Sisters Bar	bar		29.67140	-100.00660	508 E 4th St	Camp Wood	78833	+18305973999	http://www.hillcountryportal.com/campwood.html		0.92
+c79b06c8e510	Val Verde Winery	bar	winery	29.34612	-100.89583	100 Qualia Dr	Del Rio	78840	+18307759714	https://linktr.ee/valverdewinery		0.92
+886275a747a7	Alberto's Auto Sales	cardealer		29.34015	-100.91710	2620 State Hwy 239 Spur	Del Rio	78840	+18304886371	https://www.albertosauto.com/		0.92
+5dec2d19feac	Amistad Motors	cardealer	used auto dealer	29.43644	-100.91322	5334 W US Highway 90	Del Rio	78840	+18304886401	https://www.startyourcreditapproval.com/credit-application/DT0CC?lang=es		0.76
+86f4bee4329c	Amistad Motors	cardealer		29.36242	-100.90730	109 Ave R	Del Rio	78840	+18304886401	https://www.startyourcreditapproval.com/credit-application/DT0CC?lang=es		0.78
+e705ccc38210	Auto Sales Plaza, LLC	cardealer		29.37097	-100.87583	2210 E Highway 90	Del Rio	78840	+13616962886			0.90
+979d93799c9e	Best Buy Auto Sales	cardealer		29.36797	-100.89077	1105 E Gibbs St	Del Rio	78840	+18305637815			0.92
+88a46dc232ac	Brown Automotive Center	cardealer		29.39805	-100.90601	2520 Veterans Blvd	Del Rio	78840	+18558110703	https://www.brownautocenter.com	Chevrolet	0.97
+4593b6c07a63	Brown Nissan of Del Rio	cardealer		29.39134	-100.90611	2300 Veterans Blvd	Del Rio	78840	+18307750566	http://www.brownnissandelrio.com/	Nissan	0.92
+565b1388f4ed	Brown Nissan of Del Rio	cardealer	used auto dealer	29.40418	-100.90489	3102 2300 Veterans Blvd	Del Rio	78840	+18307750566	https://www.brownnissandelrio.com/		0.85
+3b3ce899b681	Cecil Atkission Ford Parts	cardealer		29.40219	-100.90528	2700 Veterans Blvd	Del Rio	78840	+18307757481	https://www.cecilforddelrio.com/	Ford Motor Company	1.00
+a39203592a07	Cecil Atkission Lincoln	cardealer		29.40257	-100.90529	2700 Veterans Blvd	Del Rio	78840		https://www.lincoln.com		0.75
+d1ce7ca5643c	Cental Auto Sales	cardealer	used auto dealer	29.64987	-100.54688	3006 W Mile 7 Rd	Mission	78574	+19565853211	http://centralautosalesrgv.com/		0.71
+1457b6ce7678	Central Auto	cardealer		29.38982	-100.90553	2222 Veterans Blvd	Del Rio	78840	+18307681122			0.92
+f31fa94b6cd2	Chevrolet	cardealer		29.39726	-100.90593	2520 Veterans Blvd	Del Rio	78840	+18307757550	https://www.chevrolet.com		0.65
+5881caed6b08	Deals On Wheels Auto Sales,llc	cardealer		29.36791	-100.89243	1002 E Gibbs St Ste B	Del Rio	78840	+18304886040			0.65
+eb8765e4ca15	Del Rio Auto Sales	cardealer		29.36758	-100.89206	1005 E Gibbs St	Del Rio	78840	+18307785055	http://www.albertosauto.com		0.85
+612892c58550	Gran Turismo Auto Sales	cardealer		29.30822	-100.41612		Brackettville		+18305635087			0.90
+d568434b4964	GT Auto Center	cardealer		29.37063	-100.86658	2700 E US-90	Del Rio	78840	+18307752277	http://gtautocenterdelrio.com/		0.92
+6addae272beb	Hyperdrive Auto	cardealer		29.37107	-100.87547	1000 E. U.S, US-90	Del Rio	78840	+18304222845	http://www.hyperdriveauto.com/		0.92
+47e8d4a27fa1	Hyundai Del Rio	cardealer	used auto dealer	29.37804	-100.90413	1508 Veterans Blvd	Del Rio	78840	+18304223900	https://www.hyundaiofdelrio.com/		0.97
+ea271c834fe6	Iii Amigo Motors	cardealer	used auto dealer	29.39947	-100.90698	120 Stricklen Ave	Del Rio	78840	+18307682969			0.95
+94c75cc040af	Koons Canyon Ranch	cardealer		29.94936	-100.10406		Rocksprings			http://www.koonscanyonranch.com/		0.74
+e4dd8b1baf53	Koons Canyon Ranch	cardealer		29.95417	-100.10780		Rocksprings			http://www.koonscanyonranch.com/		0.73
+e11274b8cf19	Leo's Used Autos	cardealer	used auto dealer	29.36913	-100.84733	3731 E Highway 90	Del Rio	78840	+18303083911	http://leosusedautos.com/		0.92
+2e24b34d31e4	M&L Auto Sales	cardealer		29.36289	-100.90665	501 W Gibbs St	Del Rio	78840	+18304222013	https://www.mandlautosales.com/		0.92
+54af42554f3d	Marco Motors	cardealer	used auto dealer	29.36094	-100.87789	708 Dr Fermin Calderon Blvd	Del Rio	78840	+18307680735			0.65
+d86a973de465	Ram Country Del Rio	cardealer		29.40528	-100.90405	3611 Veterans Blvd	Del Rio	78840	+18307757575	https://www.ramcountrydelrio.com/	Chrysler	1.00
+3c896b0c04b4	Texas Ford Dealers	cardealer		29.37034	-100.86378	2700 E Highway 90	Del Rio	78840	+12103418841		Ford Motor Company	0.92
+799e70ea62e3	Toyota Del Rio	cardealer		29.40632	-100.90421	3617 Veterans Blvd	Del Rio	78840	+18307757577	https://www.toyotaofdelrio.com/	TOYOTA	0.97
+a815ce6fbbb9	Trevino Brothers Auto and Diesel	cardealer		29.35664	-100.87492	1115 Dr Fermin Calderon Blvd	Del Rio	78840	+18304884016			0.92
+4c53e14094a2	Two Brothers Auto Sales	cardealer		29.39478	-100.90533	2444 Veterans Blvd	Del Rio	78840	+18304222058			0.86
+509de7587e27	Cinemark Del Rio Movies 8	cinema		29.39094	-100.90321	2205 Veterans Blvd	Del Rio	78840	+18307758120	https://www.cinemark.com/theatres/tx-del-rio/cinemark-movies-8?utm_medium=organic&utm_source=fb&utm_campaign=local_listing_theater&utm_content=fb_listing&y_source=1_MTc0OTI5MzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Cinemark	0.99
+a40c45d21ea1	Cinemark Del Rio Movies 8	cinema		29.44783	-100.90891	2205 Veterans Blvd	Del Rio	78840		https://www.cinemark.com/theatres/tx-del-rio/cinemark-del-rio-movies-8	Cinemark	0.80
+a1f9bf0892d8	Post Theater	cinema		29.30500	-100.42095	15 Patton Dr	Brackettville	78832	+18305632412			0.92
+8564fed5bd2b	Barksdale coffee company	coffee		29.72474	-100.03488	25772 TX-55	Barksdale	78828	+18302821616	http://www.barksdalecoffee.com/		0.96
+aa608131b418	Bem Bom Gelato Boricua	coffee		29.40988	-100.90926	405 N Broadview St	Del Rio	78840	+17872131387			0.84
+25f70d82fb1e	Benny's Cafe	coffee		29.35874	-100.89870	650 S Main St	Del Rio	78840	+18307743176	http://www.bennyscafemilwaukee.com		0.99
+b8c13acce59b	Cafe Sol Coffee & Bakery	coffee		29.42843	-100.90916	4730 US-90	Del Rio	78840	+18304530050			0.92
+d4a7e61344b5	Cardinal Points Coffee Shop	coffee		29.35833	-100.89835	115 E Greenwood St	Del Rio	78840	+18302730278			0.92
+4221b2deb2b1	Esp	coffee		29.41528	-100.91901	2620 Fountain View Dr # 302	Houston	77057		http://www.espshop.com		0.65
+caf738d99970	HTeaO	coffee	tea room	29.36710	-100.89834	301 Veterans Blvd	Del Rio	78840	+18307147114	https://hteao.com/locations/del-rio-tx/	HTeaO	0.92
+5fda374bb22f	MoMo's Coffee	coffee		29.36177	-100.90069	217 S Main St	Del Rio	78840	+18304222464			0.92
+4cbfdfed61bc	Piazza MilaBella	coffee		29.39733	-100.90874	116 S Terry St	Del Rio	78840	+18302904661			0.92
+29d8894a8784	Starbucks	coffee		29.39201	-100.90475	2209 Veterans Blvd	Del Rio	78840	+18307684846	https://www.starbucks.com/store-locator/store/1008981/	Starbucks	0.97
+83b684bf5ff3	Southwest Texas Junior College	college		29.38397	-100.92254	207 Wildcat Dr	Del Rio	78840	+18307751612	http://www.swtjc.net		0.99
+fed1a1ac430b	Sul Ross State University	college		29.38321	-100.92203	205 Wildcat Dr	Del Rio	78840	+18307034808	http://www.sulross.edu/rgc		0.92
+06c2f70f2e7c	7-Eleven	convenience		29.38612	-100.90620	2100 Veterans Blvd	Del Rio	78840	+18303504847	https://www.7-eleven.com/		1.00
+1ffa48da2a9f	7-Eleven	convenience		29.40478	-100.90418	3607 Veterans Blvd	Del Rio	78840	+18307759890	https://www.7-eleven.com/locations/tx/del-rio/3607-veterans-blvd-40539	7-Eleven	1.00
+34aa1c5ec8c5	7-Eleven	convenience		29.36648	-100.89787	203 Veterans Blvd	Del Rio	78840	+16823955634	https://www.7-eleven.com/		1.00
+44fb2b90e671	7-Eleven	convenience		29.34685	-100.91683	2200 Spur 239	Del Rio	78840	+18307741881	https://www.7-eleven.com/locations/tx/del-rio/2200-spur-239-40530	7-Eleven	0.99
+6e4c8f5142ec	7-Eleven	convenience		29.37898	-100.90457	1602 Veterans Blvd	Del Rio	78840	+18307745634	https://www.7-eleven.com/		1.00
+9daa255d8e21	7-Eleven	convenience		29.36939	-100.88832	1300 E Gibbs St	Del Rio	78840	+18307751604	https://www.7-eleven.com/locations/tx/del-rio/1300-e-gibbs-street-40538	7-Eleven	0.98
+b6a652099d23	7-Eleven	convenience		29.30969	-100.41879	108 U.S. 90, Brackettville, TX, USA	Brackettville	78832	+18305632424	https://www.7-eleven.com/		1.00
+fd465ba2f1f6	A&L Grocery Store	convenience		29.66849	-100.01193	Nueces St, Camp Wood, TX 78833	Camp Wood	78833	+18305972240	http://www.algercounty.com		0.77
+9dedb0f7360e	Border One Stop	convenience		29.34397	-100.91785	2301 State Loop 239	Del Rio	78840	+18304222011	https://border-one-stop.hub.biz/		0.92
+8bf246f88ab7	CAT Scale	convenience	truck gas station	29.34739	-100.91675	2200 Texas Spur 239	Del Rio	78840	+18307741881	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+6ba964ddf7b4	Chevron Station Del Rio	convenience		29.38611	-100.90597	2100 Veterans Blvd 2100	Del Rio	78840	+18322343600			0.99
+85f6bdc8ffc0	Chevron Station Del Rio	convenience		29.36646	-100.89794	203 Veterans Blvd	Del Rio	78840	+18322343600			0.92
+793a4ae6bd96	Dam	convenience		29.61997	-100.00988	TX-55	Uvalde	78801				0.60
+4e138c36ec72	Dam Store	convenience		29.71775	-100.03178	33747 N State Highway 55	Camp Wood	78833	+18305973431			0.70
+e21fe9422e7a	Del Rio No One Stop	convenience		29.34706	-100.91649	2243 Spur 239	Del Rio	78840	+18307782260			0.66
+e61526a9555f	Easy Mart & Gas	convenience		29.36917	-100.83047	101 Charles Dr	Del Rio	78840	+18302983131	http://texaco.com		0.92
+1cdd2e9d2525	Exxon	convenience		29.37393	-100.90127	1009 Veterans Blvd	Del Rio	78840	+18307753369	http://www.exxon.com		0.92
+3fa4499d7a57	Exxon	convenience		29.41160	-100.90514	3820 Ave F	Del Rio	78840	+18307744402	https://www.exxon.com/en	Exxon & Mobil Stations	0.92
+528adcb0a669	Exxon	convenience		29.36460	-100.90189	100 E Gibbs	Del Rio	78840	+18307747353	http://www.exxon.com		1.00
+da3220b3ddf0	Exxon	convenience		29.36150	-100.87858	616 Dr Fermin Calderon Blvd	Del Rio	78840	+18307757099	http://www.exxon.com		0.92
+f23e27cf0c3e	Exxon	convenience		29.36620	-100.89946	3820 Ave F	Del Rio	78840	+18307744402	https://locations.exxon.com/tx/del-rio/3820-ave-f?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
+87c8b95d342c	Five Points Market	convenience		29.39119	-100.90903	300 Margaret Ln	Del Rio	78840	+18304888336	http://spanky2020.myshopify.com/		0.92
+fa14c5ecfda9	Five Points Market 24	convenience		29.41154	-100.90499	3820 AVE F	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-fivepointsmarket24-200314722	Exxon	0.80
+e011c3d57347	Five Points Market 25	convenience		29.36458	-100.90191	100 E GIBBS	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-fivepointsmarket25-200314739	Exxon	0.80
+d69d622d2cad	Get-N-Go	convenience		29.66937	-100.01228	103 E 4th St	Camp Wood	78833	+18305973156	http://www.campwoodgetngo.com/		0.92
+2dd734395e1a	Hidalgo Gandy Service Station	convenience		29.66813	-100.01183	204 S Nueces St	Camp Wood	78833	+18305979115	https://hidalgo-gandy-texaco-station.hub.biz/		0.92
+cb69dce729fe	Hooker's One Stop, LLC	convenience		29.57792	-100.97469	7116 Texas R 2	Del Rio	78840	+18308349133			0.99
+06e5eed7f8af	Hookers 1 Stop	convenience		29.57788	-100.97456	7116 Texas R 2	Del Rio	78840	+18307683616	http://hookersonestop.com/		0.99
+815c8348c7bb	Loma Alta Store	convenience		29.50973	-100.90848	US-277	Val Verde	78840	+18303952277	https://loma-alta-store.hub.biz/		0.71
+6aa5f38f3d4d	Lucky In	convenience		29.36870	-100.82101	100 Dallas Dr.	Del Rio	78840		https://locations.valero.com/en-us/LocationDetails/Index/100-DALLAS-DR/0000032054	Valero	0.80
+f43fd841be4d	Mare's Mart	convenience		29.37096	-100.87573	2210 E US Highway 90	Del Rio	78840	+18307745258			0.64
+e94f00e92ee7	Max-E-Mart	convenience		29.36152	-100.87852	616 Dr Fermin Calderon Blvd	Del Rio	78840	+18307757099	http://www.max-e-mart.com/store.asp		0.80
+a33ba779b609	MAX-E-MART #3	convenience		29.36149	-100.87854	616 DR FERMIN CALDERON BLVD	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-maxemart3-200314053	Exxon	0.80
+7053ab632559	MINIT MART #101	convenience		29.37403	-100.90135	1009 VETERANS BLVD	Del Rio	78840		https://www.exxon.com/en/find-station/exxon-delrio-tx-minitmart101-200320630	Exxon	0.80
+29aa805a9840	Mr Cartender	convenience		29.37407	-100.90127	1009 Veterans Blvd	Del Rio	78840	+18307753369	http://chevron.com		0.91
+6e98f557a38e	Mr Cartender	convenience		29.35537	-100.90542	620 Las Vacas St	Del Rio	78840	+18307759788			0.65
+2b98d8cc84b5	Murphy USA	convenience		29.37011	-100.88772	207 N. Bedell Ave	Del Rio	78840			Murphy USA	0.80
+de6ab7281642	Murphy USA	convenience		29.39658	-100.90416	2427 Veterans Blvd	Del Rio	78840	+18307786888	http://www.murphyusa.com/		0.92
+f089514350ee	Neal One Stop	convenience		29.36469	-100.90197	100 E Gibbs St	Del Rio	78840	+18307747353	http://exxonmobilstations.com		0.92
+a8cc8776b787	Peter Rabbit 101	convenience		29.37405	-100.90131	1009 Veterans Blvd	Del Rio	78840	+18307750824	http://chevron.com		0.97
+8f6ef2f47248	Pico #19	convenience		29.40479	-100.90397	3607 U.S. 90, Westlake, LA 70669	Del Rio, Tx	78840		http://valero.com		0.77
+445ff16dd4f6	Pico Propane and Fuels	convenience		29.37448	-100.90361	307 E 10th St	Del Rio	78840	+18307757761	https://www.picopropane.com/		0.92
+d50a9d69f4f1	SE40525 BRACKETVILLE TX	convenience		29.30970	-100.41880	108 W MILITARY HWY	Brackettville	78832		https://locations.valero.com/en-us/LocationDetails/Index/108-W-MILITARY-HWY/0000002066	Valero	0.95
+33f25dd866bd	SE40538 DEL RIO TX	convenience		29.36940	-100.88841	1300 E GIBBS ST	Del Rio	78840		https://locations.valero.com/en-us/LocationDetails/Index/1300-E-GIBBS-ST/0000002069	Valero	0.80
+849db31ecf6c	SE40539 DEL RIO TX	convenience		29.40470	-100.90421	3607 W HIGHWAY 90	Del Rio	78840		https://locations.valero.com/en-us/LocationDetails/Index/3607-W-HIGHWAY-90/0000002068	Valero	0.80
+be7a9fc9ae9d	Shell	convenience		29.34399	-100.91798	2301 TX-239 Spur	Del Rio	78840	+18307782260	https://find.shell.com/us/fuel/10052040-2301-spur-239		0.92
+25f8594a3cff	Stripes	convenience		29.36939	-100.88831	1300 E Gibbs St	Del Rio	78840	+18307751604	https://stripesstores.com/		0.96
+26317e943c46	Stripes	convenience		29.30958	-100.41885	108 W Military Hwy	Brackettville	78832	+18305632424	https://www.7-eleven.com/	Stripes	1.00
+8d6ffca414c2	Stripes	convenience		29.38604	-100.90604	2100 Veterans Blvd	Del Rio	78840	+18307759375	https://www.7-eleven.com/	Stripes	1.00
+9a814e3b2b54	Stripes	convenience		29.37870	-100.90454	1602 Veterans Blvd	Del Rio	78840	+18307745634	https://www.laredotacocompany.com/	Stripes	0.97
+d5fdf4616f74	Stripes	convenience		29.40474	-100.90399	3607 Veterans Blvd	Del Rio	78840	+18307759890	https://stripesstores.com/		0.93
+da45ec84fb30	Stripes	convenience		29.34683	-100.91673	2200 Spur 239	Del Rio	78840	+18307741881	https://stripesstores.com/		0.96
+f0b56d374372	Stripes Convenience Store	convenience		29.36630	-100.89783	203 Veterans Blvd	Del Rio	78840	+18307756488	https://www.7-eleven.com/	Stripes	1.00
+9fedddb062f1	Texaco	convenience		29.36914	-100.83028	101 Charles Dr	Del Rio	78840	+18302983131	https://www.texaco.com/	Texaco with Techron	0.92
+42a8a7eadda4	Valdes Grocery	convenience		29.35491	-100.88294	1605 Brodbent Ave	Del Rio	78840	+18307745175			0.92
+724746c48997	Valero	convenience		29.36918	-100.88813	1300 E Gibbs St	Del Rio	78840	+18307751604	https://www.valero.com		0.92
+afcbab9df68c	Valero	convenience		29.30967	-100.41900	108 W MILITARY HWY	Brackettville	78832	+18305632424	https://locations.valero.com/en-us/LocationDetails/Index/108-W-MILITARY-HWY/0000002066	Valero	0.92
+6116be1fd02d	Arby's	fastfood		29.39277	-100.90501	2211 Veterans Blvd	Del Rio	78840	+18303202030	https://locations.arbys.com/tx/delrio/2211-veterans-blvd.html		0.96
+62bef3eb2aca	Burger King	fastfood		29.36902	-100.88934	1302 E Gibbs St	Del Rio	78840	+18303137782	https://burgerking.com/store-locator/store/23550	Burger King	0.95
+111ed77b3fb9	Chick-fil-A	fastfood		29.39036	-100.90465	2207 Veterans Blvd	Del Rio	78840	+18307752902	https://www.chick-fil-a.com/locations/tx/del-rio?utm_source=yext&utm_medium=link	Chick-fil-A	0.96
+25b1db4ef48a	Chris's Snack Room	fastfood		29.38394	-100.92178	SouthWest Texas Junior College-Del Rio, 207 Wildcat Dr	Del Rio	78840	+18303082832			0.61
+1015da6f4dbc	Church's Texas Chicken	fastfood		29.38168	-100.90530	1900 Veterans Boulevard	Del Rio	78840	+18307754788	https://locations.churchs.com/tx/del-rio/1900-veterans-boulevard	Church's Chicken	0.96
+d1f8f7333eea	Dairy Queen	fastfood		29.38180	-100.90469	1901 Ave F 1901 Ave F	Del Rio	78840	+18307751935	https://www.dairyqueen.com/en-us/locations/tx/del-rio/1901-ave-f/10606/?y_source=1_MjkzMzkwMzUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+3efdc9106441	DQ Grill & Chill	fastfood		29.38187	-100.90470	1901 Ave F	Del Rio	78840		https://www.dairyqueen.com/en-us/locations/tx/del-rio/1901-ave-f/603	DQ Grill & Chill	0.80
+476e90f99120	Dunkin Donuts	fastfood		29.39571	-100.90108	2410 Dodson Avenue, WM Store # 447	Del Rio	78840		https://www.dunkindonuts.com/locations/us/tx/del-rio/2410-dodson-avenue/store-366673/	Dunkin'	0.89
+2450090aa26c	Golden Chick	fastfood		29.36874	-100.89899	501 Avenue F	Del Rio	78840	+18307752442	http://locations.goldenchick.com/tx/del-rio/1109/	Golden Chick	0.97
+3f2617433096	KFC	fastfood		29.37739	-100.90384	1410 Veterans Boulevard	Del Rio	78840	+18307759745	https://locations.kfc.com/tx/del-rio/1410-veterans-boulevard	KFC	0.98
+8e81eebb7f7d	Long John Silver's	fastfood		29.37591	-100.90221	1205 Veterans Blvd	Del Rio	78840	+18304693059	http://www.ljsilvers.com/	Long John Silver's	0.98
+57e710c4c3cd	McDonald's	fastfood		29.36948	-100.88694	1504 E Gibbs	Del Rio	78840	+18307038594	https://www.mcdonalds.com/us/en-us/location/tx/del-rio/1504-e-gibbs/26592.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+e7ef6cb12a76	McDonald's	fastfood		29.38004	-100.90373	1701 Veterans Blvd	Del Rio	78840	+18307744505	https://www.mcdonalds.com/us/en-us/location/tx/del-rio/1701-veterans-blvd/3780.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+c46f5e68b5d6	Meme's Kleen Kitchen	fastfood		29.36540	-100.89884	401 E Gibbs St	Del Rio	78840	+18307755389	http://www.yelp.com/biz/memes-kleen-kitchen-1-del-rio		0.96
+cf53ac03df61	Panda Express	fastfood		29.39192	-100.90564	2400 Veterans Blvd. Suite 30	Del Rio	78840	+18307038808	http://www.pandaexpress.com/	Panda Express México	0.96
+a533943828fb	Sonic Drive In	fastfood		29.37492	-100.90171	1109 Avenue F	Del Rio	78840	+18307741261	https://locations.sonicdrivein.com/tx/delrio/1109-avenue-f.html	Sonic Drive-In	0.92
+c15c8586ec7e	Taco Bell	fastfood		29.38112	-100.90465	1809 Veterans Blvd	Del Rio	78840	+18304222468	http://www.tacobell.com/	Taco Bell	0.98
+ed8deb9a7743	Taco Fast Del rio	fastfood		29.36584	-100.89740	507 E Gibbs St	Del Rio	78840	+18303132805			0.97
+906e66eebc79	Wendy's	fastfood		29.39326	-100.90440	2213 Avenue F	Del Rio	78840	+18307681992	https://locations.wendys.com/united-states/tx/del-rio/2213-avenue-f	Wendy's	0.98
+b7503838847a	Avenue F and Gibbs H-E-B	grocery		29.36632	-100.89980	200 VETERAN'S BLVD	Del Rio	78840		https://www.heb.com/heb-store/us/tx/del-rio/avenue-f-and-gibbs-h-e-b-418	H-E-B	0.80
+ae9e13d649c5	Del Rio Food & Meat Market	grocery		29.36403	-100.88213	211 Dr Fermin Calderon Blvd	Del Rio	78840	+18307757782			0.96
+653a1eda41bd	E Z Stop Drive Inn & Laundromat	grocery		29.38388	-100.91164	200 Western Dr	Del Rio	78840	+18307754292			0.65
+ac35d471e335	H-E-B	grocery		29.36621	-100.89987	200 Veterans Blvd	Del Rio	78840	+18307745666	https://www.heb.com/heb-store/US/tx/del-rio/avenue-f-and-gibbs-h-e-b-418	H-E-B	0.99
+ed19f3f1b4b8	HEB	grocery		29.35802	-100.89737	500 Pecan St	Del Rio	78840	+18307742596	https://www.heb.com/heb-store/US/tx/del-rio/pecan-and-greenwood-h-e-b-88	H-E-B	0.92
+8b17606a17bb	La Hacienda Meat Market	grocery		29.36522	-100.87404	410 E Garza St	Del Rio	78840	+18307755491	https://la-hacienda-meat-market-tx.hub.biz/		0.96
+ed5cda0d657a	Laughlin Commissary	grocery		29.35479	-100.78929	574 5th St	Laughlin Air Force Base	78843	+18303086590	http://www.facebook.com/yourcommissary		1.00
+3c6776cd541f	Sana-Salud.com	grocery		29.35948	-100.90038	125 W Garfield St	Del Rio	78840	+18303096300	http://sana-salud.com/		0.92
+ba854db17e9e	Super 7 Super Market	grocery		29.36407	-100.88210	211 Dr Fermin Calderon Blvd	Del Rio	78840	+18303208000			0.92
+6fa3c03c378c	Culberson Hospital	hospital		29.13066	-100.19531	Eisenhower & FM2185	Van Horn	79855	+14322832760	https://culbersonhospital.org/		0.94
+90516a4a6921	Rio Vista Medical Center	hospital		29.39041	-100.90125	2209 Bedell Ave	Del Rio	78840	+18307758513	www.healthcare6.com/physician/del-rio-tx/jaime-j-gutierrez-997510.html		0.77
+318c75053392	San Felipe Health Center	hospital		29.36482	-100.88439	1117 W de la Rosa St	Del Rio	78840	+18307743532	http://www.umchealth.com		0.95
+31f85c1e5b13	Stat Specialty Hospital	hospital		29.40009	-100.90520	2600 Veterans Blvd	Del Rio	78840	+18302515248	http://statspecialtyhospital.com/locations/del-rio	STAT Specialty Hospital - Laredo North	0.92
+8afd21c76734	Valverde Hospital	hospital		29.37466	-100.89272		Del Rio					0.91
+8a6e4a844ec5	Agua Nada Ranch	hotel	lodge	29.80148	-100.28216	12366 County Road 310	Rocksprings	78880	+19795957594	http://AguaNadaRanch.com/		0.92
+850ddeed7a32	Angler's Lodge	hotel		29.45802	-100.96514	8969 W US Highway 90	Del Rio	78840	+18307751586	https://www.anglerslodgemt.com		0.55
+6e5ea0ad72a9	Baymont by Wyndham Del Rio	hotel	resort	29.40644	-100.90546	3616 Veterans Blvd	Del Rio	78840	+18304615325	https://www.wyndhamhotels.com/baymont/del-rio-texas/baymont-del-rio/overview?CID=LC:w1ep4ap58ea2s4j:47234&iata=00093796		1.00
+5c67a07421f7	Best Western Inn of Del Rio	hotel	motel	29.37186	-100.90113	810 Veterans Blvd	Del Rio	78840	+18307757511	https://www.bestwestern.com/en_US/book/hotel-rooms.44335.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44335	Best Western Hotels & Resorts	0.99
+5c912c882a3e	Breen Villa VilleKulla	hotel		29.31915	-100.41133	502 N Ann St	Brackettville	78832	+18307191630			0.77
+b53944f4c1a9	Camp Wood Hills Crossing	hotel		29.66755	-100.02321	River Rd	Camp Wood	78833				0.70
+49e57e01f713	Capri Temporary Housing	hotel		29.40948	-100.90525	3806 Veterans Blvd	Del Rio	78840	+18307687799	http://capritemporaryhousing.com		0.78
+4d1bfd37d4f5	Ceniza Hills	hotel		29.41218	-100.92261		Del Rio					0.97
+158a84819fe9	Cielito Lindo Motel	hotel	motel	29.38255	-100.90561	1912 Veterans Blvd	Del Rio	78840	+18307753548	http://cielitohillsmotel.placeweb.site		0.92
+6d824f2314a6	Days Inn Del Rio	hotel		29.41034	-100.90546		Del Rio		+18307750585	http://www.daysinn.com		0.75
+3f1f7cb9e55e	Del Rio Elks Lodge No. 837	hotel	lodge	29.37642	-100.88290	San Felipe Springs Rd	Del Rio	78840	+18304222063			0.97
+3f02c8d2d9d2	Del Rio Hotel Group Llc	hotel		29.38834	-100.90459	2115 Veterans Blvd	Del Rio	78840				0.95
+b1c36440c462	Del Rio Hotel Investment, Llc	hotel		29.40645	-100.90512	3616 Veterans Blvd	Del Rio	78840				0.95
+2d2ea89a19d5	Del Rio Inn	hotel	motel	29.40958	-100.90395	3811 Veterans Blvd	Del Rio	78840	+18307752600	http://www.DELRIOINN.COM/		0.98
+0f669a8b237b	Econo Lodge Del Rio	hotel	resort	29.38433	-100.90575	2000 Veterans Blvd	Del Rio	78840	+18307756323	https://www.choicehotels.com/texas/del-rio/econo-lodge-hotels/txq48?mc=llbillpx&pmf=local		0.98
+37de1d7378c1	Elks Lodge	hotel		29.36891	-100.88732	131 E Highway 90	Del Rio	78840	+18307752133	http://www.elks.org		0.64
+82779de9f3b7	Fairfield by Marriott Inn & Suites Del Rio	hotel		29.39229	-100.90141	2217 N Bedell Ave	Del Rio	78840		https://www.marriott.com/DRTFI	Fairfield Inn	0.99
+ba52c7f3c926	Fort Clark Springs	hotel		29.30685	-100.41992	23 McClernand	Brackettville	78832	+18305632493	https://fortclark.com		0.92
+fa499ef0a0f1	Hampton Inn & Suites	hotel		29.39237	-100.90083	2219 N Bedell Ave	Del Rio	78840	+18307759700	https://www.hilton.com/en/hotels/drttxhx-hampton-suites-del-rio/?SEO_id=FB-AMER-HX-DRTTXHX	Hampton by Hilton	0.99
+740c179eb769	Hawthorn Extended Stay by Wyndham Del Rio	hotel	resort	29.38588	-100.90085	273 E Cantu Rd	Del Rio	78840	+18304886226	https://www.wyndhamhotels.com/en-ca/hawthorn-extended-stay/del-rio-texas/hawthorn-extended-stay-del-rio/overview		0.92
+0c07c4e38473	Holiday Inn Express & Suites	hotel		29.39294	-100.90193	2410 N Bedell Ave	Del Rio	78840	+18307747774	https://www.ihg.com/holidayinnexpress/hotels/us/en/del-rio/drttx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-DRTTX	Holiday Inn Express	1.00
+1c7a9ec5ffc3	Home	hotel		29.35874	-100.87547		Del Rio					0.97
+7e74cbadfcca	Home2 Suites by Hilton Del Rio	hotel		29.38500	-100.90200	122 Lowe Drive	Del Rio	78840	830-202-9160	https://www.hilton.com/en/hotels/drtexht-home2-suites-del-rio/	Home2 Suites by Hilton	0.98
+4c4a51b0f9af	La Quinta Inn & Suites by Wyndham Del Rio	hotel	resort	29.38574	-100.90098	273 E Cantu Road Bld 2	Del Rio	78840	+18304886226	https://www.wyndhamhotels.com/laquinta/del-rio-texas/la-quinta-inn-and-suites-del-rio/overview?CID=LC:ycxc9dy8gi7gbv8:55214&iata=00093796		0.99
+2714dec932a4	La Quinta Inn by Wyndham Del Rio	hotel	resort	29.38507	-100.90546	2005 Veterans Blvd	Del Rio	78840	+18302821357			0.92
+e592d28be943	Laguna Diablo Resort	hotel	lodge	29.61837	-100.93941	875 Sanders Point Rd	Del Rio	78840	+18307742422	http://www.thelodgeatsanderspoint.com/		0.92
+33ee3bc5b9d2	Lakeridge Lodge	hotel	lodge	29.45852	-100.96556	8969 US-90	Del Rio	78840	+19152699900	http://Lakeridgelodge.com/		0.92
+61e728766a68	Laughlin Manor	hotel		29.35179	-100.78577	Laughlin AFB	Del Rio	78840	+18302983958	http://af.dodlodging.net		0.77
+39356138cedb	Madhu & Prahlad Llc	hotel		29.37752	-100.90253	1403 Veterans Blvd	Del Rio	78840				0.95
+781626f2ff6b	Mernava Llc	hotel		29.38504	-100.90405	2005 Veterans Blvd	Del Rio	78840				0.95
+ed6157ae97f5	Motel 6	hotel	motel	29.38841	-100.90417	2115 Veterans Blvd	Del Rio	78840	+18307742115	http://www.motel6.com/	Motel 6	0.99
+32accee55f74	Ox Safari	hotel		29.46777	-100.10824	1946 Private Road 2485	Uvalde	78801	+18302754962	http://Oxsafari.com/		0.99
+ab17fb6a72c4	Quality Inn & Suites	hotel		29.40637	-100.90523	3616 Veterans Blvd	Del Rio	78840	+18307752933	https://www.choicehotels.com/texas/del-rio/quality-inn-hotels/tx864?pmf=yext&mc=llyxyxpx	Choice Hotels	0.92
+5dabb88c6b92	Ramada by Wyndham Del Rio	hotel		29.38625	-100.90460	2101 Veterans Blvd	Del Rio	78840	+18302821597	https://ramada-del-rio-tx.hub.biz/	Ramada by Wyndham	1.00
+e9730bb7154b	Red Roof Inn Del Rio	hotel		29.41037	-100.90552	3808 Veterans Blvd	Del Rio	78840	+18304886120	http://www.redroof.com/		0.99
+4006aa690363	The Cowboy Motel	hotel	motel	29.66788	-100.01179	214 Nueces St	Camp Wood	78833	+18303336074	http://Www.TheCowboyMotel.com/		0.97
+d726348cdfcf	The Nueces River Retreat	hotel	lodge	29.72458	-100.03504	TX State Hwy 55, 29 Taylor St	Barksdale	78828	+15129817876	http://www.thenuecesriverretreat.com/		0.92
+a6d3b77dc92b	The Riv	hotel	lodge	29.61852	-100.01402	140 County Rd 417	Uvalde	78801		http://theriv.com/		0.92
+b11461fcff05	Western Motel	hotel	motel	29.37759	-100.90267	1403 Veterans Blvd	Del Rio	78840	+18307744661	http://westernmotel3.placeweb.site		0.93
+f56791eeccc6	Whispering Palms Inn	hotel	motel	29.37612	-100.90285	1300 Veterans Blvd	Del Rio	78840	+18304886270	http://www.whisperingpalmsinn.com/		1.00
+c485995cc205	Woodbine Inn	hotel		29.66785	-100.01166	214 S Nueces St	Camp Wood	78833	+18305972310	http://www.campwoodlodging.com		0.92
+ee67dcfd1a07	Condor Tech Group LLC	office	information technology company	29.38110	-100.90097	1700 Bedell Ave	Del Rio	78840	+18304691025	http://www.condortechgroup.com/		0.92
+ad71076c09c4	Eva and Davids Water Store	office	bottled water company	29.38764	-100.93107	1318 W Cantu Rd	Del Rio	78840	+18307342204			0.92
+662c197efb94	Watermill Express	office	bottled water company	29.36249	-100.88042	411 Dr Fermin Calderon Blvd	Del Rio	78840	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+cb053353a6b4	Watermill Express	office	bottled water company	29.38107	-100.90061	1700 N Bedell Ave	Del Rio	78840	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+82e996eee405	3Js	restaurant	pizza restaurant	29.09815	-100.34690	1111 W Frankford Rd	Carrollton	75007	+19728100134	https://www.3js-pizza.com/		0.70
+0dcab5731906	4th Street Pizza	restaurant	pizza restaurant	29.67105	-100.00709	500 E 4th St	Camp Wood	78833	+18308345239			0.92
+f69de79c0795	5428 N 10th, Llc	restaurant		29.38941	-100.90473	2203 Veterans Blvd	Del Rio	78840				0.95
+c6160a9bbc73	A&W & LJS Texas	restaurant	american restaurant	29.37585	-100.90218	1205 Veterans Blvd	Del Rio	78840	+18304693059	http://www.awrestaurants.com/		0.76
+c47d01d17ccd	A&W Restaurant	restaurant	burger restaurant	29.37584	-100.90218	1205 Veterans Blvd	Del Rio	78840	+18304694457	https://awrestaurants.com/locations/texas/del-rio/1205-veterans-blvd/		0.98
+406dc15546f4	Abrajan's Mexican Food	restaurant	mexican restaurant	29.37297	-100.90201	402 E 8th St	Del Rio	78840	+18304882385			0.92
+34bae8bc36b0	ACA Chavez Quick Taco	restaurant	taco restaurant	29.39928	-100.90527	2530 Veterans Blvd	Del Rio	78840	+18303137046			0.96
+c756d33ed218	Ajillos Restaurant	restaurant	mexican restaurant	29.37146	-100.87537	611 E De La Rosa St	Del Rio	78840	+18307658054	https://www.ajillostherestaurant.com/		0.95
+f493464beb13	Alonso's Tacos	restaurant	taco restaurant	29.36125	-100.88865	100 Gillis Ave	Del Rio	78840	+18303096847			0.92
+23ee8db7863f	Antojitos Mundos	restaurant	mexican restaurant	29.38637	-100.90215	2044 Bedell Ave	Del Rio	78840	+18305075224			0.92
+b61c9b5e1db4	Applebee's	restaurant	american restaurant	29.39061	-100.90363	2205 Veterans Blvd, Suite F16	Del Rio	78840	+18304222167	http://www.applebees.com	Applebee's Grill & Bar	0.99
+3669df0b74f0	Asadero las amazonas and tacos griil	restaurant		29.39934	-100.90544	2530 Veterans Blvd	Del Rio	78840	+18304221648			0.97
+ead12592346a	B29	restaurant	bar and grill restaurant	29.36535	-100.88300	104 Dr Fermin Calderon Blvd	Del Rio	78840	+18307741209	https://www.chamberofcommerce.com/del-rio-tx/7118502-b29		0.88
+ddab7ec7c07a	Buffalo Girls, Llc	restaurant		29.36820	-100.89947	410 Veterans Blvd	Del Rio	78840		24wave.com		0.95
+dbdd4751d421	Burger & Shake	restaurant	burger restaurant	29.30804	-100.41579	312 E Military Hwy	Brackettville	78832	+18305632027	http://www.brackettburgerandshake.com/		0.96
+4ae6b0f3b5db	Burger King	restaurant	burger restaurant	29.38894	-100.90578	2204 Veterans Blvd	Del Rio	78840	+18307753346	https://burgerking.com/store-locator/store/3343	Burger King	0.99
+7118e32f9898	Burger King	restaurant	burger restaurant	29.36203	-100.90319	104 S Griner St	Del Rio	78840	+14042071823	www.bk.com	Burger King	0.97
+d202321522db	Bwr Del Rio Restaurant	restaurant		29.40499	-100.90536	3600 Veterans Blvd	Del Rio	78840	+18307781297	http://www.buffalowingsandrings.com		0.75
+fcb0648bf6a3	Canyon BBQ and Grill	restaurant	barbecue restaurant	29.66984	-100.01244	107 Nueces St	Camp Wood	78833	+18305972333	http://www.canyonbbqandgrill.com/		0.94
+197e5519a7be	Carmelitas Restaurant #1	restaurant	mexican restaurant	29.34969	-100.91265	1501 Las Vacas St	Del Rio	78840	+18307745171	https://www.facebook.com/pg/95carm/menu/		0.96
+7faf4cd3fafd	Casa Falcon Restaurant	restaurant	mexican restaurant	29.66729	-100.01193	100 W Second St	Camp Wood	78833	+18305975111	http://casa-falcon.edan.io		0.94
+763ae15203c4	Charleys Cheesesteaks and Wings	restaurant	sandwich shop	29.39511	-100.90157	2410 Dodson Ave	Del Rio	78840	+18307308371	http://charleys.com/		0.96
+766a21e32ca9	Chelaz Company LLC	restaurant	mexican restaurant	29.39047	-100.90966	216 Mary Lou Dr	Del Rio	78840	+18303083125			0.92
+845168beb817	Chicken Coop Grill	restaurant	comfort food restaurant	29.72529	-100.03484	25607 TX-55	Barksdale	78828	+18302343244			0.95
+219396b06c0f	Chili's Grill & Bar	restaurant		29.39597	-100.90425	2415 Veterans Blvd.	Del Rio	78840	+18307741171	https://www.chilis.com/		0.99
+8fe57f17b4de	Chinto's Super Taco	restaurant	mexican restaurant	29.37128	-100.90154	400 E 6th St	Del Rio	78840	+18307741592	https://chintossupertaco.netwaiter.com/del-rio/about		0.97
+6b76328392a1	Chuchuy’s Q	restaurant		29.37291	-100.82286	617 Jeffery Dr	Del Rio	78840	+18307343669			0.97
+8591463e635f	Cripple Creek Steakhouse	restaurant	steakhouse	29.44072	-100.91602	5667 US-90	Del Rio	78840	+18307750153	https://www.cripplecreeksteakhouse.com/reservations		1.00
+81c17353ef92	Del Rio Management Co Llc	restaurant		29.38617	-100.90492	2101 Veterans Blvd	Del Rio	78840		www.rmontgomeryrealestate.com		0.95
+3f72ab7679be	Dinks Cafe	restaurant	american restaurant	29.45785	-100.96693	9084 W US Highway 90	Del Rio	78840	+18307755434			0.57
+bf96bd5ad29e	Doc Holliday's	restaurant	bar and grill restaurant	29.36509	-100.90067	202 E Gibbs St	Del Rio	78840	+18307196556	https://www.tiktok.com/@dochollidays.dancehall?_r=1&_t=ZT-98kDGBkhl6r		0.99
+64b298b7bfc1	Domino's	restaurant	pizza restaurant	29.38719	-100.90220	2050 N Bedell Ave	Del Rio	78840	+18307753030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+02b15100b3b4	Don Marcelino Restaurant	restaurant	mexican restaurant	29.37472	-100.90255	1110 Veterans Blvd	Del Rio	78840	+18307756242			0.99
+0a42fbccfc51	Don Quixote de la Mancha’s	restaurant	american restaurant	29.37786	-100.90175	1407 Avenue G	Del Rio	78840	+18303098133			0.95
+1c3013d1eb5f	Don Quixote de la Mancha’s	restaurant	american restaurant	29.37631	-100.90617	1407 Avenue G	Del Rio	78840	+18303098133			0.96
+54786dd728c7	Dona Elvira Mexican Restaurant	restaurant	mexican restaurant	29.39051	-100.90900	206 Mary Lou Dr	Del Rio	78840	+18307742049			0.99
+59664e39bb14	El Antojo Lagunero	restaurant	mexican restaurant	29.36788	-100.89241	1002 E Gibbs St	Del Rio	78840	+18302454720			0.96
+6d699305e70c	El Palenque Tacos and Grill	restaurant	mexican restaurant	29.38723	-100.90441	2107 Veterans Blvd Ste 11	Del Rio	78840	+18307753387	https://local.yahoo.com/info-19433023-el-palenque-tacos-grill-del-rio	Taco Palenque	0.98
+2a1d318bc331	El Patio Del Rio	restaurant	mexican restaurant	29.36887	-100.88989	1206 E Gibbs St	Del Rio	78840	+18307748080	http://www.elpatiodelrio.com/		0.99
+d6216c2c3b80	El Ranchito Mexican Restaurant	restaurant		29.36018	-100.87688	810 Dr Fermin Calderon Blvd	Del Rio	78840	+18307743039	http://www.whitepages.com/business/el-ranchito-mexican-restaurant-del-rio-tx		0.60
+87f9db8e6fa8	El Tacon Madre	restaurant	mexican restaurant	29.36412	-100.89661	101 Texas St	Del Rio	78840	+18302121101			0.92
+4c16d6fa8cd7	El Toro Restaurant	restaurant	mexican restaurant	29.36765	-100.90309	503 N Main St	Del Rio	78840	+18304885054	http://el-toro-del-rio.edan.io		1.00
+8c3a8c13bad3	Elias Mtanous And Bianka Mtanous	restaurant		29.37222	-100.89996	808 Avenue G	Del Rio	78840				0.95
+481086d7ea01	Far West Grill	restaurant	barbecue restaurant	29.38067	-100.90501	1800 Veterans Blvd	Del Rio	78840	+18304227674	http://www.farwestgrill.com		0.78
+fc538955c8c3	Flaming Bird By H-E-B	restaurant	chicken restaurant	29.36615	-100.89937	200 Veterans Blvd	Del Rio	78840	+12109381418	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.97
+72d2235215e9	Fuddruckers	restaurant	american restaurant	29.39269	-100.90440	2211 Veterans Blvd.	Del Rio	78840	+18307745685	https://www.fuddruckers.com/del-rio-tx		0.77
+7c7cecbe3f1c	Generation Nutrition	restaurant	health food restaurant	29.35942	-100.89948	110 W Losoya St.	Del Rio	78840	+18303082725	https://doit4u21.goherbalife.com/en-us		0.92
+731233e3ba94	Golden Dragon	restaurant	chinese restaurant	29.37463	-100.90131	504 E 9th St	Del Rio	78840	+18307681155	https://www.goldendragontopeka.com		0.55
+0dd87dcda302	Goodies Snack Bar	restaurant		29.39102	-100.90347	2205 Veterans Blvd	Del Rio	78840	+18307197459			0.92
+33f182d2ced6	Gorditas Sanfelipe	restaurant		29.35598	-100.88316	407 W Morin St	Del Rio	78840	+18304619238			0.94
+df9ee2523a3b	Haza Management Inc	restaurant		29.36747	-100.89838	309 Veterans Blvd	Del Rio	78840				0.95
+cb7762d99856	Hot Dog Heaven	restaurant	hot dog restaurant	29.37339	-100.90154	1000 Veterans Blvd	Del Rio	78840	+18304881576			0.92
+8329ddc0027f	Hot Dogs “El Guayumin”	restaurant		29.34834	-100.86553	194 Vista Oriente	Del Rio	78840	+18307650921			0.55
+95c9aff5794b	Humo Prime Barbecue	restaurant	barbecue restaurant	29.37206	-100.90009	808 Ave G	Del Rio	78840	+18304533476	http://www.humoprimebarbecue.com/		0.92
+8633199ef299	IHOP	restaurant	breakfast and brunch restaurant	29.38950	-100.90458	2203 Veterans Blvd	Del Rio	78840	+18307743272	http://www.ihop.com/	IHOP	0.98
+b4f6a4888933	Isenhour Management, Inc	restaurant		29.37700	-100.90347	1400 Veterans Blvd	Del Rio	78840				0.95
+cd0691136621	It's Just Wings	restaurant	chicken wings restaurant	29.39597	-100.90425	2415 Veterans Blvd.	Del Rio	78840	+14699062919	https://itsjustwings.com/		0.92
+9f0294b427dd	It's The Pits BBQ and More, LLC	restaurant	barbecue restaurant	29.66890	-100.01370	101 S Leon Klink St	Camp Wood	78833	+18305972466	http://www.itsthepitsbbqandmore.com/		0.68
+0085f24918e4	Jack in the Box	restaurant	taco restaurant	29.39359	-100.90433	100 Braddie Dr	Del Rio	78840	+18307683050	http://www.jackinthebox.com/locations/947		0.95
+52eb692a9ce9	Jimenez Tortilla Factory	restaurant	mexican restaurant	29.36551	-100.87091	518 E Gutierrez St #	Del Rio	78840	+18307757222	http://jimenez-tortilla-factory.dinehere.us		0.92
+caa06fab6611	Jitra Thai Cuisine	restaurant	thai restaurant	29.36783	-100.89309	904 E Gibbs St	Del Rio	78840	+18307757553	https://www.jitrathaicuisine.com		0.99
+7ea61ffff86a	Julie's Restaurant	restaurant		29.31379	-100.42620	612 W Military Hwy	Brackettville	78832	+18305639511	https://julie-s-place-tx.hub.biz/		0.96
+8395886ed38c	Julio's Seasoning And Corn Chips	restaurant	mexican restaurant	29.36626	-100.90446	410 Ave B	Del Rio	78840	+18307742240	http://www.julioscornchips.com/history.html		0.83
+9bb4ac32a5e6	Julio's Seasoning and Corn Chips	restaurant	mexican restaurant	29.36955	-100.84444	3900 US-90	Del Rio	78840	+18302982223	http://www.julioscornchips.com/		1.00
+b43915cafac7	Krkl & Co Llc	restaurant		29.36890	-100.89000	1206 E Gibbs St	Del Rio	78840				0.95
+f6e1d6408f34	La Cabanita Taqueria	restaurant	taco restaurant	29.36721	-100.89759	510 E 1st St	Del Rio	78840	+18303205606	https://lacabanita.my.canva.site/hand-crafted-tacos#page-2		0.98
+e654b9b2af85	La Chaparrita Tacos Tapatios	restaurant	taco restaurant	29.36429	-100.88226	205 Dr Fermin Calderon Blvd	Del Rio	78840	+18307650859			0.92
+0e51847eeb57	La Hacienda	restaurant	mexican restaurant	29.35977	-100.89769	330 Pecan St	Del Rio	78840	+18307747094	http://www.lahacienda.com		0.98
+5a59ff6b5593	La Hacienda Palace	restaurant	mexican restaurant	29.44811	-100.92647	6500 US-90	Del Rio	78840				0.92
+0de871276dba	La Lomita 4 Life	restaurant	mexican restaurant	29.36976	-100.95392	126 Center Dr	Del Rio	78840	+18303179961	https://www.giftrocket.com/gift-cards-in/del-rio-tx		0.96
+35d20f6676d5	La Lomita Snack	restaurant		29.36108	-100.90949	126 Cienegas Rd	Del Rio	78840	+18303098967	http://Google.com/		0.65
+d510f0e27282	La Mexicana	restaurant	mexican restaurant	29.37330	-100.84592	284 FM-2523	Del Rio	78840				0.74
+f0d59f1fa71a	La mexicanita	restaurant	mexican restaurant	29.37042	-100.90045	700 Veterans Blvd	Del Rio	78840	+18304612051			0.92
+5502ff760de9	Laredo Taco Company	restaurant		29.30969	-100.41879	108 US 90	Brackettville	78832	+18305632424	https://www.laredotacocompany.com/		0.93
+6e029cf5c330	Laredo Taco Company	restaurant		29.36939	-100.88831	1300 E Gibbs St	Del Rio	78840	+18307751604	https://www.laredotacocompany.com/		0.95
+ad764da2808f	Laredo Taco Company	restaurant		29.37898	-100.90457	1602 Veterans Blvd	Del Rio	78840	+18307745634	https://www.laredotacocompany.com/		0.95
+fef70bffbff5	Laredo Taco Company	restaurant		29.34683	-100.91673	2200 Spur 239	Del Rio	78840	+18307741881	https://www.laredotacocompany.com/		0.95
+e477b9e5a3ad	Laughlin Club XL	restaurant		29.35093	-100.78195	416 Liberty Dr	Laughlin Air Force Base	78843				0.60
+45eea5a7a147	Little Caesars Pizza	restaurant	pizza restaurant	29.37292	-100.90016	903 Veterans Blvd	Del Rio	78840	+18307680363	https://littlecaesarsstore.com		0.55
+cee21edc3b46	Little Caesars Pizza	restaurant	pizza restaurant	29.36633	-100.89578	615 E Gibbs St	Del Rio	78840	+18307680363	https://littlecaesars.com/en-us/store/7806	Little Caesars	0.98
+be12a978fd61	Loaves and Fishes	restaurant	soup restaurant	29.36608	-100.87727	400 E Chapoy St	Del Rio	78840				0.92
+dc0393c5dc5a	Los Beto's Restaurant	restaurant	mexican restaurant	29.38237	-100.90558	1912 Veterans Blvd	Del Rio	78840	+18307342960	http://losbetosrestaurant1.placeweb.site/		0.96
+1a3b4c893cba	Lou's Wood Fire Pizza	restaurant	pizza restaurant	29.39427	-100.90428	2409 Veterans Blvd	Del Rio	78840	+18304222150	http://www.louswoodfirepizza.com/		0.98
+ca47c3866a2c	Love Poke Poke	restaurant	poke restaurant	29.38101	-100.90531	1810 Veterans Blvd	Del Rio	78840	+18303208001	http://www.lovepokepoke.com/		0.99
+09fb254af63e	Lucero's Mexican Restaurant	restaurant	mexican restaurant	29.35953	-100.87648	906 Dr Fermin Calderon Blvd	Del Rio	78840	+18304886023			0.99
+1c1eca7c47bb	Malinda Restaurant	restaurant	diner	29.38647	-100.90417	2101 Veterans Blvd	Del Rio	78840	+18307751511			0.92
+54632f2a1e0e	Manita's Restaurant	restaurant	mexican restaurant	29.31223	-100.42144	301 Spring St	Brackettville	78832	+18305639557	https://www.whodoyou.com/l/brackettville-tx/restaurant		0.99
+f761df709bac	Manuel's Steak House	restaurant	steakhouse	29.37664	-100.90310	1312 Veterans Blvd	Del Rio	78840	+18304886044	http://www.manuelssteakhouse.com		0.99
+8ff0fc7b870b	Margaritas Restaurant	restaurant	mexican restaurant	29.37384	-100.90199	1014 Veterans Blvd	Del Rio	78840	+18304222176			0.92
+ccfc02004701	Mari's Mexican food & Gorditas	restaurant		29.35548	-100.87469	1125 Dr Fermin Calderon Blvd	Del Rio	78840	+18303548427			0.97
+30ba4dce7016	McAlister's Deli	restaurant	delicatessen	29.39273	-100.90470	2211 Veterans Blvd	Del Rio	78840	+18305810009	https://locations.mcalistersdeli.com/tx/del-rio/2211-veterans-blvd	McAlister's Deli	0.96
+e805003ace05	McDonald's	restaurant	burger restaurant	29.39621	-100.90160	2410 Dodson Avenue	Del Rio	78840	+18307744508	https://www.mcdonalds.com/us/en-us/location/tx/del-rio/2410-dodson-avenue/28630.html?cid=RF:YXT:RoN::Clicks		0.98
+67108ba04d35	Memo's Restaurant	restaurant	mexican restaurant	29.36236	-100.88939	804 E Losoya St	Del Rio	78840	+18307741583	http://www.memosrestaurant.com		0.96
+a502ba23a9ac	Mexico Tipico Mexican Food	restaurant	mexican restaurant	29.35006	-100.91161	1302 Las Vacas St	Del Rio	78840	+18304222132			0.92
+31bcc7c18f53	Mi Tierra Linda	restaurant	mexican restaurant	29.36173	-100.87868	614 Dr Fermin Calderon Blvd	Del Rio	78840	+18307752416	http://diningguide.com		0.77
+f7b761aa7add	Mi Tierra Linda Restaurant	restaurant	mexican restaurant	29.35907	-100.87663	909 Dr Fermin Calderon Blvd	Del Rio	78840	+18304222224	http://www.mitierrarestaurant.com/		0.96
+7e8f389fa5e4	Molcajetes Restaurant	restaurant	mexican restaurant	29.37282	-100.90016	901 Veterans Blvd	Del Rio	78840	+18303097060			0.97
+6dfcfada4500	Mr Gatti's Pizza	restaurant	buffet restaurant	29.38832	-100.90326	103 Garner Dr	Del Rio	78840	+18307745616	https://mrgattispizza.com/homepage/locations/gattis-pizza-del-rio/?y_source=1_MTc0MTk4MTctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Mr Gatti's Pizza	0.95
+0491a08630be	Mr. Gatti's	restaurant	pizza restaurant	29.39247	-100.90590	2400 Veterans Blvd	Del Rio	78840	+18307745616	http://www.mrgattis.com/		0.92
+b5c7f9fd42c2	Mr. Gatti's Pizza	restaurant	pizza restaurant	29.38084	-100.90239		Del Rio					0.57
+a11295ec1f2a	Munchers	restaurant	burger restaurant	29.36753	-100.89835	309 Veterans Blvd	Del Rio	78840	+18304886001			0.97
+fa30bb854349	Mussi Investments Inc	restaurant		29.36747	-100.89838	309 Veterans Blvd	Del Rio	78840				0.95
+626c22ed3e26	Ocho Dos Dos	restaurant	steakhouse	29.35684	-100.89839	822 S Main St	Del Rio	78840	+18304222045	http://ochodosdos.com/		0.99
+0403c5c7e2db	Old Rotary Dogs Bar	restaurant	bar and grill restaurant	29.39007	-100.92689		Del Rio					0.74
+5a0eaad1e31e	Oriental Cuisine	restaurant	asian restaurant	29.38759	-100.90345	110 Miers St	Del Rio	78840	+18307789175	http://www.chinabuffet.net		0.92
+a2d62834887a	Papa Johns Pizza	restaurant	pizza restaurant	29.39272	-100.90440	2211 VETERANS BLVD	Del Rio	78840	+18307194110	https://locations.papajohns.com/united-states/tx/78840/del-rio/2211-veterans-blvd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2ODItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+46f44da38c8f	Patty's Restaurant	restaurant	mexican restaurant	29.38015	-100.90466	1750 Veterans Blvd	Del Rio	78840	+18303208019	https://pattysrestauranttx.com		0.96
+2b225de49f18	Petry's Taco Place	restaurant	taco restaurant	29.36521	-100.89375	602 E Garfield St	Del Rio	78840	+18307659569			0.99
+edc88bf52994	Petry's Taco Place	restaurant	taco restaurant	29.36450	-100.90257	200 N Main St	Del Rio	78840	+18307659569	http://mavvv7.wix.com/petristacos		0.96
+535e8581a20a	Pikosito SNACK BAR LAFB	restaurant		29.36455	-100.79599	494 Arnold Blvd	Laughlin Air Force Base	78840	+18302810832			0.63
+fc7f08fd3920	Pikosito SNACK BAR LAFB	restaurant		29.35524	-100.78288	494 Arnold Blvd	Del Rio	78840	+18302810832			0.63
+8ff437fb5fa6	Pizza Hut	restaurant	pizza restaurant	29.38720	-100.90578	2114 Veterans Blvd Val Verde	Del Rio	78840	+18307745576	https://locations.pizzahut.com/tx/del-rio/2114-veterans-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=289808	Pizza Hut	1.00
+fa706f7afc33	Poncho's Mexican Restaurant	restaurant	mexican restaurant	29.37222	-100.89990	808 Avenue G	Del Rio	78840	+18307758808	http://www.ponchosmexican.com/		0.92
+cb05776db1e9	R&R's Barbeque	restaurant	barbecue restaurant	29.45594	-100.94951	401 Skyline St	Del Rio	78840	+18307782800	http://www.yellowpages.com/del-rio-tx/mip/r-rs-bbq-20166925		0.92
+773f62ed8643	Rad Dawg's Grill	restaurant	american restaurant	29.41085	-100.90524	3812 Veterans Blvd	Del Rio	78840				0.97
+74bef00d2749	Rudy's Country Store and Bar-B-Q	restaurant	barbecue restaurant	29.39366	-100.90117	330 Braddie Dr	Del Rio	78840	+18307740784	http://rudysbbq.com/location/detail/del-rio-tx	Rudy's "Country Store" and Bar-B-Q	0.93
+435ce46aa2c7	Salas Better Burger	restaurant	burger restaurant	29.36656	-100.88919	913 E Ogden St	Del Rio	78840	+18307750051			0.98
+ce0702c1bc04	San Felipe Country Club	restaurant	diner	29.37104	-100.88219	Del Rio, TX	Del Rio	78840	+18307742511	http://www.sanfelipecc.com		0.96
+224d3b374930	Shrimp Seafood	restaurant	seafood restaurant	29.36978	-100.90428	709 N Main St	Del Rio	78840				0.71
+facfb54cd244	Silver Wings	restaurant		29.35831	-100.78549	308 2nd St	Laughlin Afb	78843	+18302985661	www.menupix.com/texas/restaurants/250159165/Silver-Wings-Del-Rio-TX		0.92
+1e8ea602a885	Sirloin Stockade	restaurant	steakhouse	29.38555	-100.90466	2015 Avenue F	Del Rio	78840	+18307740411	https://order.online/store/sirloin-stockade-del-rio-956999/?hideModal=true	Sirloin Stockade	0.92
+155eef46abf5	Skillet's Restaurant	restaurant	diner	29.38440	-100.90490	2003 Veterans Blvd	Del Rio	78840	+18307756060	http://www.skilletsdelrio.com/		0.99
+97b2740a15c8	Sonic Drive-In	restaurant	burger restaurant	29.36987	-100.88611	1510 E Gibbs St	Del Rio	78840	+18307753737	https://locations.sonicdrivein.com/tx/delrio/1510-east-gibbs.html		0.95
+5719825a5a56	Strong life Nutrition	restaurant	health food restaurant	29.37568	-100.90096	600 E 10th St	Del Rio	78840	+3252015299			0.71
+9f2e025b924a	Subs & Clubs	restaurant		29.38822	-100.90131	2121 Bedell Ave	Del Rio	78840	+18307747450	https://delriomall.com/subs-n-clubs/		0.92
+261b3a3163ad	Subway	restaurant	sandwich shop	29.38796	-100.90567	2120 Ave F Suite B	Del Rio	78840	+18307744536	https://restaurants.subway.com/united-states/tx/del-rio/2120-ave-f	Subway	0.99
+96c7496c4f1b	Subway	restaurant	sandwich shop	29.36992	-100.88816	210 N Bedell Ave	Del Rio	78840	+18307742519	https://restaurants.subway.com/united-states/tx/del-rio/210-n-bedell-ave	Subway	0.98
+b20a5f157a70	Subway	restaurant	sandwich shop	29.30958	-100.41870	108 Military Hwy #90	Brackettville	78832	+18305636268	https://restaurants.subway.com/united-states/tx/brackettville/108-military-hwy	Subway	0.98
+213acf5ffcf7	Super Tacos Garcia #1	restaurant	taco restaurant	29.37016	-100.94763	555-537 Top Dr	Del Rio	78840	+18302123055	http://super-1.jany.io		0.92
+1e497c3773ce	SUSHI-FAT	restaurant	sushi restaurant	29.38106	-100.90083	1700 N Bedell Ave	Del Rio	78840	+18304882361			0.88
+ce0eeade9057	Tacos "El Primo"	restaurant	mexican restaurant	29.37070	-100.89600	759 S Main St	Del Rio	78840	+18304885105			0.74
+e41ab50772eb	Tacos El Gordo	restaurant	taco restaurant	29.35761	-100.88813	303 W Bean St	Del Rio	78840	+18304882285			0.58
+74f4c95a9169	Tacos La Ranita	restaurant	taco restaurant	29.35633	-100.87553	1303 San Felipe Ave	Del Rio	78840	+18304881510			0.92
+4549584eaacc	Taqueria Jalisco	restaurant	mexican restaurant	29.35055	-100.91008	1302 Las Vacas St	Del Rio	78840				0.55
+532d8e514891	Teriyaki Madness	restaurant	japanese restaurant	29.39398	-100.90420	2409 Veterans Blvd	Del Rio	78840	+18303208078	https://teriyakimadness.com/locations/tx-del-rio/	Teriyaki Madness	0.98
+e932f86269b5	texas mesquite bbq & grill	restaurant	barbecue restaurant	29.46685	-100.99744	11024 W US Highway 90	Del Rio	78840	+12108602004	http://www.texasmesquitebbqandgrill.weebly.com		0.92
+8127d18b637a	Texas Roadhouse	restaurant	steakhouse	29.38342	-100.90614	1918 Veterans Blvd	Del Rio	78840	+18303544035	https://www.texasroadhouse.com/location/del-rio/detail/action/start-order	Texas Roadhouse	0.99
+00aeee74438a	The Cooks Diner	restaurant	diner	29.30953	-100.41872	100 E Military Hwy	Brackettville	78832	+18308674036			0.67
+e4ae923079bb	The Pizza Outpost	restaurant	pizza restaurant	29.30842	-100.41660	302 E Military Hwy	Brackettville	78832	+18308674008	http://www.pizzaoutpost.com/		0.95
+58f474d211c0	The Red Hot Dog House	restaurant	hot dog restaurant	29.37721	-100.81774	318 Grissom Dr	Del Rio	78840	+18303097221			0.97
+9b2bc3db86a0	The Reel Grill LLC	restaurant		29.40464	-100.90341	93 Edward St	Del Rio	78840	+18307342345	http://www.thereelgrillmx.com/		0.92
+60f052010e33	Three Rivers Bait and Tackle / Lake Side Burgers	restaurant	burger restaurant	29.46009	-100.97585	9670 W US Highway 90	Del Rio	78840	+18307747777	http://www.threeriversrvpark.com/		0.95
+fa1ff75ca67e	Tortas La Reyna	restaurant		29.35188	-100.91008	1201 Las Vacas St	Del Rio	78840	+18307743539			0.92
+9413961df5d6	Town and Country Food Store	restaurant		29.36652	-100.89778	203 Veterans Blvd	Del Rio	78840	+18307756488	http://www.tcfs.com/		0.92
+fd01bedb32eb	Whataburger	restaurant	burger restaurant	29.38773	-100.90482	2113 VETERANS BLVD	Del Rio	78840	+18307756923	https://locations.whataburger.com/tx/del-rio/2113-veterans-blvd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+e957d2b5743e	Wings and Rings	restaurant		29.40500	-100.90546	3600 Veterans Blvd	Del Rio	78840	+18307781297	https://www.wingsandrings.com/		0.96
+76f68a9fa844	Wingstop	restaurant	chicken restaurant	29.36624	-100.89599	615 E Gibbs St, Ste. C	Del Rio	78840	+18303083165	https://www.wingstop.com/location/wingstop-590-del-rio-tx-78840/menu?y_source=1_NTUyMDY3NDctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+2f5c748d22a5	Ziggy's Roadside BBQ	restaurant	barbecue restaurant	29.31046	-100.42034	120 U.S. Hwy 90	Brackettville	78832	+18305639293			0.95
+22e0512de1fc	Cedar Hills Geriatric Center - Camp Wood, TX	senior	retirement home	29.67671	-100.01464	710 TX-55	Camp Wood	78833	+18305975445	https://www.caring.com/senior-living/texas/camp-wood/cedar-hills-geriatric-center-78833		0.84
+656e1ceec99c	Del Rio Nursing & Rehabilitation Center	senior	retirement home	29.35979	-100.90405	301 W Martin St	Del Rio	78840	+18307752459	http://www.delrionursingrehab.com/	Touchstone Communities	0.92
+bd486f372539	Del Rio Nursing and Rehabilitation Center	senior	assisted living facility	29.35397	-100.91095	301 W Martin St	Del Rio	78840	+18307752459	http://www.delrionursingrehab.com/		0.85
+de1436731ef3	La Vida Serena	senior	retirement home	29.40643	-100.91819	711 Kings Way	Del Rio	78840	+18307740698	http://www.lavidaserenanursing.com/		0.97
+e32d0c9c14d8	SouthWest Assisted Living Del Rio	senior	retirement home	29.40572	-100.91953	1088 Amistad Blvd	Del Rio	78840	+18307756400	http://www.swassistedliving.com/		0.77
+b1ebd411b3ea	Val Verde Nursing and Rehabilitation Center	senior	retirement home	29.37472	-100.88725	100 Hermann Dr	Del Rio	78840	+18307757477	https://wellsentialhealth.org/location/val-verde-nursing-rehabilitation-center/		0.92
+333cdb121358	Villas De Val Verde	senior	retirement home	29.38115	-100.82437	1725 FM-2523	Del Rio	78840	+18302981340	https://villas-de-val-verde.hub.biz		0.88

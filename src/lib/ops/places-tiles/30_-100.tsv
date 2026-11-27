@@ -1,0 +1,633 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+9038f677e40a	323 Bakery	bakery		30.07336	-99.24272	323 TX-39	Ingram	78025	+18303673233	http://www.323-bakery.com/		0.96
+6641066b6a6d	Burnard's Pastries	bakery		30.52346	-99.84767	365 River Rd	Junction	76849	+19402317084			0.92
+9367b57281a0	Cami's Gourmet Confections	bakery		30.04758	-99.12579	1228 5th St	Kerrville	78028	+15042340421			0.96
+745a87d9834e	Cinnabon	bakery		30.50576	-99.77641	2342 N Main St	Junction	76849	+13254462085	https://locations.cinnabon.com/tx/junction/2342-north-main-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.97
+73f80a2429b7	Creative Cakes By Sharon	bakery		30.04571	-99.14015	203 Earl Garrett St	Kerrville	78028	+18308952253	http://www.creativecakesdessertstudio.com		0.92
+82a56b3c6db8	Daily Donuts	bakery	donut shop	30.04772	-99.14133	603 Main St #A	Kerrville	78028	+18308965506	http://www.dailydonuts.com		0.96
+568331d8b261	Donut Palace	bakery	donut shop	30.05210	-99.13498	833 Sidney Baker St	Kerrville	78028	+18308963737	http://donutpalace.com		0.97
+c7edb32fc46f	Donut Palace	bakery	donut shop	30.49292	-99.77846	1815 Main St	Junction	76849	+13254463536	http://www.donutpalace.com/		0.97
+34dc8749abe7	H-E-B	bakery		30.05114	-99.14338	300 Main St	Kerrville	78028	+18308963600	https://www.heb.com/heb-store/US/tx/kerrville/kerrville-h-e-b-on-main-street-770	H-E-B	0.97
+2a65392760bf	Kneading Faith Sourdough Company	bakery		30.74905	-99.23164	126 Fort McKavitt St	Mason	76856	+18303295159			0.97
+43bd2d4c138f	Mason Donuts	bakery	donut shop	30.75007	-99.23444	404 Fort McKavitt St	Mason	76856	+13252944122			0.96
+c68ba187d16f	Pookie's Patisserie	bakery		30.04614	-99.14142	711 Water St	Kerrville	78028	+18307923000	http://www.pookiespatisserie.com/		0.99
+50c58f9976a4	Shipley Do-Nuts	bakery	donut shop	30.05684	-99.15891	704 Junction Highway Ste 1	Kerrville	78028	+18303153400	https://shipleydonuts.com/locations/fc0704		0.96
+ffac9c9c6627	Snowflake Donuts & Kolaches Shop	bakery	donut shop	30.06381	-99.17493	1487 Junction Hwy	Kerrville	78028	+18302574999	http://snowflake-kolaches.edan.io		0.99
+24507cdff88b	Texas Scratch Kitchen	bakery		30.91534	-99.78730	300 Ellis St	Menard	76859	+13253968307	http://txskmarket.com/		0.97
+02c0436362ce	The Sweeter Side of Rails	bakery		30.04984	-99.13962	415-a Clay St	Kerrville	78028	+18302579338	http://www.sweetersideofrails.com		0.98
+5d5250458f30	Apasus Vineyards Fredericksburg TX	bar	winery	30.37448	-99.03677	2201 Poverty Hill Ranch Road	Fredericksburg	78624	+18304260969	Apasustrail.com		0.85
+df219e914c7b	Barrel O' Fun	bar	cocktail bar	30.29857	-99.94580	1911 Aldrich St Ste 120	Austin	78723	+15125721425	https://drafthouse.com/austin/theater-bar/mueller		0.85
+2034ad544d75	Basement Brewers of Texas	bar	brewery	30.05070	-99.13879	521 Clay St	Kerrville	78028	+18309555073	http://basementbrewersoft.wixsite.com/mysite-1		0.92
+7aa67d4ff60a	Blackmon Wines	bar	winery	30.74829	-99.23330	120 Moody St	Mason	76856	+13258053125	https://blackmonwines.com/		0.96
+ad3665ed84eb	Blumenthal Farms	bar	winery	30.29587	-99.02101	9396 US-290	Fredericksburg	78624	+18302059930	http://Blumenthalfarmstx.com/		0.91
+7764bf74e952	Busted Sandal Brewing Company	bar	brewery	30.04617	-99.14145	709 Water St	Kerrville	78028	+18308905098	https://www.offmainbrewing.com		0.92
+58de691b07bd	Chisholm Trail Winery	bar	winery	30.26601	-99.03539	2367 Usener Rd	Fredericksburg	78624	+18309902675	https://chisholmtrailwinery.com		0.94
+a333e43e69a5	Divines Sports Bar	bar	sports bar	30.04599	-99.13967	225 Earl Garrett St	Kerrville	78028	+18308905370	https://www.instagram.com/divinessportsbar?stkn=cnNzZ2w5ZG5iM3Zn		0.99
+039b19ac9aa0	Down On The Loop	bar		30.07321	-99.24443	345 TX-39	Ingram	78025				0.92
+f497f6264039	DT's River Rock Saloon (RV Bar)	bar		30.07068	-99.20749	2605 Junction Hwy	Kerrville	78028	+18303671225	https://www.buzztime.com/site/40125		0.92
+ed885f2fbdc5	Elm Waterhole Saloon	bar	pub	30.06608	-99.11678	2033 Sidney Baker St	Kerrville	78028	+18302574440	http://yoresort.com/restaurant-bar/elm-waterhole-saloon/index.cfm		0.92
+40b713ef8076	Fly Gap Winery	bar	winery	30.74965	-99.23305	117 N Spring St	Mason	76856	+18327232203	http://flygapwinery.com/		0.92
+28704c591fc1	Fowler's Loyal Valley Vineyards	bar	winery	30.57929	-99.00826	18317 Ranch Road 2242	Mason	76856	+15126334793	http://www.loyalvalleyvineyards.com/		0.64
+8e5f6348e667	Fritzer's Saloon	bar		30.07762	-99.24043	3370 Junction Hwy	Ingram	78025	+18303671106	http://www.superpages.com/bp/fritzers-saloon-L2152612926.htm		0.96
+3a562e402292	Guadalupe River Club	bar		30.06342	-99.17443	1483 Junction Hwy	Kerrville	78028	+18308963354	https://guadaluperiverrentals.com		0.90
+26d589830466	Halter Ranch Texas	bar	winery	30.29794	-99.00904	8561 US-290	Fredericksburg	78624	+18303621455	https://www.halterranch.com/texas	Halter Ranch Vineyard	0.97
+234564a8a597	Headwaters Saloon	bar		30.29687	-99.24550	229 S Ranch Road 783	Harper	78631	+18308644055	http://www.headwaterssaloon.com/		0.96
+67b895752004	Heart Of Art	bar	winery	30.73866	-99.11139	7896 E State Hwy 29	Art	76820	+18332991900	http://Www.heartofarttexas.com/		0.92
+79f67fc375db	Kerrville Favorite Saloon	bar	wine bar	30.04601	-99.14163	709 Water St	Kerrville	78028	+18308905098			0.97
+10f437a22b01	Kerrville Hills Winery at Schreiner University	bar	winery	30.03373	-99.12582	2100 E Main St	Kerrville	78028	+18303771254	https://tinyurl.com/muu85bjb		0.92
+3738eac5af96	Kerrville Winery	bar	winery	30.04920	-99.20101	1700 Saddlewood Blvd S	Kerrville	78028	+18308954233	https://www.kerrvillehillswinery.com/index.cfm		0.92
+50a86a594af9	Lazy Dog Sports Bar	bar	pub	30.01180	-99.11531	3804 Riverside Dr E	Kerrville	78028	+18308968232	http://LazyDogBar.com/		0.95
+3fc73abd1d11	Lone Star Vines	bar	wine bar	30.07296	-99.20723	2640 Junction Hwy Ste A	Kerrville	78028	+18303671818			0.55
+e7b81eac149c	Murphy Creek Cellars	bar	winery	30.74900	-99.23149	120 Fort McKavitt St	Mason	76856	+13253471010	http://www.murphycreekcellars.com/		0.93
+cb5711d460f0	Nautilus	bar		30.06881	-99.11382	2126 Sidney Baker St	Kerrville	78028	+18308952920	https://nautilus-beach-bar.hub.biz		0.92
+b1b3f7f50866	Noblemen Wines	bar	winery	30.09311	-99.08316	3600 Fredericksburg Rd	Kerrville	78028	+14327412878	https://noblemenwines.com/experience/		0.95
+a86835a9aad0	Off Main Tavern	bar	brewery	30.04629	-99.14162	703 Water St	Kerrville	78028	+18308905645		Off Main Tavern	0.94
+d226c18260df	Old Mexico Cantina	bar		30.07352	-99.22308	3130 Junction Hwy	Ingram	78025	+18303673088			0.95
+3f66c49a6838	Ole Ingram Social Club	bar		30.07374	-99.23914	210 TX-39	Ingram	78025	+18303673830	http://www.bytheriver.com		0.96
+793ea2fb9e32	Parr Vineyards & Cellars	bar	winery	30.74862	-99.23066	106 S Liveoak St	Mason	76856	+12104150707	http://www.parrvineyards.com/		0.92
+6a3420367c52	Peters Prairie Vineyard	bar	winery	30.88436	-99.28404	9872 N US Highway 87	Mason	76856	+13258050533	http://www.petersprairievineyard.com/		0.96
+69eb83d71696	Pint and Plow Brewing Company	bar	brewery	30.04933	-99.14093	332 Clay St	Kerrville	78028	+18303157468	http://pintandplow.com/		0.99
+5b3e3f0db4e1	Pruneda's Bar	bar		30.05500	-99.14400	516 Paschal Ave	Kerrville	78028	+18307924114	https://www.chamberofcommerce.com/kerrville-tx/6101682-prunedas-bar		0.96
+9cefa85d5242	Purple Calf Family Vineyard	bar	winery	30.86525	-99.35324	6402 Starks Rd	Mason	76856	+12108340913			0.97
+2df8be100c1c	Ringo's On The River	bar	sports bar	30.06270	-99.17264	1421 Junction Hwy	Kerrville	78028	+18302858638	http://www.ringosontheriver.net/		0.99
+1e22ab4653a7	Rivenburgh Wine	bar	winery	30.09320	-99.08327	3600 Fredericksburg Rd	Kerrville	78028	+18308954233	https://rvbbeverage.com/		1.00
+8a66cbdf9283	Robert Clay Vineyards Estate Winery & Tasting Room	bar	winery	30.74859	-99.23032	113 Austin St	Mason	76856	+13252610075	https://robertclayvineyards.com/		0.83
+12df6361a950	Sandstone Cellars Wine Bar	bar	winery	30.74751	-99.23033	211 San Antonio St	Mason	76856	+13253479463	http://SandstoneCellarsWinery.com/		0.98
+b21818464b0d	Santa Maria Cellars	bar	winery	30.17702	-99.01433	12044 S State Highway 16	Fredericksburg	78624	+18309988621	https://santamariacellarswines.com		0.99
+10f49c713df9	Southway Pub	bar	pub	30.03220	-99.14468	100 Southway Dr	Kerrville	78028	+18307926006	http://southwayhousing.co.uk		0.99
+9cb3b758048e	THC Beer Company	bar	brewery	30.74908	-99.23292	246 Fort McKavitt St	Mason	76856	+13252944277	https://txhillcountry.beer/		0.95
+e31c66f34c53	The Barn at Rock House	bar	sports bar	30.22378	-99.00392	154 Rock House Drive	Fredericksburg	78624	+18309988030	https://thebarnatrockhouse.com/		0.97
+00de960f0ad4	Tiger Lily's Tavern	bar		30.06990	-99.18553	1834 Junction Hwy	Kerrville	78028	+18309284979			0.75
+d5a6abf45dc4	Truffles & Vines LLC	bar	wine bar	30.07323	-99.24258	321 Highway 39	Ingram	78025	+18303671200	https://trufflesandvines.com/		0.92
+56d28065e11f	Turtle Creek Olives and Vines	bar	winery	30.04588	-99.14001	211 Earl Garrett St	Kerrville	78028	+18308960010	https://www.turtlecreekolivesandvines.com/		0.92
+188bc57efe66	Water Street Cafe	bar		30.04550	-99.14017	804 Water St	Kerrville	78028	+18302575464			0.92
+5def511d85fc	Wilson's Ice House	bar	dive bar	30.03612	-99.13626	1621 Water St	Kerrville	78028	+18309559611			0.99
+9ec55e4342d4	Wine-o-bout-it	bar	wine bar	30.04585	-99.13979	215 Earl Garrett St	Kerrville	78028	+18309555299	https://www.wineoboutit.com		0.95
+8f43c003ed41	Wines of Dotson Cervantes	bar	winery	30.99188	-99.19250	360 S Farm to Market 1851	Voca	76887	+13252395700			0.97
+23877a88f2cd	AutoMart	cardealer		30.07197	-99.18953	2020 Junction Hwy	Kerrville	78028	+18309559602	http://www.txautomart.com/		0.92
+d38b46247d7e	Cecil Atkission Motors	cardealer		30.07186	-99.11279	550 Benson Dr	Kerrville	78028	+18665596786	http://www.cecilmotorsgm.com/	Chevrolet	0.92
+84cc62380539	Crenwelge Motors	cardealer		30.05073	-99.14482	301 Main St	Kerrville	78028	+18308964835	https://www.crenwelgemotors.net	Chrysler	0.97
+72c8befeeee2	Del Rio Motors	cardealer	used auto dealer	30.06408	-99.17437	1480 Junction Hwy	Kerrville	78028	+18308957507	http://delriomotors.com/		0.92
+330e00a66b56	Family Auto Sales of Kerrville	cardealer		30.05163	-99.14587	201 Main St	Kerrville	78028	+18307925115			0.92
+203ea7361cf9	Ford Motor Company	cardealer		30.04864	-99.13948	400 Sidney Baker St	Kerrville	78028	+18302575553	http://www.stoepelford.com	Ford Motor Company	0.75
+30bf886e43d3	GLH Auto Group	cardealer		30.07298	-99.21421	2850 Junction Hwy	Kerrville	78028	+18303673414	http://glhautogroup.com/		0.92
+a689bc55c8f6	Greg Maxwell Motors	cardealer		30.05455	-99.14835	228 W Main St	Kerrville	78028	+18303155555	http://www.gregmaxwellmotors.com		0.55
+f4023689817c	Hotrod's Toy Shop	cardealer		30.19763	-99.21291	8125 S Ranch Road 783	Kerrville	78028	+18308968440	http://www.hotrodstoyshop.com		0.92
+faa49e91be74	JCP Autos	cardealer		30.12958	-99.20133	3021 Goat Creek Rd	Kerrville	78028	+18309282020	http://www.jcpautos.com/		0.92
+865c1802ee77	Jcp Autos Llc	cardealer		30.05455	-99.14835	228 W Main St	Kerrville	78028	+18309282020	http://www.jcpautos.com		0.92
+083e6758da5b	Jeep	cardealer		30.05073	-99.14482	301 Main St	Kerrville	78028	+18308964835	https://www.crenwelgemotors.net/		0.92
+db51ae335f36	Ken Stoepel Ford	cardealer		30.03964	-99.14367	400 Sidney Baker St S	Kerrville	78028	+18302575554	https://www.stoepelford.com/	Ford Motor Company	0.97
+e6a078fba5b0	Kern's Auto Sales	cardealer	used auto dealer	30.05183	-99.14578	213 Main St	Kerrville	78028	+18303155376	http://www.kernsautosales.com/		0.92
+90f0b7362165	KerrTex Motors	cardealer		30.03516	-99.14245	212 G St W	Kerrville	78028	+18307926552	http://kerrtexmotors.com/		0.92
+8e0eec581403	Mcgee Sales	cardealer		30.07352	-99.19963	2410 Junction Hwy	Kerrville	78028	+18308952555	http://andersonchemical.com		0.92
+0e257a4c0a78	Off Road Truck Accessories	cardealer		30.07274	-99.21991	3047 Junction Hwy	Kerrville	78028	+18303673330	https://www.truckaccessorieskerrville.com/		0.92
+4d66260e2c38	On Track Auto Sales	cardealer		30.49650	-99.77772	2014 Main St	Junction	76849	+13254462668			0.58
+6a304755f390	Ranchers ATV & Tractor	cardealer		30.07434	-99.19663	2330 Junction Hwy	Kerrville	78028	+18303152330	https://ranchersatv.com/		1.00
+c4b06152e728	Select Certified Autos Kerrville	cardealer		30.04820	-99.14046	620 Main St	Kerrville	78028	+18302578266	http://www.selectcertifiedautos.com/		0.72
+307c36de7811	Seymour Auto Sales	cardealer	used auto dealer	30.07250	-99.21375	2847 Junction Hwy Unit D	Kerrville	78028	+18303671400	http://Www.Seymourautosales.com/		0.92
+8618c6d21325	Stoepel Motors	cardealer	used auto dealer	30.05467	-99.14837	228 Main St	Kerrville	78028	+18778809100	https://www.stoepelmotors.com/		0.85
+e6898800e6a6	Texas Trucks	cardealer		30.02101	-99.12418	2712 Memorial Blvd	Kerrville	78028	+18302572114	http://www.texastruckskerrville.com/		0.92
+b9c8fcb13194	Troy Faust Motor Co.	cardealer	used auto dealer	30.06952	-99.18709	1903 Junction Hwy	Kerrville	78028	+18308953166	http://www.troyfaustmotorco.com		0.92
+768aa20d48e4	Wagonmaster	cardealer	used auto dealer	30.01879	-99.12271	2905 Memorial Blvd	Kerrville	78028	+18303270325	http://www.wagonmaster.com		0.95
+d1ba4a3af214	Movie Gallery	cinema		30.04340	-99.14428	207 Sidney Baker St S	Kerrville	78028	+18302577742	http://moviegallery.com/		0.64
+db3adf525681	Odeon Theater	cinema		30.74820	-99.23325	122 Moody St	Mason	76856	+13253479010	http://www.theodeontheater.com/		0.93
+7bd64c76f2d2	Rio 10 Cinemas	cinema		30.02951	-99.13836	1401 Bandera Hwy	Kerrville	78028	+18307925170	http://www.rioentertainment.com/	Rio Entertainment, Inc	0.99
+82d7951cf81a	783 Social Haus	coffee		30.28927	-99.24235	851 S Ranch Rd 783	Harper	78631	+18308645602	http://the783socialhaus.com/		0.90
+aab5c7ee0a8b	Blue Roan Coffee	coffee		30.03519	-99.13541	1715 Broadway	Kerrville	78028		https://www.blueroan.coffee/		0.92
+6ede10e33dd9	Boba Lounge	coffee	tea room	30.04288	-99.12705	628 Everett St N	Kerrville	78028	+18304995464			0.56
+edd76d51135e	Carrot Patch Cafe	coffee		30.05246	-99.14810	141 W Water St S	Kerrville	78028	+18308967383			0.95
+a2521614ce53	Doss General Store & Cafe	coffee		30.44726	-99.13004	14394 N Ranch Road 783	Doss	78618	+18306692111			0.94
+dac01ffa4b7b	Dunkin'	coffee		30.05150	-99.13569	801 Sidney Baker St	Kerrville	78028	+18308905798	http://www.dunkindonuts.com/	Dunkin'	0.98
+68a6e8abe464	Dutch Bros Coffee	coffee		30.06327	-99.12183	1805 Sidney Baker St	Kerrville	78028	+18778992767	https://www.dutchbros.com/locations/tx/kerrville/1805-sidney-baker-st?y_source=1_MTA0NTYwOTgwNS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D	Dutch Bros Coffee	0.99
+239e6687346f	Gloria's Gonzales Cafe	coffee		30.48946	-99.77258	1106 Main St	Junction	76849	+13254464202	https://www.restaurant.com/gonzales-cafe-junction-pid		0.92
+f3c6ae558f8a	Guadalupe Grinds	coffee		30.07241	-99.21483	101 Getaway Falls Trail	Kerrville	78028		https://guadalupe-grinds.square.site/		0.92
+2144d6bf1f99	Happy 32	coffee		30.07293	-99.20342	101 Spring Mill Dr	Kerrville	78028	+13012037139			0.60
+5700708b7398	Happy 32	coffee		30.01263	-99.14050	101 Spring Mill Dr	Kerrville	78028	+13012037139			0.61
+7a1b46037300	Hill Country Social	coffee		30.07240	-99.21346	2847 Junction Hwy	Kerrville	78028	+17266105050			0.55
+2b9a652c53bc	Jefferson St	coffee		30.04909	-99.14032	627 Jefferson St	Kerrville	78028			Scooter's Coffee	0.80
+133ea7dd30e9	La Copa Joe	coffee		30.74329	-99.22554	805 San Antonio St	Mason	76856	+13258050991			0.92
+f3bb351faf28	Lift Coffee Co	coffee		30.07389	-99.23882	200 TX-39	Ingram	78025	+18303674604	https://liftcoffeeco.co/		0.96
+2d0001b355e1	Little Aurora Ranch	coffee		30.04395	-99.14658	200 Sidney Baker St S	Kerrville	78028	+18303154262	http://littleauroraranchcafe.com/		0.93
+621949a34ce5	Little Peanut Cafe	coffee		30.92652	-99.12112	11020 Ranch to Market Rd 1222	Fredonia	76842	+18308900649	http://www.fredoniapeanut.com/little-peanut-cafe		0.97
+e0855948e216	Michael Williams	coffee		30.39324	-99.62277	201 Hollis Ln	Junction	76849	+13212121214			0.58
+ae8704d4f094	Nacho's cafe	coffee		30.74092	-99.22717	2538 Ranch Rd	Mason	76856	+13253476757			0.73
+a44c7e34553a	New Kerrville Hardback Cafe	coffee		30.04854	-99.14263	501 Main St	Kerrville	78028	+18308968233			0.61
+cff1ea36e3d5	NobiliTea	coffee	tea room	30.04970	-99.14051	528 Jefferson St	Kerrville	78028	+18303158322	https://nobilitea.us/	Nobilitea	0.92
+98ca6baa580d	PAX Coffee Shop	coffee		30.04575	-99.14021	203-205 Earl Garrett St	Kerrville	78028	+18303152233	https://www.paxcoffeeandgoods.com		0.97
+8b4ec1c1ac64	Rails a Cafe at the Depot	coffee		30.04987	-99.13906	615 E Schreiner St	Kerrville	78028	+18302573877	http://www.railscafe.com/		0.97
+4d21b2af92aa	Rico Cafe	coffee		30.75316	-99.23100	510 Broad St	Mason	76856	+13253475487			0.94
+99176efc42e4	Rio Ranch Cafe	coffee		30.07299	-99.20464	2590 Junction Hwy	Kerrville	78028	+18303671850	http://www.therioranchcafe.com/	Cafe Rio Mexican Grill	0.97
+4f814fa2de93	Scooter's Coffee	coffee		30.04852	-99.13987	627 Jefferson St	Kerrville	78028	+18303153278	https://scooterscoffee.com/	Scooter's Coffee	0.96
+4faa07704db5	Starbucks	coffee		30.06716	-99.11523	2105 Sidney Baker St. 100	Kerrville	78028	+18303077329	https://www.starbucks.com/store-locator/store/1028909	Starbucks	0.99
+cec7355c6518	Starbucks	coffee		30.06197	-99.17135	1355 Junction Highway	Kerrville	78028	+18302574163	https://www.starbucks.com/store-locator/store/8284/	Starbucks	0.99
+0a4bcde1df38	Starbucks Coffee Company	coffee		30.51082	-99.77272	2437 N Main St	Junction	76849	+13252152050			0.99
+f2a6d348fe63	The Fancy Finch Tea Cottage	coffee	tea room	30.07948	-99.24262	3403 Junction Hwy	Ingram	78025	+18305549011	http://thefancyfinchteacottage.com/		0.92
+3a4e7ad3e431	The Honey Bean Coffee And Tea Company	coffee		30.49051	-99.77587	1502 Main St	Junction	76849		http://thehoneybeancoffee.com		0.96
+56cf1b4320fd	The Hunt Store	coffee		30.06825	-99.33603	1634 TX-39	Hunt	78024	+18302384410	http://thehuntstore.com		0.92
+cfa73e705e2b	the square plate	coffee		30.74909	-99.23219		Mason	76856	+13253471911	http://www.sqplate.com		0.77
+5103a4d3fe5c	Vecinos Cafe	coffee		30.04554	-99.14005	804 Water St E	Kerrville	78028	+14696711911	http://www.vecinosfc.com/		0.99
+0926577a0698	Wenhua Bakery 文华烘培坊	coffee		30.53218	-99.64043	5950 KC 320	Junction	76849	+13252151677			0.88
+04871d2e3b30	Willow Creek Cafe and Club	coffee		30.74907	-99.23109	106 Fort McKavitt St	Mason	76856	+13253476124	http://willowcreekcafeandclub.com		0.98
+aa0afa893089	Alamo College District Greater Kerrville Center	college		30.04619	-99.13097	1012 Barnett St	Kerrville	78028	+12104867300	http://www.alamo.edu/kerrville/		0.92
+28c5218a91b4	Mountaineer Fitness Center	college		30.03157	-99.12795		Kerrville	78028	+12102294515	http://www.schreiner.edu/		0.96
+ba5ea572b7f8	Schreiner Institute	college		30.02755	-99.13082	2100 Memorial Blvd	Kerrville	78028	+18307927452	http://schreiner.edu/schreiner-institute/		0.76
+f25fe2a67c32	Schreiner Institute	college		30.03187	-99.12933	2100 Memorial Blvd	Kerrville	78028	+18307927452	http://schreiner.edu/schreiner-institute/		0.76
+547f7ad6a511	Schreiner Wrestling	college		30.02738	-99.13042	2100 Memorial Blvd	Kerrville	78028	+18307927438	http://www.mountaineerswrestling.com/		0.67
+d7638c574f4f	Texas Tech University	college		30.47151	-99.78144	254 Red Raider Ln	Junction	76849	+13254462301	http://www.junction.ttu.edu/		0.92
+c1cc96437647	5 Points Chevron	convenience		30.05479	-99.15087	320 Junction Hwy	Kerrville	78028	+18308960570	https://www.exxon.com/		0.96
+30211d1ddf49	7-Eleven	convenience		30.05718	-99.15933	700 Junction Highway	Kerrville	78028	+18308964300	https://www.7-eleven.com/		0.96
+7e157c886092	7-Eleven	convenience		30.75144	-99.23715	616 Fort Mckavitt Street	Mason	76856	+13253475133	https://www.7-eleven.com/		1.00
+8c9933c0e2e6	7-Eleven	convenience		30.01528	-99.11900	3305 Memorial Blv	Kerrville	78028	+18302855267	https://www.7-eleven.com/		1.00
+f4b7487c88db	7-Eleven	convenience		30.06751	-99.11431	2109 Sidney Baker Street	Kerrville	78028	+18308962700	https://www.7-eleven.com/		1.00
+6ebd782021e7	Allsups	convenience		30.90900	-99.78796	811 Ellis St	Menard	76859	+13253962044	https://www.allsups.com/	Allsup’s	0.92
+a651328bb420	Alon	convenience		30.51047	-99.77235	2437 N Main St	Junction	76849	+13254462735	http://myalon.com/		0.92
+c2349b3bc9eb	Alon Gas Station	convenience		30.50591	-99.77764	2437 N Main St	Junction	76849	+13254462735	http://myalon.com/		0.85
+e10956fba306	ALON Gas Station	convenience		30.49440	-99.77804	1928 Main Street	Junction	76849	+13254462530	https://alonfuel.com/stations/alon-gas-station-1217-1928-main-street-junction-tx-76849/		0.92
+d616a79db034	Brain selement	convenience		30.07330	-99.23373	3263 Junction Hwy	Ingram	78025	+18303675720	http://exxon.com/		0.94
+a7ea494abe96	CAT Scale	convenience	truck gas station	30.50535	-99.77714	2342 N Main St	Junction	76849	+13254397717	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+4c69658f806f	Cherry Springs Country Store	convenience		30.48723	-99.01100	17596 N US Highway 87	Fredericksburg	78624	+14326346391			0.91
+bec0667aa98e	Cherry Springs Country Store	convenience		30.48598	-99.01079	17596 N US Highway 87	Fredericksburg	78624	+14326346391			0.90
+479b0378b4d8	Chevron	convenience		30.29972	-99.24065	22939 W HIGHWAY 290	Harper	78631		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/22939-W-HIGHWAY-290-HARPER-TX-78631-6304-id387011	Chevron	0.80
+81f1efe1f545	Chevron	convenience		30.50945	-99.77394	2415 N Main	Junction	76849	+13254463102	https://www.chevronwithtechron.com/en_us/home/find-a-station.html?/station/-2415-N-MAIN-JUNCTION-TX-76849-id71001	Chevron	1.00
+f9e6406b9de0	Chevron	convenience		30.75093	-99.23793	615 FORT MCKAVITT	Mason	76856		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/615-FORT-MCKAVITT-MASON-TX-76856-id76250	Chevron	0.95
+c42b24d18343	Chevron Station Junction	convenience		30.50557	-99.77784	2415 N Main St	Junction	76849	+18309974382			0.85
+ea8b37295b93	Circle K	convenience		30.04039	-99.14451	321 S Sidney Baker	Kerrville	78028	+18302572727	https://www.circlek.com/		1.00
+fb700cb67d55	Circle K	convenience		30.04932	-99.13764	505 Sidney Baker St	Kerrville	78028	+18307920463	https://www.circlek.com/		0.99
+2e27e0fcf96a	Conoco	convenience		30.49575	-99.77854	1977 N Main St	Junction	76849	+13254462739	https://www.conoco.com/	Conoco	0.92
+4d092fdf724c	Conoco	convenience		30.48954	-99.77163	1014 Main St	Junction	76849	+13254463099	https://www.conoco.com/		0.92
+739fbaec7914	Corner Store	convenience		30.04933	-99.13783	505 Sidney Baker St	Kerrville	78028	+18307920463	https://www.circlek.com/store-locator/us/kerrville/505-sidney-baker-st/2741073		0.92
+d70545c58ffc	DK Gas Station	convenience		30.90890	-99.78812	811 Ellis Street	Menard	76859	+13253962044	https://dkfuel.com/stations/dk-gas-station-0569-811-ellis-street-menard-tx-76859/		1.00
+5c0950d0e019	Drive In	convenience		30.05061	-99.13987	428 Clay St	Kerrville	78028				0.92
+1fe6fb5fbbc4	Exxon	convenience		30.07355	-99.23364	3263 Junction Hwy	Ingram	78025	+18303675720	https://www.exxon.com/en/find-station/exxon-ingram-tx-ingramcarcare-200315547?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+54db07b9567e	Exxon	convenience		30.05551	-99.13183	857 Sidney Baker St	Kerrville	78028	+18308961332	http://www.exxon.com		0.92
+77f822fe72e5	Exxon	convenience		30.50718	-99.77637	2349 N Main St	Junction	76849	+13254463551	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+b167823295a8	Exxon	convenience		30.07200	-99.10965	2303 Sidney Baker St	Kerrville	78028	+18302578407	https://www.exxon.com/en/find-station/exxon-kerrville-tx-kerrvilleexpressmaxey-200313366?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+c1af2e0fb372	Exxon	convenience		30.08722	-99.15305	920 Harper Rd	Kerrville	78028	+18308952141	https://www.exxonmobilfuels.com/en/find-gas-station/200313365		0.92
+d8bf35abbf30	Exxon	convenience		30.03451	-99.14355	1001 Sidney Baker St S	Kerrville	78028	+18308962994	http://www.exxon.com		0.92
+ebba94fabed9	Exxon	convenience		30.05458	-99.15076	320 Junction Hwy	Kerrville	78028	+18308960570	https://locations.exxon.com/tx/kerrville/320-junction-hwy?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+a78f09eec226	Exxon Products Distributor	convenience		30.05378	-99.14167	206 McFarland Dr	Kerrville	78028	+18302576944	https://www.exxonmobil.com		0.55
+9984c8ef093b	FIVE POINTS MARKET	convenience		30.05460	-99.15076	320 JUNCTION HWY	Kerrville	78028		https://www.exxon.com/en/find-station/exxon-kerrville-tx-fivepointsmarket-200319908	Exxon	0.80
+8e10f800fd24	Garven Store	convenience		30.07221	-99.69801	27304 Highway 83	Mountain Home	78058	+18306403235	https://garvenstore.com		0.55
+90ce6ad7ec85	Garven Store	convenience		30.06771	-99.69362	27304 US-83	Mountain Home	78058	+18306403235			0.92
+c9dcaefb7e3d	Gene's Go Truck Stop	convenience		30.51036	-99.77490	2419 N Main St	Junction	76849	+13254469528	https://www.mapquest.com/.../genes-go-truck-stop-269959454		0.92
+1bfa16150d22	Gigis Gas	convenience		30.75182	-99.23907	825 Fort McKavitt St	Mason	76856	+13253470407	https://cyrusramsey.com/places/gigis-store		0.84
+6528480f4348	Gordo's Travel Center	convenience		30.51067	-99.77254	2437 N Main St	Junction	76849	+13252152050			0.97
+2122156a82f0	Grandad's Corner Store	convenience		30.49355	-99.74897	201 Morales St	Junction	76849	+13254462158	http://shell.com	Corner Store	0.92
+afd57e9178d2	HOP IN 430527	convenience		30.48983	-99.77160	1014 MAIN ST	Junction	76849			Conoco	0.80
+62a58394978c	INGRAM CAR CARE	convenience		30.07331	-99.23367	3263 JUNCTION HWY	Ingram	78025		https://www.exxon.com/en/find-station/exxon-ingram-tx-ingramcarcare-200315547	Exxon	0.80
+c8d1f8f589c0	Inn Exxon	convenience		30.05803	-99.16271	1000 Junction Hwy	Kerrville	78028	+18308952300	http://www.exxon.com/		0.92
+da4249dad3f8	Johnnys Grab N Go	convenience		30.48969	-99.77159	1014 Main St	Junction	76849	+13254463099			0.99
+9edf37044e40	Junction Country Store	convenience		30.50908	-99.77290	2416 N Main St	Junction	76849	+13254468740	http://www.valero.com		0.92
+e98faac6864f	Junction Fuels	convenience		30.49210	-99.77795	2110 Main Street	Junction	76849	+13254462243	http://www.junctionfueling.com/		0.95
+5dddf0a0c9bb	Kerr Villa Kountry Store	convenience		30.08711	-99.15310	920 Harper Rd	Kerrville	78028	+18308952141	http://www.exxonmobil.com		0.92
+fd6deb9d5e8a	Kerrville Express-Maxey	convenience		30.07186	-99.10944	2303 Sidney Baker St	Kerrville	78028	+18302578407			0.82
+f3ad14d3f28c	Kimble County Market	convenience		30.50700	-99.77599	2350 N Main St	Junction	76849	+13252269340	https://www.phillips66gas.com/station/P66-KIMBLE-COUNTY-MARKET-0000890037		1.00
+8cb87f3c646a	Korner Store	convenience		30.48323	-99.77810	601 S Llano St	Junction	76849	+13254468823			0.92
+99cbf088dee9	Les Williams Inc	convenience		30.49442	-99.77793	1928 Main St	Junction	76849	+13254462539	https://leswilliams.com		0.92
+d7cdd49601fa	Llano's Country Corner	convenience		30.50728	-99.77646	2349 N Main St	Junction	76849	+13254463551	http://www.exxonmobil.com		0.92
+cb6c3b17f1f8	LOWES FUEL 138	convenience		30.73976	-99.21914	824 SAN ANTONIO ST	Mason	76856			Phillips 66	0.80
+ce081f0671a5	LOWES FUEL 140	convenience		30.91418	-99.78738	410 ELLIS	Menard	76859			Phillips 66	0.80
+bfef2510da16	Mauricio's Quick Stop	convenience		30.48911	-99.77217	1101 Main St	Junction	76849	+13254464204	https://www.mapquest.com/.../mauricios-quick-stop-273722829		0.92
+a2268eb65dbf	MENARD SHORT STOP	convenience		30.93960	-99.78340	1692 US HWY 83	Menard	76859		https://locations.valero.com/en-us/LocationDetails/Index/1692-US-HWY-83/0000028370	Valero	0.80
+347c70427fd3	Mini Mart	convenience		30.07285	-99.22758	3196 Junction Hwy	Ingram	78025	+18303675565	https://www.mini-mart.com		0.65
+a47d1c23810d	Mini Mart	convenience		30.03483	-99.13567	1805 Broadway	Kerrville	78028	+18302578644	https://www.mini-mart.com	Mini Mart Convenience Stores	0.99
+c59b3e64055a	Mini Mart	convenience		30.01301	-99.12441	2211 Bandera Hwy	Kerrville	78028	+18302572343	https://www.mini-mart.com		0.65
+d47a08be8676	Mini Mart	convenience		30.04324	-99.13613	1001 Main St	Kerrville	78028	+18308962994	https://www.mini-mart.com		0.92
+e10807e671da	Mini Mart	convenience		30.06668	-99.17886	1698 Junction Hwy	Kerrville	78028	+18308952996	https://www.mini-mart.com		0.92
+e5d384e53fba	Mini Mart	convenience		30.01582	-99.11848	3310 Memorial Blvd	Kerrville	78028	+18308959604	https://www.mini-mart.com	Mini Mart Convenience Stores	0.92
+fead4b4af8d0	Mini Mart	convenience		30.06572	-99.11973	1980 Sidney Baker St	Kerrville	78028	+18308968535	https://locations.valero.com/en-us/LocationDetails/Index/1980-SIDNEY-BAKER/0000001306	Mini Mart Convenience Stores	0.92
+9278b8445751	Mini Mart #66	convenience		30.05509	-99.15286	344 Junction Hwy	Kerrville	78028	+18308962666	https://www.mini-mart.com		0.95
+75070669bb5a	MINI MART 305	convenience		30.03460	-99.13500	1806 BROADWAY	Kerrville	78028		https://locations.valero.com/en-us/LocationDetails/Index/1806-BROADWAY/0000001305	Valero	0.80
+562aea3b254c	MINI MART 307	convenience		30.07370	-99.22820	3196 JUNCTION HWY	Ingram	78025		https://locations.valero.com/en-us/LocationDetails/Index/3196-JUNCTION-HWY/0000004329	Valero	0.80
+9af228c4acd7	MINI MART 308	convenience		30.06570	-99.11990	1980 SIDNEY BAKER	Kerrville	78028		https://locations.valero.com/en-us/LocationDetails/Index/1980-SIDNEY-BAKER/0000001306	Valero	0.80
+eaee22719142	Mini Mart C Stores	convenience		30.03678	-99.13433	1600 Broadway	Kerrville	78028	+18302576464	https://www.mini-mart.com		0.95
+63759252dce0	Mini Mart Convenience Stores	convenience		30.05326	-99.14703	18 W Main St	Kerrville	78028	+18302576464	http://www.mini-mart.com/	Mini Mart Convenience Stores	0.80
+b37161f39e0b	Mini Mart Grocery	convenience		30.02240	-99.15408	816 Ranchero Rd	Kerrville	78028	+18302572566	https://www.mini-mart.com		0.92
+3481b384a8a7	Mobil	convenience		30.07388	-99.23524	103 Tx-27	Ingram	78025	+18303674838	https://www.exxon.com/en/find-station/mobil-ingram-tx-velocity1-200326228?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
+d03cf8731a15	Neu-Mart	convenience		30.07329	-99.23433	3269 Junction Hwy	Ingram	78025	+18303674838	http://phillips66.com		0.92
+cb71e2fd136e	Neu-Mart Stores	convenience		30.02952	-99.11895	608 Meadow View Ln	Kerrville	78028	+18302576611	https://neu-mart-1.hub.biz/		0.92
+483d4732eadb	NUWAY	convenience		30.74910	-99.23390	317 Fort McKavett	Mason	76856		https://locations.valero.com/en-us/LocationDetails/Index/317-FORT-MCKAVETT/0000007864	Valero	0.80
+5bd93f4717cf	PETRO MART #4	convenience		30.29980	-99.24770	23401 W US HIGHWAY 290	Harper	78631		https://locations.valero.com/en-us/LocationDetails/Index/23401-W-US-HIGHWAY-290/0000028050	Valero	0.80
+245ced882918	Phillips 66	convenience		30.91374	-99.78770	410 Ellis St	Menard	76859	+13253964592	https://www.phillips66gas.com/		0.92
+4cc0d36e9196	Phillips 66	convenience		30.73962	-99.21913	824 San Antonio St	Mason	76856	+13253475906	https://www.phillips66gas.com/station/66-LOWES-FUEL-138-0000865764/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.85
+9ad8cadd4674	Phillips 66	convenience		30.74234	-99.22542	824 San Antonio St	Mason	76856	+13253475906	https://www.phillips66gas.com/		0.92
+aee8375a32e1	Phillips 66	convenience		30.41764	-99.67223	115 S Segovia Access Rd	Junction	76849	+13254397717	https://www.phillips66gas.com/		1.00
+baeeab29dded	Phillips 66	convenience		30.50687	-99.77585	2350 N Main St	Junction	76849	+13254462432	https://www.phillips66gas.com/station/66-VELOCITY-17-0000890037/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.92
+79cf80fd550f	Phillips 66 Gas	convenience		30.43488	-99.71300	465 I-10	Junction	76849	+3254463193	https://www.phillips66gas.com/	Phillips 66 Gas	0.83
+51fb41dbd97e	PICK N PACK	convenience		30.93643	-99.78288	1300 FRISCO ST	Menard	76859		https://www.exxon.com/en/find-station/exxon-menard-tx-picknpack-200330443	Exxon	0.80
+63086b0abd87	Pilot Travel Center	convenience		30.50568	-99.77641	2342 N Main St	Junction	76849	+13254397717	https://locations.pilotflyingj.com/us/tx/junction/2342-n-main-st	Pilot Flying J	0.92
+af18f71546a3	Segovia 66 Truck Stop	convenience		30.41767	-99.67232	465 Old Segovia Rd	Junction	76849	+13253380993	www.phillips66.com		0.94
+1e97defba930	Shell	convenience		30.04887	-99.14156	528 Main St	Kerrville	78028	+18308962888	https://www.shell.com		0.92
+2375123dc168	Shell	convenience		30.06655	-99.17898	1698 Junction Hwy	Kerrville	78028	+18308962995	http://www.shell.us/	Shell	0.92
+2e6abe882744	Shell	convenience		30.49381	-99.74901	Morales St	Junction	76849	+13254462158	https://find.shell.com/us/fuel/10003801-ih-10-fm-2169	Shell	0.98
+32e5fbc8fcc7	Shell	convenience		30.01296	-99.12442	2211 Bandera Highway	Kerrville	78028	+18306254214	https://find.shell.com/us/fuel/13164846-2211-bandera-hwy/en_US		1.00
+625086871e6c	Shell	convenience		30.06921	-99.11306	2128 Sidney Baker St	Kerrville	78028	+18308963522	https://find.shell.com/us/fuel/10001205-2128-sidney-baker-st/en_US	Shell	1.00
+676acd7773ab	Shell	convenience		30.05506	-99.15301	344 Junction Highway	Kerrville	78028	+18308962666	https://find.shell.com/us/fuel/13181151-344-junction-hwy/en_US		1.00
+83c05eb98092	Shell	convenience		30.02243	-99.15411	816 Ranchero Road	Kerrville	78028	+18302572566	https://find.shell.com/us/fuel/13165657-816-ranchero-rd/en_US		0.92
+db6477a93284	Shell	convenience		30.05278	-99.13419	857 Sidney Baker Street	Kerrville	78028	+18308905054	https://find.shell.com/us/fuel/13199121-857-sidney-baker-st/en_US		0.92
+ed2e574de642	Shell	convenience		30.50935	-99.77323	2416 N Main St	Junction	76849	+13254468740	https://find.shell.com/us/fuel/12508723-2416-n-main-st	Shell	0.92
+d1ee2aa34546	Shell Gas Station	convenience		30.50697	-99.77612	Morales St Ih 10 Fm 2169	Junction	76849		http://www.shell.com/		0.73
+41f3c81215a3	SHORT STOP	convenience		30.75061	-99.23662	425 Fort McKavitt St RD	Mason	76856	+13253476648	http://locations.greyhound.com/bus-stations/US/Mason/bus-station/bus-station-681879		1.00
+6bb9b2b9365d	Short Stop	convenience		30.49576	-99.77843	1977 N Main St	Junction	76849	+13254462739	https://www.conoco.com/station-finder?s=all		0.92
+a8a24a408b84	Short Stop	convenience		30.49576	-99.77843	1977 N Main St	Junction	76849	+13254462739	http://www.conoco.com/		1.00
+41d4e6fab309	Silver Spur-Menard	convenience		30.91727	-99.78591	115 W San Saba Ave	Menard	76859	+13253963200	http://silverspurmenard.com/		0.98
+0f8a3bde6930	Stripes	convenience		30.01541	-99.11898	3305 Memorial Blvd	Kerrville	78028	+18308963500	https://www.7-eleven.com/	Stripes	0.96
+22fdb940cd9b	Stripes	convenience		30.75116	-99.23724	616 Fort McKavitt St	Mason	76856	+13253475133	http://www.stripesstores.com	Stripes	0.99
+cea63733a8ac	Stripes	convenience		30.06747	-99.11430	2109 Sidney Baker St	Kerrville	78028	+18308962700	https://www.7-eleven.com/	Stripes	0.96
+dd2399232042	Stripes	convenience		30.75131	-99.23721	616 Fort McKavitt St	Mason	76856	+13253475133	http://www.stripesstores.com	Stripes	1.00
+75e9d7c2b788	Stripes Convenience Store	convenience		30.05705	-99.15950	700 Junction Hwy	Kerrville	78028	+18308964300	http://www.stripesstores.com	Stripes	0.99
+2c297809efc7	Sunoco	convenience		30.49375	-99.74897	201 Morales St	Junction	76849	+13256587521	http://www.sunoco.com	Sunoco	0.92
+3481af945e74	Sunoco	convenience		30.48862	-99.78755	201 Morelos St	Junction	76849	+13256587521	https://www.sunoco.com		0.75
+f2b37a23a882	Sunoco	convenience		30.50705	-99.77583	2350 N MAIN ST	Junction	76849		https://www.sunoco.com/locations/store/2350-n-main-st-junction-tx-8003199001	Sunoco	0.95
+dfdb75e4285e	Sunoco Gas Station	convenience		30.05721	-99.15932	700 Junction Hwy	Kerrville	78028	+18308964300	https://www.sunoco.com		0.75
+dd471e15d09c	TA Express Junction #0515	convenience		30.41758	-99.67230	115 S Segovia Access Rd	Junction	76849		https://www.ta-petro.com/location/tx/ta-express-junction/	TA	0.80
+7bc582ae2a2a	Timewise	convenience		30.06933	-99.11320	2128 Sidney Baker St	Kerrville	78028	+18308963522	https://find.shell.com/us/fuel/10001205-2128-sidney-baker-st/en_US		0.92
+ed85c9078080	Timewise	convenience		30.50910	-99.77288	2416 North Main Street	Junction	76849	+13254468740	https://find.shell.com/us/fuel/12508723-2416-n-main-st/en_US		0.96
+4065647ad8e0	Valero	convenience		30.07358	-99.22800	3196 Junction Hwy	Ingram	78025	+18302576464	http://www.valero.com	Valero Energy	0.92
+8f62883f8543	Valero	convenience		30.30042	-99.25240	23682 W Us Highway 290	Harper	78631	+18308644459	http://www.valero.com		0.92
+a7fa4b5307a9	Valero	convenience		30.50918	-99.77217	2416 N Main St	Junction	76849	+13254468740	http://www.valero.com	Valero Energy	0.78
+ca2ba5e93a0c	Valero	convenience		30.41749	-99.67233	115 S Segovia Access Rd	Junction	76849	+12103452000	https://www.valero.com		0.75
+f26aa51576ee	VALERO 2740538	convenience		30.04060	-99.14462	321 SIDNEY BAKER S	Kerrville	78028		https://locations.valero.com/en-us/LocationDetails/Index/321-SIDNEY-BAKER-S/0000020538	Valero	0.98
+2d1ba38bfc61	VALERO 2741073	convenience		30.04930	-99.13760	505 Sidney Baker St	Kerrville	78028		https://locations.valero.com/en-us/LocationDetails/Index/505-SIDNEY-BAKER-ST/0000024620	Valero	0.80
+f1645abac597	Valero ATM	convenience		30.04968	-99.13804	505 Sidney Baker St	Kerrville	78028	+18005137678	https://www.frostbank.com/locations#gid=2908?utm_source=Yext&utm_medium=LocationsPages		0.85
+9c7d829a4a3a	VELOCITY #1	convenience		30.07388	-99.23528	103 TX-27	Ingram	78025		https://www.exxon.com/en/find-station/mobil-ingram-tx-velocity1-200326228	Mobil	0.80
+f33daa7d9fc8	Velocity #17	convenience		30.50676	-99.77579	2350 N Main St	Junction	76849	+13254462432		Velocity Store Junction	0.92
+4b1b2ff7c31c	Velocity Number 7	convenience		30.93630	-99.78249	1300 Frisco Ave	Menard	76859	+13253962134		Velocity Store Junction	0.92
+e8a40de5dead	Waldos	convenience		30.30028	-99.25237	23682 US-290	Harper	78631	+18308644040	http://www.waldos.com		0.96
+d6b6291bb9e3	Champs Chicken	fastfood		30.93978	-99.78290	1692 US-83	Menard	76859	+13253963333	https://hangar54.pizza/location/menard-short-stop-menard-tx/	Champs Chicken	0.92
+c49fa5bc99a7	Chick-fil-A	fastfood		30.05928	-99.16392	1060 Junction Hwy	Kerrville	78028	+18302576901	https://www.chick-fil-a.com/locations/tx/kerrville?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
+a6f1880e70de	Chicken Express	fastfood		30.05074	-99.13736	624 Sidney Baker St	Kerrville	78028	+18303152750	http://www.chickene.com/	Chicken Express	0.98
+48dd336a419e	Church's Texas Chicken	fastfood		30.04390	-99.14492	206 Sidney Baker Street S.	Kerrville	78028	+18302573333	https://locations.churchs.com/tx/kerrville/206-sidney-baker-street-s.	Church's Chicken	0.97
+1340666c2b1a	Cinnabon	fastfood		30.05826	-99.12732	1423 Sidney Baker Street	Kerrville	78028		https://locations.cinnabon.com/tx/kerrville/1423-sidney-baker-street	Cinnabon	0.95
+030911cd1a96	Dairy Queen	fastfood		30.50709	-99.77684	2345 N Main St	Junction	76849	+13254462121	https://www.dairyqueen.com/en-us/locations/tx/junction/2345-n-main-st/14308/?y_source=1_MjkzMzkyMTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+6cbd66bd2ef2	Dairy Queen	fastfood		30.05760	-99.16267	997 Junction Hwy 997 Junction Hwy	Kerrville	78029	+18308953737	https://www.dairyqueen.com/en-us/locations/tx/kerrville/997-junction-hwy/14319/?y_source=1_MjkzMzk0NTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+a7916181bf37	Dairy Queen	fastfood		30.75617	-99.24231	1017 Fort Mc Kavitt St 1017 Fort Mc Kavitt St	Mason	76856	+13253475905	http://www.dqtexas.com/	Dairy Queen	0.98
+d7e62c99aaa0	Dairy Queen - Kerrville 2	fastfood		30.05452	-99.13229	1101 Sidney Baker St	Kerrville	78028	+18308961441	https://www.dairyqueen.com/en-us/locations/tx/kerrville/1101-sidney-baker-st/14318/?y_source=1_MjkzMzg5OTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+0e998cc4f6eb	DQ Grill & Chill	fastfood		30.50708	-99.77682	2345 N Main St	Junction	76849		https://www.dairyqueen.com/en-us/locations/tx/junction/2345-n-main-st/4081	DQ Grill & Chill	0.80
+44330171bd23	DQ Grill & Chill	fastfood		30.05457	-99.13226	1101 Sidney Baker St	Kerrville	78028		https://www.dairyqueen.com/en-us/locations/tx/kerrville/1101-sidney-baker-st/4091	DQ Grill & Chill	0.80
+7959332c9506	DQ Grill & Chill	fastfood		30.05768	-99.16272	997 Junction Hwy	Kerrville	78028		https://www.dairyqueen.com/en-us/locations/tx/kerrville/997-junction-hwy/4092	DQ Grill & Chill	0.80
+c36b67322990	DQ Grill & Chill	fastfood		30.75622	-99.24238	1017 Fort McKavitt St	Mason	76856		https://www.dairyqueen.com/en-us/locations/tx/mason/1017-fort-mckavitt-st/4171	DQ Grill & Chill	0.80
+a03f18de18f5	Dunkin Donuts	fastfood		30.06287	-99.16723	1216 JUNCTION HWY, WM508	Kerrville	78028		https://www.dunkindonuts.com/locations/us/tx/kerrville/1216-junction-hwy/store-367163/	Dunkin'	0.80
+9edb7694e439	Golden Chick	fastfood		30.06290	-99.17300	1445 Junction Hwy	Kerrville	78028	+18308900089	https://locations.goldenchick.com/tx/kerrville/1306/	Golden Chick	0.96
+0779e59854a2	McDonald's	fastfood		30.06902	-99.11341	2128 Sidney Baker	Kerrville	78028	+18307925575	https://www.mcdonalds.com/us/en-us/location/tx/kerrville/2128-sidney-baker/21850.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+18bc1d211c72	McDonald's	fastfood		30.05008	-99.13785	600 Sidney Baker	Kerrville	78028	+18308967644	https://www.mcdonalds.com/us/en-us/location/tx/kerrville/600-sidney-baker/5703.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
+99310d6bb27a	McDonald's	fastfood		30.06268	-99.17091	1308 Junction Hwy	Kerrville	78028	+18308957707	https://www.mcdonalds.com/us/en-us/location/tx/kerrville/1308-junction-hwy/27141.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+b8d2d2674b89	McDonald's	fastfood		30.50906	-99.77287	2416 N Main St	Junction	76849	+13254468005	https://www.mcdonalds.com/us/en-us/location/tx/junction/2416-n-main-street/21841.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.92
+b893876d1587	Panda Express	fastfood		30.04887	-99.14285	501 Main Street	Kerrville	78028		https://www.pandaexpress.com/locations/tx/kerrville/5123	Panda Express	0.80
+6c5f1fdb3a1f	Pizza Takeout & Delivery	fastfood		30.05460	-99.14986					https://locations.papamurphys.com/tx/kerrville/312-junction-hwy	Papa Murphy's	0.80
+cfe5a83bf02a	Popeyes	fastfood		30.05847	-99.16212	936 Junction Hwy	Kerrville	78028	+18303538678	https://www.popeyes.com/store-locator/store/restaurant_84604	Popeyes Louisiana Kitchen	1.00
+95c3b87120f7	Raising Cane's	fastfood		30.06031	-99.16830	1201 Junction Highway	Kerrville	78028	+12103012010	https://locations.raisingcanes.com/tx/kerrville/1201-junction-highway	Raising Cane's Chicken Fingers	0.99
+0ec4726a1b14	Sonic Drive In	fastfood		30.50617	-99.77792	2337 North Main Street	Junction	76849	+13254469200	https://locations.sonicdrivein.com/tx/junction/2337-north-main-street.html	Sonic Drive-In	0.99
+93cf6c16c6ff	Sonic Drive In	fastfood		30.06160	-99.17017	1281 Junction Highway	Kerrville	78028	+18308950808	https://locations.sonicdrivein.com/tx/kerrville/1281-junction-highway.html	Sonic Drive-In	0.97
+c55a305ee819	Sonic Drive In	fastfood		30.06247	-99.12299	1727 Sidney Baker	Kerrville	78028	+18302573533	https://locations.sonicdrivein.com/tx/kerrville/1727-sidney-baker.html	Sonic Drive-In	0.99
+dbe6ef214708	Sonic Drive-In	fastfood		30.41731	-99.67232	115 S Segovia Access Rd	Junction	76849	+13254463193	https://locations.sonicdrivein.com/tx/segovia/115-segovia-access-road-south.html	Sonic Drive-In	0.96
+4650018fa2ba	Subway	fastfood		30.50574	-99.77639	2342 North Main Street	Junction	76849	+13254397724	https://restaurants.subway.com/united-states/tx/junction/2342-north-main-street	Subway	0.97
+34d03556d079	Taco Bell	fastfood		30.05118	-99.13602	725 Sidney Baker	Kerrville	78028	+18307925525	http://www.tacobell.com/	Taco Bell	0.99
+d16ccdd69ed7	Tenderfix By Noah Schnapp	fastfood		30.05901	-99.12659	1429 Sidney Baker St	Kerrville	78028	+18884135074	https://www.tenderfix.com		0.55
+41e33e81650d	Wendy's	fastfood		30.06201	-99.16949	1220 Junction Hwy	Kerrville	78028	+18307929898	https://locations.wendys.com/united-states/tx/kerrville/1220-junction-highway	Wendy's	0.98
+2532210d7c2e	Whataburger	fastfood		30.02320	-99.12649	2410 Memorial Hwy	Kerrville	78028	+18303538681	https://locations.whataburger.com/tx/kerrville/2410-memorial-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+9b8c618a7c57	Whataburger	fastfood		30.05485	-99.15234	338 Junction Highway	Kerrville	78028	+18308963313	https://locations.whataburger.com/tx/kerrville/338-junction-highway.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.96
+c0210140c81c	Whataburger	fastfood		30.07317	-99.22968	3215 Junction Hwy	Ingram	78025	+18303538535	https://locations.whataburger.com/tx/ingram/3215-junction-hwy.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.95
+d17ac19f6e54	Alternations & Asian Market	grocery		30.05409	-99.14954	259 Junction Hwy	Kerrville	78028	+18303677489			0.73
+a07c99a50eda	Garvin Store	grocery		30.10270	-99.69416	27304 US-83	Mountain Home	78058	+18306403235			0.98
+45c33058c082	H-E-B	grocery		30.04129	-99.14333	313 Sidney Baker St S	Kerrville	78028	+18308968030	https://www.heb.com/heb-store/655	H-E-B	0.96
+c2cc26161a67	Ingram Lake Dam Store	grocery		30.07150	-99.25663	610 Highway 39	Ingram	78025	+18303673967	http://phillips66.com/		0.99
+242829a457b8	J P Liquor	grocery		30.07430	-99.23695	3304 Junction Hwy	Ingram	78025	+18303674388			0.92
+e6f9436e3175	Kerrville H-E-B On Main Street	grocery		30.05056	-99.14288	300 W. MAIN ST.	Kerrville	78028		https://www.heb.com/heb-store/us/tx/kerrville/kerrville-h-e-b-on-main-street-770	H-E-B	0.80
+ae49960fae56	Kerrville H-E-B on Sidney Baker St	grocery		30.04152	-99.14343	313 SIDNEY BAKER SOUTH	Kerrville	78028		https://www.heb.com/heb-store/us/tx/kerrville/kerrville-h-e-b-on-sidney-baker-st-655	H-E-B	0.80
+b522292cf600	La Tapatia Mexican Groceries	grocery		30.04514	-99.14714	208 Cully Dr #400	Kerrville	78028	+18307923081	https://la-tapatia-mexican-groceries.hub.biz/		1.00
+91c467491ca6	London Grocery and Grill	grocery		30.67767	-99.57664	17451 US-377	London	76854	+13254752296			0.96
+12f546c99bb2	London Short Stop	grocery		30.69712	-99.55011	377 North Rd	Menard	76859	+13254752431			0.58
+c28cb6b38d29	Lovin Spoonful Cafe	grocery		30.05888	-99.16567	1107 Junction Hwy	Kerrville	78028		https://www.lovinspoonfulcafe.com		0.95
+95677c86683c	Lowe's Market	grocery		30.48991	-99.77219	1102 Main St	Junction	76849	+13254462650	http://www.lowesmarket.com/	Lowe's Market	0.96
+b53975c54acb	Lowe's Market	grocery		30.48993	-99.77243	1102 Main St	Junction	76849	+13254462650	http://www.lowesmarket.com/	Lowe's Market	1.00
+d5d9efd860bb	Lowe's Market	grocery		30.73962	-99.21920	824 San Antonio St	Mason	76856		https://www.lowesmarket.com/StoreLocator/Store/?L=138	Lowe's Market	0.80
+f0a8113d5d31	Lowe's Market	grocery		30.74251	-99.22581	824 San Antonio St P.O. Box 1277	Mason	76856	+13253475906	http://www.lowesmarket.com/	Lowe's Market	0.92
+ce8af90a0136	Nu-Way Grocery	grocery		30.74915	-99.23367	317 Fort McKavitt St	Mason	76856	+13253475713	http://citgo.com		0.92
+5368ce795f13	Old Stone Market	grocery		30.42910	-99.35266	176 KC 433	Harper	78631	+18308645040	https://oldstonemarket.com/		0.70
+5f2bfe7b3f0e	Ole Ingram Grocery	grocery		30.07416	-99.23641	3298 Junction Hwy	Ingram	78025	+18303675379	https://ole-ingram-grocery.hub.biz		0.96
+e0b0e938a38d	Super S Foods	grocery		30.74232	-99.22605	804 San Antonio Street	Mason	76856	+13253475906	http://www.supersfoods.com		0.77
+6e636f37b02b	Tres Amigos	grocery		30.90899	-99.78810	811 Ellis St	Menard	76859	+13253962044	http://www.tresamigos.com/		0.92
+0ad95fd1bbed	Wahoo’s Seafood	grocery		30.05213	-99.14540	305 Francisco Lemos St	Kerrville	78028		https://wahoosseafood.com		0.92
+5e05703257c9	Acc Radiology	hospital		30.04234	-99.15093	260 Cully Dr S	Kerrville	78028	+18302587200			0.76
+21e2658a494a	Children's Medical Group	hospital		30.03119	-99.14043	1331 Bandera Hwy	Kerrville	78028	+18302571440			0.55
+0418bc853463	HCM Medical Clinic (Kerrville)	hospital		30.04730	-99.15144	500 Thompson Dr	Kerrville	78028	+18309901404	http://www.hillcountrymemorial.org/page/contact-us/hcm-kerrville	Methodist Hospital Hill Country	0.97
+dcd2bd955049	Kerrville State Hospital	hospital		30.04723	-99.15643	721 Thompson Dr	Kerrville	78028	+18308962211	http://dshs.state.tx.us/		1.00
+8f18568bb159	Kimble Hospital	hospital		30.49874	-99.78063	349 Reid Road	Junction	76849	+13254463321	https://www.kimblehospital.org/		0.92
+23960386baa2	Peterson Health	hospital		30.04461	-99.15167	551 Hill Country Dr	Kerrville	78028	+18449062019	https://www.petersonhealthtx.com/		0.85
+cc381fc814cb	Peterson Hospital	hospital		30.04375	-99.15289		Kerrville		+18302579803	http://www.petersonrehabilitationhospital.com/		0.93
+e537ac903538	Peterson Medical Associates Cailloux Professional Building	hospital		30.04334	-99.15192	551 Hill Country Dr S	Kerrville	78028	+18302586237			0.97
+789098ffafad	Peterson Regional Health Care Center	hospital		30.04615	-99.14057	710 Water St E	Kerrville	78028	+18302580440	http://www.petersonrmc.com	Peterson Laboratory Outreach	0.93
+82f3b2a8a9d0	Peterson Regional Health Care Center	hospital		30.04628	-99.14110	710 Water St E	Kerrville	78028	+18302580440			0.84
+11d9cf840c2e	Peterson Regional Medical Center Heliport	hospital		30.04740	-99.14170		Kerrville					0.58
+8abcb0cd3f6c	Prmc Er	hospital		30.04374	-99.15228	551 Hill Country Dr S	Kerrville	78028	+18308964200			0.74
+74ae3c4b5269	Sid Petersons Hospital Kerrville Tx.	hospital		30.04375	-99.15284		Kerrville					0.97
+2c01096b2425	The Wright Results	hospital		30.04223	-99.13786	1001 Water St E	Kerrville	78028	+18302576633			0.74
+04299afb08db	Americas Best Value Inn	hotel		30.06360	-99.12218	1804 Sidney Baker St	Kerrville	78028	+18308968200			0.92
+d247163dd771	Americas Best Value Inn The Legends Inn	hotel	motel	30.49312	-99.77773	1908 Main St	Junction	76849	+13254468644	https://www.redlion.com/americas-best-value-inn/tx/junction/americas-best-value-inn-legends-inn		0.99
+01f4ba694d5b	Basecamp Resort	hotel	lodge	30.07223	-99.30772	145 Cardinal Hill Rd	Ingram	78025	+18302820778	https://www.basecampresort.com/		0.96
+335e48d584fc	Best Western Dos Rios	hotel		30.50823	-99.77805	244 Dos Rios Dr	Junction	76849	+13254463700	https://www.bestwestern.com/en_US/book/hotel-rooms.44599.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44599	Best Western Hotels & Resorts	1.00
+82c6b8e09072	Best Western Sunday House Inn	hotel		30.06906	-99.11449	2124 Sidney Baker St	Kerrville	78028	+18308961313	https://www.bestwestern.com/en_US/book/hotel-rooms.44361.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44361	Best Western Hotels & Resorts	1.00
+11e3c1182083	Bon Ton Roulet Cabins	hotel		30.39542	-99.88390	171 KC 150	Junction	76849	+13254463154			0.87
+02611caa00f4	BumbleBee Lodge	hotel	lodge	30.07039	-99.30309	104 Easy St	Ingram	78025	+18304887776	http://www.bumblebeelodge.com/		0.92
+24b429e8944a	Butterfly Ranch Kerrville, Tx	hotel		30.01540	-99.25522	185 Teague Ave S	Kerrville	78028				0.81
+758081f22f82	Carlton Club Inn	hotel		30.05595	-99.16457	126 Plaza Dr	Kerrville	78028	+18303532799	http://www.carltoninnhotel.com/		0.96
+bf119fd9c0d2	Cat's Meow Bed & Breakfast	hotel		30.29746	-99.02465	9848 W US Highway 290	Fredericksburg	78624	+18309970888	http://www.catsmeowbedandbreakfast.com		0.92
+36fdbf51a1a8	Cedar Cliff Cottage	hotel		30.05691	-99.42295	205 Cedar Cliff Loop	Hunt	78024	+18323024142			0.57
+3c177de7f479	Clear Creek Ranch	hotel		30.90559	-99.96134	713 Pfluger Ln	Menard	76859	+13256555000	https://www.airbnb.com/rooms/18074162?adults=1&children=0&infants=0&location=Menard%2C+TX%2C+United+States&check_in=2017-06-30&check_out=2017-07-02&s=Qo4Zz80V		0.95
+6c8b76edf846	Cottage By the River	hotel		30.04957	-99.14813	149 Francisco Lemos St S	Kerrville	78028	+18308968348			0.63
+89d65a743934	Days Inn	hotel	motel	30.06580	-99.11928	2000 Sidney Baker St	Kerrville	78028	+18308961000	http://www.daysinn.com	Days Inn	0.99
+ac78636cb8cd	Days Inn Junction Resort	hotel		30.49166	-99.75332	111 Martinez Junction Resort	Junction	76849	+15127877642			0.85
+cdbffe89998e	Diamond H Ranch	hotel	lodge	30.04117	-99.91232	576 S View Rd	Rocksprings	78880		http://dhranch576.com/		0.64
+fc40025d875d	Doss 4S Ranch	hotel	lodge	30.48752	-99.22295	74 Schmidt Anderegg Rd	Doss	78618	+12147933314			0.92
+8be06edd904a	Dry Creek	hotel	motel	30.29783	-99.02918	3999, 10096 US-290	Fredericksburg	78624	+18309976176			0.97
+5b35fd54a899	E-vapor8 Inn	hotel		30.03079	-99.14507	1216 Sidney Baker St S Ste A	Kerrville	78028		http://mail.evapor8inn.com		0.95
+e9e4cc93f7cd	Econo Lodge	hotel		30.06686	-99.11481	2105 Sidney Baker St	Kerrville	78028	+18308961711	https://www.choicehotels.com/texas/kerrville/econo-lodge-hotels/tx373?mc=llyxyxpx		0.92
+bf8a8af9b2fc	Econo Lodge Junction	hotel		30.49193	-99.75375	111 Martinez St	Junction	76849	+13254463730	https://www.choicehotels.com/texas/junction/econo-lodge-hotels/txa43?mc=llbillpx&pmf=local		0.97
+e83f81142997	Erbstuck Ranch	hotel		30.48396	-99.03892	1039 Welge-Lewis Rd	Fredericksburg	78624	+18309983847	http://www.erbstuckranch.com		0.93
+a790909830e2	Falling Rock Ranch Resort	hotel		30.13523	-99.31132	4524 Junction Hwy	Ingram	78025	+17138065599			0.98
+9a6a318a209d	Flagstaff Inn	hotel	motel	30.05788	-99.16138	906 Junction Hwy	Kerrville	78028	+18307924449	http://www.hamptoninn.com		0.99
+e17ef6f06cf9	Fort Mckavitt Inn	hotel	motel	30.75546	-99.24083	1010 Fort McKavitt St	Mason	76856	+13253475750	https://www.fort-mckavitt-inn.business.site		0.95
+84642a217ea8	Guadalupe River Rv Resort	hotel		30.07101	-99.20503	2605 Junction Hwy	Kerrville	78028		guadaluperiverrvresort.com		0.95
+bc752196b49e	Hampton Inn Kerrville	hotel		30.06710	-99.11729	2038 Sidney Baker St	Kerrville	78028	+18302570600	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	1.00
+95572e509303	Harper Hideaway Cabins	hotel		30.29706	-99.24532	229 S Ranch Road 783	Harper	78631	+18308644055			0.66
+8b125c13cdf7	Heart of the Heart Guest Lodge	hotel	lodge	30.90436	-99.07447	13141 Oak Grove Rd	Fredonia	76842	+13254296222	http://Masontxcoc.com/		0.90
+97162de7ea3e	Hill Country Vending Company	hotel		30.06413	-99.12341	604 Roy St	Kerrville	78028		https://www.hillcountrylighting.com		0.95
+2e8ba816035f	Hillcrest Inn	hotel	motel	30.05963	-99.12682	1508 Sidney Baker St	Kerrville	78028	+18308967400	http://www.kerrvilletx.chambermaster.com		0.92
+df6ecdeccb4c	Hills Motel	hotel	motel	30.49088	-99.77599	1520 Main St	Junction	76849	+13254462567	http://www.thehillsmotel.com		0.92
+771f3c3bc3ee	Hilltop Motel	hotel	motel	30.93279	-99.78304	910 Frisco St	Menard	76859	+13253962075	https://hilltop-motel.edan.io		0.92
+a99c3365b341	Holiday Inn Express and Suites Junction	hotel		30.50863	-99.77880	304 Dos Rios Dr	Junction	76849	+13252154377	https://www.ihg.com/holidayinnexpress/hotels/us/en/junction/sjjnt/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-SJJNT	Holiday Inn Express	1.00
+e5f086c3e6ed	Holiday Inn Express and Suites Kerrville	hotel		30.06942	-99.11581	2114 Sidney Baker St	Kerrville	78028	+18308959500	https://www.ihg.com/holidayinnexpress/hotels/us/en/kerrville/kervl/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-KERVL	Holiday Inn Express	0.99
+d0b56a5ec784	Hunter House Inn & Suites	hotel	motel	30.07376	-99.24186	314 TX-39	Ingram	78025	+18303672377	http://www.hunterhouseinnandsuites.com		1.00
+aa8b2d83647d	Inn of the Hills Hotel and Conference Center	hotel		30.05812	-99.16367	1001 Junction Hwy	Kerrville	78028	+18308955000	https://www.innofthehills.com/rooms-in-kerrville		1.00
+91763e4c6a5d	Junction Hospitali	hotel		30.49209	-99.77825	2043 Main St	Junction	76849				0.55
+f0c768678291	Kavy Investments Llc	hotel		30.06496	-99.11828	2001 Sidney Baker St	Kerrville	78028				0.95
+4b34fdac22c6	Kerrville Ranch Properties	hotel		30.06425	-99.12040	1835 Sidney Baker St	Kerrville	78028	+18308957771	http://kerrvilleranchproperties.com/		0.85
+390d2913a6d5	La Misión	hotel	motel	30.92476	-99.78424		Menard		+13253968149	http://lamisionmenard.com/		0.65
+47c34b7bee58	La Quinta Inn & Suites	hotel		30.06551	-99.12033	1940 Sidney Baker St	Kerrville	78028	+18303538118	http://www.laquintakerrville.com/?cid=local_778	La Quinta by Wyndham	1.00
+864e0e6d1e67	La Vista Motel	hotel	motel	30.49776	-99.77802	2040 N Main St #3023	Junction	76849	+13254462191	https://la-vista-motel-tx-1.hub.biz/		0.96
+938e8eb43e08	Lazy Hills Guest Ranch	hotel		30.11327	-99.24733	Henderson Branch Road	Ingram	78025	+18303675600	http://lazyhillsretreat.com		0.89
+1f3b59e86087	Lazy Hills Retreat & Conference Center L.l.c	hotel		30.04058	-99.14880	163 Lehmann Dr	Kerrville	78028		http://www.lazyhillsretreat.com		0.95
+bb0ad2ed1570	Lazy T Motel	hotel	motel	30.49854	-99.77884	2043 Main St	Junction	76849	+13252151396			0.97
+75ffd22c17e1	Legacy Hideaway	hotel		30.28092	-99.14908	1146 Walnut Creek Rd	Harper	78631	+18305154787	http://legacyhideaway.com		0.92
+a4e6c9cd5d4f	Lindsay Ranch Guesthouses	hotel	lodge	30.81402	-99.26495	460 Lindsay Ranch Rd	Mason	76856	+13253474052	http://www.lindsayranch.net		0.95
+c58ce4b98e30	Lone Star Inn	hotel	resort	30.06436	-99.12293	1804 Sidney Baker St	Kerrville	78028	+18002198158	http://lonestarinnkerrville.com/		0.85
+cebf517e91f2	Lone Star Inn	hotel	motel	30.06437	-99.12296	1804 Sidney Baker St	Kerrville	78028	+18308968200	http://www.abvikerrville.com/		0.97
+78607e75e417	Luck of the Draw Cabin Vacation Rental	hotel		30.00537	-99.40483	3200 Highway 39	Hunt	78024	+18325249407	http://www.luckofthedrawvacationrentalatlacasitacrossing.com/		0.61
+ea2016eb42e9	Mason Square Hotel	hotel		30.74903	-99.23154	122 Fort McKavitt St	Mason	76856	+13253477829	http://www.masonsquarehotel.com/		0.92
+f5cd445ee17c	Motel 6	hotel	motel	30.06481	-99.12264	1810 Sidney Baker St	Kerrville	78028	+18302013798	http://www.motel6.com/	Motel 6	1.00
+5d9df234fb1d	Motel 6 Junction, TX	hotel		30.51008	-99.77512	200 I-10 W	Junction	76849	+13254463572	https://www.motel6.com/en/home/motels.tx.junction.4384.html?lid=Local_Milestone_4384&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		1.00
+02d4a4768e67	Motel 6 Junction- Tx	hotel		30.48397	-99.78326	200 I10 W	Junction	76849	+13254463572			0.85
+92b99fff68fb	Motel 6 Junction- Tx - Llano River	hotel	resort	30.50748	-99.77782	184 Dos Rios Dr	Junction	76849	+13254464588			1.00
+4b6f4b614b70	Natural Springs Lodge at Edelstein Ranch	hotel		30.00431	-99.39666	3088 TX-39	Hunt	78024				0.98
+07560e313a48	Om Sai Hotel Llc	hotel		30.49213	-99.75352	111 Martinez St	Junction	76849				0.95
+d75b184af484	On The Square Guesthouse	hotel		30.74920	-99.23259	242 Fort McKavitt St	Mason	76856	+15124968618	http://airbnb.com/h/otsg		0.89
+37d8691e1241	Our King's Ranch	hotel		30.30459	-99.19949	8926 Old Harper Road	Harper	78624	+12314258923			0.76
+ca34f0a39da6	OYO Hotel - Segovia Lodge, Junction TX	hotel		30.41548	-99.67014	311 S Segovia Access Rd	Junction	76849	+13252619342	https://www.oyorooms.com/us/263210/?utm_source=GMB&utm_medium=Organic&utm_campaign=US_JCTX001		0.93
+3b9909c54880	OYO Hotel Junction TX I-10	hotel		30.42024	-99.67414	311 N Segovia Access Rd	Junction	76849	+12097488832	https://www.oyorooms.com/us/111655?utm_source=YEXT&utm_medium=YEXT&utm_campaign=US_REMO002	OYO USA	0.71
+0d258232e52e	Quality Inn & Suites Junction	hotel		30.50980	-99.77576	200 I-10 W.	Junction	76849		https://www.choicehotels.com/texas/junction/rodeway-inn-hotels	Quality Inn	0.99
+b53327ff1174	Quality Inn and Suites	hotel		30.06528	-99.11840	2001 Sidney Baker St	Kerrville	78028	+18303538438	https://www.choicehotels.com/texas/kerrville/quality-inn-hotels/tx647?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+cd3691db77d6	Rancho Romantica	hotel		30.30556	-99.00746	483 Reeh-Weinheimer Rd	Fredericksburg	78624	+18664278374	http://www.fredericksburgvacationrental.com		0.98
+ab1ca6195230	Reed Ranch	hotel	lodge	30.32087	-99.52906	Stapp Ranch Rd, Junction, TX 76849, United States	Mountain Home	76849				0.72
+4025c004aa33	Riachuelo Ranch	hotel		30.14437	-99.36526	310 Byas Springs Rd	Mountain Home	78058	+18308663507	https://start.cortera.com/.../research/l7s0lsj5j/riachuelo-ranch-ltd		0.63
+c34681a79368	River Lodging	hotel		30.06998	-99.29330	1100 Highway 39	Ingram	78025		https://www.riverlodging.com		0.95
+23f6b42d2433	River Valley Inn and Resort	hotel		30.41526	-99.67022	311 S Segovia Access Rd	Junction	76849	+13254462169			0.94
+68e97a423d69	Riverview Inn & Suites	hotel		30.49215	-99.75330	111 Martinez St	Junction	76849	+18882712681			0.92
+07c2af7d669d	Rodeway Inn	hotel		30.50745	-99.77774	2343 N Main St	Junction	76849	+13254464588	https://www.choicehotels.com/texas/junction/rodeway-inn-hotels/tx982?mc=llbillpx&pmf=local		0.92
+97e78d8c903b	Rooster Springs	hotel		30.30478	-99.00645	409 Reeh-Weinheimer Rd	Fredericksburg	78624	+18004916126			0.78
+73a97a2c5df4	Selah Springs Ranch	hotel	lodge	30.98139	-99.26945	7300 US-87	Brady	76825	+13255972602	http://selahspringsranch.net/		1.00
+998560407b35	South Fork Ranch	hotel		30.07056	-99.33755	2 TX-39	Hunt	78024	+18306403174			0.57
+89adfd969209	South Llano River Lodge	hotel	lodge	30.46321	-99.79138	424 KC 170	Junction	76849	+13254463026	http://www.southllanoriverlodge.com/default.aspx		0.92
+50c510955712	Stablewood Springs Resort	hotel		30.05354	-99.14875		Kerrville			http://www.stablewoodspringsresort.com/		0.59
+7a8f9f97afb2	Stablewood Springs Resort	hotel		30.06899	-99.33488	USPS, 1644 Highway 39	Hunt	78024	+18302384646	http://www.stablewoodspringsresort.com/		0.79
+b15540dcd8b0	Stablewood Springs Resort	hotel		30.06449	-99.42700	145 Armadillo Hill Rd W	Hunt	78024	+18302384646	www.stablewoodspringsresort.com		0.63
+e04bd65e4bf3	Stablewood Springs Resort	hotel	resort	30.08106	-99.30058	145 Cardinal Hill Rd	Ingram	78025	+18302384646			0.77
+f721dbbc7f68	Stablewood Springs Resort	hotel		30.03111	-99.35958	USPS, 1644 Highway 39	Hunt	78024	+18302384646	http://www.stablewoodspringsresort.com/		0.76
+fbd771895941	Sun Valley Motel	hotel	motel	30.49114	-99.77738	1611 Main St	Junction	76849	+13254462505	http://www.moteljunction.com		0.98
+6155b46829a9	Super 8	hotel	motel	30.06820	-99.11276	2127 Sidney Baker St	Kerrville	78028	+18308961511	https://www.wyndhamhotels.com/super-8/kerrville-texas/super-8-kerrville-tx/overview		0.99
+2c3897280c3e	Super 8 by Wyndham Kerrville TX	hotel	resort	30.01796	-99.14192	2127 Sidney Baker St	Kerrville	78028	+18308961511	https://www.wyndhamhotels.com/super-8/kerrville-texas/super-8-kerrville-tx/overview?CID=LC:7xnkh22o63wf5qj:04736		0.85
+2fe3070e8b63	Texas Hunt Lodge	hotel	lodge	30.07235	-99.26098	120 Lakehouse Trail W	Ingram	78025	+18303677611	https://texashuntlodge.com/reserve-your-hunt/		0.92
+2b0577195447	The Fulton Guest House	hotel		30.74754	-99.23535	507 Westmoreland St	Mason	76856	+13253477829	http://Www.fultonguesthouse.com/		0.98
+6698134f1eeb	The Hilltop Hideaway	hotel		30.25878	-99.03810	3048 Usener Rd	Fredericksburg	78624		www.absolutecharm.com		0.89
+f213487c373d	The Loop River Lodge	hotel	lodge	30.07163	-99.24297	135 Old Ingram LP S	Ingram	78025	+14053069937	http://Www.theloopriverlodge.com/		0.91
+3298b4271e09	Trails End Guest House	hotel		30.04632	-99.05114	180 Gay Dr N	Kerrville	78028	+18309952812	http://www.trailsendguesthouse.com		0.57
+09ab1ed334e0	Tres Molinos Ranch & Resort	hotel	resort	30.34517	-99.21757	4260 N Ranch Rd 783	Harper	78631	+18309928783	http://www.tresmolinosresort.com/		0.92
+3e9ea7311aa9	Waltonia On The River	hotel	lodge	30.06804	-99.29588	120 Waltonia Lodges Dr S	Ingram	78025	+17372624433	http://www.WaltoniaLodges.com/		0.94
+fffacddbd27e	Wishing Well Bed and Breakfast	hotel		30.07274	-99.24245	128 Old Ingram Loop	Ingram	78025	+18303673553	http://www.wishingwellguesthouse.com		0.92
+60973d8e0384	Worldmark by Wyndham	hotel		30.08335	-99.30096	245 Stablewood Springsdrive	Ingram	78024	+18302386200	https://worldmark.wyndhamdestinations.com/us/en/resorts/united-states-of-america/texas/hunt/worldmark-hunt-stablewood-springs-resort		0.90
+23e19ba687af	Y.O. Ranch Headquarters	hotel	lodge	30.21213	-99.66428		Mountain Home		+18306403222	https://linktr.ee/yoranchhq		0.98
+bbefad5a4c16	Y.O. Ranch Headquarters	hotel		30.12104	-99.61198	1736 Y O Ranch Rd NW	Mountain Home	78058	+18306403222	https://linktr.ee/yoranchhq		0.98
+dd34c6968daf	Y.O. Ranch Hotel & Conference Center	hotel		30.06589	-99.11689	2033 Sidney Baker St	Kerrville	78028	+18779673767	http://www.yoranchhotel.com/		1.00
+9ed718be7506	Air By John Martinez	office		30.06081	-99.14948	502 Harper St	Kerrville	78028	+18302820950	https://porch.com/pros/air-by-john-martinez-26301348?Proleads_yext_webURL=		0.92
+0f91861b5603	HCTC	office	telecommunications company	30.07576	-99.23711	220 Carolyn St	Ingram	78025	+18303675333	https://www.hctc.net/		0.92
+f4174543edc3	HCTC	office	telecommunications company	30.48963	-99.77596	1501 Main Street	Junction	76849	+13254462420	https://www.hctc.net/		0.85
+0a5a04d9055f	Headwaters Groundwater Conservation	office		30.03962	-99.14656	125 Lehmann Dr Ste 201	Kerrville	78028	+18308964110	https://hgcd.org		0.65
+090bee91d936	James Avery Human Resources	office		30.06838	-99.17793	96 Coronado Dr	Kerrville	78028	+18005222303	https://www.jamesavery.com/careers		0.75
+3c582714fd35	JDS Leather Co	office	bags luggage company	30.06735	-99.17819	91 Coronado Dr N	Kerrville	78028	+18308964303	https://www.jdsleather.com/		0.92
+fcfeab1e843c	Louada Raschke Ministries	office		30.05225	-99.13674	813 Clay St	Kerrville	78028	+18303156233	https://www.louada.org		0.65
+e641486779a8	Lucky Star	office	travel company	30.06188	-99.39891	1005 FM 1340	Hunt	78024	+13619447860	http://www.luckystarartcamp.com/		0.92
+973b91d0a985	Matt's Custom Welding	office	industrial company	30.29785	-99.00997	8626 US-290	Fredericksburg	78624	+18304561022	http://www.mattscustomwelding.com/		0.57
+9831af597a12	Nutrition By Design, Inc.	office		30.75407	-99.24139	925 Fort McKavett St	Mason	76856	+13252944555	http://www.stockshowsecrets.com/		0.85
+d5396c6cb35f	Parks & Wildlife Department	office		30.04015	-99.14570	309 Sidney Baker St S	Kerrville	78028	+18302577611	https://tpwd.texas.gov		0.65
+3661a0627fd8	Riverhill Country Club	office	private association	30.02382	-99.13583	100 Riverhill Club Ln	Kerrville	78028	+18308961400	http://www.riverhillcc.com/		0.95
+43f471ae6b32	SRCWireless, LLC	office	information technology company	30.00873	-99.02956	530 Mcdonald Loop	Center Point	78010	+18302011869	http://www.srcwireless.net/		0.85
+a75dca0ebc8a	Vitanova Biomedical	office	biotechnology company	30.04712	-99.14079	222 Sidney Baker St	Kerrville	78028	+13177305955	http://www.vitanovabiomedical.com/		0.92
+6b2945c26f80	Wcr Energy Services	office	energy company	30.02316	-99.14276	101 Fairway Dr	Kerrville	78028	+18302570015	https://www.wcrenergyservices.com		0.65
+29263ea66349	Acapulco Mexican Restaurant	restaurant	texmex restaurant	30.06255	-99.12370	1718 Sidney Baker St	Kerrville	78028	+18302576222	http://orders.cake.net/11449909	Acapulco Mexican Restaurant	0.97
+ee0f1543ad34	Adf Enterprises Inc	restaurant	pizza restaurant	30.04541	-99.13552	952 Jefferson St Ste 100	Kerrville	78028	+18302574840	adf.org		0.65
+ff41b1ab2e6f	Agave Jalisco Mason TX	restaurant	mexican restaurant	30.75130	-99.23906	817 Fort McKavitt St	Mason	76856	+13258055085	https://share.google/Jv9gghvmO6zjeRjR5	Agave Jalisco Taqueria George West,Texas.	0.89
+94f8bcb9392a	Alex’s Catering	restaurant	american restaurant	30.48908	-99.76666	605 Main St	Junction	76849	+13252159145			0.97
+9ed20484d249	Alpine Lodge Restaurant	restaurant	american restaurant	30.05824	-99.16360	1001 Junction Hwy	Kerrville	78028	+18302578282	http://www.innofthehills.com/		0.95
+5c2142f640ee	Antojitos El Palmar Chico	restaurant	texmex restaurant	30.04628	-99.13901	810 Main St	Kerrville	78028	+18309559244			0.96
+396cf128ed9f	Bamboo Asian Buffet	restaurant	asian restaurant	30.05606	-99.12875	1305 Sidney Baker St Ste G	Kerrville	78028	+18308952878	http://www.kerrvillemenus.com/bamboo-asian-buffet-menu		0.77
+3051e3357443	Barreras Taco Shop	restaurant	taco restaurant	30.07519	-99.23810	3324 Junction Hwy	Ingram	78025	+18303672383			0.92
+2ce86729d6f8	Bayou Cajun Cafe	restaurant	cajun and creole restaurant	30.04534	-99.14725	208 Cully Dr Ste 218	Kerrville	78028		https://www.renhospitalitygroup.com		0.91
+6d0d9a2be5ed	Bella Sera	restaurant	italian restaurant	30.06838	-99.11421	2124 Sidney Baker St	Kerrville	78028	+18302572661	https://bellaserakerrville.com/		0.99
+51781a3228b3	Bella Vita Restaurant	restaurant	italian restaurant	30.06474	-99.17502	1550 Junction Hwy	Kerrville	78028	+18308958020	http://www.bellavitakerrville.com		0.92
+fb7a78d3a0c4	BG's	restaurant	american restaurant	30.06248	-99.16737		Kerrville					0.55
+dfe31feec676	Bill's Bar-B-Que	restaurant	barbecue restaurant	30.07043	-99.18813	1909 Junction Hwy	Kerrville	78028	+18308955733	http://www.billsbbq.net/		0.97
+4d589f02b499	Billy Gene's Restaurant	restaurant	american restaurant	30.06402	-99.17519	1489 Junction Hwy	Kerrville	78028	+18308957377	http://www.billygenes.com/		0.99
+aa09b67dc4a8	Birdies Deli & Co.	restaurant	sandwich shop	30.89280	-99.22852	17053 State Highway 36 S	Somerville	77879	+19795512988			0.87
+d5f068c58f1e	Bonsai Restaurant	restaurant		30.04730	-99.14141	218 Sidney Baker St	Kerrville	78028	+18303156888			0.94
+aa48ef6c022a	Bonzai Japanese Steak and Sushi	restaurant	japanese restaurant	30.04217	-99.14562	218 Sidney Baker St S	Kerrville	78028	+18303156888	http://www.bonzaikerrville.com		0.97
+769e2b1048b1	Brewdawgz Grille & Ale	restaurant	bar and grill restaurant	30.01185	-99.12394	2262 Bandera Hwy	Kerrville	78028	+18309555518	http://brewdawgz.com/MENU2025.pdf		0.99
+4f7bd2587b22	Brown's Drive In	restaurant	burger restaurant	30.03348	-99.14430	1152 Sidney Baker St S	Kerrville	78028	+18308963661	https://brown-s-drive-in.hub.biz/		0.99
+f1c1f78ef50e	Buddy's BBQ Shack	restaurant		30.06601	-99.36597	FM 1340	Hunt	78024				0.75
+913cdd519fe2	Bumdoodlers Lunch Co	restaurant	sandwich shop	30.03951	-99.13477	1312 Broadway	Kerrville	78028	+18303152867	http://www.bumdoodlers.com/		0.97
+627d613cab1d	Burger King	restaurant	burger restaurant	30.05006	-99.13721	611 Sidney Baker St	Kerrville	78028	+18308951417	http://www.bk.com/restaurants/tx/kerrville/611-sidney-baker-st-21502.html/	Burger King	0.96
+25ce5dbf86b1	Cardoshinsky Confections	restaurant		30.04554	-99.14701	204 Cully Dr Ste 300	Kerrville	78028	+18303159885			0.92
+b5b77376ccfb	Carmine's Italian	restaurant	italian restaurant	30.03304	-99.14449	1170 Sidney Baker St S	Kerrville	78028	+18303151170	https://carmineskerrville.com/		0.99
+c7f62a9187fe	Carmine's Pizza Truck	restaurant	italian restaurant	30.29966	-99.24733	23550 US Highway 290	Harper	78631	+18307776682	http://www.carmineskerrville.com/		0.64
+c0dd556105f3	Cartewheel Caterer's	restaurant	delicatessen	30.04611	-99.14085	720 Water St	Kerrville	78028	+18302577171	http://cartewheelscatering.com		0.77
+294250282d3f	Charleys Cheesesteaks	restaurant	sandwich shop	30.51082	-99.77277	2437 N Main St	Junction	76849	+13252152050	https://order.charleys.com/menu/gordos-travel-center-tx/	Charleys Cheesesteaks	0.98
+d9de279cd2c0	Charleys Philly Steaks	restaurant	sandwich shop	30.51081	-99.77258	2437 N Main St	Junction	76849		https://www.charleys.com/locations/gordos-travel-center-tx/	Charleys Philly Steaks	0.80
+b7c6d858125d	Chi Cho's Cafe	restaurant		30.03320	-99.14460	1168 Sidney Baker St S	Kerrville	78028	+18303770024			0.75
+508a858f8f1c	Chili's Grill & Bar	restaurant		30.05987	-99.16815	1185 Junction Hwy.	Kerrville	78028	+18308952445	https://www.chilis.com/		0.98
+a4f45351698a	China Bowl Chinese & Vietnamese Quisine Restaurant	restaurant		30.04539	-99.14716	208 Cully Dr Ste 218	Kerrville	78028	+18302571818	https://chinabowlquisine.com/		0.92
+f60b3038eccb	China Town Chinese Restaurant	restaurant	chinese restaurant	30.04068	-99.14542	735 Hill Country Dr	Kerrville	78028	+18308966688	https://www.chinatownchineserestauranttx.com/1xo8xj85/china-town-chinese-restaurant-kerrville-78028/order-online		0.99
+e0f00cfa9ccf	Church's Chicken	restaurant	chicken restaurant	30.50730	-99.77643	2349 North Main Street	Junction	76849	+13254463148	http://churchs.com		0.97
+592be93ed2e2	Cicis Pizza	restaurant	pizza restaurant	30.06325	-99.16975	1304 Junction Hwy	Kerrville	78028	+18308951339			0.92
+792f76dc6bd5	City Sweets Bakery & Cafe	restaurant	breakfast and brunch restaurant	30.49335	-99.77869	1907 Main St	Junction	76849	+13254462626			0.92
+d87089bf32ba	Classics Burgers and Moore	restaurant	burger restaurant	30.03562	-99.14428	448 Sidney Baker St S #9	Kerrville	78028	+18302578866	http://www.classicsburgers.net		0.97
+1a1d1c418af4	Club Charles	restaurant		30.04615	-99.14083	720 Water St	Kerrville	78028	+18309284409	https://www.clubcharles.com		0.65
+250ca0966819	Cooper's Bar-B-Q & Grill	restaurant	barbecue restaurant	30.51002	-99.77329	2423 N Main St	Junction	76849	+13254468664	http://coopersbbqjunction.com/menu.html		0.98
+6727ff3588ec	Cooper's Bar-B-Q & Grill	restaurant	barbecue restaurant	30.50591	-99.77764	2423 N Main St	Junction	76849	+13254468664	http://coopersbbqjunction.com/menu.html		0.85
+22cdb573625d	Cooper's Original Pit Bar-B-Q	restaurant	barbecue restaurant	30.73981	-99.21910	810 San Antonio St	Mason	76856	+13253476897	http://www.coopersbbqmason.com/		0.85
+35ee65412c39	Cooper's Original Pit Bar-B-Q	restaurant	barbecue restaurant	30.74289	-99.22591	810 San Antonio St	Mason	76856	+13253476897	http://www.coopersbbqmason.com/		0.98
+ef46d9ebb4e9	Copper Pot	restaurant	comfort food restaurant	30.07344	-99.23666	109 TX-39	Ingram	78025	+18303672676			0.96
+06d632b616eb	Cowboy Grill	restaurant	american restaurant	30.50666	-99.77748	2341 N Main St	Junction	76849	+13254462775	https://piyw.top/cowboy-grill		0.92
+9f02c95a22e2	Cowboy Steak House	restaurant	steakhouse	30.04999	-99.14286	416 Main St	Kerrville	78028	+18308965688	https://www.cowboysteakhouse.com		0.92
+176e634a1bae	Cracker Barrel	restaurant	comfort food restaurant	30.06796	-99.11516	2110 Sidney Baker I-10 & SR 16	Kerrville	78028	+18308967808	https://www.crackerbarrel.com/Locations/States/tx/kerrville/421/	Cracker Barrel Old Country Store	0.99
+95ce7228c04d	Crocket's on the Square	restaurant	american restaurant	30.74837	-99.23328	118 Moody St	Mason	76856	+12103239519	https://www.crockettsonthesquare.com/		0.97
+e7ffe7927a50	Culver's	restaurant	burger restaurant	30.06234	-99.17001	1300 Junction Hwy.	Kerrville	78028	+18302577000	http://www.culvers.com/restaurants/kerrville	Culver's	0.99
+0085baad84ed	Del Norte Restaurant	restaurant	american restaurant	30.05710	-99.16005	710 Junction Hwy	Kerrville	78028	+18302573337	http://www.delnorterestaurant.com		0.97
+bae302c3133d	Dickeys Barbecue Pit	restaurant	barbecue restaurant	30.05724	-99.16264	881 Junction Hwy	Kerrville	78028	+18307920757	https://www.dickeys.com/locations/texas/Kerrville/kerrville	Dickey's Barbecue Pit National	1.00
+1738719844b7	Domino's	restaurant	pizza restaurant	30.04229	-99.14343	305 Sidney Baker St S	Kerrville	78028	+18302576700	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+18842f78e0ba	Domino's	restaurant	pizza restaurant	30.07108	-99.25639	610 Hwy 39 Ste A	Ingram	78025	+18308673030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.92
+9e6c160aea8c	Domino's	restaurant	pizza restaurant	30.06290	-99.16726	1216 Junction Highway	Kerrville	78028	+18304963444	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.97
+47b5f758745e	Doss Store & Country Kitchen	restaurant		30.44723	-99.12996	14394 N Ranch Road 783	Doss	78618	+18306692111			1.00
+9bb4cd21b631	East End Pizza Co.	restaurant	pizza restaurant	30.03580	-99.13583	1700 Water St	Kerrville	78028	+18309555046	http://www.kerrtxeastendpizzaco.com/		0.92
+e66187b64933	El Bracero de Jalisco	restaurant	mexican restaurant	30.05629	-99.16259	843 Junction Hwy	Kerrville	78028	+18308960926	http://www.kerrvilletexascvb.com/business/el-bracero-de-jalisco		1.00
+019c8dcafbbe	El Carusel	restaurant		30.05635	-99.14328	110 W Barnett St N	Kerrville	78028	+18303533140	http://elcaruselfoodtruck.org/		0.93
+fac37ad8f89e	El Gallo Mexican Restaurant	restaurant	mexican restaurant	30.30214	-99.05545	11807 US-290	Harper	78631	+18306692406	http://www.elgallo290.com/		0.95
+30b0b0abe4ce	El Junction burrito & more	restaurant		30.49149	-99.77763		Junction		+13252151479			0.67
+08eaf3f79022	El Paisa Taqueria	restaurant	mexican restaurant	30.07343	-99.22060	3106 Junction Hwy	Ingram	78025	+18303672022			0.92
+d32fcddd3543	El Sol De Mexico	restaurant	mexican restaurant	30.04183	-99.13676	1028 Water St	Kerrville	78028	+18302579777	https://www.elsoldemexicorestaurant1028.com/		0.98
+fcde6cdf08de	El Sombrero De Jalisco	restaurant	mexican restaurant	30.04180	-99.14518	303 Sidney Baker St S	Kerrville	78028	+18302578263	http://www.elsombrerodejalisco.com/		0.99
+c5b14a5f0b48	Elaine's Table Restaurant	restaurant	american restaurant	30.06899	-99.33488	1621 Hwy 39	Hunt	78024	+18302384484	http://www.elainestable.com		0.94
+0a11e219451c	Francisco's Restaurant	restaurant	mexican restaurant	30.04555	-99.14037	201 Earl Garrett St	Kerrville	78028	+18302572995	http://www.franciscoskerrville.com/		0.99
+7f3b196f362b	Freddy's Frozen Custard & Steakburgers	restaurant	burger restaurant	30.04979	-99.13842	500 Sidney Baker St	Kerrville	78028	+18308905893	https://www.freddys.com/location/kerrville?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
+7951ce097411	Fuddruckers	restaurant	burger restaurant	30.06258	-99.17255	1421 Junction Hwy	Kerrville	78028	+18308950519	https://www.fuddruckers.com/kerrville	Fuddruckers	0.83
+76ec80ccd0cc	Gatti's Pizza	restaurant	pizza restaurant	30.04339	-99.14540	210 Sidney Baker St S	Kerrville	78028	+18308965555	http://www.gattispizza.com		0.92
+c95dee30c5f2	Grape Juice	restaurant	american restaurant	30.04658	-99.14211	623 Water St	Kerrville	78028	+18307929463	https://www.grapejuiceonline.com/thehomies		0.99
+f752fa9e15b6	Green Grocers Deli and Gourmet	restaurant	delicatessen	30.05343	-99.14936	225 W Water St	Kerrville	78028	+18302573354	https://www.instagram.com/green_grocer_deli?stkn=MW5qMWQ4bXp4MWNzOQ%3D%3D&utm_source=qr		1.00
+1319ea989ce7	Guadalupe River Club Oyster Bar and Grill	restaurant	seafood restaurant	30.06347	-99.17456	1483 Junction Hwy	Kerrville	78028	+18308963354	https://www.reverbnation.com/venue/guadaluperivercluboysterbarandgrill		0.97
+a19e9c22c071	Hangar 54 Pizza	restaurant	pizza restaurant	30.93968	-99.78327	1692 N US Hwy 83	Menard	76859	+13253963333	https://hangar54.pizza/location/menard-short-stop-menard-tx/		0.96
+331d80c95a82	Heritage Kitchen	restaurant	american restaurant	30.04598	-99.13976	225 Earl Garrett St	Kerrville	78028	+18303153180	https://www.heritagekitchentx.com		0.92
+d172f6e01792	Hill Country Cafe	restaurant	diner	30.04636	-99.13908	806 Main St	Kerrville	78028	+18302576665	http://hill-country-cafe.com		0.96
+336173bceff4	Hopf Haus Kitchen	restaurant		30.30119	-99.25243	127 Oak Ave	Harper	78631	+18304594288			0.56
+bc1d31fbfb0c	Howdy's Bar and Chill	restaurant		30.06899	-99.22430	101 Rowland Ln	Kerrville	78028	+18303671717	http://www.howdysbar.com/		0.92
+0d08b7bd14e5	Hungry Dog Roadside Eats	restaurant	barbecue restaurant	30.01173	-99.11539	3804 Riverside Dr	Kerrville	78028	+18304596883			0.99
+ead504d61b6e	Hunter House Cafe	restaurant	american restaurant	30.07358	-99.24210	316 TX-39	Ingram	78025	+18303673069	http://hunterhousecafe.com/		0.95
+dae6c08db3de	IHOP	restaurant	breakfast and brunch restaurant	30.05907	-99.12657	1429 Sidney Baker St	Kerrville	78028	+18307924940	https://restaurants.ihop.com/en-us/tx/kerrville/breakfast-1429-sidney-baker-3032		0.99
+fcedfebf399d	Il Posto	restaurant	italian restaurant	30.04631	-99.14162	701 Water St	Kerrville	78028	+18309555101	https://share.google/2rbESXDHZoCdglWJB		0.99
+ac474a88411c	Isaack Restaurant	restaurant	american restaurant	30.49099	-99.77678	1606 Main St	Junction	76849	+13254462629	https://www.isaacksrestaurantonline.com/		0.97
+4b254e7477a1	It's Just Wings	restaurant	chicken wings restaurant	30.05987	-99.16815	1185 Junction Hwy.	Kerrville	78028	+14694903917	https://itsjustwings.com/		1.00
+e752b9845a8f	James River Icehouse	restaurant	bar and grill restaurant	30.65124	-99.25230	8308 Ranch to Market Rd 2389	Mason	76856				0.96
+b29618edef3c	Jersey Mike's	restaurant	sandwich shop	30.05684	-99.15891	704 Junction Highway Suite 2	Kerrville	78028	+18303156453	https://www.jerseymikes.com/15222/kerrville-tx	Jersey Mike's Subs	0.95
+d14a6269fe2c	Jimmy John's	restaurant	sandwich shop	30.04767	-99.14127	603 Main St Ste. B	Kerrville	78028	+18308963333	https://locations.jimmyjohns.com/tx/kerrville/sandwiches-3768.html	Jimmy John's	0.96
+ec6735b88dd9	Joe's Italian Restaurant	restaurant	italian restaurant	30.74918	-99.23222	212 Fort McKavitt St	Mason	76856	+13252944856			0.92
+88b05dbe1155	Joe's Italian Ristorante	restaurant	italian restaurant	30.91559	-99.78715	210 Ellis St	Menard	76859	+13259102167			0.61
+621fd84d5d4f	Junction Burger Company & Restaurant	restaurant	burger restaurant	30.49322	-99.77851	1907 Main St	Junction	76849	+13254462695	http://junctionburgerco.com/		0.97
+8c1bd3df48bc	Kickin Wings	restaurant	chicken restaurant	30.07502	-99.23862	3106 Junction Hwy	Ingram	78025	+18303671884	http://kickinwingstx.com		0.71
+abe265e32518	Kickin Wings	restaurant	chicken restaurant	30.07356	-99.22051	3106 Junction Hwy	Ingram	78025	+18303671884	http://kickinwingstx.com		0.93
+85ac8c71024f	Kinsel Ranch	restaurant	japanese restaurant	30.10587	-99.63694	4090 Highway 41	Mountain Home	78058	+18302611874	http://www.kinselranch.com/		0.86
+7a43e23d24a1	Kirin Ramen Poke & Teriyaki	restaurant	japanese restaurant	30.04538	-99.14716	208 Cully Dr Ste 218	Kerrville	78028	+18303157266	https://www.kirinramenkerrville.com/		0.98
+5ced53570341	La Four	restaurant	cajun and creole restaurant	30.05923	-99.16612	1705 Junction Hwy	Kerrville	78028	+18308961449	http://www.lafours.com		0.77
+12754bf63cc0	La Gran Villa	restaurant		30.75588	-99.24286	1204 Koocksville Rd	Mason	76856	+13253477689			0.81
+4056154425bc	La Perla de Jalisco	restaurant	mexican restaurant	30.07352	-99.22308	3130 Junction Hwy	Ingram	78025	+18303673593			0.74
+78c9d38ae783	Laredo Taco Company	restaurant		30.06751	-99.11431	2109 Sidney Baker Street	Kerrville	78028	+18308962700	https://www.laredotacocompany.com/		0.95
+cd1b082e5f6d	Laredo Taco Company	restaurant		30.75144	-99.23715	616 Fort Mckavitt Street	Mason	76856	+13253475133	https://www.laredotacocompany.com/		1.00
+e684fe0990a4	Laredo Taco Company	restaurant		30.01528	-99.11900	3305 Memorial Blv	Kerrville	78028	+18302855267	https://www.laredotacocompany.com/		0.95
+ff64180c28c7	Lark Able	restaurant	korean restaurant	30.07838	-99.16178	898 East Ln	Kerrville	78028	+19723297688			0.61
+980aeba18511	Leakey BBQ	restaurant	barbecue restaurant	30.06434	-99.14888	411 US Highway 83	Leakey	78873	+18326226366			0.71
+b546c9e14e53	lil Orange Mirage	restaurant	pizza restaurant	30.10693	-99.63467	3883 TX-41	Mountain Home	78058	+18302851640			0.92
+4f933d1e4ae4	Line Shack	restaurant	american restaurant	30.74335	-99.22546	805 San Antonio St	Mason	76856	+13253479000	http://www.masontxcoc.com/cb-profile/userprofile/thelineshack		0.77
+d077001a557e	Little Caesars	restaurant	pizza restaurant	30.04954	-99.14310	429 Main St	Kerrville	78028	+18308968300	https://littlecaesars.com/en-us/store/3959	Little Caesars	0.99
+2829c2770bf5	Longhorn Cafe	restaurant	comfort food restaurant	30.30021	-99.25143	23624 US-290	Harper	78631	+18308644328	https://orders.cake.net/10624506		0.98
+2172d0b16140	Los Jimadores Mexican Grill and Bar	restaurant	mexican restaurant	30.06462	-99.17514	1550 Junction Hwy	Kerrville	78028	+18303152551			0.99
+654e2b81c542	Los Tres Potrillos	restaurant	mexican restaurant	30.29990	-99.24582	23283 W US Highway 290	Harper	78631	+18308644005	https://www.lostrespotrillosharpertx.com/		0.92
+6355bbefa605	Lum's BBQ	restaurant	barbecue restaurant	30.49733	-99.77851	2031 N Main St	Junction	76849	+13254463541			0.96
+2c44637104cc	Mamacita's Restaurant	restaurant	texmex restaurant	30.05350	-99.14882	215 Junction Hwy	Kerrville	78028	+18308952441	http://www.mamacitas.com/	Mamacita’s	0.99
+91d1b5b79e0f	Margarita's City Mexican Restaurant Llc	restaurant		30.06913	-99.11179	2141 Sidney Baker St	Kerrville	78028				0.95
+229bd8cb8a31	Margaritas city	restaurant	mexican restaurant	30.01596	-99.11749	3360 Memorial Blvd	Kerrville	78028	+18303152141			0.57
+bc4bda93cb88	Mary's Tacos	restaurant	mexican restaurant	30.03637	-99.13462	1616 Broadway	Kerrville	78028	+18308957474	https://marystacos.com/		0.99
+ccb5d8611181	Mauricios taqueria	restaurant	mexican restaurant	30.48947	-99.77142	1101 Main St	Junction	76849	+13254464204			0.95
+1b67bc939200	Mo-Ranch Wagon Wheel Cafe	restaurant		30.06088	-99.47547	2229 FM 1340	Hunt	78024		https://www.moranch.org/stay-at-mo-ranch/dining/#wagon		0.97
+484d055a40fa	Monroe's East End Grill	restaurant		30.03589	-99.13586	1700 Water St E	Kerrville	78028	+18309555572			0.72
+a11086af3a13	NA	restaurant		30.05701	-99.15999		Kerrville		+18302573377	http://www.delnorterestaurants.com/		0.75
+add5d0577d72	Nacho's Cafe	restaurant	texmex restaurant	30.75190	-99.23814	804 Fort McKavitt St	Mason	76856	+13253476757	http://nachoscafe.com/		0.98
+afe70e3ece66	Ojeda's Cafe	restaurant	texmex restaurant	30.94013	-99.78224	US-83	Menard	76859	+13253962112	http://ojedasdallas.com		0.99
+5e5d764d8187	Old Republic Inn Restaurant	restaurant	american restaurant	30.05363	-99.14875		Kerrville					0.70
+0d3c8ad07179	Pampell's Sports Bar & Grill	restaurant		30.04625	-99.14172	701 Water St	Kerrville	78028	+18309555935	http://www.pampellssportsbarandgrill.com		0.77
+b73b6f5a8eb2	Papa John's Pizza	restaurant	pizza restaurant	30.01183	-99.12402	2262 Bandera Hwy 173	Kerrville	78028	+18308967272	https://locations.papajohns.com/united-states/tx/78028/kerrville/2262-bandera-hwy-173		0.77
+c3b2bddbe3d6	Papa Johns Pizza	restaurant	pizza restaurant	30.05831	-99.16199	936 Junction Hwy Ste C	Kerrville	78028	+18308967272	https://www.papajohns.com		0.92
+79d1066086e8	Papa Murphy's	restaurant	pizza restaurant	30.05448	-99.14989	312 Junction Hwy	Kerrville	78028	+18308905249	http://www.papamurphys.com/		0.99
+b0b26c8d42e5	Paty's Fruit & Snacks	restaurant		30.07306	-99.20429	2590 Junction Hwy	Kerrville	78028	+18309555003			0.99
+c5c7ee4b8649	PHO MOSA	restaurant	chinese restaurant	30.04533	-99.14723	208 Cully Dr	Kerrville	78028	+18302571818	http://www.phomosakerrville.com		0.92
+002fa7070df4	Piccadilly Pizza	restaurant	pizza restaurant	30.49575	-99.77864	1977 Main St	Junction	76849	+19154462739	https://piccadilly-circus-pizza-wi-1.hub.biz		0.92
+b0e6898cb03a	Pier 27 River Lounge & 8 Ball Pizzeria	restaurant	bar and grill restaurant	30.06509	-99.17770	1521 Junction Hwy	Kerrville	78028	+18308967437	www.pier27riverloungepizzeria.com		0.95
+de229465cff7	Pizza Hut	restaurant	pizza restaurant	30.05800	-99.16279	999 Junction Hwy Kerr	Kerrville	78028	+18308954141	https://locations.pizzahut.com/tx/kerrville/999-junction-hwy?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=286968	Pizza Hut	0.99
+a9d77351b5c0	Pizza Junction	restaurant	pizza restaurant	30.48939	-99.77348	1112 Main St	Junction	76849	+13252152323	http://pizzajunctiontexas.com/		0.97
+f7a13d1409a9	Plumley’s Country Store	restaurant		30.50661	-99.77755	2341 N Main St	Junction	76849		https://plumleyscountrystore.com		0.95
+a50d1ce681e9	PoPo Restaurant @ Pampell's Corner	restaurant	seafood restaurant	30.04619	-99.14186	701 Water St	Kerrville	78028	+18308905811			0.92
+896add2168e7	Qdoba Mexican Grill	restaurant	mexican restaurant	30.06651	-99.11451	2105 Sidney Baker St Kerrville	Kerrville	78028	+18308000175	https://locations.qdoba.com/us/tx/kerrville/2105-sidney-baker-st	Qdoba	0.95
+8ea8990f8380	QueZeen Barbecue Cuisine	restaurant	barbecue restaurant	30.07140	-99.25612	610 TX-39	Ingram	78025				0.89
+b1646334fe17	Rita's Famous Tacos	restaurant	taco restaurant	30.04579	-99.14017	209 Earl Garrett St	Kerrville	78028	+18308958885	https://www.ritasfamoustacos.online/		0.92
+3a5778b665da	Rita's Famous Tacos 2 and Poquito de Todo	restaurant	mexican restaurant	30.07349	-99.22286	3130 Junction Hwy	Ingram	78025	+18303673088	http://ritasfamoustacos2.food90.com		0.94
+5797d57f9f8b	Roger's Cantina	restaurant	mexican restaurant	30.06713	-99.12443	Ward St	Kerrville	78028	+12103866907			0.56
+ab1d267e5a6c	Sake	restaurant	sushi restaurant	30.05644	-99.16265	845 Junction Hwy	Kerrville	78028	+18308960389	http://sakekerrville.com/		0.96
+8cb0c079076a	Santo Coyote	restaurant	american restaurant	30.06853	-99.11430	2124A Sidney Baker St	Kerrville	78028	+18308953211	http://www.santocoyoterestaurantbar.com/		0.77
+b6d46c047f49	Santos Taqueria	restaurant	mexican restaurant	30.74750	-99.23056	205 San Antonio St	Mason	76856	+13253476140	http://www.santostaqueria.com		0.92
+8bb337da4928	Save Inn Restaurant	restaurant	diner	30.06396	-99.12243	1806 Sidney Baker St	Kerrville	78028	+18302577484	http://www.saveinnrestaurant.com/		0.97
+4403823a7b89	Schlotzsky's	restaurant	sandwich shop	30.05830	-99.12753	1423 Sidney Baker St Ste 110	Kerrville	78028	+18308953354	https://locations.schlotzskys.com/tx/kerrville/1423-sidney-baker?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Schlotzsky's	0.95
+9a1f2e2a3d8f	Soaring Dragon	restaurant	asian restaurant	30.05232	-99.13551	820 Sidney Baker St	Kerrville	78028	+18302578888	http://soaringdragonkerr.com/		0.99
+3bdd6a46cc58	Spring St. Collective	restaurant		30.74960	-99.23290	117 N Spring St	Mason	76856	+18327232203			0.83
+0ea36f032e8f	Subway	restaurant	sandwich shop	30.75123	-99.23730	616 Ft McKavitt St	Mason	76856	+13253475133	http://www.subway.com/en-us	Subway	0.97
+6e0e533faf0c	Subway	restaurant	sandwich shop	30.04344	-99.14436	207 Sidney Baker South	Kerrville	78028	+18307924445	https://restaurants.subway.com/united-states/tx/kerrville/207-sidney-baker-south	Subway	0.98
+9cb171847b02	Subway	restaurant	sandwich shop	30.48951	-99.77162	1014 Main St	Junction	76849	+13254463099	https://www.subway.com		0.92
+b179b077c2e4	Subway	restaurant	sandwich shop	30.05426	-99.14890	228 Junction Hwy Ste A	Kerrville	78028	+18307925565	http://www.Subway.com/	Subway	0.99
+af4f3fdbbea4	Summerland Public House	restaurant		30.91558	-99.78714	210 Ellis St	Menard	76859	+13253960055	https://www.summerlandpub.com		0.92
+afd5c986ed63	Taco Casa	restaurant	texmex restaurant	30.05567	-99.13094	1215 Sidney Baker St	Kerrville	78028	+18308952323	https://tacocasatexas.com/location/20-kerrville/	Taco Casa	0.99
+bca3be1d35cc	Taco Casa	restaurant	texmex restaurant	30.05750	-99.16219	891 Junction Hwy	Kerrville	78028	+18308951616	https://tacocasatexas.com/location/10-kerrville/	Taco Casa	0.99
+ac254471bc99	Taco Express	restaurant	mexican restaurant	30.92683	-99.78361	708 Frisco Ave	Menard	76859	+13253962251	https://www.tacoexpressnj.com/#!		0.98
+b2acafa9380d	Taco to Go	restaurant	mexican restaurant	30.04955	-99.13872	428 Sidney Baker St	Kerrville	78028	+18308968226	http://www.tacotogokerrville.com/		0.99
+7a24d18c93df	Tacos Y Burritos El Jefe	restaurant	mexican restaurant	30.92633	-99.78335	203 Magnolia St	Menard	76859	+13253968075			0.92
+1a3a534f3b73	Tailchasers Patio + Pub	restaurant	bar and grill restaurant	30.05000	-99.14088	516 Jefferson St	Kerrville	78028	+18303157877	http://www.TailchasersTX.com/		0.97
+d1d0efbb8866	Taqueria Jalisco	restaurant	texmex restaurant	30.07341	-99.19324	2190 Junction Hwy	Kerrville	78028	+18302570606	https://www.jaliscokerrville.com		0.97
+2fff1dd04b6e	Taqueria Los Altos De Jalisco	restaurant	mexican restaurant	30.07272	-99.22443	3155 Junction Hwy	Ingram	78025	+18303677820	http://www.kerrvilletexascvb.com/business/taqueria-altos-de-jalisco-4		0.95
+969063c4c02f	Taqueria Los Altos De Jalisco	restaurant	texmex restaurant	30.05533	-99.15448	422 Junction Hwy	Kerrville	78028	+18303677820	https://www.groupon.com/biz/kerrville-tx/taqueria-los-altos-de-jalisco		0.90
+30df868ca8f2	Taquitos Bautista	restaurant	taco restaurant	30.01162	-99.16125	103 Denise Dr	Kerrville	78028	+18303701942			0.92
+f2fd20c7c58a	Texas Pizza Wagon	restaurant	pizza restaurant	30.74151	-99.22541	355 E Kettner St	Mason	76856	+13253477314			0.94
+0606efdd4b03	Thai Bistro And More	restaurant	thai restaurant	30.04086	-99.13541	1201 Broadway	Kerrville	78028	+18308905894			0.97
+b483a58cfdaa	Thai Ocha	restaurant	thai restaurant	30.04873	-99.14445	417 Water St	Kerrville	78028	+18307922999	https://www.thaiocha.com/		0.98
+8be236d7e96c	The Boat	restaurant	seafood restaurant	30.06356	-99.17443	1483 Junction Hwy	Kerrville	78028	+18308963354	https://www.theboatoysterbarandgrill.com/		0.99
+ecc794993fd3	The Branding Iron Restaurant	restaurant	steakhouse	30.06599	-99.11729	2033 Sidney Baker St	Kerrville	78028	+18302574440	http://www.yoranchhotel.com/		0.92
+1c57ec54e3ff	The Gatling Gun Saloon	restaurant	bar and grill restaurant	30.74833	-99.23328	116 Moody St	Mason	76856	+12103239519			0.92
+410ed1b9933b	The Humble Fork	restaurant		30.04619	-99.14185	701 Water St	Kerrville	78028	+18309555528			0.92
+a1984c519e1f	The Lakehouse	restaurant	american restaurant	30.06663	-99.18098	1655 Junction Hwy	Kerrville	78028	+18308953188	http://hillcountrycookin.com/		0.99
+3da8b751f66f	The Milky Way	restaurant	diner	30.49123	-99.77788	1619 Main St	Junction	76849	+13254462215	http://the-milky-way-drive-in.food96.com		0.84
+e7e541f09cf5	Tia Nena's	restaurant	mexican restaurant	30.51037	-99.77316	2429 N Main St	Junction	76849	+13254464031	http://lafamiliarestaurantjunction.gastrobars.com		0.94
+1c5fd7f740e3	Trail Boss Steak & Grill	restaurant	steakhouse	30.04998	-99.14297	416 W Main St	Kerrville	78028	+18308905202	https://www.toasttab.com/trail-boss-kerrville		0.97
+0feb11b270b6	True Texas BBQ	restaurant	barbecue restaurant	30.05131	-99.14314	300 W Main St	Kerrville	78028	+18304964400	https://www.truetxbbq.com	True Texas BBQ	0.92
+a5cbb59d71e8	Vfw Bingo Hall	restaurant		30.04656	-99.14732	220 Thompson Dr	Kerrville	78028	+18307923585	http://www.vfw.org/		0.63
+6abffb0b9087	Wahoo's Seafood Co.	restaurant	seafood restaurant	30.06689	-99.18176	1701 Junction Hwy	Kerrville	78028	+18303153474	http://wahoosseafood.com/		0.96
+baa221e2edb8	Wahoo's Seafood Co.	restaurant	seafood restaurant	30.05310	-99.13372	905 Sidney Baker St	Kerrville	78028	+18304963506	https://wahoosseafood.com		0.97
+854349c762d1	Whataburger	restaurant	burger restaurant	30.06919	-99.11189	2141 SIDNEY BAKER ST	Kerrville	78028	+18303538760	https://locations.whataburger.com/tx/kerrville/2141-sidney-baker-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+122d443b023e	Wild Ass Hey Barn	restaurant		30.06893	-99.22424	101 Rowland Ln	Kerrville	78028	+18303671737	http://www.bluegarcomplex.com		0.77
+fc3a0150bcc2	Wing King	restaurant	american restaurant	30.05170	-99.13589	810 Sidney Baker St	Kerrville	78028	+18308905464	https://www.groupon.com/biz/kerrville-tx/wing-king		0.92
+356b0280709b	Wingstop	restaurant	chicken restaurant	30.06302	-99.16994	1304 Junction Highway STE 550	Kerrville	78028	+18304964196	https://www.wingstop.com/location/wingstop-1670-kerrville-tx-78028/menu?y_source=1_NTUyMDc5NjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.95
+8c0755e33d75	220 Harper Kerville Assisted Living	senior	retirement home	30.06186	-99.16185	220 Harper Rd	Kerrville	78028	+18308954600	http://www.txarr.com/assisted-living-home-tour-in-kerville-texas/		1.00
+251c05f31a1e	A1 Senior Care Services Inc	senior	retirement home	30.05814	-99.12885	1418 Sidney Baker St	Kerrville	78028	+18309555236			0.65
+20bd07a6e475	Alpine Terrace	senior	assisted living facility	30.06671	-99.11190	746 Alpine Dr	Kerrville	78028	+18308962323	https://www.savaseniorcare.com/alpine-terrace		0.99
+a0ecad05a37c	Arbor View Nursing and Rehabilitation	senior	retirement home	30.04058	-99.13700	1213 Water St	Kerrville	78028	+18308962411	http://arborviewnursingandrehab.com/		0.88
+07735b06c1a2	Avir at Kerrville	senior	retirement home	30.02607	-99.13583	1555 Bandera Hwy	Kerrville	78028	+18304122366			0.97
+47e2fcddedea	Brookdale Guadalupe River Plaza	senior	assisted living facility	30.05517	-99.16447	135 Plaza Drive	Kerrville	78028	+18308952626	https://www.brookdale.com/en/communities/brookdale-guadalupe-river-plaza.html		0.77
+51f7d0949fd7	Brookdale Guadalupe River Plaza Skilled Nursing	senior	retirement home	30.05488	-99.16343	808 Guadalupe St S	Kerrville	78028	+18308952636			0.90
+74b1594930d1	Brookdale Kerrville	senior	retirement home	30.06443	-99.11880	725 Leslie Dr	Kerrville	78028	+18302576769	https://www.brookdale.com/en/communities/broodale-kerrville.html?cid=yext	Brookdale Senior Living	1.00
+3f36a8f5e9c4	Edgewater Care Center	senior	retirement home	30.04058	-99.13689	1213 Water St E	Kerrville	78028	+18308962411	http://www.savaseniorcare.com		0.87
+813a9f889b2d	Emerald Cottages of Kerrville	senior	retirement home	30.02731	-99.13746	1501 Bandera Hwy	Kerrville	78028	+18302534250	http://www.emeraldcottages.com	Emerald Cottages of Waco	0.92
+28cfadcd4cb6	Hill Country Outreach Inc	senior	retirement home	30.06655	-99.11932	600 Leslie Dr	Kerrville	78028	+18307926886			0.92
+7d055510ec0d	Hilltop Village Nursing and Rehab	senior	retirement home	30.07722	-99.15777	1400 Hilltop Rd	Kerrville	78028	+18308953200	https://hilltopvillagerehab.com/		1.00
+3379add22565	Ingram Oaks Retirement Community	senior	retirement home	30.07589	-99.25716	400 W Live Oak St	Ingram	78025	+18303672426	http://www.ingramoaks.com		0.92
+b79ba535e972	Juniper Village at Guadalupe Riverfront	senior	assisted living facility	30.05502	-99.16453	135 Plaza Dr	Kerrville	78028	+18308952626	https://junipercommunities.com/location/juniper-village-at-guadalupe-riverfront/		0.92
+23affaadf701	La Hacienda Treatment Center - Community Outreach Center	senior	retirement home	30.04823	-99.13725	429 Earl Garrett St N	Kerrville	78028	+18302384222	https://www.lahacienda.com/		0.96
+077d717ee0dd	Menard Manor	senior	retirement home	30.91654	-99.78416	100 Gay St	Menard	76859	+13253964515			0.92
+e62fa433b03d	Mountain Villa Assisted Living	senior	retirement home	30.07335	-99.19508	2201 Junction Hwy	Kerrville	78028	+18307924001	https://mountainvilla.net/kerrville	Mountain Villa Nursing Center	0.92
+7dd25742dfd4	New Haven Kerrville	senior	assisted living facility	30.06578	-99.11270	747 Alpine Dr	Kerrville	78028	+18302179544	newhaventexas.com		0.99
+f6a64e9ef469	Perryhill cottages	senior	retirement home	30.01914	-99.12206	2916 Memorial Blvd	Kerrville	78028	+18307397993			0.56
+7c8e048b2526	River Hills Health and Rehabilitation	senior	retirement home	30.01606	-99.12565	2091 Bandera Hwy	Kerrville	78028	+18302579900	http://www.swltc.com/river-hills.html		0.92
+632b8c5f9546	River Point of Kerrville	senior	retirement home	30.02843	-99.13762	1441 Bandera Hwy	Kerrville	78028	+18309475606	https://riverpointofkerrville.com/		0.99
+5e19d6e55296	The Residence at Ridgehill	senior	retirement home	30.04054	-99.14938	170 Lehmann Dr	Kerrville	78028	+18302571089	https://residenceatridgehill.com/		0.92
+cf731bf28f66	Villagio of Kerrville	senior	retirement home	30.06549	-99.11248	747 Alpine Dr N	Kerrville	78028	+18308966555	https://villagioliving.com/kerrville		0.92
+066c97c03b6b	Windmill Ridge Retirement Community	senior	retirement home	30.07897	-99.21634		Kerrville		+18308953003			0.69

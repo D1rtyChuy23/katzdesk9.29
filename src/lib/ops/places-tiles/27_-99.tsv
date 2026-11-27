@@ -1,0 +1,459 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+6fc6888f622d	Donut Palace	bakery	donut shop	27.75269	-98.06448	210 N Texas Blvd	Alice	78332	+13616644690	http://donutpalace.com	The Donut Palace San Diego TX	0.96
+db261d13ed4a	Donut Palace	bakery	donut shop	27.76280	-98.23303	607 E Gravis Ave	San Diego	78384	+13612798890	http://www.donutpalace.com/	The Donut Palace San Diego TX	0.96
+128d9b428fcf	El Camino Bakery & Taqueria	bakery		27.73324	-98.06952	1901 S Cameron St	Alice	78332	+13613964433	http://WWW.ELCAMINOBAKERY.US/		0.96
+7fa7ca41e69d	Emma's Cakes and Pies	bakery		27.75253	-98.06494	209 N Texas Blvd	Alice	78332	+13616683662	http://alicecakes.com		0.96
+293493c963c5	Falfurrias Bakery	bakery		27.21316	-98.14617	1518 S St Marys St	Falfurrias	78355	+13613255256	http://falfurriasbakery.placeweb.site		0.96
+5c2de166d123	Hillcrest Tortillas	bakery		27.29634	-98.68233	1104 S Smith St	Hebbronville	78361	+13615274505	http://hillcresttortillas1.placeweb.site		0.92
+31dbedd548fc	La Superior Urrutia's Bakery	bakery		27.76484	-98.24075	210 W Gravis St	San Diego	78384	+13612793795	http://lasuperiorurrutiasbakery.placeweb.site		0.96
+4a0f8c17f7c2	The Donut Palace	bakery	donut shop	27.76082	-98.04805	905 N Flournoy Rd	Alice	78332	+13616668776	https://share.google/o0IO7VQRswuwvhQHJ		0.92
+db500bd5a214	El Rinconcito Night Club	bar		27.76355	-98.08242	1210 N Johnson St	Alice	78332		https://www.restaurant.com/el-rinconcito-mexican-seafood...		0.92
+f333222e9d9a	Old Texas Saloon LLC	bar		27.34484	-98.12576	15205 S US Highway 281	Premont	78375	+13613483163			0.85
+eac2db400a62	Pioneer Saloon	bar		27.22692	-98.14378	113 E Rice St	Falfurrias	78355	+13617566713			0.96
+f57ed5a07ed7	Rusty Rooster’s Icehouse	bar	sports bar	27.76495	-98.23662	207 E King Ave	San Diego	78384	+3612794075			0.92
+cab53bf392b2	Silver Belly Saloon	bar		27.70045	-98.07672	4982 S U.S. Hwy 281	Alice	78332	+13615223660	https://www.silverbellysaloon.com/		0.96
+3b02f21ca578	Sluggers Bar	bar	sports bar	27.76944	-98.04096	2000 Dr N W Atkinson Blvd	Alice	78332	+13614537057	http://sluggerssportsbar2.placeweb.site		0.96
+a5de6e8fca31	The Daquri Shak	bar		27.76206	-98.22955	813 E Gravis Ave	San Diego	78384	+13612794103	http://www.thedaqurishak.com/		0.92
+e3742eaafc8f	The Drink Depot	bar		27.88250	-98.62101	309 W Riley St	Freer	78357	+13613945810			0.89
+ed6b88fa291b	The Spot	bar		27.70835	-98.07735	4755 S US Highway 281	Alice	78332	+13616611938	https://www.chamberofcommerce.com/alice-tx/5107551-spot-the		0.96
+98348dce7dca	Tillos Vino	bar	wine bar	27.74998	-98.07370	316 E Main St	Alice	78332	+13613964366	https://www.toasttab.com/tillos-vino-on-main-316-e-main-st/menu-and-pay/4		0.96
+7bc54cf28f72	Alice Autoplex Inc	cardealer		27.74867	-98.07371	310 E Front St	Alice	78332	+13616688811	http://www.aliceautoplex.com		0.92
+0fc2f4b53920	Bowden Ford Co.	cardealer		27.75471	-98.05882	1300 E Main St, Alice	Alice	78332	+13616649541		Ford Motor Company	0.73
+f72ca2a3d228	Bowden Ford Company	cardealer		27.76571	-98.04554	2265 E Main St	Alice	78332	+13616649541	http://www.bowdenford.com		0.92
+86603ec5e083	Bubba’s New & Used Auto Sales	cardealer		27.76273	-98.04595	2250 E Main St	Alice	78332	+13615226888	http://www.teamaliceChevrolet.com/		0.95
+ee5676c8e97a	Cantu Chevrolet	cardealer		27.88249	-98.61006	805 E Riley St	Freer	78357	+13613947302	http://www.cantuchevrolet.com/	Chevrolet	1.00
+ff18600132f3	Coyote Auto Sales	cardealer		27.75032	-98.08245	50 N Johnson St	Alice	78332	+13613961825	https://coyote-auto-sales-tx-1.hub.biz/		0.96
+59401bafabf9	Escamilla Auto Cars	cardealer		27.31801	-98.67807	301 E Galbraith St	Hebbronville	78361	+18004079913	http://escamillaford.dealerconnection.com		0.77
+17f998f289a2	Escamilla Chevrolet GMC	cardealer	used auto dealer	27.31798	-98.67808	1201 N Smith Ave	Hebbronville	78361	+13615273276	https://www.escamillachevrolet.com/		0.97
+dfa33a414737	Escamilla Ford	cardealer		27.30714	-98.67809	102 N Smith Ave	Hebbronville	78361	+13615273224	https://www.escamillaford.com/	Ford Motor Company	1.00
+6dc9acae2025	FORD CHARGE Charging Station	cardealer		27.76577	-98.04559	2265 E Main St	Alice	78332	+13616649541	http://www.bowdenford.com	Ford Motor Company	0.87
+78dec6e703a9	Ford Motor Company	cardealer		27.30639	-98.67607	301 W Galbraith St	Hebbronville	78361	+13615273224	http://www.escamillaford.com	Ford Motor Company	0.85
+b6ff2e475022	Hacienda Ford of Alice	cardealer		27.76573	-98.04570	2265 E Main St	Alice	78332	+13616649541	https://www.haciendafordalice.com/	Ford Motor Company	0.92
+3d7260c697af	Love Chrysler Dodge Jeep Ram	cardealer		27.75492	-98.05949	1259 E Main St	Alice	78332	+13616649955	http://paynealicecdjr.com/	Chrysler	0.97
+0e365efd23c1	Mike Baker Auto Sales	cardealer	used auto dealer	27.75697	-98.08224	608 N Johnson St	Alice	78332	+13616643113			0.65
+5d0f4558246b	Payne Alice Chevrolet GMC	cardealer		27.76297	-98.04599	2250 E Main St	Alice	78332	+13613105495	https://www.paynealicegmc.com/	Chevrolet	0.99
+a72dfcaf5bd4	Team Chevrolet GMC Events TX	cardealer		27.76305	-98.04575	2250 E Main St	Alice	78332	+13613964900	https://www.teamalicechevrolet.com/?utm_source=gmb&utm_medium=organic&utm_campaign=gmb_organic&utm_id=not_da_dont_change_it	Chevrolet	0.97
+43535fe82d0f	Tellus Equipment	cardealer		27.78688	-98.01888	4241 TX-359	Alice	78332	+13616647338	https://www.tellusequip.com/about-us/locations/alice-tx/	Tellus Equipment Solutions	1.00
+f71ea4052532	Texas Ford Dealers	cardealer		27.30658	-98.67908	301 W Galbraith St	Hebbronville	78361	+13615273224		Ford Motor Company	0.64
+e4ee249f8a20	Tino's Auto Mart	cardealer	used auto dealer	27.74601	-98.08727	913 W Front St	Alice	78332	+13616649362	https://www.tinosautomart.com		0.65
+db5fc070c3ab	Rio Entertainment, Inc	cinema		27.76691	-98.03928	2975 E Main St	Alice	78332	+13616646687	https://www.rioentertainment.com/page/12566/contact	Rio Entertainment, Inc	0.92
+7767ce17e6f1	Rio Plaza IV Alice	cinema		27.76677	-98.03915	2975 E Main St	Alice	78332	+13616646688	http://www.rioentertainment.com/		0.92
+e63e48e619a9	5A Coffee Co.	coffee		27.87990	-98.61553	322 S Main Ave	Freer	78357	+13614607092			0.97
+dfe8163e2a96	7 Brew Coffee	coffee		27.75274	-98.06194	1172 E Main St	Alice	78332	+14793589274	https://7brew.com/		0.96
+80b691265b8d	Adams Roadrunners Coffee Shop	coffee		27.76456	-98.24172	307 W Gravis Ave	San Diego	78384	+3612794033			0.94
+9555de7183af	Belinda's Cafe Alice	coffee		27.74017	-98.08173	1104 S Hwy 281	Alice	78332	+13614534533			0.92
+b1d13a32cc95	Besteas Boba	coffee	bubble tea shop	27.35898	-98.12490	215 S Agnes St	Premont	78375	+19568007867			0.71
+82ebfd1faa6c	Dunkin'	coffee		27.21192	-98.14178	1419 S US Highway 281	Falfurrias	78355	+13613251166	https://locations.dunkindonuts.com/en/tx/falfurrias/1419-s-us-highway-281/358135?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=358135&y_source=1_MTIxMTQ5NjUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dunkin'	0.95
+526bad3452ba	Las Lomitas Cafe and Tasty Pastry	coffee		27.30344	-98.67885	401 S Smith St	Hebbronville	78361	+13614067062			0.95
+834de9554d06	Liberty Cafe	coffee		27.88378	-98.61274	420 Carolyn St	Freer	78357	+13613947663	https://liberty-cafe-tx.hub.biz/		0.97
+dab495a45829	McDonald's	coffee		27.76970	-98.04298	2701 E Main	Alice	78332	+13616611269	https://www.mcdonalds.com/us/en-us/location/tx/alice/2701-e-main/30484.html?cid=RF:YXT:RoN::Clicks		0.98
+7b1eee4962f3	Midtown Perk	coffee		27.75221	-98.06384	1115 E Main St	Alice	78332	+13614156022	https://midtown-perk.square.site/s/order		0.97
+ba847fc60155	Risen Coffee Company	coffee		27.22647	-98.14347	124 E Rice St	Falfurrias	78355	+13612462984	https://risencoffeeco.square.site/#most-popular		0.92
+a2e5e5a4c436	Starbucks	coffee		27.75906	-98.05254	1728 E Main St	Alice	78332	+13614158362	https://www.starbucks.com/store-locator/store/1039258/e-main-st-coyote-trail-1728-e-main-st-alice-tx-783324048-us	Starbucks	0.92
+9c5a552786e5	Coastal Bend College	college		27.75833	-98.05077	704 Coyote Trail	Alice	78332	+13616642981	http://coastalbend.edu/	Coastal Bend College	0.92
+1d20ab0ea286	7-Eleven	convenience		27.88291	-98.61832	101 S. Norton Ave	Freer	78357	+13613946593	https://www.7-eleven.com/locations/tx/freer/101-s-norton-40918	7-Eleven	1.00
+204cf52d125e	7-Eleven	convenience		27.76165	-98.04852	1910 E Main St	Alice	78332	+13612190591	https://www.7-eleven.com/		0.92
+288af1a1fa9e	7-Eleven	convenience		27.31225	-98.67869	611 N. Smith Avenue	Hebbronville	78361	+13615275584	https://www.7-eleven.com/locations/tx/hebbronville/611-n-smith-avenue-40892	7-Eleven	0.90
+6d2711300b11	7-Eleven	convenience		27.36914	-98.11769	433 NE 8th St	Premont	78375	+13612195706	https://www.7-eleven.com/		1.00
+7a5a02785582	7-Eleven	convenience		27.22656	-98.13976	112 Us Highway 281	Falfurrias	78355	+13613252560	https://www.7-eleven.com/locations/tx/falfurrias/112-n-highway-281-sh-285-40815	7-Eleven	0.92
+d26eec1a28b7	7-Eleven	convenience		27.75953	-98.05287	1723 E Main St	Alice	78332	+13616641932	https://www.7-eleven.com/locations/tx/alice/1723-e-main-street-40816	7-Eleven	0.92
+d36976525d64	7-Eleven	convenience		27.75920	-98.05273	1723 E Main St	Alice	78332	+18002550711	https://www.7-eleven.com/locations/tx/alice/1723-e-main-street-40816		0.97
+ec05be460c3a	7-Eleven	convenience		27.22575	-98.14005	500 E. Rice Street	Falfurrias	78355	+13613251337	https://www.7-eleven.com/		1.00
+51426e60c8da	76	convenience		27.88289	-98.61761	116 E Riley St	Freer	78357	+13612072465	http://www.76.com		0.92
+0fb3085d8efb	Adrian's Drive In	convenience		27.74451	-98.07320	601 S Reynolds St	Alice	78332	+13616640505	http://txu.com/		0.92
+c09055206262	Alice Food Mart	convenience		27.74340	-98.08380	620 S US HWY 281	Alice	78332		https://locations.valero.com/en-us/LocationDetails/Index/620-S-US-HWY-281/0000029378	Valero	0.80
+771c19fe4c06	Alice Star	convenience		27.74660	-98.09380	1401 San Diego Hwy	Alice	78332		https://locations.valero.com/en-us/LocationDetails/Index/1401-SAN-DIEGO-HWY/0000031509	Valero	0.85
+651d83c793a8	Ascent Energy	convenience		27.22069	-98.14480	701 S Saint Marys St	Falfurrias	78355	+13613252950			0.65
+a5fee70aeb91	Aycock Oil Co	convenience		27.76281	-98.23273	611 E Gravis St	San Diego	78384	+13612793052	https://aycock-oil-co-inc-tx-7.hub.biz		0.81
+51ca45c838ec	Aycock Oil Co Inc	convenience		27.73792	-98.08020	1350 US-281 BUS	Alice	78332	+18008821045			0.92
+79b469789862	Bruni Country Store	convenience		27.42050	-98.83871	216 E 3rd St	Bruni	78344	+13617475494			0.62
+541797451e54	Bryan's Stop and Shop	convenience		27.31238	-98.67754	612 N Smith Ave	Hebbronville	78361	+13615273266	http://exxonmobil.com	Stop & Shop	0.92
+8b38931f0beb	Bucks Drive Thru	convenience		27.88251	-98.62105	309 W Riley St	Freer	78357	+12107870017			0.83
+a71216933889	CAT Scale	convenience	truck gas station	27.21141	-98.14172	1419 S US Highway 281	Falfurrias	78355	+13613251166	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+fcba03aa8473	Chevron	convenience		27.74329	-98.08406	620 S US Highway 281	Alice	78332	+13616645220	http://www.chevron.com/		0.69
+09141bfb095e	Circle K	convenience		27.36762	-98.11274	298 CR 421	Premont	78375	+17262328667	https://www.circlek.com		0.92
+29b4adf5e3f6	Circle K	convenience		27.75712	-98.05460	1610 E Main St	Alice	78332	+3616611171	https://www.circlek.com/store-locator/us/alice/1610-e-main-st-suite-3/2706988	Circle K	0.81
+4ca67c069774	Circle K	convenience		27.74934	-98.06921	700 E Front St	Alice	78332	+13616680494	https://www.circlek.com/store-locator/US/alice/700-e-front-st/2741867	Circle K	0.99
+632769c0cce4	Circle K	convenience		27.75275	-98.08284	215 N Johnson St	Alice	78332	+13616611139	https://www.circlek.com/		0.92
+7fab6c884600	Circle K	convenience		27.35921	-98.12316	201 S BROADWAY ST	Premont	78375	+13613483711	https://www.circlek.com/store-locator/US/premont/201-s-broadway-st/2741527	Circle K	0.93
+88e3ae0239f9	Circle K	convenience		27.35926	-98.12331	201 S Broadway St	Premont	78375	+13613483711	https://www.circlek.com/store-locator/US/premont/201-s-broadway-st/2741527		0.97
+9641e890fde2	Circle K	convenience		27.22474	-98.14496	300 S St Marys St	Falfurrias	78355	+13613255213	https://www.circlek.com/		1.00
+a6762b609c5e	Circle K	convenience		27.87998	-98.61761	322 S Norton Ave	Freer	78357	+13613946585	https://www.circlek.com/		0.92
+a722fe41f916	Circle K	convenience		27.75812	-98.05480	1617 E Main St	Alice	78332	+13616611074	https://www.circlek.com/		0.92
+ecf3ca3bb9b1	Circle K	convenience		27.88533	-98.61800	322 N Norton St	Freer	78357	+13613946585	https://www.circlek.com/store-locator/us/freer/322-s-norton-ave/2740414		0.85
+f8c77e5771bd	Circle K	convenience		27.73507	-98.07854	1605 S US Highway 281	Alice	78332	+13616611082	http://www.circlek.com/	Circle K	0.92
+fa8ae938d38f	Circle K	convenience		27.76260	-98.23158	711 E Gravis St	San Diego	78384	+13612798151	https://www.circlek.com/		1.00
+63b5cf8e291b	Circle K | Gas Station	convenience		27.74916	-98.06955	700 E Front St	Alice	78332	+13616680494	https://www.circlek.com		0.92
+bdfaf003a664	Citgo	convenience		27.22760	-98.15408	801 W Rice St	Falfurrias	78355	+13613255944	http://citgo.com		0.92
+4690cd05208c	Coldest Drinks In Town	convenience		27.21783	-98.14587	1010 S St Marys St	Falfurrias	78355	+13613252972			0.75
+30e20b7d1feb	Corner Store	convenience		27.35927	-98.12303	201 S Broadway	Premont	78375	+13613483711	http://circlek.com		0.92
+89b65ad915ca	Corner Store	convenience		27.76265	-98.23157	711 E Gravis St	San Diego	78384	+13612798151	http://www.thecornerstore.com		0.92
+bb13e745f2e0	Corner Store	convenience		27.35930	-98.12331	201 S Broadway	Premont	78375	+13613483711	http://cornerstore.com/StoreHome/1527?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.69
+b07b650e2801	Country Corner Store	convenience		27.31306	-98.68279	502 W Viggie St	Hebbronville	78361	+13612312727	https://www.clover.com/online-ordering/country-corner-store-hebbronville	Corner Store	0.92
+c0028bbbd18f	Daiquiri Shack Alice, Texas 78332	convenience		27.74632	-98.09304	1329 W Front St	Alice	78332	+13614537013			0.92
+725db23f24bb	El Mesquite Country Store	convenience		27.76897	-98.08756	249 County Road 129	Alice	78332	+13616645308			0.55
+d1422309c3e3	El Mesquite Country Store	convenience		27.73107	-98.09364	249 County Road 129	Alice	78332	+13616645308			0.56
+6bb0b228a988	El Tigre Food	convenience		27.69944	-98.07861	5015 S US Highway 281	Alice	78332	+13616688877			0.93
+01eb1964916f	Exxon	convenience		27.75325	-98.08287	301 N Johnson	Alice	78332	+13616680643	https://www.exxonmobilfuels.com/en/find-gas-station/200316152		1.00
+025be53b15c3	Exxon	convenience		27.22663	-98.14017	112 North Highway 281	Falfurrias	78355	+13613252560	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+a320f82aacc2	Exxon	convenience		27.22747	-98.14413	112 N Highway 281	Falfurrias	78355	+13613252560	https://www.exxon.com/en/find-station/exxon-falfurrias-tx-stripes2476-200312734?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.85
+adc40985b658	Exxon	convenience		27.69938	-98.07873	5015 S US Highway 281	Alice	78332	+13616688877	https://www.exxonmobilfuels.com/en/find-gas-station/200316882		1.00
+c84570d704e5	Exxon	convenience		27.88315	-98.61763	116 E RILEY ST	Freer	78357		https://www.exxon.com/en/find-station/exxon-freer-tx-exxon-200330445	Exxon	0.80
+cd66da899d19	Exxon	convenience		27.74869	-98.11161	115 S Hwy 281 Bypass	Alice	78332	+13613960887	https://www.exxon.com/en	Exxon & Mobil Stations	0.92
+dfdc6390f8a5	Exxon	convenience		27.88276	-98.61749	116 E Riley St	Freer	78357		https://www.exxon.com/en/find-station/200330445		0.92
+e33c09125000	Exxon	convenience		27.74340	-98.08412	620 S US Highway 281	Alice	78332	+13616645220	https://www.exxonmobil.com		0.79
+3d501c9ef61a	Garzas Drive Thru	convenience		27.23431	-98.14334	800 N St Marys St	Falfurrias	78355	+13613253904	https://start.cortera.com/company/research/k9n0pxo3r/garzas-drive-thru		0.88
+44056ecb2970	Glenrich Quik Stop	convenience		27.74076	-98.07629	101 Schley Ave	Alice	78332	+13616648433	http://www.quikstop.com/		0.95
+94d787c351e7	Gonzalitoz	convenience		27.58351	-98.26814	570 FM-2295	Alice	78332	+13614159001			0.97
+0cdec029070c	Green Acres Mini Mart	convenience		27.67750	-98.08151	5659 US-281	Alice	78332		https://locations.valero.com/en-us/LocationDetails/Index/5659-US-281/0000030295	Valero	0.90
+bbd19157dd6a	J and M Country Store	convenience		27.77389	-98.23515	5006 Co Rd 110	San Diego	78384				0.77
+ef6bafd19049	Jay's Kwik Serv	convenience		27.75378	-98.07533	350 N King St	Alice	78332	+13616647652			0.92
+2d8fb15365ea	Kwik Pantry	convenience		27.59848	-98.40882	504 E Main St	Benavides	78341	+13612564119			0.92
+470bb1102c4e	Kwik Pantry	convenience		27.76380	-98.23590	309 E Gravis Ave	San Diego	78384		https://locations.valero.com/en-us/LocationDetails/Index/309-E-GRAVIS-AVE/0000032653	Valero	0.80
+c2d84dcb028f	Kwik Pantry	convenience		27.31307	-98.68340	520 W Viggie St	Hebbronville	78361	+13615272507	http://citgo.com		0.97
+11cc2803b719	KWIK PANTRY #101	convenience		27.59850	-98.40881	504 E Main St	Benavides	78341		https://locations.valero.com/en-us/LocationDetails/Index/504-E-MAIN-ST/0000013619	Valero	0.80
+ef4ed17057e2	L C Drive-Thru Beverage Barn	convenience		27.75188	-98.08276	197 N Johnson St	Alice	78332	+13616649470	https://start.cortera.com/.../lc-drive-thru-beverage-barn-inc		0.92
+80968be0efd1	Lil Korner Stoppe	convenience		27.42629	-98.84089	359 N Avenue D	Bruni	78344	+13617475503			0.91
+cc9ccbd70d95	Line Drive Drive Thru	convenience		27.22928	-98.14275	126 E Forrest St	Falfurrias	78355	+13616673230			0.92
+1455ff8434af	Mr. T’s Drive Thru	convenience		27.76457	-98.23965	108 W Gravis St	San Diego	78384	+13612793143	http://macsdrivein.net		0.92
+e4cc7ff1fbe7	Murphy USA	convenience		27.76840	-98.04126	2911 E Main St	Alice	78332	+13616668129	http://www.murphyusa.com	Murphy USA	0.92
+0b15d4d453e4	Muy Grande	convenience		27.88314	-98.61770	116 E Riley St	Freer	78357	+13613945383	http://muygrandevillage.com/		0.92
+46de09d3ed62	Neighborhood Mart	convenience		27.75383	-98.07546	350 N King St	Alice	78332	+13616681118	http://neighborhoodmart.placeweb.site		0.92
+ea5e69bb19c1	Pilot Travel Center	convenience		27.21178	-98.14140	1419 US-281	Falfurrias	78355	+13613251166	https://locations.pilotflyingj.com/us/tx/falfurrias/1419-us-281	Pilot Flying J	0.97
+d1ea9ba3e6fc	PRIME STOP	convenience		27.75807	-98.08298	709 N Johnson St	Alice	78332	+13613964334			0.92
+ebf4374a02b4	Saddle Horn Convenience Store	convenience		27.22746	-98.15413	801 W Rice St	Falfurrias	78355	+3613255944	http://gas-stations.citgo.com/tx/falfurrias/78355/801-W-RICE		0.83
+18e3ef60bd62	San Diego Food Market	convenience		27.75660	-98.24097	311 S Dr E E Dunlap Hwy	San Diego	78384	+13612797010	https://www.healthmart.com		0.92
+c330a494e3f1	San Diego Food Market	convenience		27.76201	-98.23943	311 S Dr E E Dunlap St	San Diego	78384	+13612797010	https://san-diego-food-market.hub.biz/		0.66
+4cbc6007189e	SE40918 FREER TX	convenience		27.88240	-98.61830	101 S NORTON AVE	Freer	78357		https://locations.valero.com/en-us/LocationDetails/Index/101-S-NORTON-AVE/0000007483	Valero	0.80
+47559790a7df	Shell	convenience		27.75805	-98.05482	1617 E Main St	Alice	78332	+13616640208	https://find.shell.com/us/fuel/10047151-1617-e-main-st		0.92
+7d65f65ceca0	Shell	convenience		27.75270	-98.08287	215 N Johnson St	Alice	78332	+13616683146	https://find.shell.com/us/fuel/10013507-215-n-johnson-st		0.92
+f373d413a9a8	Silver Star Food Stores	convenience		27.74078	-98.06981	909 S Cameron St	Alice	78332	+13616643783	http://valero.com/		0.92
+68c743d51bce	SPEEDY MART	convenience		27.75327	-98.08282	301 N JOHNSON	Alice	78332		https://www.exxon.com/en/find-station/exxon-alice-tx-speedymart-200316152	Exxon	0.95
+00523fb21c11	Stripes	convenience		27.88236	-98.61829	101 S Norton Ave	Freer	78357	+13613946593	https://www.7-eleven.com/	Stripes	0.98
+0ba344e404eb	Stripes	convenience		27.22656	-98.13976	112 Highway 281, Falfurrias, TX, USA	Falfurrias	78355	+13613252560	https://stripesstores.com/		1.00
+6732caaeb0f1	Stripes	convenience		27.76165	-98.04852	1910 E Main St	Alice	78332		https://www.7-eleven.com/locations/tx/alice/1910-e-main-st-42626	Stripes	0.80
+b2b69e9d72df	Stripes	convenience		27.88240	-98.61839	101 S. Norton Ave	Freer	78357	+13613946593	https://stripesstores.com/		1.00
+b4809e0f1f1b	Stripes	convenience		27.31223	-98.67871	611 N. Smith Avenue	Hebbronville	78361	+13615275584	https://stripesstores.com/		1.00
+bccc8e0407f7	Stripes	convenience		27.75957	-98.05286	1723 E Main St	Alice	78332	+13616641932	https://www.7-eleven.com/	Stripes	0.92
+78d3e9914eec	Sunny's Mini Mart	convenience		27.76244	-98.23283	608 E Gravis Ave	San Diego	78384	+13612798122	https://www.mechanicadvisor.com/tx/san-diego/sunnys-mini-mart		0.92
+3e770e63a605	Sunoco	convenience		27.76284	-98.23270	611 E Gravis Ave	San Diego	78384	+13612793052	https://www.sunoco.com/locations/store/611-e-gravis-san-diego-tx-0966956500		1.00
+8ab0b2081504	Sunoco	convenience		27.73783	-98.08049	1238 S U.S. Highway 281	Alice	78332	+13616646539	https://www.sunoco.com/locations/store/1238-s-highway-281-alice-tx-0128367000		0.92
+90d76ae8a278	Sunoco	convenience		27.75393	-98.06453	318 N Texas Blvd	Alice	78332	+13616680806	https://www.sunoco.com/locations/store/318-n-texas-blvd-alice-tx-0016588600		0.92
+9c2c947d2653	Sunoco	convenience		27.88286	-98.61838	100 W Riley St	Freer	78357	+13613946610	http://www.sunoco.com	Sunoco	0.92
+f697b350f78c	Sunoco	convenience		27.31219	-98.67843	611 N Smith Highway 359	Hebbronville	78361	+13615275584	https://www.sunoco.com/locations/store/611-n-smith-highway-359-hebbronville-tx-0594547200		0.99
+fb70b2308090	Sunoco	convenience		27.22566	-98.14036	500 E Rice St	Falfurrias	78355	+13613251337	http://www.sunoco.com	Sunoco	0.92
+d0443b8e4437	T Market	convenience		27.73859	-98.08134	Falfurrias Hwy	Alice	78332	+13616646888		T MARKET	0.92
+cc60b064432b	TEX BEST #519	convenience		27.69932	-98.07872	5015 S HWY 281	Alice	78332		https://www.exxon.com/en/find-station/exxon-alice-tx-texbest519-200316882	Exxon	0.80
+bba2635c3a0b	TEX BEST #524	convenience		27.74871	-98.11164	115 S HWY 281 BYPASS	Alice	78332		https://www.exxon.com/en/find-station/exxon-alice-tx-texbest524-200318713	Exxon	0.80
+4e321f03dccd	Tex Best Fuel Island	convenience		27.74895	-98.11237	2822-2932 TX-359	Alice	78332		http://www.exxonmobilstations.com/893171-tex-best-travel-center-524-alice		0.97
+6e48e3330e0c	Tex-Best	convenience		27.69937	-98.07861	5015 S U.S. Hwy 281	Alice	78332	+13616688777	http://www.exxonmobilstations.com/893171-tex-best-travel-center-524-alice	Tex Best	0.97
+750dd3d3ea50	Tex-Best Travel Center	convenience		27.56156	-98.09647	5015 N US Highway 281	Alice	78332	+13616688777		Tex-Best Travel Centers	0.90
+c15a8c8dc591	Tex-Best Travel Center	convenience		27.74263	-98.11115	115 S Hwy 281 Byp	Alice	78332	+13613960887		Tex-Best Travel Centers	0.77
+420224ed7e6f	Times Market	convenience		27.73617	-98.07339	1427 S Reynolds St	Alice	78332	+13616641010	http://www.citgo.com/		0.92
+8e2c5ddc167a	Times Market 314	convenience		27.88241	-98.61115	717 E Riley St	Freer	78357	+13613941714	https://times-market-314.hub.biz		0.64
+38c7fdcb3813	Triple Z Mercantile, Bruni Texas	convenience		27.42516	-98.83932	304 E. 3rd St.	Bruni	78344	+13617475282	http://www.tribles.com/locations		0.77
+73cb2d6aa384	Valero	convenience		27.21189	-98.14167	1419 S US Highway 281	Falfurrias	78355	+13613253560	http://www.valero.com	Valero Energy	0.65
+c742fe8b4b31	Valero	convenience		27.35925	-98.12332	201 S Broadway St	Premont	78375	+13613483711	http://www.valero.com	Valero Energy	0.92
+e42e982750f3	Valero	convenience		27.73899	-98.08115	1238 S US Highway 281	Alice	78332	+13616643393	http://www.valero.com	Valero Energy	0.64
+f1bcce58509c	Valero	convenience		27.75404	-98.06482	318 N Texas Blvd	Alice	78332	+13616680806	http://www.valero.com/	Valero	0.76
+a3cb2e302585	VALERO 2741504	convenience		27.76260	-98.23161	711 E GRAVIS ST	San Diego	78384		https://locations.valero.com/en-us/LocationDetails/Index/711-E-GRAVIS-ST/0000021504	Valero	0.93
+d43be9212fd5	VALERO 2741515	convenience		27.22470	-98.14501	300 S ST MARY'S ST	Falfurrias	78355		https://locations.valero.com/en-us/LocationDetails/Index/300-S-ST-MARYS-ST/0000021515	Valero	0.80
+9c8c6acb5abd	Yu Mi's	convenience		27.76126	-98.06447	1106 N Texas Blvd	Alice	78332	+13616610700	http://gas-stations.citgo.com/tx/alice/78332/1106-N-TEXAS-BLVD		0.98
+a45b75da9146	Alice Food Truck Park	fastfood		27.74705	-98.08134	502 W Front St	Alice	78332				0.94
+b392efbdd467	Chick-fil-A	fastfood		27.76583	-98.04459	2273 E Main St	Alice	78332	+13614152318	https://www.chick-fil-a.com/locations/tx/alice-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.96
+0fe613932f9d	Chicken Express	fastfood		27.75425	-98.06050	1217 E Main St	Alice	78332	+13613964771	http://www.chickene.com/	Chicken Express	0.96
+bf02a120dacf	Church's Chicken	fastfood		27.30929	-98.67800	406 N. Smith Avenue	Hebbronville	78361	+13615274619	https://locations.churchs.com/tx/hebbronville/406-n.-smith-avenue	Church's Chicken	0.96
+67eb7f325446	Church's Texas Chicken	fastfood		27.76252	-98.23329	602 E. Gravis Avenue	San Diego	78384	+13612793260	https://locations.churchs.com/tx/san-diego/602-e.-gravis-avenue	Church's Chicken	0.96
+a3bed56dc130	Church's Texas Chicken	fastfood		27.22408	-98.14498	304 S. St. Marys Street	Falfurrias	78355	+13613255734	https://locations.churchs.com/tx/falfurrias/304-s.-st.-marys-street	Church's Chicken	0.96
+f01dbeb88ef6	Church's Texas Chicken	fastfood		27.75130	-98.06368	1104 E Main St	Alice	78332	+13616644262	https://locations.churchs.com/tx/alice/1104-e.-main-street	Church's Chicken	0.98
+4a5425d53d1c	Dairy Queen	fastfood		27.30980	-98.67796	402 N Smith Ave 402 N Smith Ave	Hebbronville	78361	+13615274822	https://www.dairyqueen.com/en-us/locations/tx/hebbronville/402-n-smith-ave/14198/?y_source=1_MjkzMzkzMjEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+8251c77149b6	Dairy Queen	fastfood		27.75326	-98.06176	1179 E Main St	Alice	78332	+13616644074	https://www.dairyqueen.com/en-us/locations/tx/alice/1179-e-main-st/13795/?y_source=1_MjkzMzg5MjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+967a2a9a64ec	Dairy Queen	fastfood		27.22104	-98.14536	630 S St Mary St 630 S St Mary St	Falfurrias	78355	+13613253888	https://www.dairyqueen.com/en-us/locations/tx/falfurrias/630-s-st-mary-st/14076/?y_source=1_MjkzMzkzOTMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+ad165a856303	Dairy Queen	fastfood		27.88251	-98.61323	Hwy 44 Hwy 44	Freer	78357	+13613946151	https://www.dairyqueen.com/en-us/locations/tx/freer/hwy-44/14131/?y_source=1_MjkzMzg5NDAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
+b4717504b118	Dairy Queen	fastfood		27.76248	-98.23312	604 E Gravis St 604 E Gravis St	San Diego	78384	+13612792101	https://www.dairyqueen.com/en-us/locations/tx/san-diego/604-e-gravis-st/14581/?y_source=1_MjkzMzkyNTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.95
+c37f9e730078	Dairy Queen	fastfood		27.88289	-98.59945	5344 Texas 44	Freer	78357	+13613946151	http://www.dairyqueen.com/		0.85
+fb8ddb81dde0	Dairy Queen	fastfood		27.36352	-98.12339	323 N Broadway 323 N Broadway	Premont	78375	+13613483215	https://www.dairyqueen.com/en-us/locations/tx/premont/323-n-broadway/14511/?y_source=1_MjkzMzkxNTAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+546898053915	DQ Grill & Chill	fastfood		27.75322	-98.06182	1179 E Main St	Alice	78332		https://www.dairyqueen.com/en-us/locations/tx/alice/1179-e-main-st/3568	DQ Grill & Chill	0.80
+5893f9e70761	DQ Grill & Chill	fastfood		27.76238	-98.23333	604 E Gravis St	San Diego	78384		https://www.dairyqueen.com/en-us/locations/tx/san-diego/604-e-gravis-st/4353	DQ Grill & Chill	0.80
+61293a5aed07	DQ Grill & Chill	fastfood		27.30980	-98.67786	402 N Smith Ave	Hebbronville	78361		https://www.dairyqueen.com/en-us/locations/tx/hebbronville/402-n-smith-ave/3971	DQ Grill & Chill	0.80
+7cae4bf5bf32	DQ Grill & Chill	fastfood		27.88245	-98.61324	Hwy 44	Freer	78357		https://www.dairyqueen.com/en-us/locations/tx/freer/hwy-44/3904	DQ Grill & Chill	0.80
+8ec885265003	DQ Grill & Chill	fastfood		27.36343	-98.12332	323 N Broadway	Premont	78375		https://www.dairyqueen.com/en-us/locations/tx/premont/323-n-broadway/4283	DQ Grill & Chill	0.80
+b77b645f058b	DQ Grill & Chill	fastfood		27.22127	-98.14529	630 S St Mary St	Falfurrias	78355		https://www.dairyqueen.com/en-us/locations/tx/falfurrias/630-s-st-mary-st/3849	DQ Grill & Chill	0.80
+a3ba3b8bcf18	Dunkin Donuts	fastfood		27.76973	-98.04352	2701 E MAIN ST, WM791	Alice	78332		https://www.dunkindonuts.com/locations/us/tx/alice/2701-e-main-st/store-367131/	Dunkin'	0.89
+ac43412767b3	El Galisiense	fastfood		27.76328	-98.23443	501 E Gravis Ave	San Diego	78384				0.83
+acf850168017	Long John Silver's	fastfood		27.76021	-98.05083	1812 E Main St	Alice	78332	+13612211030	https://www.ljsilvers.com/?y_source=1_MTc1NzMzMjItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
+d87b98c0ea17	Manolito's	fastfood		27.59936	-98.40512	818 E Main St Ste B	Benavides	78341	+13612563174	http://manolitos.net		0.92
+100fb7b2576f	McDonald's	fastfood		27.22692	-98.14001	118 US-281	Falfurrias	78355	+13613252151	https://www.mcdonalds.com/us/en-us/location/tx/falfurrias/118-north-highway-281/37359.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
+19b8f187b7d2	McDonald's	fastfood		27.75336	-98.06030	1220 E Main	Alice	78332	+13616648790	https://www.mcdonalds.com/us/en-us/location/tx/alice/1220-e-main/5888.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+1d191c3e6854	McDonald's	fastfood		27.31290	-98.67838	711 N Smith Ave	Hebbronville	78361		https://www.mcdonalds.com/us/en-us/location/43287.html	McDonald's	0.80
+7427357fc18a	McDonald's	fastfood		27.75240	-98.08231	212 N Johnson	Alice	78332	+13616648020	https://www.mcdonalds.com/us/en-us/location/tx/alice/212-n-johnson/25553.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
+bd1ea21b01ab	McDonald's	fastfood		27.21198	-98.14140	S Railroad St	Falfurrias	78355	+13613253752	http://www.mcdonalds.com/		0.77
+400e2b5f4a43	Panda Express	fastfood		27.75393	-98.06067	1205 E. Main Street	Alice	78332	+13616648887	http://www.pandaexpress.com/		0.95
+3199d3b05189	Popeyes	fastfood		27.75270	-98.06145	1180 E Main St	Alice	78332	+13616644927	https://www.popeyes.com/store-locator/store/restaurant_81787	Popeyes Louisiana Kitchen	0.99
+708509425583	Popeyes	fastfood		27.75270	-98.06153	1180 E Main St	Alice	78332		https://www.popeyes.com/store-locator/store/restaurant_81787	Popeyes	0.80
+66346f065c4c	Sonic Drive In	fastfood		27.75435	-98.05929	1256 East Main Street	Alice	78332	+13616648687	https://locations.sonicdrivein.com/tx/alice/1256-east-main-street.html	Sonic Drive-In	0.98
+4ff98ed1ac9e	Taco Bell	fastfood		27.75405	-98.05947	1250 E. Main	Alice	78332	+13616640900	http://www.tacobell.com/	Taco Bell	0.98
+aa542bf52288	Taco Treat	fastfood		27.75331	-98.07528	203 E 3rd St	Alice	78332	+13616642131			0.96
+94ba521852ca	The Country Kitchen	fastfood		27.87793	-98.08714	5649 S US Highway 281	Alice	78332	+13614534377			0.73
+9941b316197e	TonyReys Dine in	fastfood		27.74045	-98.07347	1001 S Reynolds St	Alice	78332	+13613964431			0.69
+91ad9cb0c92b	Vfw Hall	fastfood		27.76471	-98.23618	300 King Ave	San Diego	78384	+13612793231	http://www.vfw.org/		0.96
+5edbf60062c8	Whataburger	fastfood		27.22665	-98.14180	101 BYPASS 281	Falfurrias	78355	+13613255888	https://locations.whataburger.com/tx/falfurrias/101-us-281.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
+68c738f49581	Whataburger	fastfood		27.75386	-98.05966	1242 E Main St.	Alice	78332	+13616643663	https://locations.whataburger.com/tx/alice/1242-e-main-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
+030a82e4acbd	Wingstop	fastfood		27.76768	-98.04201	2611 E Main St Ste 701	Alice	78332		https://www.wingstop.com/location/wingstop-405-alice-tx-78332/menu	Wingstop	1.00
+4e3539d60588	Y Double Drive Thru	fastfood		27.30100	-98.67879	102 W Dannelly St	Hebbronville	78361	+13615273668	https://start.cortera.com/.../l3l8qwq2m/the-y-double-drive-thru		0.96
+27dcbcc61f5f	Alice Cash & Carry	grocery		27.75001	-98.07733	102 W Main St	Alice	78332	+13616647067			0.92
+2a8c8b29c696	Alice H-E-B	grocery		27.75272	-98.06311	1115 E. MAIN	Alice	78332		https://www.heb.com/heb-store/us/tx/alice/alice-h-e-b-223	H-E-B	0.98
+1962e0e306e4	Dan's Grocery & Market	grocery		27.74117	-98.07337	911 S Reynolds St	Alice	78332	+13616643352			0.92
+1c5486234880	Edelen Farms	grocery		27.65136	-98.13557	1125 County Road 440	Alice	78332	+13612270645	https://www.edelenfarms.com/		0.89
+59b63d49aba9	Edelen Farms	grocery		27.65438	-98.13654	1125 County Road 440	Alice	78332	+13612270645	https://www.edelenfarms.com/		0.90
+47b832302dfd	H-E-B	grocery		27.75261	-98.06297	1115 E Main St	Alice	78332	+13616686633	https://www.heb.com/heb-store/US/tx/alice/alice-h-e-b-223	H-E-B	0.97
+629a10224a75	H-E-B	grocery		27.22050	-98.14591	700 S St Marys St	Falfurrias	78355	+13613253604	https://www.heb.com/heb-store/US/tx/falfurrias/falfurrias-h-e-b-200	H-E-B	0.96
+d528a0f15b4d	Hillcrest Drive Inn Grocery	grocery		27.30045	-98.67839	705 S Smith St	Hebbronville	78361	+13615273321	http://hillcrest.com		0.92
+4c65ac7193c6	Lowe's Market	grocery		27.76315	-98.23048	803 E Gravis St	San Diego	78384		https://www.lowesmarket.com/StoreLocator/Store/?L=147	Lowe's Market	0.96
+c5a70b314233	Lowe's Market	grocery		27.88362	-98.60542	1102 E Riley St	Freer	78357	+13613946055	https://www.lowesmarket.com/	Lowe's Market	0.96
+cdb532df1b97	Lowe's Market	grocery		27.31992	-98.67931	1407 N Smith Ave	Hebbronville	78361	+13615275711	http://www.lowesmarket.com/	Lowe's Market	0.92
+eb5d55b3b06b	Lowe's Market	grocery		27.88308	-98.61829	1102 E. Riley St.	Freer	78357		https://www.lowesmarket.com/StoreLocator/Store/?L=150	Lowe's Market	0.95
+c2574f79864e	Martinez Meat Market	grocery		27.31171	-98.67722	1102 N Smith St	Hebbronville	78361	+13612317070			0.88
+a3bdc63eddcd	Perfect Stores Electronics	grocery		27.74951	-98.06144	125 Olmito St	Alice	78332				0.61
+3287c1ee29dd	Quade's Corner	grocery		27.88290	-98.62120	402 W Riley St	Freer	78357	+12109689599			0.92
+3a6ebe5e7b59	Ralph's Food Store	grocery		27.74588	-98.07312	434 S Reynolds St	Alice	78332	+13616647211			0.56
+ed7045934d7d	Salinas Electric	grocery		27.22595	-98.13525	825 E Rice St	Falfurrias	78355				0.95
+987ac919987a	Super S Foods	grocery		27.30651	-98.67781	111 E Galbraith St	Hebbronville	78361	+13615273388	http://www.supersfoods.com		0.77
+3e6fbfa9cf4e	Super S Foods #350	grocery		27.88297	-98.60570	1102 E Riley Suite A	Freer	78357	+13613946055	http://www.supersfoods.com		0.77
+13ea70736b6a	Texas corner store Alice texas	grocery		27.75544	-98.06499	501 N Texas Blvd	Alice	78332				0.89
+2ada81135ab5	The Silver Barn	grocery		27.74159	-98.09970	913 McMasters Rd	Alice	78332				0.92
+a3fef787e385	West Model Market	grocery		27.35951	-98.12424	121 SW 1st St	Premont	78375	+13613483315	https://west-model-market.hub.biz/		0.92
+6a8bfc126ee8	Alice Obgyn Specialty Clinic	hospital		27.76428	-98.04177	2510 E Main St	Alice	78332	+13616646671			0.75
+b0b9cfc56b8a	Alice Obgyn Specialty Clinic	hospital		27.76528	-98.04207	2510 E Main St	Alice	78332	+13616646671			0.75
+a87fada553fc	Alice Sleep Lab	hospital		27.75739	-98.04739	411 S Flournoy Rd #200	Alice	78332	+13616641042			0.92
+ef1907f24a62	Christus Spohn Hospital Alice	hospital		27.76465	-98.04169	2500 E Main Street	Alice	78332	+13616618016	https://www.christushealth.org/locations/alice-emergency-room	CHRISTUS Children's	1.00
+05a7aa879712	Valley Care Clinic	hospital		27.22682	-98.14785	107 S Gardner St	Falfurrias	78355	+13613252195	http://independencephysicianmanagement.com		0.56
+7a8d17f0f0d2	Alice Motor Inn	hotel	motel	27.74378	-98.08457	500 S U.S. Hwy 281	Alice	78332	+13616648100	http://www.alicemotorinn.com.au		0.92
+7f9c546c890c	Alice Motor Inn	hotel	motel	27.73582	-98.07837	500 S US Highway 281	Alice	78332	+13616648100			0.95
+bd0934694900	Antler's Inn Motel	hotel	motel	27.21286	-98.14420	1204 US-281	Falfurrias	78355	+13613252501	https://antlers-inn-motel-tx-2.hub.biz		0.99
+31a03306218f	Bel Air Motel	hotel	motel	27.75833	-98.08244	724 N Johnson St	Alice	78332	+13616642184	http://belairmotel.net	Bel Air Motel	0.92
+7a308e586eef	Best Western Hebbronville Inn	hotel		27.31455	-98.66838	37 E State Highway 359	Hebbronville	78361	+13615273600	https://www.bestwestern.com/en_US/book/hotel-rooms.44625.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44625	Best Western Hotels & Resorts	1.00
+758bc1c87338	Best Western Windwood Inn & Suites	hotel		27.88338	-98.60255	1172 E Riley St	Freer	78357	+13613946200	https://www.bestwestern.com/en_US/book/hotel-rooms.44573.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44573	Best Western Hotels & Resorts	0.98
+b40e3420e422	Brush Country Inn	hotel	motel	27.88254	-98.60793	1019 E Riley St	Freer	78357	+13613945678	http://brushcountrybank.com		0.92
+cc1c2fa751d7	Budget Inn & Suites	hotel	motel	27.88296	-98.61340	512 E Riley St	Freer	78357	+17374446080	http://budgetinn.com		0.96
+edc674a2b8b1	Cabrera Hotel	hotel		27.21689	-98.14577	1102 S St Marys St	Falfurrias	78355	+13613254595	http://motel9.net/		0.92
+1bfd0db30c0f	Capri Motel	hotel	motel	27.76864	-98.08309	1789 N Johnson St	Alice	78332	+13616647341	https://capri-motel-tx.hub.biz/		0.92
+eca43552e82d	Capri Motel	hotel		27.75830	-98.08229	724 N Johnson St	Alice	78332	+13616647341	http://www.caprimoteldartmouth.us		0.55
+a212e5e3179b	Carrales Ranch	hotel		27.36832	-98.22272		Premont					0.72
+5155b6585ab5	Days Inn by Wyndham Alice	hotel	resort	27.75636	-98.08307	555 N Johnson St	Alice	78332	+13614158666	https://www.wyndhamhotels.com/days-inn/alice-texas/days-inn-alice/overview?CID=LC:DI::BING:RIO:National:05341&iata=00093796		0.92
+6e0bbfaf6e3e	Days Inn Freer	hotel		27.88314	-98.60704	1020 E Riley St	Freer	78357	+13613945100	http://www.daysinn.com		0.95
+a45c4dcc97b4	Dmpm Inc	hotel		27.76871	-98.08308	1789 N US Highway 281	Alice	78332				0.95
+eac536f5cd51	Econo Lodge Falfurrias Highway 281	hotel	motel	27.20530	-98.14443	2116 S Highway 281	Falfurrias	78355	+13613252515	https://www.choicehotels.com/texas/falfurrias/econo-lodge-hotels/txh56?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+a587c21395e9	Executive Inn	hotel		27.88304	-98.60482	1104 E Riley St	Freer	78357	+13613946191	http://www.executiveinnfreer.com/		0.92
+f9219f8f9884	Executive Inn	hotel	motel	27.31921	-98.67731	1310 N Smith Ave	Hebbronville	78361	+13615274082	http://www.texasexecutiveinn.com		0.92
+7f5fdc01dc2e	Freer Motel	hotel	motel	27.88309	-98.61021	808 E Riley St	Freer	78357	+13613947391	http://www.ci.freer.tx.us		0.99
+a124a4b3e8f0	Garden Inn	hotel	motel	27.32170	-98.67725	1600 N Smith Ave	Hebbronville	78361	+13615273330			0.98
+fe4e3416717b	Green Acres Tx	hotel		27.67114	-98.08204		Alice			http://www.superpages.com/bp/alice-tx/mos-green-acre-L2063916667.htm		0.71
+4e24f4994d27	Hampton Inn Alice	hotel		27.76985	-98.03947	3135 E Main St	Alice	78332	+13616641111	http://hamptoninn.hilton.com/en/hp/hotels/index.jhtml?ctyhocn=CRPALHX	Hampton by Hilton	1.00
+72cc7c917c42	Hi Way Motel	hotel		27.75131	-98.08236	104 N Johnson St	Alice	78332				0.95
+a9b25bae4439	Hillsboro Hospitality Llc	hotel		27.76988	-98.03948	3135 E Highway 44	Alice	78332				0.95
+4297343efad5	Holiday Inn Express & Suites	hotel		27.76956	-98.03986	2965 E Main St	Alice	78332	+13616647111	hidesoto.net		1.00
+f7ac7c5afc75	Hornsby Ranch	hotel		27.28152	-98.15209		Falfurrias					0.71
+b82761a3a28b	La Mansion Gonzalez	hotel		27.76381	-98.23811	108 E Gravis Ave	San Diego	78384	+13612794219			0.92
+a83202a19db4	La Plaza Inn and Suites	hotel		27.88333	-98.60711	1020 E Riley St	Freer	78357	+13613945100	http://gmail.com		0.98
+663ef6d460c6	La Quinta Inn and Suites by Wyndham Alice	hotel		27.76411	-98.04358	2400 E Main St	Alice	78332	+13616611777	http://www.laquintaalice.com/?cid=local_6252	La Quinta by Wyndham	1.00
+b4b0d62496ad	Long Shot Hunting Ranch	hotel		27.73817	-98.53571	9483 TX-339	Freer	78357	+19795757425	https://longshothuntingranch.com/		0.97
+235a6615fa80	Mjb Property Inc	hotel		27.20530	-98.14478	2116 S US Highway 281	Falfurrias	78355				0.95
+f8c035b1804c	Oasis Motel	hotel	motel	27.35271	-98.12447	820 S Broadway St	Premont	78375	+13613483514	https://oasis-motel-tx-3.hub.biz/		0.95
+1316143a88ab	Owl Ranch	hotel		27.89280	-98.09332		Alice					0.72
+ab73f5b0f672	OYO Budget Inn Falfurrias Hwy 281	hotel		27.24026	-98.13956	1033 US-281	Falfurrias	78355	+17139360109	http://www.budgetinn.com/	Budget Inn	0.97
+6f7f64aa4a0f	OYO Hotel	hotel	motel	27.74236	-98.08456	815 S U.S. Hwy 281	Alice	78332	+13238530112	https://www.oyorooms.com/us/95519/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_ALI001	OYO Rooms	0.92
+55fe72cbeb31	OYO Hotel Alice TX Hwy 281 West	hotel	resort	27.76590	-98.10500	Hwy S 281, Alice TX, United States - 78332	Alice	78332	+18053228373	https://www.oyorooms.com/us/219311?utm_source=YEXT&utm_medium=YEXT&utm_campaign=US_ALI003		0.85
+ad4e26179a80	Quality Inn	hotel	resort	27.75654	-98.08292	555 N Johnson St	Alice	78332	+13612836763	https://www.choicehotels.com/texas/alice/quality-inn-hotels/txn95?mc=llbillpx&pmf=local		0.96
+d8465b944e39	Quality Inn Alice	hotel		27.75647	-98.08354	555 N Johnson St	Alice	78332	+13614158666	http://www.daysinn.com		0.77
+164e05929478	Stockman Motel	hotel	motel	27.30498	-98.67835	211 S Smith Ave	Hebbronville	78361	+13615273271			0.93
+9daf5faa3464	Sunset Motel	hotel	motel	27.75937	-98.08283	805 N Johnson St	Alice	78332	+13613964205	http://www.sunsetmotel.com		0.97
+76c11789139a	SureStay by Best Western Falfurrias	hotel	resort	27.20493	-98.14326	2299 S US Highway 281	Falfurrias	78355	+13613254848			1.00
+3c53f5b99f44	SureStay Hotel	hotel		27.20496	-98.14288	2299 S US-281	Falfurrias	78355	+13613254848	https://www.bestwestern.com/en_US/book/hotel-rooms.54121.html?iata=90000018&ssob=BLSSH0003G&cid=BLSSH0003G%3Ayext%3Awebsite%3A54121	Best Western Hotels & Resorts	1.00
+4cb6f2e43633	SureStay Hotel by Best Western Alice	hotel	motel	27.73711	-98.07932	1350 S U.S. Hwy 281	Alice	78332	+13616642133	https://www.bestwestern.com/en_US/book/hotels-in-alice/surestay-hotel-by-best-western-alice/propertyCode.54053.html	SureStay Hotels	1.00
+8471f0a84e1b	The Sanctuary at Costa Grande in Port O'Connor, Texas	hotel		27.05912	-98.43750	701 Sanctuary Lakes Drive	Seadrift	77982	+18885520785	http://costagrande.com/		0.77
+035ab238bafa	The Tin Can	hotel		27.64627	-98.07670	137 Concepcion St	Alice	78332				0.80
+88895f3729dc	Wishbone Ranch & Lodge	hotel	lodge	27.86637	-98.08650	5193 N US Highway 281	Alice	78332	+13617019434	http://wishbonelodge.com/		0.98
+2bf860ddd752	BADS	office	auto company	27.79030	-98.08338	3052 US-281 N	Alice	78332	+13616521271			0.80
+0cca1a977676	Coyote Fuels	office	energy company	27.74372	-98.04564	1048 Airport Rd	Alice	78332	+13613960005	http://www.coyotefuels.com/		0.65
+0c5779a99238	Greene's Energy Group	office	energy company	27.77237	-98.07906	2211 Industrial Blvd	Alice	78332	+13616641515	http://greenesenergy.com		0.60
+f581d201bc82	Greenes Energy Groul	office	coworking space	27.74289	-98.04318	1104 S Flournoy Rd	Alice	78332	+13616642178	http://www.greenesenergy.com		0.92
+00610bbb3cca	Jim Hogg County Jail	office		27.31035	-98.67030	201 Old Cemetery Rd	Hebbronville	78361	+13615274140	www.co.jim-hogg.tx.us		0.56
+2a01104da26b	Key Energy Services	office		27.88249	-98.59173	5245 Hwy 44	Freer	78357	+13613946661	http://www.keyenergy.com		0.77
+aa4685d17eb6	Pipeline Measurement Co	office		27.74014	-98.03934	1134 Airport Rd	Alice	78332	+13613310211	https://www.pipelinemeasurementco.com		0.75
+3da6b30c6384	South Texas Oilfield Solutions	office	energy company	27.75734	-98.04738	411 N Flournoy Rd Ste 102	Alice	78332	+13613961901	https://stxofs.com/		0.92
+473627875aa3	19th Hole Grill	restaurant	american restaurant	27.77125	-98.06010	2290 N Texas Blvd	Alice	78332	+13614537078	https://cornerecho.com		0.89
+b372296f5e9c	19th Hole Grill	restaurant	comfort food restaurant	27.77287	-98.06481	2290 N Texas Blvd	Alice	78332	+13614537078	andrew-giancola-nq2z.squarespace.com		0.55
+7b4ad2d87a6d	Agape - Tacos & Gorditas	restaurant		27.76415	-98.24226	310 Collins Ave	San Diego	78384	+13613942042	http://www.agapecafe.org		0.90
+89daa951b128	AJ’s cafe	restaurant	texmex restaurant	27.73951	-98.07295	S Reynolds St	Alice	78332				0.98
+274aa42d6bf1	Asian Gourmet	restaurant	buffet restaurant	27.75601	-98.05762	1325 E Main St	Alice	78332	+13616688885	http://chowhound.com		0.97
+c65089b9f271	Avila's BBQ	restaurant	barbecue restaurant	27.31336	-98.67780	509 N Smith Ave	Hebbronville	78361	+13615272542	http://avilasbbq1.placeweb.site		0.96
+005d23a83291	Aztla'n Restaurant	restaurant	mexican restaurant	27.75498	-98.08225	406 N Johnson St	Alice	78332	+13617565011			0.88
+c514e6c5f4e9	Belindas Cafe	restaurant		27.75490	-98.08225	406 N Johnson St	Alice	78332	+13614534544			0.75
+30c2f4b67525	Big House Burgers	restaurant	burger restaurant	27.75360	-98.06117	1201 E Main St	Alice	78332	+13616610111	http://www.bighouseburgerstx.com/	Big House Burgers Kingsville	0.98
+b209c96ce022	Big Taco	restaurant	taco restaurant	27.72881	-98.07258	406 Cecilia St	Alice	78332	+13616682029			0.92
+e5406299eebf	Buckaroo Cafe	restaurant		27.87473	-98.61810	905 S Norton Ave	Freer	78357				0.71
+098b2ae23e74	Burger King	restaurant	burger restaurant	27.22751	-98.14414	118 N Highway 281	Falfurrias	78355	+13613251843	http://www.bk.com/?utm_source=LOCATIONiq&utm_medium=locallstgs&utm_campaign=2013		0.85
+8993221ff0b7	Burger King	restaurant	burger restaurant	27.75947	-98.05154	1800 E Main St	Alice	78332	+13616683154	https://burgerking.com/store-locator/store/18614	Burger King	0.98
+b5effd91624d	Cactus Grill	restaurant		27.88107	-98.61935	207 S 1st Ave	Freer	78357				0.83
+78442874529d	Canales Cafe	restaurant		27.74838	-98.07494	204 E Front St	Alice	78332				0.97
+52d4cf45e78d	CBP Checkpoint 1017	restaurant		27.29679	-98.66295		Hebbronville					0.69
+791b70f9bb96	Chaco's Club	restaurant	texmex restaurant	27.75184	-98.08228	116 N Johnson St	Alice	78332		http://chachos.com	Chacho's	0.92
+9a8dd831a9b7	Chatitos Snacks	restaurant	mexican restaurant	27.31150	-98.67847	512 N Maria Ave	Hebbronville	78361	+13615273725			0.96
+05f4b1c97abd	Checkers Pizza	restaurant		27.30847	-98.68273	206 N Wilhelma Ave	Hebbronville	78361	+13612311481			0.91
+ca920d7b76ac	CHEF MAX’s TACO DAWG	restaurant		27.35566	-98.11930	316 SE 5th St	Premont	78375	+3614605128			0.77
+3f74e82c8a6d	Chente's Tex-Mex Restaurant	restaurant	texmex restaurant	27.72938	-98.07620	107 Cecilia St	Alice	78332	+13616689781	http://www.menupix.com/texas/restaurants/4304914/Chentes-Restaurant-Alice-TX		0.96
+a75700e25cb0	Chili's Grill & Bar	restaurant		27.76751	-98.03966	1718 Matt Murphy Blvd	Alice	78332	+13616682055	https://www.chilis.com/		0.92
+9f658dc4d6cf	Chill Zone	restaurant		27.74702	-98.09336	1329 W Front St	Alice	78332	+13616686161			0.78
+c8a20aca7557	Country Kitchen	restaurant	mexican restaurant	27.30030	-98.67824	707 S Smith Ave	Hebbronville	78361	+13615273141	http://www.countrykitchenrestaurants.com		0.92
+1b2ef5c086dd	Cowboys Bar -B-Q Station	restaurant	barbecue restaurant	27.74460	-98.07015		Alice	78332	+13616647113			0.95
+6fd18ce987c2	Crave Station	restaurant		27.75225	-98.08234	202 N Johnson St	Alice	78332	+13613964188			0.97
+7249e6572fc8	Crossroads Cafe & Cantina	restaurant	texmex restaurant	27.88036	-98.61366	1/2 S Duval Ave	Freer	78357	+13613942026			0.96
+a3d9f0d32f0a	D&J’s Cocina y Cantina	restaurant		27.76284	-98.23673	111 Victoria St	San Diego	78384	+3614607173			0.62
+9297dc910614	Dairy Burger	restaurant	burger restaurant	27.76096	-98.04980	1908 E Main St	Alice	78332	+13616647207	http://www.dairyburger.online/		0.92
+93ccdf4a139e	Dairy Burger	restaurant	burger restaurant	27.75550	-98.08237	314 N Johnson St	Alice	78332	+13616642117			0.96
+69d6e2f58dfe	DC Restaurant & Drive Thru	restaurant		27.59768	-98.41298	211 E Main St	Benavides	78341	+13612563611			0.92
+ae331c82e6c8	Delicias CAFE	restaurant		27.74893	-98.13326	3436 W State Highway 44	Alice	78332	+19562527459			0.93
+83c58f526ac2	Diamond G BBQ Restaurant	restaurant	barbecue restaurant	27.35230	-98.12433	906 S Broadway St	Premont	78375	+13613483212	http://locations.greyhound.com/bus-stations/US/Premont/bus-station/bus-station-685300		0.98
+ed2b03315b1e	Diamond G BBQ Restaurant	restaurant	barbecue restaurant	27.35220	-98.12444	906 S Broadway St	Premont	78375	+13613483212	http://locations.greyhound.com/bus-stations/US/Premont/bus-station/bus-station-685300		0.98
+22b654e6022b	Domino's	restaurant	pizza restaurant	27.74995	-98.06440	1100 E Front St	Alice	78332	+13616686400	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.96
+177446a7eed8	Double Drop Bar & Grill	restaurant	bar and grill restaurant	27.88311	-98.61172	702 E Riley St	Freer	78357	+13613942048			0.96
+65d7f4a7cbaf	Dragon's Cuisine Buffet	restaurant		27.75615	-98.05774	1325 E Main St	Alice	78332	+3616688885	https://asiangourmettxtogo.com/		0.70
+e953a28c066d	El Cazador De Jalisco	restaurant	texmex restaurant	27.88295	-98.61911	106 W Riley St	Freer	78357	+13613942006			0.92
+9a72ab549dd6	El Charo Bar	restaurant	mexican restaurant	27.74577	-98.08904	1011 W Front St	Alice	78332	+13616611450	http://www.elcharrousa.com/		0.66
+a13615a9190e	El Jalisiense Restaurant	restaurant	mexican restaurant	27.76242	-98.04871	1915 E Main St	Alice	78332	+13616610911	http://ordereljalisiense1.com		0.97
+e38c8ce011b7	El Mesquital Outdoor Bar & Grill	restaurant	bar and grill restaurant	27.78408	-98.33369	1489 TX-44	San Diego	78384	+3614443312			0.92
+9a72f9bf4694	El Mexicano Drive Thru	restaurant	mexican restaurant	27.74217	-98.08332	830 S US Highway 281	Alice	78332	+13616642109			0.55
+b53b249fcb70	El Tejano Restaurant	restaurant	mexican restaurant	27.30387	-98.67903	313 S Smith St	Hebbronville	78361	+13612310813			0.92
+94955e049c7e	Frank's Cafe	restaurant	texmex restaurant	27.30662	-98.67373	502 E Galbraith St	Hebbronville	78361	+13615279081			0.94
+77ae92f4123d	Freertopia Fruit & Deli	restaurant	delicatessen	27.88247	-98.61762	101 E Riley St	Freer	78357	+13613401223			0.70
+19f20e063cb7	Fruit Revolution & Deli	restaurant	delicatessen	27.76202	-98.04742	2042 E Main St	Alice	78332	+13616643524	https://qrmenus.seepaa.com/restaurant/fruitrevolutiondeli		0.96
+46e1bfe35e6a	Gadgi's Drive Thru	restaurant	theme restaurant	27.29970	-98.67829	102 E Garza St	Hebbronville	78361	+13615278811			0.62
+a6aa3b722d07	Gil's Smoking Grille & Catering	restaurant	barbecue restaurant	27.74011	-98.08171	1104 S Hwy 281	Alice	78332	+13613961222	https://www.groupon.com/biz/alice-tx/gils-smoking-grille-catering		0.86
+74f4ff3cf794	Gil's Smoking Grille Catering	restaurant	barbecue restaurant	27.74057	-98.07336	1001 S Reynolds St	Alice	78332	+13613961222			0.85
+aef2574b4c6f	Gloria's Tacos and Famous Spuds	restaurant	taco restaurant	27.76638	-98.24704	800-814 W Gravis St	San Diego	78384	+13612799298			0.96
+55960f943645	Godfather's Pizza Express	restaurant	pizza restaurant	27.36875	-98.11395	511 NE 8th St	Premont	78375			Godfather's Pizza	0.80
+e9656eff9d58	Gonzalez tacos and BBQ	restaurant	texmex restaurant	27.75818	-98.23522	511 E Theodora St	San Diego	78384	+12108525070			0.92
+a255d2bf5cdd	Good Eatz	restaurant		27.22562	-98.13637	102 S Sycamore St	Falfurrias	78355	+13613253500			0.96
+033d770b6cb0	Gordos BBQ Tacos	restaurant	mexican restaurant	27.73550	-98.07298	4939 S US Highway 281	Alice	78332	+13615621681			0.70
+2c164775e365	Gordos BBQ Tacos	restaurant	mexican restaurant	27.70230	-98.07791	4939 S US Highway 281	Alice	78332	+13615621681			0.71
+11868af69bc8	Heathen's Heaven	restaurant	bar and grill restaurant	27.35945	-98.12415	111 SW 1st St	Premont	78375	+19564488042			0.92
+320769e763db	Henry's Place	restaurant	mexican restaurant	27.76987	-98.24088	403 W Luby Ave	San Diego	78384	+13612794122	https://henrys-place.hub.biz/		0.92
+01e233993a0c	IHOP	restaurant	breakfast and brunch restaurant	27.76777	-98.03925	3300 E Main St	Alice	78332	+13616611123	https://restaurants.ihop.com/en-us/tx/alice/breakfast-3300-e.-main-st.-3524	IHOP	0.97
+e38876a26aa8	Irie Foods	restaurant		27.76048	-98.23441	304 S Travis St	San Diego	78384	+13613898642			0.92
+33c7b023e4da	It's Just Wings	restaurant	chicken wings restaurant	27.76751	-98.03966	1718 Matt Murphy Blvd	Alice	78332	+14694608821	https://itsjustwings.com/		0.93
+0ce5901ea3d5	J & G Grill	restaurant	bar and grill restaurant	27.65402	-98.09567	594 Co Rd 465	Alice	78332	+13616684690			0.96
+e2ca4034d790	J's Deli	restaurant	delicatessen	27.76069	-98.04800	901 N Flournoy Rd	Alice	78332	+13615629282	http://jsdelishop.square.site/menu		0.92
+f0005472405a	Jerry's Drive In & Diner	restaurant	mexican restaurant	27.76329	-98.23669	111 S Victoria St	San Diego	78384	+13612798877	http://jerrysdriveindiner.com		0.77
+ac79c3e26ae7	Julie's Tacos and more	restaurant	taco restaurant	27.74377	-98.08869	1006 Cherry St	Alice	78332	+13613964001			0.92
+3e6bb1657660	K Kitchen Taco	restaurant	taco restaurant	27.74907	-98.06918	700 E Front St	Alice	78332	+13616680494	https://www.circlek.com/store-locator/US/alice/700-e-front-st/2741867		0.77
+8bd15847f365	K Kitchen Taco	restaurant	taco restaurant	27.75272	-98.08287	215 N Johnson St	Alice	78332	+13616611139	https://www.circlek.com/store-locator/US/alice/215-n-johnson-st/2706977		0.77
+71232d8475a3	King Street Grill	restaurant	bar and grill restaurant	27.74936	-98.07562	73 S King St	Alice	78332	+13616646540			0.92
+0d9220d2239c	King Subs & More	restaurant	barbecue restaurant	27.35392	-98.12018	708 S Baxter St	Premont	78375	+13615857257			0.95
+8baa72685d3e	Kings Inn	restaurant	american restaurant	27.74269	-98.08471		Alice	78332	+13616644351	http://www.kingsinns.ie		0.77
+e212de67ae83	Krispy Krunchy Chicken	restaurant	chicken restaurant	27.74337	-98.08379	620 S Hwy 281 Bus	Alice	78332	+13616645220	https://locations.krispykrunchy.com/tx/alice/620-s-hwy-281-bus		0.79
+121d745a37d7	Laredo Taco Company	restaurant		27.36914	-98.11769	433 NE 8th St	Premont	78375	+13612195706	https://www.laredotacocompany.com/		1.00
+59fabaffc6f0	Laredo Taco Company	restaurant		27.31223	-98.67871	611 N. Smith Avenue	Hebbronville	78361	+13615275584	https://www.laredotacocompany.com/		0.95
+6626896f9422	Laredo Taco Company	restaurant		27.88314	-98.61842	100 W. Riley St	Freer	78357	+13613946610	https://www.laredotacocompany.com/		0.95
+b541bb182b80	Laredo Taco Company	restaurant		27.22575	-98.14005	500 E. Rice Street	Falfurrias	78355	+13613251337	https://www.laredotacocompany.com/		0.95
+350f2aebf0ec	Las Asaditas	restaurant		27.30048	-98.67796	100 Fal Hwy	Hebbronville	78361				0.95
+e71eb858cdbe	Las Lomitas Cafe and Tasty Pastry	restaurant	mexican restaurant	27.35639	-98.67060	3 Sally Ln	Hebbronville	78361	+13614067062			0.92
+9b9dd66594bb	Little Boat-Net	restaurant	burger restaurant	27.74818	-98.07295	200 S Reynolds St	Alice	78332	+13614537399	http://little-boat-net.poi.place		0.96
+b6a6dded4a2a	Little Caesars Pizza	restaurant	pizza restaurant	27.75216	-98.06236	1142 E Main St	Alice	78332	+13616686047	https://littlecaesars.com/en-us/store/183	Little Caesars	0.96
+daff3b02cde4	Louie's	restaurant	burger restaurant	27.59921	-98.40641	714 Main St	Benavides	78341	+13612564311	http://louiesrestaurant.com/contact-louies/		0.96
+8b2497b90569	Luchazie General Store & Restaurant	restaurant		27.76234	-98.22713	1023 TX-44	San Diego	78384	+13612792825	https://luchazierestaurant.smartonlineorder.com/		0.96
+0c0ab2298e35	Magda’s Kitchen	restaurant		27.46587	-98.97485	101 E Laredo Ave	Oilton	78371	+19566938716			0.97
+5918c12b29cb	Mendiola's Deli	restaurant	delicatessen	27.30686	-98.67951	102 N Maria Ave	Hebbronville	78361	+13615273377	http://www.gitil.com		0.92
+159eb1a7ee2c	Mi Angel Restaurant	restaurant		27.31985	-98.67678	1202 N Smith St	Hebbronville	78361	+19569001972			0.61
+3ec120a975fe	Mi Familia Restaurant	restaurant	mexican restaurant	27.74765	-98.07005	301 S Cameron St	Alice	78332	+13616648011	https://mi-familia-mexicana-cafe.hub.biz/		0.96
+633b8cbb28f8	Mi Ranchito	restaurant	mexican restaurant	27.74266	-98.08374	820 S U.S. Hwy 281	Alice	78332	+13616640104	http://www.miranchitokc.com		0.96
+68d29706741e	Monsters Smokehouse	restaurant	barbecue restaurant	27.75498	-98.08225	202 N Johnson St	Alice	78332	+13614534465			0.78
+a6e55352acaf	MR Pizza N More	restaurant	pizza restaurant	27.64713	-98.08353	100 Dubose St	Ben Bolt	78332	+13615629012			0.96
+fc42f37c3d27	Mr. Bones Restaurant & Bar	restaurant	bar and grill restaurant	27.76378	-98.04788	2021 E Main St	Alice	78332	+13613964136			0.99
+940bcc774fb9	N&M Curbside	restaurant	filipino restaurant	27.76709	-98.04035	2740 E Main St	Alice	78332	+13614552745			0.58
+4a053b140caf	Nortex Bakery and Fast Food	restaurant	mexican restaurant	27.76708	-98.06502	1801 N Texas Blvd	Alice	78332	+13616640540	http://ordernortexbakeryfastfood.com		0.95
+37016339dc6c	North Point Food Forest	restaurant		27.74949	-98.07533	62 S King St	Alice	78332	+13612271996	http://www.northpointfood.com/		0.97
+13904bf6077e	Nuevo Jalisco Freer Tx	restaurant	texmex restaurant	27.88290	-98.61403	412 E Riley St	Freer	78357	+13613942111			0.96
+d3e6df957ca4	NY Joe's Italian Restaurant	restaurant	italian restaurant	27.74680	-98.09458	1515 W Front St	Alice	78332	+13616610430	http://www.showmemenu.com/new-york-joes-pizza-and-pasta-alice-online-menu		1.00
+e54e32694a2b	Oasis Restaurant	restaurant	texmex restaurant	27.35814	-98.12337	303 S Broadway St	Premont	78375	+13613483917			0.94
+912c464f173f	Papi's Kitchen	restaurant	american restaurant	27.75928	-98.24500	713 S Tovar St	San Diego	78384				0.96
+54f2e00c90c8	Pepper's	restaurant	mexican restaurant	27.30659	-98.67473	402 E Galbraith St	Hebbronville	78361	+13615274444	http://www.peppers-restaurant.com	Pepper's Restaurant and Bar	0.96
+4147a335b764	Pizza Hut	restaurant	pizza restaurant	27.76192	-98.04763	2022 E Main St Jim Wells	Alice	78332	+13616642189	https://locations.pizzahut.com/tx/alice/2022-e-main-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=299302	Pizza Hut	0.99
+6be9a4c13db0	Pizza Hut	restaurant	pizza restaurant	27.21837	-98.14515	915 S. St. Mary's Brooks	Falfurrias	78355	+13613253621	https://locations.pizzahut.com/tx/falfurrias/915-s-st-marys?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=281891	Pizza Hut	0.98
+ec344c6a003b	Pizza Inn	restaurant	pizza restaurant	27.31280	-98.67937	204 W Viggie St	Hebbronville	78361	+13615274488	https://www.pizzainn.com/locations/hebbronville-tx-2/	Pizza Inn	0.97
+6eff31a889fb	Ponce's Old Fashioned Burgers	restaurant	burger restaurant	27.21717	-98.07478	254 County Road 220	Falfurrias	78355	+13612048488			0.92
+c378be504fc6	Ramos' Cafe	restaurant	mexican restaurant	27.88055	-98.61779	317 S Norton Ave	Freer	78357	+13613946362	https://ramos-taco-stand.hub.biz/		0.97
+9d568e367824	RC’s	restaurant		27.88281	-98.62261	510 W Riley St	Freer	78357	+13616360572			0.83
+8192a9e838fe	RealTime BBQ & Catering Co.	restaurant	barbecue restaurant	27.76843	-98.24169	406 W Dix Ave	San Diego	78384	+13613899297			0.92
+7d8946e38277	Rebecca's	restaurant	breakfast and brunch restaurant	27.22685	-98.14622	223 W Rice St	Falfurrias	78355	+13613230030			0.96
+59f260cf4cc6	Red Barn Bar & Grill	restaurant	texmex restaurant	27.46619	-98.97792	300 W Laredo Ave	Oilton	78371	+13615865093			0.99
+3ab4c8c87788	Restaurant El Charro	restaurant	texmex restaurant	27.74567	-98.08878	1011 W Front St	Alice	78332	+13616611409	https://restaurant.cybo.com/US/alice-texas/restaurants/		1.00
+a1b541085926	Restaurant El Charro	restaurant	mexican restaurant	27.74567	-98.08878	1011 W Front St	Alice	78332	+13616611409	https://restaurant.cybo.com/US/alice-texas/restaurants/		0.92
+4289084d8a3e	Rollies BBQ	restaurant	barbecue restaurant	27.74215	-98.12230	316 FM2507	Alice	78332	+13613964524	http://www.rolliesbbq.com/		0.92
+b803b34f1c82	Rowdy D's Red Barn	restaurant	burger restaurant	27.35832	-98.12382	304 S Broadway St	Premont	78375	+13613485172			0.96
+0e22c2b24bab	Sabores Y Valores Mexicanos Company	restaurant		27.74271	-98.08356	820 S US Highway 281	Alice	78332				0.95
+5611e58b7922	Scottish Inn Restaurant	restaurant	buffet restaurant	27.74274	-98.08450	815 S U.S. Hwy 281	Alice	78332		http://scottishinns1.placeweb.site		0.96
+7938dae12b4d	Sharks Sports Bar & Grill	restaurant	bar and grill restaurant	27.22640	-98.14280	212 E Rice St	Falfurrias	78355	+13616673039			0.95
+e1ac24dd691c	Side Door Cafe	restaurant	comfort food restaurant	27.22647	-98.14233	230 E Rice St	Falfurrias	78355	+13613255151	http://sidedoorcafe.com		0.93
+fec3f3883394	Silvas	restaurant	mexican restaurant	27.73963	-98.09339	1310 Range St	Alice	78332	+13613961388	https://www.mapquest.com/us/texas/business-alice/silvas-42267023		0.96
+7989659109e1	Smokin Ricks Bbq & More	restaurant		27.22436	-98.15623	820 W Bennett St	Falfurrias	78355	+13614741353			0.86
+d21cc0171535	Sonic - America's Drive-In	restaurant	theme restaurant	27.76273	-98.23373	Hwy 44 & Travis	San Diego	00000				0.60
+2f6c4d4a8ceb	South Texas Taco Co.	restaurant		27.65323	-98.09615	120 County Road 451	Alice	78332				0.61
+069aa3776359	Stars Drive-In	restaurant	theme restaurant	27.21856	-98.14519	913 S St Marys St	Falfurrias	78355	+13613252812		Stars Drive-In	0.96
+32274fc7a997	Stars Drive-In	restaurant	theme restaurant	27.75338	-98.06085	1218 E Main St	Alice	78332	+13616680247	http://sonicdrivein.com/	Stars Drive-In	0.98
+9b96e8b2e2d8	Stars Restaurant, Alice, Texas, Llc	restaurant		27.75324	-98.06073	1218 E Main St	Alice	78332				0.95
+a052e41a523a	Strickland's Restaurant	restaurant	texmex restaurant	27.20776	-98.14405	1918 US-281	Falfurrias	78355	+13613255222	http://www.restaurantfalfurrias.com		0.94
+03baecc3dad1	SUBWAY	restaurant	sandwich shop	27.88242	-98.61115		Freer	78357	+13613941925	http://subway.com		0.77
+22b00a7d267e	Subway	restaurant	sandwich shop	27.35927	-98.12303	201 S Broadway Ave	Premont	78375	+13613482307	https://restaurants.subway.com/united-states/tx/premont/201-s-broadway-ave		0.77
+2780fc0a109e	Subway	restaurant	sandwich shop	27.31168	-98.67763	610 N. Smith Suites 8 & 9	Hebbronville	78361	+13615275550	http://www.subway.com/en-us	Subway	0.95
+70ad3d7db45e	Subway	restaurant	sandwich shop	27.75262	-98.08298	215 N Johnson St	Alice	78332	+13616611173	https://restaurants.subway.com/united-states/tx/alice/215-n-johnson	Subway	0.98
+7ddda98456a2	Subway	restaurant	sandwich shop	27.75751	-98.05470	1610 East Main St. Suite 2, 3, & 4	Alice	78332	+13614592517	https://restaurants.subway.com/united-states/tx/alice/1610-east-main-st	Subway	0.95
+b4ba185f644e	Subway	restaurant	sandwich shop	27.75865	-98.07037		Alice	78332		http://subway.com		0.77
+bdb4963eb0c5	SUBWAY	restaurant	sandwich shop	27.76987	-98.04119		Alice	78332	+13613961168	http://subway.com		0.77
+f7b3ed16c210	Subway	restaurant	sandwich shop	27.22643	-98.13976	110 N Hwy 281	Falfurrias	78355	+13613252509	http://www.subway.com/en-us	Subway	0.96
+9ce6244f6cf5	SuKasa Grill & Bar	restaurant	bar and grill restaurant	27.31308	-98.67941	204 W Viggie St	Hebbronville	78361	+13612317001			0.94
+c6a57350a34a	Tacos El Rey	restaurant	mexican restaurant	27.32665	-98.14418	520 Co Rd 419	Premont	78375	+16615447197	http://Instagram.com/tacos_el_rey_1		0.94
+8f18b4a1ebc1	Taqueria Almeida #2	restaurant		27.74976	-98.13362	3436 W State Highway 44	Alice	78332	+13617396948			0.75
+ac3542f50234	Taqueria El Jalisiense	restaurant	mexican restaurant	27.76332	-98.23447	501 E Gravis Ave	San Diego	78384	+13612798998	http://taqueriaeljalisiense.placeweb.site		1.00
+ff7066dbdaf0	Taqueria El Tejano	restaurant		27.30063	-98.67839	708 S Smith Ave	Hebbronville	78361	+13612310813			0.96
+df710a95d9c4	Taqueria Guadalajara	restaurant	mexican restaurant	27.35402	-98.12393	725 S Broadway St	Premont	78375	+13613483747	http://www.taqueriasguadalajara.com		0.96
+2aa61af30327	Taqueria Guadalajara Premont Tx	restaurant		27.41979	-98.09068	Pr 432, Premont, TX 78375, United States	Premont	78375				0.80
+a2d540491eeb	Taqueria Jalesence	restaurant	mexican restaurant	27.76247	-98.04848	1915 E Main St	Alice	78332		https://www.taqueriajalisciense.com/		0.70
+038f5822894f	Taqueria Jalisco	restaurant	mexican restaurant	27.75543	-98.05880	1305 E Main St	Alice	78332	+13616644663	http://taqueria-jalisco.com		0.95
+cbc70ae85044	Taqueria Jalisco	restaurant	mexican restaurant	27.21317	-98.14175	1413 S Highway 281	Falfurrias	78355	+13613253094	http://Taqueriajaliscofalfurrias.com/		0.98
+2ee3570a30c4	Taqueria Vallarta	restaurant	mexican restaurant	27.72880	-98.07349		Alice	78333	+13616688253			0.92
+dc9a7f3ac56a	Tequila Jalisiense	restaurant	mexican restaurant	27.31880	-98.67715	1302 N Smith Ave	Hebbronville	78361	+13615273939	https://www.bizapedia.com/tx/tequila-amigo-jalisience-inc.html		0.92
+696683795923	Tex-Mex	restaurant	texmex restaurant	27.76380	-98.23181	210 N Benavides St	San Diego	78384	+13612797224	http://www.superpages.com/bp/san-diego-tx/texmex-L2052445233.htm		0.94
+b0bd37581af7	Texas Brick Oven	restaurant	pizza restaurant	27.74779	-98.07454	201 S Wright St	Alice	78332	+13616616836	https://online.skytab.com/51ed347585579cc729ec9e40e5a9cc05		0.99
+eb88189c6b6d	Texas Grub Wagon	restaurant		27.29806	-98.13216	16561 South US Hwy \n281	Falfurrias	78355	+13615007996			0.95
+f61450cb3458	Texas Hotdog	restaurant	hot dog restaurant	27.74997	-98.07424	302 E Main St	Alice	78332	+13614534077			0.55
+2bdbec0153cb	The Burger Barn	restaurant	burger restaurant	27.30061	-98.67770	114 Falfurrias Hwy	Hebbronville	78361	+13615275700	http://www.theburgerbarn.net/	The Burger Barn - Manvel	0.94
+1377830d3b92	The End Zone Sports Bar and Grille	restaurant		27.75030	-98.06976	711 E Main St	Alice	78332	+13617565009			0.92
+aacf4471b45d	The Gordita Shack	restaurant	mexican restaurant	27.74976	-98.13362	3436 W State Highway 44	Alice	78332	+13612277432			0.57
+31094bd905fc	The Pit Stop	restaurant		27.21057	-98.14330	1718 S US Highway 281	Falfurrias	78355				0.87
+f2ca25946b01	The Table Downtown Deli	restaurant	sandwich shop	27.74993	-98.07481	214 E Main St	Alice	78332	+3614534000			0.90
+5bdaea120582	Tutti Frutti Delight	restaurant	sandwich shop	27.75923	-98.05304	1721 E Main St	Alice	78332	+13616646191	http://tfyogurt.com	Tutti Frutti	0.95
+b6e116b3831c	Vernon's Cafe - Premont, TX	restaurant		27.35898	-98.12490	215 S Agnes St	Premont	78375	+13613485005			0.92
+40fbfafbc4fa	Victor's Pizza	restaurant		27.22849	-98.14955	504 W Edwards St	Falfurrias	78355	+18323425526			0.87
+f4502adfef32	W.A.M.S junior high	restaurant		27.75431	-98.06664		Alice					0.78
+376293b15628	Wendy's	restaurant	burger restaurant	27.74881	-98.07284	410 E Front St	Alice	78332	+13614156011	https://locations.wendys.com/united-states/tx/alice/410-e-front-st		0.96
+9ef45b32d991	Whataburger	restaurant	burger restaurant	27.74779	-98.11186	141 S U.S. Hwy 281	Alice	78332	+13613960212	https://locations.whataburger.com/tx/alice/141-s-us-hwy-281.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+ae595a0e51ee	Wingstop	restaurant	chicken restaurant	27.76771	-98.04189	2611 E Main St Ste 701	Alice	78332	+13616689464	https://www.wingstop.com/location/wingstop-405-alice-tx-78332/menu?y_source=1_NTUyMDY1NzEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+4f4f691d7e60	X Smoked BBQ	restaurant	barbecue restaurant	27.31425	-98.68703	906 W Harald St	Hebbronville	78361	+19563079927			0.70
+2be2802b08a9	Avir at Alice	senior	retirement home	27.75749	-98.05103	801 Coyote Trail Suite A	Alice	78332	+13616663800	http://avirhg.com/	Avir at Bowie	0.96
+d191b4ab141f	Casa Real	senior	retirement home	27.36235	-98.12823	325 NW 2nd St	Premont	78375	+13613483561	http://realinc.org/housing.php		0.92
+845801cae276	Casa Real Five	senior	retirement home	27.88473	-98.61162	700 Jeff Cowley St	Freer	78357	+13613947661			0.92
+d37230cdd60b	Falfurrias Nursing And Rehabilitation Lp	senior	retirement home	27.21480	-98.14876	1301 S Terrell St	Falfurrias	78355	+13613253658	https://nursinghomedirectory.com/texas/falfurrias		1.00
+14fa9b814de2	First Class Activity Center	senior	retirement home	27.75202	-98.07407	308 E 2nd St	Alice	78332	+13613564265			0.92
+9d6c66f05597	Gulf Shores Rehabilitation and Healthcare Center	senior	retirement home	27.21478	-98.14874	1301 S Terrell St	Falfurrias	78355	+13613253658	https://www.nexion-health.com/gulfshores/		0.99
+d0b3651ee901	La Paloma Nursing Center	senior	retirement home	27.74764	-98.24561	138 S FM 1329	San Diego	78384	+13612798291	https://www.savaseniorcare.com/la-paloma-nursing-center		1.00
+a8d45f4f41c9	Los Encinos Elderly Project	senior	retirement home	27.21550	-98.15111	1210 S Center St	Falfurrias	78355	+13613255543	http://wellsfargo.com		0.92
+36d500acc4e3	Meridian Care	senior	retirement home	27.75244	-98.07605	219 N King St	Alice	78332	+13616644366	http://www.meridiancarealice.com/		0.92
+e5007bba04ad	Meridian Care of Hebbronville	senior	retirement home	27.31936	-98.68397	606 W Gruy St	Hebbronville	78361	+13615274411	http://meridiancareheb.com		0.97
+6a36fd688b62	Premont Rehab Nursing Center	senior	retirement home	27.36318	-98.13042	431 NW 3rd St	Premont	78375	+13613483553	https://www.nursinghomesite.com/PREMONT_REHAB_AND_NURSING_CENTER...		0.92
+9738edbf7129	Real	senior	retirement home	27.75717	-98.09216	1300 Wyoming St	Alice	78332	+13616684157	http://realinc.org		0.85
+f458c1ec1610	Real	senior	retirement home	27.75736	-98.09106	1300 Wyoming St	Alice	78332	+13616684157	http://realinc.org		0.85
+019bcfd1411c	Real Adult Day Care	senior	retirement home	27.36242	-98.12811	325 NW 2nd St	Premont	78375	+13613483562	http://realinc.org		0.81
+ab42d811aa9d	Real Dahs III	senior	retirement home	27.59246	-98.40874	722 S Humble St	Benavides	78341	+13612563343			0.71
+e745d72c1cce	Windsor Nursing and Rehabilitation Center of Alice	senior	retirement home	27.75889	-98.05135	606 Coyote Trail	Alice	78332	+13616645479	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-alice/		0.92
+5a9ed6076f99	Windsor Nursing and Rehabilitation Center of San Diego	senior	retirement home	27.74761	-98.24590	138 S Farm to Market 1329	San Diego	78384	+13612798291	https://wellsentialhealth.org/location/windsor-nursing-rehabilitation-center-of-san-diego/		0.92
