@@ -1,0 +1,680 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+fb46e6f6a707	Bobby Jo's Donut Palace	bakery	donut shop	31.72460	-96.16429	335 W Commerce St	Fairfield	75840	+19033896339	http://bobby-jos-donut-palace.edan.io		0.96
+1bbbfcd0a589	Cinnabon	bakery		31.44854	-96.07867	2605 W Commerce St	Buffalo	75831	+19033229034	https://locations.cinnabon.com/tx/buffalo/2605-west-commerce-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.97
+d993bded3239	Country Donuts	bakery	donut shop	31.02417	-96.48829	2188 US-79	Franklin	77856	+19798285324			0.92
+bfbefa6b6dfe	Dessert by MommaCakes	bakery		31.72602	-96.16068	105 S Mount St	Fairfield	75840	+19033890007	http://LoveMommaCakes.com/		0.94
+1a7e62a20f0c	Donut Palace	bakery	donut shop	31.84384	-96.80228	306 N Cedar Ave	Hubbard	76648	+12545761275	http://dawson.com		0.92
+2e5fa369ff10	Donut Palace	bakery	donut shop	31.45711	-96.07162	1019 W Commerce St	Buffalo	75831	+19032219203	https://donut-place-tx-6.hub.biz		0.96
+f25c631147a5	Donut Palace in jewett	bakery	donut shop	31.36418	-96.14318	610 N Main St	Jewett	75846	+19036266715	http://donutpalace.com/		0.99
+c51a007e0b91	Fresh Donuts	bakery	donut shop	31.52691	-96.53201	502 N Ellis St	Groesbeck	76642	+19048403861			0.96
+75524af7d3b3	LY'S Donuts & Lunch	bakery	donut shop	31.03094	-96.11475	109 Main St	Normangee	77871	+19363961620	http://lys-donuts-lunch.poi.place		0.98
+d8ac7ea0a7c9	Mart Donuts	bakery	donut shop	31.54266	-96.83269	518 E Texas Ave	Mart	76664	+12548762495			0.96
+1e4addde9c07	Mimi’s Heart Bakery	bakery		31.65902	-96.42828	277 County Road 498	Mexia	76667	+19036448094	http://Mimisheartbakery.com/		0.96
+f50f53070cd7	Snowflake Donut	bakery	donut shop	31.52051	-96.53693	502 S Ellis St	Groesbeck	76642	+12542552666			0.92
+59dc13080ef7	Snowflake Donuts & Deli	bakery	donut shop	31.47592	-96.91979	105 S Wiebusch St	Riesel	76682	+12548963436			0.78
+0c7601ed9c7b	Star Donuts	bakery	donut shop	31.62652	-96.27706	920 E Main St	Teague	75860	+12547393200	http://star-donuts-teague.jany.io		0.96
+8b0b5d339f3d	Teague Donut Palace	bakery	donut shop	31.63600	-96.27162	843 US Hwy 84 W	Teague	75860	+12547393855	http://www.donutpalace.com/		0.96
+3b4334bc2575	The Flour Market	bakery		31.99614	-96.51338	6015 SW County Road 1120	Corsicana	75110	+19036547742			0.60
+d5acd7be7821	Twisty Donuts	bakery	donut shop	31.68310	-96.48965	401 W Milam St	Mexia	76667	+12547470194			0.92
+5dd15d37dcf5	Coyote Run	bar		31.67179	-96.49603	807 S Martin Luther King Jr Hwy	Mexia	76667	+12545627140	http://www.coyoterun.com		0.77
+a2af85125c11	D&R	bar		31.71439	-96.17879	W Interstate 45	Fairfield	75840	+19033899210			0.77
+bb1a67215fea	Denmond's Lounge & Sports Bar	bar		31.62892	-96.39878	2824 FM-1365	Mexia	76667	+12545629040			0.66
+9483d28f48d2	Dry Bean Saloon	bar	cocktail bar	31.16452	-96.67623	302 S Main St	Bremond	76629	+12547467449			0.92
+345ff42a4bd4	El Ranchito Winery	bar	winery	31.94015	-96.19431	629 FM-416	Streetman	75859	+12145551212			0.76
+48456631b56d	Erler’s Texas Tavern Grill	bar		31.84939	-96.79651	201 NE 4th St	Hubbard	76648	+12545763000			0.77
+66d188801e1c	Frog Branch Saloon	bar		31.91761	-96.89520	207 N Pecan St	Malone	76660	+2545301158			0.92
+cc5859d3fc0d	H Bar C Ranch	bar		31.60181	-96.52300	3912 Highway 14 N	Mexia	76667	+12545622714			0.60
+a54b1730dea0	Honey Hole Bar	bar		31.59239	-96.52296	3146 TX-14	Mexia	76667	+12542170208			0.96
+5280bbf17140	Hot Rods Tavern	bar		31.20102	-96.27153	11449 S. FM 3	Marquez	77865				0.98
+778f954e5008	Joline's Bar	bar		31.40768	-96.42773	6028 FM937	Groesbeck	76642	+12547470011			0.97
+811e6bdbd6af	JUST ONE MORE	bar		31.67119	-96.49634	311 TX-14	Mexia	76667	+19036441643			0.97
+f879da9edf1d	L&B Saloon	bar		31.68622	-96.42368	2380 Highway 84 E	Mexia	76667	+12543006912			0.70
+12c48bc349b5	Limestone Annex	bar		31.52193	-96.53669	305 S Ellis St	Groesbeck	76642	+12547292245	http://limestonecounty.net		0.98
+37c397ac953e	Limestone Louie's	bar		31.43136	-96.31255	100 Private Road 5881A	Jewett	75846	+19036264119	https://www.lakelimestonemarina.com/		0.93
+a42a1c9e1bae	M&M BAR	bar	pub	31.08118	-96.98059	888 N State Highway 77	Rosebud	76570	+12544938037			0.66
+2ef3e402bb72	Mar's Bar	bar		31.72683	-96.14301		Fairfield					0.71
+39eae75c7299	Oakley's Lumberyard Bar	bar		31.47495	-96.92549	200 E Frederick St	Riesel	76682	+12548965900	http://www.oakleys-lumberyard.com/		0.99
+b3343eef203e	Oakleys Texas Bar And Grill	bar	sports bar	31.47524	-96.92547	200 W Frederick St	Riesel	76682	+12547767372			0.55
+29010be3f670	Old Union Bar	bar		31.40749	-96.42775	6030 FM 937	Thornton	76642	+12547293701	https://www.reverbnation.com/venue/1325785		0.55
+faf2ad6bee8f	Opie and Yvetta's Lake Resort	bar		31.94819	-96.17000	340 Chelsea Dr	Streetman	75859	+18179882464			0.92
+72a8f8cdf48d	Purple Parrot Bar	bar		31.24994	-96.99130		Lott		+12547181992			0.97
+3634d5f88a5b	Purple Parrot Bucking Bar & Grill	bar		31.24576	-96.98770	576 County Road 408	Lott	76656	+12547181992			0.90
+008aac96ba6c	Rolling North Bound I-45	bar		31.33398	-96.00887		Centerville					0.97
+15e0fb454de4	Roosters	bar		31.67888	-96.42286	1093 Lcr 498	Mexia	76667	+12544729961	https://www.regiscorp.com		0.55
+1958f601ec19	Spot Sports Bar Mexia	bar	sports bar	31.60014	-96.52254	3808 TX-14 N	Mexia	76667	+18325995553			0.89
+4cd9f1401108	The Gin Palace	bar		31.25249	-96.31341		Marquez	77865	+19034802670			0.97
+62b1b4294c98	The Keg	bar	dive bar	31.35351	-96.15428	701 FM 39	Jewett	75846	+19036263044	http://www.cityseekr.com/jewett/bars-cafes/poi-the-keg-1201134.html		0.99
+e744d1f644fd	The Lone Star Dancehall	bar		31.78943	-96.46330	206 N 3rd St	Wortham	76693	+12547656230	http://thelonestardancehall.com/		0.86
+7f79d2324d38	The Red Barn Winery Tasting Room	bar	winery	31.84733	-96.79649	219 N Magnolia Ave	Hubbard	76648	+12545228466	https://theredbarnwinery.com/		0.95
+49317aaf73d3	The Station Sports Bar & Eatery	bar	sports bar	31.02977	-96.11756	302 Main St	Normangee	77871	+19363963010	https://orders.cake.net/11590119		0.61
+db0f0b1e54ce	Tradinghouse Sports Bar & Grill	bar	sports bar	31.58709	-96.92038	4553 Lake Felton Pkwy	Waco	76705	+12548635251	https://www.eventseeker.com/venue/582839-trading-house-bar-grill-waco		0.97
+8995825112bd	Apple Sport Ford	cardealer		31.32577	-96.88908	1639 Hwy 6	Marlin	76661	+12543583177	https://www.applesportford.com/	Ford Motor Company	1.00
+961b20d090dd	Apple-Sport Chevrolet	cardealer	used auto dealer	31.27259	-96.87196	1635 N Highway 6 Byp	Marlin	76661	+18558385448	http://applesportchevy.com/		0.85
+9c93615cc432	Apple-Sport Chevrolet	cardealer		31.32474	-96.88745	1635 Hwy 6	Marlin	76661	+12542720145	http://www.applesportchevy.com/	Chevrolet	0.92
+a5bb5f94cc2f	APPLE-SPORT CHEVROLET	cardealer		31.31673	-96.88857	1635 State Highway 6	Marlin	76661		https://www.applesportchevy.com	Chevrolet	0.80
+517fa67af8c0	Autos Unlimited	cardealer	used auto dealer	31.30605	-96.88483	728 Live Oak St	Marlin	76661	+12548832619	http://www.autosunlimitedofpa.com		0.92
+71048e24bdb6	Baggman's Motor Shop	cardealer		31.71632	-96.54350	364 Lcr 239	Mexia	76667	+19033909146			0.92
+894caea29b35	Beene Motor Sales Inc.	cardealer		31.68450	-96.46719	1100 E Milam St	Mexia	76667	+12542035333			0.99
+50b15db3508d	Bubba’s New & Used Auto Sales	cardealer		31.68480	-96.46854	2250 East Main St	Mexia	78332	+18325163659	http://Teamalicechevrolet.com/		0.84
+e8fd010750f8	Central Texas Auto Credit	cardealer		31.72070	-96.17690	350 I-45 E	Fairfield	75840	+19036449500	https://www.centraltexasautocredit.com/		0.68
+179c5aaec058	Chris's Cash Cars	cardealer		31.07171	-96.97809	206 S 5th St	Rosebud	76570	+12545830112	https://sites.google.com/view/chris-cash-cars/home		0.80
+556509738dd5	Dick Scott Ford	cardealer		31.68259	-96.48437	401 N Sherman St	Mexia	76667	+12543555873	https://www.dickscottfordinc.com/	Ford Motor Company	1.00
+431ec036b086	Freedom CDJR Fairfield	cardealer		31.72091	-96.17749	350 I-45 E	Fairfield	75840	+19036089517	http://www.freedomcdjrfairfield.com/		0.97
+bb109c5709e4	Freedom Chevrolet Fairfield Service Center	cardealer		31.72254	-96.17728	320 I-45	Fairfield	75840	+19036089512	http://www.freedomchevroletfairfield.com/	Chevrolet	0.97
+2fc8b75dbc46	Freedom Chrysler Jeep Dodge Ram	cardealer		31.72086	-96.17758	350 I-45	Fairfield	75840	+19032825728	https://freestone-chrysler-jeep-dodge-tx.hub.biz/	Chrysler	0.99
+d05f6d44204d	Glover Ford	cardealer		31.32473	-96.89088	1204 N. Business Hwy 6, Marlin	Marlin	76661	+12548835583	https://www.ford.com/	Ford Motor Company	0.92
+4454922bb149	GMPS Beene	cardealer		31.68472	-96.46721	Beene Motor Sales Inc, 1100 E Milam St	Mexia	76667	+12542035333	http://www.beenemotorsales.com?cs:pro=yext		0.78
+9eeea4001a8f	Greater Texas Ford Dealers	cardealer		31.32125	-96.89227	1204 N State Highway 6	Marlin	76661	+18553636064		Greater Texas Ford Dealers	0.88
+d30bc9071bde	Greater Texas Ford Dealers	cardealer		31.68303	-96.48438	401 N Sherman St	Mexia	76667	+18883294059		Greater Texas Ford Dealers	0.76
+8aecc1c9be67	Groesbeck Auto Sales	cardealer	used auto dealer	31.52105	-96.53629	410 S Ellis St	Groesbeck	76642	+12547295599			0.92
+d288ddac67ff	Highway Equipment Sales	cardealer		31.51828	-96.96224	206 Battle Lake Rd	Riesel	76682	+12548752444	http://www.highwayequipmentsales.com		0.92
+e90255dbf89f	Joe Gamble /Mike Terry Ford	cardealer		31.68190	-96.49525		Mexia		+12546441643			0.81
+625901b396a5	Johnboy at Mike Terry Auto	cardealer		31.72265	-96.18057	320 Interstate 45 E	Fairfield	75840	+19038759442			0.68
+2c87e9e2106b	L & L Sales	cardealer		31.68648	-96.45578	1537 E Milam St	Mexia	76667	+12545626224	https://www.landlsalesofmexia.com		0.96
+a2eec932d619	Mike Terry Chevrolet GMC	cardealer		31.68482	-96.46717	1100 E Milam St	Mexia	76667	+12546332675	https://www.mterryautogroup.com/	Chevrolet	0.99
+6b8449445ca6	Mike Terry Ford	cardealer		31.68246	-96.48504	401 N Sherman St	Mexia	76667	+12545623864	https://www.miketerryford.com/	Ford Motor Company	0.92
+2b9b81a985ba	Mike's Auto Sales	cardealer		31.30653	-96.88513	725 Live Oak St	Marlin	76661	+12548835000		Mike's Carwash	0.92
+c1540251af42	Powell Auto Sales	cardealer	used auto dealer	31.41698	-96.91470	110 County Road 120A	Riesel	76682	+12548962248	http://powellsautosales.com		0.92
+0b29004c5a3f	Rutherford Auto Sales	cardealer		31.72543	-96.16196	202 W Commerce St	Fairfield	75840	+19033894146	http://www.rutherfordautosalesinc.com		0.98
+d00a9400364f	Square One Sales And Services	cardealer		31.40463	-96.03716	23401 Interstate Highway 45 Feeder N	Buffalo	75831	+19033221764	http://www.sq1sales.com/		0.73
+2dce4e6a8d2c	Stanley Chevrolet Buick Marlin	cardealer		31.32457	-96.88743	1635 State Highway 6	Marlin	76661	+12542754236	https://www.gm.com		0.83
+4809c5b0bd99	Texas Auto Group	cardealer	used auto dealer	31.68305	-96.48982	401 W Milam St	Mexia	76667	+12545622222			0.65
+0250481ed1c2	Trenco Motors	cardealer		31.63834	-96.28361	1201 N 4th Ave	Teague	75860	+12546150076	http://www.trencomotors.com/		0.92
+938626342f9d	Tri County Sales	cardealer		31.68497	-96.46187	1310 E Milam St	Mexia	76667	+12544724214	http://www.tricountysalesmexia.com		0.92
+1c4c612b3cc5	Two J Llc	cardealer		31.92662	-96.42099	700 E Main St	Richland	76681				0.75
+701ec96ce10d	Watkins auto sales	cardealer	used auto dealer	31.53750	-96.95667	2324 Hallsburg Rd	Waco	76705	+12544245489			0.92
+3f09e234feb7	1912 Coffee and Bites	coffee		31.30672	-96.89651	116 Winter St	Marlin	76661	+12542528090			0.92
+8985743ee429	BlackKat CAFE	coffee		31.68460	-96.47115	1000 E Milam St	Mexia	76667	+12545627788	http://www.theblackcatcafedevon.org		0.85
+c92b4c4778f8	Brandin Iron Cafe	coffee		31.24441	-96.25800	332 W Carrington Ave	Marquez	77865	+19035291200			1.00
+9cb2dc10eeba	Coffee Cabaret	coffee		31.68512	-96.48188	600 N Paris St	Mexia	76667	+12545625655	http://www.somethingunique.net/		0.95
+c857e66ebc3e	Daily Dose Coffee	coffee		31.30615	-96.89615	204 Live Oak St	Marlin	76661				0.71
+defcd16e1514	Dixie Cafe	coffee		31.01069	-96.51058	1848 W US Highway 79	Franklin	77856	+19798281322	http://www.dixiecafe.com		0.56
+7195701ae1d0	Duck Mud Coffee Company	coffee		31.30687	-96.63015	103 N Narcissus St	Kosse	76653		http://Duckmud.com/		0.95
+da6081401c23	Ella's Cafe	coffee		31.78455	-96.86220	1738 TX-31	Mt Calm	76673	+12549931080	https://www.goodfoodbyella.com/		0.92
+787fd1eee8b5	Hart To Table	coffee		31.72512	-96.15672	405 E Commerce St	Fairfield	75840	+19033905125	https://hearttotablellc.com		0.75
+142b83d1da68	Headcount Coffee - Read and Roast	coffee		31.36122	-96.14521	110 N Main St	Jewett	75846	+18669226333	https://www.headcountcoffee.com/blogs/headcount-life/what-endurance-looks-like-before-anyone-is-watching?_pos=1&_sid=7568ce2ca&_ss=r		0.95
+2a74932e6145	Hwy 77 Cafe	coffee		31.09555	-96.98095	1101 US-77	Rosebud	76570	+12545834444	http://www.hwy77cafe.com/		0.97
+563c8bd97123	Janies restaurant	coffee		31.30612	-96.88544	718 Live Oak St	Marlin	76661	+12548049046			0.57
+10d7a8d45107	Jitters 2.0 on Main	coffee		31.02492	-96.48805	114 N Main St	Franklin	77856	+19792242857			0.96
+8af5afad20e8	KC & Company Coffee	coffee		31.72552	-96.15906	122 S Keechi St	Fairfield	75840	+13615711107	https://kc-company-coffee.square.site/		0.60
+a8f164326f85	Lakeside Cafe	coffee		31.97425	-96.69386	1355 FM667	Purdon	76679	+12545781554			0.96
+fb20fc5a1572	Lucky Food Mart	coffee		31.68457	-96.47089	1000 E Milam St	Mexia	76667	+12544725086			0.92
+144125e97096	Main Street Coffee	coffee		31.36119	-96.14516	110 N Main St	Jewett	75846	+19036263002	http://mainstreet-coffee-cafe.com		0.92
+dfaa605f6416	Market Seventy Nine	coffee		31.02612	-96.48645	204 Alley St	Franklin	77856	+19799061431	http://marketseventynine.square.site/	Title Nine	0.99
+fcfb8cc721e4	Navarro Mills General Store	coffee		31.97437	-96.69388	1355 FM-667	Purdon	76679	+12545781549	https://www.groupon.com/biz/corsicana-tx/navarro-mills-cafe		0.75
+b0c8a2a5d6c2	Pioneer Cafe	coffee		31.02576	-96.48621	106 W Hwy 79	Franklin	77856	+19798285631	http://www.horseshoecafe.com/		0.87
+174ac26edcef	Round Prairie Coffee	coffee		31.73164	-96.14114	932 Main St	Fairfield	75840	+19034182233	http://Www.rpbcfairfield.org/		0.60
+d56a68659bc4	Starbucks Coffee Company	coffee		31.68384	-96.47829	702 E Milam St	Mexia	76667	+12549641063	https://www.starbucks.com/store-locator/store/1032475/	Starbucks	0.96
+f2ec37ad486c	SugaMomma’s	coffee		31.63061	-96.27694		Teague		+19036902412			0.76
+c8d23657dbd7	The Bud Coffee House	coffee		31.07344	-96.97802	421 W Main St	Rosebud	76570	+12545830050	https://thebudcoffee.square.site/		0.99
+935e8e3a7c23	The Coffee Nook	coffee		31.46404	-96.05795	1030 Commerce St E	Buffalo	75831	+19033225994			0.96
+00c6eb8e015e	The Little Kitchen	coffee		31.71343	-96.16505	818 S Fairway St	Fairfield	75840	+19035195292			0.96
+93307c346cdb	Trigger Bear Coffee	coffee		31.30609	-96.88537	718 Live Oak St	Marlin	76661	+12542522526			0.96
+8873c6fe611e	Navarro College South	college		31.69107	-96.49039	901 N Dr M.L.K. Jr. Hwy	Mexia	76667	+12545623848	http://www.navarrocollege.edu	Navarro College	0.95
+482f81b18fda	76	convenience		31.78988	-96.46392	203 North 3rd Street	Wortham	76693	+12547653552	https://www.76.com/		1.00
+aa321f74f285	A and H Short Stop	convenience		31.52234	-96.98999	173 Old Hallsburg Rd	Riesel	76682	+12548752670	http://phillips66.com		0.99
+4f6744b1b7ce	A-1 Drive In	convenience		31.16749	-96.67766	301 W Collins St	Bremond	76629	+12547467336	https://a-1-drive-in.hub.biz/		0.92
+a99719719edc	Alon Gas Station	convenience		31.68493	-96.47380	901 E Milam St	Mexia	76667	+12545626444	https://www.myalon.com		0.92
+a53f944ad929	B.E Fairpark	convenience		31.72311	-96.14676	739 E Commerce St	Fairfield	75840	+19033892585	http://shell.com		0.78
+7ea7a2c585ca	BC Drive Thru	convenience		31.30408	-96.61977	507 Washington St E	Kosse	76653	+12543761543			0.66
+1c99aa0cbda5	Ben's Short Stop	convenience		31.30652	-96.89239	403 Live Oak St	Marlin	76661	+12548032671			0.65
+efe7addab6ca	Biddle's One Stop	convenience		31.02971	-96.11685	214 Main St	Normangee	77871	+19363966822			0.92
+3f4b6e3995bb	Boone Prairie Store	convenience		31.16620	-96.48001	8004 E FM 979	Franklin	77856	+19798285846			0.57
+7f9f999bceaf	Bremond Kwik Stop	convenience		31.16914	-96.67686	Titus St	Bremond	76629	+12547467115	https://www.bizapedia.com/tx/bremond-kwik-stop-llc.html		0.92
+ee2f2adb77b1	BUFFALO FOOD MART	convenience		31.45803	-96.07028	814 WEST COMMERCE ST.	Buffalo	75831		https://www.exxon.com/en/find-station/mobil-buffalo-tx-buffalofoodmart-200321270	Mobil	0.80
+938ddb1c20ad	C & N Axtell Store	convenience		31.65734	-96.97114	4553 E Old Axtell Rd	Axtell	76624	+12548635249	https://c-n-axtell-store.hub.biz		0.92
+2cce2fa734eb	C J's 66	convenience		31.68334	-96.49276	605 W Milam St	Mexia	76667	+12545620461	http://phillips66gas.com/locations		0.92
+a4437ea0bc9f	Casey's	convenience		31.07290	-96.97935	107 North 5th Street	Rosebud	76570		https://www.caseys.com/general-store/tx-rosebud/107-north-5th-street/4821	Casey's General Store	0.80
+9ff613eb4a39	CAT Scale	convenience	truck gas station	31.72587	-96.17867	300 I-45 E	Fairfield	75840	+19039154418	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+c3b95bb67968	CAT Scale	convenience	truck gas station	31.44796	-96.07854	2605 W Commerce St	Buffalo	75831	+19033229034	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+d9a052df55e4	Cefco	convenience		31.67216	-96.49559	301 S Martin Luther King Jr Hwy	Mexia	76667	+12547910009	https://cefcostores.com/	CEFCO Convenience Stores	1.00
+2dca5b021f33	CEFCO Convenience Store	convenience		31.47458	-96.92523	201 W Frederick St	Riesel	76682	+12548967777	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+43fd5ffacf14	CEFCO Convenience Store	convenience		31.07284	-96.97926	107 N 5th St	Rosebud	76570	+12544515079	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+4d37817418eb	CEFCO Convenience Store	convenience		31.84798	-96.79747	309 N Magnolia Ave #31	Hubbard	76648	+12545762886	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+50f083fad3f6	CEFCO Convenience Store	convenience		31.68380	-96.48268	300 E Milam St	Mexia	76667	+12545623388	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+5c05d3401d7a	CEFCO Convenience Store	convenience		31.30814	-96.63228	101 N Mignonette St	Kosse	76653	+12543752622	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+5fc89481980a	CEFCO Convenience Store	convenience		31.54115	-96.83577	212 E Texas Ave	Mart	76664	+12548762887	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+7badb8fa5857	CEFCO Convenience Store	convenience		31.02609	-96.48605	116 E US Highway 79	Franklin	77856	+19798281468	https://www.cefcostores.com/		0.92
+975c84666342	CEFCO Convenience Store	convenience		31.30600	-96.89965	101 Williams St	Marlin	76661	+12548835901	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+d5252870b266	CEFCO Convenience Store	convenience		31.30517	-96.87589	107 Hwy 6	Marlin	76661	+12548040087	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+dc2d7ef0d46c	CEFCO Convenience Store	convenience		31.72493	-96.15535	441 E Commerce St	Fairfield	75840	+19033893755	https://www.cefcostores.com/		0.92
+eac6e831e475	CEFCO Convenience Store	convenience		31.62718	-96.28023	701 Main St	Teague	75860	+12547393594	https://www.cefcostores.com/		0.92
+f1f58ab8d1c9	CEFCO Convenience Store	convenience		31.78972	-96.46317	210 N 3rd St	Wortham	76693	+12547653552	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+f49cd50ce365	CEFCO Convenience Store	convenience		31.02333	-96.48968	405 W Hwy 79	Franklin	77856	+19798284604	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+516b859b034a	Charlie's Exxon	convenience		31.68465	-96.47376	1000 E Milam St	Mexia	76667	+12545627788	http://www.exxon.com		0.67
+9ff2d3ba2bcb	Charlie's Truck Stop	convenience		31.68261	-96.49361	315 N Dr M.L.K. Jr. Hwy	Mexia	76667	+12545626296			0.92
+517ec877885e	Chevron	convenience		31.71226	-96.17743	500 I-45 SOUTH	Fairfield	75840		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/500-I-45-SOUTH-FAIRFIELD-TX-75840-id379689	Chevron	0.95
+623f35efd19e	Chevron	convenience		31.68482	-96.47365	901 E. MILAM	Mexia	76667		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/901-E-MILAM-MEXIA-TX-76667-2526-id388977	Chevron	0.80
+8f56ec3884de	Chevron	convenience		31.45402	-96.07418	1609 W Commerce St	Buffalo	75831	+19033225555	https://www.chevronwithtechron.com/en_us/home/find-a-station.html?/station/1609-W-COMMERCE-ST-BUFFALO-TX-75831-0000-id356051	Chevron Horseshoe Bend	0.92
+f491dc9ae870	Chevron	convenience		31.41493	-96.58075	801 HWY14	Thornton	76687		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/801-HWY14-THORNTON-TX-76687-0000-id384931	Chevron	0.95
+f7b257ae9338	Chevron Station Fairfield	convenience		31.71758	-96.17482	690 W Us Highway 84	Fairfield	75840	+12814499975			0.97
+8aa3945f6d8c	Chevron Station Marlin	convenience		31.30631	-96.89476	403 Live Oak St	Marlin	76661	+12547533565			0.92
+564a033e71ee	Chevron Station Wortham	convenience		31.79438	-96.46235	203 N 3rd St	Wortham	76693	+13019219200			0.85
+2ef8a06d493e	Conoco	convenience		31.72327	-96.16962	300 US-84	Fairfield	75840	+19033892931	https://www.conoco.com/	Conoco	0.92
+58b1bf0fb42f	Conoco	convenience		31.45582	-96.07220	1220 Commerce St W	Buffalo	75831	+19033222220	https://www.conoco.com/	Conoco	0.92
+80e0b3b501b0	Conoco	convenience		31.62834	-96.27193	220 E Loop 255	Teague	75860	+12547395230	https://www.conoco.com/	Conoco	0.74
+e6cbe3ce9343	Conoco	convenience		31.28410	-96.97604	3593 TX-320	Chilton	76632	+12548835933	https://www.conoco.com/		1.00
+fb67cb525b1d	Conoco	convenience		31.36776	-96.14034	1117 N Main St	Jewett	75846	+19036265112	https://www.conoco.com/	Conoco	0.92
+97cc1950b2f0	CROSS ROADS DRIVE IN	convenience		31.24320	-96.25710	633 VW GOODWIN BLVD	Marquez	77865		https://locations.valero.com/en-us/LocationDetails/Index/633-VW-GOODWIN-BLVD/0000003082	Valero	0.80
+8f62648ab0e5	Dap's Stop N Shop	convenience		31.65140	-96.24661	600 US HIGHWAY 84 W	Teague	75860		https://locations.valero.com/en-us/LocationDetails/Index/600-US-HIGHWAY-84-W/0000031024	Valero	0.80
+9f317ac47074	Daps Stop N Shop	convenience		31.63722	-96.28047	897 US Hwy 84 W	Teague	75860	+12547395511	http://Shell.com/	Stop & Shop	0.92
+aff051b6444d	Debbie's One Stop	convenience		31.72144	-96.69061	110 Highway 171	Coolidge	76635	+12547862307	www.buzzfile.com/business/Debbie!s-One-Stop-254-786-2307		0.83
+37d76fdc6a20	Discount Center	convenience		31.36787	-96.13992	1303 N Main St	Jewett	75846	+19036264872	https://discount-center-tx.hub.biz		0.99
+a609d2adb206	Don's	convenience		31.52455	-96.53380	202 N Ellis St	Groesbeck	76642	+12547292447	http://www.exxonmobil.com/		0.92
+7a286ec817ce	Double D Food & Fuel	convenience		31.67335	-96.48047	407 E Tyler St	Mexia	76667	+12545626950	http://glade.net		0.92
+5256c9dbe9e5	End Zone Mini Mart	convenience		31.46927	-96.92413	402 S Memorial St	Riesel	76682	+12548961116			0.65
+6f2be3e7dfc5	Exxon	convenience		31.59770	-96.15174	771 Hwy 179	Teague	75860	+19033892672	https://www.exxon.com/en/find-station/exxon-teague-tx-jettruckstop-200313102?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+72d5a9fd85c6	Exxon	convenience		31.02087	-96.49335	760 Hwy 79 W	Franklin	77856	+19798284344	https://www.exxon.com/en/find-station/exxon-franklin-tx-lionsdenexxon-200313703?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+74baad22eb53	Exxon	convenience		31.30895	-96.63519	506 Washington	Kosse	76653	+12543752777	http://www.exxon.com		1.00
+754d0dfc87ad	Exxon	convenience		31.63643	-96.27045	840 West Us Hwy 84	Teague	75860	+17132271050	https://www.exxon.com/en/find-station/exxon-teague-tx-teaguemart247-200322186?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.98
+8a509b9d2a02	Exxon	convenience		31.44887	-96.07715	2430 W. Commerce	Buffalo	75831	+19033229150	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+901c6d8b776b	Exxon	convenience		31.68258	-96.49347	315 N Hwy 14	Mexia	76667	+12545626296	http://www.exxon.com		1.00
+a81eeb14f687	Exxon	convenience		31.30649	-96.89979	101 Craik Street	Marlin	76661	+12548832688	https://www.exxonmobilfuels.com/en/find-gas-station/200314951		0.92
+b3e4f94f5e83	Exxon	convenience		31.87772	-96.34576	1389 Fm 246	Streetman	75859	+19035993721	http://www.exxon.com		1.00
+b8ebdae6c3e9	Exxon	convenience		31.01068	-96.51064	1870 W US Highway 79	Franklin	77856	+19798280031	http://www.exxon.com		0.62
+c3f8d5ff0329	Exxon	convenience		31.46972	-96.92419	402 S Memorial	Riesel	76682	+12548966500	http://www.exxon.com		1.00
+cb23cc5a5c8b	Exxon	convenience		31.71679	-96.17496	685 W Hwy 84	Fairfield	75840	+19033893742	http://www.exxon.com		0.92
+e27fc7af436b	Exxon	convenience		31.73007	-96.14180	923 E Main Street	Fairfield	75840	+19033896167	https://www.exxonmobilfuels.com/en/find-gas-station/200319149		0.92
+fd44e262db7b	Exxon	convenience		31.52466	-96.53375	202 N Ellis Street	Groesbeck	76642	+12547292447	https://www.exxon.com/en/find-station/exxon-groesbeck-tx-donsexxon1-200311352?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+ce6f5cecb7a9	Exxon Mobil	convenience		31.90100	-96.71802	107 E Highway 31	Dawson	76639	+12545781219	http://www.exxonmobilstations.com		0.65
+d19f70e489da	Fuel Maxx 41	convenience		31.71203	-96.17721	500 I-45	Fairfield	75840	+19039154603			0.99
+d6744b6072a9	Gilliam's Grocery	convenience		31.45998	-96.06813	431 W Commerce St	Buffalo	75831	+19033224904	https://gilliam-s-grocery-tx.hub.biz		0.92
+31eb93341644	Hallsburg Short Stop	convenience		31.52248	-96.99003	173 Old Hallsburg Rd	Riesel	76682	+12548752670	https://www.dandb.com/businessdirectory/ahshortstop-riesel-tx...		0.96
+11b059538e09	Hubbard Food Mart	convenience		31.84977	-96.79951	601 N Magnolia Ave	Hubbard	76648	+12545761080			0.92
+1d1516516522	Hubbard Liquor Store	convenience		31.84984	-96.79952		Hubbard	76648	+12562674533			0.92
+c4df22c098af	HWY 31 Unity Valero	convenience		31.78470	-96.86250	1738 STATE HIGHWAY 31	Mt Calm	76673		https://locations.valero.com/en-us/LocationDetails/Index/1738-STATE-HIGHWAY-31/0000013694	Valero	0.80
+f1cb00adc0d5	I-45 QUICK STOP	convenience		31.88050	-96.34731	16322 SOUTH IH-45	Streetman	75859		https://locations.valero.com/en-us/LocationDetails/Index/16322-SOUTH-IH-45/0000025810	Valero	0.80
+e367b17a6789	Jet Travel Plaza	convenience		31.59955	-96.16277	711 TX-179	Teague	75860	+19033892672			0.96
+ee130e8d569b	Jet Travel Plaza	convenience		31.59773	-96.15111	771 TX-179	Teague	75860	+19033892672	http://exxonmobilstations.com		1.00
+463edc4dc95d	JJ'S 210	convenience		31.36600	-96.14230	906 N MAIN STREET	Jewett	75846		https://locations.valero.com/en-us/LocationDetails/Index/906-N-MAIN-STREET/0000025742	Valero	0.80
+9e9f536f90b5	JJs Fast Stop	convenience		31.36589	-96.14211	906 N Main St	Jewett	75846	+19036265581	http://shell.com		0.92
+be0d1c24024d	Jolly's	convenience		31.83859	-96.13203	923 FM-488	Fairfield	75840	+19033896167			0.75
+f8161493bfae	Jolly's	convenience		31.71816	-96.17477	630 W US Highway 84 Blvd	Fairfield	75840	+19033896789			0.97
+21c2bb458a46	JOLLY'S #4	convenience		31.73012	-96.14175	923 E MAIN STREET	Fairfield	75840		https://www.exxon.com/en/find-station/exxon-fairfield-tx-jollys4-200319149	Exxon	0.80
+e1aec0c9e833	Jolly's Barn Stop	convenience		31.72527	-96.15556	440 E Commerce St	Fairfield	75840	+19033895511	http://citgo.com/		0.92
+febcb560b84a	Josie's Drive In Groceries	convenience		31.52192	-96.53667	303 S Ellis St Unit A	Groesbeck	76642	+12547293257			0.96
+37e43e5fbddb	Kountry Korner	convenience		31.24315	-96.25700	711 V.W. Goodwin Blvd	Marquez	77865	+19035295400	http://www.exxonmobil.com		0.99
+1a3d25f53592	Krispy Krunchy Chicken	convenience		31.16913	-96.67688	306 West Titus	Bremond	76629	+12547467115	https://locations.krispykrunchy.com/tx/bremond/306-west-titus		0.96
+9f2ee3f82a32	La Tiendita	convenience		31.67344	-96.48009	407 E Tyler St	Mexia	76667	+2545627917			0.92
+9e7af762a10b	Lake Limestone Store	convenience		31.40767	-96.42721	6030 E Navasota FM 937	Groesbeck	76642	+12547292247	https://lake-limestone-store.hub.biz/		0.99
+d029a7499ad8	Lakeside store	convenience		31.97437	-96.69397	1355 FM667	Purdon	76679	+12545781549			0.97
+bbe72380faa7	Lazy S General Store	convenience		31.16304	-96.47918	8004 FM979	Franklin	77856	+19798281865			0.93
+43afd3dc3553	Lions Den	convenience		31.02075	-96.49320	760 W US Highway 79	Franklin	77856	+19798284344	http://www.exxon.com/	Lion's Den	0.92
+dc5dffc22bfe	LONGHORN STATION	convenience		31.68030	-96.96961	195 Heritage Parkway	Axtell	76624		https://locations.valero.com/en-us/LocationDetails/Index/195-HERITAGE-PARKWAY/0000029746	Valero	0.80
+bdd7accb773d	Love's Travel Stops and Country Stores	convenience		31.72822	-96.18272	299 N Interstate 45	Fairfield	75840	+19033893967	https://www.loves.com/locations/288		0.92
+1355031aabac	Lucko's Grocery	convenience		31.91711	-96.89609	112 W Live Oak	Malone	76660	+12545339911	https://lucko-s-grocery.hub.biz/		0.96
+2a354b7cf83e	Lucky J's	convenience		31.61547	-96.15758	680 Interstate 45 S	Teague	75860	+19033899097	http://www.findfuelstops.com/truck-stop-on-I-45		0.94
+9030449f350a	Lucky J's Travel Center	convenience		31.59875	-96.15643	680 I-45	Fairfield	75860	+19033899097	http://www.findfuelstops.com/truck-stop-on-I-45		1.00
+313a44d2dc56	Main Street Market	convenience	truck gas station	31.44938	-96.07783	2431 E Commerce St	Buffalo	75831	+19033224009	http://www.petroleumwholesale.com/		0.92
+259f54d07367	MARLIN EXXON	convenience		31.30644	-96.89960	101 CRAIK STREET	Marlin	76661		https://www.exxon.com/en/find-station/exxon-marlin-tx-marlinexxon-200314951	Exxon	0.80
+93fc00ab08a0	Marquez Beverage Barn	convenience		31.24273	-96.25436	243 E Carrington Ave	Marquez	77865	+19035291294			0.84
+a7e1587c6a4b	MEXIA MINI MART	convenience		31.68410	-96.48331	209 E MILAM ST	Mexia	76667		https://locations.valero.com/en-us/LocationDetails/Index/209-E-MILAM-ST/0000004413	Valero	0.80
+6432205d7b28	Mini Stop -Lake Mexia	convenience		31.67248	-96.58866	3892 US-84 W	Mexia	76667	+12544729996			0.93
+74443fd2a745	Mini Stop Grocery	convenience		31.67241	-96.58871	3892 Highway 84 W	Mexia	76667	+12544729996	https://start.cortera.com/company/research/k9r9sqq8k/mini-stop-grocery		0.92
+709d8ca32696	Mobil	convenience		31.45803	-96.07026	814 West Commerce St.	Buffalo	75831	+19033223104	https://www.exxon.com/en/find-station/mobil-buffalo-tx-buffalofoodmart-200321270?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+7f21874ec270	Mobil	convenience		31.01067	-96.51045	1870 W US Highway 79	Franklin	77856	+19798280031	https://www.exxonmobil.com		0.92
+3754ba75934b	Mudd Creek	convenience		31.01068	-96.51064	1870 W US Highway 79	Franklin	77856	+19798280031	http://www.muddcreekchophouse.com		0.98
+b5ffedc62406	Murphy USA	convenience		31.68528	-96.45505	1410 E Milam St	Mexia	76667	+12542533078	http://www.murphyusa.com/	Murphy USA	0.92
+697c4c8a24ba	New Baden General Store	convenience		31.05109	-96.43011	3550 Main St	New Baden	77870	+19798282006	https://new-baden-general-store.business.site/		0.93
+4a046384edc5	Oak Grove Grocery	convenience		31.07301	-96.52002	4598 FM 46	Franklin	77856	+19798282676			0.92
+f67ebf799a11	Parrish Country Store	convenience		31.92801	-96.55178		Purdon	76679	+19036732221	https://www.chamberofcommerce.com/.../9154413-parrish-country-store		0.92
+44d9f61333ae	Patty's Way	convenience		31.66447	-96.49867	3070 S Martin Luther King Jr Hwy	Mexia	76667	+12542278642			0.57
+1b18afd05733	Pattys way	convenience		31.59021	-96.52338	3070 TX-14	Mexia	76667	+12542278642			0.92
+58fb6367564a	Phillips 66	convenience		31.28406	-96.97619	3682 TX-320	Chilton	76632	+12548835933		Phillips 66 Gas	0.82
+7ce5c911f9fe	Phillips 66	convenience		31.53848	-96.84080	405 W Texas Ave # 164	Mart	76664	+12548762830	http://www.phillips66gas.com		0.92
+8f096aeeece5	Phillips 66 Gas	convenience		31.30589	-96.90242	320 Bridge St	Marlin	76661	+12548835933	https://www.phillips66gas.com/	Phillips 66 Gas	0.68
+a506f5faf5eb	Pilot Electric Vehicle Charging Station	convenience		31.44796	-96.07854	2605 W Commerce St	Buffalo	75831	+19033229034	https://pilotcompany.com/ev-charging?utm_source=Pilot&utm_medium=YextLocationsPagesBlock&utm_campaign=EV		0.85
+21a6963814fa	Pilot Travel Center	convenience		31.44852	-96.07869	2605 W Commerce St	Buffalo	75831	+19033229034	https://locations.pilotflyingj.com/us/tx/buffalo/2605-w-commerce-st	Pilot Flying J	0.97
+0704dca6cd3f	Quick N	convenience		31.30620	-96.88844	526 Live Oak St	Marlin	76661	+12548835326	https://quick-n.hub.biz		0.98
+298258d65abc	Quik Stop	convenience		31.72429	-96.16569	401 W Commerce St	Fairfield	75840	+18002259702	http://www.miramax.com/movie/clerks		0.92
+2660816e0fda	Richland Store	convenience		31.92630	-96.42599	100 Austin Ave	Richland	76681	+19033623663	http://shell.com		0.92
+24e45792ad4b	Road Ranger	convenience	truck gas station	31.59693	-96.15173	779 TX-179, Teague, TX 75860 (I-45, Exit 189)					Road Ranger	0.80
+95df7fe37d62	Rob's Drive-In	convenience		31.72534	-96.15849	226 E Commerce St	Fairfield	75840	+19033892930			0.92
+66ed4107f002	Ruby's Food Mart	convenience		31.21152	-96.78182	1103 State Highway 6	Marlin	76661	+12548836166			0.96
+b856eb1b1181	RUBY'S FOOD MART #1	convenience		31.52980	-96.53040	619 N ELLIS ST	Groesbeck	76642		https://locations.valero.com/en-us/LocationDetails/Index/619-N-ELLIS-ST/0000003077	Valero	0.80
+e3f9d2665def	RUBY'S FOOD MART #3	convenience		31.32040	-96.88371	1103 STATE HIGHWAY 6	Marlin	76661		https://locations.valero.com/en-us/LocationDetails/Index/1103-STATE-HIGHWAY-6/0000003078	Valero	0.80
+47119ca855d5	RUBY'S FOOD MART #4	convenience		31.54100	-96.83591	202 E TEXAS AVE	Mart	76664		https://locations.valero.com/en-us/LocationDetails/Index/202-E-TEXAS-AVE/0000003079	Valero	0.95
+9fed5df929c0	RUBY'S FOOD MART #6	convenience		31.68960	-96.49790	915 N HIGHWAY 171	Mexia	76667		https://locations.valero.com/en-us/LocationDetails/Index/915-N-HIGHWAY-171/0000003080	Valero	0.95
+ccc51a5c3638	Sam's Drive In Grocery	convenience		31.71806	-96.17496	W Hwy 84	Fairfield	75840	+19033897414	http://www.samsoriginal.com		0.77
+0080d0d55640	Shell	convenience		31.47401	-96.92515	201 W Frederick St	Riesel	76682	+12548967777	https://www.shell.com		0.92
+087f4245fa9c	Shell	convenience		31.72412	-96.16188	223 S Harmon St	Fairfield	75840	+19033893013	http://shell.com	Shell	0.57
+320fdbb5eae7	Shell	convenience		31.40762	-96.42744	6030 East Navasota	Groesbeck	76642	+12547292247	https://find.shell.com/us/fuel/10051975-6030-fm-937/en_US		1.00
+42e3d8fdaefc	Shell	convenience		31.59743	-96.15147	771 Texas 179	Teague	75860		https://find.shell.com/us/fuel/13287608-771-state-highway-179/en_US		0.99
+52b8f5fe1d63	Shell	convenience		31.24312	-96.25683	511 Vw Goodwin Rd	Marquez	77865	+19035295400	https://find.shell.com/us/fuel/12569697-511-vw-goodwin-rd/en_US	Shell	1.00
+5ed867881f62	Shell	convenience		31.71813	-96.17472	630 W US Highway 84 Blvd	Fairfield	75840	+19033897414	https://find.shell.com/us/fuel/10048666-630-w-us-highway-84	Shell	0.92
+71f243c8c1b2	Shell	convenience		31.30649	-96.88655	701 Live Oak St	Marlin	76661	+12548833595	https://find.shell.com/us/fuel/10003040-701-live-oak-st		0.92
+7580ef360c82	Shell	convenience		31.16936	-96.67677	306 Titus St	Bremond	76629	+12542467115	https://find.shell.com/us/fuel/10051157-306-e-titus-st		0.92
+77057135c91a	Shell	convenience		31.30544	-96.87559	107 State Highway 6	Marlin	76661	+12548835600		Shell	0.92
+8d1f975fbcb2	Shell	convenience		31.92636	-96.42604	100 South Austin Ave	Richland	76681	+19033623663	https://find.shell.com/us/fuel/10012810-100-south-austin-ave	Shell	0.92
+a5c47edfb671	Shell	convenience		31.72672	-96.17792	1022 W Commerce St	Fairfield	75840	+19033897414	https://find.shell.com/us/fuel/10012771-1022-w-commerce-st/en_US		0.97
+ad7dd34ab08e	Shell	convenience		31.52140	-96.53672	401 S Ellis St	Groesbeck	76642	+12547293662	https://find.shell.com/us/fuel/10002987-401-s-ellis-st	Shell	0.92
+bc6a368838b4	Shell	convenience		31.59881	-96.15646	680 IH-45	Teague	75860	+15126942223	https://find.shell.com/us/fuel/13282176-680-i-h-45/en_US		0.99
+d594fbdaaccc	Shell	convenience		31.84796	-96.79749	309 N Magnolia Ave	Hubbard	76648	+12545762886	https://www.shell.com		0.92
+e7c9b70f7dd1	Shell	convenience		31.54147	-96.83615	213 E Texas Ave	Mart	76664	+12548762887	https://find.shell.com/us/fuel/10047330-213-e-texas-ave		0.92
+f231eccd7be7	Shell	convenience		31.90110	-96.71797	107 Highway 31	Dawson	76639	+19037242200	https://find.shell.com/us/fuel/12875229-107-w-highway-31/en_US		1.00
+f4c90e7cea31	Shell	convenience		31.62692	-96.28135	600 E Highway 84	Teague	75860	+12547395511	https://find.shell.com/us/fuel/10012831-600-e-hwy-84		0.85
+f72d15aaff9f	Shell	convenience		31.63725	-96.28056	600 US-84 W	Teague	75860	+12547395511		Shell	0.92
+f946ef3daa43	Shell	convenience		31.46005	-96.06824	431 W Commerce St	Buffalo	75831	+19033224904	https://find.shell.com/us/fuel/10071572-431-w-commerce-st	Shell	0.92
+eb9e6a1c3de6	Shell Gas Station	convenience		31.72724	-96.18225	100 I-45 W	Fairfield	75840		http://www.shell.com/		0.69
+f9e5f6f3753a	Spring Time Stop	convenience		31.17003	-96.67638	404 N Commerce St	Bremond	76629	+12547465225	https://spring-time-stop.hub.biz/		0.92
+f75d1b8c5376	Stop N Start Express	convenience		31.52154	-96.53623	402 S Ellis St	Groesbeck	76642	+12547299245			0.56
+feddebc04991	STOP N START EXPRESS #4	convenience		31.51550	-96.52471	802 E YEAGUA ST	Groesbeck	76642		https://locations.valero.com/en-us/LocationDetails/Index/802-E-YEAGUA-ST/0000003081	Valero	0.80
+eeba4d17bfa7	Streetman Chevron	convenience		31.88782	-96.35205	16322 S Interstate 45 E	Streetman	75859	+19035992025	http://www.chevronwithtechron.com/		0.73
+c1a786879172	Sunmart	convenience		31.64906	-96.79959	10269 US-84	Prairie Hill	76664	+12543442727	http://www.exxonmobil.com		0.99
+34d91d2d6c8d	Sunoco	convenience		31.53844	-96.84065	405 W Texas Ave	Mart	76664	+12548762830	https://www.sunoco.com/locations/store/405-w-texas-ave-mart-tx-0942655200		0.92
+81aa478e2330	Sunoco	convenience		31.17008	-96.67648	404 N Commerce St	Bremond	76629	+12547465225	https://www.sunoco.com/locations/store/404-n-commerce-bremond-tx-6600106401		0.92
+efb66bd0fc29	Sunoco	convenience		31.75661	-96.65016	110 TEXAS 171	Coolidge	76635		https://www.sunoco.com/locations/store/110-texas-171-coolidge-tx-8002903001	Sunoco	0.80
+dd248b9f89ba	TA EXPRESS FAIRFIELD	convenience		31.71634	-96.17557	300 E I-45	Fairfield	75840		https://www.gulfinc.com/ta-express-fairfield	Gulf	0.80
+1838e92ce8fe	Texaco	convenience		31.44942	-96.07771	2431 East Commerce Street	Buffalo	75831	+19033224009	https://www.texaco.com/	Texaco with Techron	0.92
+1b89885efabf	Texaco	convenience		31.59911	-96.15588	680 I-45	Teague	75860		https://www.texaco.com/en_us/home/find-a-station.html?/station/680-I-45-Teague-TX-75860-0000-id391211	Texaco	0.80
+25c87dc15937	Texaco	convenience		31.62906	-96.28426	215 N 4th Ave	Teague	75860	+12547393922	http://www.texaco.com		0.92
+ada2da4a5619	Texaco	convenience		31.30651	-96.88661	701 Live Oak St	Marlin	76661	+12548833593	https://www.texaco.com/	Texaco	0.92
+d0a3d8344416	Texaco	convenience		31.36809	-96.13991	1303 N MAIN STREET	Jewett	75846		https://www.texaco.com/en_us/home/find-a-station.html?/station/1303-N-MAIN-STREET-Jewett-TX-75846-4567-id391626	Texaco	0.80
+d903934c9819	Texaco	convenience		31.71667	-96.17554	881 W US Highway 84	Fairfield	75840	+19033892907	http://www.texaco.com		0.77
+98ff9cce04f5	Texaco Groesbeck	convenience		31.52102	-96.53645	402 S Ellis St	Groesbeck	76642	+16622401935	https://www.texaco.com/	Texaco	0.92
+e3bbb9140c43	Texaco Station Franklin	convenience		31.02597	-96.48594	116 E US Highway 79	Franklin	77856	+19798281468	http://www.texaco.com/stations/default.aspx		0.92
+9119dbbc6d25	Thornton Pit Stop	convenience		31.41476	-96.58098	801 TX-14	Thornton	76687	+12543801491			0.92
+f86b66d36d05	Tiger Mart of Buffalo	convenience		31.44873	-96.07722	2430 W Commerce St	Buffalo	75831	+19033229150	http://exxonmobil.com		0.92
+94532c4c73dd	Tiger Tote	convenience		31.90102	-96.71806	107 W Highway 31	Dawson	76639	+12545781219	http://www.johnsonoilcompany.com/tiger-totes.html		0.95
+5e24b6a48ee1	Tom's Mini Mart	convenience		31.46444	-96.05747	1110 Commerce St E	Buffalo	75831	+19033225910	http://texaco.com		0.92
+c44738e099f2	TOMMYS 22	convenience		31.30627	-96.87385	3682 HWY 7	Chilton	76632			Conoco	0.80
+e87b915571a3	Twice The Ice	convenience		31.68431	-96.47981	600 A West Milan	Mexia	75959		http://twicetheice.com		0.77
+126445e6d399	Valero	convenience		31.54091	-96.83575	202 E Texas Ave	Mart	76664	+12548762021	http://www.valero.com		0.92
+3046155986d2	Valero	convenience		31.72533	-96.15547	440 E Commerce St	Fairfield	75840	+18662976093	https://www.valero.com		0.65
+3317f4a5e06d	Valero	convenience		31.59883	-96.15643	680 IH 45	Fairfield	75860	+19033899097	http://valero436.placeweb.site/	Valero	0.95
+43b0ee9974e8	Valero	convenience		31.78463	-96.86255	1738 STATE HIGHWAY 31	Mt Calm	76673	+16108333472	http://www.valero.com	Valero Energy	0.92
+52f488ee6913	Valero	convenience		31.68416	-96.48377	209 E Milam St	Mexia	76667	+12103452000	https://www.valero.com		0.92
+735f60165310	Valero	convenience		31.51556	-96.52466	802 E YEAGUA ST	Groesbeck	76642	+12547295557	https://locations.valero.com/en-us/LocationDetails/Index/802-E-YEAGUA-ST/0000003081	Valero Energy	0.92
+8a73cf2e03f0	Valero	convenience		31.24419	-96.25642	633 N VW Goodwin Blvd	Marquez	77865	+19035292600	http://www.valero.com	Valero Energy	0.92
+b228aff9b703	Valero	convenience		31.68465	-96.47117	1000 E MILAM	Mexia	76667	+12545627788	https://locations.valero.com/en-us/LocationDetails/Index/1000-E-MILAM/0000026526	Valero	0.92
+c67d0dd68d65	Valero	convenience		31.88086	-96.34741	16322 SOUTH IH-45	Streetman	75859	+19035992233	https://locations.valero.com/en-us/LocationDetails/Index/16322-SOUTH-IH-45/0000025810	Valero Energy	1.00
+f7341064ac55	Valero Energy	convenience		31.59318	-96.15914	101 County Road 680	Teague	75860	+19033899097	http://valero436.placeweb.site/		0.95
+26788d9bd25a	Burger King	fastfood		31.68423	-96.47851	704 E Milam St	Mexia	76667	+12543553883	https://burgerking.com/store-locator/store/restaurant_74992		1.00
+43ac0eac7a1c	Bush's Chicken	fastfood		31.71768	-96.17497	680 US Hwy 84 W	Fairfield	75840	+19033899866	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.99
+e9d86fc27ea2	Bush's Chicken	fastfood		31.52501	-96.53345	204 N Ellis St	Groesbeck	76642	+12547293641	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.97
+a2707fd3adce	Chicken Express	fastfood		31.01072	-96.51089	1736 W Hwy 79	Franklin	77856	+19798281200	http://chickene.com/	Chicken Express	1.00
+02ba7777d9e1	Church's Texas Chicken	fastfood		31.44891	-96.07702	2430 W. Commerce Street	Buffalo	75831	+19033229159	https://locations.churchs.com/tx/buffalo/2430-w.-commerce-street	Church's Chicken	0.94
+3853e8b50479	Dairy Queen	fastfood		31.02697	-96.48476	304 US-79	Franklin	77856	+19792090538	https://dqtexas.com/	Dairy Queen	0.92
+3a0ac232c1d5	Dairy Queen	fastfood	burger restaurant	31.40734	-96.09126	605 W Commerce St	Buffalo	75831	+19033225321	http://www.dairyqueen.com		0.77
+62f4fa6da6f2	Dairy Queen	fastfood		31.07151	-96.97794	Hwy 77 Hwy 77	Rosebud	76570	+12545830450	https://www.dairyqueen.com/en-us/locations/tx/rosebud/hwy-77/14535/?y_source=1_MjkzMzkwNjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.94
+8dc9e1093bc3	Dairy Queen	fastfood		31.30678	-96.87601	4721 Live Oak St	Marlin	76661	+12548833221	https://www.dairyqueen.com/en-us/locations/tx/marlin/4721-live-oak-st/14394/?y_source=1_MjkzMzkxOTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+e8f665161ef2	Dairy Queen	fastfood		31.71713	-96.17472	677 W Us Highway 84 677 W Us Highway 84	Fairfield	75840	+19033894221	https://dqtexas.com/	Dairy Queen	0.98
+f0602463cf6e	Dairy Queen	fastfood		31.30661	-96.87602	4721 Live Oak St 4721 Live Oak St	Marlin	76661	+12548833221	https://www.dairyqueen.com/en-us/locations/tx/marlin/4721-live-oak-st/14394/?y_source=1_MjkzMzkxOTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	1.00
+639ef3021e99	Dairy Queen Store	fastfood		31.44827	-96.07771	I-45 W Commerce St	Buffalo	75831	+19033225321	https://dqtexas.com/	Dairy Queen	0.98
+12eb00f1b924	DQ Grill & Chill	fastfood		31.44831	-96.07770	2536 W Commerce	Buffalo	75831		https://www.dairyqueen.com/en-us/locations/tx/buffalo/2536-w-commerce/3661	DQ Grill & Chill	0.80
+311d9aa8c4b9	DQ Grill & Chill	fastfood		31.71710	-96.17465	677 W US Highway 84	Fairfield	75840		https://www.dairyqueen.com/en-us/locations/tx/fairfield/677-w-us-highway-84/3848	DQ Grill & Chill	0.80
+356e2e71d150	DQ Grill & Chill	fastfood		31.07143	-96.97807	Hwy 77	Rosebud	76570		https://www.dairyqueen.com/en-us/locations/tx/rosebud/hwy-77/4307	DQ Grill & Chill	0.80
+4c46596fcfd7	DQ Grill & Chill	fastfood		31.02699	-96.48468	304 East US Highway 79	Franklin	77856		https://www.dairyqueen.com/en-us/locations/tx/franklin/304-east-us-highway-79/18681	DQ Grill & Chill	0.80
+7ed8172198c4	DQ Grill & Chill	fastfood		31.30674	-96.87601	4721 Live Oak St	Marlin	76661		https://www.dairyqueen.com/en-us/locations/tx/marlin/4721-live-oak-st/4167	DQ Grill & Chill	0.80
+59ef2c040952	Jack in the Box	fastfood	american restaurant	31.98463	-96.73048		Frost		+19039154140	https://www.jackinthebox.com		0.77
+7c6fad2234bc	KFC	fastfood	chicken restaurant	31.71351	-96.17796	474 Interstate 45 N	Fairfield	75840	+19033893361	http://www.kfc.com/storelocator/Default.aspx?address=474%20Interstate%2045%20N,Fairfield,TX		0.96
+99af3c4dd5cd	Little Caesars Pizza	fastfood	pizza restaurant	31.68395	-96.47945	600 E Milam St	Mexia	76667	+12545626572	https://littlecaesars.com/en-us/store/11297	Little Caesars	0.96
+3e7e1b1e9bfe	McDonald's	fastfood		31.51759	-96.53043	412 E Yeagua St	Groesbeck	76642		https://www.mcdonalds.com/us/en-us/location/43369.html	McDonald's	0.80
+49db7cd8412a	McDonald's	fastfood		31.68499	-96.47317	903 E Milam Rd	Mexia	76667	+12545627006	https://www.mcdonalds.com/us/en-us/location/tx/mexia/903-e-milam-rd/10923.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
+9403528c4038	McDonald's	fastfood		31.44803	-96.07504	441 S Craigs Drive	Buffalo	75831	+19033221010	https://www.mcdonalds.com/us/en-us/location/tx/buffalo/441-s-craigs-drive/35939.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
+d5b03b24f088	McDonald's	fastfood		31.30588	-96.87553	1430 Live Oak Street	Marlin	76661	+12548833824	https://www.mcdonalds.com/us/en-us/location/tx/marlin/1430-live-oak-street/27054.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+ee7a297cf2cd	McDonald's	fastfood		31.71794	-96.17415	669 W Hwy 84	Fairfield	75840	+19033898829	https://www.mcdonalds.com/us/en-us/location/tx/fairfield/669-w-hwy-84/12041.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+34efac8116ab	Pizza Hut	fastfood	pizza restaurant	31.02258	-96.49061	605 W. Hwy. 79 Robertson	Franklin	77856	+19798280075	https://locations.pizzahut.com/tx/franklin/605-w-hwy-79?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310260	Pizza Hut	0.94
+3f49662de86d	Pizza Hut	fastfood	pizza restaurant	31.68322	-96.49555	822 W Milam St	Mexia	76667	+12545625565	https://locations.pizzahut.com/tx/mexia/822-w-milam?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=306496	Pizza Hut	0.97
+6e39dbb7eb60	Pizza Hut	fastfood	pizza restaurant	31.30855	-96.89967	219 Craik St Falls	Marlin	76661	+12548839262	https://locations.pizzahut.com/tx/marlin/219-craik-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=288524	Pizza Hut	0.96
+871a2ef62cc3	Pizza Hut	fastfood	pizza restaurant	31.71119	-96.17912	905 W US Highway 84	Fairfield	75840	+19033893000	https://locations.pizzahut.com/tx/fairfield/905-w-us-highway-84?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=296714	Pizza Hut	0.98
+93141e90173d	Pizza Hut	fastfood	pizza restaurant	31.62888	-96.27215	230 E. Loop 255 Freestone	Teague	75860	+12547393971	https://locations.pizzahut.com/tx/teague/230-e-loop-255?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=308743	Pizza Hut	0.98
+da6b9f317a0f	Pizza Hut	fastfood	pizza restaurant	31.52025	-96.53551	408 S Dr J B Riggs Dr	Groesbeck	76642	+12547290344	https://locations.pizzahut.com/tx/groesbeck/408-south-jb-riggs?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=308119	Pizza Hut	0.98
+fde2422b3c9f	Pizza Hut	fastfood	pizza restaurant	31.45371	-96.07362	1608 W Commerce St	Buffalo	75831	+19033221780	https://locations.pizzahut.com/tx/buffalo/1608-west-commerce?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=307134	Pizza Hut	0.98
+26a9d32e454a	Prairie Hill Store	fastfood		31.64856	-96.79961	Lcr 312	Prairie Hill					0.82
+1d9005334b2e	Sonic Drive In	fastfood		31.84863	-96.79724	101 Northeast 4Th Street	Hubbard	76648	+12545761222	https://locations.sonicdrivein.com/tx/hubbard/101-northeast-4th-street.html	Sonic Drive-In	0.96
+31e9fee70bbd	Sonic Drive In	fastfood		31.68442	-96.47903	601 East Milam Street	Mexia	76667	+12545622220	https://locations.sonicdrivein.com/tx/mexia/601-east-milam-street.html	Sonic Drive-In	0.94
+461c72929c74	Sonic Drive In	fastfood		31.30596	-96.89075	428 Live Oak Street	Marlin	76661	+12548561240	https://locations.sonicdrivein.com/tx/marlin/428-live-oak-street.html	Sonic Drive-In	0.97
+89de614a1c0d	Sonic Drive In	fastfood		31.52605	-96.53326	303 N. Ellis	Groesbeck	76642	+12547298989	https://locations.sonicdrivein.com/tx/groesbeck/303-n.-ellis.html	Sonic Drive-In	0.98
+a60174681fe0	Sonic Drive In	fastfood		31.71865	-96.17471	614 West Highway 84	Fairfield	75840	+19033897766	https://locations.sonicdrivein.com/tx/fairfield/614-west-highway-84.html	Sonic Drive-In	0.97
+139ac2e68cce	Sonic Drive-In	fastfood		31.44801	-96.07787	2610 W Commerce St	Buffalo	75831	+19033221896	https://locations.sonicdrivein.com/tx/buffalo/2610-w-commerce.html	Sonic Drive-In	0.98
+7d210ec2fb71	Sonic Drive-In	fastfood		31.63641	-96.27053	804 US-84	Teague	75860	+12547395809	https://locations.sonicdrivein.com/tx/teague/804-west-u-s-highway-84.html	Sonic Drive-In	0.98
+d26dbc94f618	Sonic Drive-In	fastfood	burger restaurant	31.02136	-96.49194	712 Highway 79	Hutto	78634	+15128462492	https://locations.sonicdrivein.com/tx/hutto/712-highway-79-west.html		0.85
+f95a11c64c01	Sonic Drive-In	fastfood	burger restaurant	31.59883	-96.15702	680 Interstate Highway 45 S	Teague	75860	+19033899098	https://locations.sonicdrivein.com/tx/teague/680-interstate-highway-45-s.html		0.96
+455323bf4682	Subway	fastfood	sandwich shop	31.02089	-96.49322	758 Hwy 79 W	Franklin	77856	+19798285922	https://restaurants.subway.com/united-states/tx/franklin/758-hwy-79-w	Subway	0.94
+49d0ac34146d	Subway	fastfood	sandwich shop	31.45440	-96.07401	1521 West Commerce, Texas Burger	Buffalo	75831			Subway	0.97
+55632f2f3762	Subway	fastfood	sandwich shop	31.36660	-96.14095	1017 N Main St	Jewett	75846	+19036265100	https://www.subway.com/en-us/	Subway	0.94
+63a55a18d465	Subway	fastfood	sandwich shop	31.47401	-96.92515	201 W Frederick St	Riesel	76682	+12548962029	https://www.subway.com		0.92
+64000a0a8cba	Subway	fastfood	sandwich shop	31.68457	-96.47633	801 E Milam St	Mexia	76667	+12545629393	https://restaurants.subway.com/united-states/tx/mexia/801-e-milam	Subway	0.95
+6e28849589f8	Subway	fastfood	sandwich shop	31.68362	-96.45642	1410 E Milam St	Mexia	76667	+12545622889	https://alibabacharleston.com		0.92
+a36eebca1421	Subway	fastfood	sandwich shop	31.71755	-96.17448	677 Highway 84	Fairfield	75840	+19033893914	http://www.subway.com/	Subway	0.96
+b31dc716c8fe	Subway	fastfood	sandwich shop	31.59719	-96.15173	776 TX 179	Teague	75860	+12543081289	https://www.subway.com/en-US?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=72416&utm_campaign=evergreen-2020&y_source=1_MTAyMjkzMDEyNy00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.96
+d3985418a4cd	Subway	fastfood		31.52393	-96.53444	102 N Ellis St	Groesbeck	76642	+12547292211	https://restaurants.subway.com/united-states/tx/groesbeck/102-n-ellis-st	Subway	0.97
+e1639ad02256	SUBWAY	fastfood	sandwich shop	31.30602	-96.89961	101 Williams St	Marlin	76661	+12548832020	http://www.subway.com/		0.92
+e585ed5856ea	Subway	fastfood		31.30557	-96.87606	105 S. Hwy 6 Bypass	Marlin	76661	+12548835700	http://www.subway.com/en-us	Subway	0.96
+ecf8f7c4228d	Subway	fastfood	sandwich shop	31.90088	-96.71789	107 State Hwy 31 W	Dawson	76639	+12545702093	https://restaurants.subway.com/united-states/tx/dawson/107-east-highway-31	Subway	0.92
+f04e31cd48ea	Subway	fastfood	sandwich shop	31.63584	-96.27201	847 US Highway 84 W	Teague	75860	+12547393066	https://www.subway.com		0.96
+a970dbeafb00	Taco Bell	fastfood		31.72108	-96.17914	474 Interstate 45 W	Fairfield	75840	+19033893361	https://www.yum.com		0.55
+ccc57987709e	Taco Bell	fastfood		31.71338	-96.17823	474 Interstate 45 N	Fairfield	75840	+19033893361	http://www.tacobell.com/	Taco Bell	0.96
+e60fb5fd8184	Taco Bell	fastfood	taco restaurant	31.44855	-96.07865	2605 West Commerce	Buffalo	75831	+19033229045	https://locations.tacobell.com/tx/buffalo/2605-west-commerce.html?utm_source=yext&utm_campaign=yextpowerlistings&utm_medium=referral&utm_term=031562&utm_content=website&y_source=1_MTcyODM0NjItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.94
+fa01e5e5574e	Taco Bell	fastfood		31.68426	-96.47453	405 North Ross Ave	Mexia	76667	+12545626893	http://www.tacobell.com/	Taco Bell	0.98
+8ece9b454803	Wendy's	fastfood		31.59630	-96.15134	776 TX-179	Teague	75860	+12543081308	https://locations.wendys.com/united-states/tx/teague/776-tx-179	Wendy's	0.92
+da617706dd3b	Whataburger	fastfood		31.72606	-96.17828	300 I-45 E Suite B	Fairfield	75840	+19039154933	https://locations.whataburger.com/tx/fairfield/300-i-45-e.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+dc0a3536d956	Whataburger	fastfood		31.68467	-96.47001	1012 E MILAM ST	Mexia	76667	+12545625200	https://locations.whataburger.com/tx/mexia/1012-e-milam-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.97
+98bc87f3fb1e	2L Goat Dairy	grocery		31.89565	-96.43877	11966 TX-14	Richland	76681	+19033621757			0.69
+5a7a230312b7	American Plant Food	grocery		31.78726	-96.46316	300 S Avenue B	Wortham	76693	+12547653602	http://www.apfcorp.net		0.89
+ae67a327119a	Branded Market	grocery		31.30689	-96.63002	101 S Narcissus St	Kosse	76653	+12543761333	http://www.tiktok.com/@brandedmarkettx		0.92
+3bd19cca0d91	Brookshire Brothers	grocery		31.08754	-96.98057	982 US-77	Rosebud	76570	+12545832824	https://www.brookshirebrothers.com/store-location/store-82	Brookshire Brothers	0.96
+92952f51b6f4	Brookshire Brothers	grocery	international grocery store	31.72507	-96.16281	300 W US Highway 84	Fairfield	75840	+19033892455	https://www.brookshirebrothers.com/store-location/store-10		0.85
+b4b3ee14ce48	Brookshire Brothers	grocery		31.02945	-96.11638	209 Main St	Normangee	77871	+19363962371	https://www.brookshirebrothers.com/store-location/store-75	Brookshire Brothers	1.00
+df17a4e5946b	Brookshire Brothers	grocery		31.62825	-96.27197	220 E Loop 255	Teague	75860	+12547395230	https://www.brookshirebrothers.com/store-location/store-41	Brookshire Brothers	0.92
+f012e6f71662	Brookshire Brothers	grocery		31.45629	-96.07339	1220 W Commerce St	Buffalo	75831	+19033224245	https://www.brookshirebrothers.com/store-location/store-54	Brookshire Brothers	0.92
+fac6c75c40ff	Brookshire Brothers	grocery		31.85034	-96.79529	305 NE 4th St	Hubbard	76648	+12545762005	https://www.brookshirebrothers.com/store-location/store-94	Brookshire Brothers	1.00
+36204147f0fb	Brookshire's	grocery		31.51855	-96.52841	519 E Yeagua St	Groesbeck	76642	+12547292797	https://www.brookshires.com/store-information/Groesbeck/75	Brookshire's	0.96
+31e895c3bf5c	Brookshire's Food & Pharmacy	grocery		31.68504	-96.47104	1001 E Milam St	Mexia	76667	+12545622182	https://www.brookshires.com		0.92
+a2785ba0a5f6	Brookshire's Food & Pharmacy	grocery		31.72944	-96.16480	300 West St # 84	Fairfield	75840	+19033897455	https://www.brookshires.com		0.92
+b579334f0be2	C. C. Farms	grocery		31.73066	-96.16580	414 W Bond St	Fairfield	75840	+19033889845			0.85
+72587083077c	Debbie's Produce	grocery		31.97145	-96.69107	1295 FM-667	Purdon	76679	+12545783368	https://www.linkedin.com/in/debbie-reyes-679a4178		0.88
+990bd0346d13	Don's	grocery		31.51617	-96.52531	725 E Navasota St	Groesbeck	76642	+12547292336	http://www.exxonmobilstations.com		0.92
+cd8905c3a894	Flynn Feed & Grocery	grocery		31.15066	-96.12585	7516 FM 39 S	Normangee	77855	+19363962200	https://www.chamberofcommerce.com/.../6979787-flynn-feed-grocery		0.77
+eb72db6d9a37	Franklin Supermarket	grocery		31.02225	-96.49146	611 W US-79	Franklin	77856	+19798284143			0.92
+4a670aa4585a	Groesbeck #75	grocery		31.51798	-96.53019	519 E Yeagua St	Groesbeck	76642			Brookshire's	0.80
+59e4b1b07ced	H-E-B	grocery		31.30709	-96.89053	435 Live Oak St	Marlin	76661	+12548035501	https://www.heb.com/heb-store/US/tx/marlin/marlin-h-e-b-104	H-E-B	1.00
+68c48298a1d1	H-E-B	grocery		31.68564	-96.47749	701 E Milam St	Mexia	76667	+12545625305	https://www.heb.com/heb-store/US/tx/mexia/mexia-h-e-b-467	H-E-B	0.99
+85287529c7ea	Jerri's Grocery Mart	grocery		31.67716	-96.48030	402 S Bonham St	Mexia	76667	+12545626264			0.92
+728e454f9019	Korner Grocery	grocery		31.02974	-96.11684	218 Main St	Normangee	77871	+19363962433			0.92
+f1128d4b2de6	Mexia H-E-B	grocery		31.68434	-96.47859	701 E. MILAM STREET	Mexia	76667		https://www.heb.com/heb-store/us/tx/mexia/mexia-h-e-b-467	H-E-B	0.80
+607bafaedab1	Rancho Pancho	grocery		31.68075	-96.97761	Olive Branch Rd, Axtell , 76624, United States	Axtell	76624	+12546449293	http://www.ranchopanchotexas.com		0.77
+f8a0d32c9e16	Read's Food Store	grocery		31.54284	-96.83309	515 E Texas Ave	Mart	76664	+12548762561	http://readsfoodstore.com/		0.96
+887293da42ae	The Lord's Community Storehouse-Teague TX.	grocery		31.62683	-96.28385	402 Main St	Teague	75860				0.96
+e779e6dbabff	Tobacco Barn	grocery	international grocery store	31.72507	-96.16281	300 W US Highway 84	Fairfield	75840	+19033894961	https://www.brookshirebrothers.com/store-location/store-10		0.85
+408e1233a504	Young's Market	grocery		31.28501	-96.87516	107 S State Highway 6	Marlin	76661	+12548835600	http://www.youngsmarket.com		0.77
+b0cb3f03e6a4	Young's Market	grocery		31.30513	-96.87597	107 State Highway 6	Marlin	76661	+12548835600	http://www.youngsmarket.com		0.62
+270881b6efd8	CHRISTUS Trinity Clinic - Fairfield	hospital		31.72659	-96.15901	106 N Keechi St	Fairfield	75840	+19033896112	https://www.christushealth.org/trinity/clinic/locations-directions/fairfield	CHRISTUS Children's	0.75
+b0be1f4cbba3	East Texas Medical Center Fairfield	hospital		31.72554	-96.17062	W Commerce St	Fairfield	75840	+19033892121	http://www.etmc.org		0.77
+613bec326744	Fairfield Memorial Hospital	hospital		31.72560	-96.17092	125 Newman St	Fairfield	75840	+19033892124			0.89
+e56ba6bafd9d	Falls Community Hospital & Clinic	hospital		31.30712	-96.89416	322 Coleman St	Marlin	76661	+12548033561	http://www.fallshospital.com/		0.92
+56c6238cc100	FCHC Bremond Clinic	hospital		31.16549	-96.67609	201 S Main St	Bremond	76629	+12547467264			0.92
+445e375f4806	Freestone Medical Center	hospital		31.45464	-96.07291	144 Humphreys St	Buffalo	75831	+19034800041		Freestone Medical Center	0.70
+42fc8d750476	Kosse Community Health Clinic a Limestone Medical Center Clinic	hospital		31.30818	-96.62986	206 N Narcissus St	Kosse	76653	+12543757001	https://www.groesbeckhospital.com/		0.92
+906748ab96cc	Limestone Medical Center	hospital		31.53289	-96.53093	701 McClintic Dr	Groesbeck	76642	+12547293281	http://www.groesbeckhospital.com/		0.97
+f9f87c028e2b	Parkview Clinic Teague	hospital		31.63562	-96.27132	101 Anthony St	Teague	75860	+12547395655	http://www.parkviewregional.com	Parkview Regional Hospital	0.92
+b24ab30174b8	Parkview Medical and Surgical	hospital		31.67682	-96.48011	515 S Bonham St	Mexia	76667	+12545629321	www.parkviewregional.com	Parkview Regional Hospital	0.92
+9133530c0f36	Parkview Regional Hospital	hospital		31.67494	-96.48049	600 South Bonham Street	Mexia	76667	+12545625332	https://www.parkviewregional.com/	Parkview Health	0.92
+47c2e2f58675	Providence Hospice	hospital		31.68129	-96.48442	107 E Commerce St	Mexia	76667	+12544720779	http://www.chot.org		0.85
+dddd93652afb	Americas Best Value Inn Buffalo	hotel		31.44686	-96.07796	2736 West Main Street	Buffalo	75831	+19033224202	https://www.redlion.com/buffalo		0.97
+586e6afb0611	Apollo Lodge and RV Park near I-45 - Fairfield TX	hotel	resort	31.72674	-96.18253	303 Interstate 45 W	Fairfield	75840	+19033895443	https://www.apollolodgefairfield.com/		0.99
+787f8bb6b106	Best Western Franklin Inn & Suites - Closed	hotel		31.02050	-96.49416	790 W US Highway 79	Franklin	77856	+19798289090	https://www.bestwestern.com/en_US/book/hotel-rooms.44593.html?iata=00171890&ssob=BLBWI0003G		0.77
+c0841b263965	Best Western Franklin Town Center Hotel & Suites	hotel		31.02576	-96.48717	208 N Center St	Franklin	77856	+19798282550	https://www.bestwestern.com/en_US/book/hotel-rooms.44746.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44746	Best Western Hotels & Resorts	1.00
+3d5df866be37	Best Western Limestone Inn & Suites	hotel		31.68485	-96.46135	1314 E Milam St	Mexia	76667	+12545620200	https://www.bestwestern.com/en_US/book/hotel-rooms.44601.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44601	Best Western Hotels & Resorts	1.00
+5cde9728358b	Budget Inn	hotel		31.72430	-96.18041	303 Interstate 45 W	Fairfield	75840	+19033895443	http://www.budgetinnfairfield.com/		0.99
+aac96885286b	Budget Inn	hotel		31.30732	-96.90008	210 Fortune St	Marlin	76661	+12548832573	http://www.budgetinn.com		0.92
+d5fd78a4bc53	Budget Inn	hotel	motel	31.45994	-96.06750	336 W Commerce St	Buffalo	75831	+19033223282	http://www.budgetinnbuffalotexas.com		0.99
+dfb4f1ed79b4	Comfort Inn	hotel		31.44676	-96.07690	2620 W Commerce St	Buffalo	75831	+19033229090	http://www.comfortinn.com		0.77
+004d726ddd7e	Comfort Inn and Suites	hotel		31.68347	-96.49479	820 W Milam St	Mexia	76667	+12545620005	https://www.choicehotels.com/texas/mexia/comfort-inn-hotels/txh11?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+dd78fbc6b427	Comfort Suites	hotel	resort	31.36064	-96.14542	120 S Main St	Jewett	75846	+19036267777	https://www.choicehotels.com/texas/jewett/comfort-suites-hotels/txc66?mc=llbillpx&pmf=local		0.97
+ff2aee32786a	Craig's Inn	hotel	motel	31.44999	-96.07729	225 N Craig St	Buffalo	75831	+19033225831	http://www.magnusonhotels.com/hotel-details.cfm?pcode=M20192		0.92
+cf0f031fa10c	Days Inn	hotel	motel	31.71844	-96.17385	603 US-84	Fairfield	75840	+19033897855	http://www.daysinn.com	Days Inn	0.92
+9b3db731a182	Days Inn & Suites by Wyndham Groesbeck	hotel		31.54063	-96.52675	1304 N Ellis	Groesbeck	76642	+12547293335	https://www.wyndhamhotels.com/days-inn/groesbeck-texas/days-inn-and-suites-groesbeck/overview?CID=LC:DI::BING:RIO:National:42093&iata=00093796		0.98
+bea4d093c596	Days Inn & Suites by Wyndham Marquez	hotel	resort	31.23934	-96.25358	814 Vw Goodwin Blvd N	Marquez	77865	+19033454634	https://www.wyndhamhotels.com/days-inn/marquez-texas/days-inn-and-suites-marquez-tx/overview?CID=LC:DI::BING:RIO:National:42092&iata=00093796		0.85
+a6f3df9d5d29	Days Inn and Suites by Wyndham Marquez	hotel		31.24537	-96.25657	814 N VW Goodwin Blvd	Marquez	77865	+19033454634	http://www.daysinn.com/hotels/texas/marquez/days-inn-and-suites-marquez/hotel-overview		1.00
+4a54caea72b8	Dk Farms Marquez Tx	hotel		31.33607	-96.27757	6422 FM-1146	Marquez	77865				0.73
+261a8f8fae00	Executive Inn & Suites	hotel		31.36996	-96.13937	1606 N Main St	Jewett	75846	+19036267200	http://www.executiveinnjewett.com/		0.99
+28cf5d4f907e	Fairfield Fair Grounds	hotel		31.72220	-96.14545		Fairfield			www.marriott.com/hotels/travel/tpaef		0.83
+4d77f79b57eb	Fort Parker Motel	hotel		31.59195	-96.52283	3126 Highway 14 N	Mexia	76667	+12545622066	http://fortparkermotel.webstarts.com		0.92
+3132c573e98c	Garner Hotel Franklin	hotel		31.02051	-96.49418	790 W Highway 79	Franklin	77856		https://www.ihg.com/garner-hotels/hotels/us/en/franklin/cllfl/hoteldetail	Garner Hotels	0.80
+d2f6eb69678e	Gilbert A Daniel Co The	hotel		31.72546	-96.17750	1015 W Commerce St	Fairfield	75840		https://www.gadco.us		0.95
+073c4aadbf1d	Hampton Inn & Suites Buffalo	hotel		31.44633	-96.07587	2624 W Commerce St	Buffalo	75831	+19033222223	https://www.hilton.com/en/hotels/bufdthx-hampton-suites-buffalo-downtown/?SEO_id=FB-AMER-HX-BFATXHX	Hampton by Hilton	1.00
+59b8ef46a677	Hampton Inn & Suites-Buffalo	hotel	resort	31.46870	-96.04877	2624 E Commerce St	Buffalo	75831	+19033222223			0.92
+b627764b4ddc	Holiday Inn Express & Suites Fairfield North	hotel		31.71873	-96.17587	640 Old Mexia Rd	Fairfield	75840	+19033892300	https://www.ihg.com/holidayinnexpress/hotels/us/en/fairfield/frfes/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-FRFES	Holiday Inn Express	1.00
+f637a5e8ef5f	Hotel Blue Fairfield	hotel		31.71803	-96.17395	603 US-84	Fairfield	75840	+19106370128	http://www.hotelbluefairfield.com/		1.00
+c01be526f120	Independent (SPHC) Franklin Inn & Suites	hotel		31.02051	-96.49418	790 W Highway 79	Franklin	77856		https://www.ihg.com/spnd/hotels/us/en/franklin/cllfl/hoteldetail		0.80
+366309c582e3	Inn At Mexia	hotel	motel	31.68236	-96.49268	600 W Palestine St	Mexia	76667	+12545625593	http://innatmexia.placeweb.site		0.99
+ee70614b797e	Kings Inn	hotel	motel	31.68617	-96.49150	700 TX-14	Mexia	76667	+12545623814	http://kingsinnmexia.com	Kings Inn Hotel	0.92
+bd9e12e6f4e9	La Quinta Inn & Suites	hotel		31.72643	-96.17671	1010 W Commerce St	Fairfield	75840	+19033897441	http://www.laquintafairfieldtx.com/?cid=local_6201	La Quinta by Wyndham	1.00
+11044fc60e2f	Laguna Jack's Beach Resort	hotel	beach resort	31.34509	-96.36771	County Road 740	Thornton	76687				0.66
+0f462cec923b	Limestone Inn	hotel		31.52195	-96.53575	302 S Ellis St	Groesbeck	76642	+12547293017	http://www.limestonecounty.net		0.89
+f2729ea7b78f	Little Granny's Bed & Bath	hotel		31.16582	-96.67442	203 E Collins St	Bremond	76629	+12547465350			0.63
+b7d65ed37b11	Lone Star Inn & Suites	hotel	resort	31.54056	-96.52595	1304 N Ellis St	Groesbeck	76642	+12547293335	http://www.lonestarinntx.com/		0.97
+b71b4ca19c3b	Malone Motor Lodge	hotel		31.91799	-96.89766	312 W Live Oak	Malone	76660	+12545335584	http://www.76660.net		0.92
+f85dbfc31589	Marlin Inn	hotel	motel	31.30767	-96.89487	261 Coleman St	Marlin	76661	+12548833521	http://marlininntexas.com		0.88
+83695ec3c7c4	Motel 6	hotel		31.52157	-96.53618	302 S Ellis St	Groesbeck	76642	+12547293017	https://verdevalleyinn.com		0.92
+e6278e42d124	Motel 6 Jewett Tx	hotel		31.35229	-96.15218	307 W Mexia Hwy	Jewett	75846	+19036264455	https://www.motel6.com/en/motels.tx.jewett.8817.html		0.92
+3ed5f276dd02	Niecy's Joint	hotel		31.07027	-96.97540	420 S 4th St	Rosebud	76570	+12544103538			0.58
+c9548ef906f7	OYO Hotel	hotel		31.35231	-96.15152	307 W Mexia Hwy	Jewett	75846	+12542123755	https://www.oyorooms.com/us/83794	OYO Rooms	0.92
+ff16f7d40641	OYO Hotel Groesbeck	hotel	motel	31.52172	-96.53588	302 S Ellis St	Groesbeck	76642	+12542123753	https://www.oyorooms.com/us/53299	OYO Rooms	1.00
+3ec431231e04	OYO USA	hotel		31.52360	-96.53464	100 S Ellis St	Groesbeck	76642	+16282630414	https://www.oyorooms.com/us/53299/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_GBK001	OYO USA	0.66
+882a5188f112	OYO USA	hotel		31.35184	-96.15119	100 Mexia Hwy W	Jewett	75846	+16282630414	https://www.oyorooms.com/us/83794/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_GBK002	OYO USA	0.83
+4c13d91c06ed	Pioneer Motel & Horseshoe Cafe	hotel		31.02578	-96.48602	108 E US Highway 79	Franklin	77856	+19798283259			0.92
+3695e0965443	Quality Inn	hotel		31.44687	-96.07686	2620 W Commerce St	Buffalo	75831	+12812198356	https://www.choicehotels.com/texas/buffalo/quality-inn-hotels/tx808?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+7648432de903	Quality Inn and Suites	hotel		31.53479	-96.52633	1012 N Ellis St	Groesbeck	76642	+12546455002	https://www.choicehotels.com/texas/groesbeck/quality-inn-hotels/txg04?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+5080b813feed	Red Roof Inn Buffalo, TX	hotel	resort	31.44709	-96.07878	2736 W Commerce St	Buffalo	75831	+19033224202	https://www.redroof.com/property/tx/Buffalo/RRI608		1.00
+88629bb973bc	Regency Inn	hotel		31.71162	-96.17902	903 W US Highway 84	Fairfield	75840	+19033894440	www.regencyinnfwb.com		0.99
+eac7433dc808	Regency Inn	hotel	motel	31.35278	-96.15269	413 W Mexia Hwy	Jewett	75846	+19036265903	http://www.beachregency.com		0.95
+efee093009c7	Relax Inn	hotel	motel	31.32132	-96.88485	1215 Hwy 6	Marlin	76661	+12548832581	http://www.relaxinnmarlin.com/		0.95
+b188c2cebc63	Sandy Cove Ranch On Richland Chamber Lake	hotel		31.95275	-96.25909	14070 Sandy Cove Cir	Streetman	75859	+19035991863			0.94
+0b91d9af2fb1	Super 8	hotel	motel	31.71936	-96.17645	370 I-45	Fairfield	75840	+19033899464	https://www.wyndhamhotels.com/super-8/fairfield-texas/super-8-fairfield-tx/overview		1.00
+4a102bc7d087	Super 8	hotel	motel	31.45006	-96.07848	225 N Craig St	Buffalo	75831	+19034804105	https://www.wyndhamhotels.com/super-8/buffalo-texas/super-8-buffalo-texas/overview		0.92
+1a7e2eb33b69	TKS Ranch	hotel		31.52286	-96.48316		Groesbeck					0.71
+00c6e5d185f8	Triangle Motel	hotel	motel	31.68426	-96.49262	508 N Dr M.L.K. Jr. Hwy jr	Mexia	76667	+12545622838	http://www.trianglemotel.com		0.98
+be2d4de85909	Uniti Pearland Hospitality Llc	hotel		31.44728	-96.07883	2736 W Commerce St	Buffalo	75831				0.95
+e7e6581fa47c	Western Motel	hotel	motel	31.54688	-96.82520	1201 E Texas Ave	Mart	76664	+18322897708	http://www.westernmotel.com		0.92
+36296473579c	Westworld Country Inn	hotel	motel	31.84275	-96.80341	901 NW 4th St	Hubbard	76648	+12545762541	http://www.westworldcountryinn.com/		0.99
+87b4c643021b	Westworld Country Inn	hotel		31.85442	-96.79034	901 NE 4th St	Hubbard	76648	+12545762541	http://www.westworldcountryinn.com/		0.81
+6b413da11863	Ballard Co	office	energy company	31.72331	-96.16563	235 S Fairway St	Fairfield	75840	+19033895774	http://www.ballard.com/	Ballard Power Systems	0.92
+7603ad58fcce	Buffalo Tank Company	office	industrial company	31.46663	-96.06973	219 Donie Rd	Buffalo	75831	+19033224153	http://www.buffalotank.com/		0.92
+28c09c397540	Classic Bank	office		31.06918	-96.97541	400 W Avenue B	Rosebud	76570	+12545837931	http://www.classicbank.com		0.77
+f25ce7d59e85	Freestone County Appraisal District	office		31.72832	-96.16041	218 N Mount St	Fairfield	75840	+19033895510	https://www.freestonecad.org		0.77
+a245ecd6a590	Marty's Place	office	private association	31.67879	-96.42323	1093 County Road 498	Mexia	76667	+19039150120			0.92
+e1908801db70	Meals on Wheels	office		31.30606	-96.90041	104 Hays St, Marlin, TX 76661	Marlin	76661	+12548832888	http://www.mowaa.org		0.92
+64999a2230b8	Potter's Saddlery	office	bags luggage company	31.00463	-96.06557	4214 Musgrove Rd	Normangee	77871	+19364439496	http://www.potterssaddlery.net/		0.92
+06ec482dbfaf	Propane Works LLC	office	industrial company	31.68132	-96.40127	1748 W US Highway 84	Mexia	76667	+18064700408	http://www.PropaneWorks.com/		0.90
+b0571f94c4d0	SkidPro Works LP	office		31.86103	-96.31725	1650 Farm to Market 80	Streetman	75859	+14062127022	https://skidproworks.com/		0.96
+d5f2f74caac2	Straight Talk	office	telecommunications company	31.68365	-96.45651	1406 E Milam St	Mexia	76667	+12545623831	https://www.walmart.com/store/248-MEXIA-TX	Straight Talk	0.60
+4b6b62521c5a	Texas Oncology-Groesbeck	office	pharmaceutical company	31.53270	-96.53119	701 McClintic Dr., Limestone Medical Center	Groesbeck	76642	+12543990741	https://www.texasoncology.com/cancer-centers/groesbeck/texas-oncology-groesbeck		0.85
+4606c5b87e45	Thermo Fisher Scientific	office	biotechnology company	31.77978	-96.46653	205 W Riley	Wortham	76693	+12547653045	https://www.thermofisher.com/		0.92
+7526d7e8be7b	Twisted Tees	office	information technology company	31.50370	-96.28976	140 F County Road 811	Donie	75838	+12544343906	https://www.twistedteecreations.com		0.77
+aa0f79284d19	302 Thai Express	restaurant	thai restaurant	31.30878	-96.89922	302 Craik St	Marlin	76661	+12547177959			0.96
+e5244877706a	7 Diaz Tacos & More	restaurant	mexican restaurant	31.62715	-96.27399	1201 E Main St	Teague	75860	+19036441799	https://7-diaz-tacos-more.square.site/		0.92
+9135a86bd0fa	Abisha's Takeout Grill	restaurant		31.88782	-96.35205	16322 S Interstate 45 E	Streetman	75859	+19035992233			0.76
+c6c77d829c1b	Amigos Y Familia	restaurant	texmex restaurant	31.02113	-96.49290	750 W Hwy 79	Franklin	77856	+19798289991	http://amigos-y-familia.edan.io		0.99
+fbae6c869538	Anita's Tex Mex Restaurant	restaurant	texmex restaurant	31.24670	-96.25611	954 V.W. Goodwin Blvd	Marquez	77865	+12543150485	https://anitastexmex.com/		0.92
+d743ecf949e1	Anthony's Restaurant	restaurant	american restaurant	31.45061	-96.07861	311 Craig	Buffalo	75831	+19033224173	http://anthonysofoldforge.com/	Anthony's Restaurant	0.96
+f2b1897ea6e8	Bada Bing Burger Joint	restaurant	burger restaurant	31.54145	-96.83507	302 E Texas Ave	Mart	76664	+12548758086	https://www.bigz-burgerjoint.com		0.55
+fb93ce1c0487	Bella Sara Pizza & Grill (Texas)	restaurant		31.07540	-96.20986	1 Hilltop Dr	Hilltop Lakes	77871	+19368559044	https://www.bellasarapizzaandgrill.com/		0.86
+ddca9d82ce8c	BIG BO SHERM'S BAR-B-QUE	restaurant	barbecue restaurant	31.96781	-96.68976	1245 FM667	Purdon	76679	+19036542540			0.95
+99fbcdb3b4e1	Big Bulldogs Burgers & BBQ	restaurant	burger restaurant	31.30662	-96.88784	529 Live Oak St	Marlin	76661	+12547498384			0.71
+93fca60f52f8	Billy B's Sale Barn Cafe	restaurant	comfort food restaurant	31.51566	-96.50838	1401 TX-164	Groesbeck	76642	+12547292253			0.98
+1d8edb01c2f3	Bucks Pizza	restaurant	pizza restaurant	31.68526	-96.46196	1322 E Milam St	Mexia	76667	+12545626999	http://www.buckspizza.com/		0.92
+31590e36369b	Bucksnort Saloon	restaurant		31.30645	-96.89500	275 Live Oak St	Marlin	76661	+12547446377	http://www.bucksnortsaloon.com		0.95
+ed14efdcea52	Burrito Express	restaurant	mexican restaurant	31.54189	-96.83495	309 E Texas Ave	Mart	76664	+12548763444	http://www.burritoexpress.com/		0.96
+340e6bf51ce0	C J's Kountry Cookin	restaurant	diner	31.37375	-96.13560	2303 N Main St	Jewett	75846	+19036265655	https://www.chamberofcommerce.com/jewett-tx/6414469-cjs-kountry-cookin		0.77
+f4320408a86a	C&B Smokin Cuts	restaurant		31.02976	-96.11043	235 TX-OSR	Normangee	77871	+19362457786			0.75
+7f3577ecb797	Cactus Grill Tex-Mex	restaurant	texmex restaurant	31.46430	-96.06767	722 N Buffalo Ave	Buffalo	75831	+19033221650	https://www.diaztexmex.com/locations		0.96
+dbb4af627586	Carrillo Fc Corp	restaurant		31.64435	-96.28935	979 US Highway 84 W	Teague	75860				0.95
+2e29f4789191	Champs Chicken	restaurant	chicken restaurant	31.78458	-96.86218	1738 TX Hwy 31	Mount Calm	76673	+12549931050	https://champschicken.com/locations/food-hub-mount-calm-tx/		0.96
+bbb89e6c4556	Champs Chicken	restaurant	chicken restaurant	31.46023	-96.06809	431 W Commerce	Buffalo	75831	+19033224904	https://champschicken.com/locations/gilliams-grocery-buffalo-tx/		0.96
+27ba18c546fe	Charley's Grilled Subs	restaurant	american restaurant	31.68325	-96.49458	822 W Milam St	Mexia	76667	+12545625565	http://www.charleys.com		0.77
+aea8dfa7de77	Charlie Burgers & Grill	restaurant	burger restaurant	31.68481	-96.47372	901 E Milam St	Mexia	76667	+12545626444	http://www.charliesburgergrill.com/		0.95
+d18763dc5f27	Checkers	restaurant	burger restaurant	31.71197	-96.17706	500 I-45 South	Fairfield	75840	+19039154794	https://locations.checkersandrallys.com/tx/fairfield/500-i-45-south?y_source=1_MTA4MzkzNTYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+bd0fec1563b4	Chester's Chicken - Jewett	restaurant	chicken restaurant	31.36832	-96.13941	1303 N Main St	Jewett	75846	+19036264872			0.71
+cb87111f5160	Chopsticks	restaurant	chinese restaurant	31.30645	-96.88920	511 Live Oak St	Marlin	76661	+12548565556	http://www.chopstickswaco.com		0.96
+854d25a6ca0e	Cindy's	restaurant	american restaurant	31.30641	-96.88953	100 Walker St	Marlin	76661	+12548832804			0.92
+9015123fb294	Cindy’s	restaurant	american restaurant	31.30641	-96.89527	263 Live Oak St	Marlin	76661	+12548832804			0.63
+05b5227f30a1	Cinnabon	restaurant	sandwich shop	31.46159	-96.06564	2605 West Commerce Street	Buffalo	75831	+19033229034	https://www.cinnabon.com/tx/buffalo/bakery-100420		0.77
+9d086d303242	Cole's Bar-B-Q	restaurant	barbecue restaurant	31.72675	-96.17793	1022 W Commerce St	Fairfield	75840	+19033893013	http://www.colesbarbeque.com		0.98
+e77af09b06f1	Comalitos Mexican Restaurant	restaurant	mexican restaurant	31.07239	-96.97840	107 S 5th St	Rosebud	76570	+12545830100			0.98
+ae870a4dfbb0	Come see us in Groesbeck	restaurant	mexican restaurant	31.52072	-96.53718	504 S Ellis St	Groesbeck	76642	+12547292796	http://www.lospepesrest.com/		0.99
+706d3e788d63	Cookies Place	restaurant	southern american restaurant	31.64165	-96.28613	951 W US Highway 84	Teague	75860	+12547395430	http://listings.findthecompany.com/l/32042509/Cookies-Place-in-Teague-TX		0.95
+cb2cb9422466	COS Closed On Sundays	restaurant	burger restaurant	31.64220	-96.28572	950 US Hwy 84 W	Teague	75860	+19036440828			0.58
+409648f52ee3	Country Pride	restaurant		31.72545	-96.17748	1015 W Commerce St	Fairfield	75840	+19039154418	https://www.ta-petro.com/	Country Pride	0.77
+1d63aa5722da	Countryside Cafe	restaurant	american restaurant	31.68393	-96.48063	500 E Milam St	Mexia	76667	+12544725070			0.92
+1fc5e99d2024	Crabby Cones	restaurant		31.52123	-96.53895	513 S Waco St	Groesbeck	76642	+12542036189			0.96
+23be8679528c	Crawfish Hideaway	restaurant	cajun and creole restaurant	31.45418	-96.07541	143 Hill St	Buffalo	75831	+19033226023	https://www.crawfishhideaway.com/	Crawfish Hideaway #2 - Dayton, TX	0.92
+ed772d45c830	Crazy Tomato Pizza Pasta & Calzones	restaurant	pizza restaurant	31.94624	-96.89783	803 E Main St	Allen	75002	+19727475131	http://www.crazytomato.net		0.77
+6abd5b6eb58a	D & S Ranch B.B.Q	restaurant	barbecue restaurant	31.29465	-96.85497	564 County Road 220	Marlin	76661	+12817727064	https://marlinbarbecue.com/		0.95
+a5da8913e28b	D & S Ranch B.B.Q	restaurant	barbecue restaurant	31.23856	-96.84825	564 Country Road 201	Marlin	76661	+12819164279	https://marlinbarbecue.com/		0.97
+c60e2c2229b0	Dew Drop In	restaurant	barbecue restaurant	31.59499	-96.14067	832 TX-179	Teague	75860	+19033893391			0.77
+87dd1b6b6631	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.63673	-96.15949	500 I-45 S	Fairfield	75840	+19039154792	https://www.dickeys.com/locations/Texas/Fairfield/fairfield-1	Dickey's Barbecue Pit National	0.99
+a0d4f2994305	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.44784	-96.07864	2710 W Commerce St	Buffalo	75831	+12078747483	https://www.dickeys.com/		0.92
+ae030eeddcfe	Dixies Little Stop	restaurant	american restaurant	31.76008	-96.88559	203 State Highway 31	Mount Calm	76673	+12549933111	http://www.dixieslittlestop.com		0.77
+7261d2469b24	Doc's Icehouse	restaurant	bar and grill restaurant	31.02599	-96.48677	211 N Center St	Franklin	77856	+19798285071			0.92
+374f51f8c893	Dona Chuy Mexican Restaurant	restaurant	latin american restaurant	31.36842	-96.13981	1319 N Main St	Jewett	75846	+19036266067			0.69
+826f0f6b3b0e	Dos Juanes Mexican Restaurant	restaurant	mexican restaurant	31.72015	-96.92751	203 State Highway 31	Mt Calm	76673	+12549813971			0.92
+05051e35fe49	Dos Juanes Restaurant Mt. Calm, Tx	restaurant	mexican restaurant	31.72015	-96.92751	203 State Highway 31	Mt Calm	76673				0.89
+0270b049ef41	DQ's BBQ	restaurant	barbecue restaurant	31.30602	-96.89781	100 Live Oak St	Marlin	76661	+12544474720	http://www.dqbbq.org/		0.73
+ecf00943267a	Drillin' Rig Restaurant	restaurant	american restaurant	31.68217	-96.49266	600 W Palestine St	Mexia	76667	+12545626323	http://longandlongpierdrillingplano.gastrobars.com		0.95
+c07a251f5ce9	El Charro	restaurant	mexican restaurant	31.28481	-96.88917	103 S State Highway 6	Marlin	76661	+12542528104	http://www.elcharrocanada.com		0.55
+072631d5f224	El Charro Mexican Restaurant Bar and Grill	restaurant	mexican restaurant	31.27327	-96.87406	103 S State Highway 6	Marlin	76661	+12542528104			0.92
+14860c930cd3	El Charro Mexican Restaurant Bar and Grill	restaurant	mexican restaurant	31.30596	-96.87675	113 Texas 6 Business	Marlin	76661	+12542528104	http://el-grill-marlin.poi.place		0.98
+4a7ec8fdb623	El Corral Mexican Restaurant	restaurant	mexican restaurant	31.46231	-96.06599	233 Buffalo Ave	Buffalo	75831	+19033221141			0.94
+6f4bfaf6239b	El Jimador	restaurant	texmex restaurant	31.70937	-96.18030	1320 US Hwy 84 W	Fairfield	75840	+19033895820	http://Eljimadorrestaurantgrill.com/	El jimador Bellville	0.98
+0ad5ff19b17c	El Pancho Mexican Restaurant	restaurant	mexican restaurant	31.52217	-96.53617	301 S Ellis St	Groesbeck	76642	+12546453236			0.92
+923626883b53	El Patio Mexican Grill - Mexia	restaurant	mexican restaurant	31.68438	-96.47163	924 E Milam St	Mexia	76667	+12544725111			0.99
+74de25c3b9b4	El Rincon del Viejo	restaurant		31.68370	-96.49130	506 W Milam St	Mexia	76667	+12544725044			0.59
+cde1fa38ff1e	El Tapatio	restaurant	mexican restaurant	31.47479	-96.92402	103 S Wiebusch St	Riesel	76682	+12548960022	http://www.elpatio.com		0.95
+82852ecd0a42	Ella's Cafe	restaurant		31.75871	-96.88198	1738 State Highway 31	Mount Calm	76673	+12549931080	https://www.goodfoodbyella.com		0.77
+822919f0ffa9	Ever Lovin Cup - Jewett	restaurant		31.36446	-96.14236	703 N Main St	Jewett	75846	+14302166240	http://ever-lovin-cup.square.site/		0.92
+6b76e4eeb721	Farm House	restaurant	southern american restaurant	31.68592	-96.45777	1401 E Milam St	Mexia	76667	+12544720512	http://farm-house-restaurant.com/	Farm House	0.95
+a3f664492c47	Fitzpatrick Preferred Partners, Llc	restaurant		31.78450	-96.86225	1738 State Highway 31	Mount Calm	76673				0.95
+c60166c21fd2	Frankie's Pasta & Pizza	restaurant	italian restaurant	31.68505	-96.49205	602 N Martin Luther King Jr Hwy	Mexia	76667	+12545622388	https://frankiesmexia.my.canva.site/		0.97
+ac040e9938c6	Frida's Cafe	restaurant	mexican restaurant	31.53943	-96.83972	306 W Texas Ave	Mart	76664	+12548768040			0.92
+c4ccb13daeb2	Gene’s BBQ Pit Stop	restaurant		31.84439	-96.79317	101 SW 2nd St	Hubbard	76648	+12542057723			0.58
+a274e3c4ccef	Get Baked & Chocolate Wasted	restaurant		31.52378	-96.53487	302 W Navasota St	Groesbeck	76642	+15126326462			0.87
+c67c15b268fb	Grand Buffet	restaurant	buffet restaurant	31.68425	-96.47559	810 E Milam St	Mexia	76667	+12544729888	https://www.grandbuffetmexia.com/accessibility.aspx		0.97
+586aae7245e4	Granny;s Soul Food	restaurant	soul food	31.52346	-96.54019	708 W Yeagua St	Groesbeck	76642	+12547292930	http://grannysrestaurant.net/		0.92
+bc29f980ca04	Halfway Bar & Grill	restaurant	bar and grill restaurant	31.44759	-96.07818	2710 W Commerce St	Buffalo	75831	+19033221919			0.92
+87091cf51864	Hangar 54 Pizza	restaurant	pizza restaurant	31.46007	-96.06802	431 W Commerce St	Buffalo	75831	+19033224904	https://hangar54.pizza/location/gilliams-grocery-buffalo-tx/	Hangar 54 Pizza	0.96
+5ab8170d5529	High Cotton Family Restaurant and Icehouse	restaurant	theme restaurant	31.30591	-96.87558	101 S State Highway 6 Byp	Marlin	76661	+12548040002			0.62
+80fb9f8a3135	Hilltop Lakes Resort & Restaurant	restaurant		31.07512	-96.20934	3 Hilltop Dr	Normangee	77871	+19368552222	http://www.hilltoplakes.com		0.97
+acf66ad770c5	Hometown Pizza	restaurant	pizza restaurant	31.36781	-96.14082	1214 N Main St	Jewett	75846	+19036267278			0.97
+16e4f52f1e6c	Hubbard City Cafe	restaurant	american restaurant	31.85010	-96.79918	602 N Magnolia Ave	Hubbard	76648	+12545762323	http://www.hubbardcitydrug.com		0.97
+3781ec64576c	Huddle House	restaurant	breakfast and brunch restaurant	31.59894	-96.15681	680 I H 45	Teague	75860	+19033899098	https://locations.huddlehouse.com/tx/teague/680-ih-45.html		0.92
+3407587e40a0	Hyden Family Barbeque	restaurant	barbecue restaurant	31.64211	-96.28571	950 US Highway 84 W	Teague	75860	+12547393102	http://calhounfamilytexasbarbeque.com		0.92
+8f41cf56a516	I-45 Restaurant	restaurant		31.71413	-96.17887	466 W Interstate 45	Fairfield	75840	+19033893383	http://shell.com		0.99
+219fac2bd177	J & D Barbeque	restaurant	barbecue restaurant	31.16781	-96.67741	106 N Commerce St	Bremond	76629	+19792551192			0.65
+d9ea53b93e3b	Jalapeño Mexican Grill	restaurant	mexican restaurant	31.24439	-96.25845	905 Vw Goodwin Blvd N	Marquez	77865	+19035291744	http://www.jalapamexicangrill.net		0.77
+692c5d1a8e2e	Jim's Krispy Fried Chicken	restaurant	chicken restaurant	31.68369	-96.48203	312 E Milam St	Mexia	76667	+12545625035	http://outeasy.wordpress.com		0.95
+35a22d9de9e5	Jman’s Burger Barn in Riesel Texas	restaurant		31.46992	-96.92417	402 S Memorial St	Riesel	76682	+12543405416			0.94
+ab5400a60b0e	Joe Friday's Diner	restaurant	diner	31.68569	-96.49219	601 N Martin Luther King Jr Hwy	Mexia	76667	+12544725105	http://www.joefridaysdiner.com	Ruby's Diner	0.94
+e513f18f885c	Julio’s	restaurant	mexican restaurant	31.47495	-96.92379	103 S Wiebusch St	Riesel	76682	+12548960022			0.92
+675984ec2c0f	Kamdan's Cafe	restaurant	american restaurant	31.52397	-96.53471	101 N Ellis St	Groesbeck	76642	+12542552135			0.98
+da0fda8aca71	Kasa Kosse	restaurant	texmex restaurant	31.30694	-96.63212	307 W Washington St	Kosse	76653	+12543752600			0.96
+2bffe3c4297e	Kosse Cafe	restaurant	diner	31.30746	-96.63264	310 W Washington St	Kosse	76653	+12543752274	http://www.kossecafe.com/		0.94
+532bc28c2f11	Kountry Grub	restaurant		31.36383	-96.14348	1833 County Road 278	Buffalo	75831	+19033885421	https://www.countrymax.com/Palmyra-CountryMax/		0.83
+695e9ee6dc36	Kowboy Steak House	restaurant	steakhouse	31.38110	-96.00535	8183 N US Highway 75	Buffalo	75831	+19033221669	http://jhcowboysteakhouse.com		0.92
+831f55900449	Krispy Krunchy Chicken	restaurant	chicken restaurant	31.72409	-96.16592	401 W Commerce St	Fairfield	75840	+19033894324	https://locations.krispykrunchy.com/tx/fairfield/401-w-commerce-st		0.96
+e0c20d8bc727	Kuntry Kafé	restaurant		31.30514	-96.89928	208 Williams St	Marlin	76661	+12548035513			0.61
+04b04ec51f6e	La Hacienda	restaurant	mexican restaurant	31.36494	-96.14262	718 N Main St	Jewett	75846	+19036263000			0.92
+56fcb4bf4910	La Sabrosita Taqueria	restaurant		31.72798	-96.18524	109 FM 27 W	Fairfield	75840	+19039154562	https://la-sabrosita-taqueria.business.site		0.75
+797084e0c85e	Lakeside Grill & Mini Mart	restaurant	breakfast and brunch restaurant	31.54490	-96.95833	1104 Wilbanks Dr	Hallsburg	76705	+12545486786			0.86
+2b30230bb485	Lakeview Drive-In	restaurant	burger restaurant	31.31968	-96.89279	1008 N Highway 6	Marlin	76661	+12548833481			0.93
+19ddbf8e487e	Laredo Tex-Mex	restaurant	texmex restaurant	31.16478	-96.67690	208 W Jack St	Bremond	76629	+12547465333			0.99
+abe1f2ed6024	Laz Pinaz Lokaz	restaurant	latin american restaurant	31.44678	-96.08008	2853 W Commerce St	Buffalo	75831	+19033221198	https://instagram.com/lazpinazlokaz?igshid=OGQ5ZDc2ODk2ZA%3D%3D		0.92
+1d9f7b0f7952	Leon restaurant	restaurant	american restaurant	31.36888	-96.14008	1500 N Main St	Jewett	75846	+19036263070	http://www.leonas.com		0.92
+050936408fb3	Leoni Pizzeria	restaurant	pizza restaurant	31.02646	-96.48669	107 E Decherd St	Franklin	77856	+19797019036	http://www.leonipizzeria.com/		0.96
+1270b9008506	Lil Joe's BBQ	restaurant	barbecue restaurant	31.07455	-96.97961	212 5th St	Rosebud	76570	+12546270846			0.97
+26401e940050	Little Red Rooster Cafe	restaurant	american restaurant	31.16592	-96.67634	109 W Denton St	Bremond	76629	+19794464306			0.65
+bcae1bed439e	Loop 442 Country Store and Boutique	restaurant		31.73425	-96.54840	3310 Hwy 171	Tehuacana	76686	+12542379750			0.90
+5107ea02cff5	Los Pepe's	restaurant	texmex restaurant	31.52010	-96.53716	504 S Ellis St	Groesbeck	76642	+12547292796	http://Lospepesrest.com/		0.98
+1eb799ca26e4	Louie's Ice House	restaurant	bar and grill restaurant	31.02620	-96.48611	211 N Center St	Franklin	77856	+19798281444			0.95
+9676c85d4267	Magic Chinese	restaurant	chinese restaurant	31.68674	-96.49203		Mexia	76667	+12545629745	https://indulgery.com/b/magic-china-mexia		0.77
+3dcebf1e0a9e	Mama's Place	restaurant	bar and grill restaurant	31.67188	-96.49615	TX-14	Mexia	76667	+12543553011			0.97
+45c7ead04d9f	Mary's Breakfast & Burger Barn	restaurant	diner	31.52042	-96.53610	411 S Dr J B Riggs Dr	Groesbeck	76642	+12547292478	http://marysbreakfastandburgerbarngroesbeck.drinkandfood.website/		0.98
+84e2226ce194	Mei Lin Inc	restaurant		31.68427	-96.47555	810 E Milam St	Mexia	76667				0.95
+25156a553f2e	Mi Familia Taco Stand	restaurant	texmex restaurant	31.67861	-96.49471	103 S Martin Luther King Jr Hwy	Mexia	76667	+12546251155	https://www.chamberofcommerce.com/.../23399945-mi-familia-taco-stand		0.96
+0d35ca6b4e39	Mickey's Pizza	restaurant	pizza restaurant	31.46416	-96.05757	1058 Commerce St E	Buffalo	75831	+19033221390	http://mickeyspizza.com	Mickey's Pizza & Subs	0.93
+84994fa1772a	MIKES PLACE	restaurant	american restaurant	31.31497	-96.89415	902 Monroe St	Marlin	76661	+12543044086			0.95
+1e44ac65cc6c	Mis Rancheros Breakfast	restaurant	mexican restaurant	31.53057	-96.52929	704 N Ellis St	Groesbeck	76642	+12542979925	http://losrancherosinc.com/		0.92
+3d0f220fa6d4	Molina's Tortilleria & Restaurant	restaurant	mexican restaurant	31.66933	-96.48060	309 E Travis St	Mexia	76667	+12544725161	http://molinas-tortilleria.edan.io		1.00
+3dc195000ab6	Montes Burritos	restaurant	mexican restaurant	31.68365	-96.49130	506 W Milam St	Mexia	76667	+12544725044			0.93
+a43c6e3c60a7	Mookie's Mesquite Patch BBQ	restaurant	barbecue restaurant	31.75500	-96.64963	102 N 1st St	Coolidge	76635	+19034671584			0.95
+6dd2701a0fa0	Mr Gatti's Pizza	restaurant	pizza restaurant	31.68338	-96.45661	1406 E. Milam Street	Mexia	76667	+12542035560	https://order.mrgattispizza.com/menu/mr-gattis-pizza-mexia/?y_source=1_MTA4MjQ4NDcyNS00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.99
+e6ba80eb1a5d	Muffin's Country Kitchen	restaurant		31.07502	-96.97983	300 5th St	Rosebud	76570	+12547164067			0.96
+83c33093b6d2	Natalie's Classic Grill	restaurant	american restaurant	31.94162	-96.16886	480 FM-416	Streetman	75859	+19033905480			0.74
+d5a199f5b58a	NBC 5 KMAM	restaurant		31.16203	-96.67340	418 E Colorado St	Bremond	76629	+17167491631	http://www.nbc5kmam.com/		0.60
+df74c06fb45f	New Baden General Store	restaurant		31.05109	-96.43011	3550 Main St	Franklin	77870	+19798282006	http://www.newbadenmarket.iga.com/StoreLocator/Store_S.las		1.00
+67297068e62a	New Márquez Restaurant	restaurant	mexican restaurant	31.24660	-96.25603	954 N VW Goodwin Blvd	Marquez	77865	+19035292173			0.57
+b85945c82e44	Old Union Eats	restaurant	barbecue restaurant	31.40619	-96.42638	6030 FM937	Groesbeck	76642	+12547292279			0.92
+310361e42b75	P.O.P. Acres Ranch & Farm	restaurant		31.91553	-96.54289	8040 FM 642	Purdon	76679	+19032297505	http://www.popacres.com		0.77
+74211d34c66a	Panther Land Food Truck Park	restaurant		31.02766	-96.11225	103 Crete St	Normangee	77871	+19363961234	https://insitebrazosvalley.com/food-drink/dining/made-with-love/?fbclid=IwAR2jIxWOfl-9NKhn2Gv2yhu-YWIESHP5KY8DbpwfHGiwB1hYeOq14z6ZqJ4&fs=e&s=cl		0.93
+d36b5a198118	Pelican Grill	restaurant	bar and grill restaurant	31.99888	-96.22371	9928 US-287	Corsicana	75109	+19039488466			0.92
+7b50e7ed087c	Petroleum Wholesale	restaurant	mexican restaurant	31.64890	-96.79945	10269 Hwy 84 W	Prairie Hill	76678	+12543442727	https://www.petroleumwholesale.com		0.77
+666adf15c9dc	Pitt Grill	restaurant	diner	31.46950	-96.04733	2535 E Commerce St	Buffalo	75831	+19033229999	http://pittgrill.com		0.77
+2bb9d985cb4b	Pizza Inn	restaurant	buffet restaurant	31.44873	-96.07704	2430 W Commerce St	Buffalo	75831	+19033224817	https://www.pizzainn.com	Pizza Inn	0.96
+17f34438fbba	Pizza Pro	restaurant	pizza restaurant	31.07428	-96.97913	206 N 5th St	Rosebud	76570	+12545830333			0.92
+43bcd79747bb	Pizza Pro	restaurant	pizza restaurant	31.54209	-96.83376	414 E Texas Ave	Mart	76664	+12548767777	https://www.pizzapro.com		0.98
+577efe0c1e39	Pizza Pro	restaurant	pizza restaurant	31.45817	-96.07007	814 W Commerce St	Buffalo	75831	+19033223104	http://www.pizzapro.com		0.92
+85c12078d502	Pizza Pro	restaurant	pizza restaurant	31.72429	-96.16582	401 W Commerce St	Fairfield	75840	+19033894886	http://www.pizzapro.com		0.92
+2694e14a814e	Pollo Express	restaurant	chicken restaurant	31.68386	-96.47690	720 E Milam St	Mexia	76667	+12542038285			0.55
+c2417cc319d3	Pollo Express	restaurant	mexican restaurant	31.68325	-96.49093	503 W Milam St	Mexia	76667	+12542038285	https://piyw.top/pollo-express		0.92
+ada1ca34fd35	Polo's Pizza	restaurant	pizza restaurant	31.84687	-96.79601	205 N Magnolia Ave	Hubbard	76648	+12545762525			0.92
+a67c2797fc6c	Ponte's Diner	restaurant	diner	31.71175	-96.17867	901 US Hwy 84 W	Fairfield	75840	+19033895555	http://pontes.fftogo.co/		0.97
+d86f102445ad	Qui Qui Seafood Kitchen	restaurant	seafood restaurant	31.68492	-96.46574	1202 E Milam St	Mexia	76667	+12544725080			0.84
+b73cdb42c961	Rancho Nuevo	restaurant	mexican restaurant	31.64223	-96.28915	979 US Hwy 84 W	Teague	75860	+12547395889	https://seatgeek.com/venues/rancho-nuevo/tickets		0.96
+52dda294ab8e	Rancho Viejo No 2	restaurant	mexican restaurant	31.44828	-96.07539	325 S Craig Dr	Buffalo	75831	+19033227474	http://www.ranchoviejo.net/		0.98
+ddda66fab615	Reagan Roundup Bar & Grill	restaurant	bar and grill restaurant	31.21791	-96.78323	360 County Rd 251	Reagan	76680	+12542522576			0.96
+2df3de468ded	Refresqueria & taqueria Tropical	restaurant	mexican restaurant	31.30591	-96.89923	114 Williams St	Marlin	76661	+12542528122			0.96
+416b200e4680	Rosebud's Brick Oven	restaurant	italian restaurant	31.07408	-96.97591	227 Main St	Rosebud	76570				0.81
+69e08ce2b644	Ruby Lee's Cafe	restaurant	diner	31.68098	-96.49407	209 TX-14	Mexia	76667	+12545629909	https://ruby-lees-cafe.hub.biz		0.96
+aa19ab702fef	S&H Drive In	restaurant		31.51548	-96.52497	802 E Yeagua St	Groesbeck	76642	+12547295557	http://valero.com		0.92
+6cfdb02daf39	Sabor Tejano	restaurant	pizza restaurant	31.96601	-96.42156	7006 S Interstate Highway 45 W	Corsicana	75109	+19723334603			0.71
+7d6db7cd868c	Sal's	restaurant	mediterranean restaurant	31.71190	-96.17705	500 I-45	Fairfield	75840	+19039235968			0.98
+0dcc2d08be38	Sam's Original Restaurant	restaurant	buffet restaurant	31.71742	-96.17620	390 Interstate 45 Frontage Road	Fairfield	75840	+19033897267	http://www.samsrestaurant.com/		0.98
+9d6956c96db7	Sams Restaurant	restaurant	american restaurant	31.75983	-96.20931		Fairfield					0.68
+f501dd2f1f05	Sandy's bar & grill	restaurant	bar and grill restaurant	31.66817	-96.49713	323 N Dr M.L.K. Jr. Hwy	Mexia	76667	+12542371620			0.92
+d05d15bbf943	Sargento’s Mexican Restaurant	restaurant	texmex restaurant	31.01095	-96.51047	1848 W Hwy 79	Franklin	77856	+19798280002	https://www.sargentosmexicanrestaurant.com/		0.98
+fd67c64c95f7	Sol De Mexico	restaurant	mexican restaurant	31.68466	-96.47632	801 E Milam St	Mexia	76667	+12545626105	http://www.soldemexico.net		0.92
+f5336364a079	Something Different	restaurant	diner	31.71732	-96.17533	690 US Hwy 84 W	Fairfield	75840	+19033893022	http://somethingdifferentrestaurant.com		0.97
+2358731d1e2b	Susanita's Tex-Mex Y Ritas	restaurant	texmex restaurant	31.36857	-96.13993	1319 N Main St	Jewett	75846	+12149450264	http://susanitas.com/		0.92
+0451ed9b265b	Sweet T.	restaurant		31.02879	-96.11711		Normangee		+19363961986			0.65
+f13e776c15b7	Taco Palin	restaurant	taco restaurant	31.61991	-96.28535	800 Washington St	Teague	75860				0.96
+2457eeecbc0a	Tacos El Barbas	restaurant	taco restaurant	31.68495	-96.47267	909 E Milam St	Mexia	76667	+12544241654			0.92
+966235818042	Tacos El Norteno	restaurant	mexican restaurant	31.68306	-96.49303	800 W Milam St	Mexia	76667	+12547234028			0.98
+e7445f43beb2	Tacos LA Vida	restaurant	taco restaurant	31.07409	-96.97562	227 Main St	Rosebud	76570	+12546549611			0.92
+6df140bd9c32	Tamale Inn	restaurant	texmex restaurant	31.66359	-96.49892	4518 S Martin Luther King Jr Hwy	Mexia	76667	+12545620100			0.64
+b9f164d3bf83	Tamale Inn	restaurant	texmex restaurant	31.63094	-96.51525	4518 State Highway 14 S	Mexia	76667	+12545620100			0.66
+61727300afaf	Tanny's Soulfood Eatery	restaurant		31.30610	-96.88538	718 Live Oak St	Marlin	76661	+12542528060			0.96
+2c0f15ff8f6c	Taqueria La Paz	restaurant		31.63135	-96.27005	325 E Loop 255	Teague	75860	+19033907826			0.88
+9eddf8d74018	Taqueria Lopez	restaurant	mexican restaurant	31.46431	-96.06718	717 N Buffalo Ave	Buffalo	75831	+19033223806	https://taqueria-lopez-tx.hub.biz/		0.96
+a60f87337807	Taqueria Mexicano #4	restaurant	mexican restaurant	31.68779	-96.49516	838 N Highway 171	Mexia	76667	+12544720400			0.95
+1f8e20d32a76	Taste of India Jewett	restaurant		31.36832	-96.13941	1303 N Main St	Jewett	75846	+19033888187			0.87
+fd0fee0d07fe	Te'Jun the Texas Cajun - Food Truck	restaurant		31.71042	-96.18004	1210 W US Highway 84	Fairfield	75840	+12542353100	http://www.tejunthetexascajun.com		0.77
+82b4fd1be957	Te'Jun, The Texas Cajun	restaurant	cajun and creole restaurant	31.71029	-96.17964	1210 US-84	Fairfield	75840	+19033905145	https://www.tejunthetexascajun.com/	Te'Jun The Texas Cajun	0.93
+0abe9fd21a69	Texas Avenue Cafe	restaurant	comfort food restaurant	31.54218	-96.83371	416 E Texas Ave	Mart	76664	+12543007473			0.92
+2129581449e7	Texas Shaved Icehouse	restaurant		31.65498	-96.73756	8313 Highway 84 W	Prairie Hill	76635				0.64
+7a5bc9b6240c	The Butcher’s Choice	restaurant	steakhouse	31.72178	-96.17163	350 US Hwy 84 W	Fairfield	75840	+19033904853	http://thebutcherschoicetx.com/		0.92
+b3dcad38616f	The Captain's Den	restaurant	burger restaurant	31.54486	-96.95821	1104 Wilbanks Dr	Waco	76705	+12548266066			0.65
+c16ee3375de0	The Chicken Place	restaurant	chicken restaurant	31.30617	-96.90423	504 Bridge St	Marlin	76661	+12548833747	http://www.thechickenplacetx.com		0.98
+5c6fae3c0212	The Drunken Goat	restaurant	burger restaurant	31.02759	-96.11217	103 Crete St	Normangee	77871	+19035124815			0.96
+9de29f9ca7eb	The Falcon Club	restaurant	bar and grill restaurant	31.68673	-96.49183	703 N Martin Luther King Jr Hwy	Mexia	76667	+12545626644	http://www.toasttab.com/thefalcon		0.96
+6d055e0c1f36	The Harbor Restaurant	restaurant	american restaurant	31.99007	-96.21466	10000 Spur 294	Corsicana	75109	+19038747000	http://www.harborinntexas.com		1.00
+6cc7db84753e	The Old Gin	restaurant	american restaurant	31.79124	-96.46248	404 N 3rd St	Wortham	76693	+12542554300	http://www.theoldgin.net/		0.97
+2a3732b12eaa	The Pharm Restaurant	restaurant	steakhouse	31.45952	-96.06845	520 W Commerce St	Buffalo	75831	+19033222229	https://thepharmrestaurant.wixsite.com/mysite?fbclid=IwAR32ksEQNcSUD7FrqzIJ68d26hA9ZkfrCQXl_jzipnGjQUL8EgbEOiUbITk		0.97
+e6ef2e5a90e7	The Place	restaurant		31.02950	-96.12055	434 Main St	Normangee	77871		http://www.theplaceboston.com		0.92
+abb7ea4b74b0	The Trolley LLC	restaurant	bar and grill restaurant	31.54205	-96.83387	412 E Texas Ave	Mart	76664	+12543070052			0.96
+eab6a6891d27	Tia Juanita's Mexican Restaurant	restaurant	texmex restaurant	31.03032	-96.11514	113 FM 39	Normangee	77871	+19363965131			0.92
+a1fb16bd3f16	TX Burger Buffalo	restaurant	burger restaurant	31.45437	-96.07403	1521 W Commerce St	Buffalo	75831	+19033225825	https://txburger.com/?utm_source=fb&utm_medium=Yext	TX Burger	0.97
+747fd03444f4	TX Burger Fairfield	restaurant	burger restaurant	31.71748	-96.17435	677 US-84	Fairfield	75840	+19033893914	https://txburger.com/?utm_source=fb&utm_medium=Yext	TX Burger	0.97
+c0372fea1a59	Victorian's Barbecue	restaurant	barbecue restaurant	31.54247	-96.83383	419 E Texas Ave	Mart	76664	+12543006122	http://victoriansbarbecue.com/		0.93
+85b9b1ab50fa	Wagon Rib & Wing Drive Thru	restaurant	barbecue restaurant	31.30640	-96.87360	4969 TX-7	Marlin	76661	+12548049000	http://wagon-thru.edan.io		0.92
+fb56a1449ea0	Ward & Whitaker Inc	restaurant		31.68607	-96.45773	1401 E Milam St	Mexia	76667				0.95
+01f7f5eb0950	Whisky River Saloon & Grill	restaurant	bar and grill restaurant	31.91730	-96.89731	207 W Live Oak	Malone	76660	+12545332220			0.99
+b17624a7e670	Whup's Boomerang Barbecue	restaurant	barbecue restaurant	31.29247	-96.89642	1203 Bennett St	Marlin	76661	+12548835770	http://www.tmbbq.com/whups-boomerang-bar-b-que		0.92
+e0f22307ad15	Wild Bill's Outlaw Steakhouse	restaurant	steakhouse	31.84909	-96.79696	107 NE 4th St	Hubbard	76648	+12545761114	http://wildbillsoutlawsteakhouse.vpweb.com		0.92
+6c0fb335644c	Win Hing Chinese Restaurant	restaurant	chinese restaurant	31.51809	-96.52988	505 E Yeagua St	Groesbeck	76642	+12547298604	http://winhingtx.com		0.94
+db1d67abd2a2	Wortham Donut Shop	restaurant		31.77641	-96.46810	101 S 3rd St	Wortham	76693	+12547653811			0.59
+c6faa28860c6	Wortham Restaurant	restaurant	american restaurant	31.79028	-96.46354	303 TX-14	Wortham	76693	+12547655060			0.92
+926519c442da	Wright's BBQ	restaurant	barbecue restaurant	31.68009	-96.49429	123 N Dr M.L.K. Jr. Hwy	Mexia	76667	+12545626805	http://www.wrightsbarbq.com/		0.97
+96b2e8ed67c6	Ash Street Group Home	senior	retirement home	31.63332	-96.28116	701 6th Ave	Teague	75860	+12547395804			0.92
+fa002525d45d	Avir at Groesbeck	senior	retirement home	31.52500	-96.54321	1025 W Yeagua St	Groesbeck	76642	+12547293366	https://avirhg.com/	Avir at Bowie	0.90
+dd98e3bf04ad	Avir at Moody	senior	retirement home	31.73203	-96.16570	420 Moody St	Fairfield	75840	+19033891236	http://avirhg.com/	Avir at Bowie	0.98
+7dcfc859c04b	Avir at Sumpter	senior	retirement home	31.68608	-96.48123	501 E Sumpter St	Mexia	76667	+12544720630	http://avirhg.com/	Avir at Bowie	0.98
+810612331ab9	Bremond Nursing and Rehabilitation	senior	retirement home	31.16753	-96.67444	211 N Main St	Bremond	76629	+12547467666	http://www.bremondnursing.com/?utm_source=Extnet&utm_medium=Yext&y_source=1_NDc5MzU0MjItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+70a5c0f9731a	Fairfield Nursing And Rehabilitation Center	senior	assisted living facility	31.73186	-96.16573	420 Moody St	Fairfield	75840	+19033891236	https://fairfieldnursingandrehab.com		0.92
+4dbba3049996	Fairview Healthcare Residence	senior	assisted living facility	31.72245	-96.15022	601 E Reunion St	Fairfield	75840	+19033894121	https://fairviewresidence.com		0.92
+57fa006da845	Franklin Nursing Home	senior	retirement home	31.02934	-96.49178	700 North Hearne St	Franklin	77856	+19798285152	http://www.franklincare.com/		0.99
+f2d8d8e9c9b6	Golden Years Nursing And Rehab	senior	assisted living facility	31.30822	-96.89345	318 Chambers St	Marlin	76661	+12548835508	https://goldenyearshc.com		1.00
+05679c6ee319	Groesbeck LTC Nursing Rehab	senior	retirement home	31.52206	-96.52308	607 Parkside Dr	Groesbeck	76642	+12547293245	http://www.groesbeckltc.com/		0.92
+1251e0ab7b18	Heritage House Nursing and Rehabilitation Center	senior	retirement home	31.07926	-96.97414	407 College St	Rosebud	76570	+12545837904	http://heritagehousenursing.com/		0.92
+da443d1e0416	Kare-Inn	senior	retirement home	31.72492	-96.16225	Fairfield Texas, 425 W Commerce St	Fairfield	75840	+19036445273			0.73
+92d0e456c107	Mexia LTC Nursing and Rehabilitation	senior	retirement home	31.68873	-96.49589	601 Terrace Ln	Mexia	76667	+12545625400	https://www.mexialtc.com/		0.92
+c17435c3deca	Mexia State Supported Living Center Volunteer Council	senior	retirement home	31.70579	-96.52934	540 FM-634	Mexia	76667	+2545622821	http://mexiastateschool.placeweb.site		0.91
+da71384c5b1f	Oakview Healthcare Residence	senior	assisted living facility	31.85320	-96.79366	506 Hickory Ave	Hubbard	76648	+12545762518			0.65
+5422cd2554e7	Rosebud Senior Center	senior	retirement home	31.07643	-96.97144	336 Main St	Rosebud	76570	+12545834745			0.60
+75b6919e6590	Skilled Care Of Mexia	senior	assisted living facility	31.68657	-96.48116	501 E Sumpter St	Mexia	76667	+12544720630	http://skilledcareofmexia.com		0.99
+6b89b0a6de4d	Smc Health Resources Inc	senior	assisted living facility	31.72490	-96.15958	129 E Commerce St	Fairfield	75840	+19033893500			0.65
+30685e567087	Teague Nursing and Rehabilitation	senior	retirement home	31.63818	-96.27672	884 W US Highway 84	Teague	75860	+12547392541	https://www.teaguenursingcare.com/		0.92
+17cc02db4bb9	The Manor Healthcare Residence	senior	retirement home	31.68749	-96.49564	831 Tehuacana Hwy	Mexia	76667	+12545623867	http://www.mhcsltd.com/		0.92
+9ab1264b9317	Vincent Personal Care Home	senior	retirement home	31.48877	-96.58157	458 Lcr 635	Groesbeck	76642	+12547293157	https://www.seniorly.com/assisted-living/texas/groesbeck/vincent-personal-care-home		0.92
+b840e9298ed3	Windsor Healthcare Residence	senior	retirement home	31.52524	-96.54822	1025 W Yeagua St	Groesbeck	76642	+12547293366	http://www.windsorresidence.com		1.00

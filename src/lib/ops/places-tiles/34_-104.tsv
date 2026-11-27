@@ -1,0 +1,12 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+732c66f5b3c0	Avid Coffee Roasters	coffee		34.38890	-103.03438	710 Avenue A	Farwell	79325	+18063152888	https://avidcoffeeroasters.net		0.55
+113269b1c6b0	Allsup's Convenience Store	convenience		34.38872	-103.03996	301 Avenue A	Farwell	79325	+18064813528	http://www.allsups.com/		0.92
+133c742624eb	Helton Oil	convenience		34.38817	-103.03148	1005 Avenue A	Farwell	79325	+18064819680			0.65
+23054bef6fe8	LOWES FUEL 66	convenience		34.38870	-103.03362	901 AVENUE A	Farwell	79325			Phillips 66	0.80
+8d669ebee5f9	Phillips 66	convenience		34.38857	-103.03223	901 Avenue A	Farwell	79325	+18064815686	https://www.phillips66gas.com/		0.92
+ee42ec5e54e1	Valero	convenience		34.38821	-103.03999	301 Avenue A	Farwell	79325	+12103452000	https://www.valero.com		0.65
+e9b82e48777a	Gin Mill Card Club Farwell	office	private association	34.38894	-103.03407	712 Ave A S	Farwell	79325	+18064812273	https://ginmillpokerfarwell.com/		0.92
+7e65d631199d	Godfather's Pizza at Annie & Martha’s Artisan Bakery	restaurant	pizza restaurant	34.38842	-103.03477	701 Ave A S	Farwell	79325	+18064812253	https://godfathers.com/		0.96
+f92372bc3cd1	La bonita	restaurant	mexican restaurant	34.38857	-103.04183	123 Avenue A	Farwell	79325	+18064539000			0.96
+962519f522dd	The BBQ Shop	restaurant	barbecue restaurant	34.38896	-103.02772	1300 Ave A S	Farwell	79325	+18064812276	http://www.farwellbbqshop.com/		0.92
+fa47e1cccdac	Farwell Care and Rehabilitation Center	senior	retirement home	34.38579	-103.03755	305 5th St	Farwell	79325	+18064819027	http://www.farwellcarecenter.net/		0.92

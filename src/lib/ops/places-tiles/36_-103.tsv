@@ -1,0 +1,136 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+897a66d1916b	Dalhart Panaderia	bakery		36.06345	-102.52335	220 Denrock Ave	Dalhart	79022	+18062492069			0.96
+cb76e239f12a	Daylight Donuts	bakery	donut shop	36.05800	-102.51077	805 US-87	Dalhart	79022	+18062441221	https://www.daylightdonuts.com	Daylight Donuts of Portales	0.98
+72fe3d604f91	Panaderia y Tortilleria México	bakery		36.06503	-102.51914	101 Scott Ave	Dalhart	79022	+18062440026			0.92
+d592ea32b4b2	TT Donuts Dalhart	bakery	donut shop	36.04993	-102.49844	1701 S US-87	Dalhart	79022	+18062441112			0.92
+960053630dcd	Dalhart Elks Lodge	bar	cocktail bar	36.06712	-102.50531	122 N Jefferson St	Dalhart	79022	+18062445621	https://lodges.texaselks.org/dalhart		0.92
+668a69e36dec	El Centenario Discoteke	bar		36.05111	-102.00613	303 North Dr	Cactus	79013	+18069664494			0.64
+e9837ee882aa	La Desvelada Bar	bar		36.06791	-102.52153	301 Stoney Dr	Cactus	79029	+18067173462			0.63
+4b6d2545fc44	Texas Tavern	bar		36.06643	-102.51917	323 Liberal St	Dalhart	79022	+18066404535			0.95
+5dcd041d55ff	Twisted Sports Bar & Grill	bar	sports bar	36.04251	-102.55984	2979 US-54	Dalhart	79022	+18062445596	https://twistedelmsgolfclub.com/		0.61
+dfcfced96660	Twisted Sports Bar & Grill	bar	sports bar	36.03141	-102.56824	2979 Highway 54 west	Dalhart	79022	+18062445597	http://www.twistedelmsgolfclub.com		0.77
+e675c4f6d687	Vingo Vineyards Winery	bar	winery	36.06310	-102.52203	302 Denver Ave	Dalhart	79022	+18062440600	http://www.vingovineyards.com/		0.92
+d148bb46975e	Duncan Chevrolet Co	cardealer		36.33125	-102.07230	103 S Poplar St	Stratford	79084	+18063665557	http://www.DuncanChevrolet.com/	Chevrolet	0.92
+7d1d7f3b5b3f	Hart Chevrolet GMC	cardealer		36.07070	-102.51057	920 Liberal St	Dalhart	79022	+18062759144	http://www.hartchevy.com/	Chevrolet	0.97
+894e495502ad	Hart/XIT Automotive Group	cardealer		36.07088	-102.51117	920 Liberal St	Dalhart	79022	+18062448512	http://xitauto.com/		0.92
+36ebe9cb607e	Rancho Autosales LLC	cardealer		36.04753	-102.00495	US-287	Cactus	79013	+18067178543	http://elranchosweetspot.com/		0.90
+f160999cc51b	XIT Ford	cardealer		36.07160	-102.50966	1002 Liberal St	Dalhart	79022	+18062448511	https://www.xitfordtrucks.com/	Ford Motor Company	0.92
+b5362bcb9318	Cactus Cafe	coffee		36.05278	-102.00591	610 Ashton Ave	Cactus	79013	+18069345742			0.96
+791de0743b58	HTeaO - Dalhart	coffee	tea room	36.06393	-102.51877	215 Oak Ave	Dalhart	79022	+18068842721	https://hteao.com/locations/dalhart-tx/	HTeaO	0.96
+b41976319570	Quest Coffee	coffee		36.06100	-102.51474	521 US-87	Dalhart	79022	+18063331918	http://quest-coffee.square.site/		1.00
+9cdc7347b363	Salt & Sage Trading Co.	coffee		36.06495	-102.52264	107 E 1st St	Dalhart	79022	+18062447258			0.96
+b0b96809d28a	Sunrise Brew LLC	coffee		36.33246	-102.07320	201 Texas St	Stratford	79084	+18064214892			0.92
+3f5429a91485	The Flying Pig Mercantile	coffee		36.06249	-102.52314	323 Denrock Ave	Dalhart	79022	+18062441988	https://theflyingpigmerc.com		0.96
+f8409192e667	The Purpose Market	coffee		36.06247	-102.52487	324 Rock Island Ave	Dalhart	79022	+18062490099	http://www.purposecoffeeco.com		0.93
+510c2db05dcf	Frank Phillips College-Dalhart	college		36.03649	-102.49347	2890 FM281	Dalhart	79022	+18062447669	http://www.fpctx.edu/	Frank Phillips College	1.00
+5e6c3427aabf	Allsup's	convenience		36.06263	-102.51685	313 Peach Ave	Dalhart	79022	+18062494735	https://www.allsups.com/	Allsup’s	0.92
+6c93082ea899	Allsup's	convenience		36.33196	-102.07256	10 S Maple St	Stratford	79084	+18063961180	https://www.allsups.com/	Allsup’s	1.00
+953a3d1ebdb0	Allsup's Convenience Store	convenience		36.33627	-102.07562	10 N Maple	Stratford	79084	+18063961180	http://www.allsups.com/		0.85
+44519d270169	Cactus Beer Stop	convenience		36.03996	-102.00047	101 Tumbleweed Rd	Cactus	79013	+18069665565			0.64
+3616a8837820	CAT Scale	convenience	truck gas station	36.33078	-102.07335	500-598 N Poplar St	Stratford	79084	+18063961035	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+e2e34e585a12	CAT Scale	convenience	truck gas station	36.07729	-102.53643	12182 Hwy 87 N	Dalhart	79022	+18062440050	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+d692df48ccb9	Chevron Station Dalhart	convenience		36.05955	-102.52229	624 Denver Ave	Dalhart	79022	+18062446431			0.92
+60d0e2d63b47	Conoco	convenience		36.06381	-102.51823	215 Oak Ave	Dalhart	79022	+18068849599	https://www.conoco.com/		0.92
+c21de73a54dd	El Jacalito Convenience Store	convenience		36.05215	-102.00581	604 Ashton Ave	Cactus	79013	+18069663066			0.92
+96070d8a3ddc	Frontier Fuel	convenience		36.06286	-102.52147	323 Denver Ave	Dalhart	79022	+18062446431	http://www.frontierfuel.com/		0.59
+d3497ad9225a	FRONTIER FUELS DALHART 3	convenience		36.06847	-102.52596	1300 N HIGHWAY 87	Dalhart	79022			Phillips 66	0.80
+868ff919f21a	FRONTIER FUELS DQ CONOCO	convenience		36.06418	-102.51801	215 OAK AVE	Dalhart	79022			Conoco	0.80
+dd52be0fb631	FRONTIER FUELS MCD P66	convenience		36.06070	-102.51408	612TENNESSEE AVE	Dalhart	79022			Phillips 66	0.80
+60b9ab424dfb	Grub's Market	convenience		36.05014	-102.00488	100 Center Dr	Cactus	79013	+18069664510			0.92
+3b385219a46e	Love's Travel Stop	convenience	truck gas station	36.07671	-102.53675	12182 U S 87	Dalhart	79022	+18062440050	https://www.loves.com/locations/836		0.92
+2bbe84ca3ac0	Phillips 66	convenience		36.06038	-102.51398	612 Tennessee Blvd	Dalhart	79022	+18068849599	https://www.phillips66gas.com/		0.92
+9486959ac754	Phillips 66	convenience		36.06858	-102.52584	801-899 N Elm St	Dalhart	79022	+18062495695	https://www.phillips66gas.com/		0.92
+650aac623f4f	Pilot Travel Center	convenience		36.33110	-102.07353	100 S Poplar St	Stratford	79084	+18063954652	https://locations.pilotflyingj.com/us/tx/stratford/100-s-poplar-st	Pilot Flying J	0.92
+797e4e257358	SimplyLynn	convenience		36.06443	-102.51859	419 E 2nd St	Dalhart	79022	+18064142852			0.86
+d1a59f474e12	Texas Kansas Oklahoma Gas	convenience		36.07401	-102.50684	1101 Liberal St	Dalhart	79022	+18062444210	http://www.tkogas.com		0.92
+48025e241c9e	Toot'n Totum	convenience		36.05608	-102.50755	1107 S Highway 87	Dalhart	79022	+18062446496	http://www.tootntotum.com	Toot'n Totum	0.92
+850bf9230efc	Toot'n Totum	convenience		36.06464	-102.52097	122 Liberal St	Dalhart	79022	+18062440120	http://www.tootntotum.com	Toot'n Totum	0.97
+94288a198888	Toot'n Totum	convenience		36.33195	-102.07392	119 Texas St	Stratford	79084	+18064253973	http://www.tootntotum.com	Toot'n Totum	1.00
+df3a2b40c388	Toot'n Totum	convenience		36.05945	-102.52230	624 Denver Ave	Dalhart	79022	+18062442604	http://www.tootntotum.com/	Toot'n Totum	0.92
+eaf8db3a44d9	Toot'n Totum	convenience		36.07178	-102.53103	1320 N Highway 87	Dalhart	79022	+18062446202	http://www.tootntotum.com/	Toot'n Totum	1.00
+bde1c7ce1e73	TOOT'N TOTUM #104	convenience		36.05590	-102.50740	1107 N HIGHWAY 87	Dalhart	79022		https://locations.valero.com/en-us/LocationDetails/Index/1107-N-HIGHWAY-87/0000001357	Valero	0.95
+30f938f7fa68	Valero	convenience		36.33191	-102.07268	10 S MAPLE	Stratford	79084	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/10-S-MAPLE/0000026416	Valero	0.92
+fb7cb779de03	Valero	convenience		36.05553	-102.50725	1107 N HIGHWAY 87	Dalhart	79022	+18062446496	https://locations.valero.com/en-us/LocationDetails/Index/1107-N-HIGHWAY-87/0000001357	Valero	0.89
+c0af2aa134b5	West Texas Gas	convenience		36.07936	-102.49669	3232 US Highway 54	Dalhart	79022	+18062494513	http://www.westtexasgas.com		0.55
+459f43162919	Golden Chick	fastfood		36.06106	-102.51548	521 US-87	Dalhart	79022	+18062445064	https://locations.goldenchick.com/tx/dalhart/1323/	Golden Chick	1.00
+731578a47cff	Little Caesars Pizza	fastfood	pizza restaurant	36.06065	-102.51520	522 Railroad St	Dalhart	79022	+18062442140	https://littlecaesars.com/en-us/store/12222	Little Caesars	0.96
+b5fac7e6ce10	McDonald's	fastfood		36.06047	-102.51409	612 Tennessee Ave	Dalhart	79022	+18062494006	https://www.mcdonalds.com/us/en-us/location/tx/dalhart/612-tennessee-ave/15846.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+9f0107a7da9f	Pizza Hut	fastfood	pizza restaurant	36.06300	-102.51731	301 Hwy 87 South Dallam	Dalhart	79022	+18062496536	https://locations.pizzahut.com/tx/dalhart/301-hwy-87-south?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283434	Pizza Hut	0.97
+8ff1d42b897b	Smokie grill and steakhouse	fastfood		36.49948	-102.24258	4265 Dennison Street	Kerrick	79051		https://smokiegrillandsteakhouse.blogspot.com/		0.82
+f08e1552ec69	Sonic Drive In	fastfood		36.06195	-102.51625	401 Highway 87 South	Dalhart	79022	+18062498488	https://locations.sonicdrivein.com/tx/dalhart/401-highway-87-south.html	Sonic Drive-In	0.97
+bbcef9ce1ac6	Sonic Drive-In	fastfood	burger restaurant	36.06215	-102.52193	401 S Highway 87	Dalhart	79022	+18062498488	https://locations.sonicdrivein.com/tx/dalhart/401-highway-87-south.html		0.85
+53bed59ca52e	Subway	fastfood	sandwich shop	36.06540	-102.51996	216 Liberal St	Dalhart	79022	+18062495822	https://www.subway.com		0.98
+8c08cb68f731	Subway	fastfood	sandwich shop	36.33108	-102.07357	100 South Poplar	Stratford	79084	+18062680688	https://restaurants.subway.com/united-states/tx/stratford/100-south-poplar?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=67548&utm_campaign=evergreen-2020&y_source=1_MTQ5MDUyMzYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
+f8ebccbb4838	Taco Bell	fastfood		36.06290	-102.51756	303 Hwy 87	Dalhart	79022	+18062490020	http://www.tacobell.com/	Taco Bell	0.98
+37e43b47f411	Wendy's	fastfood		36.05825	-102.50027	1107 S. US HWY 87	Dalhart	79022	+18062443800		Wendy's	0.93
+5f3feeae155e	Wendy's	fastfood		36.05611	-102.50782	1107 South Us Highway 87	Dalhart	79022	+18062443800	https://locations.wendys.com/united-states/tx/dalhart/1107-south-us-highway-87	Wendy's	0.94
+c6ab0aace604	Bartletts Lumber	grocery		36.06398	-102.52145	201 Denver Ave	Dalhart	79022				0.92
+60810f0f7825	Bezner Beef	grocery		36.16161	-102.87065	12846 Perico Rd	Texline	79022	+18063776301	http://www.beznerbeef.com		0.97
+f70e23ade7a3	Dalhart Processing Plant	grocery		36.05395	-102.49587	2012 E 13th St	Dalhart	79022	+18062496058	http://dalhart.org/		0.92
+154bd0b805a2	La Herradura Market	grocery		36.07468	-102.50643	1400 Liberal St	Dalhart	79022	+18062446890			0.81
+ecf0971fa400	Moore's Food Pride	grocery		36.33674	-102.06445	1002 Texas St	Stratford	79084	+18063965586	http://moores-food-pride-stratford.jany.io		0.92
+f833bc86adac	Tienda El Quetzal	grocery		36.04937	-102.00439	101 South Dr	Cactus	79013	+18067595489	http://joseluisempre.business.blog/		0.70
+e8bc30bbe0b3	United Supermarkets Bakery	grocery		36.05043	-102.51228	1601 Tennessee Ave	Dalhart	79022	+18062496167	http://unitedsupermarkets.com/	United Supermarkets	0.92
+088ab7cbe503	Coon Memorial Hospital	hospital		36.05146	-102.52120	1411 Denver Ave	Dalhart	79022	+18062444571	http://www.dhchd.org/		1.00
+a68d597efc7f	Specialty Clinic	hospital		36.05203	-102.51952	320 E Texas Blvd	Dalhart	79022	+18062443824	http://dhchd.org		0.71
+6398be9e775d	Best Western Nursanickel Hotel	hotel		36.06478	-102.51965	102 SCOTT ST	Dalhart	79022	+18062445637	https://www.bestwestern.com/en_US/book/hotel-rooms.44184.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44184	Best Western Hotels & Resorts	1.00
+9010f31c8fcf	Budget Inn	hotel	motel	36.06682	-102.51855	415 Liberal St	Dalhart	79022	+18062444557	http://www.budgetinn.com	Budget Inn	0.98
+4346f3764698	Chuck & Duck Trucking	hotel		36.05732	-102.52577	902 Conlen Ave	Dalhart	79022	+18062494341			0.56
+cebf0d5d6d3c	Days Inn by Wyndham Dalhart	hotel	motel	36.06857	-102.51577	701 Liberal St	Dalhart	79022	+18062445246	https://www.wyndhamhotels.com/days-inn/dalhart-texas/days-inn-dalhart/overview?CID=LC%3ADI%3A%3AFACEBOOK%3ARIO%3ARegional%3A02291	Days Inn	1.00
+2840f7a7b661	Econo Lodge Dalhart	hotel	motel	36.06514	-102.52132	123 Liberal St	Dalhart	79022	+18062446464	https://www.choicehotels.com/texas/dalhart/econo-lodge-hotels/tx541?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+0ba317c9103a	Hampton Inn & Suites Dalhart	hotel		36.06797	-102.51527	700 Liberal St	Dalhart	79022	+18062440111	https://www.hilton.com/en/hotels/amadhhx-hampton-suites-dalhart/	Hampton by Hilton	0.99
+96ba2f23cde3	Holiday Inn Express and Suites Dalhart	hotel		36.03153	-102.48087	12012 US-87	Dalhart	79022	+18062441001	https://www.ihg.com/holidayinnexpress/hotels/us/en/dalhart/amadh/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-AMADH	Holiday Inn Express	1.00
+a7f77123b7da	Holiday Inn Express and Suites Dalhart	hotel		36.03922	-102.48418	12012 US Hwy 87 S	Dalhart	79022	+18062441001	https://www.ihg.com/holidayinnexpress/hotels/us/en/dalhart/amadh/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-AMADH	Holiday Inn	0.92
+e74c083e7217	Holiday Inn Express Hotel Dalhart	hotel		36.06938	-102.51469	801 Liberal St	Dalhart	79022	+18062491145	http://www.holidayinn.com		0.59
+ab29444b7b63	La Quinta Inn & Suites Dalhart	hotel		36.06925	-102.51455	801 Liberal St	Dalhart	79022	+18062491145	https://www.wyndhamhotels.com/laquinta/dalhart-texas/la-quinta-dalhart/overview?CID=LC%3ALQ%3A%3AGGL%3ARIO%3ANational%3A53268&iata=00093796	La Quinta by Wyndham	1.00
+a83441de3677	Laquinta Hotel	hotel		36.06677	-102.51841	301 Rock Island St	Dalhart	79022	+18062443790	www.laquintadalhart.com		0.75
+3ff4de9766a3	Ramkabir, Ltd	hotel		36.06853	-102.51596	701 Liberal St	Dalhart	79022				0.95
+1b783ab1c6ab	Rodeway Inn	hotel		36.07450	-102.50703	1110 Liberal St	Dalhart	79022	+18062498585	https://www.choicehotels.com/texas/dalhart/rodeway-inn-hotels/tx434?pmf=yext&mc=llyxyxpx	Choice Hotels	0.56
+8a3697fa3cd5	Rodeway Inn	hotel		36.07008	-102.51099	1110 Liberal Street	Dalhart	79022	+18062498585	https://www.choicehotels.com/texas/dalhart/rodeway-inn-hotels/tx434?mc=llyxyxpx		0.77
+b027d5dfc568	Sands Motel	hotel	motel	36.06599	-102.51967	301 Liberal St	Dalhart	79022	+18062444568	http://www.sandsmotel.com		0.94
+c7c6dd00cfc0	Stratford Inn	hotel	motel	36.33337	-102.07085	402 Texas St	Stratford	79084	+18063665574			0.97
+4ce686c1d2c0	Texas Inn Motel	hotel	motel	36.05868	-102.52798	711 Olive Ave	Dalhart	79022	+18062442036			0.84
+d6d30b134692	Tri-State Extended Stay Motel	hotel	motel	36.07342	-102.50771	1020 Liberal St	Dalhart	79022	+18063418401			0.98
+ab80b727c251	Western Skies Motor Inn	hotel	motel	36.05946	-102.52174	623 Denver Ave	Dalhart	79022	+18062494538	http://www.westernskiesmotorinn.com		0.92
+6af0ce3657f3	XIT Ranch Motel	hotel	motel	36.06561	-102.52045	209 Liberal St	Dalhart	79022	+18062443590			0.93
+c6a9a9b81fbc	Paradigm Technologies	office	information technology company	36.06182	-102.52322	412 Denrock Ave	Dalhart	79022	+18062494748	http://www.p-technologies.com/		0.92
+09a1d7bc3898	Biddy's on Main (formally Ol' Biddy Cafe)	restaurant	comfort food restaurant	36.33556	-102.07223	207 N. Main	Stratford	79084	+18063662111	http://www.localfeeds.com/restaurants-in-ok-cimarron-county		0.96
+3c66a55a8a9b	Brenda's Kitchen	restaurant	mexican restaurant	36.33371	-102.06986	502 Texas St	Stratford	79084	+18063962524			0.92
+55a1d0fd11c5	Carniceria El Torito	restaurant	mexican restaurant	36.05943	-102.52976	602 W 7th St	Dalhart	79022	+18062440508	https://carniceria.top	El Torito	0.96
+8e2d82443c9a	Centenario Restaurant	restaurant		36.04792	-102.00491	303 N US Highway 287	Cactus	79013	+18067173385			0.82
+66763fbe7508	Chester's Chicken	restaurant	chicken restaurant	36.07667	-102.53666	12182 Hwy 87 N	Dalhart	79022	+18062440050	https://www.chesterschicken.com/		0.92
+6357b7fff459	City Limits Steakhouse - Stratford, TX	restaurant		36.33559	-102.07224	207 N Main St	Stratford	79084				0.66
+da2619383c1b	Dalhart Cattleman’s Cafe	restaurant		36.03200	-102.56644	2908 US Highway 54	Dalhart	79022	+18069847221			0.94
+c69f950ebfab	Dalhart Taqueria	restaurant	mexican restaurant	36.06665	-102.51872	403 Liberal St	Dalhart	79022	+18062492245	http://daysinn.com		0.92
+fb39fa4960ea	Dust Bowl Bar & Grill	restaurant	bar and grill restaurant	36.05844	-102.53371	811 W 7th St	Dalhart	79022	+18062442260	https://dalhartdustbowl.hrpos.heartland.us/menu		0.96
+00dac1907748	El Paisano Restaurant	restaurant	mexican restaurant	36.05952	-102.52900	518 W 7th St	Dalhart	79022	+18062440958	http://elpaisanousa.com/	El Paisano Asador Restaurante Hostal	0.96
+65d05d1b5267	El Primos Cafe	restaurant	mexican restaurant	36.33800	-102.06281	1120 US-54	Stratford	79084	+18063663799	http://www.primoscafe.com/		0.92
+bd66110642d4	El Sabor De Mi Tierra	restaurant	mexican restaurant	36.06660	-102.51817	418 Liberal St	Dalhart	79022	+18062443663			0.92
+0dfe62e180a5	Godfather's Pizza Express	restaurant	pizza restaurant	36.07360	-102.53394	12182 Highway 87 North	Dalhart	79022			Godfather's Pizza	0.80
+fdd52bc08688	Godfather's Pizza Express	restaurant	pizza restaurant	36.07589	-102.53751	12182 Highway 87 N	Dalhart	79022	+18062440066	https://godfathers.com/		0.85
+ec9ee2840b26	Great Wall Chinese Restaurant & Buffet	restaurant	chinese restaurant	36.06793	-102.52588		Dalhart		+18062440666	http://www.greatwalldalhart.com/		0.87
+e3a251fb4a1c	Great Wall Chinese Restaurant and Buffet	restaurant	chinese restaurant	36.05823	-102.51131	801 US-87	Dalhart	79022	+18062440666	http://www.greatwalltx.com		0.96
+511512be509e	Guera's Tacos	restaurant	mexican restaurant	36.05850	-102.51321	805 Tennessee Ave	Dalhart	79022	+18062440059	https://online.skytab.com/8a4c3ca19a53cd3f2dae246fa80e2923		0.92
+18c876a204ee	Hodie's Bar-B-Q	restaurant	barbecue restaurant	36.05930	-102.51264	701 US-87	Dalhart	79022	+18062446773			0.97
+567eac872874	Jasmine Chinese Restaurant in Dalhart	restaurant	chinese restaurant	36.05854	-102.51331	805 Tennessee Blvd	Dalhart	79022	+18062498770			0.95
+f9b7a6b2f1e8	JT Oishi Cafe	restaurant	thai restaurant	36.05139	-102.00114	403 Beola Ave	Cactus	79013	+18066709730	http://jtoishicafe.com		0.97
+9774d1b035c9	La Cabaña	restaurant	mexican restaurant	36.06653	-102.51872	403 Liberal St	Dalhart	79022	+18062440452	http://lq.com	la cabaña	0.96
+5b42d94fcb9b	La Cocina de Maria	restaurant	mexican restaurant	36.06486	-102.52164	121 Liberal St	Dalhart	79022	+18068842263			0.98
+3b007c3ae01d	La Española II	restaurant	mexican restaurant	36.05058	-102.49994	1601 US-87	Dalhart	79022	+18062495384	https://local.yahoo.com/info-19448192-la-espanola-ii-dalhart		0.97
+27849cd6222e	La mansion kitchen taqueria	restaurant		36.06200	-102.52426	405 Rock Island Ave	Dalhart	79022	+18063338376			0.96
+8f38017f1c67	La Pasadita Mexican Food	restaurant	mexican restaurant	36.06725	-102.51700	518 Liberal St	Dalhart	79022	+18062495729	https://www.et8bx.com:6002/entry/register?i_code=2823125		0.95
+4bde34b7ef81	Mazzio's Pizza	restaurant	pizza restaurant	36.07141	-102.52976	1107 N Highway 87	Dalhart	79022	+18062443800	http://www.mazzios.com		0.92
+7e2c632b3bfb	Mazzios	restaurant	pizza restaurant	36.05613	-102.50736	1107 South Highway 82	Dalhart	79022	+18062443800	http://www.mazzios.com		0.77
+0079334b40a9	Red Baron and Larsen Aviation	restaurant		36.08765	-102.40657	11908 Airport Rd	Dalhart	79022	+18062446050			0.68
+28dc7cca2226	Ribbonwire Ranch	restaurant		36.05788	-102.53452	901 W 7th St	Dalhart	79022	+18063338120	https://www.ribbonwire.com/		0.97
+e1dab0d2d80e	Tacos Las Lupitas	restaurant	mexican restaurant	36.33785	-102.06268	1120 East Highway 54	Stratford	79084	+18063663799			0.84
+28d466cfc696	Taqueria Dalhart	restaurant	mexican restaurant	36.07040	-102.51779	1301 Chicago St	Dalhart	79022	+18062443388		Taqueria Taxco	0.96
+c893249fa0b0	The Grill	restaurant	diner	36.05905	-102.52957	706 Cherry Ave	Dalhart	79022	+18062444651	https://thegrill.org/	Brewer - The Grill	0.98
+42a46ca4487e	The Loose Caboose Restaurants	restaurant		36.06313	-102.52283	301 Denrock Ave	Dalhart	79022				0.95
+010409c4ed0b	The Red Baron Restaurant	restaurant	diner	36.02790	-102.54967	11908 E Airport Rd	Dalhart	79022	+18062446050			0.94
+74ceeccbee91	Tortillería Isela	restaurant	mexican restaurant	36.05939	-102.51186	706 a, Norman Ave	Dalhart	79022	+18063336721			0.98
+f38c4b6619ce	Which Wich Superior Sandwiches	restaurant	sandwich shop	36.06487	-102.52100	122 Liberal St	Dalhart	79022	+18062440336	https://www.whichwich.com		0.99
+c5b1b168f00a	XIT Woodfire Grill	restaurant	barbecue restaurant	36.03825	-102.48989	119 Cypress Dr	Dalhart	79022	+18062441089	http://www.har.com/XIT-Woodfire-Grill/place_ChIJA-A_him0BYcRjsKgqOLkE_E		0.98
+bb69731424cb	Coldwater Manor	senior	retirement home	36.34140	-102.06277	1111 Beaver Rd	Stratford	79084	+18063965568	http://shdistrict.com/coldwater-manor.html#welcome		0.92
+c57469875890	Coon Memorial Nursing Home	senior	retirement home	36.05211	-102.52048	210 E Texas Blvd	Dalhart	79022	+18062448555	http://www.dhchd.org		1.00
+397c426233e1	Legacy Assisted Living Community	senior	retirement home	36.05272	-102.52006	301 E Texas Blvd	Dalhart	79022	+18062441450	https://legacy-assisted-living-community.hub.biz/		0.92

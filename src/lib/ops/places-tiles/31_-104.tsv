@@ -1,0 +1,299 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+781551b952c5	Breakfast Express	bakery	donut shop	31.41285	-103.50050	1304 S Johnson St	Pecos	79772	+14329405759	https://www.doordash.com/store/breakfast-express-pecos-36701987/82669746/?utm_campaign=gpa&utm_source=native_app_banner&web_consumer_id=dx_3045163ab93047ec85aa364148f6cbab		0.92
+eab68cc71d61	C and T Donuts	bakery	donut shop	31.42364	-103.49311	506 S Cedar St	Pecos	79772	+14324470470	http://www.ctdonut.com	C&T Donut	0.98
+a512bc3cf753	Eagle Doughnuts	bakery	donut shop	31.41183	-103.50161	1420 S Eddy St	Pecos	79772	+14324470663	https://eagle-doughnuts-tx.hub.biz		0.94
+35004b265397	Kermit Donuts	bakery	donut shop	31.85862	-103.09055	416 E Austin St	Kermit	79745	+14325862004	https://kermit-donut.hub.biz		0.96
+a56cbb9b6577	Panaderia Diana	bakery		31.42352	-103.50164	701 W 3rd St	Pecos	79772	+14324457082	https://panaderia-diana.hub.biz/		0.92
+9a4ccb9190bb	FREDDY'S ICEHOUSE	bar	cocktail bar	31.39357	-103.50927	2905 Tolivar St	Pecos	79772	+14324477285			0.96
+a5f5877e441c	Ice House	bar		31.39359	-103.50902	2905 Tolivar St	Pecos	79772	+14327551469			1.00
+920b766ca49b	La Bodega Express	bar		31.41970	-103.49165	923 S Cedar St	Pecos	79772	+14329403119			0.90
+91cd9f0de367	MAN CAVE	bar		31.41946	-103.51226	1712 W 3rd St	Pecos	79772	+14328429100			0.92
+5b829cedf7e7	Pecos Social Lodge	bar		31.42031	-103.50951	1510 W 3rd St	Pecos	79772	+14324455426	http://greatnonprofits.org/org/pecos-social-lodge		0.90
+25070e615ad2	Sanchos Hideaway	bar		31.53424	-103.12113	101 TX-115	Pyote	79777				0.92
+959247175278	Trailways Corner Grill	bar		31.42488	-103.49659	202 W 3rd St	Pecos	79772	+14324484548			0.92
+565550a65778	VIP Sports Bar & Grill	bar	sports bar	31.43060	-103.48141	1330 E 3rd St #3526	Pecos	79772	+19153163867	https://bars.ufc.com/bars/9034/tx/us/vip-sports-bar		0.92
+d3b243b3228d	Chance's Auto Sales	cardealer		31.39732	-103.51248	181 Raul Flores Blvd	Pecos	79772	+14808867245	http://worldAutoChevy.com/		0.75
+7a6831786fd2	Colt Auto Group	cardealer		31.39708	-103.51241	181 S Frontage Rd	Pecos	79772	+14324472251	http://www.coltchevrolet.com/		0.93
+520e883ba8c5	Ford	cardealer		31.85656	-103.09299	201 S Poplar St	Kermit	79745	+14323720006	http://www.kermitmotorco.com	Ford Motor Company	0.78
+c828c5fe660a	Greater Texas Ford Dealers	cardealer		31.85655	-103.09251	201 S Poplar St	Kermit	79745	+18448073873		Greater Texas Ford Dealers	0.84
+b5f80c313b84	GRISSOM CHEVROLET	cardealer		31.39714	-103.51244	181 S. Interstate 20 Frontage Road	Pecos	79772		https://www.grissomchevrolet.com	Chevrolet	0.94
+c69a967d5bd5	Kermit Motor Co., Inc.	cardealer		31.85663	-103.09273	201 S Poplar St	Kermit	79745	+14325862551	https://www.kermitmotorco.com		0.92
+27c11010235c	Oliver Gutmann	cardealer		31.41618	-103.48531	502 E 13th St	Pecos	79772	+15126159863	http://gpautologistics.com/		0.57
+60ca7a07ff29	Quality Auto Sales	cardealer		31.42071	-103.51007	1519 W 3rd St	Pecos	79772	+14328976944		Quality Auto Sales	0.92
+aaf4847b3c49	Solana Ford Auto Group, LLC	cardealer		31.85669	-103.09257	201 S Poplar St	Kermit	79745	+14325862551	https://www.solanaford.net/	Ford Motor Company	0.92
+98bc2d74713b	Used Vehicles for Sale in Texas	cardealer		31.85666	-103.09258	201 S Poplar St	Kermit	79745	+14325862551	http://www.solanaford.com/		0.65
+f1a69700dba3	World Auto Chevrolet Buick Gmc	cardealer		31.39709	-103.51318	181 S Frontage Rd	Pecos	79772	+14324472251	https://worldautochevy.com		0.55
+72b7b2c0c4f3	Pecos State Theater	cinema		31.42371	-103.49487	421 S Oak St	Pecos	79772	+14324455742	http://www.pecosstatetheater.com		0.92
+dc12a151fcb8	Dunkin'	coffee		31.40115	-103.52101	In Pilot Travel Center, 2500 S Bickley Ave	Pecos	79772	+14324451238	https://locations.dunkindonuts.com/en/tx/pecos/2500-s-bickley-ave/358143?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=358143&y_source=1_MTIxMTE2NjAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dunkin'	0.96
+eb10c98d0e03	Dunkin'	coffee		31.84351	-103.10364	In Pilot Travel Center, 700 TX-302	Kermit	79745	+14325862616	https://locations.dunkindonuts.com/en/tx/kermit/700-w-state-highway-302/359035?utm_source=facebook&utm_medium=local&utm_campaign=localmaps&utm_content=359035&y_source=1_MTI4MjU1MDAtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dunkin'	1.00
+1f549bfb8fbd	HTeaO	coffee	tea room	31.42173	-103.49260	701 S Cedar St	Pecos	79772	+14322034441	https://hteao.com/locations/pecos-tx/	HTeaO	0.92
+88b1e5227f61	HTeaO	coffee		31.84186	-103.10699	300 TX-302	Kermit	79745		https://hteao.com/locations/kermit-tx/	HTeaO	0.80
+27b95ee6037a	HTeaO - Kermit	coffee	tea room	31.84810	-103.08266	300 TX-302	Kermit	79745	+14323091117	http://hteao.com/	HTeaO	0.55
+da0747f0d00b	La Tejana Coffee House	coffee		31.42590	-103.49575	223 S Oak St	Pecos	79772	+14324456713			0.94
+fe3d80d4e3d9	Pyote Cafe	coffee		31.53435	-103.12112	102 Rogers St	Pyote	79777	+14323895606	https://www.mapquest.com/us/texas/business-pyote/pyote-cafe-345424899		0.92
+309e5059b602	Starbucks	coffee		31.40789	-103.48549	2856 S. Cedar	Pecos	79772	+14327550842	https://www.starbucks.com/store-locator/store/1044502/hwy-285-lincoln-2856-s-cedar-pecos-tx-797726209-us	Starbucks	0.96
+9846860d2836	The Hobbled Horse Coffee Co.	coffee		31.70659	-103.59861	230 W Harris Ave	Mentone	79754	+18069830205			0.98
+9500eb009841	Odessa College Pecos Center	college		31.41628	-103.50008	1000 S Eddy St	Pecos	79772	+14323356812	http://www.odessa.edu/pecos/		1.00
+0942196dc3fa	7-Eleven	convenience		31.41641	-103.49028	1219 S Cedar St	Pecos	79772	+14324459321	https://www.7-eleven.com/		1.00
+3187f7288f03	7-Eleven	convenience		31.40466	-103.48538	4101 S Cedar St	Pecos	79772	+14324451581	https://www.7-eleven.com/		1.00
+9c76b635e5fb	7-Eleven	convenience		31.84688	-103.09007	114 Highway 302	Kermit	79745	+14325862912	https://www.7-eleven.com/		1.00
+d96665f3c5fe	7-Eleven	convenience		31.39770	-103.52129	2612 State Highway 17	Pecos	79772	+14324451606	https://www.7-eleven.com/		1.00
+10b0fa50e110	Allsup's	convenience		31.42135	-103.49199	708 S Cedar St	Pecos	79772	+14324455905	https://www.allsups.com/	Allsup’s	1.00
+4979154c55c2	Allsup's	convenience		31.75269	-103.15800	701 E Hendricks Blvd	Wink	79789			Allsup's	0.80
+8afc8c643d0a	Allsup's	convenience		31.57001	-103.00109	398 Obrien St	Wickett	79788	+14323190084	https://www.allsups.com/	Allsup’s	1.00
+8b197eae6e50	Allsup's	convenience		31.40115	-103.50423	2323 S Eddy St	Pecos	79772	+14324474915	https://www.allsups.com/	Allsup’s	0.92
+a5044a7b9362	Allsup's	convenience		31.86049	-103.08332	100 S East Ave	Kermit	79745	+14325385054	https://www.allsups.com/	Allsup’s	0.92
+cff9e29db3d3	Allsup's	convenience		31.84642	-103.08920	101 E Jim Sharp Blvd	Kermit	79745	+14325385149	https://www.allsups.com/	Allsup’s	1.00
+3c0749c0e329	Alon	convenience		31.84657	-103.08927	101 E Jim Sharp Blvd, TX-302	Kermit	79745	+14325865015	https://www.allsups.com/	Allsup’s	0.92
+9dc58b9e1f71	ALON	convenience		31.76156	-103.15313	701 E Hendricks Blvd	Wink	79789	+14325273006	https://www.allsups.com/	Allsup’s	1.00
+0ebeb4708d97	ALON Gas Station	convenience		31.41232	-103.50161	1410 South Eddy Street	Pecos	79772	+14324474008	https://alonfuel.com/stations/alon-gas-station-9615-1410-south-eddy-street-pecos-tx-79772/		1.00
+4965a8931218	ALON Gas Station	convenience		31.42179	-103.49222	708 South Cedar Street	Pecos	79772	+14324455905	https://alonfuel.com/stations/alon-gas-station-5251-708-s-cedar-pecos-tx-79772/		1.00
+6baa9d0354c9	ALON Gas Station	convenience		31.82590	-103.90653	10 Farm to Market 652	Orla	79772	+14322730073	https://alonfuel.com/stations/alon-gas-station-1272-10-fm-652-e-orla-tx-79770/		0.92
+7e387c528b37	Alon Gas Station	convenience		31.57012	-103.00134	402 Obrien St	Wickett	79788	+14329432445	http://myalon.com/		0.97
+92d6b120fa30	ALON Gas Station	convenience		31.86061	-103.08298	115 East Austin Street	Kermit	79745	+14325865555	https://alonfuel.com/stations/alon-gas-station-5044-279-tx-115-kermit-tx-79745/		0.99
+93ccb7d76199	ALON Gas Station	convenience		31.39558	-103.50356	131 South Interstate 20 Frontage Road	Pecos	79772	+14324455009	https://alonfuel.com/stations/alon-gas-station-5698-131-south-frontage-road-pecos-tx-79772/		0.92
+a1a5780e4a3f	ALON Gas Station	convenience		31.53469	-103.12078	104 Rogers Street	Pyote	79777	+14323895955	https://alonfuel.com/stations/alon-gas-station-6864-104-rogers-street-pyote-tx-79777/		1.00
+b0e430570bda	ALON Gas Station	convenience		31.85777	-103.09236	115 279 E Austin St, Texas 115 279	Kermit	79745	+14325865555	https://alonfuel.com/stations/alon-gas-station-5044-279-tx-115-kermit-tx-79745		0.85
+c51639ee80b2	ALON Gas Station	convenience		31.40144	-103.50432	2232 South Eddy Street	Pecos	79772	+14324474915	https://alonfuel.com/stations/alon-gas-station-5252-2232-s-eddy-st-pecos-tx-79772/		0.92
+1df5840cc601	CAT Scale	convenience	truck gas station	31.82681	-103.90870	3752 US Hwy 285 N	Orla	79770	+14322730079	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+306d8dca8b37	CAT Scale	convenience	truck gas station	31.40108	-103.48660	100 E Pinehurst St	Pecos	79772	+14322946626	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+313d1d87dcab	CAT Scale	convenience	truck gas station	31.84408	-103.10422	127 W State Hwy 302	Kermit	79745	+14325384660	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+7ccce2225a1e	CAT Scale	convenience	truck gas station	31.84426	-103.09856	700 W State Hwy 302	Kermit	79745	+14325270351	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+940a94ed584e	CAT Scale	convenience	truck gas station	31.40122	-103.52126	2400 S Bickley Ave	Pecos	79772	+14324450002	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+a7978fdaaa8b	CAT Scale	convenience	truck gas station	31.52759	-103.11954	164 FM 1927	Pyote	79777	+14323895200	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+ed51561ee96f	CAT Scale	convenience	truck gas station	31.39928	-103.47952	5202 S Cedar St	Pecos	79772	+14324451867	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+f68d6980ee2c	Champ's Drive-Thru	convenience		31.75711	-103.15585	402 E Hendricks Blvd	Wink	79789	+14326341730			0.92
+f23ef41413f2	Chevron gas	convenience		31.21384	-103.40575		Pecos					0.63
+3dc995124e34	Cheyenne Grocery & Deli	convenience		31.53475	-103.12047	104 Rogers St	Pyote	79777	+14323895607			0.92
+98ed5c44fa3b	Coyanosa Food Center	convenience		31.24334	-103.06747	2630 FM 1776	Coyanosa	79730	+14323432281			0.96
+e15f911c98a6	Coyanosa Fuel Center	convenience		31.27916	-103.06043	3004 N FM 1776	Coyanosa	79730	+14323432251			0.66
+9feff2e36b37	DK Gas Station	convenience		31.97417	-103.74233	1325 FM 652	Mentone	79754	+14326346358	https://dkfuel.com/stations/dk-gas-station-0899-1325-fm-652-mentone-tx-79754/		0.92
+ec42acdea6c1	El Ranchito	convenience		31.36996	-103.53439	2206 W Limpia Rd	Pecos	79772				0.93
+5c6820dbc990	Exxon	convenience		31.84686	-103.09006	100 E State Highway 302	Kermit	79745	+14325863095	http://www.exxon.com		0.92
+468cad9140ca	Flying J Travel Center	convenience		31.40094	-103.48656	100 E Pinehurst St	Pecos	79772	+14322946626	https://locations.pilotflyingj.com/us/tx/pecos/100-e-pinehurst-st	Pilot Flying J	0.97
+bfd2e7899fe7	Flying J Travel Center	convenience		31.85303	-103.06769	700 TX-302	Kermit	79745	+14325270351	https://locations.pilotflyingj.com/us/tx/kermit/700-tx-302	Pilot Flying J	0.99
+448416174cc0	Frontier Oil Services	convenience		31.37494	-103.53091	2201 W Lindsey Rd	Pecos	79772	+14324451998	http://www.frontierservicesinc.com/		0.62
+5aec39bed55b	Gascard	convenience		31.42635	-103.49452	201 E 3rd St	Pecos	79772	+14324452522	http://valero.com		0.61
+5f219fc29c39	Gasoline Alley	convenience		31.85887	-103.08836	615 E Austin St	Kermit	79745	+14325862500			0.92
+995d55d7ab06	Horseshoe #1	convenience		31.70550	-103.59850	100 S Pecos St	Mentone	79754		https://locations.valero.com/en-us/LocationDetails/Index/100-S-PECOS-ST/0000028372	Valero	0.92
+d63f632bdfb5	JRC Petroleum Services	convenience		31.43449	-103.49848	631 N Cedar St	Pecos	79772	+14324457211			0.92
+b9a2a72351a3	Kent Kwik	convenience		31.84778	-103.08717	240 W Jim Sharp Blvd	Kermit	79745	+14325862960	http://thekentcompanies.com	Kent Kwik Convenience Stores	1.00
+b4ffdf1d29dd	Kent Kwik Convenience Stores	convenience		31.85031	-103.07581	235 E State Highway 302	Kermit	79745	+14325862960	https://kentkwik.com		0.55
+2ba7318ff3d0	Kwik Stop	convenience		31.42269	-103.50408	915 W 3rd St	Pecos	79772	+14324451285	http://www.kwikstop.org	Kwik Stop - Smoke & Vape Shop	0.92
+6152d71dbf43	Love's Travel Stop	convenience		31.40333	-103.51123	2338 Wyoming St # 2298	Pecos	79772	+14324470332	http://loves.com		0.92
+14da47dedcab	Pecos 6397	convenience		31.41566	-103.52908	1233 Oil Mill Rd	Pecos	79772				0.58
+5ab697b7cd17	Phillips 66	convenience		31.39760	-103.52138	2612 St Hwy 17	Pecos	79772	+15089662694	https://www.phillips66gas.com/		1.00
+a0c140c6de2b	Phillips 66	convenience		31.40437	-103.48525	4101 S Cedar St	Pecos	79772	+14324451581	https://www.phillips66gas.com/		1.00
+30c033754dcf	Pilot Travel Center	convenience		31.82612	-103.90881	3752 US-285	Pecos	79770	+14322730079	https://locations.pilotflyingj.com/us/tx/orla/3752-us-285-n	Pilot Flying J	1.00
+89c65f0424ad	Pilot Travel Center	convenience	truck gas station	31.72554	-103.82168	3752 US-285 N	Orla	79770		https://locations.pilotflyingj.com/us/tx/orla/3752-us-285-n	Pilot	0.80
+d1d55563c851	Pilot Travel Center	convenience		31.40124	-103.52077	2500 S Bickley Ave	Pecos	79772	+14324450002	https://locations.pilotflyingj.com/us/tx/pecos/2500-s-bickley-ave	Pilot Flying J	0.92
+d4ca0be2dee7	Pilot Travel Center	convenience		31.84608	-103.09114	127 W Jim Sharp Blvd	Kermit	79745	+14325384660	https://locations.pilotflyingj.com/us/tx/kermit/127-tx-302	Pilot Flying J	1.00
+e48c79bc9418	Pilot Travel Center	convenience		31.53017	-103.29450	164 FM 1927	Pyote	79777	+14323895200		Pilot Flying J	0.96
+f8781fa5749e	Pilot Travel Center	convenience		31.84360	-103.10390	127 TX-302	Kermit	79745	+14325384660	https://locations.pilotflyingj.com/us/tx/kermit/127-tx-302	Pilot Flying J	0.99
+ea6247a20f41	Pilot Truck Stop West Hwy 302 Kermit Tx	convenience		31.84848	-103.10509	302 Standard Ave	Kermit	79745				0.90
+3819aeb5c9f6	Sinclair Gas Station	convenience		31.68818	-103.61233	9418 Texas 302	Mentone	79754		https://stations.sinclairoil.com/tx/mentone/9418-texas-302	Sinclair	0.80
+2328fb19cade	Stripes	convenience		31.84685	-103.09016	114 Highway 302	Kermit	79745	+14325862912	https://stripesstores.com/		0.92
+7ec58d85926a	Stripes	convenience		31.39767	-103.52128	20 Frontage Street	Pecos	79772	+14324472311	http://www.stripesstores.com	Stripes	1.00
+9d4c0cc65b79	stripes	convenience		31.41637	-103.49008	1219 S Cedar St	Pecos	79772	+14324459321	http://www.stripesstores.com	Stripes	1.00
+a0d760bf03cd	Stripes	convenience		31.40681	-103.51984	2612 Highway 17 Rd	Pecos	79772	+14324451606	https://stripesstores.com		0.77
+a366e595d4f7	Stripes	convenience		31.40234	-103.52068	2612 STATE HIGHWAY 17	Pecos	79772	+14324451606	https://stripesstores.com/		0.85
+19f38272c804	Stripes 48	convenience		31.39567	-103.50361	131 S Frontage Interstate 20W	Pecos	79772	+14324472311	http://www.stripesstores.com/	Stripes	0.92
+a4b16fd04655	Stripes Convenience Stores	convenience		31.40465	-103.48525	4101 S Cedar St	Pecos	79772	+14324451581	http://www.stripesstores.com		0.99
+2845a439ae2e	Sunoco	convenience		31.39773	-103.52169	2612 TX-17	Pecos	79772	+14324451606	http://www.sunoco.com	Sunoco	0.92
+f7decd4f15e1	Sunoco	convenience		31.40480	-103.48501	4101 S Cedar St	Pecos	79772	+14324451581	http://www.sunoco.com	Sunoco	0.92
+2de073234ae1	Texaco	convenience		31.84825	-103.08759	240 E Jim Sharp Blvd	Kermit	79745	+14325204000	https://www.texaco.com/	Texaco	1.00
+76a72f2e0b69	Texaco Station Kermit	convenience		31.84601	-103.09205	240 Jim Sharp Blvd	Kermit	79745	+14325204000	http://www.texaco.com/stations/default.aspx		0.85
+6ee20ad81a3e	Texaco Station Wickett	convenience		31.57013	-103.00099	Ih-20 @ Hwy 1219	Wickett	79788	+14329433932	http://www.texaco.com/stations/default.aspx		0.85
+da4d7e926f26	Toyah Travel Center	convenience		31.31320	-103.78861	220 E FRONTAGE I-20	Toyah	79785		https://locations.valero.com/en-us/LocationDetails/Index/220-E-FRONTAGE-I-20/0000027195	Valero	0.80
+d5cb7f5aaca6	Twice The Ice	convenience		31.84698	-103.08916	132 East Hwy 302	Kermit	79745		http://twicetheice.com		0.77
+b1b135300398	Uncle's Store	convenience		31.41247	-103.50149	1410 S Eddy St	Pecos	79772	+14324474008	http://www.westtexasgas.com		0.92
+f34349cc9500	UNCLES 6420	convenience		31.42640	-103.49430	201 E 3RD ST	Pecos	79772		https://locations.valero.com/en-us/LocationDetails/Index/201-E-3RD-ST/0000002055	Valero	0.80
+7c1a4ed45193	Uncles Convenience Store	convenience		31.42630	-103.49405	201 E 3rd St	Pecos	79772	+14324452522			0.92
+7b0be0f6ce6d	United Express	convenience		31.40726	-103.48650	2801 S Cedar St	Pecos	79772	+14327553170	https://www.unitedsupermarkets.com/page/savings/shopmoresavemore		0.92
+4e3a848960da	Valero	convenience		31.42630	-103.49405	201 E 3rd St	Pecos	79772	+12103452000	https://www.valero.com		0.65
+75d3035a7a08	Valero	convenience		31.31306	-103.78864	220 E FRONTAGE I-20	Toyah	79785	+432259002		Valero	0.92
+42f543f64730	West Texas Gas	convenience		31.42303	-103.49337	2273 Business Loop I-20 W	Pecos	79772	+14324459811	http://westtexasgas.com		0.62
+12222c5ad127	Whiting Oil & Gas	convenience		31.85987	-103.08184	105 S East Ave	Kermit	79745	+14325865823	http://www.whiting.com		0.77
+a5abe863e39b	Burger King	fastfood		31.40632	-103.48643	105 Lincoln St	Pecos	79772	+14324455464	https://burgerking.com/store-locator/store/25909	Burger King	0.95
+fa5d4d5b94dc	Bush's Chicken	fastfood		31.41630	-103.50099	924 S Eddy St	Pecos	79772	+14324470065	http://bushschicken.com/	Bush's Chicken - Laredo	0.99
+3bb9503c78d3	Dairy Queen	fastfood		31.85418	-103.09213	422 S Poplar St 422 S Poplar St	Kermit	79745	+14325863489	https://www.dairyqueen.com/en-us/locations/tx/kermit/422-s-poplar-st/14317/?y_source=1_MjkzMzkzNTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+62d6977d87b3	Dairy Queen	fastfood		31.41379	-103.50105	1226 S Eddy St	Pecos	79772	+14324476760	https://www.dairyqueen.com/en-us/locations/tx/pecos/1226-s-eddy-st/14483/?y_source=1_MjkzMzg5NDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+fcdf4f51f441	Domino's	fastfood	pizza restaurant	31.39695	-103.50257	118 Raul Florez Blvd	Pecos	79772	+14324450031	http://www.dominos.com/	Domino's Pizza	0.95
+f4a6432a3fd5	DQ Grill & Chill	fastfood		31.41388	-103.50120	1226 S Eddy St	Pecos	79772		https://www.dairyqueen.com/en-us/locations/tx/pecos/1226-s-eddy-st/4255	DQ Grill & Chill	0.80
+f524290e5281	DQ Grill & Chill	fastfood		31.85416	-103.09214	422 S Poplar St	Kermit	79745		https://www.dairyqueen.com/en-us/locations/tx/kermit/422-s-poplar-st/4090	DQ Grill & Chill	0.80
+15a71f27e227	Dunkin Donuts	fastfood		31.40824	-103.51949	2500 S Bickley Ave, Pilot	Pecos	79772		https://www.dunkindonuts.com/locations/us/tx/pecos/2500-s-bickley-ave/store-358143/	Dunkin'	0.80
+aac2dd657147	Dunkin Donuts	fastfood		31.85265	-103.06864	700 W State Highway 302, Pilot Travel Center	Kermit	79745		https://www.dunkindonuts.com/locations/us/tx/kermit/700-w-state-highway-302/store-359035/	Dunkin'	0.96
+cda043184be4	Dunkin Donuts	fastfood		31.84645	-103.08936	127 W State Highway 302, Pilot	Kermit	79745		https://www.dunkindonuts.com/locations/us/tx/kermit/127-w-state-highway-302/store-358146/	Dunkin'	0.96
+dbdc07c12648	Gossip Corner Place	fastfood		31.85087	-103.07582	332 E TX-302	Kermit	79745	+14324651919			0.92
+948eb27507a7	Hawaiian Shaved Ice	fastfood		31.56999	-103.00112	100 4th St	Wickett	79788	+14325574914			0.68
+5cfa25fff44b	KFC	fastfood		31.40381	-103.48357	5102 S Cedar St	Pecos	79772	+14324470886	https://locations.kfc.com/tx/pecos/5102-s-cedar-street	KFC	0.92
+db34b2d69f22	Little Caesars Pizza	fastfood	pizza restaurant	31.41818	-103.50206	712 S Eddy St	Pecos	79772	+14327550030	https://littlecaesars.com/en-us/store/11402	Little Caesars	0.96
+104eeee2b3d6	McDonald's	fastfood		31.85299	-103.07101	902 TX-302	Kermit	79745	+14325862735	https://www.mcdonalds.com/?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+dc5e10cebb8a	McDonald's	fastfood		31.39930	-103.48052	5202 US Hwy 285	Pecos	79772	+14324451522	https://www.mcdonalds.com/us/en-us/location/tx/pecos/5202-hwy-285/36615.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	1.00
+095239ae0b5d	Pizza Hut	fastfood	pizza restaurant	31.42319	-103.49290	524 S Cedar St Reeves	Pecos	79772	+14324452929	https://locations.pizzahut.com/tx/pecos/524-s-cedar-st?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=293977	Pizza Hut	0.97
+431e6f39b494	Pizza Hut	fastfood	pizza restaurant	31.84797	-103.08587	225 E Jim Sharp Blvd Winkler	Kermit	79745	+14325866645	https://locations.pizzahut.com/tx/kermit/225-e-jim-sharp-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=294414	Pizza Hut	0.98
+b1429cf266c7	Sonic Drive In	fastfood		31.85457	-103.09184	401 S Poplar St	Kermit	79745	+14325866686	https://locations.sonicdrivein.com/tx/kermit/401-s.-poplar-street.html	Sonic Drive-In	0.96
+76473d42edde	Sonic Drive-In	fastfood		31.40342	-103.48433	5101 S Cedar St	Pecos	79772	+14324459035	https://locations.sonicdrivein.com/tx/pecos/5101-south-cedar-street.html	Sonic Drive-In	0.98
+2ca954b01d28	Subway	fastfood	sandwich shop	31.39905	-103.48072	5202 S Cedar St	Pecos	79772	+14324451499	https://www.subway.com		0.92
+92c152c19850	Subway	fastfood	sandwich shop	31.39749	-103.52136	I-H 20 & Sh17	Pecos	79772	+14324456004	http://www.Subway.com/	Subway	0.95
+b7b5f1c64375	SUBWAY	fastfood	sandwich shop	31.39555	-103.50351	76-84 Starley Dr.	Pecos	79772	+14324456004	http://subway.com		0.77
+f62a7d02efd0	Subway	fastfood	sandwich shop	31.84673	-103.09003	114 E Hwy 302	Kermit	79745	+14325869777	https://restaurants.subway.com/united-states/tx/kermit/114-e-hwy-302	Subway	0.95
+496fd67c9bbd	Taco Bell	fastfood		31.40376	-103.48351	5102 S Cedar Street	Pecos	79772		https://locations.tacobell.com/tx/pecos/5102-s-cedar-street.html	Taco Bell	0.98
+4ced68bb4f87	Wendy's	fastfood		31.40673	-103.48636	101 Lincoln St	Pecos	79772	+14322993411	https://locations.wendys.com/united-states/tx/pecos/101-lincoln-st	Wendy's	0.98
+3f4152474fa8	Wingstop	fastfood	chicken restaurant	31.40793	-103.48628	2503 S. Cedar Street 102	Pecos	79772	+14328422400	https://www.wingstop.com/location/wingstop-2180-pecos-tx-79772/menu?y_source=1_NTk0NDA5NDQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.99
+fe8a653a1a69	Deli LaTienda	grocery		31.41737	-103.50148	810 S Eddy St	Pecos	79772				0.86
+defd67842fe6	Lowe's Market	grocery		31.85872	-103.09184	310 E Austin St	Kermit	79745	+14325862861	http://lowesmarket.com/	Lowe's Market	1.00
+4cd463d2d9c2	Main Street Market	grocery		31.57215	-103.00188	600 South O’Brien	Wickett	79788	+14329432042	http://mainstreet-market.com		0.77
+fb310f9549d1	Robertson's Grocery	grocery		31.75517	-103.15766	205 E Hendricks Blvd	Wink	79789	+14325273684	https://m.facebook.com/TCgrocerymarket		0.92
+98481de4ac91	United Supermarkets	grocery		31.40741	-103.48763	2783 S Cedar St	Pecos	79772	+14327553150	https://local.unitedsupermarkets.com/tx/pecos/2783-s-cedar-st.html	United Supermarkets	0.96
+e447b36d9813	Reeves County Hospital Dialysis Center	hospital		31.40133	-103.51399	2323 Texas St	Pecos	79772	+14324472221			0.55
+484c527d653a	Reeves County Hospital District	hospital		31.40144	-103.51392	2323 Texas St	Pecos	79772	+14324473551	http://www.reevescountyhospital.com		0.77
+739bfb47b073	Reeves County Hospital Specialty Clinics	hospital		31.40150	-103.51397	2338 S Texas St	Pecos	79772	+14324470050	https://www.reevescountyhospital.com/getpage.php?name=specialtyclinics		0.92
+f18ebfed5b7c	Winkler County Memorial Hospital	hospital		31.84975	-103.09032	821 Jeffee Dr	Kermit	79745	+14325868299	http://www.wcmh.net/		1.00
+272d5923fccd	Winkler County Rural Health Clinic	hospital		31.84940	-103.09116	814 Myer Ln	Kermit	79745	+14325862040	https://winkler-county-rural-health-clinic-tx-2.hub.biz/		0.92
+05b689a499fc	A's Propane & Rv Park	hotel		31.75835	-103.15549	523 N Monahans Ave	Wink	79789	+14329246503			0.83
+daeb1034cba4	Americas Best Value Inn by Sonesta Pecos	hotel	motel	31.42833	-103.48596	1000 E 3rd St	Pecos	79772	+14324454924	https://www.sonesta.com/americas-best-value-inn/tx/pecos/americas-best-value-inn-pecos		1.00
+b652c0f90e5c	Best Western Plus Swiss Chalet Hotel & Suites	hotel		31.39584	-103.50571	141 S Frontage Rd	Pecos	79772	+14324479477	https://www.bestwestern.com/en_US/book/hotel-rooms.44640.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44640	Best Western Hotels & Resorts	1.00
+a282e8fdafc9	Best Western Swiss Clock Inn	hotel		31.39587	-103.50419	133 S Frontage Road I-20 W	Pecos	79772		https://www.bestwestern.com/en_US/book/hotels-in-pecos/best-western-swiss-clock-inn/propertyCode.44203.html	Best Western	1.00
+f2793dcd9cdb	Best Western Swiss Clock Inn	hotel		31.39559	-103.50464	133 Frontage St I-20 W	Pecos	79772	+14324472215	https://www.bestwestern.com/en_US/book/hotel-rooms.44203.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44203	Best Western Hotels & Resorts	1.00
+ac341dde3174	Budget Inn	hotel	motel	31.41687	-103.52322	2128 W 3rd St	Pecos	79772	+14324454946	http://budgetinn.com/		0.99
+c6bf8440531c	Budget Inn	hotel	motel	31.84695	-103.08786	165 W Jim Sharp Blvd	Kermit	79745	+14325862548	http://budgetinn.com	Budget Inn	0.65
+6254639e27d8	Candlewood Suites Pecos by IHG	hotel		31.40603	-103.48754	109 Lincoln St	Pecos	79772	+14327550088	https://www.ihg.com/candlewood/hotels/us/en/pecos/peqpt/hoteldetail?cm_mmc=YextLocal-_-CW-_-US-_-PEQPT	Candlewood Suites	0.97
+b06d6d018c3d	Clean Harbors Orla Lodge	hotel		31.83271	-103.91261	3806 US Hwy 285 N	Pecos	79772				0.67
+020b32afa809	Cobblestone Hotel & Suites - Pecos	hotel	resort	31.39678	-103.50092	2418 Teague Ln	Pecos	79772	+18886938262	http://www.staycobblestone.com/tx/pecos/		0.92
+fda4b03758d8	Cobblestone Inn and Suites	hotel		31.85057	-103.07825	876 S East Ave	Kermit	79745	+14325863333	https://www.staycobblestone.com/tx/kermit/		0.99
+d5e02dbdd936	Comfort Suites	hotel		31.39680	-103.50182	110 Raul Florez Blvd	Pecos	79772	+14327892192	https://www.choicehotels.com/texas/pecos/comfort-suites-hotels/txc22?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+51e06aace956	Corporate Hospitality Housing - Orla	hotel		31.72692	-103.82193	7 CO Road 433	Orla	79770	+14697166529	https://www.chsoilfield.com/location/orla-tx-lodging/		0.99
+e3c6a613d455	Corporate Hospitality Housing - Pecos	hotel		31.41173	-103.53078	6A Co Rd 203	Pecos	79772	+14696584284	https://www.chsoilfield.com/location/pecos-tx-man-camp/		0.99
+e20561c23261	Corporate Hospitality Housing - Stonegate at Pecos	hotel		31.40575	-103.51325	2100 Brandywine Dr	Pecos	79772	+14323027160	https://www.chsoilfield.com/location/pecos-tx-lodging/		0.94
+582cece4ddd1	Crew Support Services	hotel		31.75820	-103.15414	508 Rosey Dodd	Wink	79789	+14322790261	http://www.crewsupportservices.com/		0.92
+59768ecc745e	Fairfield by Marriott Inn & Suites Pecos	hotel		31.39679	-103.50282	92 Raul Florez Boulevard	Pecos	79772	+14324472500	https://www.marriott.com/en-us/hotels/peqfi-fairfield-inn-and-suites-pecos/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
+e7305e73ea37	Fairfield Inn & Suites	hotel		31.39639	-103.49792	92 Raul Florez Boulevard	Pecos	79772	+14324472500	https://www.marriott.com/en-us/hotels/peqfi-fairfield-inn-and-suites-pecos/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
+2b0939ba2644	Garner Hotel Pecos	hotel		31.39703	-103.49911	2418 South Teague Drive	Pecos	79772		https://www.ihg.com/garner-hotels/hotels/us/en/pecos/peqpe/hoteldetail	Garner Hotels	0.88
+da226c144cc4	Hampton Inn Pecos	hotel		31.39704	-103.51763	215 South Frontage Road I-20 West Exit 39	Pecos	79772	+14324470174	https://www.hilton.com/en/hotels/fstpchx-hampton-pecos/?SEO_id=FB-AMER-HX-FSTPCHX	Hampton by Hilton	1.00
+0046606669c7	Holiday Inn Express & Suites Pecos, An Ihg Hotel	hotel		31.40889	-103.48579	1900 S Cedar St	Pecos	79772	+14324459970	https://www.ihg.com		1.00
+086a32fa6453	Holiday Inn Express Kermit	hotel		31.86514	-103.07443	1019 County Road 313	Kermit	79745	+14326534455	https://www.ihg.com/holidayinnexpress/hotels/us/en/kermit/mafkt/hoteldetail	Holiday Inn Express	1.00
+ccbf9d52029b	Holiday Inn Express Kermit	hotel		31.85412	-103.06854	1019 County Rd 313	Kermit	79745	+14326534455	https://www.ihg.com/holidayinnexpress/hotels/us/en/kermit/mafkt/hoteldetail	Holiday Inn Express	1.00
+f0ff4208804f	Home2 Suites by Hilton	hotel		31.39876	-103.51285	2400 S Texas St	Pecos	79772	+14324475200	https://home2suites3.hilton.com/en/hotels/texas/home2-suites-by-hilton-pecos-PEQOSHT/index.html	Home2 Suites by Hilton	1.00
+dfe03e82e055	Howard Johnson by Wyndham Pecos	hotel	resort	31.41837	-103.51718	2207 W 3rd St	Pecos	79772	+14324452266	https://www.wyndhamhotels.com/hojo/pecos-texas/howard-johnson-pecos/overview?CID=LC:HJ::BING:RIO:National:17656&iata=00093796		0.92
+039adbea8dae	Kermit Hotel Group, Llc	hotel		31.85015	-103.07845	876 S East Ave	Kermit	79745				0.95
+970402708456	Kermit Inn	hotel	motel	31.84879	-103.08248	304 TX-302	Kermit	79745	+14325866693	http://www.kermitinn.com		0.93
+16bfb733417f	Knights Inn	hotel		31.42835	-103.48609	1000 E 3rd St	Pecos	79772	+14324454924	https://www.redlion.com/knights-inn/tx/pecos/knights-inn-pecos		1.00
+64578c6dcb20	La Quinta Inn and Suites	hotel		31.39445	-103.50118	101 Frontage St I-20 West	Pecos	79772	+14324457830	http://www.laquintapecos.com/?cid=local_6583	La Quinta by Wyndham	0.92
+105372ffb206	Microtel Inn & Suites By Wyndham Pecos	hotel	resort	31.40359	-103.48350	5204 S Cedar St	Pecos	79772	+14322512030	https://www.wyndhamhotels.com/microtel/pecos-texas/microtel-inn-and-suites-pecos/overview?CID=LC:MT::BING:RIO:National:47251&iata=00093796		1.00
+f0fd217dd5b3	Motel 6 Pecos, TX	hotel	resort	31.40578	-103.48395	4002 S Cedar St	Pecos	79772	+14254647621	https://www.motel6.com/en/home/motels.tx.pecos.3331.html?utm_source=bing&utm_medium=organic&utm_campaign=bing_listing		0.95
+87b6ba37351a	Oak Tree Inn	hotel		31.40048	-103.48734	100 US Hwy 285	Pecos	79772	+14324451628	http://www.oaktreeinn.com/		0.92
+1ee420bcb333	Pecos Cobblestone Group, Llc	hotel		31.39728	-103.49945	2418 Teague Ln	Pecos	79772				0.95
+f54f7619bb81	Pecos Sai Ram Joint Ventures Llc	hotel		31.40560	-103.48421	4002 S Cedar St	Pecos	79772				0.95
+315a9382a250	Permian Ranch Hotel	hotel		31.41870	-103.51713	2207 W 3rd St	Pecos	79772	+14324452266			0.75
+8373cab8ff3a	Quality Inn	hotel	resort	31.40577	-103.48461	4002 S Cedar St	Pecos	79772	+14327557334	https://www.choicehotels.com/texas/pecos/quality-inn-hotels/tx367?mc=llbillpx&pmf=local		0.93
+27cd34063872	Red Roof	hotel		31.39666	-103.50198	205 Raul Florez Blvd	Pecos	79772	+14324452160	https://www.redroof.com/property/tx/Pecos/RRI1275	Red Roof	0.98
+a7cfa99a1cb2	Red Roof Inn Pecos	hotel	resort	31.39746	-103.51679	205 S Interstate 20 Frontage Rd	Pecos	79772	+14324452160	https://www.redroof.com/property/tx/Pecos/RRI1275		0.99
+eeb9e724b2a2	Rodeway Inn	hotel	motel	31.40632	-103.48444	3002 S Cedar St	Pecos	79772	+14324470030	https://www.choicehotels.com/texas/pecos/rodeway-inn-hotels/txn32?pmf=yext&mc=llyxyxpx	Choice Hotels	0.95
+6dc7aae2f3df	Ropers Motel	hotel	motel	31.42912	-103.48441	1200 E 3rd St	Pecos	79772	+14324486635			0.92
+5ae1c7447925	Royal RV Park	hotel		31.76216	-103.15937	Royal RV park 907 north Roy Orbison drive p o box 1048 wink Tx 79789	Wink	79789	+14324253398			0.82
+c2e8b942d8b1	Southern Inn and Suites Kermit	hotel	motel	31.85272	-103.07932	738 S East Ave	Kermit	79745	+14325862540			0.93
+1f56bf0e7ac5	Spark by Hilton Pecos	hotel		31.40900	-103.48600	1900 S Cedar Rd	Pecos	79772	432-4459970	https://www.hilton.com/en/hotels/peqcdpe-spark-pecos-tx/	Spark by Hilton	0.98
+8c3aeaab015c	Staybridge Suites	hotel		31.40518	-103.48780	121 Lincoln St	Pecos	79772	+14322870801	https://www.ihg.com/staybridge/hotels/us/en/reservation		0.98
+27fe5a7ef78d	Staybridge Suites Pecos by IHG	hotel		31.40604	-103.49442	121 Lincoln St	Pecos	79772	+14322870801	https://www.ihg.com/staybridge/hotels/us/en/pecos/peqsb/hoteldetail?cm_mmc=FacebookMaps-_-SB-_-US-_-PEQSB	Staybridge Suites	1.00
+fb3c4db88e96	Studio 6	hotel	motel	31.40633	-103.48433	South Cedar Street	Pecos			https://www.motel6.com/property/motel-pecos-texas-us-293280/	Studio 6	0.97
+d953f64b6cfd	Suburban Studios Pecos	hotel		31.40577	-103.48461	4002 S. Cedar St.	Pecos	79772		https://www.choicehotels.com/texas/pecos/suburban-hotels	Suburban Extended Stay Hotel	0.80
+c3bbd04e5586	Superior Lodging - Orla South	hotel		31.82281	-103.91785	69 FM 652 W	Pecos	79772	+14322073300	https://superiorlodging.com		0.94
+85b5c4e6b1d2	Swiss Inn, Llc	hotel		31.39587	-103.50565	141 S Frontage Rd	Pecos	79772				0.95
+137acd4868c4	The Armadillo Hotel Orla	hotel	resort	31.83159	-103.91445	3806 US HWY 285 N	Orla	79770	+17372422416	https://www.armadillohotel.com/		0.95
+d9ca13fe7175	Travelodge by Wyndham Pecos	hotel	motel	31.40086	-103.48756	22 N Frontage St	Pecos	79772	+14322030178	https://www.wyndhamhotels.com/travelodge/pecos-texas/travelodge-pecos-tx/overview		1.00
+e160640fb1dd	Travelodge by Wyndham Pecos	hotel	resort	31.39699	-103.50422	22 N Frontage Rd	Pecos	79772	+14322030178	https://www.wyndhamhotels.com/travelodge/pecos-texas/travelodge-pecos-tx/overview		1.00
+92898bd30dd9	West Pecos RV	hotel		31.38976	-103.52504	1 W County Road 204	Pecos	79772		http://petroplexproperties.com/		0.85
+d3f7aefd985f	West Texas Lodge	hotel		31.39945	-103.49452	204 W County Rd	Pecos	79772	+14324484100			0.86
+5a1455f1d8cd	West Travel Inn	hotel		31.84786	-103.08376	239 E State Highway 302	Kermit	79745	+14325862882	https://www.searchonamerica.com/place/west-travel-inn_10510079.html		0.92
+38935589a33b	Kinder Morgan	office	energy company	31.76344	-103.17631	5887 Co Rd 201	Wink	79789	+14325273206	http://kindermorgan.com		0.92
+b9cd610f870e	Ratliff Electric	office		31.75387	-103.15781	100 E Hendricks	Wink	79789	+14325273334	https://ratliffelectric.com/home/contact		0.77
+ff390fa51a9c	Shell Kermit Office	office		31.85996	-103.09398	105 South East Avenue, Kermit, TX 79745, United States	Kermit	79745	+14325861020	https://kermit-tx.texas-pages.com/shell-kermit-office.html		0.77
+7d3f8078063b	State Farm Insurance	office		31.42290	-103.49268	602 S Cedar St	Pecos	79772	+14324452401	http://www.statefarm.com		0.92
+4bfe8f48a1ef	Texas Industrial Choice	office	industrial company	31.40421	-103.52237	2291 S Bickley Ave	Pecos	79772	+18889796520			0.92
+b64d8fe4b1b0	Versasec LLC	office	information technology company	31.85435	-103.10589	P.O. Box 170133	Austin	78717	+18556556281	https://versasec.com		0.77
+152bfd1dbc2a	2 Javelinas Draft House	restaurant	bar and grill restaurant	31.41782	-103.50171	724 S Eddy St	Pecos	79772	+14327550085	https://vindy.top/2-javelinas-draft-house		0.99
+af7f7edc712e	Abi's Kitchen	restaurant	mexican restaurant	31.42434	-103.49914	425 E 3rd St	Pecos	79772	+14324470475	https://abi-s-kitchen.hub.biz/		0.92
+65a8995d470b	All American Bar and Grill	restaurant	chicken wings restaurant	31.42690	-103.49636	125 S Oak St	Pecos	79772	+14324473663	https://all-american-bar-grill.hub.biz		0.96
+f44fa6e1a95f	Almas Mexican Restaurant	restaurant	mexican restaurant	31.24177	-103.06730	2530 FM 1776	Coyanosa	79730	+14323432345	https://almas-mexican.edan.io		0.92
+f13c3e84d682	Alpine Lodge Restaurant & Bar	restaurant	american restaurant	31.39571	-103.50447	133 S. Frontage Rd	Pecos	79772	+14324452215	https://alpinelodgerestaurant.com/		0.96
+59d721c66bb8	Ariana's Mexican Restaurant	restaurant	mexican restaurant	31.84682	-103.08937	116 W Jim Sharp Blvd	Kermit	79745	+14325860079			0.81
+6feb7d72f455	Arti's Italian Restaurant	restaurant	italian restaurant	31.42615	-103.49560	214 S Oak St	Pecos	79772	+14324459945	https://www.artisitalianrestaurant.com		0.99
+2aa2829d5da3	Asian kitchen	restaurant	asian fusion restaurant	31.41318	-103.50043	1302 S Johnson St	Pecos	79772	+14322662222			0.92
+aedda0fa356e	Beer Depot burritos and more	restaurant	mexican restaurant	31.42965	-103.48330	1224 E 3rd St	Pecos	79772	+14324459323	http://www.superpages.com/bp/pecos-tx/the-beer-depot-L2165252595.htm		0.96
+2f8222f100e6	Bruno’s Taqueria	restaurant	mexican restaurant	31.42559	-103.49690	211 S Cypress St	Pecos	79772	+14328429090			0.92
+1713775f9618	Burrito Depot	restaurant	mexican restaurant	31.40235	-103.52085	2340 S Bickley Ave	Pecos	79772	+14324473328	https://hudut.top/burrito-depot		0.92
+f0ff5d729123	Burrito Express	restaurant	mexican restaurant	31.84351	-103.10007		Kermit		+14325869167	https://burrito-express-tx-2.hub.biz/		0.92
+15b193b65b2d	Chaotic wings -Kermit	restaurant	american restaurant	31.85757	-103.09528	122 W Austin St	Kermit	79745	+14325862242	http://www.chaoticwings.com		0.96
+20c3f514a7c6	Chester's Chicken	restaurant	chicken restaurant	31.39915	-103.48029	5202 S Cedar St	Pecos	79772	+14324451490	https://www.chesterschicken.com/		0.92
+64a31a3c26a5	Chester's Chicken	restaurant	chicken restaurant	31.85307	-103.07087	674 E State Hwy 302	Kermit	79745	+14325862777	https://www.chesterschicken.com/		0.96
+df6ea98f3701	Christine's Blues & Barbeque	restaurant	barbecue restaurant	31.84679	-103.08822	157 TX-302	Kermit	79745	+14325862060	https://zups.top/christine-s-blues-barbeque		0.93
+532244fc4881	Cinnabon	restaurant		31.40043	-103.48609	100 E Pinehurst St	Pecos	79772	+14324459436	https://www.cinnabon.com/		0.97
+868ce6195ee3	CJ Burritos	restaurant	mexican restaurant	31.43452	-103.49829	608 N Cedar St	Pecos	79772	+14324481981			0.96
+c6751ead59af	Cocina Salgado	restaurant	mexican restaurant	31.41938	-103.49124	922 S Cedar St	Pecos	79772	+14324452801	https://cocina-salgado.hub.biz/		0.94
+498ac515fc06	Conchita's Restaurant	restaurant		31.84561	-103.09284	301 W State Highway 302	Kermit	79745	+14325863770			0.84
+e6a237e5c8e1	Dairy Mart	restaurant	theme restaurant	31.42250	-103.50397	920 W 3rd St	Pecos	79772	+14324453894	http://visitpecos.com/visit-pecos/destination/dairy-mart-american		0.94
+27ee398cae57	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.39656	-103.49783	126 Raul Florez Blvd	Pecos	79772	+14326145445	https://www.dickeys.com/locations/Texas/Pecos/pecos	Dickey's Barbecue Pit National	0.99
+be92858274bd	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.42291	-103.49323	126 Raul Flores Blvd.	Pecos	79772	+18066739528	https://www.dickeys.com/locations/Texas/Pecos/pecos?		0.85
+efa96ff504a3	Dickey's Barbecue Pit	restaurant	barbecue restaurant	31.39690	-103.50296	126 Raul Flores Blvd	Pecos	79772	+14326145445	http://www.dickeys.com/	Dickey's Barbecue Pit National	0.99
+3534956ef532	Don Burrito Restaurant	restaurant	mexican restaurant	31.85879	-103.09013	500 E Austin St	Kermit	79745	+14325869284	https://don-burrito-restaurant-tx.hub.biz		0.92
+b9f6777f3f74	Dona Liz Cuban and Mexican Food	restaurant	cuban restaurant	31.84967	-103.07717	405 TX-302	Kermit	79745	+14325860030	https://donalizcubamex.com/		0.97
+341473ebb5f6	El Rodeó Restaurant	restaurant	mexican restaurant	31.41286	-103.48861	1501 S Cedar St	Pecos	79772	+14324470221	http://www.elrodeopa.com		0.97
+91a9c7239bda	El Taco Loco Birrieria Pecos	restaurant	mexican restaurant	31.41909	-103.49142	923 S Cedar St	Pecos	79772	+19516758135	https://eltacolocobtx.com/		1.00
+7d128cd58873	El Tarahumara	restaurant		31.42762	-103.48847	305 S Sycamore St	Pecos	79772	+19706978485			0.93
+690aea42360d	Fito's Mexican Restaurant	restaurant	mexican restaurant	31.85767	-103.09293	201 E Austin St	Kermit	79745	+14328884690			0.89
+afd68feefbb3	Golden Palace	restaurant	chinese restaurant	31.42128	-103.49245	707 S Cedar St	Pecos	79772	+14324459889	http://www.beyondmenu.com/23432/Pecos/Golden-Palace-Pecos-79772.aspx		0.98
+9e63bc28d96a	Happy Dragon Chinese Cuisine	restaurant	chinese restaurant	31.40561	-103.48418	4002 S Cedar St	Pecos	79772	+14324452223	http://happydragon.com		0.92
+e4aee7972bf7	He Brews Coffee House	restaurant		31.42276	-103.50240	800 W 3rd St	Pecos	79772		https://hebrewscoffeenc.com		0.95
+f669aaabcbfc	Huddle House	restaurant	diner	31.84735	-103.08799	220 E Jim Sharp Blvd	Kermit	79745	+14325862103	https://huddlehouse.com/locations/tx/kermit/220-east-jim-sharp-boulevard	Huddle House	0.96
+1ca54370c217	Jerrie's Cafe	restaurant	diner	31.85014	-103.08039	354 E 334 TX-302	Kermit	79745	+14325869000			0.95
+c94799b4d181	Jr. & Poley’s Spot	restaurant	american restaurant	31.42611	-103.49590	207 S Oak St	Pecos	79772	+14324471137			0.92
+53a3b49d4c5e	Juanito's Taqueria	restaurant	mexican restaurant	31.75717	-103.15616	311 Hendricks Blvd	Wink	79789	+14328948971			0.96
+0f4fa11e3f1e	KBJ Burritos	restaurant	mexican restaurant	31.75837	-103.15554	608 N Monahans Dr	Wink	79789	+14325273900	http://kbj-burritos.jany.io		0.92
+78eba8cbd323	Kermit Home Diner	restaurant	diner	31.85841	-103.09536	112 W San Antonio St	Kermit	79745	+14325863398	http://kermit-home-diner.edan.io		0.96
+4cad1d922739	La Bodega	restaurant	mexican restaurant	31.42423	-103.49974	505 W 3rd St	Pecos	79772	+14329403119	http://www.sonomawineshop.com		0.96
+79810d795995	La Fiesta Mexican Restaurant	restaurant	texmex restaurant	31.41561	-103.48972	1313 S Cedar St	Pecos	79772	+14324457749	http://www.lafiesta.com/		0.99
+15b559cfe306	La Herradura Taqueria	restaurant	taco restaurant	31.85299	-103.09517	300 W Campbell St	Kermit	79745	+14325860181			0.92
+92bb87d659a3	La Luz Del Dia	restaurant	mexican restaurant	31.84686	-103.08941		Kermit	79745	+14325860018			0.92
+4cccc04f62b9	La Nortena Tamale Factory	restaurant	mexican restaurant	31.42632	-103.49363	211 E 3rd St	Pecos	79772	+14324453273	http://www.lanortenatamales.com/		0.96
+6856ef3591e6	La Pasadita	restaurant	mexican restaurant	31.43056	-103.49671	230 N Cedar St	Pecos	79772	+14324473442	https://lapasaditadrivethru.com/?fbclid=IwAR0PQxFI9CECGaYlprLxfNgfBxd7UaM_VNlaGSwxWjEldXxoQL-0SoeTxqI&mibextid=Zxz2cZ		0.92
+53a5da74037b	Laredo Taco Company	restaurant		31.84688	-103.09007	114 Highway 302	Kermit	79745	+14325862912	https://www.laredotacocompany.com/		0.92
+6f15a578e5f3	Laredo Taco Company	restaurant		31.40466	-103.48538	4101 S Cedar St	Pecos	79772	+14324451581	https://www.laredotacocompany.com/		0.96
+f39b5a134c5c	Laredo Taco Company	restaurant		31.39770	-103.52129	2612 State Highway 17	Pecos	79772	+14324451606	https://www.laredotacocompany.com/		0.92
+7294fc629c47	Loncheria & Licoreria Lupita	restaurant	mexican restaurant	31.85703	-103.09686	304 W Austin St	Kermit	79745	+14325860056			0.92
+ed5bd214dbb8	Mary's Taqueria	restaurant	mexican restaurant	31.86034	-103.09794	412 N Pine St	Kermit	79745	+14328881165	https://marystaqueria.com		0.96
+86b3622473eb	Mexican tacos	restaurant	mexican restaurant	31.42190	-103.50648	1201 W 3rd St	Pecos	79772	+15757492440	http://ordermexicantacos.com/		0.92
+4e1e5efd73de	Noodles and Dumplings	restaurant	ramen restaurant	31.42474	-103.49818	317 W 3rd St	Pecos	79772	+14327557002	https://order.mealkeyway.com/merchant/704c75375075745059713672424c7654414a366856773d3d/main	Noodles & Dumplings Mcallen Texas	0.93
+2e0f87ba93bb	Novak Food & Drinks	restaurant		31.43052	-103.48130	1330 E 3rd St	Pecos	79772	+19153163867			0.97
+c3a57f026ea2	Old Mill Restaurant	restaurant	barbecue restaurant	31.41273	-103.50169	1318 S Eddy St	Pecos	79772	+14324476106			0.97
+dcc5914153f8	On Location food truck	restaurant		31.85876	-103.08849	608 E Austin St	Kermit	79745	+14324257232			0.88
+82578bf82ba7	Panda Buffet	restaurant	chinese restaurant	31.84638	-103.09120	110 TX-302	Kermit	79745	+14325865888	https://lordmap.top/panda-buffet		0.95
+4efcf7213edf	Pd Texas BBq	restaurant	barbecue restaurant	31.85814	-103.09525	112 W San Antonio St	Kermit	79745				0.97
+d431d79af438	Pody's BBQ	restaurant	barbecue restaurant	31.41522	-103.48923	1330 S Cedar St	Pecos	79772	+14324484635	http://www.texasmonthly.com/.../the-50-best-bbq-joints-in-the-world/podys-bbq		0.94
+1114aeda063e	Poor Daddys Smokehouse BBQ	restaurant	barbecue restaurant	31.85822	-103.09531	123 N Mulberry St	Kermit	79745	+14325860102	http://poordaddys.com		0.96
+556d9bd9468c	Roma's Pasta and Pizza	restaurant	italian restaurant	31.85769	-103.09397	108 E Austin St	Kermit	79745	+14325860162	https://libino.top/roma-s-pasta-and-pizza		0.99
+9b2d4f97b9e1	Sabor a Mi	restaurant	taco restaurant	31.85024	-103.07403	373 TX-302	Kermit	79745	+14322329383	http://elisaborami.square.site/		0.92
+56707ba23b70	Sdi Pecos, Tx, South Cedar Street, Llc	restaurant		31.40316	-103.48392	5101 S Cedar St	Pecos	79772				0.95
+959beb7302e4	Sook's Place	restaurant	burger restaurant	31.54225	-103.12365	891 Rogers St	Pyote	79777	+14323895647	https://roadtrippers.com/us/pyote-tx/food-drink/sooks-place-pyote		0.92
+34b9c14f79ab	Stuffing Box Steakhouse	restaurant	steakhouse	31.85070	-103.07606	354 E Jim Sharp Blvd	Kermit	79745	+14325862808	http://sbsteakhouse.weebly.com		0.77
+d63f8d27972d	Super Pollo Mentone,tx	restaurant	chicken restaurant	31.70599	-103.59843		Mentone					0.79
+802127895683	Taco loco Birrieria	restaurant	mexican restaurant	31.41866	-103.49137	923 S Cedar St	Pecos	79772	+19516758135	http://www.elburritoloco.net/index.htm		0.77
+e82bf7003d07	Takeria Sonora	restaurant	mexican restaurant	31.85694	-103.09594	215 W Austin St	Kermit	79745	+14325860077			0.96
+947f4a985271	Taqueria Dos Hermanoz	restaurant	mexican restaurant	31.41483	-103.50093	1110 S Eddy St	Pecos	79772	+14322322648	https://taqueriadoshermanostx.com		0.96
+3e9044c3bd1c	Terrazas Restaurant	restaurant	mexican restaurant	31.41331	-103.50138	1300 S Eddy St	Pecos	79772	+14324476663	https://terrazasrestaurant.com		0.96
+d52f801a6890	The American king of Wings	restaurant	bar and grill restaurant	31.42681	-103.49644	125 S Oak St	Pecos	79772	+14324473663	https://all-american-bar-grill.hub.biz		0.94
+86d15c5775e2	The Gossip Corner Fast	restaurant	burger restaurant	31.84788	-103.08372	239 E Jim Sharp Blvd	Kermit	79745	+16156743759			0.83
+5090b13cfb74	The King of Wings Pecos Tx	restaurant	chicken restaurant	31.42690	-103.49622	125 S Oak St	Pecos	79772	+14324473663	https://www.restaurant.com/all-american-bar-grill-king-of-wings...		0.84
+308b93e67389	The King Shark	restaurant	seafood restaurant	31.42521	-103.49331	215 E 4th St	Pecos	79772	+14324455890	https://www.doordash.com/store/the-king-shark-pecos-2491714/		0.99
+b6114ebe9ac3	The Little Shark	restaurant	taco restaurant	31.42101	-103.50859	1400 W 3rd St	Pecos	79772	+14322876968	http://orderthelittleshark.com/		0.92
+7e91ebdb26e9	The Stop Cafe & Catering	restaurant		31.70796	-103.60106	408 N Dallas St	Mentone	79754	+15043575427			0.55
+48dc9b4da8d5	The Wildcat Den	restaurant		31.75587	-103.15412	313 N Monahans Dr	Wink	79789	+14325275018			0.92
+04f39c1479e9	Tommy's Paradise	restaurant	mexican restaurant	31.42881	-103.48521	1102 E 3rd St	Pecos	79772	+14324454710			0.96
+e2f44f36c0c6	Tortas El Sinaloense	restaurant	texmex restaurant	31.84612	-103.09289	301 TX-302	Kermit	79745	+14325862677	http://tortas-el-sinalorense.poi.place		0.98
+a1a4519a2202	Twin Peaks Restaurant, Odessa, TX	restaurant		31.42250	-103.58723	County Road 408	Pecos	79772				0.64
+03cbd882693e	Uncle's Cheyenne Deli	restaurant	delicatessen	31.53488	-103.12058	115 Rogers St	Pyote	79777	+14323895607			0.87
+432f659c90ae	Used to be	restaurant	diner	31.31065	-103.79295		Toyah					0.60
+a2be2aabf3f8	Wickett Brisket	restaurant	barbecue restaurant	31.56698	-103.01420	1040 E State Loop 291	Junction	76849	+14329400300	http://wickettbrisket.com/		0.78
+000efdd0a7c9	Yesenia's kitchen	restaurant		31.83849	-103.13368	1967 Kermit St	Kermit	79745	+15757040545	http://www.kitchenyes.com/		0.79
+d0cf8dc66060	Yummy Good Llc	restaurant		31.40560	-103.48421	4002 S Cedar St	Pecos	79772				0.95
+5ae5d91e43b9	Avir at Pecos	senior	retirement home	31.40510	-103.50067	1819 S Memorial Dr	Pecos	79772	+14324472183	https://avirhg.com/avir-at-pecos/	Avir at Bowie	0.93

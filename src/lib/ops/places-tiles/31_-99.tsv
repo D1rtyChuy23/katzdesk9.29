@@ -1,0 +1,702 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+aef17404ef7f	Bread To Dough Bakery	bakery		31.19699	-98.71916	301 E Brown St	San Saba	76877	+13253724242	https://www.breadtodough.com		0.92
+25215f670f95	Country Donuts	bakery	donut shop	31.98352	-98.03434	405 N 2nd St	Hico	76457	+12547962324			0.92
+3881a1307084	Donut City	bakery	donut shop	31.19491	-98.71979	204 E Commerce St	San Saba	76877	+13253723121	http://www.sansabatexas.com		0.92
+92bd4d0a1e57	Donut City	bakery	donut shop	31.44983	-98.56887	1006 Fisher St	Goldthwaite	76844	+12255723661			0.92
+5e7437126104	Donut Palace	bakery	donut shop	31.72896	-98.97871	200 E Commerce St	Brownwood	76801	+13256467355	https://the-donut-palace-tx-100.hub.biz/		0.99
+60a0e17099d7	Donut Palace	bakery	donut shop	31.05909	-98.18056	102 W 9th St	Lampasas	76550	+15125562696	http://www.donutpalace.com	The Donut Palace San Diego TX	0.99
+dd228c381031	Donut Palace	bakery	donut shop	31.89751	-98.60097	305 E Central Ave	Comanche	76442	+13253563777			0.96
+1a7fcbe1338d	Early Donuts	bakery	donut shop	31.74213	-98.94666	938 Early Blvd	Early	76802	+13256418777	http://brownwoodtx.com/		0.93
+d407d7fdf43e	Flour Power	bakery		31.72286	-98.98167	104 S Broadway St	Brownwood	76801	+14695056674	http://www.shopflourpower.com/		0.89
+3f9f2b7acc9a	Kellee Donut Shop	bakery	donut shop	31.67872	-98.96379	1504 Indian Creek Dr	Brownwood	76801	+13258008667			0.93
+eb3ef8910190	shipleybrownwood	bakery	donut shop	31.72880	-98.98222	305 W Commerce St	Brownwood	76801	+13259985862	https://www.shipleydonuts.com		0.61
+47b42020fb88	The Donut Palace	bakery	donut shop	31.72904	-98.97869	200 E Commerce St	Brownwood	76801	+13256467355	rachelduke.com		0.92
+95ca6560c751	Town's Farm and Bakery	bakery		31.75442	-98.90249	4600 Co Rd 292	Early	76802	+13258009074			0.68
+9da742f79864	Tres Leches Bakery	bakery		31.72083	-98.98079	201 E Baker St	Brownwood	76801	+13252001205	http://tres-leches-bakery.poi.place		0.92
+a1b465496f87	Two Clay Birds Bakery, Country Market and Farm	bakery		31.98623	-98.03659	708 N 2nd St	Hico	76457	+15129149406	http://www.twoclaybirds.com/		0.92
+8a856088e3ce	10 Mile Productions	bar	wine tasting room	31.72044	-98.98283	401 Center Ave	Brownwood	76801	+13259988388			0.55
+c47910cdc2b7	1895	bar	cocktail bar	31.89866	-98.60467	125 W Grand Ave	Comanche	76442		http://www.1895tx.com/		0.97
+b5fd5748d54e	Baby Cow Brewing	bar	brewery	31.89863	-98.60404	101 W Grand Ave	Comanche	76442		https://www.babycowbrewing.com/		0.95
+33e158029236	Bar D Brewhouse and Restaurant	bar	brewery	31.19730	-98.71864	213 N High St	San Saba	76877	+13253726100	http://bardbrewss.com/		0.98
+32389b83ae10	Bear Vineyards	bar	winery	31.10230	-98.53576	677 Co Rd 430	San Saba	76877	+17077531069	http://BearVineyardsSanSaba.com/		0.92
+637d6402c92c	Buffalo Wild Wings	bar	sports bar	31.73056	-98.98443	511 West Commerce Street	Brownwood	76801	+13256411400	https://www.buffalowildwings.com/locations/us/tx/brownwood/511-west-commerce-street/sports-bar-952?utm_source=fb&utm_medium=yext	Buffalo Wild Wings	0.96
+454a13b49096	Burleson 1856	bar		31.07882	-98.18678	1047 US-281	Lampasas	76550				0.92
+460a5b9894d0	Centunzi's Bar	bar		31.06783	-98.20007	1216 Nix Rd	Lampasas	76550				0.86
+87765c78424f	Cj's Cigar Lounge	bar	cigar bar	31.72125	-98.98072	110 E Baker St	Brownwood	76801	+13259980789			0.75
+a37a316f6d82	CMK Cellars	bar	wine bar	31.70294	-98.12422	122 S Bell St	Hamilton	76531	+12546880717	http://cmkwinery.com/		0.66
+54db0ec5adf9	DejaVu Hookah Lounge & Bar	bar	hookah bar	31.72011	-98.98315	413 Center Ave	Brownwood	76801	+13254885759			0.99
+1e4bdf71b18f	Fiesta Winery	bar	winery	31.12287	-98.47729	18727 Farm to Market 580	Lometa	76853	+13256283433	http://www.fiestawinery.com/	Fiesta Winery	0.93
+301c7c7bdaa6	Fiesta Winery	bar	winery	31.10830	-98.36620	18727 W Fm 580	Lometa	76853	+13256283433	http://www.fiestawinery.com/		0.85
+3eb9555e905a	Finca De la Luna vineyards and venue	bar	winery	31.16775	-98.19899	3920 County Road 2207	Lampasas	76550	+15126800908			0.92
+c7046a8a1eea	Gatewood Estate Vineyards	bar	winery	31.96815	-98.36700	300 County Road 345	Dublin	76446	+12144764500	http://www.silverspurwinery.com/		0.74
+f37fd809f146	Good Vibe Vineyards	bar	wine bar	31.26865	-98.95525	13100 W Hwy 190	Richland Springs	76871	+19794739875	http://www.goodvibevineyards.com/		0.81
+03cd87460d2c	H&H Beer Stop	bar	beer bar	31.44669	-98.56747	716 Fisher St	Goldthwaite	76844	+13256482121			0.72
+159caf94a46c	Halls Daiquiris To Go	bar	cocktail bar	31.72927	-98.99381	714 W Commerce St	Brownwood	76801	+13256423284			0.96
+578ca7dcc605	Hd Daiquiris	bar		31.73243	-98.96947	111 Early Blvd Ste C	Early	76802				0.65
+87dbaffb53e2	J.W. Hardin Wine Co.	bar	winery	31.89861	-98.60409	107 W Grand Ave	Comanche	76442	+13252610299	http://jwhardinwine.com/		0.92
+230be25657a8	Lampasas Beer Market	bar	sports bar	31.06505	-98.17693	502 S Pecan St	Lampasas	76550	+15122211341	http://lampasasbeermarket.com/		0.97
+16746884ad04	Lampasas VFW Post 8539 Canteen	bar		31.08430	-98.18954	281 N US Highway 183	Lampasas	76550	+15125641941			0.78
+0fc05ad6524e	Nabors Creek	bar	winery	31.37447	-98.54678	148 County Road 410	Goldthwaite	76844	+13259385944	https://www.naborscreek.com/reservations/		0.70
+b72345bcc636	Pioneer Tap House	bar	beer bar	31.72119	-98.98070	112 E Baker St	Brownwood	76801	+13254303821	http://pioneertaphouse.com/		0.97
+10d1f0cff471	Red Wing Dove Winery	bar	winery	31.63536	-98.25038	9112 FM 2005	Hamilton	76531	+12543867359	http://www.redwingdove.com		0.92
+d78b097817c7	Saloon 37	bar		31.06564	-98.17902	406 E 3rd St	Lampasas	76550				0.99
+63468a250260	Silver Spur Winery	bar	winery	31.98114	-98.03062	107 S Pecan St	Hico	76457	+12547962600	https://www.silverspurwinery.com		0.92
+ee04c2dbdf24	Silverfox	bar		31.73096	-98.97277	515 E Commerce St	Brownwood	76801	+13256465200	http://silverfoxlounge.com		0.92
+11099099c85a	Skies Over Texas Winery	bar	winery	31.71682	-98.87793	6037 County Road 291	Early	76802	+13254553232	http://www.sotwines.com		0.96
+ab36c9159c75	Star of Texas Winery L	bar	winery	31.71676	-98.87797	6005 Highway 84 E	Early	76802	+15124553232	http://www.staroftexaswinery.com/		0.70
+991de0a7a109	Steve’s Bar	bar		31.66154	-98.51409	24cr141	Priddy	76870				0.62
+f50ae8ee8a27	Stoneledge Winery & Vineyard	bar	winery	31.11402	-98.36283	518 County Road 1403	Lometa	76853	+15129374252	http://www.stoneledge.wine/		0.89
+0a58ab252173	Stone’s Grove	bar		31.72082	-98.98286	112 W Anderson St	Brownwood	76801	+13252033606	https://stonesgrove21.wixsite.com/stonesgrove		0.95
+10195f47920a	Texas Legato Winery	bar	winery	31.02979	-98.23172	2935 FM1478	Lampasas	76550	+15125569600	http://www.texaslegatowinery.net		0.91
+5a6f15ac8c6b	The Ironwood Cantina at Los Trece	bar	cocktail bar	31.73024	-98.91430	3903 US-84	Early	76802	+13257730070	https://imenupro.com/+1lqn-2		0.96
+1346569cc27a	Waylon's & Ray's	bar		31.72258	-98.97900	411 S Broadway St	Brownwood	76801	+13256431222	http://www.waylonsandrays.com/		0.99
+c92b9d49623b	Wedding Oak Winery	bar	winery	31.19572	-98.71878	316 E Wallace St	San Saba	76877	+13253724050	http://www.weddingoakwinery.com/	Wedding Oak Winery	0.94
+e92341342080	Wild Saddle Saloon	bar		31.98926	-98.03275	Hico Building Center, 101 S Elm St	Hico	76457	+12547659094	http://thewildsaddlesaloon.com/		0.95
+f96db40176c1	Autos de Venta	cardealer		31.89805	-98.61569	1101 W Central Ave	Comanche	76442	+18446956060	https://www.bayerautogroup.com/es/		0.68
+d987a79893e5	Barron's Auto Enterprise	cardealer		31.72958	-98.97305	415 E Commerce St	Brownwood	76801	+13256412771	https://www.barronsautobrownwood.com/		0.97
+fb4a119763de	Bayer Auto Group Fleet	cardealer		31.89812	-98.61562	1101 W Central Ave	Comanche	76442	+13253308152	http://www.bayerautogroup.com/		0.97
+fe351c574afa	Bayer Chrysler Dodge Jeep Ram	cardealer		31.69933	-98.11053	1012 E Main St	Hamilton	76531	+12543865318	http://www.bayerdodge.com/	Chrysler	1.00
+f75d9211bf30	Bayer Ford Comanche	cardealer		31.89730	-98.60256	200 E Central Ave	Comanche	76442	+13253308152	http://bayerford.com/		0.92
+c6cd19d209e4	Bayer Motor Co	cardealer		31.89694	-98.59568	714 E Central Ave	Comanche	76442	+18559979073	www.bayermotor.net		0.75
+d5dfda2cc0c6	Bayer Motor Company	cardealer		31.89804	-98.61584	1101 W Central Ave	Comanche	76442	+13257540294	https://www.bayermotor.com/	Chevrolet	0.97
+b6e9d9ee2924	Benny Boyd Lampasas Chrysler Dodge Jeep Ram	cardealer		31.07207	-98.18526	601 N Key Ave	Lampasas	76550	+15125258305	https://www.bennyboydcdj.com/	Chrysler	1.00
+9ecb58066c2f	Big Country Ford	cardealer		31.72759	-98.98392	500 W Commerce St	Brownwood	76801	+13256431651	https://www.bigcountryford.net/		1.00
+337e256ed046	Bostick's Auto and Truck Sales	cardealer		31.73923	-98.99759	2210 Belle Plain St	Brownwood	76801	+13254688811	http://www.bostickauto.net/		0.92
+3ed8f25727ed	Bruner Auto Group	cardealer		31.73611	-98.96453	224 Early Blvd	Early	76802	+13256469511	https://www.toyota.com/dealers/dealer/42299/	Chevrolet	1.00
+f695627427f5	Bruner Toyota	cardealer		31.73639	-98.96474	224 Early Blvd	Early	76802	+13256460500	http://brunertoyota.com/	TOYOTA	0.97
+f7b6e6c76b4f	Bucket List Auto Sales	cardealer		31.01646	-98.19061	3320 S US Highway 281	Lampasas	76550	+15127820555	https://bucketlistautosales.com/		0.86
+33cc30c08f96	Budget Auto Sales	cardealer		31.05540	-98.07720	6923 E US Hwy 190	Lampasas	76550	+15125549001	http://lampasas-tx.texas-pages.com		0.92
+78a0f56c9b83	C&J Equipment Sales & Rentals	cardealer		31.08259	-98.18652	1344 N US Highway 281	Lampasas	76550	+15127340857	http://www.cjsaltcreek.com		0.92
+661ad678b5ef	Car Corral	cardealer	used auto dealer	31.70813	-98.97918	1200 Coggin Ave	Brownwood	76801	+13256468159	http://carcorraltexas.com/		0.92
+1080985c98ad	Cen-Tex Auction Sales & Services	cardealer		31.80831	-98.54927	State Hwy 16 S	Comanche	76442		http://centexauctionsales.com/		0.73
+53263d8af136	Centex Cars And Trucks Llc	cardealer	used auto dealer	31.06066	-98.14244	2855 E Highway 190 Ste A	Lampasas	76550	+12546694322			0.75
+b337552da93b	Cowboy Cars R Us	cardealer	used auto dealer	31.71654	-98.11958	805 N Rice St	Hamilton	76531	+12543868663			0.92
+5f3e292c6c8f	D and M Car Sales	cardealer	used auto dealer	31.90400	-98.56641	7201 U.S. Hwy 67	Comanche	76442	+13253562811			0.95
+1c882a4c278c	DEEDS MOTOR COMPANY	cardealer	used auto dealer	31.19493	-98.71822	205 S High St	San Saba	76877	+13253723945	http://deedsmotors.com/		0.92
+fa7233661536	DEEDS MOTOR COMPANY LLC	cardealer	used auto dealer	31.19549	-98.73667	1801 W WALLACE, 205 S HIGH St	San Saba	76877	+13253723945	https://www.deedsmotors.com/		0.85
+4b8eb307d870	Ford Pre-Owned Vehicles	cardealer		31.72762	-98.98341	Romines St	Brownwood	76801	+13252002920	http://BigCford.com/		0.92
+1b178f858056	Greater Texas Ford Dealers	cardealer		31.47190	-98.36188	1200 US Hwy 84 E	Goldthwaite	76844	+13256482296		Greater Texas Ford Dealers	0.76
+45bd0b8469eb	Greater Texas Ford Dealers	cardealer		31.07516	-98.18671	902 N Key Ave	Lampasas	76550	+18887067968		Greater Texas Ford Dealers	0.71
+cf0ddb922932	Hill Country Kawasaki	cardealer		31.47020	-98.56792	1200 US-183	Goldthwaite	76844	+13256482296	http://www.hillcountryford.com/	Ford Motor Company	0.92
+82d4986d6fe2	Hoffpauir	cardealer		31.07515	-98.18657	902 N Key Ave	Lampasas	76550	+18004604171	http://www.hoffpauirinc.com/		0.92
+16560e42fb03	Hoffpauir Polaris	cardealer		31.46542	-98.56715	2114 US Highway 84 W	Goldthwaite	76844	+13256483341	http://www.hpolaris.com/		1.00
+6809f58934fb	House of Wheels	cardealer		31.72591	-98.97843	901 Riverside Dr	Brownwood	76801	+13256435555	http://thehouseofwheels.com/	House of Wheels	1.00
+e14935c79a77	Juniper Hill Auto	cardealer		31.21499	-98.40006	800 W Main St	Lometa	76853	+15127346733			0.92
+6539bdca2e6e	Kami 3	cardealer		31.05981	-98.14131	2855 E Highway 190	Lampasas	76550	+12546694322			0.85
+acb498f71733	Lee Hoffpauir Chevrolet Buick	cardealer	used auto dealer	31.47251	-98.56850	1260 US Highway 84 W	Goldthwaite	76844	+13256482273	http://www.leehoffpauir.com/		0.92
+4b91e2980b27	Little Creek Auto Sales	cardealer		31.73976	-98.95355	702 Early Blvd	Early	76802	+13256438116			1.00
+c34eb3882173	Longhorn Auto Sales	cardealer	used auto dealer	31.72864	-98.99796	903 W Commerce St	Brownwood	76801	+13256432994			0.92
+2197356fbcee	Nct Sales Llc	cardealer		31.69423	-98.99597	3104 US-377	Brownwood	76801	+13256411931			0.92
+524220283647	Newman Sales	cardealer	used auto dealer	31.89945	-98.61785	201 NW Highway 36	Comanche	76442	+13253563739	http://www.newmanhomeandranch.com		0.92
+c92f1ae1ab08	Pecan Capital Motors	cardealer	used auto dealer	31.20208	-98.76337	469 W US Highway 190	San Saba	76877	+13253724857			0.75
+992cac591021	Premco	cardealer		31.05725	-98.17892	104 Riverview Dr	Lampasas	76550	+15125568734	http://www.dieselparts.com/		0.97
+c1022a50e804	Procter Motor Company	cardealer	used auto dealer	31.05862	-98.17973	1101 S Key Ave	Lampasas	76550	+15125565713	https://www.proctermotorcompany.com/		0.92
+253f7b3d6167	Rojo Traders	cardealer	used auto dealer	31.74408	-98.94184	1004 Early Blvd	Early	76802	+13256418114			0.92
+c6df4a0eaf4f	Schoen Motor Co	cardealer	used auto dealer	31.70267	-98.11980	501 E Main St	Hamilton	76531	+12543864515			0.65
+edf2aab52437	Stanley CDJRF Brownwood	cardealer		31.72827	-98.99986	1003 W Commerce St	Brownwood	76801	+13256432616	https://www.chrysler.com		0.77
+eea186c8bb9d	Stanley Chrysler Dodge Jeep Ram Brownwood Service Department	cardealer		31.72835	-98.99979	1003 W Commerce St	Brownwood	76801	+13254800979	http://www.stanleychryslerdodgejeepbrownwood.com	Chrysler	0.99
+9113183df1f9	Tegeler Chevrolet	cardealer		31.47131	-98.56805	1260 US-84	Goldthwaite	76844	+18007412866	https://www.tegchevy.com/	Chevrolet	0.99
+62da7ff153b2	TEGELER CHEVROLET-CENTRAL TEXAS	cardealer		31.46730	-98.56800	1260 Highway 84 West	Goldthwaite	76844		https://www.tegchevy.com	Chevrolet	0.80
+87b00ceeb49b	Texas Auto Exchange	cardealer	used auto dealer	31.44683	-98.56709	710 Fisher St	Goldthwaite	76844	+13256487271	http://www.texasautoexchange.com/		0.92
+59e2cd2043a4	Texas Independent Wholesalers	cardealer	used auto dealer	31.73081	-98.91718	3755 U S 84	Early	76802	+13256462210	http://runinout.com/Texas-Independent-Wholesalers-Early-TX		0.85
+27aee0d3c631	Texas Street Cars	cardealer		31.07788	-98.00295	298 Pecan St	Kempner	76539	+12543833517	https://www.TxStreetCars.com/		0.92
+69a40efeaf8b	The McCannic Shop	cardealer		31.48175	-98.16073	916 W US Highway 84	Evant	76525	+12544715570			0.91
+66adeba3f87f	Goldthwaite Theatre	cinema		31.45085	-98.56799	1202 Fisher St	Goldthwaite	76844	+13254511811	http://www.goldthwaitetheatre.org/		0.97
+a4709e4e8c0a	Heartland STM 8	cinema		31.73814	-98.96129	300 Early Blvd	Early	76802	+18003263264	http://www.cityseekr.com/early/entertainment-venues/poi-hollywood-stadium-8-at-heartland-mall-716439.html		0.92
+ca8bd3774bad	Regal Heartland	cinema		31.73869	-98.96147	300 Early Blvd	Early	76802	+18444627342	https://www.regmovies.com/theatres/regal-heartland/1643?utm_source=google&utm_medium=organic&utm_campaign=gmb-listing	Regal	0.95
+17f40b50e7fc	7 Brew Coffee	coffee		31.73129	-98.97218	523 East Commerce Street	Brownwood	76801	+14793589274	https://7brew.com/location/texas-brownwood-000391		0.97
+bf0dd3d969bf	Alamo Coffee	coffee		31.05746	-98.18210	301 S Highway 281	Lampasas	76550	+15125645133	https://alamocoffee.com/pages/lampasas		0.61
+c1dfd1f109b3	Alamo Coffee Company	coffee		31.06444	-98.18203	401 S Key Ave	Lampasas	76550	+15125645133	https://alamocoffee.com/		0.98
+0683f86f807d	Alamo Pecan & Coffee Co	coffee		31.19609	-98.71630	601 E Wallace St	San Saba	76877	+13253725275	http://www.alamopecan.com/		0.96
+d6e893286fb7	Aroma of Hope Coffee Shop & Gifts	coffee		31.45081	-98.56956	1105 Fisher St	Goldthwaite	76844	+13254537610			0.96
+1c2fa0b288ea	Cahoots Cafe	coffee		31.45497	-98.57092	1418 Fisher St	Goldthwaite	76844	+13256483909	https://cahoots-cafe.hub.biz		0.95
+e9a06077b859	Central Perk	coffee		31.70018	-98.12567	423 S Rice St	Hamilton	76531	+12546889660	http://centralperks.us		0.98
+65c3e5c6ad51	City Cafe -- TX	coffee		31.84402	-98.39713	103 E Lucy Bertram St	Gustine	76455	+12544319111			0.85
+45b66f9b1ff4	Coffee Cup Ranch	coffee		31.87102	-98.21594	2292 County Road 396	Carlton	76436	+12547852579	http://www.coffeecupranch.com		0.77
+6d08cb3ccc94	Comanche Coffee Co.	coffee		31.89079	-98.56564	11550 Highway 36	Comanche	76442	+15035446656			0.92
+7a8d3c451b4a	Comanche County City Cafe	coffee		31.84622	-98.40322		Gustine		+12544319111			0.68
+af7782577646	Common Grounds	coffee		31.06227	-98.16357	1502 Central Texas Expy	Lampasas	76550		http://www.commongrounds.com/	Common Grounds	0.96
+fe78155d818a	Common Grounds Coffeehouse	coffee		31.71914	-98.98653	809 Main St	Brownwood	76801	+13256433354	http://mycommongrounds.coffee/		0.92
+63f40be1afcf	Cool Beans Coffee	coffee		31.98287	-98.03432	404 N 2nd St	Hico	76457	+12549672027	https://coolbeanscoffee2024.square.site/		0.90
+aa7d14dd42a2	Diamond R Store & Cafe	coffee		31.67411	-98.79288	11801 US-84	Zephyr	76890	+13257392068	http://diamondrstoreandcafezephyr.mycafebussines.website		0.95
+73b4e38ea3ed	Double Buck Coffee	coffee		31.44911	-98.56940	1009 5th St	Goldthwaite	76844	+13254514203	http://doublebuckcoffee.com/		0.92
+6eec535a44a1	Goin2Be…	coffee		31.98194	-98.03087	110 N Pecan St	Hico	76457	+12547959000			0.92
+6467ba94bba9	Grace to you Coffee	coffee		31.72422	-98.98057	508 N Center Ave	Brownwood	76801	+13259986068			0.57
+6f089e7dce9c	Grazed and Confused of Brownwood	coffee		31.72356	-98.98045	306 N Broadway St Ste A	Brownwood	76801	+13252035616	https://www.toasttab.com/grazed-and-confused-of-brownwood-306-north-broadway-suite-a/v3/?mode=fulfillment		0.92
+a44a7e8ebb5d	HTeaO - Early	coffee	tea room	31.73594	-98.96017	403 Early Blvd	Early	76802	+13252744068	https://hteao.com/locations/early-tx/	HTeaO	0.92
+a04c52356ddb	HTeaO - Lampasas	coffee	tea room	31.06927	-98.18408	301 N Key Ave	Lampasas	76550	+15122716993	https://hteao.com/locations/lampasas-tx/	HTeaO	0.96
+58a521b63c10	Indian Creek Coffee	coffee		31.89711	-98.61215	802 W Central Ave	Comanche	76442	+13253561785			0.97
+16e8a071a857	Larry's Corner Cafe	coffee		31.19591	-98.72859	902 W Wallace St	San Saba	76877	+13253725094			0.95
+4f0a9b8c0407	Mama J's Cafe	coffee		31.19594	-98.73554	1608 W Wallace St Unit A	San Saba	76877	+13253726265	https://mamajscafehi.com		0.55
+9ea8c1c9a868	Mojo Coffee Lampasas	coffee		31.05852	-98.18016	1008 S Key Ave	Lampasas	76550	+15123641000	http://www.mojodrivethru.com		0.99
+bb1d2858dc4f	Oliver and Co	coffee		31.19574	-98.71866	320 E Wallace St	San Saba	76877	+13253723333	http://www.oliverandcobistro.com		0.97
+5208468b51dd	Rosie Jo's	coffee		31.70808	-98.12215	520 N Rice St	Hamilton	76531	+12543868874	http://hamilton-tx.where-food.com/rosie-jos-cafe		0.92
+7b575ff63cfb	Spiral Horn Coffee Co.	coffee		31.25089	-98.86599	3890 County Rd 226	San Saba	76877	+13253052100	http://spiralhorncoffee.com/		0.92
+095a4749596f	Starbucks	coffee		31.73065	-98.97625	302 E Commerce St	Brownwood	76801	+13255103370	https://www.starbucks.com/store-locator/store/1013825	Starbucks	0.92
+bcd8788a28cb	Starbucks	coffee		31.06656	-98.18363	108 S Key Ave	Lampasas	76550	+17372993067	https://www.starbucks.ca/store-locator/store/1038326	Starbucks	0.96
+cd5731d53c6c	Starbucks	coffee		31.73340	-98.96695	117 Early Blvd	Early	76802	+13254504164	https://www.starbucks.com/store-locator/store/1028308	Starbucks	0.92
+23d28fe85027	Starbucks Coffee	coffee		31.72814	-98.98164	300 W Commerce St	Brownwood	76801	+13256410431	http://www.starbucks.com/		0.66
+9d79208b18cf	The Daily Mix	coffee		31.19569	-98.71754	106 S Cherokee St	San Saba	76877	+13252051770	https://thedailymixss.com		0.96
+445fc02879ee	The Human Bean Missouri City, TX	coffee		31.35363	-98.08594	5310 Sienna Parkway Suite 210	Missouri City	77459	+18324400081	https://thehumanbean.com/blogs/stores/tx-missouri-city-sienna-pkwy	The Human Bean of Northern Colorado	0.89
+96f55d357a0e	Howard Payne University	college		31.71570	-98.98716	1000 Fisk St	Brownwood	76801	+13256498020	http://www.hputx.edu/christianstudies	Howard Payne University	1.00
+28986994ca9c	Howard Payne University Music and Fine Arts	college		31.71755	-98.98613	106 Whaley St	Brownwood	76801	+13256498500	http://www.hputx.edu/academics/schools/school-of-music-fine-arts/	Howard Payne University	0.94
+0fbf9c38d523	Howard payne University, Brownwood, Texas	college		31.70790	-98.98241		Brownwood		+13256498020	www.hputx.edu		0.78
+a81c39c032ee	HPU Davidson Music Complex	college		31.71778	-98.98597	Whaley St	Brownwood	76801				0.78
+7d00339fa224	HPU Outdoor Recreation Complex	college		31.71513	-98.98660	HPU ORC, Carnegie St	Brownwood	76801				0.56
+a3949c3717cf	HPUTX Admissions	college		31.71681	-98.98580	1000 Fisk Ave	Brownwood	76801	+13256498020	https://linktr.ee/hputxadmissions		0.83
+fff68b0c555e	Lampasas County Higher Education Center	college		31.06950	-98.18227	208 E Avenue B	Lampasas	76550	+15125568226	http://www.LCHEC.net/		0.92
+0bea82ed679d	Ranger College	college		31.89881	-98.60484	211 S Austin St	Comanche	76442	+13253565474	http://www.rangercollege.edu/		0.94
+a360579ef58b	Ranger Jr College	college		31.74003	-98.94994	819 Early Blvd	Early	76802	+13256415726	http://www.rangercollege.edu		0.80
+bae4484b6301	TSTC in Brownwood	college		31.72160	-98.98380	305 Booker St	Brownwood	76801	+13256435987	https://tstc.edu/campuses/brownwood		0.99
+e19a56c57142	Walker House	college		31.71878	-98.98447	701 Center Ave	Brownwood	76801				0.92
+1f86a88ba884	7-Eleven	convenience		31.07520	-98.18524	801 N Key Ave	Lampasas	76550	+15125641459	https://www.7-eleven.com/		1.00
+75cc875b7fd7	7-Eleven	convenience		31.19596	-98.73203	1306 W Wallace St	San Saba	76877	+13253726518	https://www.7-eleven.com/		1.00
+a5decef280bd	7-Eleven	convenience		31.19566	-98.71992	106 E Wallace St	San Saba	76877	+13253723482	http://www.7-eleven.com/	7-Eleven	0.71
+b87812c1f5e9	7-Eleven	convenience		31.89798	-98.61401	1003 W Central Avenue	Comanche	76442	+13253562422	https://www.7-eleven.com/		1.00
+0114e5c5ae36	Allsup's	convenience		31.89799	-98.59890	501 E Central Ave	Comanche	76442	+13253563474	http://www.allsups.com/	Allsup’s	0.92
+62ba7e54505c	Allsup's	convenience		31.90544	-98.60417	907 N Austin St	Comanche	76442	+13253565572	https://www.allsups.com/	Allsup’s	0.92
+9596bab9dd70	Allsup's	convenience		31.70922	-98.97842	1019 Coggin Ave	Brownwood	76801	+13256434142	https://www.allsups.com/	Allsup’s	0.92
+ae9e14bfcbaf	Allsup's	convenience		31.70952	-98.12161	608 N Rice St	Hamilton	76531	+12545082007	https://www.allsups.com/	Allsup’s	0.92
+b1df68f7a03a	Allsup's	convenience		31.74177	-98.94800	910 Early Blvd	Early	76802	+13253391138	https://www.allsups.com/	Allsup’s	0.92
+eef74197ad63	Allsup's	convenience		31.70209	-98.12430	218 S Rice St	Hamilton	76531	+12543868732	https://www.allsups.com/	Allsup’s	1.00
+53d4335d4df5	Allsup's Convenience Store	convenience		31.70932	-98.99117	3480 Highway 377 S	Brownwood	76801	+13256468900	https://www.allsups.com/		0.85
+7b363341d510	Allsup's Convenience Store	convenience		31.98379	-98.03506	504 N 2nd St	Hico	76457	+12544344379	https://www.allsups.com/	Allsup’s	1.00
+a100a9d45e11	Allsup's Convenience Store	convenience		31.72875	-98.98596	518 W Commerce St	Brownwood	76801	+13256464297	http://www.allsups.com	Allsup's Convenience store #207	0.92
+055699a845d4	Alon	convenience		31.70910	-98.97831	1019 Coggin Ave	Brownwood	76801	+19156434142	http://myalon.com/		0.96
+24ce81f8ec3d	Alon	convenience		31.70603	-98.98180	1501 Coggin Ave	Brownwood	76801	+13256466148	http://myalon.com/		0.97
+62fdc574c15c	Alon	convenience		31.05621	-98.17889	1401 S Key St	Lampasas	76550	+15125566609	http://myalon.com/		0.92
+7620f9a9c6fc	Alon	convenience		31.74146	-98.94784	910 Early Blvd	Early	76802	+19156461075	http://myalon.com/		0.92
+8ed2b00ce157	ALON	convenience		31.69209	-98.99722	3480 U S Unit 377	Brownwood	76801	+13256468900	https://myalon.com/stations/ALON-Gas-Station-2733-3480-Hwy-377-South-BROWNWOOD-TX-76801		1.00
+c04c8ab02a45	Alon	convenience		31.06799	-98.18385	108 Key St	Lampasas	76550	+15125566465	http://myalon.com/		0.99
+cd7b8850e4ce	Alon	convenience		31.19579	-98.72060	106 E Wallace St	San Saba	76877	+13253723482	http://myalon.com/		0.99
+f731670f0867	Alon	convenience		31.90513	-98.60377	907 N Austin St	Comanche	76442	+19153565572	http://myalon.com/		0.85
+4e79223593e2	ALON Gas Station	convenience		31.70213	-98.12458	218 South Rice Street	Hamilton	76531	+12543868732	https://alonfuel.com/stations/alon-gas-station-2383-218-south-rice-hamilton-tx-76531/		1.00
+62e330382532	Alon Gas Station	convenience		31.89841	-98.59843	501 N Main St	Comanche	76442	+13253563474	http://myalon.com/		0.85
+84452494cc2f	ALON Gas Station	convenience		31.73101	-98.97329	513 East Commerce Street	Brownwood	76801	+13252910312	https://alonfuel.com/stations/alon-gas-station-5319-513-e-commerce-st-brownwood-tx-76801/		1.00
+90e00e7ae193	ALON Gas Station	convenience		31.67890	-98.96352	3801 4th Street	Brownwood	76801	+13256431928	https://alonfuel.com/stations/alon-gas-station-5317-3801-4th-st-brownwood-tx-76801/		1.00
+4d259c0ea30b	Austin Avenue Texaco	convenience		31.70780	-98.97599	1519 Austin Ave	Brownwood	76801	+13256460839	https://www.chevron.com		0.55
+56aa37727227	Berkly's C-Store	convenience		31.07131	-98.18567	508 N Key Ave	Lampasas	76550	+15125566828	http://shell.com		0.92
+f8ef10966940	Big's 104	convenience		31.21739	-98.39507	201 N 4th St	Lometa	76853	+15127525901			0.92
+4e03703ffdf8	Blanket General Store	convenience		31.81992	-98.78640	1020 Isham Blvd	Blanket	76432	+13257484012			0.96
+1d3b61a0097f	Brown Express	convenience		31.72906	-98.99507	766 W Commerce St	Brownwood	76801	+13256466202			0.96
+f7ca9921a58e	BROWN EXPRESS	convenience		31.73505	-98.96251	301 EARLY BLVD	Early	76802			Conoco	0.80
+9114c69888c6	Cefco	convenience		31.06438	-98.16135	1699 Central Texas Expy	Lampasas	76550	+12547910009	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+67131167b032	CEFCO Convenience Store	convenience		31.70610	-98.12264	312 N Rice St	Hamilton	76531	+12543865588	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+af720ff0b20e	CEFCO Convenience Store	convenience		31.70028	-98.11091	1101 E Main	Hamilton	76531	+12543868850	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+c56eee0429d0	CEFCO Convenience Store	convenience		31.73426	-98.96694	130 Early Blvd	Early	76802	+13254300029	https://www.cefcostores.com/	CEFCO Convenience Stores	1.00
+07caf73429a1	Chevron	convenience		31.98288	-98.03429	404 N SECOND STREET	Hico	76457		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/404-N-SECOND-STREET-HICO-TX-76457-6294-id383792	Chevron	0.95
+e0d02f4c35c5	Chevron	convenience		31.73132	-98.98899	1300 BELLE PLAIN ST.	Brownwood	76801		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/1300-BELLE-PLAIN-ST--BROWNWOOD-TX-76801-1602-id387274	Chevron	0.80
+f31ff6bf645c	Chevron	convenience		31.44864	-98.56863	903 FISHER ST	Goldthwaite	76844		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/903-FISHER-ST-GOLDTHWAITE-TX-76844-2108-id390125	Chevron	0.80
+666b6d39b7a0	Chevron Station Proctor	convenience		31.98785	-98.43723	2296 Hwy 377	Proctor	76468	+13019219200			0.99
+a89fd993f2a5	Chevron Station San Saba	convenience		31.19593	-98.71537	705 E Wallace St	San Saba	76877	+13253725520			0.92
+02d9a78a42d0	Circle K	convenience		31.06892	-98.18378	207 N Key Ave	Lampasas	76550	+15125563244	https://www.circlek.com/store-locator/us/lampasas/207-n-key-ave/2740109	Circle K	0.92
+9d0547dfdd8a	Circle K	convenience		31.05594	-98.17909	101 E Ohnmeiss Dr	Lampasas	76550	+15125565360	https://www.circlek.com/		0.92
+5db67230a367	Conoco	convenience		31.89756	-98.60826	405 W Central Ave	Comanche	76442	+13253562224	https://www.conoco.com/		0.92
+6ce4b66d4924	Conoco	convenience		31.19575	-98.73164	1306 W Wallace St	San Saba	76877	+13253726518	https://www.conoco.com/		1.00
+c748fc199d72	Conoco	convenience		31.70693	-98.98040	1400 Coggin Ave	Brownwood	76801	+13256772775	https://www.conoco.com/		0.92
+c8c222f94f4b	Conoco	convenience		31.73514	-98.96269	301 Early Blvd	Early	76802	+13256468510	https://www.conoco.com/		0.92
+7cc6ca514fa9	Corner Store	convenience		31.05577	-98.17960	101 EE Ohnmeiss Blvd	Lampasas	76550	+15125565360	http://cornerstore.com/StoreHome/1553?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.91
+973ab2a622ce	Corner Store	convenience		31.06896	-98.18382	207 N Key Ave	Lampasas	76550		www.circlek.com		0.92
+0117d72a57a0	Country Corner	convenience		31.67533	-98.79377	11801 Highway 84 E	Zephyr	76890	+13257392068	http://www.countrycornerguthrie.com		0.55
+ba07f4449a3d	Country Store	convenience		31.68788	-98.99895	3706 Highway 377 S	Brownwood	76801	+13256467980	http://www.countrystorecatalog.com		0.77
+e815a52c6841	Cousins	convenience		31.74131	-98.94772	915 Early Blvd	Early	76802	+13256460801	http://www.cousinssubs.com/		0.92
+eee286b3ac1b	Coyote One Stop	convenience		31.27007	-98.94408	105 E Coyote Trail	Richland Springs	76871	+13254523224	http://www.coyotestationrs.com/		0.92
+329d6ecca338	DK Gas Station	convenience		31.74178	-98.94804	910 Early Boulevard	Early	76802	+13256461075	https://dkfuel.com/stations/dk-gas-station-5196-910-early-blvd-early-tx-76801/		0.92
+44592b344699	DK Gas Station	convenience		31.84337	-98.39871	501 N Main St	Comanche	76442	+13253563474	https://dkfuel.com/stations/dk-gas-station-1506-501-e-central-comanche-tx-76442		0.85
+d07ddc620b85	DK Gas Station	convenience		31.19567	-98.72049	106 East Wallace Street	San Saba	76877	+13252910326	https://dkfuel.com/stations/dk-gas-station-5327-106-e-wallace-st-san-saba-tx-76877/		0.95
+d0f8abd77d2c	DK Gas Station	convenience		31.90521	-98.60397	907 North Austin Street	Comanche	76442	+13253565572	https://dkfuel.com/stations/dk-gas-station-5197-907-n-austin-comanche-tx-76442/		0.92
+f431b12e39a8	DK Gas Station	convenience		31.89790	-98.59836	501 East Main Street	Comanche	76442	+13253563474	https://dkfuel.com/stations/dk-gas-station-1506-501-e-central-comanche-tx-76442/		1.00
+fa2b4c7cec4e	DK Gas Station	convenience		31.69187	-98.99654	3480 U.S. 377	Brownwood	76801	+13256468900	https://dkfuel.com/stations/dk-gas-station-2733-3480-hwy-377-south-brownwood-tx-76801/		0.99
+09fc0ec7510e	Exxon	convenience		31.19812	-98.71858	307 North High	San Saba	76877	+13253726028	https://www.exxon.com/en/find-station/exxon-sansaba-tx-ricksonestop-200318034?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+2a7c43e4e75c	Exxon	convenience		31.70032	-98.99609	2800 Highway 377 S	Brownwood	76801	+13256467645	http://www.exxon.com		0.98
+60b98c90aabe	Exxon	convenience		31.69060	-98.97152	2800 4th St	Brownwood	76801	+13256466935	https://www.exxon.com/en/find-station/exxon-brownwood-tx-foodplaza9-200312140?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+6166ef0bea3e	Exxon	convenience		31.70027	-98.11042	1101 E Main St	Hamilton	76531	+12543868850	http://exxon.com/		0.92
+6579285efcc0	Exxon	convenience		31.73662	-98.99554	1909 Belle Plain St	Brownwood	76801	+13256462416	http://exxon.com/		0.92
+77227d49730f	Exxon	convenience		31.98270	-98.03323	Hwy 6 &, US-281	Hico	76457	+12547964838	https://www.exxon.com/en	Exxon & Mobil Stations	0.98
+a21de606ae1d	Exxon	convenience		31.06396	-98.18195	411 S. Key	Lampasas	76550	+15125641847	https://www.exxonmobilfuels.com/en/find-gas-station/200310334		0.92
+b499c180c002	Exxon	convenience		31.89780	-98.59222	1001 E Central Ave	Comanche	76442	+13253565061	https://www.exxon.com/en/find-station/exxon-comanche-tx-foodplaza12-200312135?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+cca8e154ff20	Exxon	convenience		31.72890	-98.99515	766 W Commerce St	Brownwood	76801	+13256466202	http://www.exxon.com		0.92
+ccc751f42220	Exxon	convenience		31.45484	-98.57087	1418 Fisher St	Goldthwaite	76844	+13256483020	https://www.exxonmobilfuels.com/en/find-gas-station/200315263		0.92
+9c1abcf1eaee	Food Mart 8 1	convenience		31.74964	-98.92827	1300 Early Blvd	Early	76802	+13256431228	http://www.exxonmobil.com/		0.92
+adbfa52b2ffe	Food Plaza	convenience		31.89798	-98.59235	1001 E Central Ave	Comanche	76442	+13253565061	foodplaza.de		0.92
+5a52bb1f2211	FOOD PLAZA #8	convenience		31.74970	-98.92822	1300 EARLY BLVD	Early	76802		https://locations.valero.com/en-us/LocationDetails/Index/1300-EARLY-BLVD/0000006997	Valero	0.80
+b8d263c04f93	H-e-b Fuel	convenience		31.06189	-98.18080	705 S Key Ave	Lampasas	76550	+15125563461	https://heb.com		0.94
+25255088ea28	HEB Gas Pumps Lampasses, Tx	convenience		31.06174	-98.18095		Lampasas					0.72
+364e6e6164f0	Holland Country Store	convenience		31.91975	-98.54123			76442	+13253563300			0.92
+bf77a3ded36a	HOP IN 430460	convenience		31.70678	-98.98041	1400 COGGIN AVE	Brownwood	76801			Conoco	0.80
+5379a3dfd044	Hunter's Station	convenience		31.70784	-98.97584	1519 Austin Ave	Brownwood	76801	+13256460839	http://www.brownwoodnews.com/Hunters		0.92
+1a8bd85be99a	Kwik Pantry	convenience		31.72867	-98.98168	303 W Commerce St	Brownwood	76801	+13256411755	http://thepantry.com		0.92
+e4112ee192c0	LILLI FOOD	convenience		31.71160	-98.97930	1201 AUSTIN AVE	Brownwood	76801		https://locations.valero.com/en-us/LocationDetails/Index/1201-AUSTIN-AVE/0000002489	Valero	0.80
+c74d2ca9ae09	LOWES FUEL 130	convenience		31.19577	-98.73090	1204 W WALLACE	San Saba	76877			Phillips 66	0.80
+60363c78fbc1	MLK MART #2	convenience		31.19599	-98.73696	1802 W WALLACE ST	San Saba	76877		https://www.exxon.com/en/find-station/mobil-sansaba-tx-mlkmart2-200331319	Mobil	0.80
+896dd8fc1a67	Mobil	convenience		31.06893	-98.18390	207 N Key Ave	Lampasas	76550	+15125563244	https://www.exxon.com/en/find-station/mobil-lampasas-tx-tx0296-200327675?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
+0757fcc1ccb0	Murphy Oil	convenience		31.06395	-98.16000	1712 Plum St	Lampasas	76550	+15125565690	http://www.murphyusa.com/	Murphy Sumac Mart	0.66
+47c0fd0fab87	Murphy Usa	convenience		31.06403	-98.16006	1712 Central Texas Expy	Lampasas	76550	+15125565690			0.92
+e17937c0cd88	Murphy USA	convenience		31.72896	-98.98322	403 W Commerce St	Brownwood	76801	+13256419355	http://www.murphyusa.com/		0.92
+f33ed113cd28	Oliver's Place	convenience		31.46983	-98.56865	117 US-84	Goldthwaite	76844	+13256482277	http://www.oliversplace.com		0.82
+1b623a9257f9	Phillips 66	convenience		31.89782	-98.61415	1003 W Central Ave	Comanche	76442	+13253562422	https://www.phillips66gas.com/		1.00
+820cf7bd5928	Phillips 66	convenience		31.73045	-98.97598	302 E Commerce St	Brownwood	76801	+13255103515	https://www.phillips66gas.com/		0.92
+ff8e2741b75b	Phillips 66	convenience		31.19597	-98.73080	125 N Fentress St	San Saba	76877	+13253724191	https://www.phillips66gas.com/		0.92
+efc62f4b2ed0	Pop's Quick Stop	convenience		31.89772	-98.60148	303 E Central Ave	Comanche	76442	+13253569400	http://shell.com		0.92
+c22bb6d2ce69	Priddy Store	convenience		31.67086	-98.51074	1341 TX-16	Comanche	76870	+13259663547			0.98
+d530cf278746	Proctor Grocery	convenience		31.98938	-98.43440	2201 US-377	Dublin	76446	+12548792727	https://proctorgrocery.webnode.com/		0.99
+baabbd53c5a9	Quality DEF Solutions	convenience		31.18748	-98.71835	471 S Highway 16	San Saba	76877	+13253725786	http://www.qualitydefsolutions.com/index.html		0.85
+6bae57cfa41a	Quick Check	convenience		31.45506	-98.57085	1418 Fisher St	Goldthwaite	76844	+13256483020	http://www.exxonmobil.com/		0.92
+29021e97a24d	QUICK CHECK #6	convenience		31.45480	-98.57076	1418 FISHER STREET	Goldthwaite	76844		https://www.exxon.com/en/find-station/exxon-goldthwaite-tx-quickcheck6-200315263	Exxon	0.80
+956220ecf7bb	R & R Fuel Stop	convenience		31.20009	-98.72712	604 N 8th St	San Saba	76877	+13253723027	https://www.loc8nearme.com/texas/san-saba/r-and-r-fuel-stop/2322370		0.92
+7f9261a93ecc	Ranglers Travel Center Valero #7	convenience		31.70477	-98.12919	520 W Main St	Hamilton	76531	+12543868903	http://ranglers.net		0.75
+28ba6bc0d8ad	RICK'S ONE STOP	convenience		31.19813	-98.71860	307 NORTH HIGH	San Saba	76877		https://www.exxon.com/en/find-station/exxon-sansaba-tx-ricksonestop-200318034	Exxon	0.93
+f2ecbb2b27fb	Rodriguez Convenience & Hardware Store	convenience		31.19604	-98.71523	705 E Wallace St	San Saba	76877	+13253725520	https://rodriguez-convenience-hardware-store.business.site		0.75
+36bb2d29f74e	Shell	convenience		31.89728	-98.60960	405 W Central Ave	Comanche	76442	+13253562224	http://www.shell.us/motorist/shell-station-locator-and-route-planner.html?id=10003394&modeselected=true	Shell	0.92
+434cb352ac89	Shell	convenience		31.98393	-98.03526	504 N 2nd St	Hico	76457	+12547964676	https://find.shell.com/us/fuel/10047010-504-north-2nd	Shell	0.93
+76c56a63156d	Shell	convenience		31.48912	-98.14754	14981 S US Highway 281	Evant	76525	+12544713557	https://find.shell.com/us/fuel/13115341-14981-s-us-highway-281/en_US		0.92
+7afcf1139f86	Shell	convenience		31.73518	-98.96260	301 Early Blvd	Early	76802	+13256468510	https://find.shell.com/us/fuel/10051146-301-early-blvd		0.92
+d8024eb7854a	Shell	convenience		31.07138	-98.18546	508 N Key Ave	Lampasas	76550	+15125566828	http://www.shell.us/	Shell	0.92
+5ed5c131fbaa	Shell Station, Lometa Tx	convenience		31.21743	-98.39488	201 N 4th St	Lometa	76853	+15127525901	http://www.shell.com/	Shell	0.92
+ad227e6e7e4a	Star Mart 20	convenience		31.47174	-98.56869	1290 US-84	Goldthwaite	76844	+13256482442	http://www.shaws.com/	Star Mart	0.92
+da04100a32c4	Stephen's Country Corner	convenience		31.98281	-98.03452	404 2nd St	Hico	76457	+12547969899	http://valero.com		0.99
+469fc283303e	Stripes	convenience		31.07512	-98.18542	801 N Key Ave	Lampasas	76550	+15125641459	https://www.7-eleven.com/	Stripes	1.00
+c4380bddab6c	Stripes	convenience		31.89804	-98.61395	1003 W Central Ave	Comanche	76442	+13253562422	http://www.stripesstores.com	Stripes	1.00
+f6fe0a5855df	Stripes	convenience		31.73013	-98.98965	601 W Commerce St	Brownwood	76801	+13256431666	http://www.stripesstores.com	Stripes	1.00
+f927cb5e62fb	Stripes	convenience		31.19604	-98.73190	1306 W Wallace St	San Saba	76877	+13253726518			0.99
+0be872c4a749	Sunoco	convenience		31.19614	-98.73192	1306 West Wallace Street	San Saba	76877	+13253726518	https://www.sunoco.com/		0.99
+7849bd72d3f7	Sunoco	convenience		31.07512	-98.18555	801 N Key Ave	Lampasas	76550	+15125641459	http://www.sunoco.com	Sunoco	0.92
+8763e2b48a17	Sunoco	convenience		31.70932	-98.99117	3801 Highway 377 S	Brownwood	76801	+13256467209	https://www.sunoco.com/locations/store/3801-highway-377-s-brownwood-tx-0148257900		0.85
+c24a3c9a1ec1	Sunoco	convenience		31.89782	-98.61416	1003 W Central Ave	Comanche	76442	+13253562422	https://www.sunoco.com/locations/store/1003-w-central-ave-comanche-tx-0761526300		0.92
+c2eee3f54281	Sunoco	convenience		31.05650	-98.17835	1401 S KEY AVE	Lampasas	76550		https://www.sunoco.com/locations/store/1401-s-key-ave-lampasas-tx-8002946301	Sunoco	0.80
+c3d4c94c4f2e	Sunoco	convenience		31.84636	-98.40237	101 E LUCY BERTRAM ST	Gustine	76455		https://www.sunoco.com/locations/store/101-e-lucy-bertram-st-gustine-tx-8003310801	Sunoco	0.80
+126bfc58fd6b	Texaco	convenience		31.46970	-98.56844	1170 US-84 W	Goldthwaite	76844	+13256482277	https://www.texaco.com/	Texaco with Techron	0.92
+a96bca75c611	Texaco	convenience		31.98958	-98.43434	2201 US HWY 377	Dublin	76446		https://www.texaco.com/en_us/home/find-a-station.html?/station/2201-US-HWY-377-DUBLIN-TX-76446-5848-id385398	Texaco	0.95
+6d826ec0222f	Texaco Station Lampasas	convenience		31.06999	-98.18505	404 N Key Ave	Lampasas	76550	+15123850510	http://www.texaco.com/stations/default.aspx		0.92
+755afde622b0	Texas Express	convenience		31.73520	-98.96252	301 Early Blvd	Early	76802	+13256468510	http://www.texas-express.com		0.55
+e8223fe9e69b	Texas Express	convenience		31.72403	-98.98106	505 N Center Ave	Brownwood	76801	+13256464777	http://www.texas-express.com		0.55
+a4ba4d098c3b	Texas Express #4	convenience		31.68901	-98.99908	3701 Highway 377 S	Brownwood	76801	+3254885703			0.85
+e827cdd7b7cf	the coop	convenience		31.47566	-98.15285	162 S Hwy 281	Evant	76525	+15122171300	http://www.thecooptexas.com/		0.92
+8f5af371e9b3	The Elk Stop	convenience		31.48910	-98.14753	14981 S Hwy 281	Evant	76525	+12544713557	http://www.kimscstores.com/		0.92
+ddc4734a3659	Thedford Git N Go	convenience		31.84616	-98.40235	101 E Lucy Bertram St	Gustine	76455	+13256677013	https://thedford-git-n-go.hub.biz/		0.92
+24a77cecf798	Town & Country Food Store	convenience		31.19594	-98.73157	1306 W Wallace St	San Saba	76877	+13253726518	http://tcfs.com		0.92
+1b8fad1a51f0	TX0296	convenience		31.06881	-98.18417	207 N KEY AVE	Lampasas	76550		https://www.exxon.com/en/find-station/mobil-lampasas-tx-tx0296-200327675	Mobil	0.80
+2765213fe03f	Valero	convenience		31.05551	-98.17957	1408 S Key Ave	Lampasas	76550	+15125565360	https://www.valero.com	Valero	0.99
+8c8622156024	Valero	convenience		31.70481	-98.12939	502 W Main St	Hamilton	76531	+18662976093	http://www.valero.com	Valero Energy	0.92
+c30cd9aaecf1	Valero	convenience		31.71166	-98.97927	1201 Austin Ave	Brownwood	76801	+19156418158	http://www.valero.com	Valero Energy	0.92
+e269c8889c9f	WECKWERTH FUEL	convenience		31.89767	-98.60851	405 W CENTRAL AVE	Comanche	76442			Conoco	0.80
+ca1ee3cd86ee	West End Convenience Store	convenience		31.19590	-98.73689	1802 W Wallace St	San Saba	76877	+13253723253	https://west-end-convenience-store.hub.biz/		0.92
+6d9a8ae3a4e9	WinStop	convenience		31.47802	-98.15190	889 N US Highway 281	Evant	76525	+12544713049	http://www.thewinstop.com/		0.95
+ae09ca22fadb	WinStop	convenience		31.48360	-98.15010	889 N US Hwy 281	Evant	76525		https://locations.valero.com/en-us/LocationDetails/Index/889-N-US-HWY-281/0000032691	Valero	0.80
+406c07671088	Yesway	convenience		31.70677	-98.98045	1400 Coggin Avenue	Brownwood	76801	+13256462775	https://yesway.com/		0.85
+759119d5396c	Yesway	convenience		31.98238	-98.03306	301 2nd St	Hico	76457	+12545082004	http://www.yesway.com/	Yesway	0.92
+f2383a753aec	Yesway	convenience		31.70501	-98.12928	502 W Main St	Hamilton	76531	+12545082003	http://www.yesway.com/	Yesway	0.92
+2f566d4eb025	Bush's Chicken	fastfood		31.05385	-98.17764	1621 S Key Ave	Lampasas	76550	+15125566044	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.97
+8c6dd0acda94	Bush's Chicken	fastfood		31.70619	-98.12350	305 N Rice St	Hamilton	76531	+12543864442	https://www.bushschicken.com		0.92
+2d59a2a46634	Chick-fil-A	fastfood		31.73147	-98.97371	500 E Commerce St	Brownwood	76801	+13255103302	https://www.chick-fil-a.com/locations/tx/brownwood-tx?utm_source=yext&utm_medium=link	Chick-fil-A	0.95
+75b13b7b6000	Chick-fil-A	fastfood	breakfast and brunch restaurant	31.73800	-98.96153	306 Early Blvd	Early	76802	+13256433910	http://www.chick-fil-a.com/heartlandmall		0.92
+3b9da66037f3	Chicken Express	fastfood	chicken restaurant	31.67925	-98.96353	1504 Indian Creek Dr	Brownwood	76801	+13256434060	http://www.chickene.com		0.92
+6a36c1d095ae	Chicken Express	fastfood		31.89799	-98.58831	1213 E Central Ave	Comanche	76442	+13253565100	https://chickene.com/	Chicken Express	0.97
+829f09ec7e48	Chicken Express	fastfood		31.73492	-98.96327	221 Early Blvd	Early	76802	+13256433100	https://chickene.com/	Chicken Express	0.96
+b57c52e45c28	Chicken Express	fastfood	chicken restaurant	31.98280	-98.03450	404 N Second St	Hico	76457	+12547964044	https://www.chickene.com		0.77
+0b21fd826ef3	Dairy Queen	fastfood		31.70697	-98.97478	1620 Austin Ave 1620 Austin Ave	Brownwood	76801	+13256466132	https://www.dairyqueen.com/en-us/locations/tx/brownwood/1620-austin-ave/13882/?y_source=1_MjkzMzkxMjItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+333aa270526d	Dairy Queen	fastfood		31.46956	-98.56793	1140 US-84	Goldthwaite	76844	+13256483325	https://www.dairyqueen.com/en-us/locations/tx/goldthwaite/hwy-84-lp/14164/?y_source=1_MjkzMzg5MjMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+564b4f7fc47a	Dairy Queen	fastfood		31.89759	-98.60788	403 W Central Ave	Comanche	76442	+13253563942	http://www.dairyqueen.com/	Dairy Queen	0.96
+b0a5834c50e3	Dairy Queen	fastfood		31.69641	-98.12683	820 S Rice St 820 S Rice St	Hamilton	76531	+12543863048	http://www.dairyqueen.com/	Dairy Queen	0.95
+b173a0fb8d13	Dairy Queen	fastfood		31.19590	-98.73395	1508 W Wallace St 1508 W Wallace St	San Saba	76877	+13253725214	https://www.dairyqueen.com/en-us/locations/tx/san-saba/1508-w-wallace-st/14586/?y_source=1_MjkzMzg5OTYtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+e23263190b65	Dairy Queen	fastfood		31.05833	-98.18015	1110 S Key Ave	Lampasas	76550	+15125566254	https://www.dairyqueen.com/en-us/locations/tx/lampasas/1110-s-key-ave/14340/?y_source=1_MjkzMzg5MTQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+ba4f17917dc0	Domino's	fastfood	pizza restaurant	31.70907	-98.97810	1012 Coggin Ave	Brownwood	76801	+13256433112	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+ee51869210ac	Domino's	fastfood	pizza restaurant	31.06910	-98.18476	302 N. Key St.	Lampasas	76550	+15122658855	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.96
+3f90fbfa4524	DQ Grill & Chill	fastfood		31.89767	-98.60783	403 W Central Ave	Comanche	76442		https://www.dairyqueen.com/en-us/locations/tx/comanche/403-w-central-ave/3703	DQ Grill & Chill	0.80
+4143c1715899	DQ Grill & Chill	fastfood		31.46959	-98.56782	Hwy 84 Lp	Goldthwaite	76844		https://www.dairyqueen.com/en-us/locations/tx/goldthwaite/hwy-84-lp/3937	DQ Grill & Chill	0.80
+43df2ddb96ad	DQ Grill & Chill	fastfood		31.69640	-98.12678	820 S Rice St	Hamilton	76531		https://www.dairyqueen.com/en-us/locations/tx/hamilton/820-s-rice-st/3962	DQ Grill & Chill	0.80
+5fa491150e79	DQ Grill & Chill	fastfood		31.70702	-98.97463	1620 Austin Ave	Brownwood	76801		https://www.dairyqueen.com/en-us/locations/tx/brownwood/1620-austin-ave/3655	DQ Grill & Chill	0.80
+779c039c8e4f	DQ Grill & Chill	fastfood		31.19597	-98.73392	1508 W Wallace St	San Saba	76877		https://www.dairyqueen.com/en-us/locations/tx/san-saba/1508-w-wallace-st/4358	DQ Grill & Chill	0.80
+864cd8f29c69	DQ Grill & Chill	fastfood		31.05832	-98.18005	1110 S Key Ave	Lampasas	76550		https://www.dairyqueen.com/en-us/locations/tx/lampasas/1110-s-key-ave/4113	DQ Grill & Chill	0.80
+8f2766c0ec71	Freddy's Frozen Custard & Steakburgers	fastfood	burger restaurant	31.72884	-98.98218	305 W Commerce	Brownwood	76801	+13255555555	https://www.freddys.com/location/brownwood?utm_source=fb&utm_medium=organic	Freddy's Frozen Custard & Steakburgers	0.99
+655fc0917492	Golden Chick	fastfood		31.06372	-98.16147	1702 Central Texas Expy	Lampasas	76550	+17372346023	https://locations.goldenchick.com/tx/lampasas/1340/	Golden Chick	0.95
+aa90e8fd77f5	Golden Chick	fastfood		31.72972	-98.98705	563 W Commerce St	Brownwood	76801	+13256435533	https://locations.goldenchick.com/tx/brownwood/1200/	Golden Chick	0.99
+b398b23c5629	KFC	fastfood		31.72794	-98.97926	1013 N. Fisk Avenue	Brownwood	76801	+13256466433	https://locations.kfc.com/tx/brownwood/1013-n-fisk-avenue	KFC	0.97
+7f1eb0dee924	Krispy Krunchy Chicken	fastfood		31.47182	-98.56918	1290 US Highway 84	Goldthwaite	76844		https://locations.krispykrunchy.com/tx/goldthwaite/1290-us-highway-84	Krispy Krunchy Chicken	0.96
+9523c3d038c4	Laredo Taco Company	fastfood		31.73028	-98.98969	601 W Commerce St	Brownwood	76801	+13256431666	https://www.laredotacocompany.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.92
+8cf82cbc6106	Layne's Chicken Fingers	fastfood		31.07007	-98.18517	404 N Key Ave	Lampasas	76550	+15125645080	https://burgerking.com/store-locator/store/restaurant_65185		0.77
+c984c1269014	Little Caesars Pizza	fastfood	pizza restaurant	31.72957	-98.98657	559 W Commerce St	Brownwood	76801	+13256411670	https://littlecaesars.com/en-us/store/7914	Little Caesars	0.96
+0da45d3fdd1e	Long John Silvers	fastfood	american restaurant	31.72877	-98.98222	305 W Commerce St	Brownwood	76801	+13256469351	http://www.longjohnsilvers.com/		0.92
+b4151fb5b977	McDonald's	fastfood		31.06034	-98.18104	804 S Key Ave	Lampasas	76550	+15125562202	https://www.mcdonalds.com/us/en-us/location/tx/lampasas/804-s-key-ave/17456.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+cce2f98218f3	McDonald's	fastfood		31.72927	-98.97835	204 E Commerce	Brownwood	76801	+13256411408	https://www.mcdonalds.com/us/en-us/location/tx/brownwood/204-e-commerce/5131.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.97
+a2983a022f86	Olam Edible Nuts	fastfood		31.94114	-98.38801	1033 County Road 343	Dublin	76446	+12544454021	http://universalblanchers.com		0.77
+6fd6b77d6281	Panda Express	fastfood		31.73157	-98.97266	515 E Commerce St	Brownwood	76801	+13257730937	https://www.pandaexpress.com/locations/tx/brownwood/3841		0.92
+022531962fc1	Pizza Hut	fastfood	pizza restaurant	31.71078	-98.97854	1301 Austin Ave	Brownwood	76801	+13256435811	http://www.pizzahut.com/	Pizza Hut	0.96
+304932277569	Pizza Hut	fastfood	pizza restaurant	31.05417	-98.17825	1602 S Key Ave	Lampasas	76550	+15125568211	https://locations.pizzahut.com/tx/lampasas/1602-s-key?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=283268	Pizza Hut	0.97
+162772781324	Popeyes Louisiana Kitchen	fastfood	chicken restaurant	31.72901	-98.97798	207 E Commerce St	Brownwood	76801	+13255105150	https://www.popeyes.com/store-locator/store/restaurant_238072?utm_source=yext&utm_medium=referral&utm_campaign=organic-local-listings		0.99
+df65de7dfc9b	Quiznos	fastfood	sandwich shop	31.70477	-98.12919	520 W Main St	Hamilton	76531	+12543868903	https://www.quiznos.com		0.92
+68b14aa5f1dd	Schlotzsky's	fastfood	sandwich shop	31.72683	-98.98016	919 N Fisk Ave	Brownwood	76801	+13256436661	http://www.schlotzskys.com/brownwood/1761/home		0.79
+b9736b72e3e3	Schlotzsky's	fastfood	sandwich shop	31.05725	-98.17892	102 Riverview Dr	Lampasas	76550	+15125565000	www.schlotzskys.com		0.96
+4a232da8c1a3	Sonic Drive In	fastfood		31.70896	-98.97624	1500 Austin Avenue	Brownwood	76801	+13256435510	https://locations.sonicdrivein.com/tx/brownwood/1500-austin-avenue.html	Sonic Drive-In	0.95
+5a45dded678e	Sonic Drive In	fastfood		31.74327	-98.94406	974 Early Boulevard	Early	76802	+13256433434	https://locations.sonicdrivein.com/tx/early/974-early-boulevard.html	Sonic Drive-In	0.97
+7ac0f2966b5b	Sonic Drive In	fastfood		31.72894	-98.98116	211 W. Commerce	Brownwood	76801	+13256466812	https://locations.sonicdrivein.com/tx/brownwood/211-w.-commerce.html	Sonic Drive-In	1.00
+9af49c351595	Sonic Drive In	fastfood		31.06171	-98.18147	702 S. Key Avenue	Lampasas	76550	+15125566834	https://locations.sonicdrivein.com/tx/lampasas/702-s.-key-avenue.html	Sonic Drive-In	0.97
+b5bba80b016d	Sonic Drive In	fastfood		31.19588	-98.72934	1006 West Wallace	San Saba	76877	+17372951916	https://locations.sonicdrivein.com/tx/sansaba/1006-west-wallace.html	Sonic Drive-In	0.97
+c3db6a86c853	Sonic Drive In	fastfood		31.89755	-98.59003	1202 E. Central	Comanche	76442	+13253565080	https://locations.sonicdrivein.com/tx/comanche/1202-e.-central.html	Sonic Drive-In	0.98
+e0b78078166a	Sonic Drive In	fastfood		31.98239	-98.03249	205 West Second Street	Hico	76457	+12547962258	https://locations.sonicdrivein.com/tx/hico/205-west-second-street.html	Sonic Drive-In	0.94
+318b4b4ce463	Sonic Drive-In	fastfood	theme restaurant	31.70151	-98.11510	701 E Main St	Hamilton	76531	+12546884053	https://locations.sonicdrivein.com/tx/hamilton/701-e-main-street.html	Sonic Drive-In	0.99
+50f425b70a54	Sonic Drive-In	fastfood	burger restaurant	31.46569	-98.45812	614 W Us Highway 84	Fairfield	75840	+19033897766	https://locations.sonicdrivein.com/tx/fairfield/614-west-highway-84.html		0.85
+9d68e7534730	Sonic Drive-In	fastfood	burger restaurant	31.70791	-98.13691	230 Highway 36 S	Caldwell	77836	+19795677911	https://locations.sonicdrivein.com/tx/caldwell/230-highway-36-south.html		0.85
+1759970224ed	Subway	fastfood	sandwich shop	31.70604	-98.12270	312 N Rice St	Hamilton	76531	+12543865587	https://www.subway.com		0.92
+5c1a00380498	Subway	fastfood	sandwich shop	31.71070	-98.97858	1305 Austin Ave	Brownwood	76801	+13256469798	https://restaurants.subway.com/united-states/tx/brownwood/1305-austin-ave	Subway	0.98
+74ab02ab229a	Subway	fastfood	sandwich shop	31.72930	-98.97698	211 E Commerce	Brownwood	76801	+13256467878	https://restaurants.subway.com/united-states/tx/brownwood/211-e-commerce	Subway	0.95
+9c378af94561	Subway	fastfood	sandwich shop	31.06796	-98.18423	108 N Key Ave	Lampasas	76550	+15125566440	https://restaurants.subway.com/united-states/tx/lampasas/108-n-key-ave	Subway	0.97
+a9b5ebee914d	Subway	fastfood	sandwich shop	31.89761	-98.60830	409 W Central Ave	Comanche	76442	+13253562224	https://restaurants.subway.com/united-states/tx/comanche/409-w-central-ave	Subway	0.97
+c149283029f5	Subway	fastfood	sandwich shop	31.19593	-98.73194	1306 W Wallace St	San Saba	76877	+13253726518	https://restaurants.subway.com/united-states/tx/san-saba/1306-w-wallace-st	Subway	0.97
+d93d53c4ee4a	Subway	fastfood	sandwich shop	31.45101	-98.56931	1110 Fisher Street	Goldthwaite	76844	+13256483355	https://restaurants.subway.com/united-states/tx/goldthwaite/1110-fisher-street	Subway	0.92
+66b4aa10713a	Summer Shivers Ice House	fastfood		31.45153	-98.56643	702 4th St	Goldthwaite	76844				0.98
+50a288e23fd1	Super Rooster Restaurant	fastfood		31.75027	-98.99602	2918 Beeghley Street	Temple	76501		https://superroosterrestaurant.blogspot.com/		0.75
+34101ac66e7d	Taco Bell	fastfood		31.72944	-98.98581	547 W Commerce St	Brownwood	76801	+13256431466	http://www.tacobell.com/	Taco Bell	0.99
+3884c1d2f8d5	Taco Bell	fastfood		31.05944	-98.18110	908 South Key Ave	Lampasas	76550	+15125568528	http://www.tacobell.com/	Taco Bell	0.99
+da68e463b2b5	Taco Casa	fastfood		31.73404	-98.96533	207 Early Blvd #63	Early	76802	+13256467810	https://tacocasatexas.com/location/63-early/	Taco Casa	0.97
+3e3f13e4a472	Whataburger	fastfood	burger restaurant	31.73064	-98.97389	411 E COMMERCE ST	Brownwood	76801	+13256464244	https://locations.whataburger.com/tx/brownwood/411-e-commerce-st.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.92
+898868c337a3	Whataburger	fastfood		31.05938	-98.18000	1003 S KEY AVE	Lampasas	76550	+15127461945	https://locations.whataburger.com/tx/lampasas/1003-s-key-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.95
+28bdab97f03f	Wingstop	fastfood		31.73169	-98.97504	432 E. Commerce St.	Brownwood	76801	+13252035360	https://www.wingstop.com/location/wingstop-1325-brownwood-tx-76801/menu?y_source=1_NTUyMDc4OTgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+760dc98cb1b5	Aldi	grocery		31.72919	-98.98589	519 W. Commerce Street	Brownwood	76801	+18559552534	https://stores.aldi.us/tx/brownwood/519-w-commerce-street?utm_source=fb&utm_medium=local&utm_campaign=brand&utm_content=storepage_webclick	ALDI	0.96
+316cd2016a11	Bagley R B & Sons	grocery		31.19487	-98.71765	420 E Commerce St	San Saba	76877	+13253725154	https://www.bagleypecan.com		0.55
+546ff77e4253	Brookshire Brothers	grocery		31.69965	-98.11133	1004 E Main St	Hamilton	76531	+12543868744	https://www.brookshirebrothers.com/store-location/store-84	Brookshire Brothers	0.97
+2fd840152349	Brookshire's	grocery		31.71039	-98.97628	1400 Austin Ave	Brownwood	76801	+13256432234	https://www.brookshires.com/store-information/Brownwood/116	Brookshire's	0.92
+5b29cbe13aad	Brookshire's	grocery		31.89697	-98.60842	404 W Central Ave	Comanche	76442	+13253563248	https://www.brookshires.com/store-information/Comanche/93	Brookshire's	0.97
+7a5d25f65a72	Brownwood #116	grocery		31.70994	-98.97717	1400 Austin Ave	Brownwood	76801			Brookshire's	0.80
+8f17b8b44c5e	Comanche #93	grocery		31.89737	-98.60748	404 W Central Ave	Comanche	76442			Brookshire's	0.80
+2be89dd9400c	Cowboy General Store - Richland Springs Texas	grocery		31.27416	-98.94516	110 W Main St	Richland Springs	76871	+13254523131			0.75
+e8131a674cd2	Down Unda Trading Post	grocery		31.30195	-98.16936	16707 N US Highway 281	Lampasas	76550	+15125402814	http://www.yelp.com/biz/down-unda-trading-post-lampasas		0.92
+90e8d8337dde	Food Plaza	grocery		31.69070	-98.97118	2800 4th St	Brownwood	76801	+13256466935	http://www.exxonmobil.com/		0.93
+f52570ec40a5	Gillens Candies and Wine	grocery		31.06584	-98.18256	209 S Key Ave	Lampasas	76550	+17375372370	http://gillenscandies.com/		0.98
+9d358d993734	H-E-B	grocery		31.06195	-98.18043	705 S Key Ave	Lampasas	76550	+15125563461	https://www.heb.com/heb-store/US/tx/lampasas/lampasas-h-e-b-432	H-E-B	0.96
+63d58ae84853	Haley's Homestead	grocery		31.98268	-98.03187	208 W 2nd St	Hico	76457	+15125654874	http://www.haleyshomestead.com/		0.65
+0141b2029705	Hico Meat Market	grocery		31.98782	-98.03730	801 N Second St	Hico	76457	+12547960904			0.95
+a80b23ae7572	Leonard's Big Valley Farm	grocery		31.35598	-98.69002	450 Co Rd 417	Goldthwaite	76844	+13259385560			0.63
+9c6f225141a0	Lowe's Market	grocery		31.98333	-98.02779	300 E Third St	Hico	76457	+12547964623	http://www.lowesmarket.com/	Lowe's Market	0.96
+7bc53d77055a	Lowes Family Center	grocery		31.19624	-98.73114	1204 W Wallace St	San Saba	76877	+13253724191	https://www.acehardware.com/store-details/12289		0.92
+cd995a2d88a7	Nature's Rancher	grocery		31.69095	-98.13100	1207 S Rice St	Hamilton	76531		http://www.naturesrancher.com/		0.59
+e1fb4a433ace	Schwartz Food Store	grocery		31.45560	-98.57121	1500 Fisher St	Goldthwaite	76844	+13256483313	http://www.schwartzfoodstore.com/		0.92
+acefc29b0209	Sligers Produce Market	grocery		31.69528	-98.99428	2909 Coggin Ave	Brownwood	76801	+13256004281			0.92
+473d6b0fd538	Super S Foods	grocery		31.19626	-98.73121	1204 W Wallace St	San Saba	76877	+13253724191	http://www.supersfoods.com		0.77
+e3e3f5d6a3f9	Super S Foods	grocery		31.98330	-98.02782	300 E Third St # 3	Hico	76457	+12547964623	http://www.supersfoods.com		0.77
+9d14ded00225	The Bend General Store	grocery		31.09971	-98.51185	115 County Rd 438	Bend	76877	+13256283523			1.00
+f1349c1a337b	United Supermarkets	grocery		31.73069	-98.97626	300 E Commerce St	Brownwood	76801	+13255103370	https://local.unitedsupermarkets.com/tx/brownwood/300-e-commerce-st.html	United Supermarkets	1.00
+1c21bc73f7b2	Volleman's Family Farm	grocery		31.84731	-98.44041	15400 Highway 36	Gustine	76455	+13256677420	http://vollemansdairy.com/		0.92
+2f13ebab66c4	Windsor Foods Inc.	grocery		31.06713	-98.17635	601 E 3rd St	Lampasas	76550	+15125565454	http://windsorfoods.com		0.92
+8b517f53fac5	AdventHealth Central Texas Family Medicine Clinic- Lampasas	hospital		31.07116	-98.18716	207 W Avenue E	Lampasas	76550	+15125563621			0.92
+4dd920b6c8bf	Adventhealth Rollins Brook	hospital		31.07241	-98.18604	608 North Key Avenue	Lampasas	76550	+15125563682	http://AdventHealthRollinsBrook.com/		0.92
+99713ee31fae	Baylor Scott & White Clinic - Lampasas	hospital		31.07140	-98.18726	207 W Avenue E, Ste 1100	Lampasas	76550				0.80
+a1362ba78ddb	Brownwood Regional Hospital	hospital		31.72330	-98.98198		Brownwood					0.70
+91269689421d	CCMC Health System	hospital		31.98433	-98.56209	10201 Highway 16	Comanche	76442	+12548794900	https://whitestoneassistedliving.com/		0.97
+2037b6a806eb	De Leon Hospital	hospital		31.98403	-98.56216	10201 Highway 16	Comanche	76442	+12548932011			0.65
+fb90c6acb3be	Diagnostic Imaging Center	hospital		31.67873	-98.99413	125 S Park Dr	Brownwood	76801	+13256419498	https://www.mdsave.com/p/brownwood-regional-medical-center		0.92
+ec1f64b7c43f	Hamilton Clinic	hospital		31.70358	-98.11415	303 N Brown St	Hamilton	76531		http://www.hamiltonclinic.com/index.html		0.98
+956c39f73980	Hendrick Medical Center Brownwood	hospital		31.67784	-98.99337	1501 Burnet Dr	Brownwood	76801	+13256468541	http://hendrickhealth.org/		0.97
+3a773bab1f78	Hendrick Medical Plaza	hospital		31.68188	-98.99686	2371 Crockett Dr	Brownwood	76801	+13256411140	https://www.hendrickmedicalclinic.com/medicalclinic/medical-clinic-brownwood.aspx	Hendrick Health	1.00
+4abd99d181fe	Lampasas Hospital	hospital		31.07238	-98.18594		Lampasas					0.83
+0e09db652cbe	One Source Health Center-Early	hospital		31.73863	-98.96354	2005 Highway 183 N	Early	76802	+13256433010	http://www.brmc-cares.com/one-source-health-centers		0.99
+074e884bb63c	Special Care Clinic	hospital		31.70351	-98.11369	400 N Brown St	Hamilton	76531	+12543861800	http://www.hamiltonhospital.org/		0.78
+3c89e7c25b2c	315 Center Street	hotel		31.98399	-98.03396	315 Center St	Hico	76457		http://www.315center.com/		0.84
+113a8222a394	8 20 Ranch	hotel		31.10596	-98.36349	11585 W FM 580	Lampasas	76550				0.71
+626fc21cde8f	A Little Bed & Breakfast, LLC	hotel		31.45934	-98.57281	1807 Fisher St	Goldthwaite	76844	+13254517147			0.93
+1ba16f209dc9	Americas Best Value Inn Comanche	hotel	resort	31.89693	-98.60989	508 W Central Ave	Comanche	76442	+13253565267	https://www.sonesta.com/americas-best-value-inn/tx/comanche/americas-best-value-inn-comanche?utm_medium=soci&utm_source=bing		0.98
+f8a4875d467e	Avalon Motel	hotel	motel	31.73916	-98.95382	618 Early Blvd	Early	76802	+13256434551	https://avalon-motel-early.booked.net		0.99
+faa8bc298fdd	Best Western Comanche Inn	hotel		31.89852	-98.58452	1505 E Central Ave	Comanche	76442	+13253562300	https://www.bestwestern.com/en_US/book/hotel-rooms.44626.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44626	Best Western Hotels & Resorts	1.00
+8f5065e3d69c	Best Western Plus Lampasas Inn & Suites	hotel		31.05413	-98.17880	1504 S Key Ave	Lampasas	76550	+15125562100	http://book.bestwestern.com/bestwestern/US/TX/Lampasas-hotels/BEST-WESTERN-Plus-Lampasas-Inn---Suites/Hotel-Overview.do?propertyCode=44722	Best Western Hotels & Resorts	1.00
+747f66e7ab48	Best Western Plus Riata	hotel		31.72861	-98.98447	504 W Commerce St	Brownwood	76801	+13252035400	https://www.bestwestern.com/en_US/book/hotel-rooms.44779.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44779	Best Western Hotels & Resorts	0.99
+bcb05e594edf	Bhakta - Bcp Management Llc	hotel		31.73003	-98.97865	103 Market Place Blvd	Brownwood	76801				0.95
+8e1f8295991f	Brownwood Hospitality Group, Inc	hotel		31.72868	-98.97737	1103 Riverside Dr	Brownwood	76801				0.95
+2fda0ea43d75	Budget Inn Hamilton	hotel	motel	31.71177	-98.12075		Hamilton		+12543868959	http://budgetinn.com/		0.98
+2c5696640d5e	Burnham's Paint & Supply	hotel		31.19597	-98.71965	105 N Clear St	San Saba	76877	+13253726067	http://burnhamslodging.com		0.92
+7e56d722f905	Classic Inn Motel	hotel		31.73797	-98.95493	607 Early Blvd	Early	76802	+13256433567	http://www.magnusonhotels.com/classic-inn-early		0.98
+a2f11504aeba	Comfort Inn Early Brownwood	hotel		31.73499	-98.96640	204 Early Blvd	Early	76802	+13256413400	https://www.choicehotels.com/texas/early/comfort-inn-hotels/tx872?pmf=yext&mc=llyxyxpx	Choice Hotels	0.99
+ebcbc4cd99bb	Country Comfort Inn	hotel	motel	31.89703	-98.61366	900 W Central Ave	Comanche	76442	+13253562543	http://www.comfortinn.com	Choice Hotels	0.97
+1e976002db59	Country Inn At Lampasas	hotel		31.05403	-98.18045	1502 S Key Ave	Lampasas	76550	+15125566201	https://www.countryinnlampasas.com		0.99
+91ccf775c3da	Creekside Retreat Lampasas	hotel		31.07253	-98.13818	1177 County Road 3010	Lampasas	76550	+15126276670	https://www.airbnb.com/h/lampasascreekside		0.94
+fbfd1804b772	Executive Inn	hotel	motel	31.20251	-98.71825	1010 N High St	San Saba	76877	+13253725191	http://www.executiveinnsansaba.com		0.95
+889717bdf689	Executive Inn Motel	hotel	motel	31.73296	-98.96691	1204 C C Woodson Rd	Early	76802	+13256435611			0.92
+8d38c7bb5a08	Gate 1 Inn	hotel	motel	31.67711	-98.99979	4410 US-377	Brownwood	76801	+13256435463			0.92
+b1e6c015dbeb	Good Vibe Vineyards Retreat	hotel		31.19595	-98.71991	207 E Wallace St	San Saba	76877	+15123515811	https://www.airbnb.com/h/goodvibevineyardsretreat		0.84
+99775f519eda	Hamilton Inn	hotel	motel	31.67628	-98.13479	1447 S Hwy 281	Hamilton	76531	+12543868864	http://www.hamiltoninntexas.com/		0.95
+cb68a118ff4c	Hampton Inn Brownwood	hotel		31.72846	-98.97720	1103 Riverside Dr	Brownwood	76801	+13256411122	https://www.hilton.com/en/locations/usa/	Hampton by Hilton	0.99
+58a027a9b9e7	Hico Hills Inn	hotel		31.98100	-98.03455	401 N Railroad Ave	Hico	76457	+12547964217	https://hicohillsinn.com		0.98
+719249395357	Hico's Nothin' But Time	hotel		31.97998	-98.03731	306 Hickory St	Hico	76457	+12544850459	http://www.hicobandb.com/		0.92
+12e5abe87740	Holiday Inn Express & Suites Brownwood	hotel		31.72893	-98.98497	504 W Commerce St	Brownwood	76801	+13256418085	https://www.ihg.com/holidayinnexpress/hotels/us/en/brownwood/bwdtx/hoteldetail?cm_mmc=BingMaps-_-ex-_-USEN-_-bwdtx		0.92
+f72f1ee0f3ae	Holiday Inn Express Early	hotel		31.73400	-98.96771	128 Early Blvd	Early	76802	+13256411014	https://www.ihg.com/holidayinnexpress/hotels/us/en/early/bwder/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-BWDER	Holiday Inn Express	1.00
+0e53923916fe	Home2 Suites by Hilton Brownwood	hotel		31.73000	-98.97401	401 East Commerce Street	Brownwood	76801	325-600-4858	https://www.hilton.com/en/hotels/abibrht-home2-suites-brownwood/	Home2 Suites by Hilton	0.99
+15c678c5b5e9	Inn At Circle T	hotel		31.74822	-98.17150	4021 W Highway 36	Hamilton	76531	+12543863209	https://www.inn-at-circle-t.com		0.99
+c06b34c59670	Inn At Circle T	hotel		31.74932	-98.17142	4021 W State Highway 36	Hamilton	76531	+12543863209	http://www.inn-at-circle-t.com/		1.00
+496730cd940f	Knights Inn Brownwood	hotel		31.73905	-98.95564	606 Early Blvd	Early	76802	+13256435621	https://www.redlion.com/knights-inn/tx/early/knights-inn-brownwood		0.92
+c18894ff8153	L & L Motel	hotel		31.20152	-98.71835	1010 N High St	San Saba	76877	+13253725191			0.70
+651fe4828aab	La Quinta Inn & Suites	hotel		31.72997	-98.97872	103 Market Pl Blvd	Brownwood	76801	+13255105397	http://www.laquintabrownwood.com/?cid=local_6147	La Quinta by Wyndham	1.00
+895c060d7b36	La Quinta Inn & Suites Brownwood	hotel	resort	31.73483	-98.97991	103 Market Place Blvd	Brownwood	76801	+13256411731	http://www.laquintabrownwood.com/?cid=local_6147		0.85
+8bdb6952fd09	Lina Ai world	hotel		31.19482	-98.72219	fifth street	San Saba	76877	+13253724900			0.99
+6a5cd6a2e4c7	Loose Nuts Lodge Bed and Breakfast	hotel		31.25034	-98.27236	1702 County Road 2800	Lometa	76853	+15127525321	http://loosenutslodge.com/index.html		0.67
+be772a9b8314	Midland Hotel	hotel		31.98158	-98.03066	103 N Pecan St	Hico	76457	+12547964426	http://www.historicmidlandhotel.com/		1.00
+a082bbc74476	OYO Hotel Brownwood Hwy 67	hotel	resort	31.73157	-98.97266	515 E Commerce St	Brownwood Tx	76801	+13256004083	https://www.oyorooms.com/us/82910?utm_source=Google_gmb_US&utm_medium=Organic&utm_campaign=US_BRW001&latitude=31.73091&longitude=-98.9721&locale=en		0.80
+2bf3d3d1add0	OYO USA	hotel		31.73120	-98.97244	515 E Commerce St	Brownwood	76801	+16282630414	https://www.oyorooms.com/us/82910/?utm_source=google&utm_medium=local&utm_campaign=localmaps&utm_content=US_BRW001	OYO USA	0.80
+ec08909c81c8	Post Oak Inn	hotel		31.73855	-98.95582	606 Early Blvd	Early	76802	+13256435621	https://www.agoda.com/knights-inn-brownwood/hotel		0.75
+e44026a9b834	Proctor Lake Lodge	hotel		31.98604	-98.49815	124 Arrowhead	Comanche	76442	+18176910803	http://www.proctorlakelodge.com/		0.92
+3d6cc4a0211c	Quality Inn and Suites	hotel		31.05904	-98.16803	1200 Central Texas Expy	Lampasas	76550	+15125404267	https://www.choicehotels.com/texas/lampasas/quality-inn-hotels/txj27?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+7ba330950ce0	Red Lantern Tavern	hotel		31.70818	-98.97623	1507 Austin Ave	Brownwood	76801		https://redlanternpub.com		0.95
+082e426421fd	Redbud Inn	hotel	motel	31.45505	-98.57150	1501 Fisher St	Goldthwaite	76844	+13256483061	http://www.myredbudinn.com		0.97
+157ebbc4190a	Regency Inn Comanche	hotel	motel	31.89812	-98.58747	1301 E Central Ave	Comanche	76442	+13253562508	http://www.regencyinncomanche.com		0.99
+349865bbda66	Relax Inn	hotel	motel	31.47075	-98.56867	1230 US-84	Goldthwaite	76844	+13256482288	https://www.relaxinngoldthwaite.com		0.93
+a07f3293d28b	Relax Inn	hotel		31.47220	-98.35638	1230 US Highway 84 E	Goldthwaite	76844	+13256482288	www.relaxinngreeneville.com		0.55
+ea1e738d22d3	Royal Inn	hotel	motel	31.73941	-98.95157	807 Early Blvd	Early	76802	+13256465525			0.99
+b60b2899eb78	San Saba Lodging	hotel		31.19606	-98.74179	2301 W Wallace St	San Saba	76877	+13253725408			0.92
+373a55d834e6	The Duren Hotel	hotel		31.72147	-98.97008	220 County Road 549	Mullin	76864	+15126083135			0.97
+6be0b7cf3a92	The Henry	hotel		31.98090	-98.03072	111 Pecan St	Hico	76457		http://www.the-henry.com/		0.92
+a5cfb469027b	The Inn At Lampasas	hotel		31.05885	-98.16808	1200 Central Texas Expy	Lampasas	76550		https://www.innatlampasas.com		0.95
+50fbb531a5d9	Value Lodge Brownwood	hotel	motel	31.73080	-98.97466	410 E Commerce St	Brownwood	76801	+13256463511			0.92
+e09db1641fc3	Veda Hodge Hall	hotel		31.71572	-98.98785	Center Ave	Brownwood	76801	+13256497343			0.73
+f37f8cea59ef	Western Inn	hotel	motel	31.69109	-98.12932	1208 S Rice St	Hamilton	76531	+12543863141	http://www.bestwestern.com/		0.98
+d2ce05cda1ed	Central Texas Telecommunications	office	telecommunications company	31.45123	-98.56519	1012 Reilley St	Goldthwaite	76844	+13256482237	http://www.cttcinc.com		0.92
+c69076574eff	Central Texas Telephone Co-Op	office	telecommunications company	31.19656	-98.72108	208 E Brown St	San Saba	76877	+13256482237	http://centex.net		0.92
+d4906f752b3d	Clariv	office	information technology company	31.72906	-98.99385	25145 Star Lane, Unit # 905, Katy, TX 77494	Katy	77494	+12812058805	https://www.clariv.ai		0.77
+c9097de5d608	Comanche Crossroads	office		31.88885	-98.60431	1005 S Austin St	Comanche	76442	+13259483046	http://www.comanchecrossroads.com		0.65
+f5030adab4b3	Comanche Gas Solutions	office	energy company	31.91221	-98.60120	303 Industrial Blvd	Comanche	76442	+13254553205	http://www.comanchegas.com/		0.92
+a1746e6d53cb	CTTC	office	telecommunications company	31.45127	-98.56551	1012 Reilley St	Goldthwaite	76844	+18005358904	http://centex.net/		0.79
+18a765bca62c	Don Johnson Rentals	office		31.71783	-98.98230	600 Fisk Ave	Brownwood	76801	+13256461326	http://iwantahomedon.com		0.92
+b0c3f0c53bed	JF Ranch	office	private association	31.52439	-98.24104		Goldthwaite					0.70
+6191f147670e	Locksmith Driftwood	office		31.76470	-98.87251	18131 Ranch to Market Rd 150	Driftwood	78619	+15127900741	https://locksmithdriftwood.com		0.77
+2c5a41c796b6	Mike Bullard Telephone Service & Wiring	office	telecommunications company	31.71428	-98.84422	271 Jack Rabbit Cir	Zephyr	76890	+13256432881			0.92
+6fd7433432a9	Oil States Industries Inc	office	energy company	31.06433	-98.15823	1720 Central Texas Expy	Lampasas	76550	+15125565471	http://oilstates.com	Oil States Industries Thailand	0.99
+3193cc145c3e	R&B Water Store	office	bottled water company	31.45176	-98.57298	1210 2nd St	Goldthwaite	76844	+14093335526	http://rbwaterstore.wixsite.com/rbwaterstore		0.92
+f378292c7d06	Sawyer Industries	office		31.67239	-98.98953	2700 Virgil Gray Dr	Brownwood	76801	+13256418267	https://www.sawyerindustries.com		0.75
+797860aa2a6a	Southern Star Communications, L.l.c.	office	telecommunications company	31.05693	-98.17869	1305 S Key Ave , Ste 108	Lampasas	76550	+15125565504			0.75
+84f45066ffc3	Suddenlink Communications	office	telecommunications company	31.06579	-98.17867	403 E 3rd St	Lampasas	76550	+18885923861	http://www.suddenlink.com/		0.92
+50a754637cb7	Texas Oncology-Hamilton	office	pharmaceutical company	31.70431	-98.11329	400 N Brown St	Hamilton	76531	+12547554460	https://www.texasoncology.com/cancer-centers/hamilton/texas-oncology-hamilton		0.85
+67a25225bee6	TG Fuels	office	energy company	31.08811	-98.18877	1695 US-281	Lampasas	76550	+15125565939	http://www.wtgfuels.com		0.96
+c294b9c50cf2	Watermill Express	office	bottled water company	31.72914	-98.98508	543 W Commerce St	Brownwood	76801	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+79c3ff669117	2nd Street Provisions	restaurant		31.98266	-98.03164	208 West 2nd Street	Hico	76457	+12549023000	http://2ndstreetprovisions.com		0.77
+194a8a628f4e	2nd Street Social	restaurant	bar and grill restaurant	31.98288	-98.03204	204 2nd St	Hico	76457	+12549023000	http://2ndstreetsocial.com/		0.96
+76ccaafd7d6d	Acs Investments Inc	restaurant		31.72936	-98.97709	211 E Commerce St	Brownwood	76801		acsvcp.com		0.95
+f36de59108b4	Agave Jalisco	restaurant	mexican restaurant	31.19564	-98.73108	1203 W Wallace St	San Saba	76877	+13253726688	http://www.agavejalisco.com/		0.92
+490ac108284f	Alfredo's Mexican Restaurant	restaurant	mexican restaurant	31.04675	-98.18130	2202 US-281	Lampasas	76550	+15125564447	https://www.alfredosmexicanrestaurant.com/		0.97
+ff9adda7e92f	Alfredo's Mexican Restaurant	restaurant	mexican restaurant	31.06359	-98.05869	8190 US Highway 190 E	Lampasas	76550	+15125564447			0.97
+26f20281f763	B's Q	restaurant		31.71946	-98.98327	514 Center Ave	Brownwood	76801	+13256468200			0.85
+0df972f97eb6	Baker Street Pizzeria & Bistro	restaurant	pizza restaurant	31.72077	-98.98083	201 E Baker St	Brownwood	76801	+13256463300			0.61
+f0dbf1890b05	BarbaCelli’s	restaurant	pizza restaurant	31.98092	-98.03171	114 N Railroad Ave	Hico	76457	+12547962126	http://www.barbacellis.com		0.95
+015ce3458a1a	Bella Italia	restaurant	italian restaurant	31.06888	-98.18463	208 N Key Ave	Lampasas	76550	+15125645202	http://www.thebellaitalia.com	Bella Italia	0.99
+2ed5cbf3e45f	Best Fried Chicken	restaurant	american restaurant	31.67865	-98.96366	1504 Indian Creek Dr	Brownwood	76801	+13256418700	http://chickene.com		0.92
+a26481dc6d4e	Bistro	restaurant		31.70018	-98.12575		Hamilton		+12546889660			0.91
+d47eca047251	Bootleg Chicken	restaurant		31.44652	-98.56853	707 Commercial Dr	Goldthwaite	76844	+12107223072			0.98
+af4264755977	Brad's Burgers	restaurant	burger restaurant	31.06192	-98.18221	105 W 6th St	Lampasas	76550	+15125563144	http://bradsburgers.com/		0.60
+0a15eb592cbc	Broken Arrow, Inc	restaurant		31.71947	-98.98801	405 W Austin Ave	Brownwood	76801		https://www.brokenrockscafe.com		0.95
+bcdffac87205	Broken Fork	restaurant	diner	31.04706	-98.18084		Lampasas					0.73
+ae2bf23190a3	Buffe’s Pantry, LLC	restaurant	diner	31.66188	-98.51411	1301 TX-16 N	Priddy	76870	+13259663547			0.93
+8e2f7cada0bd	Buzzed Brumby Wood Fired Pizza & Espresso Bar, Llc	restaurant	pizza restaurant	31.98198	-98.03154	105 N Elm	Hico	76457	+12547840897	https://www.buzzedbrumby.com		1.00
+1c08720021f5	Casa Del Charro Mexican Grill & Bar	restaurant	mexican restaurant	31.19596	-98.73547	1608 W Wallace St	San Saba	76877	+13253726265			0.92
+48af012f8775	Casey's	restaurant	pizza restaurant	31.73435	-98.96703	130 Early Boulevard	Early	76802	+13252220780	https://www.caseys.com		1.00
+7eb538cf3798	Casey's	restaurant	pizza restaurant	31.06422	-98.16155	1699 Central Texas Expressway	Lampasas	76550	+15124105579	https://www.caseys.com		1.00
+199b19dac878	Chili's Grill & Bar	restaurant		31.72968	-98.97783	210 E. Commerce St.	Brownwood	76801	+13256411314	https://www.chilis.com/		0.98
+0a607cb87338	China Cafe	restaurant	chinese restaurant	31.70902	-98.97679	1417 Austin Ave # C	Brownwood	76801	+13256418359	http://www.chinacafeaustin.com		0.98
+28f4f1df7962	China Star	restaurant	chinese restaurant	31.89797	-98.59148	1009 E Central Ave	Comanche	76442	+13253569899	http://www.thechinastarnewyork.com		0.96
+acc778339965	China Wok	restaurant	chinese restaurant	31.70457	-98.12283	121 E Henry St	Hamilton	76531	+12543869990	http://chinawok.us/	China Wok El Salvador	0.95
+04e1d5f5fe95	Chop Kitchen	restaurant	chinese restaurant	31.72685	-98.98042	420 N Main Ave	Brownwood	76801	+13252035318	http://chopkitchen.weebly.com		0.92
+4c68e8c75629	Cici's Pizza	restaurant	buffet restaurant	31.72914	-98.98038	1107 Clement, 1107 Clement	Brownwood	76801	+13256463700			0.97
+cabd58bacb46	City Cafe	restaurant		31.84623	-98.40261	103 E Lucy Bertram St	Gustine	76455	+12544319111	http://www.citycafescranton.com		0.92
+8957a9e578d7	Comanche Trail Bbq	restaurant		31.90319	-98.60413	703 N Austin St	Comanche	76442	+13253563717			0.65
+d01acb9fa7d1	Commie's Tacos	restaurant	texmex restaurant	31.19561	-98.72131	101 W Wallace St	San Saba	76877	+13253725780	http://commies-tacos.yeeq.io		0.92
+d2ca6a29904b	Cooks Fish barn	restaurant	seafood restaurant	31.91242	-98.62167	3669 NW Highway 36	Comanche	76442	+12548425409	http://www.cooks.com/rec/search/0		0.97
+a73270c713a3	Cotton Patch Cafe	restaurant	comfort food restaurant	31.73091	-98.97497	406 E Commerce St	Brownwood	76801	+13254300125	https://cottonpatch.com/locations/tx/brownwood/406-e-commerce-us67	Cotton Patch Cafe	0.98
+60a705a0668a	Country Kitchen and Bakery	restaurant	diner	31.06991	-98.18441	307 N Key Ave	Lampasas	76550	+15125566152	http://countrykitchenrestaurants.com/		0.98
+e3a77a3b34f1	Country Pickin's Cafe	restaurant	american restaurant	31.96271	-98.50482	1795 Hwy 2861	Comanche	76442	+12548792244			0.94
+cb7ac400eaec	Crazy Lemon	restaurant	bar and grill restaurant	31.72334	-98.97925	540 Pecan St #8252	Brownwood	76801	+13252035111	http://www.clubplanet.com		0.92
+8e2cc3687df2	Crossfire Steakhouse & Cantina	restaurant	steakhouse	31.74842	-98.16959	4007 TX-36	Hamilton	76531	+12543863559	http://circletarena.net		0.95
+10a16beb5a37	Dari's Snack	restaurant	taco restaurant	31.70622	-98.97495	1701 Austin Ave	Brownwood	76801	+13256429010			0.92
+0684764b3460	Delicias Del Rancho	restaurant	mexican restaurant	31.19482	-98.71980	206 E Commerce St	San Saba	76877	+13253725215			0.92
+bb635bc3343d	Diggs	restaurant	steakhouse	31.19433	-98.69518	1035 US-190	San Saba	76877	+13253723010	https://www.atxgive.org/diggs		0.93
+ba4b50590de3	Dollar Slice Club	restaurant		31.05293	-98.08321		Lampasas			https://www.dollareats.com/dollar-slice-club		0.84
+3560ac10e980	Dos Burros Smokeshack & Cocina	restaurant		31.98201	-98.03192	108 Elm St	Hico	76457	+12546880489			0.66
+48376870c90f	Double G Pit Stop	restaurant	barbecue restaurant	31.19583	-98.73058	1108 W Wallace St	San Saba	76877	+13253725546	http://www.tmbbq.com		0.92
+c7745b8bb0d7	Doughboys	restaurant	pizza restaurant	31.70594	-98.12183	320 N Bell St	Hamilton	76531	+12543868534	thenewfreedomproject.com		0.55
+5e1195965c16	Dutchman's Hidden Valley	restaurant	delicatessen	31.76667	-98.12228	3408 US-281	Hamilton	76531	+12543863018	http://www.dutchmans-hiddenvalley.com/		0.98
+7d3d1bb4b76e	El Frias	restaurant	mexican restaurant	31.07802	-98.18700	904 N Key Ave	Lampasas	76550	+15125645077	https://elfrias.com/		0.94
+461a73a022eb	El Jardin	restaurant	texmex restaurant	31.70449	-98.12253	200 N Bell St	Hamilton	76531	+12543863660	http://www.dexknows.com/rd?dku=http%3A%2F%2Fwww.dexknows.com%2Fbusiness_profiles%2Fel_jardin-b216647&mkt=63801		0.94
+b1e4203dc252	El Rodeo Mexican Restaurant	restaurant	mexican restaurant	31.05770	-98.17307	609 Central Texas Expy	Lampasas	76550	+15125568757	http://elrodeomexicanrestaurant.com		1.00
+231e2408b198	El Tapatio	restaurant	mexican restaurant	31.46008	-98.57344	1903 Fisher St	Goldthwaite	76844	+13256482900	http://eltapatiogoldthwaite.myrestaurantpage.website/		0.97
+500d526b7bcb	El Tapatio	restaurant	mexican restaurant	31.89784	-98.59592	709 E Central Ave	Comanche	76442	+13255100855	https://eltapatiocomanche.com/		0.98
+b21aa48a63ab	Emilio's Mexican Restaurant	restaurant	mexican restaurant	31.70800	-98.97560	1520 Austin Ave	Brownwood	76801	+13256464040	https://www.groupon.com/biz/brownwood-tx/emilios-mexican-restaurant		0.94
+7c38e4ce5a1a	Eve's Cafe	restaurant	german restaurant	31.06637	-98.17759	521 E 3rd St	Lampasas	76550	+15125563500			0.97
+2d2c1c07b967	Express smookie grill	restaurant	bar and grill restaurant	31.72479	-98.98070	3988 Washburn Street	Brownwood	76801		https://expresssmookiegrill.blogspot.com/		0.81
+5e214d2930ec	Fisher Street Bar and Grill	restaurant	bar and grill restaurant	31.45111	-98.56944	1116 Fisher St	Goldthwaite	76844	+13252832293	http://www.fisherstreetbg.com		0.97
+f6a4c0a5414b	Flacas Fitness & Brews, Llc	restaurant		31.98184	-98.03111	110 N Pecan St	Hico	76457				0.99
+4943f9862e8e	Fredas	restaurant		31.69156	-98.12905	1204 S Rice St	Hamilton	76531	+12543864324	http://www.ortegasbistro.com/		0.92
+e8838be2faa8	Fusion Grill	restaurant		31.72145	-98.98110	919 N Fisk Ave	Brownwood	76801	+13256436661			0.96
+7954e4201d02	Fuzzy's Taco Shop	restaurant	taco restaurant	31.72422	-98.98075	508 N Center Ave	Brownwood	76801	+13252035002	https://fuzzystacoshop.com/locations/texas/brownwood/	Fuzzy's Taco Shop	0.92
+8f2fca429ae0	Gesture Sensing RC Stunt Car With Light & Music	restaurant	texmex restaurant	31.44976	-98.56880	1004 Fisher St	Goldthwaite	76844	+13256482202	http://www.haciendajalisco.us/		0.95
+baaf3df35fe5	Giovanni's II	restaurant	italian restaurant	31.70604	-98.12190	320 N Bell St	Hamilton	76531	+12543863255	http://www.giovannis.com/		0.95
+150f026ec9f6	Giovanni's Italian Restaurant	restaurant	italian restaurant	31.06113	-98.18066	801 S Key Ave	Lampasas	76550	+15125563362	http://giovannisrestaurant.com		0.96
+03c443a670cc	Giovannis Restaurant	restaurant	italian restaurant	31.98511	-98.03545	601 2nd St	Hico	76457	+12547962160	https://www.mapquest.com/us/texas/business-hico/giovannis-365202239		0.92
+bd4254c28645	Goin2be…	restaurant		31.98184	-98.03111	110 N Pecan St	Hico	76457	+12547959000			0.99
+c625890fb6a8	Golden Fried Chicken	restaurant		31.06372	-98.18215	502 S Key Ave	Lampasas	76550	+15125562872	http://goldenchick.com/		0.92
+b1d6818f64eb	Gustine City Cafe Llc	restaurant		31.70439	-98.12421	115 N Rice St	Hamilton	76531				0.95
+e676941dd402	H&c Enterprises, Inc	restaurant		31.19596	-98.71677	517 E Wallace St	San Saba	76877				0.95
+55c9d1253876	Hacienda Leon Mexican Kitchen + Bar	restaurant	mexican restaurant	31.74509	-98.93955	1020 Early Blvd	Early	76802	+13252035136			0.95
+a245c9d41d9f	Hamburger Hill	restaurant	burger restaurant	31.71678	-98.11979	809 N Rice St	Hamilton	76531	+12543863181	https://hamburger-hill.hub.biz/		0.95
+c0df7b5b649b	Hart's Firehouse BBQ	restaurant	barbecue restaurant	31.05342	-98.18185	1799 S Hwy 281	Lampasas	76550	+15125568787	http://lampasasbbq.com/		0.94
+aaf5f35abc37	Harvest La Creperie	restaurant	pancake house	31.89799	-98.60376	112 N Austin St	Comanche	76442	+13253562374	http://www.harvestcomanche.com		0.97
+203163dbda10	Hawaiian Shaved Ice & More	restaurant	hawaiian restaurant	31.19550	-98.73402	Mill Pond Park, 110 S Thomas Stewart Dr	San Saba	76877	+3253727855			0.94
+7ff1707d8e48	Heff’s Burgers - Early	restaurant	burger restaurant	31.73437	-98.96399	215 Early Blvd	Early	76802	+13254300033	https://www.heffsburgersearly.com		0.92
+ab9a9f14930f	Humphrey Pete's	restaurant	steakhouse	31.73251	-98.97119	102 Early Blvd	Early	76802	+13256468576	http://humphreypetes.com/		0.97
+48101e1ce42f	It's Just Wings	restaurant	chicken wings restaurant	31.72968	-98.97783	210 E. Commerce St.	Brownwood	76801	+14695017406	https://itsjustwings.com/		0.92
+cf3bbb2d44f2	J and H PIZZA & Burgers Sonny & LeAnn Garman	restaurant	pizza restaurant	31.98007	-98.92039	19020 Hwy 183 N	May	76857	+12542592353			0.67
+b8470d0c1b27	Jalisco Mexican Grill	restaurant	mexican restaurant	31.98441	-98.03488	505 N 2nd St	Hico	76457	+12547961922			0.98
+0391b0bf0c48	Je-car Construction, Inc	restaurant		31.00256	-98.19865	1902 S Highway 281	Lampasas	76550				0.95
+070900f47c91	Jerry's Burgers & Shakes	restaurant	burger restaurant	31.74486	-98.94042	1016 Early Blvd	Early	76802	+13256436140	http://jerrysburgersandshakes.com/		0.95
+ae421662c5e1	Jersey Lilly's Mexican Restaurant	restaurant	texmex restaurant	31.98227	-98.03094	128 N Pecan St	Hico	76457	+12547960999	http://jerseylillys.com/		0.98
+15560b4db082	Joes crab store	restaurant	seafood restaurant	31.72924	-98.97836	204 E Commerce St	Brownwood	76801	+13256424250			0.56
+041f744c3237	Jolene's Thai Cuisine	restaurant	thai restaurant	31.70255	-98.98579	2001 Coggin Ave	Brownwood	76801	+13252175635			0.98
+b2732e1412c0	Junior Urias- Up In Smoke BBQ	restaurant		31.73436	-98.96228	235 Park Dr	Early	76802	+14325285017	https://upinsmokebarbeque.wordpress.com/		0.96
+fb63ccc656ec	Junior’s Tacos and More	restaurant	mexican restaurant	31.89796	-98.59190	1007 E Central Ave	Comanche	76442	+13253561296			0.96
+67b01d5e0a91	Katana Sushi and Hibachi	restaurant	sushi restaurant	31.72689	-98.98032	420 N Main St	Brownwood	76801	+13252034779	http://www.katanajapanesesushi.com/		0.92
+64b55b4f8072	Kemper's BBQ	restaurant	barbecue restaurant	31.74007	-98.99895	2312 Belle Plain Ave	Brownwood	76801	+13256420136			0.96
+574618780f6f	Kempner Brick Oven	restaurant	german restaurant	31.08019	-98.00123	12093 E US Hwy 190	Kempner	76539	+15129322597	http://kempnerbrickoven.com/		0.97
+3373906c8037	Kinzaap Thai Restaurant LLC	restaurant	thai restaurant	31.72060	-98.98050	211 E Baker St	Brownwood	76801	+13256428087			0.92
+77cc701446bb	Koffee Kup Family Restaurant	restaurant	theme restaurant	31.98308	-98.03298	300 W 2nd St	Hico	76457	+12547964839			0.97
+297b161a7627	Krispy Krunchy Chicken	restaurant	chicken restaurant	31.74094	-98.94756	915 Early Blvd	Early	76802	+13256413453	https://locations.krispykrunchy.com/tx/early/915-early-blvd		0.96
+752f59958797	L & B Roadhouse BBQ	restaurant	barbecue restaurant	31.22699	-98.40215	17346 N Highway 183	Lometa	76853	+15127523147	http://www.lb-roadhousebbq.com/		0.92
+1d9dd0ed66d7	La Botana Mexican Grill and Tequila Bar	restaurant	mexican restaurant	31.73306	-98.97002	108 Early Blvd	Early	76802	+13256435294	https://labotanamexicangrillearlytx.com/		0.92
+e56f343339eb	La Citta Pizzeria	restaurant	pizza restaurant	31.19572	-98.71459	706 W Wallace St	San Saba	76877	+13253725000			0.85
+61a09277fed2	La Hacienda De Jalisco	restaurant	mexican restaurant	31.44976	-98.56876	1004 TX-16	Goldthwaite	76844	+13256482202	https://www.haciendajalisco.us/		0.97
+fe461858f8da	La Palapa Mexican Grill Food Truck	restaurant	mexican restaurant	31.05896	-98.18105		Lampasas		+12145632930			0.78
+b4f1252e8331	La Plaza Mexicana	restaurant	mexican restaurant	31.20357	-98.71837	1102 N High St	San Saba	76877	+13253723101			0.62
+f524cddbd5e2	La Sabrosita Taqueria	restaurant	texmex restaurant	31.73800	-98.95439	611 Early Blvd	Early	76802	+13256429537			0.92
+00c42ce3189a	La Victoria" Restaurant	restaurant	mexican restaurant	31.27417	-98.94534	110 W Main St	Richland Springs	76871	+13259987468			0.84
+53566529ac32	Laredo Taco Company	restaurant		31.07520	-98.18524	801 N Key Ave	Lampasas	76550	+15125641459	https://www.laredotacocompany.com/		0.95
+e7fb7f270e7a	Laredo Taco Company	restaurant		31.89798	-98.61401	1003 W Central Avenue	Comanche	76442	+13253562422	https://www.laredotacocompany.com/		0.92
+48b70ab96790	Layne's Chicken Fingers - Lampasas	restaurant	chicken restaurant	31.07001	-98.18524	404 N Key Ave	Lampasas	76550	+15125497782		Layne's Chicken Fingers	0.55
+8094afb307c5	Lemongrass Asian Cuisine	restaurant	cambodian restaurant	31.70319	-98.98470	1900 Coggin Ave	Brownwood	76801	+13252034466			0.92
+2d81a0ba680e	Lemons' Bar-B-Q	restaurant	barbecue restaurant	31.69286	-98.99612	3202 Coggin Ave	Brownwood	76801	+13256469655	http://www.lemonsbarbq.com		0.94
+fa34d7ab8688	Lonesome Dove Bbq & Tex Mex	restaurant		31.67380	-98.79333	11800 Highway 84 E	Zephyr	76890				0.95
+6af280bc3bcd	Los Juanes Mexican & BBQ	restaurant	texmex restaurant	31.89377	-98.60411	505 S Austin St	Comanche	76442	+13253565724	http://sigsiu.net		0.95
+f19cecc1c3c6	Lozano's Mexican Restaurant	restaurant	mexican restaurant	31.89406	-98.60484	404 S Houston St	Comanche	76442	+13253300417	http://www.lozanosmexicantx.com/		0.95
+83d267bded41	Main Street Diner	restaurant	diner	31.47618	-98.15218	101 E Brooks Dr	Evant	76525	+12544713174			0.98
+d39472578a79	Main Street Market	restaurant	delicatessen	31.21752	-98.39088	400 E Main St	Lometa	76853				0.97
+cabece6eaca9	Manila Kitchen	restaurant	filipino restaurant	31.72062	-98.98048	211 E Baker St	Brownwood	76801	+13254300010			0.92
+e475aad73e2e	Mary's Tacos & Burgers	restaurant	mexican restaurant	31.43829	-98.56864	76 US-183	Goldthwaite	76844	+13256483839	http://m.yelp.com/biz/marys-tacos-and-burgers-goldthwaite		0.92
+ec63d7ed479d	McAlister's Deli	restaurant	delicatessen	31.73131	-98.97422	414 E Commerce Street	Brownwood	76801	+13256004375	https://locations.mcalistersdeli.com/tx/brownwood/414-e-commerce-street?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	McAlister's Deli	0.96
+7fc7dc428f8c	Medina's Mexican Restaurant	restaurant	mexican restaurant	31.06554	-98.17995	309 E 3rd St	Lampasas	76550	+15125568412			0.92
+d53d6a946f1b	Mei Yuan Chinese Cuisine	restaurant	chinese restaurant	31.05737	-98.18216	301 US-281	Lampasas	76550	+15128150126			0.95
+cc9ade94d9c1	Memo's Mexican Restaurant & Bar	restaurant	mexican restaurant	31.05806	-98.17474	407 Central Texas Expy	Lampasas	76550	+15125645166	http://foodeist.com/place/memo-s-mexican-restaurant-in-lampasas-tx		1.00
+dfd9eacc084a	Micasa Micasa	restaurant	mexican restaurant	31.21861	-98.39423		Lometa		+15122340642			0.60
+a6a64357c189	Mostly Good Ideas, Llc	restaurant		31.98259	-98.03087	202 N Pecan St	Hico	76457				0.95
+c42a11fe1082	Napoli's Italian Grill	restaurant	italian restaurant	31.19489	-98.71969	210 E Commerce St	San Saba	76877	+13253724745	http://www.napolisgrill.com/		0.95
+9dec35ec27bc	Nic and Mads	restaurant		31.89812	-98.61562	1101 West Central Avenue	Comanche	76442	+3253564012	http://Www.nicandmads.com/		0.97
+d1a8e16c45a1	Nothin Butts BBQ & Catering	restaurant	barbecue restaurant	31.04925	-98.07776	117 County Rd 4330	Lampasas	76550	+15127343611			0.70
+78ce00bc1b96	Oma Leen's	restaurant	southern american restaurant	31.98092	-98.03085	111 Pecan St	Hico	76457	+12547962275	http://www.omaleens.com/		0.96
+77bcd4cff7a2	Patiños Produce	restaurant	mexican restaurant	31.89737	-98.59030	1200 E Central Ave	Comanche	76442	+3253565941			0.88
+515b0a21b4ea	Pecan House Grill	restaurant	steakhouse	31.19571	-98.71806	408 E Wallace St	San Saba	76877	+13253725300	http://pecanhousegrill.com/		0.95
+83d3b3db6b2d	Pepperbelly's Mexican Food	restaurant	texmex restaurant	31.19607	-98.71664	517 E Wallace St	San Saba	76877	+13253724462	https://pepperbellys.wixsite.com/pepperbellys		0.98
+daac0057f72e	Pepperbelly's Mexican Food	restaurant	mexican restaurant	31.19552	-98.73103	US Highway 190, San Saba, Texas	San Saba	76877	+13253724462	http://www.sspepperbellys.com		0.77
+54ba0357131b	Perfectly Elegant Photography	restaurant	barbecue restaurant	31.89858	-98.60455	121 W Grand Ave	Comanche	76442	+13252003558	https://www.perfectlyelegantphotography.com		0.92
+e2290a20d6ad	Pho Yes	restaurant	asian restaurant	31.16404	-98.23975	11300 Old Highway 20	Manor	78653	+15129920366	https://www.phoyesmanor.com/		0.89
+d15ceed87b32	Pizza Pro	restaurant	pizza restaurant	31.97995	-98.92025	19020 Highway 183 N	May	76857	+12542593008			0.92
+284887edb683	Pizza Pro / Partner's Grill	restaurant	pizza restaurant	31.91775	-98.58923	12850 Highway 16	Comanche	76442	+13253567564			0.97
+10620ae23184	Pizza Pro of Comanche	restaurant	pizza restaurant	31.91400	-98.59471	12850 Highway 16	Comanche	76442	+13253567564	http://pizzapro.com/		0.77
+694189c67158	Pizza Werx	restaurant	pizza restaurant	31.06345	-98.16128	1702 Central Texas Expy	Lampasas	76550	+17372345615			0.92
+f6ab60ed2c0d	Po Boys Bar B Que And Catering	restaurant		31.67559	-98.75174	1400 FM-218	Zephyr	76890	+13256427596			0.58
+d039c2176013	Potters Pizza	restaurant	buffet restaurant	31.72911	-98.98046	1107 Clement	Brownwood	76801	+13252035318	http://www.potterspizza.com/	Potter's Pizza	0.92
+22c3fb371f4b	Prima Pasta	restaurant	italian restaurant	31.73462	-98.96543	210 Early Blvd	Early	76802	+13256418070	http://localedge.com/listing/127261/69568/prima+pasta+italian+restaurant+|+pizza/3256418070/210+early+blvd/early/tx/76802	Prima Pasta	0.96
+afa0f6d8557f	Prima Pasta Italian Restaurant and Pizza	restaurant		31.73140	-98.97103	101 Early Blvd	Early	76802	+13256418070	http://localedge.com/listing/127261/69568/prima+pasta+italian+restaurant+%7c+pizza/3256418070/210+early+blvd/early/tx/76802		0.97
+e0431eba6d86	Progressive Pizza Partners	restaurant		31.72909	-98.98415	507 W Commerce St	Brownwood	76801		https://progressive-pizza-partners.hub.biz		0.95
+f6230822f565	Red River Bar-B-Que	restaurant	barbecue restaurant	31.71236	-98.12030	706 N Rice St	Hamilton	76531	+12543865553	http://www.redriverbarbque.com/		0.92
+6465747685e9	Regios Tacos y Antojitos | Mexican	restaurant	mexican restaurant	31.70536	-98.98218	1512 Coggin Ave	Brownwood	76801	+13252038943			0.92
+b7f43cc845e9	Revival Public House	restaurant		31.98405	-98.03602	204 W 2nd St	Hico	76457		http://www.revivalfoodhall.com/		0.67
+95350083e227	Ricardo's Tortilla Bakery	restaurant	mexican restaurant	31.71904	-98.98727	904 Booker St	Brownwood	76801	+13256433333	http://ricardos-bakery.poi.place		0.95
+1344565124f2	Ritter's BBQ	restaurant	barbecue restaurant	31.22707	-98.40209	17346 N Highway 183	Lometa	76853	+15127523064	http://www.rittersbbq.com		0.77
+210bfc3be4b7	River Club	restaurant	bar and grill restaurant	31.96637	-98.45216	4600 US-67	Comanche	76442				0.96
+a42a08d8ca87	Roadhouse	restaurant		31.05348	-98.18178	1799 S Highway 281	Lampasas	76550	+15125568787	http://roadhouserestorations.com/		0.92
+4d3cb79dc3fb	Roma's Italian Restaurant	restaurant	italian restaurant	31.06881	-98.18453	206 N Key Ave	Lampasas	76550	+15125645080			0.59
+a36113729dae	Rosa's Restaurant	restaurant	mexican restaurant	31.70472	-98.99421	2306 Highway 377 S	Brownwood	76801	+13256435944	http://www.rosasitalian.com		0.92
+e8c83b5a46c2	Runaway Train Cafe	restaurant	diner	31.67784	-98.96851	3600 Stephen F Austin Dr	Brownwood	76801	+13256463333	http://www.runawaytraincafe.com/		0.97
+f9643553bfaa	Salt & Light BBQ	restaurant	barbecue restaurant	31.06449	-98.17704	504 S Pecan St	Lampasas	76550	+15125252595	http://www.SaltandLightBBQ.com/		0.63
+4c74c0a2cafc	Sam's Southern Eatery	restaurant	southern american restaurant	31.72995	-98.98014	1113 Clements St	Brownwood	76801	+13252035120	http://www.samssoutherneatery.com/		0.94
+30ef652651c1	Sammy's Rockin' K Kafe	restaurant	comfort food restaurant	31.21505	-98.39271	215 S 4th St	Lometa	76853	+15127524499	http://www.sammyscafelometatx.com/		0.92
+9b433a668de0	San Saba Civic Center	restaurant		31.18914	-98.71172	1190 S Thomas Stewart Dr	San Saba	76877	+13253725440	www.sansabatexas.com		0.84
+0431ebd4c416	San Saba Health Services Board	restaurant		31.19514	-98.73895	2005 W Wallace St	San Saba	76877	+13253725773			0.55
+0c2cca6a1b18	Section Hand Steakhouse	restaurant	steakhouse	31.67661	-98.99934	4412 US-377	Brownwood	76801	+13256431581	https://www.sectionhandsteakhouse.com		0.92
+d3d0dc5cec97	Shields family resturant	restaurant	sandwich shop	31.06129	-98.19946	1308 W 1st St	Lampasas	76550				0.61
+ca82849ae178	Show Cones - Brownwood	restaurant		31.72893	-98.98747	1115 Belle Plain St	Brownwood	76801	+13252610256			0.99
+9bd9e8460daf	Sidecar Smoke Shack	restaurant	barbecue restaurant	31.98283	-98.03435	404 N 2nd St suite A	Hico	76457	+12547959404	http://sidecarsmokeshack.com/		0.73
+9497e5edc213	Sissy's Red Wagon	restaurant	american restaurant	31.72590	-98.98032	401 N Main St	Brownwood	76801	+13256461599	https://sissys-red-wagon.hub.biz		0.97
+c6676d0d7d5c	Smitty's Bar-B-Q	restaurant	barbecue restaurant	31.72136	-98.98948	708 W Austin Ave	Brownwood	76801	+13256465922	http://www.smittysbarbque.com		0.94
+1e46d7696b55	Smoke Shack	restaurant	barbecue restaurant	31.69794	-98.12625	702 S Rice St	Hamilton	76531	+12543865246	http://smoke-shack.com		0.95
+f7166b34c10c	Sono Restaurant Portside Wharf	restaurant		31.70450	-98.13480	101 S Hercules St	Hamilton	76531		http://www.sonorestaurant.com.au/index1.php		0.97
+e31714cdc57a	Southside Tavern	restaurant	bar and grill restaurant	31.44921	-98.56947	1011 5th St	Goldthwaite	76844	+13256482388	https://order.menudrive.com/southsidetavern		0.95
+e0d76da6ba03	Starbeaus	restaurant	american restaurant	31.89714	-98.60492	134 W Central Ave	Comanche	76442	+13253562869	http://starbeauscomanche.mealcreator.website		0.97
+be0d6a1240cd	State National Pizza	restaurant	pizza restaurant	31.89710	-98.60432	114 W Central Ave	Comanche	76442	+13253564011	https://statenationalpizza.com/?y_source=1_MjA3Njc3NTU4NS01NTktbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.92
+d58e59f8c2e1	Storm's Across Texas	restaurant	american restaurant	31.06878	-98.18340	201 N Key Ave	Lampasas	76550	+15125560444		Storm's Drive-In Lampasas	0.92
+d620c2981dab	Storm's Drive-In	restaurant	burger restaurant	31.06842	-98.18375	201 N Key Ave	Lampasas	76550	+15125566269	http://www.stormsrestaurants.com/	Storm's Drive-In Lampasas	0.98
+6d368a055cda	Storm's Drive-in, Hamilton	restaurant	burger restaurant	31.70062	-98.11242	923 E Main St	Hamilton	76531	+12543863143	https://www.stormsrestaurants.com		0.95
+92b29ce28a0e	Storm's Hamburgers	restaurant	burger restaurant	31.70054	-98.11247	923 E Main St	Hamilton	76531	+12543863143	http://www.stormsrestaurants.com/	Storm's Drive-In Lampasas	0.97
+26d617932785	Studebaker's Cafe & Grill	restaurant		31.73052	-98.97446	409 E Commerce St	Brownwood	76801	+13256438090	http://www.studebakerscafe.com		0.92
+b73ef9a4d655	Sweet Pickle Deli	restaurant	delicatessen	31.05140	-98.18237	1908 US-281	Lampasas	76550	+15125568330			0.97
+575aeb459742	Swig's BBQ & Catering	restaurant	barbecue restaurant	31.89769	-98.60979	507 W Central Ave	Comanche	76442	+12549774263			0.92
+216964e5c180	Taco Bueno	restaurant	taco restaurant	31.72871	-98.97782	201 E. Commerce St.	Brownwood	76801	+13256430214	http://www.tacobueno.com		0.77
+0ed6729aca27	Taco Loco	restaurant	mexican restaurant	31.69317	-98.12901	1103 S Rice St	Hamilton	76531	+12543868444	http://tacoloco.com/		0.96
+5b8867bac0bb	Taco Loco	restaurant	mexican restaurant	31.75117	-98.92447	1410 Early Blvd	Early	76802	+13256464400			0.92
+8325febd1f87	Taco Rico	restaurant	mexican restaurant	31.73713	-98.95789	419 Early Blvd	Early	76802	+13256433079	http://www.localedge.com/listing/124376/69568/taco+rico+mexican+taqueria/3256433079/419+early+blvd/early/tx/76802	Taco Rico	0.97
+8ec907c00dd3	Tacos 1985 Inc	restaurant		31.72892	-98.98680	528 W Commerce St	Brownwood	76801				0.95
+38bfdab2c676	Tacos El Compa	restaurant	mexican restaurant	31.72906	-98.98680	528 W Commerce St	Brownwood	76801	+13252035202			0.95
+9a80eb5008ad	Tacos Mi Casa	restaurant	mexican restaurant	31.19588	-98.73022	1104 W Wallace St	San Saba	76877	+13253723676			0.92
+9ec8033c953b	Taqueria 3 Olveras	restaurant	mexican restaurant	31.70658	-98.12153	410 N Bell St	Hamilton	76531	+12547840379			0.92
+08f61fb6f0f9	Taqueria Guadalajara	restaurant		31.89769	-98.61070	605 W Central Ave	Comanche	76442	+13255004786			0.87
+8c3b4a38c6a3	Taqueria Guanajuato	restaurant	mexican restaurant	31.89758	-98.61224	801 W Central Ave	Comanche	76442	+13253563905	https://taqueria-guanajuato.square.site		0.78
+d75fdbc46eef	Taquito Millonario	restaurant	mexican restaurant	31.95996	-98.49612	2295 Hwy 2861	Comanche	76442	+12548794242			0.95
+fa4ea28791a5	Taquito Millonario	restaurant	mexican restaurant	31.69581	-98.99564	3004 US-377	Brownwood	76801	+13256439715	http://foodeist.com/place/taquito-millonario		0.92
+5d6da94f7be6	Teriyaki Madness	restaurant	asian fusion restaurant	31.06364	-98.16120	1702 Central Texas Expressway	Lampasas	76550	+15129674826	https://teriyakimadness.com/locations/tx-lampasas		0.98
+f8b7ec87d1b9	Texas Trails	restaurant	burger restaurant	31.98273	-98.03353	204 W Second St	Hico	76457	+12547960916	http://texastrails.com/		0.77
+cb1f5b50553e	The Beer Kooler	restaurant	bar and grill restaurant	31.21792	-98.39499	220 4th St	Lometa	76853	+15127528400			0.92
+1fa12dfbd45e	The Chilled Spoon	restaurant		31.73788	-98.96141	Heartland Mall, 300 Early Blvd	Early	76802				0.71
+9628487e3ff0	The Donut Shop	restaurant		31.70539	-98.12337	223 N Rice St	Hamilton	76531	+12543863379	http://www.the-donut-shop.com		0.92
+9ba038f3a5c3	The Feed Trough	restaurant		31.75440	-98.11927	2525 N US Highway 281	Hamilton	76531	+12546796658			0.65
+7fa552977557	The FeedLot	restaurant	bar and grill restaurant	31.26799	-98.93896	604 US-190	Richland Springs	76871	+13254523040			0.92
+0ef14cbcaab0	The Grain Drafthouse & Eatery	restaurant	american restaurant	31.70302	-98.12309	110 S Bell St	Hamilton	76531	+12547845122			0.96
+884d5df019a6	The Hen House	restaurant		31.72936	-98.99521	825 W Commerce St	Brownwood	76801	+13256462620	https://the-hen-house-tx-3.hub.biz		0.92
+87efe81b3cc7	The Mill at Zephyr	restaurant	pizza restaurant	31.67644	-98.79511	3951 Farm to Market 590	Zephyr	76890	+13252183011			0.92
+fa9c526a9dd8	The Pizza Company	restaurant	pizza restaurant	31.70862	-98.97909	1201 Coggin Ave	Brownwood	76801	+13256461851	http://www.thepizzacompany.biz		0.94
+709027976bd1	The Sticks BBQ Etc	restaurant	barbecue restaurant	31.69179	-98.99796	3601 US-377	Brownwood	76801	+13256462315	http://www.thestickbbqetc.com/our-menu		0.93
+c681ddcd8799	The Turtle Enoteca	restaurant	italian restaurant	31.71947	-98.98331	510 Center Ave	Brownwood	76801	+13256468200	https://theturtlerestaurant.com/		0.95
+0e9c2d6cadfd	Town and Country Food Store	restaurant		31.73007	-98.98976	601 W Commerce St	Brownwood	76801	+13256431666	http://tcfs.com/		0.92
+b306a9b244ca	Triple T Grill	restaurant	burger restaurant	31.67963	-98.96353	1411 Indian Creek Dr	Brownwood	76801	+13256468619	http://tttgrill.com/		0.99
+3db09943c5fd	Underwood's Cafeteria	restaurant	barbecue restaurant	31.72817	-98.98313	404 W Commerce St	Brownwood	76801	+13256461776	http://www.underwoodsbbq.com/		1.00
+82bf499b0807	Wild Duck Bar & Grill	restaurant	bar and grill restaurant	31.72056	-98.97971	102 N Fisk Ave	Brownwood	76801	+13253081820	http://www.wildduckbarandgrill.com/		0.99
+446e7a5c8f99	Woody's Hamburgers	restaurant	burger restaurant	31.70494	-98.12390	201 N Rice St	Hamilton	76531	+12546889016	http://woodyshamburgers.com/		0.99
+76877ba5af27	Young's BBQ and More	restaurant	barbecue restaurant	31.07092	-98.18534	504 N Key Ave	Lampasas	76550	+15125641220			0.92
+8167d33ef7eb	Avir at Brownwood	senior	retirement home	31.67782	-98.99531	101 Miller Dr	Brownwood	76801	+13256439555	https://careers.hireology.com/brownwood		0.97
+b14e5ece8d8f	Avir at Comanche	senior	retirement home	31.90053	-98.61900	400 Sidney Rd	Comanche	76442	+13253562571			0.94
+248fc5705b46	Avir at Hico	senior	retirement home	31.98269	-98.04055	712 N Railroad Ave	Hico	76457	+12547962111			0.98
+afec970da1f5	Care Nursing and Rehabilitation	senior	retirement home	31.74738	-98.96806	200 Co Rd 616	Early	76802	+13256465521	http://www.carenursingcenter.com/		0.92
+6aacde9297c7	Care Retirement Apartment Community	senior	retirement home	31.74739	-98.96809	200 County Road 616	Early	76802	+13256465521	http://careretirementapartmentcommunity.com/		0.92
+81fa5fe8dd91	Cedar Hill Healthcare Centre	senior	retirement home	31.07873	-98.17600	1000 E Avenue J	Lampasas	76550	+15125566267			0.92
+a58895a7e378	Dove Hill Nursing and Rehabilitation	senior	retirement home	31.70531	-98.09130	1315 TX-22	Hamilton	76531	+12542366100	https://dovehillnursing.com/		0.96
+6f4eefd083c0	Focused Care at Hamilton	senior	retirement home	31.70531	-98.09130	1315 TX-22	Hamilton	76531	+12542366100	https://dovehillnursing.com/		0.97
+8e6169582cff	Goldthwaite Health & Rehab Center	senior	retirement home	31.45109	-98.57255	1207 Reynolds St	Goldthwaite	76844	+13256482258	http://www.goldthwaitehealth.com		0.92
+037933b6c85d	Hill Country Estates Assisted Living	senior	retirement home	31.98182	-98.03422	100 Walnut St	Hico	76457	+12547962582			0.92
+0ca99b6ece0b	Hillview Nursing & Rehabilitation	senior	retirement home	31.45289	-98.56368	1110 Rice St	Goldthwaite	76844	+13256482247	http://www.savaseniorcare.com		0.92
+80793f30b579	Honey Creek Place	senior	retirement home	31.98204	-98.03461	100 Walnut St	Hico	76457	+12547962582			0.92
+03e5e66f2bc7	J G & M Llc	senior	assisted living facility	31.67837	-98.98965	2700 Memorial Park Dr	Brownwood	76801	+13256469359			0.65
+31f71d59b344	Kindred at Home	senior	assisted living facility	31.67868	-98.99471	118 S Park Dr	Brownwood	76801	+13256435525	https://www.kindredhealthcare.com/locations/home-health/brownwood-tx-3539		0.77
+625c21c85d65	Kindred Hospice	senior	assisted living facility	31.68226	-98.99508	2400 Crockett Dr	Brownwood	76801	+13256435718	https://www.kindredhospice.com/locations/kindred-hospice-brownwood/		0.92
+04d00adff393	Lake Hills Healthcare Center	senior	retirement home	31.67751	-98.96421	1514 Indian Creek Rd	Brownwood	76801	+13256466529	https://www.nexion-health.com/lakehills/		0.97
+8ca19b837084	Lampasas Assisted Living	senior	retirement home	31.05020	-98.18208	2032 US-281	Lampasas	76550	+17376185264	http://www.lampasasassistedliving.com/		0.92
+bd63dd082ec3	Lampasas Nursing and Rehabilitation Center	senior	retirement home	31.07223	-98.18764	611 N Broad St	Lampasas	76550	+15125563588	https://www.LampasasNursing.com/		1.00
+d306aa29977d	Legacy Estate Long Term Care	senior	retirement home	31.98595	-98.56250	10133 TX-16	Comanche	76442	+12548794970	https://legacyestateltc.com/		0.92
+a1a4896929ac	Lily Springs Rehabilitation and Healthcare Center	senior	retirement home	31.05910	-98.16994	901 Central Texas Expy	Lampasas	76550	+15125568827	https://www.nexion-health.com/lilysprings/		0.92
+6ce6c8c91065	Manor at Hancock Park	senior	retirement home	31.05429	-98.17978	108 E E Ohnmeiss Dr	Lampasas	76550	+15125641774	http://manorathancockpark.com/		0.92
+3daf25307ee3	New Hope Lifestyles	senior	assisted living facility	31.53685	-98.60046	101 FM 1029 N	Mullin	76864	+13259853994	https://www.centex.net		0.92
+7a7c1119e590	Oak Ridge Manor Skilled Nursing & Rehab	senior	retirement home	31.67509	-98.99177	2501 Morris Sheppard Dr	Brownwood	76801	+13256432746	http://OakridgeManorNursing.com/		0.92
+fd117835311b	Pecan Bayou Nursing and Rehabilitation	senior	retirement home	31.67814	-98.98981	2700 Memorial Park Dr	Brownwood	76801	+13256439801	https://www.pecanbayounursingandrehabilitation.com/		0.92
+1677b9fb115b	Pecan Creek Healthcare Center	senior	retirement home	31.69708	-98.11368	910 E Pierson St	Hamilton	76531	+12543868113	https://www.nexion-health.com/pecancreek/		0.92
+63993dc73d6d	Redstone Park	senior	retirement home	31.68134	-98.99229	2410 Songbird Cir	Brownwood	76801	+13256439056	http://www.titansenquest.com/home.asp?ID=61		0.92
+7d8ca7f50314	Regal Nursing and Rehabilitation	senior	assisted living facility	31.07863	-98.17591	1000 E Avenue J	Lampasas	76550	+15125566267	http://www.regalhcresidence.com		0.92
+b6bbbfaf7d7a	San Saba Rehabilitation and Nursing	senior	retirement home	31.19850	-98.74243	2400 W Brown St	San Saba	76877	+13253878123	http://www.sansabarehab.com/		0.92
+97c83d06f466	Senior Care of Brownwood	senior	assisted living facility	31.67844	-98.98953	2700 Memorial Park Dr	Brownwood	76801	+13256439801	http://brownwood.seniorcarecentersltc.com		0.77
+3e0af209c37c	Shady Shores Nursing Home	senior	retirement home	31.19848	-98.74268	2400 W Brown St	San Saba	76877	+13253878123	www.shadyshorescommunities.com		0.92
+913d2cad66e1	Silver Creek Assisted Living	senior	assisted living facility	31.00256	-98.19865	1802 S Highway 281	Lampasas	76550	+15125568990			0.55
+ec61cc11f62c	Silver Creek Assisted Living Lampasas	senior	retirement home	31.05211	-98.18241	1802 US-281	Lampasas	76550	+15125568990	http://silvercreeklampasas.com/		0.92
+a37c76b5008c	Songbird Lodge	senior	retirement home	31.68042	-98.99181	2500 Songbird Cir	Brownwood	76801	+13256464750	http://www.songbirdlodgehealthcare.com		0.92
+3fd4ba3f69c0	The Chatfield Assisted Living	senior	retirement home	31.67687	-98.97161	1605 Calvert Rd	Brownwood	76801	+13252004904	http://chatfieldassistedliving.com/		0.92
+64e4d181fe00	The Estates of Lampasas	senior	retirement home	31.07380	-98.19032	807 N Ridge St	Lampasas	76550	+15125663939	http://Www.wheatlandinvestmentsgroup.com/	The Estates of Weatherford	0.92
+97c5917cd8cf	The Whitestone Assisted Living	senior	retirement home	31.91509	-98.58980	100 Alamo Dr	Comanche	76442	+13253569303	https://whitestoneassistedliving.com/		0.92
+e06b53b34d96	Vicksburg Retirement Community	senior	retirement home	31.68788	-98.96933	3020 4th St	Brownwood	76801	+13256466938	http://www.vicksburgretirementcommunity.com/		0.92
+d91aec6b7ed1	West Oaks Independent Living Community	senior	retirement home	31.05732	-98.19574	1212 W 6th St	Lampasas	76550	+15125569007	http://westoakscommunity.com/		0.92
+c84e2b40205a	Western Hills Nursing & Rehab	senior	retirement home	31.90062	-98.61887		Comanche					0.72

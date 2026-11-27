@@ -1,0 +1,395 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+b6d996c2d613	Brownfield Donuts	bakery	donut shop	33.18954	-102.27438	1013 Lubbock Rd	Brownfield	79316	+18066320273	https://business.google.com/website_shared/launch_bw.html?f=brownfield-donuts.business.site		0.92
+fe19c89ee624	Good Morning Donuts	bakery	donut shop	33.17561	-102.27519	405 S 1st St	Brownfield	79316	+18066376935	www.menupix.com/.../328186/Good-Morning-Donuts-Brownfield-TX		0.96
+e9c1789a278e	Jack n Jill Donuts	bakery	donut shop	33.91730	-102.33530	115 E Waylon Jennings Blvd	Littlefield	79339	+18065512368		Jack 'N' Jill Donuts	0.96
+c9f7e33ddc13	Lexi’s Bakery	bakery		33.58620	-102.37207	404 Austin St	Levelland	79336	+18065680095			0.58
+1baff32c0f0b	Morning Doughnuts	bakery	donut shop	33.58957	-102.36789	306 College Ave	Levelland	79336	+18068974817			0.58
+86659e65d6d6	Mrs Baird's Bakeries Inc	bakery		33.17680	-102.27647	301 S 2nd St	Brownfield	79316	+18066372392			0.65
+d6e30a526b34	Rise ‘N’ Shine Donuts	bakery	donut shop	33.52012	-102.00703	602 Donald Preston Dr	Wolfforth	79382	+18068552014			0.92
+88b0850ca682	The farmers lunchbox and bakery	bakery		33.91060	-102.33649	1607 S Phelps Ave	Littlefield	79339	+18066325053			0.71
+5652c3114789	Walmart Bakery	bakery		33.59612	-102.36105	407 E State Road 114	Levelland	79336	+18068947517	https://www.walmart.com		0.55
+aa8bb2bbfead	Alta Loma Vineyard	bar	winery	33.14980	-102.25806	1990 Floyd Dr	Brownfield	79316	+18068914338			0.92
+d0a5f8a7be75	Bingham Family Vineyards and Winery	bar	winery	33.30601	-102.41315	645 FM303	Meadow	79345	+18065856616	https://BinghamFamilyVineyards.com/	Bingham Family Vineyards Hye	0.95
+ee6f26ef6b4a	Blackwater Draw Vineyards	bar	winery	33.26812	-102.24324	2066 County Road 280	Brownfield	79316		https://twitter.com/Blackwatervines		0.70
+670399f59305	Bolen Vineyards	bar	winery	33.58847	-102.17220	312 N FM168	Smyer	79367	+18066320359	https://bolenvineyards.com/		0.92
+8db8f51bc414	Burklee Hill at Levelland	bar	wine tasting room	33.58661	-102.37830	618 Avenue H	Levelland	79336	+18065689463	https://www.burkleehillvineyards.com/trilogy		0.94
+4f7b50ed4265	Club L.A.	bar		33.19572	-102.27741	205 W Bynum Ln	Brownfield	79316				0.93
+76f5ba012c1b	Cooper Vineyard	bar	winery	33.46457	-102.09259	3680 Quail Rd	Ropesville	79358	+18069282851			0.92
+fb5065566a45	DDD Vineyard	bar	winery	33.14185	-102.57932		Tokio		+18064567898			0.66
+6891381b413c	Diamante Doble Vineyard	bar	winery	33.14185	-102.57932	1753 County Road 121	Tokio	79376				0.93
+3e9d52252697	Farmhouse Vineyard	bar	winery	33.26755	-102.35864	2196 off Hwy 385	Meadow					0.77
+2cc36c7c1e09	Farmhouse Vineyards Crookshouse Block	bar	winery	33.33751	-102.20660	260 FM-303	Meadow	79345		http://www.farmhousevineyard.com/		0.85
+8ecaa49dffc3	FermForge	bar	winery	33.10856	-102.25626	1999 Lamesa Hwy	Brownfield	79316	+18063188301	https://www.fermforge.com/		0.64
+d7b0e90daf02	Good Line Beer | Wolfforth Public House	bar	brewery	33.50074	-102.00956	217 US 62 #4	Wolfforth	79382		http://www.goodlinebeer.com		0.77
+bba46cde74c5	Good Line Wolfforth	bar	beer bar	33.50769	-102.00128	217 US-62 E	Wolfforth	79382		http://www.goodlinebeer.com/		0.97
+a5c53b320bef	Lahey Farms	bar	winery	33.15215	-102.30522	1720 County Rd 460	Brownfield	79316	+18066370924	http://www.laheyvineyards.com/		0.92
+504ba5cb7d20	Levelland Main Street Cork & Keg	bar	wine bar	33.58720	-102.37684	802 Houston St	Levelland	79336	+18068949079	https://www.downtownlevelland.com/		0.68
+a72ee1995aa3	Lost Draw Vineyards	bar	winery	33.15023	-102.21813	1701 County Road 525	Brownfield	79316	+18066370100	http://twitter.com/Grapeguy68		0.81
+423207f39531	Mano Negra Craft Sodas	bar	brewery	33.51298	-102.06114	8924 County Road 1100	Wolfforth	79382	+18069996762	http://www.manonegrabrewingco.com/		0.77
+009fd0abde30	Narra Vineyards	bar	winery	33.14364	-102.29150	1756 FM-403	Brownfield	79316				0.95
+2590cedd5480	Oswald Vineyard	bar	winery	33.22105	-102.33124	1227 CR 365	Brownfield	79316	+18066864738	https://www.oswaldvineyard.com/		0.98
+225867d4092e	Phillips Vineyard	bar	winery	33.12374	-102.29192	1895 FM-403	Brownfield	79316		http://phillipsvineyard.com/		0.88
+aaf2c7527913	Prairie Chick Winery	bar	winery	33.61460	-102.29713	3924 Alaska Rd	Levelland	79336	+18068915343	http://prairie-chick-winery-milieu.square.site/		0.95
+57feb46fb1c6	Savage Slushez	bar	wine bar	33.58710	-102.37081	302 Houston St	Levelland	79336	+18064663266			0.96
+f77fb45756c2	Tailored 385 Wine	bar	winery	33.19518	-102.27743	202 W Bynum Ln	Brownfield	79316	+14322943398	https://fusedgraphics.infigosoftware.com/t385/?fbclid=PAZXh0bgNhZW0CMTEAAaZ0mdVFYfa5tQDBnv6bX-TkAjX1Oy1y9lQZLSJ7KUzDEAGO2pKlZOYoh8g_aem_otI2WR1dZP9gxNY6tF3lWg		0.92
+3b6bdccb4fb4	Texas Custom Wine Works	bar	winery	33.15318	-102.28825	1823 County Road 460	Brownfield	79316	+18066379877	https://texascww.com		0.92
+c5adfdd743e2	Texas Wine Company	bar	winery	33.38468	-102.18069	82 US-82	Meadow	79345	+18065300012	https://www.txwineco.com/		0.81
+4bbe741384c1	The Armory	bar	winery	33.16698	-102.27473	101 W Webb St	Brownfield	79316	+18067529596	https://www.farmhousevineyard.com/		0.92
+e250d4ee0fd0	The Plains Brew Co.	bar	brewery	33.60603	-102.00969	515 N FM 179	Lubbock	79416	+18067868583	http://www.theplainsbrew.com		0.95
+202f2c5f806b	The Republic of Texas Sports Bar and Grill	bar	sports bar	33.58480	-102.36710	803 College Ave	Levelland	79336	+18065687070			0.92
+d298353f4bd7	The Triple D Winery and Event Center	bar	winery	33.17936	-102.28091	519 W Main St	Brownfield	79316	+18064567897	http://thetripled.com		0.92
+59f22ca71c8d	The Triple D Winery and Restaurant	bar	wine tasting room	33.17919	-102.28091	519 W Main St	Brownfield	79316	+18066370243	https://thetripled.com/		0.92
+cacb799b74cb	Whitehouse Parker	bar	winery	33.17120	-102.26820	702 Old Lamesa Rd	Brownfield	79316	+18067527377	http://www.farmhousevineyards.com/		0.92
+aab6dbdcf7b1	Yellow House Cellars	bar	winery	33.28323	-102.03587	374 Farm to Market Rd 1317	Tahoka	79373	+18067467099	http://yellowhousecellars.com/		0.88
+e717d21cf4ea	Benham Auto Inc.	cardealer		33.54014	-102.07790	5911 FM-2378	Lubbock	79407	+18068851117	http://www.benhamauto.com/		1.00
+1c61021f700e	Brownfield Ford	cardealer		33.19786	-102.27312	1708 Lubbock Rd	Brownfield	79316	+18066373561	https://www.brownfieldford.com/?utm_source=google&utm_medium=organic&utm_campaign=gbp-mainlink	Ford Motor Company	0.97
+a5be10c22a78	CNC Automotive	cardealer		33.61598	-102.34743	1124 Alaska Rd	Levelland	79336				0.75
+4d77608b8b51	Ford	cardealer		33.59375	-102.31461	2483 E State Road 114	Levelland	79336	+18065986293	http://www.smithsouthplainsford.com	Ford Motor Company	0.71
+e712d3a8f3d5	Greater Texas Ford Dealers	cardealer		33.59403	-102.31508	2483 E State Road 114	Levelland	79336	+18884420414		Greater Texas Ford Dealers	0.82
+f73e78497acc	J's Place Auto	cardealer		33.41579	-102.15468	105 Ellwood St	Ropesville	79358	+18065980218			0.83
+f25a842599a5	Jacob at Smith Auto Family	cardealer		33.59418	-102.31491	2483 E State Road 114	Levelland	79336	+18065682235	http://smithfordlevelland.com/		0.58
+9b1e20a7dd51	Joey's Used Cars	cardealer	used auto dealer	33.58492	-102.38689	803 West Ave	Levelland	79336	+18068943403			0.92
+bb1dc7b7b1f2	John Roley Autocenter Levelland, Inc.	cardealer	used auto dealer	33.59742	-102.36869	1403 Texas Ave 114	Levelland	79336	+18068946141	https://www.johnroleylevelland.com/		0.85
+7d24ade0b20f	King Motor Co.	cardealer		33.17989	-102.27522	103 N 1st St	Brownfield	79316	+18064505032	http://kingmotorcompany.net/		0.92
+425e384f5840	Levelland Chevrolet Buick GMC	cardealer		33.59446	-102.34766	1403 TX-114	Levelland	79336	+18067624810	https://www.levellandchevrolet.com/	Chevrolet	0.97
+c8f79087117e	Matt Martinez Your Favorite Car Guy	cardealer		33.90387	-102.31194	1825 E Marshall Howard Blvd	Littlefield	79339	+18068054238	https://www.premierlittlefield.com/		0.69
+32ce196b2375	Peace of Mind Auto Center	cardealer		33.54007	-102.07821	5911 FM 2378	Lubbock	79407	+18068851117	http://benhamauto.com/		0.92
+bbd047f4003c	Premier Chevrolet GMC	cardealer		33.90308	-102.31082	1852 E Marshall Howard Blvd	Littlefield	79339	+18066042550	https://www.premierlittlefield.com/	Chevrolet	0.92
+e5b6192d2246	Prime Autos	cardealer		33.91805	-102.32498	814 Hall Ave	Littlefield	79339	+18065512385			0.92
+c23e565506d1	Reagor Dykes Levelland	cardealer		33.59431	-102.31624	2379 E State Road 114	Levelland	79336	+18065681400	https://www.reagordykeslevelland.com		0.92
+1474ee9125a9	Scoggin Dickey Chrysler Dodge Jeep Ram	cardealer		33.59438	-102.35076	1303 TX-114	Levelland	79336	+18065683500	http://www.scoggindickeycdjr.com/	Chrysler	1.00
+ea41d64ae188	Small Town Auto Sales	cardealer	used auto dealer	33.58297	-102.36806	102 10th St	Levelland	79336	+18065681756			0.92
+a0a1161b2209	Smith Auto Family Ford Collision	cardealer		33.59407	-102.31491	2483 TX-114	Levelland	79336	+18068943191	https://www.smithautofamilylevelland.com/	Smith Auto Family	1.00
+80550b6dd182	Smith South Plains Ford/Dodge	cardealer		33.59415	-102.31474	2483 East State Hwy 114	Levelland	79336	+18068943191	http://www.smithsouthplains.com		0.77
+5cc9b6a90bba	South Plains Custom Truck	cardealer		33.58753	-102.37447	601 Houston St	Levelland	79336	+18062981585	https://www.southplainsautoplex.com/		0.92
+eea9af323c00	Texas Car Place	cardealer	used auto dealer	33.54816	-102.02773	9100 County Rd 6900	Lubbock	79407	+18062522696	https://www.texascarplace.com		0.77
+04ff15cc1340	Wright Truck & Auto Sales	cardealer	used auto dealer	33.91916	-102.32484	714 Hall Ave	Littlefield	79339	+18063856279	https://www.wexinc.com		0.92
+92642551830a	You Drive Auto Wolfforth	cardealer		33.50488	-102.00518	214 E Highway 62	Wolfforth	79382	+18068337300	https://www.youdriveauto.com/	You Drive Auto	0.96
+8e3a620bebaf	84 Tobacco & Coffee Shop	coffee		33.90466	-102.33298	137 E Marshall Howard Blvd	Littlefield	79339	+18063859004	http://www.coffeeservice.com/gettingstarted		0.92
+e24bba0cf153	Board and Brew Cafe	coffee		33.19250	-102.27369	1402 Lubbock Rd	Brownfield	79316	+14322099746		Board & Brew	0.92
+3f473556cd3a	boardandbrewcafe	coffee		33.18002	-102.27485	1402 LBK HWY Suite E	Brownfield	79316				0.86
+7ba56a06b669	Hometown Hangout	coffee		33.18072	-102.26028	1214 Tahoka Rd	Brownfield	79316	+18064913010	https://rautbort.goherbalife.com/en-us		0.92
+ce08693ad201	HTeaO - Levelland	coffee	tea room	33.59187	-102.36725	201 College Ave	Levelland	79336	+18063000860	https://hteao.com/locations/levelland-tx/	HTeaO	0.96
+c36660b695f2	Jack 'N' Jill Donuts	coffee		33.50858	-102.00912	502 Dowden Ave	Wolfforth	79382	+18066877428		Jack 'N' Jill Donuts	0.97
+d19100154ede	Moonspun Antiques	coffee		33.17900	-102.28158	103 S 6th St	Brownfield	79316	+18062817418			0.87
+9776b3eca6f1	Mosaic Sandwich & Coffee Company	coffee		33.58614	-102.37732	814 Austin St	Levelland	79336	+18065231610	http://www.mosaicsandwichandcoffeeco.com/		0.92
+11cf46ac8aff	She'Brews Coffee House	coffee		33.19597	-102.27477	1601 Lubbock Rd	Brownfield	79316	+18065921569	http://shebrewscoffeeandco.square.site/		0.96
+9d0025966d60	Starbucks	coffee		33.58456	-102.36816	812 S College Ave	Levelland	79336	+18065986555	https://www.starbucks.com/store-locator/store/1039887/college-9th-812-college-ave-levelland-tx-793364838-us	Starbucks	0.92
+1f2a0cbfedab	Starbucks Coffee Company	coffee		33.58865	-102.36639	511 College Ave	Levelland	79336	+18068945131	https://www.starbucks.com/store-locator/store/1014448		0.92
+c277438b1970	Tea2Go	coffee	tea room	33.58073	-102.36729	1205 College Ave	Levelland	79336	+18065681009	http://www.tea2go.us/	Tea2go	0.96
+9462d23a2d21	The Carpenter’s Daughter	coffee		33.57291	-102.37920	913 FM-300	Levelland	79336				0.58
+6a5b9cbffa9a	Center for Clinical Excellence	college		33.59437	-102.02827	528 S Gilbert Dr	Lubbock	79416	+18067162922	https://www.southplainscollege.edu/simspc/simspc.php		0.93
+2f4f5e293ed7	Department Of Environmental Toxicology	college		33.58801	-102.03149	1207 S Gilbert Dr	Lubbock	79416	+18067424567	https://www.entx.ttu.edu		0.84
+eb8b0ccb2000	Institute Of Environmental	college		33.58807	-102.03113	1207 Gilbert Dr	Lubbock	79416	+18068854567	http://www.tiehh.ttu.edu		0.99
+0e4d827e9363	Sound Technology at SPC	college		33.57751	-102.36436	1401 S College Ave	Levelland	79336	+18068949611	http://www.southplainscollege.edu/exploreprograms/technicaleducation/creativearts/soundtech/soundtech.php		0.90
+a38a071ab52e	South Plains College	college		33.57838	-102.36749	1401 College Ave	Levelland	79336	+18068949611	southplainscollege.edu		0.99
+acd944f32440	South Plains College	college		33.59026	-102.37148	303 Avenue C	Levelland	79336	+18068942594	http://www.southplainscollege.edu		0.63
+e480e9b6474d	South Plains College Cosmetology	college		33.57256	-102.36422		Levelland		+18067162288	https://www.southplainscollege.edu/information-for/current-spc...	South Plains College	0.84
+b2e83e9e0c48	South Plains College Law Enforcement Building	college		33.57497	-102.36406		Levelland					0.66
+91031f895142	South Plains College Mathematics and Engineering Building	college		33.57453	-102.36289	Math and Engineering Building (M), J V Morton Dr	Levelland	79336				0.68
+4e5b86a68578	South Plains College Nursing	college		33.57508	-102.36997	202 Clubview Dr	Levelland	79336	+18067162391	http://southplainscollege.edu/		0.97
+ae6d4fd89c38	South Plains College, Lubbock, TX	college		33.59460	-102.03052		Lubbock		+18068949611	www.southplainscollege.edu		0.78
+b988631b910b	South Plains Reese Campus	college		33.58962	-102.02856	819 S Gilbert Dr	Lubbock	79416	+18067470576	http://www.southplainscollege.edu		0.97
+43ca111d49a4	SPC Creative Arts	college		33.57816	-102.36437	1401 S College Ave	Levelland	79336	+18067162281	http://www.SPCCreativeArts.com/		0.97
+1f584d67076e	SPC Theatre	college		33.57823	-102.36459	1401 S College Ave	Levelland	79336	+18067162266	http://southplainscollege.edu/		0.97
+83dd9d51d0c1	7-Eleven	convenience		33.91698	-102.32852	700 East Waylon Jennings Blvd	Littlefield	79339	+18063856575	https://www.7-eleven.com/		1.00
+a056085d9c81	7-Eleven	convenience		33.16630	-102.28456	801 Seagraves Road	Brownfield	79316	+18066377464	https://www.7-eleven.com/		1.00
+a166577c63ce	7-Eleven	convenience		33.90285	-102.32677	2500 Hall Avenue	Littlefield	79339	+18063857522	https://www.7-eleven.com/		1.00
+c2f7de6af3bd	7-Eleven	convenience		33.57661	-102.36836	102 Clubview Drive	Levelland	79336	+18068949486	https://www.7-eleven.com/		1.00
+d6e99fd32921	7-Eleven	convenience		33.59443	-102.36708	101 N College Avenue	Levelland	79336	+18068947142	https://www.7-eleven.com/		1.00
+ddb92f85de4b	7-Eleven	convenience		33.18065	-102.25617	1402 E Tahoka Rd	Brownfield	79316	+18066379340	https://www.7-eleven.com/		1.00
+f38840a90045	7-Eleven	convenience		33.58664	-102.38739	700 West Avenue	Levelland	79336	+18068944843	https://www.7-eleven.com/		1.00
+5e9572a9c6bd	Allsup's	convenience		33.51565	-102.00901	701 Dowden Road	Wolfforth	79382			Allsup's	0.80
+8a73b5c2b011	Allsup's	convenience		33.50330	-102.00826	701 Dowden Rd	Wolfforth	79382	+18068669242	https://www.allsups.com/	Allsup’s	0.99
+b6526e012b4d	Allsup's	convenience		33.72298	-102.75043	803 E Fillmore Ave	Morton	79346	+18062665845	https://www.allsups.com/	Allsup’s	0.92
+585f2f5f6a22	Allsup's 102396	convenience		33.50349	-102.00820	701 Dowden Rd.	Wolfforth	79832		https://locations.valero.com/en-us/LocationDetails/Index/701-DOWDEN-RD/0000013039	Valero	0.80
+116cedff19ee	Allsup's Convenience Store	convenience		33.04074	-102.81892	214 N Highway 214	Denver City	79323	+18065925163	https://www.allsups.com/		0.99
+5543334db2a2	Allsup's Convenience Store	convenience		33.72001	-102.75980	602 S Main St	Morton	79346	+18062665801	https://www.allsups.com/		0.99
+e4151c1a1cc3	Allsup's Convenience Store	convenience		33.59062	-102.36796	212 College Ave	Levelland	79336	+18068941234	https://www.allsups.com/	Allsup’s	1.00
+b5902a6ce96f	Allsups #0256	convenience		33.99714	-102.42535	FM-37	Amherst	79312				0.90
+40a9084ea3dd	Allsups 119	convenience		33.18589	-102.82114	1219 Brownfield Rd	Plains	79355	+18064566711	http://www.allsups.com		0.68
+dffe303c36aa	Allsups Convenience Store	convenience		33.18099	-102.26762	708 E Tahoka Rd	Brownfield	79316	+18066372993	http://www.allsups.com		0.92
+e535df169b5f	Allsups Convenience Store	convenience		33.17525	-102.27477	414 S 1st St	Brownfield	79316	+18066374917	http://www.allsups.com		0.92
+2a89043c448b	ALON	convenience		33.18385	-102.81702	1489 US-82	Plains	79355	+18064562023	https://www.allsups.com/	Allsup’s	0.92
+3713dd6a54cb	Alon	convenience		33.60107	-102.36703	100 E Ellis St	Levelland	79336	+18068949838	http://myalon.com/		0.97
+eb31413a9afe	Alon	convenience		33.40925	-102.16058	110 Arnett St	Ropesville	79358	+18065622030	http://myalon.com/		0.92
+451ca7186666	ALON Gas Station	convenience		33.57317	-102.37848	907 Farm to Market Road 300	Levelland	79336	+18068842488	https://alonfuel.com/stations/alon-gas-station-0564-907-fm300-levelland-tx-79336/		0.99
+9464f30bb8a2	ALON Gas Station	convenience		33.60412	-102.61377	401 North Taylor Street	Whiteface	79379	+18062871151	https://alonfuel.com/stations/alon-gas-station-5470-401-north-taylor-street-whiteface-tx-79379/		0.92
+94fd7ce6cfcb	ALON Gas Station	convenience		33.18893	-102.83537	380 Roswell Highway 102	Plains	79355	+18064567424	https://alonfuel.com/stations/alon-gas-station-9601-102-roswell-highway-plains-tx-79355/		0.92
+f5dd178c3e1c	ALON Gas Station	convenience		33.49987	-102.01735	1002 Flint Avenue	Wolfforth	79382	+18068664070	https://alonfuel.com/stations/alon-gas-station-1064-1002-flint-avenue-wolfforth-tx-79382/		0.92
+f5672b721231	Brownfield Farmers Co Op Station	convenience		33.17905	-102.28516	902 W Main St	Brownfield	79316	+18066374517			0.90
+4597b7df10b8	CEFCO Convenience Store	convenience		33.17969	-102.27523	101 N 1st St	Brownfield	79316	+18066370153	https://www.cefcostores.com/	CEFCO Convenience Stores	0.92
+c3b378a9357f	Chisum #40	convenience		33.58430	-102.15480	202 1ST ST	Smyer	79367		https://locations.valero.com/en-us/LocationDetails/Index/202-1ST-ST/0000030478	Valero	0.80
+028d2280e3e2	Chisum Travel Center	convenience		33.19031	-102.27383	1106 Lubbock Rd	Brownfield	79316	+18066373151	http://www.yesway.com		0.92
+5d099b42348d	Chisum Travel Center	convenience		33.40892	-102.16019	110 Arnett Ave	Ropesville	79358	+18065622030			0.92
+20a9b977b570	Circle K	convenience		33.59422	-102.34862	1307 E Hwy 114	Levelland	79336	+18066420984	https://www.circlek.com/		1.00
+22da949ad6f2	Conoco	convenience		33.17517	-102.27481	414 S 1st St	Brownfield	79316	+18066374917	https://www.conoco.com/		0.92
+527471da9967	Conoco	convenience		33.18744	-102.27384	800 Lubbock Rd	Brownfield	79316	+18066378111	https://www.conoco.com/?utm_source=Facebook&utm_medium=local&utm_campaign=facebook-local	Conoco	0.66
+6d4fea27effc	Conoco	convenience		33.91721	-102.32848	700 E 9th St	Littlefield	79339	+18063856575	https://www.conoco.com/		0.92
+b43ce67676b8	Conoco	convenience		33.18078	-102.26745	714 Tahoka Rd	Brownfield	79316	+18066372993	https://www.conoco.com/		0.92
+37dad5554f7d	DK Gas Station	convenience		33.72303	-102.75948	304 South Main Street	Morton	79346	+18062665573	https://dkfuel.com/stations/dk-gas-station-9604-304-south-main-street-morton-tx-79346/		0.92
+5f86ebaf706b	DK Gas Station	convenience		33.60087	-102.36677	100 Ellis Street	Levelland	79336	+18068949838	https://dkfuel.com/stations/dk-gas-station-6907-100-east-ellis-street-levelland-tx-79336/		0.95
+9a4480190fb3	DK Gas Station	convenience		33.58604	-102.34810	701 Alamo Road	Levelland	79336	+18065792913	https://dkfuel.com/stations/dk-gas-station-0959-701-s-alamo-rd-levelland-tx-79336/		0.95
+f113d89fc3c6	HOP IN 430487	convenience		33.17528	-102.27468	414 S 1ST ST	Brownfield	79316			Conoco	0.80
+5b2eb2b37679	HOP IN 430488	convenience		33.18077	-102.26747	708 E TAHOKA RD	Brownfield	79316			Conoco	0.80
+8e0621afd872	HOP IN 430493	convenience		33.99702	-102.42526	1200 US HIGHWAY 84	Amherst	79312			Phillips 66	0.80
+4a0ebb2c6d04	Hop in Brownfield Texas	convenience		33.17535	-102.27457	414 S 1st St	Brownfield	79316	+18066374917			0.90
+1866c747af90	Joshua Park Grocery	convenience		33.60074	-102.36691	100 E Ellis St	Levelland	79336	+18068949838	http://myalon.com/		0.92
+2a1b3a38e4fb	Kennedy Estates Vintage Glass and more.	convenience		33.60096	-102.62061		Whiteface		+18065234571	https://honeycomb-pie-shop.hub.biz/		0.87
+7379c917f88a	L & D's Qwik Mart Inc	convenience		33.80766	-102.16184	201 E 1st St	Anton	79313	+18069972043			0.92
+b743e54797f5	Laguna Market Inc	convenience		33.92443	-102.33630	701 W 3rd St	Littlefield	79339	+18063851613			0.95
+add44f0b28d5	LOWES FUEL 131	convenience		33.45629	-102.48922	103 E RICHARDSON	Sundown	79372			Phillips 66	0.80
+5656b6f4c95d	LOWES FUEL 8	convenience		33.91727	-102.33616	102 E WAYLON JENNING	Littlefield	79339			Phillips 66	0.80
+8ac97ba6076f	M and M Grocery	convenience		33.60396	-102.61399	TX-114 & FM 1780	Whiteface	79379	+18062871151			0.92
+210b6eee8f2c	Murphy USA	convenience		33.59443	-102.36240	401 TX-114	Levelland	79336	+18068972526	http://www.murphyusa.com/		0.92
+542c74613c4e	Petro Products	convenience		33.58562	-102.36752	705 College Ave	Levelland	79336	+18068941009			0.92
+06a1beccb6fa	Phillips 66	convenience		33.59427	-102.36711	101 TX-114	Levelland	79336	+18068947142	https://www.phillips66gas.com/		0.92
+16e4f805211b	Phillips 66	convenience		33.90282	-102.32672	2356 S Hall Ave	Littlefield	79339	+18063857522	https://www.phillips66gas.com/		0.92
+1fb62e265aea	Phillips 66	convenience		33.91703	-102.33673	102 E Waylon Jenning	Littlefield	79339	+18063854711	https://www.phillips66gas.com/		0.92
+48232ac31934	Phillips 66	convenience		33.16635	-102.28442	801 Seagraves Rd	Brownfield	79316	+18066377464	https://www.phillips66gas.com/		0.92
+50f63e466123	Phillips 66	convenience		33.57670	-102.36793	102 Clubview Dr	Levelland	79336	+18068949486	https://www.phillips66gas.com/		0.92
+684882c31438	Phillips 66	convenience		33.58860	-102.36727	511 College Ave	Levelland	79336	+18068946699	https://www.phillips66gas.com/		0.92
+6995fb7447bf	Phillips 66	convenience		33.45660	-102.48837	185 E Richardson St	Sundown	79372	+18062296410	https://www.phillips66gas.com/		0.92
+9bc91b35ac54	Phillips 66	convenience		33.18743	-102.27442	804 Lubbock Rd	Brownfield	79316	+18066378111	https://www.phillips66gas.com/		0.92
+9cbb4e951873	Phillips 66	convenience		33.58656	-102.38724	700 West Ave	Levelland	79336	+18068944843	https://www.phillips66gas.com/		1.00
+e8b067ce45d2	Phillips 66	convenience		33.18076	-102.25616	1402 Tahoka Rd	Brownfield	79316	+18066379340	https://www.phillips66gas.com/		0.92
+f8f3bd484a62	Phillips 66	convenience		33.99710	-102.42519	1210 US Highway 84	Amherst	79312	+18062467774	https://www.phillips66gas.com/		1.00
+691fd25a8024	Phillips 66 Gas	convenience		33.59079	-102.36798	212 College Ave	Levelland	79336	+18068941234	https://www.phillips66gas.com/	Phillips 66 Gas	0.75
+7e1fedb3222f	Quick Mart	convenience		33.80770	-102.16174		Anton					0.60
+3e578b90fb1e	Scooter's Convenience Store	convenience		33.57315	-102.37847	907 FM 300	Levelland	79336	+18068942837	http://phillips66.com		0.77
+58b7d6c1dc33	Scooters Convenience	convenience		33.57318	-102.37849	907 FM 300	Levelland	79336	+18068842488			0.75
+fa33d5fcd764	SEI FUELS STORE 42442-132	convenience		33.59462	-102.36742	101 N COLLEGE AVE	Levelland	79336			Phillips 66	0.80
+1c441ea57696	SEI FUELS STORE 42544-5011	convenience		33.16626	-102.28456	801 SEAGRAVES RD	Brownfield	79316			Phillips 66	0.80
+afc9489ef21e	SEI FUELS STORE 42547-5014	convenience		33.57644	-102.36798	102 CLUBVIEW DR	Levelland	79336			Phillips 66	0.80
+70fc8e237ebd	SEI FUELS STORE 42548-5015	convenience		33.58667	-102.38733	700 WEST AVE	Levelland	79336			Phillips 66	0.80
+f78bb269d2be	SEI FUELS STORE 42549-5016	convenience		33.91704	-102.32844	700 E WAYLON JENNINGS BLVD	Littlefield	79339			Conoco	0.80
+dde8ee31e7b3	SEI FUELS STORE 42556-5023	convenience		33.18732	-102.27383	800 LUBBOCK RD	Brownfield	79316			Phillips 66	0.80
+92656551b3d2	SEI FUELS STORE 42562-5030	convenience		33.90274	-102.32687	2500 HALL AVE	Littlefield	79339			Phillips 66	0.80
+f2dbf5a77ade	SEI FUELS STORE 42569-5038	convenience		33.18053	-102.25613	1402 TAHOKA RD	Brownfield	79316			Phillips 66	0.80
+0788aa6beca6	Stripes	convenience		33.90289	-102.32676	2500 Hall Ave	Littlefield	79339	+18063857522	http://www.stripesstores.com	Stripes	1.00
+2006f181dcaf	Stripes	convenience		33.16628	-102.28469	801 Seagraves Rd	Brownfield	79316	+18066377464	http://www.stripesstores.com	Stripes	0.92
+57db8f2fabbb	Stripes	convenience		33.57643	-102.36800	102 Clubview Dr	Levelland	79336	+18068949486	https://stripesstores.com/		0.99
+6c6e4e3bc5b8	Stripes	convenience		33.59071	-102.36786	212 College Ave	Levelland	79336		http://calscstores.com		0.55
+88d20ebe4d47	Stripes	convenience		33.59424	-102.36710	101 N College Ave	Levelland	79336	+18068947142	http://www.stripesstores.com	Stripes	0.97
+8d87372496d0	Stripes	convenience		33.91708	-102.32845	700 E Waylon Jennings Blvd	Littlefield	79339	+18063856575	http://www.stripesstores.com	Stripes	1.00
+a264bf6173ea	Stripes	convenience		33.18756	-102.27458	800 Brownfield Highway	Brownfield	79316	+18066378111	http://www.stripesstores.com	Stripes	0.92
+adfe7e3e909a	Stripes	convenience		33.58669	-102.38731	700 West Ave	Levelland	79336	+18068949487	http://www.stripesstores.com	Stripes	1.00
+b3fb878af93e	Stripes	convenience		33.18075	-102.25619	1402 E Tahoka Rd	Brownfield	79316	+18066379340	http://www.stripesstores.com	Stripes	0.92
+59ace97c436c	Taylor Food Mart	convenience		33.18071	-102.27550	101 N 1st St	Brownfield	79316	+19409376471	https://www.taylorfoodmart.com		0.65
+2ca6ccc9634a	UNITED EXPRESS 689	convenience		33.52961	-102.00082	1110 DONALD PRESTON DR	Wolfforth	79382			Phillips 66	0.80
+27cef98ad15b	Valero	convenience		33.50356	-102.00845	701 Dowden Rd.	Wolfforth	79382	+18068664263	https://locations.valero.com/en-us/LocationDetails/Index/701-DOWDEN-RD/0000013039	Valero	0.92
+424562ee20c2	Valero	convenience		33.16636	-102.28448	801 Seagraves Rd	Brownfield	79316	+18066377464	http://www.valero.com	Valero	0.72
+5649ceb0390b	Valero	convenience		33.19028	-102.27348	1106 Lubbock Rd	Brownfield	79316	+12103452000	https://www.valero.com		0.65
+fada8f7bfd03	Valero	convenience		33.90503	-102.32663	2310 Hall Ave	Littlefield	79339	+12103452000	https://www.valero.com		0.92
+470b9d666fe6	Yesway	convenience		33.19031	-102.27336	1106 Lubbock Rd	Brownfield	79316	+18066373151	https://yesway.com/	Yesway	0.92
+651420589750	Yesway	convenience		33.41844	-102.15304	110 Arnett St	Ropesville	79358	+18066075228	https://yesway.com/	Yesway	1.00
+7160f2f0ee81	Yesway	convenience		33.50349	-102.00821	701 Dowden Road	Wolfforth	79382	+18068664263	https://yesway.com/		0.96
+b68deec7adfc	Yesway	convenience		33.90501	-102.32708	2310 Hall Ave	Littlefield	79339	+18063859817	https://yesway.com/	Yesway	1.00
+c34989f10b40	Yesway	convenience		33.51753	-102.00979	701 N Dowden Rd	Wolfforth	79382	+18068664263	https://yesway.com/	Yesway	0.81
+83ea2c6484f2	A&N Shaved Ice	fastfood		33.41513	-102.15253	904 Ellington St	Ropesville	79358	+18067785722			0.98
+846f8b700df7	Braum's	fastfood		33.51972	-102.00201	1111 Donald Preston Drive, Wolfforth, Texas	Wolfforth	79382		https://www.braums.com/store/store-288-1111-donald-preston-drive-wolfforth-texas/	Braum's	0.80
+511af76e0508	Burger King	fastfood		33.18448	-102.27367	518 Lubbock Rd	Brownfield	79316	+18066374530	https://burgerking.com/store-locator/store/11828	Burger King	0.96
+b2b7c4254d37	Burger King	fastfood		33.57888	-102.36825	1304 College Ave	Levelland	79336	+18068942595	https://burgerking.com/store-locator/store/6541	Burger King	0.99
+06c6c2573dd6	Caribbean Ice	fastfood		33.58806	-102.36794	502 College Ave	Levelland	79336				0.65
+26bb1a232eaf	Dairy Queen	fastfood		33.18690	-102.82315	Dairy Queen Store 1105 Cowboy Way	Plains	79355	+18064568366	https://www.dqtexas.com/?y_source=1_MjkzMzg5MDgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.92
+8b11cf17fd3d	Dairy Queen	fastfood		33.17780	-102.27601	120 W Broadway St	Brownfield	79316	+18066372013	https://www.dairyqueen.com/en-us/locations/tx/brownfield/120-w-broadway/13877/?y_source=1_MjkzMzkwMjQtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.97
+9ee9bb4fc90c	Dairy Queen	fastfood		33.57981	-102.36739	1311 S College Ave	Levelland	79336	+18068944948	https://www.dairyqueen.com/en-us/locations/tx/levelland/1311-college-ave/14348/?y_source=1_MjkzMzg5NjktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+c80f3ebe8f92	Dairy Queen	fastfood		33.50086	-102.01666	726 Highway 62 726 Highway 62	Wolfforth	79382	+18068664864	https://www.dairyqueen.com/en-us/locations/tx/wolfforth/726-highway-62/14735/?y_source=1_MjkzMzk0MTEtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+01ac8bce2667	Domino's	fastfood	pizza restaurant	33.59448	-102.36042	409 E. Hwy 114	Levelland	79336	+18068943030	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps_menutest	Domino's Pizza	0.98
+b6bd3a0b80c9	Domino's Pizza	fastfood	pizza restaurant	33.19242	-102.27378	1402 Lubbock Rd	Brownfield	79316	+18066363030	http://www.dominos.com/	Domino's Pizza	0.99
+0ea730aac7a9	DQ Grill & Chill	fastfood		33.50089	-102.01663	726 Highway 62	Wolfforth	79382		https://www.dairyqueen.com/en-us/locations/tx/wolfforth/726-highway-62/4507	DQ Grill & Chill	0.80
+6bbf3818da42	DQ Grill & Chill	fastfood		33.57980	-102.36742	1311 College Ave	Levelland	79336		https://www.dairyqueen.com/en-us/locations/tx/levelland/1311-college-ave/4121	DQ Grill & Chill	0.80
+f9ab68f4ef51	DQ Grill & Chill	fastfood		33.17779	-102.27604	120 W Broadway	Brownfield	79316		https://www.dairyqueen.com/en-us/locations/tx/brownfield/120-w-broadway/3650	DQ Grill & Chill	0.80
+da3102e0399b	KFC	fastfood		33.18422	-102.27444	509 Lubbock Road	Brownfield	79316	+18066373158	https://locations.kfc.com/tx/brownfield/509-lubbock-road	KFC	0.97
+fc0ca58860b4	KFC	fastfood		33.58386	-102.36781	904 College Avenue	Levelland	79336	+18065986836	https://locations.kfc.com/tx/levelland/904-college-avenue	KFC	0.96
+34b7f7d6dcd0	Little Caesars Pizza	fastfood	pizza restaurant	33.58240	-102.36736	1011 College Ave	Levelland	79336	+18065685000	https://littlecaesars.com/en-us/store/11601	Little Caesars	0.94
+dbf56eeefe5b	Long John Silver's	fastfood		33.18422	-102.27453	509 Lubbock Rd	Brownfield	79316	+18066373158	https://www.ljsilvers.com/?y_source=1_MTc1NzMzMTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.94
+74fa99a980a5	McDonald's	fastfood		33.58684	-102.36718	605 College Ave	Levelland	79336	+18068946984	https://www.mcdonalds.com/us/en-us/location/tx/levelland/605-college-ave/7127.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+e465e297d497	McDonald's	fastfood		33.90453	-102.32695	2330 Hall Avenue	Littlefield	79339	+18063850452	https://www.mcdonalds.com/us/en-us/location/tx/littlefield/2330-hall-avenue/30308.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.95
+fdcfb1a9fc52	McDonald's	fastfood		33.18182	-102.27390	304 Lubbock Hwy	Brownfield	79316	+18066378929	https://www.mcdonalds.com/us/en-us/location/tx/brownfield/304-lubbock-hwy/7365.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+c083caf77e81	Mike's Beef Jerky,inc	fastfood		33.92509	-102.32681	134 N Eastside Ave	Littlefield	79339	+18063853398	http://mikesjerkyplace.com		1.00
+4174d59c6f62	Pizza Hut	fastfood	pizza restaurant	33.18145	-102.27458	301 Lubbock Rd Terry	Brownfield	79316	+18066379511	https://locations.pizzahut.com/tx/brownfield/301-lubbock-rd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=287235	Pizza Hut	0.98
+5f2737adcd72	Pizza Hut	fastfood	pizza restaurant	33.90549	-102.33611	101 E Marshall Howard Blvd Lamb	Littlefield	79339	+18063853905	https://locations.pizzahut.com/tx/littlefield/101-e-marshall-howard-blvd?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=313060	Pizza Hut	1.00
+79fa1eba2bac	Pizza Hut	fastfood	pizza restaurant	33.59448	-102.36189	403 East State Highway 114	Levelland	79336	+18068949696	https://locations.pizzahut.com/tx/levelland/403-east-state-highway-114?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=310640	Pizza Hut	0.97
+e89a12a4f7f1	Pizza Hut	fastfood	pizza restaurant	33.58095	-102.36745	1203 College Ave	Levelland	79336	+18068949696	http://www.pizzahut.com/		0.92
+58f1021edec6	Riley's Smokehouse	fastfood		33.46587	-102.00222	14012 Fairbanks Ave	Wolfforth	79382				0.58
+6482b8882d70	Sonic Drive In	fastfood		33.91533	-102.32632	1015 Hall Avenue	Littlefield	79339	+18063855442	https://locations.sonicdrivein.com/tx/littlefield/1015-hall-avenue.html	Sonic Drive-In	0.99
+ade7d9cd36e4	Sonic Drive In	fastfood		33.59113	-102.36780	202 College Avenue	Levelland	79336	+18068942926	https://locations.sonicdrivein.com/tx/levelland/202-college-avenue.html	Sonic Drive-In	0.96
+b4b330128ee4	Sonic Drive In	fastfood		33.18405	-102.27441	507 Lubbock Road	Brownfield	79316	+18066377703	https://locations.sonicdrivein.com/tx/brownfield/507-lubbock-road.html	Sonic Drive-In	0.96
+2006230b550b	Subway	fastfood	sandwich shop	33.59612	-102.36105	407 E State Road 114	Levelland	79336	+18068970073			0.92
+4fcf5a29a5bd	Subway	fastfood	sandwich shop	33.57843	-102.36806	1402 College Ave	Levelland	79336	+18068947514	https://restaurants.subway.com/united-states/tx/levelland/1402-college-ave	Subway	0.99
+639a4f20121f	Subway	fastfood	sandwich shop	33.90283	-102.32699	2500 Hall Ave	Littlefield	79339	+18063854949	https://restaurants.subway.com/united-states/tx/littlefield/2500-hall-ave	Subway	0.96
+653b6f3d3e61	Subway	fastfood	sandwich shop	33.50347	-102.00838	701 Dowden Rd	Wolfforth	79382	+18068664947	https://www.subway.com		0.99
+d8e00af1febd	Subway	fastfood	sandwich shop	33.18093	-102.27403	202 Tahoka Rd	Brownfield	79316	+18069063064	http://www.subway.com/en-us	Subway	0.99
+fe573b797e7d	Subway	fastfood	sandwich shop	33.45701	-102.48835	103 E. Richardson	Sundown	79372	+18062296410	https://restaurants.subway.com/united-states/tx/sundown/103-e-richardson?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=60079&utm_campaign=evergreen-2020&y_source=1_MTQ5MDE2MDctNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.92
+18bfc0febeb6	Taco Bell	fastfood		33.90870	-102.32749	1808 Hall Ave # R25	Littlefield	79339				0.75
+2e183731df99	Taco Bell	fastfood		33.18125	-102.27472	301 Lubbock Road	Brownfield	79316	+18066362227	http://www.tacobell.com/	Taco Bell	0.96
+6dc20beb645f	Taco Bell	fastfood		33.59441	-102.36160	405 E. Hwy 114	Levelland	79336	+18068972277	http://www.tacobell.com/	Taco Bell	0.96
+d9ec29097239	Wawa- Kiki's	fastfood		33.59415	-102.36636	100 House Ave	Levelland	79336	+18065187112			0.63
+f9c986003f17	Wendy's	fastfood	burger restaurant	33.59037	-102.36749	301 College Ave	Levelland	79336	+18065032631	https://locations.wendys.com/united-states/tx/levelland/301-college-ave		0.97
+3f00adf35cd4	Whataburger	fastfood		33.59422	-102.35495	705 E Highway 114	Levelland	79336		https://locations.whataburger.com/tx/levelland/705-e-highway-114.html	Whataburger	0.80
+39dcf58684c8	Wingstop	fastfood	chicken wings restaurant	33.51972	-102.00700	602 Donald Preston Dr Ste 105 106	Wolfforth	79382	+18066304240	https://www.wingstop.com/location/wingstop-2538-wolfforth-tx-79382/menu?y_source=1_MTAzMDc0Mzg2NC00ODMtbG9jYXRpb24ud2Vic2l0ZQ%3D%3D		0.97
+0352efc5ba16	Cbo's Kwik Stop	grocery		33.50545	-102.01192		Wolfforth		+18068662518			0.96
+0d562aefa7b1	Curly Top	grocery		33.92632	-102.33131	300 W Delano Ave	Littlefield	79339				0.95
+cc9c71ec8ae7	Elias Cafe	grocery		33.72358	-102.76116	212 W Fillmore Ave	Morton	79346				0.95
+ed411ac0f25c	Food King	grocery		33.91663	-102.33693	102 W Waylon Jennings Blvd	Littlefield	79339	+18063854711	https://www.foodkingcostplus.com/	Food King	1.00
+60c81b697282	Lowe's Market	grocery		33.45675	-102.48829	103 E Richardson St	Sundown	79372	+18062296410	https://www.lowesmarket.com/	Lowe's Market	0.92
+6556d6a8d5e5	Lowe's Market	grocery		33.18814	-102.82750	710 Cowboy Wy Box 240	Plains	79355	+18064563434	http://www.lowesmarket.com/	Lowe's Market	0.96
+fd5c874be0cf	Rodriguez Mexican Market	grocery		33.17687	-102.27464	302 S 1st St	Brownfield	79316				0.67
+b1e1eaaa08f3	Shameless Snacks	grocery		33.90594	-102.33781	701 W Marshall Howard Blvd	Littlefield	79339	+18063854639		Shameless Snacks	0.57
+1702980d8811	United Express	grocery		33.58876	-102.36744	511 College Ave	Levelland	79336	+18068946699	https://www.unitedsupermarkets.com/rs/storelocator	United Express	0.92
+904ec90d018e	United Supermarkets	grocery		33.18202	-102.25644	1401 Tahoka Rd	Brownfield	79316	+18066372321	https://local.unitedsupermarkets.com/tx/brownfield/1401-tahoka-rd.html	United Supermarkets	0.92
+b0b15bb7bec9	United Supermarkets	grocery		33.58907	-102.36678	511 College Ave	Levelland	79336	+18068945131	https://local.unitedsupermarkets.com/tx/levelland/511-college-ave.html	United Supermarkets	0.92
+d77916e55529	United Supermarkets	grocery		33.90665	-102.33684	701 W Marshall Howard Blvd	Littlefield	79339	+18063854639	https://local.unitedsupermarkets.com/tx/littlefield/701-marshall-howard-blvd.html	United Supermarkets	0.92
+abd82078f8a4	Village Market	grocery		33.45647	-102.48889	103 E Richardson St	Sundown	79372	+18062296410	http://ucook.com		0.92
+71d55499761b	Walmart Supercenter	grocery		33.58284	-102.38110	1108 10th St	Levelland	79336	+18068947612	http://www.walmart.com/		0.69
+a95ee161aa0b	Cochran Memorial Hospital	hospital		33.71964	-102.75754	201 E Grant Ave	Morton	79346	+18062665565	http://www.cochranmemorial.com/		0.99
+f1d059f34e5f	Cochran Memorial Hospital	hospital		33.72650	-102.75954	104 W Wilson Ave	Morton	79346	+18062660329			0.73
+dab4c1ecad9e	Covenant Hospital Levelland	hospital		33.57286	-102.36881	1900 College Ave	Levelland	79336	+18068944963	https://www.covenanthealth.org/our-services/	Covenant Health	1.00
+b865956836c4	Interim HealthCare of Levelland TX	hospital		33.44416	-102.35033	727 S Alamo Rd	Levelland	79336	+18068971485	https://www.interimhealthcare.com/location/levelland-tx	Interim HealthCare	0.82
+6da0fae7258b	Lamb Healthcare Center	hospital		33.91170	-102.34427	1500 S Sunset	Littlefield	79339	+18063856411	http://Lambhc.org/		0.92
+e3d2de477b21	Levelland Clinic	hospital		33.57405	-102.36771	1804 College Ave	Levelland	79336	+18068943141	http://www.covenanthealth.org/.../Family-Medicine/Levelland-Clinic.aspx		0.97
+cf1dc06d3ee5	Levelland Primary Health Care Clinic	hospital		33.57176	-102.38005	1000 FM-300	Levelland	79336	+18068947842			0.67
+2054b5cc87e0	Littlefield Hospital	hospital		33.91162	-102.34428	1500 S Sunset Ave	Littlefield	79339		littlefieldtexas.net/index.php/our-community/lamb-healthcare-center		0.98
+c51bd27c2ddb	One Eighty Service	hospital		33.57278	-102.36883	1900 College Ave	Levelland	79336	+18065593254	https://www.impacthealthcaremanagement.com/		0.92
+fc545c1655d9	Plains Clinic and Lifestyle Center	hospital		33.29940	-102.81867	602 TX-214	Plains	79355	+18064566365			0.90
+cc4dcf1b785b	Best Inn Texas	hotel	motel	33.59003	-102.36872	304 College Ave	Levelland	79336	+18068947335	http://www.bestinntexas.com/		1.00
+081b4bf6f3b8	Best Western Caprock Inn	hotel		33.18188	-102.27528	321 Lubbock Rd	Brownfield	79316	+18066379471	https://www.bestwestern.com/en_US/book/hotel-rooms.44341.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44341	Best Western Hotels & Resorts	1.00
+d32b58852ff5	Best Western Littlefield Inn & Suites	hotel		33.90084	-102.32676	2600 Hall Ave	Littlefield	79339	+18063853400	https://www.bestwestern.com		1.00
+0e0eba0b8993	Best Western South Plains Inn & Suites	hotel		33.59507	-102.36869	204 N College Ave	Levelland	79336	+18068949155	https://www.bestwestern.com/en_US/book/hotel-rooms.44602.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44602	Best Western Hotels & Resorts	1.00
+cc50c06f8972	Budget Inn	hotel	motel	33.18321	-102.27454	501 Lubbock Rd	Brownfield	79316	+18066372574	http://www.budgetinnbrownfield.com/		0.98
+1dbec30d9390	Budget inn of Levelland	hotel	resort	33.59816	-102.36809	308 N College Ave	Levelland	79336	+18068949679	http://www.budgetinnlevelland.com/		0.96
+0efc607f1c97	Crescent Park Motel and Suites	hotel	motel	33.90689	-102.32761	2021 Hall Ave	Littlefield	79339	+18063854464	http://www.crescentparkmotel.com		0.99
+a73018a7ab25	Crescent Park Motel Suites Littlefield Hotel	hotel		33.91738	-102.32539	2021 Hall Avenue	Littlefield	79339	+18063854464	https://www.crescentparkmotelsuiteslittlefield.com		0.77
+e11db6968686	Crystal Palace Inn	hotel		33.18186	-102.25975	1303 Tahoka Rd	Brownfield	79316	+18066372586	https://crystalpalaceinntx.com		0.99
+199b174267f5	Economy Inn Motel	hotel	motel	33.17887	-102.29066	1310 W Main St	Brownfield	79316	+18066373521	https://www.economyinnhollywood.com		1.00
+7085590473c5	Holiday Inn Express & Suites	hotel		33.59524	-102.35543	703 TX-114	Levelland	79336	+18068948555	https://www.ihg.com/holidayinnexpress/hotels/us/en/levelland/lvltx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-LVLTX	Holiday Inn Express	1.00
+93ddf5694971	Holiday Inn Express & Suites Brownfield	hotel		33.18286	-102.27343	410 Lubbock Rd	Brownfield	79316	+18066379000	https://www.ihg.com/holidayinnexpress/hotels/us/en/brownfield/brftx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-BRFTX	Holiday Inn Express	1.00
+d0c4e4f91d79	Levelland Manor	hotel		33.58056	-102.34818	903 Alamo Rd	Levelland	79336	+18068944754			0.85
+972eead34958	Levelland Motel	hotel		33.58559	-102.37624	715 Avenue G	Levelland	79336	+18068947335			0.79
+99778933338a	Littlefield Isd	hotel		33.92125	-102.33158	508 Phelps Ave	Littlefield	79339		https://www.lfdisd.org		0.95
+05c9dec9b2a0	Littlefield Manor Apartments	hotel		33.91202	-102.34110	1601 S Wicker Ave	Littlefield	79339	+18063854709	https://www.rentalhousingdeals.com/apartments-for-rent/littlefield-manor-littlefield-tx-79339/100050		0.72
+58183c783e1e	Plains Motel Of Littlefield	hotel		33.90463	-102.33206	201 E Marshall Howard Blvd	Littlefield	79339	+18063855724	http://www.theplainsmotel.com/		0.92
+9c1c2d595f4a	Preston Manor	hotel		33.53244	-102.00120		Wolfforth		+18068554510	http://prestonmanor.com/		0.97
+6c36903b1103	Red Sands Motel	hotel	motel	33.18786	-102.27437	901 Lubbock Rd #901	Brownfield	79316	+18066376536	http://red-sands-motel.keeq.io		0.95
+e427df44cbcb	Verrado Estates	hotel		33.55127	-102.01755	FM 179 & 50th	Lubbock	79407	+18062836839	http://www.verradotexas.com/		0.89
+bc406a26ef0a	𝐈𝐧𝐟𝐫𝐦𝐚𝐭𝐢ó𝐧 𝐏𝐚𝐠é𝐬 𝐁𝐮𝐬𝐢𝐧é𝐬𝐬.	hotel		33.90097	-102.32668	2600 Hall Ave	Littlefield	79339	+18063853400	https://www.bestwestern.com/en_US/book/hotel-rooms.44615.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44615	Best Western Hotels & Resorts	0.89
+d5c0956c21d3	Amazing Taste Purified Water	office	bottled water company	33.58328	-102.34781	725 Alamo Rd	Levelland	79336	+18068945888	http://www.amazingspacetexas.com		0.63
+1cbfdb62d9c4	Centurion Pipeline LP	office	energy company	33.59729	-102.38692	304 Northwest Ave	Levelland	79336	+18068977000	http://oxy.com		0.58
+3199d385a60a	Continental Dairy Facilities Southwest, LLC	office	industrial company	33.91503	-102.30006	1926 Farm to Market Rd 54	Littlefield	79339	+18553781835	http://www.cdfswllc.com/		0.93
+bd04b84ec183	Dixie Electric	office		33.45500	-102.49043	105 W Gulf	Sundown	79372	+18062292461	http://www.dixielectric.com		0.77
+d5a2b4d0d89b	JD's Heating & Air Conditioning	office		33.51928	-102.32195	3348 S FM 3261	Levelland	79336	+18068948900	http://jdsonehour.com		0.92
+822cc6b703e6	Pipeline Plastics	office	plastics company	33.58775	-102.38187	2309 Commerce St	Levelland	79336	+18065680800	http://www.pipe.us		0.77
+657c0d23d7f2	Scott Manufacturing Inc	office	plastics company	33.47519	-102.05104	10609 FM-1585	Wolfforth	79382	+18067473395	http://www.scottmanufacturing.com	Scott Industries, LLC	0.93
+7da4e8f2dc70	509 Restaurant	restaurant	comfort food restaurant	33.60004	-102.36694	509 N College Ave	Levelland	79336	+18068941509	http://www.superpages.com/bp/levelland-tx/509-restaurant-L2337597275.htm		0.92
+e4e8d4e7a9be	806 Bbq & Grill	restaurant	barbecue restaurant	33.90484	-102.33349	135 E Marshall Howard Blvd	Littlefield	79339	+18062640854			0.92
+d945798abfae	All American Eatery & Catering	restaurant	breakfast and brunch restaurant	33.50091	-102.01591	704 US-62	Wolfforth	79382	+18068552115	https://wolfforth.orderallamericaneaterytx.com/?utm_source=bing&utm_medium=websiteurl&utm_campaign=search		0.92
+faf379ad66d4	Aramark Frenship Isd	restaurant	cafeteria	33.50607	-102.01412	603 Main St	Wolfforth	79382	+18068669389	frenship.net		0.65
+ce0204b6f459	BBQ Joint	restaurant	barbecue restaurant	33.90482	-102.33325	135 E Marshall Howard Blvd	Littlefield	79339	+18063850460	http://thebbqjoint.biz		0.92
+02d1f806fbdb	Bush's Chicken	restaurant	chicken restaurant	33.59302	-102.36782	106 College Ave	Levelland	79336		https://www.bushschicken.com		0.95
+2b7f1d727d10	Bush’s Chicken	restaurant	chicken restaurant	33.18916	-102.27362	1004 Lubbock Rd	Brownfield	79316	+18066360012	bwli.com		0.92
+cc6b9dd24d97	Cagle Steaks	restaurant	steakhouse	33.59647	-102.01028	8732 4th St	Lubbock	79416	+18067953879	http://www.caglesteaks.com/		0.96
+122529a0ec33	Caribbean Ice Hawaiian Shaved Ice	restaurant		33.91751	-102.32674	821 E Waylon Jennings Blvd	Littlefield	79339	+13614556249			0.69
+6f6495c9bef0	Carniceria La Mexicana	restaurant	mexican restaurant	33.58268	-102.37842	1002 Avenue H	Levelland	79336	+18065682274			0.92
+f06ebf5fbd73	Charley's	restaurant	american restaurant	33.57444	-102.37326	506 Clubview Dr	Levelland	79336	+18068949699	http://www.charleyssteakery.com		0.92
+48f181907539	Chefita’s Coffee (Dixie’s Too)	restaurant	diner	33.90692	-102.32698	2000 Hall Ave	Littlefield	79339	+18067290726			0.86
+6f663d75d34c	Chelo's Mexican Restaurant	restaurant	mexican restaurant	33.50074	-102.01718	730 Highway 62	Wolfforth	79382	+18068662222	http://chelosmx.com/		0.92
+9ad5a1949982	Circle S Restaurant	restaurant		33.72499	-102.75961	107 W Washington Ave	Morton	79346				0.95
+d012850773e4	Cub Drive In	restaurant	american restaurant	33.18694	-102.27401	710 Lubbock Rd #710	Brownfield	79316	+18066370060	https://www.groupon.com/biz/levelland-tx/cub-drive-in		0.96
+629bd808b9a6	Dickey's Barbecue Pit	restaurant	barbecue restaurant	33.58754	-102.36816	512 College Ave	Levelland	79336	+18065687675	https://www.dickeys.com/locations/Texas/Levelland/levelland	Dickey's Barbecue Pit National	0.96
+af4f5157185b	Dixie Dog	restaurant	burger restaurant	33.49988	-102.01470	Hwy 62-82	Wolfforth	79382	+18068664780	https://dixie-dog-tx-1.hub.biz		0.77
+2520db4fa035	Dixie's Too	restaurant	american restaurant	33.90685	-102.32681	2000 S Hall Ave	Littlefield	79339	+18063853558	http://www.menupix.com/texas/restaurants/4308746/Dixies-Too-Littlefield-TX		0.98
+0c85d1f43efe	El Agave Mexican Restaurant	restaurant	mexican restaurant	33.19117	-102.27381	1202 Lubbock Rd	Brownfield	79316	+18069063272			0.92
+55a9a909c142	El Antojito	restaurant	mexican restaurant	33.18927	-102.27430	1007 Lubbock Rd	Brownfield	79316	+18064660461			0.96
+244bd733f8f5	El Palacio | Mexican	restaurant	mexican restaurant	33.17593	-102.27460	102 E Cardwell St	Brownfield	79316	+18066370276	https://www.groupon.com/biz/levelland-tx/el-palacio		0.95
+bbe60e4568c3	El Salvador	restaurant	latin american restaurant	33.54831	-102.02929	9609 County Road 6900	Lubbock	79407	+18068852222	http://restaurantelsalvador.com		0.92
+d8f9fae6ae1d	El sazón de Ana’s	restaurant	mexican restaurant	33.58551	-102.36806	College Ave	Levelland	79336	+18065489639			0.92
+be50c6df70a5	El Taquito De Mar Y Tierra	restaurant	mexican restaurant	33.58688	-102.36308	219 Cactus Dr	Levelland	79336	+18068970001	https://el-taquito-de-mar-y-tierra.hub.biz/		0.95
+e4f2503d92f9	Evie Mae's BBQ	restaurant	barbecue restaurant	33.50094	-102.00976	217 US-62	Wolfforth	79382	+18067822281	http://eviemaesbbq.com/		0.98
+bee02ce344c2	Evie Mae’s Pit Barbecue	restaurant		33.49954	-102.01601	717 Highway 62	Wolfforth	79382		https://eviemaesbbq.com		0.95
+299b221b7021	F & B's Cafe	restaurant		33.57444	-102.37794	1714 Avenue H	Levelland	79336	+18068970279	https://www.levelland.com		0.92
+68ab89588850	Faith Grill BBQ	restaurant	barbecue restaurant	33.58889	-102.37754	407 Ave H	Levelland	79336	+18067774746	https://www.faithgrillbbq.com/home		0.97
+51bfb71fd90c	Fish N Chicken	restaurant	chicken restaurant	33.90788	-102.32745	1909 Hall Ave	Littlefield	79339	+18063856000	https://sanchez-fish-n-chicken.hub.biz/		0.96
+440092c658c0	Gracias Cafe	restaurant	texmex restaurant	33.72541	-102.76309	400-498 W Washington Ave	Morton	79346	+18062660060	http://gracias-cafe.jany.io/		0.92
+500f945f1235	Great Wall Super Buffet	restaurant	buffet restaurant	33.59751	-102.36762	306 N College Ave	Levelland	79336	+18068971533	http://www.greatwallbedford.com/	Great Wall Buffet	0.95
+b3daa19ce00e	Grill It	restaurant	bar and grill restaurant	33.60016	-102.36796	500 N College Ave	Levelland	79336				0.92
+818124e450f8	Hey vos Latin Restaurant	restaurant		33.51987	-102.01176	602 Donald Preston Dr	Wolfforth	79382	+18068552064	https://ttucasnr.az1.qualtrics.com/jfe/form/SV_bqt2YzC8zfPvh9c		0.97
+cd12656dd120	Hong Kong Buffet	restaurant	buffet restaurant	33.18224	-102.27384	402 Lubbock Rd	Brownfield	79316	+18066371778	http://www.hongkongbuffettx.com		0.94
+9c927bed753c	I Don't Know Diner	restaurant	diner	33.58749	-102.37365	505 Houston St	Levelland	79336	+18065237468	https://idontknowdiner.com/		0.97
+1ca4f6ec6858	J&A burgers	restaurant	burger restaurant	33.71989	-102.75908	613 S Main St	Morton	79346	+18068915883			0.89
+4b411ef7dd6b	Jorge Tacos y Más	restaurant		33.59697	-102.31219	12295 Keenan Cut Off Rd	Montgomery	77316	+18323183287			0.58
+676868689b4e	La Esmeralda	restaurant	mexican restaurant	33.59024	-102.38680	301 West Ave	Levelland	79336	+18068971240			0.92
+469c73681a10	La Hacienda Brownfield | Mexican	restaurant	mexican restaurant	33.18156	-102.25994	1301 Tahoka Rd	Brownfield	79316	+18069063042			0.95
+e6e1d4924b6b	La Sabrosa restaurant	restaurant		33.18488	-102.27351	215 E Ripley St	Brownfield	79316	+18066388055			0.64
+8349efbb448d	Lalito’s Mexican Restaurant	restaurant	mexican restaurant	33.18811	-102.82687	802 US-82	Plains	79355	+18064562233			0.99
+4cd24e089b57	Laredo Taco Company	restaurant		33.90285	-102.32677	2500 Hall Avenue	Littlefield	79339	+18063857522	https://www.laredotacocompany.com/		0.92
+e6203a587e3c	Levelland Tattlers	restaurant	american restaurant	33.58069	-102.37803	1202 Ave H	Levelland	79336	+18068971867	https://levelland-tattlers.hub.biz		1.00
+075fa5e637f8	Loco's Restaurant and Bar	restaurant	texmex restaurant	33.91734	-102.33617	603 W Waylon Jennings Blvd	Littlefield	79339	+18065512378	http://foodeist.com/place/locos-restaurant		0.98
+6fa4d747a06a	Lone Star Cajun Seafood and Steak	restaurant	cajun and creole restaurant	33.19069	-102.27266	304 E Lanny Ave	Brownfield	79316	+18069063012	http://lonestarcajun.cuteorder.com/		0.92
+d9809d31975c	Lone Star Grill	restaurant	american restaurant	33.90599	-102.33796	709 Marshall Howard Blvd	Littlefield	79339	+18064857827	https://www.thegrilltx.com		0.92
+ed15d981e871	Lonestar Cajun Seafood & Steak	restaurant	steakhouse	33.58707	-102.37311	502 Houston St	Levelland	79336	+18068939972			0.92
+273eea27b972	Meat Slangers'	restaurant		33.57758	-102.37341	505 15th St	Levelland	79336	+18068915334			0.95
+f9488f60f095	Mi Lindo Valle	restaurant	texmex restaurant	33.54840	-102.02922	9609 County Rd 6900	Lubbock	79407	+18069055859	http://www.milindovalle.com/		0.55
+3be48fa94862	Noemi's Place	restaurant	diner	33.58606	-102.36745	703 College Ave	Levelland	79336	+18068941009	https://www.levelland.com		0.94
+b1503ab23fa5	Nopalitos	restaurant	mexican restaurant	33.91693	-102.34036	1012 W Waylon Jennings Blvd	Littlefield	79339	+18063856263	http://www.nopalitoscafe.com/		0.96
+c1fee390bacd	Olivo's Mexican Restaurant	restaurant	mexican restaurant	33.57446	-102.37781	1714 Ave H	Levelland	79336	+18068970237			0.96
+0c4a363aebe2	Outlaw Cafe	restaurant	comfort food restaurant	33.60054	-102.62058	2545 W 2nd St	Whiteface	79379	+18063298776			0.92
+0c131e697407	Outlaw Egg Rolls	restaurant		33.52534	-102.01371	7702 FM 179	Wolfforth	79382	+12102049587	http://www.outlaweggrolls.com		0.92
+8ba8d6cbaeb3	P.T. Tacos	restaurant	mexican restaurant	33.18979	-102.82968	507 9th St	Plains	79355	+18064568603	https://linktr.ee/pttacos		0.92
+ac1f52c2e57c	Pizza Ninjas	restaurant		33.90755	-102.32777	1921 Hall Ave	Littlefield	79339	+18063851002			0.75
+32f75f157bf1	Platinum H Steakhouse	restaurant	steakhouse	33.18095	-102.25730	1316 Tahoka Rd	Brownfield	79316	+18066377471	http://platinum-h.edan.io		0.98
+2937abfc1e9c	Pollo Rico | Mexican	restaurant	mexican restaurant	33.18139	-102.27522	301 N 1st St	Brownfield	79316	+18064412400	http://orderpollorico.com		0.96
+e8f3b131bb95	Rachel's	restaurant		33.45808	-102.48891	711 S Slaughter Ave	Sundown	79372	+18062293482	http://www.rachels.com		0.92
+273276a87346	Ramen Shack	restaurant	japanese restaurant	33.50082	-102.01522	704 Highway 62	Wolfforth	79382	+18062834726			0.85
+9d5f854c1cd4	Rise-N-Shine Donuts and coffee	restaurant		33.51987	-102.01176	602 County Road 7100	Wolfforth	79382	+18064413339	http://www.risenshinedonut/		0.74
+386fe4dadd5c	Roberto's Mexican Food	restaurant	mexican restaurant	33.57673	-102.37716	1513 Avenue H	Levelland	79336	+18068945738	https://robertos-mexican-food-tx.hub.biz		0.92
+4eba3ce8b268	Rodriguez Cafe	restaurant	mexican restaurant	33.72535	-102.75722	215 E Washington Ave	Morton	79346	+18062665962	https://www.chamberofcommerce.com/morton-tx/restaurants		0.92
+0b2299676aef	Savannah's Mexican Restaurant	restaurant	texmex restaurant	33.58750	-102.36900	115 Houston St #115	Levelland	79336	+18068945699	http://www.savannahsmenu.com		0.94
+0009a7fea5a7	Shea D's Burritos	restaurant	mexican restaurant	33.91686	-102.34072		Littlefield	79339	+18063856263			0.92
+1f915bfd42e3	Shogun	restaurant	japanese restaurant	33.18239	-102.25784	1315 Tahoka Rd	Brownfield	79316	+18066361688	https://shogun-brownfield-tx.hub.biz		0.93
+3730b9a4e573	Slim Chickens	restaurant	chicken restaurant	33.59451	-102.36792	102 N College Ave	Levelland	79336	+18065986428	https://slimchickens.com/menu/slim-chickens-texas-levelland	Slim Chickens	0.98
+45f9373ee788	Smokin Joe's Level Land	restaurant		33.58335	-102.36743	911 College Ave	Levelland	79336	+18068971303	https://smokinjoeslevellan.wixsite.com/smokinjoes		0.92
+eaddc4a888fe	Something Different Grill	restaurant	american restaurant	33.59431	-102.36536	207 TX-114 BUS	Levelland	79336	+18068979797	http://www.somethingdifferentgrill.com/	Something Different Grill - Texas	0.98
+c4ce89fdc29d	Super Antojitos	restaurant	mexican restaurant	33.91893	-102.32537	715 Hall Ave	Littlefield	79339	+18063857270			0.96
+1fa7cb297dff	Super Pollo - Levelland	restaurant	chicken restaurant	33.59486	-102.36722	109 N College Ave	Levelland	79336	+18065792754			0.55
+9b74cc01f942	Super Pollo Mexican Grill Brownfield	restaurant	mexican restaurant	33.18919	-102.27372	1004 Lubbock Rd	Brownfield	79316	+18069063130	http://Www.vivasuperpollo.com/	Super Pollo Mexican Grill	0.92
+bfa55c716c0a	Swackhammer's Texas Grill	restaurant	barbecue restaurant	33.59413	-102.35575	701 TX-114 #701	Levelland	79336	+18067600513	https://start.cortera.com/company/research/l5n1jxs8p/swackhammers		0.98
+67f0f72fa01a	Taco Express	restaurant	mexican restaurant	33.18222	-102.28115	404 N 6th St	Brownfield	79316	+18066374449			0.96
+116f9b959686	Taco Loteria	restaurant	mexican restaurant	33.45596	-102.49017	105 W Richardson St	Sundown	79372	+18062414355			0.83
+8aff26645013	Taco Villa	restaurant	texmex restaurant	33.58106	-102.36726	1203 College Ave	Levelland	79336	+18068973212	http://www.tacovillaonline.com	Taco Villa Fanatics	0.94
+5b4de788e313	Taqueria Guadalajara	restaurant	mexican restaurant	33.59338	-102.36725	101 College Ave	Levelland	79336	+18068941244	http://www.taqueriasguadalajara.com		0.97
+9551e7a448fd	Taqueria Jalisco	restaurant	mexican restaurant	33.90649	-102.33096	709 Marshall Howard Blvd	Littlefield	79339	+18063859659	http://taqueriajalisco.net		0.77
+6660f5368fce	Taqueria Jesus Maria	restaurant	mexican restaurant	33.18837	-102.27449	907 Lubbock Rd	Brownfield	79316	+18066360035			0.92
+d4fb2c0f9647	Taqueria Mi Casita	restaurant	mexican restaurant	33.18500	-102.27393	602 Lubbock Rd	Brownfield	79316	+18066385710	https://my.favecard.co/taqueria-mi-casita		0.72
+08e4bd78d895	Tencha's Lunch Box	restaurant	mexican restaurant	33.17828	-102.27969	120 S 5th St	Brownfield	79316	+18066373491	https://kmaps.top/tencha-s-lunch-box		0.98
+4c3d0c99db0d	Thai Pattaya	restaurant		33.58600	-102.37447	602 Austin St	Levelland	79336	+18065680011	https://thaipattaya330.com		0.92
+bbf37cb676e1	The BBQ Barn	restaurant	barbecue restaurant	33.18064	-102.25768	1316 Tahoka Rd	Brownfield	79316	+18066371028			0.97
+ab9747aa3022	The Crackin' Crab	restaurant	seafood restaurant	33.17899	-102.27492	106 S 1st St	Brownfield	79316	+18063325214			0.92
+1958ceae064a	The Hideaway Burgers & More	restaurant	burger restaurant	33.18848	-102.83031	502 Cowboy Wy	Plains	79355	+18068412181			0.92
+4d9ac54a01a3	The Pizza Stop	restaurant		33.18844	-102.83356	204 Cowboy Way	Plains	79355	+18062154054			0.97
+b589b4df55ee	The White Kitchen	restaurant	breakfast and brunch restaurant	33.92218	-102.33145	425 Phelps Ave	Littlefield	79339	+18063855039	http://whitekitchencabinets.com		0.92
+0852c23304d9	Tienda's Tortilla Factory	restaurant	mexican restaurant	33.58722	-102.37366	510 Houston St	Levelland	79336	+18068947691	https://tienda-s-tortilla-factory.hub.biz		0.96
+80b1b1d84378	Town and Country Food Store	restaurant		33.90279	-102.32678	2500 Hall Ave	Littlefield	79339	+18063857522	http://tcfs.com/		0.77
+8a7f4bcc082a	Town and Country Foods	restaurant		33.18053	-102.25613	1402 Tahoka Rd	Brownfield	79316	+18066379340	http://phillips66.com/		0.92
+278ebc171d00	Típico Salvadoreño	restaurant	salvadoran restaurant	33.54369	-102.03038	5502 County Rd 1260	Lubbock	79407	+18065004581			0.96
+6ee92660f4c0	Vegas Family Restaurant	restaurant	mexican restaurant	33.57676	-102.37717	1513 Avenue H	Levelland	79336	+18068945738	https://robertos-mexican-food-tx.hub.biz/		0.92
+c5c14e5ead9a	Yesway	restaurant	sandwich shop	33.18079	-102.27404	202 E Tahoka Rd	Brownfield	79316	+18066377844	https://yesway.com/		0.99
+a6dc349f5a2e	Adams Assisted Living Community	senior	retirement home	33.47651	-102.01313	8824 130th St	Wolfforth	79382	+18065494469	http://www.adamsassistedliving.com/		0.92
+9e24599a0342	Apex Secure Care	senior	retirement home	33.18283	-102.26167	1101 E Lake St	Brownfield	79316	+18066377561	http://www.kcbd.com		0.92
+61ca896d39cf	Arbor Grace Wellness Center	senior	retirement home	33.91014	-102.34469	1241 W Marshall Howard Blvd	Littlefield	79339	+18063856600	https://paramounthcla.com/properties/arbor-grace-wellness-center/		0.92
+85fc75890ac8	BeeHive Homes of Levelland	senior	retirement home	33.59434	-102.33074	140 County Rd	Levelland	79336	+18064525883	https://beehivehomes.com/locations/levelland/	Beehive Homes of Page- Elk Road	1.00
+b6d784cc72a6	Brownfield Rehabilitation and Care Center	senior	retirement home	33.17425	-102.27468	510 S 1st St	Brownfield	79316	+18066374307	http://brownfieldcare.com/		1.00
+e12c871780ed	Cedar Creek Lodge Boutique Senior Living	senior	retirement home	33.31369	-102.30761		Gun Barrel City					0.90
+14a88f4e63e2	Cottage Village of Brownfield	senior	retirement home	33.16786	-102.25191	1202 Cheryl Dr #1202	Brownfield	79316	+18066379066	https://cottagevillageliving.com/		0.92
+6a6b0410fe90	Hickory Place	senior	assisted living facility	33.58414	-102.34780	717 S Alamo Rd Ofc	Levelland	79336	+18065986825			0.92
+e9588a1a97a9	Hickory Terrace	senior	retirement home	33.58413	-102.34788	717 Alamo Rd	Levelland	79336	+18062306537	https://cimaseniorliving.com/hickory-terrace		0.92
+b5bbc8f6a7e9	Legacy Of Love Hospice	senior	retirement home	33.90483	-102.33347	125 E Marshall Howard Blvd	Littlefield	79339	+18063859329	https://legacyoflovehospice.com		0.92
+cf420965583c	Levelland Development Center	senior	assisted living facility	33.58873	-102.38670	1515 5th St	Levelland	79336	+18068944902			0.65
+eb17361ed455	Levelland Nursing & Rehabilitation Center	senior	retirement home	33.59074	-102.38708	210 West Ave	Levelland	79336	+18068945053	http://www.savaseniorcare.com		1.00
+896d4a298bb7	Library of Legacies	senior	retirement home	33.91077	-102.34616	1303 E Marshall Howard Blvd	Littlefield	79339	+18063850364			0.92
+f03afd2f3d04	Lynwood Nursing & Rehabilitation	senior	retirement home	33.58160	-102.34796	803 S, 803 Alamo Rd	Levelland	79336	+18068942806	https://slpoperations.com/	Senior Living Properties	0.92
+687a72562629	Lynwood Nursing & Rehabilitation, L.P.	senior	assisted living facility	33.58685	-102.34828	803 S Alamo Rd	Levelland	79336	+18068942806	http://www.daybreakventure.com/lynwood-nursing-and-rehabilitation-lp-home.aspx		0.85
+54f211031e91	Smyer Senior Citizens Community Center	senior	retirement home	33.58640	-102.16422		Smyer					0.65
+8aa74488deb2	The Callander House Llc	senior	retirement home	33.50482	-102.01728	808 Main St	Wolfforth	79382	+18068554699			0.95
+ac37b97488a8	The Residence at Wolfforth	senior	retirement home	33.51121	-102.00685	111 TX-193 Loop #193	Wolfforth	79382	+18066325933	https://www.residenceatwolfforth.com/		1.00
+23474cf98b62	Villa of Wolfforth	senior	retirement home	33.50500	-102.00702	109 E 5th St	Wolfforth	79382	+18068664666	http://www.cathedralrock.com		0.99

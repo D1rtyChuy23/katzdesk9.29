@@ -1,0 +1,4 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+a0e79e5cdfa5	Kyrish Autos	cardealer		35.52024	-97.51135	8900 North Loop E	Houston	77029	+19038033235	https://www.kyrishtruckcenters.com/		0.80
+e73b86e1ec23	Arbuckle Mountain Fried Pies & Arbuckle Coffee Shop	coffee		35.45314	-97.55415	208 W US-82	Nocona	76255	+14058080022			0.85
+06bc9d1803c4	Sonic Drive-In	fastfood		35.41872	-97.51279	11600 N I-35 Service Rd	Jarrell	76537	+15125980536	https://locations.sonicdrivein.com/tx/jarrell/11600-north-i-35-service-road.html		0.85

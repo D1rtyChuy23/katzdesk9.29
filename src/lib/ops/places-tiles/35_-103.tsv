@@ -1,0 +1,66 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+ed05d520c0cf	Cinnabon	bakery		35.23588	-102.42889	6555 US-385	Vega	79092	+18063353323	https://locations.cinnabon.com/tx/vega/6555-us-highway-385?utm_source=extnet&utm_medium=organic&utm_campaign=locations_partner	Cinnabon	0.97
+5e801568bb5b	Sod Cellars	bar	winery	35.97038	-102.44200	11520 US-87 Bldg C	Dalhart	79022	+18066792388	https://www.instagram.com/sodcellars?igsh=MWw1MmY0a3B0YXk3cA%3D%3D		0.74
+a220adf466c3	Dickson Automotive	cardealer		35.20886	-102.20847	609 W Interstate 40	Wildorado	79098	+18064263544			0.92
+c638c4714525	Mom Cinema 3	cinema		35.26627	-102.00073	Tascosa Road.	Amarillo	79124		http://www.mom3.com/		0.74
+34a6fb21d64f	Beans 'N Butter Coffee Co.	coffee		35.88316	-102.40029	918 7th St	Hartley	79044	+18063610024	http://beansnbutter.square.site/		0.92
+e219d039a049	Bushland Coffee Company	coffee		35.19604	-102.06416	1600 S Farm To Market Rd 2381	Amarillo	79124	+18063109856	http://www.bushlandcoffee.com/		0.99
+40523cec89b6	Hickory Inn Cafe	coffee		35.24321	-102.42941	1004 Vega Blvd	Vega	79092	+18062672569	https://hickoryinncafe.wixsite.com/vegatexas		0.92
+ea57d61d31c2	Midpoint Cafe	coffee		35.27077	-102.67285	305 Historic Rte 66	Adrian	79001	+18065366379	http://midpointroute66cafe.com/		1.00
+803fa9a450ed	Route 66 Chilling Station	coffee		35.24554	-102.42816		Vega	79092	+18063405770			0.81
+84fef663b55f	The Bee's Knees on Route 66	coffee		35.23859	-102.42858	920 S Main St	Vega	79092	+18062670177			0.88
+2d3b36f56bee	The Bent Door Cafe	coffee		35.27099	-102.66815	104 W Historic Route 66	Adrian	79001	+19366157730	http://bentdoor.wordpress.com/		0.98
+8ba7a7e8fcec	ADRIAN TRUCK STOP	convenience		35.26220	-102.74610	1790 INTERSTATE 40	Adrian	79001		https://locations.valero.com/en-us/LocationDetails/Index/1790-INTERSTATE-40/0000027727	Valero	0.80
+173dfa19e07b	Allsup's Convenience Store	convenience		35.23804	-102.42906	1000 S Main St	Vega	79092	+18062672551	https://www.allsups.com/	Allsup’s	0.92
+f3c948a0bc81	Alon	convenience		35.24300	-102.42897	1001 Vega Blvd	Vega	79092	+18062672714	http://myalon.com/		0.85
+3d6311916b16	CAT Scale	convenience	truck gas station	35.18710	-102.01147	14701 I-40 W Service Rd	Amarillo	79124	+18063582551	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+c312c3ab8187	CAT Scale	convenience	truck gas station	35.23515	-102.42846	6555 US Hwy 385	Vega	79092	+18062670011	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+ff0fa94def47	Dalhart Consumer Fuel Association	convenience		35.88553	-102.39657	700 4th St	Hartley	79044	+18063654431	http://www.dalhartconsumers.net/		0.58
+6f34e2b59758	Double T Fuels	convenience		35.10015	-102.40263	5595 US-385	Hereford	79045	+18068019000			0.92
+c8742f73c961	Empire Fuel	convenience		35.24330	-102.42890	1000 Vega BLVD	Vega	79092		https://locations.valero.com/en-us/LocationDetails/Index/1000-VEGA-BLVD/0000030470	Valero	0.80
+1c2151d8ced5	Hitchin' Post	convenience		35.88690	-102.39732	700 US-87	Hartley	79044	+18063654441			0.92
+73ad1e16de24	KK IRISH	convenience		35.26880	-102.67661	2190 Interstate 40 W	Adrian	79001		https://locations.valero.com/en-us/LocationDetails/Index/2190-INTERSTATE-40-W/0000026317	Valero	0.80
+0e7505362bfe	Midway 66	convenience		35.26896	-102.67658	2190 I-40	Adrian	79001	+18065389506	http://phillips66.com		0.92
+d96c84463eed	Pak-A-Sak	convenience		35.19070	-102.06580	20101 I-40	Bushland	79012	+18064571111	https://pakasak.net	PAK A SAK	0.92
+0cb767ada4d4	Phillip 66	convenience		35.26892	-102.67652	2190 I-40 E	Adrian	79001	+18065386218	http://www.phillips66gas.com	Phillips 66 Gas	0.92
+41296c1e1faf	Phillips 66	convenience		35.88660	-102.39743	711 US Hwy 87	Hartley	79044	+18063654441	https://www.phillips66gas.com/		1.00
+d6d39eaea7d9	Phillips 66	convenience		35.19069	-102.06549	2306 Wells St	Bushland	79012	+18064571111	https://www.phillips66gas.com/		0.92
+c2a59a98f7cf	Pilot Travel Center	convenience		35.23590	-102.42887	6555 US-385	Vega	79092	+18062670011	https://locations.pilotflyingj.com/us/tx/vega/6555-us-385	Pilot Flying J	0.92
+419d5ca9eba8	Sarges Country Store	convenience		35.52434	-102.26100		Boys Ranch		+18063527739	https://sarges-country-store.hub.biz/		0.56
+e245c83474e0	Shamrock	convenience		35.24287	-102.42867	502 S Main St	Vega	79092	+18062672206			0.92
+67143db7da89	Sunflower Station	convenience		35.27078	-102.67290	W Historic Route 66	Adrian	79001				0.77
+e63995fad0d0	Valero	convenience		35.26898	-102.67621	2190 Interstate 40 W	Adrian	79001	+19065386218	https://locations.valero.com/en-us/LocationDetails/Index/2190-INTERSTATE-40-W/0000026317	Valero	0.92
+ffb69ea93792	Valero	convenience		35.24313	-102.42878	1000 Vega Blvd	Vega	79092	+18062670633	https://locations.valero.com/en-us/LocationDetails/Index/1000-VEGA-BLVD/0000030470	Valero	0.97
+e6a1d2c690d9	Valero Energy	convenience		35.23816	-102.42912	1001 Vega Blvd	Vega	79092	+18062672206	http://www.valero.com	Valero	0.98
+75cad2dfab65	Subway	fastfood	sandwich shop	35.24073	-102.42815	701 S Main St	Vega	79092	+18062670004	https://www.subway.com		0.75
+93b7f0130e0f	Subway	fastfood	sandwich shop	35.18931	-102.01123	14701 I-40	Amarillo	79124	+18063582551	https://restaurants.subway.com/united-states/tx/amarillo/14701-i-40-w	Subway	0.98
+878d827cfbfb	Taylor's Vega Market	grocery		35.24685	-102.42719	107 S 9th St	Vega	79092	+18062672331	http://vegamarket.com		0.99
+ce22fa10623c	Americas Best Value Inn & Suites Vega	hotel		35.24528	-102.43787	1800 Vega Blvd	Vega	79092	+18062672131	https://www.redlion.com		0.92
+9d8dababd3f2	Bonanza Motel	hotel	motel	35.24271	-102.42444	607 Vega Blvd	Vega	79092	+18062672158	http://www.bonanzamotelvega.com		0.99
+3c67693e8bb1	Capital O Route 66 Country Inn Vega Tx	hotel		35.24548	-102.43735	Vega Blvd, Vega TX	Vega Tx			https://www.oyorooms.com/gb/300043/	OYO	0.94
+364e8774f1ee	Comfort Inn Vega	hotel		35.23772	-102.42773	1005 S Main St	Vega	79092	+18062670126	http://www.comfortinn.com		0.92
+d30bd2eb77d0	Days Inn by Wyndham Vega TX	hotel		35.23752	-102.42773	1005 S Main St	Vega	79092	+18062670126	https://www.wyndhamhotels.com/days-inn/vega-texas/days-inn-vega-tx/overview	Days Inn	0.99
+979ad28bc3c0	Deadman Canyon	hotel		35.24525	-102.81111		Adrian			http://deadmanspassranch.com		0.73
+72ffab554656	Fabulous 40s Motel	hotel	motel	35.27078	-102.67242	301 Historic Rte 66	Adrian	79001	+18062143043	http://facebook.com/fabulous40smotel		0.92
+081fba3f2a4d	Richardson Agco	hotel		35.24465	-102.43602	1500 Vega Blvd	Vega	79092	+18062672459			0.65
+b3e408f38516	Rodeway Inn-Dalhart	hotel		35.76094	-102.87915	1110 US Highway 54	Dalhart	79022	+18062498585	http://www.choicehotels.com		0.72
+f71b7a9456b2	Amarillo Natural Gas Inc	office	energy company	35.14648	-102.01108	5800 Arnot Rd	Amarillo	79119	+18063525271	http://anginc.net/		0.92
+35a6ef500c0b	Bar H steak house restaurant	restaurant	steakhouse	35.73835	-102.91425	910 US Highway 54	Dalhart	79022	+18062443813			0.88
+68f8f929c124	Burrito Barn	restaurant	mexican restaurant	35.19100	-102.01060	2008 Arnot Rd	Amarillo	79124	+18066902746			0.92
+14fd9b2c1560	Country Kitchen	restaurant		35.89153	-102.39989	109 4th St	Hartley	79044	+18063654697	https://instagram.com/countrykitchenhartley_tx?igshid=NTc4MTIwNjQ2YQ%3D%3D		0.88
+a76691885979	Godfather's Pizza Express	restaurant	pizza restaurant	35.18915	-102.01113	14701 I-40 WEST	Amarillo	79124			Godfather's Pizza	0.80
+f8444d4412c3	Hoggs BBQ	restaurant		35.86373	-102.01203	5928 US 87	Dumas	79029	+18069349497	https://www.thehoggsbbq.com		0.77
+2cc11e7f8e83	Indian Dhaba	restaurant	indian restaurant	35.23579	-102.42743	3650 I-40 E	Vega	79092	+18062672960	http://www.indiandhaba.com/		0.95
+d40ca41075a3	Joe's Pizza & Pasta	restaurant	italian restaurant	35.19062	-102.06348	19151 I-40 Frontage Rd	Bushland	79124	+18063568191	http://www.joespizzanpasta.com/		0.97
+9c82488b97ea	Lucy's Kitchen	restaurant	texmex restaurant	35.24172	-102.42858	604 S Main St	Vega	79092	+18062860058	https://lucyskitchentx.weebly.com		0.94
+6e90a583c35f	Mi Ranchito	restaurant	mexican restaurant	35.88461	-102.39608	1003 4th St	Hartley	79044	+18063613663	http://mi-ranchito-104110.square.site/		0.72
+6c2891db3cff	Mike's Bar and Grill	restaurant	bar and grill restaurant	35.24013	-102.42802	701 S Main St	Vega	79092	+18062860400			0.87
+1ed776e51e95	Mitch's Texas Style BBQ	restaurant	barbecue restaurant	35.19811	-102.06462	1500 S FM 2381	Amarillo	79124	+18062302126		Mitch's TX BBQ	0.98
+b4931a609ad8	Piccadilly Circus Pizza	restaurant	pizza restaurant	35.26878	-102.67660	2190 Interstate 40 W	Adrian	79001	+18065386218	http://www.pcpizza.com		0.92
+392bad7abeb0	Rooster's Mexican Restaurant and Cantina	restaurant	mexican restaurant	35.24334	-102.43271	1300 Vega Blvd	Vega	79092	+18062670113	https://www.restaurant.com/roosters-vega-pid=213373		0.92
+74ef87a21e28	Route 66 Smokehouse	restaurant	barbecue restaurant	35.18788	-102.01141	2420 Arnot Rd	Amarillo	79124	+18063569295			0.85
+8cee95ca66bf	Sam’s Southern Eatery / Dumas	restaurant	southern american restaurant	35.86368	-102.01201	5928 US-87	Dumas	79029	+18069345740	http://www.samssouthern.com/		0.92
+3094255a0eb3	Shem's Burritos	restaurant	latin american restaurant	35.80274	-102.03269	6320 FM-722	Dumas	79029	+18069308940			0.65
+c895eea46b90	The Falcon in Bushland TX	restaurant	comfort food restaurant	35.19036	-102.06565	2300 Wells St	Bushland	79012	+18068030219	http://www.thefalconinbushland.com/		0.96
+42b91d344f2f	The Trails Cafe	restaurant		35.57679	-102.66232	none	Gunter					0.73
+adff613aba46	LoretoOnThePlains	senior	retirement home	35.89054	-102.39949		Hartley		+18063615097	http://loretoontheplains.org/		0.63

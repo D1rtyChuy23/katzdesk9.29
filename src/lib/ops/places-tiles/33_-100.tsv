@@ -1,0 +1,158 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+b8e6e4e9968d	Laurabelle’s Porch Bakery	bakery		33.44990	-99.63082	211 N 9th Ave	Munday	76371	+13256602942	https://qr.imenupro.com/1v3j-2		0.92
+08226c7cfeb2	lil Cake Barn	bakery		33.17814	-99.17719	110 S Minter Ave	Throckmorton	76483	+18063168644			0.92
+b985c4dc3491	Munday Donuts	bakery	donut shop	33.44894	-99.63032	941 W Main St	Munday	76371	+19404213210			0.96
+7bc587e67a07	Seymour Donuts	bakery	donut shop	33.59418	-99.26260	109 W California St	Seymour	76380	+19408894230			0.92
+b837aef11726	Wonderland	bakery		33.44910	-99.62096	421 E Main St	Munday	76371	+19404810541	http://wonder.land/		0.58
+a684f35d8272	Chuck Wagon	bar		33.17898	-99.17840	110 W Chestnut St	Throckmorton	76483	+19402564637			0.92
+7efe89b04850	Last Chance Saloon	bar		33.58270	-99.79291	105 W Cedar St	Benjamin	79505	+19404542030			0.70
+4a36e18265aa	The Fox & Hare Public House	bar	pub	33.98380	-99.72531	107 S Main St	Crowell	79227	+19406841060	http://thefoxandharepub.com		0.69
+4665804e12d9	Throckmorton Country Club	bar		33.17266	-99.18475	Lake Road	Throckmorton	76483	+19408493131			0.92
+091ff6ad9b86	Bailey Toliver Chevrolet	cardealer	used auto dealer	33.15453	-99.73380	578 U S 277	Haskell	79521	+18667451948	http://www.baileytoliverchevrolet.com/		0.97
+f9abca9b6734	Bailey Toliver Chevrolet, Llp	cardealer	used auto dealer	33.13234	-99.74065	578 US Highway 277 S	Haskell	79521	+19408642626	https://www.baileytoliverchevrolet.com/		0.92
+9e2b02413574	Horton Motors	cardealer	used auto dealer	33.59398	-99.26517	309 W California St	Seymour	76380	+19408896636	http://www.hortonmotors.com		0.65
+9dd187ee95bb	Horton Motors Auto Sales	cardealer		33.59238	-99.25060	1001 E Nevada St	Seymour	76380	+19408896636	http://www.hortonmotors.com/		0.69
+b516565b2c9d	Larned's Sales Center	cardealer		33.14909	-99.73420	806 S Ave E	Haskell	79521	+19408642749	https://www.larnedstoragecenter.com		0.99
+b39f1d113d0f	Mitch Hall Chevrolet	cardealer		33.13213	-99.74065	578 US Highway 277 S	Haskell	79521	+19408642626	http://www.MitchHallHaskell.com/	Chevrolet	0.92
+256ebde80069	United Ag and Turf	cardealer		33.60853	-99.25880	19677 US-82	Seymour	76380	+19403550520	https://www.unitedagandturf.com/?y_source=1_NjE4Nzg2OTItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	United Ag & Turf	0.99
+f77893824534	City Hall Cinema	cinema		33.59021	-99.26173	301 N Washington St	Seymour	76380	+19408890030			0.92
+2ae5557d43b6	1983 Coffee Food & Gifts	coffee		33.41869	-99.81951	112 N Central Ave	Knox City	79529	+19402611617			0.96
+c4a9c3078df2	Blessings Tea Room & Catering	coffee	tea room	33.59325	-99.25712	407 E Idaho St	Seymour	76380	+19408896735	http://www.seymourblessings.com/		0.97
+71d56187f7e2	Latte-da Coffee & Co	coffee		33.98438	-99.72321	216 E Commerce St	Crowell	79227	+19406554585			0.73
+6d5886c1f3f0	Tater's Cafe Crowell Tx.	coffee		33.98378	-99.72350	111 S 1st St	Crowell	79227	+19406841491	http://www.taterscafe.com/		0.98
+2ac489187704	The Last Drop	coffee		33.44930	-99.62493	211 W Main St	Munday	76371	+19405530605	https://order.dripos.com/The-Last-Drop		0.96
+e215a40d4f1b	The Meltdown Snow Cones	coffee		33.99213	-99.72598	125 W Britt St	Crowell	79227	+19406554134			0.92
+bc42766cfae7	7-Eleven	convenience		33.15698	-99.72708	106 N 1st Street	Haskell	79521	+19408643434	https://www.7-eleven.com/		1.00
+9826f56db0f8	Allsup's	convenience		33.16641	-99.73354	1000 N Ave E	Haskell	79521	+19408642519	https://www.allsups.com/	Allsup’s	0.92
+aefa8d38f262	Allsup's	convenience		33.41177	-99.81925	105 S Central Ave	Knox City	79529			Allsup's	0.80
+c5a17eee3c6c	Allsup's	convenience		33.18394	-99.89435	508 Union Ave	Rule	79547	+19405313029	https://www.allsups.com/	Allsup’s	1.00
+dcdd08c43dc7	Allsup's	convenience		33.44869	-99.62260	120 S Birch Ave	Munday	76371	+19404225368	https://www.allsups.com/	Allsup’s	0.92
+f0756bc928b8	Allsup's	convenience		33.17831	-99.17706	102 S Minter Ave	Throckmorton	76483	+19402095115	https://www.allsups.com/	Allsup’s	1.00
+10bc980f3ad0	Allsup's Convenience Store	convenience		33.59464	-99.26015	700 N Main St	Seymour	76380	+19408883552	https://allsups.com/	Allsup’s	0.92
+ae844c3869e5	Allsup's Convenience Store	convenience		33.58497	-99.26076	310 S Main St	Seymour	76380	+19408885692	https://allsups.com/	Allsup's Convenience store #207	0.92
+b5ea0607b7ea	Allsup's Convenience Store	convenience		33.98423	-99.71941	500 E Commerce St	Crowell	79227	+19406841966	http://allsups.com/	Allsup's Convenience store #207	1.00
+043fae8253d7	Alon	convenience		33.59462	-99.26030	700 N Main St	Seymour	76380	+19408883552	https://www.allsups.com/	Allsup’s	0.92
+9771d987afab	ALON	convenience		33.58495	-99.26036	310 S Main St	Seymour	76380	+19408885692	https://www.allsups.com/	Allsup’s	1.00
+f6590e32fbf4	ALON	convenience		33.41780	-99.81905	105 S Central Ave	Knox City	79529	+19406583481	https://www.allsups.com/	Allsup’s	1.00
+a1aed0d05a12	ALON Gas Station	convenience		33.98428	-99.71915	500 East Commerce Street	Crowell	79227	+19406841966	https://alonfuel.com/stations/alon-gas-station-4805-500-e-commerce-tennessee-crowell-tx-79227/		0.95
+a5e22f288fa6	ALON Gas Station	convenience		33.17850	-99.17718	101 East Chestnut Street	Throckmorton	76483	+19408493003	https://alonfuel.com/stations/alon-gas-station-5187-102-s-minter-ave-throckmorton-tx-76483/		1.00
+1094bcaeb579	Chevron	convenience		33.15723	-99.72920	105 N 1ST	Haskell	79521		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/105-N-1ST-HASKELL-TX-79521-id382276	Chevron	0.95
+fa2aeeccb8f5	Clint’s A Penman’s Fuel Stop	convenience		33.17983	-99.17751	201 N Minter Ave	Throckmorton	76483	+19408493008			0.83
+8e54d9358eb0	Conoco	convenience		33.16098	-99.73366	426 N Avenue E	Haskell	79521	+13256772775	https://www.conoco.com/		0.92
+6044048fdd55	Conoco Gas Station	convenience		33.41779	-99.81261	609 E Main St	Knox City	79529	+19406583513	http://www.conoco.com		0.92
+f83e211b7b63	Cow Country	convenience		33.19418	-99.17771	1105 N Minter Ave	Throckmorton	76483	+19406312333			0.82
+172c58044a63	DK Gas Station	convenience		33.58496	-99.26052	310 South Main Street	Seymour	76380	+19408885692	https://dkfuel.com/stations/dk-gas-station-1682-700-north-main-st-seymour-tx-76380/		0.92
+631a935a1b90	DK Gas Station	convenience		33.41788	-99.81890	105 South Central Avenue	Knox City	79529	+19406583481	https://dkfuel.com/stations/dk-gas-station-5173-105-south-central-ave-knox-city-tx-79529/		0.95
+6dee4bbee1b6	DK Gas Station	convenience		33.59462	-99.26019	700 North Main Street	Seymour	76380	+19408883552	https://dkfuel.com/stations/dk-gas-station-1682-700-north-main-st-seymour-tx-76380/		0.92
+722a58cea620	DK Gas Station	convenience		33.16637	-99.73362	1000 North Avenue East	Haskell	79521	+19408642519	https://dkfuel.com/stations/dk-gas-station-5174-1000-north-ave-e-haskell-tx-79521/		0.95
+7c3cb212536a	DK Gas Station	convenience		33.18398	-99.89413	510 Union Avenue	Rule	79547	+19409972358	https://dkfuel.com/stations/dk-gas-station-5175-510-union-ave-rule-tx-79547/		0.95
+c26a348584b0	H-P Oil	convenience		33.58464	-99.25999	200 E Ingram St	Seymour	76380	+19408896236			1.00
+146104cc3575	Haskellians Grasp N Pass	convenience		33.15781	-99.73729	706 N 1st St	Haskell	79521	+19408642062			0.92
+e591de78d136	HOP IN 430463	convenience		33.16104	-99.73350	400 N AVE E	Haskell	79521			Conoco	0.80
+9f326265876a	Kent Kwik	convenience		33.15739	-99.72929	105 N 1st St	Haskell	79521	+19408634505	https://kentkwik.com	Kent Kwik Convenience Stores	0.92
+cde60dd0ef70	Penman Conoco	convenience		33.41779	-99.81211	609 E Main St	Knox City	79529	+19406583513	http://www.penmanservices.com/	Conoco	0.99
+38f814f390cf	Penmans	convenience		33.58438	-99.79195	102 E Hayes St	Benjamin	79505	+19404542323	http://conoco.com/station-finder		0.92
+bf08dc6daeaa	Phillips 66	convenience		33.15700	-99.72707	106 N 1st St	Haskell	79521	+19408643434	https://www.phillips66gas.com/		1.00
+c65532461ae7	Ranchland	convenience		33.58433	-99.79184	102 E Hayes St	Benjamin	79505	+19404542323	http://www.penmanservices.com/		0.99
+5892607540cc	Shell	convenience		33.59411	-99.26066	611 N Main St	Seymour	76380	+19408892819	https://find.shell.com/us/fuel/10003100-611-n-main-st		0.92
+97b46041841e	SIMPSON OIL CO	convenience		33.18373	-99.88394	4349 US Highway 380 W	Rule	79547	+19409972122			0.85
+d4a663311c42	Spring Market	convenience		33.16919	-99.72819	5 N 14th St	Haskell	79521	+19408643127	https://www.spring-market.com/store-information/Haskell/722	Spring Market	0.92
+b5b36e93d6a5	Star Stop Cafe	convenience		33.15779	-99.73735	706 N 1st St	Haskell	79521	+19408642062	https://www.starstopcafe.com		0.79
+188157078405	Stripes	convenience		33.15698	-99.72708	106 N 1st St	Haskell	79521	+19408643434	https://stripesstores.com/?utm_source=Bing&utm_medium=local&utm_campaign=bing-local		0.99
+40b50dd6ea66	Stripes	convenience		33.15705	-99.72021	106 N 1st St E	Haskell	79521	+19408643434	http://calscstores.com		0.55
+16c011d8fbaa	Sunoco	convenience		33.15725	-99.72704	106 N 1st St	Haskell	79521	+19408643434	http://www.sunoco.com	Sunoco	0.92
+83bbd5362ac0	Super Stop	convenience		33.59411	-99.26067	611 N Main St	Seymour	76380	+19408892819	http://shell.com		0.92
+bc683206e38d	Valero	convenience		33.58469	-99.25986	200 E INGRAM ST	Seymour	76380	+18178885731	http://www.valero.com	Valero Energy	0.92
+21ed3c52d30f	Wes-t-go Convenience Store 29	convenience		33.16100	-99.73334	400 N Avenue E	Haskell	79521	+19408642929			0.92
+6a9b9333dafa	Chicken Express	fastfood		33.59291	-99.26022	510 N Main St	Seymour	76380	+19408892888	http://www.chickenexpress.us/	Chicken Express	0.98
+d0063cc006f7	Cristina's Taqueria & More	fastfood		33.18518	-99.89558	408 Sunny Ave	Rule	79547	+19402003842			0.96
+05a0e26d0bd5	Dairy Queen	fastfood		33.45314	-99.62199	320 W G St	Munday	76371	+19404224661	https://dqtexas.com/	Dairy Queen	0.97
+9002de330bb5	Dairy Queen	fastfood		33.59464	-99.26071	111 E California St 111 E California St	Seymour	76380	+19408885285	https://dqtexas.com/	Dairy Queen	0.99
+222e0dca2769	DQ Grill & Chill	fastfood		33.45304	-99.62191	320 W G St	Munday	76371		https://www.dairyqueen.com/en-us/locations/tx/munday/320-w-g-st/4209	DQ Grill & Chill	0.80
+4a4492067441	DQ Grill & Chill	fastfood		33.59462	-99.26086	111 E California St	Seymour	76380		https://www.dairyqueen.com/en-us/locations/tx/seymour/111-e-california-st/4374	DQ Grill & Chill	0.80
+56bb7f5079ad	Jersey Mike's Subs	fastfood		33.99860	-99.72506	Hwy 6 & Hwy 288	Manvel	77578	+17322234044	https://www.jerseymikes.com/15190		0.77
+89650e920260	Krispy Krunchy Chicken	fastfood		33.15794	-99.73736	706 N 1st St	Haskell	79521		https://locations.krispykrunchy.com/tx/haskell/706-n-1st-st	Krispy Krunchy Chicken	0.96
+9d70577060b8	Lone Bull Shaved Ice	fastfood		33.15789	-99.72908	100 N 1st St	Haskell	79521	+3253708436			0.73
+0bf1c63ea8a4	Overflow Outpost	fastfood		33.18234	-99.17721	308 N Minter Ave	Throckmorton	76483	+19405781695			0.97
+5b611e7b9b4b	Sonic Drive In	fastfood		33.59626	-99.26098	901 North Main Street	Seymour	76380	+19408882039	https://locations.sonicdrivein.com/tx/seymour/901-north-main-street.html	Sonic Drive-In	0.99
+4c510be8f66f	Sonic Drive-In	fastfood		33.17023	-99.73319	1402 N Ave E	Haskell	79521	+19403550020	https://locations.sonicdrivein.com/tx/haskell/1402-n.-e-avenue.html	Sonic Drive-In	0.96
+00712c64cdcc	Subway	fastfood	sandwich shop	33.16100	-99.73334	400 N Avenue E	Haskell	79521	+19408645396	https://www.subway.com		0.92
+c5b200246a8f	Brookshire's Food & Pharmacy	grocery		33.16974	-99.72867	5 N 14th St	Haskell	79521	+19408643127	https://www.brookshires.com		0.92
+bd7963cfc2de	Haskell #722	grocery		33.16989	-99.72787	5 N 14th St	Haskell	79521			Spring Market	0.80
+98ac3c55334f	Knox Inn	grocery		33.41491	-99.81953	402 S Central Ave	Knox City	79529				0.98
+8d69f10e1621	Lawrence Brothers IGA	grocery		33.45015	-99.62407	211 N Munday Ave	Munday	76371	+19404224133	http://lawrencebros.com/		0.92
+c6d932dfac17	Lawrence Brothers IGA	grocery		33.41826	-99.81752	206 W Main St	Knox City	79529	+19406583715	http://LawrenceBros.com/		0.92
+ddc1eeacec8b	Smith's Grocery	grocery		33.98419	-99.72274	220 E Commerce St	Crowell	79227	+19406841822			0.92
+b7eb9429d2a8	The Grocery Store	grocery		33.08626	-99.17956	101 Highway 183 N	Woodson	76491	+19403456721			0.86
+f7a3cad36a86	United Supermarkets	grocery		33.58953	-99.26006	202 N Main St	Seymour	76380	+19403101955	https://local.unitedsupermarkets.com/tx/seymour/202-n-main-st.html	United Supermarkets	0.92
+96c02348bd6a	Walmart Neighborhood Market	grocery		33.16993	-99.72855	5 N 14th St	Haskell	79521	+19408648084	http://www.walmart.com/store/2779		0.92
+65e3f92bf297	Woodson Grocery	grocery		33.02290	-99.05441	528 N US Highway 183	Woodson	76491	+19403456721			0.83
+f7bdf4a6c59a	Haskell Memorial Hospital	hospital		33.15732	-99.74466	1 Avenue N	Haskell	79521	+19408642621	http://www.haskellmemorialhospital.com		0.92
+872c19c9288e	Haskell Outpatient Clinic	hospital		33.15781	-99.74419	1301 N 1st St	Haskell	79521	+19408642834	http://haskellmemorialhospital.com		0.92
+c6f1bd02d2c7	Knox County Hospital	hospital		33.41376	-99.81133	701 Southeast 5 Th Street	Knox City	79529	+19406573535	http://www.knoxhospital.org/		1.00
+33a72a7120c5	Seymour Hospital	hospital		33.59019	-99.24851	200 Stadium Drive	Seymour	76380	+19408895572	https://www.SeymourHospital.com/		0.92
+d5b74e60b88e	Throckmorton County Memorial Hospital	hospital		33.18994	-99.17671	802 N Minter Ave	Throckmorton	76483	+19408492151	http://throckmortonhospital.com/		0.92
+bfac14d0decd	American Star Inn - Munday Texas	hotel	motel	33.45383	-99.61541	851 E G St	Munday	76371	+19404225542			0.98
+a5d94465b1fe	AmeriStay Inn & Suites	hotel		33.15789	-99.72955	108 N 1st St	Haskell	79521	+19408642424	http://www.ameristayhaskell.com		0.92
+91fc5aea24b2	City Motel	hotel	motel	33.41821	-99.80688	1100 E Main St	Knox City	79529	+19406583541	http://www.christysmotel.com		0.99
+031b248314c7	Corley Manor Guest House	hotel		33.41621	-99.81416	500 SE 3rd St	Knox City	79529	+19406574406	http://www.corleymanor.com		0.94
+b2df1cd39537	Corner Inn	hotel		33.45385	-99.61551	851 E G St	Munday	76371	+19404225542			0.83
+82c58cfeccac	Haskell Inn	hotel	motel	33.15574	-99.73365	115 S Avenue E	Haskell	79521	+19408642251	http://haskellinn.com/		0.99
+cd3516a606ac	HH Creek Inn	hotel	motel	33.58448	-99.26064	400 S Main St	Seymour	76380	+19404482001	http://hhcreekinn.com/		1.00
+104caecb275e	La Siesta Motel	hotel	motel	33.59458	-99.27225	904 W California St	Seymour	76380	+19408893171	http://la-siesta-motel-tx-2.hub.biz/		0.95
+442eb2112f96	Moonshine Gate	hotel		33.74300	-99.15495	596 Moonshine Gate Rd	Seymour	76380	+19403572346			0.79
+6daa226cdf73	Pony Creek Gate	hotel		33.70793	-99.25301	191 Pony Creek Rd	Seymour	76380	+19403572456			0.76
+1fc5d66a625c	Rooster's Roost & Chick Inn	hotel		33.58983	-99.26657	211 N Donald St	Seymour	76380	+19404482001			0.98
+c6c003a8b4bd	Sagamar Inn	hotel	motel	33.59849	-99.26074	1101 N Main St	Seymour	76380	+19408885507	http://www.sagamarinncleburne.com		0.99
+027ec491dd04	The Woodson Inn	hotel		33.08596	-99.17942	121 US-183	Woodson	76491	+19403456599			0.91
+c428eee1c25e	Yellow Rose Lodge LLC	hotel	motel	33.17849	-99.18008	207 W Chestnut St	Throckmorton	76483	+14699955003	http://yellowroselodge.com/		0.92
+5492494b0f53	Hunt Oil Co	office	energy company	33.41787	-99.80466	1301 E Main St	Knox City	79529	+19406583567	http://huntoil.com		0.92
+edae0d9d51ff	Pro Techno Solutions	office	information technology company	33.16280	-99.73049	202 N 6th St	Haskell	79521	+17252560881			0.92
+77da248b68d8	Badland's BBQ and Deli	restaurant	barbecue restaurant	33.58440	-99.79206	102 E Hayes St	Benjamin	79505	+19404542323			0.96
+2ebe7deac495	Big Johns	restaurant	pizza restaurant	33.58428	-99.79169	128 W Main St	Munday	76371	+19402798924			0.89
+e4692b93dada	Bigg's Pizza and More	restaurant	pizza restaurant	33.58834	-99.26179	107 N Washington St	Seymour	76380	+19408894224			0.92
+2620a9be955c	China Wok	restaurant	chinese restaurant	33.15775	-99.73360	418 N 1st St	Haskell	79521	+19408643338	https://www.chinawokhaskelltx.com/		0.93
+576d0ab4615f	Copeland's Cafe	restaurant	comfort food restaurant	33.58457	-99.26077	400 S Main St	Seymour	76380	+19408894100	http://www.copelandscafe.com/		0.97
+22c7a31c89b1	Cow Country Cafe	restaurant	american restaurant	33.17886	-99.17749	113 E Washington St	Throckmorton	76483	+19408493044	http://country-cafe-throckmorton.edan.io		0.77
+41b784acf859	Dairy Bar	restaurant	diner	33.98394	-99.72279	221 E Commerce St	Crowell	79227	+19406841961	http://dairybarcrowell.foodmaker.website		0.97
+230cc0343d23	Double A Drive Inn	restaurant	theme restaurant	33.15753	-99.74127	1103 N 1st St	Haskell	79521	+19408642466			0.97
+21d7d5f287ca	Farmers Daughter	restaurant		33.17956	-99.17719	132 N Minter	Throckmorton	76483				0.60
+cc37b98b72d2	Feed Me, Seymour	restaurant		33.58741	-99.25997	111 S Main St	Seymour	76380				0.88
+4bb6a397ab9b	Gobble You Up	restaurant	salad bar	33.15645	-99.73355	411 S 1st St	Haskell	79521				0.76
+5d5e72f2c0e2	Haskell Donuts	restaurant	breakfast and brunch restaurant	33.15790	-99.73894	900 N 1st St	Haskell	79521	+19408642610	http://haskelledc.com		0.92
+e3db68705b76	Haskell Grub	restaurant		33.15778	-99.73413	112 N Avenue E	Haskell	79521				0.80
+f4460a0d04f0	Haskell Outpost	restaurant	diner	33.14716	-99.73450	1006 S Ave E	Haskell	79521	+19408645990	https://www.haskelloutpost.com/gallery.html		0.62
+09d232e96d48	Isabella's Tex Mex Cafe	restaurant	texmex restaurant	33.41894	-99.81901	121 N Central Ave	Knox City	79529	+19406581049			0.95
+736cec55ad14	La 10/14 Fruteria y Mas	restaurant	mexican restaurant	33.44869	-99.63014	840 W Main St	Munday	76371	+19402031660			0.77
+ef371a616da8	Laredo Taco Company	restaurant		33.15698	-99.72708	106 N 1st Street	Haskell	79521	+19408643434	https://www.laredotacocompany.com/		0.95
+5e89b8fcbdf9	Little Italy Restaurant KC	restaurant		33.41783	-99.81101	709 E Main St	Knox City	79529	+19406583111			0.76
+8fa06664a6df	Long Branch Roadhouse	restaurant	steakhouse	33.59689	-99.26030	910 N Main St	Seymour	76380	+19408894336			0.96
+037ae6116b73	Mati's	restaurant	mexican restaurant	33.45318	-99.61578	840 E G St	Munday	76371	+19404213167	http://www.matis.com		0.92
+20e1e4d0731d	Megargel Deli Beer Wine & Grocery	restaurant	delicatessen	33.57671	-99.23564	918 State Highway 114	Seymour	76380	+19405622121			0.62
+5b7ef898d367	Mi Familia Mexican Restaurant	restaurant	mexican restaurant	33.16475	-99.73416	500 N 8th St	Haskell	79521	+19408634144			0.92
+4c26b3471ee6	New Maverick Cafe	restaurant	american restaurant	33.59042	-99.26085	303 N Main St	Seymour	76380	+19408893056	http://thenewmaverickcafe.food94.com		0.92
+feae94d02a00	Ollie B's Restaurant	restaurant		33.44888	-99.62486	210 W Main St	Munday	76371	+19404213223			0.92
+c1b9e498311f	Pizza Place	restaurant	pizza restaurant	33.41866	-99.81904	113 N Central Ave	Knox City	79529	+19406575345			0.92
+14c0cf4aad8f	Rock Inn Cafe	restaurant	american restaurant	33.59416	-99.26369	207 W California St	Seymour	76380	+19408882322	http://rock-inn-cafe.com		0.96
+c447839e43b3	Rodriguez Inn	restaurant	mexican restaurant	33.15766	-99.72717	105 N 1st St	Haskell	79521	+19408648919	https://cyrusramsey.com/places/rodriguez-inn		0.94
+15ac8f7493fa	Rustic Cafe	restaurant	diner	33.15700	-99.72952	105 N 1st St	Haskell	79521	+19408634506	https://kentkwik.com/rustic-cafe/		0.97
+4da097fbd26a	Rusty Spur Saloon	restaurant	steakhouse	33.58263	-99.26035	600 S Main St	Seymour	76380	+19408881878	http://www.rustyspursaloon.com		0.94
+75499707e055	Sdi Seymour, Tx, Main Street, Llc	restaurant		33.59626	-99.26089	901 N Main St	Seymour	76380				0.95
+99f3cb631213	Shuggie's Pizzeria	restaurant	pizza restaurant	33.15533	-99.72894	102 S Avenue A	Haskell	79521				0.75
+efc0566a7f3e	Simple Simon's Pizza	restaurant	pizza restaurant	33.58476	-99.25986	200 E Ingram St	Seymour	76380	+19408896236	http://www.simplesimonspizza.com/		0.94
+89539b1a35c2	Smokey Bros	restaurant	barbecue restaurant	33.59458	-99.26915		Seymour	76380	+19408882767	http://www.smokeybros.com		0.77
+440fb2db8383	Stanfield's World Famous Big Honker Lodge	restaurant	barbecue restaurant	33.41610	-99.81371		Knox City			www.stanfieldhunting.com		0.97
+f09037d9a84f	Sweet T Pizza	restaurant	pizza restaurant	33.98451	-99.72525	109 N Main St	Crowell	79227	+19406841357	http://www.sweettpizza.com/		0.94
+97c53dbe4d5e	Tex Mex Cafe	restaurant	texmex restaurant	33.17636	-99.89188	704 13th St	Rule	79547	+19409966111	https://tex-mex-cafe.hub.biz/		0.98
+f7e56241aeb6	The Burrito Shop	restaurant	mexican restaurant	33.45079	-99.62322	321 N Birch Ave	Munday	76371	+19404225678	http://www.burritoshops.com		0.92
+40a5b75d1bbb	The Green Inforno	restaurant	pizza restaurant	33.59336	-99.26019	610 N Main St	Seymour	76380	+19406420791	http://thegreeninforno.com/		0.85
+a5b2d9802155	The Local Outpost Diner	restaurant		33.18245	-99.17719	308 N Minter Ave	Throckmorton	76483	+19405322600			0.91
+eafa871bb109	Tia Oci's Taqueria	restaurant	mexican restaurant	33.17934	-99.17701	104 N Minter Ave	Throckmorton	76483				0.96
+ca137e24a4ab	Avir at Crowell	senior	retirement home	33.98142	-99.72741	200 S Ave B	Crowell	79227	+19406841511	http://avirhg.com/	Avir at Bowie	0.99
+156a874ba636	Avir at Haskell	senior	retirement home	33.15855	-99.74652	1504 N 1st St	Haskell	79521	+19402772580	http://avirhg.com/	Senior Living Properties	0.98
+946ab7ebad7b	Avir at Knox City	senior	retirement home	33.41232	-99.81168	605 S Avenue F	Knox City	79529	+19402761044	https://slpoperations.com/	Senior Living Properties	0.98
+130bd4cf7df8	Avir at Seymour	senior	retirement home	33.59910	-99.27589	1110 Westview Dr	Seymour	76380	+19408893176	http://avirhg.com/	Avir at Bowie	0.98
+6a1529898195	Crowell Nursing Center	senior	assisted living facility	33.98299	-99.72730	200 S Avenue B	Crowell	79227	+19406841511			0.92
+c681fcd4cfa6	Munday Nursing Center	senior	retirement home	33.45271	-99.62682	421 W F St	Munday	76371	+19404224541	https://www.mundaynursing.org/		0.92
+f27a1089c6e9	S E Senior Care Management Group	senior	retirement home	33.15801	-99.74423	1302 N 1st St	Haskell	79521	+19408642727			0.92
+b1561be3b0d0	Seymour Rehabilitation And Healthcare	senior	assisted living facility	33.59906	-99.27619	1110 Westview Dr	Seymour	76380	+19408893176	https://www.ahstexas.com		0.99

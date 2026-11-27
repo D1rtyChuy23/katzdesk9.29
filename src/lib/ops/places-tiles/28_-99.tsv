@@ -1,0 +1,402 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+f7ea0426dc23	Butter Krust Bakery	bakery		28.97384	-98.49500	1016 West Ave	Pleasanton	78064	+18305695866			0.92
+e106e909c57d	Cinnabon	bakery		28.33725	-98.02420	4066 US-59	George West	78022	+13614491420	https://www.cinnabon.com/	Cinnabon	0.97
+7553f2449e1f	Creations Cake Shop	bakery		28.96038	-98.49204	122 N Bryant St	Pleasanton	78064	+18302813222	http://www.creationscakes.com/		0.96
+e8b984dce470	Donut And Espresso Coffee	bakery	donut shop	28.92446	-98.53693	1505 TX-97	Jourdanton	78026	+18307691030			0.89
+ef5b177d3f43	Hummingbird Creations Llc	bakery		28.97382	-98.47926	1513 2nd St Ste A	Pleasanton	78064		https://www.hummingbirdcreations.com		0.92
+c2c79e68baaa	Piggy Cakes	bakery		28.46149	-98.18211	112 N Harborth Ave	Three Rivers	78071	+13617842118	https://piggy-cakes.com		0.96
+cc41dfec38b7	Star Glaze Donuts	bakery	donut shop	28.95682	-98.49010	601 W Oaklawn Rd	Pleasanton	78064	+18303664086			0.72
+e63ef65ba9f4	Sweet Caroline’s Taste of Heaven	bakery		28.97536	-98.48620	215 Haverlah Rd	Pleasanton	78064	+18305703034	https://bakesy.shop/b/sweet-carolines-taste-of-heaven		0.92
+c696547bb1dd	The Donut Palace	bakery	donut shop	28.92445	-98.53689	1505 TX-97	Jourdanton	78026	+18307691030			0.96
+a0f41e790855	Three Rivers Doughnuts	bakery		28.46196	-98.18183	200 W Thornton St	Three Rivers	78071	+13617862927			0.91
+03f10921f7c8	140 Bar	bar		28.86370	-98.70821	150 Edwards Ave	Charlotte	78011				0.63
+ae9e652164ad	Bar K Icehouse	bar		28.95318	-98.48379	627 S Main St	Pleasanton	78064	+18305692295	http://www.barebackbar.com		0.99
+fb75a0cc7d46	Dalton's Place	bar	pub	28.96966	-98.47916	1123 2nd St	Pleasanton	78064	+18305707244	http://events.mysanantonio.com		0.95
+60ae30eb69bd	Live Oak Restaurant Sports Grill	bar	sports bar	28.45786	-98.18298	305 S Harborth Ave	Three Rivers	78071	+13617842089			0.92
+7dff2f8df383	Miller Crossing	bar	pub	28.46672	-98.21571	131 County Road 403	Three Rivers	78071	+13617864600			0.73
+5ab924c901c9	Texas Margarita Factory	bar		28.95485	-98.48407	605 S Main St	Pleasanton	78064	+18304805062	https://txmargaritafactory.com		0.75
+2a0b38fedb1d	Texas South	bar		28.94242	-98.50894	1933 W Oaklawn Rd	Pleasanton	78064	+18302818700	http://www.southtexasranches.com		0.96
+fd3eae140734	Threerivers Bar	bar		28.46180	-98.18221	201 N Harborth Ave	Three Rivers	78071	+12106298417	http://eventful.com/threerivers_tx/venues/bar-3-rivers-/V0-001-006803817-2		0.64
+cfc9454e4141	Allways Atascosa CDJR	cardealer		28.99859	-98.42999	110128 Interstate Highway 37 N	Pleasanton	78064	+18302812244	http://www.atascosacdj.com/	Chrysler	1.00
+176fd3469c95	Allways Express Service and Sales	cardealer		28.95836	-98.48360	121 S Main St	Pleasanton	78064	+18306310237	https://www.atascosacdj.com/used-car-specials-pleasanton-tx.html		0.72
+beeb4feb153f	Ford Motor Company	cardealer		28.46862	-98.17986	905 N Harborth Ave	Three Rivers	78071	+13617862547	http://www.kinselfordthreerivers.com	Ford Motor Company	0.71
+dc20579d9e57	Ford of Pleasanton	cardealer		28.99162	-98.43675	3874 E. Hwy 97	Pleasanton	78064		https://www.fordofpleasantontx.com	Ford	0.80
+6cf6f7b8804f	Jm Connected Auto Sales	cardealer	used auto dealer	28.94640	-98.50416	1612 W Oaklawn Rd	Pleasanton	78064	+12109606910	http://jmconnectedauto.com/		0.63
+b8cb768d4820	K&l Auto Sales Llc	cardealer	used auto dealer	28.96632	-98.47936	805 2nd St	Pleasanton	78064	+18302686432	https://knlautosales.com		0.75
+845d0be93ea3	Kinsel Ford	cardealer		28.46908	-98.18031	Hazel Ave	Three Rivers	78071	+13617862547	http://www.kinselfordthreerivers.com		0.77
+67184edabf74	Price Chevrolet	cardealer		28.94114	-98.51003	2035 W Oaklawn Rd	Pleasanton	78064	+18303863135	http://www.pricechevy.com/	Chevrolet	0.97
+c1d432b86f26	Pursch Motors Inc.	cardealer		28.93728	-98.51555	2207 W Oaklawn Rd	Pleasanton	78064	+18302684283	http://www.purschmotors.net/	GMC	0.97
+0e4acb1f445e	Swan's Autoplex	cardealer		28.92797	-98.53178	1793 TX-97 E	Jourdanton	78026	+18307672033	http://Swansauto.net/		1.00
+856a52090a7e	Swans Auto Sales	cardealer		28.92838	-98.53120	1793 E State Highway 97	Jourdanton	78026	+18307692152			0.55
+d9d909d41835	Texas Ford Dealers	cardealer		28.95831	-98.48384	121 S Main St	Pleasanton	78064	+18305693825	http://www.kinselfordpleasanton.com	Ford Motor Company	0.96
+9e1f7f141848	Three Rivers Ford	cardealer		28.99164	-98.43572	3874 E State Highway 97	Pleasanton	78064	+13614368229	https://www.fordofpleasanton.com/		0.95
+a0f5edf87601	Three Rivers Ford	cardealer	used auto dealer	28.49226	-98.15816	905 Highway 281 N	Three Rivers	78071	+13612722062	https://www.threeriversford.com		0.77
+c270f4c3aae6	Peliculas TV	cinema		28.33455	-98.11453	302 Houston St	George West	78022	+13614473300	http://www.yellowpages.com/george-west-tx/steak-houses		0.80
+35653e61fca0	Plestex Theatre	cinema		28.96116	-98.48362	111 E Johnson St	Pleasanton	78064	+18305693212	http://www.hensontheatres.com/		1.00
+43a30ca8effa	Bangkok Boba	coffee	bubble tea shop	28.96046	-98.48431	211 N Main St	Pleasanton	78064	+18306310300			0.96
+4b077f2f581c	Bangkok Boba	coffee	bubble tea shop	28.96839	-98.47906	1003 2nd St	Pleasanton	78064	+18306310300			0.55
+c99ef516660e	Charlotte Cafe	coffee		28.86150	-98.70473	408 Jourdanton Ave	Charlotte	78011	+18307710622	http://charlottecafeteria.com		0.92
+4699bc70d652	Comiskey Coffee Company	coffee		28.32958	-98.12698	803 Jeffrey Dr	George West	78022	+3617743646			0.75
+89b0020ff431	EagleNutrition_Ptown	coffee		28.97470	-98.48576	211 North St	Pleasanton	78064	+18302686438			0.66
+d4844f024536	Mr.Bean's Toffeeria	coffee		28.46977	-98.17884	107 E St Marys St	Three Rivers	78071	+13617842000			0.94
+5732e4e0968b	Pleasant Perk Coffee House	coffee		28.94756	-98.50262	1416 W Oaklawn Rd a	Pleasanton	78064	+18302686429	http://www.pleasantperkcoffeehouse.com/		0.92
+ff2be82c970f	Red Crown Coffee Etc	coffee		28.95970	-98.49204	103 N Bryant St	Pleasanton	78064	+18305696166	http://www.areyofflowers.com/		0.92
+55cefb81a478	Red, White & BlueBonnet CoffeeBar (opening soon)	coffee		28.46130	-98.17625	600 E Tips St	Three Rivers	78071	+13614366306	https://bbcoffeebar.com/		0.99
+650d0d1e84b9	Starbucks	coffee		28.94519	-98.50473	1701 W Oaklawn Rd	Pleasanton	78064	+18304022049	https://www.starbucks.com/store-locator/store/1031019/	Starbucks	0.92
+9da3836708a3	Sunshine House Coffee	coffee		28.92686	-98.53194	1752 TX-97	Jourdanton	78026	+18307700006	http://www.sunshinehousecoffee.com/		0.96
+b35a8c7cbf31	Texas Republic Coffee	coffee		28.33213	-98.11700	600 Nueces St	George West	78022				0.91
+38b20baa8981	Artemis Outdoors - Internship program	college		28.50419	-98.01679	1060 FM 1358	Three Rivers	78071	+13617861877	http://www.artemisoutdoors.com		0.92
+9eaa7b35f5b1	Coastal Bend College	college		28.97709	-98.49837	1411 Bensdale Rd	Pleasanton	78064	+18305694222	http://coastalbend.edu/	Coastal Bend College	0.92
+12948f508892	7-Eleven	convenience		28.92116	-98.54076	1202 Oak St	Jourdanton	78026	+18307693359	https://www.7-eleven.com/locations/tx/jourdanton/1202-oak-street-40524	7-Eleven	0.92
+5e5f84334c44	7-Eleven	convenience		28.36517	-98.04473	1900 I-37 N	George West	78022	+18002550711	https://www.7-eleven.com/locations/tx/george-west/1900-ih-37-north-40811	7-Eleven	0.70
+bb5a34ec6c78	7-Eleven	convenience		28.33920	-98.02602	1800 I-37	George West	78022	+13614493766	https://www.7-eleven.com/locations/tx/george-west/923-south-hwy-37-access-road-40809	7-Eleven	0.99
+eafcf9093fcc	7-Eleven	convenience		28.33401	-98.02216	1900 Interstate 37 N	George West	78022	+18002550711	https://www.7-eleven.com/locations/tx/george-west/1900-ih-37-north-40811		0.85
+2b70b3a9cc09	A and I Grocery	convenience		28.86248	-98.70659	549 Rodriguez Ave	Charlotte	78011	+18302771657	https://a-i-grocery.hub.biz		0.92
+20997183fd64	CAT Scale	convenience	truck gas station	28.52134	-98.18458	2645 S Hwy 37	Three Rivers	78071	+13617862523	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+4ef77eb3694e	CAT Scale	convenience	truck gas station	28.45768	-98.55204	100-198 S Hwy 16	Tilden	78072	+13612740015	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+c4afc036e94e	CAT Scale	convenience	truck gas station	28.99610	-98.43288	109963 Interstate 37	Pleasanton	78064	+17262240813	http://catscale.com/?utm_medium=yext&utm_source=bing		0.99
+ea396cb2f257	CAT Scale	convenience	truck gas station	28.33652	-98.02322	4066 Hwy 59	George West	78022	+13614491420	http://catscale.com/?utm_medium=yext&utm_source=bing		0.85
+0a2d0aadcc9b	Chevron	convenience		28.95675	-98.49330	924 W Oaklawn Rd	Pleasanton	78064	+18305698813	http://www.chevron.com/	Chevron	0.99
+0c173cc8bae1	Chevron	convenience		28.98271	-98.01805	201 N FRONT ST.	Falls City	78113		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/201-N-FRONT-ST--FALLS-CITY-TX-78113-5856-id371898	Chevron	0.95
+83fe4abd737c	Chevron	convenience		28.66425	-98.25676	868 Fm 99	Whitsett	78075	+18304941344	http://www.chevron.com/	Chevron	0.92
+656713b90d1f	Chevron Station Jourdanton	convenience		28.90976	-98.54003	307 Zanderson Ave	Jourdanton	78026	+18309312135			0.92
+83b274946cc6	Chevron Station Pleasanton	convenience		28.99474	-98.42931	4460 E Highway 97	Pleasanton	78064	+18322343600			0.92
+fb092123a26a	Christine Gas & Grocery	convenience		28.79308	-98.49717	2650 E FM 140	Christine	78012	+18307843339			0.94
+12a69af339de	Circle K	convenience		28.47026	-98.54824	3093 Hwy 16	Tilden	78072	+13612743520	https://www.circlek.com/		1.00
+1aca51d47938	Circle K	convenience		28.45984	-98.18205	301 N Harborth Ave	Three Rivers	78071	+13617863451	https://www.circlek.com/store-locator/US/three-rivers/301-n-harborth-ave/2740425		0.77
+897b52b57b67	Circle K	convenience		28.48677	-98.14341	1085 Hwy 72	Three Rivers	78071	+13617863101	https://www.circlek.com/		1.00
+d0c252936045	Circle K	convenience		28.97173	-98.47842	1318 2nd St	Pleasanton	78064	+18302814032	https://www.circlek.com/		0.92
+db648a33c4de	Circle K	convenience		28.93832	-98.51641	2370 W Oaklawn Rd	Pleasanton	78064	+18305692239	www.circlek.com		0.99
+dd914a4751df	Circle K	convenience		28.33018	-98.11510	304 N Nueces St	George West	78022	+13614491575	https://www.circlek.com/		0.92
+d95770de80bd	Circle K | Gas Station	convenience		28.45991	-98.18214	301 N Harborth Ave	Three Rivers	78071	+13617863451	https://www.circlek.com		1.00
+c503b8ca7be7	Conoco Gas Station	convenience		28.71641	-98.20137	1656 FM 99	Campbellton	78008	+18305794428	http://www.conocophillips.com		0.77
+0beb9b8985c4	Corner Store	convenience		28.46181	-98.18230	301 N Harborth Ave	Three Rivers	78071	+13617863451	http://cornerstore.com/StoreHome/425?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.92
+185de9c2614f	Corner Store	convenience		28.97173	-98.47885	1318 2nd St	Pleasanton	78064	+18302814032			0.92
+c411b1f5194d	Corner Store	convenience		28.93832	-98.51641	2370 W Oaklawn Rd	Pleasanton	78064		https://keenegroup.net		0.92
+df152f169ff7	Corner Store	convenience		28.47149	-98.54758	3093 N Hwy 16	Tilden	78072	+13612743520	http://cornerstore.com/StoreHome/1498?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.92
+f5c567c60ae7	Corner Store	convenience		28.33012	-98.11530	304 Nueces St	George West	78022	+13614491575	http://cornerstore.com/StoreHome/418?utm_source=Facebook&utm_medium=LPM&utm_campaign=CSTBrand	Corner Store	0.57
+e4aa2ce93764	Crossroads Quickstop & Cafe	convenience		28.32579	-98.11378	100 Nueces St	George West	78022	+13614492966			0.92
+172647d056ae	Exxon	convenience		28.33271	-98.11795	701 N. Nueces	George West	78022	+13614472517	https://www.exxon.com/en/find-station/exxon-georgewest-tx-fivepointsmarket31-200319300?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+2ad469c17e2e	Exxon	convenience		28.95676	-98.48453	304 S Main St	Pleasanton	78064	+18305698580	https://www.exxonmobil.com		0.92
+3243a2979163	Exxon	convenience		28.99388	-98.42902	4463 E. Highway 97	Pleasanton	78064	+18305698520	http://www.exxon.com		0.92
+45c116d58e8e	Exxon	convenience		28.93576	-98.55997	3220 Zanderson Ave.	Jourdanton	78026	+18307700774	https://www.exxon.com/en	Exxon & Mobil Stations	0.92
+545a7b4fa9d0	Exxon	convenience		28.32721	-98.11391	100 S Nueces St	George West	78022	+13614492800	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+5b851db965ed	Exxon	convenience		28.91846	-98.54682	1302 Zanderson Ave	Jourdanton	78026	+18307693324	https://www.exxonmobil.com		0.79
+8b6a5b160cf8	Exxon & Mobil Stations	convenience		28.66195	-98.25522	868 FM 99	Whitsett	78075	+18304941344	https://www.exxon.com/en	Exxon & Mobil Stations	0.80
+51f51920900a	Fillin Station	convenience		28.98281	-98.01799	201 N Front St	Falls City	78113	+18302543709	http://www.express.com/		0.92
+960d9696fd5f	Five Points Market 31	convenience		28.33276	-98.11794	701 N. NUECES	George West	78022		https://www.exxon.com/en/find-station/exxon-georgewest-tx-fivepointsmarket31-200319300	Exxon	0.80
+aed252e3f6a1	GasFusion	convenience		28.46192	-98.54849	401 River St	Tilden	78072	+3612743331			0.92
+e639ade51ad5	Hi-Way One Stop	convenience		28.86105	-98.70788	265 St Louis Ave	Charlotte	78011	+18302771100	http://valero.com		0.92
+2082cfe80bcb	Jourdanton Ice House	convenience		28.92044	-98.54250	1004 Oak St	Jourdanton	78026	+18307700030			0.92
+d53022f74836	Kountry Korner Campbellton	convenience		28.74630	-98.30261	2725 Commerce St	Campbellton	78008		https://locations.valero.com/en-us/LocationDetails/Index/2725-COMMERCE-ST/0000030215	Valero	0.80
+6737489fa012	Kuntry Korner	convenience		28.90438	-98.42546	103344 I-37	Pleasanton	78064	+18305692050	http://www.superpages.com/bp/pleasanton-tx/kuntry-korner-L2061067042.htm		0.94
+9b60f82099b9	Kwik Chek	convenience		28.46224	-98.18777	500 W Thornton	Three Rivers	78071	+13617842125	https://kwikchek.com/	TXB	0.98
+0bc1ede3649d	Leo's Country Store	convenience		28.02592	-98.22537	5415 W CR 239	Orange Grove	78372	+18174371131			0.98
+0eb3d735f1af	Love's Travel Stops and Country Stores	convenience		28.52084	-98.18396	2645 I-37 S	Three Rivers	78071	+13617862523	https://www.loves.com/locations/342	Love	0.99
+ad2de2e526ca	Lucky Fuel Station	convenience		28.91040	-98.53990	307 Zanderson Ave	Jourdanton	78026		https://locations.valero.com/en-us/LocationDetails/Index/307-ZANDERSON-AVE/0000029288	Valero	0.99
+07df082ef3b9	Murphy USA	convenience		28.93968	-98.51283	2145 W Oaklawn Rd	Pleasanton	78064	+18305695860	http://www.murphyusa.com/	Murphy USA	0.92
+3248c0115b9d	Neal Inc.	convenience		28.33279	-98.11813		George West	78022	+13614472517			0.92
+f8bd74bdedfc	Oakville Mercantile	convenience		28.44921	-98.10203	1915 N Highway 37 Acc	George West	78022	+13617861551			0.66
+a2c38936ba21	Pawnee Pit Stop	convenience		28.66450	-98.00260	14682 HIGHWAY 72	Pawnee	78145		https://locations.valero.com/en-us/LocationDetails/Index/14682-HIGHWAY-72/0000025160	Valero	0.80
+9ed1ef10ee93	PETRO MART #5	convenience		28.91850	-98.54681	1302 Zanderson Ave.	Jourdanton	78026		https://locations.valero.com/en-us/LocationDetails/Index/1302-ZANDERSON-AVE/0000031456	Valero	0.80
+ef4c07e429e0	PETRO MART #6	convenience		28.95670	-98.48451	304 S. Main St.	Pleasanton	78064		https://locations.valero.com/en-us/LocationDetails/Index/304-S-MAIN-ST/0000031455	Valero	0.96
+ec6a223c110f	Phillips 66	convenience		28.33149	-98.11703	723 Bowie St	George West	78022	+13614492796	https://www.phillips66gas.com/		0.92
+2edbc71ef113	Pilot Travel Center	convenience	truck gas station	28.45262	-98.55235	3080 S Highway 16	Tilden	78072	+12078747483	https://www.pilotflyingj.com/stores/1002		0.92
+34a4328bc64f	Pilot Travel Center	convenience		28.46199	-98.18681	500 W Thornton	Three Rivers	78071		http://pilotflyingj.com/view-location?id=1039		0.57
+53eb16a44034	Pilot Travel Center	convenience		28.47160	-98.54721	3080 N Hwy 16	Tilden	78072	+13612741558	https://pilotflyingj.com/stores/	Pilot Flying J	0.98
+5e2a0d008dc7	Red's Barn	convenience		28.95208	-98.49681	1199 W Oaklawn Rd	Pleasanton	78064	+18305693303	http://redbarn.com		0.92
+32a5ac779195	Refuel	convenience		28.98314	-98.01930	303 N Front St. (Hwy 181)	Falls City	78113	+18309714328	https://www.refuelmarket.com/stores/refuel-1323-falls-city		0.98
+a7fc99dfcde3	Rodeo Travel Center 2	convenience		28.99560	-98.43240	109963 IH 37	Pleasanton	78064		https://locations.valero.com/en-us/LocationDetails/Index/109963-IH-37/0000029732	Valero	0.80
+49ea668b3fe3	Shell	convenience		28.74647	-98.30282	2725 Commerce St	Campbellton	78008	+18305794451	https://find.shell.com/us/fuel/10087407-2725-commerce-st		0.92
+8cb8af808b50	Shell	convenience		28.47163	-98.54758	3080 Texas Hwy 16	Tilden	78072	+13612741558	https://find.shell.com/us/fuel/12983973-3080-tx-16/en_US		1.00
+a7818c5608cb	Shell	convenience		28.46205	-98.54868	401 River St	Tilden	78072	+13612743331	https://find.shell.com/us/fuel/10014923-401-river-st	Shell	0.92
+7c8bf97791a6	Shell George West,tx	convenience		28.32754	-98.11333	Us Hwy 281 and 59	George West	78022		http://www.shell.us/ontheroad		0.94
+4bafaabf82fb	Sherry's	convenience		28.97142	-98.49365	1216 N Bryant St	Pleasanton	78064	+18305698093			0.92
+6877bb4ed82f	Speedy Fuel	convenience		28.96384	-98.48007	512 2nd St	Pleasanton	78064	+18302815432			0.92
+6eff26037035	Stripes	convenience		28.92126	-98.54060	1202 Oak St	Jourdanton	78026	+18307693359	https://stripesstores.com/		0.93
+7001da0cac62	Stripes	convenience		28.33790	-98.02921	923 Interstate 37	George West	78022	+13614492214	https://stripesstores.com/		1.00
+8564964d95b3	Stripes	convenience		28.34824	-98.03220	1900 N Highway 37 Acc	George West	78022	+13614493766	https://www.7-eleven.com/	Stripes	0.89
+596d6e988321	Sunoco	convenience		28.34796	-98.03320	2648 N HWY 37 ACCESS RD	Oakville	78060	+13617863995	http://sunoco.com		0.77
+89052037410f	Sunoco	convenience		28.45208	-98.10503	2648 North highway 37	Oakville	78060	+13617863995	https://www.sunoco.com/locations/store/2648-n-hwy-37-access-rd-oakville-tx-0295106900		0.92
+f638acdffe13	Sunoco	convenience		28.92125	-98.54095	1202 Oak St	Jourdanton	78026	+18307693359	https://www.sunoco.com/locations/store/1202-oak-st-jourdanton-tx-0523780500		0.92
+cc492cab9b96	TA Express Pleasanton #0445	convenience		28.99521	-98.43333	109963 Interstate 37	Pleasanton	78064		https://www.ta-petro.com/location/tx/ta-express-pleasanton/	TA	0.80
+ded37edbee77	Tex Best	convenience		28.93573	-98.56020	3220 Zanderson Ave	Jourdanton	78026	+18307700774	https://www.mapquest.com/.../tex-best-travel-center-527-366299507	Tex-Best Travel Centers	1.00
+eff3ec5f6762	Tex Best	convenience		28.32756	-98.11372	101 S Nueces	George West	78022	+13614492777			0.97
+fda75f33e4c0	TEX BEST #525	convenience		28.99405	-98.42910	4463 E. HIGHWAY 97	Pleasanton	78064		https://www.exxon.com/en/find-station/exxon-pleasanton-tx-texbest525-200319370	Exxon	0.80
+15b8f552e38b	Tex Best Travel Center	convenience		28.94025	-98.51213	2095 W Oaklawn	Pleasanton	78064	+18305692989	http://bk.com		0.92
+eea4923dffdc	Tex-Best Travel Center	convenience		28.96467	-98.47281	4463 East State HWY	Pleasanton	78064	+18305698520		Tex-Best Travel Centers	0.88
+b4967634848f	Texaco	convenience		28.95886	-98.48443	104 S Main St	Pleasanton	78064	+18303664061	https://www.texaco.com/	Texaco	0.92
+e39290b0f1b3	Texaco	convenience		28.97149	-98.49368	1216 N BRYANT	Pleasanton	78064		https://www.texaco.com/en_us/home/find-a-station.html?/station/1216-N-BRYANT-PLEASANTON-TX-78064-2014-id383938	Texaco	0.98
+eaf791bdcbd8	Texaco	convenience		28.66399	-98.25317	870 FM 99	Whitsett	78075	+18305794439	https://www.texaco.com/	Texaco	0.92
+6fd83f9b4d90	Texan Fuel Stop	convenience		28.33800	-98.02931	923 I-37	George West	78022		https://locations.valero.com/en-us/LocationDetails/Index/923-I-37/0000007482	Valero	0.80
+2f7f3f6fb594	The Texan	convenience		28.46227	-98.18671	500 W Thorton St	Three Rivers	78071	+13617842125	https://thetexanstores.com/		0.92
+dc6f437ff910	Twice The Ice	convenience		28.49478	-98.15546	100 King David Drive	Three Rivers	78071		http://twicetheice.com		0.77
+314d549a4575	TXB	convenience		28.46225	-98.18675	500 W Thornton	Three Rivers	78071	+13617842125	http://www.txbstores.com/		0.99
+4037f24ed9f1	Valero	convenience		28.47040	-98.54819	3093 HWY 16	Tilden	78072	+13612743520	https://locations.valero.com/en-us/LocationDetails/Index/3093-HWY-16/0000021498	Valero Energy	0.92
+5a66b943dc43	Valero	convenience		28.90435	-98.42570	103344 I-37 #103344	Pleasanton	78064	+12103452000	http://www.valero.com	Valero Energy	0.92
+8fcdb20d7ab8	Valero	convenience		28.92138	-98.54112	1202 Oak St	Jourdanton	78026	+18307693359	http://www.valero.com	Valero Energy	0.64
+d6942509dad7	Valero	convenience		28.33012	-98.11530	304 Nueces St	George West	78022	+13614491575	http://www.valero.com	Valero Energy	1.00
+dad8fa8041be	Valero	convenience		28.48734	-98.14377	1085 TX-72	Three Rivers	78071	+13617863101	http://www.valero.com	Valero Energy	0.92
+cd75bc43700d	VALERO 2740425	convenience		28.45990	-98.18211	301 N HARBORTH AVE	Three Rivers	78071		https://locations.valero.com/en-us/LocationDetails/Index/301-N-HARBORTH-AVE/0000020425	Valero	0.95
+fff62215dc8a	VALERO 2742428	convenience		28.97170	-98.47840	1318 2ND ST	Pleasanton	78064		https://locations.valero.com/en-us/LocationDetails/Index/1318-2ND-ST/0000022428	Valero	0.98
+8b23dcd3bcc7	Wells Quick Shop	convenience		28.99507	-98.41786	1211 East Trl	Pleasanton	78064	+18302814234			0.63
+fc3ab4b8a15c	Wheeler's Mercantile	convenience		28.46189	-98.54852	401 River Street	Tilden	78072	+13612743331	http://listings.findthecompany.com/.../wheeler-mercantile-inc-in-tilden-tx		0.92
+455cff50962a	Burger King	fastfood	burger restaurant	28.94009	-98.51219	2095 W Oaklawn	Pleasanton	78064	+18302669262	https://burgerking.com/store-locator/store/13189	Burger King	0.98
+3953205a46e9	Bush's Chicken	fastfood		28.94470	-98.50554	1725 W Oaklawn Rd	Pleasanton	78064	+18305691803	http://bushschicken.com/	Bush's Chicken - Laredo	0.95
+fac1a26ed649	Chick-fil-A	fastfood		28.95780	-98.49101	620 W Oaklawn Road	Pleasanton	78064		https://www.chick-fil-a.com/locations/tx/pleasanton-tx	Chick-fil-A	0.86
+590bba1f0ef1	Church's Texas Chicken	fastfood		28.32921	-98.11466	212 Nueces St	George West	78022	+13614491864	https://locations.churchs.com/tx/george-west/212-nueces-st	Church's Chicken	0.94
+733161231719	Church's Texas Chicken	fastfood		28.96879	-98.47855	1018 Second Street	Pleasanton	78064	+18305696611	https://locations.churchs.com/tx/pleasanton/1018-second-street	Church's Chicken	0.98
+e57aa43c5712	Crazy About Mangonadas	fastfood		28.96004	-98.48429	111 W Hunt St	Pleasanton	78064		https://crazy-about-mangonadas.business.site		0.93
+034f3a3a7e62	Dairy Queen	fastfood		28.95732	-98.48366	223 S Main St 223 S Main St	Pleasanton	78064	+18305692441	https://www.dairyqueen.com/en-us/locations/tx/pleasanton/223-s-main-st/14493/?y_source=1_MjkzMzkwODUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+275dc3c78b0b	Dairy Queen	fastfood		28.92006	-98.54811	1502 Zanderson Ave 1502 Zanderson Ave	Jourdanton	78026	+18307692021	https://www.dairyqueen.com/en-us/locations/tx/jourdanton/1502-zanderson-ave/14307/?y_source=1_MjkzMzkxMDUtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+c5fd05cf7096	Dairy Queen	fastfood		28.32761	-98.11453	1350 Hwy 281 S 1350 Hwy 281 S	George West	78022	+13614491822	https://www.dairyqueen.com/en-us/locations/tx/george-west/1350-hwy-281-s/14157/?y_source=1_MjkzMzg5NjgtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.96
+e5ff0800a244	Dairy Queen	fastfood		28.46736	-98.17989	Hwy 281 Hwy 281	Three Rivers	78071	+13617862521	https://www.dairyqueen.com/en-us/locations/tx/three-rivers/hwy-281/14655/?y_source=1_MjkzMzkyOTktNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.98
+6d152991db38	Domino's	fastfood	pizza restaurant	28.94919	-98.50114	1320 W Oaklawn	Pleasanton	78064	+18305695599	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+21287267d571	DQ Grill & Chill	fastfood		28.95733	-98.48363	223 S Main St	Pleasanton	78064		https://www.dairyqueen.com/en-us/locations/tx/pleasanton/223-s-main-st/4265	DQ Grill & Chill	0.80
+3555907b4e99	DQ Grill & Chill	fastfood		28.32762	-98.11466	1350 Hwy 281 S	George West	78022		https://www.dairyqueen.com/en-us/locations/tx/george-west/1350-hwy-281-s/3930	DQ Grill & Chill	0.80
+a5db2bb56e18	DQ Grill & Chill	fastfood		28.46734	-98.17976	Hwy 281	Three Rivers	78071		https://www.dairyqueen.com/en-us/locations/tx/three-rivers/hwy-281/4427	DQ Grill & Chill	0.80
+bdcd6c0a18e5	DQ Grill & Chill	fastfood		28.92010	-98.54818	1502 Zanderson Ave	Jourdanton	78026		https://www.dairyqueen.com/en-us/locations/tx/jourdanton/1502-zanderson-ave/4080	DQ Grill & Chill	0.80
+2aeaebe5b212	Golden Chick	fastfood		28.94409	-98.50651	1741 W Oaklawn Rd	Pleasanton	78064	+18302813040	https://locations.goldenchick.com/tx/pleasanton/1035/?utm_source=Google&utm_medium=Organic&utm_campaign=Maps	Golden Chick	0.94
+5c8939210951	Krispy Krunchy Chicken	fastfood		28.86261	-98.70665	549 Rodriguez Ave	Charlotte	78011		https://locations.krispykrunchy.com/tx/charlotte/549-rodriguez-ave	Krispy Krunchy Chicken	0.87
+85546a496c47	Krispy Krunchy Chicken	fastfood		28.99574	-98.43287	109963 Interstate 37	Pleasanton	78064		https://locations.krispykrunchy.com/tx/pleasanton/109963-interstate-37	Krispy Krunchy Chicken	0.96
+5c841c62c3c6	Little Caesars	fastfood	pizza restaurant	28.93833	-98.51550	2087 W Oaklawn Rd Ste 208	Pleasanton	78064	+18305695955	https://littlecaesars.com/en-us/store/7764		0.92
+1889f2bf03c2	Little Caesars Pizza	fastfood	pizza restaurant	28.93971	-98.51126	2087 W Oaklawn Rd Ste 208	Pleasanton	78064	+18305695955	https://littlecaesars.com/en-us/store/7764	Little Caesars	0.97
+260767425748	McDonald's	fastfood		28.33710	-98.02383	4066 US-59	George West	78022	+13614491230	https://www.mcdonalds.com/us/en-us/location/tx/george-west/4066-highway-59/36149.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.94
+4bb0e1bea76b	McDonald's	fastfood		28.52131	-98.18536	2645 Hwy 37 S	Three Rivers	78071	+13617861020	https://www.mcdonalds.com/us/en-us/location/tx/three-rivers/2645-hwy-37-s/34549.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+51f58582e45a	McDonald's	fastfood		28.94433	-98.50597	1733 W Oaklawn	Pleasanton	78064	+18305695550	https://www.mcdonalds.com/us/en-us/location/tx/pleasanton/1733-w-oaklawn/10999.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.98
+9110478272e1	McDonald's	fastfood		28.93796	-98.51322	2151 W Oaklawn Rd	Pleasanton	78064	+18302815400	http://www.mcdonalds.com/		0.92
+610bbbf4ae84	Papa Johns Pizza	fastfood	pizza restaurant	28.94179	-98.51120	2044 W OAKLAWN RD	Pleasanton	78064	+18306310272	https://locations.papajohns.com/united-states/tx/78064/pleasanton/2044-w-oaklawn-rd?utm_source=bing-maps&utm_medium=organic&y_source=1_NjEzMTI2OTgtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+1eaff7336a6b	Pizza Hut	fastfood	pizza restaurant	28.46281	-98.22601	904 N Harborth Ave	Three Rivers	78071	+13617863506	http://www.pizzahut.com/locations/texas/three-rivers/022651		0.77
+2507951790aa	Pizza Hut	fastfood	pizza restaurant	28.94773	-98.50105	1343 Hwy 97 W	Pleasanton	78064	+18305698783	https://locations.pizzahut.com/tx/pleasanton/1343-hwy-97-w?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=305615	Pizza Hut	0.98
+dc8c6e7ee69d	Pizza Hut	fastfood	pizza restaurant	28.97146	-98.47567	1343 E State Highway 97	Pleasanton	78064	+18305698783	http://www.pizzahut.com		0.77
+d6ff458e904e	Pizza Hut Express	fastfood		28.99575	-98.43273	109963 Interstate 37	Pleasanton	78064		https://locations.pizzahut.com/tx/pleasanton/109963-interstate-37	Pizza Hut	0.80
+603e26412385	Sonic Drive In	fastfood		28.95667	-98.49102	635 W Oaklawn St	Pleasanton	78064	+18305692255	https://locations.sonicdrivein.com/tx/pleasanton/635-w.-oaklawn-rd..html	Sonic Drive-In	0.98
+78fc124bd117	Sonic Drive In	fastfood		28.33401	-98.11905	805 North Nueces	George West	78022	+13614492614	https://locations.sonicdrivein.com/tx/georgewest/805-north-nueces.html	Sonic Drive-In	1.00
+1262373c1046	Subway	fastfood	sandwich shop	28.48700	-98.14381	1085 Hwy 72 East	Three Rivers	78071	+13617863127	https://restaurants.subway.com/united-states/tx/three-rivers/1085-hwy-72-east?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=57186&utm_campaign=evergreen-2020&y_source=1_MTQ5MDQ0NDItNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.95
+39e1539f4b19	Subway	fastfood	sandwich shop	28.93806	-98.51322	2151 West Oaklawn	Pleasanton	78064	+18305691910	https://restaurants.subway.com/united-states/tx/pleasanton/2151-west-oaklawn	Subway	0.98
+4bc92c0e7610	Subway	fastfood		28.45984	-98.18208	301 S. Harborth Ave.	Three Rivers	78071	+13617863308	https://restaurants.subway.com/united-states/tx/three-rivers/301-s-harborth-ave?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=21208&utm_campaign=evergreen-2020&y_source=1_MTQ5MDA1NTYtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.80
+54f5042c1073	Subway	fastfood	sandwich shop	28.91185	-98.54192	512 Zanderson Avenue	Jourdanton	78026	+18307700633	https://restaurants.subway.com/united-states/tx/jourdanton/512-zanderson-avenue	Subway	0.93
+a81394a5eed3	Subway	fastfood	sandwich shop	28.95672	-98.49140	703 W Oaklawn Rd	Pleasanton	78064	+18305692025	https://restaurants.subway.com/united-states/tx/pleasanton/703-w-oaklawn	Subway	0.97
+d12daccc4a20	Subway	fastfood	sandwich shop	28.52132	-98.18539	2645 S. Hwy 37	Three Rivers	78071	+13617862523	http://www.subway.com	Subway	0.98
+95f1a4415d37	Taco Bell	fastfood		28.94137	-98.51205	2052 W Oaklawn Rd.	Pleasanton	78064	+18305698055	http://www.tacobell.com/	Taco Bell	0.96
+9c636deb69a5	Tenderfix By Noah Schnapp	fastfood		28.95356	-98.49498	1133 W Oaklawn Rd	Pleasanton	78064	+18884135074	https://www.tenderfix.com		0.55
+c01771520c95	Wendy's	fastfood		28.99549	-98.43282	109963 Ih 37 Ste 100	Pleasanton	78064	+17262177977	https://locations.wendys.com/united-states/tx/pleasanton/109963-ih-37-ste-100	Wendy's	0.96
+c6ea19c1577b	Whataburger	fastfood		28.93832	-98.51495	2173 W OAKLAWN RD	Pleasanton	78064	+18305698823	https://locations.whataburger.com/tx/pleasanton/2173-w-oaklawn-rd.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+1aff65c94168	Wingstop	fastfood	chicken restaurant	28.94184	-98.51128	2044 W Oaklawn Rd Ste 130	Pleasanton	78064	+18305698188	https://www.wingstop.com/location/wingstop-808-pleasanton-tx-78064/menu?y_source=1_NTUyMDc2MTctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.97
+e8d2916e5bca	HEB	grocery		28.95603	-98.48674	219 W Oaklawn	Pleasanton	78064	+18302818172	https://www.heb.com/heb-store/US/tx/pleasanton/pleasanton-h-e-b-411	H-E-B	0.97
+a7cd63d6b699	Lowe's Market	grocery		28.46057	-98.17757	516 E Alexander	Three Rivers	78071	+13617862503	www.lowesmarket.com	Lowe's Market	0.74
+d7b0ed3c602a	Lowe's Market	grocery		28.33081	-98.11711	501 Nueces St	George West	78022	+13614492796	https://www.lowesmarket.com/		0.92
+07e410a0edf7	Nicks Tienda	grocery		28.33984	-98.11458	102 Salinas St	George West	78022	+13614497766			0.58
+0b5ff32a882d	Pleasanton H-E-B	grocery		28.95598	-98.48673	219 W OAKLAWN	Pleasanton	78064		https://www.heb.com/heb-store/us/tx/pleasanton/pleasanton-h-e-b-411	H-E-B	0.80
+e8d88f0778af	Smith's Drive Inn Grocery	grocery		28.46722	-98.18035	703 N Harborth Ave	Three Rivers	78071	+13617862585			0.57
+de5b9cc67aad	super s foods	grocery		28.46232	-98.18363		Three Rivers	78071	+13617862503	http://supersfoods.com		0.77
+2e720a0be6c1	Super S Foods #306	grocery		28.33095	-98.11707	501 Nueces St	George West	78022	+13614492796	http://www.supersfoods.com		0.92
+6ddb84a081be	Tex Best	grocery		28.93573	-98.56020	3220 Zanderson Ave	Jourdanton	78026	+18307700774	https://www.mapquest.com/.../tex-best-travel-center-527-366299507	Tex-Best Travel Centers	0.92
+f165e2881ab1	Atascosa County Emergency Med	hospital		28.92064	-98.54461	31 Courthouse Circle Dr	Jourdanton	78026	+18307692702	http://www.atascosacountytexas.net/elected_officials/county_clerk.htm		0.66
+39015e9b6d8c	Clinic of Pulmonary Sleep and Healthy AG	hospital		28.95982	-98.50114	1342 W Goodwin St	Pleasanton	78064	+18304805133			0.92
+1873d1049b22	Heart & Vascular Institute Of Texas	hospital		28.93357	-98.52145	1808 E State Highway 97	Jourdanton	78026	+18305694003	https://havit.com		0.55
+8f87f86fee54	Heart & Vascular Institute of Texas	hospital		28.90955	-98.61608	1808 Highway 97 E	Jourdanton	78026	+12102237500			0.85
+be9a51bd3f6d	Live Oak Community Health Center	hospital		28.46064	-98.18149	105 E Thornton	Three Rivers	78071	+13617863618	http://www.atascosahealthcenter.org		0.92
+8c057aebce05	Medfirst Primary Care - Jourdanton	hospital		28.93357	-98.52145	1808 E State Highway 97 Ste C	Jourdanton	78026	+18305691104	https://medfirstsanmarcos.com		0.55
+d0b718ef47ca	Methodist Hospital Atascosa	hospital		28.93309	-98.52608	1905 Hwy 97 East	Jourdanton	78026	+18307693515	https://sahealth.com/locations/methodist-hospital-atascosa/	Methodist Health System	0.97
+b065fa798b65	Retama Manor Nursing Center/Jourdanton	hospital		28.92371	-98.53639	1504 E State Highway 97	Jourdanton	78026	+18307693531	https://www.savaseniorcare.com/retama-manor-nursing-center-jourdanton		0.77
+629bdbb73c68	San Antonio Kidney Disease Center	hospital		28.94925	-98.50082	1320 W Oaklawn Rd	Pleasanton	78064	+18305691858		San Antonio Kidney	0.92
+c449a63c2ddd	South Texas Regional Medical Center	hospital		28.93308	-98.52598	1905 State Highway 97	Jourdanton	78026	+18307693515	http://www.chs.net/		0.93
+0b3bfccb5282	1672 Tilden	hotel		28.46200	-98.54932	404 River St	Tilden	78072	+15123802502	http://www.thecottagesofkarnescity.com		0.92
+229cd1076bed	A & Y Group Inc	hotel		28.92589	-98.53220	110 Bmt Dr	Jourdanton	78026				0.95
+05cd5fe4a1a1	Americas Best Value Inn Jourdanton Pleasanton	hotel		28.92708	-98.53119	1756 Texas 97	Jourdanton	78026	+18307700044	https://www.redlion.com/americas-best-value-inn/tx/jourdanton/americas-best-value-inn-jourdanton-pleasanton		0.98
+13e8ea6abdc1	Aries Residence Suites	hotel		28.47191	-98.17785	1081 King David Dr	Three Rivers	78071	+13613714726	http://www.ariesresidencesuites.com		0.85
+feef8b411d72	Atria Inn & Suites (Kitchenettes)	hotel		28.91661	-98.54580	1104 Zanderson Ave	Jourdanton	78026	+18307693400	https://www.choicehotels.com/texas/jourdanton/rodeway-inn-hotels/txk19?pmf=yext&mc=llyxyxpx	Choice Hotels	0.96
+fb85d4679c46	Atria Inn and Suites	hotel		28.46772	-98.18037	701 N Harborth Ave	Three Rivers	78071	+13617861500	https://www.atriainn.com/		0.92
+f99049663f60	Belmont Inn & Suites	hotel		28.95318	-98.49622	1167 W Oaklawn Rd	Pleasanton	78064	+18305692604			0.92
+02f58721f1cc	Best Rest Motel	hotel	motel	28.85847	-98.71260	56 M and M Alley	Charlotte	78011	+12145784845			0.97
+9a4eba67ef47	Best Western George West Executive Inn	hotel		28.32908	-98.11404	208 Nueces St	George West	78022	+13614493300	https://www.bestwestern.com/en_US/book/hotel-rooms.44442.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44442	Best Western Hotels & Resorts	1.00
+2d60eb7d831f	Best Western Plus Pleasanton Hotel	hotel		28.94227	-98.50733	1917 W Oaklawn Rd	Pleasanton	78064	+18305691917	https://www.bestwestern.com/en_US/book/hotel-rooms.44687.html?iata=00171890&ssob=BLBWI0003G&cid=BLBWI0003G%3Ayext%3Awebsite%3A44687	Best Western Hotels & Resorts	1.00
+0dc2fcccb7a3	Brush Country Lodge	hotel	resort	28.95139	-98.50165	413 Winship Rd	Pleasanton	78064	+12107141862	http://www.brushcountrylodge.com/		0.85
+83d54cb0cd75	Budget Host Inn & Suites	hotel	motel	28.91657	-98.54569	1104 Zanderson Ave	Jourdanton	78026	+18307693400	https://www.choicehotels.com/texas/jourdanton/rodeway-inn-hotels/txk19?pmf=yext&mc=llyxyxpx	Choice Hotels	0.91
+2d9aa705bc1a	CaveMan Ranch	hotel		28.89528	-98.38223		Pleasanton					0.80
+90cc0ccf271e	Chaparral Place Apartments	hotel		28.95418	-98.49496	1121 W Oaklawn Rd	Pleasanton	78064	+17133984801	http://www.chaparralplace.com		0.92
+b80182a2625b	Charlotte's Country Inn	hotel		28.85639	-98.71922	304 TX-85	Charlotte	78011	+18303996373	http://www.ccountryinn.com/		0.92
+e93a00d474ea	Choke Canyon Cabins and RV Resort	hotel		28.45979	-98.35668	258 Recreation Road 8	Calliham	78007	+18305347594	http://chokecanyonresort.com/		0.56
+2368656e263a	Choke Canyon Motel	hotel	motel	28.44709	-98.30547	3161 Highway 72 E	Three Rivers	78071	+13618777117			0.95
+7fce1b208be8	Eagle Ford Apartments	hotel		28.47634	-98.17596	1609 N Hill St	Three Rivers	78071	+12104598636	https://eaglefordapartments.weebly.com/		0.98
+edfbd0261802	Eagle Ford Hospitality, Llc	hotel		28.92732	-98.53137	1756 E State Highway 97	Jourdanton	78026				0.95
+5575ebefde4a	Eagle Ford Lodging	hotel	resort	28.97200	-98.46871	1036 Commerce St	Pleasanton	78064	+18305693793	http://www.eaglefordlodging.net/		0.99
+1525820a3615	Eagle RV & Lodge	hotel		28.74446	-98.29767	235 E Brazos St	Campbellton	78008	+12106390987			0.63
+badb5afb9f25	Eagle's Den Suites Three Rivers a Travelodge by Wyndham	hotel	resort	28.47675	-98.17814	5842 Highway 281	Three Rivers	78071	+13614368233	https://www.wyndhamhotels.com/travelodge		0.97
+bb2a71555097	Eddy's Motel	hotel	resort	28.95299	-98.48413	640 S Main St	Pleasanton	78064	+18305695571			0.99
+64a6668e9d33	El Lago Vista Resort	hotel		28.44726	-98.30641	3161 Highway 72 E	Three Rivers	78071	+13614257948			0.72
+d9bdf80ccfc3	Emblaze Hotel	hotel		28.52017	-98.18493	6284 US-281	Three Rivers	78071	+13617860110	http://emblazehotel.com/		0.99
+5bb39aca44cf	Encino Motel	hotel	motel	28.98305	-98.47979	2320 2nd St	Pleasanton	78064	+18305692192	https://encino-motel.hub.biz		0.97
+b39e661a9c05	Fairfield by Marriott Inn & Suites Pleasanton	hotel		28.93740	-98.51459	200 Showbarn Rd	Pleasanton	78064	+18305698656	https://www.marriott.com/en-us/hotels/satpt-fairfield-inn-and-suites-pleasanton/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	Fairfield by Marriott	1.00
+5d236979a5bf	Hampton Inn Pleasanton	hotel		28.94020	-98.51067	2057 W Oaklawn Rd	Pleasanton	78064	+18305693001	https://www.hilton.com/en/hotels/satplhx-hampton-pleasanton/	Hampton by Hilton	1.00
+f9623b4f7f2c	Holiday Inn Express & Suites Jourdanton-Pleasanton	hotel	resort	28.93060	-98.52756	350 Medical Dr	Jourdanton	78026	+18307693323	https://www.ihg.com/holidayinnexpress/hotels/us/en/jourdanton/pezjo/hoteldetail?cm_mmc=BingMaps-_-EX-_-US-_-PEZJO		0.97
+c867827d7e2a	Holiday Inn Express & Suites Jourdanton-pleasanton By Ihg	hotel		28.93436	-98.52444	350 Medical Dr	Jourdanton	78026	+18307693323	https://www.ihg.com		0.99
+7d6085928ead	Holiday Inn Express and Suites George West	hotel		28.32518	-98.11361	200 S Nueces	George West	78022	+13614494336	https://www.ihg.com/holidayinnexpress/hotels/us/en/george-west/gowtx/hoteldetail?cm_mmc=FacebookMaps-_-EX-_-US-_-GOWTX	Holiday Inn Express	1.00
+77fc18ee276e	Hpdc Hotel Management Llc	hotel		28.46674	-98.18092	101 W McMullen Ave	Three Rivers	78071				0.95
+44542438646b	Jourdanton Inn	hotel		28.91765	-98.54635	1200 Zanderson Ave	Jourdanton	78026	+18307693560	http://www.angieslist.com/companylist/us/tx/jourdanton/jourdanton-appliance-repair-reviews-7662923.htm		0.92
+ed5bf5af33bd	Knights Inn George West	hotel	motel	28.32320	-98.11412	213 Nueces St	George West	78022	+13614491581	https://www.wyndhamhotels.com/knights-inn/george-west-texas/knights-inn-george-west-royal-inn/overview?CID=LC:KG:20160927:Rio:Local		0.85
+45cf23086cf5	Knights Inn Three Rivers	hotel	resort	28.46793	-98.18103	701 N Harborth Ave	Three Rivers	78071	+13617861500	https://www.knightsinn.com/Three-Rivers-TX		0.92
+9eaf31a7225b	La Quinta Inn & Suites Jourdanton	hotel		28.92582	-98.53246	110 Bmt Dr	Jourdanton	78026	+18307693050	http://www.laquintajourdanton.com/?cid=local_6594	La Quinta by Wyndham	1.00
+3579ec062d28	Living The Dream Trophy Ranch	hotel		28.05775	-98.37797	102 Highway 59	George West	78022	+13613627922	http://www.LivingtheDreamTrophyRanch.com/		0.97
+1f0fdafd5ca2	Lux Inn and Suites	hotel		28.47850	-98.17735	5864 Highway 281	Three Rivers	78071	+13617842490	http://www.extendasuites.com		0.98
+02f53edf9c42	Luxury Inn	hotel	motel	28.32901	-98.11175	100 San Antonio St	George West	78022	+13614491192			0.93
+a8267b6afafc	Malek Buck Horn Creek Ranch	hotel		28.87005	-98.29131		Mccoy		+13618160580	http://www.mbhcr.com/		0.83
+b1d88d174535	Mesquite Lodge at Jourdanton	hotel		28.92225	-98.55259	416 Mulberry St	Jourdanton	78026	+12107455854	http://www.mesquitelodge.net/		0.59
+e1be65b7a51e	Microtel Inn & Suites by Wyndham Pleasanton	hotel	resort	28.98662	-98.42544	1311 Brusch Country Ln	Pleasanton	78064	+18302685057	https://www.wyndhamhotels.com/microtel/pleasanton-texas/microtel-inn-and-suites-by-wyndham-pleasanton/overview?CID=LC:zfj6qosca83hrbc:46717&iata=00093796		0.85
+66f24201ed7b	Microtel Inn and Suites	hotel		28.94356	-98.50497	1311 Brush Country Lane	Pleasanton	78064	+18302685057	https://www.wyndhamhotels.com/microtel/pleasanton-texas/microtel-inn-and-suites-by-wyndham-pleasanton/overview		1.00
+520a588f0c79	Motel 6	hotel	motel	28.92326	-98.53854	1403 TX-97	Jourdanton	78026	+18302013803	http://www.motel6.com/	Motel 6	0.99
+95cceb444331	Motel 6 Jourdanton, TX	hotel	resort	28.91813	-98.54958	1403 Highway 97 E	Jourdanton	78026	+18302013803	https://www.motel6.com/en/home/motels.tx.jourdanton.4976.html?lid=Local_Milestone_4976&travelAgentNumber=TA001305&corporatePlusNumber=CP792N5W&utm_source=bing%20places&utm_medium=listing&utm_campaign=visit%20website		0.97
+3b7045e6e662	Motel 6-Three Rivers, TX - Deluxe King Room - Non-Smoking	hotel		28.52015	-98.18491		Three Rivers		+13617866900	https://www.motel6.com/en/motels.tx.three-rivers.8980.html?corporatePlusNumber=CP792N5W&travelAgentNumber=TA001305	Motel 6 Headingley / Winnipeg West	0.98
+e286c5a7e664	Oasis Lodge	hotel		28.96326	-98.47948	517 Colwell Ave	Pleasanton	78064	+18305698950	http://www.tx-cabins.com/		0.95
+330413ed30fa	OYO Hotel	hotel		28.47469	-98.17908	1401, North Harborth Avenue, Rio Vista Estates	Three Rivers	78071	+13617863563	https://www.oyorooms.com/us/103343	OYO Rooms	0.99
+36ba8f2c8a34	OYO Hotel Three Rivers TX Hwy 72	hotel		28.44695	-98.30177	3149 Texas 72	Three Rivers	78071		https://www.oyorooms.com/us/90064?utm_source=Google_gmb_US&utm_medium=Organic&utm_campaign=US_THR001&latitude=28.44691&longitude=-98.3017&locale=en		0.85
+9b90f3e041e2	P3 Ranch	hotel		28.91087	-98.49597	1800 County Road 302	Jourdanton	78026	+18305703544			0.55
+a9c44da813d2	Pleasanton Executive Inn	hotel	motel	28.94237	-98.50846	1927 W Oaklawn Rd	Pleasanton	78064	+18305698747	http://www.pleasantonexecutiveinn.us/		0.98
+ca3c4050185f	Quality Inn	hotel		28.46880	-98.17937	900 N Harborth Ave	Three Rivers	78071	+13614368195	https://www.choicehotels.com/texas/three-rivers/quality-inn-hotels/txj93?pmf=yext&mc=llyxyxpx	Choice Hotels	0.96
+23ecbdcaf492	Regency Inn	hotel	motel	28.47143	-98.17950	1023 N Harborth Ave	Three Rivers	78071	+15613753183	https://www.oyorooms.com/us/224063	OYO USA	0.99
+0db617f33bad	Relax Inn	hotel		28.97859	-98.47968	2107 2nd St	Pleasanton	78064	+18305692185	http://www.relaxinnkuttawa.com		0.92
+dcd927cdefea	Rivers Inn Suites	hotel		28.46681	-98.18107	101 W Mc Mullen St	Three Rivers	78071	+13617842469	http://riversinnandsuites.com/		0.95
+d96604e90303	Royal Inn	hotel	resort	28.32885	-98.11469	213 Nueces St	George West	78022	+13614491581			0.93
+e7c8bd7dfe62	Ryno Lodging	hotel		28.44799	-98.36412	259 Highway 72	Calliham	78007	+13618168686	https://rynolodging.com		0.55
+25859189bdd4	Savannah Suites Pleasanton	hotel		28.94344	-98.50865	1924 W Oaklawn Rd	Pleasanton	78064	+18305698500	http://www.savannahsuites.com/locations/savannah-suites-pleasanton-tx		0.77
+7283661fd2b0	Savannah Suites Pleasanton	hotel		28.94328	-98.51040	910 Palmer Ln	Pleasanton	78064	+18305698515	http://www.savannahsuites.com/locations/savannah-suites-pleasanton-tx		0.98
+3419f5fb15f5	Shale Lodge Three Rivers	hotel		28.46601	-98.22292	2569 Highway 72	Three Rivers	78071	+13617861100			0.96
+827705a84040	Sleep Inn & Suites	hotel		28.92825	-98.52901	1800 TX-97	Jourdanton	78026	+18305801051	https://www.choicehotels.com/texas/jourdanton/sleep-inn-hotels/txg52?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+225bdafb059d	Studio 6	hotel	motel	28.95242	-98.49529	1167 W Oaklawn Rd	Pleasanton	78064	+18302013804	https://www.staystudio6.com/en/motels.tx.pleasanton.5112.html?corporatePlusNumber=CP5RGT6G&travelAgentNumber=TA001305	Studio 6	0.99
+e647a70957f4	Sunbridge Inn and Suites Extended Stay	hotel	motel	28.93349	-98.52408	388 Medical Drive	Jourdanton	78026	+18307692100	https://sunbridge-inn-suites.hub.biz/		0.98
+a623030f8a53	Super 8	hotel	motel	28.94300	-98.50764	1913 W Oaklawn Rd	Pleasanton	78064	+18305695587	http://www.wyndhamhotelgroup.com/		0.97
+b1f6d9e744db	Texan Inn and Suites	hotel	motel	28.46976	-98.54751	3084 TX-16	Tilden	78072	+13612742267	https://www.texaninntilden.com/		0.92
+8fd68d5e01de	The GW West Hotel	hotel		28.33604	-98.11250	100 Houston St	George West	78022				0.77
+a02e1f711970	The Lodge at Kenedy	hotel		28.58611	-98.04377	301 W State Highway 72	Kenedy	78119	+18305830406	http://www.thelodgeatkenedy.com/		0.97
+67742f5c2989	Tilden Country Inn	hotel	motel	28.46091	-98.54805	301 Elm St	Tilden	78072	+13612743451			0.96
+9afb93d8e15c	American Polymer Company	office	plastics company	28.96071	-98.57536	167 Old Pearsall Rd	Jourdanton	78026	+18884113048	http://www.apcunderground.com/		0.99
+7a59666cf02f	Cactus Wellhead	office	energy company	28.94226	-98.48174	101 Eurostar Dr	Pleasanton	78064	+18302684490	http://cactuswellhead.com	Cactus Wellhead	0.92
+5d6aa08bf5a2	Clear Energy Services	office		28.98119	-98.45138	276 Corgey Rd	Pleasanton	78064	+18302025004			0.65
+b0f1e18bb2b2	Culberson Construction Inc	office		28.46616	-98.23411	2639 Highway 72	Three Rivers	78071	+13617864070	http://cci.com		0.77
+c98f3c1a69b3	D & D Hydraulics	office	industrial company	28.91911	-98.54474	812 Oak St	Jourdanton	78026	+18307672777	http://danddhydraulics.com/		0.92
+4851e39a71eb	Enterprise Products	office	energy company	28.98069	-98.44756	473 Corgey Rd	Pleasanton	78064	+18305692504	http://enterpriseproducts.com		0.97
+6cce8e43430a	EOG Resources	office	energy company	28.87942	-98.53907	116 TX-16	Jourdanton	78026	+16307695700			0.92
+afaecc6b1953	Green Era Solar	office	energy company	28.95570	-98.49402	1020 W Oaklawn Rd	Pleasanton	78064	+12109344414	https://www.greenerasolar.com		0.75
+f1da79e894a0	HP Propane	office	energy company	28.35932	-98.13563	3360 Highway 281	George West	78022	+13614491414	http://www.hppropanetx.com		0.92
+2605a26777ce	Key Energy	office		28.36271	-98.14070	3409 Highway 281	George West	78022	+13614491541	http://www.keyenergy.com		0.92
+e6bb37200cab	Naz Tricks	office	information technology company	28.47790	-98.22526	634 Camden Road Suite 479	Port Ethylview	75071	+14199182381	https://naztricks.net		0.77
+704a298f68d1	Nu Star Energy	office	energy company	28.58291	-98.54262	123 Roark Rd	Tilden	78026	+18307843161	http://www.nustarenergy.com/		0.92
+7167ef5274bf	Spartan Flow Control	office		28.97820	-98.44623	511 Corgey Rd	Pleasanton	78064	+18305690003	https://www.spartansenergy.com		0.65
+2559ca8c3625	Texas Farm Bureau Insurance - Ross Nieschwitz	office		28.91966	-98.54368	910 Oak St	Jourdanton	78026	+18307693603	http://www.txfb-ins.com/agentreg/rnieschwitz		0.77
+cf9fe962bad3	Texas Oncology-Jourdanton	office	pharmaceutical company	28.93380	-98.52608	1907 E State Highway 97 Ste 240	Jourdanton	78026	+12102246531	https://www.texasoncology.com/cancer-centers/jourdanton/texas-oncology-jourdanton		0.92
+9e71cf75eb92	Valero Three Rivers Refinery	office	industrial company	28.45910	-98.18363	100 W Le Roy St	Three Rivers	78071	+13617864610	www.valero.com	Valero	0.84
+595f419796b0	Aarons pizza	restaurant	pizza restaurant	28.67714	-98.54112		Jourdanton		+18302761850	https://aaronspizzatexas.com/		0.91
+109de274c40a	Agave Jalisco	restaurant	mexican restaurant	28.33039	-98.11611	403 Nueces St	George West	78022	+13614498899	http://agavejalisco.com/	Agave Jalisco Taqueria George West,Texas.	0.98
+77e9046f91fc	Agave Jalisco	restaurant	mexican restaurant	28.45741	-98.18304	400 S Harborth Ave	Three Rivers	78071	+13617864050	http://www.agavejalisco.com	Agave Jalisco Taqueria George West,Texas.	0.97
+17308c2dc5f8	Agave Jalisco Mexican Restaurant	restaurant	mexican restaurant	28.46836	-98.54797	220 River St	Tilden	78072	+13612743337	http://www.agavejalisco.com	Agave Jalisco Taqueria George West,Texas.	0.93
+c89a0b92871f	Angelica's Mexican Restaurant	restaurant	mexican restaurant	28.97551	-98.47860	1710 2nd St	Pleasanton	78064	+18305692293	https://angelicasmexicanrestauranttx.com		0.95
+3cfc7e91cc98	BBQ Wagon	restaurant	barbecue restaurant	28.51828	-98.18615	6281 US 281 Three Rivers	Three Rivers	78071		http://www.facebook.com/TRBBWagon		0.85
+4597d3153793	Bill Miller Bar-B-Q	restaurant	barbecue restaurant	28.95689	-98.48372	301 S Main St	Pleasanton	78064	+18305693266	https://www.billmillerbbq.com/locations/bill-miller-66/	Bill Miller Bar-B-Q	0.96
+bbb6343e0f00	Brush Country Barbecue	restaurant	barbecue restaurant	28.46988	-98.17991	1304 N Harborth Ave	Three Rivers	78071	+13617864335			0.85
+123623bd1d2d	Cafe Chris	restaurant	comfort food restaurant	28.97506	-98.47907	1627 2nd St	Pleasanton	78064	+18305696551			0.92
+cb56e290e341	Cafe Chris	restaurant	american restaurant	28.94895	-98.50026	1360 W Oaklawn Rd Ste C	Pleasanton	78064	+18305696551	https://cafechrispleasanton.com		0.92
+b3fb1a00497b	Camco Stop N Go	restaurant		28.05750	-98.37785	675 Highway 59	George West	78022	+13615662351			0.86
+39f252ac29ca	Cancun Mexican Restaurant	restaurant	mexican restaurant	28.92737	-98.53485	1411 Jiffy Blvd	Jourdanton	78026	+18307692824	https://cancun-mexican-restaurant-tx-1.hub.biz		0.97
+27348a6a1b73	Charros De Jalisco 405 N Harborth Ave	restaurant	bar and grill restaurant	28.46447	-98.18155		Three Rivers					0.66
+08ce2b1e35f5	Chicken Salad Factory	restaurant	salad bar	28.94733	-98.50298	1502 W Oaklawn Rd	Pleasanton	78064	+18303664030		Chicken Salad Chick	0.92
+48f6d8c5f832	Chili's Grill & Bar	restaurant		28.93720	-98.51669	2311 W. Oaklawn	Pleasanton	78064	+18305696449	https://www.chilis.com/		0.97
+88b7fc4e1df0	China Garden Restaurant	restaurant	chinese restaurant	28.95640	-98.48389	401 S Main St	Pleasanton	78064	+18305695548	https://chinagardentx.com/		0.96
+b555e952f2e3	Choke Canyon Bar-B-Q	restaurant	barbecue restaurant	28.66147	-98.25481	868 FM 99	Whitsett	78075	+18304941174	https://www.restaurant.com/choke-canyon-bar-b-que-whitsett-pid		1.00
+06721fb9cb86	Chubbs BBQ	restaurant		28.65376	-98.00282	14231 FM-673	Pawnee	78145				0.58
+584cf3105f1a	Cinnabon	restaurant	sandwich shop	28.47160	-98.54718	3080 N. Hwy 16	Tilden	78072	+13612741558	https://www.cinnabon.com/tx/tilden/bakery-6818		0.94
+6df8d86be10f	Cinnabon	restaurant		28.46019	-98.55070	3080 S Highway 16	Tilden	78072	+13612741558	https://www.cinnabon.com/		0.85
+a6416508d5a2	Dixieland Barbque	restaurant	barbecue restaurant	28.95423	-98.48360	604 S Main St	Pleasanton	78064	+12108876891	http://www.dixielandbbqsa.com		0.86
+ad86bb2f2932	Don Jesus	restaurant	mexican restaurant	28.97016	-98.47727	1201 3rd St	Pleasanton	78064	+18305693963	https://m.yelp.com/biz/don-jesus-mexican-restaurante-pleasanton		0.97
+faf6b4a27bf4	Donut Palace	restaurant		28.95690	-98.49037	601 W Oaklawn St	Pleasanton	78064	+18305698139	http://www.donutpalace.com	The Donut Palace San Diego TX	0.58
+bd56023b2792	Eagle Express Drive Thru	restaurant	taco restaurant	28.97224	-98.47863	501 Commerce St	Pleasanton	78064	+18305694892	https://www.mapquest.com/.../eagle-express-drive-thru-42429405		0.92
+338661dded69	East Coast Wings + Grill	restaurant	chicken wings restaurant	28.94041	-98.51405	2120 W Oaklawn Rd	Pleasanton	78064	+18305694647	https://www.eastcoastwings.com		1.00
+840c330d05f9	El Castillo Restaurante	restaurant	mexican restaurant	28.96122	-98.48424	301 N Main St	Pleasanton	78064	+18305694403	http://www.restaurantelcastillo.com		0.97
+000bbc5e16ea	El Charro	restaurant	mexican restaurant	28.97128	-98.47870	1301-1399 2nd St	Pleasanton	78064	+18305694777	https://el-charro-tx-2.hub.biz		0.77
+db7b177e19e8	El Durango	restaurant		28.97150	-98.47876	1310 2nd St	Pleasanton	78064				0.95
+23b69d295798	El Rancho	restaurant	mexican restaurant	28.96458	-98.48023	615 2nd St	Pleasanton	78064	+18305693305	http://www.elranchomexican.com		0.92
+364594640ce7	Enrique's Barbacoa	restaurant	mexican restaurant	28.86382	-98.70181	246 Hindes Ave	Charlotte	78011	+18307710119			0.92
+be26357240e2	Fifty Rock’	restaurant		28.33137	-98.11602	606 Fannin St	George West	78022	+13614496476			0.92
+354802876f36	Fig Tree Restaurant	restaurant		28.79341	-98.49545	2998 Morris St	Corpus Christi	78405				0.62
+44cd99f84aaa	Galindo's Mexican Restaurant	restaurant		28.86131	-98.70622	58 S Edwards Ave	Charlotte	78011	+18307710066			0.90
+978718976c32	George West Lucky Seafood	restaurant	seafood restaurant	28.33406	-98.11489	607 Guadalupe St	George West	78022	+13612681066			0.92
+4796f767f22a	George West Steakhouse	restaurant	steakhouse	28.33484	-98.11468	302 Houston St	George West	78022	+13614473300			0.97
+fe55e2fe7e58	Georgio's Pizza & Subs	restaurant	pizza restaurant	28.33300	-98.11828	707 Nueces St	George West	78022	+13614473100			0.95
+dd9433ae367a	Grandma's Tacos	restaurant	mexican restaurant	28.96016	-98.48713	314 W Hunt St	Pleasanton	78064	+18305696180	http://grandmasmountaincookies.com		0.96
+64daff095b06	Handi Stop Three Rivers	restaurant		28.46978	-98.17971	1304 N Harbor Ave	Three Rivers	78071	+13617864335			0.99
+0db573666b04	Heavenly Angels Sandwich Shop	restaurant	sandwich shop	28.46065	-98.18105	201 E Thornton St	Three Rivers	78071	+13617842034			0.92
+3ad3465a994b	IHOP	restaurant	breakfast and brunch restaurant	28.95358	-98.49499	1133 W Oaklawn Rd	Pleasanton	78064	+18304805008	http://www.ihop.com/	IHOP	0.98
+5ad265678d72	It's Just Wings	restaurant	chicken wings restaurant	28.93720	-98.51669	2311 W. Oaklawn	Pleasanton	78064	+14692515479	https://itsjustwings.com/		0.92
+acae7e12dc84	Jalisco Mexican Restaurant	restaurant	mexican restaurant	28.91879	-98.54493	802 Oak St	Jourdanton	78026	+18307699226	http://www.fiestajalisco.net/		0.95
+5d6c8855eec0	Jalisco Mexico Taqueria	restaurant	mexican restaurant	28.33167	-98.11652	506 US-281	George West	78022	+13614492874	http://taqueriajalisco.net		0.97
+c76acadd1e8d	JK&B Hutt	restaurant		28.46995	-98.17802	207 Woodward St	Three Rivers	78071	+13614497733			0.92
+b5376562c93e	Johnny Bandera BBQ	restaurant	barbecue restaurant	28.91888	-98.54627	1303 Zanderson Ave	Jourdanton	78026	+18307700111			0.59
+3007b0d624b1	La Cantera Restaurant	restaurant	texmex restaurant	28.96659	-98.47923	815 2nd St	Pleasanton	78064	+18304805156			0.92
+4a781dcf059e	La Herradura Mexican Restaurant @ Three Rivers, Tx	restaurant	mexican restaurant	28.46444	-98.18174	405 N Harborth Ave	Three Rivers	78071	+13617842510	https://www.laherradurarestaurant.net		0.92
+f29510169dfd	La Perla Bar and Grill 3	restaurant	mexican restaurant	28.92095	-98.57439	1743 TX-97	Jourdanton	78026	+18307700025			0.97
+a3b011d178db	Laredo Taco Company	restaurant		28.33920	-98.02602	1800 I-37	George West	78022	+13614493766	https://www.laredotacocompany.com/		0.95
+02cf471f84da	Las Palmas Cafe	restaurant	mexican restaurant	28.98224	-98.01735	107 S Front St	Falls City	78113	+18302543096	http://www.laspalmascafe.net/		0.92
+dccc9baf4759	Las Tres Hermanas	restaurant	mexican restaurant	28.33199	-98.11738	601 Nueces St	George West	78022	+13614493141	https://www.restaurant.com/las-tres-hermanas-george-west-pid		0.78
+195f4c38abb2	Lauren's Deli	restaurant	delicatessen	28.91215	-98.54227	613 Olive St	Jourdanton	78026	+18305697101	http://www.laurensdeli.com/		0.95
+bde2dcee904d	Lew's	restaurant	bar and grill restaurant	28.98284	-98.48414	1801 McGuffin Dr	Pleasanton	78064	+18305692950	http://www.lewspatioandgrill.com/		0.98
+67f46ee6f95d	Los Gallos de Jalisco	restaurant	mexican restaurant	28.97134	-98.47868	1310 2nd St	Pleasanton	78064	+18304805055			0.97
+77cfcb877f8a	Luna café	restaurant		28.92849	-98.55371	2405 Zanderson Ave	Jourdanton	78026	+18305700776			0.81
+5a70b1e06a54	Maguey Jalisco	restaurant	mexican restaurant	28.79305	-98.49622	305 E Ave	Christine	78012	+18307843252	https://www.groupon.com/biz/chesterfield-mo/el-maguey		0.97
+94bf99b786cd	Margarita’s Tacos	restaurant	mexican restaurant	28.94273	-98.50935	2002 W Oaklawn Rd	Pleasanton	78064	+12102751181			0.66
+0362f00149f4	Max's Cafe	restaurant	texmex restaurant	28.46462	-98.54769	3047 TX-16	Tilden	78072	+13612743342			0.92
+52ead7d06fff	Mi Casita Mexican Restaurant	restaurant	mexican restaurant	28.63555	-98.27486	Hwy 281 and FM 99	Whitsett	78075	+13614948151			0.98
+fccbadc854b3	Mi Mexico Restaurant Jalisco Style	restaurant		28.92725	-98.53292	1743 E State Highway 97	Jourdanton	78026		https://local.mysanantonio.com/b31820710/mi+mexico+restaurant+jalisco+style		1.00
+39f97d6282f7	Mr. Biggz Tacos& More	restaurant	mexican restaurant	28.92187	-98.53970	1213 Waltom Ave	Jourdanton	78026	+18303999733			0.60
+0098f1b0e513	Ned's Pizza & Wings	restaurant	pizza restaurant	28.97185	-98.49380	1220 N Bryant St	Pleasanton	78064	+18302816610			0.78
+575ab0d58580	Nutrition 830	restaurant	health food restaurant	28.92448	-98.53676	1505 TX-97	Jourdanton	78026	+18307700095			0.92
+af06a042e0db	Playa Cancun Mexican Restaurant	restaurant		28.96411	-98.48020	601 2nd St	Pleasanton	78064	+18305698836			0.78
+2ab8157ed7cb	Playa Cancun Mexican/Seafood Restaurant	restaurant	mexican restaurant	28.95416	-98.48205	601 US-281	Pleasanton	78064	+18305698836	http://www.cancunmexicanrestaurante.com		0.92
+fae06aea7aba	Plaza Tapatio Mexican Grill	restaurant	mexican restaurant	28.94264	-98.50810	1921 W Oaklawn Rd	Pleasanton	78064	+18305692052	http://www.restaurants.pleasantontx.ypeek.com/		0.97
+3e6f6e177f57	Pollok's	restaurant		28.98281	-98.01859	207 N Front St	Falls City	78113	+18302543241	https://polloks.com		0.95
+b303fcdd0e66	Pollos Asados El Viejon	restaurant		28.94266	-98.50946	2002 Highway 97 W	Pleasanton	78064	+18306313939			0.80
+c0f4acd2029a	Poppy's Shaved Ice	restaurant		28.97190	-98.48839	405 Bensdale Rd	Pleasanton	78064	+12105734922	http://www.adoptapet.com/pet/12925682		0.96
+6f7505671c9f	Railroad	restaurant		28.74150	-98.30074	3110 Commerce St	Campbellton	78008	+18305794466			0.79
+473b18c98674	Restaurante Chile Bandera	restaurant	texmex restaurant	28.92653	-98.53389	1305 Jiffy Blvd	Jourdanton	78026	+18307692105	https://www.restaurantechilebandera.com/		0.93
+69d0fd1640f6	Rock House Cafe	restaurant	mexican restaurant	28.92526	-98.55189	2102 Zanderson Ave	Jourdanton	78026	+18307672116	https://rockhouseindy.com		0.92
+2895c653a2e8	Rodeo Grill	restaurant	steakhouse	28.33471	-98.11453	302 Houston St	George West	78022	+13614473300			0.92
+0a612fcbada8	Roma's Italian Restaurant	restaurant	italian restaurant	28.97375	-98.47923	1513 2nd St	Pleasanton	78064	+18304805047	https://www.romasitalianpleasanton.com/		0.92
+e08d488caf37	Rosie's Cafe	restaurant	mexican restaurant	28.96558	-98.47908	706 2nd St	Pleasanton	78064	+18305696034	http://www.rosiescafe.com		0.92
+334057e5a1bb	Rosita's Barbacoa	restaurant	mexican restaurant	28.97355	-98.47858	1514 2nd St	Pleasanton	78064	+18305706677			0.96
+301eb9759569	Sally's Taco Cocina	restaurant	mexican restaurant	28.97188	-98.49388	1220 N Bryant St	Pleasanton	78064	+18302816610	https://sally-s-taco-cocina.hub.biz		0.92
+1c2a4b22c0ed	Sely's Mexican Restaurant	restaurant	mexican restaurant	28.97327	-98.47373	737 San Antonio St	Pleasanton	78064	+18305696484	http://www.yellowpages.com/pleasanton-tx/mip/selys-mexican-restaurant-7498449		0.95
+2af105816afc	Shifters American Grill	restaurant	american restaurant	28.95267	-98.49609	1177 W Oaklawn Rd	Pleasanton	78064	+18304805160			0.92
+41e3d9c5680a	Shorty's Place	restaurant	steakhouse	28.96600	-98.00109	7901 US-181	Hobson	78117	+18302543322	http://www.shortystx.com	Shorty's Place TX	0.97
+3fec441d9a20	Sowell's BBQ	restaurant	barbecue restaurant	28.46076	-98.18330	114 W Thornton	Three Rivers	78071	+13617863333	http://texasdinersdrive-insdives.blogspot.com/		0.95
+dd907adf65ed	Staghorn Restaurant	restaurant		28.47109	-98.17952	1019 N Harborth Ave	Three Rivers	78071	+13617863545	https://local.yahoo.com/info-19232429-staghorn-restaurant-three-rivers		1.00
+45f2a3584e83	Steak & Eggs	restaurant	steakhouse	28.90444	-98.42564	103344 Ih 37	Pleasanton	78064	+18305692050	http://www.kuntrykorner.com		0.92
+970e9c414697	Taco jalisco	restaurant	mexican restaurant	28.85822	-98.71175	488 Hindes Ave	Charlotte	78011	+18302771383	https://drive.google.com/drive/folders/1Qu_fA1HLsyBLPPr9IIkG9GdLC6BEZAnE		0.92
+e959f04e01d8	Taqueria Huentitan	restaurant	mexican restaurant	28.96394	-98.49253	517 N Bryant St	Pleasanton	78064	+18305694421			0.92
+acd21fa8860d	Taqueria Los Potrillos	restaurant	mexican restaurant	28.99537	-98.42816	4500 TX-97	Pleasanton	78064	+18305691130	http://taquerialospotrillos1.com	Taqueria Los Potrillos Mexican Rest	0.98
+c93dbcb63d39	Taqueria Mazatlan	restaurant	texmex restaurant	28.32525	-98.11456	101 S Nueces	George West	78022	+13614493999	https://www.saltyangler.com/pickup-locations2.html		0.96
+3a5f44431d3a	Taqueria Vallarta	restaurant	mexican restaurant	28.46090	-98.18371	200 W Thornton St	Three Rivers	78071	+13617862961	http://taqueriavallartaonline.com/menu		0.92
+bb76b45659d2	Texas Prime Bbq & Catering	restaurant	barbecue restaurant	28.97229	-98.47931	1401 2nd St	Pleasanton	78064	+18302817307			0.92
+1686068de69e	The Location Restaurant & Beer Garden	restaurant	american restaurant	28.46843	-98.54805	3071 Highway 16	Tilden	78072	+13612743337	http://thelocationtx.com		0.94
+8477e408a453	The Oaks Bar	restaurant	bar and grill restaurant	28.96830	-98.47929	1003 2nd St	Pleasanton	78064	+18303992277	http://gruposolidopleasanton.eventbrite.com/		0.97
+1040644c5fae	The Office Bar & Grill	restaurant	bar and grill restaurant	28.96018	-98.48262	205 E Hunt St	Pleasanton	78064	+18303664065	https://onlineorder.focuspos.com/16569		0.97
+035d925a4c54	The Outlaw Bar and Grill	restaurant	bar and grill restaurant	28.94049	-98.51393	2120 W Oaklawn Rd	Pleasanton	78064	+18305694647	https://theoutlawbarandgrill.com/?utm_source=facebook&utm_medium=social&utm_campaign=profile		0.98
+6cff4df3ecce	The Postal Grill	restaurant	american restaurant	28.46533	-98.81145	27148 TX-97	Fowlerton	78021	+18303734325			0.96
+dd7a7005ef3e	The Potato Company	restaurant		28.95781	-98.48420	206 S Main St	Pleasanton	78064	+18304805042	https://www.potatocompanypleasanton.com		0.99
+154cdc6a241f	The Snack Shack	restaurant	mexican restaurant	28.33020	-98.11581	406 Fannin St	George West	78022	+13614947549			0.92
+e31c7f84f6f4	The Snackery	restaurant		28.86012	-98.70927	277 Hindes Ave	Charlotte	78011	+18307710006	https://www.facebook.com/TheSnackeryCharlotte		0.71
+13219eeb56f2	Tita's taco	restaurant	taco restaurant	28.86270	-98.70617	35 Yule Ave	Charlotte	78011	+18302771025			0.94
+edf76a751133	Trevino's Barbacoa	restaurant	barbecue restaurant	28.97178	-98.47829	514 Commerce St	Pleasanton	78064	+18305692993	https://www.dandb.com/.../trevinosbarbacoa-pleasanton-tx-26988525.html		0.92
+36077b7c6cc5	True Texas BBQ	restaurant	barbecue restaurant	28.95616	-98.48678	219 W Oaklawn Rd	Pleasanton	78064	+18305698103	http://www.heb.com/txbbq	True Texas BBQ	0.97
+aa5e192fd4e3	Urban Bricks Pleasanton, TX	restaurant	pizza restaurant	28.94734	-98.50301	1502 W Oaklawn Rd Ste E	Pleasanton	78064	+18302535533	http://urbanbrickspizza.com/locations/Pleasanton/		0.95
+bb844e58651e	VAN'S BAR-B-Q	restaurant	barbecue restaurant	28.45188	-98.10477	2648 I-37	Oakville	78060	+13617863995	www.superpages.com/bp/three-rivers-tx/vans-barbeque-L2181835353.htm		0.98
+e2e82886d7f0	Whoo Dat Cafe'	restaurant		28.97412	-98.47904	1601 2nd St	Pleasanton	78064	+18304809063	http://whoodatcafe.com/		0.97
+ffc00505ea44	Ybanez Mexican Gazeebo Hwy 59	restaurant	mexican restaurant	28.32498	-98.11572		George West					0.74
+1fafb02895c0	Yummy Buffet	restaurant	buffet restaurant	28.94938	-98.50074	1320 W Oaklawn Rd	Pleasanton	78064	+18305696969	https://www.pleasantonyummybuffet.com		0.96
+cf04f6149d4d	Argent Court of Jourdanton	senior	retirement home	28.93412	-98.52281	1951 Highway 97 E	Jourdanton	78026	+18307699797	http://www.argentcourt.com	Argent Court Assisted Living	0.92
+a59a6484ad15	Jourdanton Nursing and Rehab	senior	retirement home	28.92381	-98.53651	1504 E State Highway 97	Jourdanton	78026	+18307693531	https://jourdantonhc.com/		0.99
+fd7f403abcf4	Jourdanton Nursing and Rehab	senior	assisted living facility	28.91870	-98.55145	1504 TX 97	Jourdanton	78026	+18307693531	https://jourdantonhc.com/		0.85
+0e8dcfb65930	Julie's Care Home	senior	assisted living facility	28.91779	-98.53667	1310 Poplar St	Jourdanton	78026	+18307673082	http://www.juliescarehome.com/		0.92
+38d2496458cb	Live Oak Nursing and Rehabilitation Center	senior	retirement home	28.33679	-98.12283	2951 US-281	George West	78022	+13614492532	https://wellsentialhealth.org/location/live-oak-nursing-rehabilitation-center/		0.92
+b2d1f38458e6	Pleasanton North Nursing and Rehab	senior	retirement home	28.95910	-98.48769	404 W Goodwin St	Pleasanton	78064	+18305692138	https://pleasantonnorthhc.com/		0.99
+273b4d23133a	Pleasanton South Nursing and Rehab	senior	retirement home	28.95625	-98.49216	905 W Oaklawn Rd	Pleasanton	78064	+18305693861	https://www.pleasantonsouthhc.com		0.99
+bf7972413c77	The Heights of Atascosa	senior	retirement home	28.95949	-98.51451	1855 W Goodwin St	Pleasanton	78064	+18302818202	http://www.theheightsatascosa.com	Touchstone Communities	0.97
+f2a2079823ce	Three Rivers Nursing Home Llc	senior	assisted living facility	28.47567	-98.16814	1717 45th St	Three Rivers	78071	+13617862256			0.65

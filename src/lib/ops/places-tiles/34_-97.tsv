@@ -1,0 +1,3 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+dd580113810e	Firehouse Subs North Central Expressway	fastfood		34.24397	-96.21826	901 N US 75-Central Expressway, Ste 300	Plano	75075	+14695739500	http://firehousesubs.com/menu?service-mode=TAKEOUT&store-number=1988		0.85
+01b52f13f78b	La Quinta Inn & Suites by Wyndham Denison - N. Lake Texoma	hotel	resort	34.26596	-96.20882	801 N US Highway 75	Denison	75020	+19034640340	https://www.wyndhamhotels.com/laquinta/denison-texas/la-quinta-denison-north-lake-texoma/overview?CID=LC:ycxc9dy8gi7gbv8:53278&iata=00093796		0.85

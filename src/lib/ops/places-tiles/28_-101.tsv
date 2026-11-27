@@ -1,0 +1,417 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+136f8bc8f706	7 A's Local Fresh Farm Eggs	bakery		28.66507	-100.48506	1079 Francis St	Eagle Pass	78852	+18307527566			0.66
+f82e3c6a59f0	Ana's Ice Cream and Bakery	bakery		28.68647	-100.48634	1580 Eidson Rd	Eagle Pass	78852	+18304156214	https://anas-bakery-ice-cream-shop.weebly.com/		1.00
+11c805c9a01c	Angel's cakes	bakery		28.65726	-100.42624	791 Wildwood Dr	Eagle Pass	78852	+18303256689	http://www.eptx411.com/listing/angels-bakery-cakes-more/		0.97
+f5b9b59096f6	Appo's Bakery And Coffee	bakery		28.70935	-100.50269	437 Quarry St	Eagle Pass	78852	+18304217821			0.92
+3d43573a003a	Bluebonnet Baked Goods	bakery		28.70840	-100.50185	498 E Main St	Eagle Pass	78852	+18303257062			0.96
+9853e0100ff7	Downtown Cupcake Shoppe	bakery	cupcake shop	28.70942	-100.50563	481 Washington St	Eagle Pass	78852	+18307767373	https://downtown-cupcake-shoppe.square.site/		0.96
+4ba8c7c19e2c	El Dulce Pasteleria	bakery		28.71429	-100.47702	1995 N Veterans Blvd	Eagle Pass	78852	+18307731550			0.92
+8a7f1a47d3e3	Irasema Pereda Cakes	bakery		28.72682	-100.49853	989 Rio Rd	Eagle Pass	78852	+18308721110			0.96
+c884f71a1cf3	La Union	bakery		28.68729	-100.47528	2825 El Indio Hwy	Eagle Pass	78852	+18308720088			0.96
+c68f137693b9	Panaderia Olivares	bakery		28.72256	-100.49794	1310 Del Rio Blvd	Eagle Pass	78852	+18307576999	https://panaderia-olivares.hub.biz		0.96
+8035a702b907	Sweet Tweets Bakery	bakery		28.70788	-100.50080	259 N Monroe St	Eagle Pass	78852	+18302134802	http://www.sweettweetsbakeryep.com/		0.92
+d0935653b704	Border Bar	bar	pub	28.70950	-100.46525	3025 US-57	Eagle Pass	78852	+18307572477			0.92
+3cbd1cb6b116	Casino Bar & Grill	bar		28.65145	-100.42631	183 FM-2030	Eagle Pass	78852	+18307576433	http://www.eaglepasscasinohotel.com		0.70
+0e9d8fc72276	Fat Lizard Pub	bar	pub	28.70822	-100.50345	348 E Main St	Eagle Pass	78852				0.96
+2ae0c56eed4b	Guajardo Bar	bar		28.69190	-100.46901	1536 Lety St	Eagle Pass	78852				0.95
+998c232a201b	La Bodega	bar		28.74617	-100.50471	800 Ritchie Rd	Eagle Pass	78852		http://www.labodegakc.com/		0.70
+4c2647dae9e2	Monkeys Drinks TOGO	bar		28.70635	-100.48159	404 South Texas Dr	Eagle Pass	78852	+18309687333			0.60
+5472b08b4e0d	Tequila Cantina	bar	pub	28.74241	-100.49623	2504 Del Rio Blvd	Eagle Pass	78852				0.99
+16c5c23242f5	William Shannon	bar		28.70862	-100.50260	303 Main St	Eagle Pass	78852	+18307571000			0.76
+cb9962540bb4	3 D'S Auto Sales Llc	cardealer		28.70052	-100.49284	1694 El Indio Hwy	Eagle Pass	78852	+18305138767			0.92
+d2921744f157	Affordable Truck Store	cardealer		28.68458	-100.47282	2868 El Indio Hwy	Eagle Pass	78852	+18307570100	http://www.affordabletrucktires.com/	Affordable Truck Tires LLC	0.92
+73881f6c39de	America Auto Sales	cardealer		28.65704	-100.43318	291 Wildwood Dr	Eagle Pass	78852	+18307578019			0.55
+ca5d9f6eca6b	Ancira Eagle Pass Ford	cardealer		28.71473	-100.47718	1997 N Veterans Blvd	Eagle Pass	78852	+18009442000	http://www.aepford.com		0.92
+841da41dfee3	Ancira Eagle Pass Ford Chrysler Dodge Jeep Ram	cardealer		28.72794	-100.45753	4039 Adams Cir	Eagle Pass	78852	+18309710837	http://www.anciraeaglepass.com/	Ford Motor Company	0.97
+3bb74e2f8ead	Ancira Eagle Pass Ford Parts	cardealer		28.72762	-100.45760	4039 Adams Cir	Eagle Pass	78852	+18009442000	http://www.fordeaglepass.com/	Ford Motor Company	0.97
+588f61918a15	Auto One	cardealer		28.68857	-100.47399	1879 S Veterans Blvd	Eagle Pass	78852	+18307760821		Auto One	0.92
+90cd9cfa8cc5	AutoWorld Eagle Pass	cardealer	used auto dealer	28.71472	-100.47719	1997 N Veterans Blvd	Eagle Pass	78852	+18308723444	https://www.autoworldeaglepass.com/		0.92
+13af1a827a3a	Bexar Motors	cardealer	used auto dealer	28.70605	-100.49446	1426 E Garrison St	Eagle Pass	78852	+18307529003	http://www.bexarmotors.com/		0.92
+44d659bdbb86	Brother's Auto Sales	cardealer	used auto dealer	28.69067	-100.48000	2482 El Indio Hwy	Eagle Pass	78852	+18309689541			0.92
+6e16fe324295	Brown Chevrolet Buick GMC of Eagle Pass	cardealer	used auto dealer	28.71739	-100.46304	3860 US Highway 57	Eagle Pass	78852	+18775937986	http://www.brownep.net/		0.97
+d31eff0537ba	Campos Auto Sales	cardealer	used auto dealer	28.68803	-100.47604	2775 El Indio Hwy	Eagle Pass	78852	+18307526363	http://camposautos.com	Campos Trucks & SUVs INC.	0.92
+44a25d640c69	Chevrolet	cardealer		28.72565	-100.45938	3860 Us Hwy 57	Eagle Pass	78852	+18775937986	https://www.brownep.net	Chevrolet	0.97
+2a791552e0a3	City Auto Sales	cardealer		28.69487	-100.47422	1581 S Veterans Blvd	Eagle Pass	78852	+18307529010			0.72
+4a5fe0e8a569	Delsa Auto Sales	cardealer		28.70566	-100.49342	1498 Garrison St	Eagle Pass	78852	+18303250904	http://delsaauto.acapply.com/		0.92
+bee66014c4e7	Eagle Used Cars Inc	cardealer		28.69044	-100.47420	1703 S Veterans Blvd	Eagle Pass	78852	+18307739980	http://eagleusedcars.com/		0.92
+5187a99ce939	El Aguila Auto Sales Llc	cardealer		28.69525	-100.48602	2155 Brown St	Eagle Pass	78852	+18303257172			0.75
+6edeede70afe	El Bravo Used Cars Llc	cardealer	used auto dealer	28.70581	-100.48911	1890 E Garrison St	Eagle Pass	78852	+18307731363			0.92
+ba9fc973f270	El OSO AUTO SALES	cardealer		28.69580	-100.48489	2201 El Indio Hwy	Eagle Pass	78852	+18303252288			0.63
+707ccd014705	Fasco Motors Group	cardealer	used auto dealer	28.69481	-100.49545	1305 Industrial Blvd	Eagle Pass	78852	+18307737130	https://ericher.com		0.65
+f7e73527f458	Ford Motor Company	cardealer		28.72783	-100.45757	4039 Adams Cir	Eagle Pass	78852	+18307575700	http://www.ancirafordeaglepass.com	Ford Motor Company	0.85
+9e5d037cd919	Fort Duncan Motors LLC	cardealer		28.68806	-100.47312	2811 Swell Rd	Eagle Pass	78852	+18307769314			0.63
+13d004902892	Garcia's Auto Sales	cardealer	used auto dealer	28.72811	-100.49637	1834 Del Rio Blvd	Eagle Pass	78852	+18307578373			0.92
+e99f85328b06	Garza Used Cars	cardealer		28.68338	-100.47045	2959 El Indio Hwy	Eagle Pass	78852	+18307730056			0.81
+37965325f711	GE Motors	cardealer		28.68538	-100.48554	1632 Eidson Rd	Eagle Pass	78852	+18305130708			0.92
+bb626e7aef41	Gonzalez Used Cars	cardealer		28.70627	-100.48946	1815 Garrison St	Eagle Pass	78852	+18307573355	http://gonzalesusedcars.com		0.86
+8f35f8386ec9	Ideal Auto Sales	cardealer	used auto dealer	28.69476	-100.47409	1585 S Veterans Blvd	Eagle Pass	78852	+18307575264			0.92
+d1dd20f9c48d	J. Bass Auto Parts & Used Cars	cardealer		28.68212	-100.46818		Eagle Pass	78853	+18307734410			0.92
+a06a364d498b	Jerry Rdz Brown Ep	cardealer		28.72258	-100.46160	3860 US Highway 57	Eagle Pass	78852	+18307732349	http://brownep.net/		0.80
+a52c1be75f27	JR Auto Sales	cardealer	used auto dealer	28.68382	-100.47024	2955 El Indio Hwy	Eagle Pass	78852	+18309683131			0.91
+92b6b4a466b4	Js Auto Sales	cardealer	used auto dealer	28.70624	-100.49030	1757 E Garrison St	Eagle Pass	78852	+18307738300	https://www.facebook.com/profile.php?id=61572087125515		0.92
+0806e0f50836	Lico's Auto Sales Llc	cardealer	used auto dealer	28.69312	-100.47418	1643 S Veterans Blvd	Eagle Pass	78852	+18307580689	https://www.licosautosalesllc.com		0.75
+b7ed0a37003f	M&M Party Rentals	cardealer		28.68278	-100.46794	3097 El Indio Highway	Eagle Pass	78852	+18306992101			0.77
+ecf00ab864e7	Martinez Auto Sales	cardealer		28.69965	-100.49079	1858 El Indio Hwy	Eagle Pass	78852	+18307730324	https://martinez-auto-sales-service.hub.biz/		0.92
+7afd7ea3cfca	Monroe Trail LLC	cardealer		28.70920	-100.49525	324 Medina St	Eagle Pass	78852	+18307768154			0.92
+63a8fe719d5b	Muzquiz Motors	cardealer		28.70885	-100.49452	1391 Main St	Eagle Pass	78852	+18304158414			0.77
+ce3d83596b7f	Polsix Enterprises	cardealer		28.69760	-100.47269	1506 S Veterans Blvd	Eagle Pass	78852	+18307731372	http://www.polsix.com		0.85
+af274ad3a9b0	Pueblo Nuevo/ Eagle Pass Tx	cardealer		28.65639	-100.42727		Eagle Pass			http://www.yellowpages.com/eagle-pass-tx/mip/pueblo-nuevo-auto-sales-6242224		0.97
+452834dadb0b	RG Auto Sales 2	cardealer	used auto dealer	28.70650	-100.49567	141 Medina St	Eagle Pass	78852	+18307571020			0.92
+3bc73091fc03	Sky Auto Sales	cardealer		28.67765	-100.47704	103 Nogal St, Eagle Pass, TX 78852-5614, United States	Eagle Pass	78852	+18307761015			0.83
+3d3679fe4843	Speedy Rosales	cardealer		28.76974	-100.49274	3737 Deer Run Blvd	Eagle Pass	78852	+18309686649			0.92
+9b5d5f830f46	Tejas Auto Sales	cardealer	used auto dealer	28.74756	-100.49740	2855 Del Rio Blvd	Eagle Pass	78852	+18303091662			0.92
+8944c2ad0ec1	Texas Ford Dealers	cardealer		28.72783	-100.45754	4039 Adams Cir	Eagle Pass	78852	+12106814900		Ford Motor Company	0.98
+6af96982c410	Top Discount Auto	cardealer		28.68278	-100.46796	3097 El Indio Hwy	Eagle Pass	78852	+18303250650			0.92
+fd2bcb90e035	Cinemark Mall de Las Aguilas	cinema		28.70206	-100.48324	455 South Bibb St	Eagle Pass	78852		http://www.cinemark.com/theatres/tx-eagle-pass/cinemark-mall-de-las-aguilas	Cinemark	0.99
+91774c116826	Cafe Lulu	coffee		28.70733	-100.50040	607 E Rio Grande St	Eagle Pass	78852	+17707449516			0.92
+963f779309ac	Crazy Wabble Cones	coffee	bubble tea shop	28.66238	-100.41447	1271 FM-2030	Eagle Pass	78852	+18309685804			0.67
+0d3b5560e8c0	Four Corners Coffee	coffee		28.70593	-100.49264	1556 E Garrison St	Eagle Pass	78852	+18309681749			0.59
+e4ab86b434e3	Magic Cafe	coffee		28.71080	-100.46025	3101 Bob Rogers Dr	Eagle Pass	78852	+18308728008			0.55
+3014f2369946	Marco's Coffee	coffee		28.73236	-100.48255	2230 Foothill St	Eagle Pass	78852	+18305131227			0.71
+21b741ce3764	McDonald's	coffee		28.70116	-100.48069	496 S Bibb St	Eagle Pass	78852	+18307526005	https://www.mcdonalds.com/us/en-us/location/tx/eagle-pass/496-s-bibb-st/29699.html?cid=RF:YXT:RoN::Clicks		1.00
+2df4d0d57ddc	Port Coffee	coffee		28.72285	-100.49750	1350 Del Rio Blvd	Eagle Pass	78852	+18308677454			0.92
+b249f68f03e9	Revive Coffee Shop	coffee		28.71219	-100.45992	3101 Bob Rogers Dr	Eagle Pass	78852	+18309685398			0.92
+d8e7f54077a1	Starbucks	coffee		28.70671	-100.48365	275 S Bibb Ave	Eagle Pass	78852	+18307233510	https://www.starbucks.com/store-locator/store/1031548/	Starbucks	0.99
+75aae51be3d4	Colegio Biblico	college		28.70767	-100.48754	264 N Brazos St	Eagle Pass	78852	+18307733110	http://www.colegiobiblico.net/	Colegio Biblico	0.92
+7a7e8678501e	Eagle Pass Extension Center	college		28.71856	-100.48737	1980 Comm Antonio M Garcia Roadway	Eagle Pass	78852	+18307521761	http://www.swtjc.edu/academics/programs-and-degrees/adult-education-and-literacy/index.html		0.92
+899f04b40b19	Grace Community College	college		28.70844	-100.48923	1858 Main St	Eagle Pass	78852	+18307734000	http://gracecommunitycollege.net/		0.88
+168af659fd4e	Southwest Texas Junior College	college		28.71127	-100.46008	3101 Bob Rogers Dr	Eagle Pass	78852	+18307584100			1.00
+93e2bc1601d8	Sul Ross State University - Rio Grande College	college		28.71112	-100.45969	3107 Bob Rodgers Dr	Eagle Pass	78852	+18307585022	http://rgc.sulross.edu/sbdc.html		0.99
+10cd6556bcb3	7-Eleven	convenience		28.71934	-100.47706	2093 N Veterans Blvd	Eagle Pass	78852	+18307730941	https://www.7-eleven.com/locations/tx/eagle-pass/2093-n-veterans-boulevard-40531	7-Eleven	1.00
+2f2b9c968625	7-Eleven	convenience		28.74084	-100.49680	2427 Del Rio Blvd	Eagle Pass	78852	+18307521260	https://www.7-eleven.com/locations/tx/eagle-pass/2427-del-rio-boulevard-40533	7-Eleven	0.99
+f6b5742893ab	7-Eleven	convenience		28.67043	-100.45484	4377 El Indio Hwy	Eagle Pass	78852	+18307733939	https://www.7-eleven.com/locations/tx/eagle-pass/4377-fm-1021-tx-loop-480-40537	7-Eleven	1.00
+04d8b960bae4	Ace Cash Express	convenience		28.70820	-100.49917	750 E Main St	Eagle Pass	78852	+18307732274			0.55
+5a70221180b0	Cartenders Truck Stop	convenience		28.70995	-100.46413	US Highway 277	Eagle Pass	78852	+18307521381	https://www.mechanicadvisor.com/tx/eagle-pass/auto-repair		0.91
+c8010bdb2d06	Casino Grocery #4	convenience		28.70940	-100.47640	3518 NORTH HWY 277	Eagle Pass	78852		https://locations.valero.com/en-us/LocationDetails/Index/3518-NORTH-HWY-277/0000010748	Valero	0.80
+5e7efe7a9f4a	CAT Scale	convenience	truck gas station	28.70967	-100.46340	3002 US Highway 57	Eagle Pass	78852	+18307581712	http://catscale.com/?utm_medium=yext&utm_source=bing		0.92
+6437e7d936b3	Chevron	convenience		28.64991	-100.42871	6525 EL INDIO HWY COR. FM 1021 & FM 2030	Eagle Pass	78852		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/6525-EL-INDIO-HWY-COR-FM-1021-FM-2030-EAGLE-PASS-TX-78852-0000-id209921	Chevron	0.95
+b0b927539f3f	Chevron	convenience		28.70283	-100.49928	FM 1021	Eagle Pass	78852	+18309312135	http://www.chevron.com/	Chevron	0.69
+b965814d37ca	Chevron	convenience		28.75411	-100.49498	3212 N HWY 277	Eagle Pass	78852		https://www.chevronwithtechron.com/en_us/home/gas-station-near-me.html?/station/3212-N-HWY-277-EAGLE-PASS-TX-78852-id210742	Chevron	0.95
+149950a3a807	Cleo's Convenience Store	convenience		28.69613	-100.48564	2196 El Indio Hwy	Eagle Pass	78852	+18307578434	http://valero.com		0.92
+4e1b47116dcb	Cleo's Convenience Store	convenience		28.73420	-100.48273	2757 N Veterans Blvd	Eagle Pass	78852	+18307571455			0.91
+40d2043d0ba3	Cleos 8	convenience		28.73410	-100.48310	2757 LOOP 431	Eagle Pass	78852	+18307571455			0.84
+ba57d297b735	Dragon Mart	convenience		28.71448	-100.48353	821 N Bibb Ave	Eagle Pass	78852	+18307733366	http://citgo.com		0.92
+205b82aa208e	Exxon	convenience		28.70902	-100.47974	2415 E Main St	Eagle Pass	78852	+18307737476	https://www.exxon.com/en	Exxon & Mobil Stations	0.92
+2e87f91e7563	Exxon	convenience		28.70843	-100.49931	750 E Main St	Eagle Pass	78852	+18307735786	http://www.exxon.com/		0.92
+5347d99890b3	Exxon	convenience		28.70995	-100.46449	86 A Hwy 57	Eagle Pass	78852	+18307581712	https://www.exxon.com/en	Exxon & Mobil Stations	1.00
+587671d75ab9	Exxon	convenience		28.70628	-100.50068	585 E Garrison St	Eagle Pass	78852	+18307578228	https://www.exxonmobilfuels.com/en/find-gas-station/200314723		1.00
+dbc60933df7e	Exxon	convenience		28.73888	-100.49675	2401 Del Rio Blvd	Eagle Pass	78852	+18307731659	https://www.exxonmobilfuels.com/en/find-gas-station/200317609		0.92
+d6bad0bd7f6e	Five Points Market 27	convenience		28.70624	-100.50079	585 E GARRISON ST	Eagle Pass	78852		https://www.exxon.com/en/find-station/exxon-eaglepass-tx-fivepointsmarket27-200314723	Exxon	0.80
+91dac730797f	Kickapoo Lucky Eagle Convenience Store	convenience		28.64514	-100.42153	7054 FM1021	Eagle Pass	78852	+18307733200	https://www.bizapedia.com/tx/kickapoo-lucky-eagle-convenience...		0.97
+ce987fff2ac4	Kwik Chek	convenience		28.69693	-100.48637	2196 El Indio Hwy	Eagle Pass	78852	+18307578434	https://www.kwikchekstores.com		0.92
+53fc1e741aed	Kwik Chek now TXB	convenience		28.73436	-100.48284	2757 N Veterans Blvd	Eagle Pass	78852	+18307571455	https://www.kwikchekstores.com		0.98
+f34a10ca8875	Lara's Beer To Go	convenience		28.68439	-100.48497	1664 Eidson Rd	Eagle Pass	78852	+18303352114			0.92
+8f417617f42b	Maverick Gas Services	convenience		28.70919	-100.48360	2195 E Main St	Eagle Pass	78852	+18307739669	https://maverick-gas-services-llc.hub.biz/		0.92
+40c86283b0bc	Maverick Pit Stop No. 2	convenience		28.70835	-100.50033	602 E Main St	Eagle Pass	78852	+18303257073			0.92
+8fefbaadabde	Max E Mart 11	convenience		28.70810	-100.49918	750 E Main St	Eagle Pass	78852	+18307735786			0.84
+a0e6f06f76b0	MAX-E-MART #9	convenience		28.70912	-100.47982	2415 E MAIN ST	Eagle Pass	78852		https://www.exxon.com/en/find-station/exxon-eaglepass-tx-maxemart9-200314055	Exxon	0.80
+6f4109edefb7	Medina Mart	convenience		28.71502	-100.49593	697 Medina St	Eagle Pass	78852	+18307733303	http://citgo.com		0.92
+b84cfa581de4	MINIT MART #2	convenience		28.68690	-100.47467	1989 S VETERANS BLVD	Eagle Pass	78852		https://www.exxon.com/en/find-station/exxon-eaglepass-tx-minitmart2-200330907	Exxon	0.80
+b48b8d2918e9	MINIT MART #3	convenience		28.75251	-100.49684	3165 DEL RIO BLVD	Eagle Pass	78852		https://www.exxon.com/en/find-station/mobil-eaglepass-tx-minitmart3-200330908	Mobil	0.80
+aa01c8cba20d	Minits	convenience		28.70115	-100.49451	1540 El Indio Hwy	Eagle Pass	78852	+18307738888	http://www.minitmart.com/	Minit Mart	0.95
+e4184af87f24	MINITS #125	convenience		28.70933	-100.47691	2455 MAIN ST	Eagle Pass	78852		https://www.exxon.com/en/find-station/mobil-eaglepass-tx-minits125-200326195	Mobil	0.80
+fe9c738fd0c8	Minits No. 3	convenience		28.75247	-100.49653	3165 Del Rio Blvd	Eagle Pass	78852	+18307732230	http://www.minitmartcstores.com/minit-mart-3		0.92
+968f76bb5c04	Mobil	convenience		28.70931	-100.47694	2455 Main St	Eagle Pass	78852		https://www.exxon.com/en/find-station/mobil-eaglepass-tx-minits125-200326195?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.97
+2c96a7f6872f	MR CARTENDER TRAVEL CENTER	convenience		28.70993	-100.46443	86A HWY 57	Eagle Pass	78852		https://www.exxon.com/en/find-station/exxon-eaglepass-tx-mrcartendertravelcenter-200314402	Exxon	0.80
+208168f4dcf3	Murphy USA	convenience		28.70127	-100.48272	490 S Bibb Ave	Eagle Pass	78852	+18307521724	http://www.murphyusa.com	Murphy USA	0.92
+9765b292f90e	Murphy USA	convenience		28.71936	-100.47574	2090 N Veterans Blvd	Eagle Pass	78852	+18302620235	http://www.murphyusa.com/		0.92
+9ce0ef6cba3d	Neal One Stop	convenience		28.70624	-100.50082	585 E Garrison St	Eagle Pass	78852	+18307578228	http://exxonmobilstations.com		0.92
+caedf16b30f7	Petro	convenience		28.71425	-100.46449	3199 US Highway 57	Eagle Pass	78852	+18307765662	https://www.ta-petro.com/		0.55
+83fc670a4c0b	Pilot Dealer	convenience		28.70989	-100.46408	3002 US-57	Eagle Pass	78852	+18307581712	https://locations.pilotflyingj.com/us/tx/eagle-pass/3002-us-57	Pilot Flying J	0.92
+a87ac28e0331	SE40537 EAGLE PASS TX	convenience		28.67060	-100.45471	4377 FM 1021	Eagle Pass	78852		https://locations.valero.com/en-us/LocationDetails/Index/4377-FM-1021/0000026129	Valero	0.80
+7cbffd17a1b9	Shell	convenience		28.70916	-100.48359	2195 E Main St	Eagle Pass	78852	+18307739669	https://www.shell.com		0.92
+934e08d4228e	Shell	convenience		28.64518	-100.42152	7054 Fm 1021	Eagle Pass	78852	+18304215291	http://www.shell.us/	Shell	1.00
+c9706b33dd6f	Shell	convenience		28.75227	-100.49677	3165 Del Rio Blvd	Eagle Pass	78852	+18307732230	https://www.shell.com		0.92
+bf4108a8d715	Six Pack Stop	convenience		28.75406	-100.49475	3212 US-277	Eagle Pass	78852	+18307767095	http://chevron.com		0.92
+81b5e55c74d9	Stripes	convenience		28.74082	-100.49700	2427 Del Rio Blvd	Eagle Pass	78852	+18307521260	https://stripesstores.com/		0.96
+99260df4abb9	Stripes	convenience		28.71949	-100.47726	2093 N Veterans Blvd	Eagle Pass	78852	+18307730941	https://stripesstores.com/		1.00
+45b5fe805520	TXB	convenience		28.69600	-100.48570	2196 El Indio Hwy	Eagle Pass	78852	+18307578434	http://www.txbstores.com/		0.92
+9e3ffc2fac99	TXB	convenience		28.73436	-100.48271	2757 N Veterans Blvd	Eagle Pass	78852	+18307571455	http://www.txbstores.com/		0.92
+369d54ea7dea	Valero	convenience		28.69600	-100.48560	2196 EL INDIO HWY	Eagle Pass	78852	+18307578434	https://locations.valero.com/en-us/LocationDetails/Index/2196-EL-INDIO-HWY/0000001137	Valero Energy	0.99
+497eb96a3a09	Valero	convenience		28.76319	-100.49330	3518 US-277	Eagle Pass	78852	+12103452000	https://locations.valero.com/en-us/LocationDetails/Index/3518-NORTH-HWY-277/0000010748	Valero	0.92
+a5cbf56081f7	Valero	convenience		28.73408	-100.48283	2757 N Veterans Blvd	Eagle Pass	78852	+18307571455	https://www.valero.com		0.65
+c9d32ee7dd33	Valero	convenience		28.67016	-100.45492	4377 FM 1021	Eagle Pass	78852	+18307733939	https://locations.valero.com/en-us/LocationDetails/Index/4377-FM-1021/0000026129	Valero	0.97
+0fb02d0ee093	Valley Mart Inc	convenience		28.73922	-100.49651	2401 Del Rio Blvd	Eagle Pass	78852	+18307731659	http://exxonmobilstations.com		1.00
+c2f354a83cbc	Vicco Retail	convenience		28.69286	-100.48126	2351 El Indio Hwy	Eagle Pass	78852	+18307581210			0.92
+00219fe1dc83	Burger King	fastfood	burger restaurant	28.70803	-100.48469	2280 Garrison Street	Eagle Pass	78852	+18302948001	https://burgerking.com/store-locator/store/5585	Burger King	0.99
+186eb267bce0	Burger King	fastfood	burger restaurant	28.73965	-100.49643	2413 Del Rio Blvd	Eagle Pass	78852	+18307765107	https://burgerking.com/store-locator/store/23561	Burger King	0.96
+d432743ba396	Bush's Chicken	fastfood		28.73723	-100.48518	2834 N Veterans Blvd	Eagle Pass	78852	+18307521100	http://www.bushschicken.com/	Bush's Chicken - Laredo	0.95
+7b4986a695a0	Champs Chicken	fastfood		28.68689	-100.47418	1989 S Veterans Blvd	Eagle Pass	78852	+18307576996	https://champschicken.com/locations/minit-mart-2-eagle-pass-tx/	Champs Chicken	0.94
+8b65a9ae0272	Champs Chicken	fastfood		28.70964	-100.46371	3002 US-57	Eagle Pass	78852	+18307581712	https://champschicken.com/locations/minit-mart-4-exxon-eagle-pass-tx/	Champs Chicken	0.94
+cdf4af22eb7a	Champs Chicken	fastfood		28.75224	-100.49651	3165 Del Rio Blvd	Eagle Pass	78852	+18307732230	https://champschicken.com/locations/minit-mart-3-eagle-pass-tx/	Champs Chicken	0.94
+d5d6943dd291	Chick-fil-A	fastfood		28.69929	-100.48485	635 S Bibb Ave	Eagle Pass	78852	+18303352012	https://www.chick-fil-a.com/locations/tx/eagle-pass?utm_source=yext&utm_medium=link	Chick-fil-A	0.99
+b27d07d22350	Church's Texas Chicken	fastfood		28.75325	-100.49611	3195 Del Rio Blvd	Eagle Pass	78852	+18302138176	https://locations.churchs.com/tx/eagle-pass/3195-del-rio-boulevard	Church's Chicken	0.97
+b5bc7812da8f	Church's Texas Chicken	fastfood		28.64626	-100.42178	6995 FM-1021	Eagle Pass	78852	+18307576740	https://locations.churchs.com/tx/eagle-pass/6995-fm-1021	Church's Chicken	0.98
+b624e348126f	Church's Texas Chicken	fastfood		28.68631	-100.47343	1990 S Veterans Blvd	Eagle Pass	78852	+18307731500	https://locations.churchs.com/tx/eagle-pass/1990-s.-veterans-boulevard	Church's Chicken	0.98
+c2ebc22c8101	Church's Texas Chicken	fastfood		28.70852	-100.49412	1430 Main Street	Eagle Pass	78852	+18307573672	https://locations.churchs.com/tx/eagle-pass/1430-main-street	Church's Chicken	0.96
+cf669eea1821	Dairy Queen	fastfood		28.70841	-100.48404	2178 E Main St	Eagle Pass	78852	+18307736010	https://www.dairyqueen.com/en-us/locations/tx/eagle-pass/2178-main-st/14035/?y_source=1_MjkzMzkwNzctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Dairy Queen	0.99
+b7a737ab2176	Domino's	fastfood	pizza restaurant	28.70684	-100.48291	286 S Bibb	Eagle Pass	78852	+18307739797	https://www.dominos.com/en/?utm_source=google&utm_medium=loclist&utm_campaign=localmaps	Domino's Pizza	0.98
+ef13b77a1c37	DQ Grill & Chill	fastfood		28.70848	-100.48403	2178 Main St	Eagle Pass	78852		https://www.dairyqueen.com/en-us/locations/tx/eagle-pass/2178-main-st/3808	DQ Grill & Chill	0.80
+c121315cdece	Dunkin Donuts	fastfood		28.70109	-100.48095	496 South Bibb Avenue, WM Store # 461	Eagle Pass	78852		https://www.dunkindonuts.com/locations/us/tx/eagle-pass/496-south-bibb-avenue/store-366674/	Dunkin'	0.80
+0fe5ae3553bd	Golden Chick	fastfood		28.70862	-100.48625	2100 East Main St	Eagle Pass	78852		https://locations.goldenchick.com/tx/eagle-pass/1410/	Golden Chick	0.98
+ebffd7cec11b	Heaven Taste Grill	fastfood		28.64875	-100.42204	291 Alamo Rd	Eagle Pass	78852	+18305132051			0.71
+0f66da690df0	Jack in the Box	fastfood		28.69947	-100.48350	564 S Bibb Ave	Eagle Pass	78852	+13465696065	https://www.jackinthebox.com		0.99
+b2716ec45274	JJMaya	fastfood		28.68725	-100.47508	2847 El Indio Hwy	Eagle Pass	78852	+18303195331	http://jjmaya.square.site/		0.98
+de689d6ffc94	KFC	fastfood		28.70631	-100.48805	1993 Garrison	Eagle Pass	78852	+18307575445	https://locations.kfc.com/tx/eagle-pass/1993-garrison	KFC	0.99
+fec8a6adaf45	Las 12 Millas	fastfood		28.85047	-100.53600	Us 277	Eagle Pass	78852		rancherita.com.mx/...y-dos-heridos-dejo...a--millas-de-eagle-pass.html		0.88
+873364aa8dfd	Little Caesars Pizza	fastfood	pizza restaurant	28.70645	-100.48263	300 S Bibb Ave Unit 3	Eagle Pass	78852	+18307737227	https://littlecaesars.com/en-us/store/7644	Little Caesars	0.99
+8fceb71928c5	Long John Silver's	fastfood		28.70554	-100.48515	2151 E Garrison St	Eagle Pass	78852	+18307732711	https://www.ljsilvers.com/?y_source=1_MTc1NzMyNzMtNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Long John Silver's	0.99
+c26a75d54bf4	Los TAKOS	fastfood		28.68643	-100.48582	1593 Eidson Rd	Eagle Pass	78852	+18303883289			0.97
+14b23be0109e	McDonald's	fastfood		28.68653	-100.47317	1860 S Veterans Boulevard	Eagle Pass	78852	+18307580781	https://www.mcdonalds.com/us/en-us/location/tx/eagle-pass/1860-s-veterans-boulevard/32540.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+bd823740a520	McDonald's	fastfood		28.66994	-100.45562	30 Queens Ct.	Eagle Pass	78852		https://www.mcdonalds.com/us/en-us/location/44796.html	McDonald's	0.80
+d90f5ba9aba5	McDonald's	fastfood		28.73922	-100.49698	2401 Del Rio Blvd	Eagle Pass	78852	+18307521776	https://www.mcdonalds.com/us/en-us/location/tx/eagle-pass/2401-del-rio-blvd/34797.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+e8bf5aa1da6f	McDonald's	fastfood		28.70844	-100.48550	2130 Main St	Eagle Pass	78852	+18307735141	https://www.mcdonalds.com/us/en-us/location/tx/eagle-pass/2130-main-st/5637.html?cid=RF%3AYXT%3ARoN%3A%3AClicks%3Fcid%3DRF%3AYXT%3AFB%3A%3AClicks	McDonald's	0.99
+ea7af65453f8	Mi Vida Tito Tacos	fastfood		28.74186	-100.49606	2504 Del Rio Blvd	Eagle Pass	78852	+18309681352			0.89
+0da036db42bc	Panda Express	fastfood		28.70788	-100.48362	231 S Bibb Ave	Eagle Pass	78852	+18307576670	http://www.pandaexpress.com/	Panda Express México	0.99
+82f81d186a91	Papa Johns	fastfood	pizza restaurant	28.73435	-100.48268	2757 Veteran's Blvd	Eagle Pass	78852	+18307572444	https://locations.papajohns.com/united-states/tx/78852/eagle-pass/2757-veterans-blvd?utm_source=facebook-store-pages&utm_medium=referral&y_source=1_MTU2NDc0ODctNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Papa John's Pizza	0.95
+56f71d15795e	Peter Rabbits Fast Food	fastfood		28.68691	-100.47438	1989 S Veterans Blvd	Eagle Pass	78852	+18307576996			0.56
+6f809118c163	Pizza Hut	fastfood	pizza restaurant	28.70543	-100.48354	405 S Bibb Ave.unit 3002 Maverick	Eagle Pass	78852	+18307529191	http://www.pizzahut.com/	Pizza Hut	0.99
+d64dc0d94b78	Pizza Hut	fastfood	pizza restaurant	28.70911	-100.47812	2425 E. Main Maverick	Eagle Pass	78852	+18307735371	https://locations.pizzahut.com/tx/eagle-pass/2425-e-main?utm_medium=organic&utm_source=local&utm_campaign=yextpowerlistings&utm_content=website&utm_term=280536	Pizza Hut	0.98
+fa086eb8d872	Popeyes Louisiana Kitchen	fastfood		28.70845	-100.48357	2190 E Main St	Eagle Pass	78852	+18307573226	https://www.popeyes.com/store-locator/store/restaurant_82252	Popeyes Louisiana Kitchen	0.99
+5fb6cdde3944	Quiznos	fastfood		28.70369	-100.48267	432 S Bibb Ave	Eagle Pass	78852	+18307730588	http://quiznos.com/		0.92
+80982b396b18	Rodee's Country Fried Chicken	fastfood		28.69929	-100.49013	1910 El Indio Hwy	Eagle Pass	78852	+18307739189	https://www.eptx411.com/listing/rodees-country-fried-chicken/		0.95
+17051e50bdaa	Sonic Drive In	fastfood		28.70925	-100.47776	2447 E. Main	Eagle Pass	78852	+18307733946	https://locations.sonicdrivein.com/tx/eaglepass/2447-e.-main.html	Sonic Drive-In	0.99
+31784312f5f8	Subway	fastfood	sandwich shop	28.70866	-100.46831	2814 E Main St	Eagle Pass	78852	+18307575555	https://restaurants.subway.com/united-states/tx/eagle-pass/2814-e-main-street	Subway	0.95
+672d4538747f	Subway	fastfood	sandwich shop	28.70845	-100.49741	1200 Main Street	Eagle Pass	78852	+18307731904	https://restaurants.subway.com/united-states/tx/eagle-pass/1200-main-street	Subway	0.96
+948456911ce7	Subway	fastfood	sandwich shop	28.73417	-100.48293	2757 N Veterans Blvd	Eagle Pass	78852	+18307300213	https://restaurants.subway.com/united-states/tx/eagle-pass/2757-n-veterans-blvd	Subway	0.98
+d72016e6cd75	Subway	fastfood	sandwich shop	28.69592	-100.48573	2196 El Indio Hwy	Eagle Pass	78852	+18307578300	https://restaurants.subway.com/united-states/tx/eagle-pass/2196-el-indio-hwy	Subway	0.95
+aa616f7e9ad2	Taco Bell	fastfood		28.70607	-100.48446	2127 E Garrison St	Eagle Pass	78852	+18307739649	http://www.tacobell.com/	Taco Bell	0.99
+bb29c62a3081	Taqueria Santos	fastfood		28.67338	-100.47327	3238 Calle Teresa	Eagle Pass	78852	+18303549751			0.91
+3ae3f1ed1c0b	Taquería El Botanero	fastfood		28.70591	-100.48959	1820 Garrison St	Eagle Pass	78852				0.57
+f2f636b571f8	Tortas y Tacos Los Pachangueros	fastfood		28.70400	-100.50304	341 Bullis St	Eagle Pass	78852	+18309685596			0.98
+52ed45389614	Wendy's	fastfood		28.70914	-100.47940	2419 E Main St	Eagle Pass	78852	+18307580018	https://locations.wendys.com/united-states/tx/eagle-pass/2419-e-main-street	Wendy's	0.97
+a3b533ac3d19	Whataburger	fastfood		28.70308	-100.48283	454 S BIBB AVE	Eagle Pass	78852	+18307737923	https://locations.whataburger.com/tx/eagle-pass/454-s-bibb-ave.html/?utm_source=yextpages&utm_medium=locallistings&utm_campaign=yextpages	Whataburger	0.99
+1936086f0b68	Wingstop	fastfood	chicken restaurant	28.70613	-100.48167	404 S Texas Dr	Eagle Pass	78852	+18307734300	https://www.wingstop.com/location/wingstop-532-eagle-pass-tx-78852/menu?y_source=1_NTUyMDY2NzItNTU5LWxvY2F0aW9uLndlYnNpdGU%3D	Wingstop	0.98
+c253b6836d46	Yuki Loco	fastfood		28.65201	-100.42500	273 FM2030	Eagle Pass	78852	+18302133327	http://wwwyukiloco.com		0.85
+99958ce7e657	Casino Grocery 2	grocery		28.73560	-100.49530	2226 Del Rio Blvd	Eagle Pass	78852	+18307573955	http://chevron.com		0.96
+491662d60669	Casino Grocery and Market	grocery		28.76327	-100.49311	3518 Del Rio Blvd	Eagle Pass	78852	+18307576328	https://casino-grocery.hub.biz		0.92
+d7f5deb10f79	Casino Grocery and Market	grocery		28.69715	-100.48734	2110 El Indio Hwy	Eagle Pass	78852	+18307732440	http://www.planetbeauty.com		1.00
+796218cfbdd3	Casino Grocery and Meat Market	grocery		28.64982	-100.42838	Corner of FM 2030 and FM 1021, 6525 El Indio Hwy	Eagle Pass	78852	+18307738085	http://www.casinogrocery.com/		0.99
+822254dd31b3	Eagle Grocery	grocery		28.70843	-100.50413	299 E Main St	Eagle Pass	78852	+18307732384	https://www.chamberofcommerce.com/eagle-pass-tx/6431695-eagle-grocery		0.99
+56ee7af99dec	Eagle Pass H-E-B	grocery		28.71058	-100.48499	2135 E. MAIN	Eagle Pass	78852		https://www.heb.com/heb-store/us/tx/eagle-pass/eagle-pass-h-e-b-419	H-E-B	0.94
+973b74319b8e	H-E-B	grocery		28.71060	-100.48478	2135 E Main St	Eagle Pass	78852	+18307730345	https://www.heb.com/heb-store/US/tx/eagle-pass/eagle-pass-h-e-b-419	H-E-B	0.99
+f40591edd451	H-E-B	grocery		28.70851	-100.50493	201 Main St	Eagle Pass	78852	+18302782581	https://www.heb.com/heb-store/US/tx/eagle-pass/eagle-pass-h-e-b-419	H-E-B	0.75
+dba904dbcfbe	Jacinto Enterprises Inc	grocery		28.75238	-100.49574	3164 Del Rio Blvd	Eagle Pass	78852	+18307734010			0.76
+11c830b7c26d	Kickapoo Pecan Farm	grocery		28.60604	-100.41814		Eagle Pass		+18307575735	https://kickapoo-pecan-farm.hub.biz/		0.82
+ccbe1f430a03	La Michoacana Supermarket	grocery		28.73207	-100.48057	2676 N Veteran's Blvd	Eagle Pass	78852	+18303352048			0.77
+1e99d0909e23	La Tienda de los Venados	grocery		28.70858	-100.50422	299 Main St	Eagle Pass	78852	+18307732385			0.95
+0f19ab216473	La Villita Tortilla Factory	grocery		28.68829	-100.48766	1504 Eidson Rd	Eagle Pass	78852	+18307735919			0.92
+f2dc87dc32e2	Moses Pecan Farm	grocery		28.94372	-100.62509	322 Abdalla Rd	Quemado	78877	+18307731965	http://mosespecanfarm.com/		0.90
+ded2bace81ef	Mr Cartender	grocery		28.75253	-100.49680	3165 Del Rio Blvd	Eagle Pass	78852	+18307732230	https://www.groupon.com/biz/eagle-pass-tx/mr-cartender-3		0.88
+c3829eb17cf9	Panchito's Grocery	grocery		28.68581	-100.48651	1580 Eidson Rd	Eagle Pass	78852	+18307733035	https://www.groupon.com/biz/eagle-pass-tx/panchitos-grocery		0.90
+9cee5110163a	Sarita's Tortilla Factory Inc.	grocery		28.69084	-100.47886	2505 El Indio Hwy	Eagle Pass	78852	+18307739151	https://la-hacienda-tortilla-factory.negocio.site		0.92
+9eb8da1d0046	Super 7 Super Market	grocery		28.68764	-100.48638	1547 Eidson Rd	Eagle Pass	78852	+18307731023	http://superafoods.com/		1.00
+94be745a51de	Toottie Frutti	grocery		28.72060	-100.48431	2143 2nd St	Eagle Pass	78852	+18307768809			0.80
+1a7921040650	A Plus Family Care Phccba	hospital		28.72648	-100.47655	2298 N Veterans Blvd	Eagle Pass	78852	+18307581800			0.92
+1ab6149f93d3	Anthem Healthcare	hospital		28.71141	-100.45702	3147 Megan St	Eagle Pass	78852	+18307767068			0.71
+fafe3ecca522	Ford Duncan Emergency Room	hospital		28.71330	-100.45508		Eagle Pass					0.70
+68d5183879ac	Fort Duncan Regional Medical Center	hospital		28.71330	-100.45562	3333 North Foster Maldonado Boulevard	Eagle Pass	78852	+18307735321	https://www.fortduncanmedicalcenter.com/?utm_source=Facebook&utm_medium=Yext		0.97
+d4f50fd2cae5	Fort Duncan Regional Medical Center	hospital		28.70940	-100.45398	3333 N Foster Maldonado Blvd	Eagle Pass	78852	+18307735321	https://www.fortduncanmedicalcenter.com/		0.85
+430ea1a3acf7	Galizia James MD - Physician Specialty Group	hospital		28.72016	-100.47802	2483 2nd St	Eagle Pass	78852	+18307522322	http://www.mchdep.org/		0.71
+d8884104bc25	La Piedad BC	hospital		28.72455	-100.47592	2230 N Veterans Blvd	Eagle Pass	78852	+18309680055	http://maternidadlapiedad.com/		0.63
+33159880a3d9	Maverick County Hospital District	hospital		28.71506	-100.45496	3406 Bob Rogers Dr	Eagle Pass	78852	+18307574900	http://www.mchdep.org/		0.99
+03a53644ac80	Outpatient Physical Rehabilitation Center	hospital		28.71518	-100.45511	3406 Bob Rogers	Eagle Pass	78852	+18308722811			0.75
+eaf4357060ac	Stat Specialty Hospital	hospital		28.72041	-100.47629	2114 N Veterans Blvd	Eagle Pass	78852	+18302025873	http://statspecialtyhospital.com/locations/eagle-pass	STAT Specialty Hospital - Laredo North	0.99
+4ab6044ba694	TPR Eagle Pass	hospital		28.70339	-100.50508	350 S Adams St	Eagle Pass	78852	+18307573010	http://www.grifolsplasma.com/		0.67
+23fac1eca687	U.S Renal Care	hospital		28.71383	-100.45844	3307 Bob Rogers	Eagle Pass	78852				0.74
+35a935cc4777	United Medical Center	hospital		28.70945	-100.50408	474 Adams St	Eagle Pass	78852	+18307739160	https://umchealth.com/El-Indio-Hwy-Clinic		0.92
+502b1d18df1a	United Medical Centers	hospital		28.73009	-100.47890	2525 N Veterans Blvd	Eagle Pass	78852	+18307735358	http://www.umchealth.com/		0.99
+ce8f67a723f1	Americas Best Value Inn Eagle Pass	hotel		28.73095	-100.49542	2150 Del Rio Blvd	Eagle Pass	78852	+18307739531	https://www.redlion.com/americas-best-value-inns-suites		0.92
+0db3460bd09e	Border Inn	hotel		28.70962	-100.47868	2423 E Main St	Eagle Pass	78852	+18308720167			0.99
+3e3db2c18800	Camino Real Hotel	hotel	motel	28.70882	-100.46807	2856 E Main St	Eagle Pass	78852	+18307578111	https://www.magnusonhotels.com/hotel/camino-real-hotel-eagle-pass		0.98
+1a3f6f63db3d	Casino Hotel	hotel	motel	28.65119	-100.42626	197 FM-2030	Eagle Pass	78852	+18307580744	http://www.eaglepasscasinohotel.com/casino_hotel/casino_hotel_in_eagle_pass_tx___home.html		0.96
+9f2eddc6aae7	Casino Hotel	hotel		28.69825	-100.48809	2030 El Indio Hwy	Eagle Pass	78852	+18307580744	http://www.eaglepasscasinohotel.com		0.70
+9e3f60fcc5f3	Comfort Inn & Suites Lakeside	hotel		28.70711	-100.48176	402 South Texas Dr	Eagle Pass	78852	+18307731933	https://www.choicehotels.com/texas/eagle-pass/comfort-inn-hotels/txc31?pmf=yext&mc=llyxyxpx	Choice Hotels	1.00
+d53d0a6ce249	Country Hill Inn & Suites	hotel	motel	28.73783	-100.49609	2297 Del Rio Blvd	Eagle Pass	78852	+18307731811	http://www.bookeasy.co/Hotel/Country_Hill_Inn_Suite_Eagle_Pass.htm		0.99
+c4b41ebf4e27	Eagle Pass Hotels Llc	hotel		28.71644	-100.47734	2033 N Veterans Blvd	Eagle Pass	78852				0.95
+23731abbe088	Eagle Pass Inn	hotel	motel	28.70887	-100.48589	2127 E Main St	Eagle Pass	78852	+18307573700	https://eagle-pass-inn.hub.biz/		0.94
+adab8915c77a	Econo Lodge Inn & Suites	hotel	resort	28.71011	-100.47671	1923 N Veterans Blvd	Eagle Pass	78852	+18307581234	https://www.choicehotels.com/texas/eagle-pass/econo-lodge-hotels/txg10?mc=llbillpx&pmf=local		1.00
+e32380082574	Executive Inn and Kitchenette Suites	hotel	motel	28.72318	-100.49812	1395 Del Rio Blvd	Eagle Pass	78852	+18307736990			1.00
+c654e6475132	Hampton Inn Eagle Pass	hotel		28.71001	-100.46204	3301 E Main St	Eagle Pass	78852	+18307575565	https://www.hilton.com/en/hotels/eglpshx-hampton-eagle-pass/	Hampton by Hilton	0.99
+10a552888eb6	Hawthorn Extended Stay by Wyndham Eagle Pass	hotel		28.70317	-100.50567	482 Bliss St	Eagle Pass	78852	+18305229244	https://www.wyndhamhotels.com/laquinta/eagle-pass-texas/la-quinta-inn-and-suites-eagle-pass/overview		0.98
+18c10b134ba0	Hesles Motel	hotel	motel	28.70776	-100.50162	266 Madison St	Eagle Pass	78852	+18307736094			0.92
+048fded9f836	Hillcrest Motel	hotel	motel	28.70899	-100.49119	1699 E Main St #18	Eagle Pass	78852	+18307581432	http://www.hillcrestmotel.com	Hillcrest Motel	0.99
+f98a64ef5a16	Holiday Inn Express & Suites Eagle Pass	hotel		28.71498	-100.47610	2007 N Veterans Blvd	Eagle Pass	78852	+18307573050	http://www.hiexpress.com/	Holiday Inn Express	1.00
+f584281b865e	Hyatt Place Eagle Pass	hotel		28.70784	-100.46442	1060 Patsy Winn Blvd	Eagle Pass	78852	+18304980600	https://www.hyatt.com/hyatt-place/en-US/egpze-hyatt-place-eagle-pass		0.99
+1b2bba044ca4	Knights Inn	hotel		28.73780	-100.49647	2297 Del Rio Blvd	Eagle Pass	78852	+18307731811	https://www.kingsinnmichigancity.com		0.55
+34d191adb7fa	Knights Inn Eagle Pass	hotel		28.72319	-100.49848	1395 Del Rio Blvd	Eagle Pass	78852	+18307736990	https://www.redlion.com/knights-inn/tx/eagle-pass/knights-inn-eagle-pass		0.98
+e9a27c59dd63	La Quinta Inn & Suites by Wyndham Eagle Pass	hotel		28.70329	-100.50557	482 Bliss St	Eagle Pass	78852	+18305229245	https://www.wyndhamhotels.com/laquinta/eagle-pass-texas/la-quinta-inn-and-suites-eagle-pass/overview		0.99
+a97cfb8fa32d	La Quinta Inn by Wyndham Eagle Pass	hotel	resort	28.70992	-100.47553	2525 E Main St	Eagle Pass	78852	+18307737000	https://www.wyndhamhotels.com/laquinta/eagle-pass-texas/la-quinta-inn-eagle-pass/overview?CID=LC:LQ::BING:RIO:National:53282&iata=00093796		0.99
+0158abf3359a	La Quinta Inn Eagle Pass	hotel	resort	28.70884	-100.48640	2525 E Main St	Eagle Pass	78852	+18307737000	http://www.laquintaeaglepass.com/?cid=local_569		0.85
+4cf9639d0dc2	Maverick Inn	hotel	motel	28.70889	-100.49086	1711 E Main St	Eagle Pass	78852	+18307571711	http://www.maverick-inn.com		0.99
+7c5c9fe0d7cc	Microtel Inn & Suites by Wyndham	hotel	motel	28.69213	-100.48161	2352 El Indio Hwy	Eagle Pass	78852	+18303124806	https://www.wyndhamhotels.com/microtel/eagle-pass-texas/microtel-inn-and-suites-eagle-pass/overview		1.00
+4cfd0533698d	Motel 6	hotel	motel	28.70780	-100.48188	2338 E Main St	Eagle Pass	78852	+18302013797	https://www.motel6.com/en/motels.tx.eagle%20pass.4360.html?srccode=X_PMG_NaturalSearch_Local_Yext_4360&utm_source=local&utm_medium=local&utm_campaign=yextlocal-4360	Motel 6	1.00
+4b1da2e35345	Puni Anu Hospitality Llc	hotel		28.72312	-100.49831	1395 Del Rio Blvd	Eagle Pass	78852				0.95
+3ab1fed44aea	Sunset Inn	hotel		28.70842	-100.50014	656 E Main St	Eagle Pass	78852	+18307733313	http://www.sunsetinn.com	Sunset Inn Restaurant	0.92
+923f7834b92f	TownePlace Suites	hotel		28.71634	-100.47705	2033 North Veterans Boulevard	Eagle Pass	78852	+18307570077	https://www.marriott.com/en-us/hotels/egpts-towneplace-suites-eagle-pass/overview/?scid=d2406702-e8ea-4b45-bb9b-69cddaaef03d	TownePlace Suites by Marriott	0.99
+9f22ee8be27f	Welcome Inn	hotel	resort	28.73069	-100.49583	2150 Del Rio Blvd	Eagle Pass	78852	+18307739531	https://www.welcomeinnep.com/		0.99
+ae4999320736	Alkalive 1	office	bottled water company	28.72626	-100.47782	2416 Maria Del Refugio Dr	Eagle Pass	78852	+18309682585			0.92
+f059610d9307	Union Pacific RR Eagle Pass	office		28.70963	-100.49854	315 N Converse St	Eagle Pass	78852	+18307733724			0.90
+30daa2e82afd	Watermill Express	office	bottled water company	28.69718	-100.48736	2110 El Indio Hwy	Eagle Pass	78852	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+bda0a18f0c33	Watermill Express	office	bottled water company	28.70860	-100.48634	2126 E Main St	Eagle Pass	78852	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+c9afe0b18344	Watermill Express	office	bottled water company	28.76347	-100.49339	3518 Del Rio Blvd	Eagle Pass	78852	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+f3704cdd45cd	Watermill Express	office	bottled water company	28.64983	-100.42875	6525 El Indio Hwy	Eagle Pass	78852	+18004879643	https://watermillexpress.com/	Watermill Express	0.92
+10ea287a6137	830 Clamatos	restaurant	mexican restaurant	28.69494	-100.48393	2301 El Indio Hwy	Eagle Pass	78852	+18307520176			0.92
+3b32a02d40a8	956 Mexican St Food	restaurant		28.70846	-100.47869	2424 Main St	Eagle Pass	78852	+18309683888			0.60
+f748b6b18f5e	Al pastor Eagle Pass	restaurant		28.71410	-100.47695	1995 N Veterans Blvd	Eagle Pass	78852	+18307765661			0.92
+aa9aebed7858	Antojitos "El Jaliskito"	restaurant	mexican restaurant	28.69085	-100.48787	1156-1236 Eidson Rd	Eagle Pass	78852				0.92
+5f49c9ee106b	Antojitos Mexicanos	restaurant		28.68949	-100.46625	1684 Las Quintas Blvd	Eagle Pass	78852	+18305135086			0.56
+8b80570cb5d0	Azul	restaurant	steakhouse	28.61072	-100.44144	794 Lucky Eagle Dr	Eagle Pass	78852	+18307524838	https://luckyeagletexas.com/azul		0.98
+6a703790ddb8	Branding Iron	restaurant		28.75400	-100.49478	3212 Del Rio Blvd	Eagle Pass	78852	+18305133079			0.64
+ba578717698d	Burros y Tacos Del Rio Blvd.	restaurant	mexican restaurant	28.74849	-100.49691	2934 Del Rio Blvd	Eagle Pass	78852	+18307766856			0.88
+d179913fcf40	Cafe Los Reyes	restaurant	mexican restaurant	28.74373	-100.49649	2600 US-277	Eagle Pass	78852	+18307737372	https://cafe-los-reyes.hub.biz		0.96
+6cbfc43f3939	Caracoles Restaurant	restaurant		28.70916	-100.48863	1915 E Main St	Eagle Pass	78852	+18307572995	http://www.caracolesrestaurant.com/		0.92
+cd9309502cf4	Casino Cafe	restaurant	buffet restaurant	28.70846	-100.48844	1916 E Main St	Eagle Pass	78852	+18307574680			0.92
+af4e64fbf058	Champs Chicken	restaurant	chicken restaurant	28.71173	-100.49896	3165 Del Rio Blvd	Eagle Pass	78852	+18307732230	https://champschicken.com/locations/minit-mart-3-eagle-pass-tx/		0.85
+a665cd345348	Chance and Lee's	restaurant		28.72204	-100.49811	1296 Del Rio Blvd	Eagle Pass	78852	+18307767656	http://www.chanceandlees.com		0.96
+b17cd3b24724	Chili's Grill & Bar	restaurant		28.70724	-100.48273	264 Bibb Avenue	Eagle Pass	78852	+18307574600	https://www.chilis.com/		0.99
+dce97685f719	Chilos Tacos	restaurant		28.65522	-100.43021	1593 Eidson Rd	Eagle Pass	78852	+18305135090			0.61
+0e268ff79357	China Wok	restaurant		28.70326	-100.48442	455 S Bibb Ave	Eagle Pass	78852	+18308720072	http://chinapantry.com		0.80
+d7e203db9816	Choche's BBQ and Bar	restaurant	barbecue restaurant	28.71421	-100.47703	1995 N Veterans Blvd	Eagle Pass	78852	+18303358464	https://www.choches-bbq.com/		0.99
+500c50b24e86	Cooters Pub	restaurant	bar and grill restaurant	28.70845	-100.50381	303 E Main St	Eagle Pass	78852	+18307571000	http://cootersbar.blogspot.com		0.99
+01b35b6bf39d	Corner Cafe	restaurant	diner	28.94812	-100.62368	20000 US-277	Quemado	78877	+18307578133	http://thecornercafe.com/		0.99
+faa67b2e7b83	Cow Taco Eagle Pass	restaurant	taco restaurant	28.70847	-100.47798	2432 E Main St	Eagle Pass	78852	+18303526232			0.92
+fb6bc2fba4cd	cowboy Rodeo	restaurant	american restaurant	28.74925	-100.49721	2974 Del Rio Blvd	Eagle Pass	78852	+18303255679			0.92
+32f1c901cbfc	Cuernos Chuecos Bar & Grill	restaurant	bar and grill restaurant	28.68007	-100.46438	1956 Lindburgh Cir	Eagle Pass	78852				0.71
+a9759936f19d	De Los Reyes	restaurant	asian fusion restaurant	28.71751	-100.47031	2932 Chapote Loop	Eagle Pass	78852	+528781045390	https://www.casamasamoto.com/		0.61
+0306f0de6fee	De Los Santos Foodie Park	restaurant		28.75041	-100.49770	3055 Del Rio Blvd	Eagle Pass	78852	+18305161256			0.92
+c545c19f1581	Denny's Restaurant	restaurant		28.69951	-100.48339	564 S Bibb Avenue	Eagle Pass	78852	+18302138321	https://www.dennys.com/		0.99
+e00e93f471b2	Don Birriaz	restaurant	theme restaurant	28.68473	-100.47123	2931 El Indio Hwy	Eagle Pass	78852	+18307520111			0.88
+2f87b1f5b76a	Eat Fit Eagle Pass	restaurant	health food restaurant	28.73753	-100.49783	2263 Basswood	Eagle Pass	78852	+18305134832			0.96
+b305ef43f908	El Antojito Duranguense	restaurant		28.67902	-100.47645	492 Memo Robinson Rd	Eagle Pass	78852	+18308726535			0.97
+91d7bbeac13c	El Indio Hwy	restaurant	indian restaurant	28.68748	-100.47626		Eagle Pass					0.62
+385aa64e8b4d	El Relincho Restaurant	restaurant	mexican restaurant	28.71679	-100.47612	2076 N Veterans Blvd	Eagle Pass	78852	+18303352110			0.79
+92a9c22dcf31	El Restaurante Gaona's	restaurant	mexican restaurant	28.71099	-100.47599	1920 North Veterans Boulevard	Eagle Pass	78852	+18307573223			0.85
+52059413286f	El Rey del Sazon	restaurant		28.71052	-100.48307	2301 Stanley Dr	Eagle Pass	78852	+18303354865	http://google.com/		0.93
+e59097f42660	El Rincon De Veronica	restaurant	mexican restaurant	28.70723	-100.50499	230 Washington St	Eagle Pass	78852	+18307733301	http://www.superpages.com/bp/us/el-rincon-de-veronica-L0126797886.htm		0.97
+dfd252555301	El Zarape Grill	restaurant	mexican restaurant	28.69339	-100.48254	2328 El Indio Hwy #484	Eagle Pass	78852	+18307575364	https://el-zarape-grill.hub.biz		0.96
+673ac87d6141	EntreQuesos GrazingCo	restaurant	mexican restaurant	28.70654	-100.49031	Eagle pass	Eagle Pass	78852	+18309680876			0.94
+97992510db33	Estrella Restaurant	restaurant	mexican restaurant	28.70902	-100.48867	1915 E Main St	Eagle Pass	78852	+18307572995	http://www.estrellaseafood.com/		0.90
+3a3aa01d8c5f	Fat Daddys Smokehouse	restaurant	barbecue restaurant	28.69167	-100.47977	2461 El Indio Hwy	Eagle Pass	78852				0.55
+f92009f90d82	Felipes Hot Dogs	restaurant	hot dog restaurant	28.70140	-100.49332	1591 El Indio Hwy	Eagle Pass	78852	+18307576656			0.97
+f23b0818f5a3	Fern’s Smoke Squad & Catering	restaurant		28.70813	-100.49084		Eagle Pass		+18307761756			0.97
+964a092af651	Flaming Bird By H-E-B	restaurant	chicken restaurant	28.71017	-100.48486	2135 E Main St	Eagle Pass	78852	+12109381419	https://www.heb.com/discover/restaurants-and-food-to-go-at-heb		0.97
+dbfe31988119	Fuddruckers	restaurant	burger restaurant	28.70497	-100.48298	406 S Bibb Ave	Eagle Pass	78853	+18307733177	https://www.fuddruckers.com/eagle-pass	Fuddruckers	0.99
+d7d8b27f87b9	Gaona's LLC	restaurant	mexican restaurant	28.70626	-100.49014	1755 Garrison St	Eagle Pass	78852	+18307573223			0.92
+4f45eadfad5a	Gaona's Mexican Bite	restaurant	mexican restaurant	28.68239	-100.46764	2090 Las Quintas Blvd	Eagle Pass	78852	+18304215040			0.92
+df5bf62bc3ed	Garcias Mexican Restaurant	restaurant	mexican restaurant	28.68358	-100.46989	2991 El Indio Hwy	Eagle Pass	78852	+18307527669			0.96
+fc05b4488cbb	Gus tacos	restaurant	mexican restaurant	28.70891	-100.49748	977 e main st	Eagle Pass	78853	+18303254338			0.58
+a06d46522f29	Habanero restaurant	restaurant		28.73105	-100.49583	2150 Del Rio Blvd	Eagle Pass	78852	+18307767395			0.63
+af996e8b6905	HELA2	restaurant		28.75043	-100.49761	3055 Del Rio Blvd	Eagle Pass	78852	+18305132191			0.93
+fc34e2ed7adb	Hot Diggity Dog	restaurant		28.69364	-100.48196	2333 El Indio Hwy	Eagle Pass	78852	+18309715358			0.87
+d20b03f95ea9	Huddle House	restaurant	diner	28.69227	-100.48149	2352 El Indio Hwy	Eagle Pass	78852	+18307767083	https://huddlehouse.com/locations/tx/eagle-pass/2352-el-indio-hwy	Huddle House	0.99
+935f38dcf881	IHOP	restaurant	diner	28.61128	-100.44100	794 Lucky Eagle Dr	Eagle Pass	78852	+18307524866	http://www.ihop.com/	IHOP	0.96
+2f14ff485c95	Imperial Food Trailers Lider	restaurant	american restaurant	28.76281	-100.49326	3506 Del Rio Blvd	Eagle Pass	78852	+18302942828	http://Robuksteel.com/		0.68
+b1a50d9ac0c0	It's Just Wings	restaurant	chicken wings restaurant	28.70724	-100.48273	264 Bibb Avenue	Eagle Pass	78852	+14694608864	https://itsjustwings.com/		0.92
+4760fb43ed64	Jade Palace	restaurant	ramen restaurant	28.71677	-100.47575		Eagle Pass	78852		http://www.jadepalaceeaglepass.com		0.92
+aad2e5f48113	Jesica Restaurant	restaurant	mexican restaurant	28.70750	-100.50504	250 Washington St	Eagle Pass	78852	+18303256107			0.96
+85e3fbf631b4	Jesse's Tacos	restaurant	taco restaurant	28.70584	-100.49496	1398 E Garrison St	Eagle Pass	78852	+18307739166			0.96
+5f1f414ca5b7	La Cabañita Breakfast Tacos	restaurant	mexican restaurant	28.67861	-100.47903	561 Memo Robinson Dr	Eidson Road	78852	+18307579090			0.92
+cb342882abee	La Casita Restaurant	restaurant	mexican restaurant	28.68108	-100.47630	403 Memo Robinson Dr	Eagle Pass	78852	+18307574084	http://www.lacasitarestaurant.com		0.96
+f1fdb0954da7	La Hacienda Tortilla Factory	restaurant	mexican restaurant	28.69080	-100.47892	2505 El Indio Hwy	Eagle Pass	78852	+18307739151	http://lahaciendainc.com		0.77
+2e997fee92c0	La Parrilla	restaurant	mexican restaurant	28.74423	-100.49662	2640 Del Rio Blvd	Eagle Pass	78852	+18307580646	http://www.laparrilla.com		0.92
+65a65549b37f	La Patrona, Comidas Caseras	restaurant	mexican restaurant	28.63030	-100.41582	183 Santos Cir	Eagle Pass	78852	+18309298495			0.92
+55d3c327f234	La sombrilla EP comidas caseras	restaurant	mexican restaurant	28.69373	-100.47340	2904 J M Wheeler St	Eagle Pass	78852	+18303350145			0.92
+d866e6083912	La Taqueria	restaurant	mexican restaurant	28.70903	-100.48892	1885 Main St	Eagle Pass	78852	+18303257262			0.59
+de6a2f8bc1e5	La Taqueria	restaurant	mexican restaurant	28.74942	-100.49763	2971 Del Rio Blvd	Eagle Pass	78852				0.92
+0ae35e82b010	La Texanita	restaurant	mexican restaurant	28.77401	-100.48698	1445 El Venado Dr	Eagle Pass	78852	+18304210605			0.96
+429985257366	La Texanita 2	restaurant	mexican restaurant	28.70849	-100.49532	1308 Main St	Eagle Pass	78852	+18303194357			0.63
+2bd2fe6ba785	Laredo Taco Company	restaurant		28.71949	-100.47726	2093 N Veterans Blvd	Eagle Pass	78852	+18307730941	https://www.laredotacocompany.com/		1.00
+821b9f889710	Laredo Taco Company	restaurant		28.67049	-100.45464	4377 El Indio Hwy	Eagle Pass	78852	+18307733939	https://www.laredotacocompany.com/		0.95
+c98052fe1a29	Laredo Taco Company	restaurant		28.74082	-100.49700	2427 Del Rio Blvd	Eagle Pass	78852	+18307521260	https://www.laredotacocompany.com/		0.97
+36131b4c8834	Lety's Diner and Grocery	restaurant	diner	28.70814	-100.50648		Eagle Pass	78852	+18305131997			0.92
+57aac7bacb82	Lin-Bar's BBQ & Grill	restaurant	bar and grill restaurant	28.69455	-100.47957	1181 Yoblanda Dr	Eagle Pass	78852				0.85
+400f22b56a9e	Loma Bonita	restaurant	mexican restaurant	28.70654	-100.49039	1755 E Garrison St	Eagle Pass	78852	+18307734433			0.99
+4ed97c1ac919	Los Gordos Burgers	restaurant	burger restaurant	28.66527	-100.48290	1028 Mariza St	Eagle Pass	78852	+18309681879			0.92
+720073607b20	los gueros mexican grill and beer	restaurant	mexican restaurant	28.64297	-100.42233	191 Rosita Valley Rd	Eagle Pass	78852	+18302945972			0.98
+38824314fdde	Los Jochos Mas Perros	restaurant	mexican restaurant	28.69062	-100.46661	1605 Las Quintas Blvd	Eagle Pass	78852	+18302136646			0.76
+075aa6f10eaa	Los Primos	restaurant		28.67140	-100.48046	3135 Palma St	Eagle Pass	78852				0.67
+5aa285d82d8c	Los Tocayos Tacos	restaurant	taco restaurant	28.70857	-100.48006	Andy's Car Wash, 2890 E Main St	Eagle Pass	78852	+18302128402	https://www.groupon.com/biz/eagle-pass-tx/los-tocayos-tacos		0.92
+5910f979882f	LosVaqueros Restautant	restaurant		28.74687	-100.49671	2782 Del Rio Blvd	Eagle Pass	78852	+18307580700			0.99
+94b70a669fd0	Luby's	restaurant	comfort food restaurant	28.69937	-100.48352	564 S. Bibb Ave.	Eagle Pass	78852	+18308723020	https://www.lubys.com/eagle-pass		0.77
+b4bc1b27fec7	Luna's	restaurant	mexican restaurant	28.70675	-100.50656	195 Commercial St	Eagle Pass	78852	+18307581007	http://www.lunasmexicanrestaurant.com/		0.92
+76eb92676519	M A's Chicities Finest	restaurant	american restaurant	28.70852	-100.47809	2432 Main St	Eagle Pass	78852	+18303192994			0.71
+5e960763296c	Mabely's Pizza	restaurant	pizza restaurant	28.65409	-100.43291	148 Wild Turkey Dr	Eagle Pass	78852	+18303251636	https://www.mabelyspizza.com		0.96
+b4f115f53288	Macro Plaza Piedras Negras Coah	restaurant		28.71889	-100.49761		Eagle Pass			https://www.vipcars.com/.../piedras-negras/piedras-negras-airport		0.57
+dbb6e0cbf36a	Mario's Burgers	restaurant	burger restaurant	28.68888	-100.48790	1504 Eidson Rd	Eagle Pass	78852	+18303253809			0.96
+9680684c3e5e	Maverick county food pantry & family services	restaurant		28.72523	-100.49806	1609 Del Rio Blvd	Eagle Pass	78852	+18307576424			0.85
+43a93eb14363	Max Tacos	restaurant	taco restaurant	28.69905	-100.48948	19279, 1980 El Indio Hwy	Eagle Pass	78852	+18303523040			0.92
+cbbb522828c2	Mi Ranchito Mexican Restaurant	restaurant	mexican restaurant	28.72691	-100.49679	1720 Del Rio Blvd	Eagle Pass	78852	+18303253663	https://www.mariasmexicanrestaurant.com		0.93
+2724346f1135	Mia's	restaurant	mexican restaurant	28.70848	-100.50024	666 Main St	Eagle Pass	78852	+18307581158	http://www.eptx411.com/listing/mias/		0.92
+8b856320c5ef	Miguel y Miguel	restaurant	mexican restaurant	28.70101	-100.49364	1592 El Indio Hwy	Eagle Pass	78852	+18307580383	https://dinenear.com/miguelymiguel		0.92
+8a46d1bdd11e	Molcajete	restaurant	mexican restaurant	28.70985	-100.50632	143 Ford St	Eagle Pass	78852	+18303257058	https://www.facebook.com/molcajeteeaglepass		0.92
+f42f9991e842	Molcajete	restaurant	mexican restaurant	28.70753	-100.50073	229 Monroe St	Eagle Pass	78852	+18303192488			0.99
+6deaec8526ae	Movi Enterprises	restaurant		28.74430	-100.49638	2640 Del Rio Blvd	Eagle Pass	78852				0.95
+0a5bb99aee79	Munch BBQ	restaurant	barbecue restaurant	28.73093	-100.49320	2014 Renee Dr	Eagle Pass	78852	+18303524767			0.92
+522d2358f794	New China Buffet	restaurant	buffet restaurant	28.70468	-100.48126	410 S Texas # E	Eagle Pass	78852	+18307575777	http://www.buzzfile.com/business/New-China-Buffet-830-757-5777		0.98
+c0fa49653c44	Orly's BBQ	restaurant	barbecue restaurant	28.70795	-100.50282	290 Jefferson St	Eagle Pass	78852	+18308720500			0.92
+776c06f9df58	OT'S Snacks	restaurant		28.65702	-100.42065	124 Ranchitos Rd	Eagle Pass	78852	+18303253601			0.83
+4984dc745229	Pablitos Tacos	restaurant	mexican restaurant	28.67773	-100.47926	496 Memo Robinson Dr	Eagle Pass	78852	+18302130212	https://lordmap.top/pablitos-place		0.97
+95a296e85e7a	Pancha’s Tacos & Mas	restaurant	mexican restaurant	28.70579	-100.48800	1990 Garrison St	Eagle Pass	78852	+18302139999			0.93
+59ffda6cf02f	Parrilla De San Miguel	restaurant	mexican restaurant	28.70506	-100.48137	408 S Texas Dr	Eagle Pass	78852	+18307573100	http://www.parrilladesanmiguel.com		0.99
+2e7491010f09	Peke's Tacos y algo Mas	restaurant	taco restaurant	28.67699	-100.48662	307 Zaragoza St	Eagle Pass	78852	+18307528619			0.96
+6b28d7935cb3	Perikitos	restaurant	mexican restaurant	28.70650	-100.48291	300 S Bibb Ave	Eagle Pass	78852	+18307765252			0.99
+6d5d814cecfb	Peter Piper Pizza	restaurant	pizza restaurant	28.70537	-100.48241	402 S Bibb Ave	Eagle Pass	78852	+18307730313	https://locations.peterpiperpizza.com/tx/eaglepass/402-s-bibb-ave	Peter Piper Pizza	0.99
+5afed09cc6f8	Piedras Negras Tortilla Factory	restaurant	mexican restaurant	28.70931	-100.49763	340 N Pierce St	Eagle Pass	78852	+18307736706	https://order.toasttab.com/online/piedras-negras-tortilla-factory-340-north-pierce-street		0.95
+a052464d0c0f	Pink Tako	restaurant	mexican restaurant	28.70843	-100.50019	666 Main St	Eagle Pass	78852	+18308720022			0.67
+fd659ed7c0da	Platillos Caseros	restaurant	mexican restaurant	28.68787	-100.47321	2811 Siwel St	Eagle Pass	78852	+18305136215			0.75
+5a70215d09f3	Pollos Asados los hermanos	restaurant		28.75042	-100.49761	3055 Del Rio Blvd	Eagle Pass	78852	+18303570699			0.82
+ebe0b9e90b10	Popo's Barbacoa	restaurant	barbecue restaurant	28.74873	-100.49702	3059 Del Rio Blvd	Eagle Pass	78852	+18307731644			0.92
+cd060d446c70	Puros Antojitos	restaurant	spanish restaurant	28.70853	-100.49532	1308 Main St	Eagle Pass	78852	+18303354096			0.61
+c7ae38318748	R&R Tacos Burgers and More	restaurant	bar and grill restaurant	28.73096	-100.49566	2150 Del Rio Blvd	Eagle Pass	78852	+18309656526			0.92
+f0d740dd0ae7	Rays Lonches Tacos Quesadillas	restaurant		28.64822	-100.42480	212 Fresno St	Eagle Pass	78852				0.63
+982ab305cdd1	Red Barn	restaurant	mexican restaurant	28.84943	-100.53397	11088 N US Highway 277	Eagle Pass	78852	+18302136070			0.92
+f37f47f1e124	Red Dogs	restaurant	hot dog restaurant	28.67985	-100.48229	1840 Eidson Rd	Eagle Pass	78852				0.59
+a5bbe8127d7c	Red Sky Grill	restaurant		28.61142	-100.44162	794 Lucky Eagle Dr	Eagle Pass	78852	+18882558259	http://luckyeagletexas.com/mezquite-restaurant		0.92
+005fe6c896a4	Restaurant Loma Bonita	restaurant	mexican restaurant	28.68993	-100.47514	1823 S Veterans Blvd	Eagle Pass	78852	+18307734433	http://www.eptx411.com/listing/restaurant-loma-bonita/		0.92
+bb48f9c47ed9	Restaurante Y Taqueria	restaurant	mexican restaurant	28.70095	-100.49361	1592 El Indio Hwy	Eagle Pass	78852	+18307580383			0.91
+78e75cc3def0	Rio Grande Buffet at Kickapoo Lucky Eagle Casino	restaurant	buffet restaurant	28.61127	-100.44080		Eagle Pass			http://luckyeagletexas.com/the-buffet/		0.81
+c42bb4873588	Rio Grande Restaurant	restaurant	mexican restaurant	28.70721	-100.50391	210 N Adams St	Eagle Pass	78852	+18307571600	http://eatriogrande.com	Rio Grande- EDEN	0.94
+eb12e5bd5f7c	Riverbend	restaurant	mexican restaurant	28.61106	-100.44076	794 Lucky Eagle Dr	Eagle Pass	78852	+18307524832	http://www.kickapooluckyeaglecasino.com/riverbend-cafe.html		0.95
+1198425b6c65	RJ Snacks	restaurant		28.70753	-100.50073	229 Monroe St	Eagle Pass	78852	+18304985250			0.71
+d982558e7761	Sage Steakhouse	restaurant	steakhouse	28.61102	-100.44144	794 Lucky Eagle Dr	Eagle Pass	78852	+18307524838	http://www.kickapooluckyeaglecasino.com		0.92
+7f8533aed31d	Sarita's Tortilla Factory	restaurant	mexican restaurant	28.74101	-100.49617	2464 Del Rio Blvd	Eagle Pass	78852	+18307738377			0.96
+010d1ac29afb	Silver Spoon	restaurant	salad bar	28.70750	-100.50089	229 N Monroe St	Eagle Pass	78852	+18302138337	https://silverspoononline.com/britannia		0.96
+8ceff617f529	Skillets Restaurant	restaurant	diner	28.70930	-100.47593	2505 E Main St	Eagle Pass	78852	+18307737263	http://skilletsrestaurants.com		0.99
+36ac2295d3d5	Snackmasters	restaurant	hot dog restaurant	28.68369	-100.46954	127 Ford St	Eagle Pass	78852				0.65
+e88e1c13d304	Snappy's Burgers	restaurant		28.68489	-100.47148	2923 El Indio Hwy	Eagle Pass	78852	+18307760706	http://www.twitter.com/snappysburgers		0.88
+15978b000303	Strawberry Fields at Mall de las Aguilas	restaurant		28.70157	-100.48429	455 S Bibb Ave	Eagle Pass	78852	+18307733657			0.77
+18584243013c	Super Tacos La Main	restaurant	mexican restaurant	28.70880	-100.49544	295 Medina St	Eagle Pass	78852	+18307762785			0.92
+0c672cc21455	Super Tacos Morales	restaurant	mexican restaurant	28.69207	-100.48057	2427 El Indio Hwy	Eagle Pass	78852	+18307521615	http://www.supertacosmorales.net		0.99
+6a50bbb311c1	T-N-T Burgers and more	restaurant	burger restaurant	28.68314	-100.47071	2974 El Indio Hwy	Eagle Pass	78852	+18303357860			0.77
+cd8d8f97b32d	Taco Express	restaurant	mexican restaurant	28.70634	-100.50407	133 N Adams St	Eagle Pass	78852	+18303250510			0.99
+ed84ec17ae90	Taco Palenque	restaurant	mexican restaurant	28.70482	-100.48203	409 S Texas	Eagle Pass	78852	+18302948720	https://tacopalenque.com/	Taco Palenque	0.97
+e39fa1725668	Tacontento	restaurant		28.75039	-100.49763	3055 Del Rio Blvd	Eagle Pass	78852				0.92
+de487fa0ebb8	Tacos El Huequito	restaurant	theme restaurant	28.64506	-100.42138	67 Rosita Valley Rd	Eagle Pass	78852				0.96
+0f7889ba4d03	Tacos Los Borrados	restaurant	mexican restaurant	28.68935	-100.47415	1823 S Veterans Blvd	Eagle Pass	78852	+18303191746			0.99
+40dd2f0eb18f	Tacos Los Compadres	restaurant	taco restaurant	28.70797	-100.49756		Eagle Pass	78852	+18303524280	www.kansas.com/entertainment/restaurants/dining-with-denise-neil/...		0.92
+ca170c87f12a	Tacos Xpress	restaurant	mexican restaurant	28.70866	-100.47838	2424 E Main St	Eagle Pass	78852	+18309682032			0.92
+d202f7e77e34	Tacquerías Herradura	restaurant	mexican restaurant	28.68747	-100.47320	2829 Siwell Street	Eagle Pass	78852	+18304988974			0.92
+c77979f898c2	Takata	restaurant		28.72495	-100.47545	2276 N Veterans Blvd	Eagle Pass	78852	+18307521166			0.68
+132a0369d1c9	Takitos Con Sabor de Chavarria	restaurant		28.69419	-100.47368	1594 S Veterans Blvd	Eagle Pass	78852	+18305133461	https://takitosconsabor.com/		0.96
+4e8eaa826f23	Taqueria El Amigo	restaurant		28.66716	-100.48049	843 Fresno Dr	Eagle Pass	78852	+18307762330			0.89
+adc1008b9d18	Taqueria La Grilla	restaurant	texmex restaurant	28.70859	-100.48585	2120 E Main St	Eagle Pass	78852	+18303357049			0.92
+85dcdf0be10f	Taqueria La Mexicana	restaurant	mexican restaurant	28.70257	-100.49776	706 Kifuri St	Eagle Pass	78852	+18309688576		Taqueria La Mexicana	0.97
+6bbb945479ca	Taquería Balcones	restaurant	mexican restaurant	28.67439	-100.48769	419 Balcones Blvd	Eagle Pass	78852	+18307573387	https://www.eaglepasstexas.com/quality-of-life/education		0.96
+583930996928	Tensai Sushi	restaurant	asian fusion restaurant	28.69068	-100.47486	476 S Bibb Ave Ste A2	Eagle Pass	78852	+18304215062	http://www.tensaisushi.com/		0.85
+c44ad9c6a589	Tensai Sushi	restaurant	sushi restaurant	28.70205	-100.48281	476 S Bibb Ave	Eagle Pass	78852	+18304215062	https://tensaisushi.com/	Tensai SUSHI	0.99
+0d4473431632	Texas Roadhouse	restaurant	steakhouse	28.69964	-100.48279	568 S Bibb Ave	Eagle Pass	78852	+18302948958	https://www.texasroadhouse.com/location/eagle-pass/detail/action/start-order	Texas Roadhouse	0.97
+48275386af45	Tgm Eagle Pass Tx	restaurant		28.72271	-100.45855	3688 Adams Cir	Eagle Pass	78852				0.88
+33fc82a40911	The Burger Den	restaurant	burger restaurant	28.69951	-100.48338	564 S Bibb Avenue	San Antonio	78852	+18302138321	https://www.theburgerden.com/		1.00
+2f5d9a9030a7	The Meltdown	restaurant	sandwich shop	28.69951	-100.48338	564 S Bibb Avenue	San Antonio	78852	+18302138321	https://themeltdown.com/		1.00
+de31fc85b3d5	The Smoke Barn	restaurant	steakhouse	28.72789	-100.49643	1824 Del Rio Blvd	Eagle Pass	78852	+18303257070	http://thesmokebarnbbq.com		0.92
+5de98d98b3b7	The Wagon Wheel	restaurant	barbecue restaurant	28.72777	-100.49648	1824 Del Rio Blvd	Eagle Pass	78852	+18305137250			0.99
+3cefbd990769	Two Hands Corn Dogs Eagle Pass	restaurant	hot dog restaurant	28.70393	-100.48424	INSIDE MALL DE LAS AGUILAS, 455 S Bibb Ave ste #136	Eagle Pass	78852	+18307765505	http://twohandsus.com/	Two Hands Corn Dogs	0.92
+cfd2331bead1	Wagon Wheel Saloon	restaurant	barbecue restaurant	28.75617	-100.49495	3283 Del Rio Blvd	Eagle Pass	78852	+18307730506	http://eaglepass411.com/pages/Businesses/view/1299		0.88
+6c81ad6baa6f	Wok Inn	restaurant	chinese restaurant	28.61103	-100.44089	794 Lucky Eagle Dr	Eagle Pass	78852	+18307524870			0.96
+9b870d171d4d	Wok N Roll Ramen Truck Eagle Pass Texas	restaurant	japanese restaurant	28.70917	-100.49930	336 N Ceylon St	Eagle Pass	78852	+18308677953			0.57
+f671a7d6cd59	Yopo's	restaurant	burger restaurant	28.70853	-100.47917	2420 E Main St	Eagle Pass	78852	+18307739676	https://yopos.online/		0.99
+cbc115d7822b	Yopo's Burgers, Beer & Fun - Mall de las Aguilas	restaurant	american restaurant	28.70326	-100.48442	455 S Bibb Ave	Eagle Pass	78852	+18307730983			0.99
+5cc731f94710	Yosikawa's Seafood	restaurant	seafood restaurant	28.70851	-100.49168	1640 Main St	Eagle Pass	78852	+18307572343			0.63
+184652d9f259	Avir at Eagle Pass	senior	retirement home	28.71562	-100.47855	2550 Zacatecas Dr	Eagle Pass	78852	+18307734488	http://avirhg.com/	Avir at Bowie	0.97
+bf6b343315db	Avir at La Hacienda	senior	retirement home	28.71458	-100.45758	3333 Bob Rodgers Dr	Eagle Pass	78852	+18302138138	http://avirhg.com/	Avir at Bowie	0.98
+1cc217a0c2e1	La Guadalupana Adult Day Care	senior	retirement home	28.71143	-100.45850	3407 Cathleen St	Eagle Pass	78852	+18307578130	http://www.la-guadalupana.com.mx/en		0.92
+7fe299a96c52	Maverick Nursing and Rehabilitation Center	senior	retirement home	28.71064	-100.45807	3106 Bob Rogers Dr	Eagle Pass	78852	+18307578566	https://wellsentialhealth.org/location/maverick-nursing-rehabilitation-center/		0.99
+da8a4771f373	National Nursing and Rehab Eagle Pass	senior	retirement home	28.73243	-100.47971	1000 Crown Ridge	Eagle Pass	78852	+18307570900	https://nationalnursingrehab.com		0.92
+9a905aa73503	Sculpt me up	senior	retirement home	28.70864	-100.48898	1884 E Main St Ste 2	Eagle Pass	78852	+18309688312	https://www.instagram.com/sculptmeup/		0.92
+bd9ed194640f	TLC Adult Day Care	senior	assisted living facility	28.69156	-100.48109	2448 El Indio Hwy	Eagle Pass	78852	+18307733755	http://www.apchh.com		0.77

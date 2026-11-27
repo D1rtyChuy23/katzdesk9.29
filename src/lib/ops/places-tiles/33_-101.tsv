@@ -1,0 +1,35 @@
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
+7650b8dece12	R2 Donuts Spur	bakery	donut shop	33.48393	-100.85700	410 W Hill St	Spur	79370	+18062714299			0.92
+dd74b42eafae	Aspermont Vineyards	bar	winery	33.13343	-100.22895	337 W Swenson Ave	Aspermont	79502	+19409893412	http://www.classicdraperies.com		0.92
+e334ecf5b163	Kent County Icehouse	bar	pub	33.24541	-100.57390	448 S Main St	Jayton	79528	+18062372603			0.73
+2d8beb51d2ac	Robert Hall Chevrolet	cardealer		33.24826	-100.57355	501 N Main St	Jayton	79528	+18062372182	http://www.roberthallchevy.com?cs:pro=yext	Chevrolet	0.92
+a7e30a2ab25d	Palace Historic Theatre	cinema		33.47705	-100.85503	422 Burlington Ave	Spur	79370	+18174685842	http://www.PalaceSpur.org/		0.99
+8174760e17d7	The Palace Theater - Spur, Texas	cinema		33.47703	-100.85503	422 Burlington Ave	Spur	79370		http://www.PalaceSpur.org/		0.99
+9741b8d48c15	Country Grace Cafe & Boutique	coffee		33.89788	-100.85694	405 1st St	Roaring Springs	79256	+18063487100			0.69
+4d13370c5fca	The BrewTique	coffee		33.70436	-100.84100	Country Road 236	Dickens	79229	+18067732580			0.61
+32c895cf69e4	Alexander's Fuel & Service	convenience		33.89859	-100.85952	223 Broadway	Roaring Springs	79256	+18063487958			0.81
+2ae1a92577ba	Allsup's	convenience		33.48326	-100.85597	322 W Hill St	Spur	79370	+18062714122	https://www.allsups.com/	Allsup’s	1.00
+6b5992906959	Allsup's	convenience		33.13668	-100.22733	829 S Broadway St	Aspermont	79502	+19409892952	https://www.allsups.com/	Allsup’s	1.00
+6e1e30588de8	DK Gas Station	convenience		33.13661	-100.22757	829 South Broadway Street	Aspermont	79502	+19409892952	https://dkfuel.com/stations/dk-gas-station-1316-829-south-broadway-street-aspermont-tx-79502/		0.92
+3ced0198ad9a	Phillips 66 Gas	convenience		33.13668	-100.22733	829 S Broadway St	Aspermont	79502	+19409892952	https://www.phillips66gas.com/	Phillips 66 Gas	0.91
+3c441b15de01	Bahama Junks	fastfood		33.48335	-100.85661	410 W Hill St	Spur	79370	+18063460781			0.95
+0e1bcd99a5c7	Dairy Queen Store	fastfood		33.14325	-100.22774	US-83	Aspermont	79502	+19409893435	http://dqtexas.com/	Dairy Queen	0.97
+635f1b550a18	DQ Grill & Chill	fastfood		33.14328	-100.22787	Hwy 83/380 N	Aspermont	79502		https://www.dairyqueen.com/en-us/locations/tx/aspermont/hwy-83380-n/3592	DQ Grill & Chill	0.80
+ca215131ab76	Krispy Krunchy Chicken	fastfood		33.62094	-100.84649	114 W Hwy 82	Dickens	79229		https://locations.krispykrunchy.com/tx/dickens/114-w-hwy-82	Krispy Krunchy Chicken	0.96
+8adc2d0f7689	Lawrence Brothers IGA	grocery		33.47911	-100.85437	601 Burlington Ave	Spur	79370	+18062714372	https://www.lawrencebros.com		0.98
+a22ad9939821	Spur Lawrence Brother’s	grocery		33.47760	-100.85700	601 Burlington	Spur	79370	+18062714372			0.58
+da46b2424e2b	Stonewall Memorial Hospital District	hospital		33.15065	-100.22919	821 North Broadway	Aspermont	79502	+19409893551	http://www.stonewallhospital.org/		0.92
+001fdb104173	Budget Inn	hotel	motel	33.14975	-100.22775	731 N Broadway St	Aspermont	79502	+19409893501	http://www.budgetinn.com	Budget Inn	0.97
+87598ead01d7	Hickman's Motel	hotel	motel	33.15227	-100.22704	1008 Broadway St	Aspermont	79502	+19409893531	https://reservation.magnusonhotels.com/bbe/page1.aspx?pcode=M19150		0.93
+fe62bfaeb0fd	Roaring Springs Ranch Club	office	private association	33.86012	-100.86032	1001 Farm to Market Rd 3203	Roaring Springs	79256	+18063487292	http://www.rsrc.org/		0.98
+2fcb8c14966c	Espuela Land and Cattle Steakhouse-Dickens, Tx	restaurant	steakhouse	33.62045	-100.85264	Hwy 82	Dickens	79229	+18066235630	http://local.yahoo.com/info-19462721-espuela-land-cattle-co-restaurant-steakhouse-dickens		0.96
+ad162b602958	Hickman's Restaurant	restaurant	comfort food restaurant	33.15170	-100.22723	936 Broadway St	Aspermont	79502	+19409892220			0.97
+4645f6ed1539	J & M Caprock Cafe	restaurant	diner	33.62021	-100.84946	186 US-82	Dickens	79229	+18066235547	http://www.caprockcafe.com/		0.92
+b1a84dee83ee	Ole Town Spur Cafe	restaurant		33.47717	-100.85551	415 Burlington Ave	Spur	79370	+18062714522			0.92
+eb990a189dd7	TC's Ponderosa	restaurant	barbecue restaurant	33.62073	-100.84754	136 US-82	Dickens	79229	+18066235260	http://www.tmbbq.com/joints/tcs-ponderosa		0.92
+4f6205195495	Turnaround Top Cafe	restaurant		33.47430	-100.85642	202 N Burlington Ave	Spur	79370	+18062713983	http://turnaroundtopcafe.com/		0.95
+3e827c811b44	Val’s TexMex	restaurant		33.14236	-100.22798	220 S Broadway St	Aspermont	79502	+19409890137			0.67
+4248d386a483	Video Express & Pizza	restaurant	pizza restaurant	33.13895	-100.22841	121 W 6th St	Aspermont	79502	+19409893451			0.96
+e0f5f411fe04	Gibson Care Center	senior	retirement home	33.15163	-100.22780	931 N Broadway St	Aspermont	79502	+19409893526	https://www.ourparents.com/texas/aspermont/gibson_care_center		0.98
+05c67a572c47	Kent County Nursing Home	senior	retirement home	33.25769	-100.57403	1443 N Main St	Jayton	79528	+18062373036	http://www.kentcountynursinghome.org/		0.92
+bbaa9f5edf20	Stonewall Living Center	senior	retirement home	33.15171	-100.22820	931 Broadway St	Aspermont	79502	+19409893551			0.92
