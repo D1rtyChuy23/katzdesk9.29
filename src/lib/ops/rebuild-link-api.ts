@@ -17,6 +17,7 @@ import { rebuildBillTo } from "@/lib/ops/invoice-api";
 import { heldUnitLockSentence, lockedUnitMovesSql, moveHeldUnits, rebuildRowOut, requireRebuildEditor, type Rebuild } from "@/lib/ops/rebuilds";
 import { normalizeCustomerKey } from "@/lib/ops/customer-key";
 import { INSTALL_WOS_SQL, WO_KEY_SQL } from "@/lib/ops/wo-search";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 import {
   billName,
   lineCount,
@@ -533,7 +534,8 @@ export function linkRebuildSql(): string {
           and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
         for update
      ), tj as (
-       select j.id, j.kind, btrim(coalesce(j.customer, '')) as customer, nullif(btrim(j.po), '') as po, j.ns_so
+       select j.id, j.kind, btrim(coalesce(j.customer, '')) as customer, ${listedAccountSql("j.customer_id", "j.customer")} as account_id,
+              nullif(btrim(j.po), '') as po, j.ns_so
          from service_jobs j
         where $4::text = 'job' and j.id = $5::int and j.kind in ('service', 'tlc') and j.status <> 'Cancelled'
           and j.duplicate_of is null and j.merged_install_id is null
@@ -541,15 +543,16 @@ export function linkRebuildSql(): string {
         for update
      ), ti as (
        -- The install row locked, as the person saw it: approving its invoice, or merging it, waits for this.
-       select i.id, btrim(coalesce(i.customer, '')) as customer, nullif(btrim(i.po), '') as po
+       select i.id, btrim(coalesce(i.customer, '')) as customer, ${listedAccountSql("i.customer_id", "i.customer")} as account_id,
+              nullif(btrim(i.po), '') as po
          from installs i
         where $4::text = 'install' and i.id = $5::int and i.archived = false
           and ${STAMP("i.updated_at")} = split_part($8::text, '|', 1)
         for update
      ), tgt as (
-       select 'job'::text as t, tj.id, tj.kind, tj.customer, tj.po, tj.ns_so from tj
+       select 'job'::text as t, tj.id, tj.kind, tj.customer, tj.account_id, tj.po, tj.ns_so from tj
        union all
-       select 'install', ti.id, 'install', ti.customer, ti.po, null from ti
+       select 'install', ti.id, 'install', ti.customer, ti.account_id, ti.po, null from ti
      ), own as (
        select v.id, v.approved_at, v.submitted_at, v.discount_value from invoices v join rb on v.entity_type = 'rebuild' and v.entity_id = rb.id
      ), own_lines as (
@@ -558,7 +561,8 @@ export function linkRebuildSql(): string {
        -- The lines that go on the project's bill: none when they stay on its own invoice's Sales Order ($11).
        select l.* from own_lines l where not $11::boolean
      ), ok as (
-       select rb.id, rb.account as old_account, tgt.t, tgt.id as target_id, tgt.kind as target_kind, tgt.customer as account, tgt.po,
+       select rb.id, rb.account as old_account, tgt.t, tgt.id as target_id, tgt.kind as target_kind, tgt.customer as account,
+              tgt.account_id, tgt.po,
               (select count(*)::int from moving) as n,
               (select coalesce(sum(round(l.qty * l.rate, 2)), 0) from moving l) as amount
          from rb cross join tgt
@@ -591,8 +595,8 @@ export function linkRebuildSql(): string {
      ), head as (
        -- The install's invoice takes them waiting for an Admin to approve it; its saved stamp moves, so an Invoice
        -- window opened before this approves nothing.
-       insert into invoices (entity_type, entity_id, customer, total, submitted_by, submitted_at, updated_at)
-       select 'install', ok.target_id, ok.account, invoice_total(ok.amount, null, null), $6::text, now(), now()
+       insert into invoices (entity_type, entity_id, customer, customer_id, total, submitted_by, submitted_at, updated_at)
+       select 'install', ok.target_id, ok.account, ok.account_id, invoice_total(ok.amount, null, null), $6::text, now(), now()
          from ok where ok.t = 'install' and ok.n > 0
        on conflict (entity_type, entity_id) do update
           -- Its lines with these after them. They come in unticked (11/7): on Chosen lines its discount stays on what
@@ -631,7 +635,7 @@ export function linkRebuildSql(): string {
        update rebuilds r
           set install_id = case when done.t = 'install' then done.target_id end,
               job_id = case when done.t = 'job' then done.target_id end,
-              account = done.account, po = done.po, link_lines = done.n, link_open = true, updated_at = now()
+              account = done.account, account_id = done.account_id, po = done.po, link_lines = done.n, link_open = true, updated_at = now()
          from done
         where r.id = done.id
        returning r.id, r.account, done.old_account
@@ -700,7 +704,8 @@ export function noteRebuildSalesOrderSql(): string {
  */
 export function unlinkRebuildSql(): string {
   return `with rb as (
-       select r.id, r.account, r.po, r.install_id, r.job_id, coalesce(r.link_open, false) as link_open, r.link_billed_with
+       select r.id, r.account, ${listedAccountSql("r.account_id", "r.account")} as account_id, r.po, r.install_id, r.job_id,
+              coalesce(r.link_open, false) as link_open, r.link_billed_with
          from rebuilds r
         where r.id = $1::int and coalesce(r.archived, false) = false
           and r.install_id is not distinct from $2::int and r.job_id is not distinct from $3::int
@@ -715,7 +720,7 @@ export function unlinkRebuildSql(): string {
      ), ohead as (
        select v.id, v.approved_at from invoices v join oi on v.entity_type = 'install' and v.entity_id = oi.id
      ), ok as (
-       select rb.id, rb.account, rb.po, oj.id as job_id, oj.kind as job_kind, oi.id as install_id, ohead.id as head_id
+       select rb.id, rb.account, rb.account_id, rb.po, oj.id as job_id, oj.kind as job_kind, oi.id as install_id, ohead.id as head_id
          from rb
          left join oj on true
          left join oi on true
@@ -746,8 +751,8 @@ export function unlinkRebuildSql(): string {
      ), back as (
        select count(*)::int as n, coalesce(sum(round(t.qty * t.rate, 2)), 0) as amount from taken t
      ), back_head as (
-       insert into invoices (entity_type, entity_id, customer, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po)
-       select 'rebuild', ok.id, ok.account, $8::text, $9::text, $10::text, $11::text, invoice_total(back.amount, null, null), $4::text, now(), now(), ok.po
+       insert into invoices (entity_type, entity_id, customer, customer_id, bill_name, bill_account, bill_address, bill_rep, total, approved_by, approved_at, updated_at, po)
+       select 'rebuild', ok.id, ok.account, ok.account_id, $8::text, $9::text, $10::text, $11::text, invoice_total(back.amount, null, null), $4::text, now(), now(), ok.po
          from ok cross join back
         where back.n > 0
        on conflict (entity_type, entity_id) do update

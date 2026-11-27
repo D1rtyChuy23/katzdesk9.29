@@ -11,6 +11,7 @@ import { assertUnlocked, canLockEquipment, lockOwnerName } from "@/lib/ops/equip
 import { isLocked, lockedBy, lockedMessage } from "@/lib/ops/equipment-lock-rules";
 import { readsAsModel } from "@/lib/ops/warehouse-serial";
 import { adoptUnitIds } from "@/lib/ops/install-form";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 import {
   CORE_HOLE_CATEGORY,
   CORE_HOLE_LABEL,
@@ -360,9 +361,11 @@ async function insertEquipment(
   const matched = matchCatalogModel(model, model, names);
   const catalogModel = matched.catalogModel || model.trim();
   const key = serialKey(serial) || null;
+  // The install's account goes with its name (C6): its id when listed, else the account the name finds.
   const rows = await sql.query<{ id: number }>(
-    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, electrical, created_by_install)
-     values ($1, $2, $3, $4, $5, $6, $7)
+    `insert into account_equipment (customer, customer_id, catalog_model, equipment_name, serial, serial_key, electrical, created_by_install)
+     values ($1, coalesce((select ${listedAccountSql("i.customer_id", "$1::text")} from installs i where i.id = $7), katz_customer_id($1::text)),
+             $2, $3, $4, $5, $6, $7)
      returning id`,
     [customer, catalogModel, model.trim() || catalogModel, serial?.trim() || null, key, electrical?.trim() || null, installId],
   );
@@ -2872,8 +2875,11 @@ export function putBackInstallUnitSql(): string {
   return `with r as (select * from install_units_removed where id = $1 and put_back_at is null),
           unit as (
             insert into account_equipment
-            -- Its account id comes from its name now (the trigger), never the snapshot's: the account may be gone.
-            select x.* from r, jsonb_populate_record(null::account_equipment, (r.links->'unit') - 'customer_id') x
+            -- Its account: the snapshot's while that account is still listed (C6), else the one its name finds now.
+            select x.* from r, jsonb_populate_record(
+                     null::account_equipment,
+                     (r.links->'unit') || jsonb_build_object('customer_id', ${listedAccountSql("(r.links->'unit'->>'customer_id')::int", "r.links->'unit'->>'customer'")})
+                   ) x
              where r.links->'unit' is not null and r.links->'unit' <> 'null'::jsonb
                and not exists (select 1 from account_equipment a where a.id = r.unit_id)
             returning id

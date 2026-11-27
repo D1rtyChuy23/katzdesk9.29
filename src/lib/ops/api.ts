@@ -1465,10 +1465,12 @@ export const confirmDealMachines = createServerFn({ method: "POST" }).middleware
 		await assertTakesNewWork(sql, deal.customer, "install");
 		const packed = serializeMachines(incoming);
 		const made = await sql`
-      insert into installs (received, customer, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
+      insert into installs (received, customer, customer_id, equipment, equip_status, account_rep, payment_status, deal_id, machines, serial, power_voltage)
       values (
         ${today},
         ${deal.customer},
+        -- The deal's account goes with its name (C6): its id when listed, else the account the name finds.
+        coalesce((select own.id from directory_customers own where own.id = ${deal.customer_id ?? null}::int and own.archived = false), katz_customer_id(${deal.customer}::text)),
         ${packed.equipment},
         ${"Not Ready"},
         ${canonicalRepName(String(deal.producer ?? "")) ?? null},
@@ -1741,8 +1743,10 @@ async function linkOrMakeInstall(sql: any, deal: any, dealId: any, userId: strin
            and machines is not distinct from ${cur.machines ?? null}::text
          for update
       ), ins as (
-        insert into installs (received, customer, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
-        select ${today}::date, ${cur.customer}::text, ${packed.equipment ?? cur.equipment ?? null}::text, ${initials}::text, ${cur.terms ?? null}::text,
+        insert into installs (received, customer, customer_id, equipment, account_rep, payment_status, deal_id, machines, serial, power_voltage, deal_review, deal_review_at)
+        select ${today}::date, ${cur.customer}::text,
+               coalesce((select own.id from directory_customers own where own.id = ${cur.customer_id ?? null}::int and own.archived = false), katz_customer_id(${cur.customer}::text)),
+               ${packed.equipment ?? cur.equipment ?? null}::text, ${initials}::text, ${cur.terms ?? null}::text,
                ${dealId}::int, ${packed.machines}::text, ${packed.serial}::text, ${packed.powerVoltage}::text, 'made', now()
           from d
          where not exists (select 1 from installs where deal_id = ${dealId}::int and archived = false)
@@ -2634,7 +2638,7 @@ export async function assignAssetToInstallFor(sql: any, data: { assetId: number;
 	if (asset.stock_hold) throw new Error("This unit is waiting on approval. The slot stays until then.");
 	if (asset.status === "sold") throw new Error("Already sold");
 	const inst = (await sql`
-      select id, customer from installs where id = ${data.installId}`)[0];
+      select id, customer, customer_id from installs where id = ${data.installId}`)[0];
 	if (asset.status !== "assigned") await assertUnlocked(sql, asset);
 	if (!inst) throw new Error("Install not found");
 	// Locked: a unit already assigned to an account is an asset at that site until it is returned.
@@ -2660,6 +2664,8 @@ export async function assignAssetToInstallFor(sql: any, data: { assetId: number;
         install_id = ${inst.id},
         job_id = null,
         sold_to = ${inst.customer},
+        -- The install's account goes with its name (C6).
+        sold_to_id = coalesce((select own.id from directory_customers own where own.id = ${inst.customer_id ?? null}::int and own.archived = false), katz_customer_id(${inst.customer}::text)),
         origin_site = ${originSite},
         origin_pallet = ${originPallet},
         origin_level = ${originLevel},

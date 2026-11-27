@@ -15,6 +15,7 @@ import {
 } from "@/lib/ops/stock-action-rules";
 import { CUSTOMER_SITES, electricalFrom, unitPlaceLabel } from "@/lib/ops/unit-place-rules";
 import { SITE_LABEL, SITE_PURPOSE } from "@/lib/ops/warehouse";
+import { listedAccountOf } from "@/lib/ops/bill-account";
 
 type Hold = "remove" | "assign";
 
@@ -43,6 +44,8 @@ type ActionRow = {
   reason: string | null;
   note: string | null;
   customer: string | null;
+  /** The request's account id (C2/C3), kept with its name. */
+  customer_id?: number | null;
   place_site: string | null;
   serial: string | null;
   model: string | null;
@@ -177,7 +180,7 @@ async function assertRemovable(sql: Sql, row: AssetRow) {
 
 async function pendingFor(sql: Sql, assetId: number): Promise<ActionRow | null> {
   const rows = await sql.query<ActionRow>(
-    `select id, asset_id, kind, status, reason, note, customer, place_site, serial, model, last_slot, asked_by, asked_name
+    `select id, asset_id, kind, status, reason, note, customer, customer_id, place_site, serial, model, last_slot, asked_by, asked_name
        from asset_stock_actions
       where asset_id = $1 and status = 'pending'
       order by id desc
@@ -224,7 +227,8 @@ async function finalizeRemove(sql: Sql, row: AssetRow, reason: string, note: str
   );
 }
 
-async function putOnAccount(sql: Sql, customer: string, model: string, serial: string | null, notes: string | null) {
+/** `customerId`: the account the unit goes on with its name (C6; listedAccountOf). */
+async function putOnAccount(sql: Sql, customer: string, model: string, serial: string | null, notes: string | null, customerId: number | null) {
   const key = serialKey(serial);
   const electrical = electricalFrom(notes);
   if (key) {
@@ -237,13 +241,14 @@ async function putOnAccount(sql: Sql, customer: string, model: string, serial: s
       await sql.query(
         `update account_equipment set
             customer = $2,
+            customer_id = $6,
             catalog_model = $3,
             equipment_name = $3,
             serial = $4,
             electrical = coalesce($5, electrical),
             updated_at = now()
           where id = $1`,
-        [existing[0].id, customer, model, serial?.trim() || null, electrical],
+        [existing[0].id, customer, model, serial?.trim() || null, electrical, customerId],
       );
       return;
     }
@@ -259,9 +264,9 @@ async function putOnAccount(sql: Sql, customer: string, model: string, serial: s
     }
   }
   await sql.query(
-    `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, electrical)
-     values ($1, $2, $2, $3, $4, $5)`,
-    [customer, model, serial?.trim() || null, key || null, electrical],
+    `insert into account_equipment (customer, customer_id, catalog_model, equipment_name, serial, serial_key, electrical)
+     values ($1, $6, $2, $2, $3, $4, $5)`,
+    [customer, model, serial?.trim() || null, key || null, electrical, customerId],
   );
 }
 
@@ -272,7 +277,10 @@ async function finalizeAssign(
   placeSite: string | null,
   asked: string,
   approved: string,
+  /** The request's account id, when it has one (C6): the unit goes on it while it is listed. */
+  requestedId: number | null = null,
 ) {
+  const customerId = await listedAccountOf(sql, requestedId, customer);
   const slot = slotOf(row);
   const site = placeSite || "account";
   const status = placeSite ? "deployed" : "at-account";
@@ -287,6 +295,7 @@ async function finalizeAssign(
         level = null,
         line_no = null,
         sold_to = $4,
+        sold_to_id = $7,
         purpose = $5,
         notes = $6,
         stock_hold = null,
@@ -296,9 +305,9 @@ async function finalizeAssign(
         stock_hold_by = null,
         updated_at = now()
       where id = $1`,
-    [row.id, status, site, customer, purpose, withLine(row.notes, line)],
+    [row.id, status, site, customer, purpose, withLine(row.notes, line), customerId],
   );
-  await putOnAccount(sql, customer, row.model, row.serial, row.notes);
+  await putOnAccount(sql, customer, row.model, row.serial, row.notes, customerId);
 }
 
 /**
@@ -548,7 +557,7 @@ export const decideStockAction = createServerFn({ method: "POST" })
       await finalizeRemove(sql, row, action.reason || "Removed", (action.note ?? "").trim(), action.asked_name || "Warehouse", who.name);
     } else {
       const customer = await accountForApproval(sql, action.customer);
-      await finalizeAssign(sql, row, customer, action.place_site, action.asked_name || "Warehouse", who.name);
+      await finalizeAssign(sql, row, customer, action.place_site, action.asked_name || "Warehouse", who.name, action.customer_id ?? null);
     }
     await sql.query(
       `update asset_stock_actions set

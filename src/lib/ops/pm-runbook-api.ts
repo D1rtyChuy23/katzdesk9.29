@@ -10,6 +10,7 @@ import { assertUnitUnlocked } from "@/lib/ops/equipment-lock";
 import { flagOn } from "@/lib/ops/flag";
 import { normalizeCustomerKey, parseSerial, serialKey } from "@/lib/ops/account-equip";
 import { pmAccountId, pmAccountUnits, pmEarlierVisits, sameAccountAsPm, UNIT_LISTED_SQL } from "@/lib/ops/pm-account";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 import { matchRunbookPiece, matchRunbookSerial, runbookById } from "@/lib/ops/runbooks";
 import {
   canEditRunbookDefinitions,
@@ -1055,7 +1056,10 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
     const sql = await ready();
     const me = await requireWriter(sql, context.userId);
     const pm = (
-      await sql.query<{ customer: string; equipment: string | null }>("select customer, equipment from pm_jobs where id = $1", [data.pmId])
+      await sql.query<{ customer: string; equipment: string | null; account: number | null }>(
+        `select p.customer, p.equipment, ${listedAccountSql("p.customer_id", "p.customer")} as account from pm_jobs p where p.id = $1`,
+        [data.pmId],
+      )
     )[0];
     if (!pm) throw new Error("PM not found");
     // The account the runbook listed its units by: the PM's id once PMs reads by id (phase C5), else its name.
@@ -1086,21 +1090,23 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
       if (taken[0]) throw new Error("That unit is already logged on another line of this PM.");
       // A locked unit stays on its account until the owner unlocks it.
       await assertUnitUnlocked(sql, Number(dup.id));
-      await sql.query("update account_equipment set customer = $2, updated_at = now() where id = $1", [Number(dup.id), pm.customer]);
+      // The unit takes the PM's account with its name (C6).
+      await sql.query("update account_equipment set customer = $2, customer_id = $3, updated_at = now() where id = $1", [Number(dup.id), pm.customer, pm.account]);
       const attached = await sql.query<{ id: number; assigned_unit_label: string | null }>(
         "select id, assigned_unit_label from modules where assigned_unit_id = $1",
         [Number(dup.id)],
       );
       if (attached.length) {
-        await sql.query("update modules set assigned_customer = $2, location = $2, updated_at = now() where assigned_unit_id = $1", [
+        await sql.query("update modules set assigned_customer = $2, assigned_customer_id = $3, location = $2, updated_at = now() where assigned_unit_id = $1", [
           Number(dup.id),
           pm.customer,
+          pm.account,
         ]);
         for (const m of attached) {
           await sql.query(
-            `insert into module_stops (module_id, kind, customer, unit_id, unit_label, from_place, to_place, by_name)
-             values ($1, 'moved', $2, $3, $4, $5, $2, $6)`,
-            [m.id, pm.customer, Number(dup.id), m.assigned_unit_label, dup.customer, me.name],
+            `insert into module_stops (module_id, kind, customer, customer_id, unit_id, unit_label, from_place, to_place, by_name)
+             values ($1, 'moved', $2, $7, $3, $4, $5, $2, $6)`,
+            [m.id, pm.customer, Number(dup.id), m.assigned_unit_label, dup.customer, me.name, pm.account],
           );
         }
       }
@@ -1132,9 +1138,9 @@ export const logRunbookAsset = createServerFn({ method: "POST" })
         const rb = line.runbookId ? runbookById(line.runbookId) : undefined;
         const model = rb?.def.models.find((m) => m.id === plannedLine?.model)?.label ?? line.piece;
         const inserted = await sql.query<{ id: number }>(
-          `insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key, install_date)
-           values ($1, $2, $2, $3, $4, $5) returning id`,
-          [pm.customer, model, parsed, key, installDate],
+          `insert into account_equipment (customer, customer_id, catalog_model, equipment_name, serial, serial_key, install_date)
+           values ($1, $6, $2, $2, $3, $4, $5) returning id`,
+          [pm.customer, model, parsed, key, installDate, pm.account],
         );
         if (!inserted[0]) throw new Error("Could not add that unit.");
         accountId = Number(inserted[0].id);

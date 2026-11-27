@@ -11,6 +11,7 @@ import { LOCKED_BY_ASSIGNED } from "@/lib/ops/equipment-lock-rules";
 import { isBarn, siteLabel, slotId } from "@/lib/ops/warehouse";
 import { normalizeCustomerKey, serialKey as accountSerialKey } from "@/lib/ops/account-equip";
 import { woCanonical } from "@/lib/ops/corrigo";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export type SerialHit = {
   assetId: number;
@@ -290,6 +291,11 @@ async function attachAsset(
         install_id = $2,
         job_id = $3,
         sold_to = $4,
+        -- The install's or ticket's account with its name (C6), else the account the name finds.
+        sold_to_id = coalesce(
+          (select ${listedAccountSql("i.customer_id", "i.customer")} from installs i where i.id = $2 and btrim(i.customer) = btrim($4)),
+          (select ${listedAccountSql("j.customer_id", "j.customer")} from service_jobs j where j.id = $3 and btrim(j.customer) = btrim($4)),
+          katz_customer_id($4)),
         origin_site = $5,
         origin_pallet = $6,
         origin_level = $7,

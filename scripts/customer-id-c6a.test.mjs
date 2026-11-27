@@ -155,3 +155,73 @@ test("moving a PM, install or deal to another customer puts it on a listed accou
   await A.updatePmFor(sql, { id: older, customer: "ZZ Gone Cafe", notes: "still here" }, "zz-admin");
   assert.equal((await run("select customer from pm_jobs where id = $1", [older]))[0].customer, "ZZ Gone Cafe");
 });
+
+// A record whose name finds no account but whose id names one (a save that set the id itself, or a name that will lag
+// its account once C7 stops rewriting names): a copy of its name takes its account id, not the name's.
+async function lagging(run) {
+  const alpha = await account(run, "ZZ Alpha Cafe");
+  return { alpha, name: "ZZ Alpha Kitchen" };
+}
+const LINES = [{ item: "Service : TRIPCHARGE", description: "", qty: 1, rate: 150 }];
+
+test("copies carry the account id: a PM moved to a ticket, and the PM's invoice", async () => {
+  const { sql, run } = await fresh();
+  const { alpha, name } = await lagging(run);
+  const M = await import("../src/lib/ops/pm-to-ticket.ts");
+  const moving = await pm(run, name, alpha);
+  const stamp = (await M.previewPmMoveFor(sql, "zz-admin", moving)).stamp;
+  await M.movePmToTicketFor(sql, "zz-admin", { pmId: moving, stamp });
+  const made = (await run("select customer, customer_id from service_jobs where moved_from_pm_id = $1", [moving]))[0];
+  assert.deepEqual([made.customer, made.customer_id], [name, alpha]);
+  const I = await import("../src/lib/ops/invoice-api.ts");
+  const billed = await pm(run, name, alpha);
+  await I.approveInvoiceFor(sql, { type: "pm", id: billed, lines: LINES, lineIds: [], discount: null, seen: null }, "zz-admin");
+  const inv = (await run("select customer, customer_id from invoices where entity_type = 'pm' and entity_id = $1", [billed]))[0];
+  assert.deepEqual([inv.customer, inv.customer_id], [name, alpha]);
+});
+
+test("copies carry the account id: retiring a unit, and putting it back on its account", async () => {
+  const { sql, run } = await fresh();
+  const { alpha, name } = await lagging(run);
+  const R = await import("../src/lib/ops/account-equip-retire.ts");
+  const unit = await idOf(run, "insert into account_equipment (customer, catalog_model, equipment_name, serial, serial_key) values ($1, 'Bunn TB3', 'Bunn TB3', 'ZZ-T9', 'ZZT9') returning id", [name]);
+  await run("update account_equipment set customer_id = $2 where id = $1", [unit, alpha]);
+  const retired = await R.retireUnitRecord(sql, unit);
+  assert.equal(Number((await run("select customer_id from account_equipment_retired where id = $1", [retired]))[0].customer_id), alpha);
+  await run("delete from account_equipment where id = $1", [unit]);
+  // Its name finds no account; its id does: it goes back on that account, under the account's name.
+  await R.restoreRetiredUnit(sql, retired);
+  const back = (await run("select customer, customer_id from account_equipment where id = $1", [unit]))[0];
+  assert.deepEqual([back.customer, back.customer_id], ["ZZ Alpha Cafe", alpha]);
+});
+
+test("copies carry the account id: a module's stop, a move request, and an install's units", async () => {
+  const { sql, run } = await fresh();
+  const { alpha, name } = await lagging(run);
+  const beta = await account(run, "ZZ Beta Cafe");
+  const MA = await import("../src/lib/ops/module-assign.ts");
+  const mod = await idOf(run, "insert into modules (module_id, assigned_customer) values ('ZZ-MOD-1', $1) returning id", [name]);
+  await run("update modules set assigned_customer_id = $2 where id = $1", [mod, alpha]);
+  await MA.addStop(sql, mod, { kind: "moved", customer: name });
+  assert.equal(Number((await run("select customer_id from module_stops where module_id = $1", [mod]))[0].customer_id), alpha);
+
+  const unit = await idOf(run, "insert into account_equipment (customer, catalog_model, equipment_name) values ($1, 'Bunn TB3', 'Bunn TB3') returning id", [name]);
+  await run("update account_equipment set customer_id = $2 where id = $1", [unit, alpha]);
+  const inst = await idOf(run, "insert into installs (customer, complete, equip_status, archived) values ('ZZ Beta Kitchen', false, 'Not Ready', false) returning id");
+  await run("update installs set customer_id = $2 where id = $1", [inst, beta]);
+  const MR = await import("../src/lib/ops/move-requests.ts");
+  await MR.askMove(sql, "zz-admin", { unitId: unit, fromCustomer: name, installId: inst, serial: "", machineIndex: null });
+  const ask = (await run("select from_customer_id, to_customer_id from equipment_move_requests where unit_id = $1", [unit]))[0];
+  assert.deepEqual([ask.from_customer_id, ask.to_customer_id], [alpha, beta]);
+
+  const { syncInstallUnits } = await import("../src/lib/ops/inspection-api.ts");
+  await run("insert into directory_equipment (name) values ('Fetco CBS') on conflict do nothing");
+  const loaded = await idOf(run, "insert into installs (customer, complete, equip_status, archived, equipment, machines) values ($1, false, 'Not Ready', false, 'Fetco CBS', $2) returning id", [
+    name,
+    JSON.stringify([{ equipment: "Fetco CBS", serial: "ZZ-T10", powerVoltage: "" }]),
+  ]);
+  await run("update installs set customer_id = $2 where id = $1", [loaded, alpha]);
+  await syncInstallUnits(sql, loaded);
+  const made = await run("select customer, customer_id from account_equipment where created_by_install = $1", [loaded]);
+  assert.deepEqual(made.map((u) => [u.customer, u.customer_id]), [[name, alpha]]);
+});

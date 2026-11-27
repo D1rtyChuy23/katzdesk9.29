@@ -153,7 +153,7 @@ test("retire and put back keep the same machine, with or without a serial", asyn
       const [r] = await q(retireUnitSql(), [u.id, "zz", "Zz", null]);
       assert.equal(await machineOf(q, "account_equipment_retired", r.id), u.machine_id, `retired ${serial}`);
       await q("delete from account_equipment where id = $1", [u.id]);
-      await q(restoreUnitSql(), [r.id, "Zz Cafe"]);
+      await q(restoreUnitSql(), [r.id, "Zz Cafe", null]);
       assert.equal(await machineOf(q, "account_equipment", u.id), u.machine_id, `put back ${serial}`);
     }
   } finally {

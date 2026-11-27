@@ -23,6 +23,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import { nextCallId } from "@/lib/ops/call-id";
 import { checked } from "@/lib/ops/checked-input";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export const ADMIN_ONLY = "Only an Admin can move a PM to a service ticket, or back.";
 export const MOVED_STATUS = "Moved To Ticket";
@@ -139,10 +140,10 @@ export function movePmSql(): string {
   ), ok as (
     select lk.* from lk where lk.stamp = $2::text and ${PM_MOVE_REFUSAL_SQL("lk")} is null
   ), job as (
-    insert into service_jobs (kind, call_id, customer, received, equipment, issue, call_type, status, technician, wo, scheduled,
+    insert into service_jobs (kind, call_id, customer, customer_id, received, equipment, issue, call_type, status, technician, wo, scheduled,
                               sched_time, notes, done, work_done, completed_at, po, vendor_po, corrigo_id, service_location,
                               urgency, moved_from_pm_id)
-    select 'service', $3::text, ok.customer, ok.received, ok.equipment, 'Moved from PM #' || ok.id, 'Field Service',
+    select 'service', $3::text, ok.customer, ${listedAccountSql("ok.customer_id", "ok.customer")}, ok.received, ok.equipment, 'Moved from PM #' || ok.id, 'Field Service',
            ${caseSql(PM_TO_TICKET_STATUS, "ok.status", "Open")}, ok.technician, ok.wo, ok.projected, ok.sched_time, ok.notes,
            ${caseSql(PM_TO_TICKET_STATUS, "ok.status", "Open")} in ${CLOSED_TICKET}, ok.work_done, ok.completed_at, ok.po, ok.vendor_po,
            ok.corrigo_id, ok.service_location, 'Normal', ok.id
@@ -247,6 +248,8 @@ export function undoPmMoveSql(): string {
            done = ${caseSql(TICKET_TO_PM_STATUS, "ok.status", "Pending Scheduling")} in ('Completed', 'Cancelled'),
            -- A PM never goes on Walk - In: one moved back from a Walk - In ticket keeps its own account.
            customer = case when regexp_replace(lower(btrim(coalesce(ok.customer, ''))), '[^a-z0-9]+', '', 'g') in ('', 'walkin') then p.customer else ok.customer end,
+           customer_id = case when regexp_replace(lower(btrim(coalesce(ok.customer, ''))), '[^a-z0-9]+', '', 'g') in ('', 'walkin') then p.customer_id
+                              else ${listedAccountSql("ok.customer_id", "ok.customer")} end,
            equipment = ok.equipment, technician = ok.technician, wo = ok.wo, projected = ok.scheduled,
            sched_time = ok.sched_time, notes = ok.notes, work_done = ok.work_done, completed_at = ok.completed_at, po = ok.po,
            vendor_po = ok.vendor_po, corrigo_id = ok.corrigo_id, service_location = ok.service_location, updated_at = now()

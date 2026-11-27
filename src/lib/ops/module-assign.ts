@@ -12,6 +12,7 @@ import { swapError, trail, workError, workTotals, type ModuleStop, type ModuleWo
 import { moduleAssignmentBlock, modulesNotTakenReason, normalizeConfig } from "@/lib/ops/pm-runbook";
 import { optionsKeyFor } from "@/lib/ops/pm-runbook-units";
 import { runbookForPiece } from "@/lib/ops/runbooks";
+import { listedAccountSql } from "@/lib/ops/bill-account";
 
 export type EversysUnit = {
   id: number;
@@ -407,8 +408,15 @@ type StopInput = {
 /** Add one stop to a module's trail. Stops are only ever added, so the last account is never overwritten. */
 export async function addStop(sql: Sql, moduleId: number, s: StopInput) {
   await sql.query(
-    `insert into module_stops (module_id, kind, customer, unit_id, unit_label, other_module, from_place, to_place, by_name, note)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    // The stop keeps its account with its name (C6): the module's or the unit's when the stop names it, else the account
+    // the name finds.
+    `insert into module_stops (module_id, kind, customer, customer_id, unit_id, unit_label, other_module, from_place, to_place, by_name, note)
+     values ($1, $2, $3,
+             coalesce(
+               (select ${listedAccountSql("m.assigned_customer_id", "m.assigned_customer")} from modules m where m.id = $1 and btrim(m.assigned_customer) = btrim($3::text)),
+               (select ${listedAccountSql("a.customer_id", "a.customer")} from account_equipment a where a.id = $4::int and btrim(a.customer) = btrim($3::text)),
+               katz_customer_id($3::text)),
+             $4, $5, $6, $7, $8, $9, $10)`,
     [moduleId, s.kind, s.customer ?? null, s.unitId ?? null, s.unitLabel ?? null, s.otherModule ?? null, s.fromPlace ?? null, s.toPlace ?? null, s.byName ?? null, s.note ?? null],
   );
 }
@@ -566,10 +574,13 @@ export const swapModule = createServerFn({ method: "POST" })
     // The incoming module takes the outgoing one's place on the unit.
     await sql.query(
       `update modules set
-          assigned_customer = $2, assigned_unit_id = $3, assigned_unit_label = $4, assigned_at = now(), assigned_by = $5,
+          assigned_customer = $2,
+          -- The outgoing module's account with its name (C6).
+          assigned_customer_id = coalesce((select ${listedAccountSql("o.assigned_customer_id", "o.assigned_customer")} from modules o where o.id = $6), katz_customer_id($2)),
+          assigned_unit_id = $3, assigned_unit_label = $4, assigned_at = now(), assigned_by = $5,
           return_pending = false, status = 'Installed at Account', location = $2, updated_at = now()
         where id = $1`,
-      [incoming.id, customer, unitId, unitLabel, who.name],
+      [incoming.id, customer, unitId, unitLabel, who.name, out.id],
     );
     // The outgoing module comes back to HQ for a rebuild.
     await sql.query(
