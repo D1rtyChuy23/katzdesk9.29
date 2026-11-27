@@ -1,4 +1,5 @@
 /** Ticket charges (trip, labor, parts) and the billing hand-off. Pure rules — no database, no UI. */
+import { safeCsvCell } from "./csv-safe.ts";
 
 export type ChargeKind = "trip" | "labor" | "part" | "equipment" | "other";
 
@@ -492,11 +493,9 @@ export const BILLING_CSV_HEADER = [
   "Location",
 ];
 
+/** A CSV cell: a negative amount stays a number; text that could run as a formula gets an apostrophe (csv-safe.ts). */
 export function csvCell(v: string | number): string {
-  const s = String(v ?? "");
-  // A cell starting with = + - @ can run as a formula when the file is opened in a spreadsheet.
-  const safe = /^[=+\-@]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s) ? `'${s}` : s;
-  return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
+  return safeCsvCell(v);
 }
 
 /** One row per charge line, in the order the lines sit on the ticket. */

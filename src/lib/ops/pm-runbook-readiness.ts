@@ -5,6 +5,7 @@
  */
 import { normalizeCustomerKey } from "./account-equip.ts";
 import { planUnits, type AccountUnitRow, type SerialMatcher } from "./pm-runbook-units.ts";
+import { spreadsheetText } from "./csv-safe.ts";
 
 /** `customerId`: the PM's account, when PMs reads by id (phase C5); otherwise left out and the PM goes by its name. */
 export type ReadinessPm = { id: number; customer: string; equipment: string | null; status: string; customerId?: number | null };
@@ -102,7 +103,8 @@ export function readinessSummary(rows: ReadinessRow[]) {
 
 /** CSV the cleanup can work from: one line per PM unit that still has a gap. */
 export function readinessCsv(rows: ReadinessRow[]): string {
-  const q = (v: string | number | null) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  // Every cell quoted, as before; text that could run as a formula gets an apostrophe first (csv-safe.ts).
+  const q = (v: string | number | null) => `"${spreadsheetText(String(v ?? "")).replace(/"/g, '""')}"`;
   const head = ["PM", "Customer", "Status", "Equipment line", "Missing"].map(q).join(",");
   const lines = rows
     .filter((r) => r.gaps.length)

@@ -21,6 +21,7 @@ import { isoDay } from "@/lib/ops/iso";
 import { catalogNames, loadInspectionSummaries, loadInspectionUnits } from "@/lib/ops/inspection-api";
 import { findDuplicateSerials } from "@/lib/ops/duplicate-serials";
 import { emptyInspection, photosCell, siteIsReady } from "@/lib/ops/pre-inspection";
+import { safeCsvCell } from "@/lib/ops/csv-safe";
 
 
 export const REPORT_TYPES = ["pending", "pms", "modules", "tlc", "installs", "rebuilds", "serials"] as const;
@@ -985,10 +986,8 @@ function toWorkbook(report: BuiltReport): XLSX.WorkBook {
 
 function toCsv(report: BuiltReport): string {
   const lines: string[] = [];
-  const esc = (v: string) => {
-    if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-    return v;
-  };
+  // Quoted when needed, and no cell can start a spreadsheet formula (csv-safe.ts).
+  const esc = (v: string) => safeCsvCell(v);
   lines.push(esc(report.label));
   lines.push(esc(`Generated ${report.generated}`));
   lines.push(esc(report.filterSummary));

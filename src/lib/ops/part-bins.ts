@@ -7,6 +7,7 @@
  */
 import { csvCell, splitItemName } from "./charges.ts";
 import { blankRow, headerKey, mpnKey, PART_HEADERS } from "./part-pricing.ts";
+import { unSpreadsheetText } from "./csv-safe.ts";
 
 /** Longest Rack, Shelf or Bin kept. */
 export const BIN_MAX = 40;
@@ -20,10 +21,11 @@ export const BIN_LABEL: Record<(typeof BIN_PIECES)[number], string> = { rack: "R
  * puts before = + - @ (so the cell is not run as a formula) is taken off again.
  */
 export function cleanBinValue(raw: unknown): string | null {
-  const s = String(raw ?? "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/^'(?=[=+\-@])/, "");
+  const s = unSpreadsheetText(
+    String(raw ?? "")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
   return s || null;
 }
 
@@ -180,8 +182,9 @@ export function binRowsFromSheets(sheets: { name: string; matrix: unknown[][] }[
     for (let i = head + 1; i < sheet.matrix.length; i++) {
       const r = sheet.matrix[i] ?? [];
       if (blankRow(r)) continue;
-      const mpn = cell(r, "mpn");
-      const rawSku = cell(r, "sku");
+      // The Bin Template puts an apostrophe before an MPN or SKU that starts with = + - @; take it off so it matches exactly.
+      const mpn = unSpreadsheetText(cell(r, "mpn"));
+      const rawSku = unSpreadsheetText(cell(r, "sku"));
       const sku = rawSku ? splitItemName(rawSku).sku : "";
       if (!mpnKey(mpn) && !mpnKey(sku)) {
         skipped += 1;

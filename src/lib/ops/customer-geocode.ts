@@ -5,6 +5,7 @@
  */
 import { normalizeCustomerKey } from "./customer-key.ts";
 import { accountNumberKey } from "./account-numbers.ts";
+import { safeCsvCell } from "./csv-safe.ts";
 
 export type GeoRow = {
   line: number;
@@ -295,10 +296,8 @@ const REVIEW_ORDER: Record<GeoStatus, number> = { no_location: 0, unmatched: 1, 
 /** The review list as CSV: every row that needs a person, worst first. Opens in Excel (UTF-8 with BOM). */
 export function reviewCsv(lines: GeoPlanLine[]): string {
   const head = ["Line", "Name", "Account", "Internal ID", "KatzDesk account", "Matched by", "Shipping address", "Geocoder result", "Matched address", "Latitude", "Longitude", "Saved", "What to check"];
-  const q = (v: unknown) => {
-    const s = v === null || v === undefined ? "" : String(v);
-    return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
+  // Quoted when needed, and no cell can start a spreadsheet formula (csv-safe.ts).
+  const q = safeCsvCell;
   const rows = lines
     .filter((l) => l.review)
     .sort((a, b) => REVIEW_ORDER[a.status] - REVIEW_ORDER[b.status] || a.line - b.line)

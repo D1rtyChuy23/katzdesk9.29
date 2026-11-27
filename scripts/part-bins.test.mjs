@@ -264,3 +264,29 @@ test("searching Parts by bin: A 03 12 and A/03/12 read as the code A-03-12; othe
   assert.equal(binSearchCode("EVER104120"), "EVER104120");
   assert.equal(binSearchCode(""), "");
 });
+
+test("an MPN or SKU that starts with = + - @ comes back from the Bin Template as itself and matches exactly", () => {
+  // Made up: "-AB12" and "AB12" normalise to the same number, so only the exact SKU tells them apart.
+  const parts = [
+    part(10, "-AB12", null, { rack: "A", shelf: "1", bin: "1" }),
+    part(11, "AB12", null, { rack: "B", shelf: "2", bin: "2" }),
+    part(12, "EVER9", "=X1", { rack: "C", shelf: "3", bin: "3" }),
+    part(13, "+5 KIT", "@HOME-2", { rack: "D", shelf: "4", bin: "4" }),
+  ];
+  const csv = binTemplateCsv(parts);
+  assert.match(csv, /'-AB12/, "the template keeps the formula guard");
+  const read = binRowsFromSheets(sheet(csvMatrix(csv)));
+  assert.deepEqual(read.rows.map((r) => [r.mpn, r.sku]), [
+    [null, "-AB12"],
+    [null, "AB12"],
+    ["=X1", "EVER9"],
+    ["@HOME-2", "+5 KIT"],
+  ]);
+  const plan = planBins(read.rows, parts);
+  assert.deepEqual(plan.map((l) => [l.status, l.partId]), [
+    ["same", 10],
+    ["same", 11],
+    ["same", 12],
+    ["same", 13],
+  ]);
+});

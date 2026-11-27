@@ -14,6 +14,7 @@
 import { accountNumberKey, cleanAccountNumber } from "./account-numbers.ts";
 import { isWalkInName, shipToAddress, tidy } from "./clean-names.ts";
 import { normalizeCustomerKey } from "./customer-key.ts";
+import { safeCsvCell } from "./csv-safe.ts";
 
 export type AddressParts = { line1: string; line2: string; city: string; state: string; zip: string; country: string };
 export type StoredAddress = { [K in keyof AddressParts]: string | null };
@@ -594,12 +595,8 @@ export function countNetsuitePlan(lines: Pick<NsPlanLine, "status">[]): NsCounts
 
 // ── The preview as a CSV download ───────────────────────────────────────────────────────────────────────────────────
 
-/** A CSV cell: quoted when needed, and a leading = + @ or -word can't start a spreadsheet formula. */
-function csvCell(v: unknown): string {
-  let s = String(v ?? "");
-  if (/^[=+@]/.test(s) || /^-[^\d]/.test(s)) s = `'${s}`;
-  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+/** A CSV cell: quoted when needed, and it can't start a spreadsheet formula (csv-safe.ts). */
+const csvCell = safeCsvCell;
 
 const changeText = (c: NsChange) => `${c.label}: ${c.before ?? "—"} → ${c.after ?? "—"}`;
 

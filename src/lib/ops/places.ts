@@ -456,14 +456,6 @@ export const PROSPECT_COLUMNS = [
 ] as const;
 
 /**
- * Text from OpenStreetMap that a spreadsheet would run as a formula ("-2+HYPERLINK(…)", a tab then "="): an apostrophe
- * in front keeps it text. The CSV writer catches "=", "+" and "@" itself; this adds a leading "-", tab or return.
- */
-export function sheetText(s: string): string {
-  return /^[-\t\r]/.test(s) ? `'${s}` : s;
-}
-
-/**
  * One CSV row per place, for the download: the nearest account (any), how far, and the rep of the nearest account that
  * has one (the rep whose area it likely is).
  */
@@ -473,18 +465,18 @@ export function prospectRows(places: readonly Place[], accounts: readonly Accoun
     const n = nearestAccount(p, accounts);
     const r = nearestAccount(p, withRep);
     return [
-      sheetText(p.name),
+      p.name,
       PLACE_CATEGORY.get(p.category)?.label ?? p.category,
-      sheetText(p.street ?? ""),
-      sheetText(p.city ?? ""),
+      p.street ?? "",
+      p.city ?? "",
       p.zip ?? "",
       formatPhone(p.phone) ?? "",
       websiteUrl(p.website) ?? "",
       p.lat.toFixed(6),
       p.lng.toFixed(6),
-      sheetText(n?.account.name ?? ""),
+      n?.account.name ?? "",
       n ? n.miles.toFixed(1) : "",
-      sheetText(r?.account.rep ?? ""),
+      r?.account.rep ?? "",
       osmUrl(p.id),
     ];
   });

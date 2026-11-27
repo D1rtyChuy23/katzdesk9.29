@@ -235,7 +235,7 @@ test("a restaurant that also lists coffee stays a restaurant; a fast-food coffee
   assert.equal(places.categoryOf({ amenity: "bench" }), null);
 });
 
-test("review follow-ups: tenants of one address, one-word names, donut and coffee fast food, spreadsheet text", () => {
+test("review follow-ups: tenants of one address, one-word names, donut and coffee fast food, spreadsheet text", async () => {
   // Fable review 11/26: a strip center's account must not hide its neighbors.
   const center = [{ id: 20, name: "Nobu", lat: 29.7383, lng: -95.4630, address: "5085 Westheimer Rd Ste 100, Houston, TX 77056", rep: "Rosa" }];
   const tenants = [
@@ -259,9 +259,11 @@ test("review follow-ups: tenants of one address, one-word names, donut and coffe
   assert.equal(places.categoryOf({ amenity: "fast_food", cuisine: "coffee_shop;breakfast" }), "coffee");
   // Formula-looking names stay text in the download.
   const row = places.prospectRows([{ id: "node/1", name: "-2+HYPERLINK(\"x\")", category: "coffee", lat: 29, lng: -95, street: "\t=1+1", city: "Houston", zip: null, phone: null, website: null }], [])[0];
-  assert.equal(row[0], "'-2+HYPERLINK(\"x\")");
-  assert.equal(row[2], "'\t=1+1");
-  assert.equal(row[8], "-95.000000", "a negative longitude is a number, left alone");
+  const { toCsv } = await import("../src/lib/ops/customer-export.ts");
+  const line = toCsv(places.PROSPECT_COLUMNS, [row]).split("\r\n")[1];
+  assert.ok(line.startsWith(`"'-2+HYPERLINK(""x"")",`), line);
+  assert.ok(line.includes(",'\t=1+1,"), "a tab then = stays text");
+  assert.ok(line.includes(",-95.000000,"), "a negative longitude is a number, left alone");
 });
 
 test("ZIP requests by zoom: fewer circles and a coarser box zoomed out; the server keeps the limit in range", async () => {
