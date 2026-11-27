@@ -66,7 +66,7 @@ const placeTiles = new Map<string, Promise<Place[]>>();
 const PLACE_TILES_KEPT = 16;
 
 /** One square's places, read once and kept while it is in use; a square with no file (outside Texas) is empty. */
-function placeTile(key: string): Promise<Place[]> {
+export function placeTile(key: string): Promise<Place[]> {
   const hit = placeTiles.get(key);
   if (hit) {
     placeTiles.delete(key);
@@ -79,6 +79,17 @@ function placeTile(key: string): Promise<Place[]> {
   placeTiles.set(key, p);
   while (placeTiles.size > PLACE_TILES_KEPT) placeTiles.delete(placeTiles.keys().next().value!);
   return p;
+}
+
+/**
+ * One square's places for a one-off pass over many squares (the Web Check report): a square already kept is used, but
+ * one read here is not kept, so the report does not push out the squares people are looking at on the Map.
+ */
+export function placeTilePassing(key: string): Promise<Place[]> {
+  const hit = placeTiles.get(key);
+  if (hit) return hit;
+  const load = placeFileLoaders()[`./places-tiles/${key}.tsv`];
+  return load ? load().then(parsePlaceTile) : Promise.resolve([]);
 }
 
 export type PlacesResult = { places: Place[]; total: number; truncated: boolean; source: string };

@@ -1,3 +1,3 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-8c041f5ba968	Exxon	convenience		32.72652	-103.06405	2595 Us Hwy 62 & Hwy I80 W	Seminole	79360	+14322971137	https://www.exxon.com/en/find-station/exxon-seminole-tx-statelinestore-200316399?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92
-e982343854c9	STATELINE STORE	convenience		32.72649	-103.06416	2595 US HWY 62 & HWY I80 W	Seminole	79360		https://www.exxon.com/en/find-station/exxon-seminole-tx-statelinestore-200316399	Exxon	0.80
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+8c041f5ba968	Exxon	convenience		32.72652	-103.06405	2595 Us Hwy 62 & Hwy I80 W	Seminole	79360	+14322971137	https://www.exxon.com/en/find-station/exxon-seminole-tx-statelinestore-200316399?utm_medium=referral&utm_source=yxt-bing&utm_campaign=us_fue_ret_xom_yxt		0.92	
+e982343854c9	STATELINE STORE	convenience		32.72649	-103.06416	2595 US HWY 62 & HWY I80 W	Seminole	79360		https://www.exxon.com/en/find-station/exxon-seminole-tx-statelinestore-200316399	Exxon	0.80	

@@ -99,6 +99,8 @@ export function GeocodeImportButton() {
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-addresses"] });
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
+      void qc.invalidateQueries({ queryKey: ["web-check"] });
+      void qc.invalidateQueries({ queryKey: ["account-web"] });
       setOpen(false);
       setPreview(null);
     },

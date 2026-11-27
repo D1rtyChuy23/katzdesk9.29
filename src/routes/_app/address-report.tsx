@@ -18,12 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/desk/desk-charts";
 import { ListToolbar, ToolbarNote, ToolbarSearch } from "@/components/desk/list-toolbar";
+import { WebCheckView } from "@/components/desk/web-check";
 
 const toNumber = (v: unknown) => (typeof v === "string" && v.trim() !== "" ? Number(v) : v);
 const toBoolean = (v: unknown) => (v === "true" || v === "1" || v === 1 ? true : v === "false" || v === "0" || v === 0 ? false : v);
 
-/** ?account=<id> shows just that account (even if skipped); ?skipped=true shows the skipped rows; ?page=<n> from 1. */
+/**
+ * ?account=<id> shows just that account (even if skipped); ?skipped=true shows the skipped rows; ?page=<n> from 1;
+ * ?web=true shows the Web Check (every account against current business listings).
+ */
 const searchSchema = z.object({
+  web: z.preprocess(toBoolean, z.boolean()).optional().catch(undefined),
   account: z.preprocess(toNumber, z.number().int().positive().max(MAX_ACCOUNT_ID)).optional().catch(undefined),
   skipped: z.preprocess(toBoolean, z.boolean()).optional().catch(undefined),
   // Same caps as the server: anything else falls back to the whole report, or the first page.
@@ -42,7 +47,7 @@ const errorText = (e: unknown, fallback: string) => (e instanceof Error && e.mes
 function Page() {
   const qc = useQueryClient();
   const navigate = useNavigate({ from: Route.fullPath });
-  const { account, skipped = false, page = 1 } = Route.useSearch();
+  const { account, skipped = false, page = 1, web = false } = Route.useSearch();
   const [q, setQ] = useState("");
   const [needle, setNeedle] = useState("");
   // Search on the server a moment after typing stops, from the first page.
@@ -64,6 +69,7 @@ function Page() {
         data: { page, pageSize: DEFAULT_PAGE_SIZE, account, skipped: skipped || undefined, search: account ? undefined : needle || undefined },
       }),
     placeholderData: keepPreviousData,
+    enabled: !web,
   });
   const data = report.data;
   const pages = data ? pageCount(data.total, data.pageSize) : 1;
@@ -89,6 +95,8 @@ function Page() {
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
       void qc.invalidateQueries({ queryKey: ["customer-history"] });
       void qc.invalidateQueries({ queryKey: ["customers"] });
+      void qc.invalidateQueries({ queryKey: ["web-check"] });
+      void qc.invalidateQueries({ queryKey: ["account-web"] });
     },
     onError: (e) => {
       toast.error(errorText(e, "Could not save the address"));
@@ -122,9 +130,9 @@ function Page() {
         <div>
           <h1 className="font-display text-3xl font-medium tracking-tight">Address Report</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Accounts the map cannot place: no pin, or only a ZIP area pin. Each one shows its address and any other address
-            KatzDesk has on file for it. Approve one to save it on the account, or skip the account. Nothing changes until
-            you approve. Accounts with a possible address are listed first.
+            {web
+              ? "Web Check: every account against current business listings. Closed, listed at another address, or listed somewhere else come first. Nothing changes until an Admin approves an address."
+              : "Accounts the map cannot place: no pin, or only a ZIP area pin. Each one shows its address and any other address KatzDesk has on file for it. Approve one to save it on the account, or skip the account. Nothing changes until you approve. Accounts with a possible address are listed first."}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -134,7 +142,18 @@ function Page() {
         </div>
       </header>
 
-      {account ? (
+      <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Address Report view" data-testid="address-views">
+        <FilterChip selected={!web} onClick={() => go({})} data-testid="address-view-report">
+          Can&apos;t Place
+        </FilterChip>
+        <FilterChip selected={web} onClick={() => go({ web: true })} data-testid="address-view-web">
+          Web Check
+        </FilterChip>
+      </div>
+
+      {/* The Web Check is its own list; the rest of the page is the Can't Place report. */}
+      {web ? <WebCheckView /> : null}
+      {web ? null : account ? (
         <div className="mt-4 flex flex-col gap-2 rounded-xl border border-border bg-card/60 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between" data-testid="address-account-note">
           <p className="text-muted-foreground">
             {report.isLoading
@@ -173,8 +192,8 @@ function Page() {
         </ListToolbar>
       )}
 
-      {data && !data.canEdit ? <p className="mt-3 text-xs text-muted-foreground">Only an Admin can approve or skip addresses.</p> : null}
-      {report.isError && !data ? (
+      {!web && data && !data.canEdit ? <p className="mt-3 text-xs text-muted-foreground">Only an Admin can approve or skip addresses.</p> : null}
+      {!web && report.isError && !data ? (
         <div className="mt-4 rounded-xl border border-border bg-card px-4 py-4 text-sm" role="alert">
           <p className="font-medium text-destructive">Could not load the address report.</p>
           <p className="mt-1 text-muted-foreground">{errorText(report.error, "Something went wrong.")}</p>
@@ -185,9 +204,9 @@ function Page() {
         </div>
       ) : null}
 
-      {report.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Loading the report…</p> : null}
+      {!web && report.isLoading ? <p className="mt-6 text-sm text-muted-foreground">Loading the report…</p> : null}
 
-      {data && (data.rows.length || !account) ? (
+      {!web && data && (data.rows.length || !account) ? (
         <ul className="mt-3 overflow-hidden rounded-xl border border-border bg-card" data-testid="address-rows" aria-busy={report.isFetching}>
           {data.rows.map((row) => (
             <ReportRow
@@ -213,7 +232,7 @@ function Page() {
         </ul>
       ) : null}
 
-      {data && !account && data.total > data.pageSize ? (
+      {!web && data && !account && data.total > data.pageSize ? (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2" data-testid="address-pager">
           <p className="text-xs text-muted-foreground" data-testid="address-page">
             Page {Math.min(page, pages)} of {pages}

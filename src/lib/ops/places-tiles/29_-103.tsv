@@ -1,2 +1,2 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-fdaa19c9f946	Espresso y Poco Mas	coffee		29.55195	-102.93367	100 Milagro way	Terlingua	79852	+14323713044			0.90
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+fdaa19c9f946	Espresso y Poco Mas	coffee		29.55195	-102.93367	100 Milagro way	Terlingua	79852	+14323713044			0.90	

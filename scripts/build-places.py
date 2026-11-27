@@ -31,7 +31,9 @@ BUCKET = "https://overturemaps-us-west-2.s3.us-west-2.amazonaws.com/"
 WEST, EAST, SOUTH, NORTH = -106.65, -93.5, 25.8, 36.5  # Texas, with the parts of its neighbors the box takes in
 MIN_CONFIDENCE = 0.55
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "lib", "ops", "places-tiles")
-COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence"]
+# status: "" for open, "closed" for a place Overture marks permanently closed. Closed places are never prospects; they
+# are kept so the Address Report's Web Check can tell when one of our customers has closed.
+COLUMNS = ["id", "name", "category", "kind", "lat", "lng", "street", "city", "zip", "phone", "website", "brand", "confidence", "status"]
 
 # Overture basic categories worth reading; the finer taxonomy decides the type (category_of).
 BASIC = {
@@ -229,7 +231,7 @@ def first(xs):
 
 
 def read_current():
-    """The places in the files now: id → (type, name, city). Empty when there are none yet."""
+    """The open places in the files now: id → (type, name, city). Empty when there are none yet."""
     out = {}
     if not os.path.isdir(OUT):
         return out
@@ -240,7 +242,7 @@ def read_current():
             next(fh, None)
             for line in fh:
                 c = line.rstrip("\n").split("\t")
-                if len(c) >= len(COLUMNS):
+                if len(c) >= 13 and (len(c) < 14 or c[13] != "closed"):
                     out[c[0]] = (c[2], c[1], c[7])
     return out
 
@@ -258,10 +260,7 @@ def write_tiles(table, before=None, min_share=0.0):
         cat = category_of(r["basic"], r["tax"])
         if not cat:
             why["type"] += 1; continue
-        if r["status"] == "permanently_closed":
-            why["closed"] += 1
-            closed_ids.add((r["id"] or "").replace("-", "")[:12])
-            continue
+        closed = r["status"] == "permanently_closed"
         if (r["conf"] or 0) < MIN_CONFIDENCE:
             why["unsure"] += 1; continue
         a = first(r["addresses"] or []) or {}
@@ -281,7 +280,7 @@ def write_tiles(table, before=None, min_share=0.0):
         zip_raw = clean(a.get("postcode"))[:5]
         if zip_raw and not TX_ZIP.match(zip_raw):
             why["not a Texas ZIP"] += 1; continue
-        dup = (name.lower(), clean(a.get("freeform")).lower(), cat)
+        dup = (name.lower(), clean(a.get("freeform")).lower(), cat, closed)
         if dup in same:
             why["listed twice"] += 1; continue
         same.add(dup)
@@ -291,11 +290,15 @@ def write_tiles(table, before=None, min_share=0.0):
         seen.add(pid)
         zip5 = re.match(r"\d{5}", clean(a.get("postcode")))
         row = [pid, name, cat, kind_of(r["tax"]), f"{r['y']:.5f}", f"{r['x']:.5f}", clean(a.get("freeform")), clean(a.get("locality")).title(),
-               zip5.group(0) if zip5 else "", phone, web, brand, f"{r['conf']:.2f}"]
+               zip5.group(0) if zip5 else "", phone, web, brand, f"{r['conf']:.2f}", "closed" if closed else ""]
         row = [c.replace("\t", " ") for c in row]
         # The square from the written (rounded) numbers, so a place at 32.999996°N, written 33.00000, files under 33.
         tiles[f"{math.floor(float(row[4]))}_{math.floor(float(row[5]))}"].append(row)
-        kept += 1
+        if closed:
+            why["closed (kept, flagged)"] += 1
+            closed_ids.add(pid)
+        else:
+            kept += 1
     if before and kept < min_share * len(before):
         sys.exit(f"Refusing: only {kept:,} places, against {len(before):,} now (less than {min_share:.0%}). Overture may still be uploading this release; try again later, or pass --allow-shrink.")
     os.makedirs(OUT, exist_ok=True)
@@ -308,8 +311,8 @@ def write_tiles(table, before=None, min_share=0.0):
             fh.write("\t".join(COLUMNS) + "\n")
             for row in rows:
                 fh.write("\t".join(row) + "\n")
-    print(f"{kept} places in {len(tiles)} files; left out: {dict(why)}", file=sys.stderr)
-    return {row[0]: (row[2], row[1], row[7]) for rows in tiles.values() for row in rows}, dict(why), closed_ids
+    print(f"{kept} open places (and {len(closed_ids)} closed ones, flagged) in {len(tiles)} files; other counts: {dict(why)}", file=sys.stderr)
+    return {row[0]: (row[2], row[1], row[7]) for rows in tiles.values() for row in rows if row[13] != "closed"}, dict(why), closed_ids
 
 
 LABELS = {
@@ -330,7 +333,7 @@ def summary(old_release, release, before, after, why, closed_ids):
         "",
         f"- **{len(after):,}** places now (was {len(before):,}): **{len(added):,} added**, **{len(dropped):,} dropped**"
         f" ({len(closed):,} of them now marked permanently closed by Overture; the rest left its listings, changed type or fell below the bar).",
-        f"- Left out this time: {', '.join(f'{k} {v:,}' for k, v in sorted(why.items()))}.",
+        f"- Not prospects this time: {', '.join(f'{k} {v:,}' for k, v in sorted(why.items()))}.",
         "",
         "| Type | Before | Now | Added | Dropped |",
         "|---|---:|---:|---:|---:|",

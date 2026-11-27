@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { SheetTabs } from "./sheet-tabs";
+import { AccountWebInfo } from "./web-check";
 import { AccountPhotosPanel } from "./photos-panel";
 import { listAccountPhotos } from "@/lib/ops/ticket-photos";
 import { listAccountInvoices } from "@/lib/ops/invoice-api";
@@ -156,6 +157,8 @@ export function CustomerHistorySheet({
       void qc.invalidateQueries({ queryKey: ["account-addresses"] });
       void qc.invalidateQueries({ queryKey: ["customer-address"] });
       void qc.invalidateQueries({ queryKey: ["account-geo"] });
+      void qc.invalidateQueries({ queryKey: ["web-check"] });
+      void qc.invalidateQueries({ queryKey: ["account-web"] });
       if (row.merged || row.id !== customerId) {
         void navigate({ to: "/customers", search: (prev) => ({ ...prev, open: row.id }), replace: true });
       }
@@ -288,6 +291,7 @@ export function CustomerHistorySheet({
                   )}
                   <AccountNumberField id={data.id} value={data.accountNumber ?? null} canEdit={!!data.canEditAccountNumber} />
                   <AccountPinField id={data.id} pin={data.pin ?? null} canEdit={!!data.canEditPin} />
+                  <AccountWebInfo accountId={data.id} className="mt-2" />
                   <InactiveBlock id={data.id} netsuite={data.netsuite ?? null} admin={canRename} />
                   <NetsuiteDetails netsuite={data.netsuite ?? null} />
                   <AccountMarksForm id={data.id} aviKatz={data.aviKatz} accountRep={data.accountRep} />
@@ -724,7 +728,7 @@ function AccountPinField({ id, pin, canEdit }: { id: number; pin: CustomerHistor
     onSuccess: (r) => {
       toast.success(`Map pin saved: ${pinText(r.latitude, r.longitude)}`);
       setEditing(false);
-      for (const key of [["customer-history"], ["account-geo"], ["account-addresses"], ["customer-address"], ["address-report"]]) {
+      for (const key of [["customer-history"], ["account-geo"], ["account-addresses"], ["customer-address"], ["address-report"], ["web-check"], ["account-web"]]) {
         void qc.invalidateQueries({ queryKey: key });
       }
     },

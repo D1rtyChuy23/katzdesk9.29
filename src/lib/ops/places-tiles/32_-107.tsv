@@ -1,6 +1,7 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-a36540401b00	M and E Beverage Depot	convenience		32.00012	-106.60683	124 W Washington St	Anthony	79821	+19158863130	http://beveragedepot.biz/		0.92
-d8ffd5d50656	El Camaron Pelao	restaurant	seafood restaurant	32.00056	-106.60626	100 N Main St	Anthony	79821	+19153140966			0.99
-16669c6d82cb	Mona’s Kitchen	restaurant	mexican restaurant	32.00044	-106.60497	117 N First St	Anthony	79821		https://order.tbdine.com/pickup/39314		0.96
-0428712b25d1	The Edge of Texas Steakhouse	restaurant	steakhouse	32.00005	-106.32507	8690 Edge of Texas	El Paso	79934	+19158223343	https://theedgeoftexas.com/		0.99
-5d8911caf644	The Rose Garden Restaurant	restaurant	mexican restaurant	32.00013	-106.60535	26 E Washington St	Anthony	79821	+19158862029	https://local.yahoo.com/info-19516459-rose-garden-restaurant-anthony		0.97
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+b0406ccc441e	Luis Rey Auto Sales	cardealer		32.00035	-106.60899	242 W Washington St	Vinton	79821				0.65	closed
+a36540401b00	M and E Beverage Depot	convenience		32.00012	-106.60683	124 W Washington St	Anthony	79821	+19158863130	http://beveragedepot.biz/		0.92	
+d8ffd5d50656	El Camaron Pelao	restaurant	seafood restaurant	32.00056	-106.60626	100 N Main St	Anthony	79821	+19153140966			0.99	
+16669c6d82cb	Mona’s Kitchen	restaurant	mexican restaurant	32.00044	-106.60497	117 N First St	Anthony	79821		https://order.tbdine.com/pickup/39314		0.96	
+0428712b25d1	The Edge of Texas Steakhouse	restaurant	steakhouse	32.00005	-106.32507	8690 Edge of Texas	El Paso	79934	+19158223343	https://theedgeoftexas.com/		0.99	
+5d8911caf644	The Rose Garden Restaurant	restaurant	mexican restaurant	32.00013	-106.60535	26 E Washington St	Anthony	79821	+19158862029	https://local.yahoo.com/info-19516459-rose-garden-restaurant-anthony		0.97	

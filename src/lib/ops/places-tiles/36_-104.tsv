@@ -1,10 +1,10 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-0cdb50af7ca5	Allsup's Convenience Store	convenience		36.37780	-103.02410	425 Hwy 87 S	Texline	79087	+18063624790	https://www.allsups.com/		0.85
-82d6a31583c7	Allsup's Convenience Store	convenience		36.37445	-103.01862	425 US-87	Texline	79087	+18066075080	https://www.allsups.com	Allsup’s	0.92
-d809899a4324	Valero	convenience		36.37973	-103.02736	N 2nd St	Texline	79087		http://www.valero.com/	Valero	0.74
-ff84d094f450	Lazy 6 Meat Market	grocery		36.37836	-103.02528	219 2nd St	Texline	79087	+18063624900			0.85
-780be37e1fb8	el sazon de Martha	restaurant	mexican restaurant	36.37836	-103.02537	221 N 2nd St	Texline	79087	+18063624979			0.96
-dcfdfb0990c9	Granny's Diner	restaurant	diner	36.37360	-103.01771	511 S 2nd St	Texline	79087	+18063624899	http://texlinefrontporch.com		0.94
-74ca419b582e	Maria's Country Kitchen	restaurant	diner	36.37785	-103.02403	120 N 2nd St	Texline	79087	+18063624208	http://countrykitchenrestaurants.com		0.97
-3415a2424ca5	Texline Restaurant	restaurant		36.37839	-103.02543	301 N 2nd St	Texline	79087	+18063624979			0.94
-8c95f20d6530	The Front Porch	restaurant	american restaurant	36.37367	-103.01781	511 S 2nd St	Texline	79087	+18063624899	http://texlinefrontporch.com/		0.96
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+0cdb50af7ca5	Allsup's Convenience Store	convenience		36.37780	-103.02410	425 Hwy 87 S	Texline	79087	+18063624790	https://www.allsups.com/		0.85	
+82d6a31583c7	Allsup's Convenience Store	convenience		36.37445	-103.01862	425 US-87	Texline	79087	+18066075080	https://www.allsups.com	Allsup’s	0.92	
+d809899a4324	Valero	convenience		36.37973	-103.02736	N 2nd St	Texline	79087		http://www.valero.com/	Valero	0.74	
+ff84d094f450	Lazy 6 Meat Market	grocery		36.37836	-103.02528	219 2nd St	Texline	79087	+18063624900			0.85	
+780be37e1fb8	el sazon de Martha	restaurant	mexican restaurant	36.37836	-103.02537	221 N 2nd St	Texline	79087	+18063624979			0.96	
+dcfdfb0990c9	Granny's Diner	restaurant	diner	36.37360	-103.01771	511 S 2nd St	Texline	79087	+18063624899	http://texlinefrontporch.com		0.94	
+74ca419b582e	Maria's Country Kitchen	restaurant	diner	36.37785	-103.02403	120 N 2nd St	Texline	79087	+18063624208	http://countrykitchenrestaurants.com		0.97	
+3415a2424ca5	Texline Restaurant	restaurant		36.37839	-103.02543	301 N 2nd St	Texline	79087	+18063624979			0.94	
+8c95f20d6530	The Front Porch	restaurant	american restaurant	36.37367	-103.01781	511 S 2nd St	Texline	79087	+18063624899	http://texlinefrontporch.com/		0.96	

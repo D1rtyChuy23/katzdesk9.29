@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Globe, MapPinOff, Navigation, RotateCcw, Store, X } from "lucide-react";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { DeskMap, type MapBounds, type MapPin } from "./desk-map";
+import { AccountWebInfo } from "./web-check";
 import {
   DownloadProspects,
   ElevationLine,
@@ -1291,6 +1292,7 @@ function AccountCard({ account: a, type, onClose }: { account: AccountGeo; type:
       </p>
       {/* A ZIP area pin's height is the ZIP's center, not the building: only street-level pins get one. */}
       {point && a.quality !== "approx" ? <ElevationLine point={point} className="mt-1" /> : null}
+      <AccountWebInfo accountId={a.id} className="mt-2" />
 
       <ul className="mt-3 space-y-0.5 text-xs">
         {lines.length ? lines.map((l, i) => <li key={i}>{l}</li>) : <li className="text-muted-foreground">No open work.</li>}

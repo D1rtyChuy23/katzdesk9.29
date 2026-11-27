@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { webListingAddress } from "@/lib/ops/account-web-api";
 import { z } from "zod";
 import { getSql, type Sql } from "@/lib/db";
 import { canReviewNames, deskMiddleware } from "@/lib/ops/access";
 import {
   buildSuggestions,
   likePattern,
+  normalizeAddress,
   searchWords,
   DEFAULT_PAGE_SIZE,
   MAX_ACCOUNT_ID,
@@ -335,8 +337,13 @@ export const approveAddressSuggestion = createServerFn({ method: "POST" })
     if (shown(cur.address) === data.newAddress) return { status: "already", account: summary(data.newAddress) };
     if ((shown(cur.address) ?? "") !== (shown(data.expectedAddress) ?? "")) throw changedError(cur.name);
     const src = (await loadSources(sql, [cur.id])).get(cur.id);
-    const offered = buildSuggestions({ address: cur.address, geocodeAddress: cur.geocode_address, cleanList: src?.cleanList, invoices: src?.invoices });
-    const pick = offered.find((s) => s.address === data.newAddress);
+    const web = await webListingAddress(sql, cur.id);
+    const offered = buildSuggestions({ address: cur.address, geocodeAddress: cur.geocode_address, cleanList: src?.cleanList, invoices: src?.invoices, web });
+    // The address as offered; or the web listing's, when another source offers the same address in other words (the
+    // Web Check shows the listing's wording).
+    const pick =
+      offered.find((s) => s.address === data.newAddress) ??
+      (web === data.newAddress ? offered.find((s) => normalizeAddress(s.address) === normalizeAddress(web)) : undefined);
     if (!pick) throw new Error("That suggestion is no longer offered for this account.");
     const who = await actorName(sql, context.userId);
     const source: AddressSource = pick.source;

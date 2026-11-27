@@ -1,61 +1,61 @@
-id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence
-aa22f169df2b	Alta Marfa Restaurant & Wine Bar	bar	winery	30.31147	-104.02279	120 N Austin St	Marfa	79843	+14322946028	http://www.altamarfa.com/visitus		0.90
-73e72b0c4a4c	Blue Mountain Trail Vineyard	bar	winery	30.54011	-104.03096	125 Blue Mountain Trl	Fort Davis	79734	+12103818290	http://www.bluemountainwine.com		0.77
-cb1e299d8b49	Lost Horse Saloon	bar		30.30998	-104.01787	306 E. San Antonio St.	Marfa	79843	+14327294499	http://www.losthorsesaloon.com		0.92
-c9e86387e1e8	Padre's Marfa	bar		30.30942	-104.02322	209 W. El Paso St.	Marfa	79843	+14327294425	http://www.padresmarfa.com		0.77
-b5d57387e32b	The Pool Marfa	bar		30.31087	-104.01982	113 E El Paso St	Marfa	79843	+4327293700	http://marfasaintgeorge.com/recreation		0.92
-1758ffaa3a1d	Valentine Texas Bar	bar	dive bar	30.58369	-104.49544	450 California Ave	Valentine	79854	+14322945753	http://vtx.bar/		0.98
-15099ed9f8fa	Vaquero Vibes	bar		30.31330	-104.01176	1007 E Oak St	Marfa	79843	+14322950502			0.96
-8f564bdea7ed	Big Bend Coffee Roasters	coffee		30.30826	-104.02605	510 W San Antonio St	Marfa	79843	+14327294503	https://bigbendcoffeeroasters.com/		0.93
-bde27ff20839	Buns N' Roses	coffee		30.30487	-104.04036	1599 W San Antonio St	Marfa	79843	+14327294282	http://bunsnroses.t2-food.com/		0.86
-4845e0d82c60	The Sentinel Marfa	coffee		30.30966	-104.02324	209 W El Paso St	Marfa	79843	+14327297009	https://www.thesentinelmarfa.com/		0.92
-73c01070f624	7-Eleven	convenience		30.31001	-104.01974	109 E San Antonio Street	Marfa	79843	+14327293933	https://www.7-eleven.com/		1.00
-54f045bf48e3	Solids	convenience		30.30993	-104.01824	220 W San Antonio St	Marfa	79843	+14322953180			0.85
-1941be3498f7	Stripes	convenience		30.30735	-104.02912	812 W San Antonio St	Marfa	79843	+14327294541	http://www.stripesstores.com	Stripes	1.00
-96e44caa5da8	Stripes Convenience Stores	convenience		30.30994	-104.01972	109 E San Antonio St	Marfa	79843	+14327293933	http://www.stripesstores.com		1.00
-4d07fce00b6f	Sunland Exxon	convenience		30.30966	-104.02097	100 W San Antonio St	Marfa	79843	+14327293696	http://exxon.com/		0.67
-6ce09e20f0c2	Sunoco	convenience		30.31001	-104.01959	109 E SAN ANTONIO ST	Marfa	79843	+14327293933	https://www.sunoco.com/locations/store/109-e-san-antonio-st-marfa-tx-0713259000?utm_source=bing&utm_medium=places&utm_campaign=yext&utm_content=8001290802		0.92
-6f92e4d9ff02	Sunoco	convenience		30.30723	-104.02894	812 W San Antonio St	Marfa	79843	+14327294541	https://www.sunoco.com/locations/store/812-w-san-antonio-st-marfa-tx-0581426400		0.92
-cec06d5c57d8	DQ Grill & Chill	fastfood		30.30783	-104.02760	704 W San Antonio St	Marfa	79843		https://www.dairyqueen.com/en-us/locations/tx/marfa/704-w-san-antonio-st/8573	DQ Grill & Chill	0.80
-5e1bea5fc722	Subway	fastfood	sandwich shop	30.30761	-104.02911	812 W San Antonio	Marfa	79843	+14327294541	https://restaurants.subway.com/united-states/tx/marfa/812-w-san-antonio?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=34577&utm_campaign=evergreen-2020&y_source=1_MTQ5MDA1NTQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97
-ca4fcb6de46d	Lowe's Market	grocery		30.30911	-104.02084	717 West San Antonio St.	Marfa	79843		https://www.lowesmarket.com/StoreLocator/Store/?L=179	Lowe's Market	0.80
-df2f40af6044	Lowe's Market	grocery		30.30691	-104.02765	717 W San Antonio St	Marfa	79843	+14327294375	https://www.lowesmarket.com/	Lowe's Market	0.92
-59e7e38e381a	Porter's	grocery		30.30702	-104.02788	717 W San Antonio St	Marfa	79843	+14327294375		Lowe's Markets	0.95
-76744e17112f	The Get Go	grocery		30.30916	-104.01895	208 S. Dean St.	Marfa	79843	+14327293335	http://www.thegetgomarfa.com		0.92
-55c1dbb1491e	Arcon Inn	hotel		30.31222	-104.02361	215 N Austin St	Marfa	79843	+14327294826	http://www.bedandbreakfast.com/texas-marfa-the-arcon-inn.html?bid=18&aid=CD242&opt=		0.89
-10ee72d35e72	Carmen's Boutique Hotel	hotel		30.31041	-104.01772	317 E San Antonio St	Marfa	79843	+14325382807	https://carmensmarfahotel.com/		0.92
-19814171a999	Cibolo Creek Ranch	hotel		30.06170	-104.17889	97139 US Hwy 67	Marfa	79843	+14327296654	http://www.cibolocreekranch.com/		0.99
-7fd6d0b55093	Cibolo Creek Ranch	hotel		30.01210	-104.21246	97139 US Highway 67	Marfa	79843	+14327296654	http://www.cibolocreekranch.com/		0.97
-9c46db65b39b	Coal Mine Ranch	hotel		30.58717	-104.49958	About 15 miles west of Valentine.	Valentine	79854		http://www.coalmineranch.com/		0.76
-d178792a1e65	El Sueño Marfa	hotel		30.31210	-104.02256	110 W Texas St	Marfa	79843	+12813335512	http://www.ElSuenoMarfa.com/		0.57
-07c712d7a4ef	Hotel Paisano	hotel		30.31232	-104.02185	207 Highland St	Marfa	79843	+14327293669	http://hotelpaisano.com/		1.00
-c6bfc8e6a088	Hotel Saint George	hotel		30.31019	-104.02074	105 S Highland Ave	Marfa	79843	+14327293700	http://marfasaintgeorge.com/		0.99
-95d5e218a236	Marfa Hill House	hotel		30.31058	-104.01465	201 S Aparejo St	Marfa	79843	+12148264612	http://www.marfahillhouse.com/		0.92
-b4087da5cb2f	Pik Pak Marfa	hotel		30.30601	-104.03722	1500 W San Antonio St	Marfa	79843	+17134456466	https://www.pikpakmarfa.com/		0.98
-9a20a1dc921c	Riata Inn Marfa	hotel		30.30593	-104.03732	1500 W San Antonio St	Marfa	79843	+14327293800	http://riatainnmarfa.com/		1.00
-cd532d1c1e35	Riata Inn Marfa	hotel		30.31095	-104.00999	1500 US-90	Marfa	79843	+14327293800	http://riatainnmarfa.com/		0.99
-67fe35c2ae14	Stardust Motel, Marfa Texas	hotel		30.30818	-104.02635	US 90 West	Marfa	79843				0.97
-1378d572f4b7	The Basic Marfa	hotel		30.30976	-104.01898	200 E San Antonio St	Marfa	79843	+14322014911			0.92
-0c7e646dbbb7	Thunderbird Hotel	hotel		30.30807	-104.02663	601 W San Antonio St	Marfa	79843	+14327297777	http://thunderbirdmarfa.com		0.99
-dafd4ce4aca0	The Big Bend Sentinel	office		30.31166	-104.02097	110 N. Highland Ave.	Marfa	79843	+14327294342	http://www.bigbendnow.com		0.77
-a2ff753cae6f	Al Campo	restaurant	delicatessen	30.31088	-104.01821	202 S Russell St	Marfa	79843				0.66
-b4c7d80d8d7c	Aster	restaurant	breakfast and brunch restaurant	30.31277	-104.02214	215 N Highland St	Marfa	79843	+14327294500	https://www.astermarfa.com		0.88
-9d70a5551ca3	Bee's Hive	restaurant	texmex restaurant	30.30885	-104.02328	300 US-90	Marfa	79843	+14322952540	http://www.hombresmarfa.com/		0.92
-ceeef26138df	Bordo	restaurant	italian restaurant	30.30651	-104.03350	1210 W San Antonio St	Marfa	79843		http://bordomarfa.com		0.92
-08a8798fc114	Brown Recluse	restaurant		30.30924	-104.02088	111 W San Antonio St	Marfa	79843	+14327291811	http://www.brownreclusemarfa.com		0.92
-14e6504622ec	Future Shark Cafeteria & Day Lounge	restaurant		30.31191	-104.02148	120 N. Highland Ave.	Marfa	79843	+14327294278	http://www.foodsharkmarfa.com		0.77
-159f2e93aebf	Jett's Grill	restaurant	american restaurant	30.31211	-104.02204	207 S Highland Ave	Marfa	79843	+14327293838	http://hotelpaisano.com/		0.97
-fa74630e8312	Laredo Taco Company	restaurant		30.31001	-104.01974	109 E San Antonio Street	Marfa	79843	+14327293933	https://www.laredotacocompany.com/		1.00
-e6b246673b1e	LaVenture	restaurant	american restaurant	30.31023	-104.02079	105 S Highland Ave	Marfa	79843	+14327293700	http://www.marfasaintgeorge.com/laventure		0.97
-925d14b05875	Marfa Burrito	restaurant	mexican restaurant	30.30664	-104.01940	515 S Highland Ave	Marfa	79843	+13255149867			0.97
-7864ae988336	marfaparallevar	restaurant	pizza restaurant	30.31013	-104.01915	113 S Dean St	Marfa	79843	+14323054322	http://www.marfaparallevar.com/		0.97
-49d418e15313	Margaret's in Marfa	restaurant	american restaurant	30.31129	-104.02152	103 Highland St	Marfa	79843	+14327292030	https://www.margaretsinmarfa.com		0.97
-e70d0cc11f8d	Otherside Marfa	restaurant		30.31148	-104.02119	108 E El Paso St	Marfa	79843	+16507300850	http://www.othersidemarfa.com/		0.95
-4ce4fa6da7ec	Pizza Foundation	restaurant	pizza restaurant	30.30938	-104.02029	100 W. San Antonio St.	Marfa	79843	+14327293377	http://www.pizzafoundation.com		0.77
-bcddf6ecbec9	Pizza Foundation	restaurant	pizza restaurant	30.31433	-104.01757	305 N Spring St	Marfa	79843	+14327293377	http://www.pizzafoundation.com		0.77
-048712959f0d	Planet Marfa	restaurant	bar and grill restaurant	30.30866	-104.02312	200 S Abbot St	Marfa	79843		http://planetmarfa.com/		0.98
-4168ba71350d	Restaurant Cochineal	restaurant	american restaurant	30.30893	-104.02162	107 W San Antonio St	Marfa	79843	+14327293300	http://www.cochinealmarfatexas.com/		0.97
-3f1b76ba4b9e	Squeeze Marfa	restaurant	breakfast and brunch restaurant	30.31287	-104.02209	215 N. Highland Ave.	Marfa	79843	+14327294500	http://www.squeezemarfa.com		0.77
-8c5e7718a395	The Capri	restaurant	steakhouse	30.30780	-104.02571	603 W San Antonio St	Marfa	79843	+14327291984	http://thunderbirdmarfa.com		0.92
-ecc1a95cb28e	The Pony	restaurant	bar and grill restaurant	30.30996	-104.01775	306 E San Antonio St	Marfa	79843	+14324266669	https://www.instagram.com/the_pony_marfa/		0.92
-2adf32c0bb19	The Water Stop	restaurant	american restaurant	30.30631	-104.03423	1300 W San Antonio St	Marfa	79843	+14322953302			0.96
+id	name	category	kind	lat	lng	street	city	zip	phone	website	brand	confidence	status
+aa22f169df2b	Alta Marfa Restaurant & Wine Bar	bar	winery	30.31147	-104.02279	120 N Austin St	Marfa	79843	+14322946028	http://www.altamarfa.com/visitus		0.90	
+73e72b0c4a4c	Blue Mountain Trail Vineyard	bar	winery	30.54011	-104.03096	125 Blue Mountain Trl	Fort Davis	79734	+12103818290	http://www.bluemountainwine.com		0.77	
+cb1e299d8b49	Lost Horse Saloon	bar		30.30998	-104.01787	306 E. San Antonio St.	Marfa	79843	+14327294499	http://www.losthorsesaloon.com		0.92	
+c9e86387e1e8	Padre's Marfa	bar		30.30942	-104.02322	209 W. El Paso St.	Marfa	79843	+14327294425	http://www.padresmarfa.com		0.77	
+b5d57387e32b	The Pool Marfa	bar		30.31087	-104.01982	113 E El Paso St	Marfa	79843	+4327293700	http://marfasaintgeorge.com/recreation		0.92	
+1758ffaa3a1d	Valentine Texas Bar	bar	dive bar	30.58369	-104.49544	450 California Ave	Valentine	79854	+14322945753	http://vtx.bar/		0.98	
+15099ed9f8fa	Vaquero Vibes	bar		30.31330	-104.01176	1007 E Oak St	Marfa	79843	+14322950502			0.96	
+8f564bdea7ed	Big Bend Coffee Roasters	coffee		30.30826	-104.02605	510 W San Antonio St	Marfa	79843	+14327294503	https://bigbendcoffeeroasters.com/		0.93	
+bde27ff20839	Buns N' Roses	coffee		30.30487	-104.04036	1599 W San Antonio St	Marfa	79843	+14327294282	http://bunsnroses.t2-food.com/		0.86	
+4845e0d82c60	The Sentinel Marfa	coffee		30.30966	-104.02324	209 W El Paso St	Marfa	79843	+14327297009	https://www.thesentinelmarfa.com/		0.92	
+73c01070f624	7-Eleven	convenience		30.31001	-104.01974	109 E San Antonio Street	Marfa	79843	+14327293933	https://www.7-eleven.com/		1.00	
+54f045bf48e3	Solids	convenience		30.30993	-104.01824	220 W San Antonio St	Marfa	79843	+14322953180			0.85	
+1941be3498f7	Stripes	convenience		30.30735	-104.02912	812 W San Antonio St	Marfa	79843	+14327294541	http://www.stripesstores.com	Stripes	1.00	
+96e44caa5da8	Stripes Convenience Stores	convenience		30.30994	-104.01972	109 E San Antonio St	Marfa	79843	+14327293933	http://www.stripesstores.com		1.00	
+4d07fce00b6f	Sunland Exxon	convenience		30.30966	-104.02097	100 W San Antonio St	Marfa	79843	+14327293696	http://exxon.com/		0.67	
+6ce09e20f0c2	Sunoco	convenience		30.31001	-104.01959	109 E SAN ANTONIO ST	Marfa	79843	+14327293933	https://www.sunoco.com/locations/store/109-e-san-antonio-st-marfa-tx-0713259000?utm_source=bing&utm_medium=places&utm_campaign=yext&utm_content=8001290802		0.92	
+6f92e4d9ff02	Sunoco	convenience		30.30723	-104.02894	812 W San Antonio St	Marfa	79843	+14327294541	https://www.sunoco.com/locations/store/812-w-san-antonio-st-marfa-tx-0581426400		0.92	
+cec06d5c57d8	DQ Grill & Chill	fastfood		30.30783	-104.02760	704 W San Antonio St	Marfa	79843		https://www.dairyqueen.com/en-us/locations/tx/marfa/704-w-san-antonio-st/8573	DQ Grill & Chill	0.80	
+5e1bea5fc722	Subway	fastfood	sandwich shop	30.30761	-104.02911	812 W San Antonio	Marfa	79843	+14327294541	https://restaurants.subway.com/united-states/tx/marfa/812-w-san-antonio?utm_source=yxt-bing&utm_medium=local&utm_term=acq&utm_content=34577&utm_campaign=evergreen-2020&y_source=1_MTQ5MDA1NTQtNDgzLWxvY2F0aW9uLndlYnNpdGU%3D		0.97	
+ca4fcb6de46d	Lowe's Market	grocery		30.30911	-104.02084	717 West San Antonio St.	Marfa	79843		https://www.lowesmarket.com/StoreLocator/Store/?L=179	Lowe's Market	0.80	
+df2f40af6044	Lowe's Market	grocery		30.30691	-104.02765	717 W San Antonio St	Marfa	79843	+14327294375	https://www.lowesmarket.com/	Lowe's Market	0.92	
+59e7e38e381a	Porter's	grocery		30.30702	-104.02788	717 W San Antonio St	Marfa	79843	+14327294375		Lowe's Markets	0.95	
+76744e17112f	The Get Go	grocery		30.30916	-104.01895	208 S. Dean St.	Marfa	79843	+14327293335	http://www.thegetgomarfa.com		0.92	
+55c1dbb1491e	Arcon Inn	hotel		30.31222	-104.02361	215 N Austin St	Marfa	79843	+14327294826	http://www.bedandbreakfast.com/texas-marfa-the-arcon-inn.html?bid=18&aid=CD242&opt=		0.89	
+10ee72d35e72	Carmen's Boutique Hotel	hotel		30.31041	-104.01772	317 E San Antonio St	Marfa	79843	+14325382807	https://carmensmarfahotel.com/		0.92	
+19814171a999	Cibolo Creek Ranch	hotel		30.06170	-104.17889	97139 US Hwy 67	Marfa	79843	+14327296654	http://www.cibolocreekranch.com/		0.99	
+7fd6d0b55093	Cibolo Creek Ranch	hotel		30.01210	-104.21246	97139 US Highway 67	Marfa	79843	+14327296654	http://www.cibolocreekranch.com/		0.97	
+9c46db65b39b	Coal Mine Ranch	hotel		30.58717	-104.49958	About 15 miles west of Valentine.	Valentine	79854		http://www.coalmineranch.com/		0.76	
+d178792a1e65	El Sueño Marfa	hotel		30.31210	-104.02256	110 W Texas St	Marfa	79843	+12813335512	http://www.ElSuenoMarfa.com/		0.57	
+07c712d7a4ef	Hotel Paisano	hotel		30.31232	-104.02185	207 Highland St	Marfa	79843	+14327293669	http://hotelpaisano.com/		1.00	
+c6bfc8e6a088	Hotel Saint George	hotel		30.31019	-104.02074	105 S Highland Ave	Marfa	79843	+14327293700	http://marfasaintgeorge.com/		0.99	
+95d5e218a236	Marfa Hill House	hotel		30.31058	-104.01465	201 S Aparejo St	Marfa	79843	+12148264612	http://www.marfahillhouse.com/		0.92	
+b4087da5cb2f	Pik Pak Marfa	hotel		30.30601	-104.03722	1500 W San Antonio St	Marfa	79843	+17134456466	https://www.pikpakmarfa.com/		0.98	
+9a20a1dc921c	Riata Inn Marfa	hotel		30.30593	-104.03732	1500 W San Antonio St	Marfa	79843	+14327293800	http://riatainnmarfa.com/		1.00	
+cd532d1c1e35	Riata Inn Marfa	hotel		30.31095	-104.00999	1500 US-90	Marfa	79843	+14327293800	http://riatainnmarfa.com/		0.99	
+67fe35c2ae14	Stardust Motel, Marfa Texas	hotel		30.30818	-104.02635	US 90 West	Marfa	79843				0.97	
+1378d572f4b7	The Basic Marfa	hotel		30.30976	-104.01898	200 E San Antonio St	Marfa	79843	+14322014911			0.92	
+0c7e646dbbb7	Thunderbird Hotel	hotel		30.30807	-104.02663	601 W San Antonio St	Marfa	79843	+14327297777	http://thunderbirdmarfa.com		0.99	
+dafd4ce4aca0	The Big Bend Sentinel	office		30.31166	-104.02097	110 N. Highland Ave.	Marfa	79843	+14327294342	http://www.bigbendnow.com		0.77	
+a2ff753cae6f	Al Campo	restaurant	delicatessen	30.31088	-104.01821	202 S Russell St	Marfa	79843				0.66	
+b4c7d80d8d7c	Aster	restaurant	breakfast and brunch restaurant	30.31277	-104.02214	215 N Highland St	Marfa	79843	+14327294500	https://www.astermarfa.com		0.88	
+9d70a5551ca3	Bee's Hive	restaurant	texmex restaurant	30.30885	-104.02328	300 US-90	Marfa	79843	+14322952540	http://www.hombresmarfa.com/		0.92	
+ceeef26138df	Bordo	restaurant	italian restaurant	30.30651	-104.03350	1210 W San Antonio St	Marfa	79843		http://bordomarfa.com		0.92	
+08a8798fc114	Brown Recluse	restaurant		30.30924	-104.02088	111 W San Antonio St	Marfa	79843	+14327291811	http://www.brownreclusemarfa.com		0.92	
+14e6504622ec	Future Shark Cafeteria & Day Lounge	restaurant		30.31191	-104.02148	120 N. Highland Ave.	Marfa	79843	+14327294278	http://www.foodsharkmarfa.com		0.77	
+159f2e93aebf	Jett's Grill	restaurant	american restaurant	30.31211	-104.02204	207 S Highland Ave	Marfa	79843	+14327293838	http://hotelpaisano.com/		0.97	
+fa74630e8312	Laredo Taco Company	restaurant		30.31001	-104.01974	109 E San Antonio Street	Marfa	79843	+14327293933	https://www.laredotacocompany.com/		1.00	
+e6b246673b1e	LaVenture	restaurant	american restaurant	30.31023	-104.02079	105 S Highland Ave	Marfa	79843	+14327293700	http://www.marfasaintgeorge.com/laventure		0.97	
+925d14b05875	Marfa Burrito	restaurant	mexican restaurant	30.30664	-104.01940	515 S Highland Ave	Marfa	79843	+13255149867			0.97	
+7864ae988336	marfaparallevar	restaurant	pizza restaurant	30.31013	-104.01915	113 S Dean St	Marfa	79843	+14323054322	http://www.marfaparallevar.com/		0.97	
+49d418e15313	Margaret's in Marfa	restaurant	american restaurant	30.31129	-104.02152	103 Highland St	Marfa	79843	+14327292030	https://www.margaretsinmarfa.com		0.97	
+e70d0cc11f8d	Otherside Marfa	restaurant		30.31148	-104.02119	108 E El Paso St	Marfa	79843	+16507300850	http://www.othersidemarfa.com/		0.95	
+4ce4fa6da7ec	Pizza Foundation	restaurant	pizza restaurant	30.30938	-104.02029	100 W. San Antonio St.	Marfa	79843	+14327293377	http://www.pizzafoundation.com		0.77	
+bcddf6ecbec9	Pizza Foundation	restaurant	pizza restaurant	30.31433	-104.01757	305 N Spring St	Marfa	79843	+14327293377	http://www.pizzafoundation.com		0.77	
+048712959f0d	Planet Marfa	restaurant	bar and grill restaurant	30.30866	-104.02312	200 S Abbot St	Marfa	79843		http://planetmarfa.com/		0.98	
+4168ba71350d	Restaurant Cochineal	restaurant	american restaurant	30.30893	-104.02162	107 W San Antonio St	Marfa	79843	+14327293300	http://www.cochinealmarfatexas.com/		0.97	
+3f1b76ba4b9e	Squeeze Marfa	restaurant	breakfast and brunch restaurant	30.31287	-104.02209	215 N. Highland Ave.	Marfa	79843	+14327294500	http://www.squeezemarfa.com		0.77	
+8c5e7718a395	The Capri	restaurant	steakhouse	30.30780	-104.02571	603 W San Antonio St	Marfa	79843	+14327291984	http://thunderbirdmarfa.com		0.92	
+ecc1a95cb28e	The Pony	restaurant	bar and grill restaurant	30.30996	-104.01775	306 E San Antonio St	Marfa	79843	+14324266669	https://www.instagram.com/the_pony_marfa/		0.92	
+2adf32c0bb19	The Water Stop	restaurant	american restaurant	30.30631	-104.03423	1300 W San Antonio St	Marfa	79843	+14322953302			0.96	
