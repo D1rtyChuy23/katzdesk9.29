@@ -331,11 +331,15 @@ export function usePlaces(view: MapBounds | null, on: boolean, categories: reado
   const needle = search.trim().toLowerCase();
   const want = `${cats}|${needle}|${limit}`;
   const zoomedIn = !!view && view.zoom >= PLACES_MIN_ZOOM - 0.01;
-  /** The last complete answer's box and what it was for. */
-  const [last, setLast] = useState<{ box: Bounds; want: string } | null>(null);
+  /**
+   * The last answer's box, what it was for, and at what zoom. A complete answer is reused at any zoom while its box
+   * covers the screen; a cut-off one only at the same zoom (zooming in asks again, for all of the places there).
+   */
+  const [last, setLast] = useState<{ box: Bounds; want: string; zoom: number; complete: boolean } | null>(null);
   let box: Bounds | null = null;
   if (view && on && zoomedIn && categories.length) {
-    box = last && last.want === want && containsBounds(last.box, view) ? last.box : padBounds(view, 0.25, view.zoom < 12 ? 0.1 : 0.02);
+    const reuse = last && last.want === want && containsBounds(last.box, view) && (last.complete || last.zoom === Math.round(view.zoom));
+    box = reuse ? last.box : padBounds(view, 0.25, view.zoom < 12 ? 0.1 : 0.02);
   }
   const q = useQuery({
     queryKey: ["places", box?.south, box?.west, box?.north, box?.east, want],
@@ -347,11 +351,11 @@ export function usePlaces(view: MapBounds | null, on: boolean, categories: reado
   });
   const answered = !!q.data && !q.isPlaceholderData && !!box;
   const complete = answered && !q.data!.truncated;
+  const zoom = view ? Math.round(view.zoom) : 0;
   useEffect(() => {
-    // Remember a complete answer for reuse; a cut-off one is not reused (zooming in asks again, for all of them).
-    if (complete && box && (!last || last.box !== box || last.want !== want)) setLast({ box, want });
-    if (answered && !complete && last && last.want === want && last.box === box) setLast(null);
-  }, [complete, answered, box, want, last]);
+    if (!answered || !box) return;
+    if (!last || last.box !== box || last.want !== want || last.complete !== complete || (!complete && last.zoom !== zoom)) setLast({ box, want, zoom, complete });
+  }, [answered, complete, box, want, zoom, last]);
   const status: PlacesStatus = !on || !view || !categories.length ? "off" : !zoomedIn ? "zoom" : q.isError && !q.data ? "error" : !q.data ? "loading" : "ready";
   return {
     places: (status === "ready" ? q.data?.places : null) ?? NO_PLACES,
