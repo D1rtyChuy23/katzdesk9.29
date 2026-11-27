@@ -269,18 +269,20 @@ function pinGap(miles: number): string {
   return ft < 50 ? "under 50 ft" : ft < 1000 ? `${ft} ft` : `${miles.toFixed(1)} mi`;
 }
 
+/** "250 ft from our pin" for a listing at this address or listed somewhere else; null otherwise. Cards and report rows. */
+export function pinDistance(c: Pick<WebCheck, "status" | "miles">): string | null {
+  if (c.miles == null) return null;
+  if (c.status === "elsewhere") return `${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin`;
+  if (c.status === "same") return `${pinGap(c.miles)} from our pin`;
+  return null;
+}
+
 export function webCheckLine(c: WebCheck): string {
   const label = WEB_STATUS_LABEL[c.status];
   if (!c.place) return label;
   const where = placeAddress(c.place);
-  const far =
-    c.miles == null
-      ? ""
-      : c.status === "elsewhere"
-        ? ` (${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin)`
-        : c.status === "same"
-          ? ` (${pinGap(c.miles)} from our pin)`
-          : "";
+  const gap = pinDistance(c);
+  const far = gap ? ` (${gap})` : "";
   const pinOff = c.status === "elsewhere" && c.sameAddress ? ". Same address as ours: the map pin looks off" : "";
   return `${label}${where ? `: ${where}` : ""}${far}${pinOff}`;
 }
