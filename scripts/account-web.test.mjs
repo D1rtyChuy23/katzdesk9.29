@@ -273,3 +273,11 @@ test("spot-check 11/27: a listing that carries our location without a dash; a bi
   assert.equal(web.webCheckLine({ status: "same", place: rows[1].check.place, miles: 0.02, listedAddress: null, sameAddress: true }).endsWith("(100 ft from our pin)"), true);
   assert.doesNotMatch(web.webCheckLine(rows[1].check), /pin looks off/);
 });
+
+test("report rows and cards say the same distance from our pin", () => {
+  assert.equal(web.pinDistance({ status: "same", miles: 0.05 }), "250 ft from our pin");
+  assert.equal(web.pinDistance({ status: "same", miles: 0.19 }), "0.2 mi from our pin");
+  assert.equal(web.pinDistance({ status: "elsewhere", miles: 2.76 }), "2.8 mi from our pin");
+  assert.equal(web.pinDistance({ status: "different", miles: 0.05 }), null);
+  assert.equal(web.pinDistance({ status: "none", miles: null }), null);
+});

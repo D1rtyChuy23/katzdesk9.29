@@ -5,7 +5,7 @@ import { Check, Download, ExternalLink, Globe, Phone, RotateCcw, Search } from "
 import { toast } from "sonner";
 import { approveAddressSuggestion } from "@/lib/ops/address-report-api";
 import { getAccountWebCheck, listWebChecks } from "@/lib/ops/account-web-api";
-import { WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
+import { pinDistance, WEB_STATUS_LABEL, WEB_STATUS_ORDER, webCheckLine, type WebCheck, type WebCheckRow, type WebStatus } from "@/lib/ops/account-web";
 import { formatPhone, PLACE_CATEGORY, placeAddress, searchUrl, websiteUrl } from "@/lib/ops/places";
 import { toCsv } from "@/lib/ops/customer-export";
 import { todayChicago } from "@/lib/ops/clock";
@@ -193,7 +193,7 @@ function WebCheckItem({ row: r, canEdit, saving, locked, onApprove }: { row: Web
               <dd className="break-words" data-testid="web-check-listing">
                 <span className="font-medium">{p.name}</span>
                 {placeAddress(p) ? ` · ${placeAddress(p)}` : ""}
-                {c.status === "elsewhere" && c.miles != null ? ` · ${c.miles < 10 ? c.miles.toFixed(1) : Math.round(c.miles)} mi from our pin` : ""}
+                {pinDistance(c) ? ` · ${pinDistance(c)}` : ""}
                 {p.closed ? <span className="text-destructive"> · permanently closed</span> : null}
               </dd>
             </>
