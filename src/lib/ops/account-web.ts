@@ -245,12 +245,17 @@ export function sameStreetAddress(a: string | null | undefined, b: string | null
  * "Cherry" and "Cherry Block Smokehouse"). "Port Lavaca Dodge" is not "Port Lavaca Ford"; "Texas Roadhouse" is not
  * "Texas Children's Hospital".
  */
-export function possibleMatch(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
+export function possibleMatch(
+  listingName: string | null | undefined,
+  accountName: string | null | undefined,
+  /** The listing is at our street address: the one-word limit on added words is lifted ("Christie's"). */
+  atOurAddress = false,
+): boolean {
   const ours = businessWords(baseName(accountName));
   const theirs = businessWords(baseName(listingName));
   if (!ours.length || !theirs.length || ours[0] !== theirs[0] || ours[0]!.length < 4) return false;
   const [short, long] = ours.length <= theirs.length ? [ours, theirs] : [theirs, ours];
-  if (short.length === 1 && (short[0]!.length < 5 || long.length > 2)) return false;
+  if (short.length === 1 && (short[0]!.length < 5 || (long.length > 2 && !atOurAddress))) return false;
   const words = new Set(long);
   return short.every((w) => words.has(w));
 }
@@ -297,16 +302,18 @@ export function webCheck(account: WebAccount, candidates: readonly Place[]): Web
   const closedHere = here.find((x) => x.p.closed) ?? named.find((x) => x.p.closed && x.street === true);
   if (closedHere) return found("closed", closedHere);
   // Nothing under our name: a listing at our street pin whose name is close, for a person to judge. Never offered.
+  // A listing at our very street address may add more words to a one-word name ("Christie's" for "Christie's Seafood &
+  // Steaks"): the address agrees.
   if (!account.approx) {
     const maybe = candidates
-      .filter((p) => !sameBusiness(p.name, account.name) && possibleMatch(p.name, account.name))
-      .map((p) => ({ p, miles: milesBetween(pin, p) }))
-      .filter((x) => x.miles <= HERE_MILES)
-      .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || a.miles - b.miles)[0];
+      .filter((p) => !sameBusiness(p.name, account.name))
+      .map((p) => ({ p, miles: milesBetween(pin, p), street: account.address && p.street ? sameStreetAddress(p.street, account.address, p.zip, null) : null }))
+      .filter((x) => x.miles <= HERE_MILES && possibleMatch(x.p.name, account.name, x.street === true))
+      // Open first, then one at our street address, then nearest.
+      .sort((a, b) => Number(a.p.closed) - Number(b.p.closed) || Number(b.street === true) - Number(a.street === true) || a.miles - b.miles)[0];
     if (maybe) {
-      const street = account.address && maybe.p.street ? sameStreetAddress(maybe.p.street, account.address, maybe.p.zip, null) : null;
-      const zipOnly = street === false ? zipOnlyDifference(maybe.p.street, maybe.p.zip, account.address) : null;
-      return { status: "maybe", place: maybe.p, miles: Math.round(maybe.miles * 100) / 100, listedAddress: null, sameAddress: street, zipOnly };
+      const zipOnly = maybe.street === false ? zipOnlyDifference(maybe.p.street, maybe.p.zip, account.address) : null;
+      return { status: "maybe", place: maybe.p, miles: Math.round(maybe.miles * 100) / 100, listedAddress: null, sameAddress: maybe.street, zipOnly };
     }
   }
   return none("none");
