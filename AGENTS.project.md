@@ -1,18 +1,24 @@
 # KatzDesk team rules (all agents)
 
-Chuy (the owner) works on KatzDesk with three AI agents. Every agent follows this file.
+Chuy (the owner) works on KatzDesk with several AI agents. Every agent follows this file.
 
 ## Who does what
 - **Claude** (claude.ai): plans the work, writes the prompts, and reviews every PR before Chuy merges it. It checks the code and runs the real data through it.
 - **Grok** (Grok Build): builds features and fixes on a branch, then opens a PR.
 - **Cursor** (Cursor agent): builds features and fixes on a branch, then opens a PR. It also gives second-opinion reviews when asked.
+- **Grok** (the Grok app) also publishes: after a merge, Chuy publishes from Grok/Vercel.
+- **Grokatron** (a separate app): tests the live site, read-only, from a test prompt. It never publishes, saves or imports.
+
+**After a merge** (Chuy, 11/28): the merging agent's reply is only the test prompt for Grokatron, ready to copy. It
+says what to check on the live site, read-only, and what to report. It has no merge summary or publishing steps.
+Publishing is Grok's job, testing is Grokatron's: two separate apps.
 
 Only one agent builds a given PR at a time. If a PR already belongs to another agent, don't push to its branch unless Chuy says so.
 
 ## Sign every prompt and report
 When you write a prompt or report that Chuy will pass to another agent, start it with this line:
 
-`From: <Claude | Grok | Cursor> — <date> — for: <Claude | Grok | Cursor | Chuy>`
+`From: <Claude | Grok | Cursor> — <date> — for: <Claude | Grok | Cursor | Grokatron | Chuy>`
 
 End it with:
 
