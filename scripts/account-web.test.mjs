@@ -361,3 +361,24 @@ test("a ZIP-only difference is said as one, and offered only at our pin", () => 
   assert.equal(web.maybeAddressNote({ sameAddress: true, zipOnly: null }), "Its street address is ours.");
   assert.equal(web.zipOnlyDifference("401 S Alamo St", "78204", "401 S Alamo St, San Antonio"), null, "no ZIP of ours to compare");
 });
+
+test("possible match: a one-word name, and the other name adds at most one word", () => {
+  const may = web.possibleMatch;
+  assert.equal(may("Popeyes Louisiana Kitchen", "Popeyes"), true, "\"Kitchen\" is a kind word: one word added");
+  assert.equal(may("Velocity #5", "Velocity Sim Racing Lounge"), false, "numbered stores of another business");
+  assert.equal(may("Cherry Block Smokehouse", "Cherry"), false);
+  assert.equal(may("Union", "Union Coffee House Ministry"), true, "one word added (kind words don't count)");
+  assert.equal(may("Starbucks Reserve", "Starbucks"), true);
+  assert.equal(may("Walmart Grocery Pickup and Delivery", "Walmart"), false);
+  assert.equal(may("Elio's Osteria e Pizzeria", "Elio's Pizzeria & Bar. (Canyon Lake)"), true, "two-word names: unchanged");
+});
+
+test("our location suffix: a dash with a space on one side, or a job after a colon", () => {
+  assert.equal(web.baseName("Belong Kitchen HTX- Kids Meals"), "Belong Kitchen HTX");
+  assert.equal(web.baseName("Black Rock -Pearland"), "Black Rock");
+  assert.equal(web.baseName("Brevity Coffee Company #15F:Job 1"), "Brevity Coffee Company #15F");
+  assert.equal(web.baseName("Bar-B-Que Shack"), "Bar-B-Que Shack", "a dash inside a word stays");
+  assert.equal(web.baseName("Chick-fil-A - Westheimer"), "Chick-fil-A");
+  assert.equal(web.possibleMatch("Belong Kitchen", "Belong Kitchen HTX- Kids Meals"), true);
+  assert.equal(web.sameBusiness("Brevity Coffee", "Brevity Coffee Company #15F:Job 1"), true);
+});

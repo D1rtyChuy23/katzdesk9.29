@@ -88,7 +88,9 @@ const KIND = new Set(["cafe", "coffee", "shop", "house", "restaurant", "bar", "g
 
 /** An account's name without the location we add after " - ", " @ ", " | " or "(": "Black Rock - Pearland" → "Black Rock". */
 export function baseName(name: string | null | undefined): string {
-  return String(name ?? "").split(/\s+[-–—@|]\s+|\s*\(/)[0]!.trim();
+  // A dash with a space on either side ("HTX- Kids Meals", "Rock -Pearland"; not "Bar-B-Que"), or a QuickBooks job
+  // after a colon ("Brevity Coffee Company #15F:Job 1").
+  return String(name ?? "").split(/\s+[-–—@|]\s*|\s*[-–—@|]\s+|\s*\(|\s*:/)[0]!.trim();
 }
 
 function nameWords(name: string | null | undefined): string[] {
@@ -238,15 +240,17 @@ export function sameStreetAddress(a: string | null | undefined, b: string | null
 /**
  * A listing that may be ours though its name differs: the same first distinguishing word, and every word of the
  * shorter name in the longer one ("Elio's Pizzeria" in "Elio's Osteria e Pizzeria"; "Hampton Inn Port Lavaca" in
- * "Hampton Inn & Suites by Hilton Port Lavaca"). A one-word name needs five letters. "Port Lavaca Dodge" is not
- * "Port Lavaca Ford"; "Texas Roadhouse" is not "Texas Children's Hospital".
+ * "Hampton Inn & Suites by Hilton Port Lavaca"). A one-word name needs five letters, and the other name may add only
+ * one word to it ("Popeyes" and "Popeyes Louisiana Kitchen"; not "Velocity #5" and "Velocity Sim Racing Lounge", nor
+ * "Cherry" and "Cherry Block Smokehouse"). "Port Lavaca Dodge" is not "Port Lavaca Ford"; "Texas Roadhouse" is not
+ * "Texas Children's Hospital".
  */
 export function possibleMatch(listingName: string | null | undefined, accountName: string | null | undefined): boolean {
   const ours = businessWords(baseName(accountName));
   const theirs = businessWords(baseName(listingName));
   if (!ours.length || !theirs.length || ours[0] !== theirs[0] || ours[0]!.length < 4) return false;
   const [short, long] = ours.length <= theirs.length ? [ours, theirs] : [theirs, ours];
-  if (short.length === 1 && short[0]!.length < 5) return false;
+  if (short.length === 1 && (short[0]!.length < 5 || long.length > 2)) return false;
   const words = new Set(long);
   return short.every((w) => words.has(w));
 }
