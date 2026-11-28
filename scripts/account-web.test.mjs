@@ -382,3 +382,28 @@ test("our location suffix: a dash with a space on one side, or a job after a col
   assert.equal(web.possibleMatch("Belong Kitchen", "Belong Kitchen HTX- Kids Meals"), true);
   assert.equal(web.sameBusiness("Brevity Coffee", "Brevity Coffee Company #15F:Job 1"), true);
 });
+
+test("possible match at our street address: our first name word is enough", () => {
+  const christies = place("c1", "Christie's", 29.7, -95.4, { street: "6029 Westheimer Rd", zip: "77057" });
+  const ours = acct("Christie's Seafood & Steaks", 29.7003, -95.4, "6029 Westheimer Road, Houston, TX 77057");
+  assert.equal(web.possibleMatch("Christie's", "Christie's Seafood & Steaks"), false, "by name alone: too far apart");
+  const c = web.webCheck(ours, [christies]);
+  assert.deepEqual([c.status, c.place.id, c.sameAddress, c.listedAddress], ["maybe", "c1", true, null]);
+  assert.match(web.webCheckLine(c), /Its street address is ours\.$/);
+  // Not at our street address: nothing, as before.
+  assert.equal(web.webCheck(ours, [{ ...christies, street: "9 Other St" }]).status, "none");
+  // Not at our pin: nothing.
+  assert.equal(web.webCheck({ ...ours, lat: 29.72 }, [christies]).status, "none");
+  // Same first word at our address, but other words (another business in the building): nothing.
+  assert.equal(web.webCheck(acct("Taqueria De Jalisco", 29.7, -95.4, "1536 S Cage Blvd, Pharr, TX 77057"), [place("t2", "Taquería La Fe RB", 29.7, -95.4, { street: "1536 S Cage Blvd", zip: "77057" })]).status, "none");
+  assert.equal(web.possibleMatch("Laredo Rehabilitation Hospital", "Laredo Specialty Hospital", true), false);
+  assert.equal(web.possibleMatch("Valero Corner Store", "Valero", true), true);
+  // Another first word at our address (another business in the building): nothing.
+  assert.equal(web.webCheck(ours, [{ ...christies, id: "t1", name: "Tribute" }]).status, "none");
+  // A first word under four letters: nothing.
+  const ole = place("o1", "Ole", 29.7, -95.4, { street: "1 A St", zip: "77057" });
+  assert.equal(web.webCheck(acct("Ole Mexican Grill Deluxe Cantina", 29.7, -95.4, "1 A St, Houston, TX 77057"), [ole]).status, "none");
+  // Two at our pin: the one at our street address is shown.
+  const other = place("c2", "Christie's Seafood Market", 29.70001, -95.4, { street: "77 Z St", zip: "77057" });
+  assert.equal(web.webCheck(ours, [other, christies]).place.id, "c1");
+});
